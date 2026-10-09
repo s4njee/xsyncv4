@@ -46,22 +46,25 @@ class ProtocolTests(unittest.TestCase):
         cls.legacy = cls.build(old, cls.root / 'legacy build')
         cls.subset = cls.build(REPO, cls.root / 'subset build', '-DCMAKE_CXX_FLAGS=-DXSYNC_PROTOCOL_FEATURES=1')
         cls.global_filters = cls.build(REPO, cls.root / 'global filters build', '-DCMAKE_CXX_FLAGS=-DXSYNC_PROTOCOL_FEATURES=4095')
+        cls.merge_filters = cls.build(REPO, cls.root / 'merge filters build', '-DCMAKE_CXX_FLAGS=-DXSYNC_PROTOCOL_FEATURES=8191')
         cls.old_rsh = RSH
         cls.remote_legacy = str(cls.legacy)
         cls.remote_subset = str(cls.subset)
         cls.remote_global_filters = str(cls.global_filters)
+        cls.remote_merge_filters = str(cls.merge_filters)
         if HOST:
             import ssh_test
             ssh_test.SSHTests.setUpClass()
             ssh_test.remote_code('import pathlib,sys; pathlib.Path(sys.argv[1]).mkdir(parents=True)', cls.root)
             for local, name in ((cls.legacy, 'legacy xsync'), (cls.subset, 'subset xsync'),
-                                (cls.global_filters, 'global filters xsync')):
+                                (cls.global_filters, 'global filters xsync'), (cls.merge_filters, 'merge filters xsync')):
                 target = cls.root / name
                 subprocess.run(['rsync', '-a', '-e', RSH, str(local), HOST + ':' + str(target)],
                                check=True, capture_output=True, timeout=20)
                 if name.startswith('legacy'): cls.remote_legacy = str(target)
                 elif name.startswith('subset'): cls.remote_subset = str(target)
-                else: cls.remote_global_filters = str(target)
+                elif name.startswith('global'): cls.remote_global_filters = str(target)
+                else: cls.remote_merge_filters = str(target)
 
     @classmethod
     def build(cls, source, output, *options):
@@ -211,6 +214,31 @@ p=pathlib.Path(sys.argv[1]); print(json.dumps({'hash':hashlib.sha256((p/'file').
                     self.assertIn(b'peer does not support per-directory filters', result.stderr)
                     self.assertNotIn(b'falling back', result.stderr)
                     self.assertFalse(target.exists())
+                    if HOST:
+                        from ssh_test import remote_json
+                        self.assertFalse(remote_json('import pathlib,json,sys; print(json.dumps(pathlib.Path(sys.argv[1]).exists()))', target))
+
+    def test_cvs_filters_require_their_own_capability(self):
+        source = self.root / 'cvs source'
+        source.mkdir()
+        (source / 'file').write_bytes(b'unchanged')
+        for direction in ('push', 'pull'):
+            for flags in (['--filter=-C'], ['-C'], ['--filter=: .rules']):
+                with self.subTest(direction=direction, flags=flags):
+                    target = self.root / 'uncreated cvs destination'
+                    a, b = str(source) + '/', str(target) + '/'
+                    if HOST and direction == 'pull':
+                        subprocess.run(['rsync', '-a', '-e', RSH, a, HOST + ':' + a], check=True, capture_output=True)
+                    if direction == 'push': b = (HOST or 'fake') + ':' + b
+                    else: a = (HOST or 'fake') + ':' + a
+                    result = subprocess.run([str(BINARY), '--no-fallback', '-r', *flags, '-e', RSH,
+                                             '--rsync-path=' + shlex.quote(self.remote_merge_filters), a, b],
+                                            capture_output=True, timeout=20)
+                    self.assertEqual(result.returncode, 4, result.stderr)
+                    self.assertIn(b'peer does not support global CVS filters', result.stderr)
+                    self.assertNotIn(b'falling back', result.stderr)
+                    self.assertFalse(target.exists())
+                    self.assertEqual((source / 'file').read_bytes(), b'unchanged')
                     if HOST:
                         from ssh_test import remote_json
                         self.assertFalse(remote_json('import pathlib,json,sys; print(json.dumps(pathlib.Path(sys.argv[1]).exists()))', target))

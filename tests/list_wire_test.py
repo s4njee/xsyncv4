@@ -97,4 +97,20 @@ class ListWireTests(unittest.TestCase):
         self.assertEqual(result.returncode, 255, result.stderr)
         self.assertIn(b'remote shell exited', result.stderr)
 
+    def test_cvs_source_metadata_and_validation(self):
+        for name, source, code in (('safe', None, 2), ('safe', '/source/\0safe', 2),
+                                    ('unsafe.o', '/source/unsafe.o', 4), ('safe', '/source/safe', 0)):
+            with self.subTest(name=name, source=source):
+                entry = string(name) + b'\1' + var(0o644) + var(5) + b'\0' + string('')
+                if source is not None: entry += string(source)
+                frames = frame(16, entry) + frame(5, b'\0\1')
+                result = self.run_list(self.peer(frames, features=10753), '--no-fallback', '--filter=-C')
+                self.assertEqual(result.returncode, code, result.stderr)
+                if code == 2: self.assertIn(b'protocol error', result.stderr)
+                elif code == 4:
+                    self.assertIn(b'rejecting excluded file-list name', result.stderr)
+                    self.assertEqual(result.stdout, b'')
+                else: self.assertIn(b'safe', result.stdout)
+                self.assertFalse((self.root/'source').exists())
+
 if __name__ == '__main__': unittest.main()

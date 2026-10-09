@@ -58,6 +58,9 @@ void listing_output(const ListingEntry& item) {
 }
 
 int run_listing(const std::vector<std::string>& sources, const ListingSink& emit) {
+  auto source_path = [](std::string_view path) {
+    return g_opt.am_server && (g_opt.peer_features & PF_CVS_FILTERS) ? FilterList::absolute_path(path) : std::string();
+  };
   Worker worker;
   RootList root;
   auto normalized = sources;
@@ -65,7 +68,7 @@ int run_listing(const std::vector<std::string>& sources, const ListingSink& emit
     if (source == ".." || source.ends_with("/..")) source += '/';
   build_root(normalized, root, worker);
   worker.flush_log();
-  if (root.has_attrs) emit({root.attrs, ".", ""});
+  if (root.has_attrs) emit({root.attrs, ".", "", source_path(root.attr_source)});
   struct Frame {
     DirList list;
     std::vector<std::string> paths;
@@ -79,9 +82,11 @@ int run_listing(const std::vector<std::string>& sources, const ListingSink& emit
   while (!stack.empty() && !g_stop.load()) {
     Frame& frame = stack.back();
     if (!frame.files_done) {
-      for (const Entry& e : frame.list.e) {
+      for (size_t i = 0; i < frame.list.e.size(); ++i) {
+        const Entry& e = frame.list.e[i];
         if (g_stop.load()) break;
-        if (e.type != T_DIR) emit({e, rel_join(frame.rel, frame.list.name_sv(e)), e.type == T_LNK ? frame.list.link(e) : ""});
+        if (e.type != T_DIR) emit({e, rel_join(frame.rel, frame.list.name_sv(e)), e.type == T_LNK ? frame.list.link(e) : "",
+                                  source_path(frame.paths.empty() ? path_join(frame.base, frame.list.name_sv(e)) : frame.paths[i])});
       }
       frame.files_done = true;
     }
@@ -99,7 +104,7 @@ int run_listing(const std::vector<std::string>& sources, const ListingSink& emit
       source_dirs.emplace_back(frame.paths.empty() ? path_join(frame.base, frame.list.name_sv(e)) : frame.paths[next], frame.list.e[next],
                                frame.contexts.empty() ? nullptr : frame.contexts[next]);
     }
-    emit({e, rel, ""});
+    emit({e, rel, "", source_path(std::get<0>(source_dirs.front()))});
     if (!g_opt.recursive) continue;
     Frame child;
     child.rel = rel;

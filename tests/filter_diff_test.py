@@ -69,10 +69,14 @@ class FilterDifferentials(unittest.TestCase):
         command += ['--filter=' + rule for rule in rules]
         if direction != 'local':
             server = ('/usr/local/bin/xsync' if transfer.HOST else str(transfer.BINARY)) if native else 'rsync'
-            command += ['-e', transfer.RSH, '--rsync-path=' + shlex.quote(server)]
+            server_command = shlex.quote(server)
+            if getattr(self, 'server_env', None):
+                server_command = shlex.join(['env', *[key + '=' + value for key, value in self.server_env.items()], server])
+            command += ['-e', transfer.RSH, '--rsync-path=' + server_command]
             if direction == 'push': destination = (transfer.HOST or 'fake') + ':' + destination
             else: source = (transfer.HOST or 'fake') + ':' + source
-        result = subprocess.run(command + [source, destination], capture_output=True, timeout=20)
+        result = subprocess.run(command + [source, destination], capture_output=True, timeout=20,
+                                env=getattr(self, 'env', None))
         snapshot = difftest.snapshot(str(self.root))
         if transfer.HOST and direction != 'local':
             from ssh_test import remote_json
@@ -90,12 +94,21 @@ class FilterDifferentials(unittest.TestCase):
         with self.subTest(direction=direction, seed=label, rules=rules, delete_excluded=delete_excluded):
             begin = time.time_ns() - 2_000_000_000
             self.fixture(direction != 'local')
+            original = difftest.snapshot(str(self.root))
             reference, expected, ref_output = self.copy(False, direction, rules, delete_excluded)
-            self.assertEqual(reference.returncode, 0, reference.stderr)
+            self.assertIn(reference.returncode, getattr(self, 'reference_codes', (0,)), reference.stderr)
             self.fixture(direction != 'local')
             result, actual, output = self.copy(True, direction, rules, delete_excluded)
             self.assertEqual(result.returncode, reference.returncode, result.stderr)
             self.assertNotIn(b'falling back', result.stderr)
+            if reference.returncode:
+                self.assertIn(b'rejecting excluded file-list name', reference.stderr)
+                self.assertIn(b'rejecting excluded file-list name', result.stderr)
+                self.assertFalse(any(line.startswith(b'*deleting') for line in output))
+                source = lambda tree: {k: v for k, v in tree.items() if k == 'src' or k.startswith('src/')}
+                self.assertEqual(source(expected), source(original))
+                self.assertEqual(source(actual), source(original))
+                return
             differences = difftest.compare(expected, actual, window=(begin, time.time_ns() + 2_000_000_000))
             self.assertFalse(differences, '\n'.join(differences))
             self.assertEqual(output, ref_output)

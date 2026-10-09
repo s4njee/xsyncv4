@@ -3,7 +3,7 @@
 #include <functional>
 #include "common.h"
 
-struct ListingEntry { Entry attrs; std::string path, target; };
+struct ListingEntry { Entry attrs; std::string path, target, source; };
 using ListingSink = std::function<void(const ListingEntry&)>;
 int run_listing(const std::vector<std::string>& sources, const ListingSink& emit);
 void listing_output(const ListingEntry& entry);

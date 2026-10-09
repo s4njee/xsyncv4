@@ -461,6 +461,8 @@ std::string missing_feature(u64 features) {
     return "peer does not support extended filters";
   if (g_opt.filters.has_merges() && !(features & PF_MERGE_FILTERS))
     return "peer does not support per-directory filters";
+  if ((g_opt.filters.has_cvs() || g_opt.filters.has_merges()) && !(features & PF_CVS_FILTERS))
+    return "peer does not support global CVS filters";
   if (g_opt.list_only) return features & PF_LIST ? "" : "peer does not support source listing";
   if (g_opt.safe_links && !(features & PF_SAFE_LINKS)) return "peer does not support --safe-links";
   if (!g_opt.numeric_ids && (g_opt.owner || g_opt.group) && !(features & PF_IDMAP))
@@ -494,7 +496,7 @@ void get_options(RBuf& r) {
   std::string err;
   for (size_t i = 0; i < n && !r.bad; i++) {
     std::string rule(r.str());
-    if (!o.filters.add_filter(rule, &err, false)) die(RERR_PROTOCOL, "bad filter rule from client: %s", err.c_str());
+    if (!o.filters.add_filter(rule, &err, false, false)) die(RERR_PROTOCOL, "protocol error: bad filter rule from client: %s", err.c_str());
   }
 }
 
@@ -728,6 +730,8 @@ struct Sender {
         if (e.type != T_REG) put_var(body, (u64)e.size);
         put_str(body, d->src_paths.empty() ? path_join(d->src_path, l.name_sv(e)) : d->src_paths[i]);
       }
+      if (o.peer_features & PF_CVS_FILTERS)
+        put_str(body, FilterList::absolute_path(d->src_paths.empty() ? path_join(d->src_path, l.name_sv(e)) : d->src_paths[i]));
     }
     if (client) {
       g_stats.files_seen.fetch_add(nf, std::memory_order_relaxed);
@@ -1272,6 +1276,8 @@ struct Receiver {
     if (r.bad || n > (1u << 28)) die(RERR_PROTOCOL, "protocol error: bad DIR frame");
     DirList& l = w.src;
     l.e.resize(n);
+    std::vector<std::string> filter_sources;
+    if (o.peer_features & PF_CVS_FILTERS) filter_sources.resize(n);
     if (structured_output()) w.output_sources.resize(n);
     if (o.checksum) l.sums.assign(n * 2, 0);
     for (size_t i = 0; i < n; i++) {
@@ -1313,8 +1319,24 @@ struct Receiver {
         w.output_sources[i] = r.str();
         if (e.size < 0) die(RERR_PROTOCOL, "protocol error: negative file size");
       }
+      if (o.peer_features & PF_CVS_FILTERS) {
+        filter_sources[i] = r.str();
+        if (filter_sources[i].find('\0') != std::string::npos)
+          die(RERR_PROTOCOL, "protocol error: NUL in filter source path");
+      }
     }
     if (r.bad) die(RERR_PROTOCOL, "protocol error: truncated DIR frame");
+    // A per-directory merge delegates selection to the sender. Otherwise a
+    // global CVS list must also agree with the pulling client's settings.
+    if (client && o.filters.has_cvs() && !o.filters.trusts_sender_filters()) {
+      for (size_t i = 0; i < l.e.size(); ++i) {
+        const Entry& e = l.e[i];
+        auto name = l.name_sv(e);
+        if (o.filters.excluded(rel_join(w.rel, name), e.type == T_DIR,
+                               filter_sources[i]))
+          die(RERR_UNSUPPORTED, "rejecting excluded file-list name: %s", rel_join(w.rel, name).c_str());
+      }
+    }
     if ((o.owner || o.group) && !o.numeric_ids) {
       std::lock_guard<std::mutex> lk(ids.mu);
       ids.map(w.attrs);
@@ -1738,6 +1760,8 @@ struct Receiver {
 
 int receive_listing(Conn& c) {
   u64 count = 0;
+  const bool verify = g_opt.filters.has_cvs() && !g_opt.filters.trusts_sender_filters();
+  std::vector<ListingEntry> pending;
   u8 type;
   std::string payload;
   for (;;) {
@@ -1748,6 +1772,11 @@ int receive_listing(Conn& c) {
       u64 code = r.var(), expected = r.var();
       if (r.bad || !r.empty() || code > 255 || expected != count)
         die(RERR_PROTOCOL, "protocol error: malformed listing completion");
+      for (const auto& entry : pending) {
+        if (entry.path != "." && g_opt.filters.excluded(entry.path, entry.attrs.type == T_DIR, entry.source))
+          die(RERR_UNSUPPORTED, "rejecting excluded file-list name: %s", entry.path.c_str());
+      }
+      for (const auto& entry : pending) listing_output(entry);
       report_peer_error((int)code, "errors were reported while listing remote sources");
       c.finish();
       close(c.wfd);
@@ -1766,12 +1795,15 @@ int receive_listing(Conn& c) {
     entry.attrs.size = (i64)r.var();
     entry.attrs.mtime = r.svar();
     entry.target = r.str();
+    if (g_opt.peer_features & PF_CVS_FILTERS) entry.source = r.str();
     if (r.bad || !r.empty() || !listing_path_valid(entry.path) || mode > 07777 ||
         entry.attrs.type < T_REG || entry.attrs.type > T_BLK || entry.attrs.size < 0 ||
         entry.target.size() > (1 << 20) || entry.target.find('\0') != entry.target.npos ||
+        entry.source.find('\0') != entry.source.npos ||
         (entry.attrs.type != T_LNK && !entry.target.empty()))
       die(RERR_PROTOCOL, "protocol error: malformed listing entry");
-    listing_output(entry);
+    if (verify) pending.push_back(std::move(entry));
+    else listing_output(entry);
     ++count;
   }
 }
@@ -1881,10 +1913,11 @@ int run_client(const std::vector<std::string>& srcs, const std::string& dest, u3
   put_var(f, wire_version);
   f.push_back(push ? 'R' : 'S');
   u64 advertised = PROTO_FEATURES & (o.whole_file ? ~(PF_RESUME | PF_DELTA) : ~u64(0));
-  if (o.list_only) advertised &= PF_CORE | PF_ZSTD | PF_LIST | PF_IO_CONTROL | PF_FILTERS | PF_MERGE_FILTERS;
+  if (o.list_only) advertised &= PF_CORE | PF_ZSTD | PF_LIST | PF_IO_CONTROL | PF_FILTERS | PF_MERGE_FILTERS | PF_CVS_FILTERS;
   else advertised &= ~PF_LIST;
   if (!o.filters.needs_extended()) advertised &= ~PF_FILTERS;
   if (!o.filters.has_merges()) advertised &= ~PF_MERGE_FILTERS;
+  if (!o.filters.has_cvs() && !o.filters.has_merges()) advertised &= ~PF_CVS_FILTERS;
   if (!o.hard_links) advertised &= ~PF_HLINK;
   if (!output_enabled()) advertised &= ~(PF_OUTPUT | PF_DIR_OUTPUT);
   if (wire_version >= 4) put_var(f, advertised);
@@ -1969,7 +2002,8 @@ int run_client(const std::vector<std::string>& srcs, const std::string& dest, u3
   }
   if (o.peer_features & PF_FILTERS) {
     std::string config = new_frame(F_FILTER_CONFIG);
-    auto rules = o.filters.to_strings();
+    if (o.peer_features & PF_CVS_FILTERS) config.push_back((char)o.cvs_exclude);
+    auto rules = o.filters.to_strings(push, o.delete_excluded, !push && o.cvs_exclude, !push);
     if (rules.size() > 10000) die(RERR_UNSUPPORTED, "too many filter rules for a remote transfer");
     put_var(config, rules.size());
     for (const auto& rule : rules) put_str(config, rule);
@@ -1988,6 +2022,7 @@ int run_client(const std::vector<std::string>& srcs, const std::string& dest, u3
   if (!o.list_only && o.verbose > 0) out_line(push ? "sending incremental file list" : "receiving incremental file list");
   if (!o.list_only) progress_start(default_jobs());
   int rc;
+  if (!push) o.filters.prepare_pull();
   if (o.list_only) rc = receive_listing(c);
   else if (push) {
     Sender s(c, true);
@@ -2071,18 +2106,27 @@ int run_server() {
   if (o.peer_features & PF_FILTERS) {
     if (!c.read_frame(type, payload)) conn_lost();
     RBuf config(payload);
+    if (o.peer_features & PF_CVS_FILTERS) {
+      u8 cvs = config.byte();
+      if (cvs > 1) die(RERR_PROTOCOL, "protocol error: malformed CVS configuration");
+      o.cvs_exclude = cvs;
+    }
     u64 count = config.var();
     if (type != F_FILTER_CONFIG || config.bad || count > 10000 || !o.filters.empty())
       die(RERR_PROTOCOL, "protocol error: malformed filter configuration");
     std::string error;
     for (u64 i = 0; i < count && !config.bad; ++i) {
       auto rule = config.str();
-      if (!config.bad && !o.filters.add_filter(rule, &error, false))
+      if (!config.bad && !o.filters.add_filter(rule, &error, false, o.peer_features & PF_CVS_FILTERS))
         die(RERR_PROTOCOL, "protocol error: bad configured filter: %s", error.c_str());
     }
     if (config.bad || !config.empty()) die(RERR_PROTOCOL, "protocol error: malformed filter configuration");
-    if (o.filters.has_merges() && !(o.peer_features & PF_MERGE_FILTERS))
+    if ((o.filters.has_merges() || o.cvs_exclude) && !(o.peer_features & PF_MERGE_FILTERS))
       die(RERR_PROTOCOL, "protocol error: unnegotiated per-directory filters");
+    if (o.filters.has_merges() && !(o.peer_features & PF_CVS_FILTERS))
+      die(RERR_PROTOCOL, "protocol error: unnegotiated CVS merge-file syntax");
+    if (o.cvs_exclude && role == 'S' && !o.filters.add_cvs_option(&error))
+      die(RERR_PROTOCOL, "protocol error: bad CVS configuration: %s", error.c_str());
   }
   if (o.peer_features & PF_DIR_OUTPUT) {
     if (!c.read_frame(type, payload)) conn_lost();
@@ -2103,6 +2147,7 @@ int run_server() {
       f.push_back((char)entry.attrs.type);
       put_var(f, entry.attrs.mode), put_var(f, (u64)entry.attrs.size);
       put_svar(f, entry.attrs.mtime), put_str(f, entry.target);
+      if (o.peer_features & PF_CVS_FILTERS) put_str(f, entry.source);
       c.send(std::move(f), true);
       ++count;
     });

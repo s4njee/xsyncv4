@@ -94,7 +94,7 @@ coverage clarification remains open.
 | E-05 | **List mode.** `xsync host:dir/` or a single SRC should list, as rsync does; today it is a usage error. | **done** | `ls -l`-style listing for local and remote sources. | S |
 | E-06 | **End-of-run error summary.** With thousands of files an error scrolls away. | **done** | After the run: count of errors and the first ten, grouped by kind; exit-code line as now. | S |
 | E-07 | **`--bwlimit`, `--timeout`, keep-alive.** `--bwlimit` is rejected; `--timeout` is ignored (T-04). A stalled ssh connection hangs forever. | **done** | Token-bucket limit on the writer thread; idle timeout with keep-alive frames; exit 30 on timeout like rsync. | M |
-| E-08 | **Filter completeness.** Global rule sides, single/per-directory merge files, `-F` and merge modifiers are implemented. Remaining: global CVS rules/`-C`, `-m`, and reloading newly transferred receiver merge files for `--delete-after`. The prune-empty case is the remaining difftest failure. | **in progress** | 231/231 difftest (expanded from 159); a differential fuzzer against rsync for the new rule kinds, checked into `tests/`. | L |
+| E-08 | **Filter completeness.** Global rule sides, single/per-directory merge files, `-F`, merge modifiers, and global CVS rules/`-C` are implemented. Remaining: `-m` and reloading newly transferred receiver merge files for `--delete-after`. The prune-empty case is the remaining difftest failure. | **in progress** | 231/231 difftest (expanded from 159); a differential fuzzer against rsync for the new rule kinds, checked into `tests/`. | L |
 | E-09 | **`--files-from`, `-R`, `--from0`.** Common in backup scripts and with `find … -print0`. | code | Implemented for local and remote, including the "implied directories" semantics of `-R`. | L |
 | E-10 | **Metadata beyond `-a`.** `-H` hard links, `-X` xattrs, `-A` ACLs, `-N` creation times, `-U` atimes, BSD file flags, `-E`, `--chmod`, `--chown`. Also an inconsistency to resolve: the clone path already carries xattrs and ACLs while the byte-copy and remote paths drop them. | code | `-H` and `-X` first (most used on macOS). Without `-X`, both paths behave the same — either strip on clone or document that clones are a superset. | XL |
 | E-11 | **Backup-style options.** `--backup`/`--backup-dir`, `--link-dest`, `--compare-dest`, `--remove-source-files`, `--append`, real `-S` sparse handling, `--preallocate`. | code | Prioritise `--link-dest` (snapshot backups) and `-S`; the rest fall back to rsync via R-02 until needed. | L |
@@ -1228,3 +1228,45 @@ Verified artifact manifest (source `864bd37edf14`):
   newly transferred receiver merge files still need implementation and
   differential coverage. Release artifacts remain the completed E-07 set;
   QA builds cover both macOS architectures and installed helpers were unchanged.
+
+### E-08 — in progress: global CVS filters (2026-10-09)
+
+- Added `-C`/`--cvs-exclude` and positioned global `-C`/`+C` filter rules.
+  CVS defaults, `$HOME/.cvsignore` and `CVSIGNORE` share the first imported
+  global list; per-directory `.cvsignore` files retain their own merge slots.
+  Built-in patterns are perishable, while home/environment patterns inherit
+  explicit perishable defaults. Directory-only VCS patterns leave ordinary
+  files such as a file named `.git` visible. Repeated command-line `-C` flags
+  append the CVS rules once, after explicit rules.
+- Matched separate client/server settings: pushes expand the client's global
+  CVS patterns; pulls import the sender's own settings. Command-line `-C`
+  preserves the receiver's unsent global cache under `--delete-excluded`.
+  Receiver-only global markers do not initialize the sender's CVS cache.
+  Explicit global filters reject excluded incoming names with exit 4; a
+  per-directory rule delegates filter selection to the sender, including when
+  that rule is subsequently cleared. Remote listings apply the same checks.
+- Added `PF_CVS_FILTERS` (8192): the negotiated filter configuration carries
+  the CLI CVS flag, and transfer/listing entries carry each source's absolute
+  path for global filter checks, including relative and multiple source roots.
+  Configured CVS rules require negotiation before reading home files; frozen
+  hello fields cannot import CVS rules. Per-directory merge syntax also needs
+  this feature because its files can contain global CVS markers. Helpers
+  missing the feature refuse before destination creation.
+- Checked in `tests/filter_cvs_test.py`: **282** transfer comparisons (35
+  directed cases with both deletion policies and 24 randomized cases in each
+  direction), distinct client/server settings, an unchanged-destination
+  rejection check, and direct native coverage of documented CVS list clearing.
+  `tests/filter_cvs_listing_test.py` adds **16** local/remote listing comparisons.
+  Cases include single/per-directory merges with side, perishable and xattr
+  defaults; CVS imports deliberately do not inherit an xattr default.
+- All **298** CVS transfer/listing comparisons pass on ARM, Rosetta and real
+  Linux SSH. Unit checks total **32,940**, green on all three; filter-wire
+  checks (6), listing-wire
+  checks (5), and mixed-version protocol checks (7) cover negotiation and
+  malformed inputs. Existing P0 (13), listing (7), and merge checks (7) pass.
+  Forced byte-copy sorted itemization remains **230/231**, with only
+  `include_exclude_prune_empty` failing.
+- **E-08 remains in progress:** `-m` and `--delete-after` reloading newly
+  transferred receiver merge files still need implementation and differential
+  coverage. Release artifacts remain the completed E-07 set; installed helpers
+  were unchanged.

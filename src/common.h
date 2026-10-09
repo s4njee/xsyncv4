@@ -25,8 +25,9 @@ constexpr u64 PF_LIST = 512;
 constexpr u64 PF_IO_CONTROL = 1024;
 constexpr u64 PF_FILTERS = 2048;
 constexpr u64 PF_MERGE_FILTERS = 4096;
+constexpr u64 PF_CVS_FILTERS = 8192;
 #ifndef XSYNC_PROTOCOL_FEATURES
-#define XSYNC_PROTOCOL_FEATURES 8191
+#define XSYNC_PROTOCOL_FEATURES 16383
 #endif
 constexpr u64 PROTO_FEATURES = XSYNC_PROTOCOL_FEATURES;
 constexpr u64 LEGACY_V3_FEATURES = 15;
@@ -63,6 +64,7 @@ struct Options {
   bool output_attrs = false, output_unchanged = false;  // Configured before workers start.
   bool hard_links = false;  // Negotiated separately from the frozen v3 options.
   bool delete_before = false;  // Deletion is still deferred for sender-read safety.
+  bool cvs_exclude = false;  // Added at the end of explicit rules, outside the frozen hello.
   bool list_only = false, dirs_explicit = false, human_ungrouped = false;
   u64 bwlimit = 0;  // Bytes/second; outside the frozen v3 option layout.
   u32 timeout = 0;  // Remote idle seconds; zero disables the deadline.

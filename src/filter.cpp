@@ -5,6 +5,7 @@
 #include <cerrno>
 #include <cstddef>
 #include <cstdio>
+#include <cstdlib>
 #include <cstring>
 #include <filesystem>
 #include <system_error>
@@ -235,7 +236,7 @@ bool FilterList::add_old_style(std::string_view pat, bool include, std::string* 
 void FilterList::add_pattern(std::string_view pat, bool include) { add_old_style(pat, include, nullptr); }
 
 // Port of rsync's parse_rule_tok() for command-line -f rules (no word splitting).
-bool FilterList::add_filter(std::string_view rule, std::string* err, bool read_merge_files) {
+bool FilterList::add_filter(std::string_view rule, std::string* err, bool read_merge_files, bool allow_cvs) {
   if (rule.empty()) return true;
   const auto fail = [&](std::string what) {
     set_err(err, std::move(what) + ": " + std::string(rule));
@@ -276,7 +277,6 @@ bool FilterList::add_filter(std::string_view rule, std::string* err, bool read_m
           (merge && m == '!') || ((m == '+' || m == '-' || m == 'C') && no_prefix))
         return fail(std::string("invalid modifier '") + m + "' in filter rule");
       if (m == '+' || m == '-' || m == 'C') no_prefix = true;
-      if (!merge && m == 'C') return fail("unsupported filter rule (CVS excludes)");
       if (!std::strchr("!/sprxCenw+-", m)) {
         return fail(std::string(std::strchr("/Cenprswx", m) ? "unsupported" : "invalid") + " modifier '" + m +
                     "' in filter rule");
@@ -295,7 +295,23 @@ bool FilterList::add_filter(std::string_view rule, std::string* err, bool read_m
     return true;
   }
   const bool cvs = modifiers.find('C') != std::string::npos;
-  if (pat.empty() && !(merge && cvs)) return fail("unexpected end of filter rule");
+  if (pat.empty() && !cvs) return fail("unexpected end of filter rule");
+  if (cvs && !merge) {
+    if (!allow_cvs) return fail("unnegotiated global CVS filter");
+    Rule marker;
+    marker.kind = Kind::Cvs;
+    marker.prefix = ch;
+    marker.include = ch == '+';
+    marker.text = pat;
+    marker.modifiers = modifiers;
+    marker.sides = sides;
+    marker.negate = negate;
+    marker.absolute = modifiers.find('/') != modifiers.npos;
+    marker.perishable = modifiers.find('p') != modifiers.npos;
+    if (!defer_cvs_ && !load_cvs(marker, err)) return false;
+    rules_.push_back(std::move(marker));
+    return true;
+  }
   if (merge) {
     if (ch == '.' && !read_merge_files) return fail("single-instance merge rules are not allowed on the wire");
     Rule spec;
@@ -317,6 +333,8 @@ bool FilterList::add_filter(std::string_view rule, std::string* err, bool read_m
       spec.modifiers.erase(std::remove(spec.modifiers.begin(), spec.modifiers.end(), 'e'), spec.modifiers.end());
     }
     if (ch == '.') return load_merge(spec.text, spec, parse_scope_, err, false);
+    trusts_sender_filters_ = true;
+    if (!cvs_cache_) cvs_cache_ = std::make_shared<CvsCache>();
     rules_.push_back(std::move(spec));
     return true;
   }
@@ -403,6 +421,10 @@ bool FilterList::load_merge(const std::string& path, const Rule& defaults, std::
     set_err(err, "failed to read merge file " + path + ": " + std::generic_category().message(read_error));
     return false;
   }
+  return merge_content(content, defaults, scope, err);
+}
+
+bool FilterList::merge_content(std::string_view content, const Rule& defaults, std::string_view scope, std::string* err) {
   const bool cvs = defaults.modifiers.find('C') != std::string::npos;
   const bool words = cvs || defaults.modifiers.find('w') != std::string::npos;
   const bool no_prefix = cvs || defaults.modifiers.find_first_of("+-") != std::string::npos;
@@ -411,9 +433,15 @@ bool FilterList::load_merge(const std::string& path, const Rule& defaults, std::
     FilterList entry;
     entry.merge_depth_ = merge_depth_ + 1;
     entry.parse_scope_ = scope;
+    entry.cvs_cache_ = cvs_cache_;
+    entry.directory_cvs_ = directory_cvs_;
+    entry.receiver_cvs_ = receiver_cvs_;
+    entry.defer_cvs_ = true;
     if (no_prefix && !(cvs && text == "!")) {
-      entry.add_rule(text, defaults.modifiers.find('+') != std::string::npos, false);
+      entry.add_rule(text, defaults.include || defaults.modifiers.find('+') != std::string::npos, defaults.negate);
     } else if (!entry.add_filter(text, err)) return false;
+    if (entry.cvs_cache_) cvs_cache_ = entry.cvs_cache_;
+    trusts_sender_filters_ |= entry.trusts_sender_filters_;
     if (entry.cleared_) { rules_.clear(); cleared_ = true; }
     for (Rule& rule : entry.rules_) {
       if (defaults.sides && rule.sides) {
@@ -427,9 +455,11 @@ bool FilterList::load_merge(const std::string& path, const Rule& defaults, std::
       if (defaults.sides & 2) add_modifier('r');
       rule.sides |= defaults.sides;
       if (defaults.absolute) rule.absolute = true, add_modifier('/');
+      if (defaults.negate) rule.negate = true, add_modifier('!');
       if (defaults.perishable) rule.perishable = true, add_modifier('p');
       if (defaults.xattr) rule.xattr = true, add_modifier('x');
       if (!scope.empty()) rule.scope = scope;
+      if (rule.kind == Kind::Cvs && !rule.merged && !defer_cvs_ && !load_cvs(rule, err)) return false;
       rules_.push_back(std::move(rule));
     }
     return true;
@@ -462,6 +492,50 @@ bool FilterList::load_merge(const std::string& path, const Rule& defaults, std::
   return true;
 }
 
+bool FilterList::load_cvs(Rule& marker, std::string* err) {
+  if (!cvs_cache_) cvs_cache_ = std::make_shared<CvsCache>();
+  std::lock_guard<std::mutex> lock(cvs_cache_->mutex);
+  auto& list = cvs_cache_->lists[directory_cvs_ && receiver_cvs_ ? 1 : 0];
+  if (!list) {
+    FilterList contents;
+    Rule defaults = marker;
+    defaults.xattr = false;  // CVS containers do not pass xattr defaults to children.
+    defaults.perishable = true;
+    // rsync's built-in CVS list; VCS directories have directory-only patterns.
+    constexpr std::string_view patterns = "RCS SCCS CVS CVS.adm RCSLOG cvslog.* tags TAGS .make.state .nse_depinfo "
+        "*~ #* .#* ,* _$* *$ *.old *.bak *.BAK *.orig *.rej .del-* *.a *.olb *.o *.obj *.so *.exe *.Z *.elc *.ln core "
+        ".svn/ .git/ .hg/ .bzr/";
+    if (!contents.merge_content(patterns, defaults, {}, err)) return false;
+    defaults.perishable = marker.perishable;
+    if (const char* home = std::getenv("HOME"))
+      if (!contents.load_merge((std::filesystem::path(home) / ".cvsignore").string(), defaults, {}, err, true)) return false;
+    if (const char* value = std::getenv("CVSIGNORE"))
+      if (!contents.merge_content(value, defaults, {}, err)) return false;
+    list = std::make_shared<const FilterList>(std::move(contents));
+  }
+  if (!directory_cvs_) cvs_cache_->lists[1] = list;
+  marker.merged = list;
+  return true;
+}
+
+bool FilterList::add_cvs_option(std::string* err) {
+  cvs_option_start_ = rules_.size();
+  return add_filter(":C", err) && add_filter("-C", err);
+}
+
+void FilterList::prepare_pull() {
+  if (!cvs_cache_ || !cvs_cache_->lists[0]) return;
+  const size_t end = std::min(cvs_option_start_, rules_.size());
+  for (size_t i = 0; i < end; ++i)
+    if (rules_[i].kind == Kind::Cvs && rules_[i].sides != 2) return;
+  FilterList unelided = *cvs_cache_->lists[0];
+  for (Rule& rule : unelided.rules_) rule.sides = 3;
+  auto list = std::make_shared<const FilterList>(std::move(unelided));
+  cvs_cache_->lists[0] = cvs_cache_->lists[1] = list;
+  for (Rule& rule : rules_)
+    if (rule.kind == Kind::Cvs) rule.merged = list;
+}
+
 FilterList FilterList::in_directory(std::string_view path, bool receiver, std::string* err) const {
   if (err) err->clear();
   std::error_code error;
@@ -487,6 +561,8 @@ void FilterList::registered_merges(MergeRegistry& registry, bool inheriting) con
 FilterList FilterList::directory_impl(std::string_view path, bool receiver, std::string* err, unsigned depth,
                                      MergeRegistry& registry) const {
   FilterList result = *this;
+  result.directory_cvs_ = true;
+  result.receiver_cvs_ = receiver;
   if (depth >= 64) { set_err(err, "dir-merge nesting exceeds 64: " + std::string(path)); return result; }
   for (Rule& rule : result.rules_) {
     if (rule.kind != Kind::Merge) continue;
@@ -519,6 +595,9 @@ FilterList FilterList::directory_impl(std::string_view path, bool receiver, std:
       if (rule.merged && rule.modifiers.find_first_of("nC") == std::string::npos) inherited = *rule.merged;
       FilterList local;
       local.merge_depth_ = depth;
+      local.cvs_cache_ = result.cvs_cache_;
+      local.directory_cvs_ = true;
+      local.receiver_cvs_ = receiver;
       if (!local.load_merge((std::filesystem::path(directory) / rule.merge_name).string(), rule, directory, err, true)) return result;
       if (local.cleared_) {
         MergeRegistry discarded;
@@ -547,7 +626,16 @@ int FilterList::match(std::string_view relative, bool is_dir, bool receiver, boo
   std::string_view framed_path;
 
   for (const Rule& r : rules_) {
-    if (r.xattr || (receiver && deleting_directory && r.perishable)) continue;
+    // A CVS marker reuses the first imported global list. Its pattern and later
+    // side/xattr modifiers do not alter that list; perishable still gates it.
+    if (r.kind == Kind::Cvs) {
+      if (!(receiver && deleting_directory && r.perishable) && r.merged) {
+        int result = r.merged->match(relative, is_dir, receiver, delete_excluded, deleting_directory, absolute);
+        if (result) return result;
+      }
+      continue;
+    }
+    if (receiver && deleting_directory && r.perishable) continue;
     uint8_t sides = r.sides ? r.sides : delete_excluded && r.kind != Kind::Merge ? 1 : 3;
     if (!(sides & (receiver ? 2 : 1))) continue;
     if (r.kind == Kind::Merge) {
@@ -557,6 +645,7 @@ int FilterList::match(std::string_view relative, bool is_dir, bool receiver, boo
       }
       continue;
     }
+    if (r.xattr) continue;
     path = r.absolute ? absolute : relative;
     if (r.absolute && path.starts_with('/')) path.remove_prefix(1);
     if (!r.absolute && !r.scope.empty()) {
@@ -575,7 +664,7 @@ int FilterList::match(std::string_view relative, bool is_dir, bool receiver, boo
     if (is_dir || !r.dir_only) {
       const std::string_view pat = r.pat;
       switch (r.kind) {
-        case Kind::Merge: break;  // Handled before pathname matching.
+        case Kind::Merge: case Kind::Cvs: break;  // Handled before pathname matching.
         case Kind::NameLit: m = base == pat; break;
         case Kind::NameSuffix: m = base.ends_with(pat); break;
         case Kind::NamePrefix: m = base.starts_with(pat); break;
@@ -625,7 +714,7 @@ bool FilterList::protected_from_deletion(std::string_view path, bool is_dir, boo
 
 bool FilterList::needs_extended() const {
   return std::any_of(rules_.begin(), rules_.end(), [](const Rule& r) {
-    return r.kind == Kind::Merge || r.sides || r.absolute || r.perishable || r.xattr;
+    return r.kind == Kind::Merge || r.kind == Kind::Cvs || r.sides || r.absolute || r.perishable || r.xattr;
   });
 }
 
@@ -639,6 +728,10 @@ bool FilterList::has_merges() const {
   return std::any_of(rules_.begin(), rules_.end(), [](const Rule& r) { return r.kind == Kind::Merge; });
 }
 
+bool FilterList::has_cvs() const {
+  return std::any_of(rules_.begin(), rules_.end(), [](const Rule& r) { return r.kind == Kind::Cvs; });
+}
+
 std::string FilterList::absolute_path(std::string_view path) {
   // Resolve directories as getcwd() would, retaining the final named entry even
   // when it is a symlink. Excludes match the named link, not its referent.
@@ -649,10 +742,25 @@ std::string FilterList::absolute_path(std::string_view path) {
   return (error ? value : parent / value.filename()).string();
 }
 
-std::vector<std::string> FilterList::to_strings() const {
+std::vector<std::string> FilterList::to_strings(bool expand_cvs, bool delete_excluded, bool omit_cvs_option,
+                                               bool pulling) const {
   std::vector<std::string> out;
   out.reserve(rules_.size());
-  for (const Rule& r : rules_) {
+  const size_t end = omit_cvs_option ? std::min(cvs_option_start_, rules_.size()) : rules_.size();
+  for (size_t i = 0; i < end; ++i) {
+    const Rule& r = rules_[i];
+    // A receiver-only marker cannot initialize the remote sender's CVS cache.
+    if (pulling && r.kind == Kind::Cvs && r.sides == 2) continue;
+    if (expand_cvs && r.kind == Kind::Cvs) {
+      if (r.sides == 1 || (!r.sides && delete_excluded)) continue;
+      if (r.merged) {
+        for (Rule child : r.merged->rules_) {
+          if (r.perishable && !child.perishable) child.perishable = true, child.modifiers += 'p';
+          out.push_back(std::string(1, child.prefix) + child.modifiers + ' ' + child.text);
+        }
+      }
+      continue;
+    }
     std::string s(1, r.prefix);
     s += r.modifiers;
     s += ' ';

@@ -696,9 +696,8 @@ const Case kCases[] = {
     {{"i:*/", "e:**/*a*/**\?c"}, kExcl, {"bar/foo/a.c", "bar/baz/x.c", "dir1/ab/foo/bar/a.c"}},
 };
 
-// Global CVS excludes still need support, alongside invalid modifier combinations.
+// Invalid modifier combinations.
 const char* const kUnsupported[] = {
-    "-C",
     "Hs foo", "Hr foo", "Ss foo", "Sr foo", "Ps foo", "Pr foo", "Rs foo", "Rr foo",
     "HC foo", "-e foo", "-n foo", "-w foo",
 };
@@ -939,6 +938,48 @@ void test_merges() {
   std::filesystem::remove_all(root);
 }
 
+void test_cvs() {
+  const char* old_home = std::getenv("HOME");
+  const char* old_ignore = std::getenv("CVSIGNORE");
+  std::string saved_home = old_home ? old_home : "", saved_ignore = old_ignore ? old_ignore : "";
+  std::string root = write_temp("");
+  std::remove(root.c_str());
+  std::filesystem::create_directory(root);
+  std::ofstream(root + "/.cvsignore") << "home.keep\n";
+  setenv("HOME", root.c_str(), 1);
+  setenv("CVSIGNORE", "env.keep", 1);
+  FilterList filters;
+  std::string error;
+  CHECK(filters.add_filter("-C", &error), "%s", error.c_str());
+  CHECK(filters.excluded("a.o", false), "CVS defaults");
+  CHECK(filters.excluded(".git", true) && !filters.excluded(".git", false), "VCS directories only");
+  CHECK(filters.excluded("home.keep", false) && filters.excluded("env.keep", false), "home and environment");
+  CHECK(filters.protected_from_deletion("a.o", false), "default protection");
+  CHECK(!filters.protected_from_deletion("gone/a.o", false, false, true), "built-in defaults are perishable");
+  CHECK(filters.protected_from_deletion("gone/home.keep", false, false, true), "home patterns are not perishable");
+  CHECK(filters.protected_from_deletion("gone/env.keep", false, false, true), "environment patterns are not perishable");
+  CHECK(filters.add_filter("!", &error) && filters.add_filter("+C", &error), "%s", error.c_str());
+  CHECK(filters.excluded("a.o", false), "global clearing preserves the initial CVS import");
+  FilterList positive;
+  CHECK(positive.add_filter("+C", &error) && positive.add_filter("- *", &error), "%s", error.c_str());
+  CHECK(!positive.excluded("a.o", false) && positive.excluded("normal", false), "positive CVS list");
+  FilterList wire;
+  CHECK(!wire.add_filter("-C", &error, false, false) && wire.empty(), "unnegotiated CVS cannot read home files");
+  FilterList cli;
+  CHECK(cli.add_cvs_option(&error), "%s", error.c_str());
+  CHECK(!cli.protected_from_deletion("a.o", false, true), "local delete-excluded elides default CVS protection");
+  cli.prepare_pull();
+  CHECK(cli.protected_from_deletion("a.o", false, true), "pull appends CLI CVS cache after sending rules");
+  CHECK(cli.protected_from_deletion("home.keep", false, true), "unsent home filters retain pull protection");
+  FilterList sent;
+  CHECK(sent.add_filter("-C", &error) && sent.add_cvs_option(&error), "%s", error.c_str());
+  sent.prepare_pull();
+  CHECK(!sent.protected_from_deletion("a.o", false, true), "explicit CVS cache is elided before CLI CVS append");
+  if (old_home) setenv("HOME", saved_home.c_str(), 1); else unsetenv("HOME");
+  if (old_ignore) setenv("CVSIGNORE", saved_ignore.c_str(), 1); else unsetenv("CVSIGNORE");
+  std::filesystem::remove_all(root);
+}
+
 }  // namespace
 
 int main() {
@@ -947,6 +988,7 @@ int main() {
   test_long_paths();
   test_sides();
   test_merges();
+  test_cvs();
   std::printf("%d checks, %d failures\n", g_checks, g_failures);
   return g_failures ? 1 : 0;
 }

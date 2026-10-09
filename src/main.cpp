@@ -95,6 +95,7 @@ Options (same meaning as rsync):
      --compress-level=NUM explicitly set compression level
  -f, --filter=RULE        add a file-filtering RULE
  -F                       merge .rsync-filter files (twice also excludes them)
+ -C, --cvs-exclude        exclude CVS defaults and .cvsignore patterns
      --exclude=PATTERN    exclude files matching PATTERN
      --exclude-from=FILE  read exclude patterns from FILE
      --include=PATTERN    don't exclude files matching PATTERN
@@ -233,6 +234,7 @@ Parsed parse(int argc, char** argv) {
       if (name == "dirs" || name == "no-dirs") o.dirs_explicit = true;
     } else if (name == "ignore-non-existing") o.existing = true;
     else if (name == "no-D") o.devices = o.specials = false;
+    else if (name == "cvs-exclude") o.cvs_exclude = true;
     else if (name == "atomic") o.direct_new = false;
     else if (name == "no-atomic") o.direct_new = true;
     else if (name == "delete-before") o.del = o.delete_before = true;
@@ -301,7 +303,7 @@ Parsed parse(int argc, char** argv) {
           "acls", "xattrs", "backup", "backup-dir", "suffix", "link-dest", "compare-dest", "copy-dest", "files-from",
           "from0", "relative", "chmod", "chown", "usermap", "groupmap", "append", "append-verify", "partial-dir",
           "delay-updates", "fuzzy", "remove-source-files", "keep-dirlinks", "copy-dirlinks", "copy-unsafe-links",
-          "munge-links", "executability", "atimes", "crtimes", "cvs-exclude", "prune-empty-dirs", "daemon", "port", "password-file",
+          "munge-links", "executability", "atimes", "crtimes", "prune-empty-dirs", "daemon", "port", "password-file",
           "write-batch", "read-batch", "only-write-batch", "super", "fake-super", "temp-dir",
           "iconv", "checksum-seed", "address", "sockopts", "stop-after", "stop-at", "max-alloc", "write-devices", "copy-devices",
           "delete-missing-args", "ignore-missing-args", "trust-sender", "copy-as", "early-input", "remote-option",
@@ -389,7 +391,7 @@ Parsed parse(int argc, char** argv) {
         case 'X': usage_error("--xattrs is not supported by xsync");
         case 'R': usage_error("--relative is not supported by xsync");
         case 'b': usage_error("--backup is not supported by xsync");
-        case 'C': usage_error("--cvs-exclude is not supported by xsync");
+        case 'C': o.cvs_exclude = true; break;
         case 'F':
           if (++filter_files == 1) {
             if (!o.filters.add_filter(": /.rsync-filter", &err)) usage_error(err);
@@ -408,6 +410,7 @@ Parsed parse(int argc, char** argv) {
   if (o.del && !o.recursive && !o.dirs) usage_error("--delete does not work without --recursive (-r) or --dirs (-d).");
   if (o.quiet) o.verbose = 0;
   if (o.bwlimit) o.clone = false;  // A clone must not bypass a requested copy rate.
+  if (o.cvs_exclude && !o.filters.add_cvs_option(&err)) usage_error(err);
   return p;
 }
 

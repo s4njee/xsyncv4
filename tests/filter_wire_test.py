@@ -25,7 +25,8 @@ class FilterWireTests(unittest.TestCase):
         options = bytes(name == 'recursive' for name in wire.BOOLS)
         options += b''.join(var(1 if name == 'max_delete' else 2 if name == 'jobs' else 0) for name in wire.INTS)
         hello = b'XSYNC\1' + var(wire.VERSION) + b'R' + var(features) + options + b'\0\1' + string(str(target))
-        proc = subprocess.Popen([str(wire.BINARY), '--server'], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        proc = subprocess.Popen([str(wire.BINARY), '--server'], stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                                stderr=subprocess.PIPE, env=getattr(self, 'env', None))
         self.addCleanup(self.close, proc)
         proc.stdin.write(frame(1, hello)); proc.stdin.flush()
         self.assertEqual(read_frame(proc)[0], 1)
@@ -69,14 +70,36 @@ class FilterWireTests(unittest.TestCase):
         proc, target = self.server(features=1)
         self.rejected(proc, target, frame(19, var(1) + string('P keep')))
 
+    def test_cvs_configuration(self):
+        for label, payload in (
+            ('missing-flag', b''), ('invalid-flag', b'\2\0'),
+            ('missing-count', b'\1'), ('too-many', b'\0' + var(10001)),
+            ('truncated-rule', b'\0' + var(1) + string('-C')[:-1]),
+            ('trailing', b'\0\0x'),
+        ):
+            with self.subTest(label=label):
+                proc, target = self.server(features=14337)
+                self.rejected(proc, target, frame(19, payload))
+        proc, target = self.server(features=10241)  # CVS without per-directory support.
+        self.rejected(proc, target, frame(19, b'\1\0'))
+
+    def test_unnegotiated_cvs_cannot_read_home(self):
+        # A FIFO makes accidental HOME access observable as a timeout.
+        home = self.root / 'home'; home.mkdir()
+        os.mkfifo(home / '.cvsignore')
+        self.env = dict(os.environ, HOME=str(home))
+        for features in (2049, 6145):
+            proc, target = self.server(features=features)
+            self.rejected(proc, target, frame(19, var(1) + string('-C')))
+
     def test_extended_rule_in_frozen_hello_is_rejected(self):
-        for features in (1, 2049):
-            with self.subTest(features=features):
+        for features, rule in ((1, 'P keep'), (2049, 'P keep'), (2049, '-C'), (14337, '-C')):
+            with self.subTest(features=features, rule=rule):
                 target = self.root / 'uncreated'
                 options = bytes(name == 'recursive' for name in wire.BOOLS)
                 options += b''.join(var(1 if name == 'max_delete' else 2 if name == 'jobs' else 0) for name in wire.INTS)
                 hello = b'XSYNC\1' + var(wire.VERSION) + b'R' + var(features) + options
-                hello += var(1) + string('P keep') + var(1) + string(str(target))
+                hello += var(1) + string(rule) + var(1) + string(str(target))
                 proc = subprocess.Popen([str(wire.BINARY), '--server'], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 self.addCleanup(self.close, proc)
                 self.rejected(proc, target, frame(1, hello))
@@ -107,6 +130,7 @@ class FilterWireTests(unittest.TestCase):
         self.assertEqual(result.stderr.count(b'falling back to rsync'), 1)
         self.assertFalse(target.exists())
         self.assertEqual(source.read_bytes(), b'original')
+
 
 
 if __name__ == '__main__': unittest.main()

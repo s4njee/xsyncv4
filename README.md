@@ -444,8 +444,20 @@ inheritance), together with side, absolute-path, perishable and xattr defaults.
 `-F` merges `.rsync-filter` files, including ancestor files; a second `-F` also
 excludes those files. Per-directory rules additionally negotiate
 `PF_MERGE_FILTERS` so helpers with only global-filter support refuse or delegate
-the request before transfer. `-C`, `-m`, and reloading newly transferred merge
-files for `--delete-after` remain pending under E-08.
+the request before transfer.
+
+`-C`/`--cvs-exclude` appends CVS filtering after explicit rules: per-directory
+`.cvsignore` files, built-in CVS exclusions, `$HOME/.cvsignore`, and `CVSIGNORE`.
+Use `--filter=':C'` and `--filter='-C'` to choose their positions explicitly.
+Built-in exclusions are perishable; home and environment patterns retain
+deletion protection unless made perishable explicitly. A push sends the
+client's global CVS patterns to the receiver; a pull uses each side's own
+settings. Explicit global CVS filters can reject a pull when those settings
+disagree about a file selected by the sender; remote listings enforce the same
+checks. Global CVS and per-directory
+merge syntax additionally negotiate `PF_CVS_FILTERS` before transfer.
+`-m` and reloading newly transferred merge files for `--delete-after` remain
+pending under E-08.
 
 xsync-only options: `-j N`/`--jobs=N` (worker threads; default is the number of
 performance cores), `--no-clone`, `--atomic` (default), `--no-atomic`.

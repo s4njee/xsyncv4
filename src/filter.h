@@ -1,6 +1,7 @@
 #pragma once
 #include <cstdint>
 #include <memory>
+#include <mutex>
 #include <string>
 #include <string_view>
 #include <utility>
@@ -16,7 +17,8 @@ class FilterList {
   // sender/receiver, absolute-path, perishable, negation and xattr modifiers,
   // single-instance merge files and per-directory merge templates.
   // Returns false for unsupported or invalid syntax, with a reason when supplied.
-  bool add_filter(std::string_view rule, std::string* err, bool read_merge_files = true);
+  bool add_filter(std::string_view rule, std::string* err, bool read_merge_files = true, bool allow_cvs = true);
+  bool add_cvs_option(std::string* err);
   // --exclude-from=FILE / --include-from=FILE ("-" = stdin).
   bool add_from_file(const std::string& path, bool include, std::string* err);
   bool empty() const { return rules_.empty(); }
@@ -28,12 +30,18 @@ class FilterList {
   bool needs_extended() const;
   bool has_absolute() const;
   bool has_merges() const;
+  bool has_cvs() const;
+  bool trusts_sender_filters() const { return trusts_sender_filters_; }
+  // A pull appends CLI CVS rules after sending explicit rules. A CVS cache
+  // that was never sent has no receiver-side elisions, even with deletion.
+  void prepare_pull();
   // Return a new immutable context: local rules precede inherited rules within
   // their merge slot. The parent remains safe to share across worker threads.
   FilterList in_directory(std::string_view path, bool receiver, std::string* err) const;
   static std::string absolute_path(std::string_view path);
   // One add_filter()-compatible string per rule, in order.
-  std::vector<std::string> to_strings() const;
+  std::vector<std::string> to_strings(bool expand_cvs = false, bool delete_excluded = false,
+                                    bool omit_cvs_option = false, bool pulling = false) const;
 
  private:
   enum class Kind : uint8_t {
@@ -45,6 +53,7 @@ class FilterList {
     PathLitTail,  // unanchored literal with a '/': trailing components == pat
     PathWild,     // wildmatch against the path
     Merge,
+    Cvs,
   };
   struct Rule {
     std::string text;  // pattern as given, for to_strings()
@@ -72,6 +81,12 @@ class FilterList {
              bool deleting_directory, std::string_view absolute) const;
   bool load_merge(const std::string& path, const Rule& defaults, std::string_view scope,
                   std::string* err, bool optional);
+  bool merge_content(std::string_view content, const Rule& defaults, std::string_view scope, std::string* err);
+  bool load_cvs(Rule& marker, std::string* err);
+  struct CvsCache {
+    std::mutex mutex;
+    std::shared_ptr<const FilterList> lists[2];
+  };
   using MergeRegistry = std::vector<std::pair<std::string, uint64_t>>;
   void registered_merges(MergeRegistry& registry, bool inheriting) const;
   FilterList directory_impl(std::string_view path, bool receiver, std::string* err, unsigned depth,
@@ -81,4 +96,8 @@ class FilterList {
   bool cleared_ = false;
   unsigned merge_depth_ = 0;
   std::string parse_scope_;
+  std::shared_ptr<CvsCache> cvs_cache_;
+  bool directory_cvs_ = false, receiver_cvs_ = false, defer_cvs_ = false;
+  bool trusts_sender_filters_ = false;
+  size_t cvs_option_start_ = static_cast<size_t>(-1);
 };
