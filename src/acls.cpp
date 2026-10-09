@@ -196,10 +196,10 @@ bool apply_acls(const AclSet& source, const std::string& path, u8 type, u32 mode
 
 namespace {
 bool named(const AclRecord& entry) {
-  return ACL_STYLE == 2 || entry.tag == 2 || entry.tag == 8;
+  return ACL_STYLE == 2 ? entry.tag <= 4 : entry.tag == 2 || entry.tag == 8;
 }
 bool group_entry(const AclRecord& entry) {
-  return ACL_STYLE == 2 ? entry.tag >= 3 : entry.tag == 8;
+  return ACL_STYLE == 2 ? entry.tag == 3 || entry.tag == 4 : entry.tag == 8;
 }
 std::mutex names_mutex;
 std::map<std::pair<bool, u32>, std::string> source_names;
@@ -337,14 +337,20 @@ AclRecords export_acls(const AclSet& source) {
       if (!qualifier) acl_error();
       id_t id; int kind;
       int error = mbr_uuid_to_id(*qualifier, &id, &kind);
-      acl_free(qualifier);
-      if (error || (kind != ID_TYPE_UID && kind != ID_TYPE_GID)) { errno = error ? error : EINVAL; acl_error(); }
       AclRecord record;
-      record.tag = (kind == ID_TYPE_GID ? 2 : 0) + (tag == ACL_EXTENDED_ALLOW ? 1 : 2);
+      if (error == ENOENT) {
+        record.tag = tag == ACL_EXTENDED_ALLOW ? 5 : 6;
+        record.name.assign((const char*)*qualifier, sizeof(uuid_t));
+      } else if (error || (kind != ID_TYPE_UID && kind != ID_TYPE_GID)) {
+        acl_free(qualifier); errno = error ? error : EINVAL; acl_error();
+      } else {
+        record.tag = (kind == ID_TYPE_GID ? 2 : 0) + (tag == ACL_EXTENDED_ALLOW ? 1 : 2);
+        record.id = (u32)id;
+        record.name = principal_name(kind == ID_TYPE_GID, record.id);
+      }
+      acl_free(qualifier);
       record.permissions = (u32)permissions;
       record.flags = flags_of(entry, 0x1f0);
-      record.id = (u32)id;
-      record.name = principal_name(kind == ID_TYPE_GID, record.id);
       records.access.push_back(std::move(record));
     }
 #else
@@ -371,11 +377,13 @@ bool valid_acl_records(const AclRecords& records, u8 type) {
     bool owner = false, group = false, other = false, mask = false, have_names = false;
     u32 previous_tag = 0, previous_id = 0;
     for (const auto& record : *list) {
-      if (record.name.size() > 255 || record.name.find('\0') != record.name.npos) return false;
       if (ACL_STYLE == 2) {
-        if (record.tag < 1 || record.tag > 4 || record.id == UINT32_MAX ||
+        bool uuid = record.tag == 5 || record.tag == 6;
+        if (record.tag < 1 || record.tag > 6 ||
+            (uuid ? record.id != UINT32_MAX || record.name.size() != 16 : record.id == UINT32_MAX || record.name.size() > 255 || record.name.find('\0') != record.name.npos) ||
             (record.permissions & ~0x103ffeu) || (record.flags & ~0x1f0u)) return false;
       } else {
+        if (record.name.size() > 255 || record.name.find('\0') != record.name.npos) return false;
         if (record.permissions > 7 || record.flags || record.tag < previous_tag) return false;
         if (named(record)) {
           if (record.id == UINT32_MAX || (record.tag == previous_tag && record.id <= previous_id)) return false;
@@ -413,8 +421,11 @@ AclSet import_acls(AclRecords records) {
     acl_entry_t entry;
     if (acl_create_entry(&acl.value, &entry)) acl_error();
     uuid_t qualifier;
-    int error = group_entry(record) ? mbr_gid_to_uuid(record.id, qualifier) : mbr_uid_to_uuid(record.id, qualifier);
-    if (error) { errno = error; acl_error(); }
+    if (record.tag > 4) memcpy(qualifier, record.name.data(), sizeof qualifier);
+    else {
+      int error = group_entry(record) ? mbr_gid_to_uuid(record.id, qualifier) : mbr_uid_to_uuid(record.id, qualifier);
+      if (error) { errno = error; acl_error(); }
+    }
     if (acl_set_tag_type(entry, (record.tag & 1) ? ACL_EXTENDED_ALLOW : ACL_EXTENDED_DENY) ||
         acl_set_qualifier(entry, qualifier) || acl_set_permset_mask_np(entry, record.permissions)) acl_error();
     set_flags(entry, record.flags);

@@ -116,10 +116,12 @@ class AclDifferentials(unittest.TestCase):
 
     def check_case(self, flags, clone=False, rules=(), direction='local', **fixture):
         results = []
+        root_acls = []
         window = (time.time_ns() - 2_000_000_000, time.time_ns() + 30_000_000_000)
         for native in (False, True):
             self.fixture(**fixture)
             before = snapshot(self.root / 'src')
+            source_root_acl = get_acl(self.root / 'src')
             command = [str(transfer.BINARY) if native else attrs.RSYNC, '-i', '--out-format=%i|%n', *[flag for flag in flags if native or flag != '--no-atomic']]
             if native:
                 command += ['--no-fallback', '-j8']
@@ -135,9 +137,12 @@ class AclDifferentials(unittest.TestCase):
                                     capture_output=True, timeout=30, env=dict(os.environ, XSYNC_CONFIG='', XSYNC_OPTS=''))
             self.assertEqual(result.returncode, 0, (command, result.stdout, result.stderr))
             self.assertEqual(snapshot(self.root / 'src'), before)
+            self.assertEqual(get_acl(self.root / 'src'), source_root_acl)
+            root_acls.append(get_acl(self.root / 'dst'))
             results.append((snapshot(self.root / 'dst'), sorted(result.stdout.splitlines())))
         expected, reference_output = results[0]
         actual, output = results[1]
+        self.assertEqual(root_acls[1], root_acls[0])
         self.assertFalse(difftest.compare(expected, actual, window=window), difftest.compare(expected, actual, window=window))
         self.assertEqual({n: e['acl'] for n,e in actual.items()}, {n:e['acl'] for n,e in expected.items()})
         # Without -X clones retain ordinary xattrs as documented. ACLs must agree.

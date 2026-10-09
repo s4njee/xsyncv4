@@ -57,10 +57,10 @@ if case=='missing': sys.exit(127)
 elif case=='mismatch': frame(1,b'XSYNC\\x01\\x00')
 elif case=='fatal_mismatch': frame(8,b'\\x02\\x02protocol version mismatch: test peer')
 elif case=='banner': print('welcome to a broken shell',flush=True)
-elif case in ('disconnect','capability','xattr_legacy'):
+elif case in ('disconnect','capability','xattr_legacy','darwin_acl_legacy'):
  import re,pathlib
  version=int(re.search(r'PROTO_VERSION = (\\d+)',pathlib.Path(sys.argv[2]).read_text())[1])
- features = 262159 if case=='xattr_legacy' else 15
+ features = 262159 if case=='xattr_legacy' else 2097167 if case=='darwin_acl_legacy' else 15
  def var(value):
   result=bytearray()
   while value>=128: result.append((value&127)|128); value>>=7
@@ -212,6 +212,32 @@ else: sys.exit(255)
                     self.assertEqual(result.stderr.count(b'falling back'), 1)
                     self.assertEqual(get_attrs(dest / source.name), before)
                     self.assertEqual(get_attrs(source), before)
+
+    @unittest.skipUnless(sys.platform == 'darwin', 'Darwin UUID capability')
+    def test_darwin_acl_peer_without_uuid_support(self):
+        from acls_test import get_acl, set_acl
+        source = self.src / 'file with spaces'
+        set_acl(source)
+        before = get_acl(source)
+        rsh = self.fake_shell()
+        for direction in ('push', 'pull'):
+            with self.subTest(direction=direction):
+                dest = self.root / ('ACL UUID legacy ' + direction)
+                a, b = str(source), str(dest)
+                a, b = (a, 'fake:' + b) if direction == 'push' else ('fake:' + a, b)
+                environment = dict(self.env, XSYNC_TEST_PEER='darwin_acl_legacy')
+                result = self.run_sync('--no-fallback', '-rA', '-e', rsh, a, b, env=environment)
+                self.assertEqual(result.returncode, 4, result.stderr)
+                self.assertIn(b'peer does not support unresolved ACL UUID principals', result.stderr)
+                self.assertNotIn(b'falling back', result.stderr)
+                self.assertFalse(dest.exists())
+                self.assertEqual(get_acl(source), before)
+                result = self.run_sync('-rA', '-e', rsh, a, b, env=environment)
+                self.assertEqual(result.returncode, 0, result.stderr)
+                self.assertEqual(result.stderr.count(b'falling back'), 1)
+                self.assertEqual(dest.read_bytes(), source.read_bytes())
+                self.assertEqual(get_acl(dest), before)
+                self.assertEqual(get_acl(source), before)
 
     def test_remote_handshake_fallback_and_strict_failures(self):
         rsh = self.fake_shell()

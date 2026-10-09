@@ -4,6 +4,8 @@
 
 // Transport records contain validated fields, never an opaque acl_copy_int blob.
 struct AclRecord {
+  // Darwin tags 5/6 retain an unresolved UUID as exactly 16 name-field bytes;
+  // their ID is UINT32_MAX. All other names are ordinary account names.
   u32 tag = 0, permissions = 0, flags = 0, id = UINT32_MAX;
   std::string name;
 };

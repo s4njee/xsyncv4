@@ -2,7 +2,7 @@
 
 Initial audit written 2026-10-08 against xsync 0.1.0 (protocol 1).
 All fifteen P0 stories completed against protocol 3; per-story evidence is below.
-P1 R-02 through R-09 and E-01 through E-09 are complete (17 of 22 stories). Current protocol 4 supports protocol 3; E-10 is in progress (local/remote xattrs and matching-style ACLs implemented; cross-style ACLs and wider metadata pending).
+P1 R-02 through R-09 and E-01 through E-09 are complete (17 of 22 stories). Current protocol 4 supports protocol 3; E-10 is in progress (local/remote xattrs and matching-style ACLs implemented, cross-style compatibility guarded; wider metadata pending).
 Problem statements retain the original audit findings.
 
 ## What "daily driver" means here
@@ -1804,3 +1804,62 @@ Verified artifact manifest (source `864bd37edf14`):
   flag/identity cases, creation/access times, BSD flags, `-E`, `--chmod`,
   `--chown`, and packaging. Installed helpers and release artifacts have not
   been replaced.
+
+## E-10 progress — 2026-10-09: complete Darwin ACL fields and cross-style boundary
+
+- E-10 remains **code**, and P1 remains **17/22**. Native Darwin remote ACLs
+  now preserve unresolved UUID allow/deny principals, including UUID bytes
+  containing NUL. Tags **5/6** carry exactly 16 bytes with the undefined numeric
+  ID; ordinary user/group records continue to map by name. `--numeric-ids`
+  leaves UUIDs intact. Capability **4194304** explicitly negotiates this support;
+  older Darwin ACL helpers delegate or refuse before writes. Invalid UUID
+  lengths/IDs and UUID capability without Darwin ACL capability are rejected.
+  Linux does not advertise UUID support. Protocol 4/v3 framing remains unchanged.
+- **84** native Darwin cases pass on both ARM and Rosetta: twelve ACL variants
+  across local/push/pull, data and metadata-only updates, plus APFS clones. Every
+  case checks source integrity, root and file ACLs, data and empty repeat-sync
+  output. Variants cover synchronization/all permission bits, both global
+  inheritance flags, every entry inheritance flag and unresolved UUID allow/deny
+  principals. These native fields are preserved even where rsync's Darwin shim
+  drops synchronization/global flags or rejects an unresolved UUID with **23**;
+  matching rsync's omission would lose source permissions.
+- Strengthened the ordinary ACL differential suite to explicitly compare the
+  transfer root's ACL as well as descendants and source integrity. All **seven**
+  methods pass on ARM and Rosetta, retaining the existing 53-case differential
+  coverage and storage-failure checks. The first expanded fixture incorrectly
+  expected child snapshots to contain the root; it was corrected before final
+  verification.
+- The **six-method** hostile-wire suite passes on ARM and Rosetta, including
+  four successful binary UUID allow/deny cases with ordinary/numeric mapping.
+  Linux passes all applicable ordinary/wire ACL methods; the opt-in cross-style
+  rig and Darwin-only cases skip there. All **ten** mixed-version protocol
+  checks pass. The **ten-method** fallback suite passes on ARM and Rosetta,
+  including push/pull against a Darwin ACL peer without UUID support.
+- Resolved the previously listed cross-style conversion question with an actual
+  Darwin/Linux SSH baseline: Homebrew rsync **3.4.4** and Debian rsync **3.2.7**
+  reject the tested nontrivial macOS extended/POSIX access/default ACLs with
+  **12** in both directions. Native strict mode retains its pre-write **4**
+  refusal rather than inventing an access-policy conversion. The durable opt-in
+  `tests/acls_cross_test.py` passes **12** push/pull cases: rsync, native strict
+  and native fallback, each with fresh/existing destinations. It checks both
+  source trees and destination integrity, owns a disposable SSH container bound
+  only to localhost, and removes it afterward. Empty/trivial cross-style ACLs
+  are not claimed to fail. Cross-style native conversion is outside rsync's
+  demonstrated compatibility behavior; the guarded boundary is retained.
+- Evidence: `/tmp/xsync-e10-acls-darwin-complete.log`,
+  `/tmp/xsync-e10-acls-darwin-complete-rosetta.log`,
+  `/tmp/xsync-e10-acls-root-check-final-mac.log`,
+  `/tmp/xsync-e10-acls-root-check-final-rosetta.log`,
+  `/tmp/xsync-e10-acls-uuid-wire-final-mac.log`,
+  `/tmp/xsync-e10-acls-uuid-wire-final-rosetta.log`,
+  `/tmp/xsync-e10-acls-uuid-final-linux.log`,
+  `/tmp/xsync-e10-acls-uuid-protocol.log`,
+  `/tmp/xsync-e10-acls-uuid-fallback-final-mac.log`,
+  `/tmp/xsync-e10-acls-uuid-fallback-final-rosetta.log`,
+  `/tmp/xsync-e10-acls-cross-final.log`, and the exploratory reference
+  `/tmp/xsync-e10-acls-flags-baseline.log`.
+- **Remaining before E-10 completion:** creation/access times, BSD flags, `-E`,
+  `--chmod`, `--chown`, final metadata composition checks and packaging. Installed
+  helpers and release artifacts have not been replaced. `sanjee@neo.local`
+  currently fails DNS resolution, so R-01's outstanding physical-host checks
+  remain pending.

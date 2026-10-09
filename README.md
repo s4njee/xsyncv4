@@ -424,7 +424,13 @@ Differences to be aware of:
   require matching ACL styles; older helpers and transfers between macOS and
   Linux delegate before destination writes, or refuse in strict mode. ACL
   principals map by user/group name even without `--owner`/`--group`;
-  `--numeric-ids` retains numeric identities. As with rsync, a remote push's
+  `--numeric-ids` retains numeric identities. Darwin transfers also preserve
+  unresolved UUID principals, synchronization rights and global inheritance
+  flags that rsync may reject or omit. UUID principals retain their UUIDs,
+  including with `--numeric-ids`; remote Darwin ACLs require the UUID capability.
+  Rsync itself rejects the tested nontrivial Darwin/POSIX ACLs in both cross-platform
+  directions, so fallback does not guarantee cross-platform ACL conversion.
+  As with rsync, a remote push's
   receiver re-enables `--perms` for `-A`, including after `--no-perms`.
 - **Delegated to rsync** (strict mode rejects them): incompatible remote `-A`,
   `-b`, `--link-dest`/`--compare-dest`/`--copy-dest`,

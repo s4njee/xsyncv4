@@ -667,6 +667,8 @@ std::string_view unpack(std::string_view in, bool compressed, std::string& scrat
 
 std::string missing_feature(u64 features) {
   if (g_opt.acls && !g_opt.list_only && !(features & PF_NATIVE_ACL)) return "peer does not support the required ACL style";
+  if (g_opt.acls && !g_opt.list_only && PF_NATIVE_ACL == PF_ACL_DARWIN && !(features & PF_ACL_UUID))
+    return "peer does not support unresolved ACL UUID principals";
   if (g_opt.xattrs && !g_opt.list_only && !(features & PF_XATTRS)) return "peer does not support --xattrs";
   if ((features & PF_XATTRS) && !(features & PF_XATTR_STREAM)) return "peer does not support streamed --xattrs";
   if (g_opt.files_from_set && !(features & PF_FILES_FROM)) return "peer does not support --files-from";
@@ -2338,7 +2340,7 @@ int run_client(const std::vector<std::string>& srcs, const std::string& dest, u3
   if (!o.files_from_set) advertised &= ~PF_FILES_FROM;
   if (!o.hard_links) advertised &= ~PF_HLINK;
   if (!o.xattrs) advertised &= ~(PF_XATTRS | PF_XATTR_STREAM);
-  if (!o.acls) advertised &= ~PF_ACLS;
+  if (!o.acls) advertised &= ~(PF_ACLS | PF_ACL_UUID);
   if (!output_enabled()) advertised &= ~(PF_OUTPUT | PF_DIR_OUTPUT);
   if (wire_version >= 4) put_var(f, advertised);
   put_options(f);
@@ -2518,6 +2520,8 @@ int run_server() {
   o.am_server = true;
   o.wire_version = ver;
   o.peer_features = advertised & PROTO_FEATURES;
+  if ((advertised & PF_ACL_UUID) && !(advertised & PF_ACL_DARWIN))
+    die(RERR_PROTOCOL, "protocol error: ACL UUID principals require Darwin ACL metadata");
   if ((advertised & PF_ACLS) == PF_ACLS) die(RERR_PROTOCOL, "protocol error: ambiguous ACL style");
   if ((server_acls || (advertised & PF_ACLS)) && !(o.peer_features & PF_NATIVE_ACL))
     die(RERR_UNSUPPORTED, "peer does not support the required ACL style");

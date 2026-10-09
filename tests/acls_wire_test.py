@@ -12,7 +12,7 @@ import xattrs_wire_test as xwire
 from acls_test import get_acl, set_acl
 from xattrs_test import DARWIN
 
-CAPABILITY = 2097152 if DARWIN else 1048576
+CAPABILITY = (2097152 | 4194304) if DARWIN else 1048576
 UNDEFINED = 0xffffffff
 
 
@@ -74,7 +74,9 @@ class AclWireTests(unittest.TestCase):
         self.rejected(proc, target, wire.frame(30, b'\1'))
         proc, target = self.server(features=1 | CAPABILITY)
         self.rejected(proc, target, struct.pack('<IB', 1024 * 1024, 30))
-        for features, status in ((3145729, 2), (1 | (1048576 if DARWIN else 2097152), 4)):
+        cases = [(3145729, 2), (1 | (1048576 if DARWIN else 2097152), 4), (4194305, 2)]
+        if DARWIN: cases.append((2097153, 4))
+        for features, status in cases:
             target = self.root / 'uncreated'
             options = bytes(name == 'recursive' for name in wire.BOOLS) + b''.join(wire.var(0) for _ in wire.INTS)
             hello = b'XSYNC\1' + wire.var(wire.VERSION) + b'R' + wire.var(features) + options + b'\0\1' + wire.string(str(target))
@@ -96,9 +98,13 @@ class AclWireTests(unittest.TestCase):
                   acl([record(1)], complete=0), acl(flags=1 << 32),
                   b'\1\0\1' + b'\x81' + b'\x80' * 8 + b'\x02']
         if DARWIN:
-            common += [acl([record(5)]), acl([record(1, permissions=1)]),
+            common += [acl([record(7)]), acl([record(1, permissions=1)]),
                        acl([record(1, flags=1)]), acl([record(1, ident=UNDEFINED)]),
-                       acl(defaults=[record(1)]), acl(flags=2), acl([record(1)] * 129)]
+                       acl(defaults=[record(1)]), acl(flags=2), acl([record(1)] * 129),
+                       acl([record(5, ident=UNDEFINED, name=b'')]),
+                       acl([record(6, ident=UNDEFINED, name=b'x' * 15)]),
+                       acl([record(5, ident=UNDEFINED, name=b'x' * 17)]),
+                       acl([record(6, ident=1, name=b'x' * 16)])]
         else:
             common += [acl([record(3)]), acl([record(1, 8, ident=UNDEFINED)]), acl(flags=1),
                        acl([record(1, flags=16, ident=UNDEFINED)]),
@@ -133,6 +139,28 @@ class AclWireTests(unittest.TestCase):
                 proc.communicate(timeout=10)
                 self.assertEqual(proc.returncode, 2)
                 self.assertFalse((target / 'file').exists())
+
+    @unittest.skipUnless(DARWIN, 'Darwin UUID ACL principals')
+    def test_unresolved_binary_uuid_principals(self):
+        import uuid
+        principal = uuid.UUID('01234567-89ab-cdef-0012-3456789abcde')
+        for numeric in (False, True):
+            for tag in (5, 6):
+                with self.subTest(numeric=numeric, tag=tag):
+                    proc, target = self.configured(numeric=numeric)
+                    proc.stdin.write(directory(entry=acl())); proc.stdin.flush()
+                    self.assertEqual(wire.read_frame(proc)[0], 3)
+                    metadata = acl([record(tag, permissions=128, ident=UNDEFINED, name=principal.bytes)])
+                    raw = b'\0\0\1' + wire.var(0o644) + b'\0' * 4 + metadata + wire.string(b'data')
+                    proc.stdin.write(xwire.data_record(raw) + wire.frame(5, b'\0' * 5) + wire.frame(6, b'\0')); proc.stdin.flush()
+                    self.assertEqual(wire.read_frame(proc)[0], 7)
+                    proc.stdin.close(); proc.stdin = None
+                    proc.communicate(timeout=10)
+                    self.assertEqual(proc.returncode, 0)
+                    self.assertEqual((target / 'file').read_bytes(), b'data')
+                    result = get_acl(target / 'file').lower()
+                    self.assertIn(str(principal), result)
+                    self.assertIn(':allow:' if tag == 5 else ':deny:', result)
 
     def test_names_map_without_owner_group_and_numeric_ids_override(self):
         for numeric in (False, True):
