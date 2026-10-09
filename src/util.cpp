@@ -6,6 +6,7 @@
 #include "common.h"
 #include "fs.h"
 #include "progress.h"
+#include "output.h"
 
 Options g_opt;
 u32 g_umask = 022;
@@ -33,7 +34,7 @@ void out_line(std::string_view s) {
   if (g_msg_sink) return g_msg_sink(0, 0, s);
   std::string t(s);
   t.push_back('\n');
-  ui_write(false, t);
+  output_text(t);
 }
 
 static void record_code(int code) {
@@ -72,6 +73,7 @@ void die(int code, const char* fmt, ...) {
   if (g_msg_sink) g_msg_sink(2, code, s);
   else {
     progress_stop(false);
+    output_flush();
     fprintf(stderr, "xsync: %s\nxsync error: exiting (code %d)\n", s.c_str(), code);
   }
   fflush(nullptr);
@@ -81,6 +83,7 @@ void die(int code, const char* fmt, ...) {
 void exit_signal() {
   cleanup_open_outputs();
   progress_stop(false);
+  output_flush();
   if (!g_opt.am_server) fprintf(stderr, "\nxsync error: received SIGINT, SIGTERM, or SIGHUP (code %d)\n", RERR_SIGNAL);
   _Exit(RERR_SIGNAL);
 }

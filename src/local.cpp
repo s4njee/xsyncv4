@@ -11,6 +11,7 @@
 
 #include "engine.h"
 #include "progress.h"
+#include "output.h"
 
 #ifdef __APPLE__
 #include <sys/clonefile.h>
@@ -352,17 +353,11 @@ struct Local {
       return false;
     }
     u64 nf = 0, nl = 0, nb = 0;
-    bool names = o.itemize || o.verbose > 0;
-    std::string line;
-    for (const Entry& e : l.e) {
+    for (u32 i = 0; i < l.e.size(); ++i) {
+      const Entry& e = l.e[i];
       if (e.type == T_REG) nf++, nb += (u64)e.size;
       else nl++;
-      if (!names) continue;
-      line = o.itemize ? (e.type == T_REG ? ">f+++++++++ " : "cL+++++++++ ") : "";
-      line.append(d->rel).push_back('/');
-      line.append(l.name_sv(e));
-      if (e.type == T_LNK) line.append(" -> ").append(l.link(e));
-      w.logf(line);
+      note_item(*d, i, e.type == T_REG ? ">f+++++++++" : "cL+++++++++", 0, w);
     }
     g_stats.files_seen.fetch_add(nf, std::memory_order_relaxed);
     g_stats.links_seen.fetch_add(nl, std::memory_order_relaxed);
@@ -478,7 +473,7 @@ struct Local {
     if (g_stop.load(std::memory_order_relaxed)) return;
     if (o.dry_run) {
       g_stats.xfer_bytes.fetch_add((u64)s.size, std::memory_order_relaxed);
-      note_transferred(d, idx, s.size, w);
+      note_transferred(d, idx, 0, w);
       return;
     }
     src_path_of(d, idx, w.p2);
@@ -496,7 +491,7 @@ struct Local {
       u32 fl = (o.copy_links ? 0 : CLONE_NOFOLLOW) | (o.owner && o.am_root ? 0 : CLONE_NOOWNERCOPY);
       if (clone_copy(d, idx, w.p2.c_str(), fl, w)) {
         g_stats.xfer_bytes.fetch_add((u64)s.size, std::memory_order_relaxed);
-        note_transferred(d, idx, s.size, w);
+        note_transferred(d, idx, 0, w);
         slot_end(w.id);
         return;
       }
@@ -577,7 +572,7 @@ struct Local {
       }
       ok = out_finish(f, d, idx, w, ok) && ok;
       if (!ok) return fail(total);
-      note_transferred(d, idx, total, w);
+      note_transferred(d, idx, total - prefix.size, w);
       slot_end(w.id);
       return;
     }

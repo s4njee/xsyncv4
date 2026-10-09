@@ -160,6 +160,30 @@ p=pathlib.Path(sys.argv[1]); print(json.dumps({'hash':hashlib.sha256((p/'file').
                     from ssh_test import remote_json
                     self.assertFalse(remote_json('import pathlib,json,sys; print(json.dumps(pathlib.Path(sys.argv[1]).exists()))', target))
 
+    def test_formatted_output_requires_negotiated_support(self):
+        source = self.root / 'format source'
+        source.write_bytes(b'unchanged')
+        for peer in (self.remote_subset, self.remote_legacy):
+            for direction in ('push', 'pull'):
+                for option in ('--out-format=%n', '--log-file=' + str(self.root / 'unopened log')):
+                    with self.subTest(peer=peer, direction=direction, option=option):
+                        target = self.root / 'uncreated format destination'
+                        a, b = str(source), str(target)
+                        if HOST and direction == 'pull':
+                            subprocess.run(['rsync', '-a', '-e', RSH, a, HOST + ':' + a], check=True, capture_output=True)
+                        if direction == 'push': b = (HOST or 'fake') + ':' + b
+                        else: a = (HOST or 'fake') + ':' + a
+                        result = subprocess.run([str(BINARY), '--no-fallback', option, '-e', RSH,
+                                                 '--rsync-path=' + shlex.quote(peer), a, b],
+                                                capture_output=True, timeout=20)
+                        self.assertEqual(result.returncode, 4, result.stderr)
+                        self.assertIn(b'peer does not support structured file output', result.stderr)
+                        self.assertFalse(target.exists())
+                        self.assertFalse((self.root / 'unopened log').exists())
+                        if HOST:
+                            from ssh_test import remote_json
+                            self.assertFalse(remote_json('import pathlib,json,sys; print(json.dumps(pathlib.Path(sys.argv[1]).exists()))', target))
+
 
 if __name__ == '__main__':
     unittest.main()

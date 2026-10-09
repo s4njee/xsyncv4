@@ -50,6 +50,7 @@ struct DirWork {
   std::string rel;       // path relative to the transfer root ("" for the root)
   std::string src_path;  // local mode: source directory
   std::vector<std::string> src_paths;  // per-entry source path (root listing only)
+  std::vector<std::string> output_sources;  // Display-only paths supplied by a remote sender.
   DirList src;           // source entries, sorted by name
   Entry attrs;           // source directory attributes
   bool has_attrs = false;
@@ -102,7 +103,8 @@ bool clone_copy(DirWork& w, u32 idx, const char* source, unsigned flags, Worker&
 // Whole small file from memory.
 bool write_whole(DirWork& w, u32 idx, const char* data, size_t len, Worker& t);
 // Report a completed transfer (-v / -i output and counters).
-void note_transferred(DirWork& w, u32 idx, i64 bytes, Worker& t);
+void note_transferred(DirWork& w, u32 idx, i64 bytes, Worker& t, i64 final_size = -1);
+void note_item(DirWork& w, u32 idx, const char* code, i64 bytes, Worker& t, i64 size = -1);
 
 void src_path_of(const DirWork& w, u32 i, std::string& out);
 bool write_all(int fd, const char* p, size_t n);

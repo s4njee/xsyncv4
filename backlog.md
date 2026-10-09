@@ -2,7 +2,7 @@
 
 Initial audit written 2026-10-08 against xsync 0.1.0 (protocol 1).
 All fifteen P0 stories completed against protocol 3; per-story evidence is below.
-P1 R-02 through R-09 and E-01 are complete. Current protocol 4 supports protocol 3; E-02 is next.
+P1 R-02 through R-09 and E-01/E-02 are complete. Current protocol 4 supports protocol 3; E-03 is next.
 Problem statements retain the original audit findings.
 
 ## What "daily driver" means here
@@ -88,7 +88,7 @@ coverage clarification remains open.
 | ID | Item | Status | Done when | Size |
 |---|---|---|---|---|
 | E-01 | **`-P` does not resume.** `--partial` is accepted, but a partial file is never reused: there is no delta or append logic, so an interrupted 10 GB file starts from zero. On a remote disconnect the partial is not even kept (T-08). | **done** | An interrupted large file resumes from the verified prefix (hash the existing bytes on both sides, send the rest); tested by killing a transfer at 50 %. | L |
-| E-02 | **`--out-format` and stable script output.** One project script parses `--out-format='%i %n'`. With `-v`/`-i`, line order follows thread completion, so diffs between runs are noisy. | confirmed ignored | `%i %n %L %l %o %f %b %t` supported; when stdout is not a terminal, lines are emitted in path order; `--log-file` writes the same stream. | M |
+| E-02 | **`--out-format` and stable script output.** One project script parses `--out-format='%i %n'`. With `-v`/`-i`, line order follows thread completion, so diffs between runs are noisy. | **done** | `%i %n %L %l %o %f %b %t` supported; when stdout is not a terminal, lines are emitted in path order; `--log-file` writes the same stream. | M |
 | E-03 | **Itemize parity.** Missing against rsync: the `./` root line, `.d..t......` for existing directories whose time changed, `cd` lines in clone mode come from a different code path than byte-copy mode, `hf` for hard links. | code | `-i` output of both paths matches rsync's on the difftest corpus after sorting; difftest starts comparing stdout for `-i` runs. | M |
 | E-04 | **Delta transfer for large changed files.** Changed files are always sent whole. Irrelevant for the congress corpus, decisive for a 2 GB database dump with small edits over Wi-Fi. | code | Files above a threshold (1 MiB) use block matching (rsync rolling checksum, or content-defined chunks with XXH3) when the destination has a previous version; `-W` disables; bytes-on-wire within 20 % of rsync on an edited-large-file test. | XL |
 | E-05 | **List mode.** `xsync host:dir/` or a single SRC should list, as rsync does; today it is a usage error. | confirmed | `ls -l`-style listing for local and remote sources. | S |
@@ -724,3 +724,41 @@ These change defaults, so they should be chosen rather than inherited from a ben
   execution and compressed resume transfers in scratch and bare Debian. The
   universal macOS binary passes ARM-client/x86_64-peer push and pull: a 2 MiB
   prefix in a 4 MiB file sends 2,097,435 and 2,097,355 bytes respectively.
+
+
+### E-02 — complete (2026-10-09)
+
+- Native local, push and pull support `%i %n %L %l %o %f %b %t`, literal `%%`
+  and optional field widths. Explicit formats imply file reporting; empty formats
+  suppress file lines. Source lengths include directories and symlinks, and a
+  retried file reports its final size without mutating shared scanned entries.
+- File events remain structured until the client formats them. Non-terminal
+  stdout buffers and sorts events by transfer-relative path; terminal output
+  reports completions live. Ordinary `-v`/`-i` use the same ordering. Progress
+  stays on stderr. `--log-file` appends exactly the stdout stream, including
+  summaries; opening a missing/unwritable log fails before copying.
+- Control characters and invalid UTF-8 bytes are escaped as `\#ooo`, with valid
+  Unicode retained. `-8` retains high bytes while still escaping control bytes.
+  Linux covers invalid-byte names; APFS rejects that fixture before xsync runs.
+- `PF_OUTPUT` gates structured output records and extended DIR display fields.
+  Source paths from a remote peer are display-only. Frozen protocol-3 layouts
+  stay unchanged. Explicit format/log requests require negotiated support and
+  fail with 4 (or fall back to rsync) before destination writes; ordinary output
+  still works with older peers. Malformed/unnegotiated output records fail with
+  2, and an overflowing timestamp renders safely without exposing memory.
+- `%b` counts file-content bytes before compression, excluding framing: resume
+  reports only its tail; clones, metadata changes and dry runs report zero.
+  This deliberate native accounting difference from rsync is documented in
+  README. Field meanings were checked against the
+  [official rsync format definitions](https://download.samba.org/pub/rsync/rsyncd.conf.5).
+- All nine output methods pass on macOS and Linux, including real SSH, repeated
+  ordering, all eight fields, mirrored/append logs, metadata/deletions, escaped
+  names, dry runs, compressed resume and hostile event records. All four
+  mixed-version/feature methods pass on macOS and over real SSH, including new
+  strict format/log rejection against the frozen protocol-3 and core-only peers.
+- All twelve P0 trust methods pass (the repaired help/options and source-mutation
+  checks were rerun after the full suite). Six fallback methods, the original
+  hostile receiver test, all seven Linux resume methods and four resume wire
+  methods pass. Strict differentials remain 212/214; the two pending E-08 filter
+  features are unchanged. Installed executable/manual and live completion pass.
+- E-03 remains open for root/directory itemization and full sorted stdout parity.

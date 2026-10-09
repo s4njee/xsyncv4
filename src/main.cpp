@@ -14,6 +14,7 @@
 #include "install.h"
 #include "transport.h"
 #include "arguments.h"
+#include "output.h"
 
 namespace {
 
@@ -33,7 +34,7 @@ void print_version() {
 
 void print_help() {
   print_version();
-  printf(R"(
+  fputs(R"(
 Usage: xsync [OPTION]... SRC [SRC]... DEST
   or   xsync [OPTION]... SRC [SRC]... [USER@]HOST:DEST
   or   xsync [OPTION]... [USER@]HOST:SRC [DEST]
@@ -57,6 +58,7 @@ Options (same meaning as rsync):
  -J, --omit-link-times    omit symlinks from --times
  -n, --dry-run            perform a trial run with no changes made
  -W, --whole-file         send the whole file; disable verified-prefix resume
+     --no-whole-file      enable verified-prefix resume again
  -x, --one-file-system    don't cross filesystem boundaries
  -e, --rsh=COMMAND        specify the remote shell to use
      --rsync-path=PROGRAM specify the xsync to run on the remote machine
@@ -91,6 +93,9 @@ Options (same meaning as rsync):
      --progress           show live per-file and whole-transfer progress
  -P                       same as --partial --progress
  -i, --itemize-changes    output a change-summary for all updates
+ -8, --8-bit-output       retain high bytes in names; always escape control bytes
+     --out-format=FORMAT  file lines: %i %n %L %l %o %f %b %t %% (optional width)
+     --log-file=FILE      append the same stdout stream to FILE
      --version, --help
 
 Documented compatibility no-ops:
@@ -98,7 +103,6 @@ Documented compatibility no-ops:
                           paths always travel as protocol data, not shell text
      --blocking-io, --no-blocking-io
                           the remote transport always uses blocking pipes
- -8, --8-bit-output       names are always emitted without high-byte escaping
      --no-motd            no daemon transport or daemon greeting exists
 
 xsync extensions:
@@ -110,7 +114,7 @@ xsync extensions:
      --atomic             create new files via temp file + rename (default)
      --no-atomic          create new byte-copied files directly (fewer renames;
                           a crash can leave truncated files under final names)
-)");
+)", stdout);
 }
 
 i64 parse_size(const std::string& s, const char* opt) {
@@ -192,6 +196,15 @@ Parsed parse(int argc, char** argv) {
     else if (name == "no-human-readable") o.human = 0;
     else if (name == "rsh") o.rsh = need(), o.rsh_set = true;
     else if (name == "rsync-path") o.rsync_path = need();
+    else if (name == "out-format") {
+      o.out_format = need();
+      o.out_format_set = true;
+      if (!output_format_supported(o.out_format)) usage_error("unsupported --out-format escape (native: %i %n %L %l %o %f %b %t %%)");
+    }
+    else if (name == "log-file") {
+      o.log_file = need();
+      if (o.log_file.empty()) usage_error("--log-file requires a non-empty path");
+    }
     else if (name == "jobs") o.jobs = atoi(need().c_str());
     else if (name == "max-delete") {
       std::string value = need();
@@ -229,9 +242,9 @@ Parsed parse(int argc, char** argv) {
         if (comma == std::string::npos) break;
         start = comma + 1;
       } while (true);
-    } else if (flag(o.whole_file, "whole-file")) {}
+    } else if (flag(o.whole_file, "whole-file") || flag(o.raw_names, "8-bit-output")) {}
     else if (name == "protect-args" || name == "secluded-args" ||
-               name == "blocking-io" || name == "no-blocking-io" || name == "8-bit-output" || name == "no-motd") {
+               name == "blocking-io" || name == "no-blocking-io" || name == "no-motd") {
       // These intrinsic behaviours are listed with their reasons in --help.
     } else {
       static const char* unsupported[] = {
@@ -239,11 +252,11 @@ Parsed parse(int argc, char** argv) {
           "from0", "relative", "chmod", "chown", "usermap", "groupmap", "bwlimit", "append", "append-verify", "partial-dir",
           "delay-updates", "fuzzy", "remove-source-files", "keep-dirlinks", "copy-dirlinks", "copy-unsafe-links",
           "munge-links", "executability", "atimes", "crtimes", "cvs-exclude", "prune-empty-dirs", "daemon", "port", "password-file",
-          "log-file", "write-batch", "read-batch", "only-write-batch", "super", "fake-super", "temp-dir", "list-only",
+          "write-batch", "read-batch", "only-write-batch", "super", "fake-super", "temp-dir", "list-only",
           "iconv", "checksum-seed", "address", "sockopts", "stop-after", "stop-at", "max-alloc", "write-devices", "copy-devices",
           "delete-missing-args", "ignore-missing-args", "trust-sender", "copy-as", "early-input", "remote-option",
           "timeout", "contimeout", "sparse", "no-sparse", "fsync", "preallocate", "skip-compress",
-          "block-size", "checksum-choice", "cc", "log-file-format", "debug", "out-format", "outbuf",
+          "block-size", "checksum-choice", "cc", "log-file-format", "debug", "outbuf",
           "inc-recursive", "no-inc-recursive", "i-r", "no-i-r", "no-protect-args", "old-args",
           "ipv4", "ipv6", "msgs2stderr", "no-msgs2stderr", "new-compress", "old-compress", "no-implied-dirs",
           "implied-dirs", "open-noatime"};
@@ -306,7 +319,8 @@ Parsed parse(int argc, char** argv) {
         case 'h': o.human++; break;
         case 'P': o.partial = o.progress = true; break;
         case 'W': o.whole_file = true; break;
-        case 's': case '8': break;  // documented compatibility no-ops
+        case 's': break;  // documented compatibility no-op
+        case '8': o.raw_names = true; break;
         case 'S': usage_error("--sparse is not supported by xsync");
         case '4': usage_error("--ipv4 is not supported by xsync");
         case '6': usage_error("--ipv6 is not supported by xsync");
@@ -403,7 +417,7 @@ void print_summary(u64 t0) {
     out += "\nsent " + fmt_num(sent) + " bytes  received " + fmt_num(recv) + " bytes  " + r + " bytes/sec\n";
     out += "total size is " + fmt_num(total) + "  speedup is " + speedup + (o.dry_run ? " (DRY RUN)" : "") + "\n";
   }
-  if (!out.empty()) ui_write(false, out);
+  if (!out.empty()) output_text(out);
 }
 
 int main(int argc, char** argv) {
@@ -448,11 +462,14 @@ int main(int argc, char** argv) {
   if (remote_src && remote_dest) usage_error("The source and destination cannot both be remote.");
 
   u64 t0 = now_ns();
+  if (!remote_src && !remote_dest) output_start();
   int rc = (remote_src || remote_dest) ? run_client(srcs, dest) : run_local(srcs, dest);
   if (g_stop.load()) rc = RERR_SIGNAL;
   if (!rc) rc = g_exit_code.load();
   progress_stop(rc == 0 || rc == RERR_PARTIAL || rc == RERR_VANISHED);
+  output_flush();
   if (rc != RERR_SIGNAL) print_summary(t0);
+  if (!rc) rc = g_exit_code.load();
   fflush(stdout);
   if (rc == RERR_VANISHED) fprintf(stderr, "xsync warning: %s (code %d)\n", rerr_name(rc), rc);
   else if (rc) fprintf(stderr, "xsync error: %s (code %d)\n", rerr_name(rc), rc);

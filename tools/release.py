@@ -65,8 +65,12 @@ chmod 755 /tmp/fakessh
 mkdir /tmp/pushed /tmp/pulled
 head -c 1048576 /tmp/source/file >/tmp/pushed/file
 head -c 1048576 /tmp/source/file >/tmp/pulled/file
-"$bin" --no-fallback -az --partial -e /tmp/fakessh --rsync-path="$bin" /tmp/source/ fake:/tmp/pushed/
-"$bin" --no-fallback -az --partial -e /tmp/fakessh --rsync-path="$bin" fake:/tmp/pushed/ /tmp/pulled/
+"$bin" --no-fallback -az --partial --out-format='%i|%n|%l|%b' --log-file=/tmp/push.log -e /tmp/fakessh --rsync-path="$bin" /tmp/source/ fake:/tmp/pushed/ >/tmp/push.stdout
+"$bin" --no-fallback -az --partial --out-format='%i|%n|%l|%b' --log-file=/tmp/pull.log -e /tmp/fakessh --rsync-path="$bin" fake:/tmp/pushed/ /tmp/pulled/ >/tmp/pull.stdout
+cmp /tmp/push.log /tmp/push.stdout
+cmp /tmp/pull.log /tmp/pull.stdout
+grep -F 'file|2097152|1048576' /tmp/push.stdout
+grep -F 'file|2097152|1048576' /tmp/pull.stdout
 cmp /tmp/source/file /tmp/pulled/file
 cmp '/tmp/source/straße with spaces' '/tmp/pulled/straße with spaces'
 test "$(readlink '/tmp/pulled/space link')" = file

@@ -14,6 +14,7 @@
 #include <unordered_map>
 
 #include "progress.h"
+#include "output.h"
 
 #ifdef __APPLE__
 #include <sys/attr.h>
@@ -54,7 +55,7 @@ void Worker::flush_log() {
     log.pop_back();
     g_msg_sink(0, 0, log);
   } else {
-    ui_write(false, log);
+    output_text(log);
   }
   log.clear();
 }
@@ -110,7 +111,7 @@ void entry_from_stat(const struct stat& st, Entry& e) {
   e.mode = st.st_mode & 07777;
   e.uid = st.st_uid;
   e.gid = st.st_gid;
-  e.size = e.type == T_REG ? (i64)st.st_size : 0;
+  e.size = (i64)st.st_size;  // Includes directory/link lengths for formatted output.
 #ifdef __APPLE__
   e.mtime = st.st_mtimespec.tv_sec;
   e.mtime_ns = (u32)st.st_mtimespec.tv_nsec;
@@ -285,7 +286,15 @@ static int list_dir_fd(int fd, DirList& out, unsigned flags) {
         }
         entry_from_stat(st, e);
       }
-      if (e.type != T_REG) e.size = 0;
+      if (e.type != T_REG) {
+        e.size = 0;
+        if (output_enabled()) {
+          struct stat st;
+          std::string name(nm, nlen);
+          if (fstatat(fd, name.c_str(), &st, AT_SYMLINK_NOFOLLOW) == 0) e.size = st.st_size;
+          else out.incomplete = true;
+        }
+      }
       if (e.type != T_CHR && e.type != T_BLK) e.rdev = 0;
       e.name_off = out.add_str({nm, nlen});
       e.name_len = (u16)nlen;
@@ -441,8 +450,14 @@ void set_mode(const char* path, u32 mode, bool link) {
 #endif
 }
 
-void item(Worker& t, const char* code, std::string_view rel, bool is_dir, const char* target = nullptr) {
-  if (!g_opt.itemize && g_opt.verbose < 1) return;
+void item(Worker& t, const char* code, std::string_view rel, const Entry& entry,
+          std::string_view source = {}, const char* target = nullptr, i64 bytes = 0, i64 size = -1) {
+  if (!output_enabled()) return;
+  if (!g_opt.am_server || g_output_sink) {
+    output_event({code, std::string(rel), std::string(source), target ? target : "", entry.type, size < 0 ? entry.size : size, bytes});
+    return;
+  }
+  bool is_dir = entry.type == T_DIR;
   std::string l;
   if (g_opt.itemize) l.append(code).push_back(' ');
   l.append(rel.empty() ? "." : rel);
@@ -452,7 +467,11 @@ void item(Worker& t, const char* code, std::string_view rel, bool is_dir, const 
 }
 
 void item_delete(Worker& t, std::string_view rel, bool is_dir) {
-  if (!g_opt.itemize && g_opt.verbose < 1) return;
+  if (!output_enabled()) return;
+  if (!g_opt.am_server || g_output_sink) {
+    output_event({"*deleting  ", std::string(rel), {}, {}, (u8)(is_dir ? T_DIR : T_NONE)});
+    return;
+  }
   std::string l = g_opt.itemize ? "*deleting   " : "deleting ";
   l.append(rel);
   if (is_dir) l.push_back('/');
@@ -517,7 +536,7 @@ bool make_way(const std::string& path, const Entry& d, const std::string& rel, c
 }
 
 // Bring owner/group/mode/mtime of an existing, up-to-date destination entry in line.
-void tweak_attrs(const char* path, const Entry& s, const Entry& d, std::string_view rel, char kind, Worker& t) {
+void tweak_attrs(const char* path, const Entry& s, const Entry& d, std::string_view rel, char kind, Worker& t, DirWork& work, u32 index) {
   const Options& o = g_opt;
   bool link = s.type == T_LNK;
   bool time_same = (g_opt.checksum && kind == 'f') ? same_time_exact(s, d) : same_secs(s, d);
@@ -541,7 +560,7 @@ void tweak_attrs(const char* path, const Entry& s, const Entry& d, std::string_v
     if (!o.dry_run) set_mtime(path, s, link);
     code[4] = 't', changed = true;
   }
-  if (changed && o.itemize) item(t, code, rel, false);
+  if (changed && (o.itemize || o.out_format_set || !o.log_file.empty())) note_item(work, index, code, 0, t);
 }
 
 }  // namespace
@@ -663,7 +682,7 @@ void generate(DirWork& w, Worker& t) {
             if ((final_mode | 0700) == final_mode && !(final_mode & 07000)) s.flags |= EF_MODE_OK;
             w.modified = true;
             g_stats.created_dirs.fetch_add(1, std::memory_order_relaxed);
-            item(t, "cd+++++++++", rel, true);
+            note_item(w, (u32)i, "cd+++++++++", 0, t);
           } else if (!o.dry_run && destination_mkdir(path.c_str(), final_mode | 0700) != 0) {
             if (errno != EEXIST) {
               file_io_error(errno, path.c_str(), "recv_generator: mkdir");
@@ -675,7 +694,7 @@ void generate(DirWork& w, Worker& t) {
             if ((final_mode | 0700) == final_mode && !(final_mode & 07000)) s.flags |= EF_MODE_OK;
             w.modified = true;
             g_stats.created_dirs.fetch_add(1, std::memory_order_relaxed);
-            item(t, "cd+++++++++", rel, true);
+            note_item(w, (u32)i, "cd+++++++++", 0, t);
             if (!o.dry_run) {
               if (o.group && s.gid != w.dgid && can_set_gid(s.gid)) check_attr(destination_chown(path.c_str(), (uid_t)-1, s.gid), path.c_str(), "ownership");
               if (o.owner && o.am_root && s.uid != my_uid) check_attr(destination_chown(path.c_str(), s.uid, (gid_t)-1), path.c_str(), "ownership");
@@ -690,7 +709,7 @@ void generate(DirWork& w, Worker& t) {
             if (!(s.flags & EF_MODE_OK)) check_attr(destination_chmod(path.c_str(), final_mode), path.c_str(), "permissions");
             if (o.times && !o.omit_dir_times && !time_ok) set_mtime(path.c_str(), s, false);
           }
-          if (!was_created && !time_ok && o.times && !o.omit_dir_times && o.itemize) item(t, ".d..t......", rel, true);
+          if (!was_created && !time_ok && o.times && !o.omit_dir_times && o.itemize) note_item(w, (u32)i, ".d..t......", 0, t);
           s.flags &= (u8)~EF_DESCEND;
         }
         break;
@@ -742,7 +761,7 @@ void generate(DirWork& w, Worker& t) {
           }
           if (same) {
             if (!o.perms) s.mode = d->mode;
-            tweak_attrs(path.c_str(), s, *d, rel, 'f', t);
+            tweak_attrs(path.c_str(), s, *d, rel, 'f', t, w, (u32)i);
             break;
           }
           s.flags |= EF_EXISTS | EF_INPLACE_SAFE;
@@ -767,7 +786,7 @@ void generate(DirWork& w, Worker& t) {
           ssize_t k = destination_readlink(path.c_str(), buf, sizeof buf - 1);
           if (k >= 0 && (size_t)k == strlen(target) && memcmp(buf, target, (size_t)k) == 0) {
             if (!o.perms) s.mode = d->mode;
-            tweak_attrs(path.c_str(), s, *d, rel, 'L', t);
+            tweak_attrs(path.c_str(), s, *d, rel, 'L', t, w, (u32)i);
             break;
           }
         }
@@ -793,7 +812,7 @@ void generate(DirWork& w, Worker& t) {
         }
         w.modified = true;
         g_stats.created_links.fetch_add(1, std::memory_order_relaxed);
-        item(t, d ? "cL........." : "cL+++++++++", rel, false, target);
+        note_item(w, (u32)i, d ? "cL........." : "cL+++++++++", 0, t);
         break;
       }
 
@@ -806,7 +825,7 @@ void generate(DirWork& w, Worker& t) {
         u32 final_mode = o.perms ? s.mode : (s.mode & 0777 & ~g_umask);
         if (d && d->type == s.type && (!dev || d->rdev == s.rdev)) {
           if (!o.perms) s.mode = d->mode;
-          tweak_attrs(path.c_str(), s, *d, rel, dev ? 'D' : 'S', t);
+          tweak_attrs(path.c_str(), s, *d, rel, dev ? 'D' : 'S', t, w, (u32)i);
           break;
         }
         if (d ? o.ignore_existing : o.existing) break;
@@ -833,7 +852,7 @@ void generate(DirWork& w, Worker& t) {
         }
         w.modified = true;
         g_stats.created_specials.fetch_add(1, std::memory_order_relaxed);
-        item(t, dev ? "cD+++++++++" : "cS+++++++++", rel, false);
+        note_item(w, (u32)i, dev ? "cD+++++++++" : "cS+++++++++", 0, t);
         break;
       }
       default: break;
@@ -1183,26 +1202,30 @@ bool write_whole(DirWork& w, u32 idx, const char* data, size_t len, Worker& t) {
   return out_finish(o, w, idx, t, ok);
 }
 
-void note_transferred(DirWork& w, u32 idx, i64 bytes, Worker& t) {
+void note_item(DirWork& w, u32 idx, const char* code, i64 bytes, Worker& t, i64 size) {
+  if (!output_enabled()) return;
+  const Entry& entry = w.src.e[idx];
+  std::string source;
+  // A remote receiver has source paths only for logging, never for filesystem use.
+  if (!w.output_sources.empty()) source = w.output_sources[idx];
+  else if (!w.src_path.empty() || !w.src_paths.empty()) src_path_of(w, idx, source);
+  item(t, code, rel_join(w.rel, w.src.name_sv(entry)), entry, source,
+       entry.type == T_LNK ? w.src.link(entry) : nullptr, bytes, size);
+}
+
+void note_transferred(DirWork& w, u32 idx, i64 bytes, Worker& t, i64 final_size) {
   const Options& o = g_opt;
   const Entry& s = w.src.e[idx];
   g_stats.xfer_files.fetch_add(1, std::memory_order_relaxed);
-  (void)bytes;
   if (!(s.flags & EF_EXISTS)) g_stats.created_files.fetch_add(1, std::memory_order_relaxed);
-  if (!o.itemize && o.verbose < 1) return;
-  std::string l;
-  if (o.itemize) {
-    char code[13] = ">f+++++++++ ";
-    if (o.pushing) code[0] = '<';
-    if (s.flags & EF_EXISTS) {
-      memcpy(code + 2, ".........", 9);
-      if (o.checksum) code[2] = 'c';
-      if (s.flags & EF_DIFF_SIZE) code[3] = 's';
-      if (s.flags & EF_DIFF_TIME) code[4] = o.times ? 't' : 'T';
-    }
-    l.append(code);
+  if (!output_enabled()) return;
+  char code[12] = ">f+++++++++";
+  if (o.pushing) code[0] = '<';
+  if (s.flags & EF_EXISTS) {
+    memcpy(code + 2, ".........", 9);
+    if (o.checksum) code[2] = 'c';
+    if (s.flags & EF_DIFF_SIZE) code[3] = 's';
+    if (s.flags & EF_DIFF_TIME) code[4] = o.times ? 't' : 'T';
   }
-  if (!w.rel.empty()) l.append(w.rel).push_back('/');
-  l.append(w.src.name_sv(s));
-  t.logf(l);
+  note_item(w, idx, code, bytes, t, final_size);
 }

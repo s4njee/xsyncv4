@@ -152,7 +152,7 @@ rsync unless fallback is disabled.
 Protocol 4 advertises feature bits in both Hello messages and uses their
 intersection. Unknown feature bits are ignored. The core transfer format is
 required; compression, identity mapping, safe-link filtering and verified-prefix
-resume have distinct bits. If compression is unavailable, both sides send plain data. Requested
+resume and structured file output have distinct bits. If compression is unavailable, both sides send plain data. Requested
 safe-link or user/group mapping semantics are never silently dropped: missing
 support fails before transfer (or invokes rsync when fallback is enabled).
 Receivers reject compressed or identity-map frames that were not negotiated.
@@ -172,6 +172,28 @@ Files up to 512 KiB use the whole-file path. Peers without the resume feature,
 including protocol 3, keep the historical full-file format and transfer the
 whole file; no new fields are added to their wire messages.
 `-W`/`--whole-file` disables resume; `--no-whole-file` enables it again.
+
+`--out-format` supports `%i` (itemization), `%n` (transfer-relative name, with a
+trailing slash for directories), `%L` (symlink target), `%l` (source length),
+`%o` (`send`, `recv`, `del.`), `%f` (long source name on a sender, short name on
+a remote pull), `%b` (file-content bytes transferred), `%t` (local date/time)
+and `%%`. Optional field widths such as `%-40n` and `%12l` pad with spaces.
+`%b` counts content before compression, excluding framing; a resumed transfer
+counts only the remaining tail, and clones, metadata updates and dry runs count
+zero. This differs from rsync's protocol-specific byte accounting.
+
+When stdout is a pipe or file, file events are buffered until the transfer ends
+and sorted by transfer-relative path. A terminal receives events as they finish.
+Progress stays on stderr. `--log-file=FILE` appends exactly the same stdout
+stream, including summaries, without timestamps or prefixes added to the log.
+An empty output format suppresses file lines; `-q` suppresses the stream.
+Control bytes in names are escaped as `\\#ooo`; valid UTF-8 is retained. Invalid
+high bytes are escaped unless `-8`/`--8-bit-output` is set.
+
+Structured events and display-only source paths use a negotiated feature bit.
+An explicit format or log request against a peer lacking that feature delegates
+to rsync before any destination writes, or fails with code 4 in strict mode.
+Ordinary `-v`/`-i` output still works with older peers using their plain messages.
 
 Future optional frames/options must be gated by an agreed feature bit; they must
 not change the protocol-3 layout or add unnegotiated fields to the baseline Hello.
@@ -284,12 +306,12 @@ Differences to be aware of:
   deletion. The explicit destination path is resolved once at setup.
 - **Clones carry extended attributes and ACLs** along, which `rsync -a` (without `-X -A`)
   does not. Use `--no-clone` if that matters.
-- **Output order.** With `-v`/`-i`, names appear in the order threads finish them.
+- **Output order.** File lines are sorted by path when stdout is not a terminal.
 - **Delegated to rsync** (strict mode rejects them): `-H`, `-A`, `-X`, `-R`,
   `-b`, `-m`, `-C`, `-F`, `--files-from`, `--link-dest`/`--compare-dest`/`--copy-dest`,
   `--bwlimit`, `--chmod`, `--append`, `--partial-dir`, `--remove-source-files`, per-directory
   merge files and `P`/`R`/`H`/`S` filter rules, listing mode (a single `SRC` argument).
-- **Unsupported options fall back before transfer; strict mode fails.** This includes `--out-format`,
+- **Unsupported options fall back before transfer; strict mode fails.** This includes
   `--timeout`, `--contimeout`, `-S`/`--sparse`, `--fsync`, `--preallocate`,
   `--skip-compress`, `--block-size`, `--checksum-choice`,
   `--log-file-format`, and `--debug`. `--compress-choice` accepts `zstd` or `none`.
@@ -297,7 +319,7 @@ Differences to be aware of:
 - **Compatibility no-ops are listed in `--help` with reasons.**
   `-s`/`--protect-args`/`--secluded-args` is intrinsic
   to protocol-carried paths. `--blocking-io`/`--no-blocking-io` cannot change the
-  blocking pipe transport. `-8`/`--8-bit-output` matches the always-raw name output.
+  blocking pipe transport.
   `--no-motd` has no effect because there is no daemon transport.
 
 xsync-only options: `-j N`/`--jobs=N` (worker threads; default is the number of
@@ -321,6 +343,7 @@ python3 tests/mount_test.py                               # macOS: disposable AP
 ./tests/ssh-rig.sh ssh_reach_test.py fallback_test.py        # prompts + fallback
 python3 tests/fallback_test.py                            # local fallback checks
 python3 tests/protocol_test.py                            # frozen N-1 and feature subsets
+python3 tests/output_test.py                              # formats, ordering, log parity
 XSYNC_LAN_HOST=user@host python3 tests/lan_test.py -v       # missing-helper LAN
 ./tests/ssh-rig.sh root_test.py                           # Docker: 96 root/ID/device cases
 ```

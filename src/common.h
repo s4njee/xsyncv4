@@ -19,9 +19,9 @@ using i64 = int64_t;
 #define XSYNC_VERSION "0.1.0"
 constexpr u32 PROTO_VERSION = 4;
 constexpr u32 PROTO_MIN_VERSION = PROTO_VERSION - 1;
-constexpr u64 PF_CORE = 1, PF_ZSTD = 2, PF_IDMAP = 4, PF_SAFE_LINKS = 8, PF_RESUME = 16;
+constexpr u64 PF_CORE = 1, PF_ZSTD = 2, PF_IDMAP = 4, PF_SAFE_LINKS = 8, PF_RESUME = 16, PF_OUTPUT = 32;
 #ifndef XSYNC_PROTOCOL_FEATURES
-#define XSYNC_PROTOCOL_FEATURES 31
+#define XSYNC_PROTOCOL_FEATURES 63
 #endif
 constexpr u64 PROTO_FEATURES = XSYNC_PROTOCOL_FEATURES;
 constexpr u64 LEGACY_V3_FEATURES = 15;
@@ -51,11 +51,15 @@ struct Options {
   std::string rsh, rsync_path;
   bool rsh_set = false;  // Client-only; an explicit empty command is an error.
   bool whole_file = false;  // Client controls resume feature negotiation.
+  std::string out_format, log_file;
+  bool out_format_set = false;  // An explicitly empty format suppresses file lines.
+  bool raw_names = false;  // -8: retain invalid high bytes; always escape control bytes.
   FilterList filters;
   // Set at runtime, not parsed.
   bool am_root = false;
   bool am_server = false;
   bool pushing = false;  // client is sending to a remote receiver (itemize prints '<')
+  bool receiving = false;  // Client-only: short %f and recv %o for remote pulls.
   u32 wire_version = PROTO_VERSION;
   u64 peer_features = PROTO_FEATURES;
 };

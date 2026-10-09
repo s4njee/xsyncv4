@@ -30,6 +30,7 @@
 #include "progress.h"
 #include "fallback.h"
 #include "transport.h"
+#include "output.h"
 
 #ifndef O_CLOEXEC
 #define O_CLOEXEC 0
@@ -37,7 +38,7 @@
 
 namespace {
 
-enum : u8 { F_HELLO = 1, F_DIR, F_NEED, F_DATA, F_LIST_END, F_DATA_END, F_DONE, F_MSG, F_IDMAP, F_DEST };
+enum : u8 { F_HELLO = 1, F_DIR, F_NEED, F_DATA, F_LIST_END, F_DATA_END, F_DONE, F_MSG, F_IDMAP, F_DEST, F_OUTPUT };
 enum : u8 { DF_ATTRS = 1, DF_SINGLE = 2, DF_NODELETE = 4, DF_ZSTD = 8 };
 enum : u8 { R_WHOLE = 1, R_CHUNK = 2, R_FAIL = 4, R_END = 8 };
 constexpr size_t HDR = 5;                  // u32 payload length + u8 type
@@ -47,6 +48,7 @@ constexpr size_t DATA_PREFIX = HDR + 1 + 8;
 const char MAGIC[] = "XSYNC\x01";
 
 bool resume_enabled() { return g_opt.partial && (g_opt.peer_features & PF_RESUME); }
+bool structured_output() { return g_opt.peer_features & PF_OUTPUT; }
 
 // ---------------------------------------------------------------- encoding
 
@@ -242,6 +244,7 @@ void send_msg(int kind, int code, std::string_view s) {
 [[noreturn]] void conn_lost() {
   // A broken connection cannot carry the fatal message back to the peer.
   g_msg_sink = nullptr;
+  g_output_sink = nullptr;
   if (g_stop.load()) exit_signal();
   die(RERR_STREAMIO, "connection unexpectedly closed");
 }
@@ -251,9 +254,31 @@ void handle_msg(std::string_view payload) {
   int kind = r.byte();
   int code = (int)r.var();
   std::string text(r.rest());
-  if (kind == 0) ui_write(false, text + "\n");
+  if (kind == 0) output_legacy(text);
   else if (kind == 1) err_line(code, "%s", text.c_str());
   else die(code ? code : RERR_STREAMIO, "%s", text.c_str());
+}
+
+void send_output(const OutputEvent& event) {
+  std::string frame = new_frame(F_OUTPUT);
+  put_str(frame, event.code), put_str(frame, event.path), put_str(frame, event.source), put_str(frame, event.target);
+  frame.push_back((char)event.type);
+  put_var(frame, (u64)event.size), put_var(frame, (u64)event.bytes), put_svar(frame, event.time);
+  g_conn->send(std::move(frame), true);
+}
+
+void handle_output(std::string_view payload) {
+  if (!structured_output() || g_opt.am_server) die(RERR_PROTOCOL, "file output without negotiated support");
+  RBuf r(payload);
+  OutputEvent event;
+  event.code = r.str(), event.path = r.str(), event.source = r.str(), event.target = r.str();
+  event.type = r.byte();
+  event.size = (i64)r.var(), event.bytes = (i64)r.var(), event.time = r.svar();
+  if (r.bad || !r.empty() || event.type > T_BLK || event.size < 0 || event.bytes < 0 ||
+      (event.code.size() != 11 && event.code != "*deleting  ") ||
+      std::any_of(event.code.begin(), event.code.end(), [](unsigned char c) { return c < 32 || c >= 127; }))
+    die(RERR_PROTOCOL, "protocol error: malformed file output");
+  output_event(std::move(event));
 }
 
 // Optionally compress `raw` into `f` (appending). Returns true if compressed.
@@ -299,7 +324,7 @@ std::string missing_feature(u64 features) {
 
 void put_options(std::string& f) {
   const Options& o = g_opt;
-#define X(n) f.push_back((char)o.n);
+#define X(n) f.push_back((char)(o.n || (std::string_view(#n) == "itemize" && (o.out_format_set || !o.log_file.empty()))));
   WIRE_V3_BOOL_OPTS(X)
 #undef X
 #define X(n) put_svar(f, o.n);
@@ -477,6 +502,10 @@ struct Sender {
         case T_CHR:
         case T_BLK: put_var(body, e.rdev); [[fallthrough]];
         default: ns++;
+      }
+      if (structured_output()) {
+        if (e.type != T_REG) put_var(body, (u64)e.size);
+        put_str(body, d->src_paths.empty() ? path_join(d->src_path, l.name_sv(e)) : d->src_paths[i]);
       }
     }
     if (client) {
@@ -741,6 +770,7 @@ struct Sender {
       switch (type) {
         case F_NEED: on_need(payload); break;
         case F_MSG: handle_msg(payload); break;
+        case F_OUTPUT: handle_output(payload); break;
         case F_DONE: {
           RBuf r(payload);
           int code = (int)r.var();
@@ -896,6 +926,7 @@ struct Receiver {
     if (r.bad || n > (1u << 28)) die(RERR_PROTOCOL, "protocol error: bad DIR frame");
     DirList& l = w.src;
     l.e.resize(n);
+    if (structured_output()) w.output_sources.resize(n);
     if (o.checksum) l.sums.assign(n * 2, 0);
     for (size_t i = 0; i < n; i++) {
       Entry& e = l.e[i];
@@ -926,6 +957,11 @@ struct Receiver {
         case T_CHR:
         case T_BLK: e.rdev = (u32)r.var(); break;
         default: break;
+      }
+      if (structured_output()) {
+        if (e.type != T_REG) e.size = (i64)r.var();
+        w.output_sources[i] = r.str();
+        if (e.size < 0) die(RERR_PROTOCOL, "protocol error: negative file size");
       }
     }
     if (r.bad) die(RERR_PROTOCOL, "protocol error: truncated DIR frame");
@@ -963,7 +999,7 @@ struct Receiver {
       if (o.dry_run) {
         for (u32 i : w.need) {
           g_stats.xfer_bytes.fetch_add((u64)l.e[i].size, std::memory_order_relaxed);
-          note_transferred(w, i, l.e[i].size, t);
+          note_transferred(w, i, 0, t);
         }
         w.need.clear();
       }
@@ -1050,7 +1086,7 @@ struct Receiver {
           g_stats.xfer_bytes.fetch_add(bytes.size());
           if ((i64)bytes.size() >= s.size) g_stats.xfer_bytes_total.fetch_add(bytes.size() - (u64)s.size);
           else g_stats.xfer_bytes_total.fetch_sub((u64)s.size - bytes.size());
-          note_transferred(w, idx, (i64)bytes.size(), t);
+          note_transferred(w, idx, (i64)bytes.size(), t, (i64)bytes.size());
         } else {
           g_stats.xfer_files_total.fetch_sub(1);
           g_stats.xfer_bytes_total.fetch_sub((u64)s.size);
@@ -1156,7 +1192,7 @@ struct Receiver {
               g_stats.xfer_bytes.fetch_add((u64)b->expected);
               if (b->expected >= s.size) g_stats.xfer_bytes_total.fetch_add((u64)(b->expected - s.size));
               else g_stats.xfer_bytes_total.fetch_sub((u64)(s.size - b->expected));
-              note_transferred(w, idx, b->expected, t);
+              note_transferred(w, idx, b->expected - b->prefix, t, b->expected);
             } else {
               g_stats.xfer_files_total.fetch_sub(1);
               g_stats.xfer_bytes_total.fetch_sub((u64)s.size);
@@ -1379,12 +1415,14 @@ int run_client(const std::vector<std::string>& srcs, const std::string& dest, u3
   c.rfd = from_child[0], c.wfd = to_child[1];
   g_conn = &c;
   o.pushing = push;
+  o.receiving = !push;
   // Hello: magic, version, the role the server plays, options, paths.
   std::string f = new_frame(F_HELLO);
   f.append(MAGIC, sizeof MAGIC - 1);
   put_var(f, wire_version);
   f.push_back(push ? 'R' : 'S');
   u64 advertised = PROTO_FEATURES & (o.whole_file ? ~PF_RESUME : ~u64(0));
+  if (!output_enabled()) advertised &= ~PF_OUTPUT;
   if (wire_version >= 4) put_var(f, advertised);
   put_options(f);
   put_var(f, paths.size());
@@ -1454,9 +1492,12 @@ int run_client(const std::vector<std::string>& srcs, const std::string& dest, u3
     o.peer_features = features & advertised;
     std::string missing = missing_feature(o.peer_features);
     if (!missing.empty()) fallback(missing, RERR_UNSUPPORTED);
+    if ((o.out_format_set || !o.log_file.empty()) && !structured_output())
+      fallback("peer does not support structured file output", RERR_UNSUPPORTED);
     if (!(o.peer_features & PF_ZSTD)) o.compress = false;
     break;
   }
+  output_start();
   if (o.verbose > 0) out_line(push ? "sending incremental file list" : "receiving incremental file list");
   progress_start(default_jobs());
   int rc;
@@ -1518,6 +1559,7 @@ int run_server() {
   f.append(MAGIC, sizeof MAGIC - 1);
   put_var(f, ver);
   if (ver >= 4) put_var(f, o.peer_features);
+  if (structured_output()) g_output_sink = send_output;
   c.send(std::move(f));
   int rc;
   if (role == 'R') {
