@@ -55,6 +55,7 @@ Options (same meaning as rsync):
  -R, --relative           preserve source path components and implied directories
      --files-from=FILE    select source names from FILE ("-" reads stdin)
      --list-only          list source entries; do not transfer or change DEST
+ -X, --xattrs             preserve extended attributes (twice includes rsync internals)
  -H, --hard-links         preserve hard links within the transferred tree
  -l, --links              copy symlinks as symlinks
      --safe-links         skip symlinks that point outside the transfer tree
@@ -229,6 +230,8 @@ Parsed parse(int argc, char** argv) {
     else if (name == "itemize-changes") o.itemize = true, ++o.itemize_level;
     else if (name == "no-itemize-changes") o.itemize = false, o.itemize_level = 0;
     else if (name == "archive") set_archive(o);
+    else if (name == "xattrs") o.xattrs = std::min(o.xattrs + 1, 2);
+    else if (name == "no-xattrs" || name == "no-X") o.xattrs = 0;
     else if (flag(o.relative, "relative")) relative_explicit = true;
     else if (name == "no-R") o.relative = false, relative_explicit = true;
     else if (name == "files-from") o.files_from = need(), o.files_from_set = true;
@@ -318,7 +321,7 @@ Parsed parse(int argc, char** argv) {
       // These intrinsic behaviours are listed with their reasons in --help.
     } else {
       static const char* unsupported[] = {
-          "acls", "xattrs", "backup", "backup-dir", "suffix", "link-dest", "compare-dest", "copy-dest",
+          "acls", "backup", "backup-dir", "suffix", "link-dest", "compare-dest", "copy-dest",
           "chmod", "chown", "usermap", "groupmap", "append", "append-verify", "partial-dir",
           "delay-updates", "fuzzy", "remove-source-files", "keep-dirlinks", "copy-dirlinks", "copy-unsafe-links",
           "munge-links", "executability", "atimes", "crtimes", "daemon", "port", "password-file",
@@ -407,7 +410,7 @@ Parsed parse(int argc, char** argv) {
         case 'M': usage_error("--remote-option is not supported by xsync");
         case 'H': o.hard_links = true; break;
         case 'A': usage_error("--acls is not supported by xsync");
-        case 'X': usage_error("--xattrs is not supported by xsync");
+        case 'X': o.xattrs = std::min(o.xattrs + 1, 2); break;
         case 'R': o.relative = true; relative_explicit = true; break;
         case 'b': usage_error("--backup is not supported by xsync");
         case 'C': o.cvs_exclude = true; break;

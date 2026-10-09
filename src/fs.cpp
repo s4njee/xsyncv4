@@ -589,7 +589,12 @@ void tweak_attrs(const char* path, const Entry& s, const Entry& d, std::string_v
     if (d.mode != s.mode) code[5] = 'p';
     changed = true;
   }
-  if (o.times && !(link && o.omit_link_times) && !time_same) {
+  if (o.xattrs) {
+    const FilterList& filters = work.receiver_filter ? *work.receiver_filter : o.filters;
+    if (s.item_flags & IF_XATTR) code[10] = 'x', changed = true;
+    if (s.item_flags & IF_XATTR) apply_xattrs(work.src_xattrs[index], path, s.type, filters);
+  }
+  if (o.times && !(link && o.omit_link_times) && (!time_same || (s.item_flags & IF_XATTR))) {
     if (!o.dry_run) set_mtime(path, s, link);
     if (!same_secs(s, d)) code[4] = 't', changed = true;
   }
@@ -711,11 +716,16 @@ void generate(DirWork& w, Worker& t) {
     }
     if (s.item_flags & IF_PRUNED) { if (d) extra(*d); continue; }
     set_names(name);
+    if (o.xattrs && !w.src_xattrs[i].complete) continue;
 
+    auto compare_xattrs = [&] {
+      if (o.xattrs && d && d->type == s.type && xattrs_differ(w.src_xattrs[i], path, s.type, filters)) s.item_flags |= IF_XATTR;
+    };
     switch (s.type) {
       case T_DIR: {
         seen_dirs++;
         bool keep = d && d->type == T_DIR;
+        compare_xattrs();
         if (keep && output_enabled()) {
           DirWork directory;
           directory.rel = rel;
@@ -763,6 +773,9 @@ void generate(DirWork& w, Worker& t) {
             }
           }
         }
+        if (o.xattrs && (!keep || (s.item_flags & IF_XATTR)) && !(s.flags & EF_LAZY)) apply_xattrs(w.src_xattrs[i], path, T_DIR, filters);
+        // Resource-fork and other metadata writes can change filesystem mtimes.
+        if (s.item_flags & IF_XATTR) s.flags &= (u8)~EF_TIME_OK, time_ok = false;
         s.mode = final_mode;
         if ((!o.recursive && !(s.item_flags & IF_SELECTED_CHILD)) || s.rdev == 1) {
           // Not descended into: finish its attributes right away.
@@ -797,6 +810,7 @@ void generate(DirWork& w, Worker& t) {
           transfer = true;
         } else {
           if (o.update && (d->mtime > s.mtime || (d->mtime == s.mtime && d->mtime_ns > s.mtime_ns))) break;
+          compare_xattrs();
           bool same;
           if (o.checksum) {
             same = d->size == s.size;
@@ -848,7 +862,9 @@ void generate(DirWork& w, Worker& t) {
 
       case T_LNK: {
         seen_links++;
+        if (d && o.ignore_existing) break;
         const char* target = src.link(s);
+        compare_xattrs();
         if (d && d->type == T_LNK) {
           char buf[PATH_MAX];
           ssize_t k = destination_readlink(path.c_str(), buf, sizeof buf - 1);
@@ -870,6 +886,7 @@ void generate(DirWork& w, Worker& t) {
           if (o.perms && lmode != d->mode) link_code[5] = 'p';
           if (o.owner && o.am_root && d->uid != s.uid) link_code[6] = 'o';
           if (o.group && d->gid != s.gid && can_set_gid(s.gid)) link_code[7] = 'g';
+          if (s.item_flags & IF_XATTR) link_code[10] = 'x';
         }
         if (d) {
           if (d->type == T_DIR) {
@@ -887,6 +904,7 @@ void generate(DirWork& w, Worker& t) {
           if (lmode != 0777) set_mode(path.c_str(), lmode, true);
           if (o.group && s.gid != w.dgid && can_set_gid(s.gid)) check_attr(destination_chown(path.c_str(), (uid_t)-1, s.gid), path.c_str(), "ownership");
           if (o.owner && o.am_root && s.uid != my_uid) check_attr(destination_chown(path.c_str(), s.uid, (gid_t)-1), path.c_str(), "ownership");
+          if (o.xattrs) apply_xattrs(w.src_xattrs[i], path, T_LNK, filters);
           if (o.times && !o.omit_link_times) set_mtime(path.c_str(), s, true);
         }
         w.modified = true;
@@ -901,7 +919,9 @@ void generate(DirWork& w, Worker& t) {
       case T_CHR:
       case T_BLK: {
         seen_spec++;
+        if (d && o.ignore_existing) break;
         bool dev = s.type == T_CHR || s.type == T_BLK;
+        compare_xattrs();
         u32 final_mode = o.perms ? s.mode : (s.mode & 0777 & ~g_umask);
         if (d && d->type == s.type && (!dev || d->rdev == s.rdev)) {
           if (!o.perms) s.mode = d->mode;
@@ -931,6 +951,7 @@ void generate(DirWork& w, Worker& t) {
           if (o.perms) check_attr(destination_chmod(path.c_str(), final_mode), path.c_str(), "permissions");
           if (o.group && s.gid != w.dgid && can_set_gid(s.gid)) check_attr(destination_chown(path.c_str(), (uid_t)-1, s.gid), path.c_str(), "ownership");
           if (o.owner && o.am_root && s.uid != my_uid) check_attr(destination_chown(path.c_str(), s.uid, (gid_t)-1), path.c_str(), "ownership");
+          if (o.xattrs) apply_xattrs(w.src_xattrs[i], path, s.type, filters);
           if (o.times) set_mtime(path.c_str(), s, false);
         }
         w.modified = true;
@@ -1277,6 +1298,8 @@ bool out_finish(OutFile& f, DirWork& w, u32 idx, Worker&, bool ok, const Entry* 
   if (o.group && (reused || s.gid != w.dgid) && can_set_gid(s.gid)) check_attr(fchown(f.fd, (uid_t)-1, s.gid), f.path.c_str(), "ownership");
   if (o.owner && o.am_root && (reused || s.uid != my_uid)) check_attr(fchown(f.fd, s.uid, (gid_t)-1), f.path.c_str(), "ownership");
   if (reused || f.created_mode != s.mode) check_attr(fchmod(f.fd, s.mode), f.path.c_str(), "permissions");
+  if (o.xattrs) apply_fd_xattrs(w.src_xattrs[idx], f.fd, f.path, T_REG,
+                              w.receiver_filter ? *w.receiver_filter : o.filters, f.temp || !f.existed);
   if (o.times) {
     timespec ts[2] = {{0, UTIME_OMIT}, {s.mtime, (long)s.mtime_ns}};
     check_attr(futimens(f.fd, ts), f.path.c_str(), "times");
@@ -1314,13 +1337,18 @@ bool clone_copy(DirWork& w, u32 idx, const char* source, unsigned flags, Worker&
   Entry fresh;
   int source_fd = -1;
   struct stat before;
-  if (g_opt.hard_links) {
+  if (g_opt.hard_links || g_opt.xattrs) {
     source_fd = open(source, O_RDONLY | O_CLOEXEC | (g_opt.copy_links || !w.src_paths.empty() ? 0 : O_NOFOLLOW));
     if (source_fd < 0 || fstat(source_fd, &before) != 0 || !S_ISREG(before.st_mode)) {
       if (source_fd >= 0) close(source_fd);
       return false;
     }
     fresh = source_snapshot(w.src.e[idx], before);
+    if (g_opt.xattrs) {
+      const auto& context = w.source_contexts.empty() ? w.source_filter : w.source_contexts[idx];
+      w.src_xattrs[idx] = source_fd_xattrs(source_fd, source, T_REG, context ? *context : g_opt.filters);
+      if (!w.src_xattrs[idx].complete) { close(source_fd); return false; }
+    }
   }
   auto close_source = [&] { if (source_fd >= 0) close(source_fd); source_fd = -1; };
   if (!out_open(f, w, idx, t, true)) { close_source(); return false; }
@@ -1354,7 +1382,7 @@ bool clone_copy(DirWork& w, u32 idx, const char* source, unsigned flags, Worker&
   f.fd = fd;
   f.created_mode = st.st_mode & 07777;
   register_output(f);
-  return out_finish(f, w, idx, t, true, g_opt.hard_links ? &fresh : nullptr);
+  return out_finish(f, w, idx, t, true, g_opt.hard_links || g_opt.xattrs ? &fresh : nullptr);
 #else
   errno = ENOTSUP;
   return false;
@@ -1395,6 +1423,7 @@ void note_directory(DirWork& w, const Entry* before, bool created, Worker& t) {
     if (o.perms && source.mode != before->mode) code[5] = 'p', changed = true;
     if (o.owner && o.am_root && source.uid != before->uid) code[6] = 'o', changed = true;
     if (o.group && source.gid != before->gid && can_set_gid(source.gid)) code[7] = 'g', changed = true;
+    if (source.item_flags & IF_XATTR) code[10] = 'x', changed = true;
   }
   if (!changed && o.output_unchanged) memset(code + 2, ' ', 9);
   else if (!changed || (!created && !o.output_attrs)) return;
@@ -1418,6 +1447,7 @@ void note_transferred(DirWork& w, u32 idx, i64 bytes, Worker& t, i64 final_size)
     if (s.item_flags & IF_PERMS) code[5] = 'p';
     if (s.item_flags & IF_OWNER) code[6] = 'o';
     if (s.item_flags & IF_GROUP) code[7] = 'g';
+    if (s.item_flags & IF_XATTR) code[10] = 'x';
   }
   note_item(w, idx, code, bytes, t, final_size);
 }

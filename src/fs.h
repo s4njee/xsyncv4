@@ -5,6 +5,7 @@
 
 #include "common.h"
 #include "destination.h"
+#include "xattrs.h"
 
 struct stat;
 struct SelectedSource;
@@ -66,6 +67,9 @@ struct DirWork {
   std::vector<std::unique_ptr<DirWork>> prepared_children;  // Full source walk for -m.
   std::shared_ptr<SelectedSource> selection;
   bool scan_failed = false;
+  XattrSet attrs_xattrs;
+  std::vector<XattrSet> src_xattrs;  // Parallel to the filtered source entries.
+  bool xattrs_loaded = false, attrs_xattrs_loaded = false;
   Entry attrs;           // source directory attributes
   bool has_attrs = false;
   bool created = false;   // destination directory was just created: nothing to compare against

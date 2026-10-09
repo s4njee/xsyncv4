@@ -463,6 +463,7 @@ std::string_view unpack(std::string_view in, bool compressed, std::string& scrat
 // ---------------------------------------------------------------- options on the wire
 
 std::string missing_feature(u64 features) {
+  if (g_opt.xattrs && !g_opt.list_only) return "native remote --xattrs support is not yet available";
   if (g_opt.files_from_set && !(features & PF_FILES_FROM)) return "peer does not support --files-from";
   if (g_opt.relative && !(features & PF_RELATIVE)) return "peer does not support --relative";
   if (g_opt.prune_empty && !(features & PF_PRUNE_EMPTY)) return "peer does not support --prune-empty-dirs";

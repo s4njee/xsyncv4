@@ -30,6 +30,8 @@ class FilterList {
   // True if the entry is excluded: first matching rule wins, no match => included. Tests only
   // the given path, not its ancestors. Allocation-free; safe for concurrent calls.
   bool excluded(std::string_view relpath, bool is_dir, std::string_view absolute = {}) const;
+  bool xattr_excluded(std::string_view name, bool receiver = false, bool delete_excluded = false) const;
+  bool has_xattr_filters() const;
   bool protected_from_deletion(std::string_view relpath, bool is_dir, bool delete_excluded = false,
                                bool deleting_directory = false, std::string_view absolute = {}) const;
   bool needs_extended() const;
@@ -49,6 +51,7 @@ class FilterList {
                                     bool omit_cvs_option = false, bool pulling = false) const;
 
  private:
+  std::string xattr_root_scope_;  // First directory entered in this transfer context.
   enum class Kind : uint8_t {
     NameLit,      // final component == pat
     NameSuffix,   // "*lit": final component ends with pat
@@ -83,7 +86,7 @@ class FilterList {
   void add_rule(std::string_view pat, bool include, bool negate);
   bool add_old_style(std::string_view pat, bool include, std::string* err);
   int match(std::string_view path, bool is_dir, bool receiver, bool delete_excluded,
-             bool deleting_directory, std::string_view absolute) const;
+             bool deleting_directory, std::string_view absolute, bool xattr = false, std::string_view xattr_root = {}) const;
   bool load_merge(const std::string& path, const Rule& defaults, std::string_view scope,
                   std::string* err, bool optional);
   bool merge_content(std::string_view content, const Rule& defaults, std::string_view scope, std::string* err);

@@ -404,7 +404,13 @@ Differences to be aware of:
 - **Clones carry extended attributes and ACLs** along, which `rsync -a` (without `-X -A`)
   does not. Use `--no-clone` if that matters.
 - **Output order.** File lines are sorted by path when stdout is not a terminal.
-- **Delegated to rsync** (strict mode rejects them): `-A`, `-X`,
+- **Local extended attributes.** `-X`/`--xattrs` copies xattrs on files, directories
+  and supported symlinks. `-XX` also copies rsync internal attributes. Attribute-only
+  updates and per-file APFS clones apply the same attribute selection as byte copies.
+  Whole-directory clones are disabled with `-X` so every entry is handled individually.
+  Native remote xattrs are still pending; remote `-X` delegates before destination
+  writes, or refuses in strict mode.
+- **Delegated to rsync** (strict mode rejects them): `-A`,
   `-b`, `--link-dest`/`--compare-dest`/`--copy-dest`,
   `--chmod`, `--append`, `--partial-dir`, and `--remove-source-files`.
 - **Unsupported options fall back before transfer; strict mode fails.** This includes
@@ -454,8 +460,9 @@ Selecting an individual file leaves unlisted siblings in its implied parents
 alone, including with `--delete`. `-R` does not enable recursion; use `-r` or
 `-a` to walk explicitly selected directory trees. `--no-relative` restores
 ordinary source basename handling. `--no-implied-dirs` still delegates to rsync.
-The `x` modifier applies to xattr names and does not filter filenames; native
-`-X` support is still pending. Extended filters negotiate `PF_FILTERS` before
+The `x` modifier applies to xattr names and does not filter filenames. Local
+`-X` transfers honor xattr filters; an `x` modifier on a merge container does not
+add `x` to the rules inside it. Extended filters negotiate `PF_FILTERS` before
 their rule text is sent. Older helpers refuse or delegate these requests before
 transferring, while ordinary include/exclude filters retain their original wire
 format.
@@ -519,6 +526,7 @@ python3 tests/mount_test.py                               # macOS: disposable AP
 ./tests/ssh-rig.sh                                        # Docker: real SSH + SIGINT
 ./tests/ssh-rig.sh ssh_reach_test.py fallback_test.py        # prompts + fallback
 python3 tests/fallback_test.py                            # local fallback checks
+python3 tests/xattrs_test.py                              # local xattrs, filters, clones and read-only files
 python3 tests/protocol_test.py                            # frozen N-1 and feature subsets
 python3 tests/output_test.py                              # formats, ordering, log parity
 python3 tests/error_test.py                               # error counts, samples, exit codes and log parity

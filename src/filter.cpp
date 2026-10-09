@@ -467,7 +467,7 @@ bool FilterList::merge_content(std::string_view content, const Rule& defaults, s
       if (defaults.absolute) rule.absolute = true, add_modifier('/');
       if (defaults.negate) rule.negate = true, add_modifier('!');
       if (defaults.perishable) rule.perishable = true, add_modifier('p');
-      if (defaults.xattr) rule.xattr = true, add_modifier('x');
+      // Like rsync, an xattr modifier on a merge container is not inherited.
       if (!scope.empty()) rule.scope = scope;
       if (rule.kind == Kind::Cvs && !rule.merged && !defer_cvs_ && !load_cvs(rule, err)) return false;
       rules_.push_back(std::move(rule));
@@ -555,7 +555,9 @@ FilterList FilterList::in_directory(std::string_view path, bool receiver, std::s
   if (error) dir = std::filesystem::path(path).lexically_normal();
   MergeRegistry registry;
   registered_merges(registry, true);
-  return directory_impl(dir.string(), receiver, err, 0, registry);
+  auto result = directory_impl(dir.string(), receiver, err, 0, registry);
+  if (result.xattr_root_scope_.empty()) result.xattr_root_scope_ = dir.string();
+  return result;
 }
 
 void FilterList::registered_merges(MergeRegistry& registry, bool inheriting) const {
@@ -628,7 +630,7 @@ FilterList FilterList::directory_impl(std::string_view path, bool receiver, std:
 }
 
 int FilterList::match(std::string_view relative, bool is_dir, bool receiver, bool delete_excluded,
-                       bool deleting_directory, std::string_view absolute) const {
+                       bool deleting_directory, std::string_view absolute, bool xattr, std::string_view xattr_root) const {
   std::string_view path = relative;
   if (path.empty()) return false;
 
@@ -642,8 +644,9 @@ int FilterList::match(std::string_view relative, bool is_dir, bool receiver, boo
     // A CVS marker reuses the first imported global list. Its pattern and later
     // side/xattr modifiers do not alter that list; perishable still gates it.
     if (r.kind == Kind::Cvs) {
+      if (xattr) continue;
       if (!(receiver && deleting_directory && r.perishable) && r.merged) {
-        int result = r.merged->match(relative, is_dir, receiver, delete_excluded, deleting_directory, absolute);
+        int result = r.merged->match(relative, is_dir, receiver, delete_excluded, deleting_directory, absolute, xattr, xattr_root);
         if (result) return result;
       }
       continue;
@@ -653,15 +656,18 @@ int FilterList::match(std::string_view relative, bool is_dir, bool receiver, boo
     if (!(sides & (receiver ? 2 : 1))) continue;
     if (r.kind == Kind::Merge) {
       if (r.merged) {
-        int result = r.merged->match(relative, is_dir, receiver, delete_excluded, deleting_directory, absolute);
+        int result = r.merged->match(relative, is_dir, receiver, delete_excluded, deleting_directory, absolute, xattr, xattr_root);
         if (result) return result;
       }
       continue;
     }
-    if (r.xattr) continue;
+    if (r.xattr != xattr) continue;
+    // Nested per-directory anchored patterns include a directory prefix that a
+    // bare attribute name cannot match. Root and unanchored rules still apply.
+    if (xattr && r.text.starts_with('/') && !r.scope.empty() && r.scope != xattr_root) continue;
     path = r.absolute ? absolute : relative;
     if (r.absolute && path.starts_with('/')) path.remove_prefix(1);
-    if (!r.absolute && !r.scope.empty()) {
+    if (!xattr && !r.absolute && !r.scope.empty()) {
       path = absolute;
       if (r.scope == "/") { if (!path.starts_with('/')) continue; path.remove_prefix(1); }
       else {
@@ -718,6 +724,16 @@ int FilterList::match(std::string_view relative, bool is_dir, bool receiver, boo
 
 bool FilterList::excluded(std::string_view path, bool is_dir, std::string_view absolute) const {
   return match(path, is_dir, false, false, false, absolute) < 0;
+}
+
+bool FilterList::xattr_excluded(std::string_view name, bool receiver, bool delete_excluded) const {
+  return match(name, false, receiver, delete_excluded, false, name, true, xattr_root_scope_) < 0;
+}
+
+bool FilterList::has_xattr_filters() const {
+  return std::any_of(rules_.begin(), rules_.end(), [](const Rule& rule) {
+    return rule.xattr || (rule.merged && rule.merged->has_xattr_filters());
+  });
 }
 
 bool FilterList::protected_from_deletion(std::string_view path, bool is_dir, bool delete_excluded,

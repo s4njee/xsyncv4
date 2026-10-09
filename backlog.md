@@ -2,7 +2,7 @@
 
 Initial audit written 2026-10-08 against xsync 0.1.0 (protocol 1).
 All fifteen P0 stories completed against protocol 3; per-story evidence is below.
-P1 R-02 through R-09 and E-01 through E-09 are complete (17 of 22 stories). Current protocol 4 supports protocol 3; E-10 is next.
+P1 R-02 through R-09 and E-01 through E-09 are complete (17 of 22 stories). Current protocol 4 supports protocol 3; E-10 is in progress (local xattrs implemented, remote pending).
 Problem statements retain the original audit findings.
 
 ## What "daily driver" means here
@@ -1476,3 +1476,39 @@ Verified artifact manifest (source `864bd37edf14`):
 - Installed helpers remain unchanged; disposable SSH rigs were removed.
   **E-10 is next**, starting with native extended attributes (`-H` is already
   implemented). R-01 still awaits a distinct Linux LAN target beyond the Pi.
+
+
+## E-10 progress — 2026-10-09: local extended attributes
+
+- E-10 remains **code**, with P1 still **17/22**. Its `-H` prerequisite is already
+  complete. Native local `-X`/`--xattrs`, repeated `-XX` and `--no-xattrs`/`--no-X`
+  now handle file and directory xattrs, binary/empty values, supported macOS
+  symlinks, stale-attribute removal and attribute-only itemization (`x`).
+- Byte-copy and per-file APFS-clone transfers share the metadata updater. Filtered
+  attributes carried by a clone are removed as required; whole-directory cloning
+  is disabled with `-X` so each entry receives its selected attributes. Without
+  `-X`, the documented clone superset remains unchanged.
+- Destination updates use anchored file descriptors, including read-only-file
+  metadata updates that temporarily add owner write permission and restore it.
+  Metadata opens are nonblocking and symlink attributes do not follow referents.
+  Copied file attributes are refreshed from the opened source, and source-read failures cannot erase
+  destination attributes. `-L` retains rsync's physical-link xattr behavior.
+- The local differential suite covers **84 cross-platform cases**, eight macOS
+  resource-fork cases and idempotence, checking data, modes, timestamps, hard
+  links, binary xattrs, source integrity and successful itemization against rsync.
+  The seven cross-platform methods pass on Apple Silicon,
+  Rosetta, Linux root and Linux UID/GID 60000. macOS resource-fork checks also
+  verify mtime restoration after attribute-only updates. Two unprivileged read-only
+  `--inplace` cases verify matching partial-transfer status and final trees;
+  rsync reports a planned failed write, while xsync reports completed transfers.
+- Existing CVS/merge local regression suites pass. Filter unit tests remain
+  **32,940 checks, zero failures** on ARM, Rosetta and Linux. Fallback fixtures
+  now use unsupported ACLs to test delegation; xattrs get their own missing-peer
+  capability checks, with strict refusal before destination creation and actual
+  rsync fallback preserving binary attribute values.
+- **Remaining before E-10 completion:** negotiated native remote xattrs and
+  cross-platform namespace handling, source-race/resource-fork stress, packaging,
+  and the wider metadata scope (`-A`, creation/access times, file flags, `-E`,
+  `--chmod`, `--chown`). Current remote `-X` delegates or strictly refuses before
+  writes. No installed helper or release artifact has been replaced for this
+  partial milestone. R-01 still awaits a distinct Linux LAN host beyond the Pi.
