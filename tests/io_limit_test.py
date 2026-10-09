@@ -237,6 +237,24 @@ while True: send(18);time.sleep(0.15)
                 self.assertGreaterEqual(time.monotonic()-start,2.1,'source delay did not activate')
                 for p in self.source.iterdir():self.assertEqual((self.root/('delayed-'+direction)/p.name).read_bytes(),p.read_bytes())
 
+    def test_simultaneous_read_write_stalls_report_one_timeout(self):
+        (self.root/'huge').write_bytes(b'x'*(8*1024*1024))
+        body='''send(10,b"\\0\\0\\0\\0")
+while True:
+ kind,payload=read_frame()
+ if kind==2:
+  ident,_=take_var(payload);send(3,var(ident)+b"\\1\\0");break
+time.sleep(10)
+'''
+        for attempt in range(4):
+            with self.subTest(attempt=attempt):
+                result=subprocess.run([str(BINARY),'--no-fallback','-r','--numeric-ids','-W','--timeout=1',
+                                       '-e',self.peer(body,features=1025),'--rsync-path=unused',
+                                       str(self.root/'huge'),'fake:target'],capture_output=True,env=ENV,timeout=6)
+                self.assertEqual(result.returncode,30,result.stderr)
+                self.assertEqual(result.stderr.count(b'error summary:'),1,result.stderr)
+                self.assertIn(b'error summary: 1 error (showing first 1)',result.stderr)
+
     def test_invalid_and_unnegotiated_keepalives(self):
         for features,body in [(1537,'send(18,b"bad")'),(513,'send(18)')]:
             result,_=self.run_peer(body,features=features)

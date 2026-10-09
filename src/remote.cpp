@@ -128,6 +128,7 @@ struct Conn {
   RateLimiter limiter;
   std::atomic<u64> idle_ns{0}, last_activity{now_ns()}, last_send{now_ns()}, heartbeat_ns{10000000000ull};
   std::atomic<bool> keepalive{false};
+  std::mutex timeout_mu;
   std::mutex mu;
   std::condition_variable cv, cv_space;
   std::deque<std::string> q;
@@ -149,6 +150,9 @@ struct Conn {
     u64 deadline = idle_ns.load();
     u64 now = now_ns(), last = write_progress ? write_progress : last_activity.load();
     if (!deadline || now < last || now - last < deadline) return;
+    // Read and write waits can expire together. Only one thread owns cleanup
+    // and the final diagnostic; the others wait until that thread exits.
+    std::lock_guard<std::mutex> timeout_lock(timeout_mu);
     // A stalled writer cannot safely drain a fatal frame, especially mid-frame.
     // Both peers have the deadline; the client also recognizes shell exit 30.
     if (peer_pid > 0) kill(peer_pid, SIGTERM);
