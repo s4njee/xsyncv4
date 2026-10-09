@@ -102,6 +102,7 @@ Options (same meaning as rsync):
      --exclude-from=FILE  read exclude patterns from FILE
      --include=PATTERN    don't exclude files matching PATTERN
      --include-from=FILE  read include patterns from FILE
+ -0, --from0              use NUL delimiters in list and filter merge files
      --stats              give some file-transfer stats
  -h, --human-readable     output numbers in a human-readable format
      --progress           show live per-file and whole-transfer progress
@@ -224,6 +225,10 @@ Parsed parse(int argc, char** argv) {
     else if (name == "itemize-changes") o.itemize = true, ++o.itemize_level;
     else if (name == "no-itemize-changes") o.itemize = false, o.itemize_level = 0;
     else if (name == "archive") set_archive(o);
+    else if (name == "from0" || name == "no-from0") {
+      o.from0 = name == "from0";
+      o.filters.set_from0(o.from0);
+    }
     else if (flag(o.list_only, "list-only")) {}
     else if (flag(o.recursive, "recursive") || flag(o.dirs, "dirs") || flag(o.links, "links") || flag(o.copy_links, "copy-links") ||
              flag(o.perms, "perms") || flag(o.times, "times") || flag(o.group, "group") || flag(o.owner, "owner") ||
@@ -306,7 +311,7 @@ Parsed parse(int argc, char** argv) {
     } else {
       static const char* unsupported[] = {
           "acls", "xattrs", "backup", "backup-dir", "suffix", "link-dest", "compare-dest", "copy-dest", "files-from",
-          "from0", "relative", "chmod", "chown", "usermap", "groupmap", "append", "append-verify", "partial-dir",
+          "relative", "chmod", "chown", "usermap", "groupmap", "append", "append-verify", "partial-dir",
           "delay-updates", "fuzzy", "remove-source-files", "keep-dirlinks", "copy-dirlinks", "copy-unsafe-links",
           "munge-links", "executability", "atimes", "crtimes", "daemon", "port", "password-file",
           "write-batch", "read-batch", "only-write-batch", "super", "fake-super", "temp-dir",
@@ -355,6 +360,7 @@ Parsed parse(int argc, char** argv) {
         case 'v': o.verbose++; break;
         case 'q': o.quiet = true; break;
         case 'a': set_archive(o); break;
+        case '0': o.from0 = true; o.filters.set_from0(true); break;
         case 'r': o.recursive = true; break;
         case 'd': o.dirs = o.dirs_explicit = true; break;
         case 'l': o.links = true; break;

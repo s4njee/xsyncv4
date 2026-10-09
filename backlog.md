@@ -2,7 +2,7 @@
 
 Initial audit written 2026-10-08 against xsync 0.1.0 (protocol 1).
 All fifteen P0 stories completed against protocol 3; per-story evidence is below.
-P1 R-02 through R-09 and E-01 through E-08 are complete (16 of 22 stories). Current protocol 4 supports protocol 3; E-09 is next.
+P1 R-02 through R-09 and E-01 through E-08 are complete (16 of 22 stories). Current protocol 4 supports protocol 3; E-09 is in progress.
 Problem statements retain the original audit findings.
 
 ## What "daily driver" means here
@@ -95,7 +95,7 @@ coverage clarification remains open.
 | E-06 | **End-of-run error summary.** With thousands of files an error scrolls away. | **done** | After the run: count of errors and the first ten, grouped by kind; exit-code line as now. | S |
 | E-07 | **`--bwlimit`, `--timeout`, keep-alive.** `--bwlimit` is rejected; `--timeout` is ignored (T-04). A stalled ssh connection hangs forever. | **done** | Token-bucket limit on the writer thread; idle timeout with keep-alive frames; exit 30 on timeout like rsync. | M |
 | E-08 | **Filter completeness.** Global rule sides, single/per-directory merge files, `-F`, merge modifiers, global CVS rules/`-C`, `-m`, and `--delete-after` reloading newly transferred receiver merge files are implemented and verified. | **done** | 231/231 difftest (expanded from 159); a differential fuzzer against rsync for the new rule kinds, checked into `tests/`. | L |
-| E-09 | **`--files-from`, `-R`, `--from0`.** Common in backup scripts and with `find … -print0`. | code | Implemented for local and remote, including the "implied directories" semantics of `-R`. | L |
+| E-09 | **`--files-from`, `-R`, `--from0`.** Common in backup scripts and with `find … -print0`. | **partial** | Implemented for local and remote, including the "implied directories" semantics of `-R`. | L |
 | E-10 | **Metadata beyond `-a`.** `-H` hard links, `-X` xattrs, `-A` ACLs, `-N` creation times, `-U` atimes, BSD file flags, `-E`, `--chmod`, `--chown`. Also an inconsistency to resolve: the clone path already carries xattrs and ACLs while the byte-copy and remote paths drop them. | code | `-H` and `-X` first (most used on macOS). Without `-X`, both paths behave the same — either strip on clone or document that clones are a superset. | XL |
 | E-11 | **Backup-style options.** `--backup`/`--backup-dir`, `--link-dest`, `--compare-dest`, `--remove-source-files`, `--append`, real `-S` sparse handling, `--preallocate`. | code | Prioritise `--link-dest` (snapshot backups) and `-S`; the rest fall back to rsync via R-02 until needed. | L |
 | E-12 | **macOS specifics.** Dataless iCloud files (reading triggers a download; cloning may not), immutable (`uchg`) destination files, sockets (rsync creates them, xsync skips silently), paths beyond `PATH_MAX` (tested to 40 levels only). | unverified | One test each; behaviour documented where it differs. | M |
@@ -1351,3 +1351,25 @@ Verified artifact manifest (source `864bd37edf14`):
     SHA-256 `48f21ece76e56f811f040077d0a3033cc86ccb1bbb343c939f2570e5c1a56ceb`.
 - **E-08 is complete; P1 is now 16/22.** Installed helpers were unchanged.
   E-09 is next; R-01 still awaits a distinct Linux LAN target beyond the Pi.
+
+### E-09 progress — NUL-delimited filter input (2026-10-09)
+
+- Implemented `-0`/`--from0` and `--no-from0` for include/exclude files,
+  single-instance and per-directory merge files, nested merges, word-split
+  templates and CVS inputs. CR/LF and spaces remain pattern bytes in NUL
+  record mode. Word templates still split whitespace. Empty/comment records,
+  missing final delimiters and line-mode input containing NUL match rsync.
+- CLI filter files use the setting at the point they are opened; directory
+  contexts inherit the final setting. Ordinary SSH helper contexts remain in
+  line mode as in rsync; an explicit `--rsync-path='xsync --from0'` works.
+  No protocol version or frozen HELLO layout changed for this component.
+- Added `tests/filter_from0_test.py`: **147** transfer comparisons across
+  local/push/pull, **5** stdin comparisons and **2** listing comparisons,
+  including source integrity, metadata, deletion, rule sides, nested merges,
+  CVS, pruning and delete-after. ARM and Rosetta checks pass. Linux SSH
+  transfer/stdio checks and its separate listing check pass; merge regression
+  checks are finishing. Unit checks remain **32,940**, green on all three.
+- **E-09 remains partial and P1 remains 16/22.** `--files-from` and `-R`,
+  including local/remote file-list input and implied directory behavior,
+  still require implementation and acceptance checks. Packaged releases and
+  installed helpers remain at the completed E-08 baseline.

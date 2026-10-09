@@ -21,6 +21,8 @@ class FilterList {
   bool add_cvs_option(std::string* err);
   // --exclude-from=FILE / --include-from=FILE ("-" = stdin).
   bool add_from_file(const std::string& path, bool include, std::string* err);
+  // Input delimiter is global to this invocation, including nested merge files.
+  void set_from0(bool enabled) { from0_ = enabled; }
   bool empty() const { return rules_.empty(); }
   // True if the entry is excluded: first matching rule wins, no match => included. Tests only
   // the given path, not its ancestors. Allocation-free; safe for concurrent calls.
@@ -99,5 +101,6 @@ class FilterList {
   std::shared_ptr<CvsCache> cvs_cache_;
   bool directory_cvs_ = false, receiver_cvs_ = false, defer_cvs_ = false;
   bool trusts_sender_filters_ = false;
+  bool from0_ = false;
   size_t cvs_option_start_ = static_cast<size_t>(-1);
 };

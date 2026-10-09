@@ -70,6 +70,7 @@ class FilterDifferentials(unittest.TestCase):
         if direction != 'local':
             server = ('/usr/local/bin/xsync' if transfer.HOST else str(transfer.BINARY)) if native else 'rsync'
             server_command = shlex.quote(server)
+            if getattr(self, 'server_flags', None): server_command += ' ' + shlex.join(self.server_flags)
             if getattr(self, 'server_env', None):
                 server_command = shlex.join(['env', *[key + '=' + value for key, value in self.server_env.items()], server])
             command += ['-e', transfer.RSH, '--rsync-path=' + server_command]

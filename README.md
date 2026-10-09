@@ -390,12 +390,9 @@ Differences to be aware of:
 
 - **Not wire-compatible.** xsync speaks its own protocol, so it needs xsync on both ends
   and delegates rsync daemon transfers (`host::module`, `rsync://`) to rsync.
-- **Remote block matching is in progress.** Large local byte copies can reuse
-  verified blocks from an existing destination; APFS cloning remains preferred.
-  Remote changed files still travel whole except for a verified existing prefix
-  reused with `--partial`/`-P`. For many small
-  files that is the fast path anyway; for large files that change slightly over a slow
-  link, rsync will send less.
+- **Large local and remote transfers reuse verified blocks** from an existing
+  destination. `-W` requests whole-file transfers; APFS cloning remains preferred
+  for eligible local copies.
 - **New byte-copied files are atomic by default.** Files are written to temporary
   names and renamed after verification. `--no-atomic` saves a rename for new files,
   but a crash can leave a truncated file under its final name. `--inplace` explicitly
@@ -408,9 +405,8 @@ Differences to be aware of:
   does not. Use `--no-clone` if that matters.
 - **Output order.** File lines are sorted by path when stdout is not a terminal.
 - **Delegated to rsync** (strict mode rejects them): `-A`, `-X`, `-R`,
-  `-b`, `-m`, `-C`, `-F`, `--files-from`, `--link-dest`/`--compare-dest`/`--copy-dest`,
-  `--chmod`, `--append`, `--partial-dir`, `--remove-source-files`, per-directory
-  merge files and filter modifiers `C e n w`.
+  `-b`, `--files-from`, `--link-dest`/`--compare-dest`/`--copy-dest`,
+  `--chmod`, `--append`, `--partial-dir`, and `--remove-source-files`.
 - **Unsupported options fall back before transfer; strict mode fails.** This includes
   `--contimeout`, `-S`/`--sparse`, `--fsync`, `--preallocate`,
   `--skip-compress`, `--block-size`, `--checksum-choice`,
@@ -428,6 +424,13 @@ destination deletion. Hide/show (`H`/`S`) apply to the source; protect/risk
 both, but become sender-only with `--delete-excluded`; explicit receiver rules
 continue to protect entries. Perishable (`p`) rules are ignored inside a
 directory being deleted. The `/` modifier matches the entry's absolute path.
+
+`-0`/`--from0` uses NUL delimiters for include/exclude files and filter merge
+files, preserving newlines and carriage returns inside patterns. It affects
+command-line files opened after the option; directory merge files use the
+final setting. `--no-from0` restores line mode. As in rsync, ordinary SSH
+helpers retain line mode unless explicitly configured, for example with
+`--rsync-path='xsync --from0'`.
 The `x` modifier applies to xattr names and does not filter filenames; native
 `-X` support is still pending. Extended filters negotiate `PF_FILTERS` before
 their rule text is sent. Older helpers refuse or delegate these requests before

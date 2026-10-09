@@ -68,6 +68,7 @@ struct Options {
   bool delete_before = false;  // Deletion is still deferred for sender-read safety.
   bool delete_after = false;   // Scan extras and merge files after transfers finish.
   bool prune_empty = false;   // Receiver file-list pruning; outside the frozen hello.
+  bool from0 = false;         // NUL-delimited list/merge files, outside the frozen hello.
   bool cvs_exclude = false;  // Added at the end of explicit rules, outside the frozen hello.
   bool list_only = false, dirs_explicit = false, human_ungrouped = false;
   u64 bwlimit = 0;  // Bytes/second; outside the frozen v3 option layout.

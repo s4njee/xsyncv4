@@ -2130,7 +2130,12 @@ int run_server() {
     die(RERR_PROTOCOL, "protocol version mismatch: client %u, server %u (supports %u and %u)",
         ver, PROTO_VERSION, PROTO_VERSION, PROTO_MIN_VERSION);
   u64 advertised = ver >= 4 ? r.var() : LEGACY_V3_FEATURES;
+  // Like rsync, an explicitly configured helper may set its own input
+  // delimiter. Ordinary SSH invocations do not forward the client's -0.
+  const bool server_from0 = o.from0;
   o = Options();
+  o.from0 = server_from0;
+  o.filters.set_from0(server_from0);
   o.am_server = true;
   o.wire_version = ver;
   o.peer_features = advertised & PROTO_FEATURES;

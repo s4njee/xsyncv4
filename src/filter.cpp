@@ -361,11 +361,15 @@ bool FilterList::add_from_file(const std::string& path, bool include, std::strin
   };
   if (!fp) return io_fail("failed to open");
 
-  // Lines end at '\n' or '\r'; empty lines and lines starting with ';' or '#' are skipped.
+  // NUL mode preserves CR and LF as pattern bytes. Empty records and
+  // records starting with ';' or '#' are skipped in either delimiter mode.
   // No whitespace is trimmed (rsync keeps it as part of the pattern).
   std::string line;
   bool ok = true;
   const auto flush = [&] {
+    // In line mode rsync's parser stops at the first NUL in a record.
+    const auto nul = line.find('\0');
+    if (nul != line.npos) line.resize(nul);
     if (ok && !line.empty() && line[0] != ';' && line[0] != '#') ok = add_old_style(line, include, err);
     line.clear();
   };
@@ -373,7 +377,7 @@ bool FilterList::add_from_file(const std::string& path, bool include, std::strin
   for (;;) {
     const size_t n = std::fread(buf, 1, sizeof buf, fp);
     for (size_t k = 0; k < n; ++k) {
-      if (buf[k] == '\n' || buf[k] == '\r') flush();
+      if (from0_ ? buf[k] == '\0' : buf[k] == '\n' || buf[k] == '\r') flush();
       else line += buf[k];
     }
     if (n == sizeof buf) continue;
@@ -429,8 +433,10 @@ bool FilterList::merge_content(std::string_view content, const Rule& defaults, s
   const bool words = cvs || defaults.modifiers.find('w') != std::string::npos;
   const bool no_prefix = cvs || defaults.modifiers.find_first_of("+-") != std::string::npos;
   auto consume = [&](std::string_view text) {
+    text = text.substr(0, text.find('\0'));
     if (text.empty() || (!words && (text.front() == '#' || text.front() == ';'))) return true;
     FilterList entry;
+    entry.from0_ = from0_;
     entry.merge_depth_ = merge_depth_ + 1;
     entry.parse_scope_ = scope;
     entry.cvs_cache_ = cvs_cache_;
@@ -465,25 +471,26 @@ bool FilterList::merge_content(std::string_view content, const Rule& defaults, s
     return true;
   };
   std::string_view input(content);
+  const auto separator = [&](char ch) { return is_space(ch) || (from0_ && ch == '\0'); };
   while (!input.empty()) {
     if (words) {
-      while (!input.empty() && is_space(input.front())) input.remove_prefix(1);
+      while (!input.empty() && separator(input.front())) input.remove_prefix(1);
       if (input.empty()) break;
       size_t end = 0;
-      while (end < input.size() && !is_space(input[end])) ++end;
+      while (end < input.size() && !separator(input[end])) ++end;
       std::string text(input.substr(0, end));
       input.remove_prefix(end);
       // Prefix and pattern have one syntactic separator even in word mode.
       if (!no_prefix && text != "!" && text != "clear" && text.find('_') == text.npos) {
         while (!input.empty() && is_space(input.front())) input.remove_prefix(1);
         size_t pattern_end = 0;
-        while (pattern_end < input.size() && !is_space(input[pattern_end])) ++pattern_end;
+        while (pattern_end < input.size() && !separator(input[pattern_end])) ++pattern_end;
         if (pattern_end) text += ' ', text.append(input.substr(0, pattern_end));
         input.remove_prefix(pattern_end);
       }
       if (!consume(text)) return false;
     } else {
-      size_t end = input.find_first_of("\r\n");
+      size_t end = from0_ ? input.find('\0') : input.find_first_of("\r\n");
       if (!consume(input.substr(0, end))) return false;
       if (end == input.npos) break;
       input.remove_prefix(end + 1);
@@ -498,6 +505,7 @@ bool FilterList::load_cvs(Rule& marker, std::string* err) {
   auto& list = cvs_cache_->lists[directory_cvs_ && receiver_cvs_ ? 1 : 0];
   if (!list) {
     FilterList contents;
+    contents.from0_ = from0_;
     Rule defaults = marker;
     defaults.xattr = false;  // CVS containers do not pass xattr defaults to children.
     defaults.perishable = true;
@@ -594,6 +602,7 @@ FilterList FilterList::directory_impl(std::string_view path, bool receiver, std:
       FilterList inherited;
       if (rule.merged && rule.modifiers.find_first_of("nC") == std::string::npos) inherited = *rule.merged;
       FilterList local;
+      local.from0_ = from0_;
       local.merge_depth_ = depth;
       local.cvs_cache_ = result.cvs_cache_;
       local.directory_cvs_ = true;
