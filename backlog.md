@@ -2,7 +2,7 @@
 
 Initial audit written 2026-10-08 against xsync 0.1.0 (protocol 1).
 All fifteen P0 stories completed against protocol 3; per-story evidence is below.
-P1 R-02 through R-09 and E-01 through E-09 are complete (17 of 22 stories). Current protocol 4 supports protocol 3; E-10 is in progress (local xattrs implemented, remote pending).
+P1 R-02 through R-09 and E-01 through E-09 are complete (17 of 22 stories). Current protocol 4 supports protocol 3; E-10 is in progress (local and remote xattrs implemented; wider metadata pending).
 Problem statements retain the original audit findings.
 
 ## What "daily driver" means here
@@ -1512,3 +1512,50 @@ Verified artifact manifest (source `864bd37edf14`):
   `--chmod`, `--chown`). Current remote `-X` delegates or strictly refuses before
   writes. No installed helper or release artifact has been replaced for this
   partial milestone. R-01 still awaits a distinct Linux LAN host beyond the Pi.
+
+
+## E-10 progress — 2026-10-09: negotiated remote extended attributes
+
+- E-10 remains **code** and P1 remains **17/22**. Native push/pull `-X` and
+  `-XX` now use `PF_XATTRS` (262144), configuration frame 26 and feature-gated
+  directory/file attribute records. Protocol 4 remains compatible with the frozen
+  protocol-3 Hello and transfers; helpers lacking the feature still refuse or
+  delegate before destination writes.
+- Source directory/entry attributes follow the selected filter context. Opened
+  files send fresh xattrs with each data attempt; whole-file, chunked, delta and
+  resumed transfers apply that attempt's attributes at publication. Large-file
+  completion records keep metadata with their attempt under its lock, including
+  when completion arrives before chunks. Invalid configurations, duplicate/NUL
+  names, oversized counts, incomplete values and trailing data are rejected.
+  Incomplete source records preserve destination data/attributes and suppress
+  deletion with partial-transfer status.
+- Push filter forwarding now follows rsync: without deletion, global xattr rules
+  select sender values and are omitted at the remote receiver; deletion forwards
+  the relevant rules. Destination merge files still load locally. A cross-platform
+  check also caught skipped symlinks/specials being treated as absent under
+  `--delete`; their source names now guard deletion without copying metadata.
+- Source read retries also guard the physical symlink's inode/ctime under `-L`,
+  in addition to the opened referent. The sender refreshes file or link attributes
+  after a detected change. macOS resource-fork checks now include 16 MiB values
+  through local clone/copy and native push/pull paths.
+- Verification: **95 local and 172 push/pull differential cases** plus
+  idempotence and macOS resource-fork cases pass on Apple Silicon, Rosetta and
+  unprivileged Linux (Darwin-only fork cases skip on Linux). Linux root real-SSH
+  regressions also pass, followed by xattr trust, source-retry, filter-wire and
+  fallback suites. **24 macOS/Linux namespace cases** compare ordinary/internal
+  values, filters, symlinks and unsupported-attribute partial status with rsync.
+  **18 source-mutation cases** pass on ARM/Rosetta; Linux verifies regular-file
+  mutations and skips unavailable symlink xattrs. Four wire-test methods cover
+  42 valid/error scenarios; malformed records cannot publish file data or erase
+  destination values. Filter units remain **32,940 checks, zero failures** on
+  ARM/Rosetta/Linux; nine frozen-peer/capability protocol tests pass. The
+  **231-case** byte-copy corpus also passes with fallback disabled and itemization.
+- Cross-platform copying now reports partial status when selected incoming
+  attributes cannot be written on the destination file type, matching rsync's
+  Linux symlink behavior instead of silently discarding values.
+- **Remaining before E-10 completion:** wider namespace/collision and privileged
+  attribute handling, resource-fork memory scaling across large directories,
+  packaging, and the metadata scope beyond `-H`/`-X` (`-A`, creation/access times,
+  BSD file flags, `-E`, `--chmod`, `--chown`). No installed helper or release
+  artifact has been replaced for this checkpoint. R-01 still awaits a distinct
+  Linux LAN host beyond the Pi.

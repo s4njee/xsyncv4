@@ -172,7 +172,10 @@ void prune_source(DirList& l, std::string_view rel, u32 parent_dev, Worker& t, s
     }
     if (skip && !o.list_only) {
       if (!o.quiet) t.logf("skipping non-regular file \"" + full() + "\"");
-      continue;
+      if (!o.del) continue;
+      // rsync retains skipped source names in its deletion comparison. Keep a
+      // placeholder without transferring metadata or following a symlink.
+      e.type = T_NONE;
     }
     if (k != i) {
       l.e[k] = e;
@@ -640,7 +643,7 @@ struct Local {
           slot_add(w.id, size);
           return true;
         });
-        bool stable = result.ok && source_unchanged(in, w.p2, before);
+        bool stable = result.ok && source_unchanged(in, w.p2, before) && (!o.xattrs || source_xattrs_unchanged(d.src_xattrs[idx], w.p2));
         close(in);
         f.size = s.size;
         if (output_ok && !stable && attempt == 0) {
@@ -702,7 +705,7 @@ struct Local {
         slot_add(w.id, n);
         if (g_stop.load()) { ok = false; break; }
       }
-      bool stable = total == s.size && source_unchanged(in, w.p2, before);
+      bool stable = total == s.size && source_unchanged(in, w.p2, before) && (!o.xattrs || source_xattrs_unchanged(d.src_xattrs[idx], w.p2));
       close(in);
       f.size = total;
       if (ok && !stable && attempt == 0) {

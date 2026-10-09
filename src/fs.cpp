@@ -1283,7 +1283,7 @@ void out_abort(OutFile& f, bool keep_partial) {
   f.dir_fd = -1;
 }
 
-bool out_finish(OutFile& f, DirWork& w, u32 idx, Worker&, bool ok, const Entry* attrs) {
+bool out_finish(OutFile& f, DirWork& w, u32 idx, Worker&, bool ok, const Entry* attrs, const XattrSet* xattrs) {
   std::lock_guard<std::recursive_mutex> lock(output_mu);
   if (output_shutdown) { f.fd = f.dir_fd = -1; return false; }
   const Options& o = g_opt;
@@ -1298,7 +1298,7 @@ bool out_finish(OutFile& f, DirWork& w, u32 idx, Worker&, bool ok, const Entry* 
   if (o.group && (reused || s.gid != w.dgid) && can_set_gid(s.gid)) check_attr(fchown(f.fd, (uid_t)-1, s.gid), f.path.c_str(), "ownership");
   if (o.owner && o.am_root && (reused || s.uid != my_uid)) check_attr(fchown(f.fd, s.uid, (gid_t)-1), f.path.c_str(), "ownership");
   if (reused || f.created_mode != s.mode) check_attr(fchmod(f.fd, s.mode), f.path.c_str(), "permissions");
-  if (o.xattrs) apply_fd_xattrs(w.src_xattrs[idx], f.fd, f.path, T_REG,
+  if (o.xattrs) apply_fd_xattrs(xattrs ? *xattrs : w.src_xattrs[idx], f.fd, f.path, T_REG,
                               w.receiver_filter ? *w.receiver_filter : o.filters, f.temp || !f.existed);
   if (o.times) {
     timespec ts[2] = {{0, UTIME_OMIT}, {s.mtime, (long)s.mtime_ns}};
@@ -1363,7 +1363,8 @@ bool clone_copy(DirWork& w, u32 idx, const char* source, unsigned flags, Worker&
     close_source();
     return false;
   }
-  if (source_fd >= 0 && !source_unchanged(source_fd, source, before)) {
+  if (source_fd >= 0 && (!source_unchanged(source_fd, source, before) ||
+      (g_opt.xattrs && !source_xattrs_unchanged(w.src_xattrs[idx], source)))) {
     close_source();
     out_abort(f);
     errno = ESTALE;

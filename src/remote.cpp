@@ -47,7 +47,7 @@ namespace {
 
 enum : u8 { F_HELLO = 1, F_DIR, F_NEED, F_DATA, F_LIST_END, F_DATA_END, F_DONE, F_MSG, F_IDMAP, F_DEST, F_OUTPUT, F_OUTPUT_CONFIG,
             F_DELTA_REQUEST, F_DELTA_SIGNATURE, F_DELTA_RETRY_ACK, F_LIST_ENTRY, F_IO_CONFIG, F_KEEPALIVE, F_FILTER_CONFIG, F_DELETE_CONFIG,
-            F_PRUNE_CONFIG, F_RELATIVE_CONFIG, F_FILES_CONFIG, F_FILES_DATA, F_FILES_END };
+            F_PRUNE_CONFIG, F_RELATIVE_CONFIG, F_FILES_CONFIG, F_FILES_DATA, F_FILES_END, F_XATTR_CONFIG };
 enum : u8 { DF_ATTRS = 1, DF_SINGLE = 2, DF_NODELETE = 4, DF_ZSTD = 8 };
 enum : u8 { R_WHOLE = 1, R_CHUNK = 2, R_FAIL = 4, R_END = 8, R_LITERAL = 16, R_DELTA_END = 32, R_COPY = 64 };
 constexpr size_t HDR = 5;                  // u32 payload length + u8 type
@@ -72,13 +72,20 @@ void put_str(std::string& s, std::string_view v) {
   s.append(v);
 }
 
-void put_file_attrs(std::string& s, const Entry& e) {
+void put_xattrs(std::string& s, const XattrSet& attrs) {
+  s.push_back((char)attrs.complete);
+  put_var(s, attrs.values.size());
+  for (const auto& [name, value] : attrs.values) put_str(s, name), put_str(s, value);
+}
+
+void put_file_attrs(std::string& s, const Entry& e, const XattrSet& xattrs) {
   put_var(s, e.mode), put_var(s, e.uid), put_var(s, e.gid);
   put_svar(s, e.mtime), put_var(s, e.mtime_ns);
   if (g_opt.peer_features & PF_HLINK) {
     put_var(s, e.hdev), put_var(s, e.ino), put_var(s, e.nlink);
     put_svar(s, e.ctime), put_var(s, e.ctime_ns);
   }
+  if (g_opt.peer_features & PF_XATTRS) put_xattrs(s, xattrs);
 }
 
 struct RBuf {
@@ -114,6 +121,24 @@ struct RBuf {
   std::string_view rest() { return raw((size_t)(e - p)); }
   bool empty() const { return p >= e; }
 };
+
+XattrSet get_xattrs(RBuf& r) {
+  XattrSet attrs;
+  u8 complete = r.byte();
+  u64 count = r.var();
+  // Each pair needs at least its two length fields. Bound allocation before
+  // constructing maps, and reject ambiguous names before any destination work.
+  if (r.bad || complete > 1 || count > 65536 || count > (u64)(r.e - r.p) / 2 || (!complete && count))
+    die(RERR_PROTOCOL, "protocol error: malformed xattr list");
+  attrs.complete = complete;
+  for (u64 i = 0; i < count; ++i) {
+    auto name = r.str(), value = r.str();
+    if (r.bad || name.empty() || name.size() > 1024 || name.find('\0') != name.npos ||
+        !attrs.values.emplace(std::string(name), std::string(value)).second)
+      die(RERR_PROTOCOL, "protocol error: invalid or duplicate xattr name/value");
+  }
+  return attrs;
+}
 
 std::string new_frame(u8 type) {
   std::string f(HDR, '\0');
@@ -193,6 +218,7 @@ struct Conn {
   }
   // Queue a frame built with new_frame(); `bounded` applies back-pressure to bulk producers.
   void send(std::string&& f, bool bounded = false) {
+    if (f.size() < HDR || f.size() - HDR > (1u << 30)) die(RERR_PROTOCOL, "protocol error: oversized outgoing frame");
     u32 len = (u32)(f.size() - HDR);
     memcpy(f.data(), &len, 4);
     std::unique_lock<std::mutex> lk(mu);
@@ -343,6 +369,8 @@ struct Conn {
             (type == F_FILES_DATA && (!len || len > 65536)) || (type == F_FILES_END && len > 10))
           die(RERR_PROTOCOL, "protocol error: oversized or malformed files-from frame");
       }
+      if (type == F_XATTR_CONFIG && (len != 1 || !(g_opt.peer_features & PF_XATTRS)))
+        die(RERR_PROTOCOL, "protocol error: malformed or unnegotiated xattr configuration");
       if (type == F_KEEPALIVE) {
         if (!keepalive.load() || len) die(RERR_PROTOCOL, "protocol error: invalid or unnegotiated keep-alive");
         continue;
@@ -463,7 +491,7 @@ std::string_view unpack(std::string_view in, bool compressed, std::string& scrat
 // ---------------------------------------------------------------- options on the wire
 
 std::string missing_feature(u64 features) {
-  if (g_opt.xattrs && !g_opt.list_only) return "native remote --xattrs support is not yet available";
+  if (g_opt.xattrs && !g_opt.list_only && !(features & PF_XATTRS)) return "peer does not support --xattrs";
   if (g_opt.files_from_set && !(features & PF_FILES_FROM)) return "peer does not support --files-from";
   if (g_opt.relative && !(features & PF_RELATIVE)) return "peer does not support --relative";
   if (g_opt.prune_empty && !(features & PF_PRUNE_EMPTY)) return "peer does not support --prune-empty-dirs";
@@ -577,6 +605,9 @@ struct SDir {
   std::vector<std::shared_ptr<const FilterList>> source_contexts;
   std::shared_ptr<const FilterList> source_filter;
   DirList list;
+  XattrSet attrs_xattrs;
+  std::vector<XattrSet> src_xattrs;
+  bool attrs_xattrs_loaded = false;
   std::unordered_map<u32, ResumePrefix> prefixes;
   std::unordered_set<u32> delta_candidates;
   Entry attrs;
@@ -694,6 +725,20 @@ struct Sender {
       prune_source(d->list, d->rel, d->attrs.dev, w, nullptr, guard, d->src_path, d->source_filter.get());
     }
     DirList& l = d->list;
+    if (o.xattrs) {
+      const FilterList& base = d->source_filter ? *d->source_filter : o.filters;
+      if ((d->flags & DF_ATTRS) && !d->attrs_xattrs_loaded) {
+        d->attrs_xattrs = source_xattrs(d->attr_source.empty() ? d->src_path : d->attr_source, T_DIR, base);
+        d->attrs_xattrs_loaded = true;
+      }
+      d->src_xattrs.resize(l.e.size());
+      for (size_t i = 0; i < l.e.size(); ++i) {
+        if (l.e[i].item_flags & IF_PRUNED) continue;
+        const auto& context = d->source_contexts.empty() ? d->source_filter : d->source_contexts[i];
+        d->src_xattrs[i] = source_xattrs(d->src_paths.empty() ? path_join(d->src_path, l.name_sv(l.e[i])) : d->src_paths[i],
+                                        l.e[i].type, context ? *context : base);
+      }
+    }
     if (o.checksum) {
       l.sums.assign(l.e.size() * 2, 0);
       for (size_t i = 0; i < l.e.size(); i++) {
@@ -715,6 +760,7 @@ struct Sender {
       put_var(body, (u64)d->attrs.size);
       put_str(body, d->attr_source.empty() ? d->src_path : d->attr_source);
     }
+    if (o.peer_features & PF_XATTRS) put_xattrs(body, d->attrs_xattrs);
     put_var(body, l.e.size());
     u64 nf = 0, nd = 0, nl = 0, ns = 0, nb = 0;
     for (size_t i = 0; i < l.e.size(); i++) {
@@ -740,7 +786,7 @@ struct Sender {
         case T_LNK: put_str(body, l.link(e)), nl++; break;
         case T_CHR:
         case T_BLK: put_var(body, e.rdev); [[fallthrough]];
-        default: ns++;
+        default: if (e.type != T_NONE) ns++;
       }
       if (o.peer_features & PF_HLINK) {
         put_var(body, e.hdev), put_var(body, e.ino), put_var(body, e.nlink);
@@ -752,6 +798,7 @@ struct Sender {
       }
       if (o.peer_features & (PF_CVS_FILTERS | PF_RELATIVE | PF_FILES_FROM))
         put_str(body, FilterList::absolute_path(d->src_paths.empty() ? path_join(d->src_path, l.name_sv(e)) : d->src_paths[i]));
+      if (o.peer_features & PF_XATTRS) put_xattrs(body, d->src_xattrs[i]);
     }
     if (client) {
       g_stats.files_seen.fetch_add(nf, std::memory_order_relaxed);
@@ -786,6 +833,7 @@ struct Sender {
       ch->source_filter = d->source_contexts.empty() ? d->source_filter : d->source_contexts[i];
       ch->rel = rel_join(d->rel, nm);
       ch->attrs = e;
+      if (o.xattrs) { ch->attrs_xattrs = d->src_xattrs[i]; ch->attrs_xattrs_loaded = true; }
       ch->flags = DF_ATTRS;
       ch->selection = d->selection;
       if (ch->selection) {
@@ -926,6 +974,17 @@ struct Sender {
         return;
       }
       Entry fresh = source_snapshot(scanned, before);
+      XattrSet xattrs;
+      if (o.xattrs) {
+        const auto& context = d.source_contexts.empty() ? d.source_filter : d.source_contexts[idx];
+        xattrs = source_fd_xattrs(in, w.p2, T_REG, context ? *context : o.filters);
+        if (!xattrs.complete) {
+          close(in);
+          head(R_FAIL);
+          if (client) { g_stats.xfer_files_total.fetch_sub(1); g_stats.xfer_bytes_total.fetch_sub((u64)planned); slot_end(w.id); }
+          return;
+        }
+      }
       if (client) {
         if (fresh.size >= planned) g_stats.xfer_bytes_total.fetch_add((u64)(fresh.size - planned));
         else g_stats.xfer_bytes_total.fetch_sub((u64)(planned - fresh.size));
@@ -1007,7 +1066,7 @@ struct Sender {
           flush_block(w);
         }
       }
-      bool stable = off == fresh.size && source_unchanged(in, w.p2, before);
+      bool stable = off == fresh.size && source_unchanged(in, w.p2, before) && (!o.xattrs || source_xattrs_unchanged(xattrs, w.p2));
       close(in);
       bool retry = !stable && attempt == 0 && !g_stop.load();
       if (!stable && !retry && !g_stop.load())
@@ -1016,7 +1075,7 @@ struct Sender {
         w.block.resize(checkpoint);
         if (stable && ok) {
           head(R_WHOLE);
-          put_file_attrs(w.block, fresh);
+          put_file_attrs(w.block, fresh, xattrs);
           put_str(w.block, {w.buf.data(), (size_t)off});
         } else if (!retry) head(R_FAIL);
       } else {
@@ -1025,7 +1084,7 @@ struct Sender {
         if (!delta && resume_enabled()) put_var(w.block, prefix);
         put_var(w.block, (u64)off);
         w.block.push_back(retry ? 1 : stable && ok ? 0 : 2);
-        put_file_attrs(w.block, fresh);
+        put_file_attrs(w.block, fresh, xattrs);
         if (delta) w.block.append((const char*)delta_result.sum, 16);
         std::shared_ptr<DeltaReply> ack;
         if (delta && retry) ack = expect_reply(((u64)d.id << 32) | idx, true);
@@ -1182,6 +1241,7 @@ struct BigFile {
   OutFile f;
   std::mutex mu;
   Entry attrs;
+  XattrSet xattrs;
   i64 received = 0, expected = -1;
   i64 prefix = 0, total = -1;
   std::map<i64, i64> chunks;
@@ -1308,10 +1368,16 @@ struct Receiver {
       w.attr_source = r.str();
       if (w.attrs.size < 0) die(RERR_PROTOCOL, "protocol error: negative directory size");
     }
+    if (o.peer_features & PF_XATTRS) {
+      w.attrs_xattrs = get_xattrs(r);
+      w.xattrs_loaded = w.attrs_xattrs_loaded = true;
+      if (!w.attrs_xattrs.complete) { g_source_io_error.store(true); err_line(RERR_PARTIAL, "incomplete source directory extended attributes"); }
+    }
     size_t n = (size_t)r.var();
     if (r.bad || n > (1u << 28)) die(RERR_PROTOCOL, "protocol error: bad DIR frame");
     DirList& l = w.src;
     l.e.resize(n);
+    if (o.xattrs) w.src_xattrs.resize(n);
     std::vector<std::string> filter_sources;
     if (o.peer_features & (PF_CVS_FILTERS | PF_RELATIVE | PF_FILES_FROM)) filter_sources.resize(n);
     if (structured_output()) w.output_sources.resize(n);
@@ -1366,6 +1432,10 @@ struct Receiver {
         filter_sources[i] = r.str();
         if (filter_sources[i].find('\0') != std::string::npos)
           die(RERR_PROTOCOL, "protocol error: NUL in filter source path");
+      }
+      if (o.peer_features & PF_XATTRS) {
+        w.src_xattrs[i] = get_xattrs(r);
+        if (!w.src_xattrs[i].complete) { g_source_io_error.store(true); err_line(RERR_PARTIAL, "incomplete source extended attributes: %s", l.name(e)); }
       }
     }
     if (r.bad || !r.empty()) die(RERR_PROTOCOL, "protocol error: truncated or trailing DIR frame");
@@ -1498,7 +1568,7 @@ struct Receiver {
     staged.clear();
   }
 
-  void get_file_attrs(RBuf& r, Entry& attrs) {
+  void get_file_attrs(RBuf& r, Entry& attrs, XattrSet& xattrs) {
     u32 mode = (u32)r.var() & 07777;
     attrs.uid = (u32)r.var(), attrs.gid = (u32)r.var();
     attrs.mtime = r.svar(), attrs.mtime_ns = (u32)r.var();
@@ -1506,6 +1576,7 @@ struct Receiver {
       attrs.hdev = r.var(), attrs.ino = r.var(), attrs.nlink = r.var();
       attrs.ctime = r.svar(), attrs.ctime_ns = (u32)r.var();
     }
+    if (g_opt.peer_features & PF_XATTRS) xattrs = get_xattrs(r);
     if (g_opt.perms) attrs.mode = mode;
     if ((g_opt.owner || g_opt.group) && !g_opt.numeric_ids) {
       std::lock_guard<std::mutex> lock(ids.mu);
@@ -1550,10 +1621,11 @@ struct Receiver {
         complete_file(*d, idx);
       } else if (kind == R_WHOLE) {
         Entry attrs = s;
-        get_file_attrs(r, attrs);
+        XattrSet xattrs;
+        get_file_attrs(r, attrs, xattrs);
         std::string_view bytes = r.str();
         attrs.size = (i64)bytes.size();
-        if (r.bad) die(RERR_PROTOCOL, "protocol error: truncated DATA record");
+        if (r.bad || !xattrs.complete) die(RERR_PROTOCOL, "protocol error: truncated DATA record or incomplete file xattrs");
         slot_begin(t.id, w.rel, w.src.name_sv(s), (i64)bytes.size());
         OutFile file;
         bool ok = out_open(file, w, idx, t);
@@ -1561,7 +1633,7 @@ struct Receiver {
           file.size = (i64)bytes.size();
           ok = out_write(file, bytes.data(), bytes.size(), 0);
           if (!ok) file_io_error(errno, file.path.c_str(), "write");
-          ok = out_finish(file, w, idx, t, ok, &attrs) && ok;
+          ok = out_finish(file, w, idx, t, ok, &attrs, &xattrs) && ok;
         }
         if (ok) {
           g_stats.xfer_bytes.fetch_add(bytes.size());
@@ -1586,6 +1658,7 @@ struct Receiver {
         u64 sum[2] = {};
         int status = -1;
         Entry attrs = s;
+        XattrSet xattrs;
         std::string_view bytes;
         if (!ending) {
           off = (i64)r.var(), total = (i64)r.var();
@@ -1604,12 +1677,12 @@ struct Receiver {
         } else {
           total = (i64)r.var();
           status = r.byte();
-          get_file_attrs(r, attrs);
+          get_file_attrs(r, attrs, xattrs);
           if (delta) {
             auto digest = r.raw(16);
             if (!r.bad) memcpy(sum, digest.data(), 16);
           }
-          if (total < 0 || status > 2) die(RERR_PROTOCOL, "protocol error: bad file completion");
+          if (total < 0 || status > 2 || (status == 0 && !xattrs.complete)) die(RERR_PROTOCOL, "protocol error: bad file completion");
         }
         if (r.bad) die(RERR_PROTOCOL, "protocol error: truncated file record");
         auto offered = d->prefixes.find(idx);
@@ -1646,6 +1719,7 @@ struct Receiver {
               (!b->chunks.empty() && b->chunks.rbegin()->second > total))
             die(RERR_PROTOCOL, "protocol error: inconsistent file size");
           b->status = status, b->expected = total, b->attrs = attrs;
+          b->xattrs = std::move(xattrs);
           if (delta) memcpy(b->sum, sum, 16);
         } else {
           if (b->total < 0) b->total = total;
@@ -1692,7 +1766,7 @@ struct Receiver {
               g_source_io_error.store(true);
               b->ok = b->prefix_ok = false;
             }
-            if (b->status == 0 && b->ok) ok = out_finish(b->f, w, idx, t, true, &b->attrs);
+            if (b->status == 0 && b->ok) ok = out_finish(b->f, w, idx, t, true, &b->attrs, &b->xattrs);
             else out_abort(b->f, b->prefix_ok && b->status == 2 && g_opt.partial);
           }
           {
@@ -2074,6 +2148,7 @@ int run_client(const std::vector<std::string>& srcs, const std::string& dest, u3
   if (!o.relative) advertised &= ~PF_RELATIVE;
   if (!o.files_from_set) advertised &= ~PF_FILES_FROM;
   if (!o.hard_links) advertised &= ~PF_HLINK;
+  if (!o.xattrs) advertised &= ~PF_XATTRS;
   if (!output_enabled()) advertised &= ~(PF_OUTPUT | PF_DIR_OUTPUT);
   if (wire_version >= 4) put_var(f, advertised);
   put_options(f);
@@ -2155,6 +2230,7 @@ int run_client(const std::vector<std::string>& srcs, const std::string& dest, u3
     c.configure(o.bwlimit, o.timeout, true);
     c.send(std::move(config));
   }
+  if (o.peer_features & PF_XATTRS) c.send(new_frame(F_XATTR_CONFIG) + (char)o.xattrs);
   if (o.peer_features & PF_RELATIVE) c.send(new_frame(F_RELATIVE_CONFIG) + '\1');
   if (o.peer_features & PF_FILES_FROM) {
     std::string config = new_frame(F_FILES_CONFIG);
@@ -2176,7 +2252,7 @@ int run_client(const std::vector<std::string>& srcs, const std::string& dest, u3
   if (o.peer_features & PF_FILTERS) {
     std::string config = new_frame(F_FILTER_CONFIG);
     if (o.peer_features & PF_CVS_FILTERS) config.push_back((char)o.cvs_exclude);
-    auto rules = o.filters.to_strings(push, o.delete_excluded, !push && o.cvs_exclude, !push);
+    auto rules = o.filters.to_strings(push, o.delete_excluded, !push && o.cvs_exclude, !push, push && !o.del);
     if (rules.size() > 10000) die(RERR_UNSUPPORTED, "too many filter rules for a remote transfer");
     put_var(config, rules.size());
     for (const auto& rule : rules) put_str(config, rule);
@@ -2284,6 +2360,12 @@ int run_server() {
     o.bwlimit = rate;
     o.timeout = (u32)seconds;
     c.configure(rate, (u32)seconds, true);
+  }
+  if (o.peer_features & PF_XATTRS) {
+    if (!c.read_frame(type, payload)) conn_lost();
+    if (type != F_XATTR_CONFIG || payload.size() != 1 || (payload[0] != 1 && payload[0] != 2) || o.list_only)
+      die(RERR_PROTOCOL, "protocol error: malformed xattr configuration");
+    o.xattrs = (u8)payload[0];
   }
   if (o.peer_features & PF_RELATIVE) {
     if (!c.read_frame(type, payload)) conn_lost();

@@ -48,7 +48,7 @@ class FilterList {
   static std::string absolute_path(std::string_view path);
   // One add_filter()-compatible string per rule, in order.
   std::vector<std::string> to_strings(bool expand_cvs = false, bool delete_excluded = false,
-                                    bool omit_cvs_option = false, bool pulling = false) const;
+                                    bool omit_cvs_option = false, bool pulling = false, bool omit_xattr_rules = false) const;
 
  private:
   std::string xattr_root_scope_;  // First directory entered in this transfer context.

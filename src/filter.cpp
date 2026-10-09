@@ -772,12 +772,15 @@ std::string FilterList::absolute_path(std::string_view path) {
 }
 
 std::vector<std::string> FilterList::to_strings(bool expand_cvs, bool delete_excluded, bool omit_cvs_option,
-                                               bool pulling) const {
+                                               bool pulling, bool omit_xattr_rules) const {
   std::vector<std::string> out;
   out.reserve(rules_.size());
   const size_t end = omit_cvs_option ? std::min(cvs_option_start_, rules_.size()) : rules_.size();
   for (size_t i = 0; i < end; ++i) {
     const Rule& r = rules_[i];
+    // Without deletion, rsync does not transmit global xattr rules to a
+    // remote receiver. The sender selects values; merges still load locally.
+    if (omit_xattr_rules && r.xattr && r.kind != Kind::Merge && r.kind != Kind::Cvs) continue;
     // A receiver-only marker cannot initialize the remote sender's CVS cache.
     if (pulling && r.kind == Kind::Cvs && r.sides == 2) continue;
     if (expand_cvs && r.kind == Kind::Cvs) {

@@ -113,7 +113,7 @@ struct OutFile {
   std::shared_ptr<OutputProgress> progress;
 };
 bool out_open(OutFile& f, DirWork& w, u32 idx, Worker& t, bool force_temp = false, bool readable = false);
-bool out_finish(OutFile& f, DirWork& w, u32 idx, Worker& t, bool ok, const Entry* attrs = nullptr);
+bool out_finish(OutFile& f, DirWork& w, u32 idx, Worker& t, bool ok, const Entry* attrs = nullptr, const XattrSet* xattrs = nullptr);
 void out_abort(OutFile& f, bool keep_partial = false);
 void cleanup_open_outputs();
 bool out_write(OutFile& f, const char* bytes, size_t size, i64 offset);

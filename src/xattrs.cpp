@@ -169,7 +169,12 @@ LocalValues desired(const XattrSet& source, const FilterList& filters) {
   return result;
 }
 bool update(const XattrSet& source, int fd, const std::string& path, u8 type, const FilterList& filters, bool write, bool fresh = false) {
-  if (!source.complete || !supported_type(type)) return false;
+  if (!source.complete) return false;
+  if (!supported_type(type)) {
+    bool selected = !desired(source, filters).empty();
+    if (selected && write) file_io_error(ENOTSUP, path.c_str(), "set extended attributes on unsupported file type");
+    return selected;
+  }
   auto access = access_fd(fd);
   auto before = read(access, path, filters, false);
   if (!before.complete) return false;
@@ -212,11 +217,27 @@ XattrSet source_xattrs(const std::string& path, u8 type, const FilterList& filte
 XattrSet source_fd_xattrs(int fd, const std::string& path, u8 type, const FilterList& filters) {
   if (!supported_type(type)) return {};
   struct stat leaf;
-  if (lstat(path.c_str(), &leaf) == 0 && S_ISLNK(leaf.st_mode)) return source_xattrs(path, type, filters);
+  if (lstat(path.c_str(), &leaf) == 0 && S_ISLNK(leaf.st_mode)) {
+    auto attrs = source_xattrs(path, type, filters);
+    Entry entry; entry_from_stat(leaf, entry);
+    attrs.guarded_link = true;
+    attrs.link_dev = leaf.st_dev, attrs.link_ino = leaf.st_ino;
+    attrs.link_ctime = entry.ctime, attrs.link_ctime_ns = entry.ctime_ns;
+    return attrs;
+  }
   return read(access_fd(fd), path, filters, true);
 }
+bool source_xattrs_unchanged(const XattrSet& attrs, const std::string& path) {
+  if (!attrs.guarded_link) return true;
+  struct stat leaf;
+  if (lstat(path.c_str(), &leaf) != 0 || !S_ISLNK(leaf.st_mode)) return false;
+  Entry entry; entry_from_stat(leaf, entry);
+  return (u64)leaf.st_dev == attrs.link_dev && (u64)leaf.st_ino == attrs.link_ino &&
+         entry.ctime == attrs.link_ctime && entry.ctime_ns == attrs.link_ctime_ns;
+}
 bool xattrs_differ(const XattrSet& source, const std::string& path, u8 type, const FilterList& filters) {
-  if (!source.complete || !supported_type(type)) return false;
+  if (!source.complete) return false;
+  if (!supported_type(type)) return !desired(source, filters).empty();
   Target target(path, type);
   if (target.fd < 0) { file_io_error(errno, path.c_str(), "open extended attributes"); return false; }
   return update(source, target.fd, path, type, filters, false);
@@ -225,7 +246,12 @@ bool apply_fd_xattrs(const XattrSet& source, int fd, const std::string& path, u8
   return update(source, fd, path, type, filters, !g_opt.dry_run, fresh);
 }
 bool apply_xattrs(const XattrSet& source, const std::string& path, u8 type, const FilterList& filters) {
-  if (g_opt.dry_run || !source.complete || !supported_type(type)) return false;
+  if (g_opt.dry_run || !source.complete) return false;
+  if (!supported_type(type)) {
+    bool selected = !desired(source, filters).empty();
+    if (selected) file_io_error(ENOTSUP, path.c_str(), "set extended attributes on unsupported file type");
+    return selected;
+  }
   Target target(path, type);
   if (target.fd < 0) { file_io_error(errno, path.c_str(), "open extended attributes"); return false; }
   return update(source, target.fd, path, type, filters, true);
