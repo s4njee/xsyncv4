@@ -425,6 +425,11 @@ void src_path_of(const DirWork& w, u32 i, std::string& out) {
 namespace {
 
 struct DeleteCandidate { std::string path, rel, parent; u8 type; std::shared_ptr<const FilterList> filters; };
+struct DeleteScan {
+  std::string path, rel;
+  std::vector<std::string> names;
+  std::shared_ptr<const ReceiverFilterNode> node;
+};
 struct FinalDirectory {
   std::string path, rel, source;
   Entry attrs;
@@ -432,6 +437,7 @@ struct FinalDirectory {
 };
 std::mutex final_mu;
 std::vector<DeleteCandidate> delete_candidates;
+std::vector<DeleteScan> delete_scans;
 std::vector<FinalDirectory> final_directories;
 u64 deletion_count = 0;
 bool deletion_limit_reported = false;
@@ -488,6 +494,16 @@ void item_delete(Worker& t, std::string_view rel, bool is_dir) {
   t.logf(l);
 }
 
+void order_deletions(DirList& list) {
+  if (!g_opt.delete_after) return;
+  // The non-incremental file list used by delete-after groups a directory's
+  // files before its subdirectories. Deletion walks that list backwards.
+  std::sort(list.e.begin(), list.e.end(), [&](const Entry& a, const Entry& b) {
+    if ((a.type == T_DIR) != (b.type == T_DIR)) return a.type != T_DIR;
+    return name_cmp(list.name_sv(a), list.name_sv(b)) < 0;
+  });
+}
+
 bool remove_tree(const std::string& path, u8 type, const std::string& rel, Worker& t, bool limited = false, bool report = true,
                  std::shared_ptr<const FilterList> context = {}) {
   auto permit = [&] {
@@ -509,6 +525,7 @@ bool remove_tree(const std::string& path, u8 type, const std::string& rel, Worke
       err_line(RERR_PARTIAL, "delete_file: opendir \"%s\" failed: %s", path.c_str(), errstr(e).c_str());
       return false;
     }
+    order_deletions(l);
     bool ok = true;
     for (size_t i = l.e.size(); i > 0; i--) {
       const Entry& c = l.e[i - 1];
@@ -596,7 +613,10 @@ void skip_unsafe_links(DirWork& w, Worker& t) {
 
 void generate(DirWork& w, Worker& t) {
   const Options& o = g_opt;
-  if (w.has_attrs || !w.rel.empty()) w.receiver_filter = directory_filters(w.receiver_filter, w.dst_path, true);
+  bool load_filters = w.has_attrs || !w.rel.empty();
+  if (o.delete_after)
+    w.receiver_filter_node = std::make_shared<const ReceiverFilterNode>(ReceiverFilterNode{w.dst_path, w.receiver_filter_node, load_filters});
+  else if (load_filters) w.receiver_filter = directory_filters(w.receiver_filter, w.dst_path, true);
   const FilterList& filters = w.receiver_filter ? *w.receiver_filter : o.filters;
   DirList& src = w.src;
   DirList& dl = t.dl;
@@ -630,6 +650,14 @@ void generate(DirWork& w, Worker& t) {
       if (dl.incomplete) w.no_delete = true;
     }
   }
+  if (o.del && o.delete_after && !w.no_delete && w.rename_to.empty()) {
+    DeleteScan scan{w.dst_path, w.rel, {}, w.receiver_filter_node};
+    scan.names.reserve(n);
+    for (size_t i = 0; i < n; ++i) scan.names.emplace_back(w.dst_name((u32)i));
+    std::sort(scan.names.begin(), scan.names.end(), [](const auto& a, const auto& b) { return name_cmp(a, b) < 0; });
+    std::lock_guard<std::mutex> lock(final_mu);
+    delete_scans.push_back(std::move(scan));
+  }
   // Group that newly created children will get: the directory's on BSD/macOS, ours on Linux
   // unless the directory is setgid. Only looked up when something is about to be created.
   w.dgid = getegid();
@@ -656,7 +684,7 @@ void generate(DirWork& w, Worker& t) {
     rel.append(nm);
   };
   auto extra = [&](const Entry& d) {
-    if (!o.del || w.no_delete || !w.rename_to.empty()) return;
+    if (!o.del || o.delete_after || w.no_delete || !w.rename_to.empty()) return;
     set_names(dl.name_sv(d));
     std::string absolute;
     if (filters.has_absolute()) absolute = FilterList::absolute_path(path);
@@ -940,6 +968,50 @@ void finalize_tree() {
   if (g_source_io_error.load() && !g_opt.ignore_errors && g_opt.del) {
     err_line(0, "IO error encountered -- skipping file deletion");
   } else {
+    if (g_opt.delete_after) {
+      // Load each logical parent once, preserving its rules even if a merge
+      // file is itself removed before the deletion walk reaches a child.
+      std::unordered_map<const ReceiverFilterNode*, std::shared_ptr<const FilterList>> contexts;
+      auto refresh = [&](const std::shared_ptr<const ReceiverFilterNode>& node) {
+        std::vector<const ReceiverFilterNode*> chain;
+        auto current = node.get();
+        while (current && !contexts.count(current)) { chain.push_back(current); current = current->parent.get(); }
+        auto context = current ? contexts.at(current) : std::shared_ptr<const FilterList>();
+        for (auto i = chain.rbegin(); i != chain.rend(); ++i) {
+          if ((*i)->load) context = directory_filters(context, (*i)->path, true);
+          contexts.emplace(*i, context);
+        }
+        return context;
+      };
+      std::sort(delete_scans.begin(), delete_scans.end(), [](const auto& a, const auto& b) { return name_cmp(a.rel, b.rel) < 0; });
+      for (const auto& scan : delete_scans) {
+        if (g_stop.load() || deletion_limit_reported) break;
+        auto context = refresh(scan.node);
+        const FilterList& filters = context ? *context : g_opt.filters;
+        DirList listed;
+        int error = destination_list_dir(scan.path.c_str(), listed, 0);
+        if (error == ENOENT && g_opt.dry_run) continue;
+        if (error || listed.incomplete) {
+          err_line(RERR_PARTIAL, "delete-after: cannot list \"%s\": %s", scan.path.c_str(), error ? errstr(error).c_str() : "incomplete listing");
+          continue;
+        }
+        order_deletions(listed);
+        for (size_t i = listed.e.size(); i > 0; --i) {
+          const Entry& entry = listed.e[i - 1];
+          auto name = listed.name_sv(entry);
+          auto found = std::lower_bound(scan.names.begin(), scan.names.end(), name,
+                                       [](const auto& a, auto b) { return name_cmp(a, b) < 0; });
+          if (found != scan.names.end() && name_cmp(*found, name) == 0) continue;
+          std::string path = path_join(scan.path, name), rel = rel_join(scan.rel, name);
+          std::string absolute = filters.has_absolute() ? FilterList::absolute_path(path) : "";
+          if (filters.protected_from_deletion(rel, entry.type == T_DIR, g_opt.delete_excluded, false, absolute)) continue;
+          u64 before = g_stats.deleted.load();
+          remove_tree(path, entry.type, rel, worker, true, true, context);
+          if (g_stats.deleted.load() != before) dirty.push_back(scan.path);
+          if (g_stop.load() || deletion_limit_reported) break;
+        }
+      }
+    }
     // rsync processes a directory's extras from the end of its sorted file list.
     std::sort(delete_candidates.begin(), delete_candidates.end(), [](const auto& a, const auto& b) { return a.path > b.path; });
     for (const auto& candidate : delete_candidates) {
@@ -964,6 +1036,7 @@ void finalize_tree() {
   }
   worker.flush_log();
   delete_candidates.clear();
+  delete_scans.clear();
   final_directories.clear();
 }
 

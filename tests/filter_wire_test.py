@@ -20,9 +20,9 @@ class FilterWireTests(unittest.TestCase):
         self.addCleanup(self.tmp.cleanup)
         self.root = pathlib.Path(self.tmp.name)
 
-    def server(self, features=2049):
+    def server(self, features=2049, deleting=False):
         target = self.root / 'uncreated'
-        options = bytes(name == 'recursive' for name in wire.BOOLS)
+        options = bytes(name == 'recursive' or (deleting and name == 'del') for name in wire.BOOLS)
         options += b''.join(var(1 if name == 'max_delete' else 2 if name == 'jobs' else 0) for name in wire.INTS)
         hello = b'XSYNC\1' + var(wire.VERSION) + b'R' + var(features) + options + b'\0\1' + string(str(target))
         proc = subprocess.Popen([str(wire.BINARY), '--server'], stdin=subprocess.PIPE, stdout=subprocess.PIPE,
@@ -70,6 +70,16 @@ class FilterWireTests(unittest.TestCase):
         proc, target = self.server(features=1)
         self.rejected(proc, target, frame(19, var(1) + string('P keep')))
 
+    def test_delete_after_configuration(self):
+        for payload in (b'', b'\0', b'\2', b'\1x'):
+            with self.subTest(payload=payload):
+                proc, target = self.server(features=16385, deleting=True)
+                self.rejected(proc, target, frame(20, payload))
+        proc, target = self.server(features=16385)
+        self.rejected(proc, target, frame(20, b'\1'))
+        proc, target = self.server(features=1, deleting=True)
+        self.rejected(proc, target, frame(20, b'\1'))
+
     def test_cvs_configuration(self):
         for label, payload in (
             ('missing-flag', b''), ('invalid-flag', b'\2\0'),
@@ -114,20 +124,24 @@ class FilterWireTests(unittest.TestCase):
         rsh = shlex.join([sys.executable, str(peer)])
         source = self.root / 'source'; source.write_bytes(b'original')
         target = self.root / 'uncreated'
-        original = ['-a', '--delete', '--filter=P stale.*', '-e', rsh, '--rsync-path=unused', str(source), 'fake:' + str(target)]
         env = dict(os.environ, XSYNC_CONFIG='', XSYNC_OPTS='', XSYNC_FALLBACK='0')
-        result = subprocess.run([str(wire.BINARY), *original], capture_output=True, env=env, timeout=10)
-        self.assertEqual(result.returncode, 4, result.stderr)
-        self.assertIn(b'peer does not support extended filters', result.stderr)
         directory = self.root / 'commands'; directory.mkdir()
         capture = directory / 'rsync'
         capture.write_text('#!' + sys.executable + '\nimport sys,json\nprint(json.dumps(sys.argv[1:]));sys.exit(19)\n')
         capture.chmod(0o755)
-        env.update(PATH=str(directory), XSYNC_FALLBACK='1')
-        result = subprocess.run([str(wire.BINARY), *original], capture_output=True, env=env, timeout=10)
-        self.assertEqual(result.returncode, 19, result.stderr)
-        self.assertEqual(json.loads(result.stdout), original)
-        self.assertEqual(result.stderr.count(b'falling back to rsync'), 1)
+        for flags, diagnostic in ((['--delete', '--filter=P stale.*'], b'extended filters'),
+                                  (['--delete-after'], b'--delete-after')):
+            with self.subTest(flags=flags):
+                original = ['-a', *flags, '-e', rsh, '--rsync-path=unused', str(source), 'fake:' + str(target)]
+                env['XSYNC_FALLBACK'] = '0'
+                result = subprocess.run([str(wire.BINARY), *original], capture_output=True, env=env, timeout=10)
+                self.assertEqual(result.returncode, 4, result.stderr)
+                self.assertIn(b'peer does not support ' + diagnostic, result.stderr)
+                env.update(PATH=str(directory), XSYNC_FALLBACK='1')
+                result = subprocess.run([str(wire.BINARY), *original], capture_output=True, env=env, timeout=10)
+                self.assertEqual(result.returncode, 19, result.stderr)
+                self.assertEqual(json.loads(result.stdout), original)
+                self.assertEqual(result.stderr.count(b'falling back to rsync'), 1)
         self.assertFalse(target.exists())
         self.assertEqual(source.read_bytes(), b'original')
 

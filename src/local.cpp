@@ -465,6 +465,7 @@ struct Local {
         else c->src_path = d->src_paths[i];
         c->source_filter = d->source_contexts.empty() ? d->source_filter : d->source_contexts[i];
         c->receiver_filter = d->receiver_filter;
+        c->receiver_filter_node = d->receiver_filter_node;
         c->dst_path = path_join(d->dst_path, nm);
         c->rel = rel_join(d->rel, nm);
         c->attrs = s;

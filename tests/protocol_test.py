@@ -243,6 +243,30 @@ p=pathlib.Path(sys.argv[1]); print(json.dumps({'hash':hashlib.sha256((p/'file').
                         from ssh_test import remote_json
                         self.assertFalse(remote_json('import pathlib,json,sys; print(json.dumps(pathlib.Path(sys.argv[1]).exists()))', target))
 
+    def test_delete_after_requires_its_own_capability(self):
+        source = self.root / 'after source'
+        source.mkdir()
+        (source / 'file').write_bytes(b'unchanged')
+        for direction in ('push', 'pull'):
+            for filters in ([], ['--filter=P stale.*']):
+                with self.subTest(direction=direction, filters=filters):
+                    target = self.root / 'uncreated after destination'
+                    a, b = str(source) + '/', str(target) + '/'
+                    if HOST and direction == 'pull':
+                        subprocess.run(['rsync', '-a', '-e', RSH, a, HOST + ':' + a], check=True, capture_output=True)
+                    if direction == 'push': b = (HOST or 'fake') + ':' + b
+                    else: a = (HOST or 'fake') + ':' + a
+                    result = subprocess.run([str(BINARY), '--no-fallback', '-r', '--delete-after', *filters,
+                                             '-e', RSH, '--rsync-path=' + shlex.quote(self.remote_merge_filters), a, b],
+                                            capture_output=True, timeout=20)
+                    self.assertEqual(result.returncode, 4, result.stderr)
+                    self.assertIn(b'peer does not support --delete-after', result.stderr)
+                    self.assertFalse(target.exists())
+                    self.assertEqual((source / 'file').read_bytes(), b'unchanged')
+                    if HOST:
+                        from ssh_test import remote_json
+                        self.assertFalse(remote_json('import pathlib,json,sys; print(json.dumps(pathlib.Path(sys.argv[1]).exists()))', target))
+
     def test_basic_single_merge_works_with_legacy_helper(self):
         source = self.root / 'single merge source'
         source.mkdir()

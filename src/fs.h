@@ -44,6 +44,12 @@ struct ResumePrefix {
 bool hash_prefix_fd(int fd, i64 size, u64 out[2]);
 ResumePrefix destination_resume_prefix(const char* path, i64 limit);
 
+struct ReceiverFilterNode {
+  std::string path;
+  std::shared_ptr<const ReceiverFilterNode> parent;
+  bool load;
+};
+
 // One directory being synchronised, as seen from the destination side.
 struct DirWork {
   std::string dst_path;  // destination directory
@@ -52,6 +58,7 @@ struct DirWork {
   std::vector<std::string> src_paths;  // per-entry source path (root listing only)
   std::vector<std::shared_ptr<const FilterList>> source_contexts;
   std::shared_ptr<const FilterList> source_filter, receiver_filter;
+  std::shared_ptr<const ReceiverFilterNode> receiver_filter_node;
   std::vector<std::string> output_sources;  // Display-only paths supplied by a remote sender.
   std::string attr_source;  // Display-only source path for this directory's attributes.
   DirList src;           // source entries, sorted by name

@@ -94,7 +94,7 @@ coverage clarification remains open.
 | E-05 | **List mode.** `xsync host:dir/` or a single SRC should list, as rsync does; today it is a usage error. | **done** | `ls -l`-style listing for local and remote sources. | S |
 | E-06 | **End-of-run error summary.** With thousands of files an error scrolls away. | **done** | After the run: count of errors and the first ten, grouped by kind; exit-code line as now. | S |
 | E-07 | **`--bwlimit`, `--timeout`, keep-alive.** `--bwlimit` is rejected; `--timeout` is ignored (T-04). A stalled ssh connection hangs forever. | **done** | Token-bucket limit on the writer thread; idle timeout with keep-alive frames; exit 30 on timeout like rsync. | M |
-| E-08 | **Filter completeness.** Global rule sides, single/per-directory merge files, `-F`, merge modifiers, and global CVS rules/`-C` are implemented. Remaining: `-m` and reloading newly transferred receiver merge files for `--delete-after`. The prune-empty case is the remaining difftest failure. | **in progress** | 231/231 difftest (expanded from 159); a differential fuzzer against rsync for the new rule kinds, checked into `tests/`. | L |
+| E-08 | **Filter completeness.** Global rule sides, single/per-directory merge files, `-F`, merge modifiers, global CVS rules/`-C`, and `--delete-after` reloading newly transferred receiver merge files are implemented. Remaining: `-m`. The prune-empty case is the remaining difftest failure. | **in progress** | 231/231 difftest (expanded from 159); a differential fuzzer against rsync for the new rule kinds, checked into `tests/`. | L |
 | E-09 | **`--files-from`, `-R`, `--from0`.** Common in backup scripts and with `find … -print0`. | code | Implemented for local and remote, including the "implied directories" semantics of `-R`. | L |
 | E-10 | **Metadata beyond `-a`.** `-H` hard links, `-X` xattrs, `-A` ACLs, `-N` creation times, `-U` atimes, BSD file flags, `-E`, `--chmod`, `--chown`. Also an inconsistency to resolve: the clone path already carries xattrs and ACLs while the byte-copy and remote paths drop them. | code | `-H` and `-X` first (most used on macOS). Without `-X`, both paths behave the same — either strip on clone or document that clones are a superset. | XL |
 | E-11 | **Backup-style options.** `--backup`/`--backup-dir`, `--link-dest`, `--compare-dest`, `--remove-source-files`, `--append`, real `-S` sparse handling, `--preallocate`. | code | Prioritise `--link-dest` (snapshot backups) and `-S`; the rest fall back to rsync via R-02 until needed. | L |
@@ -1268,5 +1268,39 @@ Verified artifact manifest (source `864bd37edf14`):
   `include_exclude_prune_empty` failing.
 - **E-08 remains in progress:** `-m` and `--delete-after` reloading newly
   transferred receiver merge files still need implementation and differential
+  coverage. Release artifacts remain the completed E-07 set; installed helpers
+  were unchanged.
+
+### E-08 — in progress: refreshed delete-after filters (2026-10-09)
+
+- `--delete-after` now scans the updated destination tree after all transfers,
+  rather than reusing the extras found by the generator. Receiver merge files
+  are loaded during that pass, so newly transferred protection/risk rules and
+  newly created extra files affect deletion. Immutable parent contexts survive
+  removal of their own merge files. Named source roots retain their established
+  filter scope, and dry runs consult the unchanged receiver tree.
+- Preserved sender-error deletion suppression, `--ignore-errors`, deletion
+  limits and final directory attributes. The non-incremental deletion pass
+  handles subdirectories before sibling files, matching rsync's surviving
+  entries when `--max-delete` is reached. Conflicting `--delete-WHEN` modes
+  fail with a syntax error before touching the destination.
+- Added `PF_DELETE_AFTER` (16384) and a strict, separately negotiated deletion
+  configuration frame. Older helpers refuse before destination creation;
+  fallback retains the original arguments. Malformed or unnegotiated
+  configurations cannot create a destination.
+- Checked in `tests/filter_after_test.py`: **237** local/push/pull comparisons
+  covering changed receiver rules, inheritance, nested merges, CVS imports,
+  excluded merge files, named roots, type replacements, sender read errors,
+  dry runs, deletion limits, 24 random seeds per direction and transfers
+  without filter configuration. A timed paired check creates an extra file
+  after copying starts and verifies that the final scan deletes it. Eight
+  conflicting-mode executions verify an unchanged destination.
+- All six methods pass on macOS ARM, Rosetta and real Linux SSH (the final
+  no-filter method was run separately). Filter-wire checks (7) pass on all
+  three; mixed-version checks (8) pass on ARM and Linux. Unit checks remain
+  **32,940**, green on all three. Existing merge checks (7) and P0 checks (13)
+  pass on ARM. Forced byte-copy sorted itemization remains **230/231**, with
+  only `include_exclude_prune_empty` failing.
+- **E-08 remains in progress:** `-m` still needs implementation and differential
   coverage. Release artifacts remain the completed E-07 set; installed helpers
   were unchanged.

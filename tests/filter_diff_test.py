@@ -101,7 +101,7 @@ class FilterDifferentials(unittest.TestCase):
             result, actual, output = self.copy(True, direction, rules, delete_excluded)
             self.assertEqual(result.returncode, reference.returncode, result.stderr)
             self.assertNotIn(b'falling back', result.stderr)
-            if reference.returncode:
+            if reference.returncode == 4:
                 self.assertIn(b'rejecting excluded file-list name', reference.stderr)
                 self.assertIn(b'rejecting excluded file-list name', result.stderr)
                 self.assertFalse(any(line.startswith(b'*deleting') for line in output))

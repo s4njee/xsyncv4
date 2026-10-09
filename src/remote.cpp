@@ -46,7 +46,7 @@
 namespace {
 
 enum : u8 { F_HELLO = 1, F_DIR, F_NEED, F_DATA, F_LIST_END, F_DATA_END, F_DONE, F_MSG, F_IDMAP, F_DEST, F_OUTPUT, F_OUTPUT_CONFIG,
-            F_DELTA_REQUEST, F_DELTA_SIGNATURE, F_DELTA_RETRY_ACK, F_LIST_ENTRY, F_IO_CONFIG, F_KEEPALIVE, F_FILTER_CONFIG };
+            F_DELTA_REQUEST, F_DELTA_SIGNATURE, F_DELTA_RETRY_ACK, F_LIST_ENTRY, F_IO_CONFIG, F_KEEPALIVE, F_FILTER_CONFIG, F_DELETE_CONFIG };
 enum : u8 { DF_ATTRS = 1, DF_SINGLE = 2, DF_NODELETE = 4, DF_ZSTD = 8 };
 enum : u8 { R_WHOLE = 1, R_CHUNK = 2, R_FAIL = 4, R_END = 8, R_LITERAL = 16, R_DELTA_END = 32, R_COPY = 64 };
 constexpr size_t HDR = 5;                  // u32 payload length + u8 type
@@ -454,6 +454,8 @@ std::string_view unpack(std::string_view in, bool compressed, std::string& scrat
 // ---------------------------------------------------------------- options on the wire
 
 std::string missing_feature(u64 features) {
+  if (!g_opt.list_only && g_opt.delete_after && !(features & PF_DELETE_AFTER))
+    return "peer does not support --delete-after";
   if (!(features & PF_CORE)) return "peer does not support the required core transfer features";
   if ((g_opt.bwlimit || g_opt.timeout) && !(features & PF_IO_CONTROL))
     return "peer does not support bandwidth limits and idle timeouts";
@@ -1358,6 +1360,7 @@ struct Receiver {
       go = pe.flags & EF_DESCEND;
       w.dst_path = path_join(p->w.dst_path, p->w.src.name_sv(pe));
       w.receiver_filter = p->w.receiver_filter;
+      w.receiver_filter_node = p->w.receiver_filter_node;
       w.attrs.mode = pe.mode;  // final mode as decided by the parent's generator
       w.has_attrs = true;
       w.created = pe.flags & EF_CREATED;
@@ -1918,6 +1921,7 @@ int run_client(const std::vector<std::string>& srcs, const std::string& dest, u3
   if (!o.filters.needs_extended()) advertised &= ~PF_FILTERS;
   if (!o.filters.has_merges()) advertised &= ~PF_MERGE_FILTERS;
   if (!o.filters.has_cvs() && !o.filters.has_merges()) advertised &= ~PF_CVS_FILTERS;
+  if (!o.delete_after) advertised &= ~PF_DELETE_AFTER;
   if (!o.hard_links) advertised &= ~PF_HLINK;
   if (!output_enabled()) advertised &= ~(PF_OUTPUT | PF_DIR_OUTPUT);
   if (wire_version >= 4) put_var(f, advertised);
@@ -2010,6 +2014,7 @@ int run_client(const std::vector<std::string>& srcs, const std::string& dest, u3
     if (config.size() > 1024 * 1024) die(RERR_UNSUPPORTED, "filter configuration exceeds 1 MiB");
     c.send(std::move(config));
   }
+  if (o.peer_features & PF_DELETE_AFTER) c.send(new_frame(F_DELETE_CONFIG) + '\1');
   if (o.peer_features & PF_DIR_OUTPUT) {
     std::string config = new_frame(F_OUTPUT_CONFIG);
     config.push_back((char)o.output_attrs);
@@ -2127,6 +2132,12 @@ int run_server() {
       die(RERR_PROTOCOL, "protocol error: unnegotiated CVS merge-file syntax");
     if (o.cvs_exclude && role == 'S' && !o.filters.add_cvs_option(&error))
       die(RERR_PROTOCOL, "protocol error: bad CVS configuration: %s", error.c_str());
+  }
+  if (o.peer_features & PF_DELETE_AFTER) {
+    if (!c.read_frame(type, payload)) conn_lost();
+    if (type != F_DELETE_CONFIG || payload != std::string(1, '\1') || !o.del)
+      die(RERR_PROTOCOL, "protocol error: malformed delete-after configuration");
+    o.delete_after = true;
   }
   if (o.peer_features & PF_DIR_OUTPUT) {
     if (!c.read_frame(type, payload)) conn_lost();

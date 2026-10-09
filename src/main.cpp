@@ -75,6 +75,7 @@ Options (same meaning as rsync):
      --existing           skip creating new files on receiver
      --ignore-existing    skip updating files that exist on receiver
      --delete             delete extraneous files from dest dirs
+     --delete-after       scan deletions and merge files after transfer
      --delete-excluded    also delete excluded files from dest dirs
      --ignore-errors      delete even when the sender encountered I/O errors
      --max-delete=NUM     delete at most NUM entries (exit 25 if exceeded)
@@ -191,6 +192,7 @@ void set_archive(Options& o) { o.recursive = o.links = o.perms = o.times = o.gro
 Parsed parse(int argc, char** argv) {
   Options& o = g_opt;
   Parsed p;
+  unsigned delete_modes = 0;
   o.compress_level = 3;
   o.direct_new = false;
   o.clone = true;
@@ -237,10 +239,11 @@ Parsed parse(int argc, char** argv) {
     else if (name == "cvs-exclude") o.cvs_exclude = true;
     else if (name == "atomic") o.direct_new = false;
     else if (name == "no-atomic") o.direct_new = true;
-    else if (name == "delete-before") o.del = o.delete_before = true;
-    else if (name == "delete" || name == "del" || name == "delete-during" || name == "delete-delay" ||
-             name == "delete-after")
-      o.del = true;
+    else if (name == "delete-before") o.del = o.delete_before = true, delete_modes |= 1;
+    else if (name == "delete-after") o.del = o.delete_after = true, delete_modes |= 8;
+    else if (name == "delete") o.del = true;
+    else if (name == "del" || name == "delete-during") o.del = true, delete_modes |= 2;
+    else if (name == "delete-delay") o.del = true, delete_modes |= 4;
     else if (name == "delete-excluded") o.del = o.delete_excluded = true;
     else if (name == "human-readable") o.human++, o.human_ungrouped = false;
     else if (name == "no-human-readable" || name == "no-h") o.human = 0, o.human_ungrouped = true;
@@ -408,6 +411,7 @@ Parsed parse(int argc, char** argv) {
   if (o.list_only && !o.dirs_explicit && !o.recursive) o.dirs = true;
   if (o.compress_level == -1000) o.compress_level = 3;
   if (o.del && !o.recursive && !o.dirs) usage_error("--delete does not work without --recursive (-r) or --dirs (-d).");
+  if (delete_modes && (delete_modes & (delete_modes - 1))) usage_error("You may not combine multiple --delete-WHEN options.");
   if (o.quiet) o.verbose = 0;
   if (o.bwlimit) o.clone = false;  // A clone must not bypass a requested copy rate.
   if (o.cvs_exclude && !o.filters.add_cvs_option(&err)) usage_error(err);

@@ -456,8 +456,15 @@ settings. Explicit global CVS filters can reject a pull when those settings
 disagree about a file selected by the sender; remote listings enforce the same
 checks. Global CVS and per-directory
 merge syntax additionally negotiate `PF_CVS_FILTERS` before transfer.
-`-m` and reloading newly transferred merge files for `--delete-after` remain
-pending under E-08.
+
+`--delete-after` scans the destination after transfers finish and loads receiver
+merge files from the updated tree. Newly transferred protection and risk rules
+therefore apply to that deletion pass, and files created during transfer are
+included in the scan. Source I/O errors suppress deletion unless
+`--ignore-errors` is set. The option negotiates `PF_DELETE_AFTER`; helpers
+missing it refuse or delegate before destination creation. Conflicting
+`--delete-WHEN` options are rejected. Pruning empty directories with `-m`
+remains pending under E-08.
 
 xsync-only options: `-j N`/`--jobs=N` (worker threads; default is the number of
 performance cores), `--no-clone`, `--atomic` (default), `--no-atomic`.
