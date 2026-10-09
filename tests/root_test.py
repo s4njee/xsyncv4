@@ -47,6 +47,31 @@ for f in [root]+sorted(root.rglob('*')):
 print(json.dumps(result,sort_keys=True))
 """
 
+ACL_FIXTURE = """import os,pathlib,struct,sys
+root=pathlib.Path(sys.argv[1]); shared,only=map(int,sys.argv[2:4])
+for side in ('src','ref','got'):
+ p=root/side
+ if not p.exists(): continue
+ ids=sorted([0,shared,only,45454]) if side=='src' else [60001]
+ for f in list(p.rglob('*'))+[p]:
+  if f.is_symlink(): continue
+  mode=f.stat().st_mode
+  entries=[(1,(mode>>6)&7,0xffffffff)]
+  entries += [(2,4 if i%2 else 6,ident) for i,ident in enumerate(ids)]
+  entries += [(4,5,0xffffffff)]
+  entries += [(8,4 if i%2 else 5,ident) for i,ident in enumerate(ids)]
+  entries += [(16,(mode>>3)&7,0xffffffff),(32,mode&7,0xffffffff)]
+  data=struct.pack('<I',2)+b''.join(struct.pack('<HHI',*entry) for entry in entries)
+  os.setxattr(f,'system.posix_acl_access',data)
+  if f.is_dir(): os.setxattr(f,'system.posix_acl_default',data)
+"""
+ACL_SNAPSHOT = SNAPSHOT.replace('import hashlib,', 'import base64,errno,hashlib,').replace(
+    ' result[str(f.relative_to(root))]=row',
+    " acl={}\n for name in ('system.posix_acl_access','system.posix_acl_default'):\n"
+    "  try: acl[name]=base64.b64encode(os.getxattr(f,name,follow_symlinks=False)).decode()\n"
+    "  except OSError as error:\n   if error.errno not in (errno.ENODATA,errno.ENOTSUP): raise\n"
+    ' row += [acl]\n result[str(f.relative_to(root))]=row')
+
 
 def local_code(code, *args):
     result = subprocess.run(["python3", "-c", code, *map(str, args)], capture_output=True, text=True, timeout=15)
@@ -65,6 +90,52 @@ class RootTests(unittest.TestCase):
         subprocess.run(["usermod", "-l", "clientonly", "onlyhere"], check=True)
         subprocess.run(["groupmod", "-n", "clientonly", "onlyhere"], check=True)
         remote_code("import subprocess; subprocess.run(['usermod','-l','serveronly','onlyhere'],check=True); subprocess.run(['groupmod','-n','serveronly','onlyhere'],check=True)")
+
+    def test_acl_principal_names_map_independently_of_file_ownership(self):
+        count = 0
+        for direction in ('local', 'push', 'pull'):
+            for existing in (False, True):
+                for flags in (['-aA'], ['-aA', '--numeric-ids'], ['-rltDA'],
+                              ['-aA', '--no-owner', '--no-group'], ['-aA', '--no-perms']):
+                    with self.subTest(direction=direction, existing=existing, flags=flags), tempfile.TemporaryDirectory(dir='/rig', prefix='ACL names ') as tmp:
+                        root = pathlib.Path(tmp)
+                        try:
+                            local_code(FIXTURE, root, 1111, 22222, int(existing))
+                            remote_code(FIXTURE, root, 3333, 33333, int(existing))
+                            local_code(ACL_FIXTURE, root, 1111, 22222)
+                            remote_code(ACL_FIXTURE, root, 3333, 33333)
+                            source_snapshot = remote_json if direction == 'pull' else lambda code, path: json.loads(local_code(code, path))
+                            before = source_snapshot(ACL_SNAPSHOT, root / 'src')
+                            results = []
+                            for tool, destination in (('/usr/bin/rsync', 'ref'), ('/usr/local/bin/xsync', 'got')):
+                                source, target = str(root / 'src') + '/', str(root / destination) + '/'
+                                command = [tool, '-i', '--out-format=%i|%n', *flags]
+                                if tool.endswith('xsync'): command += ['--no-fallback', '--no-clone', '-j8']
+                                if direction != 'local':
+                                    command += ['-e', RSH, '--rsync-path=' + tool]
+                                    if direction == 'push': target = HOST + ':' + target
+                                    else: source = HOST + ':' + source
+                                result = subprocess.run(command + [source, target], capture_output=True, timeout=30)
+                                self.assertEqual(result.returncode, 0, (command, result.stdout, result.stderr))
+                                observer = remote_json if direction == 'push' else lambda code, path: json.loads(local_code(code, path))
+                                itemization = sorted(line for line in result.stdout.splitlines() if line[11:12] == b'|')
+                                results.append((observer(ACL_SNAPSHOT, root / destination), itemization))
+                            self.assertEqual(results[1], results[0])
+                            self.assertEqual(source_snapshot(ACL_SNAPSHOT, root / 'src'), before)
+                            # Prove that the shared principal actually changed IDs
+                            # and unmatched/unknown principals retained numeric IDs.
+                            import base64, struct
+                            data = base64.b64decode(results[1][0]['sub/shared'][-1]['system.posix_acl_access'])
+                            named_users = [struct.unpack_from('<I', data, offset + 4)[0]
+                                           for offset in range(4, len(data), 8) if struct.unpack_from('<H', data, offset)[0] == 2]
+                            shared = 3333 if direction == 'push' else 1111
+                            if '--numeric-ids' in flags: shared = 3333 if direction == 'pull' else 1111
+                            only = 33333 if direction == 'pull' else 22222
+                            self.assertEqual(named_users, sorted([0, shared, only, 45454]))
+                            count += 1
+                        finally:
+                            remote_code('import shutil,sys; shutil.rmtree(sys.argv[1],ignore_errors=True)', root)
+        print('ACL principal differential cases passed: %d' % count, flush=True)
 
     def test_root_differential(self):
         count = 0

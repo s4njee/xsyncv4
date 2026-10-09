@@ -2,7 +2,7 @@
 
 Initial audit written 2026-10-08 against xsync 0.1.0 (protocol 1).
 All fifteen P0 stories completed against protocol 3; per-story evidence is below.
-P1 R-02 through R-09 and E-01 through E-09 are complete (17 of 22 stories). Current protocol 4 supports protocol 3; E-10 is in progress (local/remote xattrs and local ACLs implemented; remote ACLs and wider metadata pending).
+P1 R-02 through R-09 and E-01 through E-09 are complete (17 of 22 stories). Current protocol 4 supports protocol 3; E-10 is in progress (local/remote xattrs and matching-style ACLs implemented; cross-style ACLs and wider metadata pending).
 Problem statements retain the original audit findings.
 
 ## What "daily driver" means here
@@ -1724,7 +1724,7 @@ Verified artifact manifest (source `864bd37edf14`):
   `/tmp/xsync-e10-acls-races-mac.log`,
   `/tmp/xsync-e10-acls-races-rosetta.log`,
   `/tmp/xsync-e10-acls-fallback-final.log`,
-  `/tmp/xsync-e10-acls-fallback-rosetta-final.log`, and
+  `/tmp/xsync-e10-acls-fallback-rosetta-final.log`,
   `/tmp/xsync-e10-acls-xattrs-mac.log`, and
   `/tmp/xsync-e10-acls-protocol.log`. Early retry fixtures accidentally
   reused a regular source path as a symlink and compared Linux ACL xattrs as
@@ -1734,3 +1734,73 @@ Verified artifact manifest (source `864bd37edf14`):
   mapping, broader ACL flag/identity cases, creation/access times, BSD flags,
   `-E`, `--chmod`, `--chown`, and packaging. Installed helpers and release
   artifacts have not been replaced.
+
+## E-10 progress — 2026-10-09: negotiated remote ACLs and principal names
+
+- E-10 remains **code**, and P1 remains **17/22**. Native push/pull `-A` now
+  transfers Linux POSIX access/default ACLs between Linux peers and macOS
+  extended ACLs between Darwin peers. Separate capabilities (`1048576` POSIX,
+  `2097152` Darwin) select the style; frame **30** confirms ACL configuration.
+  Root-directory, file-list and fresh file-data metadata carry ACLs. Protocol
+  **4** still supports **3**, and the frozen v3 option layout is unchanged.
+- The wire uses bounded semantic records: tags, permissions, flags, numeric
+  principals and optional names. Receivers reject invalid counts, overflows,
+  missing POSIX base/mask entries, unordered/duplicate POSIX entries, invalid
+  flags/tags/permissions, malformed names, inappropriate defaults, and ACLs on
+  physical symlinks before metadata or file publication. Darwin ACL objects are
+  constructed with ACL APIs from validated fields; opaque remote blobs never
+  reach `acl_copy_int`. Cached native values retain the shared metadata budget;
+  name caches are bounded at 4096 entries each.
+- Named user/group ACL principals map independently of `--owner` and `--group`.
+  Unresolved names retain numeric IDs; `--numeric-ids` bypasses name mapping.
+  A real-SSH rig with distinct user/group databases passes **30** root
+  differentials: local/push/pull, fresh/existing destinations, ordinary and
+  numeric mapping, owner/group preservation disabled, and `--no-perms`. These
+  include regular files, directories/default ACLs, FIFOs, sockets and devices.
+  Data, all ACL bytes, metadata, source integrity and itemization match rsync.
+- A verified compatibility wrinkle is retained: rsync's remote receiver parses
+  `-A` and re-enables permissions even when the pushing client used
+  `--no-perms`. Native push now matches that behavior, while local/pull retain
+  destination modes and inherited restrictions. Mode-only cases explicitly
+  exercise different existing destination permissions.
+- The ACL differential suite passes **53** cases on ARM and Rosetta macOS and
+  **50** on unprivileged Linux (three APFS clone cases are skipped). This adds
+  **30** push/pull cases and **six** local/push/pull hard-link compositions to
+  the local foundation, including compression and `-AX` filters. The hard-link
+  checks exposed duplicate `a`/`x` itemization on aliases; those writes are now
+  reported on the anchor, matching rsync. The separate hard-link regression
+  suite remains green.
+- All **16** remote source-read ACL mutations pass on ARM, Rosetta and Linux:
+  file/followed-link, whole/delta, atomic/inplace. Fresh ACL records replace the
+  scanned metadata on the successful retry. A **five-method** hostile-wire
+  suite also verifies name mapping without owner/group, numeric override,
+  incomplete-source protection and rejected configurations/styles.
+- Fixed combined metadata failure framing: if an ACL read fails after selected
+  xattrs were cached, the sender emits an incomplete empty xattr list instead
+  of an invalid partially populated list. **Three** Darwin local/push/pull
+  failure cases fill the inline xattr budget, deny spill storage for the ACL,
+  return **23**, and retain existing data, ACLs, xattrs and deletion candidates.
+  The fixture explicitly selects its budget attributes to avoid incidental
+  provenance attributes consuming the quota first.
+- All **ten** mixed-version/feature-subset protocol checks pass, including new
+  frozen-v3 ACL refusals. The **nine-method** fallback and **ten-method** xattr
+  hostile-wire suites remain green. Missing or incompatible ACL capabilities
+  refuse or delegate before writes; no helper is installed automatically.
+- Evidence: `/tmp/xsync-e10-acls-all-final-mac.log`,
+  `/tmp/xsync-e10-acls-all-final-rosetta.log`,
+  `/tmp/xsync-e10-acls-all-final-linux.log`,
+  `/tmp/xsync-e10-acls-name-ssh-final.log`,
+  `/tmp/xsync-e10-acls-remote-races-mac.log`,
+  `/tmp/xsync-e10-acls-remote-races-rosetta.log`,
+  `/tmp/xsync-e10-acls-remote-linux-final.log`,
+  `/tmp/xsync-e10-acls-wire-mac-final.log`,
+  `/tmp/xsync-e10-acls-wire-rosetta.log`,
+  `/tmp/xsync-e10-acls-remote-protocol.log`,
+  `/tmp/xsync-e10-acls-hardlink-regression.log`, and
+  `/tmp/xsync-e10-acls-root-linux-regression.log`. The first real-SSH fixture
+  compared rsync's extra creation banner with itemized rows; the corrected
+  fixture compares all metadata and the itemized rows separately.
+- **Remaining before E-10 completion:** cross-style ACL conversion and broader
+  flag/identity cases, creation/access times, BSD flags, `-E`, `--chmod`,
+  `--chown`, and packaging. Installed helpers and release artifacts have not
+  been replaced.

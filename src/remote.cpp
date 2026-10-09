@@ -48,7 +48,7 @@ namespace {
 
 enum : u8 { F_HELLO = 1, F_DIR, F_NEED, F_DATA, F_LIST_END, F_DATA_END, F_DONE, F_MSG, F_IDMAP, F_DEST, F_OUTPUT, F_OUTPUT_CONFIG,
             F_DELTA_REQUEST, F_DELTA_SIGNATURE, F_DELTA_RETRY_ACK, F_LIST_ENTRY, F_IO_CONFIG, F_KEEPALIVE, F_FILTER_CONFIG, F_DELETE_CONFIG,
-            F_PRUNE_CONFIG, F_RELATIVE_CONFIG, F_FILES_CONFIG, F_FILES_DATA, F_FILES_END, F_XATTR_CONFIG, F_XATTR_START, F_XATTR_CHUNK, F_XATTR_END };
+            F_PRUNE_CONFIG, F_RELATIVE_CONFIG, F_FILES_CONFIG, F_FILES_DATA, F_FILES_END, F_XATTR_CONFIG, F_XATTR_START, F_XATTR_CHUNK, F_XATTR_END, F_ACL_CONFIG };
 enum : u8 { DF_ATTRS = 1, DF_SINGLE = 2, DF_NODELETE = 4, DF_ZSTD = 8 };
 enum : u8 { R_WHOLE = 1, R_CHUNK = 2, R_FAIL = 4, R_END = 8, R_LITERAL = 16, R_DELTA_END = 32, R_COPY = 64 };
 constexpr size_t HDR = 5;                  // u32 payload length + u8 type
@@ -78,8 +78,24 @@ XattrValue take_xattr_value(u64 id);
 void receive_xattr_value(u8 type, std::string_view payload);
 void check_xattr_values_drained();
 
+void put_acls(std::string& buffer, const XattrSet& attrs) {
+  auto records = export_acls(attrs.acl());
+  buffer.push_back((char)records.complete);
+  put_var(buffer, records.flags);
+  for (const auto* list : {&records.access, &records.defaults}) {
+    put_var(buffer, list->size());
+    for (const auto& record : *list) {
+      put_var(buffer, record.tag), put_var(buffer, record.permissions), put_var(buffer, record.flags), put_var(buffer, record.id);
+      put_str(buffer, record.name);
+    }
+  }
+}
+
 void put_xattrs(std::string& s, const XattrSet& attrs) {
   s.push_back((char)attrs.complete);
+  // An ACL read can mark combined metadata incomplete after successful xattr
+  // reads. Do not send a partially populated list as an empty successful set.
+  if (!attrs.complete) { put_var(s, 0); return; }
   put_var(s, attrs.values.size());
   for (const auto& [name, value] : attrs.values) {
     put_str(s, name);
@@ -101,6 +117,7 @@ void put_file_attrs(std::string& s, const Entry& e, const XattrSet& xattrs) {
     put_svar(s, e.ctime), put_var(s, e.ctime_ns);
   }
   if (g_opt.peer_features & PF_XATTRS) put_xattrs(s, xattrs);
+  if (g_opt.peer_features & PF_NATIVE_ACL) put_acls(s, xattrs);
 }
 
 struct RBuf {
@@ -166,6 +183,33 @@ XattrSet get_xattrs(RBuf& r) {
     }
   }
   return attrs;
+}
+
+void get_acls(RBuf& r, XattrSet& attrs, u8 type) {
+  AclRecords records;
+  u8 complete = r.byte();
+  u64 flags = r.var();
+  if (r.bad || complete > 1 || flags > UINT32_MAX) die(RERR_PROTOCOL, "protocol error: malformed ACL header");
+  records.complete = complete, records.flags = (u32)flags;
+  for (auto* list : {&records.access, &records.defaults}) {
+    u64 count = r.var();
+    if (r.bad || count > ACL_MAX_RECORDS || count > (u64)(r.e - r.p) / 5)
+      die(RERR_PROTOCOL, "protocol error: oversized or truncated ACL list");
+    list->reserve((size_t)count);
+    for (u64 index = 0; index < count; ++index) {
+      u64 tag = r.var(), permissions = r.var(), entry_flags = r.var(), id = r.var();
+      auto name = r.str();
+      if (r.bad || tag > UINT32_MAX || permissions > UINT32_MAX || entry_flags > UINT32_MAX || id > UINT32_MAX || name.size() > 255)
+        die(RERR_PROTOCOL, "protocol error: malformed ACL entry");
+      list->push_back({(u32)tag, (u32)permissions, (u32)entry_flags, (u32)id, std::string(name)});
+    }
+  }
+  if (!valid_acl_records(records, type)) die(RERR_PROTOCOL, "protocol error: invalid ACL entries");
+  try {
+    auto acl = import_acls(std::move(records));
+    attrs.complete &= acl.complete;
+    if (!acl.complete || acl.access.size() || acl.defaults.size()) attrs.acls = std::make_shared<AclSet>(std::move(acl));
+  } catch (const std::system_error& error) { die(RERR_FILEIO, "construct received ACL: %s", error.what()); }
 }
 
 std::string new_frame(u8 type) {
@@ -399,6 +443,8 @@ struct Conn {
       }
       if (type == F_XATTR_CONFIG && (len != 1 || !(g_opt.peer_features & PF_XATTRS)))
         die(RERR_PROTOCOL, "protocol error: malformed or unnegotiated xattr configuration");
+      if (type == F_ACL_CONFIG && (len != 1 || !(g_opt.peer_features & PF_NATIVE_ACL)))
+        die(RERR_PROTOCOL, "protocol error: malformed or unnegotiated ACL configuration");
       if (type >= F_XATTR_START && type <= F_XATTR_END) {
         if (!(g_opt.peer_features & PF_XATTR_STREAM)) die(RERR_PROTOCOL, "protocol error: unnegotiated xattr value stream");
         if ((type == F_XATTR_START && len > 20) || (type == F_XATTR_CHUNK && (len < 4 || len > 65536 + 32)) ||
@@ -620,7 +666,7 @@ std::string_view unpack(std::string_view in, bool compressed, std::string& scrat
 // ---------------------------------------------------------------- options on the wire
 
 std::string missing_feature(u64 features) {
-  if (g_opt.acls && !g_opt.list_only) return "native remote --acls is not yet supported";
+  if (g_opt.acls && !g_opt.list_only && !(features & PF_NATIVE_ACL)) return "peer does not support the required ACL style";
   if (g_opt.xattrs && !g_opt.list_only && !(features & PF_XATTRS)) return "peer does not support --xattrs";
   if ((features & PF_XATTRS) && !(features & PF_XATTR_STREAM)) return "peer does not support streamed --xattrs";
   if (g_opt.files_from_set && !(features & PF_FILES_FROM)) return "peer does not support --files-from";
@@ -856,7 +902,7 @@ struct Sender {
       prune_source(d->list, d->rel, d->attrs.dev, w, nullptr, guard, d->src_path, d->source_filter.get());
     }
     DirList& l = d->list;
-    if (o.xattrs) {
+    if (metadata_enabled()) {
       const FilterList& base = d->source_filter ? *d->source_filter : o.filters;
       if ((d->flags & DF_ATTRS) && !d->attrs_xattrs_loaded) {
         d->attrs_xattrs = source_xattrs(d->attr_source.empty() ? d->src_path : d->attr_source, T_DIR, base);
@@ -892,6 +938,7 @@ struct Sender {
       put_str(body, d->attr_source.empty() ? d->src_path : d->attr_source);
     }
     if (o.peer_features & PF_XATTRS) put_xattrs(body, d->attrs_xattrs);
+    if (o.peer_features & PF_NATIVE_ACL) put_acls(body, d->attrs_xattrs);
     put_var(body, l.e.size());
     u64 nf = 0, nd = 0, nl = 0, ns = 0, nb = 0;
     for (size_t i = 0; i < l.e.size(); i++) {
@@ -930,6 +977,7 @@ struct Sender {
       if (o.peer_features & (PF_CVS_FILTERS | PF_RELATIVE | PF_FILES_FROM))
         put_str(body, FilterList::absolute_path(d->src_paths.empty() ? path_join(d->src_path, l.name_sv(e)) : d->src_paths[i]));
       if (o.peer_features & PF_XATTRS) put_xattrs(body, d->src_xattrs[i]);
+      if (o.peer_features & PF_NATIVE_ACL) put_acls(body, d->src_xattrs[i]);
     }
     if (client) {
       g_stats.files_seen.fetch_add(nf, std::memory_order_relaxed);
@@ -964,7 +1012,7 @@ struct Sender {
       ch->source_filter = d->source_contexts.empty() ? d->source_filter : d->source_contexts[i];
       ch->rel = rel_join(d->rel, nm);
       ch->attrs = e;
-      if (o.xattrs) { ch->attrs_xattrs = d->src_xattrs[i]; ch->attrs_xattrs_loaded = true; }
+      if (metadata_enabled()) { ch->attrs_xattrs = d->src_xattrs[i]; ch->attrs_xattrs_loaded = true; }
       ch->flags = DF_ATTRS;
       ch->selection = d->selection;
       if (ch->selection) {
@@ -1106,9 +1154,10 @@ struct Sender {
       }
       Entry fresh = source_snapshot(scanned, before);
       XattrSet xattrs;
-      if (o.xattrs) {
+      if (metadata_enabled()) {
         const auto& context = d.source_contexts.empty() ? d.source_filter : d.source_contexts[idx];
         xattrs = source_fd_xattrs(in, w.p2, T_REG, context ? *context : o.filters);
+        if (o.acls && !export_acls(xattrs.acl()).complete) xattrs.complete = false;
         if (!xattrs.complete) {
           close(in);
           head(R_FAIL);
@@ -1197,7 +1246,7 @@ struct Sender {
           flush_block(w);
         }
       }
-      bool stable = off == fresh.size && source_unchanged(in, w.p2, before) && (!o.xattrs || source_xattrs_unchanged(xattrs, w.p2));
+      bool stable = off == fresh.size && source_unchanged(in, w.p2, before) && (!metadata_enabled() || source_xattrs_unchanged(xattrs, w.p2));
       close(in);
       bool retry = !stable && attempt == 0 && !g_stop.load();
       if (!stable && !retry && !g_stop.load())
@@ -1501,14 +1550,17 @@ struct Receiver {
     }
     if (o.peer_features & PF_XATTRS) {
       w.attrs_xattrs = get_xattrs(r);
+    }
+    if (o.peer_features & PF_NATIVE_ACL) get_acls(r, w.attrs_xattrs, T_DIR);
+    if (metadata_enabled()) {
       w.xattrs_loaded = w.attrs_xattrs_loaded = true;
-      if (!w.attrs_xattrs.complete) { g_source_io_error.store(true); err_line(RERR_PARTIAL, "incomplete source directory extended attributes"); }
+      if (!w.attrs_xattrs.complete) { g_source_io_error.store(true); err_line(RERR_PARTIAL, "incomplete source directory metadata"); }
     }
     size_t n = (size_t)r.var();
     if (r.bad || n > (1u << 28)) die(RERR_PROTOCOL, "protocol error: bad DIR frame");
     DirList& l = w.src;
     l.e.resize(n);
-    if (o.xattrs) w.src_xattrs.resize(n);
+    if (metadata_enabled()) w.src_xattrs.resize(n);
     std::vector<std::string> filter_sources;
     if (o.peer_features & (PF_CVS_FILTERS | PF_RELATIVE | PF_FILES_FROM)) filter_sources.resize(n);
     if (structured_output()) w.output_sources.resize(n);
@@ -1566,8 +1618,9 @@ struct Receiver {
       }
       if (o.peer_features & PF_XATTRS) {
         w.src_xattrs[i] = get_xattrs(r);
-        if (!w.src_xattrs[i].complete) { g_source_io_error.store(true); err_line(RERR_PARTIAL, "incomplete source extended attributes: %s", l.name(e)); }
       }
+      if (o.peer_features & PF_NATIVE_ACL) get_acls(r, w.src_xattrs[i], e.type);
+      if (metadata_enabled() && !w.src_xattrs[i].complete) { g_source_io_error.store(true); err_line(RERR_PARTIAL, "incomplete source metadata: %s", l.name(e)); }
     }
     if (r.bad || !r.empty()) die(RERR_PROTOCOL, "protocol error: truncated or trailing DIR frame");
     if (client && o.file_requests) {
@@ -1708,6 +1761,7 @@ struct Receiver {
       attrs.ctime = r.svar(), attrs.ctime_ns = (u32)r.var();
     }
     if (g_opt.peer_features & PF_XATTRS) xattrs = get_xattrs(r);
+    if (g_opt.peer_features & PF_NATIVE_ACL) get_acls(r, xattrs, T_REG);
     if (g_opt.perms) attrs.mode = mode;
     if ((g_opt.owner || g_opt.group) && !g_opt.numeric_ids) {
       std::lock_guard<std::mutex> lock(ids.mu);
@@ -2284,6 +2338,7 @@ int run_client(const std::vector<std::string>& srcs, const std::string& dest, u3
   if (!o.files_from_set) advertised &= ~PF_FILES_FROM;
   if (!o.hard_links) advertised &= ~PF_HLINK;
   if (!o.xattrs) advertised &= ~(PF_XATTRS | PF_XATTR_STREAM);
+  if (!o.acls) advertised &= ~PF_ACLS;
   if (!output_enabled()) advertised &= ~(PF_OUTPUT | PF_DIR_OUTPUT);
   if (wire_version >= 4) put_var(f, advertised);
   put_options(f);
@@ -2366,6 +2421,7 @@ int run_client(const std::vector<std::string>& srcs, const std::string& dest, u3
     c.send(std::move(config));
   }
   if (o.peer_features & PF_XATTRS) c.send(new_frame(F_XATTR_CONFIG) + (char)o.xattrs);
+  if (o.peer_features & PF_NATIVE_ACL) c.send(new_frame(F_ACL_CONFIG) + '\1');
   if (o.peer_features & PF_RELATIVE) c.send(new_frame(F_RELATIVE_CONFIG) + '\1');
   if (o.peer_features & PF_FILES_FROM) {
     std::string config = new_frame(F_FILES_CONFIG);
@@ -2447,7 +2503,7 @@ int run_server() {
   char role = (char)r.byte();
   c.start();
   g_msg_sink = send_msg;
-  if (o.acls) die(RERR_UNSUPPORTED, "native remote --acls is not yet supported");
+  const bool server_acls = o.acls;
   if (r.bad || magic != std::string_view(MAGIC, sizeof MAGIC - 1)) die(RERR_PROTOCOL, "protocol error: bad hello from client");
   if (ver < PROTO_MIN_VERSION || ver > PROTO_VERSION)
     die(RERR_PROTOCOL, "protocol version mismatch: client %u, server %u (supports %u and %u)",
@@ -2462,16 +2518,24 @@ int run_server() {
   o.am_server = true;
   o.wire_version = ver;
   o.peer_features = advertised & PROTO_FEATURES;
+  if ((advertised & PF_ACLS) == PF_ACLS) die(RERR_PROTOCOL, "protocol error: ambiguous ACL style");
+  if ((server_acls || (advertised & PF_ACLS)) && !(o.peer_features & PF_NATIVE_ACL))
+    die(RERR_UNSUPPORTED, "peer does not support the required ACL style");
   if ((o.peer_features & PF_XATTR_STREAM) && !(o.peer_features & PF_XATTRS))
     die(RERR_PROTOCOL, "protocol error: xattr streaming requires xattr metadata");
   o.list_only = o.peer_features & PF_LIST;
   o.hard_links = o.peer_features & PF_HLINK;
+  o.acls = o.peer_features & PF_NATIVE_ACL;
   get_options(r);
+  // rsync's remote receiver parses -A after the client's options and thereby
+  // re-enables -p, including when the pushing client used --no-perms.
+  if (o.acls && role == 'R') o.perms = true;
   if (o.filters.needs_extended())
     die(RERR_PROTOCOL, "protocol error: extended filters require a negotiated configuration");
   o.output_attrs = o.itemize;
   if (r.bad || (role != 'R' && role != 'S')) die(RERR_PROTOCOL, "protocol error: malformed hello options or role");
   if (o.list_only && role != 'S') die(RERR_PROTOCOL, "protocol error: listing requires sender role");
+  if (o.acls && o.list_only) die(RERR_PROTOCOL, "protocol error: ACL metadata is not valid for listing");
   std::string missing = missing_feature(o.peer_features);
   if (!missing.empty()) die(RERR_UNSUPPORTED, "%s", missing.c_str());
   if (ver == 3 && o.compress && !(o.peer_features & PF_ZSTD))
@@ -2504,6 +2568,11 @@ int run_server() {
     if (type != F_XATTR_CONFIG || payload.size() != 1 || (payload[0] != 1 && payload[0] != 2) || o.list_only)
       die(RERR_PROTOCOL, "protocol error: malformed xattr configuration");
     o.xattrs = (u8)payload[0];
+  }
+  if (o.peer_features & PF_NATIVE_ACL) {
+    if (!c.read_frame(type, payload)) conn_lost();
+    if (type != F_ACL_CONFIG || payload != std::string(1, '\1'))
+      die(RERR_PROTOCOL, "protocol error: malformed ACL configuration");
   }
   if (o.peer_features & PF_RELATIVE) {
     if (!c.read_frame(type, payload)) conn_lost();

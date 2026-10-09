@@ -74,6 +74,10 @@ OutputEvent linked_event(const Member& member, const Member& anchor, bool alread
   if (already) event.code = "hf         ";
   event.code[0] = 'h';
   event.code[1] = kind(member.attrs.type);
+  // The alias inherits these attributes from the completed anchor. rsync
+  // itemizes their writes on the anchor, not again on the published hard link.
+  if (event.code[9] == 'a') event.code[9] = '.';
+  if (event.code[10] == 'x') event.code[10] = '.';
   return event;
 }
 }

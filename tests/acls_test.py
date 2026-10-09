@@ -6,6 +6,7 @@ import errno
 import os
 from pathlib import Path
 import shutil
+import shlex
 import struct
 import subprocess
 import tempfile
@@ -75,7 +76,7 @@ class AclDifferentials(unittest.TestCase):
         self.addCleanup(self.tmp.cleanup)
         self.root = Path(self.tmp.name)
 
-    def fixture(self, identical=False, inherited=True, readonly=False):
+    def fixture(self, identical=False, inherited=True, readonly=False, hardlinks=False):
         for side in ('src', 'dst'):
             path = self.root / side
             if path.exists():
@@ -88,6 +89,9 @@ class AclDifferentials(unittest.TestCase):
             for name in ('same', 'changed', 'plain', 'sub/file'):
                 (path / name).write_bytes(b'old' if side == 'dst' and name == 'changed' else b'data')
             if side == 'src': (path / 'new').write_bytes(b'new')
+            if hardlinks:
+                (path / 'same').write_bytes(b'new linked contents' if side == 'src' else b'old')
+                os.link(path / 'same', path / 'sub/alias')
             (path / 'link').symlink_to('same')
             os.mkfifo(path / 'pipe')
             set_acl(path, 0 if side == 'src' or identical else 1, inherit=inherited)
@@ -110,7 +114,7 @@ class AclDifferentials(unittest.TestCase):
             for name in ('src', 'src/sub'):
                 os.chmod(self.root / name, 0o550)
 
-    def check_case(self, flags, clone=False, rules=(), **fixture):
+    def check_case(self, flags, clone=False, rules=(), direction='local', **fixture):
         results = []
         window = (time.time_ns() - 2_000_000_000, time.time_ns() + 30_000_000_000)
         for native in (False, True):
@@ -121,7 +125,13 @@ class AclDifferentials(unittest.TestCase):
                 command += ['--no-fallback', '-j8']
                 if not clone: command += ['--no-clone']
             command += ['--filter=' + rule for rule in rules]
-            result = subprocess.run(command + [str(self.root / 'src') + '/', str(self.root / 'dst') + '/'],
+            source, dest = str(self.root / 'src') + '/', str(self.root / 'dst') + '/'
+            if direction != 'local':
+                server = str(transfer.BINARY) if native else attrs.RSYNC
+                command += ['-e', transfer.RSH, '--rsync-path=' + shlex.quote(server)]
+                if direction == 'push': dest = 'fake:' + dest
+                else: source = 'fake:' + source
+            result = subprocess.run(command + [source, dest],
                                     capture_output=True, timeout=30, env=dict(os.environ, XSYNC_CONFIG='', XSYNC_OPTS=''))
             self.assertEqual(result.returncode, 0, (command, result.stdout, result.stderr))
             self.assertEqual(snapshot(self.root / 'src'), before)
@@ -148,6 +158,56 @@ class AclDifferentials(unittest.TestCase):
 
     def test_mode_only_updates_do_not_itemize_acl_changes(self):
         self.check_case(['-aA'], identical=True)
+        self.check_case(['-aA', '--no-perms'], identical=True)
+
+    def test_native_push_pull_acl_metadata_and_data_paths(self):
+        for direction in ('push', 'pull'):
+            for flags in (['-aA'], ['-aAX'], ['-azA'], ['-azAX'], ['-rA'], ['-aAn'], ['-aA', '--inplace'],
+                          ['-aA', '--partial'], ['-aA', '--checksum'], ['-aAL'], ['-aA', '--no-perms']):
+                with self.subTest(direction=direction, flags=flags):
+                    self.check_case(flags, direction=direction)
+            self.check_case(['-aAX'], direction=direction, rules=['-x *'])
+            self.check_case(['-aA'], direction=direction, identical=True)
+            self.check_case(['-aA', '--no-perms'], direction=direction, identical=True)
+            try: self.check_case(['-aA'], direction=direction, readonly=True)
+            finally:
+                for side in ('src', 'dst'):
+                    for name in ('', 'sub'): (self.root / side / name).chmod(0o750)
+
+    def test_acls_and_hardlinks_across_directories(self):
+        for direction in ('local', 'push', 'pull'):
+            for flags in (['-aAH'], ['-aAHX']):
+                with self.subTest(direction=direction, flags=flags):
+                    self.check_case(flags, direction=direction, hardlinks=True)
+
+    @unittest.skipUnless(attrs.DARWIN, 'fill the shared inline budget with Darwin attributes')
+    def test_acl_storage_failure_after_xattrs_preserves_existing_files(self):
+        source = self.root / 'source'; source.mkdir()
+        subprocess.run(['chmod', '-N', str(source)], check=True, capture_output=True)
+        file = source / 'file'; file.write_bytes(b'new contents'); set_acl(file)
+        for index in range(128): attrs.set_attr(file, 'xsync.budget.%03d' % index, b'x' * 65536)
+        original_acl, original_attrs = get_acl(file), attrs.get_attrs(file)
+        for direction in ('local', 'push', 'pull'):
+            target = self.root / direction; target.mkdir()
+            old = target / 'file'; old.write_bytes(b'old contents'); set_acl(old, 1)
+            attrs.set_attr(old, 'xsync.stale', b'keep me')
+            extra = target / 'extra'; extra.write_bytes(b'keep deletion')
+            before = snapshot(target)
+            a, b = str(source) + '/', str(target) + '/'
+            command = [str(transfer.BINARY), '--no-fallback', '--no-clone', '-aAX', '--delete',
+                       '--filter=+xs xsync.budget.*', '--filter=-xs *']
+            if direction != 'local':
+                command += ['-e', transfer.RSH, '--rsync-path=' + shlex.quote(str(transfer.BINARY))]
+                if direction == 'push': b = 'fake:' + b
+                else: a = 'fake:' + a
+            result = subprocess.run(command + [a, b], capture_output=True, timeout=30,
+                                    env=dict(os.environ, XSYNC_CONFIG='', XSYNC_OPTS='', TMPDIR=str(self.root / 'missing storage')))
+            self.assertEqual(result.returncode, 23, (direction, result.stdout, result.stderr))
+            self.assertIn(b'store ACL', result.stderr)
+            after = snapshot(target)
+            for name in ('file', 'extra'): self.assertEqual(after[name], before[name])
+            self.assertEqual(get_acl(file), original_acl)
+            self.assertEqual(attrs.get_attrs(file), original_attrs)
 
     def test_readonly_directories_and_repeat_sync(self):
         try:

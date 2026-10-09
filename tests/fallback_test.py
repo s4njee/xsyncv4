@@ -147,20 +147,19 @@ else: sys.exit(255)
         source = self.src / 'file with spaces'
         set_acl(source)
         before = get_acl(source)
-        rsh = shlex.quote(str(REPO / 'tests/fakessh.sh'))
         for direction in ('push', 'pull'):
             for flags in ('-aA', '-aAX'):
                 with self.subTest(direction=direction, flags=flags):
                     dest = self.root / (direction + flags)
                     a, b = str(self.src) + '/', str(dest)
                     a, b = (a, 'fake:' + b) if direction == 'push' else ('fake:' + a, b)
-                    arguments = [flags, '-e', rsh, '--rsync-path=' + shlex.quote(str(BINARY)), a, b]
-                    result = self.run_sync('--no-fallback', *arguments)
+                    environment = dict(self.env, XSYNC_TEST_PEER='capability')
+                    arguments = [flags, '-e', self.fake_shell(), a, b]
+                    result = self.run_sync('--no-fallback', *arguments, env=environment)
                     self.assertEqual(result.returncode, 4, result.stderr)
                     self.assertFalse(dest.exists())
                     # Use rsync as the explicit fallback peer; the client's
                     # native negotiation fails before it sends any directory.
-                    environment = dict(self.env, XSYNC_TEST_PEER='capability')
                     fallback_arguments = [flags, '-e', self.fake_shell(), a, b]
                     result = self.run_sync(*fallback_arguments, env=environment)
                     self.assertEqual(result.returncode, 0, result.stderr)
@@ -183,7 +182,7 @@ else: sys.exit(255)
                     kind, message = wire.read_frame(proc)
                     self.assertEqual(kind, 8)
                     self.assertEqual(message[:2], b'\2\4')
-                    self.assertIn(b'native remote --acls', message)
+                    self.assertIn(b'peer does not support the required ACL style', message)
                     proc.communicate(timeout=10)
                     self.assertEqual(proc.returncode, 4)
                     self.assertFalse(target.exists())

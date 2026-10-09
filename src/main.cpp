@@ -64,7 +64,7 @@ Options (same meaning as rsync):
  -o, --owner              preserve owner (super-user only)
  -g, --group              preserve group
  -D                       same as --devices --specials
- -A, --acls               preserve local ACLs (implies --perms)
+ -A, --acls               preserve ACLs (implies --perms)
  -t, --times              preserve modification times
  -O, --omit-dir-times     omit directories from --times
  -J, --omit-link-times    omit symlinks from --times

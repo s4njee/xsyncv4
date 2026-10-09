@@ -5,8 +5,14 @@
 #include <unistd.h>
 #include <cerrno>
 #include <system_error>
+#include <algorithm>
+#include <grp.h>
+#include <pwd.h>
+#include <map>
+#include <mutex>
 #ifdef __APPLE__
 #include <sys/acl.h>
+#include <membership.h>
 #else
 #include <sys/xattr.h>
 #endif
@@ -186,4 +192,243 @@ bool apply_acls(const AclSet& source, const std::string& path, u8 type, u32 mode
   Pin pin; pin.open(path, type, false);
   if (pin.fd < 0) { file_io_error(errno, path.c_str(), "open ACL"); return false; }
   return apply_fd_acls(source, pin.fd, path, type, mode);
+}
+
+namespace {
+bool named(const AclRecord& entry) {
+  return ACL_STYLE == 2 || entry.tag == 2 || entry.tag == 8;
+}
+bool group_entry(const AclRecord& entry) {
+  return ACL_STYLE == 2 ? entry.tag >= 3 : entry.tag == 8;
+}
+std::mutex names_mutex;
+std::map<std::pair<bool, u32>, std::string> source_names;
+std::map<std::pair<bool, std::string>, u32> destination_names;
+std::string principal_name(bool group, u32 id) {
+  if (g_opt.numeric_ids) return {};
+  std::lock_guard<std::mutex> lock(names_mutex);
+  auto key = std::make_pair(group, id);
+  if (auto found = source_names.find(key); found != source_names.end()) return found->second;
+  std::string name;
+  for (size_t size = 16384; size <= 131072; size *= 2) {
+    std::vector<char> buffer(size);
+    int error;
+    if (group) {
+      struct group record, *result = nullptr;
+      error = getgrgid_r(id, &record, buffer.data(), buffer.size(), &result);
+      if (!error && result) name = result->gr_name;
+    } else {
+      struct passwd record, *result = nullptr;
+      error = getpwuid_r(id, &record, buffer.data(), buffer.size(), &result);
+      if (!error && result) name = result->pw_name;
+    }
+    if (error != ERANGE) break;
+  }
+  // An absent or unrepresentable name retains the numeric identity.
+  if (name.size() > 255) name.clear();
+  if (source_names.size() >= 4096) source_names.clear();
+  source_names.emplace(std::move(key), name);
+  return name;
+}
+u32 principal_id(bool group, u32 id, const std::string& name) {
+  if (g_opt.numeric_ids || name.empty()) return id;
+  std::lock_guard<std::mutex> lock(names_mutex);
+  auto key = std::make_pair(group, name);
+  if (auto found = destination_names.find(key); found != destination_names.end())
+    return found->second == UINT32_MAX ? id : found->second;
+  u32 mapped = UINT32_MAX;
+  for (size_t size = 16384; size <= 131072; size *= 2) {
+    std::vector<char> buffer(size);
+    int error;
+    if (group) {
+      struct group record, *result = nullptr;
+      error = getgrnam_r(name.c_str(), &record, buffer.data(), buffer.size(), &result);
+      if (!error && result) mapped = result->gr_gid;
+    } else {
+      struct passwd record, *result = nullptr;
+      error = getpwnam_r(name.c_str(), &record, buffer.data(), buffer.size(), &result);
+      if (!error && result) mapped = result->pw_uid;
+    }
+    if (error != ERANGE) break;
+  }
+  if (destination_names.size() >= 4096) destination_names.clear();
+  destination_names.emplace(std::move(key), mapped);
+  return mapped == UINT32_MAX ? id : mapped;
+}
+#ifdef __APPLE__
+struct AclHandle {
+  acl_t value = nullptr;
+  ~AclHandle() { if (value) acl_free(value); }
+};
+[[noreturn]] void acl_error() { throw std::system_error(errno ? errno : EINVAL, std::generic_category(), "ACL conversion"); }
+u32 flags_of(void* object, u32 allowed) {
+  acl_flagset_t flags;
+  if (acl_get_flagset_np(object, &flags)) acl_error();
+  u32 result = 0;
+  for (u32 bit = 1; bit <= allowed; bit <<= 1) {
+    if (!(allowed & bit)) continue;
+    int set = acl_get_flag_np(flags, (acl_flag_t)bit);
+    if (set < 0) acl_error();
+    if (set) result |= bit;
+  }
+  return result;
+}
+void set_flags(void* object, u32 mask) {
+  acl_flagset_t flags;
+  if (acl_get_flagset_np(object, &flags) || acl_clear_flags_np(flags)) acl_error();
+  for (u32 bit = 1; bit <= mask; bit <<= 1)
+    if ((mask & bit) && acl_add_flag_np(flags, (acl_flag_t)bit)) acl_error();
+  if (acl_set_flagset_np(object, flags)) acl_error();
+}
+#else
+u32 identifier(const std::string& data, size_t offset) {
+  u32 value = 0;
+  for (int byte = 0; byte < 4; ++byte) value |= (u32)(u8)data[offset + byte] << (byte * 8);
+  return value;
+}
+std::vector<AclRecord> linux_records(const XattrValue& value) {
+  auto data = bytes(value);
+  std::vector<AclRecord> result;
+  for (size_t offset = 4; offset + 8 <= data.size(); offset += 8) {
+    AclRecord record{tag(data, offset), tag(data, offset + 2), 0, identifier(data, offset + 4), {}};
+    if (named(record)) record.name = principal_name(group_entry(record), record.id);
+    result.push_back(std::move(record));
+  }
+  return result;
+}
+XattrValue linux_value(std::vector<AclRecord> records) {
+  if (records.empty()) return {};
+  std::sort(records.begin(), records.end(), [](const auto& a, const auto& b) {
+    return a.tag == b.tag ? a.id < b.id : a.tag < b.tag;
+  });
+  std::string data(4, '\0'); data[0] = 2;
+  for (const auto& record : records) {
+    data.push_back((char)record.tag), data.push_back(0);
+    data.push_back((char)record.permissions), data.push_back(0);
+    for (int byte = 0; byte < 4; ++byte) data.push_back((char)(record.id >> (byte * 8)));
+  }
+  return XattrValue(std::move(data));
+}
+#endif
+}
+
+AclRecords export_acls(const AclSet& source) {
+  AclRecords records; records.complete = source.complete;
+  if (!records.complete) return records;
+  try {
+#ifdef __APPLE__
+    if (!source.access.size()) return records;
+    auto data = bytes(source.access);
+    AclHandle acl{acl_copy_int(data.data())};
+    if (!acl.value) acl_error();
+    records.flags = flags_of(acl.value, (u32)ACL_FLAG_DEFER_INHERIT | ACL_FLAG_NO_INHERIT);
+    acl_entry_t entry;
+    int next = ACL_FIRST_ENTRY;
+    for (;;) {
+      if (acl_get_entry(acl.value, next, &entry)) {
+        if (errno == EINVAL) break;
+        acl_error();
+      }
+      next = ACL_NEXT_ENTRY;
+      acl_tag_t tag;
+      acl_permset_mask_t permissions;
+      if (acl_get_tag_type(entry, &tag) || acl_get_permset_mask_np(entry, &permissions)) acl_error();
+      auto qualifier = (uuid_t*)acl_get_qualifier(entry);
+      if (!qualifier) acl_error();
+      id_t id; int kind;
+      int error = mbr_uuid_to_id(*qualifier, &id, &kind);
+      acl_free(qualifier);
+      if (error || (kind != ID_TYPE_UID && kind != ID_TYPE_GID)) { errno = error ? error : EINVAL; acl_error(); }
+      AclRecord record;
+      record.tag = (kind == ID_TYPE_GID ? 2 : 0) + (tag == ACL_EXTENDED_ALLOW ? 1 : 2);
+      record.permissions = (u32)permissions;
+      record.flags = flags_of(entry, 0x1f0);
+      record.id = (u32)id;
+      record.name = principal_name(kind == ID_TYPE_GID, record.id);
+      records.access.push_back(std::move(record));
+    }
+#else
+    records.access = linux_records(source.access);
+    records.defaults = linux_records(source.defaults);
+#endif
+    if (!valid_acl_records(records, T_DIR)) throw std::system_error(EINVAL, std::generic_category(), "source ACL fields");
+  } catch (const std::system_error& error) {
+    g_source_io_error.store(true);
+    file_io_error(error.code().value(), "source ACL", "serialize ACL");
+    records = {}; records.complete = false;
+  }
+  return records;
+}
+
+bool valid_acl_records(const AclRecords& records, u8 type) {
+  if ((!supported(type) || !records.complete) && (records.flags || !records.access.empty() || !records.defaults.empty())) return false;
+  if (type != T_DIR && !records.defaults.empty()) return false;
+  if (records.access.size() > ACL_MAX_RECORDS || records.defaults.size() > ACL_MAX_RECORDS) return false;
+  if (ACL_STYLE == 2) {
+    if (!records.defaults.empty() || (records.flags & ~0x20001u)) return false;
+  } else if (records.flags) return false;
+  for (const auto* list : {&records.access, &records.defaults}) {
+    bool owner = false, group = false, other = false, mask = false, have_names = false;
+    u32 previous_tag = 0, previous_id = 0;
+    for (const auto& record : *list) {
+      if (record.name.size() > 255 || record.name.find('\0') != record.name.npos) return false;
+      if (ACL_STYLE == 2) {
+        if (record.tag < 1 || record.tag > 4 || record.id == UINT32_MAX ||
+            (record.permissions & ~0x103ffeu) || (record.flags & ~0x1f0u)) return false;
+      } else {
+        if (record.permissions > 7 || record.flags || record.tag < previous_tag) return false;
+        if (named(record)) {
+          if (record.id == UINT32_MAX || (record.tag == previous_tag && record.id <= previous_id)) return false;
+          have_names = true;
+        } else {
+          if (record.id != UINT32_MAX || !record.name.empty()) return false;
+          switch (record.tag) {
+            case 1: if (owner) return false; owner = true; break;
+            case 4: if (group) return false; group = true; break;
+            case 16: if (mask) return false; mask = true; break;
+            case 32: if (other) return false; other = true; break;
+            default: return false;
+          }
+        }
+        previous_tag = record.tag, previous_id = record.id;
+      }
+    }
+    if (ACL_STYLE == 1 && !list->empty() && (!owner || !group || !other || (have_names && !mask))) return false;
+  }
+  return true;
+}
+
+AclSet import_acls(AclRecords records) {
+  AclSet result; result.complete = records.complete;
+  if (!result.complete) return result;
+  for (auto* list : {&records.access, &records.defaults})
+    for (auto& record : *list)
+      if (named(record)) record.id = principal_id(group_entry(record), record.id, record.name);
+#ifdef __APPLE__
+  if (records.access.empty() && !records.flags) return result;
+  AclHandle acl{acl_init((int)records.access.size())};
+  if (!acl.value) acl_error();
+  set_flags(acl.value, records.flags);
+  for (const auto& record : records.access) {
+    acl_entry_t entry;
+    if (acl_create_entry(&acl.value, &entry)) acl_error();
+    uuid_t qualifier;
+    int error = group_entry(record) ? mbr_gid_to_uuid(record.id, qualifier) : mbr_uid_to_uuid(record.id, qualifier);
+    if (error) { errno = error; acl_error(); }
+    if (acl_set_tag_type(entry, (record.tag & 1) ? ACL_EXTENDED_ALLOW : ACL_EXTENDED_DENY) ||
+        acl_set_qualifier(entry, qualifier) || acl_set_permset_mask_np(entry, record.permissions)) acl_error();
+    set_flags(entry, record.flags);
+  }
+  if (acl_valid(acl.value)) acl_error();
+  ssize_t size = acl_size(acl.value);
+  if (size < 0 || size > (ssize_t)MAX_ACL_BYTES) { errno = E2BIG; acl_error(); }
+  std::string data((size_t)size, '\0');
+  ssize_t copied = acl_copy_ext(data.data(), acl.value, size);
+  if (copied < 0) acl_error();
+  data.resize((size_t)copied); result.access = XattrValue(std::move(data));
+#else
+  result.access = linux_value(std::move(records.access));
+  result.defaults = linux_value(std::move(records.defaults));
+#endif
+  return result;
 }

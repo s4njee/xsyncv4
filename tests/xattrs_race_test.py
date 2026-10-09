@@ -108,6 +108,14 @@ class XattrRaceTests(unittest.TestCase):
                     with self.subTest(link=link, whole=whole, inplace=inplace):
                         self.check_race('local', link, whole, inplace, acl=True)
 
+    def test_remote_acls_refresh_on_retry(self):
+        for direction in ('push', 'pull'):
+            for link in (False, True):
+                for whole in (False, True):
+                    for inplace in (False, True):
+                        with self.subTest(direction=direction, link=link, whole=whole, inplace=inplace):
+                            self.check_race(direction, link, whole, inplace, acl=True)
+
     @unittest.skipUnless(DARWIN or PRIVILEGED_LINKS, 'physical symlink attrs require Darwin or the privileged Linux fixture')
     def test_followed_link_attributes_refresh_on_retry(self):
         for direction in ('local', 'push', 'pull'):

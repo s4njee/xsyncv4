@@ -33,10 +33,17 @@ constexpr u64 PF_RELATIVE = 65536;
 constexpr u64 PF_FILES_FROM = 131072;
 constexpr u64 PF_XATTRS = 262144;
 constexpr u64 PF_XATTR_STREAM = 524288;
-#ifndef XSYNC_PROTOCOL_FEATURES
-#define XSYNC_PROTOCOL_FEATURES 1048575
+constexpr u64 PF_ACL_POSIX = 1048576, PF_ACL_DARWIN = 2097152;
+constexpr u64 PF_ACLS = PF_ACL_POSIX | PF_ACL_DARWIN;
+#ifdef __APPLE__
+constexpr u64 PF_NATIVE_ACL = PF_ACL_DARWIN;
+#else
+constexpr u64 PF_NATIVE_ACL = PF_ACL_POSIX;
 #endif
-constexpr u64 PROTO_FEATURES = XSYNC_PROTOCOL_FEATURES;
+#ifndef XSYNC_PROTOCOL_FEATURES
+#define XSYNC_PROTOCOL_FEATURES 4194303
+#endif
+constexpr u64 PROTO_FEATURES = XSYNC_PROTOCOL_FEATURES & ~(PF_ACLS & ~PF_NATIVE_ACL);
 constexpr u64 LEGACY_V3_FEATURES = 15;
 
 // ---------------------------------------------------------------- options
