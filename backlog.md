@@ -820,4 +820,19 @@ These change defaults, so they should be chosen rather than inherited from a ben
   and then joins successful members with verified atomic links. Duplicate data
   may be copied/sent; README documents this and `%b` retains actual copied bytes.
   E-10 remains open for xattrs and wider metadata; its hard-link prerequisite is
-  implemented. Release artifacts are being refreshed and checked next.
+  implemented. Release artifacts at source `e0adac5d165a` were rebuilt and
+  verified in scratch and bare Debian for Linux amd64/arm64. Release smoke
+  covers compressed resume/logs plus local/push/pull hard-linked regular files,
+  symlinks and FIFOs. The four hard-link methods also pass on the universal
+  macOS release in ARM and Rosetta modes; ARM-client/x86_64-peer compressed
+  push/pull checks preserve both regular/symlink groups and formatted logs.
+  Homebrew and the installed Pi helper were not changed.
+
+### E-03 release manifest (2026-10-09)
+
+- `xsync-darwin-universal`: `cfc1b63efc6cd3c53c4b1a084cf770f875da259ac8ba941b536ae0b0206f14c9`, 2,724,280 bytes, source
+  `e0adac5d165a`.
+- `xsync-linux-amd64`: `846364be84a6fda2a391d71e90cebb58590dbfed8443378a455a2d66dd747858`, 4,695,736 bytes, source
+  `e0adac5d165a`.
+- `xsync-linux-arm64`: `737cc8dcbcbfb82396d658cbd9f56c54d77501b4f9cbfe98384ec3a1e52533fc`, 4,679,728 bytes, source
+  `e0adac5d165a`.
