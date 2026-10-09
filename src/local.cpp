@@ -727,6 +727,8 @@ int run_local(const std::vector<std::string>& srcs, const std::string& dest) {
   root->attr_source = std::move(rl.attr_source);
   root->has_attrs = rl.has_attrs;
   root->no_delete = !rl.has_attrs;  // only the contents of "SRC/" own the destination directory
+  if (g_opt.verbose > 0) w0.logf(g_opt.prune_empty ? "building file list" : "sending incremental file list");
+  w0.flush_log();
   if (g_opt.prune_empty) {
     std::vector<DirWork*> directories{root};
     for (size_t index = 0; index < directories.size() && !g_stop.load(); ++index) {
@@ -759,8 +761,6 @@ int run_local(const std::vector<std::string>& srcs, const std::string& dest) {
     }
     prune_empty_directories(directories, dest.empty() ? "." : dest);
   }
-  if (g_opt.verbose > 0) w0.logf("sending incremental file list");
-  w0.flush_log();
   if (!setup_dest(dest, *root, rl.single)) {
     delete root;
     return g_exit_code.load();

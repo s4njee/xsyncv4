@@ -1749,6 +1749,7 @@ struct Receiver {
         case F_LIST_END:
           if (list_end.exchange(true)) die(RERR_PROTOCOL, "protocol error: duplicate LIST_END");
           if (g_opt.prune_empty) {
+            if (staged.empty()) die(RERR_PROTOCOL, "protocol error: LIST_END without a root directory");
             Task task;
             task.kind = K_PRUNE;
             pool.push(0, std::move(task));
@@ -1756,6 +1757,8 @@ struct Receiver {
           if (gens.load() == 0) g_stats.scan_done.store(true);
           break;
         case F_DATA_END: {
+          if (g_opt.prune_empty && !list_end.load())
+            die(RERR_PROTOCOL, "protocol error: DATA_END before LIST_END");
           RBuf r(payload);
           sender_code = (int)r.var();
           if (r.bad) die(RERR_PROTOCOL, "protocol error: truncated DATA_END");
@@ -2080,7 +2083,9 @@ int run_client(const std::vector<std::string>& srcs, const std::string& dest, u3
     c.send(std::move(config));
   }
   output_start();
-  if (!o.list_only && o.verbose > 0) out_line(push ? "sending incremental file list" : "receiving incremental file list");
+  if (!o.list_only && o.verbose > 0)
+    out_line(o.prune_empty ? (push ? "sending file list" : "receiving file list") :
+                            (push ? "sending incremental file list" : "receiving incremental file list"));
   if (!o.list_only) progress_start(default_jobs());
   int rc;
   if (!push) o.filters.prepare_pull();
