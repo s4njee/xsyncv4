@@ -49,7 +49,7 @@ RemoteSpec parse_remote_spec(const std::string& argument) {
   return {};
 }
 
-std::vector<std::string> split_shell_words(const std::string& command) {
+std::vector<std::string> split_shell_words(const std::string& command, const std::string& description) {
   std::vector<std::string> words;
   std::string word;
   char quote = 0;
@@ -57,7 +57,7 @@ std::vector<std::string> split_shell_words(const std::string& command) {
   for (size_t i = 0; i < command.size(); ++i) {
     char ch = command[i];
     if (ch == '\\' && quote != '\'') {
-      if (++i == command.size()) die(RERR_SYNTAX, "remote shell command ends with an escape");
+      if (++i == command.size()) die(RERR_SYNTAX, "%s ends with an escape", description.c_str());
       char next = command[i];
       if (quote == '"' && next != '"' && next != '\\' && next != '$' && next != '`' && next != '\n') word += '\\';
       if (next != '\n') word += next;
@@ -70,13 +70,14 @@ std::vector<std::string> split_shell_words(const std::string& command) {
       if (present) words.push_back(word), word.clear(), present = false;
     } else word += ch, present = true;
   }
-  if (quote) die(RERR_SYNTAX, "unterminated quote in remote shell command");
+  if (quote) die(RERR_SYNTAX, "unterminated quote in %s", description.c_str());
   if (present) words.push_back(word);
   return words;
 }
 
 std::string remote_shell_command() {
-  if (!g_opt.rsh.empty()) return g_opt.rsh;
+  if (g_opt.rsh_set) return g_opt.rsh;
+  if (const char* env = getenv("XSYNC_RSH")) return env;
   if (const char* env = getenv("RSYNC_RSH")) return env;
   return "ssh";
 }

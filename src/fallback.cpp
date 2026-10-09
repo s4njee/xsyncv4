@@ -1,4 +1,5 @@
 #include "fallback.h"
+#include "arguments.h"
 #include "progress.h"
 #include <sys/stat.h>
 #include <unistd.h>
@@ -16,16 +17,6 @@ bool enabled = true;
 mode_t original_umask;
 struct stat self_stat {};
 bool have_self_stat = false;
-
-bool takes_value(const std::string& name) {
-  static const std::string names =
-      " install rsh rsync-path jobs max-delete max-size min-size modify-window compress-level zl compress-choice zc "
-      "exclude include exclude-from include-from filter info backup-dir suffix link-dest compare-dest copy-dest files-from "
-      "chmod chown usermap groupmap bwlimit partial-dir port password-file log-file write-batch read-batch only-write-batch "
-      "temp-dir iconv checksum-seed address sockopts stop-after stop-at max-alloc copy-as early-input remote-option "
-      "timeout contimeout skip-compress block-size checksum-choice cc log-file-format debug out-format outbuf ";
-  return names.find(" " + name + " ") != std::string::npos;
-}
 
 std::string find_rsync() {
   const char* path = getenv("PATH");
@@ -74,7 +65,7 @@ void init_fallback(int argc, char** argv) {
     }
     if (a.rfind("--", 0) == 0) {
       arguments.push_back(a);
-      if (a.find('=') == std::string::npos && takes_value(a.substr(2)) && i + 1 < argc) arguments.push_back(argv[++i]);
+      if (a.find('=') == std::string::npos && long_option_takes_value(a.substr(2)) && i + 1 < argc) arguments.push_back(argv[++i]);
       continue;
     }
     // Strip -j from bundles, leaving the original rsync flags and option values.

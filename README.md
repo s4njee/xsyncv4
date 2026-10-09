@@ -31,6 +31,41 @@ protocol data do not fall back. Original rsync arguments are retained, including
 an explicit `--rsync-path`: that command must support rsync if fallback is needed.
 Worker, clone and atomic extensions are stripped before invoking rsync.
 
+## Personal defaults
+
+For scalar options and on/off flags, precedence is **command-line flags, then
+environment, then config**. Within one layer, the last value wins. Repeatable
+options such as filters accumulate from config, then environment, then flags;
+`--filter='!'` clears earlier
+filter rules. There is no automatic change to progress defaults.
+
+The optional config file is `$XDG_CONFIG_HOME/xsync/config`, or
+`~/.config/xsync/config` when `XDG_CONFIG_HOME` is unset. `XSYNC_CONFIG` selects
+another file; an empty value disables the config file. A missing default file
+is ignored; an explicitly selected missing file is an error. For example:
+
+```text
+# ~/.config/xsync/config
+--progress
+--jobs=4
+--exclude 'scratch files'
+```
+
+`XSYNC_OPTS` contains additional shell-quoted options, for example
+`export XSYNC_OPTS='--jobs=8 --no-progress'`. Config lines use the same quoting;
+blank lines and whole-line `#` comments are allowed. Quoting only splits words:
+commands, variables and `~` are never expanded. Defaults contain options and
+their values, with transfer paths supplied on the command line. Control actions
+such as `--install`, `--server`, `--help` and `--version` are not defaults.
+
+`-e`/`--rsh` overrides `XSYNC_RSH`, which overrides `RSYNC_RSH`, then a remote
+shell in `XSYNC_OPTS`, then one in config, then `ssh`. `XSYNC_FALLBACK` overrides
+a fallback switch in `XSYNC_OPTS` or config; an explicit command-line
+`--fallback`/`--no-fallback` wins. Empty remote-shell values fail clearly.
+Fallback passes the effective defaults and original transfer arguments to rsync
+after stripping xsync's extensions. `--help`, `--version` and protocol-server
+invocations bypass personal defaults; servers use the client's wire options.
+
 ## Install locally
 
 Install the built executable, generated man page and zsh completion into a prefix:

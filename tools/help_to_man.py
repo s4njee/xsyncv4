@@ -26,8 +26,20 @@ def generate(binary, output):
 XSYNC_FALLBACK
 Set to 0 to disable automatic rsync fallback. The --fallback flag overrides it.
 .TP
+XSYNC_OPTS
+Shell-quoted default options. Command-line flags override these defaults.
+.TP
+XSYNC_CONFIG
+Optional defaults file; an empty value disables config. Otherwise the default
+is $XDG_CONFIG_HOME/xsync/config or ~/.config/xsync/config. Config options are
+lower priority than environment defaults. Blank lines and full-line comments
+are allowed. Transfer paths and control actions are not defaults.
+.TP
+XSYNC_RSH
+Remote shell command, overriding RSYNC_RSH and default options; --rsh wins.
+.TP
 RSYNC_RSH
-Default remote shell command when --rsh is absent.
+Remote shell command when --rsh and XSYNC_RSH are absent.
 .TP
 XSYNC_REMOTE_PATH
 Additional remote executable path, after PATH and ~/.local/bin/xsync.

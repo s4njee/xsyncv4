@@ -2,7 +2,7 @@
 
 Initial audit written 2026-10-08 against xsync 0.1.0 (protocol 1).
 All fifteen P0 stories completed against protocol 3; per-story evidence is below.
-P1 R-02 through R-08 are complete. Current protocol 4 supports protocol 3; R-09 is next.
+P1 R-02 through R-09 are complete. Current protocol 4 supports protocol 3; E-01 is next.
 Problem statements retain the original audit findings.
 
 ## What "daily driver" means here
@@ -67,7 +67,9 @@ work, or lies about what it did.
 
 At the initial audit, every `host:` argument failed unless matching xsync was on
 the remote PATH. R-02 through R-06 now provide fallback, releases, explicit
-installation, lookup and protocol compatibility. Remaining reach work is below.
+installation, lookup and protocol compatibility. R-07 through R-09 add local
+packaging, IPv6 host parsing and personal defaults. R-01's second physical-host
+coverage clarification remains open.
 
 | ID | Item | Status | Done when | Size |
 |---|---|---|---|---|
@@ -79,7 +81,7 @@ installation, lookup and protocol compatibility. Remaining reach work is below.
 | R-06 | **Protocol negotiation instead of version equality.** Any protocol change currently breaks every installed remote at once. | done | Hello carries feature bits; a newer client talks to an older server using the common subset; policy written down (client supports N and N-1). | M |
 | R-07 | **Install on this machine.** `cmake --install`, a Homebrew formula or tap, zsh completion (rsync's completer mostly applies), a man page generated from `--help`. | **done** | `brew install` or `make install` puts `xsync`, its completion and man page in place. | M |
 | R-08 | **IPv6 literals and odd host specs.** `[::1]:path` is mis-parsed; `user@host:` with an empty path and `host:` alone are untested. | **done** | Host parsing matches rsync's for bracketed IPv6, empty paths and `-l`-style users; unit tests. | S |
-| R-09 | **Defaults without flags.** Environment (`XSYNC_RSH` alongside the honoured `RSYNC_RSH`) and an optional config file or `XSYNC_OPTS` for personal defaults such as "progress on when stderr is a terminal". | new | Documented precedence: flags, then env, then config. | S |
+| R-09 | **Defaults without flags.** Environment (`XSYNC_RSH` alongside the honoured `RSYNC_RSH`) and an optional config file or `XSYNC_OPTS` for personal defaults such as "progress on when stderr is a terminal". | **done** | Documented precedence: flags, then env, then config. | S |
 
 ## P1 — Everyday behaviour: the flags in your muscle memory
 
@@ -631,3 +633,31 @@ These change defaults, so they should be chosen rather than inherited from a ben
   applicable methods pass on macOS. All six fallback regressions pass in the rig.
 - The strict native differential result remains 212/214. The only failures are
   E-08's pending `-m` and protect-filter support; host parsing adds no failures.
+
+
+### R-09 — complete (2026-10-09)
+
+- Personal defaults load from `$XDG_CONFIG_HOME/xsync/config` or
+  `~/.config/xsync/config`, then shell-quoted `XSYNC_OPTS`, then command-line
+  flags. `XSYNC_CONFIG` selects a file; an empty value disables config. Missing
+  implicit files are ignored, while explicitly selected missing files fail.
+- Scalar options and on/off flags follow flags > environment > config.
+  Repeatable filters accumulate in normal rsync order; `--filter=!` clears them.
+  Dedicated `XSYNC_RSH` overrides `RSYNC_RSH` and default-option shell settings;
+  `-e`/`--rsh` wins. Dedicated fallback environment controls likewise override
+  defaults, with explicit flags highest. Empty remote shells fail clearly.
+- Quoted values retain spaces and literal characters without shell evaluation.
+  Config supports blank lines and whole-line comments. Defaults reject transfer
+  operands and control actions. `--help`, `--version`, and protocol servers bypass
+  personal defaults; native servers use the client's wire options.
+- Fallback retains the effective default options and original CLI arguments,
+  stripping worker/clone/atomic extensions as before. README and the generated
+  manual document precedence and all supported environment/config settings.
+- All seven functional default tests pass on macOS and Linux: actual copies and
+  dry-runs, file/environment/flag precedence, quoted exclusions and clearing,
+  exact shell argv, config selection, malformed/default control handling,
+  server isolation and fallback argv/exit status. Packaging and host-spec tests
+  pass; all six original fallback methods pass. Real SSH transfer/SIGINT,
+  lookup, and local/SSH installer suites pass (max shutdown 0.639 s).
+- The strict native differential run remains 212/214, with only E-08's pending
+  `-m` and protect-filter support failing.

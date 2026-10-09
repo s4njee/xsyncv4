@@ -49,6 +49,7 @@ struct Options {
   bool quiet = false, progress = false, stats = false, mkpath = false;
   int human = 0;
   std::string rsh, rsync_path;
+  bool rsh_set = false;  // Client-only; an explicit empty command is an error.
   FilterList filters;
   // Set at runtime, not parsed.
   bool am_root = false;

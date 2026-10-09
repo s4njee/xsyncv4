@@ -13,6 +13,7 @@
 #include "fallback.h"
 #include "install.h"
 #include "transport.h"
+#include "arguments.h"
 
 namespace {
 
@@ -191,7 +192,7 @@ Parsed parse(int argc, char** argv) {
     else if (name == "delete-excluded") o.del = o.delete_excluded = true;
     else if (name == "human-readable") o.human++;
     else if (name == "no-human-readable") o.human = 0;
-    else if (name == "rsh") o.rsh = need();
+    else if (name == "rsh") o.rsh = need(), o.rsh_set = true;
     else if (name == "rsync-path") o.rsync_path = need();
     else if (name == "jobs") o.jobs = atoi(need().c_str());
     else if (name == "max-delete") {
@@ -309,7 +310,7 @@ Parsed parse(int argc, char** argv) {
         case 'S': usage_error("--sparse is not supported by xsync");
         case '4': usage_error("--ipv4 is not supported by xsync");
         case '6': usage_error("--ipv6 is not supported by xsync");
-        case 'e': o.rsh = need(); break;
+        case 'e': o.rsh = need(); o.rsh_set = true; break;
         case 'j': o.jobs = atoi(need().c_str()); break;
         case '@': o.modify_window = atoi(need().c_str()); break;
         case 'f':
@@ -406,9 +407,12 @@ void print_summary(u64 t0) {
 }
 
 int main(int argc, char** argv) {
-  init_fallback(argc, argv);
   signal(SIGPIPE, SIG_IGN);
-  Parsed p = parse(argc, argv);
+  auto arguments = effective_arguments(argc, argv);
+  std::vector<char*> effective;
+  for (auto& argument : arguments) effective.push_back(argument.data());
+  init_fallback((int)effective.size(), effective.data());
+  Parsed p = parse((int)effective.size(), effective.data());
   g_umask = umask(0);
   init_ids();
   struct sigaction sa {};
