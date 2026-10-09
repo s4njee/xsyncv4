@@ -762,3 +762,9 @@ These change defaults, so they should be chosen rather than inherited from a ben
   methods pass. Strict differentials remain 212/214; the two pending E-08 filter
   features are unchanged. Installed executable/manual and live completion pass.
 - E-03 remains open for root/directory itemization and full sorted stdout parity.
+- Release checkpoint: all three artifacts identify source `22b1cfae0b94`.
+  Linux amd64/arm64 pass scratch execution and bare-Debian compressed resume
+  with formatted lengths/byte counts and logs matching stdout. All nine output
+  methods pass against the macOS universal artifact; ARM-client/x86_64-peer
+  push and pull also pass formatted resume and mirrored-log checks. Existing
+  Homebrew and Pi helper installations were not changed by this story.
