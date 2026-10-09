@@ -2,7 +2,7 @@
 
 Initial audit written 2026-10-08 against xsync 0.1.0 (protocol 1).
 All fifteen P0 stories completed against protocol 3; per-story evidence is below.
-P1 R-02 through R-09 and E-01 through E-07 are complete (15 of 22 stories). Current protocol 4 supports protocol 3; E-08 is next.
+P1 R-02 through R-09 and E-01 through E-07 are complete (15 of 22 stories). Current protocol 4 supports protocol 3; E-08 is in progress.
 Problem statements retain the original audit findings.
 
 ## What "daily driver" means here
@@ -94,7 +94,7 @@ coverage clarification remains open.
 | E-05 | **List mode.** `xsync host:dir/` or a single SRC should list, as rsync does; today it is a usage error. | **done** | `ls -l`-style listing for local and remote sources. | S |
 | E-06 | **End-of-run error summary.** With thousands of files an error scrolls away. | **done** | After the run: count of errors and the first ten, grouped by kind; exit-code line as now. | S |
 | E-07 | **`--bwlimit`, `--timeout`, keep-alive.** `--bwlimit` is rejected; `--timeout` is ignored (T-04). A stalled ssh connection hangs forever. | **done** | Token-bucket limit on the writer thread; idle timeout with keep-alive frames; exit 30 on timeout like rsync. | M |
-| E-08 | **Filter completeness.** Not implemented: `P`/`R` (protect/risk), `H`/`S` (hide/show), per-directory merge files (`.rsync-filter`, `-F`, `:` rules), `-C`, `-m`, the rule modifiers `/ C e n p r s w x`. These are the two remaining difftest failures. | confirmed | 159/159 difftest; a differential fuzzer against rsync for the new rule kinds, checked into `tests/`. | L |
+| E-08 | **Filter completeness.** Not implemented: `P`/`R` (protect/risk), `H`/`S` (hide/show), per-directory merge files (`.rsync-filter`, `-F`, `:` rules), `-C`, `-m`, the rule modifiers `/ C e n p r s w x`. These are the two remaining difftest failures. | **in progress** | 159/159 difftest; a differential fuzzer against rsync for the new rule kinds, checked into `tests/`. | L |
 | E-09 | **`--files-from`, `-R`, `--from0`.** Common in backup scripts and with `find … -print0`. | code | Implemented for local and remote, including the "implied directories" semantics of `-R`. | L |
 | E-10 | **Metadata beyond `-a`.** `-H` hard links, `-X` xattrs, `-A` ACLs, `-N` creation times, `-U` atimes, BSD file flags, `-E`, `--chmod`, `--chown`. Also an inconsistency to resolve: the clone path already carries xattrs and ACLs while the byte-copy and remote paths drop them. | code | `-H` and `-X` first (most used on macOS). Without `-X`, both paths behave the same — either strip on clone or document that clones are a superset. | XL |
 | E-11 | **Backup-style options.** `--backup`/`--backup-dir`, `--link-dest`, `--compare-dest`, `--remove-source-files`, `--append`, real `-S` sparse handling, `--preallocate`. | code | Prioritise `--link-dest` (snapshot backups) and `-S`; the rest fall back to rsync via R-02 until needed. | L |
@@ -1151,3 +1151,38 @@ Verified artifact manifest (source `864bd37edf14`):
 | `xsync-darwin-universal` | 2,957,800 | `1d05ec29d5b6b2141353109d495790c2394ff7d5f68dd7089b9ccb95c265902b` |
 | `xsync-linux-amd64` | 4,842,480 | `4b68887b2af6f53abbf91f80bcb7f09124b6d9ab89b001eb767d67baf70f4a84` |
 | `xsync-linux-arm64` | 4,785,944 | `458d6373ad5a14673a042e01dce378d31a46b8b82fcf92ec8fbb16c7a3b452fd` |
+
+### E-08 — in progress: global rule sides and differential coverage (2026-10-09)
+
+- Added native hide/show and protect/risk rules, long spellings, and global
+  modifiers `/ p r s x` alongside existing negation. Sender traversal and
+  receiver deletion now evaluate their own ordered rules. `--delete-excluded`
+  drops default receiver protection while retaining explicit receiver rules.
+  Perishable rules can protect a directory itself, but are ignored during
+  removal of children inside an unprotected directory. Absolute patterns use
+  the named entry's absolute path; xattr rules do not filter filenames.
+- `PF_FILTERS` (2048) negotiates a bounded, separate rule configuration (frame
+  19). Extended text is omitted from the frozen v3 hello and sent only after
+  negotiation. Unsupported peers refuse with code 4 or delegate original argv
+  before transfer. Malformed, oversized, unnegotiated and hello-embedded extended
+  rules are rejected before destination creation. Invalid side modifiers on
+  `H`/`S`/`P`/`R` fail with rsync's syntax status.
+- Checked in `tests/filter_diff_test.py`: reproducible seeds, mixed rule order,
+  sender/receiver sides, deletion, `--delete-excluded`, perishable rules,
+  absolute paths, source integrity, data/types/modes/times and sorted itemization.
+  Its 234 local/push/pull comparisons pass on macOS ARM, Rosetta and real Linux
+  SSH. An additional 512 local random seeds plus 30 directed cases pass. Twelve
+  invalid side/modifier cases match rsync on ARM, Rosetta and Linux. The fuzzer
+  currently covers the implemented global subset; merge/prune cases remain to
+  be added with those implementations.
+- All 32,913 filter unit checks pass on ARM and Rosetta. Four hostile filter-wire
+  methods pass on macOS, Rosetta and Linux; expanded frozen/subset protocol
+  checks (4) pass on macOS and Linux. A Python 3.11 f-string incompatibility in
+  the new wire test was corrected before final Linux verification. macOS P0
+  (13), output (10) and listing (7) methods remain green.
+- Strict native forced-byte-copy sorted itemization is now **230/231**; the
+  protect-filter failure is fixed and `include_exclude_prune_empty` remains.
+  **E-08 is not complete:** single/per-directory merge files, inheritance and
+  merge modifiers `C e n w`, `-F`, CVS rules/`-C` and `-m` still need implementation
+  and differential coverage. QA builds include both macOS architectures; release
+  artifacts remain the completed E-07 set above, and installed helpers were unchanged.

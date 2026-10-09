@@ -146,7 +146,7 @@ p=pathlib.Path(sys.argv[1]); print(json.dumps({'hash':hashlib.sha256((p/'file').
     def test_requested_feature_is_never_silently_dropped(self):
         source = self.root / 'feature source'
         source.write_bytes(b'unchanged')
-        for flags in (['-rl', '--safe-links'], ['-a'], ['-H'], ['--bwlimit=256'], ['--timeout=1']):
+        for flags in (['-rl', '--safe-links'], ['-a'], ['-H'], ['--bwlimit=256'], ['--timeout=1'], ['--filter=P stale']):
             with self.subTest(flags=flags):
                 target = self.root / 'unsupported feature destination'
                 result = subprocess.run([str(BINARY), '--no-fallback', *flags, '-e', RSH,
@@ -165,7 +165,7 @@ p=pathlib.Path(sys.argv[1]); print(json.dumps({'hash':hashlib.sha256((p/'file').
         source.write_bytes(b'unchanged')
         for peer in (self.remote_subset, self.remote_legacy):
             for direction in ('push', 'pull'):
-                for option in ('--out-format=%n', '--log-file=' + str(self.root / 'unopened log'), '-H', '--bwlimit=256', '--timeout=1'):
+                for option in ('--out-format=%n', '--log-file=' + str(self.root / 'unopened log'), '-H', '--bwlimit=256', '--timeout=1', '--filter=H hidden'):
                     with self.subTest(peer=peer, direction=direction, option=option):
                         target = self.root / 'uncreated format destination'
                         a, b = str(source), str(target)
@@ -177,7 +177,8 @@ p=pathlib.Path(sys.argv[1]); print(json.dumps({'hash':hashlib.sha256((p/'file').
                                                  '--rsync-path=' + shlex.quote(peer), a, b],
                                                 capture_output=True, timeout=20)
                         self.assertEqual(result.returncode, 4, result.stderr)
-                        expected = b'peer does not support bandwidth limits and idle timeouts' if option.startswith(('--bwlimit', '--timeout')) else \
+                        expected = b'peer does not support extended filters' if option.startswith('--filter') else \
+                                   b'peer does not support bandwidth limits and idle timeouts' if option.startswith(('--bwlimit', '--timeout')) else \
                                    b'peer does not support hard-link preservation' if option == '-H' else b'peer does not support structured file output'
                         self.assertIn(expected, result.stderr)
                         self.assertFalse(target.exists())

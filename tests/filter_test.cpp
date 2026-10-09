@@ -694,11 +694,11 @@ const Case kCases[] = {
     {{"i:*/", "e:**/*a*/**\?c"}, kExcl, {"bar/foo/a.c", "bar/baz/x.c", "dir1/ab/foo/bar/a.c"}},
 };
 
-// Rules rsync accepts but FilterList deliberately rejects.
+// Rules that still need merge support, and invalid side/modifier combinations.
 const char* const kUnsupported[] = {
-    ": .f", ". f", "-/ foo", "-p a.c", "H foo", "S foo", "P foo", "R foo", "hide foo", "show foo",
-    "protect foo", "risk foo", "merge f", "dir-merge .f", "-s foo", "-r foo", "-x foo", "-C", "+/ foo",
-    "-!p foo",
+    ": .f", ". f", "merge f", "dir-merge .f", "-C",
+    "Hs foo", "Hr foo", "Ss foo", "Sr foo", "Ps foo", "Pr foo", "Rs foo", "Rr foo",
+    "HC foo", "-e foo", "-n foo", "-w foo",
 };
 
 std::string write_temp(std::string_view content) {
@@ -863,12 +863,45 @@ void test_long_paths() {
   CHECK(fl.excluded(deep, false) && !fl.excluded(deep + "d", true), "100k path");
 }
 
+void test_sides() {
+  std::string error;
+  for (const auto& prefix : {"H", "S", "P", "R", "-s", "+s", "-r", "+r", "-sr", "+sr"}) {
+    FilterList filters, roundtrip;
+    CHECK(filters.add_filter(std::string(prefix) + " *.o", &error), "%s", error.c_str());
+    for (const auto& rule : filters.to_strings()) CHECK(roundtrip.add_filter(rule, &error), "%s", error.c_str());
+    const bool include = prefix[0] == '+' || prefix[0] == 'S' || prefix[0] == 'R';
+    const bool sender = prefix[0] == 'H' || prefix[0] == 'S' || std::string_view(prefix).find('s') != std::string_view::npos;
+    const bool receiver = prefix[0] == 'P' || prefix[0] == 'R' || std::string_view(prefix).find('r') != std::string_view::npos;
+    CHECK(filters.excluded("d/a.o", false) == (sender && !include), "sender %s", prefix);
+    for (const bool deleted : {false, true}) {
+      CHECK(filters.protected_from_deletion("d/a.o", false, deleted) == (receiver && !include), "receiver %s", prefix);
+      CHECK(roundtrip.protected_from_deletion("d/a.o", false, deleted) == (receiver && !include), "roundtrip %s", prefix);
+    }
+  }
+  FilterList defaults;
+  defaults.add_pattern("*.o", false);
+  CHECK(defaults.protected_from_deletion("a.o", false), "default receiver protection");
+  CHECK(!defaults.protected_from_deletion("a.o", false, true), "delete-excluded removes default protection");
+  FilterList perish;
+  CHECK(perish.add_filter("-p *.o", &error), "%s", error.c_str());
+  CHECK(perish.protected_from_deletion("dir/a.o", false), "perishable at existing directory");
+  CHECK(!perish.protected_from_deletion("dir/a.o", false, false, true), "perishable inside deleted directory");
+  FilterList absolute;
+  CHECK(absolute.add_filter("-/ /tmp/src/a.o", &error), "%s", error.c_str());
+  CHECK(absolute.excluded("a.o", false, "/tmp/src/a.o"), "absolute match");
+  CHECK(!absolute.excluded("a.o", false, "/tmp/dst/a.o"), "absolute mismatch");
+  FilterList xattr;
+  CHECK(xattr.add_filter("-x *", &error), "%s", error.c_str());
+  CHECK(!xattr.excluded("file", false) && !xattr.protected_from_deletion("file", false), "xattr rules ignore filenames");
+}
+
 }  // namespace
 
 int main() {
   test_table();
   test_api();
   test_long_paths();
+  test_sides();
   std::printf("%d checks, %d failures\n", g_checks, g_failures);
   return g_failures ? 1 : 0;
 }

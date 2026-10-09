@@ -378,7 +378,8 @@ second is printed. `-v` and `-i` lines scroll above the live region. `NO_COLOR` 
 Supported with rsync's meaning: `-a -r -d -H -l -L -p -t -g -o -D -O -J -n -u -c -I -x -z -v -q
 -i -h -P -e -f`, `--delete` (and `--del`, `--delete-before/-during/-after/-delay`),
 `--delete-excluded`, `--force`, `--exclude`, `--include`, `--exclude-from`,
-`--include-from`, `--filter` (`+`/`-` rules and `!`), `--existing`, `--ignore-existing`,
+`--include-from`, `--filter` (`+`/`-`, `H`/`S`, `P`/`R`, `!`, and modifiers
+`! / s r p x`), `--existing`, `--ignore-existing`,
 `--ignore-errors`, `--max-delete`,
 `--size-only`, `--modify-window`, `--max-size`, `--min-size`, `--inplace`, `--partial`,
 `--mkpath`, `--numeric-ids`, `--rsync-path`, `--compress-level`, `--stats`, `--progress`,
@@ -409,7 +410,7 @@ Differences to be aware of:
 - **Delegated to rsync** (strict mode rejects them): `-A`, `-X`, `-R`,
   `-b`, `-m`, `-C`, `-F`, `--files-from`, `--link-dest`/`--compare-dest`/`--copy-dest`,
   `--chmod`, `--append`, `--partial-dir`, `--remove-source-files`, per-directory
-  merge files and `P`/`R`/`H`/`S` filter rules.
+  merge files and filter modifiers `C e n w`.
 - **Unsupported options fall back before transfer; strict mode fails.** This includes
   `--contimeout`, `-S`/`--sparse`, `--fsync`, `--preallocate`,
   `--skip-compress`, `--block-size`, `--checksum-choice`,
@@ -420,6 +421,18 @@ Differences to be aware of:
   to protocol-carried paths. `--blocking-io`/`--no-blocking-io` cannot change the
   internally polled pipe transport.
   `--no-motd` has no effect because there is no daemon transport.
+
+Filters use first-match ordering independently for the source file list and
+destination deletion. Hide/show (`H`/`S`) apply to the source; protect/risk
+(`P`/`R`) apply to deletion. Unqualified include/exclude rules normally apply to
+both, but become sender-only with `--delete-excluded`; explicit receiver rules
+continue to protect entries. Perishable (`p`) rules are ignored inside a
+directory being deleted. The `/` modifier matches the entry's absolute path.
+The `x` modifier applies to xattr names and does not filter filenames; native
+`-X` support is still pending. Extended filters negotiate `PF_FILTERS` before
+their rule text is sent. Older helpers refuse or delegate these requests before
+transferring, while ordinary include/exclude filters retain their original wire
+format.
 
 xsync-only options: `-j N`/`--jobs=N` (worker threads; default is the number of
 performance cores), `--no-clone`, `--atomic` (default), `--no-atomic`.

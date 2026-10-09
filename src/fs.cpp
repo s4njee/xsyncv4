@@ -510,7 +510,9 @@ bool remove_tree(const std::string& path, u8 type, const std::string& rel, Worke
       const Entry& c = l.e[i - 1];
       std::string crel = rel_join(rel, l.name_sv(c));
       // Excluded files are protected from deletion, which keeps their directory alive too.
-      if (!g_opt.delete_excluded && !g_opt.filters.empty() && g_opt.filters.excluded(crel, c.type == T_DIR)) {
+      std::string absolute;
+      if (g_opt.filters.has_absolute()) absolute = FilterList::absolute_path(path_join(path, l.name_sv(c)));
+      if (g_opt.filters.protected_from_deletion(crel, c.type == T_DIR, g_opt.delete_excluded, true, absolute)) {
         if (ok && !g_opt.quiet) t.logf("cannot delete non-empty directory: " + rel);
         ok = false;
         continue;
@@ -649,7 +651,9 @@ void generate(DirWork& w, Worker& t) {
   auto extra = [&](const Entry& d) {
     if (!o.del || w.no_delete || !w.rename_to.empty()) return;
     set_names(dl.name_sv(d));
-    if (!o.delete_excluded && !o.filters.empty() && o.filters.excluded(rel, d.type == T_DIR)) return;
+    std::string absolute;
+    if (o.filters.has_absolute()) absolute = FilterList::absolute_path(path);
+    if (o.filters.protected_from_deletion(rel, d.type == T_DIR, o.delete_excluded, false, absolute)) return;
     std::lock_guard<std::mutex> lock(final_mu);
     delete_candidates.push_back({path, rel, w.dst_path, d.type});
   };

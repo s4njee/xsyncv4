@@ -46,7 +46,7 @@
 namespace {
 
 enum : u8 { F_HELLO = 1, F_DIR, F_NEED, F_DATA, F_LIST_END, F_DATA_END, F_DONE, F_MSG, F_IDMAP, F_DEST, F_OUTPUT, F_OUTPUT_CONFIG,
-            F_DELTA_REQUEST, F_DELTA_SIGNATURE, F_DELTA_RETRY_ACK, F_LIST_ENTRY, F_IO_CONFIG, F_KEEPALIVE };
+            F_DELTA_REQUEST, F_DELTA_SIGNATURE, F_DELTA_RETRY_ACK, F_LIST_ENTRY, F_IO_CONFIG, F_KEEPALIVE, F_FILTER_CONFIG };
 enum : u8 { DF_ATTRS = 1, DF_SINGLE = 2, DF_NODELETE = 4, DF_ZSTD = 8 };
 enum : u8 { R_WHOLE = 1, R_CHUNK = 2, R_FAIL = 4, R_END = 8, R_LITERAL = 16, R_DELTA_END = 32, R_COPY = 64 };
 constexpr size_t HDR = 5;                  // u32 payload length + u8 type
@@ -330,6 +330,10 @@ struct Conn {
         die(RERR_PROTOCOL, "the remote shell is printing text on stdout (or --rsync-path is not xsync); remove shell startup output");
       if (len > (1u << 30)) die(RERR_PROTOCOL, "protocol error: oversized frame");
       if (type == F_IO_CONFIG && len > 20) die(RERR_PROTOCOL, "protocol error: malformed I/O configuration (oversized)");
+      if (type == F_FILTER_CONFIG && len > 1024 * 1024)
+        die(RERR_PROTOCOL, "protocol error: oversized filter configuration");
+      if (type == F_FILTER_CONFIG && !(g_opt.peer_features & PF_FILTERS))
+        die(RERR_PROTOCOL, "protocol error: unnegotiated filter configuration");
       if (type == F_KEEPALIVE) {
         if (!keepalive.load() || len) die(RERR_PROTOCOL, "protocol error: invalid or unnegotiated keep-alive");
         continue;
@@ -453,6 +457,8 @@ std::string missing_feature(u64 features) {
   if (!(features & PF_CORE)) return "peer does not support the required core transfer features";
   if ((g_opt.bwlimit || g_opt.timeout) && !(features & PF_IO_CONTROL))
     return "peer does not support bandwidth limits and idle timeouts";
+  if (g_opt.filters.needs_extended() && !(features & PF_FILTERS))
+    return "peer does not support extended filters";
   if (g_opt.list_only) return features & PF_LIST ? "" : "peer does not support source listing";
   if (g_opt.safe_links && !(features & PF_SAFE_LINKS)) return "peer does not support --safe-links";
   if (!g_opt.numeric_ids && (g_opt.owner || g_opt.group) && !(features & PF_IDMAP))
@@ -468,7 +474,8 @@ void put_options(std::string& f) {
 #define X(n) put_svar(f, o.n);
   WIRE_V3_INT_OPTS(X)
 #undef X
-  auto rules = o.filters.to_strings();
+  // Extended syntax must not reach legacy parsers before capability negotiation.
+  auto rules = o.filters.needs_extended() ? std::vector<std::string>() : o.filters.to_strings();
   put_var(f, rules.size());
   for (auto& r : rules) put_str(f, r);
 }
@@ -1866,8 +1873,9 @@ int run_client(const std::vector<std::string>& srcs, const std::string& dest, u3
   put_var(f, wire_version);
   f.push_back(push ? 'R' : 'S');
   u64 advertised = PROTO_FEATURES & (o.whole_file ? ~(PF_RESUME | PF_DELTA) : ~u64(0));
-  if (o.list_only) advertised &= PF_CORE | PF_ZSTD | PF_LIST | PF_IO_CONTROL;
+  if (o.list_only) advertised &= PF_CORE | PF_ZSTD | PF_LIST | PF_IO_CONTROL | PF_FILTERS;
   else advertised &= ~PF_LIST;
+  if (!o.filters.needs_extended()) advertised &= ~PF_FILTERS;
   if (!o.hard_links) advertised &= ~PF_HLINK;
   if (!output_enabled()) advertised &= ~(PF_OUTPUT | PF_DIR_OUTPUT);
   if (wire_version >= 4) put_var(f, advertised);
@@ -1950,6 +1958,15 @@ int run_client(const std::vector<std::string>& srcs, const std::string& dest, u3
     c.configure(o.bwlimit, o.timeout, true);
     c.send(std::move(config));
   }
+  if (o.peer_features & PF_FILTERS) {
+    std::string config = new_frame(F_FILTER_CONFIG);
+    auto rules = o.filters.to_strings();
+    if (rules.size() > 10000) die(RERR_UNSUPPORTED, "too many filter rules for a remote transfer");
+    put_var(config, rules.size());
+    for (const auto& rule : rules) put_str(config, rule);
+    if (config.size() > 1024 * 1024) die(RERR_UNSUPPORTED, "filter configuration exceeds 1 MiB");
+    c.send(std::move(config));
+  }
   if (o.peer_features & PF_DIR_OUTPUT) {
     std::string config = new_frame(F_OUTPUT_CONFIG);
     config.push_back((char)o.output_attrs);
@@ -2010,6 +2027,8 @@ int run_server() {
   o.list_only = o.peer_features & PF_LIST;
   o.hard_links = o.peer_features & PF_HLINK;
   get_options(r);
+  if (o.filters.needs_extended())
+    die(RERR_PROTOCOL, "protocol error: extended filters require a negotiated configuration");
   o.output_attrs = o.itemize;
   if (r.bad || (role != 'R' && role != 'S')) die(RERR_PROTOCOL, "protocol error: malformed hello options or role");
   if (o.list_only && role != 'S') die(RERR_PROTOCOL, "protocol error: listing requires sender role");
@@ -2039,6 +2058,20 @@ int run_server() {
     o.bwlimit = rate;
     o.timeout = (u32)seconds;
     c.configure(rate, (u32)seconds, true);
+  }
+  if (o.peer_features & PF_FILTERS) {
+    if (!c.read_frame(type, payload)) conn_lost();
+    RBuf config(payload);
+    u64 count = config.var();
+    if (type != F_FILTER_CONFIG || config.bad || count > 10000 || !o.filters.empty())
+      die(RERR_PROTOCOL, "protocol error: malformed filter configuration");
+    std::string error;
+    for (u64 i = 0; i < count && !config.bad; ++i) {
+      auto rule = config.str();
+      if (!config.bad && !o.filters.add_filter(rule, &error))
+        die(RERR_PROTOCOL, "protocol error: bad configured filter: %s", error.c_str());
+    }
+    if (config.bad || !config.empty()) die(RERR_PROTOCOL, "protocol error: malformed filter configuration");
   }
   if (o.peer_features & PF_DIR_OUTPUT) {
     if (!c.read_frame(type, payload)) conn_lost();

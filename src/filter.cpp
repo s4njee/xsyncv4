@@ -5,6 +5,7 @@
 #include <cstddef>
 #include <cstdio>
 #include <cstring>
+#include <filesystem>
 #include <system_error>
 #include <utility>
 
@@ -161,7 +162,9 @@ void FilterList::add_rule(std::string_view pat, bool include, bool negate) {
   Rule r;
   r.text = pat;
   r.include = include;
+  r.prefix = include ? '+' : '-';
   r.negate = negate;
+  if (negate) r.modifiers = "!";
   if (pat.size() > 1 && pat.back() == '/') {  // exactly one trailing slash is stripped
     pat.remove_suffix(1);
     r.dir_only = true;
@@ -254,24 +257,28 @@ bool FilterList::add_filter(std::string_view rule, std::string* err) {
     }
   }
   switch (ch) {
-    case '+': case '-': case '!': break;
+    case '+': case '-': case '!': case 'H': case 'S': case 'P': case 'R': break;
     case '.': return fail("unsupported filter rule (merge)");
     case ':': return fail("unsupported filter rule (dir-merge)");
-    case 'H': return fail("unsupported filter rule (hide)");
-    case 'S': return fail("unsupported filter rule (show)");
-    case 'P': return fail("unsupported filter rule (protect)");
-    case 'R': return fail("unsupported filter rule (risk)");
     default: return fail("unknown filter rule");
   }
 
   bool negate = false;
+  std::string modifiers;
+  uint8_t sides = ch == 'H' || ch == 'S' ? 1 : ch == 'P' || ch == 'R' ? 2 : 0;
+  const bool side_prefix = sides != 0;
   if (ch != '!') {
     for (char m; (m = at(++i)) && m != ' ' && m != '_';) {
-      if (m != '!') {  // rsync also has / C e n p r s w x; none of them are implemented here
+      if ((side_prefix && std::strchr("srC", m)) || std::strchr("enw", m))
+        return fail(std::string("invalid modifier '") + m + "' in filter rule");
+      if (!std::strchr("!/sprx", m)) {
         return fail(std::string(std::strchr("/Cenprswx", m) ? "unsupported" : "invalid") + " modifier '" + m +
                     "' in filter rule");
       }
-      negate = true;
+      modifiers += m;
+      if (m == '!') negate = true;
+      if (m == 's') sides |= 1;
+      if (m == 'r') sides |= 2;
     }
   }
   const std::string_view pat = rule.substr(std::min(i + 1, rule.size()));
@@ -281,7 +288,14 @@ bool FilterList::add_filter(std::string_view rule, std::string* err) {
     return true;
   }
   if (pat.empty()) return fail("unexpected end of filter rule");
-  add_rule(pat, ch == '+', negate);
+  add_rule(pat, ch == '+' || ch == 'S' || ch == 'R', negate);
+  Rule& added = rules_.back();
+  added.prefix = ch;
+  added.modifiers = std::move(modifiers);
+  added.sides = sides;
+  added.absolute = added.modifiers.find('/') != std::string::npos;
+  added.perishable = added.modifiers.find('p') != std::string::npos;
+  added.xattr = added.modifiers.find('x') != std::string::npos;
   return true;
 }
 
@@ -326,18 +340,27 @@ bool FilterList::add_from_file(const std::string& path, bool include, std::strin
   return ok && !read_err;
 }
 
-bool FilterList::excluded(std::string_view path, bool is_dir) const {
+bool FilterList::match(std::string_view relative, bool is_dir, bool receiver, bool delete_excluded,
+                       bool deleting_directory, std::string_view absolute) const {
+  std::string_view path = relative;
   if (path.empty()) return false;
-  const size_t n = path.size();
-  const size_t slash = path.rfind('/');
-  const std::string_view base = slash == path.npos ? path : path.substr(slash + 1);
 
-  // "/path/" copy, built at most once per call and only for rules needing a virtual slash.
+  // Reuse the virtual slash framing until switching between relative and absolute paths.
   char stack[4096];
   std::string heap;
   const char* framed = nullptr;
+  std::string_view framed_path;
 
   for (const Rule& r : rules_) {
+    if (r.xattr || (receiver && deleting_directory && r.perishable)) continue;
+    uint8_t sides = r.sides ? r.sides : delete_excluded ? 1 : 3;
+    if (!(sides & (receiver ? 2 : 1))) continue;
+    path = r.absolute ? absolute : relative;
+    if (r.absolute && path.starts_with('/')) path.remove_prefix(1);
+    if (path.empty()) continue;
+    const size_t n = path.size(), slash = path.rfind('/');
+    const std::string_view base = slash == path.npos ? path : path.substr(slash + 1);
+    if (path != framed_path) framed = nullptr, framed_path = path;
     bool m = false;
     if (is_dir || !r.dir_only) {
       const std::string_view pat = r.pat;
@@ -380,12 +403,41 @@ bool FilterList::excluded(std::string_view path, bool is_dir) const {
   return false;
 }
 
+bool FilterList::excluded(std::string_view path, bool is_dir, std::string_view absolute) const {
+  return match(path, is_dir, false, false, false, absolute);
+}
+
+bool FilterList::protected_from_deletion(std::string_view path, bool is_dir, bool delete_excluded,
+                                        bool deleting_directory, std::string_view absolute) const {
+  return match(path, is_dir, true, delete_excluded, deleting_directory, absolute);
+}
+
+bool FilterList::needs_extended() const {
+  return std::any_of(rules_.begin(), rules_.end(), [](const Rule& r) {
+    return r.sides || r.absolute || r.perishable || r.xattr;
+  });
+}
+
+bool FilterList::has_absolute() const {
+  return std::any_of(rules_.begin(), rules_.end(), [](const Rule& r) { return r.absolute; });
+}
+
+std::string FilterList::absolute_path(std::string_view path) {
+  // Resolve directories as getcwd() would, retaining the final named entry even
+  // when it is a symlink. Excludes match the named link, not its referent.
+  std::error_code error;
+  auto value = std::filesystem::absolute(std::filesystem::path(path), error).lexically_normal();
+  if (error) return std::string(path);
+  auto parent = std::filesystem::weakly_canonical(value.parent_path(), error);
+  return (error ? value : parent / value.filename()).string();
+}
+
 std::vector<std::string> FilterList::to_strings() const {
   std::vector<std::string> out;
   out.reserve(rules_.size());
   for (const Rule& r : rules_) {
-    std::string s(1, r.include ? '+' : '-');
-    if (r.negate) s += '!';
+    std::string s(1, r.prefix);
+    s += r.modifiers;
     s += ' ';
     s += r.text;
     out.push_back(std::move(s));

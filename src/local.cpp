@@ -94,7 +94,11 @@ void prune_source(DirList& l, std::string_view rel, u32 parent_dev, Worker& t, s
       err_line(RERR_PARTIAL, "symlink has no referent: \"%s\"", full().c_str());
       continue;
     }
-    if (!o.filters.empty() && o.filters.excluded(full(), e.type == T_DIR)) continue;
+    if (!o.filters.empty()) {
+      std::string absolute;
+      if (o.filters.has_absolute()) absolute = FilterList::absolute_path(paths ? (*paths)[i] : path_join(base, l.name_sv(e)));
+      if (o.filters.excluded(full(), e.type == T_DIR, absolute)) continue;
+    }
     bool skip = false;
     switch (e.type) {
       case T_DIR:
@@ -210,7 +214,7 @@ void build_root(const std::vector<std::string>& srcs, RootList& r, Worker& t, co
         e.link_off = one.add_str({buf, n > 0 ? (size_t)n : 0});
       }
       one.e.push_back(e);
-      prune_source(one, "", 0, t);
+      prune_source(one, "", 0, t, nullptr, guard, sl == std::string::npos ? "." : sl ? trimmed.substr(0, sl) : "/");
       if (one.e.empty()) continue;
       Entry c = one.e[0];
       c.rdev = (c.type == T_CHR || c.type == T_BLK) ? c.rdev : 0;
