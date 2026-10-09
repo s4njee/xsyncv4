@@ -152,6 +152,7 @@ extern std::atomic<bool> g_source_io_error;
 void out_line(std::string_view s);
 // Error/warning on stderr, prefixed "xsync: ". code > 0 is recorded as the exit status.
 void err_line(int code, const char* fmt, ...) __attribute__((format(printf, 2, 3)));
+void print_error_summary();
 [[noreturn]] void die(int code, const char* fmt, ...) __attribute__((format(printf, 2, 3)));
 [[noreturn]] void exit_signal();
 // When set (server mode) messages are routed here instead of the terminal. kind: 0=out 1=err.

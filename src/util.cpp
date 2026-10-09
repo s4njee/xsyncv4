@@ -1,7 +1,9 @@
 #include <algorithm>
+#include <array>
 #include <cstdarg>
 #include <cstdlib>
 #include <ctime>
+#include <mutex>
 
 #include "common.h"
 #include "fs.h"
@@ -54,12 +56,87 @@ static std::string vformat(const char* fmt, va_list ap) {
   return std::string(buf, (size_t)n);
 }
 
+namespace {
+constexpr size_t ERROR_SAMPLES = 10, OTHER_ERROR = 256;
+struct ErrorSample { int code = 0; std::string text; };
+std::mutex error_mu;
+std::array<u64, OTHER_ERROR + 1> error_counts{};
+std::array<ErrorSample, ERROR_SAMPLES> error_samples;
+size_t error_sample_count = 0;
+
+size_t error_group(int code) { return code < (int)OTHER_ERROR ? (size_t)code : OTHER_ERROR; }
+
+void remember_error(int code, std::string_view text) {
+  if (code <= 0 || g_opt.am_server) return;
+  std::lock_guard<std::mutex> lock(error_mu);
+  ++error_counts[error_group(code)];
+  if (error_sample_count < ERROR_SAMPLES)
+    error_samples[error_sample_count++] = {code, std::string(text.substr(0, 4095))};
+}
+
+const char* error_kind(size_t code) {
+  switch (code) {
+    case RERR_SYNTAX: return "syntax or usage";
+    case RERR_PROTOCOL: return "protocol incompatibility";
+    case RERR_FILESELECT: return "file selection";
+    case RERR_UNSUPPORTED: return "unsupported action";
+    case RERR_STARTCLIENT: return "protocol startup";
+    case RERR_FILEIO: return "file IO";
+    case RERR_STREAMIO: return "stream IO";
+    case RERR_IPC: return "IPC";
+    case RERR_SIGNAL: return "interruption";
+    case RERR_PARTIAL: return "partial transfer";
+    case RERR_VANISHED: return "vanished source files";
+    case RERR_DEL_LIMIT: return "deletion limit";
+    case RERR_CMD_FAILED: return "remote command failed";
+    case RERR_CMD_NOTFOUND: return "remote command not found";
+    case 255: return "remote shell failure";
+    default: return "other error";
+  }
+}
+}  // namespace
+
+void print_error_summary() {
+  if (g_opt.am_server) return;
+  // Snapshot before formatting/output so workers never wait on terminal IO.
+  std::array<u64, OTHER_ERROR + 1> counts;
+  std::array<ErrorSample, ERROR_SAMPLES> samples;
+  size_t shown;
+  {
+    std::lock_guard<std::mutex> lock(error_mu);
+    counts = error_counts;
+    samples = error_samples;
+    shown = error_sample_count;
+  }
+  u64 total = 0;
+  for (u64 n : counts) total += n;
+  if (!total) return;
+  std::string summary = "xsync: error summary: " + std::to_string(total) +
+    (total == 1 ? " error" : " errors") + " (showing first " + std::to_string(shown) + ")\n";
+  for (size_t group = 1; group < counts.size(); ++group) {
+    if (!counts[group]) continue;
+    summary += "  ";
+    summary += error_kind(group);
+    if (group != OTHER_ERROR) summary += " (code " + std::to_string(group) + ")";
+    summary += ": " + std::to_string(counts[group]) + (counts[group] == 1 ? " error\n" : " errors\n");
+    for (size_t i = 0; i < shown; ++i) {
+      if (error_group(samples[i].code) != group) continue;
+      summary += "    ";
+      if (group == OTHER_ERROR) summary += "(code " + std::to_string(samples[i].code) + ") ";
+      summary += output_escape(samples[i].text) + "\n";
+    }
+  }
+  if (total > shown) summary += "  " + std::to_string(total - shown) + " more errors not shown\n";
+  ui_write(true, summary);
+}
+
 void err_line(int code, const char* fmt, ...) {
   va_list ap;
   va_start(ap, fmt);
   std::string s = vformat(fmt, ap);
   va_end(ap);
   record_code(code);
+  remember_error(code, s);
   if (g_msg_sink) return g_msg_sink(1, code, s);
   ui_write(true, "xsync: " + s + "\n");
 }
@@ -74,7 +151,10 @@ void die(int code, const char* fmt, ...) {
   else {
     progress_stop(false);
     output_flush();
-    fprintf(stderr, "xsync: %s\nxsync error: exiting (code %d)\n", s.c_str(), code);
+    remember_error(code, s);
+    fprintf(stderr, "xsync: %s\n", s.c_str());
+    print_error_summary();
+    fprintf(stderr, "xsync error: exiting (code %d)\n", code);
   }
   fflush(nullptr);
   _Exit(code);
@@ -84,6 +164,7 @@ void exit_signal() {
   cleanup_open_outputs();
   progress_stop(false);
   output_flush();
+  print_error_summary();
   if (!g_opt.am_server) fprintf(stderr, "\nxsync error: received SIGINT, SIGTERM, or SIGHUP (code %d)\n", RERR_SIGNAL);
   _Exit(RERR_SIGNAL);
 }

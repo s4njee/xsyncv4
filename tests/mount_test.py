@@ -96,7 +96,9 @@ class MountTests(unittest.TestCase):
                                                           ["-a", "--no-clone", "--atomic", "-j4"]),
                                                 capture_output=True, timeout=10)
                         self.assertEqual(result.returncode, 11, result.stderr.decode())
-                        self.assertEqual(result.stderr.lower().count(b"no space left"), 1, result.stderr.decode())
+                        diagnostics = result.stderr.split(b"xsync: error summary:")[0]
+                        self.assertEqual(diagnostics.lower().count(b"no space left"), 1, result.stderr.decode())
+                        self.assertIn(b"error summary: 1 error (showing first 1)", result.stderr)
                         self.assertEqual(list(dst.glob(".large.*")), [])
                         if existing:
                             self.assertEqual((dst / "large").read_bytes(), b"previous valid file")

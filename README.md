@@ -207,6 +207,11 @@ and sorted by transfer-relative path. A terminal receives events as they finish.
 Progress stays on stderr. `--log-file=FILE` appends exactly the same stdout
 stream, including summaries, without timestamps or prefixes added to the log.
 An empty output format suppresses file lines; `-q` suppresses the stream.
+Transfer errors end with a stderr error count and the first ten diagnostics, grouped
+by exit-code kind, before the existing exit-code line. Quiet mode retains errors.
+Remote completion codes do not duplicate errors already reported by the peer;
+zero-code notices are excluded. Summary examples escape control bytes. These
+diagnostics do not enter stdout or the transfer log.
 Control bytes other than tabs are escaped as `\\#ooo`; valid UTF-8 is retained. Invalid
 high bytes are escaped unless `-8`/`--8-bit-output` is set.
 
@@ -415,6 +420,7 @@ python3 tests/mount_test.py                               # macOS: disposable AP
 python3 tests/fallback_test.py                            # local fallback checks
 python3 tests/protocol_test.py                            # frozen N-1 and feature subsets
 python3 tests/output_test.py                              # formats, ordering, log parity
+python3 tests/error_test.py                               # error counts, samples, exit codes and log parity
 python3 tests/list_test.py                                # listing parity and no destination writes
 python3 tests/list_wire_test.py                           # hostile listing metadata and fallback
 ./tests/ssh-rig.sh list_test.py                            # real SSH listing parity

@@ -485,6 +485,7 @@ int main(int argc, char** argv) {
   if (rc != RERR_SIGNAL) print_summary(t0);
   if (!rc) rc = g_exit_code.load();
   fflush(stdout);
+  print_error_summary();
   if (rc == RERR_VANISHED) fprintf(stderr, "xsync warning: %s (code %d)\n", rerr_name(rc), rc);
   else if (rc) fprintf(stderr, "xsync error: %s (code %d)\n", rerr_name(rc), rc);
   if (rc == RERR_SIGNAL) _exit(rc);  // workers may still be parked in syscalls

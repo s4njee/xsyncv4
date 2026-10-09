@@ -352,7 +352,9 @@ class TrustTests(unittest.TestCase):
                             args = ["fake:" + arg for arg in args]
                     result = self.run_sync([*flags, *args, dest], root, rc=23 if collides else 0)
                     if collides:
-                        self.assertEqual(result.stderr.count(b"destination name collision"), 1)
+                        diagnostics = result.stderr.split(b"xsync: error summary:")[0]
+                        self.assertEqual(diagnostics.count(b"destination name collision"), 1)
+                        self.assertIn(b"error summary: 1 error (showing first 1)", result.stderr)
                         self.assertFalse((dst / first).exists())
                         self.assertFalse((dst / second).exists())
                         self.assertTrue((dst / "extra").exists())
@@ -385,7 +387,9 @@ class TrustTests(unittest.TestCase):
                         sources = ["fake:" + s for s in sources]
                 result = self.run_sync([*flags, *sources, dest], root, rc=23 if collides else 0)
                 if collides:
-                    self.assertEqual(result.stderr.count(b"destination name collision"), 1)
+                    diagnostics = result.stderr.split(b"xsync: error summary:")[0]
+                    self.assertEqual(diagnostics.count(b"destination name collision"), 1)
+                    self.assertIn(b"error summary: 1 error (showing first 1)", result.stderr)
                     self.assertEqual(sorted(p.name for p in dst.iterdir()), ["extra"])
                 else:
                     self.assertEqual((dst / "A/first").read_bytes(), b"first")

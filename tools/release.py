@@ -110,6 +110,22 @@ grep -F 'space link -> file' /tmp/list-local.stdout
 grep -E '^p.* pipe$' /tmp/list-local.stdout
 "$bin" --no-fallback -c --stats /tmp/delta-source >/tmp/list.stats
 grep -F 'Number of regular files transferred: 0' /tmp/list.stats
+set +e
+"$bin" --no-fallback --list-only /tmp/missing-one /tmp/missing-two /tmp/ignored >/tmp/errors.stdout 2>/tmp/errors.stderr
+status=$?
+set -e
+test "$status" = 23
+test ! -s /tmp/errors.stdout
+grep -F 'xsync: error summary: 2 errors (showing first 2)' /tmp/errors.stderr
+grep -F 'partial transfer (code 23): 2 errors' /tmp/errors.stderr
+test "$(tail -n 1 /tmp/errors.stderr)" = 'xsync error: some files/attrs were not transferred (see previous errors) (code 23)'
+set +e
+"$bin" --no-fallback --list-only -e /tmp/fakessh --rsync-path="$bin" fake:/tmp/missing-one fake:/tmp/missing-two /tmp/ignored >/tmp/errors-remote.stdout 2>/tmp/errors-remote.stderr
+status=$?
+set -e
+test "$status" = 23
+test ! -s /tmp/errors-remote.stdout
+grep -F 'xsync: error summary: 2 errors (showing first 2)' /tmp/errors-remote.stderr
 "$bin" --version
 '''.replace('ARCH', arch)
             run('docker', 'run', '--rm', '--platform', 'linux/' + arch,

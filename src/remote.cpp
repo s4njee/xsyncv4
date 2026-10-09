@@ -15,6 +15,7 @@
 
 #include <cerrno>
 #include <algorithm>
+#include <array>
 #include <cstdlib>
 #include <memory>
 #include <map>
@@ -257,13 +258,24 @@ void send_msg(int kind, int code, std::string_view s) {
   die(RERR_STREAMIO, "connection unexpectedly closed");
 }
 
+// Completion status repeats the code already carried by individual F_MSGs.
+// Keep a synthetic diagnostic only when the peer supplied no detail of that kind.
+std::array<std::atomic<bool>, 256> peer_error_seen{};
+void report_peer_error(int code, const char* message) {
+  if (code > 0 && (code >= (int)peer_error_seen.size() || !peer_error_seen[code].load()))
+    err_line(code, "%s", message);
+}
+
 void handle_msg(std::string_view payload) {
   RBuf r(payload);
   int kind = r.byte();
   int code = (int)r.var();
   std::string text(r.rest());
   if (kind == 0) output_legacy(text);
-  else if (kind == 1) err_line(code, "%s", text.c_str());
+  else if (kind == 1) {
+    if (code > 0 && code < (int)peer_error_seen.size()) peer_error_seen[code] = true;
+    err_line(code, "%s", text.c_str());
+  }
   else die(code ? code : RERR_STREAMIO, "%s", text.c_str());
 }
 
@@ -909,7 +921,7 @@ struct Sender {
           RBuf r(payload);
           int code = (int)r.var();
           if (client) {
-            if (code) err_line(code, "errors were reported by the receiver");
+            report_peer_error(code, "errors were reported by the receiver");
             g_stats.created_files = r.var(), g_stats.created_dirs = r.var(), g_stats.created_links = r.var();
             g_stats.created_specials = r.var(), g_stats.deleted = r.var();
           }
@@ -1584,7 +1596,7 @@ struct Receiver {
     for (RDir* d : dirs)
       if (d && d->w.pending.load() != 0) die(RERR_PROTOCOL, "protocol error: missing requested file completion");
     if (sender_code) g_source_io_error.store(true);
-    if (client && sender_code) err_line(sender_code, "errors were reported by the sender");
+    if (client) report_peer_error(sender_code, "errors were reported by the sender");
     finalize_tree();
     if (g_stop.load()) exit_signal();
     allow_disconnect.store(true);
@@ -1613,7 +1625,7 @@ int receive_listing(Conn& c) {
       u64 code = r.var(), expected = r.var();
       if (r.bad || !r.empty() || code > 255 || expected != count)
         die(RERR_PROTOCOL, "protocol error: malformed listing completion");
-      if (code) err_line((int)code, "errors were reported while listing remote sources");
+      report_peer_error((int)code, "errors were reported while listing remote sources");
       c.finish();
       close(c.wfd);
       c.wfd = -1;

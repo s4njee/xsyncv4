@@ -92,7 +92,7 @@ coverage clarification remains open.
 | E-03 | **Itemize parity.** Missing against rsync: the `./` root line, `.d..t......` for existing directories whose time changed, `cd` lines in clone mode come from a different code path than byte-copy mode, `hf` for hard links. | **done** | `-i` output of both paths matches rsync's on the difftest corpus after sorting; difftest starts comparing stdout for `-i` runs. | M |
 | E-04 | **Delta transfer for large changed files.** Changed files are always sent whole. Irrelevant for the congress corpus, decisive for a 2 GB database dump with small edits over Wi-Fi. | **done** | Files above a threshold (1 MiB) use block matching (rsync rolling checksum, or content-defined chunks with XXH3) when the destination has a previous version; `-W` disables; bytes-on-wire within 20 % of rsync on an edited-large-file test. | XL |
 | E-05 | **List mode.** `xsync host:dir/` or a single SRC should list, as rsync does; today it is a usage error. | **done** | `ls -l`-style listing for local and remote sources. | S |
-| E-06 | **End-of-run error summary.** With thousands of files an error scrolls away. | new | After the run: count of errors and the first ten, grouped by kind; exit-code line as now. | S |
+| E-06 | **End-of-run error summary.** With thousands of files an error scrolls away. | **in progress** | After the run: count of errors and the first ten, grouped by kind; exit-code line as now. | S |
 | E-07 | **`--bwlimit`, `--timeout`, keep-alive.** `--bwlimit` is rejected; `--timeout` is ignored (T-04). A stalled ssh connection hangs forever. | code | Token-bucket limit on the writer thread; idle timeout with keep-alive frames; exit 30 on timeout like rsync. | M |
 | E-08 | **Filter completeness.** Not implemented: `P`/`R` (protect/risk), `H`/`S` (hide/show), per-directory merge files (`.rsync-filter`, `-F`, `:` rules), `-C`, `-m`, the rule modifiers `/ C e n p r s w x`. These are the two remaining difftest failures. | confirmed | 159/159 difftest; a differential fuzzer against rsync for the new rule kinds, checked into `tests/`. | L |
 | E-09 | **`--files-from`, `-R`, `--from0`.** Common in backup scripts and with `find … -print0`. | code | Implemented for local and remote, including the "implied directories" semantics of `-R`. | L |
@@ -1023,3 +1023,26 @@ Verified artifact manifest (source `75865d22f284`):
 | `xsync-darwin-universal` | 2,921,416 | `e1e94744af64df5828228f946de7b29f8a8730aa4d46bb395d246cf308e49777` |
 | `xsync-linux-amd64` | 4,803,064 | `f5d7ec600fbcd1391bc17a48c1c613f9d780d9540deb3cd9a833192384d7ac86` |
 | `xsync-linux-arm64` | 4,779,264 | `23218d9103dd9d31e5e65692c22f82d2ad6cb37ca7329b70ef3ef91fa8dbe613` |
+
+### E-06 — in progress: bounded end-of-run error summaries (2026-10-09)
+
+- Client/local diagnostics retain counts by exit-code kind and the first ten
+  examples across kinds. Storage is bounded; summary examples escape controls.
+  The stderr summary follows stopped progress and flushed output, before the
+  unchanged exit-code line. Quiet mode retains it; stdout/logs remain unchanged.
+- Fatal errors include preceding diagnostics; interruption preserves earlier
+  failures. Zero-code notices and peer completion codes repeating detailed
+  diagnostics are excluded. A peer status without details retains a synthetic
+  diagnostic. Server processes never add summaries to their protocol stream.
+- Eleven summary methods pass on macOS, including local/push/pull exact counts,
+  remote receiver errors, quiet/log parity, fatal/interrupted exits, mixed kinds,
+  escaped samples, 64 concurrent read failures and 6,000 errors with ten samples.
+  Real Linux SSH passes the first ten methods; the final large-count method and
+  verified static/universal artifacts are pending. Listing wire (4), frozen
+  protocol compatibility (4), Linux P0/output, macOS output/fallback and real
+  APFS disk-full/cross-mount checks pass. Collision/disk-full assertions now
+  distinguish the immediate diagnostic from its intentional summary repeat.
+- Strict native forced-byte-copy sorted itemization remains **229/231**, retaining
+  only E-08's two known filter failures. Release smoke now checks local/remote
+  error counts, stderr-only output and the original final exit-code line.
+  E-06 remains in progress until final release verification finishes.
