@@ -88,6 +88,7 @@ const char* error_kind(size_t code) {
     case RERR_PARTIAL: return "partial transfer";
     case RERR_VANISHED: return "vanished source files";
     case RERR_DEL_LIMIT: return "deletion limit";
+    case RERR_TIMEOUT: return "idle timeout";
     case RERR_CMD_FAILED: return "remote command failed";
     case RERR_CMD_NOTFOUND: return "remote command not found";
     case 255: return "remote shell failure";

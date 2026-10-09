@@ -22,8 +22,9 @@ constexpr u32 PROTO_MIN_VERSION = PROTO_VERSION - 1;
 constexpr u64 PF_CORE = 1, PF_ZSTD = 2, PF_IDMAP = 4, PF_SAFE_LINKS = 8, PF_RESUME = 16, PF_OUTPUT = 32;
 constexpr u64 PF_DIR_OUTPUT = 64, PF_HLINK = 128, PF_DELTA = 256;
 constexpr u64 PF_LIST = 512;
+constexpr u64 PF_IO_CONTROL = 1024;
 #ifndef XSYNC_PROTOCOL_FEATURES
-#define XSYNC_PROTOCOL_FEATURES 1023
+#define XSYNC_PROTOCOL_FEATURES 2047
 #endif
 constexpr u64 PROTO_FEATURES = XSYNC_PROTOCOL_FEATURES;
 constexpr u64 LEGACY_V3_FEATURES = 15;
@@ -61,6 +62,8 @@ struct Options {
   bool hard_links = false;  // Negotiated separately from the frozen v3 options.
   bool delete_before = false;  // Deletion is still deferred for sender-read safety.
   bool list_only = false, dirs_explicit = false, human_ungrouped = false;
+  u64 bwlimit = 0;  // Bytes/second; outside the frozen v3 option layout.
+  u32 timeout = 0;  // Remote idle seconds; zero disables the deadline.
   FilterList filters;
   // Set at runtime, not parsed.
   bool am_root = false;
@@ -161,7 +164,7 @@ extern void (*g_msg_sink)(int kind, int code, std::string_view s);
 // rsync exit codes
 enum { RERR_SYNTAX = 1, RERR_PROTOCOL = 2, RERR_FILESELECT = 3, RERR_UNSUPPORTED = 4,
        RERR_STARTCLIENT = 5, RERR_FILEIO = 11, RERR_STREAMIO = 12, RERR_IPC = 14,
-       RERR_SIGNAL = 20, RERR_PARTIAL = 23, RERR_VANISHED = 24, RERR_DEL_LIMIT = 25, RERR_CMD_FAILED = 124,
+       RERR_SIGNAL = 20, RERR_PARTIAL = 23, RERR_VANISHED = 24, RERR_DEL_LIMIT = 25, RERR_TIMEOUT = 30, RERR_CMD_FAILED = 124,
        RERR_CMD_NOTFOUND = 127 };
 
 // ---------------------------------------------------------------- helpers

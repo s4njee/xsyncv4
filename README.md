@@ -179,6 +179,29 @@ Receivers reject compressed or identity-map frames that were not negotiated.
 Protocol-3 peers use their known baseline feature set and receive the historical
 Hello response without new fields.
 
+`--bwlimit=RATE` caps each remote writer's serialized bytes after compression.
+Bare numbers are KiB/s; fractional numbers and `K`/`M`/`G`/`T`/`P`, `KiB`/`MiB`
+or decimal `KB`/`MB` suffixes are supported, rounded to the nearest KiB/s.
+Zero disables the limit; nonzero rates below 512 bytes/s are rejected. The
+token bucket accumulates at most 0.1 seconds or 16 KiB. Local copies share one
+bucket across workers and limit bytes written; a limit disables APFS cloning.
+
+`--timeout=SECONDS` bounds remote idle I/O, including initial shell/hello waits,
+partial frames, blocked writes and a shell that stays alive after protocol EOF.
+It uses integer seconds; zero disables the deadline. Timeouts clean up atomic
+outputs using the usual `--partial` policy and exit 30. A local copy has no
+remote connection deadline. Negotiated empty keep-alive frames preserve live
+connections during scans, checksums and disk work. They are sent at most every
+10 seconds, shortened to one third of a nonzero timeout (minimum 0.1 seconds).
+Sending one's own keep-alive never extends an idle peer deadline, and incoming
+heartbeats cannot extend a blocked writer's deadline.
+
+`PF_IO_CONTROL` (1024) gates a separate bandwidth/timeout configuration and
+keep-alives; the frozen v3 options remain unchanged. A requested nonzero limit
+or timeout against a peer without this feature falls back to rsync, or fails
+before transfer with code 4 in strict mode. Ordinary transfers still negotiate
+their common features with older peers.
+
 With `--partial`/`-P`, current peers hash an existing destination prefix with
 XXH3-128 on both sides and send only the remaining bytes when the hashes match.
 The receiver rechecks the prefix while copying it into the atomic output file;
@@ -383,19 +406,19 @@ Differences to be aware of:
 - **Clones carry extended attributes and ACLs** along, which `rsync -a` (without `-X -A`)
   does not. Use `--no-clone` if that matters.
 - **Output order.** File lines are sorted by path when stdout is not a terminal.
-- **Delegated to rsync** (strict mode rejects them): `-H`, `-A`, `-X`, `-R`,
+- **Delegated to rsync** (strict mode rejects them): `-A`, `-X`, `-R`,
   `-b`, `-m`, `-C`, `-F`, `--files-from`, `--link-dest`/`--compare-dest`/`--copy-dest`,
-  `--bwlimit`, `--chmod`, `--append`, `--partial-dir`, `--remove-source-files`, per-directory
-  merge files and `P`/`R`/`H`/`S` filter rules, listing mode (a single `SRC` argument).
+  `--chmod`, `--append`, `--partial-dir`, `--remove-source-files`, per-directory
+  merge files and `P`/`R`/`H`/`S` filter rules.
 - **Unsupported options fall back before transfer; strict mode fails.** This includes
-  `--timeout`, `--contimeout`, `-S`/`--sparse`, `--fsync`, `--preallocate`,
+  `--contimeout`, `-S`/`--sparse`, `--fsync`, `--preallocate`,
   `--skip-compress`, `--block-size`, `--checksum-choice`,
   `--log-file-format`, and `--debug`. `--compress-choice` accepts `zstd` or `none`.
   `--info` accepts `progress2`, `progress0`, `stats2`, and `stats0` (comma separated).
 - **Compatibility no-ops are listed in `--help` with reasons.**
   `-s`/`--protect-args`/`--secluded-args` is intrinsic
   to protocol-carried paths. `--blocking-io`/`--no-blocking-io` cannot change the
-  blocking pipe transport.
+  internally polled pipe transport.
   `--no-motd` has no effect because there is no daemon transport.
 
 xsync-only options: `-j N`/`--jobs=N` (worker threads; default is the number of
@@ -421,6 +444,8 @@ python3 tests/fallback_test.py                            # local fallback check
 python3 tests/protocol_test.py                            # frozen N-1 and feature subsets
 python3 tests/output_test.py                              # formats, ordering, log parity
 python3 tests/error_test.py                               # error counts, samples, exit codes and log parity
+python3 tests/io_limit_test.py                            # pacing, deadlines, keep-alives and negotiation
+./tests/ssh-rig.sh io_limit_test.py                        # real SSH pacing and interruption
 python3 tests/list_test.py                                # listing parity and no destination writes
 python3 tests/list_wire_test.py                           # hostile listing metadata and fallback
 ./tests/ssh-rig.sh list_test.py                            # real SSH listing parity

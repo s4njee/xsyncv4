@@ -13,6 +13,7 @@
 #include "progress.h"
 #include "output.h"
 #include "delta.h"
+#include "rate_limit.h"
 
 #ifdef __APPLE__
 #include <sys/clonefile.h>
@@ -654,6 +655,7 @@ struct Local {
 }  // namespace
 
 int run_local(const std::vector<std::string>& srcs, const std::string& dest) {
+  g_local_limiter.configure(g_opt.bwlimit);
   Local L;
   L.guard = SourceGuard(dest.empty() ? "." : dest);
   L.guard.prepare(srcs);

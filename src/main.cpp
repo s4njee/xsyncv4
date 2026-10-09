@@ -5,6 +5,8 @@
 #include <algorithm>
 #include <cctype>
 #include <cerrno>
+#include <climits>
+#include <cmath>
 #include <csignal>
 #include <cstdlib>
 
@@ -77,6 +79,8 @@ Options (same meaning as rsync):
      --force              force deletion of dirs even if not empty
      --max-size=SIZE      don't transfer any file larger than SIZE
      --min-size=SIZE      don't transfer any file smaller than SIZE
+     --bwlimit=RATE       limit bytes sent/copied per second (bare RATE: KiB/s)
+     --timeout=SECONDS    remote idle I/O timeout (0 disables; exits with code 30)
      --partial            keep partially transferred files
      --inplace            update destination files in-place
      --mkpath             create the destination's path component
@@ -106,7 +110,7 @@ Documented compatibility no-ops:
  -s, --protect-args, --secluded-args
                           paths always travel as protocol data, not shell text
      --blocking-io, --no-blocking-io
-                          the remote transport always uses blocking pipes
+                          transport polling handles either pipe mode internally
      --no-motd            no daemon transport or daemon greeting exists
 
 xsync extensions:
@@ -146,6 +150,37 @@ struct Parsed {
   std::string install;
   bool server = false;
 };
+
+u64 parse_rate(const std::string& value) {
+  char* end;
+  errno = 0;
+  long double number = strtold(value.c_str(), &end);
+  if (errno || end == value.c_str() || !std::isfinite(number) || number < 0)
+    usage_error("--bwlimit requires a nonnegative rate: " + value);
+  std::string suffix(end);
+  for (char& c : suffix) c = (char)tolower((unsigned char)c);
+  long double multiplier = 1024;
+  if (suffix == "b") multiplier = 1;
+  else if (!suffix.empty()) {
+    size_t power = std::string("kmgtp").find(suffix[0]);
+    if (power == std::string::npos || (suffix.size() != 1 && suffix.substr(1) != "b" && suffix.substr(1) != "ib"))
+      usage_error("--bwlimit has an invalid suffix: " + value);
+    multiplier = std::pow(suffix.size() == 2 ? 1000.L : 1024.L, (int)power + 1);
+  }
+  long double kib = std::floor((number * multiplier + 512) / 1024);
+  if (kib > (long double)(INT64_MAX / 1024) || (number > 0 && kib < 1))
+    usage_error("--bwlimit rate is out of range: " + value);
+  return (u64)kib * 1024;
+}
+
+u32 parse_timeout(const std::string& value) {
+  if (value.empty() || !std::all_of(value.begin(), value.end(), [](unsigned char c) { return std::isdigit(c); }))
+    usage_error("--timeout requires nonnegative integer seconds");
+  errno = 0;
+  unsigned long long seconds = strtoull(value.c_str(), nullptr, 10);
+  if (errno || seconds > INT_MAX) usage_error("--timeout seconds are out of range");
+  return (u32)seconds;
+}
 
 void set_archive(Options& o) { o.recursive = o.links = o.perms = o.times = o.group = o.owner = o.devices = o.specials = true; }
 
@@ -224,6 +259,8 @@ Parsed parse(int argc, char** argv) {
     }
     else if (name == "max-size") o.max_size = parse_size(need(), "max-size");
     else if (name == "min-size") o.min_size = parse_size(need(), "min-size");
+    else if (name == "bwlimit") o.bwlimit = parse_rate(need());
+    else if (name == "timeout") o.timeout = parse_timeout(need());
     else if (name == "modify-window") o.modify_window = atoi(need().c_str());
     else if (name == "compress-level" || name == "zl") o.compress_level = atoi(need().c_str());
     else if (name == "compress-choice" || name == "zc") {
@@ -258,13 +295,13 @@ Parsed parse(int argc, char** argv) {
     } else {
       static const char* unsupported[] = {
           "acls", "xattrs", "backup", "backup-dir", "suffix", "link-dest", "compare-dest", "copy-dest", "files-from",
-          "from0", "relative", "chmod", "chown", "usermap", "groupmap", "bwlimit", "append", "append-verify", "partial-dir",
+          "from0", "relative", "chmod", "chown", "usermap", "groupmap", "append", "append-verify", "partial-dir",
           "delay-updates", "fuzzy", "remove-source-files", "keep-dirlinks", "copy-dirlinks", "copy-unsafe-links",
           "munge-links", "executability", "atimes", "crtimes", "cvs-exclude", "prune-empty-dirs", "daemon", "port", "password-file",
           "write-batch", "read-batch", "only-write-batch", "super", "fake-super", "temp-dir",
           "iconv", "checksum-seed", "address", "sockopts", "stop-after", "stop-at", "max-alloc", "write-devices", "copy-devices",
           "delete-missing-args", "ignore-missing-args", "trust-sender", "copy-as", "early-input", "remote-option",
-          "timeout", "contimeout", "sparse", "no-sparse", "fsync", "preallocate", "skip-compress",
+          "contimeout", "sparse", "no-sparse", "fsync", "preallocate", "skip-compress",
           "block-size", "checksum-choice", "cc", "log-file-format", "debug", "outbuf",
           "inc-recursive", "no-inc-recursive", "i-r", "no-i-r", "no-protect-args", "old-args",
           "ipv4", "ipv6", "msgs2stderr", "no-msgs2stderr", "new-compress", "old-compress", "no-implied-dirs",
@@ -362,6 +399,7 @@ Parsed parse(int argc, char** argv) {
   if (o.compress_level == -1000) o.compress_level = 3;
   if (o.del && !o.recursive && !o.dirs) usage_error("--delete does not work without --recursive (-r) or --dirs (-d).");
   if (o.quiet) o.verbose = 0;
+  if (o.bwlimit) o.clone = false;  // A clone must not bypass a requested copy rate.
   return p;
 }
 
@@ -387,6 +425,7 @@ const char* rerr_name(int c) {
     case RERR_PARTIAL: return "some files/attrs were not transferred (see previous errors)";
     case RERR_VANISHED: return "some files vanished before they could be transferred";
     case RERR_DEL_LIMIT: return "the --max-delete limit stopped deletions";
+    case RERR_TIMEOUT: return "timeout in data send/receive";
     case RERR_CMD_NOTFOUND: return "remote command not found";
     default: return "unexplained error";
   }

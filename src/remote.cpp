@@ -9,6 +9,8 @@
 #include <grp.h>
 #include <glob.h>
 #include <pwd.h>
+#include <poll.h>
+#include <signal.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include <unistd.h>
@@ -17,6 +19,7 @@
 #include <algorithm>
 #include <array>
 #include <cstdlib>
+#include <climits>
 #include <memory>
 #include <map>
 #include <unordered_map>
@@ -34,6 +37,7 @@
 #include "output.h"
 #include "delta.h"
 #include "listing.h"
+#include "rate_limit.h"
 
 #ifndef O_CLOEXEC
 #define O_CLOEXEC 0
@@ -42,7 +46,7 @@
 namespace {
 
 enum : u8 { F_HELLO = 1, F_DIR, F_NEED, F_DATA, F_LIST_END, F_DATA_END, F_DONE, F_MSG, F_IDMAP, F_DEST, F_OUTPUT, F_OUTPUT_CONFIG,
-            F_DELTA_REQUEST, F_DELTA_SIGNATURE, F_DELTA_RETRY_ACK, F_LIST_ENTRY };
+            F_DELTA_REQUEST, F_DELTA_SIGNATURE, F_DELTA_RETRY_ACK, F_LIST_ENTRY, F_IO_CONFIG, F_KEEPALIVE };
 enum : u8 { DF_ATTRS = 1, DF_SINGLE = 2, DF_NODELETE = 4, DF_ZSTD = 8 };
 enum : u8 { R_WHOLE = 1, R_CHUNK = 2, R_FAIL = 4, R_END = 8, R_LITERAL = 16, R_DELTA_END = 32, R_COPY = 64 };
 constexpr size_t HDR = 5;                  // u32 payload length + u8 type
@@ -120,6 +124,10 @@ std::string new_frame(u8 type) {
 
 struct Conn {
   int rfd = -1, wfd = -1;
+  pid_t peer_pid = -1;
+  RateLimiter limiter;
+  std::atomic<u64> idle_ns{0}, last_activity{now_ns()}, last_send{now_ns()}, heartbeat_ns{10000000000ull};
+  std::atomic<bool> keepalive{false};
   std::mutex mu;
   std::condition_variable cv, cv_space;
   std::deque<std::string> q;
@@ -131,7 +139,51 @@ struct Conn {
   size_t rpos = 0, rlen = 0;
   static constexpr size_t MAX_Q = 48 << 20;
 
+  void configure(u64 rate, u32 seconds, bool heartbeat) {
+    limiter.configure(rate);
+    idle_ns = (u64)seconds * 1000000000ull;
+    heartbeat_ns = seconds ? std::max<u64>(100000000ull, std::min<u64>(10000000000ull, idle_ns.load() / 3)) : 10000000000ull;
+    keepalive = heartbeat;
+  }
+  void check_timeout(u64 write_progress = 0) {
+    u64 deadline = idle_ns.load();
+    u64 now = now_ns(), last = write_progress ? write_progress : last_activity.load();
+    if (!deadline || now < last || now - last < deadline) return;
+    // A stalled writer cannot safely drain a fatal frame, especially mid-frame.
+    // Both peers have the deadline; the client also recognizes shell exit 30.
+    if (peer_pid > 0) kill(peer_pid, SIGTERM);
+    g_msg_sink = nullptr;
+    g_output_sink = nullptr;
+    u64 seconds = deadline / 1000000000ull;
+    die(RERR_TIMEOUT, "I/O timeout after %llu second%s", (unsigned long long)seconds, seconds == 1 ? "" : "s");
+  }
+  bool wait_fd(int fd, short events, u64 write_progress = 0) {
+    for (;;) {
+      if (g_stop.load()) return false;
+      check_timeout(write_progress);
+      pollfd p{fd, events, 0};
+      int rc = poll(&p, 1, 100);
+      if (rc > 0) return true;  // Let read/write report EOF, EPIPE, or other errors.
+      if (rc < 0 && errno != EINTR) return false;
+    }
+  }
+  int wait_peer() {
+    int status = 0;
+    for (;;) {
+      pid_t result = waitpid(peer_pid, &status, WNOHANG);
+      if (result == peer_pid) return status;
+      if (result < 0 && errno != EINTR) return status;
+      if (g_stop.load()) { kill(peer_pid, SIGTERM); exit_signal(); }
+      check_timeout();
+      usleep(25000);
+    }
+  }
   void start() {
+    for (int fd : {rfd, wfd}) {
+      int flags = fcntl(fd, F_GETFL);
+      if (flags < 0 || fcntl(fd, F_SETFL, flags | O_NONBLOCK) < 0)
+        die(RERR_IPC, "cannot configure transport pipe: %s", errstr(errno).c_str());
+    }
     wt = std::thread([this] { writer(); });
   }
   // Queue a frame built with new_frame(); `bounded` applies back-pressure to bulk producers.
@@ -158,8 +210,32 @@ struct Conn {
     wt_id = std::this_thread::get_id();
     std::string small;
     std::deque<std::string> batch;
-    auto out = [&](const char* p, size_t n) {
-      if (!write_all(wfd, p, n)) {
+    auto out = [&](const char* p, size_t n, bool activity = true) {
+      bool ok = true;
+      u64 progress = now_ns();
+      while (n) {
+        size_t count = activity ? limiter.acquire(std::min<size_t>(n, 65536), [this, &progress] { check_timeout(progress); }) : n;
+        if (!count) { ok = false; break; }
+        // Reserve tokens once. EAGAIN and short writes use the remainder of the
+        // same reservation, so pipe back-pressure does not charge bytes twice.
+        while (count) {
+          ssize_t wrote = write(wfd, p, count);
+          if (wrote < 0 && errno == EINTR) continue;
+          if (wrote < 0 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
+            if (!wait_fd(wfd, POLLOUT, progress)) { ok = false; break; }
+            continue;
+          }
+          if (wrote <= 0) { ok = false; break; }
+          u64 now = now_ns();
+          progress = now;
+          last_send = now;
+          if (activity) last_activity = now;
+          p += wrote; n -= (size_t)wrote; count -= (size_t)wrote;
+          g_stats.wire_sent.fetch_add((u64)wrote, std::memory_order_relaxed);
+        }
+        if (!ok) break;
+      }
+      if (!ok) {
         // The peer may have sent a fatal filesystem error before closing. Let
         // the reader consume it instead of racing it with an EPIPE exit here.
         std::lock_guard<std::mutex> lock(mu);
@@ -169,14 +245,22 @@ struct Conn {
         cv_space.notify_all();
         return false;
       }
-      g_stats.wire_sent.fetch_add(n, std::memory_order_relaxed);
       return true;
     };
     for (;;) {
       {
         std::unique_lock<std::mutex> lk(mu);
-        cv.wait(lk, [&] { return !q.empty() || closing; });
-        if (q.empty()) break;
+        cv.wait_for(lk, std::chrono::milliseconds(100), [&] { return !q.empty() || closing; });
+        if (q.empty()) {
+          if (closing) break;
+          lk.unlock();
+          if (g_stop.load()) return;
+          if (keepalive.load() && now_ns() - last_send.load() >= heartbeat_ns.load()) {
+            std::string heartbeat = new_frame(F_KEEPALIVE);
+            if (!out(heartbeat.data(), heartbeat.size(), false)) return;
+          }
+          continue;
+        }
         batch.swap(q);
         qbytes = 0;
         cv_space.notify_all();
@@ -204,6 +288,7 @@ struct Conn {
   }
   bool read_exact(char* dst, size_t n) {
     while (n) {
+      if (g_stop.load()) return false;
       if (rpos < rlen) {
         size_t k = std::min(n, rlen - rpos);
         memcpy(dst, rb.data() + rpos, k);
@@ -213,7 +298,12 @@ struct Conn {
       ssize_t k = n >= rb.size() ? read(rfd, dst, n) : read(rfd, rb.data(), rb.size());
       if (g_stop.load()) return false;
       if (k < 0 && errno == EINTR) continue;
+      if (k < 0 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
+        if (!wait_fd(rfd, POLLIN)) return false;
+        continue;
+      }
       if (k <= 0) return false;
+      last_activity = now_ns();
       g_stats.wire_recv.fetch_add((u64)k, std::memory_order_relaxed);
       if (n >= rb.size()) dst += k, n -= (size_t)k;
       else rpos = 0, rlen = (size_t)k;
@@ -222,20 +312,27 @@ struct Conn {
   }
   // Returns false on EOF at a frame boundary or on a broken stream.
   bool read_frame(u8& type, std::string& payload, bool hello = false) {
-    char h[HDR]{};
-    if (!read_exact(h, HDR)) {
-      if (hello && std::any_of(h, h + HDR, [](char ch) { return ch != 0; }))
+    for (;;) {
+      char h[HDR]{};
+      if (!read_exact(h, HDR)) {
+        if (hello && std::any_of(h, h + HDR, [](char ch) { return ch != 0; }))
+          die(RERR_PROTOCOL, "the remote shell is printing text on stdout (or --rsync-path is not xsync); remove shell startup output");
+        return false;
+      }
+      u32 len;
+      memcpy(&len, h, 4);
+      type = (u8)h[4];
+      if (hello && type != F_HELLO && type != F_MSG)
         die(RERR_PROTOCOL, "the remote shell is printing text on stdout (or --rsync-path is not xsync); remove shell startup output");
-      return false;
+      if (len > (1u << 30)) die(RERR_PROTOCOL, "protocol error: oversized frame");
+      if (type == F_IO_CONFIG && len > 20) die(RERR_PROTOCOL, "protocol error: malformed I/O configuration (oversized)");
+      if (type == F_KEEPALIVE) {
+        if (!keepalive.load() || len) die(RERR_PROTOCOL, "protocol error: invalid or unnegotiated keep-alive");
+        continue;
+      }
+      payload.resize(len);
+      return read_exact(payload.data(), len);
     }
-    u32 len;
-    memcpy(&len, h, 4);
-    type = (u8)h[4];
-    if (hello && type != F_HELLO && type != F_MSG)
-      die(RERR_PROTOCOL, "the remote shell is printing text on stdout (or --rsync-path is not xsync); remove shell startup output");
-    if (len > (1u << 30)) die(RERR_PROTOCOL, "protocol error: oversized frame");
-    payload.resize(len);
-    return read_exact(payload.data(), len);
   }
 };
 
@@ -255,6 +352,11 @@ void send_msg(int kind, int code, std::string_view s) {
   g_msg_sink = nullptr;
   g_output_sink = nullptr;
   if (g_stop.load()) exit_signal();
+  if (g_conn && g_conn->peer_pid > 0 && g_conn->idle_ns.load()) {
+    int status = g_conn->wait_peer();
+    if (WIFEXITED(status) && WEXITSTATUS(status) == RERR_TIMEOUT)
+      die(RERR_TIMEOUT, "remote peer timed out in data send/receive");
+  }
   die(RERR_STREAMIO, "connection unexpectedly closed");
 }
 
@@ -345,6 +447,8 @@ std::string_view unpack(std::string_view in, bool compressed, std::string& scrat
 
 std::string missing_feature(u64 features) {
   if (!(features & PF_CORE)) return "peer does not support the required core transfer features";
+  if ((g_opt.bwlimit || g_opt.timeout) && !(features & PF_IO_CONTROL))
+    return "peer does not support bandwidth limits and idle timeouts";
   if (g_opt.list_only) return features & PF_LIST ? "" : "peer does not support source listing";
   if (g_opt.safe_links && !(features & PF_SAFE_LINKS)) return "peer does not support --safe-links";
   if (!g_opt.numeric_ids && (g_opt.owner || g_opt.group) && !(features & PF_IDMAP))
@@ -1747,6 +1851,8 @@ int run_client(const std::vector<std::string>& srcs, const std::string& dest, u3
 
   Conn c;
   c.rfd = from_child[0], c.wfd = to_child[1];
+  c.peer_pid = pid;
+  c.configure(0, o.timeout, false);  // Also covers authentication and hello waits.
   g_conn = &c;
   o.pushing = push;
   o.receiving = !push;
@@ -1756,7 +1862,7 @@ int run_client(const std::vector<std::string>& srcs, const std::string& dest, u3
   put_var(f, wire_version);
   f.push_back(push ? 'R' : 'S');
   u64 advertised = PROTO_FEATURES & (o.whole_file ? ~(PF_RESUME | PF_DELTA) : ~u64(0));
-  if (o.list_only) advertised &= PF_CORE | PF_ZSTD | PF_LIST;
+  if (o.list_only) advertised &= PF_CORE | PF_ZSTD | PF_LIST | PF_IO_CONTROL;
   else advertised &= ~PF_LIST;
   if (!o.hard_links) advertised &= ~PF_HLINK;
   if (!output_enabled()) advertised &= ~(PF_OUTPUT | PF_DIR_OUTPUT);
@@ -1773,10 +1879,7 @@ int run_client(const std::vector<std::string>& srcs, const std::string& dest, u3
     c.finish();
     close(c.wfd);
     close(c.rfd);
-    int status = 0;
-    while (waitpid(pid, &status, 0) < 0 && errno == EINTR) {
-      if (g_stop.load()) exit_signal();
-    }
+    c.wait_peer();
     g_conn = nullptr;
   };
   auto fallback = [&](const std::string& reason, int strict_code) {
@@ -1795,8 +1898,7 @@ int run_client(const std::vector<std::string>& srcs, const std::string& dest, u3
   for (;;) {
     if (!c.read_frame(type, payload, true)) {
       if (g_stop.load()) exit_signal();
-      int st = 0;
-      waitpid(pid, &st, 0);
+      int st = c.wait_peer();
       int code = WIFEXITED(st) ? WEXITSTATUS(st) : 255;
       if (code == 127) fallback("remote xsync is not installed on " + rem.host, RERR_CMD_NOTFOUND);
       die(code == 255 ? 255 : RERR_STREAMIO, "connection unexpectedly closed (remote shell exited with code %d)", code);
@@ -1838,6 +1940,12 @@ int run_client(const std::vector<std::string>& srcs, const std::string& dest, u3
       fallback("peer does not support hard-link preservation", RERR_UNSUPPORTED);
     break;
   }
+  if (o.peer_features & PF_IO_CONTROL) {
+    std::string config = new_frame(F_IO_CONFIG);
+    put_var(config, o.bwlimit), put_var(config, o.timeout);
+    c.configure(o.bwlimit, o.timeout, true);
+    c.send(std::move(config));
+  }
   if (o.peer_features & PF_DIR_OUTPUT) {
     std::string config = new_frame(F_OUTPUT_CONFIG);
     config.push_back((char)o.output_attrs);
@@ -1859,8 +1967,7 @@ int run_client(const std::vector<std::string>& srcs, const std::string& dest, u3
     rc = r.run(dest);
   }
   if (c.wfd >= 0) close(c.wfd);
-  int st = 0;
-  waitpid(pid, &st, 0);
+  int st = c.wait_peer();
   close(c.rfd);
   g_conn = nullptr;
   if (o.list_only && !rc && (!WIFEXITED(st) || WEXITSTATUS(st))) {
@@ -1919,6 +2026,16 @@ int run_server() {
   if (ver >= 4) put_var(f, o.peer_features);
   if (structured_output()) g_output_sink = send_output;
   c.send(std::move(f));
+  if (o.peer_features & PF_IO_CONTROL) {
+    if (!c.read_frame(type, payload)) conn_lost();
+    RBuf config(payload);
+    u64 rate = config.var(), seconds = config.var();
+    if (type != F_IO_CONFIG || config.bad || !config.empty() || rate > INT64_MAX || rate % 1024 || seconds > INT_MAX)
+      die(RERR_PROTOCOL, "protocol error: malformed I/O configuration");
+    o.bwlimit = rate;
+    o.timeout = (u32)seconds;
+    c.configure(rate, (u32)seconds, true);
+  }
   if (o.peer_features & PF_DIR_OUTPUT) {
     if (!c.read_frame(type, payload)) conn_lost();
     if (type != F_OUTPUT_CONFIG || payload.size() != 4 ||

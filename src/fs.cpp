@@ -16,6 +16,7 @@
 #include "progress.h"
 #include "output.h"
 #include "hardlink.h"
+#include "rate_limit.h"
 
 #ifdef __APPLE__
 #include <sys/attr.h>
@@ -1010,7 +1011,12 @@ bool out_write(OutFile& f, const char* bytes, size_t size, i64 offset) {
   if (output_shutdown) { errno = ECANCELED; return false; }
   size_t done = 0;
   while (done < size) {
-    ssize_t n = pwrite(f.fd, bytes + done, size - done, offset + (i64)done);
+    size_t count = size - done;
+    if (g_opt.bwlimit && !g_opt.am_server && !g_opt.pushing && !g_opt.receiving) {
+      count = g_local_limiter.acquire(count);
+      if (!count) { errno = ECANCELED; return false; }
+    }
+    ssize_t n = pwrite(f.fd, bytes + done, count, offset + (i64)done);
     if (n < 0 && errno == EINTR) continue;
     if (n <= 0) { if (!n) errno = EIO; return false; }
     done += (size_t)n;

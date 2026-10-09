@@ -126,6 +126,26 @@ set -e
 test "$status" = 23
 test ! -s /tmp/errors-remote.stdout
 grep -F 'xsync: error summary: 2 errors (showing first 2)' /tmp/errors-remote.stderr
+head -c 393216 /dev/zero >/tmp/rate-source
+for direction in local push pull; do
+  source=/tmp/rate-source
+  target=/tmp/rate-$direction
+  test "$direction" != push || target=fake:$target
+  test "$direction" != pull || source=fake:$source
+  started=$(date +%s)
+  "$bin" --no-fallback -aW --bwlimit=128 --timeout=1 -e /tmp/fakessh --rsync-path="$bin" "$source" "$target"
+  test "$(($(date +%s) - started))" -ge 2
+  cmp /tmp/rate-source /tmp/rate-$direction
+done
+printf '#!/bin/sh\nexec sleep 10\n' >/tmp/stall-rsh
+chmod 755 /tmp/stall-rsh
+set +e
+"$bin" --no-fallback --timeout=1 -e /tmp/stall-rsh fake:/tmp/source/ >/tmp/timeout.stdout 2>/tmp/timeout.stderr
+status=$?
+set -e
+test "$status" = 30
+test ! -s /tmp/timeout.stdout
+grep -F 'idle timeout (code 30): 1 error' /tmp/timeout.stderr
 "$bin" --version
 '''.replace('ARCH', arch)
             run('docker', 'run', '--rm', '--platform', 'linux/' + arch,

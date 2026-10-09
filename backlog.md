@@ -93,7 +93,7 @@ coverage clarification remains open.
 | E-04 | **Delta transfer for large changed files.** Changed files are always sent whole. Irrelevant for the congress corpus, decisive for a 2 GB database dump with small edits over Wi-Fi. | **done** | Files above a threshold (1 MiB) use block matching (rsync rolling checksum, or content-defined chunks with XXH3) when the destination has a previous version; `-W` disables; bytes-on-wire within 20 % of rsync on an edited-large-file test. | XL |
 | E-05 | **List mode.** `xsync host:dir/` or a single SRC should list, as rsync does; today it is a usage error. | **done** | `ls -l`-style listing for local and remote sources. | S |
 | E-06 | **End-of-run error summary.** With thousands of files an error scrolls away. | **done** | After the run: count of errors and the first ten, grouped by kind; exit-code line as now. | S |
-| E-07 | **`--bwlimit`, `--timeout`, keep-alive.** `--bwlimit` is rejected; `--timeout` is ignored (T-04). A stalled ssh connection hangs forever. | code | Token-bucket limit on the writer thread; idle timeout with keep-alive frames; exit 30 on timeout like rsync. | M |
+| E-07 | **`--bwlimit`, `--timeout`, keep-alive.** `--bwlimit` is rejected; `--timeout` is ignored (T-04). A stalled ssh connection hangs forever. | **in progress** | Token-bucket limit on the writer thread; idle timeout with keep-alive frames; exit 30 on timeout like rsync. | M |
 | E-08 | **Filter completeness.** Not implemented: `P`/`R` (protect/risk), `H`/`S` (hide/show), per-directory merge files (`.rsync-filter`, `-F`, `:` rules), `-C`, `-m`, the rule modifiers `/ C e n p r s w x`. These are the two remaining difftest failures. | confirmed | 159/159 difftest; a differential fuzzer against rsync for the new rule kinds, checked into `tests/`. | L |
 | E-09 | **`--files-from`, `-R`, `--from0`.** Common in backup scripts and with `find … -print0`. | code | Implemented for local and remote, including the "implied directories" semantics of `-R`. | L |
 | E-10 | **Metadata beyond `-a`.** `-H` hard links, `-X` xattrs, `-A` ACLs, `-N` creation times, `-U` atimes, BSD file flags, `-E`, `--chmod`, `--chown`. Also an inconsistency to resolve: the clone path already carries xattrs and ACLs while the byte-copy and remote paths drop them. | code | `-H` and `-X` first (most used on macOS). Without `-X`, both paths behave the same — either strip on clone or document that clones are a superset. | XL |
@@ -1079,3 +1079,33 @@ Verified artifact manifest (source `d68b5af629c3`):
 | `xsync-darwin-universal` | 2,954,824 | `2f55d168ab03fc3ea7854549e07e1b4ba8c31a275629ff950fa3211871aa345d` |
 | `xsync-linux-amd64` | 4,808,104 | `c93c071363ca1d9b868cfab1864d2b981413c12bcf1db836fecc533d7ab73e89` |
 | `xsync-linux-arm64` | 4,780,352 | `6fb670112e59a626e974e84f168a367f928f2d43a44201a1c91e0fce62345e43` |
+
+### E-07 — in progress: pacing, deadlines and keep-alives (2026-10-09)
+
+- Added a token bucket to each remote writer, accounting for serialized bytes
+  after compression, and one shared bucket for all local byte-copy workers.
+  Accumulation is capped at 0.1 seconds or 16 KiB; short writes/back-pressure do
+  not charge bytes twice. A local limit disables clones. Bare rates are KiB/s;
+  fractional and binary/decimal suffixes round to the nearest KiB/s, with zero
+  unlimited and invalid/nonfinite/overflow/tiny rates rejected.
+- Nonblocking pipes with polling bound remote idle waits from shell/hello through
+  partial frames and post-EOF shell exit. Empty keep-alives preserve long native
+  work without extending a silent peer's deadline. An independent write-stall
+  deadline cannot be extended by received heartbeats. Timeout exits use code 30,
+  terminate the shell, and retain existing atomic/partial cleanup semantics.
+- `PF_IO_CONTROL` (1024) negotiates a separate two-value configuration and empty
+  keep-alives without changing frozen v3 options. Invalid or unnegotiated frames
+  are rejected; configuration lengths are bounded before allocation. A nonzero
+  limit/timeout against unsupported peers delegates or refuses before transfer.
+- Fifteen I/O methods pass on macOS and real Linux SSH, including aggregate
+  local/push/pull pacing, clone bypass prevention, compressed wire accounting,
+  unit parsing, all stalled read stages, a blocked writer receiving heartbeats,
+  bidirectional keep-alives, delayed native source reads, interruption, remote
+  code 30, malformed configuration and atomic/partial timeout cleanup. The added
+  oversized-configuration case passes on macOS; final Linux/release checks remain.
+- P0/output/fallback/error-summary checks pass; Linux delta wire-budget checks
+  retain their pre-existing optional 2 GiB skip. Strict native forced-byte-copy
+  sorted itemization remains **229/231**, with E-08's two known filter failures.
+  Expanded frozen/subset peer tests initially had a stale expected diagnostic
+  string for the new options; that assertion is corrected and verification is
+  running. Static/universal release verification is still pending.
