@@ -2,7 +2,7 @@
 
 Initial audit written 2026-10-08 against xsync 0.1.0 (protocol 1).
 All fifteen P0 stories completed against protocol 3; per-story evidence is below.
-P1 R-02 through R-09 and E-01 through E-06 are complete (14 of 22 stories). Current protocol 4 supports protocol 3; E-07 is next.
+P1 R-02 through R-09 and E-01 through E-07 are complete (15 of 22 stories). Current protocol 4 supports protocol 3; E-08 is next.
 Problem statements retain the original audit findings.
 
 ## What "daily driver" means here
@@ -93,7 +93,7 @@ coverage clarification remains open.
 | E-04 | **Delta transfer for large changed files.** Changed files are always sent whole. Irrelevant for the congress corpus, decisive for a 2 GB database dump with small edits over Wi-Fi. | **done** | Files above a threshold (1 MiB) use block matching (rsync rolling checksum, or content-defined chunks with XXH3) when the destination has a previous version; `-W` disables; bytes-on-wire within 20 % of rsync on an edited-large-file test. | XL |
 | E-05 | **List mode.** `xsync host:dir/` or a single SRC should list, as rsync does; today it is a usage error. | **done** | `ls -l`-style listing for local and remote sources. | S |
 | E-06 | **End-of-run error summary.** With thousands of files an error scrolls away. | **done** | After the run: count of errors and the first ten, grouped by kind; exit-code line as now. | S |
-| E-07 | **`--bwlimit`, `--timeout`, keep-alive.** `--bwlimit` is rejected; `--timeout` is ignored (T-04). A stalled ssh connection hangs forever. | **in progress** | Token-bucket limit on the writer thread; idle timeout with keep-alive frames; exit 30 on timeout like rsync. | M |
+| E-07 | **`--bwlimit`, `--timeout`, keep-alive.** `--bwlimit` is rejected; `--timeout` is ignored (T-04). A stalled ssh connection hangs forever. | **done** | Token-bucket limit on the writer thread; idle timeout with keep-alive frames; exit 30 on timeout like rsync. | M |
 | E-08 | **Filter completeness.** Not implemented: `P`/`R` (protect/risk), `H`/`S` (hide/show), per-directory merge files (`.rsync-filter`, `-F`, `:` rules), `-C`, `-m`, the rule modifiers `/ C e n p r s w x`. These are the two remaining difftest failures. | confirmed | 159/159 difftest; a differential fuzzer against rsync for the new rule kinds, checked into `tests/`. | L |
 | E-09 | **`--files-from`, `-R`, `--from0`.** Common in backup scripts and with `find … -print0`. | code | Implemented for local and remote, including the "implied directories" semantics of `-R`. | L |
 | E-10 | **Metadata beyond `-a`.** `-H` hard links, `-X` xattrs, `-A` ACLs, `-N` creation times, `-U` atimes, BSD file flags, `-E`, `--chmod`, `--chown`. Also an inconsistency to resolve: the clone path already carries xattrs and ACLs while the byte-copy and remote paths drop them. | code | `-H` and `-X` first (most used on macOS). Without `-X`, both paths behave the same — either strip on clone or document that clones are a superset. | XL |
@@ -1109,3 +1109,45 @@ Verified artifact manifest (source `d68b5af629c3`):
   Expanded frozen/subset peer tests initially had a stale expected diagnostic
   string for the new options; that assertion is corrected and verification is
   running. Static/universal release verification is still pending.
+
+### E-07 — completed: rate limits, idle deadlines and verified releases (2026-10-09)
+
+- `--bwlimit` now uses token buckets in remote writers and one shared bucket for
+  local copies. Rates account for compressed wire bytes remotely and written
+  bytes locally; a local limit disables clones. Units, fractional/rounded rates,
+  zero/unlimited, invalid values and bounded accumulated credit are documented.
+- `--timeout` now bounds remote shell/hello, idle and partial-frame reads, blocked
+  writes and post-EOF shell waits. It exits 30 and uses existing atomic/partial
+  cleanup. Negotiated keep-alives preserve live native work; outgoing heartbeats
+  cannot hide a silent peer, and received heartbeats cannot hide a blocked writer.
+  Simultaneous read/write expiration has one cleanup and final diagnostic owner.
+- `PF_IO_CONTROL` (1024) adds separate configuration/empty keep-alive frames,
+  keeping frozen v3 options unchanged. Oversized, malformed and unnegotiated
+  controls are rejected. Unsupported peers refuse nonzero limits/timeouts with
+  code 4 or fall back with original argv, before destination changes.
+- Sixteen I/O methods pass on universal ARM, Rosetta and real Linux SSH, covering
+  aggregate pacing, clone bypass prevention, compression, native delayed reads,
+  stalled reads/writes/EOF, bidirectional heartbeats, interruption, remote exit
+  30, concurrent deadline expiration and atomic/partial prefix cleanup. ARM-client
+  to Rosetta-peer push/pull also preserve pacing, data and stdout/log equality.
+  Expanded frozen/subset protocol checks (4) pass on macOS, Linux and universal
+  ARM, including refusal of new options against old peers. A stale expected
+  diagnostic in the expanded tests was corrected before final verification.
+- macOS P0 (13), output (10), fallback (6) and error summaries (11) remain green;
+  Linux P0/output and delta wire budgets pass with their existing optional skips.
+  Strict native forced-byte-copy sorted itemization remains **229/231**, retaining
+  E-08's two known filter failures. Help/manual/README reflect the implemented
+  flags and polled transport; generated manual lint passes.
+- Source **`864bd37edf14`** builds verified macOS universal and static musl Linux
+  amd64/arm64 artifacts. Scratch startup and bare-Debian release smoke pass
+  local/push/pull pacing with `--timeout=1`, stalled-shell exit 30, and prior
+  resume/compression/output/hard-link/delta/listing/error-summary checks.
+  Installed Homebrew/Pi helpers were unchanged.
+
+Verified artifact manifest (source `864bd37edf14`):
+
+| Artifact | Bytes | SHA-256 |
+|---|---:|---|
+| `xsync-darwin-universal` | 2,957,800 | `1d05ec29d5b6b2141353109d495790c2394ff7d5f68dd7089b9ccb95c265902b` |
+| `xsync-linux-amd64` | 4,842,480 | `4b68887b2af6f53abbf91f80bcb7f09124b6d9ab89b001eb767d67baf70f4a84` |
+| `xsync-linux-arm64` | 4,785,944 | `458d6373ad5a14673a042e01dce378d31a46b8b82fcf92ec8fbb16c7a3b452fd` |
