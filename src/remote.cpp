@@ -668,6 +668,7 @@ std::string_view unpack(std::string_view in, bool compressed, std::string& scrat
 // ---------------------------------------------------------------- options on the wire
 
 std::string missing_feature(u64 features) {
+  if (g_opt.executability && !g_opt.perms && !g_opt.list_only && !(features & PF_EXECUTABILITY)) return "peer does not support --executability";
   if (g_opt.atimes && !g_opt.list_only && !(features & PF_ATIMES)) return "peer does not support --atimes";
   if (g_opt.crtimes && !g_opt.list_only && !(features & PF_CRTIMES)) return "peer does not support --crtimes";
   if (g_opt.open_noatime && !g_opt.list_only && !(features & PF_OPEN_NOATIME)) return "peer does not support --open-noatime";
@@ -1163,7 +1164,7 @@ struct Sender {
         }
         return;
       }
-      Entry fresh = source_snapshot(scanned, before);
+      Entry fresh = source_snapshot(scanned, before, false);
       XattrSet xattrs;
       if (metadata_enabled()) {
         const auto& context = d.source_contexts.empty() ? d.source_filter : d.source_contexts[idx];
@@ -1780,6 +1781,7 @@ struct Receiver {
     if (g_opt.peer_features & PF_XATTRS) xattrs = get_xattrs(r);
     if (g_opt.peer_features & PF_NATIVE_ACL) get_acls(r, xattrs, T_REG);
     if (g_opt.perms) attrs.mode = mode;
+    else if (g_opt.executability && (attrs.flags & EF_INPLACE_SAFE)) attrs.mode = execution_mode(mode, attrs.basis_mode);
     if ((g_opt.owner || g_opt.group) && !g_opt.numeric_ids) {
       std::lock_guard<std::mutex> lock(ids.mu);
       ids.map(attrs);
@@ -2356,6 +2358,7 @@ int run_client(const std::vector<std::string>& srcs, const std::string& dest, u3
   if (!o.hard_links) advertised &= ~PF_HLINK;
   if (!o.xattrs) advertised &= ~(PF_XATTRS | PF_XATTR_STREAM);
   if (!o.acls) advertised &= ~(PF_ACLS | PF_ACL_UUID);
+  if (!o.executability || o.perms) advertised &= ~PF_EXECUTABILITY;
   if (!o.atimes) advertised &= ~PF_ATIMES;
   if (!o.crtimes) advertised &= ~PF_CRTIMES;
   if (!o.open_noatime) advertised &= ~PF_OPEN_NOATIME;
@@ -2532,6 +2535,7 @@ int run_server() {
   // Like rsync, an explicitly configured helper may set its own input
   // delimiter. Ordinary SSH invocations do not forward the client's -0.
   const bool server_from0 = o.from0;
+  const bool server_executability = o.executability && !o.perms;
   const bool server_atimes = o.atimes, server_crtimes = o.crtimes, server_noatime = o.open_noatime;
   o = Options();
   o.from0 = server_from0;
@@ -2541,6 +2545,7 @@ int run_server() {
   o.peer_features = advertised & PROTO_FEATURES;
   if ((advertised & PF_CRTIMES) && !(PROTO_FEATURES & PF_CRTIMES))
     die(RERR_UNSUPPORTED, "peer does not support --crtimes");
+  if (server_executability && !(o.peer_features & PF_EXECUTABILITY)) die(RERR_UNSUPPORTED, "peer does not support --executability");
   if (server_atimes && !(o.peer_features & PF_ATIMES)) die(RERR_UNSUPPORTED, "peer does not support --atimes");
   if (server_crtimes && !(o.peer_features & PF_CRTIMES)) die(RERR_UNSUPPORTED, "peer does not support --crtimes");
   if (server_noatime && !(o.peer_features & PF_OPEN_NOATIME)) die(RERR_UNSUPPORTED, "peer does not support --open-noatime");
@@ -2554,6 +2559,7 @@ int run_server() {
   o.list_only = o.peer_features & PF_LIST;
   o.hard_links = o.peer_features & PF_HLINK;
   o.acls = o.peer_features & PF_NATIVE_ACL;
+  o.executability = o.peer_features & PF_EXECUTABILITY;
   o.atimes = (o.peer_features & PF_ATIMES) ? 1 : 0;
   o.crtimes = o.peer_features & PF_CRTIMES;
   o.open_noatime = o.peer_features & PF_OPEN_NOATIME;

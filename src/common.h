@@ -37,6 +37,7 @@ constexpr u64 PF_ACL_POSIX = 1048576, PF_ACL_DARWIN = 2097152;
 constexpr u64 PF_ACLS = PF_ACL_POSIX | PF_ACL_DARWIN;
 constexpr u64 PF_ACL_UUID = 4194304;
 constexpr u64 PF_ATIMES = 8388608, PF_CRTIMES = 16777216, PF_OPEN_NOATIME = 33554432;
+constexpr u64 PF_EXECUTABILITY = 67108864;
 #ifdef __APPLE__
 constexpr u64 PF_NATIVE_ACL = PF_ACL_DARWIN;
 constexpr u64 PF_UNSUPPORTED_NATIVE = PF_ACL_POSIX;
@@ -45,7 +46,7 @@ constexpr u64 PF_NATIVE_ACL = PF_ACL_POSIX;
 constexpr u64 PF_UNSUPPORTED_NATIVE = PF_ACL_DARWIN | PF_ACL_UUID | PF_CRTIMES;
 #endif
 #ifndef XSYNC_PROTOCOL_FEATURES
-#define XSYNC_PROTOCOL_FEATURES 67108863
+#define XSYNC_PROTOCOL_FEATURES 134217727
 #endif
 constexpr u64 PROTO_FEATURES = XSYNC_PROTOCOL_FEATURES & ~PF_UNSUPPORTED_NATIVE;
 constexpr u64 LEGACY_V3_FEATURES = 15;
@@ -83,6 +84,7 @@ struct Options {
   bool output_attrs = false, output_unchanged = false;  // Configured before workers start.
   bool acls = false;  // Outside the frozen v3 options.
   int atimes = 0;
+  bool executability = false;
   bool crtimes = false, open_noatime = false;  // Negotiated outside v3 options.
   int xattrs = 0;  // 1: ordinary attributes; 2: include rsync internal attributes.
   bool hard_links = false;  // Negotiated separately from the frozen v3 options.
@@ -136,6 +138,7 @@ struct Entry {
   u8 type = T_NONE, flags = 0;
   u8 item_flags = 0;  // Receiver-side comparison, kept separate from filesystem flags.
   u32 mode = 0;  // permission bits only (07777)
+  u32 basis_mode = 0;  // Receiver-only original regular-file mode for -E refreshes.
   u32 uid = 0, gid = 0, mtime_ns = 0, rdev = 0, dev = 0;
   i64 size = 0, mtime = 0;
   u64 hdev = 0, ino = 0, nlink = 0;

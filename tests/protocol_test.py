@@ -158,7 +158,7 @@ p=pathlib.Path(sys.argv[1]); print(json.dumps({'hash':hashlib.sha256((p/'file').
     def test_requested_feature_is_never_silently_dropped(self):
         source = self.root / 'feature source'
         source.write_bytes(b'unchanged')
-        for flags in (['-rl', '--safe-links'], ['-a'], ['-H'], ['-A'], ['-AX'], ['-U'], ['-UU'], ['--open-noatime'], ['--bwlimit=256'], ['--timeout=1'], ['--filter=P stale']):
+        for flags in (['-rl', '--safe-links'], ['-a'], ['-E'], ['-H'], ['-A'], ['-AX'], ['-U'], ['-UU'], ['--open-noatime'], ['--bwlimit=256'], ['--timeout=1'], ['--filter=P stale']):
             with self.subTest(flags=flags):
                 target = self.root / 'unsupported feature destination'
                 result = subprocess.run([str(BINARY), '--no-fallback', *flags, '-e', RSH,
@@ -175,7 +175,7 @@ p=pathlib.Path(sys.argv[1]); print(json.dumps({'hash':hashlib.sha256((p/'file').
     def test_legacy_metadata_requests_refuse_before_destination_writes(self):
         source = self.root / 'ACL feature source'; source.mkdir()
         (source / 'file').write_bytes(b'unchanged')
-        for flags in ('-aA', '-aAX', '-aU', '-aUU', *(['-aN', '-aUN'] if sys.platform == 'darwin' else [])):
+        for flags in ('-rltE', '-aA', '-aAX', '-aU', '-aUU', *(['-aN', '-aUN'] if sys.platform == 'darwin' else [])):
             for direction in ('push', 'pull'):
                 with self.subTest(flags=flags, direction=direction):
                     target = self.root / ('ACL refused ' + flags + direction)
@@ -193,6 +193,27 @@ p=pathlib.Path(sys.argv[1]); print(json.dumps({'hash':hashlib.sha256((p/'file').
                     if HOST:
                         from ssh_test import remote_json
                         self.assertFalse(remote_json('import pathlib,json,sys; print(json.dumps(pathlib.Path(sys.argv[1]).exists()))', target))
+
+    def test_executability_with_perms_needs_no_extra_capability(self):
+        source = self.root / 'redundant executability'; source.mkdir()
+        (source / 'file').write_bytes(b'data'); (source / 'file').chmod(0o751)
+        for peer in (self.remote_subset, self.remote_legacy):
+            for direction in ('push', 'pull'):
+                target = self.root / ('perms E ' + pathlib.Path(peer).parent.name + direction)
+                if HOST and direction == 'pull':
+                    subprocess.run(['rsync', '-a', '-e', RSH, str(source) + '/', HOST + ':' + str(source) + '/'],
+                                   check=True, capture_output=True, timeout=20)
+                a, b = str(source) + '/', str(target) + '/'
+                if direction == 'push': b = (HOST or 'fake') + ':' + b
+                else: a = (HOST or 'fake') + ':' + a
+                result = subprocess.run([str(BINARY), '--no-fallback', '-rpE', '-e', RSH,
+                                         '--rsync-path=' + shlex.quote(peer), a, b], capture_output=True, timeout=20)
+                self.assertEqual(result.returncode, 0, result.stderr)
+                if HOST and direction == 'push':
+                    from ssh_test import remote_json
+                    mode = remote_json('import os,sys,json; print(json.dumps(os.stat(sys.argv[1]).st_mode & 4095))', target / 'file')
+                else: mode = (target / 'file').stat().st_mode & 0o7777
+                self.assertEqual(mode, 0o751)
 
     def test_formatted_output_requires_negotiated_support(self):
         source = self.root / 'format source'

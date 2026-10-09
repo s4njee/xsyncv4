@@ -2,7 +2,7 @@
 
 Initial audit written 2026-10-08 against xsync 0.1.0 (protocol 1).
 All fifteen P0 stories completed against protocol 3; per-story evidence is below.
-P1 R-02 through R-09 and E-01 through E-09 are complete (17 of 22 stories). Current protocol 4 supports protocol 3; E-10 is in progress (local/remote xattrs, matching-style ACLs and access/creation times implemented, cross-style compatibility guarded; flags, identity overrides and packaging pending).
+P1 R-02 through R-09 and E-01 through E-09 are complete (17 of 22 stories). Current protocol 4 supports protocol 3; E-10 is in progress (local/remote xattrs, matching-style ACLs, executability and access/creation times implemented, cross-style compatibility guarded; flags, identity overrides and packaging pending).
 Problem statements retain the original audit findings.
 
 ## What "daily driver" means here
@@ -1938,3 +1938,69 @@ Verified artifact manifest (source `864bd37edf14`):
 - **Remaining before E-10 completion:** BSD flags, `-E`, `--chmod`, `--chown`,
   final metadata composition checks and packaging. Installed helpers and
   release artifacts have not been replaced.
+
+
+## E-10 progress — 2026-10-09: native executability
+
+- E-10 remains **code**, and P1 remains **17/22**. Native local/push/pull
+  `-E`/`--executability` now preserves regular-file execution state with
+  `--perms` disabled. Non-executable sources clear execute bits; executable
+  sources add execution rights to destination read classes only when no
+  execution rights already exist. Existing read/write/special bits are retained;
+  new files use the usual source mode and umask. `--perms` takes precedence,
+  and archive mode does not imply `-E`. Physical links/directories/special
+  inodes are unchanged; `-L` handles regular referents. Mode-only changes use
+  rsync's `p` itemization, and dry runs do not write.
+- **Negotiation and fresh metadata:** `PF_EXECUTABILITY=67108864` is outside
+  the frozen protocol-3 option layout and is requested only when needed. Older
+  helpers delegate or refuse with code 4 before destination writes. When `-p`
+  makes `-E` redundant, older/subset peers can still transfer normally. An
+  explicit helper `-E` cannot silently disappear if the client did not negotiate
+  it. Local source retries and remote fresh DATA modes compute execution rights
+  from the original destination mode, preserving its original execution classes
+  even after a prior plan cleared them. No new file-list/DATA fields are needed.
+- **Verification:** `tests/executability_test.py` has **36** rsync differential
+  transfers over local/push/pull paths, with a matrix of **9** source modes and
+  **12** destination modes. Coverage includes existing/new files, data and
+  metadata-only changes, set-ID bits, empty-directory/symlink replacements,
+  `--perms` precedence, `-L`, checksum, in-place, dry-run, hard-link anchors and
+  aliases, and `-AX` composition. Another **6** native cases retain unreadable
+  destination modes on byte replacement. `tests/executability_race_test.py`
+  verifies **24** source-mode mutations across local/push/pull, whole/delta and
+  atomic/in-place retries. Wire tests verify **4** listed/fresh mode combinations
+  and unnegotiated explicit helper refusal. The protocol suite has **11** passing
+  methods against frozen protocol 3 and feature subsets, including redundant
+  `-pE` success. Fallback checks verify strict refusal and original-argument
+  delegation. The receiver trust fixture now swaps a destination leaf for an
+  outside symlink during an `-E` permission update in all three directions.
+- **Real SSH:** `tests/executability_cross_test.py` owns and removes its
+  disposable Linux container and SSH keys. **6** Darwin/Linux rsync differentials
+  cover both directions with plain `-E`, `-pE` and dry-run, checking exact file
+  modes, contents and itemized output. Opt in with `XSYNC_ACL_CROSS_RIG=1`.
+- **Documented compatibility boundaries:** a native byte replacement that needs
+  no readable basis retains the original destination permissions; rsync's
+  receiver can instead treat an unreadable basis as a new file. Native `-E`
+  follows modern rsync's executability meaning. Apple's system rsync uses `-E`
+  for extended attributes; fallback retains the original arguments, so use
+  `--executability` for unambiguous delegation. README/help now describe the
+  option and the boundary. Semantics were checked against rsync 3.4.4's
+  `dest_mode()` implementation and its official manual.
+- **Logs:** ARM macOS **17** test methods, Intel macOS **6** executability methods,
+  Linux **45** methods (four platform skips), and the **11** protocol methods
+  pass. Separate macOS time/hard-link/output regressions pass **28** methods
+  (two Linux-only skips). Logs are `/tmp/xsync-e10-executability-mac-final.log`,
+  `/tmp/xsync-e10-executability-rosetta-final.log`,
+  `/tmp/xsync-e10-executability-linux-final.log`,
+  `/tmp/xsync-e10-executability-protocol.log`,
+  `/tmp/xsync-e10-executability-regression-mac.log`, and
+  `/tmp/xsync-e10-executability-cross.log`. Early fixtures incorrectly expected
+  rsync to accept `--no-E`, used an unresolved macOS fault-hook path, and
+  requested owner/group mapping from a minimal peer; those were corrected.
+  A misspelled trust-test class in two runners was corrected and rerun; the
+  trust method also passed separately on both platforms.
+- **Remaining before E-10 completion:** BSD flags, `--chmod`, `--chown`, final
+  metadata composition checks and packaging. Installed helpers and release
+  artifacts have not been replaced. Installed rsync variants do not expose
+  `--fileflags`; upstream's separate `fileflags.diff` does not apply cleanly to
+  rsync 3.4.4, so the next milestone needs a compatible flags reference rather
+  than treating an unknown option as a successful comparison.

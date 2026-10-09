@@ -233,7 +233,7 @@ class TrustTests(unittest.TestCase):
             self.run_sync(["--info=PROGRESS0,STATS0", "source", "dest"], root)
 
     def test_receiver_symlink_swaps(self):
-        scenarios = ("atomic", "direct", "inplace", "clone", "file_swap", "metadata", "times", "access_times", "creation_times", "delete", "interrupt", "partial")
+        scenarios = ("atomic", "direct", "inplace", "clone", "file_swap", "metadata", "executability", "times", "access_times", "creation_times", "delete", "interrupt", "partial")
         for transport in ("local", "push", "pull"):
             for scenario in scenarios:
                 if scenario == "clone" and transport != "local":
@@ -268,14 +268,17 @@ class TrustTests(unittest.TestCase):
                         elif scenario == "direct":
                             flags.append("--no-atomic")
                             match, prefix = "file", False
-                        elif scenario in ("metadata", "times", "access_times", "creation_times"):
+                        elif scenario in ("metadata", "executability", "times", "access_times", "creation_times"):
                             (dst / "hot/file").write_bytes((src / "hot/file").read_bytes())
                             flags.append("--size-only")
                             (src / "hot/file").chmod(0o640)
                             (dst / "hot/file").chmod(0o600 if scenario == "metadata" else 0o640)
+                            if scenario == "executability":
+                                flags += ['-E', '--no-perms']
+                                (src / "hot/file").chmod(0o744)
                             os.utime(src / "hot/file", (1000000000, 1000000000))
                             os.utime(dst / "hot/file", (2000000000, 2000000000))
-                            operation = ("chmod" if sys.platform == "darwin" else "open") if scenario == "metadata" else "times"
+                            operation = ("chmod" if sys.platform == "darwin" else "open") if scenario in ("metadata", "executability") else "times"
                             if scenario == "access_times": flags.append('-U')
                             if scenario == "creation_times": flags.append('-N'); operation = 'open'
                             match, prefix = "file", False
@@ -300,7 +303,7 @@ class TrustTests(unittest.TestCase):
                         while not marker.exists() and proc.poll() is None and time.monotonic() < deadline:
                             time.sleep(0.005)
                         self.assertTrue(marker.exists(), "receiver never reached the selected syscall")
-                        if scenario in ("file_swap", "metadata", "times", "access_times", "creation_times"):
+                        if scenario in ("file_swap", "metadata", "executability", "times", "access_times", "creation_times"):
                             (dst / "hot/file").unlink()
                             (dst / "hot/file").symlink_to(outside / "file")
                         else:

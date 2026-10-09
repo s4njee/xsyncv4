@@ -375,7 +375,7 @@ second is printed. `-v` and `-i` lines scroll above the live region. `NO_COLOR` 
 
 ## Compatibility with rsync
 
-Supported with rsync's meaning: `-a -r -d -H -X -A -U -R -0 -l -L -p -t -g -o -D -O -J -n -u -c -I -x -z -v -q
+Supported with rsync's meaning: `-a -r -d -H -X -A -E -U -R -0 -l -L -p -t -g -o -D -O -J -n -u -c -I -x -z -v -q
 -i -h -P -e -f`, `--delete` (and `--del`, `--delete-before/-during/-after/-delay`),
 `--delete-excluded`, `--force`, `--exclude`, `--include`, `--exclude-from`,
 `--include-from`, `--files-from`, `--relative`, `--from0`, `--filter` (`+`/`-`, `H`/`S`, `P`/`R`, `!`, and modifiers
@@ -433,6 +433,20 @@ Differences to be aware of:
   directions, so fallback does not guarantee cross-platform ACL conversion.
   As with rsync, a remote push's
   receiver re-enables `--perms` for `-A`, including after `--no-perms`.
+- **Executability.** `-E`/`--executability` preserves whether existing regular
+  files are executable when `--perms` is off. A non-executable source clears
+  execute bits; an executable source adds execute rights for destination read
+  classes only when the destination has no execute bits. Other destination
+  permissions are retained, including when a byte copy does not need a readable
+  basis (rsync may treat an unreadable replacement as new). New files use the
+  usual source mode and umask. `--perms` takes precedence, and `-a` does not
+  imply `-E`. Physical symlinks, directories and special inodes are unaffected;
+  `-L` applies it to regular referents. Older helpers delegate or refuse before
+  writes when `-E` requires its negotiated capability. This follows modern
+  rsync's executability meaning; Apple's system rsync uses `-E` for extended
+  attributes, for which xsync uses `-X`. Fallback retains the original arguments,
+  so system rsync's interpretation also applies after delegation; use
+  `--executability` for unambiguous fallback.
 - **Additional times.** `-U`/`--atimes` preserves file and special-inode access
   times; directories and physical symlinks retain rsync's omission. `-UU` also
   enables `--open-noatime`, which requests `O_NOATIME` on systems that provide it
@@ -567,6 +581,9 @@ python3 tests/xattrs_memory_test.py                       # fork RSS scaling, in
 python3 tests/xattrs_privileged_test.py                   # Linux root trusted/capability parity (isolated SYS_ADMIN rig)
 python3 tests/acls_test.py                               # local/push/pull ACLs, inherited modes, itemization and clones
 python3 tests/acls_wire_test.py                          # ACL negotiation, principal mapping and hostile records
+python3 tests/executability_test.py                       # executable-bit mode/itemize differentials
+python3 tests/executability_wire_test.py                  # fresh source modes and capability guard
+python3 tests/executability_race_test.py                  # execution bits refresh during source retries
 python3 tests/protocol_test.py                            # frozen N-1 and feature subsets
 python3 tests/output_test.py                              # formats, ordering, log parity
 python3 tests/error_test.py                               # error counts, samples, exit codes and log parity

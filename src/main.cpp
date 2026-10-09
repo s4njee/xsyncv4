@@ -61,6 +61,7 @@ Options (same meaning as rsync):
      --safe-links         skip symlinks that point outside the transfer tree
  -L, --copy-links         transform symlink into referent file/dir
  -p, --perms              preserve permissions
+ -E, --executability      preserve executability of regular files
  -o, --owner              preserve owner (super-user only)
  -g, --group              preserve group
  -D                       same as --devices --specials
@@ -236,6 +237,7 @@ Parsed parse(int argc, char** argv) {
     else if (name == "archive") set_archive(o);
     else if (name == "xattrs") o.xattrs = std::min(o.xattrs + 1, 2);
     else if (name == "no-xattrs" || name == "no-X") o.xattrs = 0;
+    else if (name == "executability") o.executability = true;
     else if (name == "atimes") { if (++o.atimes > 1) o.open_noatime = true; }
     else if (name == "no-atimes" || name == "no-U") o.atimes = 0;
     else if (name == "no-N") o.crtimes = false;
@@ -334,7 +336,7 @@ Parsed parse(int argc, char** argv) {
           "backup", "backup-dir", "suffix", "link-dest", "compare-dest", "copy-dest",
           "chmod", "chown", "usermap", "groupmap", "append", "append-verify", "partial-dir",
           "delay-updates", "fuzzy", "remove-source-files", "keep-dirlinks", "copy-dirlinks", "copy-unsafe-links",
-          "munge-links", "executability", "daemon", "port", "password-file",
+          "munge-links", "daemon", "port", "password-file",
           "write-batch", "read-batch", "only-write-batch", "super", "fake-super", "temp-dir",
           "iconv", "checksum-seed", "address", "sockopts", "stop-after", "stop-at", "max-alloc", "write-devices", "copy-devices",
           "delete-missing-args", "ignore-missing-args", "trust-sender", "copy-as", "early-input", "remote-option",
@@ -387,6 +389,7 @@ Parsed parse(int argc, char** argv) {
         case 'l': o.links = true; break;
         case 'L': o.copy_links = true; break;
         case 'p': o.perms = true; break;
+        case 'E': o.executability = true; break;
         case 't': o.times = true; break;
         case 'U': if (++o.atimes > 1) o.open_noatime = true; break;
         case 'N': o.crtimes = true; break;

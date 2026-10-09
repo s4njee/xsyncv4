@@ -142,13 +142,13 @@ else: sys.exit(255)
         result = self.run_sync('-b', 'src', 'dst')
         self.assertEqual(result.returncode, 127)
 
-    def test_remote_acls_refuse_or_delegate_before_writes(self):
+    def test_remote_metadata_refuse_or_delegate_before_writes(self):
         from acls_test import get_acl, set_acl
         source = self.src / 'file with spaces'
         set_acl(source)
         before = get_acl(source)
         for direction in ('push', 'pull'):
-            for flags in ('-aA', '-aAX'):
+            for flags in ('-aA', '-aAX', '-rltE'):
                 with self.subTest(direction=direction, flags=flags):
                     dest = self.root / (direction + flags)
                     a, b = str(self.src) + '/', str(dest)
@@ -164,7 +164,8 @@ else: sys.exit(255)
                     result = self.run_sync(*fallback_arguments, env=environment)
                     self.assertEqual(result.returncode, 0, result.stderr)
                     self.assertEqual(result.stderr.count(b'falling back'), 1)
-                    self.assertEqual(get_acl(dest / source.name), before)
+                    if 'A' in flags: self.assertEqual(get_acl(dest / source.name), before)
+                    else: self.assertEqual((dest / source.name).stat().st_mode & 0o7777, source.stat().st_mode & 0o777 & ~0o022)
                     self.assertEqual(get_acl(source), before)
 
     def test_explicit_server_acl_option_refuses_before_writes(self):

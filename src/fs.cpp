@@ -154,7 +154,13 @@ void entry_from_stat(const struct stat& st, Entry& e) {
 #endif
 }
 
-Entry source_snapshot(const Entry& scanned, const struct stat& st) {
+u32 execution_mode(u32 source, u32 destination) {
+  if (!(source & 0111)) return destination & ~0111u;
+  if (!(destination & 0111)) return destination | ((destination & 0444) >> 2);
+  return destination;
+}
+
+Entry source_snapshot(const Entry& scanned, const struct stat& st, bool receiver) {
   Entry e;
   entry_from_stat(st, e);
   e.name_off = scanned.name_off, e.name_len = scanned.name_len;
@@ -162,7 +168,13 @@ Entry source_snapshot(const Entry& scanned, const struct stat& st) {
   e.item_flags = scanned.item_flags;
   e.time_flags = scanned.time_flags;
   if (g_opt.atimes) e.atime = scanned.atime;  // checksum/read activity must not replace the listed atime.
-  if (!g_opt.perms) e.mode = scanned.mode;
+  e.basis_mode = scanned.basis_mode;
+  // Send fresh source bits; receivers retain their original destination classes.
+  if (!g_opt.perms && (receiver || !g_opt.executability)) {
+    if (g_opt.executability && (scanned.flags & EF_INPLACE_SAFE))
+      e.mode = execution_mode(e.mode, scanned.basis_mode);
+    else e.mode = scanned.mode;
+  }
   return e;
 }
 
@@ -638,7 +650,7 @@ void tweak_attrs(const char* path, const Entry& s, const Entry& d, std::string_v
     if (!o.dry_run) check_attr(destination_chown(path, s.uid, (gid_t)-1), path, "ownership");
     code[6] = 'o', changed = true;
   }
-  if (o.perms && (d.mode != s.mode || (changed && (s.mode & 06000)))) {
+  if ((o.perms || (o.executability && s.type == T_REG)) && (d.mode != s.mode || (changed && (s.mode & 06000)))) {
     if (!o.dry_run) set_mode(path, s.mode, link);
     if (d.mode != s.mode) code[5] = 'p';
     changed = true;
@@ -899,8 +911,9 @@ void generate(DirWork& w, Worker& t) {
           } else {
             same = d->size == s.size && same_secs(s, *d);
           }
+          s.basis_mode = d->mode;
+          if (!o.perms) s.mode = o.executability ? execution_mode(s.mode, d->mode) : d->mode;
           if (same) {
-            if (!o.perms) s.mode = d->mode;
             hardlink_prepare(w, (u32)i, d);
             hardlink_complete(w, (u32)i, s);
             tweak_attrs(path.c_str(), s, *d, rel, 'f', t, w, (u32)i);
@@ -911,10 +924,9 @@ void generate(DirWork& w, Worker& t) {
           if (preserve_atime(s) && d->atime != s.atime) s.time_flags |= 1;
           if (preserve_crtime(s) && d->crtime != s.crtime) s.time_flags |= 2;
           if (!same_secs(s, *d)) s.flags |= EF_DIFF_TIME;
-          if (o.perms && d->mode != s.mode) s.item_flags |= IF_PERMS;
+          if ((o.perms || o.executability) && d->mode != s.mode) s.item_flags |= IF_PERMS;
           if (o.owner && o.am_root && d->uid != s.uid) s.item_flags |= IF_OWNER;
           if (o.group && d->gid != s.gid && can_set_gid(s.gid)) s.item_flags |= IF_GROUP;
-          if (!o.perms) s.mode = d->mode;
           transfer = true;
         }
         if (transfer) {
