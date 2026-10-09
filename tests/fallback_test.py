@@ -59,7 +59,7 @@ elif case=='banner': print('welcome to a broken shell',flush=True)
 elif case=='disconnect':
  import re,pathlib
  version=int(re.search(r'PROTO_VERSION = (\\d+)',pathlib.Path(sys.argv[2]).read_text())[1])
- frame(1,b'XSYNC\\x01'+bytes([version]))
+ frame(1,b'XSYNC\\x01'+bytes([version])+(b'\\x0f' if version>=4 else b''))
 else: sys.exit(255)
 ''')
         # The fake rsync branch drops the Python fixture arguments before invoking

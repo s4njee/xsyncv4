@@ -17,18 +17,27 @@ using u64 = uint64_t;
 using i64 = int64_t;
 
 #define XSYNC_VERSION "0.1.0"
-constexpr u32 PROTO_VERSION = 3;
+constexpr u32 PROTO_VERSION = 4;
+constexpr u32 PROTO_MIN_VERSION = PROTO_VERSION - 1;
+constexpr u64 PF_CORE = 1, PF_ZSTD = 2, PF_IDMAP = 4, PF_SAFE_LINKS = 8;
+#ifndef XSYNC_PROTOCOL_FEATURES
+#define XSYNC_PROTOCOL_FEATURES 15
+#endif
+constexpr u64 PROTO_FEATURES = XSYNC_PROTOCOL_FEATURES;
+constexpr u64 LEGACY_V3_FEATURES = 15;
 
 // ---------------------------------------------------------------- options
 
-#define BOOL_OPTS(X)                                                                      \
+#define WIRE_V3_BOOL_OPTS(X)                                                               \
   X(recursive) X(dirs) X(links) X(copy_links) X(perms) X(times) X(group) X(owner)         \
   X(devices) X(specials) X(compress) X(dry_run) X(del) X(delete_excluded) X(force)        \
   X(update) X(checksum) X(size_only) X(ignore_times) X(ignore_existing) X(existing)       \
   X(one_fs) X(inplace) X(omit_dir_times) X(omit_link_times) X(numeric_ids) X(itemize)     \
   X(partial) X(clone) X(direct_new) X(ignore_errors) X(safe_links)
-#define INT_OPTS(X) \
+#define WIRE_V3_INT_OPTS(X) \
   X(verbose) X(compress_level) X(max_size) X(min_size) X(modify_window) X(jobs) X(max_delete)
+#define BOOL_OPTS(X) WIRE_V3_BOOL_OPTS(X)
+#define INT_OPTS(X) WIRE_V3_INT_OPTS(X)
 
 struct Options {
 #define X(n) bool n = false;
@@ -45,6 +54,8 @@ struct Options {
   bool am_root = false;
   bool am_server = false;
   bool pushing = false;  // client is sending to a remote receiver (itemize prints '<')
+  u32 wire_version = PROTO_VERSION;
+  u64 peer_features = PROTO_FEATURES;
 };
 
 extern Options g_opt;

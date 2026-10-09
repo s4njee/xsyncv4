@@ -20,9 +20,9 @@ cmake -S . -B build -G Ninja && cmake --build build
 ```
 
 The binary is `build/xsync`. It builds on macOS and Linux (checked with clang 21 and
-gcc 12). Native remote transfers use matching xsync versions on both machines
+gcc 12). Native remote transfers use a common supported xsync protocol on both machines
 (`--rsync-path=/path/to/xsync` if it is not on the remote `PATH`). If the remote
-helper is missing or has a different protocol version, xsync re-executes a real
+helper is missing or has no supported protocol in common, xsync re-executes a real
 rsync from PATH with one stderr notice. Unsupported rsync options and daemon
 URLs also use this fallback before any transfer. It never installs a helper.
 Use `--no-fallback` or `XSYNC_FALLBACK=0` for strict native-only operation;
@@ -48,7 +48,7 @@ libraries. zstd, xxHash and ICU source archives are vendored and hash checked,
 including ICU's Unicode name comparison support. Linux outputs run without
 installed runtime dependencies. A Linux build host can produce the two Linux
 outputs; producing the macOS universal output requires macOS. `--version`
-includes the source Git revision. Exported source trees can pass
+includes the source Git revision (`-dirty` for modified application sources). Exported source trees can pass
 `-DXSYNC_GIT_HASH=REVISION` to CMake.
 
 ```sh
@@ -68,6 +68,29 @@ Normal transfers search the remote PATH for `xsync`, then `~/.local/bin/xsync`,
 then the executable named by `XSYNC_REMOTE_PATH` (local environment first,
 otherwise the remote environment). That path can contain spaces or begin `~/`.
 An explicit `--rsync-path` supplies the remote command and bypasses this lookup.
+
+## Protocol compatibility
+
+The current protocol is **4**. Each release supports its current protocol N and
+N-1, so this release also supports **3**. A client retries a protocol-3 peer
+before transfer begins; an older protocol-3 client can use the new server. The
+protocol-3 option layout stays frozen. Versions outside that window delegate to
+rsync unless fallback is disabled.
+
+Protocol 4 advertises feature bits in both Hello messages and uses their
+intersection. Unknown feature bits are ignored. The core transfer format is
+required; compression, identity mapping and safe-link filtering have distinct
+bits. If compression is unavailable, both sides send plain data. Requested
+safe-link or user/group mapping semantics are never silently dropped: missing
+support fails before transfer (or invokes rsync when fallback is enabled).
+Receivers reject compressed or identity-map frames that were not negotiated.
+Protocol-3 peers use their known baseline feature set and receive the historical
+Hello response without new fields.
+
+Future optional frames/options must be gated by an agreed feature bit; they must
+not change the protocol-3 layout or add unnegotiated fields to the baseline Hello.
+When the compatibility window advances, keep a frozen N-1 peer fixture and prove
+both old-client/new-server and new-client/old-server transfers with fallback off.
 
 ## Benchmark
 
@@ -211,6 +234,7 @@ python3 tests/mount_test.py                               # macOS: disposable AP
 ./tests/ssh-rig.sh                                        # Docker: real SSH + SIGINT
 ./tests/ssh-rig.sh ssh_reach_test.py fallback_test.py        # prompts + fallback
 python3 tests/fallback_test.py                            # local fallback checks
+python3 tests/protocol_test.py                            # frozen N-1 and feature subsets
 XSYNC_LAN_HOST=user@host python3 tests/lan_test.py -v       # missing-helper LAN
 ./tests/ssh-rig.sh root_test.py                           # Docker: 96 root/ID/device cases
 ```

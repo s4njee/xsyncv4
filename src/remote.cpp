@@ -272,6 +272,7 @@ bool pack(std::string& f, std::string_view raw, Worker& w) {
 
 std::string_view unpack(std::string_view in, bool compressed, std::string& scratch, Worker& w) {
   if (!compressed) return in;
+  if (!(g_opt.peer_features & PF_ZSTD)) die(RERR_PROTOCOL, "compressed data without negotiated zstd support");
   RBuf r(in);
   size_t raw = (size_t)r.var();
   std::string_view z = r.rest();
@@ -285,13 +286,21 @@ std::string_view unpack(std::string_view in, bool compressed, std::string& scrat
 
 // ---------------------------------------------------------------- options on the wire
 
+std::string missing_feature(u64 features) {
+  if (!(features & PF_CORE)) return "peer does not support the required core transfer features";
+  if (g_opt.safe_links && !(features & PF_SAFE_LINKS)) return "peer does not support --safe-links";
+  if (!g_opt.numeric_ids && (g_opt.owner || g_opt.group) && !(features & PF_IDMAP))
+    return "peer does not support user/group name mapping (use --numeric-ids)";
+  return {};
+}
+
 void put_options(std::string& f) {
   const Options& o = g_opt;
 #define X(n) f.push_back((char)o.n);
-  BOOL_OPTS(X)
+  WIRE_V3_BOOL_OPTS(X)
 #undef X
 #define X(n) put_svar(f, o.n);
-  INT_OPTS(X)
+  WIRE_V3_INT_OPTS(X)
 #undef X
   auto rules = o.filters.to_strings();
   put_var(f, rules.size());
@@ -301,10 +310,10 @@ void put_options(std::string& f) {
 void get_options(RBuf& r) {
   Options& o = g_opt;
 #define X(n) o.n = r.byte();
-  BOOL_OPTS(X)
+  WIRE_V3_BOOL_OPTS(X)
 #undef X
 #define X(n) o.n = r.svar();
-  INT_OPTS(X)
+  WIRE_V3_INT_OPTS(X)
 #undef X
   size_t n = (size_t)r.var();
   std::string err;
@@ -1142,7 +1151,10 @@ struct Receiver {
           pool.push_bounded(1, std::move(t));
           break;
         }
-        case F_IDMAP: ids.learn(payload); break;
+        case F_IDMAP:
+          if (!(g_opt.peer_features & PF_IDMAP)) die(RERR_PROTOCOL, "ID map without negotiated name-mapping support");
+          ids.learn(payload);
+          break;
         case F_MSG: handle_msg(payload); break;
         case F_LIST_END:
           list_end.store(true);
@@ -1259,8 +1271,9 @@ bool is_remote_arg(const std::string& a) {
 
 }  // namespace
 
-int run_client(const std::vector<std::string>& srcs, const std::string& dest) {
+int run_client(const std::vector<std::string>& srcs, const std::string& dest, u32 wire_version) {
   Options& o = g_opt;
+  o.wire_version = wire_version;
   bool push = is_remote_arg(dest);
   Remote rem;
   std::vector<std::string> paths;  // paths on the remote side
@@ -1321,8 +1334,9 @@ int run_client(const std::vector<std::string>& srcs, const std::string& dest) {
   // Hello: magic, version, the role the server plays, options, paths.
   std::string f = new_frame(F_HELLO);
   f.append(MAGIC, sizeof MAGIC - 1);
-  put_var(f, PROTO_VERSION);
+  put_var(f, wire_version);
   f.push_back(push ? 'R' : 'S');
+  if (wire_version >= 4) put_var(f, PROTO_FEATURES);
   put_options(f);
   put_var(f, paths.size());
   for (auto& p : paths) put_str(f, p);
@@ -1331,7 +1345,7 @@ int run_client(const std::vector<std::string>& srcs, const std::string& dest) {
   u8 type;
   std::string payload;
   // Only handshake failures can fall back. No destination has been opened yet.
-  auto fallback = [&](const std::string& reason, int strict_code) {
+  auto disconnect = [&]() {
     c.finish();
     close(c.wfd);
     close(c.rfd);
@@ -1340,7 +1354,19 @@ int run_client(const std::vector<std::string>& srcs, const std::string& dest) {
       if (g_stop.load()) exit_signal();
     }
     g_conn = nullptr;
+  };
+  auto fallback = [&](const std::string& reason, int strict_code) {
+    disconnect();
     fallback_to_rsync(reason, strict_code);
+  };
+  auto mismatch = [&](u64 peer_version, const std::string& reason) -> int {
+    // Retry once using the frozen N-1 layout, before either end opens a destination.
+    if (wire_version == PROTO_VERSION && peer_version == PROTO_MIN_VERSION) {
+      disconnect();
+      return run_client(srcs, dest, PROTO_MIN_VERSION);
+    }
+    fallback(reason, RERR_PROTOCOL);
+    return RERR_PROTOCOL;
   };
   for (;;) {
     if (!c.read_frame(type, payload, true)) {
@@ -1356,8 +1382,13 @@ int run_client(const std::vector<std::string>& srcs, const std::string& dest) {
       int kind = message.byte();
       int code = (int)message.var();
       std::string text(message.rest());
-      if (!message.bad && kind == 2 && code == RERR_PROTOCOL && text.rfind("protocol version mismatch:", 0) == 0)
-        fallback(text, RERR_PROTOCOL);
+      if (!message.bad && kind == 2 && code == RERR_PROTOCOL && text.rfind("protocol version mismatch:", 0) == 0) {
+        size_t server = text.find("server ");
+        u64 peer = server == std::string::npos ? 0 : strtoull(text.c_str() + server + 7, nullptr, 10);
+        return mismatch(peer, text);
+      }
+      if (!message.bad && kind == 2 && code == RERR_UNSUPPORTED && text.rfind("peer does not support", 0) == 0)
+        fallback(text, RERR_UNSUPPORTED);
       handle_msg(payload);
       continue;
     }
@@ -1366,9 +1397,15 @@ int run_client(const std::vector<std::string>& srcs, const std::string& dest) {
     RBuf answer(payload);
     answer.raw(sizeof MAGIC - 1);
     u64 version = answer.var();
+    if (answer.bad) die(RERR_PROTOCOL, "protocol error: malformed server hello");
+    if (version != wire_version) return mismatch(version, "protocol version mismatch: client " + std::to_string(wire_version) +
+                                                 ", server " + std::to_string(version));
+    u64 features = version >= 4 ? answer.var() : LEGACY_V3_FEATURES;
     if (answer.bad || !answer.empty()) die(RERR_PROTOCOL, "protocol error: malformed server hello");
-    if (version != PROTO_VERSION) fallback("protocol version mismatch: client " + std::to_string(PROTO_VERSION) +
-                                         ", server " + std::to_string(version), RERR_PROTOCOL);
+    o.peer_features = features & PROTO_FEATURES;
+    std::string missing = missing_feature(o.peer_features);
+    if (!missing.empty()) fallback(missing, RERR_UNSUPPORTED);
+    if (!(o.peer_features & PF_ZSTD)) o.compress = false;
     break;
   }
   if (o.verbose > 0) out_line(push ? "sending incremental file list" : "receiving incremental file list");
@@ -1407,19 +1444,31 @@ int run_server() {
   c.start();
   g_msg_sink = send_msg;
   if (r.bad || magic != std::string_view(MAGIC, sizeof MAGIC - 1)) die(RERR_PROTOCOL, "protocol error: bad hello from client");
-  if (ver != PROTO_VERSION) die(RERR_PROTOCOL, "protocol version mismatch: client %u, server %u — install the same xsync on both ends", ver, PROTO_VERSION);
+  if (ver < PROTO_MIN_VERSION || ver > PROTO_VERSION)
+    die(RERR_PROTOCOL, "protocol version mismatch: client %u, server %u (supports %u and %u)",
+        ver, PROTO_VERSION, PROTO_VERSION, PROTO_MIN_VERSION);
+  u64 advertised = ver >= 4 ? r.var() : LEGACY_V3_FEATURES;
   o = Options();
   o.am_server = true;
+  o.wire_version = ver;
+  o.peer_features = advertised & PROTO_FEATURES;
   get_options(r);
+  if (r.bad || (role != 'R' && role != 'S')) die(RERR_PROTOCOL, "protocol error: malformed hello options or role");
+  std::string missing = missing_feature(o.peer_features);
+  if (!missing.empty()) die(RERR_UNSUPPORTED, "%s", missing.c_str());
+  if (ver == 3 && o.compress && !(o.peer_features & PF_ZSTD))
+    die(RERR_UNSUPPORTED, "peer does not support legacy protocol compression");
+  if (!(o.peer_features & PF_ZSTD)) o.compress = false;
   init_ids();
   std::vector<std::string> paths;
   size_t n = (size_t)r.var();
   for (size_t i = 0; i < n && !r.bad; i++) paths.push_back(expand_remote_home(std::string(r.str())));
-  if (r.bad || paths.empty()) die(RERR_PROTOCOL, "protocol error: truncated hello");
+  if (r.bad || paths.empty() || !r.empty()) die(RERR_PROTOCOL, "protocol error: truncated or trailing hello");
   o.pushing = role == 'R';
   std::string f = new_frame(F_HELLO);
   f.append(MAGIC, sizeof MAGIC - 1);
-  put_var(f, PROTO_VERSION);
+  put_var(f, ver);
+  if (ver >= 4) put_var(f, o.peer_features);
   c.send(std::move(f));
   int rc;
   if (role == 'R') {

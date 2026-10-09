@@ -72,7 +72,9 @@ class LANTests(unittest.TestCase):
     def test_native_lan_checklist(self):
         remote_root = self.remote("import tempfile; print(tempfile.mkdtemp(prefix='xsync-native-lan-'))")
         try:
-            with tempfile.TemporaryDirectory(prefix='xsync native lan ') as tmp:
+            # SSH adds a random suffix to ControlPath; macOS's default temp
+            # prefix alone can consume most of the Unix socket path limit.
+            with tempfile.TemporaryDirectory(dir='/tmp', prefix='xsync native lan ') as tmp:
                 root = pathlib.Path(tmp)
                 source = root / 'source with spaces'
                 source.mkdir()

@@ -15,8 +15,8 @@ REPO = pathlib.Path(__file__).resolve().parent.parent
 BINARY = pathlib.Path(os.environ.get("XSYNC_TEST_BINARY", REPO / "build/xsync")).resolve()
 HEADER = (REPO / "src/common.h").read_text()
 VERSION = int(re.search(r"PROTO_VERSION = (\d+)", HEADER)[1])
-BOOLS = re.findall(r"X\((\w+)\)", HEADER.split("#define BOOL_OPTS(X)")[1].split("#define INT_OPTS(X)")[0])
-INTS = re.findall(r"X\((\w+)\)", HEADER.split("#define INT_OPTS(X)")[1].split("struct Options")[0])
+BOOLS = re.findall(r"X\((\w+)\)", HEADER.split("#define WIRE_V3_BOOL_OPTS(X)")[1].split("#define WIRE_V3_INT_OPTS(X)")[0])
+INTS = re.findall(r"X\((\w+)\)", HEADER.split("#define WIRE_V3_INT_OPTS(X)")[1].split("#define BOOL_OPTS(X)")[0])
 
 
 def var(value):
@@ -71,7 +71,7 @@ class ReceiverTrustTests(unittest.TestCase):
                 (outside / "file").write_bytes(b"untouched")
                 options = bytes(name in ("recursive", "links", "perms", "safe_links") for name in BOOLS)
                 options += b"".join(var(1 if name == "max_delete" else 2 if name == "jobs" else 0) for name in INTS)
-                hello = b"XSYNC\1" + var(VERSION) + b"R" + options + b"\0\1" + string(str(dst))
+                hello = b"XSYNC\1" + var(VERSION) + b"R" + (var(15) if VERSION >= 4 else b'') + options + b"\0\1" + string(str(dst))
                 proc = subprocess.Popen([str(BINARY), "--server"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 try:
                     proc.stdin.write(frame(1, hello))

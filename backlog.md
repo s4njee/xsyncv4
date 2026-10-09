@@ -71,10 +71,10 @@ fails unless a matching xsync is already on that host's non-interactive `PATH`.
 |---|---|---|---|---|
 | R-01 | **Real ssh, end to end.** Everything "remote" so far ran through `tests/fakessh.sh` on one machine. Unknowns: `-e "ssh -i KEY"` quoting, passphrase / host-key / password prompts appearing while the progress region is live, `ControlMaster`, remote shells that print a banner on stdout (rsync detects this as protocol garbage and says so), ssh's own stderr. | partial | Checklist run by hand against a Linux LAN host and the Pi, then automated in Q-06; a banner on stdout produces a clear "the remote shell is printing text" error. | M |
 | R-02 | **Fallback to rsync.** If the remote has no xsync (ssh exit 127), the versions do not match, or the command line uses an option xsync rejects (`-H`, `-A`, `-X`, `-R`, daemon URLs…), re-exec the real rsync with the original arguments and say so in one line. This is what makes the alias safe. | done | `xsync -a src host-without-xsync:dst` completes via rsync with a one-line notice; `--no-fallback` and `XSYNC_FALLBACK=0` turn it off; the notice goes to stderr only. | M |
-| R-03 | **Static release binaries.** Linux amd64 and arm64 (musl, zstd and xxhash vendored), macOS universal. The current build links whatever Homebrew/apt provides. | partial | `cmake --preset release-static` produces one file per target that runs on a bare Debian and on Raspberry Pi OS; `xsync --version` shows the git hash. | M |
-| R-04 | **Explicit remote install.** `xsync --install HOST` copies the matching binary to `~/.local/bin/xsync` on the host after detecting its OS/arch. Never implicit — the v3 decision that a transfer must not upload a helper still stands. | partial | One command gets a fresh Linux host ready; it refuses to overwrite a newer version without `--force`. | M |
+| R-03 | **Static release binaries.** Linux amd64 and arm64 (musl, zstd and xxhash vendored), macOS universal. The current build links whatever Homebrew/apt provides. | done | `cmake --preset release-static` produces one file per target that runs on a bare Debian and on Raspberry Pi OS; `xsync --version` shows the git hash. | M |
+| R-04 | **Explicit remote install.** `xsync --install HOST` copies the matching binary to `~/.local/bin/xsync` on the host after detecting its OS/arch. Never implicit — the v3 decision that a transfer must not upload a helper still stands. | done | One command gets a fresh Linux host ready; it refuses to overwrite a newer version without `--force`. | M |
 | R-05 | **Find xsync on the remote without `--rsync-path`.** Non-interactive ssh sessions often lack `~/.local/bin` on `PATH`. | done | Server lookup tries `xsync`, then `~/.local/bin/xsync`, then `XSYNC_REMOTE_PATH`; documented. | S |
-| R-06 | **Protocol negotiation instead of version equality.** Any protocol change currently breaks every installed remote at once. | code | Hello carries feature bits; a newer client talks to an older server using the common subset; policy written down (client supports N and N-1). | M |
+| R-06 | **Protocol negotiation instead of version equality.** Any protocol change currently breaks every installed remote at once. | done | Hello carries feature bits; a newer client talks to an older server using the common subset; policy written down (client supports N and N-1). | M |
 | R-07 | **Install on this machine.** `cmake --install`, a Homebrew formula or tap, zsh completion (rsync's completer mostly applies), a man page generated from `--help`. | new | `brew install` or `make install` puts `xsync`, its completion and man page in place. | M |
 | R-08 | **IPv6 literals and odd host specs.** `[::1]:path` is mis-parsed; `user@host:` with an empty path and `host:` alone are untested. | code / unverified | Host parsing matches rsync's for bracketed IPv6, empty paths and `-l`-style users; unit tests. | S |
 | R-09 | **Defaults without flags.** Environment (`XSYNC_RSH` alongside the honoured `RSYNC_RSH`) and an optional config file or `XSYNC_OPTS` for personal defaults such as "progress on when stderr is a terminal". | new | Documented precedence: flags, then env, then config. | S |
@@ -480,7 +480,7 @@ These change defaults, so they should be chosen rather than inherited from a ben
   empty, then automatic push/pull via rsync preserves contents, symlink and
   nanosecond mtime. Both disposable directories are removed afterward.
 
-### R-03 — partial: release set built (2026-10-09)
+### R-03 — complete (2026-10-09)
 
 - `release-static` builds a macOS arm64/x86_64 universal binary and Linux
   amd64/arm64 binaries using musl in Alpine. Original zstd 1.5.7, xxHash 0.8.3
@@ -489,10 +489,15 @@ These change defaults, so they should be chosen rather than inherited from a ben
   The universal binary runs under arm64 and x86_64/Rosetta and links only
   libc++/libSystem; its destination file/directory collision checks pass.
 - Git tracking was initialized locally; `--version` includes the source commit.
-  **Remaining:** final recorded-source rebuild, bare Debian transfers, and
-  execution on the actual Raspberry Pi through R-04's explicit installation.
+  The final artifacts record commit `29050650e074`; both Linux architectures
+  pass local and compressed push/pull transfers in bare Debian bookworm-slim,
+  including spaces, Unicode names and a symlink. SHA-256 manifests are emitted.
+- The arm64 file runs on the actual Pi 5, Raspberry Pi OS reference image
+  2026-06-18 (Debian 13.5), kernel `6.18.34+rpt-rpi-2712`, with no runtime
+  dependencies installed. Its SHA-256 exactly matches the release manifest.
+  Native compressed LAN transfers also pass (details below).
 
-### R-04 — partial: explicit installer verified in isolated hosts (2026-10-09)
+### R-04 — complete (2026-10-09)
 
 - `--install HOST` detects Linux amd64/arm64 or macOS, chooses the release,
   streams it over SSH into a private temp file, verifies its version and uses
@@ -504,8 +509,11 @@ These change defaults, so they should be chosen rather than inherited from a ben
 - Five local installer regression methods pass on macOS and Linux. A real
   SSH test in the disposable server also passes fresh install, exact executable
   SHA-256, refusal of version 99.0.0, forced replacement and temp cleanup.
-- **Remaining:** install the arm64 static release on the authorized Pi and
-  verify native transfers in its disposable LAN test directory.
+- `build-release/xsync --install sanjee@neo.local` explicitly installed the
+  matching arm64 release at `/home/sanjee/.local/bin/xsync`. The remote file
+  SHA-256 is `b2a44fd2aff99b716f7306c15eb65ae8952afaf2cdeaadb480649fdd3f652ffb`,
+  matching `dist/manifest.json`. `--version` reports commit `29050650e074`.
+  Native push/pull, reruns, update/delete, metadata and shell checks pass there.
 
 ### R-05 — complete (2026-10-09)
 
@@ -518,3 +526,55 @@ These change defaults, so they should be chosen rather than inherited from a ben
   failure and copied file SHA-256. All six cases pass. Fallback regressions and
   the original SSH prompt/banner suite also pass after shell quoting was shared
   with the installer and extended to validate quotes/escapes.
+
+### R-01 follow-up — physical Pi/LAN checklist (2026-10-09)
+
+- After R-04's explicit installation, `XSYNC_TEST_BINARY=build-release/xsync
+  XSYNC_LAN_HOST=sanjee@neo.local XSYNC_LAN_NATIVE=1 python3 tests/lan_test.py -v`
+  passes with fallback disabled. It covers compressed push/pull, unchanged
+  reruns, updated files and deletions, 100 small files and a 2 MiB file, spaced
+  and Unicode paths, symlink targets, modes and nanosecond file/directory times.
+  Local and remote tree SHA-256 snapshots match. Disposable directories are
+  removed afterward.
+- ControlMaster is confirmed running and reused before being closed. A stdout
+  banner fails clearly with code 2; stderr text is preserved and the transfer
+  succeeds. The Linux SSH rig separately covers the interactive auth prompts,
+  cancellation and cursor/terminal restoration.
+- The first ControlPath exceeded SSH's Unix socket pathname limit in macOS's
+  default temp directory; SSH's 255 propagated without fallback. The fixture
+  now uses a shorter `/tmp` path, and the entire native checklist passes.
+- **Remaining clarification:** Neo is both the physical Pi and a Linux LAN
+  host. Awaiting whether that plus the isolated Linux SSH rig is the intended
+  coverage or a second physical Linux target should also be included.
+
+### P1 native regression checkpoint (2026-10-09)
+
+- `XSYNC_FALLBACK=0 python3 tests/difftest.py`: 212/214 pass after R-02 through
+  R-05. The only two failures remain native `-m` and `P` filters (E-08); fallback
+  is disabled here so it cannot mask missing native features.
+
+### R-06 — complete (2026-10-09)
+
+- Protocol 4 Hello advertises core, zstd, identity-map and safe-link features;
+  peers use their intersection. Unknown bits are ignored, core is required, and
+  unnegotiated compressed/identity-map frames are rejected. A common subset
+  can transfer without compression. Requested safe-link or name-mapping
+  semantics fail before transfer if unavailable (or use R-02's fallback).
+- The documented window is N and N-1: **4 and 3**. The client closes/reaps an
+  initial incompatible connection and retries version 3 once, before progress
+  or transfer. The server accepts a version-3 Hello and sends the historical
+  response. Its boolean/integer option layout is frozen separately from
+  future options. Versions outside this window use fallback or strict failure.
+- `tests/fixtures/protocol3.tar.gz` freezes actual pre-negotiation sources from
+  commit `29050650e074`, with a verified SHA-256. Compatibility tests compile
+  that historical peer separately, then test both client/server version orders,
+  push/pull, compression, safe links, unchanged reruns and file SHA-256. A
+  separately compiled core-only peer proves compression can be omitted and
+  safety/identity requirements cannot be silently lost. Three methods pass
+  natively and over real SSH.
+- The protocol-4 development client also passes the complete physical Neo LAN
+  checklist against its installed **protocol-3** static binary, with fallback
+  disabled. No remote upgrade was needed or performed.
+- Current/current real SSH and all eight SIGINT phases pass (maximum server
+  shutdown 0.612 s). All 96 root/ID/device differential cases pass. Hostile
+  receiver and fallback regressions pass with the updated Hello format.

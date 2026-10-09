@@ -17,7 +17,13 @@ set(XSYNC_GIT_HASH "" CACHE STRING "Source revision (for exported trees without 
 if(NOT XSYNC_GIT_HASH)
   execute_process(COMMAND git rev-parse --short=12 HEAD WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
     OUTPUT_VARIABLE XSYNC_GIT_HASH OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_QUIET)
-  if(NOT XSYNC_GIT_HASH)
+  if(XSYNC_GIT_HASH)
+    execute_process(COMMAND git diff --quiet HEAD -- src cmake tools CMakeLists.txt CMakePresets.json
+      WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}" RESULT_VARIABLE source_dirty ERROR_QUIET)
+    if(source_dirty EQUAL 1)
+      string(APPEND XSYNC_GIT_HASH "-dirty")
+    endif()
+  else()
     set(XSYNC_GIT_HASH "unknown")
   endif()
 endif()
