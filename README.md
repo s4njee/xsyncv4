@@ -187,13 +187,22 @@ and sorted by transfer-relative path. A terminal receives events as they finish.
 Progress stays on stderr. `--log-file=FILE` appends exactly the same stdout
 stream, including summaries, without timestamps or prefixes added to the log.
 An empty output format suppresses file lines; `-q` suppresses the stream.
-Control bytes in names are escaped as `\\#ooo`; valid UTF-8 is retained. Invalid
+Control bytes other than tabs are escaped as `\\#ooo`; valid UTF-8 is retained. Invalid
 high bytes are escaped unless `-8`/`--8-bit-output` is set.
 
 Structured events and display-only source paths use a negotiated feature bit.
 An explicit format or log request against a peer lacking that feature delegates
 to rsync before any destination writes, or fails with code 4 in strict mode.
 Ordinary `-v`/`-i` output still works with older peers using their plain messages.
+
+Directory display lengths/source paths and output configuration have a separate
+`PF_DIR_OUTPUT` bit. After Hello agrees that feature, a four-byte configuration
+frame selects attribute reporting, repeated itemization, `--mkpath` and the
+`--delete-before` itemization convention. Unsupported or malformed configuration
+fails before the receiver creates its destination. Current formatted-output and
+`-ii` requests require that feature; the protocol-3 layout remains frozen.
+`-ii` includes unchanged entries, while `-i` reports updates. Nanosecond-only
+mtime restoration under checksum mode does not invent a seconds-based item flag.
 
 Future optional frames/options must be gated by an agreed feature bit; they must
 not change the protocol-3 layout or add unnegotiated fields to the baseline Hello.

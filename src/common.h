@@ -20,8 +20,9 @@ using i64 = int64_t;
 constexpr u32 PROTO_VERSION = 4;
 constexpr u32 PROTO_MIN_VERSION = PROTO_VERSION - 1;
 constexpr u64 PF_CORE = 1, PF_ZSTD = 2, PF_IDMAP = 4, PF_SAFE_LINKS = 8, PF_RESUME = 16, PF_OUTPUT = 32;
+constexpr u64 PF_DIR_OUTPUT = 64;
 #ifndef XSYNC_PROTOCOL_FEATURES
-#define XSYNC_PROTOCOL_FEATURES 63
+#define XSYNC_PROTOCOL_FEATURES 127
 #endif
 constexpr u64 PROTO_FEATURES = XSYNC_PROTOCOL_FEATURES;
 constexpr u64 LEGACY_V3_FEATURES = 15;
@@ -54,6 +55,9 @@ struct Options {
   std::string out_format, log_file;
   bool out_format_set = false;  // An explicitly empty format suppresses file lines.
   bool raw_names = false;  // -8: retain invalid high bytes; always escape control bytes.
+  int itemize_level = 0;
+  bool output_attrs = false, output_unchanged = false;  // Configured before workers start.
+  bool delete_before = false;  // Deletion is still deferred for sender-read safety.
   FilterList filters;
   // Set at runtime, not parsed.
   bool am_root = false;
@@ -88,10 +92,12 @@ struct Entry {
   u32 name_off = 0, link_off = 0;  // offsets of NUL-terminated strings in DirList::names
   u16 name_len = 0;
   u8 type = T_NONE, flags = 0;
+  u8 item_flags = 0;  // Receiver-side comparison, kept separate from filesystem flags.
   u32 mode = 0;  // permission bits only (07777)
   u32 uid = 0, gid = 0, mtime_ns = 0, rdev = 0, dev = 0;
   i64 size = 0, mtime = 0;
 };
+enum : u8 { IF_PERMS = 1, IF_OWNER = 2, IF_GROUP = 4, IF_NEW_TYPE = 8 };
 
 struct DirList {
   std::vector<Entry> e;

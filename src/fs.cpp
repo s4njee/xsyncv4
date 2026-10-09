@@ -128,6 +128,7 @@ Entry source_snapshot(const Entry& scanned, const struct stat& st) {
   entry_from_stat(st, e);
   e.name_off = scanned.name_off, e.name_len = scanned.name_len;
   e.link_off = scanned.link_off, e.flags = scanned.flags;
+  e.item_flags = scanned.item_flags;
   if (!g_opt.perms) e.mode = scanned.mode;
   return e;
 }
@@ -416,9 +417,9 @@ namespace {
 
 struct DeleteCandidate { std::string path, rel, parent; u8 type; };
 struct FinalDirectory {
-  std::string path;
+  std::string path, rel, source;
   Entry attrs;
-  bool mode_ok, time_ok, modified;
+  bool mode_ok, time_ok, modified, reported;
 };
 std::mutex final_mu;
 std::vector<DeleteCandidate> delete_candidates;
@@ -478,7 +479,7 @@ void item_delete(Worker& t, std::string_view rel, bool is_dir) {
   t.logf(l);
 }
 
-bool remove_tree(const std::string& path, u8 type, const std::string& rel, Worker& t, bool limited = false) {
+bool remove_tree(const std::string& path, u8 type, const std::string& rel, Worker& t, bool limited = false, bool report = true) {
   auto permit = [&] {
     if (!limited || g_opt.max_delete < 0 || deletion_count < (u64)g_opt.max_delete) return true;
     if (!deletion_limit_reported) {
@@ -518,7 +519,7 @@ bool remove_tree(const std::string& path, u8 type, const std::string& rel, Worke
     err_line(RERR_PARTIAL, "delete_file: unlink \"%s\" failed: %s", path.c_str(), errstr(errno).c_str());
     return false;
   }
-  item_delete(t, rel, type == T_DIR);
+  if (report) item_delete(t, rel, type == T_DIR);
   g_stats.deleted.fetch_add(1, std::memory_order_relaxed);
   if (limited) deletion_count++;
   return true;
@@ -532,7 +533,7 @@ bool make_way(const std::string& path, const Entry& d, const std::string& rel, c
     err_line(RERR_PARTIAL, "could not make way for new %s: %s", what, rel.c_str());
     return false;
   }
-  return remove_tree(path, d.type, rel, t);
+  return remove_tree(path, d.type, rel, t, false, false);
 }
 
 // Bring owner/group/mode/mtime of an existing, up-to-date destination entry in line.
@@ -558,9 +559,13 @@ void tweak_attrs(const char* path, const Entry& s, const Entry& d, std::string_v
   }
   if (o.times && !(link && o.omit_link_times) && !time_same) {
     if (!o.dry_run) set_mtime(path, s, link);
-    code[4] = 't', changed = true;
+    if (!same_secs(s, d)) code[4] = 't', changed = true;
   }
-  if (changed && (o.itemize || o.out_format_set || !o.log_file.empty())) note_item(work, index, code, 0, t);
+  if (changed && o.output_attrs) note_item(work, index, code, 0, t);
+  else if (!changed && o.output_unchanged) {
+    memset(code + 2, ' ', 9);
+    note_item(work, index, code, 0, t);
+  }
 }
 
 }  // namespace
@@ -662,6 +667,14 @@ void generate(DirWork& w, Worker& t) {
       case T_DIR: {
         seen_dirs++;
         bool keep = d && d->type == T_DIR;
+        if (keep && output_enabled()) {
+          DirWork directory;
+          directory.rel = rel;
+          directory.attrs = s;
+          if (!w.output_sources.empty()) directory.attr_source = w.output_sources[i];
+          else src_path_of(w, (u32)i, directory.attr_source);
+          note_directory(directory, d, false, t);
+        }
         u32 final_mode = o.perms ? s.mode : keep ? d->mode : (s.mode & 0777 & ~g_umask);
         bool time_ok = false;
         if (keep) {
@@ -704,12 +717,10 @@ void generate(DirWork& w, Worker& t) {
         s.mode = final_mode;
         if (!o.recursive || s.rdev == 1) {
           // Not descended into: finish its attributes right away.
-          bool was_created = s.flags & EF_CREATED;
           if (!o.dry_run) {
             if (!(s.flags & EF_MODE_OK)) check_attr(destination_chmod(path.c_str(), final_mode), path.c_str(), "permissions");
             if (o.times && !o.omit_dir_times && !time_ok) set_mtime(path.c_str(), s, false);
           }
-          if (!was_created && !time_ok && o.times && !o.omit_dir_times && o.itemize) note_item(w, (u32)i, ".d..t......", 0, t);
           s.flags &= (u8)~EF_DESCEND;
         }
         break;
@@ -726,6 +737,7 @@ void generate(DirWork& w, Worker& t) {
         } else if (o.ignore_existing) {
           break;
         } else if (d->type != T_REG) {
+          s.item_flags |= IF_NEW_TYPE;
           if (d->type == T_DIR) {
             if (!make_way(path, *d, rel, "regular file", t)) break;
             w.modified = true;
@@ -767,6 +779,9 @@ void generate(DirWork& w, Worker& t) {
           s.flags |= EF_EXISTS | EF_INPLACE_SAFE;
           if (d->size != s.size) s.flags |= EF_DIFF_SIZE;
           if (!same_secs(s, *d)) s.flags |= EF_DIFF_TIME;
+          if (o.perms && d->mode != s.mode) s.item_flags |= IF_PERMS;
+          if (o.owner && o.am_root && d->uid != s.uid) s.item_flags |= IF_OWNER;
+          if (o.group && d->gid != s.gid && can_set_gid(s.gid)) s.item_flags |= IF_GROUP;
           if (!o.perms) s.mode = d->mode;
           transfer = true;
         }
@@ -792,6 +807,14 @@ void generate(DirWork& w, Worker& t) {
         }
         if (d ? o.ignore_existing : o.existing) break;
         u32 lmode = o.perms ? s.mode : (d && d->type == T_LNK) ? d->mode : (s.mode & 0777 & ~g_umask);
+        char link_code[12] = "cL+++++++++";
+        if (d && d->type == T_LNK) {
+          memcpy(link_code + 2, "c........", 9);
+          if (!same_secs(s, *d) || !o.times || o.omit_link_times) link_code[4] = o.times && !o.omit_link_times ? 't' : 'T';
+          if (o.perms && lmode != d->mode) link_code[5] = 'p';
+          if (o.owner && o.am_root && d->uid != s.uid) link_code[6] = 'o';
+          if (o.group && d->gid != s.gid && can_set_gid(s.gid)) link_code[7] = 'g';
+        }
         if (d) {
           if (d->type == T_DIR) {
             if (!make_way(path, *d, rel, "symlink", t)) break;
@@ -812,7 +835,7 @@ void generate(DirWork& w, Worker& t) {
         }
         w.modified = true;
         g_stats.created_links.fetch_add(1, std::memory_order_relaxed);
-        note_item(w, (u32)i, d ? "cL........." : "cL+++++++++", 0, t);
+        note_item(w, (u32)i, link_code, 0, t);
         break;
       }
 
@@ -876,7 +899,8 @@ void finish_dir(DirWork& w) {
   const Options& o = g_opt;
   if (!w.has_attrs || o.dry_run) return;
   std::lock_guard<std::mutex> lock(final_mu);
-  final_directories.push_back({w.dst_path, w.attrs, w.mode_ok, w.time_ok, w.modified.load()});
+  final_directories.push_back({w.dst_path, w.rel, w.attr_source.empty() ? w.src_path : w.attr_source,
+                               w.attrs, w.mode_ok, w.time_ok, w.modified.load(), w.directory_reported});
 }
 
 void finalize_tree() {
@@ -900,10 +924,14 @@ void finalize_tree() {
     return std::count(a.path.begin(), a.path.end(), '/') > std::count(b.path.begin(), b.path.end(), '/');
   });
   for (const auto& dir : final_directories) {
+    if (dir.rel.empty() && !dir.reported && g_opt.delete_before && g_opt.output_attrs && g_opt.times &&
+        !g_opt.omit_dir_times && std::find(dirty.begin(), dirty.end(), dir.path) != dirty.end())
+      item(worker, ".d..t......", dir.rel, dir.attrs, dir.source);
     if (!dir.mode_ok) check_attr(destination_chmod(dir.path.c_str(), dir.attrs.mode), dir.path.c_str(), "permissions");
     if (g_opt.times && !g_opt.omit_dir_times && (!dir.time_ok || dir.modified || std::find(dirty.begin(), dirty.end(), dir.path) != dirty.end()))
       set_mtime(dir.path.c_str(), dir.attrs, false);
   }
+  worker.flush_log();
   delete_candidates.clear();
   final_directories.clear();
 }
@@ -1213,6 +1241,25 @@ void note_item(DirWork& w, u32 idx, const char* code, i64 bytes, Worker& t, i64 
        entry.type == T_LNK ? w.src.link(entry) : nullptr, bytes, size);
 }
 
+void note_directory(DirWork& w, const Entry* before, bool created, Worker& t) {
+  if (!output_enabled()) return;
+  const Options& o = g_opt;
+  const Entry& source = w.attrs;
+  char code[12] = ".d.........";
+  bool changed = created;
+  if (created) memcpy(code, "cd+++++++++", 11);
+  else if (before) {
+    if (o.times && !o.omit_dir_times && !same_secs(source, *before)) code[4] = 't', changed = true;
+    if (o.perms && source.mode != before->mode) code[5] = 'p', changed = true;
+    if (o.owner && o.am_root && source.uid != before->uid) code[6] = 'o', changed = true;
+    if (o.group && source.gid != before->gid && can_set_gid(source.gid)) code[7] = 'g', changed = true;
+  }
+  if (!changed && o.output_unchanged) memset(code + 2, ' ', 9);
+  else if (!changed || (!created && !o.output_attrs)) return;
+  item(t, code, w.rel, source, w.attr_source.empty() ? w.src_path : w.attr_source);
+  w.directory_reported = true;
+}
+
 void note_transferred(DirWork& w, u32 idx, i64 bytes, Worker& t, i64 final_size) {
   const Options& o = g_opt;
   const Entry& s = w.src.e[idx];
@@ -1221,11 +1268,14 @@ void note_transferred(DirWork& w, u32 idx, i64 bytes, Worker& t, i64 final_size)
   if (!output_enabled()) return;
   char code[12] = ">f+++++++++";
   if (o.pushing) code[0] = '<';
-  if (s.flags & EF_EXISTS) {
+  if ((s.flags & EF_EXISTS) && !(s.item_flags & IF_NEW_TYPE)) {
     memcpy(code + 2, ".........", 9);
     if (o.checksum) code[2] = 'c';
     if (s.flags & EF_DIFF_SIZE) code[3] = 's';
-    if (s.flags & EF_DIFF_TIME) code[4] = o.times ? 't' : 'T';
+    if ((s.flags & EF_DIFF_TIME) || !o.times) code[4] = o.times ? 't' : 'T';
+    if (s.item_flags & IF_PERMS) code[5] = 'p';
+    if (s.item_flags & IF_OWNER) code[6] = 'o';
+    if (s.item_flags & IF_GROUP) code[7] = 'g';
   }
   note_item(w, idx, code, bytes, t, final_size);
 }

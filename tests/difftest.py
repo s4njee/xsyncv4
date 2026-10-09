@@ -1590,6 +1590,9 @@ def run_side(c, cfg, side_name, binary):
     subst = {"{BIN}": binary, "{SSH}": cfg.ssh, "{ROOT}": root}
     for step in c.steps:
         argv = [binary] + (c.ref_args if side_name == "ref" else [])
+        if cfg.itemize and not ('--itemize-changes' in step or any(
+                arg.startswith('-') and not arg.startswith('--') and 'i' in arg[1:] for arg in step)):
+            argv.append('-i')
         for arg in step:
             for key, val in subst.items():
                 arg = arg.replace(key, val)
@@ -1664,6 +1667,19 @@ def run_case(c, cfg):
             where = " (step %d)" % (i + 1) if multi_step else ""
             diffs.append("exit code%s: expected=%s got=%s" % (where, a, b))
             diffs += ["  xsync stderr| " + l for l in clip(got.outputs[i][2], 3)]
+        step = c.steps[i]
+        itemize = cfg.itemize or '--itemize-changes' in step or any(
+            arg.startswith('-') and not arg.startswith('--') and 'i' in arg[1:] for arg in step)
+        if itemize and a == b:
+            def file_lines(out):
+                return sorted(line for line in out.splitlines() if
+                              line.startswith('*deleting') or
+                              (len(line) >= 12 and line[0] in '<>ch.' and line[1] in 'fdLDS' and line[11] == ' '))
+            want, have = file_lines(ref.outputs[i][1]), file_lines(got.outputs[i][1])
+            if want != have:
+                import difflib
+                diffs.append('itemized stdout differs at step %d:' % (i + 1))
+                diffs += list(difflib.unified_diff(want, have, fromfile='rsync', tofile='xsync', lineterm=''))[:40]
     for i in range(1, len(ref.snaps)):
         d = compare(ref.snaps[i], got.snaps[i], skip=c.skip | cfg.skip, window=window, ignore=c.ignore)
         if d:
@@ -1730,6 +1746,7 @@ def main():
     ap.add_argument("-v", dest="verbose", action="store_true",
                     help="show the commands run and both tools' stdout/stderr")
     ap.add_argument("--list", action="store_true", help="list case names and exit")
+    ap.add_argument("--itemize", action="store_true", help="request -i for every transfer and compare sorted file lines")
     ap.add_argument("--timeout", type=float, default=STEP_TIMEOUT, metavar="SECS",
                     help="kill a tool invocation after SECS seconds (default: %(default)s)")
     ap.add_argument("--no-symlink-times", action="store_true",
@@ -1763,6 +1780,7 @@ def main():
     cfg.keep = args.keep
     cfg.timeout = args.timeout
     cfg.verbose = args.verbose
+    cfg.itemize = args.itemize
     cfg.skip = frozenset((["symlink-mtime"] if args.no_symlink_times else []) +
                          (["symlink-mode"] if args.no_symlink_modes else []))
 

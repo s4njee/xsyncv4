@@ -185,7 +185,7 @@ void build_root(const std::vector<std::string>& srcs, RootList& r, Worker& t, co
         if (target) c.link_off = merged.add_str(target);
         merged.e.push_back(c);
       }
-      if (!r.has_attrs) r.attrs = e, r.has_attrs = true;
+      if (!r.has_attrs) r.attrs = e, r.has_attrs = true, r.attr_source = path_join(a, ".");
     } else {
       std::string trimmed = arg;
       while (trimmed.size() > 1 && trimmed.back() == '/') trimmed.pop_back();
@@ -270,6 +270,16 @@ bool setup_dest(const std::string& dest_arg, DirWork& root, bool single) {
   if (root.has_attrs) {
     Entry d;
     if (exists) entry_from_stat(st, d);
+    else if (root.created && o.mkpath) {
+      d.type = T_DIR;
+      d.mode = 0777 & ~g_umask;
+      d.uid = geteuid(), d.gid = getegid();
+      d.mtime = (i64)time(nullptr);
+    }
+    Worker worker;
+    note_directory(root, (exists && !root.created) || (root.created && o.mkpath) ? &d : nullptr,
+                   root.created && !o.mkpath, worker);
+    worker.flush_log();
     u32 final_mode = o.perms ? root.attrs.mode : root.created ? (root.attrs.mode & 0777 & ~g_umask) : d.mode;
     root.attrs.mode = final_mode;
     root.mode_ok = exists && d.mode == final_mode;
@@ -603,6 +613,7 @@ int run_local(const std::vector<std::string>& srcs, const std::string& dest) {
   root->src = std::move(rl.list);
   root->src_paths = std::move(rl.src_paths);
   root->attrs = rl.attrs;
+  root->attr_source = std::move(rl.attr_source);
   root->has_attrs = rl.has_attrs;
   root->no_delete = !rl.has_attrs;  // only the contents of "SRC/" own the destination directory
   if (g_opt.verbose > 0) w0.logf("sending incremental file list");

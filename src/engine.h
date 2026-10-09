@@ -9,6 +9,7 @@ struct RootList {
   DirList list;
   std::vector<std::string> src_paths;  // parallel to list.e
   Entry attrs;                         // attributes for the destination directory itself
+  std::string attr_source;
   bool has_attrs = false;
   bool single = false;                 // exactly one non-directory source argument
 };

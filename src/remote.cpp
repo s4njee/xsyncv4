@@ -38,7 +38,7 @@
 
 namespace {
 
-enum : u8 { F_HELLO = 1, F_DIR, F_NEED, F_DATA, F_LIST_END, F_DATA_END, F_DONE, F_MSG, F_IDMAP, F_DEST, F_OUTPUT };
+enum : u8 { F_HELLO = 1, F_DIR, F_NEED, F_DATA, F_LIST_END, F_DATA_END, F_DONE, F_MSG, F_IDMAP, F_DEST, F_OUTPUT, F_OUTPUT_CONFIG };
 enum : u8 { DF_ATTRS = 1, DF_SINGLE = 2, DF_NODELETE = 4, DF_ZSTD = 8 };
 enum : u8 { R_WHOLE = 1, R_CHUNK = 2, R_FAIL = 4, R_END = 8 };
 constexpr size_t HDR = 5;                  // u32 payload length + u8 type
@@ -408,7 +408,7 @@ struct IdMaps {
 enum { K_WALK = 1, K_READ = 2, K_GEN = 3, K_DATA = 4 };
 
 struct SDir {
-  std::string src_path, rel;
+  std::string src_path, rel, attr_source;
   std::vector<std::string> src_paths;
   DirList list;
   std::unordered_map<u32, ResumePrefix> prefixes;
@@ -480,6 +480,10 @@ struct Sender {
     put_var(body, d->attrs.mtime_ns);
     put_var(body, d->attrs.uid);
     put_var(body, d->attrs.gid);
+    if (o.peer_features & PF_DIR_OUTPUT) {
+      put_var(body, (u64)d->attrs.size);
+      put_str(body, d->attr_source.empty() ? d->src_path : d->attr_source);
+    }
     put_var(body, l.e.size());
     u64 nf = 0, nd = 0, nl = 0, ns = 0, nb = 0;
     for (size_t i = 0; i < l.e.size(); i++) {
@@ -814,6 +818,7 @@ struct Sender {
     root->list = std::move(rl.list);
     root->src_paths = std::move(rl.src_paths);
     root->attrs = rl.attrs;
+    root->attr_source = std::move(rl.attr_source);
     root->flags = (rl.has_attrs ? DF_ATTRS : DF_NODELETE) | (rl.single ? DF_SINGLE : 0);
     root->prelisted = true;
     int n = default_jobs();
@@ -922,6 +927,11 @@ struct Receiver {
     w.attrs.mtime_ns = (u32)r.var();
     w.attrs.uid = (u32)r.var();
     w.attrs.gid = (u32)r.var();
+    if (o.peer_features & PF_DIR_OUTPUT) {
+      w.attrs.size = (i64)r.var();
+      w.attr_source = r.str();
+      if (w.attrs.size < 0) die(RERR_PROTOCOL, "protocol error: negative directory size");
+    }
     size_t n = (size_t)r.var();
     if (r.bad || n > (1u << 28)) die(RERR_PROTOCOL, "protocol error: bad DIR frame");
     DirList& l = w.src;
@@ -1422,7 +1432,7 @@ int run_client(const std::vector<std::string>& srcs, const std::string& dest, u3
   put_var(f, wire_version);
   f.push_back(push ? 'R' : 'S');
   u64 advertised = PROTO_FEATURES & (o.whole_file ? ~PF_RESUME : ~u64(0));
-  if (!output_enabled()) advertised &= ~PF_OUTPUT;
+  if (!output_enabled()) advertised &= ~(PF_OUTPUT | PF_DIR_OUTPUT);
   if (wire_version >= 4) put_var(f, advertised);
   put_options(f);
   put_var(f, paths.size());
@@ -1494,8 +1504,18 @@ int run_client(const std::vector<std::string>& srcs, const std::string& dest, u3
     if (!missing.empty()) fallback(missing, RERR_UNSUPPORTED);
     if ((o.out_format_set || !o.log_file.empty()) && !structured_output())
       fallback("peer does not support structured file output", RERR_UNSUPPORTED);
+    if ((o.out_format_set || o.output_unchanged) && !(o.peer_features & PF_DIR_OUTPUT))
+      fallback("peer does not support directory output metadata", RERR_UNSUPPORTED);
     if (!(o.peer_features & PF_ZSTD)) o.compress = false;
     break;
+  }
+  if (o.peer_features & PF_DIR_OUTPUT) {
+    std::string config = new_frame(F_OUTPUT_CONFIG);
+    config.push_back((char)o.output_attrs);
+    config.push_back((char)o.output_unchanged);
+    config.push_back((char)o.mkpath);
+    config.push_back((char)o.delete_before);
+    c.send(std::move(config));
   }
   output_start();
   if (o.verbose > 0) out_line(push ? "sending incremental file list" : "receiving incremental file list");
@@ -1543,6 +1563,7 @@ int run_server() {
   o.wire_version = ver;
   o.peer_features = advertised & PROTO_FEATURES;
   get_options(r);
+  o.output_attrs = o.itemize;
   if (r.bad || (role != 'R' && role != 'S')) die(RERR_PROTOCOL, "protocol error: malformed hello options or role");
   std::string missing = missing_feature(o.peer_features);
   if (!missing.empty()) die(RERR_UNSUPPORTED, "%s", missing.c_str());
@@ -1561,6 +1582,16 @@ int run_server() {
   if (ver >= 4) put_var(f, o.peer_features);
   if (structured_output()) g_output_sink = send_output;
   c.send(std::move(f));
+  if (o.peer_features & PF_DIR_OUTPUT) {
+    if (!c.read_frame(type, payload)) conn_lost();
+    if (type != F_OUTPUT_CONFIG || payload.size() != 4 ||
+        std::any_of(payload.begin(), payload.end(), [](unsigned char value) { return value > 1; }))
+      die(RERR_PROTOCOL, "protocol error: malformed output configuration");
+    o.output_attrs = payload[0];
+    o.output_unchanged = payload[1];
+    o.mkpath = payload[2];
+    o.delete_before = payload[3];
+  }
   int rc;
   if (role == 'R') {
     Receiver rv(c, false);

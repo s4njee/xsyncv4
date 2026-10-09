@@ -8,6 +8,7 @@
 #include <fcntl.h>
 #include <filesystem>
 #include <mutex>
+#include <unordered_set>
 #include <unistd.h>
 
 void (*g_output_sink)(const OutputEvent&) = nullptr;
@@ -17,6 +18,7 @@ struct Line { std::string path, text; };
 std::vector<Line> lines;
 int log_fd = -1;
 bool ordered = false;
+std::unordered_set<std::string> created_directories;
 
 // Keep script output one line per name, as rsync does for control bytes.
 std::string escaped(std::string_view name) {
@@ -35,7 +37,7 @@ std::string escaped(std::string_view name) {
     bool octal_backslash = c == '\\' && i + 4 < name.size() && name[i + 1] == '#' &&
                           name[i + 2] >= '0' && name[i + 2] <= '7' &&
                           name[i + 3] >= '0' && name[i + 3] <= '7' && name[i + 4] >= '0' && name[i + 4] <= '7';
-    if (!valid || c < 32 || c == 127 || octal_backslash) {
+    if (!valid || (c < 32 && c != '\t') || c == 127 || octal_backslash) {
       char buffer[6];
       snprintf(buffer, sizeof buffer, "\\#%03o", c);
       result.append(buffer);
@@ -53,10 +55,12 @@ std::string render(const OutputEvent& event) {
   std::string format = o.out_format_set ? o.out_format : o.itemize || !o.log_file.empty() ? "%i %n%L" : "%n%L";
   std::string path = event.path.empty() ? "." : event.path;
   std::string source = g_opt.receiving || event.source.empty() ? path : event.source;
+  bool source_dot = source.ends_with("/.");
   // The client's receiving side uses the short name; senders use the source path.
   source = std::filesystem::path(source).lexically_normal().string();
   if (source.starts_with('/')) source.erase(0, 1);
   if (source.size() > 1 && source.back() == '/') source.pop_back();
+  if (source_dot && source != ".") source += "/.";
   if (event.type == T_DIR) path.push_back('/');
   std::string result;
   for (size_t i = 0; i < format.size(); ++i) {
@@ -129,6 +133,21 @@ bool output_format_supported(std::string_view format) {
   return true;
 }
 
+bool output_format_has(std::string_view format, char escape) {
+  for (size_t i = 0; i < format.size(); ++i) if (format[i] == '%') {
+    if (++i == format.size()) break;
+    if (format[i] == '-') ++i;
+    while (i < format.size() && format[i] >= '0' && format[i] <= '9') ++i;
+    if (i < format.size() && format[i] == escape) return true;
+  }
+  return false;
+}
+
+void output_configure() {
+  g_opt.output_attrs = g_opt.itemize || output_format_has(g_opt.out_format, 'i') || !g_opt.log_file.empty();
+  g_opt.output_unchanged = g_opt.itemize_level > 1;
+}
+
 void output_start() {
   ordered = !isatty(STDOUT_FILENO);
   if (!g_opt.log_file.empty()) {
@@ -140,6 +159,10 @@ void output_start() {
 void output_event(OutputEvent event) {
   if (!output_enabled() || g_opt.quiet) return;
   if (!event.time) event.time = time(nullptr);
+  if (event.type == T_DIR && event.code == "cd+++++++++") {
+    std::lock_guard<std::mutex> lock(mutex);
+    if (!created_directories.insert(event.path).second) return;
+  }
   if (g_output_sink) { g_output_sink(event); return; }
   if (g_opt.am_server) return;  // Older peers receive the existing Worker log instead.
   if (g_opt.out_format_set && g_opt.out_format.empty()) return;

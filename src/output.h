@@ -10,6 +10,8 @@ struct OutputEvent {
 extern void (*g_output_sink)(const OutputEvent&);
 bool output_enabled();
 bool output_format_supported(std::string_view format);
+bool output_format_has(std::string_view format, char escape);
+void output_configure();
 void output_start();
 void output_event(OutputEvent event);
 void output_text(std::string_view text);

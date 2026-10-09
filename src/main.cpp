@@ -174,6 +174,8 @@ Parsed parse(int argc, char** argv) {
     else if (name == "verbose") o.verbose++;
     else if (name == "no-verbose") o.verbose = 0;
     else if (name == "quiet") o.quiet = true;
+    else if (name == "itemize-changes") o.itemize = true, ++o.itemize_level;
+    else if (name == "no-itemize-changes") o.itemize = false, o.itemize_level = 0;
     else if (name == "archive") set_archive(o);
     else if (flag(o.recursive, "recursive") || flag(o.dirs, "dirs") || flag(o.links, "links") || flag(o.copy_links, "copy-links") ||
              flag(o.perms, "perms") || flag(o.times, "times") || flag(o.group, "group") || flag(o.owner, "owner") ||
@@ -181,14 +183,15 @@ Parsed parse(int argc, char** argv) {
              flag(o.force, "force") || flag(o.update, "update") || flag(o.checksum, "checksum") || flag(o.size_only, "size-only") ||
              flag(o.ignore_times, "ignore-times") || flag(o.ignore_existing, "ignore-existing") || flag(o.existing, "existing") ||
              flag(o.one_fs, "one-file-system") || flag(o.inplace, "inplace") || flag(o.omit_dir_times, "omit-dir-times") ||
-             flag(o.omit_link_times, "omit-link-times") || flag(o.numeric_ids, "numeric-ids") || flag(o.itemize, "itemize-changes") ||
+             flag(o.omit_link_times, "omit-link-times") || flag(o.numeric_ids, "numeric-ids") ||
              flag(o.partial, "partial") || flag(o.progress, "progress") || flag(o.stats, "stats") || flag(o.mkpath, "mkpath") ||
              flag(o.clone, "clone") || flag(o.ignore_errors, "ignore-errors") || flag(o.safe_links, "safe-links")) {
     } else if (name == "ignore-non-existing") o.existing = true;
     else if (name == "no-D") o.devices = o.specials = false;
     else if (name == "atomic") o.direct_new = false;
     else if (name == "no-atomic") o.direct_new = true;
-    else if (name == "delete" || name == "del" || name == "delete-before" || name == "delete-during" || name == "delete-delay" ||
+    else if (name == "delete-before") o.del = o.delete_before = true;
+    else if (name == "delete" || name == "del" || name == "delete-during" || name == "delete-delay" ||
              name == "delete-after")
       o.del = true;
     else if (name == "delete-excluded") o.del = o.delete_excluded = true;
@@ -315,7 +318,7 @@ Parsed parse(int argc, char** argv) {
         case 'x': o.one_fs = true; break;
         case 'O': o.omit_dir_times = true; break;
         case 'J': o.omit_link_times = true; break;
-        case 'i': o.itemize = true; break;
+        case 'i': o.itemize = true; ++o.itemize_level; break;
         case 'h': o.human++; break;
         case 'P': o.partial = o.progress = true; break;
         case 'W': o.whole_file = true; break;
@@ -427,6 +430,7 @@ int main(int argc, char** argv) {
   for (auto& argument : arguments) effective.push_back(argument.data());
   init_fallback((int)effective.size(), effective.data());
   Parsed p = parse((int)effective.size(), effective.data());
+  output_configure();
   g_umask = umask(0);
   init_ids();
   struct sigaction sa {};

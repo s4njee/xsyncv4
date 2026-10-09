@@ -66,13 +66,14 @@ class OutputTests(unittest.TestCase):
                 self.assertEqual(result.stdout, log.read_bytes())
                 rows = [line.split('|') for line in result.stdout.decode().splitlines()]
                 names = [row[1] for row in rows]
-                self.assertEqual(names, ['a', 'link', 'sub/', 'sub/nested', 'utf8-é', 'z'])
+                self.assertEqual(names, ['./', 'a', 'link', 'sub/', 'sub/nested', 'utf8-é', 'z'])
                 for row in rows:
                     code, name, link, size, operation, full, transferred, when, percent = row
                     source = self.source / name.rstrip('/')
                     self.assertEqual(int(size), source.lstat().st_size)
                     self.assertEqual(operation, 'recv' if direction == 'pull' else 'send')
-                    self.assertEqual(full, name.rstrip('/') if direction == 'pull' else str(source).lstrip('/'))
+                    self.assertEqual(full, name.rstrip('/') if direction == 'pull' else
+                                     (str(source) + ('/.' if name == './' else '')).lstrip('/'))
                     self.assertRegex(when, r'^\d{4}/\d\d/\d\d \d\d:\d\d:\d\d$')
                     self.assertEqual(percent, '%')
                     self.assertEqual(link, ' -> a' if source.is_symlink() else '')
@@ -103,7 +104,7 @@ class OutputTests(unittest.TestCase):
             for flag in ('-v', '-i', '--stats'):
                 plain = self.run_copy(direction, [flag], name=direction + flag + '-plain')
                 self.assertEqual(plain.returncode, 0, plain.stderr)
-                expected = {'a', 'link', 'sub/', 'sub/nested', 'utf8-é', 'z'}
+                expected = {'./', 'a', 'link', 'sub/', 'sub/nested', 'utf8-é', 'z'}
                 paths = []
                 for line in plain.stdout.decode().splitlines():
                     name = (line[12:] if flag == '-i' else line).split(' -> ')[0]
@@ -128,7 +129,21 @@ class OutputTests(unittest.TestCase):
             self.assertEqual(log.read_bytes(), b'')
         result = self.run_copy(flags=['--out-format=%-12n|%8l'], name='width')
         self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertEqual(result.stdout.splitlines()[0], b'a           |       5')
+        self.assertIn(b'a           |       5', result.stdout.splitlines())
+
+    def test_repeated_itemize_reports_unchanged_entries(self):
+        for direction in ('local', 'push', 'pull'):
+            target = 'repeated-' + direction
+            result = self.run_copy(direction, name=target)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            result = self.run_copy(direction, ['-i'], name=target)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(result.stdout, b'')
+            result = self.run_copy(direction, ['-ii', '--out-format=%i|%n'], name=target)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(result.stdout.decode().splitlines(), [
+                '.d         |./', '.f         |a', '.L         |link', '.d         |sub/',
+                '.f         |sub/nested', '.f         |utf8-é', '.f         |z'])
 
     def test_delete_and_metadata_output(self):
         for direction in ('local', 'push', 'pull'):
@@ -210,7 +225,8 @@ def firstvar(p):
   if b<128: return n
   shift+=7
 _,hello=read()
-send(1,b'XSYNC\1'+var(hello[6])+var(1 if case=='unnegotiated' else 33))
+send(1,b'XSYNC\1'+var(hello[6])+var(1 if case=='unnegotiated' else 97 if case=='time_overflow' else 33))
+if case=='time_overflow': read() # negotiated output configuration
 send(10,string('')+string('')+var(0)+var(0))
 while True:
  kind,payload=read()

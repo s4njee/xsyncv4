@@ -60,6 +60,29 @@ def read_frame(proc):
 
 
 class ReceiverTrustTests(unittest.TestCase):
+    def test_malformed_output_configuration(self):
+        for kind, config in ((12, b'\0\0'), (12, b'\0' * 5), (12, b'\0\0\2\0'), (2, b'')):
+            with self.subTest(kind=kind, config=config), tempfile.TemporaryDirectory() as tmp:
+                target = pathlib.Path(tmp) / 'uncreated'
+                options = bytes(name in ('recursive', 'itemize') for name in BOOLS)
+                options += b''.join(var(1 if name == 'max_delete' else 2 if name == 'jobs' else 0) for name in INTS)
+                hello = b'XSYNC\1' + var(VERSION) + b'R' + var(97) + options + b'\0\1' + string(str(target))
+                proc = subprocess.Popen([str(BINARY), '--server'], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                try:
+                    proc.stdin.write(frame(1, hello)); proc.stdin.flush()
+                    self.assertEqual(read_frame(proc)[0], 1)
+                    proc.stdin.write(frame(kind, config)); proc.stdin.flush()
+                    message_kind, message = read_frame(proc)
+                    self.assertEqual(message_kind, 8)
+                    self.assertEqual(message[:2], b'\2\2')
+                    self.assertIn(b'output configuration', message)
+                    proc.communicate(timeout=10)
+                    self.assertEqual(proc.returncode, 2)
+                    self.assertFalse(target.exists())
+                finally:
+                    if proc.poll() is None: proc.kill()
+                    proc.communicate()
+
     def test_hostile_paths(self):
         cases = ("dot", "dotdot", "slash", "nul_name", "nul_target", "root_path", "child_path", "duplicate_root", "nonzero_root", "unrequested_data")
         for case in cases:
