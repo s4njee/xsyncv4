@@ -661,3 +661,23 @@ These change defaults, so they should be chosen rather than inherited from a ben
   lookup, and local/SSH installer suites pass (max shutdown 0.639 s).
 - The strict native differential run remains 212/214, with only E-08's pending
   `-m` and protect-filter support failing.
+
+
+### R-07 through R-09 — release/package checkpoint (2026-10-09)
+
+- All three static artifacts were refreshed from source commit `f2041d1c7d06`.
+  Linux amd64 and arm64 pass execution in scratch and local/compressed transfers
+  in bare Debian. The macOS universal binary also runs under x86_64/Rosetta.
+  `dist/manifest.json` records each artifact's revision, size and SHA-256.
+- Static-prefix packaging checks pass with the current executable/manual, and
+  the source archive/local Homebrew formula were regenerated with those helpers.
+  Homebrew reinstall and its package test pass; `/opt/homebrew/bin/xsync` reports
+  `f2041d1c7d06`. All seven defaults tests also pass against that installed binary.
+  The installed manual passes lint; all installed release helpers match their
+  manifest hashes. Homebrew's existing zstd headers were left intact.
+- The complete Neo native LAN checklist passes with the new universal client
+  against the intentionally retained protocol-3 Pi helper. The frozen-peer
+  protocol suite passes all three methods, including compression-free subsets
+  and required-feature rejection. No remote helper upgrade occurred.
+- Next open implementation story: **E-01, verified-prefix resume**. R-01 remains
+  partial only for its outstanding physical Linux-host coverage clarification.
