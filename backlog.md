@@ -2,7 +2,7 @@
 
 Initial audit written 2026-10-08 against xsync 0.1.0 (protocol 1).
 All fifteen P0 stories completed against protocol 3; per-story evidence is below.
-P1 R-02 through R-09 and E-01 through E-03 are complete. Current protocol 4 supports protocol 3; E-04 is in progress.
+P1 R-02 through R-09 and E-01 through E-04 are complete (12 of 22 stories). Current protocol 4 supports protocol 3; E-05 is next.
 Problem statements retain the original audit findings.
 
 ## What "daily driver" means here
@@ -90,7 +90,7 @@ coverage clarification remains open.
 | E-01 | **`-P` does not resume.** `--partial` is accepted, but a partial file is never reused: there is no delta or append logic, so an interrupted 10 GB file starts from zero. On a remote disconnect the partial is not even kept (T-08). | **done** | An interrupted large file resumes from the verified prefix (hash the existing bytes on both sides, send the rest); tested by killing a transfer at 50 %. | L |
 | E-02 | **`--out-format` and stable script output.** One project script parses `--out-format='%i %n'`. With `-v`/`-i`, line order follows thread completion, so diffs between runs are noisy. | **done** | `%i %n %L %l %o %f %b %t` supported; when stdout is not a terminal, lines are emitted in path order; `--log-file` writes the same stream. | M |
 | E-03 | **Itemize parity.** Missing against rsync: the `./` root line, `.d..t......` for existing directories whose time changed, `cd` lines in clone mode come from a different code path than byte-copy mode, `hf` for hard links. | **done** | `-i` output of both paths matches rsync's on the difftest corpus after sorting; difftest starts comparing stdout for `-i` runs. | M |
-| E-04 | **Delta transfer for large changed files.** Changed files are always sent whole. Irrelevant for the congress corpus, decisive for a 2 GB database dump with small edits over Wi-Fi. | **in progress** | Files above a threshold (1 MiB) use block matching (rsync rolling checksum, or content-defined chunks with XXH3) when the destination has a previous version; `-W` disables; bytes-on-wire within 20 % of rsync on an edited-large-file test. | XL |
+| E-04 | **Delta transfer for large changed files.** Changed files are always sent whole. Irrelevant for the congress corpus, decisive for a 2 GB database dump with small edits over Wi-Fi. | **done** | Files above a threshold (1 MiB) use block matching (rsync rolling checksum, or content-defined chunks with XXH3) when the destination has a previous version; `-W` disables; bytes-on-wire within 20 % of rsync on an edited-large-file test. | XL |
 | E-05 | **List mode.** `xsync host:dir/` or a single SRC should list, as rsync does; today it is a usage error. | confirmed | `ls -l`-style listing for local and remote sources. | S |
 | E-06 | **End-of-run error summary.** With thousands of files an error scrolls away. | new | After the run: count of errors and the first ten, grouped by kind; exit-code line as now. | S |
 | E-07 | **`--bwlimit`, `--timeout`, keep-alive.** `--bwlimit` is rejected; `--timeout` is ignored (T-04). A stalled ssh connection hangs forever. | code | Token-bucket limit on the writer thread; idle timeout with keep-alive frames; exit 30 on timeout like rsync. | M |
@@ -908,3 +908,34 @@ These change defaults, so they should be chosen rather than inherited from a ben
 - Strict native forced-byte-copy sorted itemization remains **229/231**; the only
   failures are E-08's known unsupported `-m`/protect-filter stories. E-04 remains
   in progress until static Linux and universal macOS release checks finish.
+
+### E-04 — completed: release and acceptance gate (2026-10-09)
+
+- Completed the local and negotiated remote block-matching story. Its 2 GiB
+  edited-file fixture uses **0.727x rsync's total wire bytes**, including reverse
+  signatures and framing, for both push and pull. Compressed and inplace 64 MiB
+  fixtures also pass the **<=1.20x** limit over real Linux SSH. `-W` disables reuse.
+- All 24 matching/race methods and seven hostile-wire methods pass on macOS and
+  Linux; the four existing resume-wire methods remain green. Source shrink/grow
+  retries, including inplace reconstruction, preserve current contents/metadata.
+  The Linux SSH regression suite retains its existing platform/privilege skips;
+  all applicable P0, output, hard-link and protocol-3/4 checks pass.
+- Source **`11cf957c0d36`** builds verified macOS universal and static musl Linux
+  amd64/arm64 artifacts. Linux artifacts pass scratch startup and bare-Debian
+  local, push, pull, compression, resume, logging, hard-link and new delta smoke
+  checks; the inplace delta pull also preserves its destination inode.
+- The universal macOS ARM build passes all 24 delta methods, seven hostile-wire
+  methods and applicable wire-budget methods. Rosetta passes the hostile-wire
+  and wire-budget methods. ARM-client/x86_64-peer compressed inplace push/pull
+  passes final-content checks, inode preservation and full stdout/log parity:
+  **23,934 / 23,806 total wire bytes** for an edited 8 MiB insertion fixture.
+- Strict native forced-byte-copy itemization remains **229/231**, with only the
+  two known E-08 filter failures. Installed Homebrew/Pi helpers were unchanged.
+
+Verified artifact manifest (source `11cf957c0d36`):
+
+| Artifact | Bytes | SHA-256 |
+|---|---:|---|
+| `xsync-darwin-universal` | 2,849,752 | `99a6b34c006e44049112fa24da075dadaa60eb780875e7e722eb9fda04fc2d48` |
+| `xsync-linux-amd64` | 4,751,184 | `794451e4a8f274f5dd9e8384cc983c958b6a3ff792204b79e7f96f5594a09018` |
+| `xsync-linux-arm64` | 4,688,312 | `c67a688c7453429035f076e011c02d7c28108889452ddf3e751ea48ce3b44b43` |
