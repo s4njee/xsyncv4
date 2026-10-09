@@ -84,7 +84,7 @@ class XattrDifferentials(unittest.TestCase):
             remote_code('import shutil,sys; shutil.rmtree(sys.argv[1],ignore_errors=True)', self.root)
         self.temporary.cleanup()
 
-    def fixture(self, rulefiles=None, hardlinks=False, destination_link=False, readonly=False, resource_forks=False, resource_fork_size=32768):
+    def fixture(self, rulefiles=None, hardlinks=False, destination_link=False, readonly=False, resource_forks=False, resource_fork_size=32768, namespace_aliases=False):
         for name in ('src', 'dst', 'outside'):
             path = self.root / name
             if path.exists():
@@ -140,6 +140,19 @@ class XattrDifferentials(unittest.TestCase):
             shutil.rmtree(self.root / 'dst/sub')
             tree.dirs = {key: value for key, value in tree.dirs.items() if key != 'dst/sub' and not key.startswith('dst/sub/')}
             tree.ln('dst/sub', '../outside')
+        if namespace_aliases:
+            for side in ('src', 'dst'):
+                for name in ('alias-one','alias-two','bare','foreign'):
+                    tree.f(side + '/' + name, b'source data' if side == 'src' else b'old')
+            for name, attrs in (
+                ('alias-one', [('foo',b'literal'),('rsync.user.foo',b'alias')]),
+                ('alias-two', [('user.foo',b'literal'),('rsync.user.user.foo',b'alias')]),
+                ('bare', [('rsync.',b'bare'),('rsync.%test',b'internal')]),
+                ('foreign', [('rsync.security.test',b'foreign'),('plain',b'normal')]),
+            ):
+                for attr, value in attrs:
+                    set_attr(self.root / 'src' / name, attr_name(attr), value)
+                    set_attr(self.root / 'dst' / name, attr_name(attr), b'stale')
         tree.done()
         if resource_forks:
             for side in ('src', 'dst'):
@@ -232,6 +245,12 @@ class XattrDifferentials(unittest.TestCase):
             for rules in ([], ['-x ' + attr_name('keep')], ['-xs ' + attr_name('keep')]):
                 with self.subTest(flags=flags, rules=rules):
                     self.check_case(flags, rules, clone=True)
+
+    def test_namespace_aliases(self):
+        for clone in (False, True):
+            for flags, rules in ((['-aX'], []), (['-aXX'], []), (['-aX'], ['+x *'])):
+                with self.subTest(clone=clone, flags=flags, rules=rules):
+                    self.check_case(flags, rules, clone=clone, namespace_aliases=True)
 
     def test_filters(self):
         name = attr_name('keep')

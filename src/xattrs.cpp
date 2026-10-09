@@ -82,6 +82,9 @@ bool internal(std::string_view name) {
 }
 bool eligible(std::string_view name, const FilterList& filters, bool source) {
   if (source && g_opt.xattrs < 2 && internal(name)) return false;
+#ifdef __APPLE__
+  if (source && name == "rsync.") return false;  // Empty disguised namespace.
+#endif
 #ifndef __APPLE__
   if (!filters.has_xattr_filters() && ((source || g_opt.am_root) ? name.starts_with("system.") : !name.starts_with("user."))) return false;
 #endif
@@ -134,7 +137,9 @@ XattrSet read(const Access& a, const std::string& display, const FilterList& fil
       if (errno != ERANGE) break;
     }
     if (!done) { fail("read extended attribute"); return result; }
-    result.values.emplace(source ? wire_name(name) : name, std::move(value));
+    // rsync applies later enumerated attributes last when physical names
+    // collapse to the same protocol name (foo and rsync.user.foo on Darwin).
+    result.values.insert_or_assign(source ? wire_name(name) : name, std::move(value));
   }
   return result;
 }

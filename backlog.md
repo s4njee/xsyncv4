@@ -1559,3 +1559,28 @@ Verified artifact manifest (source `864bd37edf14`):
   BSD file flags, `-E`, `--chmod`, `--chown`). No installed helper or release
   artifact has been replaced for this checkpoint. R-01 still awaits a distinct
   Linux LAN host beyond the Pi.
+
+
+## E-10 progress — 2026-10-09: namespace aliases and memory baseline
+
+- E-10 remains **code**, with P1 at **17/22**. On macOS, a literal attribute
+  and an rsync namespace alias can encode the same name. Source reads now retain
+  the last enumerated value, matching rsync (`foo` versus `rsync.user.foo`, and
+  `user.foo` versus `rsync.user.user.foo`). The empty `rsync.` disguise is skipped
+  on macOS; Linux's ordinary `user.rsync.` attribute remains valid.
+- Eighteen local/clone/push/pull cases compare aliases, empty namespace prefixes,
+  foreign namespaces and internal attributes under `-X`, `-XX` and xattr filters.
+  These pass on Apple Silicon, Rosetta and Linux UID/GID 60000, including source
+  integrity and itemization checks. The wire format and frozen peer layout are
+  unchanged.
+- The resource-fork memory check confirms the pending scaling issue: copying
+  four distinct 4 MiB forks peaks at **32,342,016 bytes RSS**; 32 forks peak at
+  **150,880,256 bytes RSS**. Values are still retained in directory metadata and
+  copied into wire frames. This is evidence of incomplete memory scaling, not a
+  passing performance claim.
+- Verified on the current macOS filesystem that
+  `openat(existing_file_fd, "..namedfork/rsrc", O_NOFOLLOW)` opens the resource
+  fork through the anchored inode. This supports a streaming implementation
+  without reopening the file by a mutable pathname. Disk-backed values and
+  bounded remote value frames are the next xattr work; privileged namespaces,
+  the wider metadata options and packaging also remain pending.
