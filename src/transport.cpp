@@ -1,9 +1,53 @@
 #include "transport.h"
 #include "common.h"
+#include <strings.h>
 #include <unistd.h>
 #ifdef __APPLE__
 #include <mach-o/dyld.h>
 #endif
+
+RemoteSpec parse_remote_spec(const std::string& argument) {
+  RemoteSpec spec;
+  if (strncasecmp(argument.c_str(), "rsync://", 8) == 0) {
+    spec.remote = spec.daemon = true;
+    return spec;
+  }
+  size_t host_begin = 0, host_end = std::string::npos;
+  for (size_t i = 0; i < argument.size(); ++i) {
+    char ch = argument[i];
+    if (ch == '/') return {};
+    if (ch == ':') {
+      spec.remote = true;
+      spec.host = argument.substr(host_begin, (host_end == std::string::npos ? i : host_end) - host_begin);
+      // User selection applies after brackets are removed, including odd hosts.
+      size_t at = spec.host.rfind('@');
+      if (at != std::string::npos) {
+        spec.user = (spec.has_user ? spec.user + "@" : "") + spec.host.substr(0, at);
+        spec.has_user = true;
+        spec.host.erase(0, at + 1);
+      }
+      spec.daemon = i + 1 < argument.size() && argument[i + 1] == ':';
+      spec.path = argument.substr(i + 1 + spec.daemon);
+      if (spec.path.empty() && !spec.daemon) spec.path = ".";
+      return spec;
+    }
+    if (ch == '@') {
+      spec.has_user = true;
+      spec.user = argument.substr(0, i);
+      host_begin = i + 1;
+    } else if (ch == '[') {
+      if (i != host_begin) return {};
+      size_t close = argument.find(']', i + 1);
+      size_t slash = argument.find('/', i + 1);
+      if (close == std::string::npos || close == i + 1 || slash < close) return {};
+      if (close + 1 < argument.size() && argument[close + 1] != ':' && argument[close + 1] != '/') return {};
+      host_begin = i + 1;
+      host_end = close;
+      i = close;
+    }
+  }
+  return {};
+}
 
 std::vector<std::string> split_shell_words(const std::string& command) {
   std::vector<std::string> words;

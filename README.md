@@ -98,6 +98,14 @@ then the executable named by `XSYNC_REMOTE_PATH` (local environment first,
 otherwise the remote environment). That path can contain spaces or begin `~/`.
 An explicit `--rsync-path` supplies the remote command and bypasses this lookup.
 
+Remote paths accept bracketed IPv6 (`user@[::1]:path`); the brackets are removed
+before invoking SSH. An empty remote path (`host:`) means its current directory.
+Multiple pull sources can use `host:first :second` to reuse the host. Colons in
+the path, including `host:dir/a::b` and local `./a::b`, remain filename characters.
+Daemon detection applies to the host separator (`host::module`) or an rsync URL.
+The parser's host/user choices are checked against
+[rsync's implementation](https://github.com/RsyncProject/rsync/blob/v3.4.1/options.c#L2893).
+
 ## Protocol compatibility
 
 The current protocol is **4**. Each release supports its current protocol N and

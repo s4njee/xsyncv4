@@ -1247,43 +1247,21 @@ std::vector<std::string> expand_remote_sources(const std::vector<std::string>& p
   return expanded;
 }
 
-struct Remote {
-  std::string user, host, path;
-};
-
-Remote split_remote(const std::string& a) {
-  Remote r;
-  size_t colon = a.find(':');
-  std::string hp = a.substr(0, colon);
-  r.path = a.substr(colon + 1);
-  size_t at = hp.rfind('@');
-  if (at != std::string::npos) r.user = hp.substr(0, at), r.host = hp.substr(at + 1);
-  else r.host = hp;
-  return r;
-}
-
-bool is_remote_arg(const std::string& a) {
-  size_t colon = a.find(':');
-  if (colon == std::string::npos) return false;
-  size_t slash = a.find('/');
-  return slash == std::string::npos || colon < slash;
-}
-
 }  // namespace
 
 int run_client(const std::vector<std::string>& srcs, const std::string& dest, u32 wire_version) {
   Options& o = g_opt;
   o.wire_version = wire_version;
-  bool push = is_remote_arg(dest);
-  Remote rem;
+  bool push = parse_remote_spec(dest).remote;
+  RemoteSpec rem;
   std::vector<std::string> paths;  // paths on the remote side
   if (push) {
-    rem = split_remote(dest);
+    rem = parse_remote_spec(dest);
     paths.push_back(rem.path);
   } else {
     for (const std::string& s : srcs) {
-      if (!is_remote_arg(s)) die(RERR_SYNTAX, "all sources must be on the same remote host");
-      Remote r = split_remote(s);
+      RemoteSpec r = parse_remote_spec(s);
+      if (!r.remote) die(RERR_SYNTAX, "all sources must be on the same remote host");
       if (paths.empty()) rem = r;
       else if (!r.host.empty() && (r.host != rem.host || r.user != rem.user)) die(RERR_SYNTAX, "all source args must come from the same machine.");
       paths.push_back(r.path);
@@ -1291,7 +1269,7 @@ int run_client(const std::vector<std::string>& srcs, const std::string& dest, u3
   }
   std::vector<std::string> cmd = split_shell_words(remote_shell_command());
   if (cmd.empty()) die(RERR_SYNTAX, "empty remote shell command");
-  if (!rem.user.empty()) cmd.push_back("-l"), cmd.push_back(rem.user);
+  if (rem.has_user) cmd.push_back("-l"), cmd.push_back(rem.user);
   cmd.push_back(rem.host);
   if (!o.rsync_path.empty()) cmd.push_back(o.rsync_path);
   else {

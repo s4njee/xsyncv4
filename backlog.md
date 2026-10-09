@@ -2,7 +2,7 @@
 
 Initial audit written 2026-10-08 against xsync 0.1.0 (protocol 1).
 All fifteen P0 stories completed against protocol 3; per-story evidence is below.
-P1 R-02 through R-07 are complete. Current protocol 4 supports protocol 3; R-08 is next.
+P1 R-02 through R-08 are complete. Current protocol 4 supports protocol 3; R-09 is next.
 Problem statements retain the original audit findings.
 
 ## What "daily driver" means here
@@ -78,7 +78,7 @@ installation, lookup and protocol compatibility. Remaining reach work is below.
 | R-05 | **Find xsync on the remote without `--rsync-path`.** Non-interactive ssh sessions often lack `~/.local/bin` on `PATH`. | done | Server lookup tries `xsync`, then `~/.local/bin/xsync`, then `XSYNC_REMOTE_PATH`; documented. | S |
 | R-06 | **Protocol negotiation instead of version equality.** Any protocol change currently breaks every installed remote at once. | done | Hello carries feature bits; a newer client talks to an older server using the common subset; policy written down (client supports N and N-1). | M |
 | R-07 | **Install on this machine.** `cmake --install`, a Homebrew formula or tap, zsh completion (rsync's completer mostly applies), a man page generated from `--help`. | **done** | `brew install` or `make install` puts `xsync`, its completion and man page in place. | M |
-| R-08 | **IPv6 literals and odd host specs.** `[::1]:path` is mis-parsed; `user@host:` with an empty path and `host:` alone are untested. | code / unverified | Host parsing matches rsync's for bracketed IPv6, empty paths and `-l`-style users; unit tests. | S |
+| R-08 | **IPv6 literals and odd host specs.** `[::1]:path` is mis-parsed; `user@host:` with an empty path and `host:` alone are untested. | **done** | Host parsing matches rsync's for bracketed IPv6, empty paths and `-l`-style users; unit tests. | S |
 | R-09 | **Defaults without flags.** Environment (`XSYNC_RSH` alongside the honoured `RSYNC_RSH`) and an optional config file or `XSYNC_OPTS` for personal defaults such as "progress on when stderr is a terminal". | new | Documented precedence: flags, then env, then config. | S |
 
 ## P1 — Everyday behaviour: the flags in your muscle memory
@@ -611,3 +611,23 @@ These change defaults, so they should be chosen rather than inherited from a ben
   Homebrew header conflict. The dependency subdirectory now builds without
   installing its headers/libraries. The regression checks package ownership;
   the existing Homebrew zstd installation was preserved without overwriting it.
+
+
+### R-08 — complete (2026-10-09)
+
+- Main dispatch and SSH client use one shared host parser. Bracketed IPv6
+  addresses (including scoped/mapped addresses) are passed to SSH without the
+  brackets. Empty paths become `.`; an empty-host subsequent pull source inherits
+  the first host. Explicit users, including an empty user, become SSH `-l` args.
+- Daemon recognition uses the outside host separator or a case-insensitive
+  rsync URL. Double colons inside a path no longer misclassify a normal file as
+  a daemon transfer. Invalid bracket forms remain local, matching rsync.
+- `tests/host_spec_test.py` compares actual remote-shell argv with real rsync
+  for 17 host/user forms in both directions, including an existing `-l` shell
+  option. Ten local/invalid-bracket filename cases also match real rsync.
+- Native compressed push/pull proves empty remote paths, relative double-colon
+  filenames and multiple sources with an inherited host. All five methods pass
+  in the Linux rig, including an isolated real sshd on IPv6 `::1`; the four
+  applicable methods pass on macOS. All six fallback regressions pass in the rig.
+- The strict native differential result remains 212/214. The only failures are
+  E-08's pending `-m` and protect-filter support; host parsing adds no failures.

@@ -12,6 +12,7 @@
 #include "progress.h"
 #include "fallback.h"
 #include "install.h"
+#include "transport.h"
 
 namespace {
 
@@ -338,13 +339,6 @@ Parsed parse(int argc, char** argv) {
   return p;
 }
 
-bool is_remote(const std::string& a) {
-  size_t colon = a.find(':');
-  if (colon == std::string::npos || colon == 0) return false;
-  size_t slash = a.find('/');
-  return slash == std::string::npos || colon < slash;
-}
-
 void on_signal(int) {
   if (g_stop.fetch_add(1) >= 1) {
     static const char show[] = "\x1b[?25h\n";
@@ -439,12 +433,14 @@ int main(int argc, char** argv) {
   if (p.args.size() < 2) usage_error("a destination is required (listing a single SRC is not supported)");
   std::string dest = p.args.back();
   std::vector<std::string> srcs(p.args.begin(), p.args.end() - 1);
-  bool remote_dest = is_remote(dest), remote_src = false;
+  RemoteSpec destination = parse_remote_spec(dest);
+  bool remote_dest = destination.remote, remote_src = false;
   for (auto& s : srcs) {
-    if (s.rfind("rsync://", 0) == 0 || s.find("::") != std::string::npos) usage_error("rsync daemon transfers are not supported by xsync");
-    remote_src |= is_remote(s);
+    RemoteSpec source = parse_remote_spec(s);
+    if (source.daemon) usage_error("rsync daemon transfers are not supported by xsync");
+    remote_src |= source.remote;
   }
-  if (dest.rfind("rsync://", 0) == 0 || dest.find("::") != std::string::npos) usage_error("rsync daemon transfers are not supported by xsync");
+  if (destination.daemon) usage_error("rsync daemon transfers are not supported by xsync");
   if (remote_src && remote_dest) usage_error("The source and destination cannot both be remote.");
 
   u64 t0 = now_ns();
