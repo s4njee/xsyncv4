@@ -521,9 +521,27 @@ struct Local {
       else g_stats.xfer_bytes_total.fetch_sub((u64)(s.size - fresh.size));
       s = fresh;
       slot_begin(w.id, d.rel, d.src.name_sv(s), s.size);
+      ResumePrefix prefix;
+      if (o.partial && !o.whole_file && attempt == 0 && s.size > (512 << 10)) {
+        prefix = destination_resume_prefix(path_join(d.dst_path, d.dst_name(idx)).c_str(), s.size);
+        u64 digest[2];
+        if (prefix.size && (!hash_prefix_fd(in, prefix.size, digest) || digest[0] != prefix.sum[0] || digest[1] != prefix.sum[1])) prefix = {};
+      }
       if (!out_open(f, d, idx, w)) { close(in); return fail(0); }
       i64 total = 0;
       bool ok = true;
+      if (prefix.size) {
+        if (!out_restore_prefix(f, prefix) || lseek(in, prefix.size, SEEK_SET) < 0) {
+          int error = errno;
+          out_abort(f);
+          close(in);
+          file_io_error(error, f.path.c_str(), "reuse partial prefix");
+          return fail(0);
+        }
+        total = prefix.size;
+        g_stats.xfer_bytes.fetch_add((u64)total);
+        slot_add(w.id, total);
+      }
       while (total < s.size) {
         size_t want = (size_t)std::min<i64>((i64)w.buf.size(), s.size - total);
         ssize_t n = read(in, w.buf.data(), want);
@@ -534,7 +552,7 @@ struct Local {
           ok = false;
         }
         if (n <= 0) break;
-        if (!write_all(f.fd, w.buf.data(), (size_t)n)) {
+        if (!out_write(f, w.buf.data(), (size_t)n, total)) {
           file_io_error(errno, f.path.c_str(), "write");
           ok = false;
           break;

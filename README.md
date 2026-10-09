@@ -151,13 +151,27 @@ rsync unless fallback is disabled.
 
 Protocol 4 advertises feature bits in both Hello messages and uses their
 intersection. Unknown feature bits are ignored. The core transfer format is
-required; compression, identity mapping and safe-link filtering have distinct
-bits. If compression is unavailable, both sides send plain data. Requested
+required; compression, identity mapping, safe-link filtering and verified-prefix
+resume have distinct bits. If compression is unavailable, both sides send plain data. Requested
 safe-link or user/group mapping semantics are never silently dropped: missing
 support fails before transfer (or invokes rsync when fallback is enabled).
 Receivers reject compressed or identity-map frames that were not negotiated.
 Protocol-3 peers use their known baseline feature set and receive the historical
 Hello response without new fields.
+
+With `--partial`/`-P`, current peers hash an existing destination prefix with
+XXH3-128 on both sides and send only the remaining bytes when the hashes match.
+The receiver rechecks the prefix while copying it into the atomic output file;
+a concurrently changed prefix fails instead of publishing mixed data. A prefix
+that does not match the source is discarded as a resume candidate and the file
+is sent in full. Local byte copies use the same verification. Interrupted
+outputs retain only their fully written contiguous prefix, with holes from
+unfinished out-of-order chunks removed. Existing `--inplace` files retain their
+length on interruption; an already verified partial prefix can be reused.
+Files up to 512 KiB use the whole-file path. Peers without the resume feature,
+including protocol 3, keep the historical full-file format and transfer the
+whole file; no new fields are added to their wire messages.
+`-W`/`--whole-file` disables resume; `--no-whole-file` enables it again.
 
 Future optional frames/options must be gated by an agreed feature bit; they must
 not change the protocol-3 layout or add unnegotiated fields to the baseline Hello.
@@ -256,7 +270,8 @@ Differences to be aware of:
 
 - **Not wire-compatible.** xsync speaks its own protocol, so it needs xsync on both ends
   and delegates rsync daemon transfers (`host::module`, `rsync://`) to rsync.
-- **No delta transfer.** Changed files are always sent whole (rsync's `-W`). For many small
+- **No general delta transfer yet.** Changed files are sent whole except for a
+  verified existing prefix reused with `--partial`/`-P`. For many small
   files that is the fast path anyway; for large files that change slightly over a slow
   link, rsync will send less.
 - **New byte-copied files are atomic by default.** Files are written to temporary
@@ -279,9 +294,8 @@ Differences to be aware of:
   `--skip-compress`, `--block-size`, `--checksum-choice`,
   `--log-file-format`, and `--debug`. `--compress-choice` accepts `zstd` or `none`.
   `--info` accepts `progress2`, `progress0`, `stats2`, and `stats0` (comma separated).
-- **Compatibility no-ops are listed in `--help` with reasons.** `-W`/`--whole-file`
-  and `--no-whole-file` cannot change this engine's whole-file transfers (no delta
-  engine exists); `-s`/`--protect-args`/`--secluded-args` is intrinsic
+- **Compatibility no-ops are listed in `--help` with reasons.**
+  `-s`/`--protect-args`/`--secluded-args` is intrinsic
   to protocol-carried paths. `--blocking-io`/`--no-blocking-io` cannot change the
   blocking pipe transport. `-8`/`--8-bit-output` matches the always-raw name output.
   `--no-motd` has no effect because there is no daemon transport.

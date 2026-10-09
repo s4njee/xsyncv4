@@ -2,7 +2,7 @@
 
 Initial audit written 2026-10-08 against xsync 0.1.0 (protocol 1).
 All fifteen P0 stories completed against protocol 3; per-story evidence is below.
-P1 R-02 through R-09 are complete. Current protocol 4 supports protocol 3; E-01 is next.
+P1 R-02 through R-09 and E-01 are complete. Current protocol 4 supports protocol 3; E-02 is next.
 Problem statements retain the original audit findings.
 
 ## What "daily driver" means here
@@ -87,7 +87,7 @@ coverage clarification remains open.
 
 | ID | Item | Status | Done when | Size |
 |---|---|---|---|---|
-| E-01 | **`-P` does not resume.** `--partial` is accepted, but a partial file is never reused: there is no delta or append logic, so an interrupted 10 GB file starts from zero. On a remote disconnect the partial is not even kept (T-08). | code | An interrupted large file resumes from the verified prefix (hash the existing bytes on both sides, send the rest); tested by killing a transfer at 50 %. | L |
+| E-01 | **`-P` does not resume.** `--partial` is accepted, but a partial file is never reused: there is no delta or append logic, so an interrupted 10 GB file starts from zero. On a remote disconnect the partial is not even kept (T-08). | **done** | An interrupted large file resumes from the verified prefix (hash the existing bytes on both sides, send the rest); tested by killing a transfer at 50 %. | L |
 | E-02 | **`--out-format` and stable script output.** One project script parses `--out-format='%i %n'`. With `-v`/`-i`, line order follows thread completion, so diffs between runs are noisy. | confirmed ignored | `%i %n %L %l %o %f %b %t` supported; when stdout is not a terminal, lines are emitted in path order; `--log-file` writes the same stream. | M |
 | E-03 | **Itemize parity.** Missing against rsync: the `./` root line, `.d..t......` for existing directories whose time changed, `cd` lines in clone mode come from a different code path than byte-copy mode, `hf` for hard links. | code | `-i` output of both paths matches rsync's on the difftest corpus after sorting; difftest starts comparing stdout for `-i` runs. | M |
 | E-04 | **Delta transfer for large changed files.** Changed files are always sent whole. Irrelevant for the congress corpus, decisive for a 2 GB database dump with small edits over Wi-Fi. | code | Files above a threshold (1 MiB) use block matching (rsync rolling checksum, or content-defined chunks with XXH3) when the destination has a previous version; `-W` disables; bytes-on-wire within 20 % of rsync on an edited-large-file test. | XL |
@@ -681,3 +681,39 @@ These change defaults, so they should be chosen rather than inherited from a ben
   and required-feature rejection. No remote helper upgrade occurred.
 - Next open implementation story: **E-01, verified-prefix resume**. R-01 remains
   partial only for its outstanding physical Linux-host coverage clarification.
+
+
+### E-01 — complete (2026-10-09)
+
+- `-P`/`--partial` reuses a destination prefix for files above 512 KiB after
+  comparing XXH3-128 hashes on both sides. Current peers negotiate `PF_RESUME`;
+  NEED offers the prefix length/hash and data records carry the accepted length.
+  A mismatch sends the file in full. Local byte copies use the same verification.
+- The receiver rehashes its original prefix while copying into the atomic output;
+  a changed destination fails with 23 and is preserved. A verified `--inplace`
+  prefix is hashed without rewriting it. `-W`/`--whole-file` disables resume;
+  `--no-whole-file` enables it again. The client negotiates that choice without
+  adding unagreed options to Hello or changing the frozen protocol-3 layout.
+- Older peers lacking the feature keep the full-file format. Mixed protocol-3/4
+  push/pull tests now also request `--partial` and all three protocol methods
+  pass natively and in the real SSH rig, including the compression-free subset.
+- Writes track completed intervals for partial outputs. Cleanup stops admitting
+  writes, waits for active writes and retains only the contiguous prefix, trimming
+  out-of-order holes before rename. Existing inplace files retain their length.
+  Receiver chunks reject overlaps, inconsistent lengths and unoffered prefixes.
+- `tests/resume_test.py` passes all six methods on Linux (five applicable methods
+  on macOS). It stops 64 MiB transfers at the 32 MiB write boundary: local and
+  remote SIGINT, sender SIGKILL/disconnect in both directions, then restart. The
+  retained 33 MiB prefix matches the source, and each restart sends only the
+  remaining 31 MiB plus less than 256 KiB of overhead. SHA-256, mode and ns mtime
+  match after completion. Valid/corrupt/empty/full/oversized candidates, inplace
+  reuse, local source-read offsets and whole-file controls are also covered.
+- Real SSH push and pull repeat the halfway sender-kill check in the isolated
+  Linux rig: each keeps 33 MiB and transfers about 32,507,000 bytes on restart,
+  preserving the full hash and metadata. The final real SSH regression suite
+  passes all eight SIGINT phases; maximum server shutdown was 0.777 s.
+- All four `tests/resume_wire_test.py` methods pass on macOS and Linux: gaps are
+  trimmed, out-of-order completion works, changed prefixes remain unpublished,
+  and unoffered prefixes/overlapping chunks fail. All 12 P0 trust methods and the
+  original hostile-wire test pass. Six fallback regressions pass. Strict native
+  differentials remain 212/214, with only E-08's pending filter features failing.

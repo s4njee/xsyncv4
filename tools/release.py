@@ -62,8 +62,11 @@ cmp /tmp/source/file /tmp/local/file
 cmp '/tmp/source/straße with spaces' '/tmp/local/straße with spaces'
 printf '#!/bin/sh\nshift\nexec /bin/sh -c "$*"\n' >/tmp/fakessh
 chmod 755 /tmp/fakessh
-"$bin" --no-fallback -az -e /tmp/fakessh --rsync-path="$bin" /tmp/source/ fake:/tmp/pushed/
-"$bin" --no-fallback -az -e /tmp/fakessh --rsync-path="$bin" fake:/tmp/pushed/ /tmp/pulled/
+mkdir /tmp/pushed /tmp/pulled
+head -c 1048576 /tmp/source/file >/tmp/pushed/file
+head -c 1048576 /tmp/source/file >/tmp/pulled/file
+"$bin" --no-fallback -az --partial -e /tmp/fakessh --rsync-path="$bin" /tmp/source/ fake:/tmp/pushed/
+"$bin" --no-fallback -az --partial -e /tmp/fakessh --rsync-path="$bin" fake:/tmp/pushed/ /tmp/pulled/
 cmp /tmp/source/file /tmp/pulled/file
 cmp '/tmp/source/straße with spaces' '/tmp/pulled/straße with spaces'
 test "$(readlink '/tmp/pulled/space link')" = file

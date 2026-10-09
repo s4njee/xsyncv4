@@ -9,6 +9,8 @@
 #include <algorithm>
 #include <cerrno>
 #include <climits>
+#include <map>
+#include <shared_mutex>
 #include <unordered_map>
 
 #include "progress.h"
@@ -356,6 +358,38 @@ bool destination_hash_file(const char* path, u64 out[2]) {
     return false;
   }
   return hash_fd(fd, out);
+}
+
+bool hash_prefix_fd(int fd, i64 size, u64 out[2]) {
+  if (size < 0) { errno = EINVAL; return false; }
+  std::vector<char> bytes(256 * 1024);
+  XXH3_state_t hash;
+  XXH3_128bits_reset(&hash);
+  for (i64 offset = 0; offset < size;) {
+    if (g_stop.load()) { errno = EINTR; return false; }
+    ssize_t n = pread(fd, bytes.data(), (size_t)std::min<i64>(bytes.size(), size - offset), offset);
+    if (n < 0 && errno == EINTR) continue;
+    if (n <= 0) { if (!n) errno = EIO; return false; }
+    XXH3_128bits_update(&hash, bytes.data(), (size_t)n);
+    offset += n;
+  }
+  auto digest = XXH3_128bits_digest(&hash);
+  out[0] = digest.low64, out[1] = digest.high64;
+  return true;
+}
+
+ResumePrefix destination_resume_prefix(const char* path, i64 limit) {
+  ResumePrefix prefix;
+  auto target = destination_path(path);
+  if (target.fd < 0 || limit <= 0) return prefix;
+  int fd = openat(target.fd, target.name.c_str(), O_RDONLY | O_CLOEXEC | O_NOFOLLOW | O_NONBLOCK);
+  struct stat before;
+  if (fd >= 0 && fstat(fd, &before) == 0 && S_ISREG(before.st_mode) && before.st_size > 0) {
+    prefix.size = std::min<i64>(before.st_size, limit);
+    if (!hash_prefix_fd(fd, prefix.size, prefix.sum) || !source_unchanged(fd, path, before)) prefix = {};
+  }
+  if (fd >= 0) close(fd);
+  return prefix;
 }
 
 // ---------------------------------------------------------------- generator
@@ -857,33 +891,120 @@ void finalize_tree() {
 
 // ---------------------------------------------------------------- writing files
 
+struct OutputProgress {
+  std::mutex mu;
+  i64 prefix = 0;
+  std::map<i64, i64> ranges;
+};
+
 namespace {
 struct OpenOutput {
   int dir_fd;
   std::string name, tmp_name;
   bool temp, existed, partial, fd_open;
+  std::shared_ptr<OutputProgress> progress;
 };
 std::recursive_mutex output_mu;
+std::shared_mutex output_io_mu;
 std::unordered_map<int, OpenOutput> open_outputs;
-bool output_shutdown = false;
+std::atomic<bool> output_shutdown{false};
 
-void register_output(const OutFile& f) {
-  open_outputs[f.fd] = {f.dir_fd, f.name, f.tmp_name, f.temp, f.existed, g_opt.partial, true};
+void register_output(OutFile& f) {
+  f.progress = g_opt.partial ? std::make_shared<OutputProgress>() : nullptr;
+  open_outputs[f.fd] = {f.dir_fd, f.name, f.tmp_name, f.temp, f.existed, g_opt.partial, true, f.progress};
+}
+
+bool trim_partial(int fd, const OpenOutput& file) {
+  if (!file.partial || (!file.temp && file.existed) || !file.fd_open) return true;
+  std::lock_guard<std::mutex> lock(file.progress->mu);
+  return ftruncate(fd, file.progress->prefix) == 0;
 }
 }
 
 void cleanup_open_outputs() {
   std::lock_guard<std::recursive_mutex> lock(output_mu);
-  output_shutdown = true;
+  output_shutdown.store(true);
+  // Wait for writes to finish before trimming, closing and publishing a prefix.
+  // Writes hold only the shared I/O lock and their own progress mutex.
+  std::unique_lock<std::shared_mutex> io_lock(output_io_mu);
   for (const auto& [fd, f] : open_outputs) {
+    bool keep = f.partial && trim_partial(fd, f);
     if (f.fd_open) close(fd);
     if (f.temp) {
-      if (!f.partial || renameat(f.dir_fd, f.tmp_name.c_str(), f.dir_fd, f.name.c_str()) != 0)
+      if (!keep || renameat(f.dir_fd, f.tmp_name.c_str(), f.dir_fd, f.name.c_str()) != 0)
         unlinkat(f.dir_fd, f.tmp_name.c_str(), 0);
-    } else if (!f.existed && !f.partial) unlinkat(f.dir_fd, f.name.c_str(), 0);
+    } else if (!f.existed && !keep) unlinkat(f.dir_fd, f.name.c_str(), 0);
     close(f.dir_fd);
   }
   open_outputs.clear();
+}
+
+bool out_write(OutFile& f, const char* bytes, size_t size, i64 offset) {
+  std::shared_lock<std::shared_mutex> io_lock(output_io_mu);
+  if (output_shutdown) { errno = ECANCELED; return false; }
+  size_t done = 0;
+  while (done < size) {
+    ssize_t n = pwrite(f.fd, bytes + done, size - done, offset + (i64)done);
+    if (n < 0 && errno == EINTR) continue;
+    if (n <= 0) { if (!n) errno = EIO; return false; }
+    done += (size_t)n;
+  }
+  if (g_opt.partial && size) {
+    auto& progress = *f.progress;
+    std::lock_guard<std::mutex> lock(progress.mu);
+    i64 end = offset + (i64)size;
+    auto next = progress.ranges.lower_bound(offset);
+    if (next != progress.ranges.begin()) {
+      auto previous = std::prev(next);
+      if (previous->second >= offset) offset = previous->first, end = std::max(end, previous->second), next = progress.ranges.erase(previous);
+    }
+    while (next != progress.ranges.end() && next->first <= end) {
+      end = std::max(end, next->second);
+      next = progress.ranges.erase(next);
+    }
+    if (offset <= progress.prefix) progress.prefix = std::max(progress.prefix, end);
+    else progress.ranges.emplace(offset, end);
+    while (!progress.ranges.empty() && progress.ranges.begin()->first <= progress.prefix) {
+      progress.prefix = std::max(progress.prefix, progress.ranges.begin()->second);
+      progress.ranges.erase(progress.ranges.begin());
+    }
+  }
+  return true;
+}
+
+bool out_restore_prefix(OutFile& f, const ResumePrefix& prefix) {
+  int fd = openat(f.dir_fd, f.name.c_str(), O_RDONLY | O_CLOEXEC | O_NOFOLLOW | O_NONBLOCK);
+  struct stat before;
+  if (fd < 0) return false;
+  if (fstat(fd, &before) != 0 || !S_ISREG(before.st_mode) || before.st_size < prefix.size) {
+    close(fd);
+    errno = ESTALE;
+    return false;
+  }
+  std::vector<char> bytes(256 * 1024);
+  XXH3_state_t hash;
+  XXH3_128bits_reset(&hash);
+  bool ok = true;
+  struct stat output;
+  bool inplace = fstat(f.fd, &output) == 0 && output.st_dev == before.st_dev && output.st_ino == before.st_ino;
+  for (i64 offset = 0; offset < prefix.size;) {
+    if (g_stop.load()) { errno = EINTR; ok = false; break; }
+    ssize_t n = pread(fd, bytes.data(), (size_t)std::min<i64>(bytes.size(), prefix.size - offset), offset);
+    if (n < 0 && errno == EINTR) continue;
+    if (n <= 0) { if (!n) errno = ESTALE; ok = false; break; }
+    XXH3_128bits_update(&hash, bytes.data(), (size_t)n);
+    if (!inplace && !out_write(f, bytes.data(), (size_t)n, offset)) { ok = false; break; }
+    offset += n;
+  }
+  auto digest = XXH3_128bits_digest(&hash);
+  if (ok && (digest.low64 != prefix.sum[0] || digest.high64 != prefix.sum[1] || !source_unchanged(fd, f.path, before))) {
+    errno = ESTALE;
+    ok = false;
+  }
+  int error = errno;
+  close(fd);
+  errno = error;
+  return ok;
 }
 
 static u64 next_rand(Worker& t) {
@@ -958,6 +1079,10 @@ bool out_open(OutFile& f, DirWork& w, u32 idx, Worker& t, bool force_temp) {
 void out_abort(OutFile& f, bool keep_partial) {
   std::lock_guard<std::recursive_mutex> lock(output_mu);
   if (output_shutdown) { f.fd = f.dir_fd = -1; return; }
+  if (keep_partial && f.fd >= 0) {
+    auto found = open_outputs.find(f.fd);
+    if (found != open_outputs.end() && !trim_partial(f.fd, found->second)) keep_partial = false;
+  }
   open_outputs.erase(f.fd);
   if (f.fd >= 0) close(f.fd);
   f.fd = -1;
@@ -1053,7 +1178,7 @@ bool write_whole(DirWork& w, u32 idx, const char* data, size_t len, Worker& t) {
   static thread_local OutFile o;  // reuse path buffers
   if (!out_open(o, w, idx, t)) return false;
   o.size = (i64)len;
-  bool ok = write_all(o.fd, data, len);
+  bool ok = out_write(o, data, len, 0);
   if (!ok) file_io_error(errno, o.path.c_str(), "write");
   return out_finish(o, w, idx, t, ok);
 }

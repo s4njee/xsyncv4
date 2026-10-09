@@ -56,7 +56,7 @@ Options (same meaning as rsync):
  -O, --omit-dir-times     omit directories from --times
  -J, --omit-link-times    omit symlinks from --times
  -n, --dry-run            perform a trial run with no changes made
- -W, --whole-file         copy files whole (always on: xsync has no delta transfer)
+ -W, --whole-file         send the whole file; disable verified-prefix resume
  -x, --one-file-system    don't cross filesystem boundaries
  -e, --rsh=COMMAND        specify the remote shell to use
      --rsync-path=PROGRAM specify the xsync to run on the remote machine
@@ -94,8 +94,6 @@ Options (same meaning as rsync):
      --version, --help
 
 Documented compatibility no-ops:
- -W, --whole-file, --no-whole-file
-                          whole-file transfer is always used; no delta engine exists
  -s, --protect-args, --secluded-args
                           paths always travel as protocol data, not shell text
      --blocking-io, --no-blocking-io
@@ -231,7 +229,8 @@ Parsed parse(int argc, char** argv) {
         if (comma == std::string::npos) break;
         start = comma + 1;
       } while (true);
-    } else if (name == "whole-file" || name == "no-whole-file" || name == "protect-args" || name == "secluded-args" ||
+    } else if (flag(o.whole_file, "whole-file")) {}
+    else if (name == "protect-args" || name == "secluded-args" ||
                name == "blocking-io" || name == "no-blocking-io" || name == "8-bit-output" || name == "no-motd") {
       // These intrinsic behaviours are listed with their reasons in --help.
     } else {
@@ -306,7 +305,8 @@ Parsed parse(int argc, char** argv) {
         case 'i': o.itemize = true; break;
         case 'h': o.human++; break;
         case 'P': o.partial = o.progress = true; break;
-        case 'W': case 's': case '8': break;  // documented compatibility no-ops
+        case 'W': o.whole_file = true; break;
+        case 's': case '8': break;  // documented compatibility no-ops
         case 'S': usage_error("--sparse is not supported by xsync");
         case '4': usage_error("--ipv4 is not supported by xsync");
         case '6': usage_error("--ipv6 is not supported by xsync");

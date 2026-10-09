@@ -112,7 +112,8 @@ static ssize_t fault_pwrite(int fd, const void* bytes, size_t len, off_t offset)
 #else
   static auto original = (ssize_t (*)(int, const void*, size_t, off_t))dlsym(RTLD_NEXT, "pwrite");
 #endif
-  if (selected(fd)) {
+  const char* from = getenv("XSYNC_FAULT_WRITE_FROM_OFFSET");
+  if (selected(fd) && (!from || offset >= (off_t)strtoll(from, nullptr, 10))) {
     if (const char* notify = getenv("XSYNC_FAULT_WRITE_NOTIFY")) {
       int marker = open(notify, O_WRONLY | O_CREAT | O_EXCL, 0600);
       if (marker >= 0) close(marker);

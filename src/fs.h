@@ -1,6 +1,7 @@
 // Filesystem primitives and the receiver-side "generator" shared by local and remote sync.
 #pragma once
 #include <mutex>
+#include <memory>
 
 #include "common.h"
 #include "destination.h"
@@ -36,6 +37,12 @@ Entry source_snapshot(const Entry& scanned, const struct stat& st);
 bool source_unchanged(int fd, const std::string& path, const struct stat& before);
 bool hash_file(const char* path, u64 out[2]);
 bool destination_hash_file(const char* path, u64 out[2]);
+struct ResumePrefix {
+  i64 size = 0;
+  u64 sum[2] = {};
+};
+bool hash_prefix_fd(int fd, i64 size, u64 out[2]);
+ResumePrefix destination_resume_prefix(const char* path, i64 limit);
 
 // One directory being synchronised, as seen from the destination side.
 struct DirWork {
@@ -73,6 +80,7 @@ void finish_dir(DirWork& w);
 void finalize_tree();
 
 // Destination file being written.
+struct OutputProgress;
 struct OutFile {
   int fd = -1;
   int dir_fd = -1;
@@ -82,11 +90,14 @@ struct OutFile {
   i64 size = -1;  // final length when known (needed to truncate --inplace updates)
   std::string path, tmp;
   std::string name, tmp_name;
+  std::shared_ptr<OutputProgress> progress;
 };
 bool out_open(OutFile& f, DirWork& w, u32 idx, Worker& t, bool force_temp = false);
 bool out_finish(OutFile& f, DirWork& w, u32 idx, Worker& t, bool ok, const Entry* attrs = nullptr);
 void out_abort(OutFile& f, bool keep_partial = false);
 void cleanup_open_outputs();
+bool out_write(OutFile& f, const char* bytes, size_t size, i64 offset);
+bool out_restore_prefix(OutFile& f, const ResumePrefix& prefix);
 bool clone_copy(DirWork& w, u32 idx, const char* source, unsigned flags, Worker& t);
 // Whole small file from memory.
 bool write_whole(DirWork& w, u32 idx, const char* data, size_t len, Worker& t);

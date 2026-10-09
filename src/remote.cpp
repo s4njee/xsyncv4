@@ -17,6 +17,7 @@
 #include <algorithm>
 #include <cstdlib>
 #include <memory>
+#include <map>
 #include <unordered_map>
 #include <unordered_set>
 
@@ -44,6 +45,8 @@ constexpr size_t BLOCK_TARGET = 1 << 20;   // raw bytes per DATA frame
 constexpr size_t SMALL_MAX = 512 << 10;    // files up to this size are packed into shared blocks
 constexpr size_t DATA_PREFIX = HDR + 1 + 8;
 const char MAGIC[] = "XSYNC\x01";
+
+bool resume_enabled() { return g_opt.partial && (g_opt.peer_features & PF_RESUME); }
 
 // ---------------------------------------------------------------- encoding
 
@@ -383,6 +386,7 @@ struct SDir {
   std::string src_path, rel;
   std::vector<std::string> src_paths;
   DirList list;
+  std::unordered_map<u32, ResumePrefix> prefixes;
   Entry attrs;
   u8 flags = 0;
   u32 id = 0;
@@ -527,7 +531,7 @@ struct Sender {
       d = id < dirs.size() ? dirs[id] : nullptr;
       if (d) dirs[id] = nullptr;
     }
-    if (!d || r.bad) die(RERR_PROTOCOL, "protocol error: bad NEED frame");
+    if (!d || r.bad || n > d->list.e.size()) die(RERR_PROTOCOL, "protocol error: bad NEED frame");
     if (n == 0) {
       if (d->pending.fetch_sub(1) == 1) delete d;
     } else {
@@ -535,9 +539,18 @@ struct Sender {
       u32 prev = 0;
       u64 bytes = 0;
       for (size_t i = 0; i < n; i++) {
-        prev += (u32)r.var();
-        if (r.bad || prev >= d->list.e.size()) die(RERR_PROTOCOL, "protocol error: bad NEED index");
+        u64 difference = r.var();
+        if (r.bad || difference > UINT32_MAX - prev || (i && !difference)) die(RERR_PROTOCOL, "protocol error: bad NEED index");
+        prev += (u32)difference;
+        if (prev >= d->list.e.size()) die(RERR_PROTOCOL, "protocol error: bad NEED index");
         idx[i] = prev;
+        if (resume_enabled()) {
+          ResumePrefix prefix;
+          prefix.size = (i64)r.var();
+          if (prefix.size) prefix.sum[0] = r.var(), prefix.sum[1] = r.var();
+          if (r.bad || prefix.size < 0 || prefix.size > d->list.e[prev].size) die(RERR_PROTOCOL, "protocol error: bad resume prefix");
+          if (prefix.size) d->prefixes.emplace(prev, prefix);
+        }
         bytes += (u64)d->list.e[prev].size;
       }
       if (client) {
@@ -561,6 +574,7 @@ struct Sender {
       d->pending.fetch_add((int)tasks.size() - 1);  // replace NEED reference with reads
       for (Task& t : tasks) pool.push(1, std::move(t));
     }
+    if (r.bad || !r.empty()) die(RERR_PROTOCOL, "protocol error: trailing or truncated NEED frame");
     pool.update([&] { needs_recv++; });
   }
 
@@ -637,7 +651,18 @@ struct Sender {
         return n;
       };
       bool small = (u64)fresh.size <= SMALL_MAX;
-      i64 off = 0;
+      i64 prefix = 0;
+      if (!small && attempt == 0 && resume_enabled()) {
+        auto offered = d.prefixes.find(idx);
+        if (offered != d.prefixes.end() && offered->second.size <= fresh.size) {
+          u64 digest[2];
+          if (hash_prefix_fd(in, offered->second.size, digest) && digest[0] == offered->second.sum[0] && digest[1] == offered->second.sum[1])
+            prefix = offered->second.size;
+        }
+      }
+      i64 off = prefix;
+      if (prefix && lseek(in, prefix, SEEK_SET) < 0) ok = false, off = prefix = 0;
+      if (client && prefix) slot_add(w.id, prefix);
       size_t checkpoint = w.block.size();
       if (small) {
         w.buf.resize((size_t)fresh.size);
@@ -651,7 +676,9 @@ struct Sender {
           // Pad only the abandoned attempt so its receiver can drain all records.
           if (n < want) memset(w.buf.data() + n, 0, want - n), ok = false;
           head(R_CHUNK);
-          put_var(w.block, attempt), put_var(w.block, (u64)off), put_var(w.block, (u64)fresh.size);
+          put_var(w.block, attempt);
+          if (resume_enabled()) put_var(w.block, prefix);
+          put_var(w.block, (u64)off), put_var(w.block, (u64)fresh.size);
           put_str(w.block, {w.buf.data(), want});
           off += (i64)want;
           if (client) slot_add(w.id, (i64)want);
@@ -672,7 +699,9 @@ struct Sender {
         } else if (!retry) head(R_FAIL);
       } else {
         head(R_END);
-        put_var(w.block, attempt), put_var(w.block, (u64)off);
+        put_var(w.block, attempt);
+        if (resume_enabled()) put_var(w.block, prefix);
+        put_var(w.block, (u64)off);
         w.block.push_back(retry ? 1 : stable && ok ? 0 : 2);
         put_file_attrs(w.block, fresh);
         flush_block(w);
@@ -805,6 +834,7 @@ struct RDir {
   u8 flags = 0;
   bool gen_done = false;        // guarded by Receiver::dmu
   std::vector<Task> waiters;    // children that arrived before our generator ran
+  std::unordered_map<u32, ResumePrefix> prefixes;
 };
 
 struct BigFile {
@@ -812,10 +842,13 @@ struct BigFile {
   std::mutex mu;
   Entry attrs;
   i64 received = 0, expected = -1;
+  i64 prefix = 0, total = -1;
+  std::map<i64, i64> chunks;
   int status = -1;
   bool ok = true;
   bool opened = false;
   bool finished = false;
+  bool prefix_ok = true;
 };
 
 struct Receiver {
@@ -941,7 +974,19 @@ struct Receiver {
     }
     put_var(f, w.need.size());
     u32 prev = 0;
-    for (u32 i : w.need) put_var(f, i - prev), prev = i;
+    for (u32 i : w.need) {
+      put_var(f, i - prev), prev = i;
+      if (resume_enabled()) {
+        ResumePrefix prefix;
+        if (l.e[i].size > (i64)SMALL_MAX)
+          prefix = destination_resume_prefix(path_join(w.dst_path, w.dst_name(i)).c_str(), l.e[i].size);
+        put_var(f, prefix.size);
+        if (prefix.size) {
+          put_var(f, prefix.sum[0]), put_var(f, prefix.sum[1]);
+          d->prefixes.emplace(i, prefix);
+        }
+      }
+    }
     std::vector<Task> wait;
     {
       std::lock_guard<std::mutex> lk(dmu);
@@ -997,7 +1042,7 @@ struct Receiver {
         bool ok = out_open(file, w, idx, t);
         if (ok) {
           file.size = (i64)bytes.size();
-          ok = write_all(file.fd, bytes.data(), bytes.size());
+          ok = out_write(file, bytes.data(), bytes.size(), 0);
           if (!ok) file_io_error(errno, file.path.c_str(), "write");
           ok = out_finish(file, w, idx, t, ok, &attrs) && ok;
         }
@@ -1015,6 +1060,7 @@ struct Receiver {
       } else if (kind == R_CHUNK || kind == R_END) {
         u32 attempt = (u32)r.var();
         if (attempt > 1) die(RERR_PROTOCOL, "protocol error: invalid retry attempt");
+        i64 prefix = resume_enabled() ? (i64)r.var() : 0;
         i64 off = 0, total;
         int status = -1;
         Entry attrs = s;
@@ -1022,7 +1068,7 @@ struct Receiver {
         if (kind == R_CHUNK) {
           off = (i64)r.var(), total = (i64)r.var();
           bytes = r.str();
-          if (off < 0 || total < 0 || bytes.size() > (u64)total || off > total - (i64)bytes.size())
+          if (off < 0 || total < 0 || bytes.empty() || bytes.size() > (u64)total || off > total - (i64)bytes.size())
             die(RERR_PROTOCOL, "protocol error: bad chunk");
         } else {
           total = (i64)r.var();
@@ -1031,6 +1077,9 @@ struct Receiver {
           if (total < 0 || status > 2) die(RERR_PROTOCOL, "protocol error: bad file completion");
         }
         if (r.bad) die(RERR_PROTOCOL, "protocol error: truncated file record");
+        auto offered = d->prefixes.find(idx);
+        if (prefix < 0 || prefix > total || (prefix && (attempt || offered == d->prefixes.end() || prefix != offered->second.size)) ||
+            (kind == R_CHUNK && off < prefix)) die(RERR_PROTOCOL, "protocol error: unverified resume prefix");
         u64 key = ((u64)id << 33) | ((u64)idx << 1) | attempt;
         std::shared_ptr<BigFile> b;
         {
@@ -1045,26 +1094,47 @@ struct Receiver {
           b->opened = true;
           b->attrs = s;
           b->ok = out_open(b->f, w, idx, t);
+          b->prefix = prefix;
+          b->total = kind == R_CHUNK ? total : -1;
+          b->received = prefix;
+          if (b->ok && prefix && !out_restore_prefix(b->f, offered->second)) {
+            file_io_error(errno, b->f.path.c_str(), "reuse partial prefix");
+            b->prefix_ok = b->ok = false;
+          }
         }
+        if (b->prefix != prefix) die(RERR_PROTOCOL, "protocol error: inconsistent resume prefix");
         if (kind == R_END) {
           if (b->status != -1) die(RERR_PROTOCOL, "protocol error: duplicate file completion");
+          if ((b->total >= 0 && (total > b->total || (status != 2 && total != b->total))) ||
+              (!b->chunks.empty() && b->chunks.rbegin()->second > total))
+            die(RERR_PROTOCOL, "protocol error: inconsistent file size");
           b->status = status, b->expected = total, b->attrs = attrs;
         } else {
+          if (b->total < 0) b->total = total;
+          if (b->total != total || (b->status >= 0 && (off + (i64)bytes.size() > b->expected ||
+              (b->status != 2 && total != b->expected)))) die(RERR_PROTOCOL, "protocol error: inconsistent file size");
           slot_begin(t.id, w.rel, w.src.name_sv(s), total);
           slot_add(t.id, off + (i64)bytes.size());
+          auto next = b->chunks.lower_bound(off);
+          i64 end = off + (i64)bytes.size();
+          if ((next != b->chunks.end() && next->first < end) ||
+              (next != b->chunks.begin() && std::prev(next)->second > off))
+            die(RERR_PROTOCOL, "protocol error: overlapping file chunks");
+          i64 start = off;
+          if (next != b->chunks.begin() && std::prev(next)->second == start) {
+            auto previous = std::prev(next);
+            start = previous->first;
+            next = b->chunks.erase(previous);
+          }
+          if (next != b->chunks.end() && next->first == end) {
+            end = next->second;
+            b->chunks.erase(next);
+          }
+          b->chunks.emplace(start, end);
           if (b->ok) {
-            const char* p = bytes.data();
-            size_t left = bytes.size();
-            i64 at = off;
-            while (left) {
-              ssize_t k = pwrite(b->f.fd, p, left, at);
-              if (k < 0 && errno == EINTR) continue;
-              if (k <= 0) {
-                file_io_error(errno, b->f.path.c_str(), "write");
-                b->ok = false;
-                break;
-              }
-              p += k, left -= (size_t)k, at += k;
+            if (!out_write(b->f, bytes.data(), bytes.size(), off)) {
+              file_io_error(errno, b->f.path.c_str(), "write");
+              b->ok = false;
             }
           }
           b->received += (i64)bytes.size();
@@ -1075,7 +1145,7 @@ struct Receiver {
           bool ok = false;
           if (b->f.fd >= 0) {
             if (b->status == 0 && b->ok) ok = out_finish(b->f, w, idx, t, true, &b->attrs);
-            else out_abort(b->f, b->status == 2 && g_opt.partial);
+            else out_abort(b->f, b->prefix_ok && b->status == 2 && g_opt.partial);
           }
           {
             std::lock_guard<std::mutex> lk(bmu);
@@ -1314,7 +1384,8 @@ int run_client(const std::vector<std::string>& srcs, const std::string& dest, u3
   f.append(MAGIC, sizeof MAGIC - 1);
   put_var(f, wire_version);
   f.push_back(push ? 'R' : 'S');
-  if (wire_version >= 4) put_var(f, PROTO_FEATURES);
+  u64 advertised = PROTO_FEATURES & (o.whole_file ? ~PF_RESUME : ~u64(0));
+  if (wire_version >= 4) put_var(f, advertised);
   put_options(f);
   put_var(f, paths.size());
   for (auto& p : paths) put_str(f, p);
@@ -1380,7 +1451,7 @@ int run_client(const std::vector<std::string>& srcs, const std::string& dest, u3
                                                  ", server " + std::to_string(version));
     u64 features = version >= 4 ? answer.var() : LEGACY_V3_FEATURES;
     if (answer.bad || !answer.empty()) die(RERR_PROTOCOL, "protocol error: malformed server hello");
-    o.peer_features = features & PROTO_FEATURES;
+    o.peer_features = features & advertised;
     std::string missing = missing_feature(o.peer_features);
     if (!missing.empty()) fallback(missing, RERR_UNSUPPORTED);
     if (!(o.peer_features & PF_ZSTD)) o.compress = false;
