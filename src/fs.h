@@ -95,7 +95,7 @@ struct OutFile {
   std::string name, tmp_name;
   std::shared_ptr<OutputProgress> progress;
 };
-bool out_open(OutFile& f, DirWork& w, u32 idx, Worker& t, bool force_temp = false);
+bool out_open(OutFile& f, DirWork& w, u32 idx, Worker& t, bool force_temp = false, bool readable = false);
 bool out_finish(OutFile& f, DirWork& w, u32 idx, Worker& t, bool ok, const Entry* attrs = nullptr);
 void out_abort(OutFile& f, bool keep_partial = false);
 void cleanup_open_outputs();

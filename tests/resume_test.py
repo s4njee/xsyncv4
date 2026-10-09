@@ -157,11 +157,13 @@ class ResumeTests(unittest.TestCase):
                 marker = root / 'source-read'
                 env = self.fault_env(self.source)
                 env['XSYNC_FAULT_READ_NOTIFY'] = str(marker)
+                env['XSYNC_FAULT_PREAD_NOTIFY'] = str(root / 'delta-read')
+                env['XSYNC_FAULT_PREAD_MIN_SIZE'] = str(MIB // 2)
                 result = subprocess.run(self.command('local', target), capture_output=True, env=env, timeout=15)
                 self.assertEqual(result.returncode, 0, result.stderr)
                 self.check_file(target)
-                # Hashing uses pread; normal data reads must start beyond a verified prefix.
-                self.assertEqual((root / 'source-read.1').exists(), not valid)
+                # Prefix hashing uses small preads; actual source data uses read or larger delta preads.
+                self.assertEqual((root / 'source-read.1').exists() or (root / 'delta-read').exists(), not valid)
 
     def test_inplace_verified_prefix(self):
         for transport in ('local', 'push', 'pull'):

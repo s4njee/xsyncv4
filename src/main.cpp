@@ -58,7 +58,7 @@ Options (same meaning as rsync):
  -O, --omit-dir-times     omit directories from --times
  -J, --omit-link-times    omit symlinks from --times
  -n, --dry-run            perform a trial run with no changes made
- -W, --whole-file         send the whole file; disable verified-prefix resume
+ -W, --whole-file         send the whole file; disable resume and block matching
      --no-whole-file      enable verified-prefix resume again
  -x, --one-file-system    don't cross filesystem boundaries
  -e, --rsh=COMMAND        specify the remote shell to use
@@ -406,6 +406,8 @@ void print_summary(u64 t0) {
     out += "Number of regular files transferred: " + fmt_num(s.xfer_files) + "\n";
     out += "Total file size: " + fmt_num(total) + " bytes\n";
     out += "Total transferred file size: " + fmt_num(s.xfer_bytes) + " bytes\n";
+    out += "Delta literal data: " + fmt_num(s.delta_literal_bytes) + " bytes\n";
+    out += "Delta matched data: " + fmt_num(s.delta_matched_bytes) + " bytes\n";
     out += "Total bytes sent: " + fmt_num(sent) + "\n";
     out += "Total bytes received: " + fmt_num(recv) + "\n";
   }

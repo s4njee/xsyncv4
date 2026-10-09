@@ -1079,7 +1079,7 @@ static u64 next_rand(Worker& t) {
   return t.rng;
 }
 
-bool out_open(OutFile& f, DirWork& w, u32 idx, Worker& t, bool force_temp) {
+bool out_open(OutFile& f, DirWork& w, u32 idx, Worker& t, bool force_temp, bool readable) {
   std::lock_guard<std::recursive_mutex> lock(output_mu);
   if (output_shutdown || g_stop.load()) return false;
   const Options& o = g_opt;
@@ -1107,7 +1107,7 @@ bool out_open(OutFile& f, DirWork& w, u32 idx, Worker& t, bool force_temp) {
   mode_t mode = s.mode & 0777;
   f.created_mode = mode;
   if (f.existed && o.inplace && (s.flags & EF_INPLACE_SAFE)) {
-    f.fd = openat(f.dir_fd, f.name.c_str(), O_WRONLY | O_CLOEXEC | O_NOFOLLOW | O_NONBLOCK);
+    f.fd = openat(f.dir_fd, f.name.c_str(), (readable ? O_RDWR : O_WRONLY) | O_CLOEXEC | O_NOFOLLOW | O_NONBLOCK);
     if (f.fd < 0) return failed("open --inplace");
     struct stat st;
     if (fstat(f.fd, &st) != 0 || !S_ISREG(st.st_mode)) {
@@ -1120,7 +1120,7 @@ bool out_open(OutFile& f, DirWork& w, u32 idx, Worker& t, bool force_temp) {
     return true;
   }
   if (!f.existed && (o.direct_new || o.inplace) && !force_temp) {
-    f.fd = openat(f.dir_fd, f.name.c_str(), O_WRONLY | O_CREAT | O_EXCL | O_CLOEXEC | O_NOFOLLOW, mode);
+    f.fd = openat(f.dir_fd, f.name.c_str(), (readable ? O_RDWR : O_WRONLY) | O_CREAT | O_EXCL | O_CLOEXEC | O_NOFOLLOW, mode);
     if (f.fd >= 0) { register_output(f); return true; }
     if (errno != EEXIST) return failed("open");
   }
@@ -1130,7 +1130,7 @@ bool out_open(OutFile& f, DirWork& w, u32 idx, Worker& t, bool force_temp) {
     u64 r = next_rand(t);
     for (int k = 0; k < 6; k++) f.tmp_name.push_back(al[r % 62]), r /= 62;
     f.tmp = path_join(w.dst_path, f.tmp_name);
-    f.fd = openat(f.dir_fd, f.tmp_name.c_str(), O_WRONLY | O_CREAT | O_EXCL | O_CLOEXEC | O_NOFOLLOW, mode | 0600);
+    f.fd = openat(f.dir_fd, f.tmp_name.c_str(), (readable ? O_RDWR : O_WRONLY) | O_CREAT | O_EXCL | O_CLOEXEC | O_NOFOLLOW, mode | 0600);
     if (f.fd >= 0) {
       f.temp = true;
       f.created_mode = mode | 0600;

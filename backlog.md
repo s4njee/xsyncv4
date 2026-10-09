@@ -2,7 +2,7 @@
 
 Initial audit written 2026-10-08 against xsync 0.1.0 (protocol 1).
 All fifteen P0 stories completed against protocol 3; per-story evidence is below.
-P1 R-02 through R-09 and E-01 through E-03 are complete. Current protocol 4 supports protocol 3; E-04 is next.
+P1 R-02 through R-09 and E-01 through E-03 are complete. Current protocol 4 supports protocol 3; E-04 is in progress.
 Problem statements retain the original audit findings.
 
 ## What "daily driver" means here
@@ -90,7 +90,7 @@ coverage clarification remains open.
 | E-01 | **`-P` does not resume.** `--partial` is accepted, but a partial file is never reused: there is no delta or append logic, so an interrupted 10 GB file starts from zero. On a remote disconnect the partial is not even kept (T-08). | **done** | An interrupted large file resumes from the verified prefix (hash the existing bytes on both sides, send the rest); tested by killing a transfer at 50 %. | L |
 | E-02 | **`--out-format` and stable script output.** One project script parses `--out-format='%i %n'`. With `-v`/`-i`, line order follows thread completion, so diffs between runs are noisy. | **done** | `%i %n %L %l %o %f %b %t` supported; when stdout is not a terminal, lines are emitted in path order; `--log-file` writes the same stream. | M |
 | E-03 | **Itemize parity.** Missing against rsync: the `./` root line, `.d..t......` for existing directories whose time changed, `cd` lines in clone mode come from a different code path than byte-copy mode, `hf` for hard links. | **done** | `-i` output of both paths matches rsync's on the difftest corpus after sorting; difftest starts comparing stdout for `-i` runs. | M |
-| E-04 | **Delta transfer for large changed files.** Changed files are always sent whole. Irrelevant for the congress corpus, decisive for a 2 GB database dump with small edits over Wi-Fi. | code | Files above a threshold (1 MiB) use block matching (rsync rolling checksum, or content-defined chunks with XXH3) when the destination has a previous version; `-W` disables; bytes-on-wire within 20 % of rsync on an edited-large-file test. | XL |
+| E-04 | **Delta transfer for large changed files.** Changed files are always sent whole. Irrelevant for the congress corpus, decisive for a 2 GB database dump with small edits over Wi-Fi. | **in progress** | Files above a threshold (1 MiB) use block matching (rsync rolling checksum, or content-defined chunks with XXH3) when the destination has a previous version; `-W` disables; bytes-on-wire within 20 % of rsync on an edited-large-file test. | XL |
 | E-05 | **List mode.** `xsync host:dir/` or a single SRC should list, as rsync does; today it is a usage error. | confirmed | `ls -l`-style listing for local and remote sources. | S |
 | E-06 | **End-of-run error summary.** With thousands of files an error scrolls away. | new | After the run: count of errors and the first ten, grouped by kind; exit-code line as now. | S |
 | E-07 | **`--bwlimit`, `--timeout`, keep-alive.** `--bwlimit` is rejected; `--timeout` is ignored (T-04). A stalled ssh connection hangs forever. | code | Token-bucket limit on the writer thread; idle timeout with keep-alive frames; exit 30 on timeout like rsync. | M |
@@ -836,3 +836,39 @@ These change defaults, so they should be chosen rather than inherited from a ben
   `e0adac5d165a`.
 - `xsync-linux-arm64`: `737cc8dcbcbfb82396d658cbd9f56c54d77501b4f9cbfe98384ec3a1e52533fc`, 4,679,728 bytes, source
   `e0adac5d165a`.
+
+### E-04 — in progress: streaming matcher and local reconstruction (2026-10-09)
+
+- Added a bounded streaming rolling-checksum/XXH3 matcher, adaptive block
+  signatures, literal batches and consecutive block references. Matching covers
+  insertions, deletions, moved blocks and the final short block without loading
+  the whole source into memory. Strong checksums revalidate each copied block;
+  XXH3-128 verifies the completed output before publication.
+- Local byte copies above 1 MiB now reuse an existing regular destination.
+  `-W` disables matching; a verified `--partial` prefix retains priority, and
+  APFS cloning remains preferred. `%b` reports literal source bytes; new stats
+  explicitly name delta literal/matched data. In an 8 MiB insertion fixture,
+  5,806 literal bytes reconstruct the entire source correctly.
+- Destination bases use anchored, no-follow opens. `--inplace` snapshots the
+  basis into an anonymous file and preserves the destination inode, including
+  its existing hard links. A changed source retries once; a changed basis is
+  rejected with code 23; final checksum failure prevents retaining unverified
+  atomic output. Existing output cleanup tracks verified writes.
+- Seven dedicated methods pass on macOS and Linux (local paths in the isolated
+  Linux container). They cover edited blocks, insertion/deletion/reordering,
+  append/truncate, threshold and whole-file toggles, inplace inode preservation,
+  25 deterministic random-edit cases, source retry, basis corruption and a
+  concurrent basis-path replacement with an outside symlink sentinel.
+- All thirteen P0 methods, ten output methods, four hard-link methods and six
+  applicable resume methods pass on macOS (the real-SSH resume method requires
+  its rig). The forced-byte-copy sorted-itemization corpus stays **229/231**;
+  only E-08's existing filter failures remain. The resume read-observation test
+  now recognizes actual streaming preads separately from prefix-hash preads.
+- **Not complete:** SSH/general remote deltas, negotiated signatures/references,
+  hostile new-wire checks and the measured <=120%-of-rsync wire-cost gate remain.
+  Next: request signatures lazily after sender prefix verification, so valid
+  partial resumes retain their existing fast path and do not require large
+  inplace snapshots. Gate new requests/responses, NEED eligibility and data
+  records behind a new feature bit; preserve the frozen options/configuration.
+  Published release artifacts remain E-03 source `e0adac5d165a` while E-04 is
+  incomplete; installed Homebrew/Pi binaries were not changed.

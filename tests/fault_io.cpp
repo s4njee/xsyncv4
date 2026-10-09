@@ -115,6 +115,25 @@ static ssize_t fault_read(int fd, void* bytes, size_t len) {
   return original(fd, bytes, len);
 }
 
+static ssize_t fault_pread(int fd, void* bytes, size_t len, off_t offset) {
+#ifdef __APPLE__
+  auto original = pread;
+#else
+  static auto original = (ssize_t (*)(int, void*, size_t, off_t))dlsym(RTLD_NEXT, "pread");
+#endif
+  const char* marker = getenv("XSYNC_FAULT_PREAD_NOTIFY");
+  const char* minimum = getenv("XSYNC_FAULT_PREAD_MIN_SIZE");
+  if (marker && selected(fd) && (!minimum || len >= strtoull(minimum, nullptr, 10))) {
+    static std::atomic<bool> notified{false};
+    if (!notified.exchange(true)) {
+      int file = open(marker, O_WRONLY | O_CREAT | O_EXCL, 0600);
+      if (file >= 0) close(file);
+      if (const char* delay = getenv("XSYNC_FAULT_PREAD_DELAY_US")) usleep((useconds_t)strtoul(delay, nullptr, 10));
+    }
+  }
+  return original(fd, bytes, len, offset);
+}
+
 static ssize_t fault_pwrite(int fd, const void* bytes, size_t len, off_t offset) {
 #ifdef __APPLE__
   auto original = pwrite;
@@ -162,6 +181,8 @@ static ssize_t fault_write(int fd, const void* bytes, size_t len) {
 __attribute__((used)) static struct { const void* replacement; const void* original; }
 interpose_read __attribute__((section("__DATA,__interpose"))) = {(const void*)fault_read, (const void*)read};
 __attribute__((used)) static struct { const void* replacement; const void* original; }
+interpose_pread __attribute__((section("__DATA,__interpose"))) = {(const void*)fault_pread, (const void*)pread};
+__attribute__((used)) static struct { const void* replacement; const void* original; }
 interpose_pwrite __attribute__((section("__DATA,__interpose"))) = {(const void*)fault_pwrite, (const void*)pwrite};
 __attribute__((used)) static struct { const void* replacement; const void* original; }
 interpose_write __attribute__((section("__DATA,__interpose"))) = {(const void*)fault_write, (const void*)write};
@@ -177,6 +198,7 @@ __attribute__((used)) static struct { const void* replacement; const void* origi
 interpose_utimensat __attribute__((section("__DATA,__interpose"))) = {(const void*)fault_utimensat, (const void*)utimensat};
 #else
 extern "C" ssize_t read(int fd, void* bytes, size_t len) { return fault_read(fd, bytes, len); }
+extern "C" ssize_t pread(int fd, void* bytes, size_t len, off_t offset) { return fault_pread(fd, bytes, len, offset); }
 extern "C" ssize_t pwrite(int fd, const void* bytes, size_t len, off_t offset) { return fault_pwrite(fd, bytes, len, offset); }
 extern "C" ssize_t write(int fd, const void* bytes, size_t len) { return fault_write(fd, bytes, len); }
 #endif

@@ -12,6 +12,7 @@
 #include "engine.h"
 #include "progress.h"
 #include "output.h"
+#include "delta.h"
 
 #ifdef __APPLE__
 #include <sys/clonefile.h>
@@ -531,6 +532,52 @@ struct Local {
         prefix = destination_resume_prefix(path_join(d.dst_path, d.dst_name(idx)).c_str(), s.size);
         u64 digest[2];
         if (prefix.size && (!hash_prefix_fd(in, prefix.size, digest) || digest[0] != prefix.sum[0] || digest[1] != prefix.sum[1])) prefix = {};
+      }
+      auto basis = !prefix.size && !o.whole_file && s.size > DELTA_THRESHOLD
+                       ? destination_delta_basis(path_join(d.dst_path, d.dst_name(idx)), o.inplace) : nullptr;
+      if (basis) {
+        if (!out_open(f, d, idx, w, false, true)) { close(in); return fail(0); }
+        bool output_ok = true;
+        auto result = delta_match_fd(in, s.size, basis->signature, [&](const DeltaOp& op) {
+          bool ok = op.count ? delta_copy_blocks(f, *basis, op.first, op.count, op.offset, w.buf)
+                             : out_write(f, op.literal.data(), op.literal.size(), op.offset);
+          if (!ok) {
+            file_io_error(errno, f.path.c_str(), "reconstruct delta");
+            g_source_io_error.store(true);
+            output_ok = false;
+            return false;
+          }
+          i64 size = op.count ? basis->signature.length(op.first, op.count) : (i64)op.literal.size();
+          g_stats.xfer_bytes.fetch_add((u64)size);
+          slot_add(w.id, size);
+          return true;
+        });
+        bool stable = result.ok && source_unchanged(in, w.p2, before);
+        close(in);
+        f.size = s.size;
+        if (output_ok && !stable && attempt == 0) {
+          out_abort(f);
+          g_stats.xfer_bytes.fetch_sub((u64)result.processed);
+          continue;
+        }
+        if (output_ok && !stable) {
+          g_source_io_error.store(true);
+          err_line(RERR_PARTIAL, "source could not be read consistently during delta transfer: \"%s\"", w.p2.c_str());
+          output_ok = false;
+        }
+        if (stable && output_ok && !delta_verify_fd(f.fd, s.size, result.sum)) {
+          file_io_error(errno, f.path.c_str(), "verify reconstructed delta");
+          g_source_io_error.store(true);
+          out_abort(f);  // Never retain an output whose final checksum failed.
+          return fail(result.processed);
+        }
+        if (!out_finish(f, d, idx, w, output_ok)) return fail(result.processed);
+        g_stats.delta_files.fetch_add(1);
+        g_stats.delta_literal_bytes.fetch_add((u64)result.literal_bytes);
+        g_stats.delta_matched_bytes.fetch_add((u64)(s.size - result.literal_bytes));
+        note_transferred(d, idx, result.literal_bytes, w);
+        slot_end(w.id);
+        return;
       }
       if (!out_open(f, d, idx, w)) { close(in); return fail(0); }
       i64 total = 0;

@@ -226,6 +226,22 @@ not change the protocol-3 layout or add unnegotiated fields to the baseline Hell
 When the compatibility window advances, keep a frozen N-1 peer fixture and prove
 both old-client/new-server and new-client/old-server transfers with fallback off.
 
+Local byte copies above 1 MiB can match blocks from an existing regular
+destination (at least 1 KiB). A rolling weak checksum finds candidates; XXH3
+checksums verify matched blocks and the completed file. The matcher keeps one
+block plus 1 MiB of source data, emits bounded literal batches and consecutive
+block runs, and recognizes inserted, deleted and moved data. `-W` disables it;
+verified-prefix resume takes priority when `--partial` finds a matching prefix.
+APFS clones continue to take priority over byte copying.
+
+The basis is opened through the destination anchor without following child
+symlinks. With `--inplace`, an anonymous basis snapshot preserves moved blocks
+while the original destination inode is updated. Source changes retry once;
+unverifiable basis blocks fail with code 23. A final checksum mismatch prevents
+publication and retention of the atomic output. `--stats` reports successful
+delta literal/matched data; `%b` reports literal source bytes for delta copies.
+Remote block matching and its wire-cost acceptance test are still in progress.
+
 ## Benchmark
 
 `bench/bench.py`, 3 runs per tool, best time shown. Corpus: the 109th Congress slice of the
@@ -318,8 +334,10 @@ Differences to be aware of:
 
 - **Not wire-compatible.** xsync speaks its own protocol, so it needs xsync on both ends
   and delegates rsync daemon transfers (`host::module`, `rsync://`) to rsync.
-- **No general delta transfer yet.** Changed files are sent whole except for a
-  verified existing prefix reused with `--partial`/`-P`. For many small
+- **Remote block matching is in progress.** Large local byte copies can reuse
+  verified blocks from an existing destination; APFS cloning remains preferred.
+  Remote changed files still travel whole except for a verified existing prefix
+  reused with `--partial`/`-P`. For many small
   files that is the fast path anyway; for large files that change slightly over a slow
   link, rsync will send less.
 - **New byte-copied files are atomic by default.** Files are written to temporary
