@@ -10,6 +10,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <vector>
+#include <fcntl.h>
 
 namespace {
 std::vector<std::string> arguments;
@@ -17,6 +18,27 @@ bool enabled = true;
 mode_t original_umask;
 struct stat self_stat {};
 bool have_self_stat = false;
+std::FILE* saved_stdin = nullptr;
+
+std::FILE* replayable_stdin() {
+  if (saved_stdin) return saved_stdin;
+  saved_stdin = std::tmpfile();
+  if (!saved_stdin) die(RERR_FILEIO, "cannot preserve stdin for fallback: %s", strerror(errno));
+  fcntl(fileno(saved_stdin), F_SETFD, FD_CLOEXEC);
+  char buffer[65536];
+  for (;;) {
+    size_t count = std::fread(buffer, 1, sizeof buffer, stdin);
+    if (std::fwrite(buffer, 1, count, saved_stdin) != count)
+      die(RERR_FILEIO, "cannot preserve stdin for fallback: %s", strerror(errno));
+    if (count == sizeof buffer) continue;
+    if (std::ferror(stdin) && errno == EINTR) { std::clearerr(stdin); continue; }
+    if (std::ferror(stdin)) die(RERR_FILEIO, "cannot read stdin: %s", strerror(errno));
+    break;
+  }
+  if (std::fflush(saved_stdin) || std::fseek(saved_stdin, 0, SEEK_SET))
+    die(RERR_FILEIO, "cannot rewind preserved stdin: %s", strerror(errno));
+  return saved_stdin;
+}
 
 std::string find_rsync() {
   const char* path = getenv("PATH");
@@ -87,6 +109,7 @@ void init_fallback(int argc, char** argv) {
     if (short_flags.size() > 1) arguments.push_back(short_flags);
   }
   if (server) enabled = false;  // The binary protocol server must never exec rsync.
+  if (enabled) FilterList::set_stdin_reader(replayable_stdin);
 }
 
 bool fallback_enabled() { return enabled; }
@@ -111,6 +134,10 @@ bool fallback_enabled() { return enabled; }
   for (char& ch : notice) if (ch == '\n' || ch == '\r') ch = ' ';
   fprintf(stderr, "xsync: falling back to rsync: %s\n", notice.c_str());
   fflush(nullptr);
+  if (saved_stdin) {
+    if (std::fseek(saved_stdin, 0, SEEK_SET) || dup2(fileno(saved_stdin), STDIN_FILENO) < 0)
+      die(RERR_FILEIO, "cannot restore stdin for fallback: %s", strerror(errno));
+  }
   umask(original_umask);
   execv(binary.c_str(), args.data());
   fprintf(stderr, "xsync: cannot execute rsync: %s\n", strerror(errno));

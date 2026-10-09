@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+#include <cstdio>
 #include <memory>
 #include <mutex>
 #include <string>
@@ -23,6 +24,8 @@ class FilterList {
   bool add_from_file(const std::string& path, bool include, std::string* err);
   // Input delimiter is global to this invocation, including nested merge files.
   void set_from0(bool enabled) { from0_ = enabled; }
+  static void set_stdin_reader(std::FILE* (*reader)());
+  static std::FILE* stdin_file();
   bool empty() const { return rules_.empty(); }
   // True if the entry is excluded: first matching rule wins, no match => included. Tests only
   // the given path, not its ancestors. Allocation-free; safe for concurrent calls.

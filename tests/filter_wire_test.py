@@ -123,6 +123,114 @@ class FilterWireTests(unittest.TestCase):
                 proc.stdin.write(frame(22, b'\1')); proc.stdin.flush()
                 self.rejected(proc, target, data)
 
+    def test_files_from_configuration(self):
+        for payload in (b'', b'\1', b'\0\0\0', b'\3\0\0', b'\1\2\0',
+                        b'\1\0\x80', b'\1\0' + string('unexpected'),
+                        b'\2\0' + string('-'), b'\2\0' + string(b'bad\0path'),
+                        b'\1\0\0x'):
+            with self.subTest(payload=payload):
+                proc, target = self.server(features=131073)
+                self.rejected(proc, target, frame(23, payload))
+        proc, target = self.server(features=131073)
+        self.rejected(proc, target, struct.pack('<IB', 1024 * 1024 + 17, 23))
+
+    def test_files_from_stream(self):
+        for label, data in (
+            ('empty-data', frame(24, b'')),
+            ('oversized-data', struct.pack('<IB', 65537, 24)),
+            ('oversized-end', struct.pack('<IB', 11, 25)),
+            ('missing-count', frame(25, b'')),
+            ('truncated-count', frame(25, b'\x80')),
+            ('trailing-count', frame(25, b'\0x')),
+            ('wrong-count', frame(24, b'a\n') + frame(25, var(1))),
+            ('unexpected-frame', frame(2, b'')),
+        ):
+            with self.subTest(label=label):
+                proc, target = self.server(features=131073)
+                proc.stdin.write(frame(23, b'\1\0\0')); proc.stdin.flush()
+                self.assertEqual(read_frame(proc), (23, b'\0'))
+                self.rejected(proc, target, data)
+        for kind in (23, 24, 25):
+            proc, target = self.server(features=1)
+            self.rejected(proc, target, frame(kind, b'\0'))
+
+    def test_files_from_directory_metadata_without_relative(self):
+        for data in (wire.directory([('dir', 2, var(0) + b'\2' + string('/source/dir'))]),
+                     wire.directory([('dir', 2, var(0))]),
+                     wire.directory([('dir', 2, var(0) + b'\1' + string(b'/source\0/dir'))])):
+            proc, target = self.server(features=131073)
+            proc.stdin.write(frame(23, b'\1\0\0')); proc.stdin.flush()
+            self.assertEqual(read_frame(proc), (23, b'\0'))
+            self.rejected(proc, target, frame(25, b'\0') + data)
+
+    def test_files_from_fallback_preserves_stdin(self):
+        peer = self.root / 'peer.py'
+        answer = frame(1, b'XSYNC\1' + var(wire.VERSION) + var(1))
+        peer.write_text('import sys,struct\n'
+                        'h=sys.stdin.buffer.read(5); sys.stdin.buffer.read(struct.unpack("<IB",h)[0])\n'
+                        f'sys.stdout.buffer.write({answer!r}); sys.stdout.buffer.flush()\n'
+                        'sys.stdin.buffer.read()\n')
+        directory = self.root / 'commands'; directory.mkdir()
+        capture = directory / 'rsync'
+        capture.write_text('#!' + sys.executable + '\nimport sys,json\n'
+                           'print(json.dumps([sys.argv[1:],sys.stdin.buffer.read().hex()]));sys.exit(19)\n')
+        capture.chmod(0o755)
+        env = dict(os.environ, PATH=str(directory), XSYNC_CONFIG='', XSYNC_OPTS='', XSYNC_FALLBACK='1')
+        rsh = shlex.join([sys.executable, str(peer)])
+        source = self.root / 'source'; source.mkdir()
+        target = self.root / 'uncreated'
+        names = b'a\0line\nbreak\0'
+        for flags, stdin in ((['--from0', '--files-from=-'], names),
+                             (['--filter=. -', '--files-from=-'], b'- *.o\n')):
+            with self.subTest(flags=flags):
+                original = ['-a', *flags, '-e', rsh, '--rsync-path=unused', str(source), 'fake:' + str(target)]
+                result = subprocess.run([str(wire.BINARY), *original], input=stdin, capture_output=True, env=env, timeout=10)
+                self.assertEqual(result.returncode, 19, result.stderr)
+                self.assertEqual(json.loads(result.stdout), [original, stdin.hex()])
+                self.assertEqual(result.stderr.count(b'falling back to rsync'), 1)
+                self.assertFalse(target.exists())
+
+    def test_files_from_pull_rejects_unrequested_names_before_writes(self):
+        peer = self.root / 'peer.py'
+        hello = frame(1, b'XSYNC\1' + var(wire.VERSION) + var(131073))
+        bad = wire.directory([('unexpected', 1, var(0) + string('/source/unexpected'))])
+        peer.write_text('import sys,struct\n'
+                        'r=sys.stdin.buffer; w=sys.stdout.buffer\n'
+                        'def read():\n h=r.read(5); n,k=struct.unpack("<IB",h); return k,r.read(n)\n'
+                        f'read(); w.write({hello!r}); w.flush()\n'
+                        f'assert read()[0]==23; w.write({frame(23, b"\0")!r}); w.flush()\n'
+                        'while read()[0]!=25: pass\n'
+                        'assert read()[0]==10\n'
+                        f'w.write({bad!r}+{frame(5, b"")!r}); w.flush()\n'
+                        'r.read()\n')
+        target = self.root / 'uncreated'
+        result = subprocess.run([str(wire.BINARY), '--no-fallback', '-r', '--no-relative', '--files-from=-',
+                                 '-e', shlex.join([sys.executable, str(peer)]), '--rsync-path=unused',
+                                 'fake:source', str(target)], input=b'allowed\n', capture_output=True, timeout=15)
+        self.assertEqual(result.returncode, 4, result.stderr)
+        self.assertIn(b'rejecting unrequested file-list name: unexpected', result.stderr)
+        self.assertFalse(target.exists())
+
+    def test_files_from_bad_acknowledgement_does_not_read_fifo(self):
+        peer = self.root / 'peer.py'
+        hello = frame(1, b'XSYNC\1' + var(wire.VERSION) + var(131073))
+        fifo = self.root / 'names'; os.mkfifo(fifo)
+        target = self.root / 'uncreated'
+        for answer in (frame(23, b''), frame(23, b'\2'), frame(23, b'\1'), frame(23, b'\0x'), frame(24, b'\0')):
+            with self.subTest(answer=answer):
+                peer.write_text('import sys,struct\n'
+                                'r=sys.stdin.buffer; w=sys.stdout.buffer\n'
+                                'def read():\n h=r.read(5); n,k=struct.unpack("<IB",h); return k,r.read(n)\n'
+                                f'read(); w.write({hello!r}); w.flush()\n'
+                                f'assert read()[0]==23; w.write({answer!r}); w.flush()\n'
+                                'r.read()\n')
+                result = subprocess.run([str(wire.BINARY), '--no-fallback', '--no-relative', '--files-from=' + str(fifo),
+                                         '-e', shlex.join([sys.executable, str(peer)]), '--rsync-path=unused',
+                                         'fake:source', str(target)], capture_output=True, timeout=10)
+                self.assertEqual(result.returncode, 2, result.stderr)
+                self.assertIn(b'malformed files-from acknowledgement', result.stderr)
+                self.assertFalse(target.exists())
+
     def test_unnegotiated_cvs_cannot_read_home(self):
         # A FIFO makes accidental HOME access observable as a timeout.
         home = self.root / 'home'; home.mkdir()

@@ -103,8 +103,9 @@ class FilterDifferentials(unittest.TestCase):
             self.assertEqual(result.returncode, reference.returncode, result.stderr)
             self.assertNotIn(b'falling back', result.stderr)
             if reference.returncode == 4:
-                self.assertIn(b'rejecting excluded file-list name', reference.stderr)
-                self.assertIn(b'rejecting excluded file-list name', result.stderr)
+                diagnostic = getattr(self, 'rejection_diagnostic', b'rejecting excluded file-list name')
+                self.assertIn(diagnostic, reference.stderr)
+                self.assertIn(diagnostic, result.stderr)
                 self.assertFalse(any(line.startswith(b'*deleting') for line in output))
                 source = lambda tree: {k: v for k, v in tree.items() if k == 'src' or k.startswith('src/')}
                 self.assertEqual(source(expected), source(original))

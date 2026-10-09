@@ -375,10 +375,10 @@ second is printed. `-v` and `-i` lines scroll above the live region. `NO_COLOR` 
 
 ## Compatibility with rsync
 
-Supported with rsync's meaning: `-a -r -d -H -l -L -p -t -g -o -D -O -J -n -u -c -I -x -z -v -q
+Supported with rsync's meaning: `-a -r -d -H -R -0 -l -L -p -t -g -o -D -O -J -n -u -c -I -x -z -v -q
 -i -h -P -e -f`, `--delete` (and `--del`, `--delete-before/-during/-after/-delay`),
 `--delete-excluded`, `--force`, `--exclude`, `--include`, `--exclude-from`,
-`--include-from`, `--filter` (`+`/`-`, `H`/`S`, `P`/`R`, `!`, and modifiers
+`--include-from`, `--files-from`, `--relative`, `--from0`, `--filter` (`+`/`-`, `H`/`S`, `P`/`R`, `!`, and modifiers
 `! / s r p x`), `--existing`, `--ignore-existing`,
 `--ignore-errors`, `--max-delete`,
 `--size-only`, `--modify-window`, `--max-size`, `--min-size`, `--inplace`, `--partial`,
@@ -405,7 +405,7 @@ Differences to be aware of:
   does not. Use `--no-clone` if that matters.
 - **Output order.** File lines are sorted by path when stdout is not a terminal.
 - **Delegated to rsync** (strict mode rejects them): `-A`, `-X`,
-  `-b`, `--files-from`, `--link-dest`/`--compare-dest`/`--copy-dest`,
+  `-b`, `--link-dest`/`--compare-dest`/`--copy-dest`,
   `--chmod`, `--append`, `--partial-dir`, and `--remove-source-files`.
 - **Unsupported options fall back before transfer; strict mode fails.** This includes
   `--contimeout`, `-S`/`--sparse`, `--fsync`, `--preallocate`,
@@ -425,10 +425,25 @@ both, but become sender-only with `--delete-excluded`; explicit receiver rules
 continue to protect entries. Perishable (`p`) rules are ignored inside a
 directory being deleted. The `/` modifier matches the entry's absolute path.
 
-`-0`/`--from0` uses NUL delimiters for include/exclude files and filter merge
+`--files-from=FILE` selects names relative to one source directory. Use `-` for
+stdin, `:FILE` to read the list on the transfer's remote machine, or `HOST:FILE`
+with the same host as the transfer. Lists imply `--relative` and `--dirs`;
+`--no-relative` flattens selected paths. With a file list, `-a` preserves
+attributes but does not enable recursion: add `-r` to copy directory trees.
+An entry `dir/` also selects its immediate contents without recursion, while
+`dir` selects the directory itself. These defaults do not depend on option order.
+
+For example, `find . -type f -print0 | xsync -a0 --files-from=- ./ host:backup/`
+copies selected files with their implied parents. Leading slashes in the list
+refer to the source root; `..` components cannot escape that root. Lists travel
+in bounded frames after capability checks. A pulling client validates locally
+requested names before creating the destination.
+
+`-0`/`--from0` uses NUL delimiters for file lists, include/exclude files and filter merge
 files, preserving newlines and carriage returns inside patterns. It affects
 command-line files opened after the option; directory merge files use the
-final setting. `--no-from0` restores line mode. As in rsync, ordinary SSH
+final setting; file lists also use the final setting. `--no-from0` restores line mode.
+For transfers without `--files-from`, ordinary SSH
 helpers retain line mode unless explicitly configured, for example with
 `--rsync-path='xsync --from0'`.
 

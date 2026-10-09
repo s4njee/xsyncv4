@@ -186,7 +186,8 @@ void prune_source(DirList& l, std::string_view rel, u32 parent_dev, Worker& t, s
 
 void build_root(const std::vector<std::string>& srcs, RootList& r, Worker& t, const SourceGuard& guard) {
   const Options& o = g_opt;
-  if (o.relative) return build_selected_root(srcs, r, t, guard);
+  if (o.files_from_set && !o.files_from_loaded) load_local_file_list();
+  if (o.relative || o.files_from_set) return build_selected_root(srcs, r, t, guard);
   unsigned lflags = o.copy_links ? LD_FOLLOW : o.links || o.list_only ? LD_LINKS : 0;
   DirList merged;
   std::vector<std::string> paths;

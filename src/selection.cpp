@@ -5,6 +5,108 @@
 #include <cerrno>
 #include <climits>
 #include <deque>
+#include <dirent.h>
+
+void FileListParser::feed(std::string_view bytes, bool final) {
+  auto flush = [&] {
+    bool comment = !forwarded && !record.empty() && (record.front() == '#' || record.front() == ';');
+    if (overflow && !comment) {
+      g_source_io_error.store(true);
+      err_line(RERR_PARTIAL, "discarding over-long files-from entry");
+    } else {
+      auto text = std::string_view(record).substr(0, record.find('\0'));
+      if (names && !text.empty() && !comment) names->emplace_back(text);
+    }
+    record.clear();
+    overflow = false;
+    discard_remainder = false;
+  };
+  for (char byte : bytes) {
+    if (((from0 || forwarded) && byte == '\0') || (!from0 && (byte == '\r' || byte == '\n'))) flush();
+    else if (!from0 && !forwarded && byte == '\0') discard_remainder = true;
+    else if (!overflow && !discard_remainder) {
+      if (record.size() == 1024 * 1024) overflow = true;
+      else record += byte;
+    }
+  }
+  if (final) flush();
+}
+
+void read_file_chunks(const std::string& path, bool allow_stdin, const std::function<void(std::string_view)>& consume, bool forwarded) {
+  if (!allow_stdin && path.empty()) return;  // An empty remote list selects nothing.
+  bool input = allow_stdin && path == "-";
+  std::FILE* file = input ? FilterList::stdin_file() : std::fopen(path.c_str(), "rb");
+  if (!file) die(g_opt.am_server ? RERR_STREAMIO : RERR_SYNTAX, "failed to open files-from file %s: %s", path.c_str(), errstr(errno).c_str());
+  char buffer[65536];
+  for (;;) {
+    size_t count = std::fread(buffer, 1, sizeof buffer, file);
+    if (count) consume({buffer, count});
+    if (count == sizeof buffer) continue;
+    if (std::ferror(file) && errno == EINTR) { std::clearerr(file); continue; }
+    // rsync's forwarding reader treats a read failure as the end of the list;
+    // a sender reading its own list reports it as a stream error.
+    if (std::ferror(file) && !forwarded) die(RERR_STREAMIO, "failed to read files-from file %s: %s", path.c_str(), errstr(errno).c_str());
+    break;
+  }
+  if (!input) std::fclose(file);
+}
+
+void load_local_file_list() {
+  g_opt.file_names.clear();
+  FileListParser parser(g_opt.from0, &g_opt.file_names);
+  read_file_chunks(g_opt.files_from, true, [&](auto bytes) { parser.feed(bytes); });
+  parser.feed({}, true);
+  g_opt.files_from_loaded = true;
+}
+
+FileListRequests::FileListRequests(const Options& options) : recursive(options.recursive), dirs(options.dirs) {
+  for (auto name : options.file_names) {
+    if (options.relative) {
+      auto cut = name.find("/./");
+      if (cut != name.npos) name.erase(0, cut + 3);
+    } else {
+      auto slash = name.rfind('/');
+      if (slash != name.npos) name.erase(0, slash + 1);
+    }
+    std::string path;
+    size_t start = 0;
+    while (start <= name.size()) {
+      auto slash = name.find('/', start);
+      auto part = name.substr(start, slash == name.npos ? slash : slash - start);
+      // Keep dot-dot in the request: a sender must not broaden the client's
+      // permission by sanitizing it to an unrelated name.
+      if (!part.empty() && part != ".") path = rel_join(path, part);
+      if (slash == name.npos) break;
+      start = slash + 1;
+    }
+    if (!path.empty()) exact.insert(path);
+    if (recursive || dirs) roots.insert(path);
+    if (options.relative) {
+      auto parent = path;
+      for (;;) {
+        auto slash = parent.rfind('/');
+        if (slash == parent.npos) break;
+        parent.resize(slash);
+        parents.insert(parent);
+      }
+    }
+  }
+}
+
+bool FileListRequests::permits(std::string_view path, bool directory) const {
+  if (path.empty() || path == "." || exact.count(path) || (directory && parents.count(path))) return true;
+  auto slash = path.rfind('/');
+  std::string_view parent = slash == path.npos ? std::string_view() : path.substr(0, slash);
+  if (roots.count(parent)) return true;
+  if (recursive) {
+    while (!parent.empty()) {
+      auto end = parent.rfind('/');
+      parent = end == parent.npos ? std::string_view() : parent.substr(0, end);
+      if (roots.count(parent)) return true;
+    }
+  }
+  return false;
+}
 
 SelectedDirectory SelectedSource::take(std::string_view relative) {
   auto found = directories.find(relative);
@@ -59,7 +161,43 @@ struct RelativePath {
     auto physical_base = cut_prefix ? path_join(base, ".") : base;
     physical = logical.empty() ? physical_base : path_join(physical_base, logical);
   }
+  RelativePath(const std::string& name, const std::string& source, bool relative) : RelativePath(name) {
+    // The list's leading slash names the source root, not the filesystem root.
+    base = base == "/" ? source : path_join(source, base);
+    auto physical_base = cut_prefix ? path_join(base, ".") : base;
+    physical = logical.empty() ? physical_base : path_join(physical_base, logical);
+    if (!relative && !logical.empty()) {
+      if (contents) base = physical, logical.clear();
+      else {
+        auto slash = logical.rfind('/');
+        if (slash != logical.npos) base = path_join(physical_base, logical.substr(0, slash)), logical.erase(0, slash + 1);
+      }
+      leading_dot = false;
+      cut_prefix = false;
+    }
+  }
 };
+
+std::string clean_list_name(const std::string& text) {
+  // Clamp dot-dot at SRC. Keep internal /./ markers for relative path cuts.
+  std::vector<std::string> parts;
+  size_t start = 0;
+  while (start <= text.size()) {
+    auto slash = text.find('/', start);
+    auto part = text.substr(start, slash == text.npos ? slash : slash - start);
+    if (part == "..") {
+      while (!parts.empty() && parts.back() == ".") parts.pop_back();
+      if (!parts.empty()) parts.pop_back();
+    } else if (!part.empty()) parts.push_back(std::move(part));
+    if (slash == text.npos) break;
+    start = slash + 1;
+  }
+  std::string result;
+  for (const auto& part : parts) result = rel_join(result, part);
+  if (result.empty()) return ".";
+  if (text.ends_with('/')) result += '/';
+  return result;
+}
 
 bool read_entry(const std::string& path, bool follow, Entry& entry, std::string& target) {
   struct stat st;
@@ -97,8 +235,16 @@ void build_selected_root(const std::vector<std::string>& sources, RootList& root
   directories[""];
   std::deque<Scan> scans;
   bool any_contents = false;
-  for (const auto& argument : sources) {
-    RelativePath path(argument);
+  if (options.files_from_set && sources.size() != 1) die(RERR_SYNTAX, "--files-from requires exactly one source directory");
+  if (options.files_from_set) {
+    DIR* source = opendir(sources.front().c_str());
+    if (!source) die(options.am_server ? RERR_STREAMIO : RERR_FILESELECT,
+                     "change_dir \"%s\" failed: %s", sources.front().c_str(), errstr(errno).c_str());
+    closedir(source);
+  }
+  const auto& arguments = options.files_from_set ? options.file_names : sources;
+  for (const auto& argument : arguments) {
+    RelativePath path = options.files_from_set ? RelativePath(clean_list_name(argument), sources.front(), options.relative) : RelativePath(argument);
     Entry entry;
     std::string target;
     if (!read_entry(path.physical, options.copy_links || path.contents, entry, target)) continue;
@@ -114,7 +260,9 @@ void build_selected_root(const std::vector<std::string>& sources, RootList& root
       err_line(RERR_FILESELECT, "source directory is inside the destination: \"%s\"", path.physical.c_str());
       continue;
     }
-    auto context = directory_filters({}, path.base, false);
+    // File lists do not enter the unlisted physical prefix. Merge files are
+    // loaded when walking an implied directory or scanning a listed directory.
+    auto context = options.files_from_set ? std::shared_ptr<const FilterList>() : directory_filters({}, path.base, false);
     if (path.leading_dot && (options.recursive || options.dirs)) {
       auto& top = directories[""];
       std::string ignored;

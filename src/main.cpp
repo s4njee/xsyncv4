@@ -53,6 +53,7 @@ Options (same meaning as rsync):
  -r, --recursive          recurse into directories
  -d, --dirs               transfer directories without recursing
  -R, --relative           preserve source path components and implied directories
+     --files-from=FILE    select source names from FILE ("-" reads stdin)
      --list-only          list source entries; do not transfer or change DEST
  -H, --hard-links         preserve hard links within the transferred tree
  -l, --links              copy symlinks as symlinks
@@ -203,6 +204,8 @@ Parsed parse(int argc, char** argv) {
   bool no_more = false;
   std::string err;
   int filter_files = 0;
+  int recursive_setting = 0;
+  bool relative_explicit = false;
 
   auto long_opt = [&](const std::string& name, const std::string* val, int& i) {
     auto need = [&]() -> std::string {
@@ -226,14 +229,16 @@ Parsed parse(int argc, char** argv) {
     else if (name == "itemize-changes") o.itemize = true, ++o.itemize_level;
     else if (name == "no-itemize-changes") o.itemize = false, o.itemize_level = 0;
     else if (name == "archive") set_archive(o);
-    else if (flag(o.relative, "relative")) {}
-    else if (name == "no-R") o.relative = false;
+    else if (flag(o.relative, "relative")) relative_explicit = true;
+    else if (name == "no-R") o.relative = false, relative_explicit = true;
+    else if (name == "files-from") o.files_from = need(), o.files_from_set = true;
+    else if (flag(o.recursive, "recursive")) recursive_setting = o.recursive ? 1 : -1;
     else if (name == "from0" || name == "no-from0") {
       o.from0 = name == "from0";
       o.filters.set_from0(o.from0);
     }
     else if (flag(o.list_only, "list-only")) {}
-    else if (flag(o.recursive, "recursive") || flag(o.dirs, "dirs") || flag(o.links, "links") || flag(o.copy_links, "copy-links") ||
+    else if (flag(o.dirs, "dirs") || flag(o.links, "links") || flag(o.copy_links, "copy-links") ||
              flag(o.perms, "perms") || flag(o.times, "times") || flag(o.group, "group") || flag(o.owner, "owner") ||
              flag(o.devices, "devices") || flag(o.specials, "specials") || flag(o.compress, "compress") || flag(o.dry_run, "dry-run") ||
              flag(o.force, "force") || flag(o.update, "update") || flag(o.checksum, "checksum") || flag(o.size_only, "size-only") ||
@@ -313,7 +318,7 @@ Parsed parse(int argc, char** argv) {
       // These intrinsic behaviours are listed with their reasons in --help.
     } else {
       static const char* unsupported[] = {
-          "acls", "xattrs", "backup", "backup-dir", "suffix", "link-dest", "compare-dest", "copy-dest", "files-from",
+          "acls", "xattrs", "backup", "backup-dir", "suffix", "link-dest", "compare-dest", "copy-dest",
           "chmod", "chown", "usermap", "groupmap", "append", "append-verify", "partial-dir",
           "delay-updates", "fuzzy", "remove-source-files", "keep-dirlinks", "copy-dirlinks", "copy-unsafe-links",
           "munge-links", "executability", "atimes", "crtimes", "daemon", "port", "password-file",
@@ -364,7 +369,7 @@ Parsed parse(int argc, char** argv) {
         case 'q': o.quiet = true; break;
         case 'a': set_archive(o); break;
         case '0': o.from0 = true; o.filters.set_from0(true); break;
-        case 'r': o.recursive = true; break;
+        case 'r': o.recursive = true; recursive_setting = 1; break;
         case 'd': o.dirs = o.dirs_explicit = true; break;
         case 'l': o.links = true; break;
         case 'L': o.copy_links = true; break;
@@ -403,7 +408,7 @@ Parsed parse(int argc, char** argv) {
         case 'H': o.hard_links = true; break;
         case 'A': usage_error("--acls is not supported by xsync");
         case 'X': usage_error("--xattrs is not supported by xsync");
-        case 'R': o.relative = true; break;
+        case 'R': o.relative = true; relative_explicit = true; break;
         case 'b': usage_error("--backup is not supported by xsync");
         case 'C': o.cvs_exclude = true; break;
         case 'F':
@@ -416,6 +421,13 @@ Parsed parse(int argc, char** argv) {
         default: usage_error(std::string("-") + c + ": unknown option");
       }
     }
+  }
+  if (o.files_from_set) {
+    // These defaults do not depend on the position of --files-from. Archive
+    // still preserves metadata but only an explicit -r requests recursion.
+    o.recursive = recursive_setting == 1;
+    if (!relative_explicit) o.relative = true;
+    if (!o.dirs_explicit) o.dirs = true;
   }
   if (o.copy_links) o.links = false;
   if (!p.server && p.install.empty() && p.args.size() == 1) o.list_only = true;
@@ -537,6 +549,13 @@ int main(int argc, char** argv) {
     remote_src |= source.remote;
   }
   if (destination.daemon && !g_opt.list_only) usage_error("rsync daemon transfers are not supported by xsync");
+  if (g_opt.files_from_set) {
+    if (p.args.size() < 2) usage_error("--files-from requires a source directory and a destination");
+    if (srcs.size() != 1) usage_error("--files-from requires exactly one source directory");
+    RemoteSpec list = parse_remote_spec(g_opt.files_from);
+    if (list.remote && !remote_src && !remote_dest) usage_error("--files-from cannot be remote for a local transfer");
+    if (list.remote && list.path == "-") usage_error("Invalid --files-from remote filename");
+  }
   if (remote_src && remote_dest) usage_error("The source and destination cannot both be remote.");
 
   u64 t0 = now_ns();

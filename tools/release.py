@@ -170,6 +170,48 @@ done
   fake:/tmp/filter-source/ >/tmp/filter.list
 grep -F 'data/file' /tmp/filter.list
 test "$(grep -c chain /tmp/filter.list)" = 0
+mkdir -p /tmp/select-source/deep/leaf /tmp/select-source/empty
+printf 'selected data' >/tmp/select-source/deep/leaf/file
+ln /tmp/select-source/deep/leaf/file /tmp/select-source/linked
+odd=$(printf 'line\nbreak')
+printf 'odd filename' >"/tmp/select-source/$odd"
+printf 'deep/leaf/file\0linked\0line\nbreak\0' >/tmp/select.names
+for direction in local push pull; do
+  source=/tmp/select-source/
+  target=/tmp/select-$direction
+  mkdir -p "$target/deep"
+  printf 'keep unlisted implied sibling' >"$target/deep/unlisted"
+  destination=$target/
+  test "$direction" != push || destination=fake:$destination
+  test "$direction" != pull || source=fake:$source
+  "$bin" --no-fallback -aH0 --files-from=/tmp/select.names --delete \
+    -e /tmp/fakessh --rsync-path="$bin" "$source" "$destination"
+  cmp /tmp/select-source/deep/leaf/file "$target/deep/leaf/file"
+  cmp "/tmp/select-source/$odd" "$target/$odd"
+  test "$(stat -c %d:%i "$target/deep/leaf/file")" = "$(stat -c %d:%i "$target/linked")"
+  test -f "$target/deep/unlisted"
+  test ! -e "$target/empty"
+done
+"$bin" --no-fallback -aH0 --files-from=:/tmp/select.names -e /tmp/fakessh --rsync-path="$bin" \
+  /tmp/select-source/ fake:/tmp/select-remote-push/
+"$bin" --no-fallback -aH0 --files-from=:/tmp/select.names -e /tmp/fakessh --rsync-path="$bin" \
+  fake:/tmp/select-source/ /tmp/select-remote-pull/
+for target in /tmp/select-remote-push /tmp/select-remote-pull; do
+  cmp /tmp/select-source/deep/leaf/file "$target/deep/leaf/file"
+  cmp "/tmp/select-source/$odd" "$target/$odd"
+done
+cat /tmp/select.names | "$bin" --no-fallback -a0 --files-from=- /tmp/select-source/ /tmp/select-stdin/
+cmp "/tmp/select-source/$odd" "/tmp/select-stdin/$odd"
+"$bin" --no-fallback -aR /tmp/select-source/./deep/leaf/file /tmp/select-relative/
+cmp /tmp/select-source/deep/leaf/file /tmp/select-relative/deep/leaf/file
+printf 'line\nbreak\0' >/tmp/select.exclude
+"$bin" --no-fallback -a0 --exclude-from=/tmp/select.exclude /tmp/select-source/ /tmp/select-filtered/
+test ! -e "/tmp/select-filtered/$odd"
+cmp /tmp/select-source/deep/leaf/file /tmp/select-filtered/deep/leaf/file
+"$bin" --no-fallback -rl0 --list-only --files-from=/tmp/select.names \
+  -e /tmp/fakessh --rsync-path="$bin" fake:/tmp/select-source/ /tmp/uncreated-selected >/tmp/select.list
+grep -F 'deep/leaf/file' /tmp/select.list
+test ! -e /tmp/uncreated-selected
 "$bin" --version
 '''.replace('ARCH', arch)
             run('docker', 'run', '--rm', '--platform', 'linux/' + arch,

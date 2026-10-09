@@ -13,7 +13,7 @@ from filter_diff_test import RSYNC
 
 class RelativeDifferentials(filters.FilterDifferentials):
     def fixture(self, remote=False):
-        super().fixture(False)
+        filters.FilterDifferentials.fixture(self, False)
         tree = difftest.Tree(str(self.root))
         tree.dirs = {name: [entry['mode'], entry['mtime']]
                      for name, entry in difftest.snapshot(str(self.root)).items() if entry['type'] == 'dir'}
@@ -26,6 +26,7 @@ class RelativeDifferentials(filters.FilterDifferentials):
         tree.f('dst/src/dir1/deep/unlisted', b'keep another sibling')
         tree.f('outside/sentinel', b'never change through destination symlinks')
         for name, contents in getattr(self, 'rulefiles', {}).items(): tree.f(name, contents)
+        for name, existing in getattr(self, 'fixture_hardlinks', {}).items(): tree.hl(name, existing)
         if getattr(self, 'destination_link', False):
             import shutil
             shutil.rmtree(self.root / 'dst/src')
@@ -36,7 +37,7 @@ class RelativeDifferentials(filters.FilterDifferentials):
         if transfer.HOST and remote:
             from ssh_test import remote_code
             remote_code('import shutil,pathlib,sys; p=pathlib.Path(sys.argv[1]); shutil.rmtree(p,ignore_errors=True); p.mkdir()', self.root)
-            subprocess.run([RSYNC, '-a', '-e', transfer.RSH, str(self.root) + '/', transfer.HOST + ':' + str(self.root) + '/'],
+            subprocess.run([RSYNC, '-aH', '-e', transfer.RSH, str(self.root) + '/', transfer.HOST + ':' + str(self.root) + '/'],
                            capture_output=True, check=True, timeout=20)
 
     def copy(self, native, direction, rules, delete_excluded):

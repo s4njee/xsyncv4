@@ -76,7 +76,7 @@ int run_listing(const std::vector<std::string>& sources, const ListingSink& emit
     else emit(entry);
   };
   auto source_path = [](std::string_view path) {
-    return g_opt.am_server && (g_opt.peer_features & (PF_CVS_FILTERS | PF_RELATIVE)) ? FilterList::absolute_path(path) : std::string();
+    return g_opt.am_server && (g_opt.peer_features & (PF_CVS_FILTERS | PF_RELATIVE | PF_FILES_FROM)) ? FilterList::absolute_path(path) : std::string();
   };
   Worker worker;
   RootList root;

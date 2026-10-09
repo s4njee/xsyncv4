@@ -1412,3 +1412,33 @@ Verified artifact manifest (source `864bd37edf14`):
   remaining E-09 work is `--files-from`, including client/remote files, stdin,
   NUL input, option defaults and selected directory semantics. Release
   artifacts and installed helpers remain at the E-08 baseline.
+
+### E-09 progress — file-list selection and transport (2026-10-09)
+
+- Implemented `--files-from` for one source root: client files, stdin, and lists
+  on the transfer's remote host (`:FILE` or matching `HOST:FILE`). Defaults imply
+  relative paths and directories independently of option order; archive mode
+  requires explicit `-r` for recursion. Selection handles path sanitizing,
+  `/./` cuts, nonrecursive directory contents, implied parents, deletion,
+  filters, pruning, hard links, dry runs and listings.
+- Added `PF_FILES_FROM` and bounded configuration/data/completion frames 23–25;
+  the frozen protocol 3 HELLO is unchanged. Capability and acknowledgement
+  checks precede file/stdin reads. Missing capabilities retain original fallback
+  arguments; stdin consumed by an earlier filter can be replayed to rsync.
+- Pulls validate locally requested names and stage directory metadata before
+  writes, rejecting unrequested names with code 4. Lists retain rsync's distinct
+  sender-owned and forwarded parsing behavior, including comments, embedded
+  NUL bytes, helper delimiter settings and merge files in implied directories.
+- Added `tests/files_from_test.py`, covering 470 transfer comparisons, 100 listing
+  comparisons, input/syntax failures and source integrity. ARM and Rosetta
+  baseline file-list suites pass; targeted oversized-record and syntax checks
+  pass on ARM. Relative and NUL-filter regression suites also pass, along with
+  231/231 forced byte-copy/itemized corpus cases and 32,940 filter unit checks.
+  Protocol checks cover malformed configurations, streams, selected metadata,
+  acknowledgements, original-argument/stdin fallback and unrequested names.
+- Real Linux SSH verification and the rebuilt three-platform release set are
+  still pending. Two fixture issues were corrected before rerunning Linux:
+  preserving hard links during fixture upload, and normalizing JSON's list
+  representation when comparing hard-link tuples. **E-09 remains partial and
+  P1 remains 16/22 until final cross-platform verification completes.** Installed
+  helpers remain unchanged.

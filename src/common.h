@@ -7,6 +7,7 @@
 #include <string>
 #include <string_view>
 #include <vector>
+#include <memory>
 
 #include "filter.h"
 
@@ -29,8 +30,9 @@ constexpr u64 PF_CVS_FILTERS = 8192;
 constexpr u64 PF_DELETE_AFTER = 16384;
 constexpr u64 PF_PRUNE_EMPTY = 32768;
 constexpr u64 PF_RELATIVE = 65536;
+constexpr u64 PF_FILES_FROM = 131072;
 #ifndef XSYNC_PROTOCOL_FEATURES
-#define XSYNC_PROTOCOL_FEATURES 131071
+#define XSYNC_PROTOCOL_FEATURES 262143
 #endif
 constexpr u64 PROTO_FEATURES = XSYNC_PROTOCOL_FEATURES;
 constexpr u64 LEGACY_V3_FEATURES = 15;
@@ -48,6 +50,7 @@ constexpr u64 LEGACY_V3_FEATURES = 15;
 #define BOOL_OPTS(X) WIRE_V3_BOOL_OPTS(X)
 #define INT_OPTS(X) WIRE_V3_INT_OPTS(X)
 
+struct FileListRequests;
 struct Options {
 #define X(n) bool n = false;
   BOOL_OPTS(X)
@@ -71,6 +74,10 @@ struct Options {
   bool prune_empty = false;   // Receiver file-list pruning; outside the frozen hello.
   bool from0 = false;         // NUL-delimited list/merge files, outside the frozen hello.
   bool relative = false;      // Source path selection, outside the frozen hello.
+  bool files_from_set = false, files_from_loaded = false;
+  std::string files_from;
+  std::vector<std::string> file_names;
+  std::shared_ptr<const FileListRequests> file_requests;
   bool cvs_exclude = false;  // Added at the end of explicit rules, outside the frozen hello.
   bool list_only = false, dirs_explicit = false, human_ungrouped = false;
   u64 bwlimit = 0;  // Bytes/second; outside the frozen v3 option layout.

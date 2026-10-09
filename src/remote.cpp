@@ -47,7 +47,7 @@ namespace {
 
 enum : u8 { F_HELLO = 1, F_DIR, F_NEED, F_DATA, F_LIST_END, F_DATA_END, F_DONE, F_MSG, F_IDMAP, F_DEST, F_OUTPUT, F_OUTPUT_CONFIG,
             F_DELTA_REQUEST, F_DELTA_SIGNATURE, F_DELTA_RETRY_ACK, F_LIST_ENTRY, F_IO_CONFIG, F_KEEPALIVE, F_FILTER_CONFIG, F_DELETE_CONFIG,
-            F_PRUNE_CONFIG, F_RELATIVE_CONFIG };
+            F_PRUNE_CONFIG, F_RELATIVE_CONFIG, F_FILES_CONFIG, F_FILES_DATA, F_FILES_END };
 enum : u8 { DF_ATTRS = 1, DF_SINGLE = 2, DF_NODELETE = 4, DF_ZSTD = 8 };
 enum : u8 { R_WHOLE = 1, R_CHUNK = 2, R_FAIL = 4, R_END = 8, R_LITERAL = 16, R_DELTA_END = 32, R_COPY = 64 };
 constexpr size_t HDR = 5;                  // u32 payload length + u8 type
@@ -337,6 +337,12 @@ struct Conn {
         die(RERR_PROTOCOL, "protocol error: unnegotiated filter configuration");
       if (type == F_RELATIVE_CONFIG && (len != 1 || !(g_opt.peer_features & PF_RELATIVE)))
         die(RERR_PROTOCOL, "protocol error: malformed or unnegotiated relative configuration");
+      if (type >= F_FILES_CONFIG && type <= F_FILES_END) {
+        if (!(g_opt.peer_features & PF_FILES_FROM)) die(RERR_PROTOCOL, "protocol error: unnegotiated files-from frame");
+        if ((type == F_FILES_CONFIG && len > 1024 * 1024 + 16) ||
+            (type == F_FILES_DATA && (!len || len > 65536)) || (type == F_FILES_END && len > 10))
+          die(RERR_PROTOCOL, "protocol error: oversized or malformed files-from frame");
+      }
       if (type == F_KEEPALIVE) {
         if (!keepalive.load() || len) die(RERR_PROTOCOL, "protocol error: invalid or unnegotiated keep-alive");
         continue;
@@ -457,6 +463,7 @@ std::string_view unpack(std::string_view in, bool compressed, std::string& scrat
 // ---------------------------------------------------------------- options on the wire
 
 std::string missing_feature(u64 features) {
+  if (g_opt.files_from_set && !(features & PF_FILES_FROM)) return "peer does not support --files-from";
   if (g_opt.relative && !(features & PF_RELATIVE)) return "peer does not support --relative";
   if (g_opt.prune_empty && !(features & PF_PRUNE_EMPTY)) return "peer does not support --prune-empty-dirs";
   if (!g_opt.list_only && g_opt.delete_after && !(features & PF_DELETE_AFTER))
@@ -726,7 +733,7 @@ struct Sender {
           break;
         case T_DIR:
           put_var(body, e.rdev == 1);
-          if (o.peer_features & PF_RELATIVE) body.push_back((char)(bool)(e.item_flags & IF_SELECTED_CHILD));
+          if (o.peer_features & (PF_RELATIVE | PF_FILES_FROM)) body.push_back((char)(bool)(e.item_flags & IF_SELECTED_CHILD));
           nd++;
           break;
         case T_LNK: put_str(body, l.link(e)), nl++; break;
@@ -742,7 +749,7 @@ struct Sender {
         if (e.type != T_REG) put_var(body, (u64)e.size);
         put_str(body, d->src_paths.empty() ? path_join(d->src_path, l.name_sv(e)) : d->src_paths[i]);
       }
-      if (o.peer_features & (PF_CVS_FILTERS | PF_RELATIVE))
+      if (o.peer_features & (PF_CVS_FILTERS | PF_RELATIVE | PF_FILES_FROM))
         put_str(body, FilterList::absolute_path(d->src_paths.empty() ? path_join(d->src_path, l.name_sv(e)) : d->src_paths[i]));
     }
     if (client) {
@@ -1305,7 +1312,7 @@ struct Receiver {
     DirList& l = w.src;
     l.e.resize(n);
     std::vector<std::string> filter_sources;
-    if (o.peer_features & (PF_CVS_FILTERS | PF_RELATIVE)) filter_sources.resize(n);
+    if (o.peer_features & (PF_CVS_FILTERS | PF_RELATIVE | PF_FILES_FROM)) filter_sources.resize(n);
     if (structured_output()) w.output_sources.resize(n);
     if (o.checksum) l.sums.assign(n * 2, 0);
     for (size_t i = 0; i < n; i++) {
@@ -1335,7 +1342,7 @@ struct Receiver {
         }
         case T_DIR:
           e.rdev = (u32)r.var();
-          if (o.peer_features & PF_RELATIVE) {
+          if (o.peer_features & (PF_RELATIVE | PF_FILES_FROM)) {
             u8 selected = r.byte();
             if (selected > 1) die(RERR_PROTOCOL, "protocol error: bad selected directory flag");
             if (selected) e.item_flags |= IF_SELECTED_CHILD;
@@ -1354,16 +1361,23 @@ struct Receiver {
         w.output_sources[i] = r.str();
         if (e.size < 0) die(RERR_PROTOCOL, "protocol error: negative file size");
       }
-      if (o.peer_features & (PF_CVS_FILTERS | PF_RELATIVE)) {
+      if (o.peer_features & (PF_CVS_FILTERS | PF_RELATIVE | PF_FILES_FROM)) {
         filter_sources[i] = r.str();
         if (filter_sources[i].find('\0') != std::string::npos)
           die(RERR_PROTOCOL, "protocol error: NUL in filter source path");
       }
     }
     if (r.bad || !r.empty()) die(RERR_PROTOCOL, "protocol error: truncated or trailing DIR frame");
+    if (client && o.file_requests) {
+      for (const auto& entry : l.e) {
+        auto path = rel_join(w.rel, l.name_sv(entry));
+        if (!o.file_requests->permits(path, entry.type == T_DIR))
+          die(RERR_UNSUPPORTED, "rejecting unrequested file-list name: %s", path.c_str());
+      }
+    }
     // A per-directory merge delegates selection to the sender. Otherwise a
     // global CVS list must also agree with the pulling client's settings.
-    if (client && (o.relative || o.filters.has_cvs()) && !o.filters.trusts_sender_filters()) {
+    if (client && (o.relative || o.files_from_set || o.filters.has_cvs()) && !o.filters.trusts_sender_filters()) {
       for (size_t i = 0; i < l.e.size(); ++i) {
         const Entry& e = l.e[i];
         auto name = l.name_sv(e);
@@ -1475,7 +1489,7 @@ struct Receiver {
       std::string().swap(task.s);
       directories.push_back(&directory->w);
     }
-    prune_empty_directories(directories, dest.empty() ? "." : dest);
+    if (g_opt.prune_empty) prune_empty_directories(directories, dest.empty() ? "." : dest);
     for (auto& task : staged) {
       if (g_stop.load()) break;
       generate_dir(static_cast<RDir*>(task.ptr), worker);
@@ -1737,12 +1751,12 @@ struct Receiver {
       if (d->parent_plus1) {
         RDir* p = d->parent_plus1 - 1 < dirs.size() ? dirs[d->parent_plus1 - 1] : nullptr;
         if (!p) die(RERR_PROTOCOL, "protocol error: DIR frame before its parent");
-        if (!g_opt.prune_empty && !p->gen_done) {
+        if (!g_opt.prune_empty && !g_opt.file_requests && !p->gen_done) {
           p->waiters.push_back(std::move(t));
           return;
         }
       }
-      if (g_opt.prune_empty) { staged.push_back(std::move(t)); return; }
+      if (g_opt.prune_empty || g_opt.file_requests) { staged.push_back(std::move(t)); return; }
     }
     pool.push_bounded(0, std::move(t));
   }
@@ -1774,7 +1788,7 @@ struct Receiver {
         case F_MSG: handle_msg(payload); break;
         case F_LIST_END:
           if (list_end.exchange(true)) die(RERR_PROTOCOL, "protocol error: duplicate LIST_END");
-          if (g_opt.prune_empty) {
+          if (g_opt.prune_empty || g_opt.file_requests) {
             if (staged.empty()) die(RERR_PROTOCOL, "protocol error: LIST_END without a root directory");
             Task task;
             task.kind = K_PRUNE;
@@ -1783,7 +1797,7 @@ struct Receiver {
           if (gens.load() == 0) g_stats.scan_done.store(true);
           break;
         case F_DATA_END: {
-          if (g_opt.prune_empty && !list_end.load())
+          if ((g_opt.prune_empty || g_opt.file_requests) && !list_end.load())
             die(RERR_PROTOCOL, "protocol error: DATA_END before LIST_END");
           RBuf r(payload);
           sender_code = (int)r.var();
@@ -1845,7 +1859,7 @@ struct Receiver {
 
 int receive_listing(Conn& c) {
   u64 count = 0;
-  const bool verify = (g_opt.relative || g_opt.filters.has_cvs()) && !g_opt.filters.trusts_sender_filters();
+  const bool verify = (g_opt.relative || g_opt.files_from_set || g_opt.filters.has_cvs()) && !g_opt.filters.trusts_sender_filters();
   std::vector<ListingEntry> pending;
   u8 type;
   std::string payload;
@@ -1858,6 +1872,8 @@ int receive_listing(Conn& c) {
       if (r.bad || !r.empty() || code > 255 || expected != count)
         die(RERR_PROTOCOL, "protocol error: malformed listing completion");
       for (const auto& entry : pending) {
+        if (g_opt.file_requests && !g_opt.file_requests->permits(entry.path, entry.attrs.type == T_DIR))
+          die(RERR_UNSUPPORTED, "rejecting unrequested file-list name: %s", entry.path.c_str());
         if (verify && entry.path != "." && g_opt.filters.excluded(entry.path, entry.attrs.type == T_DIR, entry.source))
           die(RERR_UNSUPPORTED, "rejecting excluded file-list name: %s", entry.path.c_str());
       }
@@ -1881,14 +1897,14 @@ int receive_listing(Conn& c) {
     entry.attrs.size = (i64)r.var();
     entry.attrs.mtime = r.svar();
     entry.target = r.str();
-    if (g_opt.peer_features & (PF_CVS_FILTERS | PF_RELATIVE)) entry.source = r.str();
+    if (g_opt.peer_features & (PF_CVS_FILTERS | PF_RELATIVE | PF_FILES_FROM)) entry.source = r.str();
     if (r.bad || !r.empty() || !listing_path_valid(entry.path) || mode > 07777 ||
         entry.attrs.type < T_REG || entry.attrs.type > T_BLK || entry.attrs.size < 0 ||
         entry.target.size() > (1 << 20) || entry.target.find('\0') != entry.target.npos ||
         entry.source.find('\0') != entry.source.npos ||
         (entry.attrs.type != T_LNK && !entry.target.empty()))
       die(RERR_PROTOCOL, "protocol error: malformed listing entry");
-    if (verify || g_opt.prune_empty) pending.push_back(std::move(entry));
+    if (verify || g_opt.prune_empty || g_opt.file_requests) pending.push_back(std::move(entry));
     else listing_output(entry);
     ++count;
   }
@@ -1930,6 +1946,46 @@ std::vector<std::string> expand_remote_sources(const std::vector<std::string>& p
 
 }  // namespace
 
+namespace {
+void send_file_frames(Conn& connection, const std::string& path, bool allow_stdin, bool from0,
+                      std::vector<std::string>* names, bool forwarded) {
+  FileListParser parser(from0, names, forwarded);
+  u64 bytes = 0;
+  read_file_chunks(path, allow_stdin, [&](std::string_view chunk) {
+    parser.feed(chunk);
+    bytes += chunk.size();
+    std::string frame = new_frame(F_FILES_DATA);
+    frame.append(chunk);
+    connection.send(std::move(frame));
+  }, forwarded);
+  parser.feed({}, true);
+  std::string end = new_frame(F_FILES_END);
+  put_var(end, bytes);
+  connection.send(std::move(end));
+}
+void receive_file_frames(Conn& connection, bool from0, std::vector<std::string>* names, bool forwarded) {
+  FileListParser parser(from0, names, forwarded);
+  u64 bytes = 0;
+  u8 type;
+  std::string payload;
+  for (;;) {
+    if (!connection.read_frame(type, payload)) conn_lost();
+    if (type == F_MSG) { handle_msg(payload); continue; }
+    if (type == F_FILES_END) {
+      RBuf end(payload);
+      u64 expected = end.var();
+      if (end.bad || !end.empty() || expected != bytes)
+        die(RERR_PROTOCOL, "protocol error: incomplete files-from stream");
+      parser.feed({}, true);
+      return;
+    }
+    if (type != F_FILES_DATA) die(RERR_PROTOCOL, "protocol error: unexpected files-from frame");
+    bytes += payload.size();
+    parser.feed(payload);
+  }
+}
+}
+
 int run_client(const std::vector<std::string>& srcs, const std::string& dest, u32 wire_version) {
   Options& o = g_opt;
   o.wire_version = wire_version;
@@ -1947,6 +2003,14 @@ int run_client(const std::vector<std::string>& srcs, const std::string& dest, u3
       else if (!r.host.empty() && (r.host != rem.host || r.user != rem.user)) die(RERR_SYNTAX, "all source args must come from the same machine.");
       paths.push_back(r.path);
     }
+  }
+  RemoteSpec list;
+  if (o.files_from_set) {
+    list = parse_remote_spec(o.files_from);
+    if (list.daemon) die(RERR_SYNTAX, "files-from list must use the transfer's remote shell host");
+    if (list.remote && ((!list.host.empty() && list.host != rem.host) || (list.has_user && list.user != rem.user)))
+      die(RERR_SYNTAX, "files-from hostname must match the transfer host");
+    if (list.remote && o.files_from.ends_with(':')) list.path.clear();
   }
   std::vector<std::string> cmd = split_shell_words(remote_shell_command());
   if (cmd.empty()) die(RERR_SYNTAX, "empty remote shell command");
@@ -1999,7 +2063,7 @@ int run_client(const std::vector<std::string>& srcs, const std::string& dest, u3
   put_var(f, wire_version);
   f.push_back(push ? 'R' : 'S');
   u64 advertised = PROTO_FEATURES & (o.whole_file ? ~(PF_RESUME | PF_DELTA) : ~u64(0));
-  if (o.list_only) advertised &= PF_CORE | PF_ZSTD | PF_LIST | PF_IO_CONTROL | PF_FILTERS | PF_MERGE_FILTERS | PF_CVS_FILTERS | PF_PRUNE_EMPTY | PF_RELATIVE;
+  if (o.list_only) advertised &= PF_CORE | PF_ZSTD | PF_LIST | PF_IO_CONTROL | PF_FILTERS | PF_MERGE_FILTERS | PF_CVS_FILTERS | PF_PRUNE_EMPTY | PF_RELATIVE | PF_FILES_FROM;
   else advertised &= ~PF_LIST;
   if (!o.filters.needs_extended()) advertised &= ~PF_FILTERS;
   if (!o.filters.has_merges()) advertised &= ~PF_MERGE_FILTERS;
@@ -2007,6 +2071,7 @@ int run_client(const std::vector<std::string>& srcs, const std::string& dest, u3
   if (!o.delete_after) advertised &= ~PF_DELETE_AFTER;
   if (!o.prune_empty) advertised &= ~PF_PRUNE_EMPTY;
   if (!o.relative) advertised &= ~PF_RELATIVE;
+  if (!o.files_from_set) advertised &= ~PF_FILES_FROM;
   if (!o.hard_links) advertised &= ~PF_HLINK;
   if (!output_enabled()) advertised &= ~(PF_OUTPUT | PF_DIR_OUTPUT);
   if (wire_version >= 4) put_var(f, advertised);
@@ -2090,6 +2155,23 @@ int run_client(const std::vector<std::string>& srcs, const std::string& dest, u3
     c.send(std::move(config));
   }
   if (o.peer_features & PF_RELATIVE) c.send(new_frame(F_RELATIVE_CONFIG) + '\1');
+  if (o.peer_features & PF_FILES_FROM) {
+    std::string config = new_frame(F_FILES_CONFIG);
+    config.push_back(list.remote ? '\2' : '\1');
+    config.push_back((char)o.from0);
+    put_str(config, list.remote ? list.path : "");
+    c.send(std::move(config));
+    if (!c.read_frame(type, payload)) conn_lost();
+    if (type == F_MSG) handle_msg(payload);
+    if (type != F_FILES_CONFIG || payload.size() != 1 || (u8)payload[0] > 1 ||
+        (!list.remote && (payload[0] != (char)o.from0)) || (list.remote && o.from0 && !payload[0]))
+      die(RERR_PROTOCOL, "protocol error: malformed files-from acknowledgement");
+    o.file_names.clear();
+    if (list.remote) receive_file_frames(c, payload[0] != 0, push ? &o.file_names : nullptr, push);
+    else send_file_frames(c, o.files_from, true, o.from0, &o.file_names, !push);
+    if (!push && !list.remote) o.file_requests = std::make_shared<const FileListRequests>(o);
+    o.files_from_loaded = true;
+  }
   if (o.peer_features & PF_FILTERS) {
     std::string config = new_frame(F_FILTER_CONFIG);
     if (o.peer_features & PF_CVS_FILTERS) config.push_back((char)o.cvs_exclude);
@@ -2208,6 +2290,30 @@ int run_server() {
       die(RERR_PROTOCOL, "protocol error: malformed relative configuration");
     o.relative = true;
   }
+  if (o.peer_features & PF_FILES_FROM) {
+    if (!c.read_frame(type, payload)) conn_lost();
+    RBuf config(payload);
+    u8 mode = config.byte(), from0 = config.byte();
+    std::string path(config.str());
+    if (type != F_FILES_CONFIG || config.bad || !config.empty() || (mode != 1 && mode != 2) ||
+        from0 > 1 || path.find('\0') != path.npos || (mode == 1 && !path.empty()) || (mode == 2 && path == "-"))
+      die(RERR_PROTOCOL, "protocol error: malformed files-from configuration");
+    if (paths.size() != 1) die(RERR_PROTOCOL, "protocol error: files-from requires one source root");
+    o.files_from_set = true;
+    if (role == 'S') o.dirs = true;
+    // rsync transports a client list to a remote sender in NUL mode. The
+    // native stream retains raw bytes; filter-file mode and record mode are
+    // therefore kept separate here. Receiver helpers retain their own setting.
+    if (mode == 1 && role == 'S') o.from0 = true;
+    if (mode == 2) o.from0 |= from0 != 0;
+    o.filters.set_from0(o.from0);
+    bool record_from0 = mode == 2 ? o.from0 : from0 != 0;
+    c.send(new_frame(F_FILES_CONFIG) + (char)record_from0);
+    if (mode == 1) receive_file_frames(c, record_from0, role == 'S' ? &o.file_names : nullptr, role == 'S');
+    else send_file_frames(c, path.empty() ? (role == 'S' ? "." : "") : expand_remote_home(path), false, record_from0,
+                          role == 'S' ? &o.file_names : nullptr, role == 'R');
+    o.files_from_loaded = true;
+  }
   if (o.peer_features & PF_FILTERS) {
     if (!c.read_frame(type, payload)) conn_lost();
     RBuf config(payload);
@@ -2264,7 +2370,7 @@ int run_server() {
       f.push_back((char)entry.attrs.type);
       put_var(f, entry.attrs.mode), put_var(f, (u64)entry.attrs.size);
       put_svar(f, entry.attrs.mtime), put_str(f, entry.target);
-      if (o.peer_features & (PF_CVS_FILTERS | PF_RELATIVE)) put_str(f, entry.source);
+      if (o.peer_features & (PF_CVS_FILTERS | PF_RELATIVE | PF_FILES_FROM)) put_str(f, entry.source);
       c.send(std::move(f), true);
       ++count;
     });

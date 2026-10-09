@@ -1,5 +1,9 @@
 #include "filter.h"
 
+namespace { std::FILE* (*stdin_reader)() = nullptr; }
+void FilterList::set_stdin_reader(std::FILE* (*reader)()) { stdin_reader = reader; }
+std::FILE* FilterList::stdin_file() { return stdin_reader ? stdin_reader() : stdin; }
+
 #include <algorithm>
 #include <atomic>
 #include <cerrno>
@@ -352,7 +356,7 @@ bool FilterList::add_filter(std::string_view rule, std::string* err, bool read_m
 bool FilterList::add_from_file(const std::string& path, bool include, std::string* err) {
   if (path.empty()) return true;
   const bool use_stdin = path == "-";
-  std::FILE* fp = use_stdin ? stdin : std::fopen(path.c_str(), "rb");
+  std::FILE* fp = use_stdin ? stdin_file() : std::fopen(path.c_str(), "rb");
   const auto io_fail = [&](const char* what) {
     const int e = errno;
     set_err(err, std::string(what) + (include ? " include file " : " exclude file ") + path + ": " +
@@ -398,7 +402,7 @@ bool FilterList::load_merge(const std::string& path, const Rule& defaults, std::
                             std::string* err, bool optional) {
   if (merge_depth_ >= 64) { set_err(err, "failed to read merge file " + path + ": nesting exceeds 64"); return false; }
   bool use_stdin = path == "-";
-  std::FILE* fp = use_stdin ? stdin : std::fopen(path.c_str(), "rb");
+  std::FILE* fp = use_stdin ? stdin_file() : std::fopen(path.c_str(), "rb");
   if (!fp) {
     if (optional) return true;
     set_err(err, "failed to open merge file " + path + ": " + std::generic_category().message(errno));
