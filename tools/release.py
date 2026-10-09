@@ -105,7 +105,7 @@ for stats in /tmp/delta-local.stats /tmp/delta-push.stats /tmp/delta-pull.stats;
 "$bin" --no-fallback -al -e /tmp/fakessh --rsync-path="$bin" fake:/tmp/source/ >/tmp/list-remote.stdout
 cmp /tmp/list-local.stdout /tmp/list-remote.stdout
 test ! -e /tmp/uncreated-list-target
-grep -E '^d.* \\.$' /tmp/list-local.stdout
+grep -E '^d.* [.]$' /tmp/list-local.stdout
 grep -F 'space link -> file' /tmp/list-local.stdout
 grep -E '^p.* pipe$' /tmp/list-local.stdout
 "$bin" --no-fallback -c --stats /tmp/delta-source >/tmp/list.stats
