@@ -31,6 +31,7 @@
 #include "fallback.h"
 #include "transport.h"
 #include "output.h"
+#include "delta.h"
 
 #ifndef O_CLOEXEC
 #define O_CLOEXEC 0
@@ -38,9 +39,10 @@
 
 namespace {
 
-enum : u8 { F_HELLO = 1, F_DIR, F_NEED, F_DATA, F_LIST_END, F_DATA_END, F_DONE, F_MSG, F_IDMAP, F_DEST, F_OUTPUT, F_OUTPUT_CONFIG };
+enum : u8 { F_HELLO = 1, F_DIR, F_NEED, F_DATA, F_LIST_END, F_DATA_END, F_DONE, F_MSG, F_IDMAP, F_DEST, F_OUTPUT, F_OUTPUT_CONFIG,
+            F_DELTA_REQUEST, F_DELTA_SIGNATURE, F_DELTA_RETRY_ACK };
 enum : u8 { DF_ATTRS = 1, DF_SINGLE = 2, DF_NODELETE = 4, DF_ZSTD = 8 };
-enum : u8 { R_WHOLE = 1, R_CHUNK = 2, R_FAIL = 4, R_END = 8 };
+enum : u8 { R_WHOLE = 1, R_CHUNK = 2, R_FAIL = 4, R_END = 8, R_LITERAL = 16, R_DELTA_END = 32, R_COPY = 64 };
 constexpr size_t HDR = 5;                  // u32 payload length + u8 type
 constexpr size_t BLOCK_TARGET = 1 << 20;   // raw bytes per DATA frame
 constexpr size_t SMALL_MAX = 512 << 10;    // files up to this size are packed into shared blocks
@@ -49,6 +51,7 @@ const char MAGIC[] = "XSYNC\x01";
 
 bool resume_enabled() { return g_opt.partial && (g_opt.peer_features & PF_RESUME); }
 bool structured_output() { return g_opt.peer_features & PF_OUTPUT; }
+bool delta_enabled() { return g_opt.peer_features & PF_DELTA; }
 
 // ---------------------------------------------------------------- encoding
 
@@ -308,13 +311,16 @@ bool pack(std::string& f, std::string_view raw, Worker& w) {
   return true;
 }
 
-std::string_view unpack(std::string_view in, bool compressed, std::string& scratch, Worker& w) {
-  if (!compressed) return in;
+std::string_view unpack(std::string_view in, bool compressed, std::string& scratch, Worker& w, size_t limit = 1u << 30) {
+  if (!compressed) {
+    if (in.size() > limit) die(RERR_PROTOCOL, "protocol error: oversized frame body");
+    return in;
+  }
   if (!(g_opt.peer_features & PF_ZSTD)) die(RERR_PROTOCOL, "compressed data without negotiated zstd support");
   RBuf r(in);
   size_t raw = (size_t)r.var();
   std::string_view z = r.rest();
-  if (r.bad || raw > (1u << 30)) die(RERR_PROTOCOL, "protocol error: bad compressed frame");
+  if (r.bad || raw > limit) die(RERR_PROTOCOL, "protocol error: bad compressed frame");
   if (!w.zd) w.zd = ZSTD_createDCtx();
   scratch.resize(raw);
   size_t n = ZSTD_decompressDCtx((ZSTD_DCtx*)w.zd, scratch.data(), raw, z.data(), z.size());
@@ -415,13 +421,14 @@ struct IdMaps {
 
 // ---------------------------------------------------------------- sender
 
-enum { K_WALK = 1, K_READ = 2, K_GEN = 3, K_DATA = 4 };
+enum { K_WALK = 1, K_READ = 2, K_GEN = 3, K_DATA = 4, K_SIGNATURE = 5 };
 
 struct SDir {
   std::string src_path, rel, attr_source;
   std::vector<std::string> src_paths;
   DirList list;
   std::unordered_map<u32, ResumePrefix> prefixes;
+  std::unordered_set<u32> delta_candidates;
   Entry attrs;
   u8 flags = 0;
   u32 id = 0;
@@ -444,8 +451,70 @@ struct Sender {
   std::mutex done_mu;
   std::condition_variable done_cv;
   bool got_done = false;
+  struct DeltaReply {
+    std::condition_variable cv;
+    bool ready = false;
+    std::shared_ptr<DeltaSignature> signature;
+  };
+  std::mutex reply_mu;
+  std::unordered_map<u64, std::shared_ptr<DeltaReply>> signatures, retry_acks;
 
   Sender(Conn& conn, bool is_client) : c(conn), client(is_client) {}
+
+  std::shared_ptr<DeltaReply> expect_reply(u64 key, bool retry) {
+    auto reply = std::make_shared<DeltaReply>();
+    std::lock_guard<std::mutex> lock(reply_mu);
+    auto& replies = retry ? retry_acks : signatures;
+    if (!replies.emplace(key, reply).second) die(RERR_PROTOCOL, "protocol error: duplicate delta request");
+    return reply;
+  }
+  void wait_reply(const std::shared_ptr<DeltaReply>& reply) {
+    std::unique_lock<std::mutex> lock(reply_mu);
+    while (!reply->ready) {
+      reply->cv.wait_for(lock, std::chrono::milliseconds(66));
+      if (g_stop.load()) { lock.unlock(); exit_signal(); }
+    }
+  }
+  void on_delta_reply(std::string_view payload, bool retry) {
+    if (!delta_enabled()) die(RERR_PROTOCOL, "protocol error: unnegotiated delta reply");
+    RBuf r(payload);
+    u64 id = r.var(), idx = r.var();
+    if (id > UINT32_MAX || idx > UINT32_MAX) die(RERR_PROTOCOL, "protocol error: bad delta reply index");
+    std::shared_ptr<DeltaSignature> sig;
+    static thread_local Worker worker;
+    static thread_local std::string scratch;
+    if (!retry) {
+      u8 compressed = r.byte();
+      if (r.bad || compressed > 1) die(RERR_PROTOCOL, "protocol error: bad delta compression flag");
+      r = RBuf(unpack(r.rest(), compressed, scratch, worker, (size_t)DELTA_MAX_BLOCKS * 12 + 64));
+      u8 present = r.byte();
+      if (present > 1) die(RERR_PROTOCOL, "protocol error: bad delta signature flag");
+      if (present) {
+        sig = std::make_shared<DeltaSignature>();
+        sig->size = (i64)r.var();
+        u64 block_size = r.var(), count = r.var();
+        if (sig->size <= 0 || block_size < 1024 || block_size > DELTA_MAX_BLOCK ||
+            !count || count > DELTA_MAX_BLOCKS || count != (u64)((sig->size - 1) / block_size + 1) ||
+            count > (u64)(r.e - r.p) / 12)
+          die(RERR_PROTOCOL, "protocol error: bad delta signature dimensions");
+        sig->block_size = (u32)block_size;
+        sig->blocks.resize((size_t)count);
+        for (auto& block : sig->blocks) {
+          auto weak = r.raw(4), strong = r.raw(8);
+          if (!r.bad) memcpy(&block.weak, weak.data(), 4), memcpy(&block.strong, strong.data(), 8);
+        }
+      }
+    }
+    if (r.bad || !r.empty()) die(RERR_PROTOCOL, "protocol error: trailing or truncated delta reply");
+    std::lock_guard<std::mutex> lock(reply_mu);
+    auto& replies = retry ? retry_acks : signatures;
+    auto it = replies.find((id << 32) | idx);
+    if (it == replies.end() || it->second->ready) die(RERR_PROTOCOL, "protocol error: unsolicited delta reply");
+    auto reply = it->second;
+    reply->signature = std::move(sig), reply->ready = true;
+    reply->cv.notify_all();
+    replies.erase(it);
+  }
 
   void push_walk(SDir* d, u32 parent_plus1, u32 pidx) {
     walks.fetch_add(1);
@@ -598,6 +667,12 @@ struct Sender {
           if (r.bad || prefix.size < 0 || prefix.size > d->list.e[prev].size) die(RERR_PROTOCOL, "protocol error: bad resume prefix");
           if (prefix.size) d->prefixes.emplace(prev, prefix);
         }
+        if (delta_enabled()) {
+          u8 eligible = r.byte();
+          if (eligible > 1 || (eligible && d->list.e[prev].type != T_REG))
+            die(RERR_PROTOCOL, "protocol error: bad delta candidate");
+          if (eligible) d->delta_candidates.insert(prev);
+        }
         bytes += (u64)d->list.e[prev].size;
       }
       if (client) {
@@ -660,6 +735,8 @@ struct Sender {
     };
     w.p2 = d.src_paths.empty() ? path_join(d.src_path, d.list.name_sv(scanned)) : d.src_paths[idx];
     i64 planned = scanned.size;
+    bool requested_delta = false;
+    std::shared_ptr<DeltaSignature> signature;
     for (u32 attempt = 0; attempt < 2; attempt++) {
       int in = open(w.p2.c_str(), O_RDONLY | O_CLOEXEC | (o.copy_links || !d.src_paths.empty() ? 0 : O_NOFOLLOW));
       struct stat before;
@@ -710,8 +787,33 @@ struct Sender {
       i64 off = prefix;
       if (prefix && lseek(in, prefix, SEEK_SET) < 0) ok = false, off = prefix = 0;
       if (client && prefix) slot_add(w.id, prefix);
+      if (!prefix && fresh.size > DELTA_THRESHOLD && d.delta_candidates.count(idx) && !requested_delta) {
+        requested_delta = true;
+        flush_block(w);
+        auto reply = expect_reply(((u64)d.id << 32) | idx, false);
+        std::string request = new_frame(F_DELTA_REQUEST);
+        put_var(request, d.id), put_var(request, idx);
+        c.send(std::move(request));
+        wait_reply(reply);
+        signature = reply->signature;
+      }
+      bool delta = !prefix && fresh.size > DELTA_THRESHOLD && signature;
+      DeltaResult delta_result;
       size_t checkpoint = w.block.size();
-      if (small) {
+      if (delta) {
+        flush_block(w);
+        delta_result = delta_match_fd(in, fresh.size, *signature, [&](const DeltaOp& op) {
+          head(op.count ? R_COPY : R_LITERAL);
+          put_var(w.block, attempt), put_var(w.block, (u64)op.offset), put_var(w.block, (u64)fresh.size);
+          if (op.count) put_var(w.block, op.first), put_var(w.block, op.count);
+          else put_str(w.block, op.literal);
+          if (client) slot_add(w.id, op.count ? signature->length(op.first, op.count) : (i64)op.literal.size());
+          if (w.block.size() >= BLOCK_TARGET) flush_block(w);
+          return !g_stop.load();
+        });
+        off = delta_result.processed;
+        ok = delta_result.ok;
+      } else if (small) {
         w.buf.resize((size_t)fresh.size);
         off = (i64)read_some(w.buf.data(), w.buf.size());
       } else {
@@ -745,19 +847,29 @@ struct Sender {
           put_str(w.block, {w.buf.data(), (size_t)off});
         } else if (!retry) head(R_FAIL);
       } else {
-        head(R_END);
+        head(delta ? R_DELTA_END : R_END);
         put_var(w.block, attempt);
-        if (resume_enabled()) put_var(w.block, prefix);
+        if (!delta && resume_enabled()) put_var(w.block, prefix);
         put_var(w.block, (u64)off);
         w.block.push_back(retry ? 1 : stable && ok ? 0 : 2);
         put_file_attrs(w.block, fresh);
+        if (delta) w.block.append((const char*)delta_result.sum, 16);
+        std::shared_ptr<DeltaReply> ack;
+        if (delta && retry) ack = expect_reply(((u64)d.id << 32) | idx, true);
         flush_block(w);
+        // Inplace retries must not overlap writes from the abandoned attempt.
+        if (ack) wait_reply(ack);
       }
       if (retry) continue;
       if (client) {
         if (stable && ok) g_stats.xfer_bytes.fetch_add((u64)fresh.size), g_stats.xfer_files.fetch_add(1);
         else g_stats.xfer_files_total.fetch_sub(1), g_stats.xfer_bytes_total.fetch_sub((u64)planned);
         slot_end(w.id);
+        if (delta && stable && ok) {
+          g_stats.delta_files.fetch_add(1);
+          g_stats.delta_literal_bytes.fetch_add((u64)delta_result.literal_bytes);
+          g_stats.delta_matched_bytes.fetch_add((u64)(fresh.size - delta_result.literal_bytes));
+        }
       }
       if (w.block.size() >= BLOCK_TARGET) flush_block(w);
       return;
@@ -787,6 +899,8 @@ struct Sender {
       if (!c.read_frame(type, payload)) conn_lost();
       switch (type) {
         case F_NEED: on_need(payload); break;
+        case F_DELTA_SIGNATURE: on_delta_reply(payload, false); break;
+        case F_DELTA_RETRY_ACK: on_delta_reply(payload, true); break;
         case F_MSG: handle_msg(payload); break;
         case F_OUTPUT: handle_output(payload); break;
         case F_DONE: {
@@ -884,6 +998,9 @@ struct RDir {
   bool gen_done = false;        // guarded by Receiver::dmu
   std::vector<Task> waiters;    // children that arrived before our generator ran
   std::unordered_map<u32, ResumePrefix> prefixes;
+  // Mutable transfer state is guarded by Receiver::bmu.
+  std::unordered_set<u32> delta_requested, completed;
+  std::unordered_map<u32, std::shared_ptr<DeltaBasis>> bases;
 };
 
 struct BigFile {
@@ -898,6 +1015,10 @@ struct BigFile {
   bool opened = false;
   bool finished = false;
   bool prefix_ok = true;
+  bool delta = false;
+  std::shared_ptr<DeltaBasis> basis;
+  i64 literal_bytes = 0;
+  u64 sum[2] = {};
 };
 
 struct Receiver {
@@ -909,6 +1030,7 @@ struct Receiver {
   std::vector<RDir*> dirs;
   std::mutex bmu;
   std::unordered_map<u64, std::shared_ptr<BigFile>> big;
+  std::unordered_set<u64> closed_attempts;
   bool data_end = false;  // guarded by the pool lock
   std::atomic<bool> allow_disconnect{false};
   std::atomic<int> gens{0};
@@ -925,6 +1047,70 @@ struct Receiver {
 
   void done_one(RDir& d) {
     if (d.w.pending.fetch_sub(1) == 1) finish_dir(d.w);
+  }
+
+  void complete_file(RDir& d, u32 idx) {
+    {
+      std::lock_guard<std::mutex> lock(bmu);
+      if (!d.completed.insert(idx).second) die(RERR_PROTOCOL, "protocol error: duplicate file completion");
+      d.bases.erase(idx);
+    }
+    done_one(d);
+  }
+
+  void on_delta_request(std::string_view payload) {
+    if (!delta_enabled()) die(RERR_PROTOCOL, "protocol error: unnegotiated delta request");
+    RBuf r(payload);
+    u64 id = r.var(), idx = r.var();
+    RDir* d;
+    {
+      std::lock_guard<std::mutex> lock(dmu);
+      d = id < dirs.size() ? dirs[(size_t)id] : nullptr;
+      if (!d || !d->gen_done) die(RERR_PROTOCOL, "protocol error: premature delta request");
+    }
+    if (r.bad || !r.empty() || idx >= d->w.src.e.size() || d->w.src.e[(size_t)idx].type != T_REG ||
+        !(d->w.src.e[(size_t)idx].flags & EF_INPLACE_SAFE) ||
+        !std::binary_search(d->w.need.begin(), d->w.need.end(), (u32)idx))
+      die(RERR_PROTOCOL, "protocol error: unrequested delta basis");
+    {
+      std::lock_guard<std::mutex> lock(bmu);
+      if (d->completed.count((u32)idx) || !d->delta_requested.insert((u32)idx).second)
+        die(RERR_PROTOCOL, "protocol error: duplicate delta request");
+    }
+    Task task;
+    task.kind = K_SIGNATURE, task.ptr = d, task.a = (u32)idx;
+    pool.push(0, std::move(task));
+  }
+
+  void signature(RDir& d, u32 idx, Worker& worker) {
+    bool active;
+    {
+      std::lock_guard<std::mutex> lock(bmu);
+      u64 key = ((u64)d.id << 33) | ((u64)idx << 1);
+      active = big.count(key) || big.count(key | 1);
+    }
+    // A retry of a legacy prefix attempt may still be draining; decline rather
+    // than snapshotting an inplace destination while that attempt is writing it.
+    auto basis = active ? std::shared_ptr<DeltaBasis>() :
+      destination_delta_basis(path_join(d.w.dst_path, d.w.dst_name(idx)), g_opt.inplace);
+    std::string f = new_frame(F_DELTA_SIGNATURE);
+    put_var(f, d.id), put_var(f, idx);
+    size_t flag_at = f.size();
+    f.push_back(0);
+    std::string body(1, basis ? 1 : 0);
+    if (basis) {
+      const auto& sig = basis->signature;
+      put_var(body, (u64)sig.size), put_var(body, sig.block_size), put_var(body, sig.blocks.size());
+      for (const auto& block : sig.blocks) {
+        body.append((const char*)&block.weak, 4), body.append((const char*)&block.strong, 8);
+      }
+      std::lock_guard<std::mutex> lock(bmu);
+      if (d.completed.count(idx)) die(RERR_PROTOCOL, "protocol error: delta request after file completion");
+      d.bases.emplace(idx, std::move(basis));
+    }
+    if (pack(f, body, worker)) f[flag_at] = 1;
+    else f.append(body);
+    c.send(std::move(f), true);
   }
 
   void gen(RDir* d, std::string& payload, Worker& t) {
@@ -1050,6 +1236,7 @@ struct Receiver {
           d->prefixes.emplace(i, prefix);
         }
       }
+      if (delta_enabled()) f.push_back((l.e[i].flags & EF_INPLACE_SAFE) ? 1 : 0);
     }
     std::vector<Task> wait;
     {
@@ -1088,7 +1275,9 @@ struct Receiver {
     RBuf r(raw);
     RDir* d = nullptr;
     while (!r.empty()) {
-      u32 id = (u32)r.var(), idx = (u32)r.var();
+      u64 raw_id = r.var(), raw_idx = r.var();
+      if (raw_id > UINT32_MAX || raw_idx > UINT32_MAX) die(RERR_PROTOCOL, "protocol error: bad DATA index");
+      u32 id = (u32)raw_id, idx = (u32)raw_idx;
       u8 kind = r.byte();
       if (!d || d->id != id) d = dir(id);
       if (r.bad || !d || idx >= d->w.src.e.size()) die(RERR_PROTOCOL, "protocol error: bad DATA record");
@@ -1096,10 +1285,21 @@ struct Receiver {
       const Entry& s = w.src.e[idx];
       if (!d->gen_done || s.type != T_REG || !std::binary_search(w.need.begin(), w.need.end(), idx))
         die(RERR_PROTOCOL, "protocol error: unrequested file data");
+      bool delta = kind == R_LITERAL || kind == R_COPY || kind == R_DELTA_END;
+      std::shared_ptr<DeltaBasis> basis;
+      {
+        std::lock_guard<std::mutex> lock(bmu);
+        if (d->completed.count(idx)) die(RERR_PROTOCOL, "protocol error: data after file completion");
+        if (delta) {
+          auto it = d->bases.find(idx);
+          if (!delta_enabled() || it == d->bases.end()) die(RERR_PROTOCOL, "protocol error: unrequested delta data");
+          basis = it->second;
+        }
+      }
       if (kind == R_FAIL) {
         g_stats.xfer_files_total.fetch_sub(1, std::memory_order_relaxed);
         g_stats.xfer_bytes_total.fetch_sub((u64)s.size, std::memory_order_relaxed);
-        done_one(*d);
+        complete_file(*d, idx);
       } else if (kind == R_WHOLE) {
         Entry attrs = s;
         get_file_attrs(r, attrs);
@@ -1125,34 +1325,53 @@ struct Receiver {
           g_stats.xfer_bytes_total.fetch_sub((u64)s.size);
         }
         slot_end(t.id);
-        done_one(*d);
-      } else if (kind == R_CHUNK || kind == R_END) {
-        u32 attempt = (u32)r.var();
-        if (attempt > 1) die(RERR_PROTOCOL, "protocol error: invalid retry attempt");
-        i64 prefix = resume_enabled() ? (i64)r.var() : 0;
+        complete_file(*d, idx);
+      } else if (kind == R_CHUNK || kind == R_END || delta) {
+        u64 raw_attempt = r.var();
+        if (raw_attempt > 1) die(RERR_PROTOCOL, "protocol error: invalid retry attempt");
+        u32 attempt = (u32)raw_attempt;
+        bool ending = kind == R_END || kind == R_DELTA_END;
+        i64 prefix = !delta && resume_enabled() ? (i64)r.var() : 0;
         i64 off = 0, total;
+        i64 length = 0;
+        u32 first = 0, count = 0;
+        u64 sum[2] = {};
         int status = -1;
         Entry attrs = s;
         std::string_view bytes;
-        if (kind == R_CHUNK) {
+        if (!ending) {
           off = (i64)r.var(), total = (i64)r.var();
-          bytes = r.str();
-          if (off < 0 || total < 0 || bytes.empty() || bytes.size() > (u64)total || off > total - (i64)bytes.size())
+          if (kind == R_COPY) {
+            u64 raw_first = r.var(), raw_count = r.var();
+            if (raw_first > UINT32_MAX || raw_count > UINT32_MAX) die(RERR_PROTOCOL, "protocol error: bad delta reference");
+            first = (u32)raw_first, count = (u32)raw_count;
+            length = basis->signature.length(first, count);
+            if (length <= 0 || length > (8 << 20)) die(RERR_PROTOCOL, "protocol error: bad delta reference");
+          } else {
+            bytes = r.str(), length = (i64)bytes.size();
+            if (delta && bytes.size() > (1 << 16)) die(RERR_PROTOCOL, "protocol error: oversized delta literal");
+          }
+          if (off < 0 || total < 0 || length <= 0 || length > total || off > total - length)
             die(RERR_PROTOCOL, "protocol error: bad chunk");
         } else {
           total = (i64)r.var();
           status = r.byte();
           get_file_attrs(r, attrs);
+          if (delta) {
+            auto digest = r.raw(16);
+            if (!r.bad) memcpy(sum, digest.data(), 16);
+          }
           if (total < 0 || status > 2) die(RERR_PROTOCOL, "protocol error: bad file completion");
         }
         if (r.bad) die(RERR_PROTOCOL, "protocol error: truncated file record");
         auto offered = d->prefixes.find(idx);
         if (prefix < 0 || prefix > total || (prefix && (attempt || offered == d->prefixes.end() || prefix != offered->second.size)) ||
-            (kind == R_CHUNK && off < prefix)) die(RERR_PROTOCOL, "protocol error: unverified resume prefix");
+            (!ending && off < prefix)) die(RERR_PROTOCOL, "protocol error: unverified resume prefix");
         u64 key = ((u64)id << 33) | ((u64)idx << 1) | attempt;
         std::shared_ptr<BigFile> b;
         {
           std::lock_guard<std::mutex> lk(bmu);
+          if (closed_attempts.count(key)) die(RERR_PROTOCOL, "protocol error: data after file completion");
           auto& item = big[key];
           if (!item) item = std::make_shared<BigFile>();
           b = item;
@@ -1162,30 +1381,32 @@ struct Receiver {
         if (!b->opened) {
           b->opened = true;
           b->attrs = s;
-          b->ok = out_open(b->f, w, idx, t);
+          b->delta = delta, b->basis = basis;
+          b->ok = out_open(b->f, w, idx, t, false, delta);
           b->prefix = prefix;
-          b->total = kind == R_CHUNK ? total : -1;
+          b->total = !ending ? total : -1;
           b->received = prefix;
           if (b->ok && prefix && !out_restore_prefix(b->f, offered->second)) {
             file_io_error(errno, b->f.path.c_str(), "reuse partial prefix");
             b->prefix_ok = b->ok = false;
           }
         }
-        if (b->prefix != prefix) die(RERR_PROTOCOL, "protocol error: inconsistent resume prefix");
-        if (kind == R_END) {
+        if (b->prefix != prefix || b->delta != delta) die(RERR_PROTOCOL, "protocol error: inconsistent transfer method");
+        if (ending) {
           if (b->status != -1) die(RERR_PROTOCOL, "protocol error: duplicate file completion");
-          if ((b->total >= 0 && (total > b->total || (status != 2 && total != b->total))) ||
+          if ((b->total >= 0 && (total > b->total || ((delta ? status == 0 : status != 2) && total != b->total))) ||
               (!b->chunks.empty() && b->chunks.rbegin()->second > total))
             die(RERR_PROTOCOL, "protocol error: inconsistent file size");
           b->status = status, b->expected = total, b->attrs = attrs;
+          if (delta) memcpy(b->sum, sum, 16);
         } else {
           if (b->total < 0) b->total = total;
-          if (b->total != total || (b->status >= 0 && (off + (i64)bytes.size() > b->expected ||
-              (b->status != 2 && total != b->expected)))) die(RERR_PROTOCOL, "protocol error: inconsistent file size");
+          if (b->total != total || (b->status >= 0 && (off + length > b->expected ||
+              ((delta ? b->status == 0 : b->status != 2) && total != b->expected)))) die(RERR_PROTOCOL, "protocol error: inconsistent file size");
           slot_begin(t.id, w.rel, w.src.name_sv(s), total);
-          slot_add(t.id, off + (i64)bytes.size());
+          slot_add(t.id, off + length);
           auto next = b->chunks.lower_bound(off);
-          i64 end = off + (i64)bytes.size();
+          i64 end = off + length;
           if ((next != b->chunks.end() && next->first < end) ||
               (next != b->chunks.begin() && std::prev(next)->second > off))
             die(RERR_PROTOCOL, "protocol error: overlapping file chunks");
@@ -1201,12 +1422,16 @@ struct Receiver {
           }
           b->chunks.emplace(start, end);
           if (b->ok) {
-            if (!out_write(b->f, bytes.data(), bytes.size(), off)) {
-              file_io_error(errno, b->f.path.c_str(), "write");
+            bool wrote = count ? delta_copy_blocks(b->f, *basis, first, count, off, t.buf) :
+              out_write(b->f, bytes.data(), bytes.size(), off);
+            if (!wrote) {
+              file_io_error(errno, b->f.path.c_str(), count ? "reconstruct delta" : "write");
+              g_source_io_error.store(true);
               b->ok = false;
             }
           }
-          b->received += (i64)bytes.size();
+          if (delta && !count) b->literal_bytes += length;
+          b->received += length;
         }
         if (b->status >= 0 && b->received == b->expected) {
           b->finished = true;
@@ -1214,24 +1439,39 @@ struct Receiver {
           b->attrs.size = b->expected;
           bool ok = false;
           if (b->f.fd >= 0) {
+            if (b->delta && b->status == 0 && b->ok && !delta_verify_fd(b->f.fd, b->expected, b->sum)) {
+              file_io_error(errno, b->f.path.c_str(), "verify reconstructed delta");
+              g_source_io_error.store(true);
+              b->ok = b->prefix_ok = false;
+            }
             if (b->status == 0 && b->ok) ok = out_finish(b->f, w, idx, t, true, &b->attrs);
             else out_abort(b->f, b->prefix_ok && b->status == 2 && g_opt.partial);
           }
           {
             std::lock_guard<std::mutex> lk(bmu);
             big.erase(key);
+            closed_attempts.insert(key);
           }
           if (b->status != 1) {
             if (ok) {
               g_stats.xfer_bytes.fetch_add((u64)b->expected);
               if (b->expected >= s.size) g_stats.xfer_bytes_total.fetch_add((u64)(b->expected - s.size));
               else g_stats.xfer_bytes_total.fetch_sub((u64)(s.size - b->expected));
-              note_transferred(w, idx, b->expected - b->prefix, t, b->expected);
+              note_transferred(w, idx, b->delta ? b->literal_bytes : b->expected - b->prefix, t, b->expected);
+              if (b->delta) {
+                g_stats.delta_files.fetch_add(1);
+                g_stats.delta_literal_bytes.fetch_add((u64)b->literal_bytes);
+                g_stats.delta_matched_bytes.fetch_add((u64)(b->expected - b->literal_bytes));
+              }
             } else {
               g_stats.xfer_files_total.fetch_sub(1);
               g_stats.xfer_bytes_total.fetch_sub((u64)s.size);
             }
-            done_one(*d);
+            complete_file(*d, idx);
+          } else if (delta) {
+            std::string ack = new_frame(F_DELTA_RETRY_ACK);
+            put_var(ack, id), put_var(ack, idx);
+            c.send(std::move(ack));
           }
           slot_end(t.id);
         }
@@ -1284,6 +1524,7 @@ struct Receiver {
       if (ended) die(RERR_PROTOCOL, "protocol error: frame after DATA_END");
       switch (type) {
         case F_DIR: on_dir(payload); break;
+        case F_DELTA_REQUEST: on_delta_request(payload); break;
         case F_DATA: {
           Task t;
           t.kind = K_DATA;
@@ -1329,12 +1570,17 @@ struct Receiver {
     std::thread rt([this] { reader(); });
     pool.start(n, [this](Task& t, Worker& w) {
       if (t.kind == K_GEN) gen((RDir*)t.ptr, t.s, w);
+      else if (t.kind == K_SIGNATURE) signature(*(RDir*)t.ptr, t.a, w);
       else data(t.s, w);
     });
     wait_pool(pool);
     if (g_stop.load()) exit_signal();
     pool.join();
     g_stats.scan_done.store(true);
+    // DATA_END cannot turn missing records or an undrained attempt into success.
+    if (!big.empty()) die(RERR_PROTOCOL, "protocol error: incomplete file data");
+    for (RDir* d : dirs)
+      if (d && d->w.pending.load() != 0) die(RERR_PROTOCOL, "protocol error: missing requested file completion");
     if (sender_code) g_source_io_error.store(true);
     if (client && sender_code) err_line(sender_code, "errors were reported by the sender");
     finalize_tree();
@@ -1455,7 +1701,7 @@ int run_client(const std::vector<std::string>& srcs, const std::string& dest, u3
   f.append(MAGIC, sizeof MAGIC - 1);
   put_var(f, wire_version);
   f.push_back(push ? 'R' : 'S');
-  u64 advertised = PROTO_FEATURES & (o.whole_file ? ~PF_RESUME : ~u64(0));
+  u64 advertised = PROTO_FEATURES & (o.whole_file ? ~(PF_RESUME | PF_DELTA) : ~u64(0));
   if (!o.hard_links) advertised &= ~PF_HLINK;
   if (!output_enabled()) advertised &= ~(PF_OUTPUT | PF_DIR_OUTPUT);
   if (wire_version >= 4) put_var(f, advertised);

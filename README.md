@@ -226,7 +226,7 @@ not change the protocol-3 layout or add unnegotiated fields to the baseline Hell
 When the compatibility window advances, keep a frozen N-1 peer fixture and prove
 both old-client/new-server and new-client/old-server transfers with fallback off.
 
-Local byte copies above 1 MiB can match blocks from an existing regular
+Local byte copies and remote transfers above 1 MiB can match blocks from an existing regular
 destination (at least 1 KiB). A rolling weak checksum finds candidates; XXH3
 checksums verify matched blocks and the completed file. The matcher keeps one
 block plus 1 MiB of source data, emits bounded literal batches and consecutive
@@ -240,7 +240,14 @@ while the original destination inode is updated. Source changes retry once;
 unverifiable basis blocks fail with code 23. A final checksum mismatch prevents
 publication and retention of the atomic output. `--stats` reports successful
 delta literal/matched data; `%b` reports literal source bytes for delta copies.
-Remote block matching and its wire-cost acceptance test are still in progress.
+Remote matching uses negotiated feature `PF_DELTA` (256): NEED carries basis
+eligibility, and the sender requests block signatures only after a resume prefix
+fails verification or is unavailable. Signatures and literal data can use zstd;
+block references are bounded and each attempt ends with a whole-file checksum.
+An abandoned delta attempt must finish draining before an inplace retry starts.
+Peers without this feature continue with their supported whole-file/prefix path.
+Tests compare total bytes in both directions, including signatures and framing,
+against rsync on edited 64 MiB and 2 GiB files, with a maximum ratio of 1.20.
 
 ## Benchmark
 
@@ -371,7 +378,7 @@ performance cores), `--no-clone`, `--atomic` (default), `--no-atomic`.
 
 ## Tests
 
-`tests/difftest.py` runs 214 scenarios on macOS through both rsync and xsync and compares the
+`tests/difftest.py` runs 231 scenarios on macOS through both rsync and xsync and compares the
 resulting trees (names, types, contents, modes, nanosecond mtimes, symlink targets) and exit
 codes — local and remote, fresh copies and updates, deletions, filters, odd file names,
 permissions, type changes.
@@ -388,11 +395,15 @@ python3 tests/mount_test.py                               # macOS: disposable AP
 python3 tests/fallback_test.py                            # local fallback checks
 python3 tests/protocol_test.py                            # frozen N-1 and feature subsets
 python3 tests/output_test.py                              # formats, ordering, log parity
+python3 tests/delta_test.py                               # local/push/pull matching and races
+python3 tests/delta_wire_test.py                          # signatures, references, integrity
+XSYNC_DELTA_LARGE=1 python3 tests/delta_remote_test.py     # 64 MiB + 2 GiB wire cost vs rsync
+./tests/ssh-rig.sh delta_remote_test.py                   # real SSH delta wire cost
 XSYNC_LAN_HOST=user@host python3 tests/lan_test.py -v       # missing-helper LAN
 ./tests/ssh-rig.sh root_test.py                           # Docker: 96 root/ID/device cases
 ```
 
-In strict native mode, 212 of 214 pass in both configurations; the two that do not use `-m` and `P` filter rules,
+In strict native mode, 229 of 231 pass in both configurations; the two that do not use `-m` and `P` filter rules,
 which are not implemented. The root group also compares UID/GID values and
 character/block device numbers across two machines with different account databases,
 including IDs present on only one machine and real sudo elevation on both ends.

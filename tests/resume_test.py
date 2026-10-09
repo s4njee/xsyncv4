@@ -140,7 +140,13 @@ class ResumeTests(unittest.TestCase):
                     result = subprocess.run(self.command(transport, target), capture_output=True, timeout=15)
                     self.assertEqual(result.returncode, 0, result.stderr)
                     self.check_file(target)
-                    accepted = size if kind in ('valid', 'complete', 'oversized') else 0
+                    accepted = size if kind in ('valid', 'corrupt', 'complete', 'oversized') else 0
+                    if kind == 'corrupt':
+                        # E04 rejects the corrupt prefix, then independently verifies
+                        # and reuses its unaffected blocks through negotiated deltas.
+                        matched = re.search(rb'Delta matched data: ([\d,]+)', result.stdout)
+                        self.assertIsNotNone(matched, result.stdout)
+                        self.assertGreater(int(matched[1].replace(b',', b'')), size - 256 * 1024)
                     cost = self.wire_bytes(result, transport)
                     remaining = self.source.stat().st_size - accepted
                     self.assertGreaterEqual(cost, remaining)

@@ -89,6 +89,18 @@ for target in /tmp/hard-local /tmp/hard-pushed /tmp/hard-pulled; do
   test "$(stat -c %d:%i "$target/space link")" = "$(stat -c %d:%i "$target/space link2")"
   test "$(stat -c %d:%i "$target/pipe")" = "$(stat -c %d:%i "$target/pipe2")"
 done
+head -c 8388608 /dev/urandom >/tmp/delta-source
+cp /tmp/delta-source /tmp/delta-local
+cp /tmp/delta-source /tmp/delta-pushed
+cp /tmp/delta-source /tmp/delta-pulled
+printf 'edited delta record' | dd of=/tmp/delta-source bs=1 seek=123456 conv=notrunc 2>/dev/null
+"$bin" --no-fallback -aI --no-clone --stats /tmp/delta-source /tmp/delta-local >/tmp/delta-local.stats
+"$bin" --no-fallback -azI --stats -e /tmp/fakessh --rsync-path="$bin" /tmp/delta-source fake:/tmp/delta-pushed >/tmp/delta-push.stats
+inode=$(stat -c %d:%i /tmp/delta-pulled)
+"$bin" --no-fallback -azI --inplace --stats -e /tmp/fakessh --rsync-path="$bin" fake:/tmp/delta-source /tmp/delta-pulled >/tmp/delta-pull.stats
+test "$(stat -c %d:%i /tmp/delta-pulled)" = "$inode"
+for target in /tmp/delta-local /tmp/delta-pushed /tmp/delta-pulled; do cmp /tmp/delta-source "$target"; done
+for stats in /tmp/delta-local.stats /tmp/delta-push.stats /tmp/delta-pull.stats; do grep -E 'Delta matched data: [1-9]' "$stats"; done
 "$bin" --version
 '''.replace('ARCH', arch)
             run('docker', 'run', '--rm', '--platform', 'linux/' + arch,

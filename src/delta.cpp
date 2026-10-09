@@ -184,7 +184,7 @@ DeltaResult delta_match_fd(int fd, i64 size, const DeltaSignature& signature,
     }
     if (length) {
       if (!flush_literal()) { failed = true; break; }
-      if (copy.count && (copy.first + copy.count != index || signature.length(copy.first, copy.count) >= COPY_RUN))
+      if (copy.count && (copy.first + copy.count != index || signature.length(copy.first, copy.count) + length > COPY_RUN))
         if (!flush_copy()) { failed = true; break; }
       if (!copy.count) copy = {position, index, 0, {}};
       copy.count++;

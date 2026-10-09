@@ -4,6 +4,7 @@ import os
 import pathlib
 import random
 import re
+import shlex
 import subprocess
 import sys
 import tempfile
@@ -139,6 +140,19 @@ class DeltaTests(unittest.TestCase):
         self.assertEqual(code, 0, err)
         self.assertEqual(self.dest.read_bytes(), self.source.read_bytes())
 
+    def test_source_shrink_grow_and_inplace_retry(self):
+        for grow in (False, True):
+            for flags in ((), ('--inplace',)):
+                with self.subTest(grow=grow, flags=flags):
+                    def change():
+                        with self.source.open('r+b') as stream:
+                            if grow: stream.seek(0, 2); stream.write(b'new tail' * 200000)
+                            else: stream.truncate(2 * MIB + 37)
+                    code, out, err = self.race(change, *flags)
+                    self.assertEqual(code, 0, err)
+                    self.assertEqual(self.dest.read_bytes(), self.source.read_bytes())
+                    self.assertEqual(self.dest.stat().st_mtime_ns, self.source.stat().st_mtime_ns)
+
     def test_changed_basis_is_rejected_without_publication(self):
         def change():
             with self.dest.open('r+b') as stream:
@@ -162,5 +176,19 @@ class DeltaTests(unittest.TestCase):
         self.assertEqual(outside.read_bytes(), b'outside sentinel')
         self.assertEqual((outside.stat().st_ino, outside.stat().st_mtime_ns, outside.stat().st_nlink),
                          (before.st_ino, before.st_mtime_ns, before.st_nlink))
+
+class PushDeltaTests(DeltaTests):
+    def command(self, *flags):
+        command = super().command(*flags)
+        command[-1] = 'fake:' + command[-1]
+        return command[:-2] + ['-e', shlex.join([sys.executable, str(REPO / 'tests/fault_ssh.py')]),
+                              '--rsync-path=' + shlex.quote(str(BINARY))] + command[-2:]
+
+class PullDeltaTests(DeltaTests):
+    def command(self, *flags):
+        command = super().command(*flags)
+        command[-2] = 'fake:' + command[-2]
+        return command[:-2] + ['-e', shlex.join([sys.executable, str(REPO / 'tests/fault_ssh.py')]),
+                              '--rsync-path=' + shlex.quote(str(BINARY))] + command[-2:]
 
 if __name__ == '__main__': unittest.main()

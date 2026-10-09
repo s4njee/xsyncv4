@@ -872,3 +872,39 @@ These change defaults, so they should be chosen rather than inherited from a ben
   records behind a new feature bit; preserve the frozen options/configuration.
   Published release artifacts remain E-03 source `e0adac5d165a` while E-04 is
   incomplete; installed Homebrew/Pi binaries were not changed.
+
+### E-04 — remote implementation verified; release checks pending (2026-10-09)
+
+- Added negotiated `PF_DELTA` (256), leaving the frozen protocol-3 options and
+  four-byte output configuration unchanged. NEED advertises eligible regular
+  bases; sender workers request signatures lazily after prefix verification.
+  Signatures optionally use zstd, references cover at most 8 MiB, literals at
+  most 64 KiB, and each successful attempt supplies a whole-file XXH3-128 sum.
+  Older peers keep the whole-file/verified-prefix path; `-W` clears both optional
+  reuse features. A delta retry waits for receiver acknowledgment after the
+  abandoned attempt drains, including inplace writes.
+- Receiver blocks are revalidated from anchored pinned bases; reconstruction
+  checksums gate publication. Unverified final output is never retained even
+  with `--partial`. Tombstones reject replayed attempts/completions, and DATA_END
+  rejects missing requested completions or undrained file records before tree
+  finalization/deletion.
+- **Measured bidirectional total wire cost**, including signatures and framing:
+  edited **2 GiB** push **468,375 bytes** vs rsync **644,399**; pull **468,298** vs
+  **644,407** (**0.727x**, below the required **1.20x** limit). The 64 MiB fixture
+  passes normal, compressed and inplace push/pull on macOS and real Linux SSH:
+  normal/inplace about **0.862x**, compressed about **0.644x**. Whole-file mode
+  sends the complete source and reports zero matched delta bytes.
+- All **24** local/fake-push/fake-pull delta methods pass on macOS, including 25
+  random-edit cases per transport and shrink/grow plus inplace retries. Seven
+  new hostile-wire methods pass: malformed/unsolicited signatures, invalid
+  compression dimensions, reference bounds, overlap/method mixing, out-of-order
+  completion, replay, missing completion, final checksum failure, basis changes
+  and a replaced basis path with an outside symlink sentinel.
+- Existing P0 (13), formatted output (10), hard links (4), mixed-version protocol
+  (4), baseline hostile wire (2) and applicable resume methods pass on macOS and
+  the real-SSH rig (existing platform/privilege skips remain). The four resume
+  wire methods also pass. Corrupt partial prefixes now reject prefix reuse but
+  independently verify and reuse their unchanged delta blocks.
+- Strict native forced-byte-copy sorted itemization remains **229/231**; the only
+  failures are E-08's known unsupported `-m`/protect-filter stories. E-04 remains
+  in progress until static Linux and universal macOS release checks finish.
