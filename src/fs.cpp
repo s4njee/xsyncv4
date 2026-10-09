@@ -15,6 +15,7 @@
 
 #include "progress.h"
 #include "output.h"
+#include "hardlink.h"
 
 #ifdef __APPLE__
 #include <sys/attr.h>
@@ -121,6 +122,12 @@ void entry_from_stat(const struct stat& st, Entry& e) {
 #endif
   e.rdev = (e.type == T_CHR || e.type == T_BLK) ? (u32)st.st_rdev : 0;
   e.dev = (u32)st.st_dev;
+  e.hdev = (u64)st.st_dev, e.ino = (u64)st.st_ino, e.nlink = (u64)st.st_nlink;
+#ifdef __APPLE__
+  e.ctime = st.st_ctimespec.tv_sec, e.ctime_ns = (u32)st.st_ctimespec.tv_nsec;
+#else
+  e.ctime = st.st_ctim.tv_sec, e.ctime_ns = (u32)st.st_ctim.tv_nsec;
+#endif
 }
 
 Entry source_snapshot(const Entry& scanned, const struct stat& st) {
@@ -277,7 +284,7 @@ static int list_dir_fd(int fd, DirList& out, unsigned flags) {
         default: e.type = T_NONE;
       }
       const u32 want = ATTR_CMN_OBJTYPE | ATTR_CMN_MODTIME | ATTR_CMN_ACCESSMASK;
-      if (err || (ret.commonattr & want) != want || (e.type == T_REG && !(ret.fileattr & ATTR_FILE_DATALENGTH))) {
+      if (g_opt.hard_links || err || (ret.commonattr & want) != want || (e.type == T_REG && !(ret.fileattr & ATTR_FILE_DATALENGTH))) {
         // Attributes missing for this entry: fall back to a plain lstat.
         struct stat st;
         std::string tmp(nm, nlen);
@@ -773,6 +780,8 @@ void generate(DirWork& w, Worker& t) {
           }
           if (same) {
             if (!o.perms) s.mode = d->mode;
+            hardlink_prepare(w, (u32)i, d);
+            hardlink_complete(w, (u32)i, s);
             tweak_attrs(path.c_str(), s, *d, rel, 'f', t, w, (u32)i);
             break;
           }
@@ -786,6 +795,8 @@ void generate(DirWork& w, Worker& t) {
           transfer = true;
         }
         if (transfer) {
+          hardlink_prepare(w, (u32)i, d);
+          if (o.dry_run) hardlink_complete(w, (u32)i, s);
           if (!o.perms && !(d && d->type == T_REG)) s.mode = s.mode & 0777 & ~g_umask;
           w.need.push_back((u32)i);
           plan_bytes += (u64)s.size;
@@ -801,11 +812,14 @@ void generate(DirWork& w, Worker& t) {
           ssize_t k = destination_readlink(path.c_str(), buf, sizeof buf - 1);
           if (k >= 0 && (size_t)k == strlen(target) && memcmp(buf, target, (size_t)k) == 0) {
             if (!o.perms) s.mode = d->mode;
+            hardlink_prepare(w, (u32)i, d);
+            hardlink_complete(w, (u32)i, s);
             tweak_attrs(path.c_str(), s, *d, rel, 'L', t, w, (u32)i);
             break;
           }
         }
         if (d ? o.ignore_existing : o.existing) break;
+        hardlink_prepare(w, (u32)i, d);
         u32 lmode = o.perms ? s.mode : (d && d->type == T_LNK) ? d->mode : (s.mode & 0777 & ~g_umask);
         char link_code[12] = "cL+++++++++";
         if (d && d->type == T_LNK) {
@@ -835,6 +849,7 @@ void generate(DirWork& w, Worker& t) {
         }
         w.modified = true;
         g_stats.created_links.fetch_add(1, std::memory_order_relaxed);
+        hardlink_complete(w, (u32)i, s);
         note_item(w, (u32)i, link_code, 0, t);
         break;
       }
@@ -848,10 +863,13 @@ void generate(DirWork& w, Worker& t) {
         u32 final_mode = o.perms ? s.mode : (s.mode & 0777 & ~g_umask);
         if (d && d->type == s.type && (!dev || d->rdev == s.rdev)) {
           if (!o.perms) s.mode = d->mode;
+          hardlink_prepare(w, (u32)i, d);
+          hardlink_complete(w, (u32)i, s);
           tweak_attrs(path.c_str(), s, *d, rel, dev ? 'D' : 'S', t, w, (u32)i);
           break;
         }
         if (d ? o.ignore_existing : o.existing) break;
+        hardlink_prepare(w, (u32)i, d);
         if (d) {
           if (d->type == T_DIR) {
             if (!make_way(path, *d, rel, "special file", t)) break;
@@ -875,6 +893,7 @@ void generate(DirWork& w, Worker& t) {
         }
         w.modified = true;
         g_stats.created_specials.fetch_add(1, std::memory_order_relaxed);
+        hardlink_complete(w, (u32)i, s);
         note_item(w, (u32)i, dev ? "cD+++++++++" : "cS+++++++++", 0, t);
         break;
       }
@@ -905,7 +924,7 @@ void finish_dir(DirWork& w) {
 
 void finalize_tree() {
   Worker worker;
-  std::vector<std::string> dirty;
+  std::vector<std::string> dirty = hardlink_finalize();
   if (g_source_io_error.load() && !g_opt.ignore_errors && g_opt.del) {
     err_line(0, "IO error encountered -- skipping file deletion");
   } else {
@@ -1164,6 +1183,8 @@ bool out_finish(OutFile& f, DirWork& w, u32 idx, Worker&, bool ok, const Entry* 
     timespec ts[2] = {{0, UTIME_OMIT}, {s.mtime, (long)s.mtime_ns}};
     check_attr(futimens(f.fd, ts), f.path.c_str(), "times");
   }
+  struct stat published;
+  bool have_published = o.hard_links && fstat(f.fd, &published) == 0;
   int fd = f.fd;
   f.fd = -1;
   int closed = close(fd);
@@ -1184,6 +1205,7 @@ bool out_finish(OutFile& f, DirWork& w, u32 idx, Worker&, bool ok, const Entry* 
   close(f.dir_fd);
   f.dir_fd = -1;
   w.modified.store(true, std::memory_order_relaxed);
+  if (have_published) hardlink_complete(w, idx, s, &published);
   return true;
 }
 
@@ -1191,7 +1213,19 @@ bool clone_copy(DirWork& w, u32 idx, const char* source, unsigned flags, Worker&
 #ifdef __APPLE__
   std::lock_guard<std::recursive_mutex> lock(output_mu);
   OutFile f;
-  if (!out_open(f, w, idx, t, true)) return false;
+  Entry fresh;
+  int source_fd = -1;
+  struct stat before;
+  if (g_opt.hard_links) {
+    source_fd = open(source, O_RDONLY | O_CLOEXEC | (g_opt.copy_links || !w.src_paths.empty() ? 0 : O_NOFOLLOW));
+    if (source_fd < 0 || fstat(source_fd, &before) != 0 || !S_ISREG(before.st_mode)) {
+      if (source_fd >= 0) close(source_fd);
+      return false;
+    }
+    fresh = source_snapshot(w.src.e[idx], before);
+  }
+  auto close_source = [&] { if (source_fd >= 0) close(source_fd); source_fd = -1; };
+  if (!out_open(f, w, idx, t, true)) { close_source(); return false; }
   // Reserve a unique name and retain its directory while the clone replaces the
   // reservation. The kernel refuses any unexpected new occupant of that name.
   unlinkat(f.dir_fd, f.tmp_name.c_str(), 0);
@@ -1200,8 +1234,16 @@ bool clone_copy(DirWork& w, u32 idx, const char* source, unsigned flags, Worker&
     if (error == ENOSPC || error == EDQUOT) file_io_error(error, f.path.c_str(), "clonefile");
     out_abort(f);
     errno = error;
+    close_source();
     return false;
   }
+  if (source_fd >= 0 && !source_unchanged(source_fd, source, before)) {
+    close_source();
+    out_abort(f);
+    errno = ESTALE;
+    return false;
+  }
+  close_source();
   int fd = openat(f.dir_fd, f.tmp_name.c_str(), O_WRONLY | O_NOFOLLOW | O_CLOEXEC | O_NONBLOCK);
   struct stat st;
   if (fd < 0 || fstat(fd, &st) != 0 || !S_ISREG(st.st_mode)) {
@@ -1214,7 +1256,7 @@ bool clone_copy(DirWork& w, u32 idx, const char* source, unsigned flags, Worker&
   f.fd = fd;
   f.created_mode = st.st_mode & 07777;
   register_output(f);
-  return out_finish(f, w, idx, t, true);
+  return out_finish(f, w, idx, t, true, g_opt.hard_links ? &fresh : nullptr);
 #else
   errno = ENOTSUP;
   return false;
@@ -1237,6 +1279,8 @@ void note_item(DirWork& w, u32 idx, const char* code, i64 bytes, Worker& t, i64 
   // A remote receiver has source paths only for logging, never for filesystem use.
   if (!w.output_sources.empty()) source = w.output_sources[idx];
   else if (!w.src_path.empty() || !w.src_paths.empty()) src_path_of(w, idx, source);
+  if (hardlink_defer(w, idx, {code, rel_join(w.rel, w.src.name_sv(entry)), source,
+       entry.type == T_LNK ? w.src.link(entry) : "", entry.type, size < 0 ? entry.size : size, bytes})) return;
   item(t, code, rel_join(w.rel, w.src.name_sv(entry)), entry, source,
        entry.type == T_LNK ? w.src.link(entry) : nullptr, bytes, size);
 }

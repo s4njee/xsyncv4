@@ -74,6 +74,21 @@ grep -F 'file|2097152|1048576' /tmp/pull.stdout
 cmp /tmp/source/file /tmp/pulled/file
 cmp '/tmp/source/straße with spaces' '/tmp/pulled/straße with spaces'
 test "$(readlink '/tmp/pulled/space link')" = file
+ln /tmp/source/file /tmp/source/hardlink
+ln -P '/tmp/source/space link' '/tmp/source/space link2'
+mkfifo /tmp/source/pipe
+ln /tmp/source/pipe /tmp/source/pipe2
+"$bin" --no-fallback -aHi /tmp/source/ /tmp/hard-local/
+"$bin" --no-fallback -azH --out-format='%i|%n|%L' -e /tmp/fakessh --rsync-path="$bin" /tmp/source/ fake:/tmp/hard-pushed/ >/tmp/hard.stdout
+"$bin" --no-fallback -azH -e /tmp/fakessh --rsync-path="$bin" fake:/tmp/source/ /tmp/hard-pulled/
+grep -F 'hf+++++++++' /tmp/hard.stdout
+grep -F '| => ' /tmp/hard.stdout
+for target in /tmp/hard-local /tmp/hard-pushed /tmp/hard-pulled; do
+  cmp /tmp/source/file "$target/file"
+  test "$(stat -c %d:%i "$target/file")" = "$(stat -c %d:%i "$target/hardlink")"
+  test "$(stat -c %d:%i "$target/space link")" = "$(stat -c %d:%i "$target/space link2")"
+  test "$(stat -c %d:%i "$target/pipe")" = "$(stat -c %d:%i "$target/pipe2")"
+done
 "$bin" --version
 '''.replace('ARCH', arch)
             run('docker', 'run', '--rm', '--platform', 'linux/' + arch,

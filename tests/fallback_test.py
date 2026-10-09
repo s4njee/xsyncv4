@@ -71,22 +71,22 @@ else: sys.exit(255)
 
     def test_original_arguments_and_extensions(self):
         self.fake_rsync()
-        original = ['-aH', '-e', 'ssh -i "a key"', '--out-format=%i %n',
+        original = ['-aX', '-e', 'ssh -i "a key"', '--out-format=%i %n',
                     '--rsync-path=custom wrapper', 'source with spaces/', 'user@host:dest with spaces/']
         result = self.run_sync('--no-clone', '-j8', '--atomic', *original, mask=0o077)
         self.assertEqual(result.returncode, 19, result.stderr)
         self.assertEqual(json.loads(result.stdout), {'args': original, 'umask': 0o077})
         self.assertEqual(result.stderr.count(b'falling back to rsync:'), 1)
         self.assertEqual(len(result.stderr.splitlines()), 1)
-        result = self.run_sync('-avj', '3', '-H', 'a', 'b')
-        self.assertEqual(json.loads(result.stdout)['args'], ['-av', '-H', 'a', 'b'])
+        result = self.run_sync('-avj', '3', '-X', 'a', 'b')
+        self.assertEqual(json.loads(result.stdout)['args'], ['-av', '-X', 'a', 'b'])
 
     def test_strict_switches_and_invalid_options(self):
         self.fake_rsync()
-        for flags, env in ((['-H', '--no-fallback'], self.env),
-                           (['--no-fallback', '-H'], self.env),
-                           (['-H'], dict(self.env, XSYNC_FALLBACK='0')),
-                           (['-H', '--server'], self.env),
+        for flags, env in ((['-X', '--no-fallback'], self.env),
+                           (['--no-fallback', '-X'], self.env),
+                           (['-X'], dict(self.env, XSYNC_FALLBACK='0')),
+                           (['-X', '--server'], self.env),
                            (['--not-a-real-option'], self.env),
                            (['-f', 'invalid rule'], self.env),
                            (['--max-delete=invalid'], self.env)):
@@ -96,22 +96,22 @@ else: sys.exit(255)
                 self.assertNotIn(b'falling back', result.stderr)
                 self.assertEqual(result.stdout, b'')
                 self.assertFalse((self.root / 'dest').exists())
-        result = self.run_sync('-H', '--fallback', 'src', 'dst', env=dict(self.env, XSYNC_FALLBACK='0'))
+        result = self.run_sync('-X', '--fallback', 'src', 'dst', env=dict(self.env, XSYNC_FALLBACK='0'))
         self.assertEqual(result.returncode, 19)
         # A value resembling a control flag is still an option value.
-        result = self.run_sync('-H', '-e', '--no-fallback', 'src', 'dst')
-        self.assertEqual(json.loads(result.stdout)['args'], ['-H', '-e', '--no-fallback', 'src', 'dst'])
-        result = self.run_sync('-H', '--', '--no-fallback', 'dst')
-        self.assertEqual(json.loads(result.stdout)['args'], ['-H', '--', '--no-fallback', 'dst'])
+        result = self.run_sync('-X', '-e', '--no-fallback', 'src', 'dst')
+        self.assertEqual(json.loads(result.stdout)['args'], ['-X', '-e', '--no-fallback', 'src', 'dst'])
+        result = self.run_sync('-X', '--', '--no-fallback', 'dst')
+        self.assertEqual(json.loads(result.stdout)['args'], ['-X', '--', '--no-fallback', 'dst'])
 
-    def test_real_rsync_hardlinks_and_umask(self):
+    def test_native_hardlinks_and_umask(self):
         dest = self.root / 'destination'
-        result = self.run_sync('-aH', str(self.src) + '/', dest)
+        result = self.run_sync('--no-fallback', '-aH', str(self.src) + '/', dest)
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual((dest / 'file with spaces').read_bytes(), (self.src / 'file with spaces').read_bytes())
         self.assertEqual((dest / 'hard link').stat().st_ino, (dest / 'file with spaces').stat().st_ino)
         dest = self.root / 'mask destination'
-        result = self.run_sync('-rH', str(self.src) + '/', dest, mask=0o077)
+        result = self.run_sync('--no-fallback', '-rH', str(self.src) + '/', dest, mask=0o077)
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(stat.S_IMODE((dest / 'file with spaces').stat().st_mode), 0o600)
 
@@ -129,11 +129,11 @@ else: sys.exit(255)
         directory.mkdir()
         (directory / 'rsync').symlink_to(BINARY)
         self.env['PATH'] = str(directory)
-        result = self.run_sync('-H', 'src', 'dst')
+        result = self.run_sync('-X', 'src', 'dst')
         self.assertEqual(result.returncode, 127)
         self.assertIn(b'no real rsync', result.stderr)
         (directory / 'rsync').unlink()
-        result = self.run_sync('-H', 'src', 'dst')
+        result = self.run_sync('-X', 'src', 'dst')
         self.assertEqual(result.returncode, 127)
 
     def test_remote_handshake_fallback_and_strict_failures(self):

@@ -502,5 +502,45 @@ class TrustTests(unittest.TestCase):
             self.run_sync(["-a", *self.remote(["pulled/", "fake:~xsync_no_such_user_817/dst"])], root, env, rc=3)
 
 
+    def test_hardlink_anchor_replacement_is_rejected(self):
+        for direction in ("local", "push", "pull"):
+            with self.subTest(direction=direction), tempfile.TemporaryDirectory(prefix="xsync hardlink race ") as tmp:
+                root = pathlib.Path(tmp)
+                source, dest = root / "source", root / "destination"
+                source.mkdir()
+                (source / "a").write_bytes(b"validated data")
+                os.link(source / "a", source / "z")
+                outside = root / "outside"
+                outside.write_bytes(b"outside sentinel")
+                outside_before = outside.stat()
+                marker = root / "link selected"
+                env = self.fault_env(dest)
+                env.update(XSYNC_FAULT_AT_OP="link", XSYNC_FAULT_AT_NAME="z", XSYNC_FAULT_AT_NOTIFY=str(marker))
+                args = [str(BINARY), "--no-fallback", "-aHi", "--no-clone"]
+                a, b = str(source) + "/", str(dest) + "/"
+                if direction != "local":
+                    args += ["-e", f"{sys.executable} {REPO / 'tests/fault_ssh.py'}", "--rsync-path=" + str(BINARY)]
+                    if direction == "push": b = "fake:" + b
+                    else: a = "fake:" + a
+                proc = subprocess.Popen(args + [a, b], stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env)
+                try:
+                    deadline = time.monotonic() + 10
+                    while not marker.exists() and proc.poll() is None and time.monotonic() < deadline:
+                        time.sleep(0.005)
+                    self.assertTrue(marker.exists(), "hard-link publication was not reached")
+                    (dest / "z").unlink()
+                    (dest / "z").symlink_to(outside)
+                    stdout, stderr = proc.communicate(timeout=10)
+                finally:
+                    if proc.poll() is None: proc.kill()
+                    proc.communicate()
+                self.assertEqual(proc.returncode, 23, stderr)
+                self.assertIn(b"hard link", stderr)
+                self.assertEqual((dest / "a").read_bytes(), b"validated data")
+                self.assertEqual(outside.read_bytes(), b"outside sentinel")
+                self.assertEqual((outside.stat().st_ino, outside.stat().st_nlink, outside.stat().st_mtime_ns),
+                                 (outside_before.st_ino, outside_before.st_nlink, outside_before.st_mtime_ns))
+                self.assertFalse(any(path.name.startswith(".xsync-hardlink-") for path in dest.iterdir()))
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

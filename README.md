@@ -204,6 +204,23 @@ fails before the receiver creates its destination. Current formatted-output and
 `-ii` includes unchanged entries, while `-i` reports updates. Nanosecond-only
 mtime restoration under checksum mode does not invent a seconds-based item flag.
 
+`-H` negotiates `PF_HLINK` only when requested. It adds source device/inode/link
+count/change-time fields to directory entries and fresh file metadata, and a
+hard-link-target flag to structured output. Old peers receive none of these
+fields; missing support falls back or fails with code 4 before destination writes.
+The frozen Hello options and four-byte output configuration remain unchanged.
+
+With `-H`, selected regular files, symlinks and special files retain their source
+hard-link groups, including groups spanning directories. Each selected member
+is independently validated/copied before the receiver joins successful members
+with verified temporary links. This first implementation can copy/send duplicate
+contents; `%b` still reports the actual bytes copied for each member. Link
+creation pins the selected object and both receiver-owned parent directories,
+checks inode and type, and publishes atomically. Directory times are restored
+once linking and deletion finish. Links outside the selected source list are
+not recreated. `hf`, `hL` and `hS` records and `%L` distinguish hard-link targets
+(` => `) from symlink targets (` -> `), including repeated itemization.
+
 Future optional frames/options must be gated by an agreed feature bit; they must
 not change the protocol-3 layout or add unnegotiated fields to the baseline Hello.
 When the compatibility window advances, keep a frozen N-1 peer fixture and prove
@@ -287,7 +304,7 @@ second is printed. `-v` and `-i` lines scroll above the live region. `NO_COLOR` 
 
 ## Compatibility with rsync
 
-Supported with rsync's meaning: `-a -r -d -l -L -p -t -g -o -D -O -J -n -u -c -I -x -z -v -q
+Supported with rsync's meaning: `-a -r -d -H -l -L -p -t -g -o -D -O -J -n -u -c -I -x -z -v -q
 -i -h -P -e -f`, `--delete` (and `--del`, `--delete-before/-during/-after/-delay`),
 `--delete-excluded`, `--force`, `--exclude`, `--include`, `--exclude-from`,
 `--include-from`, `--filter` (`+`/`-` rules and `!`), `--existing`, `--ignore-existing`,

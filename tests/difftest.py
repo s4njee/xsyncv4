@@ -198,7 +198,7 @@ class Tree:
     def hl(self, rel, existing):
         """Hard link rel -> existing (shares inode, mode and mtime)."""
         self._parents(rel)
-        os.link(self._p(existing), self._p(rel))
+        os.link(self._p(existing), self._p(rel), follow_symlinks=False)
         return self
 
     def done(self):
@@ -1372,6 +1372,45 @@ case("hardlinks_no_H", hardlinks, "-a src/ dst/",
      verify=all_of(same_file("src/h1", "dst/h2"),
                    lambda s: ["dst/h1 should not be hard-linked without -H"]
                    if s.get("dst/h1", {}).get("links") else []))
+
+
+def hardlink_groups(t):
+    t.f("src/a", text(60, 5000), mtime=T1)
+    for name in ("m", "z", "sub/q"):
+        t.hl("src/" + name, "src/a")
+    t.ln("src/sym", "a", mtime=T1)
+    t.hl("src/sym2", "src/sym")
+    t.fifo("src/pipe", mtime=T1)
+    t.hl("src/pipe2", "src/pipe")
+    t.f("src/solo", b"independent", mtime=T1)
+
+
+def hardlink_existing(t):
+    hardlink_groups(t)
+    for name in ("a", "m", "z", "sub/q"):
+        t.f("dst/" + name, text(60, 5000), mtime=T1)
+    t.ln("dst/sym", "a", mtime=T1)
+    t.ln("dst/sym2", "a", mtime=T1)
+    t.fifo("dst/pipe", mtime=T1)
+    t.fifo("dst/pipe2", mtime=T1)
+
+for direction, cmd in (
+    ("local", "-aHi src/ dst/"),
+    ("push", "-aHi " + R + " src/ fakehost:{ROOT}/dst/"),
+    ("pull", "-aHi " + R + " fakehost:{ROOT}/src/ dst/"),
+):
+    case("hardlinks_H_" + direction, hardlink_groups, cmd, cmd, unchanged=1)
+    case("hardlinks_H_existing_" + direction, hardlink_existing, cmd, cmd, unchanged=1)
+    case("hardlinks_H_dry_" + direction, hardlink_groups, cmd.replace("-aHi", "-aHin"), unchanged=0)
+
+for name, flags in (("inplace", "--inplace"), ("no_perms", "--no-perms"),
+                    ("ignore_existing", "--ignore-existing"), ("update", "--update"),
+                    ("existing_only", "--existing"), ("checksum", "--checksum"),
+                    ("filtered", "--exclude=/sub/ --exclude=sym2")):
+    case("hardlinks_H_" + name,
+         B(hardlink_groups, lambda t: t.f("dst/a", b"stale", mode=0o600, mtime=T1 - 1000000000)),
+         "-aHi " + flags + " src/ dst/", "-aHi " + flags + " src/ dst/", unchanged=1)
+case("hardlinks_H_repeat_itemize", hardlink_groups, "-aHi src/ dst/", "-aHii src/ dst/", unchanged=1)
 
 if sys.platform == "darwin":
     def immutable_dest(t):

@@ -2,7 +2,7 @@
 
 Initial audit written 2026-10-08 against xsync 0.1.0 (protocol 1).
 All fifteen P0 stories completed against protocol 3; per-story evidence is below.
-P1 R-02 through R-09 and E-01/E-02 are complete. Current protocol 4 supports protocol 3; E-03 is in progress.
+P1 R-02 through R-09 and E-01 through E-03 are complete. Current protocol 4 supports protocol 3; E-04 is next.
 Problem statements retain the original audit findings.
 
 ## What "daily driver" means here
@@ -89,7 +89,7 @@ coverage clarification remains open.
 |---|---|---|---|---|
 | E-01 | **`-P` does not resume.** `--partial` is accepted, but a partial file is never reused: there is no delta or append logic, so an interrupted 10 GB file starts from zero. On a remote disconnect the partial is not even kept (T-08). | **done** | An interrupted large file resumes from the verified prefix (hash the existing bytes on both sides, send the rest); tested by killing a transfer at 50 %. | L |
 | E-02 | **`--out-format` and stable script output.** One project script parses `--out-format='%i %n'`. With `-v`/`-i`, line order follows thread completion, so diffs between runs are noisy. | **done** | `%i %n %L %l %o %f %b %t` supported; when stdout is not a terminal, lines are emitted in path order; `--log-file` writes the same stream. | M |
-| E-03 | **Itemize parity.** Missing against rsync: the `./` root line, `.d..t......` for existing directories whose time changed, `cd` lines in clone mode come from a different code path than byte-copy mode, `hf` for hard links. | **in progress** | `-i` output of both paths matches rsync's on the difftest corpus after sorting; difftest starts comparing stdout for `-i` runs. | M |
+| E-03 | **Itemize parity.** Missing against rsync: the `./` root line, `.d..t......` for existing directories whose time changed, `cd` lines in clone mode come from a different code path than byte-copy mode, `hf` for hard links. | **done** | `-i` output of both paths matches rsync's on the difftest corpus after sorting; difftest starts comparing stdout for `-i` runs. | M |
 | E-04 | **Delta transfer for large changed files.** Changed files are always sent whole. Irrelevant for the congress corpus, decisive for a 2 GB database dump with small edits over Wi-Fi. | code | Files above a threshold (1 MiB) use block matching (rsync rolling checksum, or content-defined chunks with XXH3) when the destination has a previous version; `-W` disables; bytes-on-wire within 20 % of rsync on an edited-large-file test. | XL |
 | E-05 | **List mode.** `xsync host:dir/` or a single SRC should list, as rsync does; today it is a usage error. | confirmed | `ls -l`-style listing for local and remote sources. | S |
 | E-06 | **End-of-run error summary.** With thousands of files an error scrolls away. | new | After the run: count of errors and the first ten, grouped by kind; exit-code line as now. | S |
@@ -770,7 +770,7 @@ These change defaults, so they should be chosen rather than inherited from a ben
   Homebrew and Pi helper installations were not changed by this story.
 
 
-### E-03 — in progress: itemization and differential gate (2026-10-09)
+### E-03 — completed: itemization and differential gate (2026-10-09)
 
 - Native local/push/pull now report the `./` root, directory time/permission/
   ownership changes, transfer permission markers and symlink target changes.
@@ -797,6 +797,27 @@ These change defaults, so they should be chosen rather than inherited from a ben
   on macOS and Linux, including real SSH. New repeated-itemization and malformed
   output-configuration checks pass on macOS and Linux; all ten output methods
   and both hostile-wire methods pass on the real SSH rig.
-- **Not complete:** native hard-link preservation and `hf` output remain. The
-  hard-link part of E-10 is a dependency of E-03 and is the next implementation
-  step. E-10's xattrs and wider metadata work remain separate pending work.
+- Native `-H` now preserves groups of regular files, symlinks and special files
+  across directories for local, push and pull transfers. `PF_HLINK` gates source
+  inode identity/fresh metadata and the structured hard-link-target flag; older
+  peers receive no extensions, and strict requests fail with code 4 before
+  writes. The v3 option layout and four-byte output configuration remain frozen.
+- Added seventeen hard-link differential cases: new/existing groups, local/
+  push/pull, dry runs, inplace, no-perms, ignore-existing, update, existing-only,
+  checksum, filters and repeated itemization. **229/231** now pass with sorted
+  itemization for both clone and byte-copy configurations; only the same two
+  E-08 filter cases fail. All eighteen hard-link cases (including no-H) pass.
+- Four dedicated native hard-link methods pass on macOS and Linux with real
+  SSH, covering compressed large files, fresh groups, unchanged reruns, quiet,
+  dry runs and inplace. All thirteen P0 methods pass on macOS; Linux passes
+  eleven with its two existing platform/privilege skips. The new concurrent
+  anchor-replacement check covers local/push/pull, rejects symlink inode reuse,
+  leaves the outside sentinel untouched and removes temporary links.
+- All ten output methods, both hostile-wire methods and four mixed-version/
+  feature methods pass on macOS and Linux, including real SSH. Unsupported
+  hard-link requests are checked against both frozen v3 and core-only peers.
+- The first `-H` implementation independently validates/copies selected members
+  and then joins successful members with verified atomic links. Duplicate data
+  may be copied/sent; README documents this and `%b` retains actual copied bytes.
+  E-10 remains open for xattrs and wider metadata; its hard-link prerequisite is
+  implemented. Release artifacts are being refreshed and checked next.

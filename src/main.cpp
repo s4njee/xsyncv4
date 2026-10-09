@@ -46,6 +46,7 @@ Options (same meaning as rsync):
  -a, --archive            archive mode; equals -rlptgoD
  -r, --recursive          recurse into directories
  -d, --dirs               transfer directories without recursing
+ -H, --hard-links         preserve hard links within the transferred tree
  -l, --links              copy symlinks as symlinks
      --safe-links         skip symlinks that point outside the transfer tree
  -L, --copy-links         transform symlink into referent file/dir
@@ -93,7 +94,7 @@ Options (same meaning as rsync):
      --progress           show live per-file and whole-transfer progress
  -P                       same as --partial --progress
  -i, --itemize-changes    output a change-summary for all updates
- -8, --8-bit-output       retain high bytes in names; always escape control bytes
+ -8, --8-bit-output       retain high bytes in names; escape unsafe control bytes
      --out-format=FORMAT  file lines: %i %n %L %l %o %f %b %t %% (optional width)
      --log-file=FILE      append the same stdout stream to FILE
      --version, --help
@@ -245,13 +246,13 @@ Parsed parse(int argc, char** argv) {
         if (comma == std::string::npos) break;
         start = comma + 1;
       } while (true);
-    } else if (flag(o.whole_file, "whole-file") || flag(o.raw_names, "8-bit-output")) {}
+    } else if (flag(o.hard_links, "hard-links") || flag(o.whole_file, "whole-file") || flag(o.raw_names, "8-bit-output")) {}
     else if (name == "protect-args" || name == "secluded-args" ||
                name == "blocking-io" || name == "no-blocking-io" || name == "no-motd") {
       // These intrinsic behaviours are listed with their reasons in --help.
     } else {
       static const char* unsupported[] = {
-          "hard-links", "acls", "xattrs", "backup", "backup-dir", "suffix", "link-dest", "compare-dest", "copy-dest", "files-from",
+          "acls", "xattrs", "backup", "backup-dir", "suffix", "link-dest", "compare-dest", "copy-dest", "files-from",
           "from0", "relative", "chmod", "chown", "usermap", "groupmap", "bwlimit", "append", "append-verify", "partial-dir",
           "delay-updates", "fuzzy", "remove-source-files", "keep-dirlinks", "copy-dirlinks", "copy-unsafe-links",
           "munge-links", "executability", "atimes", "crtimes", "cvs-exclude", "prune-empty-dirs", "daemon", "port", "password-file",
@@ -337,7 +338,7 @@ Parsed parse(int argc, char** argv) {
         case 'B': usage_error("--block-size is not supported by xsync");
         case 'T': usage_error("--temp-dir is not supported by xsync");
         case 'M': usage_error("--remote-option is not supported by xsync");
-        case 'H': usage_error("--hard-links is not supported by xsync");
+        case 'H': o.hard_links = true; break;
         case 'A': usage_error("--acls is not supported by xsync");
         case 'X': usage_error("--xattrs is not supported by xsync");
         case 'R': usage_error("--relative is not supported by xsync");

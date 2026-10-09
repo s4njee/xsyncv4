@@ -20,9 +20,9 @@ using i64 = int64_t;
 constexpr u32 PROTO_VERSION = 4;
 constexpr u32 PROTO_MIN_VERSION = PROTO_VERSION - 1;
 constexpr u64 PF_CORE = 1, PF_ZSTD = 2, PF_IDMAP = 4, PF_SAFE_LINKS = 8, PF_RESUME = 16, PF_OUTPUT = 32;
-constexpr u64 PF_DIR_OUTPUT = 64;
+constexpr u64 PF_DIR_OUTPUT = 64, PF_HLINK = 128;
 #ifndef XSYNC_PROTOCOL_FEATURES
-#define XSYNC_PROTOCOL_FEATURES 127
+#define XSYNC_PROTOCOL_FEATURES 255
 #endif
 constexpr u64 PROTO_FEATURES = XSYNC_PROTOCOL_FEATURES;
 constexpr u64 LEGACY_V3_FEATURES = 15;
@@ -54,9 +54,10 @@ struct Options {
   bool whole_file = false;  // Client controls resume feature negotiation.
   std::string out_format, log_file;
   bool out_format_set = false;  // An explicitly empty format suppresses file lines.
-  bool raw_names = false;  // -8: retain invalid high bytes; always escape control bytes.
+  bool raw_names = false;  // -8: retain invalid high bytes; escape unsafe control bytes.
   int itemize_level = 0;
   bool output_attrs = false, output_unchanged = false;  // Configured before workers start.
+  bool hard_links = false;  // Negotiated separately from the frozen v3 options.
   bool delete_before = false;  // Deletion is still deferred for sender-read safety.
   FilterList filters;
   // Set at runtime, not parsed.
@@ -96,6 +97,9 @@ struct Entry {
   u32 mode = 0;  // permission bits only (07777)
   u32 uid = 0, gid = 0, mtime_ns = 0, rdev = 0, dev = 0;
   i64 size = 0, mtime = 0;
+  u64 hdev = 0, ino = 0, nlink = 0;
+  i64 ctime = 0;
+  u32 ctime_ns = 0;
 };
 enum : u8 { IF_PERMS = 1, IF_OWNER = 2, IF_GROUP = 4, IF_NEW_TYPE = 8 };
 

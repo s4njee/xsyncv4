@@ -146,7 +146,7 @@ p=pathlib.Path(sys.argv[1]); print(json.dumps({'hash':hashlib.sha256((p/'file').
     def test_requested_feature_is_never_silently_dropped(self):
         source = self.root / 'feature source'
         source.write_bytes(b'unchanged')
-        for flags in (['-rl', '--safe-links'], ['-a']):
+        for flags in (['-rl', '--safe-links'], ['-a'], ['-H']):
             with self.subTest(flags=flags):
                 target = self.root / 'unsupported feature destination'
                 result = subprocess.run([str(BINARY), '--no-fallback', *flags, '-e', RSH,
@@ -165,7 +165,7 @@ p=pathlib.Path(sys.argv[1]); print(json.dumps({'hash':hashlib.sha256((p/'file').
         source.write_bytes(b'unchanged')
         for peer in (self.remote_subset, self.remote_legacy):
             for direction in ('push', 'pull'):
-                for option in ('--out-format=%n', '--log-file=' + str(self.root / 'unopened log')):
+                for option in ('--out-format=%n', '--log-file=' + str(self.root / 'unopened log'), '-H'):
                     with self.subTest(peer=peer, direction=direction, option=option):
                         target = self.root / 'uncreated format destination'
                         a, b = str(source), str(target)
@@ -177,7 +177,7 @@ p=pathlib.Path(sys.argv[1]); print(json.dumps({'hash':hashlib.sha256((p/'file').
                                                  '--rsync-path=' + shlex.quote(peer), a, b],
                                                 capture_output=True, timeout=20)
                         self.assertEqual(result.returncode, 4, result.stderr)
-                        self.assertIn(b'peer does not support structured file output', result.stderr)
+                        self.assertIn(b'peer does not support hard-link preservation' if option == '-H' else b'peer does not support structured file output', result.stderr)
                         self.assertFalse(target.exists())
                         self.assertFalse((self.root / 'unopened log').exists())
                         if HOST:

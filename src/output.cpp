@@ -78,7 +78,7 @@ std::string render(const OutputEvent& event) {
       case 'n': value = escaped(path); break;
       case 'f': value = escaped(source); break;
       case 'L':
-        if (!event.target.empty()) prefix = " -> ", value = escaped(event.target);
+        if (!event.target.empty()) prefix = event.hardlink_target ? " => " : " -> ", value = escaped(event.target);
         else if (width) prefix = "    ";
         break;
       case 'l': value = std::to_string(event.size); break;

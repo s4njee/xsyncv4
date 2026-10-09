@@ -6,6 +6,7 @@ struct OutputEvent {
   std::string code, path, source, target;
   u8 type = T_NONE;
   i64 size = 0, bytes = 0, time = 0;
+  bool hardlink_target = false;
 };
 extern void (*g_output_sink)(const OutputEvent&);
 bool output_enabled();

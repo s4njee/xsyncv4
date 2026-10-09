@@ -63,6 +63,15 @@ static int fault_unlinkat(int fd, const char* name, int flags) {
   at_pause("unlink", fd, name);
   return original(fd, name, flags);
 }
+static int fault_linkat(int from_fd, const char* from, int to_fd, const char* to, int flags) {
+#ifdef __APPLE__
+  auto original = linkat;
+#else
+  static auto original = (int (*)(int, const char*, int, const char*, int))dlsym(RTLD_NEXT, "linkat");
+#endif
+  at_pause("link", from_fd, from);
+  return original(from_fd, from, to_fd, to, flags);
+}
 static int fault_fchmodat(int fd, const char* name, mode_t mode, int flags) {
 #ifdef __APPLE__
   auto original = fchmodat;
@@ -161,6 +170,8 @@ interpose_openat __attribute__((section("__DATA,__interpose"))) = {(const void*)
 __attribute__((used)) static struct { const void* replacement; const void* original; }
 interpose_unlinkat __attribute__((section("__DATA,__interpose"))) = {(const void*)fault_unlinkat, (const void*)unlinkat};
 __attribute__((used)) static struct { const void* replacement; const void* original; }
+interpose_linkat __attribute__((section("__DATA,__interpose"))) = {(const void*)fault_linkat, (const void*)linkat};
+__attribute__((used)) static struct { const void* replacement; const void* original; }
 interpose_fchmodat __attribute__((section("__DATA,__interpose"))) = {(const void*)fault_fchmodat, (const void*)fchmodat};
 __attribute__((used)) static struct { const void* replacement; const void* original; }
 interpose_utimensat __attribute__((section("__DATA,__interpose"))) = {(const void*)fault_utimensat, (const void*)utimensat};
@@ -177,6 +188,7 @@ extern "C" int openat(int fd, const char* name, int flags, ...) {
   return fault_openat(fd, name, flags, mode);
 }
 extern "C" int unlinkat(int fd, const char* name, int flags) { return fault_unlinkat(fd, name, flags); }
+extern "C" int linkat(int from_fd, const char* from, int to_fd, const char* to, int flags) { return fault_linkat(from_fd, from, to_fd, to, flags); }
 extern "C" int fchmodat(int fd, const char* name, mode_t mode, int flags) { return fault_fchmodat(fd, name, mode, flags); }
 extern "C" int utimensat(int fd, const char* name, const timespec times[2], int flags) { return fault_utimensat(fd, name, times, flags); }
 #endif

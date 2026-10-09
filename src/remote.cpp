@@ -65,6 +65,10 @@ void put_str(std::string& s, std::string_view v) {
 void put_file_attrs(std::string& s, const Entry& e) {
   put_var(s, e.mode), put_var(s, e.uid), put_var(s, e.gid);
   put_svar(s, e.mtime), put_var(s, e.mtime_ns);
+  if (g_opt.peer_features & PF_HLINK) {
+    put_var(s, e.hdev), put_var(s, e.ino), put_var(s, e.nlink);
+    put_svar(s, e.ctime), put_var(s, e.ctime_ns);
+  }
 }
 
 struct RBuf {
@@ -264,6 +268,7 @@ void send_output(const OutputEvent& event) {
   put_str(frame, event.code), put_str(frame, event.path), put_str(frame, event.source), put_str(frame, event.target);
   frame.push_back((char)event.type);
   put_var(frame, (u64)event.size), put_var(frame, (u64)event.bytes), put_svar(frame, event.time);
+  if (g_opt.peer_features & PF_HLINK) frame.push_back((char)event.hardlink_target);
   g_conn->send(std::move(frame), true);
 }
 
@@ -274,6 +279,11 @@ void handle_output(std::string_view payload) {
   event.code = r.str(), event.path = r.str(), event.source = r.str(), event.target = r.str();
   event.type = r.byte();
   event.size = (i64)r.var(), event.bytes = (i64)r.var(), event.time = r.svar();
+  if (g_opt.peer_features & PF_HLINK) {
+    u8 hardlink = r.byte();
+    if (hardlink > 1) die(RERR_PROTOCOL, "protocol error: invalid hard-link output flag");
+    event.hardlink_target = hardlink;
+  }
   if (r.bad || !r.empty() || event.type > T_BLK || event.size < 0 || event.bytes < 0 ||
       (event.code.size() != 11 && event.code != "*deleting  ") ||
       std::any_of(event.code.begin(), event.code.end(), [](unsigned char c) { return c < 32 || c >= 127; }))
@@ -506,6 +516,10 @@ struct Sender {
         case T_CHR:
         case T_BLK: put_var(body, e.rdev); [[fallthrough]];
         default: ns++;
+      }
+      if (o.peer_features & PF_HLINK) {
+        put_var(body, e.hdev), put_var(body, e.ino), put_var(body, e.nlink);
+        put_svar(body, e.ctime), put_var(body, e.ctime_ns);
       }
       if (structured_output()) {
         if (e.type != T_REG) put_var(body, (u64)e.size);
@@ -968,6 +982,10 @@ struct Receiver {
         case T_BLK: e.rdev = (u32)r.var(); break;
         default: break;
       }
+      if (o.peer_features & PF_HLINK) {
+        e.hdev = r.var(), e.ino = r.var(), e.nlink = r.var();
+        e.ctime = r.svar(), e.ctime_ns = (u32)r.var();
+      }
       if (structured_output()) {
         if (e.type != T_REG) e.size = (i64)r.var();
         w.output_sources[i] = r.str();
@@ -1049,6 +1067,10 @@ struct Receiver {
     u32 mode = (u32)r.var() & 07777;
     attrs.uid = (u32)r.var(), attrs.gid = (u32)r.var();
     attrs.mtime = r.svar(), attrs.mtime_ns = (u32)r.var();
+    if (g_opt.peer_features & PF_HLINK) {
+      attrs.hdev = r.var(), attrs.ino = r.var(), attrs.nlink = r.var();
+      attrs.ctime = r.svar(), attrs.ctime_ns = (u32)r.var();
+    }
     if (g_opt.perms) attrs.mode = mode;
     if ((g_opt.owner || g_opt.group) && !g_opt.numeric_ids) {
       std::lock_guard<std::mutex> lock(ids.mu);
@@ -1082,6 +1104,7 @@ struct Receiver {
         Entry attrs = s;
         get_file_attrs(r, attrs);
         std::string_view bytes = r.str();
+        attrs.size = (i64)bytes.size();
         if (r.bad) die(RERR_PROTOCOL, "protocol error: truncated DATA record");
         slot_begin(t.id, w.rel, w.src.name_sv(s), (i64)bytes.size());
         OutFile file;
@@ -1188,6 +1211,7 @@ struct Receiver {
         if (b->status >= 0 && b->received == b->expected) {
           b->finished = true;
           b->f.size = b->expected;
+          b->attrs.size = b->expected;
           bool ok = false;
           if (b->f.fd >= 0) {
             if (b->status == 0 && b->ok) ok = out_finish(b->f, w, idx, t, true, &b->attrs);
@@ -1432,6 +1456,7 @@ int run_client(const std::vector<std::string>& srcs, const std::string& dest, u3
   put_var(f, wire_version);
   f.push_back(push ? 'R' : 'S');
   u64 advertised = PROTO_FEATURES & (o.whole_file ? ~PF_RESUME : ~u64(0));
+  if (!o.hard_links) advertised &= ~PF_HLINK;
   if (!output_enabled()) advertised &= ~(PF_OUTPUT | PF_DIR_OUTPUT);
   if (wire_version >= 4) put_var(f, advertised);
   put_options(f);
@@ -1507,6 +1532,8 @@ int run_client(const std::vector<std::string>& srcs, const std::string& dest, u3
     if ((o.out_format_set || o.output_unchanged) && !(o.peer_features & PF_DIR_OUTPUT))
       fallback("peer does not support directory output metadata", RERR_UNSUPPORTED);
     if (!(o.peer_features & PF_ZSTD)) o.compress = false;
+    if (o.hard_links && !(o.peer_features & PF_HLINK))
+      fallback("peer does not support hard-link preservation", RERR_UNSUPPORTED);
     break;
   }
   if (o.peer_features & PF_DIR_OUTPUT) {
@@ -1562,6 +1589,7 @@ int run_server() {
   o.am_server = true;
   o.wire_version = ver;
   o.peer_features = advertised & PROTO_FEATURES;
+  o.hard_links = o.peer_features & PF_HLINK;
   get_options(r);
   o.output_attrs = o.itemize;
   if (r.bad || (role != 'R' && role != 'S')) die(RERR_PROTOCOL, "protocol error: malformed hello options or role");

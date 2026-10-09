@@ -349,7 +349,7 @@ struct Local {
   bool clone_leaf(DirWork* d, size_t listed, Worker& w) {
     const Options& o = g_opt;
     const DirList& l = d->src;
-    if (!clone_ok.load(std::memory_order_relaxed) || l.e.size() != listed || l.e.empty() || l.e.size() > 4096 || l.incomplete) return false;
+    if (o.hard_links || !clone_ok.load(std::memory_order_relaxed) || l.e.size() != listed || l.e.empty() || l.e.size() > 4096 || l.incomplete) return false;
     if ((d->attrs.mode & 07000) || (d->attrs.mode & 0700) != 0700) return false;
     u32 gid = d->waiter ? d->waiter->dgid : d->attrs.gid;
     if (o.group && d->attrs.gid != gid) return false;
