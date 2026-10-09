@@ -193,12 +193,13 @@ class FilterWireTests(unittest.TestCase):
     def test_files_from_pull_rejects_unrequested_names_before_writes(self):
         peer = self.root / 'peer.py'
         hello = frame(1, b'XSYNC\1' + var(wire.VERSION) + var(131073))
+        acknowledgement = frame(23, bytes([0]))
         bad = wire.directory([('unexpected', 1, var(0) + string('/source/unexpected'))])
         peer.write_text('import sys,struct\n'
                         'r=sys.stdin.buffer; w=sys.stdout.buffer\n'
                         'def read():\n h=r.read(5); n,k=struct.unpack("<IB",h); return k,r.read(n)\n'
                         f'read(); w.write({hello!r}); w.flush()\n'
-                        f'assert read()[0]==23; w.write({frame(23, b"\0")!r}); w.flush()\n'
+                        f'assert read()[0]==23; w.write({acknowledgement!r}); w.flush()\n'
                         'while read()[0]!=25: pass\n'
                         'assert read()[0]==10\n'
                         f'w.write({bad!r}+{frame(5, b"")!r}); w.flush()\n'

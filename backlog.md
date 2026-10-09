@@ -2,7 +2,7 @@
 
 Initial audit written 2026-10-08 against xsync 0.1.0 (protocol 1).
 All fifteen P0 stories completed against protocol 3; per-story evidence is below.
-P1 R-02 through R-09 and E-01 through E-08 are complete (16 of 22 stories). Current protocol 4 supports protocol 3; E-09 is in progress.
+P1 R-02 through R-09 and E-01 through E-09 are complete (17 of 22 stories). Current protocol 4 supports protocol 3; E-10 is next.
 Problem statements retain the original audit findings.
 
 ## What "daily driver" means here
@@ -95,7 +95,7 @@ coverage clarification remains open.
 | E-06 | **End-of-run error summary.** With thousands of files an error scrolls away. | **done** | After the run: count of errors and the first ten, grouped by kind; exit-code line as now. | S |
 | E-07 | **`--bwlimit`, `--timeout`, keep-alive.** `--bwlimit` is rejected; `--timeout` is ignored (T-04). A stalled ssh connection hangs forever. | **done** | Token-bucket limit on the writer thread; idle timeout with keep-alive frames; exit 30 on timeout like rsync. | M |
 | E-08 | **Filter completeness.** Global rule sides, single/per-directory merge files, `-F`, merge modifiers, global CVS rules/`-C`, `-m`, and `--delete-after` reloading newly transferred receiver merge files are implemented and verified. | **done** | 231/231 difftest (expanded from 159); a differential fuzzer against rsync for the new rule kinds, checked into `tests/`. | L |
-| E-09 | **`--files-from`, `-R`, `--from0`.** Common in backup scripts and with `find … -print0`. | **partial** | Implemented for local and remote, including the "implied directories" semantics of `-R`. | L |
+| E-09 | **`--files-from`, `-R`, `--from0`.** Common in backup scripts and with `find … -print0`. | **done** | Implemented for local and remote, including the "implied directories" semantics of `-R`. | L |
 | E-10 | **Metadata beyond `-a`.** `-H` hard links, `-X` xattrs, `-A` ACLs, `-N` creation times, `-U` atimes, BSD file flags, `-E`, `--chmod`, `--chown`. Also an inconsistency to resolve: the clone path already carries xattrs and ACLs while the byte-copy and remote paths drop them. | code | `-H` and `-X` first (most used on macOS). Without `-X`, both paths behave the same — either strip on clone or document that clones are a superset. | XL |
 | E-11 | **Backup-style options.** `--backup`/`--backup-dir`, `--link-dest`, `--compare-dest`, `--remove-source-files`, `--append`, real `-S` sparse handling, `--preallocate`. | code | Prioritise `--link-dest` (snapshot backups) and `-S`; the rest fall back to rsync via R-02 until needed. | L |
 | E-12 | **macOS specifics.** Dataless iCloud files (reading triggers a download; cloning may not), immutable (`uchg`) destination files, sockets (rsync creates them, xsync skips silently), paths beyond `PATH_MAX` (tested to 40 levels only). | unverified | One test each; behaviour documented where it differs. | M |
@@ -1442,3 +1442,37 @@ Verified artifact manifest (source `864bd37edf14`):
   representation when comparing hard-link tuples. **E-09 remains partial and
   P1 remains 16/22 until final cross-platform verification completes.** Installed
   helpers remain unchanged.
+
+### E-09 — complete: selected sources and NUL input (2026-10-09)
+
+- **E-09 is complete; P1 is now 17/22.** Native `--files-from`, relative source
+  paths and NUL-delimited inputs work locally and over SSH. README documents
+  file-list defaults, remote lists, stdin, directory selection and helper
+  delimiter behavior. `--no-implied-dirs` remains delegated to rsync.
+- File-list verification covers **470 transfer comparisons**, **100 listings**,
+  input/syntax failures and source integrity. ARM and Rosetta baseline suites
+  and later record/syntax checks pass. The final complete Linux SSH file-list
+  suite passes all 10 methods. All 16 protocol checks pass on ARM, Rosetta and
+  Linux, including rejected streams/metadata, capability and acknowledgement
+  checks before reads, stdin replay on fallback and requested-name validation
+  before writes. The Linux wire helper also runs under Python 3.11.
+- Relative and NUL-filter regression suites remain green on ARM, with focused
+  relative and stdin checks passing again on Linux. Filter unit tests report
+  **32,940 checks, zero failures** on ARM, Rosetta and Linux. Both development
+  and packaged ARM byte-copy/itemization corpora pass **231/231**.
+- Release artifacts were rebuilt from source commit **c4a380a025cf**. Linux
+  amd64/arm64 scratch and Debian smoke checks pass, including selected file
+  lists, stdin, remote-owned lists, implied-directory deletion, hard links,
+  relative cuts and NUL-filter/listing input. Packaged ARM and Rosetta file-list
+  checks also pass. macOS contains both architectures and only system dylibs;
+  manifest sizes and SHA-256 values were verified:
+
+  | Artifact | Bytes | SHA-256 |
+  |---|---:|---|
+  | Darwin universal | 3,380,104 | `ee1e3f6dee8b934934bce830474be9bd06a8797105838728caa66a6bbc65089c` |
+  | Linux amd64 | 5,053,680 | `e38ad5deb562e1eafcb25599b50c99ef42c188cf675b6306d6e0108659a7e241` |
+  | Linux arm64 | 4,946,976 | `18d62cb84c417a1f1ded7184f35b111c5da13abe448dadbadd6d9f97afabcef3` |
+
+- Installed helpers remain unchanged; disposable SSH rigs were removed.
+  **E-10 is next**, starting with native extended attributes (`-H` is already
+  implemented). R-01 still awaits a distinct Linux LAN target beyond the Pi.
