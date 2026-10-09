@@ -1,0 +1,481 @@
+# xsync backlog — from benchmark winner to daily driver
+
+Initial audit written 2026-10-08 against xsync 0.1.0 (protocol 1).
+All fifteen P0 stories are now complete against protocol 3; per-story evidence is below.
+Problem statements retain the original audit findings.
+
+## What "daily driver" means here
+
+The bar is: `alias rsync=xsync` and never notice, except that it is faster and the progress
+is better. That is judged against how rsync is actually used on this machine, not against
+the whole rsync manual. From shell history and project scripts:
+
+| shape | share | what it needs from xsync |
+|---|---|---|
+| `rsync -axhP DIR DEST` | 17 of 28 history entries | `-x` correct, `-P` meaning real resume, progress on a real terminal |
+| `rsync -az[P] SRC DEST`, some with `--exclude` | 8 of 28 | remote path solid, filters (done) |
+| `rsync -e "ssh -i KEY" …` (alone or with the above) | 4 of 28 | real ssh, quoting in `-e`, key/passphrase prompts |
+| scripts: `-az --delete --out-format='%i %n'`, `-rlptz`, `--info=progress2` | several repos | `--out-format` honoured, stable script-readable output |
+| targets | Linux hosts on the LAN, a Raspberry Pi | xsync present on the far end, or a fallback when it is not |
+
+At the initial audit xsync was strong on the middle of that table (local and pipe transfers of many small
+files, 157/159 differential tests) and weak at the edges: it had never run over real ssh,
+needs itself installed on every remote, and has a handful of behaviours that would cost
+trust the first time they bite.
+
+## How to read this
+
+Status of each claim:
+
+- **partial** — verified progress recorded below; acceptance checks remain
+- **done** — implemented and verified; evidence is in the completion log below
+- **confirmed** — reproduced on 2026-10-08 with the current binary
+- **code** — known from how it is implemented; not separately tested
+- **unverified** — suspected or simply never exercised; the first task is a test
+
+Size: **S** an hour or two, **M** a day, **L** several days, **XL** a week or more.
+
+Priority tiers are ordered. Within a tier, items are roughly in the order I would do them.
+
+---
+
+## P0 — Trust: things that are wrong or dangerous today
+
+Nothing below is exotic. Each is a way a normal invocation produces a wrong tree, loses
+work, or lies about what it did.
+
+| ID | Item | Status | Done when | Size |
+|---|---|---|---|---|
+| T-01 | **Runaway recursion when DEST already exists inside SRC.** `xsync -a r/ r/backup/` on a second run nests `backup/backup/backup/…` until `ENAMETOOLONG` (about 145 levels before it stopped). rsync nests once per run because its file list is built before it writes. | **done** | The destination root (by device+inode, and by path prefix) is never descended into as a source; a difftest case covers first and second run, local and remote. | S |
+| T-02 | **`host:~/path` is not expanded.** Paths travel in the handshake rather than through the remote shell, so `~` arrives literally: `mkdir "~/tilde-dst" failed`. | **done** | Leading `~` and `~user` expand on the server for both source and destination paths; test via fakessh with a fake `HOME`. | S |
+| T-03 | **Remote wildcards do not expand.** `host:dir/*.txt` fails with `link_stat … No such file`. Same root cause as T-02. | **done** | Server-side glob of source args, with rsync's "no match is an error" behaviour. | S |
+| T-04 | **Options accepted and silently ignored.** `--out-format` (used in a project script), `--timeout`, `--contimeout`, `-S/--sparse`, `--fsync`, `--preallocate`, `--ignore-errors`, `--skip-compress`, `--block-size`, `--checksum-choice`, `--log-file-format`, `--debug`. The README promises unsupported options are rejected. | **done** | Every option is one of: implemented, rejected with an error, or listed in `--help` as a documented no-op with the reason. No fourth category. | M |
+| T-05 | **Attribute failures are silent.** Return values of `chmod`, `chown`, `utimensat`, `futimens`, `fchmod` are discarded, so a destination that cannot take the mode or time reports success. rsync prints `failed to set times/permissions` and exits 23. | **done** | Each failure prints one rsync-style error and sets exit 23; difftest case on a destination where `chmod` fails. | S |
+| T-06 | **No detection of files changing while they are read.** The copy reads `st_size` bytes as of the scan. A file rewritten mid-read lands as a mix with no warning; rsync verifies a whole-file checksum and retries. | **done** | Size and mtime are re-checked after the read; a mismatch re-sends once, then warns and exits 23/24. Test with a writer racing the copy. | M |
+| T-07 | **`--delete` keeps going after source I/O errors.** rsync skips all deletions if the sender hit any I/O error (`IO error encountered — skipping file deletion`). xsync only protects the one directory whose listing was incomplete; an unreadable sibling does not stop deletes elsewhere. | **done** | Any sender-side read/list error disables deletion for the rest of the run unless `--ignore-errors`; `--max-delete=N` implemented. | M |
+| T-08 | **Interrupted remote transfers leave temp files.** On connection loss the receiver exits immediately; in-flight `.name.XXXXXX` files stay and nothing sweeps them later. | **done** | Receiver unlinks (or, with `--partial`, keeps under the final name) every open temp on disconnect and on signal; test kills the sender mid-file and asserts a clean tree. | M |
+| T-09 | **Disk-full behaviour is untested** — and this machine's data volume is 99.6 % full. Expected risks: one error per file instead of stopping, temp files left behind, misleading exit code. | **done** | Test on a small disk image: `ENOSPC` stops the run promptly with one clear message, exit 11, no temp files, no truncated files under final names. | M |
+| T-10 | **`-x` has only been tested on a tree with no mount point**, yet it is in the most common invocation. | **done** | Test with a mounted disk image inside the source: the mount-point directory is created empty, nothing below it is copied, local and remote. | S |
+| T-11 | **New files are written under their final name.** A crash or `kill -9` leaves a truncated new file (repaired next run because its mtime differs). Defensible for speed, but it is a real difference from rsync and deserves a decision rather than a default nobody chose. See "Decisions". | **done** | Decision recorded; if kept, the cost of `--atomic` is measured on ext4 and APFS and stated in the README. | S |
+| T-12 | **Case and Unicode-normalisation collisions.** A Linux source with `A` and `a`, or NFC/NFD variants of one name, written to APFS: last writer wins silently and the result depends on thread timing. | **done** | Detect collisions in the generator (case-folded, normalised compare when the destination is insensitive), warn once per pair, exit 23. | M |
+| T-13 | **Symlink trust on the receiver.** All operations are path-based, so a destination directory swapped for a symlink mid-run is followed. Symlink targets from the sender are taken as-is; `--safe-links`, `--copy-unsafe-links`, `--munge-links` are not implemented. | **done** | Receiver opens destination directories with `O_NOFOLLOW` and works `openat`-relative, or re-verifies type before writing; `--safe-links` implemented. | L |
+| T-14 | **Ctrl-C during a remote transfer.** Local interrupt is tested (exit 20, resumes cleanly). The remote case — does the far side stop, are both terminals and both trees clean — is not. | **done** | Test in the two-container ssh rig (Q-06): SIGINT on the client ends the server within a second and leaves no temp files. | S |
+| T-15 | **Root-only paths never ran.** `-o`, device nodes, uid/gid name mapping, `--numeric-ids`, running under `sudo`. | **done** | difftest group that runs in a container as root, including a uid that exists on one side only. | M |
+
+## P1 — Reach: being able to use it against the machines you sync with
+
+The largest practical blocker. xsync cannot talk to rsync, so today every `host:` argument
+fails unless a matching xsync is already on that host's non-interactive `PATH`.
+
+| ID | Item | Status | Done when | Size |
+|---|---|---|---|---|
+| R-01 | **Real ssh, end to end.** Everything "remote" so far ran through `tests/fakessh.sh` on one machine. Unknowns: `-e "ssh -i KEY"` quoting, passphrase / host-key / password prompts appearing while the progress region is live, `ControlMaster`, remote shells that print a banner on stdout (rsync detects this as protocol garbage and says so), ssh's own stderr. | partial | Checklist run by hand against a Linux LAN host and the Pi, then automated in Q-06; a banner on stdout produces a clear "the remote shell is printing text" error. | M |
+| R-02 | **Fallback to rsync.** If the remote has no xsync (ssh exit 127), the versions do not match, or the command line uses an option xsync rejects (`-H`, `-A`, `-X`, `-R`, daemon URLs…), re-exec the real rsync with the original arguments and say so in one line. This is what makes the alias safe. | done | `xsync -a src host-without-xsync:dst` completes via rsync with a one-line notice; `--no-fallback` and `XSYNC_FALLBACK=0` turn it off; the notice goes to stderr only. | M |
+| R-03 | **Static release binaries.** Linux amd64 and arm64 (musl, zstd and xxhash vendored), macOS universal. The current build links whatever Homebrew/apt provides. | new | `cmake --preset release-static` produces one file per target that runs on a bare Debian and on Raspberry Pi OS; `xsync --version` shows the git hash. | M |
+| R-04 | **Explicit remote install.** `xsync --install HOST` copies the matching binary to `~/.local/bin/xsync` on the host after detecting its OS/arch. Never implicit — the v3 decision that a transfer must not upload a helper still stands. | new | One command gets a fresh Linux host ready; it refuses to overwrite a newer version without `--force`. | M |
+| R-05 | **Find xsync on the remote without `--rsync-path`.** Non-interactive ssh sessions often lack `~/.local/bin` on `PATH`. | new | Server lookup tries `xsync`, then `~/.local/bin/xsync`, then `XSYNC_REMOTE_PATH`; documented. | S |
+| R-06 | **Protocol negotiation instead of version equality.** Any protocol change currently breaks every installed remote at once. | code | Hello carries feature bits; a newer client talks to an older server using the common subset; policy written down (client supports N and N-1). | M |
+| R-07 | **Install on this machine.** `cmake --install`, a Homebrew formula or tap, zsh completion (rsync's completer mostly applies), a man page generated from `--help`. | new | `brew install` or `make install` puts `xsync`, its completion and man page in place. | M |
+| R-08 | **IPv6 literals and odd host specs.** `[::1]:path` is mis-parsed; `user@host:` with an empty path and `host:` alone are untested. | code / unverified | Host parsing matches rsync's for bracketed IPv6, empty paths and `-l`-style users; unit tests. | S |
+| R-09 | **Defaults without flags.** Environment (`XSYNC_RSH` alongside the honoured `RSYNC_RSH`) and an optional config file or `XSYNC_OPTS` for personal defaults such as "progress on when stderr is a terminal". | new | Documented precedence: flags, then env, then config. | S |
+
+## P1 — Everyday behaviour: the flags in your muscle memory
+
+| ID | Item | Status | Done when | Size |
+|---|---|---|---|---|
+| E-01 | **`-P` does not resume.** `--partial` is accepted, but a partial file is never reused: there is no delta or append logic, so an interrupted 10 GB file starts from zero. On a remote disconnect the partial is not even kept (T-08). | code | An interrupted large file resumes from the verified prefix (hash the existing bytes on both sides, send the rest); tested by killing a transfer at 50 %. | L |
+| E-02 | **`--out-format` and stable script output.** One project script parses `--out-format='%i %n'`. With `-v`/`-i`, line order follows thread completion, so diffs between runs are noisy. | confirmed ignored | `%i %n %L %l %o %f %b %t` supported; when stdout is not a terminal, lines are emitted in path order; `--log-file` writes the same stream. | M |
+| E-03 | **Itemize parity.** Missing against rsync: the `./` root line, `.d..t......` for existing directories whose time changed, `cd` lines in clone mode come from a different code path than byte-copy mode, `hf` for hard links. | code | `-i` output of both paths matches rsync's on the difftest corpus after sorting; difftest starts comparing stdout for `-i` runs. | M |
+| E-04 | **Delta transfer for large changed files.** Changed files are always sent whole. Irrelevant for the congress corpus, decisive for a 2 GB database dump with small edits over Wi-Fi. | code | Files above a threshold (1 MiB) use block matching (rsync rolling checksum, or content-defined chunks with XXH3) when the destination has a previous version; `-W` disables; bytes-on-wire within 20 % of rsync on an edited-large-file test. | XL |
+| E-05 | **List mode.** `xsync host:dir/` or a single SRC should list, as rsync does; today it is a usage error. | confirmed | `ls -l`-style listing for local and remote sources. | S |
+| E-06 | **End-of-run error summary.** With thousands of files an error scrolls away. | new | After the run: count of errors and the first ten, grouped by kind; exit-code line as now. | S |
+| E-07 | **`--bwlimit`, `--timeout`, keep-alive.** `--bwlimit` is rejected; `--timeout` is ignored (T-04). A stalled ssh connection hangs forever. | code | Token-bucket limit on the writer thread; idle timeout with keep-alive frames; exit 30 on timeout like rsync. | M |
+| E-08 | **Filter completeness.** Not implemented: `P`/`R` (protect/risk), `H`/`S` (hide/show), per-directory merge files (`.rsync-filter`, `-F`, `:` rules), `-C`, `-m`, the rule modifiers `/ C e n p r s w x`. These are the two remaining difftest failures. | confirmed | 159/159 difftest; a differential fuzzer against rsync for the new rule kinds, checked into `tests/`. | L |
+| E-09 | **`--files-from`, `-R`, `--from0`.** Common in backup scripts and with `find … -print0`. | code | Implemented for local and remote, including the "implied directories" semantics of `-R`. | L |
+| E-10 | **Metadata beyond `-a`.** `-H` hard links, `-X` xattrs, `-A` ACLs, `-N` creation times, `-U` atimes, BSD file flags, `-E`, `--chmod`, `--chown`. Also an inconsistency to resolve: the clone path already carries xattrs and ACLs while the byte-copy and remote paths drop them. | code | `-H` and `-X` first (most used on macOS). Without `-X`, both paths behave the same — either strip on clone or document that clones are a superset. | XL |
+| E-11 | **Backup-style options.** `--backup`/`--backup-dir`, `--link-dest`, `--compare-dest`, `--remove-source-files`, `--append`, real `-S` sparse handling, `--preallocate`. | code | Prioritise `--link-dest` (snapshot backups) and `-S`; the rest fall back to rsync via R-02 until needed. | L |
+| E-12 | **macOS specifics.** Dataless iCloud files (reading triggers a download; cloning may not), immutable (`uchg`) destination files, sockets (rsync creates them, xsync skips silently), paths beyond `PATH_MAX` (tested to 40 levels only). | unverified | One test each; behaviour documented where it differs. | M |
+| E-13 | **Broken stdout.** `xsync -av … \| head` — rsync dies on EPIPE; xsync's behaviour is unknown. | unverified | Exits promptly with the right code and does not keep copying silently. | S |
+
+## P2 — Progress and feel: the reason to switch
+
+The display has only been checked by capturing frames from a pseudo-terminal.
+
+| ID | Item | Status | Done when | Size |
+|---|---|---|---|---|
+| U-01 | **Real-terminal pass.** Terminal.app, iTerm, tmux, over ssh, narrow widths, resize mid-run, light themes, `TERM=dumb`, non-UTF-8 locales (needs an ASCII bar fallback). | unverified | Checklist with screenshots; SIGWINCH handled; ASCII fallback when `LC_CTYPE` is not UTF-8. | M |
+| U-02 | **Rows are noise for small files.** At 12,000 files/s each row shows a random file at 0 % or 100 %. | confirmed | Rows are reserved for files that have been in flight for more than ~200 ms; small files collapse into one "small files" row with a rate. Large files show their own speed and ETA. | M |
+| U-03 | **Clone mode shows nothing per file.** Whole directories complete in one call, so the rows stay empty and the bar moves in jumps. | code | Rows show the directory being cloned; the bar advances per directory. | S |
+| U-04 | **Push progress counts bytes read, not bytes landed.** The bar can sit at 100 % while the receiver is still writing. | code | Receiver acknowledges completed bytes; the client bar reflects acknowledged work, with "sent" shown separately. | M |
+| U-05 | **Remote detail.** Wire bytes, compression ratio, and which side is the bottleneck (reading, network, writing) are known internally and not shown. | new | Total line shows wire rate and ratio with `-z`; `-vv` names the limiting stage. | M |
+| U-06 | **Progress by default on a terminal?** rsync is silent without `-P`. A daily driver might show the bar whenever stderr is a tty and stay silent in scripts. See "Decisions". | new | Decision recorded; `--no-progress` and env override exist either way. | S |
+| U-07 | **Machine-readable progress.** Off a terminal, `--progress` prints a line a second. Scripts and wrappers want rsync's `--info=progress2` single line or JSON events. | code | `--info=progress2` output is line-compatible with rsync off a tty; `--progress=json` emits one object per tick and per file. | M |
+| U-08 | **Phases that look like hangs.** Deleting a large tree, waiting for the remote to finish, hashing with `-c`: the display says "scanning" or sits at 100 %. | code | Each phase has its own label and counter (`deleting 12,410`, `verifying`, `waiting for receiver`). | S |
+| U-09 | **Dry-run summary.** `-n` prints names only with `-v`. | new | `-n` always ends with "would transfer N files (X), delete M". | S |
+| U-10 | **`-h` consistency.** The summary follows rsync's `-h` (1000-based, 1024 with `-hh`); the progress display is always 1024-based. | code | One rule, applied everywhere, documented. | S |
+| U-11 | **Suspend/resume and cursor hygiene.** Ctrl-Z / `fg`, and every exit path (including `die()` from a worker thread) restoring the cursor. | unverified | SIGTSTP/SIGCONT redraw; cursor restored in a single exit hook. | S |
+
+## P3 — Performance: holding the lead where you actually sync
+
+The benchmark so far is one corpus slice, one machine, one filesystem, no network.
+
+| ID | Item | Status | Done when | Size |
+|---|---|---|---|---|
+| F-01 | **Benchmark the real targets.** Over ssh to a Linux LAN host (ext4/XFS) and to the Pi; the full 14 GB corpus (needs disk space freed first); an update run with ~1 % of files changed; a mixed tree with large files; cold cache. | new | `bench/bench.py --target host:path` and a results table per target in the README; this decides the order of everything below. | M |
+| F-02 | **Regression gate.** Nothing stops a change from losing the lead. | new | CI job fails if any scenario drops below a recorded ratio to rsync on the same runner. | M |
+| F-03 | **ssh is one stream on one core.** On a fast LAN the cipher becomes the ceiling long before the disks do. | unverified | Measured first. Then, if it is the limit: `--streams N` (several ssh connections sharing one transfer) and no compression by default on links faster than the compressor. | L |
+| F-04 | **Adaptive compression.** `-z` compresses every block at level 3 regardless of content or link. | code | Incompressible blocks are detected from a sample and sent raw; `--skip-compress` suffixes honoured; level chosen from measured link speed unless set. | M |
+| F-05 | **Large files.** One thread reads and one stream carries each large file; local copies on Linux use a plain read/write loop. | code | Parallel ranges within a file on both ends; `copy_file_range`/`FICLONE` on Linux (reflinks on btrfs/XFS mirror the APFS clone path); `F_NOCACHE` above a size so a 50 GB copy does not evict the page cache. | L |
+| F-06 | **Linux scan path.** macOS uses `getattrlistbulk`; Linux uses `readdir` plus one `fstatat` per entry. | code | `getdents64` + `statx`, optionally batched with io_uring; measured against rsync on a no-op re-sync of the corpus on ext4. | M |
+| F-07 | **APFS byte-copy ceiling.** Creation is ~100 µs per file and does not scale with threads here; system time triples from 2 to 8 threads for no gain. Unknown: how much is path-lookup contention versus the filesystem itself, and how much is the nearly full volume. | confirmed | Re-measure on a volume with free space; try `openat`-relative creation; pick the thread count per filesystem instead of always using all performance cores. | M |
+| F-08 | **No-op re-sync burns CPU.** 0.40 s wall but 2.7 s of system time at 8 threads. | confirmed | Wall time unchanged or better with under 1 s of CPU; or an opt-in manifest that skips listing the destination entirely. | M |
+| F-09 | **Memory on very large trees.** The receiver keeps every directory record until exit; the local engine holds up to 200,000 pending files. Never run beyond 77k files. | code | A 5-million-file synthetic tree syncs within a stated memory bound; receiver frees a directory once it and its children are finished. | M |
+| F-10 | **Whole-subtree clones.** Only leaf directories are cloned in one call. A missing subtree could be one call, at the price of a long volume-wide lock. | new | Bounded version (subtrees under N entries, known from the scan) measured against the leaf-only path. | M |
+| F-11 | **Clones when `-a` is incomplete.** `-rt` or `-rlt` fall back to byte copies because the clone would bring the wrong mode. | code | Clone, then correct mode/owner; still cheaper than create+write. | S |
+| F-12 | **Deletion is single-threaded.** Removing the 96,000-entry benchmark tree takes about 10 s with `rm`; `--delete` of a large stale subtree will feel the same. | code | Parallel removal by subtree. | S |
+| F-13 | **Tiny transfers.** For one file over ssh the fixed costs dominate: thread pool start, handshake round trip. | unverified | A single small file over ssh is within 10 ms of rsync. | S |
+| F-14 | **`-c` at scale.** Sender hashes in the walkers, receiver hashes inline in the generator; unmeasured. | unverified | Benchmarked against `rsync -c`; hashing gets its own pool if it starves the scan. | S |
+
+## P4 — Engineering base
+
+| ID | Item | Status | Done when | Size |
+|---|---|---|---|---|
+| Q-01 | **Version control.** The directory is not a git repository. | confirmed | `git init`, first commit, `.gitignore` already present. | S |
+| Q-02 | **CI.** Nothing runs automatically. | new | GitHub Actions on macOS and Linux: build, `filter_test`, difftest (clone and no-clone), warnings as errors. | M |
+| Q-03 | **difftest on Linux.** The harness was written and validated on macOS only; the Linux check so far is a hand-written smoke script in a container. | confirmed | Full harness passes against Debian's rsync, with macOS-only expectations (symlink modes, clones) gated. | M |
+| Q-04 | **Sanitizers.** Never built with ASan, UBSan or TSan. The progress slots use a seqlock that TSan will flag and needs annotating. | new | Clean runs of the full difftest under each; TSan suppressions limited to the documented seqlock. | M |
+| Q-05 | **Fuzz the wire decoders.** `DIR`, `NEED`, `DATA`, hello and options parsing take bytes from the other side. Name validation exists; nothing else is adversarially tested. | new | libFuzzer targets for each frame type and for `get_options`; a day of fuzzing with no crashes; corpus checked in. | M |
+| Q-06 | **Two-machine test rig.** A pair of containers with a real sshd, for R-01, T-08, T-14 and network fault injection (`tc` delay, loss, mid-transfer disconnect). | new | `tests/ssh-rig.sh` runs the remote difftest group over real ssh and three fault cases. | M |
+| Q-07 | **Kill and converge.** `kill -9` either side at random points, re-run, compare to rsync's result. | new | 200 random kill points, local and remote, always converge with no stray files. | M |
+| Q-08 | **Randomised differential testing.** The 159 cases are hand-written. | new | Generator of random trees × random supported option sets, compared against rsync; failures minimised and added as named cases. | L |
+| Q-09 | **Large and sparse files.** Largest file tested is 12 MB. | unverified | Cases past 4 GiB offsets, a sparse file, and a file that grows or shrinks during transfer. | S |
+| Q-10 | **Option parser versus popt.** Bundled short options with arguments, `--opt=value` versus `--opt value`, `--no-*` for every negatable option, `--` handling. | code | Table-driven test comparing accept/reject against rsync for a few hundred argument vectors. | M |
+| Q-11 | **Progress rendering tests.** No automated check of the display. | new | Golden-frame tests through a pty at three widths; a test that every exit path restores the cursor. | S |
+| Q-12 | **Internal cleanups.** Fixed clone temp name `.name.xsclone` (two concurrent runs collide); `die()` from worker threads exits without cleanup; a source directory that cannot be listed is created on the destination but never gets its attributes; global mutable option state; `remove_tree` recursion depth unbounded. | code | Each fixed with a test where one is possible. | M |
+| Q-13 | **Docs.** Protocol description, a changelog, a "differences from rsync" page kept in step with the tests. | new | `docs/protocol.md` matches the code; README differences section is generated from the difftest skip list. | S |
+
+---
+
+## Decisions needed from you
+
+These change defaults, so they should be chosen rather than inherited from a benchmark run.
+
+1. **Clones by default** (current: on). Fastest by far and uses no extra disk, but copies
+   carry xattrs/ACLs and share storage with the source. Alternative: opt-in `--clone`.
+2. **New files written in place — resolved by T-11.** Atomic writes are now the
+   default for P0 trust hardening. `--no-atomic` restores direct new-file writes;
+   `--inplace` remains an explicit opt-in to direct writing.
+3. **Progress on by default when stderr is a terminal** (current: off, as in rsync).
+4. **Fallback to rsync — resolved by R-02.** Automatic with a one-line stderr notice,
+   as specified in its acceptance criteria. `--no-fallback` or `XSYNC_FALLBACK=0`
+   selects strict failure; `--fallback` overrides the environment.
+5. **Remote install** (R-04): keep it an explicit command, as decided in v3, or allow
+   `--bootstrap` during a transfer.
+6. **Scope line.** Delta transfer (E-04) and the long tail of options (E-09 to E-11) are
+   weeks of work. With fallback in place they can wait until a real invocation needs them.
+
+## Suggested order
+
+1. **Trust** — T-01 to T-05 and Q-01. All small; T-01 is a real hazard.
+2. **Reach** — R-01, R-02, R-03, R-05, with the ssh rig Q-06. After this the alias is safe
+   for every shape in the table at the top.
+3. **Your top invocation** — T-10 (`-x`), E-01 (`-P` resume), T-08, U-01, U-02.
+4. **Scripts** — E-02, E-03, T-07, E-06.
+5. **Measure, then tune** — F-01 before any other F item; it decides which of them matter.
+6. **Parity as needed** — E-08 onward, driven by what falls back to rsync in practice
+   (log every fallback and its reason; that log is the real backlog).
+
+
+## P0 completion log
+
+### T-01 — complete (2026-10-08)
+
+- Source scans exclude the destination root and descendants by canonical path,
+  and aliases by device/inode. This covers a destination that does not exist yet.
+- Remote receivers send destination identity before scanning; senders apply the
+  guard when both ends identify the same machine/filesystem root. Protocol is now 2;
+  both endpoints must be rebuilt.
+- Six differential cases cover new/existing nested destinations, two consecutive
+  runs each, local/push/pull. rsync receives an explicit destination exclusion
+  because xsync intentionally avoids rsync's once-per-run nesting. All six pass.
+- Additional `-aL` symlink-alias checks pass for local/push/pull, two runs each.
+
+### T-02 — complete (2026-10-08)
+
+- Server expands leading `~` from HOME (account database fallback) and `~user`
+  from the account database before resolving either source or destination.
+- Unknown users fail clearly with exit 3; they cannot create a literal `~user` tree.
+- `python3 tests/p0_test.py` passes fake-HOME-with-spaces push/pull, named-user
+  push/pull, unknown-user, and destination-alias tests (2 test methods).
+- T-01 full differential verification: 163/165 pass; only the original unsupported
+  prune-empty/protect-filter cases fail.
+
+### T-03 — complete (2026-10-08)
+
+- Server globs source arguments after home expansion, with sorted matches, shell
+  dot-file rules, brackets, question marks, escaped metacharacters and trailing slashes.
+- No matches produce a clear error and exit 23. Destination paths remain literal.
+- Four new differential cases pass (multiple patterns, no match, directory contents,
+  bracket patterns); the existing wildcard-filter case and fake-HOME regressions pass.
+
+### T-04 — complete (2026-10-08)
+
+- Previously ignored semantic options now fail before any transfer, including all
+  options listed in T-04 and the previously ignored short forms `-S`, `-B`, `-T`, `-M`.
+- Audited the rest of the parser: rejected ignored recursion, address-family,
+  compression and argument-mode switches. Retained only intrinsic/no-effect
+  compatibility flags, explicitly documented with reasons in help and README.
+- Compression choice is restricted to zstd/none; info accepts progress2/progress0
+  and stats2/stats0, including comma-separated and case-insensitive forms.
+- Trust regression covers 39 rejected options with an unchanged destination,
+  documented no-ops and valid compression/info choices. All 3 test methods pass.
+- The first full pass exposed three uses of `--no-whole-file`; retained it as a\n+  documented no-op because this engine has no delta mode. Final verification below.
+
+### T-05 — complete (2026-10-08)
+
+- Checked permission, ownership and timestamp calls in the generator, directory
+  finalizer, clone path and file writer. Each failed operation reports its path
+  and errno and records exit 23. In-place truncation failures are also reported.
+- Real APFS immutable-file differential cases force chmod to fail: local, push
+  and pull all match rsync's exit 23 and resulting tree. Fixture cleanup clears flags.
+- Full differential suite after T-04/T-05: 170/172 pass; only the original unsupported
+  prune-empty/protect-filter cases fail. All 3 trust test methods pass.
+
+### T-06 — complete (2026-10-08)
+
+- Byte readers snapshot the opened file and recheck size, nanosecond mtime/ctime,
+  device/inode and the named path after reading. An unstable read retries once;
+  a second change reports exit 23. Missing source opens report exit 24.
+- Remote large files remain staged until a completion record confirms stability;
+  abandoned attempts are drained and removed, including out-of-order chunk work.
+  Successful retries apply the fresh source timestamps and size. Small files are
+  validated before emitting their record. APFS clones already snapshot file content.
+- Fixed sender-directory lifetime so a fast NEED response cannot free a directory
+  while its walker is scheduling children.
+- 24 deterministic writer races cover growth, shrinkage, same-size rewrites and
+  replacement by a new inode, local/push/pull. One change succeeds with fresh bytes
+  and mtime; two changes exit 23, preserve the old destination, and leave no temp.
+- All 4 trust methods pass. Clone and byte-copy differential suites each pass
+  170/172 (the same two known filter failures); filter_test: 32,842 checks pass.
+
+### T-07 — complete (2026-10-08)
+
+- Extraneous-entry deletion is deferred until all source scans and reads finish.
+  Any source selection/list/read/checksum error skips deletions across the whole
+  tree, with one clear notice; `--ignore-errors` explicitly overrides it.
+- Directory metadata is restored after deletions, deepest directories first.
+- `--max-delete=N` counts files and directories recursively, handles zero,
+  and reports exit 25 when a limit prevents further deletions. Deletion ordering
+  matches rsync's reverse sorted-list order within the tested directories.
+- Fixed generic listing descriptor leaks and detection of readdir/stat/readlink
+  failures, so incomplete source listings cannot masquerade as complete trees.
+- Unreadable-directory and injected-read-error sibling tests pass for local/push/pull,
+  with and without `--ignore-errors`. All 24 missing-source/max-delete differential
+  cases pass, including recursive limits.
+- Clone and byte-copy full suites before adding the 12 nested-limit cases each
+  pass 182/184; only the original two filter failures remain.
+
+### T-08 — complete (2026-10-08)
+
+- Open outputs are registered independently of worker lifetimes. Fatal exits and
+  caught signals close and unlink all in-flight temporaries; `--partial` renames
+  them under their final names. New direct outputs are removed without `--partial`.
+- Output finalization/cleanup is serialized so disconnect cleanup cannot race a
+  worker into publishing an incomplete file. Server mode now installs signal handlers.
+- Eight deterministic in-flight tests pass: push/pull, killed sender or client SIGINT,
+  with/without `--partial`. They assert expected exits, no hidden temporaries,
+  absent uncommitted files or incomplete retained partials as appropriate.
+- Full differential suite: 194/196 pass, only the same two unsupported filter cases fail.
+
+### T-09 — complete (2026-10-08)
+
+- ENOSPC/EDQUOT now stop filesystem writes promptly with one diagnostic and exit 11.
+  The fatal path cleans all registered outputs, preserving existing final files.
+- Connection writers let readers consume a peer's fatal filesystem error before
+  treating EPIPE as a generic stream failure, so remote disk-full exits remain 11.
+- `tests/mount_test.py` fills a disposable 64 MiB APFS image, leaving about 2 MiB
+  free, then copies 16 MiB files. All six real-ENOSPC cases pass: new/existing final
+  files, local/push/pull; one clear message, exit 11, no temps/truncated finals.
+- The same mount test exposed a real T-10 bug: bulk source attributes report the
+  underlying mount point's device, so -x crossed it. T-10 is being fixed next.
+
+### T-10 — complete (2026-10-08)
+
+- Fixed a reproduced APFS mount-boundary bug: getattrlistbulk can return the
+  underlying mount-point device. Under -x, source directory entries are resolved
+  with stat/lstat and refreshed before comparing against the parent device.
+- The wire carries the boundary marker so the receiver creates the mount-point
+  directory and restores its attributes without expecting a child listing.
+- Disposable mounted APFS image tests pass locally, for push and for pull: the
+  directory is empty and has matching mode/mtime. A control run without -x copies
+  the mounted content. Disk images are detached and deleted after testing.
+
+### T-11 — complete (2026-10-08)
+
+- Decision for P0 hardening: atomic new-file writes are the default. The optional
+  preference question received no answer; the agent chose the safer default under
+  the trust goal. `--no-atomic` retains the previous fast path, and `--inplace`
+  explicitly writes directly. Clones create their own content snapshot.
+- Help and README document the choice and flag the earlier performance table as
+  a baseline from before trust hardening.
+- In-flight tests verify default temporary visibility versus `--no-atomic` and
+  `--inplace`, then SIGINT cleanup. Both focused atomic/remote-cleanup test methods pass.
+- Full default-path differential suite remains 194/196, with only the known filter
+  limitations.
+- Linux build/real-SSH test-image scaffolding is prepared for T-14/T-15.
+
+### T-01 follow-up — parent destinations (2026-10-08)
+
+- Narrowed subtree exclusion to cases where DEST lies inside a selected source.
+  Copying a child source into its parent destination is valid and remains supported.
+- Three new differential cases cover this shape locally, on push and on pull.
+  They pass alongside the six nested-destination cases and symlink-alias regression.
+
+### P0 checkpoint after T-11 (2026-10-08)
+
+- Both full differential configurations pass 197/199 after the parent-destination
+  regressions were added; only the original -m/protect-filter limitations fail.
+- T-01 through T-11 are complete. Next: T-12 destination-name collisions, then
+  T-13 receiver path/symlink safety, T-14 real-SSH interruption, T-15 root ownership/devices.
+- The active goal remains open until those four stories are verified.
+
+### T-12 — complete (2026-10-08)
+
+- Generator compares names according to destination case and normalization rules
+  before requesting any bytes. ICU supplies full Unicode folding and canonical
+  decomposition (including multi-character folds such as Straße/STRASSE).
+- Each colliding pair reports one diagnostic and exit 23. Both colliding entries
+  are suppressed; unrelated entries transfer, and deletion in that directory is
+  disabled. Duplicate directory arguments retain their merge semantics.
+- Eighteen file/directory collision cases pass locally, on push and on pull.
+  Case-sensitive APFS keeps A/a distinct while still rejecting NFC/NFD aliases.
+  Linux ext4 checks pass without falsely folding its distinct names.
+- Full macOS differential suite remains 197/199, with the same two filter limitations.
+- Build now requires ICU; prerequisites and the Linux test image were updated.
+
+### T-13 — complete (2026-10-08)
+
+- The receiver pins the explicit destination once, then opens descendants with
+  `O_NOFOLLOW` and performs file creation, metadata changes, directory creation,
+  symlinks, special files, checksums, cloning and deletion through directory
+  descriptors. Open outputs retain their parent descriptors through rename,
+  abort and disconnect cleanup. Clone temporaries now use unique names.
+- `--safe-links` rejects absolute targets and relative targets escaping the
+  transfer tree. Unsafe source links protect existing destination entries from
+  `--delete`, matching rsync. `--copy-unsafe-links`/`--munge-links` still fail
+  explicitly as unsupported. Protocol is now version 3; install matching peers.
+- Twenty-eight deterministic syscall-boundary races pass on macOS and Linux:
+  local/push/pull, atomic/direct/in-place/clone writes, final-name swaps,
+  metadata, deletion, interruption and partial retention. Every outside tree
+  remains byte-for-byte intact, including permissions and nanosecond mtimes.
+- Ten hostile-peer tests pass on both systems: escaping/NUL names, NUL link
+  targets, forged directory paths, duplicate roots and unrequested file data
+  are rejected with protocol error 2.
+- Fifteen new rsync differential cases pass: safe links, safe-link deletion,
+  `-L`, source-directory depth and replacing a preexisting destination symlink
+  with `--inplace`. Full corpus plus these additions: 212/214 in clone and
+  byte-copy configurations; only the two preexisting unsupported filter cases
+  remain. 32,842 filter checks, the full P0 fault suite and real mount/ENOSPC
+  tests pass.
+
+### P0 progress checkpoint
+
+- T-01 through T-13 are complete. Next: T-14 real-SSH interruption, then T-15
+  root ownership, ID mapping, sudo and devices.
+
+### T-14 — complete (2026-10-08)
+
+- `tests/ssh-rig.sh` builds a disposable Debian client/server pair, runs a real
+  sshd on a private internal Docker network, and removes its containers,
+  network and temporary keys even on failure. Key and transfer paths contain
+  spaces to exercise actual `-e` argument quoting.
+- Fixed interrupt handling while the sender waits for `DONE`. The receiver now
+  continues watching EOF after `DATA_END` while writes/deletions drain, so a
+  disconnected client stops the remote process and cleans its open outputs.
+- Eight SIGINT cases pass: push/pull, source reading/receiver draining, with and
+  without `--partial`. Draining cases verify that the sender has already sent
+  `DATA_END`. Client exit is 20; the slowest observed server shutdown is 0.598s,
+  under the one-second acceptance limit. No temporary names survive; atomic
+  updates retain old complete files and partial updates retain incomplete data.
+- A real client PTY retains its terminal settings and restores its hidden cursor.
+  Both source trees remain complete. Real-SSH compressed transfers and unchanged
+  reruns pass in both directions, including spaces in paths and key filenames.
+- Existing injected disconnect cleanup and hostile-wire tests still pass.
+
+### P0 progress checkpoint
+
+- T-01 through T-14 are complete. Remaining: T-15 root ownership, ID mapping,
+  sudo and device-node differential tests.
+
+### T-15 — complete (2026-10-08)
+
+- `tests/root_test.py` compares rsync and xsync in 96 root-only cases: local,
+  real-SSH push/pull; fresh, changed, in-place and metadata-only files; archive,
+  numeric IDs, owner-only and group-only preservation; direct root and real
+  `runner -> sudo` elevation on client and server.
+- Client/server databases give `shared` different UID/GID values (1111/3333).
+  Each side has an account absent from the other (22222/33333), plus unknown
+  numeric ID 45454. Assertions verify name mapping, numeric preservation and
+  fallback, rather than only comparing two possibly incomplete fixtures.
+- Snapshots compare owner/group, permission and set-id bits, nanosecond mtimes,
+  contents, symlink targets, FIFOs, sockets, and character/block device numbers.
+- Fixed destination-root owner/group preservation, restoring UID/GID 0 for
+  in-place writes, and restoring set-id permissions after metadata-only chown.
+- All 96 differential cases pass. The shared rig also passes all eight SIGINT
+  cases (latest maximum server shutdown 0.619s), compressed transfers and reruns.
+- Final macOS suites: 212/214 in both clone and byte-copy modes. Linux root suite:
+  208/210; the same two unsupported filter cases remain. macOS-only attribute
+  fixtures and the non-root unreadable-file fixture are correctly excluded on
+  Linux root. Full injected trust and hostile-wire suites pass on both platforms.
+
+### P0 completion checkpoint
+
+- T-01 through T-15 are complete, with each story updated when verified.
+- The next priority tier remains open. The real-SSH rig supplies part of Q-06;
+  network delay/loss faults and R-01's LAN/Pi/prompt checklist are still future work.
+- Protocol 3 requires matching xsync builds on both ends. ICU is a build dependency.
+- Two existing differential failures are explicitly unsupported P1 filter features
+  (`-m` and protect filters), not unfinished P0 acceptance checks.
+
+## P1 completion log
+
+### R-01 — partial: SSH prompts and shell checks (2026-10-09)
+
+- `tests/ssh_reach_test.py` runs against a real sshd in the isolated two-machine
+  rig: host-key confirmation, an encrypted key with a spaced filename, password
+  authentication, cancellation during a prompt, ControlMaster reuse, stdout
+  banners (including a short banner), and ordinary SSH stderr. All five methods
+  pass. Terminal attributes are preserved; progress starts after authentication
+  and restores the cursor. Authentication cancellation returns 20.
+- A shell banner now produces the explicit “the remote shell is printing text
+  on stdout” diagnostic. Protocol corruption does not trigger fallback.
+- `sanjee@neo.local` is an accessible Raspberry Pi 5 running Debian 13.5/aarch64;
+  rsync 3.4.1 is installed, xsync is absent. R-02's fallback push/pull is verified
+  there with disposable directories, spaces, a 2 MiB file, symlink, timestamp and
+  SHA-256 comparisons. No helper was uploaded.
+- **Remaining:** run the native xsync LAN/Pi checklist after R-03/R-04 provide a
+  compatible release and explicit install. Container SSH coverage supplements
+  that checklist; it does not complete the physical-host requirement.
+
+### R-02 — complete (2026-10-09)
+
+- Unsupported rsync options/filter features and daemon URLs exec a real rsync
+  from PATH before any xsync transfer. Original rsync arguments, quoting,
+  explicit `--rsync-path`, exit status and the caller's umask are preserved.
+  xsync-only worker/clone/atomic/fallback switches are removed. Executables
+  resolving to xsync itself are skipped to prevent an alias recursion loop.
+- A remote exit 127 or an explicit handshake version mismatch closes and reaps
+  the first connection before exec. Authentication failures, malformed frames,
+  shell banners, filesystem failures and disconnects after handshake remain
+  failures; an already-started transfer is never replayed. Protocol servers
+  cannot fall back. Exactly one fallback notice goes to stderr.
+- `--no-fallback` and `XSYNC_FALLBACK=0` disable fallback even when the flag is
+  after an unsupported option. `--fallback` enables it over the environment.
+- Six regression methods pass on macOS and Linux: real rsync hard-link/umask
+  preservation, exact argument capture and exit status, strict controls, daemon
+  and filter dispatch, no rsync/recursive alias, and push/pull handshake cases.
+  Existing strict unsupported-option and hostile receiver checks also pass.
+- `XSYNC_LAN_HOST=sanjee@neo.local python3 tests/lan_test.py -v` passes with a
+  missing remote xsync: strict exit 127 leaves the disposable remote directory
+  empty, then automatic push/pull via rsync preserves contents, symlink and
+  nanosecond mtime. Both disposable directories are removed afterward.
