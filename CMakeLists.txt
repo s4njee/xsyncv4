@@ -63,8 +63,27 @@ if(XSYNC_RELEASE_STATIC)
 endif()
 target_compile_options(xsync PRIVATE -Wall -Wextra -Wno-unused-parameter)
 
+include(GNUInstallDirs)
+find_package(Python3 REQUIRED COMPONENTS Interpreter)
+set(XSYNC_MAN_PAGE "${CMAKE_BINARY_DIR}/man/xsync.1")
+add_custom_command(OUTPUT "${XSYNC_MAN_PAGE}"
+  COMMAND ${Python3_EXECUTABLE} "${CMAKE_SOURCE_DIR}/tools/help_to_man.py" "$<TARGET_FILE:xsync>" "${XSYNC_MAN_PAGE}"
+  DEPENDS xsync "${CMAKE_SOURCE_DIR}/tools/help_to_man.py" VERBATIM)
+add_custom_target(man-page ALL DEPENDS "${XSYNC_MAN_PAGE}")
+install(TARGETS xsync RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(FILES "${XSYNC_MAN_PAGE}" DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
+install(FILES completions/_xsync DESTINATION ${CMAKE_INSTALL_DATADIR}/zsh/site-functions)
+
+if(EXISTS "${CMAKE_SOURCE_DIR}/dist/manifest.json")
+  foreach(release xsync-linux-amd64 xsync-linux-arm64 xsync-darwin-universal)
+    if(EXISTS "${CMAKE_SOURCE_DIR}/dist/${release}")
+      install(PROGRAMS "${CMAKE_SOURCE_DIR}/dist/${release}" DESTINATION ${CMAKE_INSTALL_DATADIR}/xsync/releases)
+    endif()
+  endforeach()
+  install(FILES "${CMAKE_SOURCE_DIR}/dist/manifest.json" DESTINATION ${CMAKE_INSTALL_DATADIR}/xsync/releases)
+endif()
+
 if(XSYNC_BUILD_RELEASE_SET)
-  find_package(Python3 REQUIRED COMPONENTS Interpreter)
   add_custom_target(release-set ALL
     COMMAND ${Python3_EXECUTABLE} "${CMAKE_SOURCE_DIR}/tools/release.py"
       --native "$<TARGET_FILE:xsync>" --revision "${XSYNC_GIT_HASH}"

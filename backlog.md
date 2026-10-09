@@ -2,7 +2,7 @@
 
 Initial audit written 2026-10-08 against xsync 0.1.0 (protocol 1).
 All fifteen P0 stories completed against protocol 3; per-story evidence is below.
-P1 R-02 through R-06 are complete. Current protocol 4 supports protocol 3; R-07 is next.
+P1 R-02 through R-07 are complete. Current protocol 4 supports protocol 3; R-08 is next.
 Problem statements retain the original audit findings.
 
 ## What "daily driver" means here
@@ -77,7 +77,7 @@ installation, lookup and protocol compatibility. Remaining reach work is below.
 | R-04 | **Explicit remote install.** `xsync --install HOST` copies the matching binary to `~/.local/bin/xsync` on the host after detecting its OS/arch. Never implicit — the v3 decision that a transfer must not upload a helper still stands. | done | One command gets a fresh Linux host ready; it refuses to overwrite a newer version without `--force`. | M |
 | R-05 | **Find xsync on the remote without `--rsync-path`.** Non-interactive ssh sessions often lack `~/.local/bin` on `PATH`. | done | Server lookup tries `xsync`, then `~/.local/bin/xsync`, then `XSYNC_REMOTE_PATH`; documented. | S |
 | R-06 | **Protocol negotiation instead of version equality.** Any protocol change currently breaks every installed remote at once. | done | Hello carries feature bits; a newer client talks to an older server using the common subset; policy written down (client supports N and N-1). | M |
-| R-07 | **Install on this machine.** `cmake --install`, a Homebrew formula or tap, zsh completion (rsync's completer mostly applies), a man page generated from `--help`. | new | `brew install` or `make install` puts `xsync`, its completion and man page in place. | M |
+| R-07 | **Install on this machine.** `cmake --install`, a Homebrew formula or tap, zsh completion (rsync's completer mostly applies), a man page generated from `--help`. | **done** | `brew install` or `make install` puts `xsync`, its completion and man page in place. | M |
 | R-08 | **IPv6 literals and odd host specs.** `[::1]:path` is mis-parsed; `user@host:` with an empty path and `host:` alone are untested. | code / unverified | Host parsing matches rsync's for bracketed IPv6, empty paths and `-l`-style users; unit tests. | S |
 | R-09 | **Defaults without flags.** Environment (`XSYNC_RSH` alongside the honoured `RSYNC_RSH`) and an optional config file or `XSYNC_OPTS` for personal defaults such as "progress on when stderr is a terminal". | new | Documented precedence: flags, then env, then config. | S |
 
@@ -587,3 +587,27 @@ These change defaults, so they should be chosen rather than inherited from a ben
   Neo intentionally retains the tested protocol-3 release for compatibility.
 - The final strict native differential run remains 212/214: only E-08's native
   `-m` and protect-filter cases are unsupported. No new failures were introduced.
+
+
+### R-07 — complete (2026-10-09)
+
+- CMake installs the executable, a manual generated from its `--help`, and zsh
+  completion. The completer reuses zsh's rsync support and adds xsync's worker,
+  explicit-install, clone, atomic and fallback switches. Existing release helpers
+  are installed under `share/xsync/releases/` for explicit remote installation.
+- `tools/package.py` creates a reproducible source archive and a local Homebrew
+  formula with the archive's SHA-256. The formula builds static, hash-checked
+  vendored dependencies. The local `xsync/local` tap is installed on this machine;
+  nothing was published. README contains both CMake and Homebrew instructions.
+- Functional packaging tests pass on macOS (including the universal static build)
+  and Linux: disposable prefixes with spaces, actual copied bytes/nanosecond
+  timestamps, clean man-page rendering, and interactive zsh TAB completion of
+  both xsync extensions and baseline rsync options.
+- `brew reinstall --build-from-source xsync/local/xsync` and `brew test
+  xsync/local/xsync` pass. `/opt/homebrew/bin/xsync` is linked, the installed
+  manual passes `mandoc -Tlint`, and adding the documented completion directory
+  to zsh's `fpath` registers `_xsync`. `otool -L` shows only libc++/libSystem.
+- The first static install exposed vendored zstd's install rules, producing a
+  Homebrew header conflict. The dependency subdirectory now builds without
+  installing its headers/libraries. The regression checks package ownership;
+  the existing Homebrew zstd installation was preserved without overwriting it.

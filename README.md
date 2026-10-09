@@ -12,7 +12,7 @@ xsync -a --progress src/ dst/            # live per-file + whole-transfer progre
 
 ## Build
 
-Needs a C++20 compiler, CMake, zstd, xxhash and ICU (`brew install zstd xxhash icu4c` /
+Needs Python 3, a C++20 compiler, CMake, zstd, xxhash and ICU (`brew install zstd xxhash icu4c` /
 `apt install libzstd-dev libxxhash-dev libicu-dev`). ICU supplies Unicode filename comparison.
 
 ```sh
@@ -30,6 +30,35 @@ Use `--no-fallback` or `XSYNC_FALLBACK=0` for strict native-only operation;
 protocol data do not fall back. Original rsync arguments are retained, including
 an explicit `--rsync-path`: that command must support rsync if fallback is needed.
 Worker, clone and atomic extensions are stripped before invoking rsync.
+
+## Install locally
+
+Install the built executable, generated man page and zsh completion into a prefix:
+
+```sh
+cmake --install build --prefix "$HOME/.local"
+```
+
+Add that prefix's `bin` to `PATH`. For zsh, put
+`fpath=("$HOME/.local/share/zsh/site-functions" $fpath)` before `compinit` in
+`.zshrc`. The completer uses zsh's rsync completion and adds xsync's extensions.
+The manual is generated from the built executable's `--help`.
+
+For a local Homebrew tap, generate the source archive and formula from this checkout:
+
+```sh
+python3 tools/package.py
+brew tap-new xsync/local
+cp dist/homebrew/Formula/xsync.rb "$(brew --repository xsync/local)/Formula/"
+brew install --build-from-source xsync/local/xsync
+brew test xsync/local/xsync
+```
+
+If the local tap already exists, skip `tap-new`; use `brew reinstall` to replace an
+installed copy. The generated formula points to this checkout's source archive
+and builds its hash-checked vendored dependencies. No public tap is published.
+Release helpers already present in `dist/` are included under
+`share/xsync/releases/` for explicit remote installation.
 
 ## Release binaries and explicit remote install
 

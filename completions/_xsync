@@ -1,0 +1,35 @@
+#compdef xsync
+
+autoload -Uz _rsync
+
+if [[ ${words[CURRENT-1]} = (--install) ]]; then
+  _hosts
+  return
+elif compset -P '--install='; then
+  _hosts
+  return
+elif [[ ${words[CURRENT-1]} = (--jobs|-j) ]] || compset -P '--jobs='; then
+  _guard '[0-9]#' 'worker count'
+  return
+fi
+
+local -a flags values
+local ret=1
+flags=(
+  '--no-fallback:fail when native support is missing'
+  '--fallback:enable rsync fallback'
+  '--no-clone:copy bytes instead of cloning'
+  '--clone:enable copy-on-write clones'
+  '--atomic:publish new files by rename'
+  '--no-atomic:write new files directly'
+)
+values=(
+  '--jobs=:number of worker threads'
+  '--install=:explicitly install the matching release on a host'
+)
+if [[ $PREFIX = -* ]]; then
+  _describe -t options 'xsync option' flags && ret=0
+  _describe -t options 'xsync option' values -S '' && ret=0
+fi
+_rsync "$@" && ret=0
+return ret

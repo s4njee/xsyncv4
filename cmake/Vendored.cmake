@@ -29,7 +29,11 @@ set(ZSTD_BUILD_PROGRAMS OFF CACHE BOOL "" FORCE)
 set(ZSTD_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(ZSTD_LEGACY_SUPPORT OFF CACHE BOOL "" FORCE)
 set(ZSTD_DISABLE_ASM ON CACHE BOOL "" FORCE)
-xsync_archive(zstd zstd-1.5.7.tar.gz SOURCE_SUBDIR build/cmake)
+# Build the linked library without installing its headers or package metadata.
+# EXCLUDE_FROM_ALL also excludes this subdirectory's install rules.
+xsync_archive(zstd zstd-1.5.7.tar.gz SOURCE_SUBDIR unused)
+add_subdirectory("${zstd_SOURCE_DIR}/build/cmake"
+  "${CMAKE_BINARY_DIR}/_deps/zstd-build" EXCLUDE_FROM_ALL)
 xsync_archive(xxhash xxhash-0.8.3.tar.gz SOURCE_SUBDIR unused)
 xsync_archive(icu icu4c-77_1-src.tgz SOURCE_SUBDIR unused)
 
