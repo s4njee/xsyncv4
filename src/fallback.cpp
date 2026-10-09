@@ -19,7 +19,7 @@ bool have_self_stat = false;
 
 bool takes_value(const std::string& name) {
   static const std::string names =
-      " rsh rsync-path jobs max-delete max-size min-size modify-window compress-level zl compress-choice zc "
+      " install rsh rsync-path jobs max-delete max-size min-size modify-window compress-level zl compress-choice zc "
       "exclude include exclude-from include-from filter info backup-dir suffix link-dest compare-dest copy-dest files-from "
       "chmod chown usermap groupmap bwlimit partial-dir port password-file log-file write-batch read-batch only-write-batch "
       "temp-dir iconv checksum-seed address sockopts stop-after stop-at max-alloc copy-as early-input remote-option "
@@ -64,7 +64,7 @@ void init_fallback(int argc, char** argv) {
     std::string a = argv[i];
     if (operands || a.size() < 2 || a[0] != '-') { arguments.push_back(a); continue; }
     if (a == "--") { operands = true; arguments.push_back(a); continue; }
-    if (a == "--server") server = true;
+    if (a == "--server" || a == "--install" || a.rfind("--install=", 0) == 0) server = true;
     if (a == "--no-fallback") { enabled = false; continue; }
     if (a == "--fallback") { enabled = true; continue; }
     if (a == "--atomic" || a == "--no-atomic" || a == "--clone" || a == "--no-clone") continue;

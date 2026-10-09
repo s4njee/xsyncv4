@@ -71,9 +71,9 @@ fails unless a matching xsync is already on that host's non-interactive `PATH`.
 |---|---|---|---|---|
 | R-01 | **Real ssh, end to end.** Everything "remote" so far ran through `tests/fakessh.sh` on one machine. Unknowns: `-e "ssh -i KEY"` quoting, passphrase / host-key / password prompts appearing while the progress region is live, `ControlMaster`, remote shells that print a banner on stdout (rsync detects this as protocol garbage and says so), ssh's own stderr. | partial | Checklist run by hand against a Linux LAN host and the Pi, then automated in Q-06; a banner on stdout produces a clear "the remote shell is printing text" error. | M |
 | R-02 | **Fallback to rsync.** If the remote has no xsync (ssh exit 127), the versions do not match, or the command line uses an option xsync rejects (`-H`, `-A`, `-X`, `-R`, daemon URLs…), re-exec the real rsync with the original arguments and say so in one line. This is what makes the alias safe. | done | `xsync -a src host-without-xsync:dst` completes via rsync with a one-line notice; `--no-fallback` and `XSYNC_FALLBACK=0` turn it off; the notice goes to stderr only. | M |
-| R-03 | **Static release binaries.** Linux amd64 and arm64 (musl, zstd and xxhash vendored), macOS universal. The current build links whatever Homebrew/apt provides. | new | `cmake --preset release-static` produces one file per target that runs on a bare Debian and on Raspberry Pi OS; `xsync --version` shows the git hash. | M |
-| R-04 | **Explicit remote install.** `xsync --install HOST` copies the matching binary to `~/.local/bin/xsync` on the host after detecting its OS/arch. Never implicit — the v3 decision that a transfer must not upload a helper still stands. | new | One command gets a fresh Linux host ready; it refuses to overwrite a newer version without `--force`. | M |
-| R-05 | **Find xsync on the remote without `--rsync-path`.** Non-interactive ssh sessions often lack `~/.local/bin` on `PATH`. | new | Server lookup tries `xsync`, then `~/.local/bin/xsync`, then `XSYNC_REMOTE_PATH`; documented. | S |
+| R-03 | **Static release binaries.** Linux amd64 and arm64 (musl, zstd and xxhash vendored), macOS universal. The current build links whatever Homebrew/apt provides. | partial | `cmake --preset release-static` produces one file per target that runs on a bare Debian and on Raspberry Pi OS; `xsync --version` shows the git hash. | M |
+| R-04 | **Explicit remote install.** `xsync --install HOST` copies the matching binary to `~/.local/bin/xsync` on the host after detecting its OS/arch. Never implicit — the v3 decision that a transfer must not upload a helper still stands. | partial | One command gets a fresh Linux host ready; it refuses to overwrite a newer version without `--force`. | M |
+| R-05 | **Find xsync on the remote without `--rsync-path`.** Non-interactive ssh sessions often lack `~/.local/bin` on `PATH`. | done | Server lookup tries `xsync`, then `~/.local/bin/xsync`, then `XSYNC_REMOTE_PATH`; documented. | S |
 | R-06 | **Protocol negotiation instead of version equality.** Any protocol change currently breaks every installed remote at once. | code | Hello carries feature bits; a newer client talks to an older server using the common subset; policy written down (client supports N and N-1). | M |
 | R-07 | **Install on this machine.** `cmake --install`, a Homebrew formula or tap, zsh completion (rsync's completer mostly applies), a man page generated from `--help`. | new | `brew install` or `make install` puts `xsync`, its completion and man page in place. | M |
 | R-08 | **IPv6 literals and odd host specs.** `[::1]:path` is mis-parsed; `user@host:` with an empty path and `host:` alone are untested. | code / unverified | Host parsing matches rsync's for bracketed IPv6, empty paths and `-l`-style users; unit tests. | S |
@@ -479,3 +479,42 @@ These change defaults, so they should be chosen rather than inherited from a ben
   missing remote xsync: strict exit 127 leaves the disposable remote directory
   empty, then automatic push/pull via rsync preserves contents, symlink and
   nanosecond mtime. Both disposable directories are removed afterward.
+
+### R-03 — partial: release set built (2026-10-09)
+
+- `release-static` builds a macOS arm64/x86_64 universal binary and Linux
+  amd64/arm64 binaries using musl in Alpine. Original zstd 1.5.7, xxHash 0.8.3
+  and ICU 77.1 archives, SHA-256 checks and licenses are vendored.
+- Both Linux artifacts run in scratch containers with no runtime libraries.
+  The universal binary runs under arm64 and x86_64/Rosetta and links only
+  libc++/libSystem; its destination file/directory collision checks pass.
+- Git tracking was initialized locally; `--version` includes the source commit.
+  **Remaining:** final recorded-source rebuild, bare Debian transfers, and
+  execution on the actual Raspberry Pi through R-04's explicit installation.
+
+### R-04 — partial: explicit installer verified in isolated hosts (2026-10-09)
+
+- `--install HOST` detects Linux amd64/arm64 or macOS, chooses the release,
+  streams it over SSH into a private temp file, verifies its version and uses
+  rename to publish `~/.local/bin/xsync`. It never runs during a transfer.
+- Newer/unrecognized versions are refused unless `--force`; the version is
+  checked again before publishing to catch concurrent changes. Invalid upload
+  preserves the old executable and removes its temp file. Non-file targets,
+  unexpected shell output, unsupported platforms and missing artifacts fail.
+- Five local installer regression methods pass on macOS and Linux. A real
+  SSH test in the disposable server also passes fresh install, exact executable
+  SHA-256, refusal of version 99.0.0, forced replacement and temp cleanup.
+- **Remaining:** install the arm64 static release on the authorized Pi and
+  verify native transfers in its disposable LAN test directory.
+
+### R-05 — complete (2026-10-09)
+
+- Default SSH server lookup tries PATH `xsync`, `~/.local/bin/xsync`, then
+  `XSYNC_REMOTE_PATH` (local value, otherwise remote value). Quoted paths with
+  spaces/apostrophes and `~/` are supported. Explicit `--rsync-path` bypasses
+  all lookup. Nothing is uploaded; no candidate exits 127 before transfer.
+- A real SSH regression isolates PATH and HOME in disposable directories and
+  verifies all lookup choices, the explicit override, the missing-helper strict
+  failure and copied file SHA-256. All six cases pass. Fallback regressions and
+  the original SSH prompt/banner suite also pass after shell quoting was shared
+  with the installer and extended to validate quotes/escapes.

@@ -31,6 +31,44 @@ protocol data do not fall back. Original rsync arguments are retained, including
 an explicit `--rsync-path`: that command must support rsync if fallback is needed.
 Worker, clone and atomic extensions are stripped before invoking rsync.
 
+## Release binaries and explicit remote install
+
+Build on macOS with CMake 3.24+, Ninja, a C/C++ compiler, GNU make and Docker
+(with Linux amd64/arm64 emulation available):
+
+```sh
+cmake --preset release-static
+cmake --build --preset release-static
+```
+
+The preset creates `dist/xsync-linux-amd64`, `dist/xsync-linux-arm64` and
+`dist/xsync-darwin-universal`, plus a SHA-256 manifest. Linux uses musl and is
+fully static; macOS contains both architectures and links only Apple system
+libraries. zstd, xxHash and ICU source archives are vendored and hash checked,
+including ICU's Unicode name comparison support. Linux outputs run without
+installed runtime dependencies. A Linux build host can produce the two Linux
+outputs; producing the macOS universal output requires macOS. `--version`
+includes the source Git revision. Exported source trees can pass
+`-DXSYNC_GIT_HASH=REVISION` to CMake.
+
+```sh
+build/xsync --install sanjee@neo.local
+build/xsync --install user@host --force  # explicitly replace a newer version
+```
+
+`--install HOST` probes the host's OS and architecture, chooses the matching
+release, and atomically installs it at `~/.local/bin/xsync`. It refuses newer or
+unrecognized existing versions unless `--force` is given. An interrupted or
+invalid upload leaves the previous executable intact. Release files are searched
+beside the local executable, in its sibling `dist/`, or in
+`../share/xsync/releases/`; `XSYNC_RELEASE_DIR` explicitly selects another directory.
+Only the install command uploads an executable; transfers never install one.
+
+Normal transfers search the remote PATH for `xsync`, then `~/.local/bin/xsync`,
+then the executable named by `XSYNC_REMOTE_PATH` (local environment first,
+otherwise the remote environment). That path can contain spaces or begin `~/`.
+An explicit `--rsync-path` supplies the remote command and bypasses this lookup.
+
 ## Benchmark
 
 `bench/bench.py`, 3 runs per tool, best time shown. Corpus: the 109th Congress slice of the

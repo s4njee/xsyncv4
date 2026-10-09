@@ -14,6 +14,7 @@
 #include <unistd.h>
 
 #include <cerrno>
+#include <algorithm>
 #include <cstdlib>
 #include <memory>
 #include <unordered_map>
@@ -27,6 +28,7 @@
 #include "engine.h"
 #include "progress.h"
 #include "fallback.h"
+#include "transport.h"
 
 #ifndef O_CLOEXEC
 #define O_CLOEXEC 0
@@ -1248,27 +1250,6 @@ Remote split_remote(const std::string& a) {
   return r;
 }
 
-std::vector<std::string> split_words(const std::string& s) {
-  std::vector<std::string> out;
-  std::string cur;
-  bool in = false;
-  char quote = 0;
-  for (char ch : s) {
-    if (quote) {
-      if (ch == quote) quote = 0;
-      else cur.push_back(ch);
-    } else if (ch == '\'' || ch == '"') {
-      quote = ch, in = true;
-    } else if (ch == ' ' || ch == '\t') {
-      if (in) out.push_back(cur), cur.clear(), in = false;
-    } else {
-      cur.push_back(ch), in = true;
-    }
-  }
-  if (in) out.push_back(cur);
-  return out;
-}
-
 bool is_remote_arg(const std::string& a) {
   size_t colon = a.find(':');
   if (colon == std::string::npos) return false;
@@ -1295,12 +1276,22 @@ int run_client(const std::vector<std::string>& srcs, const std::string& dest) {
       paths.push_back(r.path);
     }
   }
-  std::string rsh = !o.rsh.empty() ? o.rsh : getenv("RSYNC_RSH") ? getenv("RSYNC_RSH") : "ssh";
-  std::vector<std::string> cmd = split_words(rsh);
+  std::vector<std::string> cmd = split_shell_words(remote_shell_command());
   if (cmd.empty()) die(RERR_SYNTAX, "empty remote shell command");
   if (!rem.user.empty()) cmd.push_back("-l"), cmd.push_back(rem.user);
   cmd.push_back(rem.host);
-  cmd.push_back(o.rsync_path.empty() ? "xsync" : o.rsync_path);
+  if (!o.rsync_path.empty()) cmd.push_back(o.rsync_path);
+  else {
+    const char* override_path = getenv("XSYNC_REMOTE_PATH");
+    std::string lookup =
+        "if command -v xsync >/dev/null 2>&1; then exec xsync \"$@\"; "
+        "elif [ -x \"$HOME/.local/bin/xsync\" ]; then exec \"$HOME/.local/bin/xsync\" \"$@\"; fi; ";
+    if (override_path && *override_path) lookup += "extra=" + shell_quote(override_path) + "; ";
+    else lookup += "extra=${XSYNC_REMOTE_PATH:-}; ";
+    lookup += "case \"$extra\" in '~/'*) extra=\"$HOME/${extra#??}\";; esac; "
+              "if [ -n \"$extra\" ] && [ -x \"$extra\" ]; then exec \"$extra\" \"$@\"; fi; exit 127";
+    cmd.push_back("sh -c " + shell_quote(lookup) + " xsync");
+  }
   cmd.push_back("--server");
 
   int to_child[2], from_child[2];

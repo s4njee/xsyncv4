@@ -1,0 +1,20 @@
+{
+  "version": 3,
+  "cmakeMinimumRequired": {"major": 3, "minor": 24, "patch": 0},
+  "configurePresets": [
+    {
+      "name": "release-static",
+      "displayName": "Static release set (Linux musl and macOS universal)",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build-release",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "XSYNC_RELEASE_STATIC": "ON",
+        "XSYNC_BUILD_RELEASE_SET": "ON",
+        "CMAKE_OSX_ARCHITECTURES": "arm64;x86_64",
+        "CMAKE_OSX_DEPLOYMENT_TARGET": "11.0"
+      }
+    }
+  ],
+  "buildPresets": [{"name": "release-static", "configurePreset": "release-static", "jobs": 8}]
+}

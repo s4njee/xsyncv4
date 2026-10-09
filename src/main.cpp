@@ -11,6 +11,7 @@
 #include "engine.h"
 #include "progress.h"
 #include "fallback.h"
+#include "install.h"
 
 namespace {
 
@@ -23,9 +24,9 @@ namespace {
 }
 
 void print_version() {
-  printf("xsync  version %s  protocol version %u\n", XSYNC_VERSION, PROTO_VERSION);
-  printf("A fast, parallel rsync work-alike. Not wire-compatible with rsync:\n"
-         "remote transfers need xsync on both ends.\n");
+  printf("xsync  version %s  protocol version %u  git %s\n", XSYNC_VERSION, PROTO_VERSION, XSYNC_GIT_HASH);
+  printf("A fast, parallel rsync work-alike. Native transfers use xsync on both ends;\n"
+         "missing remote support falls back to rsync unless --no-fallback is set.\n");
 }
 
 void print_help() {
@@ -101,6 +102,8 @@ Documented compatibility no-ops:
      --no-motd            no daemon transport or daemon greeting exists
 
 xsync extensions:
+     --install=HOST       explicitly install the matching release at ~/.local/bin
+                          refuses newer versions unless --force is supplied
  -j, --jobs=N             number of worker threads (default: performance cores)
      --no-clone           always copy file data, even where a copy-on-write clone
                           (APFS, same volume, with -pt) would be possible
@@ -132,6 +135,7 @@ i64 parse_size(const std::string& s, const char* opt) {
 
 struct Parsed {
   std::vector<std::string> args;
+  std::string install;
   bool server = false;
 };
 
@@ -160,6 +164,7 @@ Parsed parse(int argc, char** argv) {
     };
     if (name == "server") p.server = true;
     else if (name == "fallback" || name == "no-fallback") {}  // captured before parsing
+    else if (name == "install") p.install = need();
     else if (name == "version") print_version(), exit(0);
     else if (name == "help") print_help(), exit(0);
     else if (name == "verbose") o.verbose++;
@@ -420,6 +425,10 @@ int main(int argc, char** argv) {
   if (p.server) {
     g_opt.am_server = true;
     return run_server();
+  }
+  if (!p.install.empty()) {
+    if (!p.args.empty()) usage_error("--install cannot be combined with transfer paths");
+    return install_remote(p.install, g_opt.force);
   }
 
   if (p.args.empty()) {
