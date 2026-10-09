@@ -2,7 +2,7 @@
 
 Initial audit written 2026-10-08 against xsync 0.1.0 (protocol 1).
 All fifteen P0 stories completed against protocol 3; per-story evidence is below.
-P1 R-02 through R-09 and E-01 through E-05 are complete (13 of 22 stories). Current protocol 4 supports protocol 3; E-06 is next.
+P1 R-02 through R-09 and E-01 through E-06 are complete (14 of 22 stories). Current protocol 4 supports protocol 3; E-07 is next.
 Problem statements retain the original audit findings.
 
 ## What "daily driver" means here
@@ -92,7 +92,7 @@ coverage clarification remains open.
 | E-03 | **Itemize parity.** Missing against rsync: the `./` root line, `.d..t......` for existing directories whose time changed, `cd` lines in clone mode come from a different code path than byte-copy mode, `hf` for hard links. | **done** | `-i` output of both paths matches rsync's on the difftest corpus after sorting; difftest starts comparing stdout for `-i` runs. | M |
 | E-04 | **Delta transfer for large changed files.** Changed files are always sent whole. Irrelevant for the congress corpus, decisive for a 2 GB database dump with small edits over Wi-Fi. | **done** | Files above a threshold (1 MiB) use block matching (rsync rolling checksum, or content-defined chunks with XXH3) when the destination has a previous version; `-W` disables; bytes-on-wire within 20 % of rsync on an edited-large-file test. | XL |
 | E-05 | **List mode.** `xsync host:dir/` or a single SRC should list, as rsync does; today it is a usage error. | **done** | `ls -l`-style listing for local and remote sources. | S |
-| E-06 | **End-of-run error summary.** With thousands of files an error scrolls away. | **in progress** | After the run: count of errors and the first ten, grouped by kind; exit-code line as now. | S |
+| E-06 | **End-of-run error summary.** With thousands of files an error scrolls away. | **done** | After the run: count of errors and the first ten, grouped by kind; exit-code line as now. | S |
 | E-07 | **`--bwlimit`, `--timeout`, keep-alive.** `--bwlimit` is rejected; `--timeout` is ignored (T-04). A stalled ssh connection hangs forever. | code | Token-bucket limit on the writer thread; idle timeout with keep-alive frames; exit 30 on timeout like rsync. | M |
 | E-08 | **Filter completeness.** Not implemented: `P`/`R` (protect/risk), `H`/`S` (hide/show), per-directory merge files (`.rsync-filter`, `-F`, `:` rules), `-C`, `-m`, the rule modifiers `/ C e n p r s w x`. These are the two remaining difftest failures. | confirmed | 159/159 difftest; a differential fuzzer against rsync for the new rule kinds, checked into `tests/`. | L |
 | E-09 | **`--files-from`, `-R`, `--from0`.** Common in backup scripts and with `find … -print0`. | code | Implemented for local and remote, including the "implied directories" semantics of `-R`. | L |
@@ -1046,3 +1046,36 @@ Verified artifact manifest (source `75865d22f284`):
   only E-08's two known filter failures. Release smoke now checks local/remote
   error counts, stderr-only output and the original final exit-code line.
   E-06 remains in progress until final release verification finishes.
+
+### E-06 — completed: bounded error summaries and verified releases (2026-10-09)
+
+- Local/client errors now end with a count and the first ten examples across
+  exit-code kinds, grouped by kind on stderr before the original exit-code line.
+  Storage remains bounded with thousands of failures. Control characters in
+  samples are escaped, quiet mode retains errors, and stdout/log streams retain
+  their existing contents. Zero-code notices and redundant peer completion
+  statuses do not inflate counts; status-only peer failures remain visible.
+- Eleven focused methods pass on macOS ARM, Rosetta and real Linux SSH, covering
+  local/push/pull failures, receiver failures, 64 simultaneous read errors,
+  6,000 errors with exactly ten retained examples, quiet/log parity, mixed kinds,
+  fatal errors, vanished-file warnings and interruption after earlier errors.
+  ARM-client/Rosetta-peer push and pull also preserve exact counts and log output.
+- macOS P0 (13), output (10), fallback (6) and real APFS mount/disk-full (2)
+  methods pass. Linux P0/output, frozen protocol compatibility (4), and hostile
+  listing wire checks (4) pass with the two pre-existing Linux P0 platform/root
+  skips. Existing collision/disk-full tests check immediate errors separately
+  from the intentional repeat in the summary. Strict native forced-byte-copy
+  sorted itemization remains **229/231**, with E-08's two known filter failures.
+- Source **`d68b5af629c3`** builds verified macOS universal and static musl Linux
+  amd64/arm64 artifacts. Scratch startup and bare-Debian release smoke pass,
+  including local/remote stderr-only error counts and the unchanged exit line,
+  plus prior transfer/resume/compression/output/hard-link/delta/listing checks.
+  Generated manual lint passes. Installed Homebrew/Pi helpers were unchanged.
+
+Verified artifact manifest (source `d68b5af629c3`):
+
+| Artifact | Bytes | SHA-256 |
+|---|---:|---|
+| `xsync-darwin-universal` | 2,954,824 | `2f55d168ab03fc3ea7854549e07e1b4ba8c31a275629ff950fa3211871aa345d` |
+| `xsync-linux-amd64` | 4,808,104 | `c93c071363ca1d9b868cfab1864d2b981413c12bcf1db836fecc533d7ab73e89` |
+| `xsync-linux-arm64` | 4,780,352 | `6fb670112e59a626e974e84f168a367f928f2d43a44201a1c91e0fce62345e43` |
