@@ -500,6 +500,13 @@ python3 tests/io_limit_test.py                            # pacing, deadlines, k
 ./tests/ssh-rig.sh io_limit_test.py                        # real SSH pacing and interruption
 python3 tests/list_test.py                                # listing parity and no destination writes
 python3 tests/list_wire_test.py                           # hostile listing metadata and fallback
+python3 tests/filter_diff_test.py                         # global rule-side differential fuzzer
+python3 tests/filter_merge_test.py                        # merge scopes, inheritance and modifiers
+python3 tests/filter_cvs_test.py                          # CVS imports and client/server settings
+python3 tests/filter_after_test.py                        # updated receiver rules and fresh deletion scans
+python3 tests/filter_prune_test.py                        # prune-empty transfers and listings
+python3 tests/filter_wire_test.py                         # negotiated filter/deletion/prune configuration
+python3 tests/prune_wire_test.py                          # incomplete or unsafe staged prune lists
 ./tests/ssh-rig.sh list_test.py                            # real SSH listing parity
 python3 tests/delta_test.py                               # local/push/pull matching and races
 python3 tests/delta_wire_test.py                          # signatures, references, integrity
@@ -509,8 +516,8 @@ XSYNC_LAN_HOST=user@host python3 tests/lan_test.py -v       # missing-helper LAN
 ./tests/ssh-rig.sh root_test.py                           # Docker: 96 root/ID/device cases
 ```
 
-In strict native mode, 229 of 231 pass in both configurations; the two that do not use `-m` and `P` filter rules,
-which are not implemented. The root group also compares UID/GID values and
+The strict native corpus passes 231/231 with sorted itemization on forced
+byte-copy transfers. The root group also compares UID/GID values and
 character/block device numbers across two machines with different account databases,
 including IDs present on only one machine and real sudo elevation on both ends.
 

@@ -2,7 +2,7 @@
 
 Initial audit written 2026-10-08 against xsync 0.1.0 (protocol 1).
 All fifteen P0 stories completed against protocol 3; per-story evidence is below.
-P1 R-02 through R-09 and E-01 through E-07 are complete (15 of 22 stories). Current protocol 4 supports protocol 3; E-08 is in progress.
+P1 R-02 through R-09 and E-01 through E-08 are complete (16 of 22 stories). Current protocol 4 supports protocol 3; E-09 is next.
 Problem statements retain the original audit findings.
 
 ## What "daily driver" means here
@@ -94,7 +94,7 @@ coverage clarification remains open.
 | E-05 | **List mode.** `xsync host:dir/` or a single SRC should list, as rsync does; today it is a usage error. | **done** | `ls -l`-style listing for local and remote sources. | S |
 | E-06 | **End-of-run error summary.** With thousands of files an error scrolls away. | **done** | After the run: count of errors and the first ten, grouped by kind; exit-code line as now. | S |
 | E-07 | **`--bwlimit`, `--timeout`, keep-alive.** `--bwlimit` is rejected; `--timeout` is ignored (T-04). A stalled ssh connection hangs forever. | **done** | Token-bucket limit on the writer thread; idle timeout with keep-alive frames; exit 30 on timeout like rsync. | M |
-| E-08 | **Filter completeness.** Global rule sides, single/per-directory merge files, `-F`, merge modifiers, global CVS rules/`-C`, and `--delete-after` reloading newly transferred receiver merge files are implemented. Remaining: `-m`. The prune-empty case is the remaining difftest failure. | **in progress** | 231/231 difftest (expanded from 159); a differential fuzzer against rsync for the new rule kinds, checked into `tests/`. | L |
+| E-08 | **Filter completeness.** Global rule sides, single/per-directory merge files, `-F`, merge modifiers, global CVS rules/`-C`, `-m`, and `--delete-after` reloading newly transferred receiver merge files are implemented and verified. | **done** | 231/231 difftest (expanded from 159); a differential fuzzer against rsync for the new rule kinds, checked into `tests/`. | L |
 | E-09 | **`--files-from`, `-R`, `--from0`.** Common in backup scripts and with `find … -print0`. | code | Implemented for local and remote, including the "implied directories" semantics of `-R`. | L |
 | E-10 | **Metadata beyond `-a`.** `-H` hard links, `-X` xattrs, `-A` ACLs, `-N` creation times, `-U` atimes, BSD file flags, `-E`, `--chmod`, `--chown`. Also an inconsistency to resolve: the clone path already carries xattrs and ACLs while the byte-copy and remote paths drop them. | code | `-H` and `-X` first (most used on macOS). Without `-X`, both paths behave the same — either strip on clone or document that clones are a superset. | XL |
 | E-11 | **Backup-style options.** `--backup`/`--backup-dir`, `--link-dest`, `--compare-dest`, `--remove-source-files`, `--append`, real `-S` sparse handling, `--preallocate`. | code | Prioritise `--link-dest` (snapshot backups) and `-S`; the rest fall back to rsync via R-02 until needed. | L |
@@ -1304,3 +1304,50 @@ Verified artifact manifest (source `864bd37edf14`):
 - **E-08 remains in progress:** `-m` still needs implementation and differential
   coverage. Release artifacts remain the completed E-07 set; installed helpers
   were unchanged.
+
+### E-08 — complete: prune-empty directories and full filter acceptance (2026-10-09)
+
+- `-m`/`--prune-empty-dirs` now prunes empty directory chains from the complete
+  filtered source list before local or remote generation and before listing
+  output. Global receiver protection keeps matching empty directories and
+  their ancestors; transfer restrictions do not make the source list empty.
+  Receiver per-directory files still govern deletion separately. Local source
+  directories are scanned once, with their immutable filter contexts retained.
+- Remote generation waits for `LIST_END`, preserves source indices and parent
+  references, and acknowledges pruned directories without requesting their
+  files or changing their attributes. `PF_PRUNE_EMPTY` (32768) negotiates the
+  configuration and pruned-directory counts used by push statistics. Older
+  helpers refuse or delegate before destination creation. Empty named roots
+  create no destination; trailing-slash roots retain their directory attributes.
+- Checked in `tests/filter_prune_test.py`: **348** transfer comparisons and
+  **32** listing comparisons, plus native pruned-statistics checks. These cover
+  global protection and rule sides, empty ancestor chains, absolute paths,
+  merge files, CVS imports, `-F`/`-FF`, named and empty roots, multiple listing
+  roots, non-recursive directory transfers, transfer restrictions, deletion
+  limits, read errors, dry runs and 24 random seeds per direction. All six
+  methods pass on ARM, Rosetta and real Linux SSH; the two final methods were
+  run separately on Rosetta and Linux.
+- `tests/prune_wire_test.py` rejects unfinished lists, a missing root and unsafe
+  staged names/child paths before destination creation. It passes on ARM,
+  Rosetta and Linux. Filter-wire checks (8) pass on all three; mixed-version
+  checks (9) pass on ARM and Linux, including a helper with all earlier feature
+  bits but no pruning support. Unit checks remain **32,940**, green on all three.
+- The refreshed delete-after suite (6) passes on real Linux SSH after pruning
+  was added. Existing macOS P0 (13), listing (7), receiver-wire (2), CVS (6)
+  and merge (7) methods remain green. The packaged macOS binary passes the
+  prune suite (6) and staged-stream check, and forced byte-copy sorted
+  itemization is now **231/231**. The formerly failing prune-empty case also
+  passes through the packaged clone path.
+- Rebuilt and verified the release set from source `5bd96f61ddfa`. Linux
+  amd64/arm64 scratch and Debian checks include pruning, refreshed receiver
+  rules, CVS filtering, push/pull statistics and remote listing, in addition
+  to the existing transfer, metadata, delta and I/O controls. macOS remains
+  universal and links only system dylibs; final Rosetta checks pass. Artifacts:
+  - `xsync-darwin-universal`: 3,235,672 bytes,
+    SHA-256 `67c3d966bc44efccb74e58870edd47f9e4f334a8984ebe64a0bd9548d256b4af`.
+  - `xsync-linux-amd64`: 4,978,728 bytes,
+    SHA-256 `bbad84586788af883469f7511721b907ac3d1d4c833d639d8cb5257c7029bf3f`.
+  - `xsync-linux-arm64`: 4,930,800 bytes,
+    SHA-256 `48f21ece76e56f811f040077d0a3033cc86ccb1bbb343c939f2570e5c1a56ceb`.
+- **E-08 is complete; P1 is now 16/22.** Installed helpers were unchanged.
+  E-09 is next; R-01 still awaits a distinct Linux LAN target beyond the Pi.
