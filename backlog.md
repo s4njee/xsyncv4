@@ -2,7 +2,7 @@
 
 Initial audit written 2026-10-08 against xsync 0.1.0 (protocol 1).
 All fifteen P0 stories completed against protocol 3; per-story evidence is below.
-P1 R-02 through R-09 and E-01 through E-04 are complete (12 of 22 stories). Current protocol 4 supports protocol 3; E-05 is in progress.
+P1 R-02 through R-09 and E-01 through E-05 are complete (13 of 22 stories). Current protocol 4 supports protocol 3; E-06 is next.
 Problem statements retain the original audit findings.
 
 ## What "daily driver" means here
@@ -91,7 +91,7 @@ coverage clarification remains open.
 | E-02 | **`--out-format` and stable script output.** One project script parses `--out-format='%i %n'`. With `-v`/`-i`, line order follows thread completion, so diffs between runs are noisy. | **done** | `%i %n %L %l %o %f %b %t` supported; when stdout is not a terminal, lines are emitted in path order; `--log-file` writes the same stream. | M |
 | E-03 | **Itemize parity.** Missing against rsync: the `./` root line, `.d..t......` for existing directories whose time changed, `cd` lines in clone mode come from a different code path than byte-copy mode, `hf` for hard links. | **done** | `-i` output of both paths matches rsync's on the difftest corpus after sorting; difftest starts comparing stdout for `-i` runs. | M |
 | E-04 | **Delta transfer for large changed files.** Changed files are always sent whole. Irrelevant for the congress corpus, decisive for a 2 GB database dump with small edits over Wi-Fi. | **done** | Files above a threshold (1 MiB) use block matching (rsync rolling checksum, or content-defined chunks with XXH3) when the destination has a previous version; `-W` disables; bytes-on-wire within 20 % of rsync on an edited-large-file test. | XL |
-| E-05 | **List mode.** `xsync host:dir/` or a single SRC should list, as rsync does; today it is a usage error. | **in progress** | `ls -l`-style listing for local and remote sources. | S |
+| E-05 | **List mode.** `xsync host:dir/` or a single SRC should list, as rsync does; today it is a usage error. | **done** | `ls -l`-style listing for local and remote sources. | S |
 | E-06 | **End-of-run error summary.** With thousands of files an error scrolls away. | new | After the run: count of errors and the first ten, grouped by kind; exit-code line as now. | S |
 | E-07 | **`--bwlimit`, `--timeout`, keep-alive.** `--bwlimit` is rejected; `--timeout` is ignored (T-04). A stalled ssh connection hangs forever. | code | Token-bucket limit on the writer thread; idle timeout with keep-alive frames; exit 30 on timeout like rsync. | M |
 | E-08 | **Filter completeness.** Not implemented: `P`/`R` (protect/risk), `H`/`S` (hide/show), per-directory merge files (`.rsync-filter`, `-F`, `:` rules), `-C`, `-m`, the rule modifiers `/ C e n p r s w x`. These are the two remaining difftest failures. | confirmed | 159/159 difftest; a differential fuzzer against rsync for the new rule kinds, checked into `tests/`. | L |
@@ -987,3 +987,39 @@ Verified artifact manifest (source `11cf957c0d36`):
   and test commands. Static/universal artifacts will include local/remote listing
   parity, no destination creation and zero-transfer-statistics release smoke.
   E-05 remains in progress until those release checks finish.
+
+### E-05 — completed: native listing and verified releases (2026-10-09)
+
+- Single local/remote SRC and explicit `--list-only` now produce rsync-style
+  metadata listings. Trailing slash, dot/parent forms, recursion, filters,
+  symlinks/specials, escaped names and size formatting are covered. Explicit
+  destinations remain unchanged; positive-control injection verifies no regular
+  file contents are read, including with `-c`. No transfer receiver is created.
+- Seven listing methods and four hostile/negotiation methods pass on macOS and
+  Linux. The universal ARM build passes those same methods. Rosetta passes the
+  six applicable listing methods and all four hostile-wire methods (the native
+  ARM fault-injection library is used for the no-content-read positive control).
+  ARM-client/x86_64-peer recursive listing also matches local stdout and logs,
+  including symlink/FIFO metadata and ignored output-format overrides.
+- New `PF_LIST` (512) gates listing metadata/completion with the existing sender
+  role. Invalid paths/types/modes/sizes, malformed completions, transfer records
+  and trailing bytes are rejected. Unsupported peers refuse in strict mode or
+  fall back with unchanged original argv. A shell failure after a valid list is
+  preserved. Frozen v3 options and ordinary transfer payloads remain unchanged.
+- Source **`75865d22f284`** builds verified macOS universal and static musl Linux
+  amd64/arm64 artifacts. Scratch startup and bare-Debian release smoke pass the
+  existing local/push/pull, resume, compression, output/logging, hard-link and
+  delta checks, plus new local/remote listing parity, no destination creation
+  and zero transferred files. Generated manual lint passes.
+- Transfer regression suites remain green; strict native forced-byte-copy sorted
+  itemization remains **229/231**, with the two existing E-08 filter failures.
+  The earlier release smoke failure was an over-escaped dot test pattern and was
+  corrected before verification. Installed Homebrew/Pi helpers were unchanged.
+
+Verified artifact manifest (source `75865d22f284`):
+
+| Artifact | Bytes | SHA-256 |
+|---|---:|---|
+| `xsync-darwin-universal` | 2,921,416 | `e1e94744af64df5828228f946de7b29f8a8730aa4d46bb395d246cf308e49777` |
+| `xsync-linux-amd64` | 4,803,064 | `f5d7ec600fbcd1391bc17a48c1c613f9d780d9540deb3cd9a833192384d7ac86` |
+| `xsync-linux-arm64` | 4,779,264 | `23218d9103dd9d31e5e65692c22f82d2ad6cb37ca7329b70ef3ef91fa8dbe613` |
