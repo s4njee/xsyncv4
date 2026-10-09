@@ -9,6 +9,8 @@
 #include <algorithm>
 #include <cstdio>
 #include <cstdlib>
+#include <filesystem>
+#include <fstream>
 #include <string>
 #include <string_view>
 #include <unordered_set>
@@ -694,9 +696,9 @@ const Case kCases[] = {
     {{"i:*/", "e:**/*a*/**\?c"}, kExcl, {"bar/foo/a.c", "bar/baz/x.c", "dir1/ab/foo/bar/a.c"}},
 };
 
-// Rules that still need merge support, and invalid side/modifier combinations.
+// Global CVS excludes still need support, alongside invalid modifier combinations.
 const char* const kUnsupported[] = {
-    ": .f", ". f", "merge f", "dir-merge .f", "-C",
+    "-C",
     "Hs foo", "Hr foo", "Ss foo", "Sr foo", "Ps foo", "Pr foo", "Rs foo", "Rr foo",
     "HC foo", "-e foo", "-n foo", "-w foo",
 };
@@ -895,6 +897,48 @@ void test_sides() {
   CHECK(!xattr.excluded("file", false) && !xattr.protected_from_deletion("file", false), "xattr rules ignore filenames");
 }
 
+void test_merges() {
+  std::string root = write_temp("");
+  std::remove(root.c_str());
+  std::filesystem::create_directories(root + "/sub/deep");
+  root = std::filesystem::canonical(root).string();
+  std::ofstream(root + "/.rules") << "- *.o\n";
+  std::ofstream(root + "/sub/.rules") << "+ *.o\n- /a.txt\n";
+  std::ofstream(root + "/sub/deep/.rules") << "!\n- *.txt\n";
+  std::string error;
+  FilterList filters;
+  CHECK(filters.add_filter("P global.keep", &error), "%s", error.c_str());
+  CHECK(filters.add_filter(": .rules", &error), "%s", error.c_str());
+  auto parent = filters.in_directory(root, false, &error);
+  CHECK(error.empty(), "%s", error.c_str());
+  CHECK(parent.excluded("a.o", false, root + "/a.o"), "parent exclusion");
+  auto child = parent.in_directory(root + "/sub", false, &error);
+  CHECK(error.empty(), "%s", error.c_str());
+  CHECK(!child.excluded("sub/a.o", false, root + "/sub/a.o"), "child overrides parent");
+  CHECK(child.excluded("sub/a.txt", false, root + "/sub/a.txt"), "per-dir anchor");
+  CHECK(!child.excluded("sub/deep/a.txt", false, root + "/sub/deep/a.txt"), "anchor only at its origin");
+  auto deep = child.in_directory(root + "/sub/deep", true, &error);
+  CHECK(error.empty(), "%s", error.c_str());
+  CHECK(!deep.excluded("sub/deep/a.o", false, root + "/sub/deep/a.o"), "clear inherited rules");
+  CHECK(deep.excluded("sub/deep/a.txt", false, root + "/sub/deep/a.txt"), "rules after clear");
+  CHECK(deep.protected_from_deletion("global.keep", false, false, false, root + "/sub/deep/global.keep"),
+        "clear leaves global protection");
+  CHECK(parent.excluded("sub/a.o", false, root + "/sub/a.o"), "parent is immutable");
+  CHECK(!filters.excluded("a.o", false, root + "/a.o"), "unloaded global context is immutable");
+  FilterList self, roundtrip;
+  CHECK(self.add_filter(":e .rules", &error), "%s", error.c_str());
+  for (const auto& rule : self.to_strings()) CHECK(roundtrip.add_filter(rule, &error), "%s", error.c_str());
+  CHECK(self.to_strings() == roundtrip.to_strings(), "exclude-self roundtrip does not duplicate rules");
+  FilterList single;
+  CHECK(single.add_filter(".s " + root + "/.rules", &error), "%s", error.c_str());
+  CHECK(single.excluded("a.o", false) && !single.protected_from_deletion("a.o", false), "single merge defaults");
+  CHECK(!single.has_merges(), "single merge is fully expanded");
+  FilterList wire;
+  CHECK(!wire.add_filter(". /etc/passwd", &error, false), "wire cannot read a single merge file");
+  CHECK(wire.empty(), "rejected wire merge does not add a rule");
+  std::filesystem::remove_all(root);
+}
+
 }  // namespace
 
 int main() {
@@ -902,6 +946,7 @@ int main() {
   test_api();
   test_long_paths();
   test_sides();
+  test_merges();
   std::printf("%d checks, %d failures\n", g_checks, g_failures);
   return g_failures ? 1 : 0;
 }

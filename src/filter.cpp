@@ -1,6 +1,7 @@
 #include "filter.h"
 
 #include <algorithm>
+#include <atomic>
 #include <cerrno>
 #include <cstddef>
 #include <cstdio>
@@ -12,6 +13,7 @@
 namespace {
 
 using uchar = unsigned char;
+std::atomic<uint64_t> next_merge_id{1};
 
 enum : int { kFalse = 0, kTrue = 1, kAbortAll = -1, kAbortToStarStar = -2 };
 
@@ -219,6 +221,7 @@ bool FilterList::add_old_style(std::string_view pat, bool include, std::string* 
     pat.remove_prefix(2);
   } else if (pat == "!") {
     rules_.clear();
+    cleared_ = true;
     return true;
   }
   if (pat.empty()) {
@@ -232,7 +235,7 @@ bool FilterList::add_old_style(std::string_view pat, bool include, std::string* 
 void FilterList::add_pattern(std::string_view pat, bool include) { add_old_style(pat, include, nullptr); }
 
 // Port of rsync's parse_rule_tok() for command-line -f rules (no word splitting).
-bool FilterList::add_filter(std::string_view rule, std::string* err) {
+bool FilterList::add_filter(std::string_view rule, std::string* err, bool read_merge_files) {
   if (rule.empty()) return true;
   const auto fail = [&](std::string what) {
     set_err(err, std::move(what) + ": " + std::string(rule));
@@ -257,9 +260,7 @@ bool FilterList::add_filter(std::string_view rule, std::string* err) {
     }
   }
   switch (ch) {
-    case '+': case '-': case '!': case 'H': case 'S': case 'P': case 'R': break;
-    case '.': return fail("unsupported filter rule (merge)");
-    case ':': return fail("unsupported filter rule (dir-merge)");
+    case '+': case '-': case '!': case 'H': case 'S': case 'P': case 'R': case '.': case ':': break;
     default: return fail("unknown filter rule");
   }
 
@@ -267,11 +268,16 @@ bool FilterList::add_filter(std::string_view rule, std::string* err) {
   std::string modifiers;
   uint8_t sides = ch == 'H' || ch == 'S' ? 1 : ch == 'P' || ch == 'R' ? 2 : 0;
   const bool side_prefix = sides != 0;
+  const bool merge = ch == '.' || ch == ':';
+  bool no_prefix = false;
   if (ch != '!') {
     for (char m; (m = at(++i)) && m != ' ' && m != '_';) {
-      if ((side_prefix && std::strchr("srC", m)) || std::strchr("enw", m))
+      if ((side_prefix && std::strchr("srC", m)) || (!merge && std::strchr("enw+-", m)) ||
+          (merge && m == '!') || ((m == '+' || m == '-' || m == 'C') && no_prefix))
         return fail(std::string("invalid modifier '") + m + "' in filter rule");
-      if (!std::strchr("!/sprx", m)) {
+      if (m == '+' || m == '-' || m == 'C') no_prefix = true;
+      if (!merge && m == 'C') return fail("unsupported filter rule (CVS excludes)");
+      if (!std::strchr("!/sprxCenw+-", m)) {
         return fail(std::string(std::strchr("/Cenprswx", m) ? "unsupported" : "invalid") + " modifier '" + m +
                     "' in filter rule");
       }
@@ -285,9 +291,35 @@ bool FilterList::add_filter(std::string_view rule, std::string* err) {
   if (ch == '!') {
     if (!pat.empty()) return fail("'!' rule has trailing characters");
     rules_.clear();
+    cleared_ = true;
     return true;
   }
-  if (pat.empty()) return fail("unexpected end of filter rule");
+  const bool cvs = modifiers.find('C') != std::string::npos;
+  if (pat.empty() && !(merge && cvs)) return fail("unexpected end of filter rule");
+  if (merge) {
+    if (ch == '.' && !read_merge_files) return fail("single-instance merge rules are not allowed on the wire");
+    Rule spec;
+    spec.kind = Kind::Merge;
+    spec.merge_id = next_merge_id.fetch_add(1, std::memory_order_relaxed);
+    spec.text = pat.empty() ? ".cvsignore" : std::string(pat);
+    auto filename = std::filesystem::path(spec.text);
+    if (!filename.is_absolute() && ch == '.' && !parse_scope_.empty())
+      spec.text = (std::filesystem::path(parse_scope_) / filename).string();
+    spec.prefix = ch;
+    spec.modifiers = modifiers;
+    spec.sides = sides;
+    spec.absolute = modifiers.find('/') != std::string::npos;
+    spec.perishable = modifiers.find('p') != std::string::npos;
+    spec.xattr = modifiers.find('x') != std::string::npos;
+    if (modifiers.find('e') != std::string::npos) {
+      auto slash = spec.text.rfind('/');
+      add_rule(slash == std::string::npos ? spec.text : spec.text.substr(slash + 1), false, false);
+      spec.modifiers.erase(std::remove(spec.modifiers.begin(), spec.modifiers.end(), 'e'), spec.modifiers.end());
+    }
+    if (ch == '.') return load_merge(spec.text, spec, parse_scope_, err, false);
+    rules_.push_back(std::move(spec));
+    return true;
+  }
   add_rule(pat, ch == '+' || ch == 'S' || ch == 'R', negate);
   Rule& added = rules_.back();
   added.prefix = ch;
@@ -340,7 +372,170 @@ bool FilterList::add_from_file(const std::string& path, bool include, std::strin
   return ok && !read_err;
 }
 
-bool FilterList::match(std::string_view relative, bool is_dir, bool receiver, bool delete_excluded,
+bool FilterList::load_merge(const std::string& path, const Rule& defaults, std::string_view scope,
+                            std::string* err, bool optional) {
+  if (merge_depth_ >= 64) { set_err(err, "failed to read merge file " + path + ": nesting exceeds 64"); return false; }
+  bool use_stdin = path == "-";
+  std::FILE* fp = use_stdin ? stdin : std::fopen(path.c_str(), "rb");
+  if (!fp) {
+    if (optional) return true;
+    set_err(err, "failed to open merge file " + path + ": " + std::generic_category().message(errno));
+    return false;
+  }
+  std::string content;
+  char buffer[16384];
+  for (;;) {
+    size_t count = std::fread(buffer, 1, sizeof buffer, fp);
+    content.append(buffer, count);
+    if (content.size() > 16 * 1024 * 1024) {
+      if (!use_stdin) std::fclose(fp);
+      set_err(err, "failed to read merge file " + path + ": size exceeds 16 MiB");
+      return false;
+    }
+    if (count == sizeof buffer) continue;
+    if (std::ferror(fp) && errno == EINTR) { std::clearerr(fp); continue; }
+    break;
+  }
+  bool failed = std::ferror(fp);
+  int read_error = errno;
+  if (!use_stdin) std::fclose(fp);
+  if (failed) {
+    set_err(err, "failed to read merge file " + path + ": " + std::generic_category().message(read_error));
+    return false;
+  }
+  const bool cvs = defaults.modifiers.find('C') != std::string::npos;
+  const bool words = cvs || defaults.modifiers.find('w') != std::string::npos;
+  const bool no_prefix = cvs || defaults.modifiers.find_first_of("+-") != std::string::npos;
+  auto consume = [&](std::string_view text) {
+    if (text.empty() || (!words && (text.front() == '#' || text.front() == ';'))) return true;
+    FilterList entry;
+    entry.merge_depth_ = merge_depth_ + 1;
+    entry.parse_scope_ = scope;
+    if (no_prefix && !(cvs && text == "!")) {
+      entry.add_rule(text, defaults.modifiers.find('+') != std::string::npos, false);
+    } else if (!entry.add_filter(text, err)) return false;
+    if (entry.cleared_) { rules_.clear(); cleared_ = true; }
+    for (Rule& rule : entry.rules_) {
+      if (defaults.sides && rule.sides) {
+        set_err(err, "specified-side merge file contains specified-side filter: " + std::string(text));
+        return false;
+      }
+      auto add_modifier = [&](char modifier) {
+        if (rule.modifiers.find(modifier) == std::string::npos) rule.modifiers += modifier;
+      };
+      if (defaults.sides & 1) add_modifier('s');
+      if (defaults.sides & 2) add_modifier('r');
+      rule.sides |= defaults.sides;
+      if (defaults.absolute) rule.absolute = true, add_modifier('/');
+      if (defaults.perishable) rule.perishable = true, add_modifier('p');
+      if (defaults.xattr) rule.xattr = true, add_modifier('x');
+      if (!scope.empty()) rule.scope = scope;
+      rules_.push_back(std::move(rule));
+    }
+    return true;
+  };
+  std::string_view input(content);
+  while (!input.empty()) {
+    if (words) {
+      while (!input.empty() && is_space(input.front())) input.remove_prefix(1);
+      if (input.empty()) break;
+      size_t end = 0;
+      while (end < input.size() && !is_space(input[end])) ++end;
+      std::string text(input.substr(0, end));
+      input.remove_prefix(end);
+      // Prefix and pattern have one syntactic separator even in word mode.
+      if (!no_prefix && text != "!" && text != "clear" && text.find('_') == text.npos) {
+        while (!input.empty() && is_space(input.front())) input.remove_prefix(1);
+        size_t pattern_end = 0;
+        while (pattern_end < input.size() && !is_space(input[pattern_end])) ++pattern_end;
+        if (pattern_end) text += ' ', text.append(input.substr(0, pattern_end));
+        input.remove_prefix(pattern_end);
+      }
+      if (!consume(text)) return false;
+    } else {
+      size_t end = input.find_first_of("\r\n");
+      if (!consume(input.substr(0, end))) return false;
+      if (end == input.npos) break;
+      input.remove_prefix(end + 1);
+    }
+  }
+  return true;
+}
+
+FilterList FilterList::in_directory(std::string_view path, bool receiver, std::string* err) const {
+  if (err) err->clear();
+  std::error_code error;
+  auto dir = std::filesystem::weakly_canonical(std::filesystem::absolute(std::filesystem::path(path), error), error);
+  if (error) dir = std::filesystem::path(path).lexically_normal();
+  MergeRegistry registry;
+  registered_merges(registry, true);
+  return directory_impl(dir.string(), receiver, err, 0, registry);
+}
+
+void FilterList::registered_merges(MergeRegistry& registry, bool inheriting) const {
+  for (const Rule& rule : rules_) {
+    if (rule.kind != Kind::Merge) continue;
+    auto name = std::filesystem::path(rule.text).filename().string();
+    auto found = std::find_if(registry.begin(), registry.end(), [&](const auto& item) { return item.first == name; });
+    if (found == registry.end()) registry.emplace_back(std::move(name), rule.merge_id);
+    else found->second = std::min(found->second, rule.merge_id);
+    if (rule.merged && (!inheriting || rule.modifiers.find_first_of("nC") == std::string::npos))
+      rule.merged->registered_merges(registry, inheriting);
+  }
+}
+
+FilterList FilterList::directory_impl(std::string_view path, bool receiver, std::string* err, unsigned depth,
+                                     MergeRegistry& registry) const {
+  FilterList result = *this;
+  if (depth >= 64) { set_err(err, "dir-merge nesting exceeds 64: " + std::string(path)); return result; }
+  for (Rule& rule : result.rules_) {
+    if (rule.kind != Kind::Merge) continue;
+    auto name = std::filesystem::path(rule.text).filename().string();
+    auto registered = std::find_if(registry.begin(), registry.end(), [&](const auto& item) { return item.first == name; });
+    if (registered != registry.end() && registered->second != rule.merge_id) { rule.merged.reset(); continue; }
+    if (registered == registry.end()) registry.emplace_back(name, rule.merge_id);
+    if (rule.sides && !(rule.sides & (receiver ? 2 : 1))) continue;
+    std::vector<std::string> directories;
+    if (!rule.merge_ready) {
+      std::filesystem::path name(rule.text), current(path);
+      rule.merge_name = name.filename().string();
+      // rsync removes '.' components but keeps '..' during its textual
+      // ancestor check. Collapsing '..' can incorrectly enable a parent scan.
+      std::filesystem::path first;
+      for (const auto& component : current / name.parent_path())
+        if (component != ".") first /= component;
+      auto start = first.string(), current_name = current.string();
+      const bool ancestor = start == "/" || current_name == start || current_name.starts_with(start + '/');
+      if (name.has_parent_path() && ancestor) {
+        while (current != first) { directories.push_back(current.string()); current = current.parent_path(); }
+        directories.push_back(first.string());
+        std::reverse(directories.begin(), directories.end());
+      }
+      rule.merge_ready = true;
+    }
+    if (directories.empty()) directories.emplace_back(path);
+    for (const auto& directory : directories) {
+      FilterList inherited;
+      if (rule.merged && rule.modifiers.find_first_of("nC") == std::string::npos) inherited = *rule.merged;
+      FilterList local;
+      local.merge_depth_ = depth;
+      if (!local.load_merge((std::filesystem::path(directory) / rule.merge_name).string(), rule, directory, err, true)) return result;
+      if (local.cleared_) {
+        MergeRegistry discarded;
+        inherited.registered_merges(discarded, false);
+        std::erase_if(registry, [&](const auto& item) { return std::any_of(discarded.begin(), discarded.end(),
+          [&](const auto& old) { return old.second == item.second; }); });
+      }
+      if (!local.cleared_) local.rules_.insert(local.rules_.end(), inherited.rules_.begin(), inherited.rules_.end());
+      auto merged = local.directory_impl(directory, receiver, err, depth + 1, registry);
+      if (err && !err->empty()) return result;
+      rule.merged = std::make_shared<const FilterList>(std::move(merged));
+    }
+  }
+  return result;
+}
+
+int FilterList::match(std::string_view relative, bool is_dir, bool receiver, bool delete_excluded,
                        bool deleting_directory, std::string_view absolute) const {
   std::string_view path = relative;
   if (path.empty()) return false;
@@ -353,10 +548,25 @@ bool FilterList::match(std::string_view relative, bool is_dir, bool receiver, bo
 
   for (const Rule& r : rules_) {
     if (r.xattr || (receiver && deleting_directory && r.perishable)) continue;
-    uint8_t sides = r.sides ? r.sides : delete_excluded ? 1 : 3;
+    uint8_t sides = r.sides ? r.sides : delete_excluded && r.kind != Kind::Merge ? 1 : 3;
     if (!(sides & (receiver ? 2 : 1))) continue;
+    if (r.kind == Kind::Merge) {
+      if (r.merged) {
+        int result = r.merged->match(relative, is_dir, receiver, delete_excluded, deleting_directory, absolute);
+        if (result) return result;
+      }
+      continue;
+    }
     path = r.absolute ? absolute : relative;
     if (r.absolute && path.starts_with('/')) path.remove_prefix(1);
+    if (!r.absolute && !r.scope.empty()) {
+      path = absolute;
+      if (r.scope == "/") { if (!path.starts_with('/')) continue; path.remove_prefix(1); }
+      else {
+        if (!path.starts_with(r.scope) || path.size() <= r.scope.size() || path[r.scope.size()] != '/') continue;
+        path.remove_prefix(r.scope.size() + 1);
+      }
+    }
     if (path.empty()) continue;
     const size_t n = path.size(), slash = path.rfind('/');
     const std::string_view base = slash == path.npos ? path : path.substr(slash + 1);
@@ -365,6 +575,7 @@ bool FilterList::match(std::string_view relative, bool is_dir, bool receiver, bo
     if (is_dir || !r.dir_only) {
       const std::string_view pat = r.pat;
       switch (r.kind) {
+        case Kind::Merge: break;  // Handled before pathname matching.
         case Kind::NameLit: m = base == pat; break;
         case Kind::NameSuffix: m = base.ends_with(pat); break;
         case Kind::NamePrefix: m = base.starts_with(pat); break;
@@ -398,28 +609,34 @@ bool FilterList::match(std::string_view relative, bool is_dir, bool receiver, bo
         }
       }
     }
-    if (m != r.negate) return !r.include;
+    if (m != r.negate) return r.include ? 1 : -1;
   }
-  return false;
+  return 0;
 }
 
 bool FilterList::excluded(std::string_view path, bool is_dir, std::string_view absolute) const {
-  return match(path, is_dir, false, false, false, absolute);
+  return match(path, is_dir, false, false, false, absolute) < 0;
 }
 
 bool FilterList::protected_from_deletion(std::string_view path, bool is_dir, bool delete_excluded,
                                         bool deleting_directory, std::string_view absolute) const {
-  return match(path, is_dir, true, delete_excluded, deleting_directory, absolute);
+  return match(path, is_dir, true, delete_excluded, deleting_directory, absolute) < 0;
 }
 
 bool FilterList::needs_extended() const {
   return std::any_of(rules_.begin(), rules_.end(), [](const Rule& r) {
-    return r.sides || r.absolute || r.perishable || r.xattr;
+    return r.kind == Kind::Merge || r.sides || r.absolute || r.perishable || r.xattr;
   });
 }
 
 bool FilterList::has_absolute() const {
-  return std::any_of(rules_.begin(), rules_.end(), [](const Rule& r) { return r.absolute; });
+  return std::any_of(rules_.begin(), rules_.end(), [](const Rule& r) {
+    return r.absolute || !r.scope.empty() || (r.merged && r.merged->has_absolute());
+  });
+}
+
+bool FilterList::has_merges() const {
+  return std::any_of(rules_.begin(), rules_.end(), [](const Rule& r) { return r.kind == Kind::Merge; });
 }
 
 std::string FilterList::absolute_path(std::string_view path) {

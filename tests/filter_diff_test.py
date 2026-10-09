@@ -48,7 +48,7 @@ class FilterDifferentials(unittest.TestCase):
             for directory in ('dir1', 'dir1/deep', 'empty', 'keep'):
                 tree.d(top + '/' + directory)
             for name in ('a.txt', 'b.o', '.hidden', 'keep/file', 'dir1/a.txt', 'dir1/b.o', 'dir1/deep/c.o'):
-                tree.f(top + '/' + name, (top + ':' + name).encode())
+                tree.f(top + '/' + name, ((top if top == 'src' else 'destination-old') + ':' + name).encode())
             tree.ln(top + '/link', 'a.txt')
         for name in ('stale.o', 'stale.txt', 'gone/stale.o', 'gone/stale.txt', 'gone/deep/file', 'dir1/stale.o'):
             tree.f('dst/' + name, name.encode())
@@ -61,7 +61,9 @@ class FilterDifferentials(unittest.TestCase):
 
     def copy(self, native, direction, rules, delete_excluded):
         source, destination = str(self.root / 'src') + '/', str(self.root / 'dst') + '/'
+        if getattr(self, 'named_source', False): source = source.rstrip('/')
         command = [str(transfer.BINARY) if native else RSYNC, '-ai', '--delete', '--out-format=%i|%n']
+        command += list(getattr(self, 'flags', ()))
         if native: command += ['--no-fallback', '--no-clone', '-j8']
         if delete_excluded: command.append('--delete-excluded')
         command += ['--filter=' + rule for rule in rules]

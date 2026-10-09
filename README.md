@@ -434,6 +434,19 @@ their rule text is sent. Older helpers refuse or delegate these requests before
 transferring, while ordinary include/exclude filters retain their original wire
 format.
 
+Single-instance merge rules (`. FILE`) read their file on the client and send
+the expanded rules. Per-directory rules (`: FILE`, `dir-merge FILE`) load each
+side's own files as traversal enters a directory. Local rules precede inherited
+rules within that merge slot; `!` clears that slot's inherited list. Merge
+modifiers support `e` (exclude the merge file), `n` (no inheritance), `w` (split
+words), `+`/`-` (unprefixed patterns), and `C` (CVS-style word lists without
+inheritance), together with side, absolute-path, perishable and xattr defaults.
+`-F` merges `.rsync-filter` files, including ancestor files; a second `-F` also
+excludes those files. Per-directory rules additionally negotiate
+`PF_MERGE_FILTERS` so helpers with only global-filter support refuse or delegate
+the request before transfer. `-C`, `-m`, and reloading newly transferred merge
+files for `--delete-after` remain pending under E-08.
+
 xsync-only options: `-j N`/`--jobs=N` (worker threads; default is the number of
 performance cores), `--no-clone`, `--atomic` (default), `--no-atomic`.
 

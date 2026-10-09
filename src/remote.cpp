@@ -459,6 +459,8 @@ std::string missing_feature(u64 features) {
     return "peer does not support bandwidth limits and idle timeouts";
   if (g_opt.filters.needs_extended() && !(features & PF_FILTERS))
     return "peer does not support extended filters";
+  if (g_opt.filters.has_merges() && !(features & PF_MERGE_FILTERS))
+    return "peer does not support per-directory filters";
   if (g_opt.list_only) return features & PF_LIST ? "" : "peer does not support source listing";
   if (g_opt.safe_links && !(features & PF_SAFE_LINKS)) return "peer does not support --safe-links";
   if (!g_opt.numeric_ids && (g_opt.owner || g_opt.group) && !(features & PF_IDMAP))
@@ -492,7 +494,7 @@ void get_options(RBuf& r) {
   std::string err;
   for (size_t i = 0; i < n && !r.bad; i++) {
     std::string rule(r.str());
-    if (!o.filters.add_filter(rule, &err)) die(RERR_PROTOCOL, "bad filter rule from client: %s", err.c_str());
+    if (!o.filters.add_filter(rule, &err, false)) die(RERR_PROTOCOL, "bad filter rule from client: %s", err.c_str());
   }
 }
 
@@ -555,6 +557,8 @@ enum { K_WALK = 1, K_READ = 2, K_GEN = 3, K_DATA = 4, K_SIGNATURE = 5 };
 struct SDir {
   std::string src_path, rel, attr_source;
   std::vector<std::string> src_paths;
+  std::vector<std::shared_ptr<const FilterList>> source_contexts;
+  std::shared_ptr<const FilterList> source_filter;
   DirList list;
   std::unordered_map<u32, ResumePrefix> prefixes;
   std::unordered_set<u32> delta_candidates;
@@ -668,7 +672,8 @@ struct Sender {
         d->flags |= DF_NODELETE;
         err_line(RERR_PARTIAL, "incomplete source listing: \"%s\"", d->src_path.c_str());
       }
-      prune_source(d->list, d->rel, d->attrs.dev, w, nullptr, guard, d->src_path);
+      d->source_filter = directory_filters(d->source_filter, d->src_path, false);
+      prune_source(d->list, d->rel, d->attrs.dev, w, nullptr, guard, d->src_path, d->source_filter.get());
     }
     DirList& l = d->list;
     if (o.checksum) {
@@ -754,6 +759,7 @@ struct Sender {
       SDir* ch = new SDir;
       std::string_view nm = l.name_sv(e);
       ch->src_path = d->src_paths.empty() ? path_join(d->src_path, nm) : d->src_paths[i];
+      ch->source_filter = d->source_contexts.empty() ? d->source_filter : d->source_contexts[i];
       ch->rel = rel_join(d->rel, nm);
       ch->attrs = e;
       ch->flags = DF_ATTRS;
@@ -1074,6 +1080,7 @@ struct Sender {
     SDir* root = new SDir;
     root->list = std::move(rl.list);
     root->src_paths = std::move(rl.src_paths);
+    root->source_contexts = std::move(rl.source_contexts);
     root->attrs = rl.attrs;
     root->attr_source = std::move(rl.attr_source);
     root->flags = (rl.has_attrs ? DF_ATTRS : DF_NODELETE) | (rl.single ? DF_SINGLE : 0);
@@ -1328,6 +1335,7 @@ struct Receiver {
         die(RERR_PROTOCOL, "protocol error: inconsistent directory path");
       go = pe.flags & EF_DESCEND;
       w.dst_path = path_join(p->w.dst_path, p->w.src.name_sv(pe));
+      w.receiver_filter = p->w.receiver_filter;
       w.attrs.mode = pe.mode;  // final mode as decided by the parent's generator
       w.has_attrs = true;
       w.created = pe.flags & EF_CREATED;
@@ -1873,9 +1881,10 @@ int run_client(const std::vector<std::string>& srcs, const std::string& dest, u3
   put_var(f, wire_version);
   f.push_back(push ? 'R' : 'S');
   u64 advertised = PROTO_FEATURES & (o.whole_file ? ~(PF_RESUME | PF_DELTA) : ~u64(0));
-  if (o.list_only) advertised &= PF_CORE | PF_ZSTD | PF_LIST | PF_IO_CONTROL | PF_FILTERS;
+  if (o.list_only) advertised &= PF_CORE | PF_ZSTD | PF_LIST | PF_IO_CONTROL | PF_FILTERS | PF_MERGE_FILTERS;
   else advertised &= ~PF_LIST;
   if (!o.filters.needs_extended()) advertised &= ~PF_FILTERS;
+  if (!o.filters.has_merges()) advertised &= ~PF_MERGE_FILTERS;
   if (!o.hard_links) advertised &= ~PF_HLINK;
   if (!output_enabled()) advertised &= ~(PF_OUTPUT | PF_DIR_OUTPUT);
   if (wire_version >= 4) put_var(f, advertised);
@@ -2068,10 +2077,12 @@ int run_server() {
     std::string error;
     for (u64 i = 0; i < count && !config.bad; ++i) {
       auto rule = config.str();
-      if (!config.bad && !o.filters.add_filter(rule, &error))
+      if (!config.bad && !o.filters.add_filter(rule, &error, false))
         die(RERR_PROTOCOL, "protocol error: bad configured filter: %s", error.c_str());
     }
     if (config.bad || !config.empty()) die(RERR_PROTOCOL, "protocol error: malformed filter configuration");
+    if (o.filters.has_merges() && !(o.peer_features & PF_MERGE_FILTERS))
+      die(RERR_PROTOCOL, "protocol error: unnegotiated per-directory filters");
   }
   if (o.peer_features & PF_DIR_OUTPUT) {
     if (!c.read_frame(type, payload)) conn_lost();

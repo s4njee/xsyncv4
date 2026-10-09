@@ -22,6 +22,8 @@
 namespace {
 
 [[noreturn]] void usage_error(const std::string& msg) {
+  if (msg.starts_with("failed to open merge file ") || msg.starts_with("failed to read merge file "))
+    die(RERR_FILEIO, "%s", msg.c_str());
   if (msg.find("not supported") != std::string::npos || msg.rfind("unsupported", 0) == 0 ||
       msg.rfind("--info supports", 0) == 0 || msg.find("supports only zstd or none") != std::string::npos)
     fallback_to_rsync(msg);
@@ -92,6 +94,7 @@ Options (same meaning as rsync):
  -z, --compress           compress file data during the transfer (zstd)
      --compress-level=NUM explicitly set compression level
  -f, --filter=RULE        add a file-filtering RULE
+ -F                       merge .rsync-filter files (twice also excludes them)
      --exclude=PATTERN    exclude files matching PATTERN
      --exclude-from=FILE  read exclude patterns from FILE
      --include=PATTERN    don't exclude files matching PATTERN
@@ -193,6 +196,7 @@ Parsed parse(int argc, char** argv) {
   o.max_delete = -1;
   bool no_more = false;
   std::string err;
+  int filter_files = 0;
 
   auto long_opt = [&](const std::string& name, const std::string* val, int& i) {
     auto need = [&]() -> std::string {
@@ -386,7 +390,11 @@ Parsed parse(int argc, char** argv) {
         case 'R': usage_error("--relative is not supported by xsync");
         case 'b': usage_error("--backup is not supported by xsync");
         case 'C': usage_error("--cvs-exclude is not supported by xsync");
-        case 'F': usage_error("-F (per-directory filter files) is not supported by xsync");
+        case 'F':
+          if (++filter_files == 1) {
+            if (!o.filters.add_filter(": /.rsync-filter", &err)) usage_error(err);
+          } else if (filter_files == 2) o.filters.add_pattern(".rsync-filter", false);
+          break;
         case 'm': usage_error("--prune-empty-dirs is not supported by xsync");
         case 'y': usage_error("--fuzzy is not supported by xsync");
         default: usage_error(std::string("-") + c + ": unknown option");

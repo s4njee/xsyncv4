@@ -56,6 +56,8 @@ class FilterWireTests(unittest.TestCase):
             ('truncated-rule', frame(19, var(1) + var(8) + b'P')),
             ('unknown-rule', frame(19, var(1) + string('unknown keep'))),
             ('invalid-side', frame(19, var(1) + string('Ps keep'))),
+            ('unnegotiated-merge', frame(19, var(1) + string(': .rules'))),
+            ('single-instance-file-read', frame(19, var(1) + string('. /etc/passwd'))),
             ('trailing-bytes', frame(19, var(1) + string('P keep') + b'x')),
             ('oversized-header', struct.pack('<IB', 1024 * 1024 + 1, 19)),
         ):

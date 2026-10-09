@@ -8,6 +8,7 @@
 struct RootList {
   DirList list;
   std::vector<std::string> src_paths;  // parallel to list.e
+  std::vector<std::shared_ptr<const FilterList>> source_contexts;
   Entry attrs;                         // attributes for the destination directory itself
   std::string attr_source;
   bool has_attrs = false;
@@ -27,7 +28,9 @@ std::string machine_identity();
 void build_root(const std::vector<std::string>& srcs, RootList& r, Worker& t, const SourceGuard& guard = SourceGuard());
 // Drop entries the sender must not transfer (filtered, unsupported or unrequested types).
 void prune_source(DirList& l, std::string_view rel, u32 parent_dev, Worker& t, std::vector<std::string>* paths = nullptr,
-                  const SourceGuard& guard = SourceGuard(), std::string_view base = "");
+                  const SourceGuard& guard = SourceGuard(), std::string_view base = "", const FilterList* filters = nullptr);
+std::shared_ptr<const FilterList> directory_filters(const std::shared_ptr<const FilterList>& parent,
+                                                   std::string_view path, bool receiver);
 // Resolve DEST for the root listing held in `root.src`; creates the directory when needed.
 // Returns false when there is nothing to do.
 bool setup_dest(const std::string& dest, DirWork& root, bool single);

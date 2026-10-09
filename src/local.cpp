@@ -74,9 +74,20 @@ std::string machine_identity() {
   return std::string(host) + ":" + std::to_string(st.st_dev) + ":" + std::to_string(st.st_ino);
 }
 
+std::shared_ptr<const FilterList> directory_filters(const std::shared_ptr<const FilterList>& parent,
+                                                   std::string_view path, bool receiver) {
+  const FilterList& filters = parent ? *parent : g_opt.filters;
+  if (!filters.has_merges()) return parent;
+  std::string error;
+  auto context = std::make_shared<const FilterList>(filters.in_directory(path, receiver, &error));
+  if (!error.empty()) die(error.starts_with("failed to ") ? RERR_FILEIO : RERR_SYNTAX, "%s", error.c_str());
+  return context;
+}
+
 void prune_source(DirList& l, std::string_view rel, u32 parent_dev, Worker& t, std::vector<std::string>* paths,
-                  const SourceGuard& guard, std::string_view base) {
+                  const SourceGuard& guard, std::string_view base, const FilterList* context) {
   const Options& o = g_opt;
+  const FilterList& filters = context ? *context : o.filters;
   size_t k = 0;
   std::string r;
   for (size_t i = 0; i < l.e.size(); i++) {
@@ -94,10 +105,10 @@ void prune_source(DirList& l, std::string_view rel, u32 parent_dev, Worker& t, s
       err_line(RERR_PARTIAL, "symlink has no referent: \"%s\"", full().c_str());
       continue;
     }
-    if (!o.filters.empty()) {
+    if (!filters.empty()) {
       std::string absolute;
-      if (o.filters.has_absolute()) absolute = FilterList::absolute_path(paths ? (*paths)[i] : path_join(base, l.name_sv(e)));
-      if (o.filters.excluded(full(), e.type == T_DIR, absolute)) continue;
+      if (filters.has_absolute()) absolute = FilterList::absolute_path(paths ? (*paths)[i] : path_join(base, l.name_sv(e)));
+      if (filters.excluded(full(), e.type == T_DIR, absolute)) continue;
     }
     bool skip = false;
     switch (e.type) {
@@ -149,6 +160,7 @@ void build_root(const std::vector<std::string>& srcs, RootList& r, Worker& t, co
   unsigned lflags = o.copy_links ? LD_FOLLOW : o.links || o.list_only ? LD_LINKS : 0;
   DirList merged;
   std::vector<std::string> paths;
+  std::vector<std::shared_ptr<const FilterList>> contexts;
   bool any_slash = false;
   for (const std::string& arg : srcs) {
     bool slash = arg.empty() || arg.back() == '/' || arg == "." || (arg.size() >= 2 && arg.compare(arg.size() - 2, 2, "/.") == 0);
@@ -182,10 +194,12 @@ void build_root(const std::vector<std::string>& srcs, RootList& r, Worker& t, co
         g_source_io_error.store(true);
         err_line(RERR_PARTIAL, "incomplete source listing: \"%s\"", a);
       }
-      prune_source(l, "", e.dev, t, nullptr, guard, a);
+      auto context = directory_filters({}, a, false);
+      prune_source(l, "", e.dev, t, nullptr, guard, a, context.get());
       for (Entry c : l.e) {
         std::string_view nm = l.name_sv(c);
         paths.push_back(path_join(a, nm));
+        if (o.filters.has_merges()) contexts.push_back(context);
         const char* target = c.type == T_LNK ? l.link(c) : nullptr;
         c.name_off = merged.add_str(nm);
         if (target) c.link_off = merged.add_str(target);
@@ -214,7 +228,9 @@ void build_root(const std::vector<std::string>& srcs, RootList& r, Worker& t, co
         e.link_off = one.add_str({buf, n > 0 ? (size_t)n : 0});
       }
       one.e.push_back(e);
-      prune_source(one, "", 0, t, nullptr, guard, sl == std::string::npos ? "." : sl ? trimmed.substr(0, sl) : "/");
+      std::string parent = sl == std::string::npos ? "." : sl ? trimmed.substr(0, sl) : "/";
+      std::shared_ptr<const FilterList> context;
+      prune_source(one, "", 0, t, nullptr, guard, parent, context.get());
       if (one.e.empty()) continue;
       Entry c = one.e[0];
       c.rdev = (c.type == T_CHR || c.type == T_BLK) ? c.rdev : 0;
@@ -223,6 +239,7 @@ void build_root(const std::vector<std::string>& srcs, RootList& r, Worker& t, co
       if (target) c.link_off = merged.add_str(target);
       merged.e.push_back(c);
       paths.push_back(trimmed);
+      if (o.filters.has_merges()) contexts.push_back(context);
     }
   }
   r.single = srcs.size() == 1 && !any_slash && merged.e.size() == 1 && merged.e[0].type != T_DIR;
@@ -238,6 +255,7 @@ void build_root(const std::vector<std::string>& srcs, RootList& r, Worker& t, co
       continue;
     r.list.e.push_back(merged.e[x]);
     r.src_paths.push_back(std::move(paths[x]));
+    if (!contexts.empty()) r.source_contexts.push_back(std::move(contexts[x]));
   }
 }
 
@@ -405,7 +423,8 @@ struct Local {
       if (list_err) err_line(RERR_PARTIAL, "opendir \"%s\" failed: %s", d->src_path.c_str(), errstr(list_err).c_str());
       if (d->src.incomplete) d->no_delete = true;
       listed = d->src.e.size();
-      prune_source(d->src, d->rel, d->attrs.dev, w, nullptr, guard, d->src_path);
+      d->source_filter = directory_filters(d->source_filter, d->src_path, false);
+      prune_source(d->src, d->rel, d->attrs.dev, w, nullptr, guard, d->src_path, d->source_filter.get());
     }
     if (d->lazy) {
       skip_unsafe_links(*d, w);
@@ -444,6 +463,8 @@ struct Local {
         std::string_view nm = d->src.name_sv(s);
         if (d->src_paths.empty()) c->src_path = path_join(d->src_path, nm);
         else c->src_path = d->src_paths[i];
+        c->source_filter = d->source_contexts.empty() ? d->source_filter : d->source_contexts[i];
+        c->receiver_filter = d->receiver_filter;
         c->dst_path = path_join(d->dst_path, nm);
         c->rel = rel_join(d->rel, nm);
         c->attrs = s;
@@ -669,6 +690,7 @@ int run_local(const std::vector<std::string>& srcs, const std::string& dest) {
   DirWork* root = new DirWork;
   root->src = std::move(rl.list);
   root->src_paths = std::move(rl.src_paths);
+  root->source_contexts = std::move(rl.source_contexts);
   root->attrs = rl.attrs;
   root->attr_source = std::move(rl.attr_source);
   root->has_attrs = rl.has_attrs;

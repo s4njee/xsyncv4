@@ -94,7 +94,7 @@ coverage clarification remains open.
 | E-05 | **List mode.** `xsync host:dir/` or a single SRC should list, as rsync does; today it is a usage error. | **done** | `ls -l`-style listing for local and remote sources. | S |
 | E-06 | **End-of-run error summary.** With thousands of files an error scrolls away. | **done** | After the run: count of errors and the first ten, grouped by kind; exit-code line as now. | S |
 | E-07 | **`--bwlimit`, `--timeout`, keep-alive.** `--bwlimit` is rejected; `--timeout` is ignored (T-04). A stalled ssh connection hangs forever. | **done** | Token-bucket limit on the writer thread; idle timeout with keep-alive frames; exit 30 on timeout like rsync. | M |
-| E-08 | **Filter completeness.** Not implemented: `P`/`R` (protect/risk), `H`/`S` (hide/show), per-directory merge files (`.rsync-filter`, `-F`, `:` rules), `-C`, `-m`, the rule modifiers `/ C e n p r s w x`. These are the two remaining difftest failures. | **in progress** | 159/159 difftest; a differential fuzzer against rsync for the new rule kinds, checked into `tests/`. | L |
+| E-08 | **Filter completeness.** Global rule sides, single/per-directory merge files, `-F` and merge modifiers are implemented. Remaining: global CVS rules/`-C`, `-m`, and reloading newly transferred receiver merge files for `--delete-after`. The prune-empty case is the remaining difftest failure. | **in progress** | 231/231 difftest (expanded from 159); a differential fuzzer against rsync for the new rule kinds, checked into `tests/`. | L |
 | E-09 | **`--files-from`, `-R`, `--from0`.** Common in backup scripts and with `find … -print0`. | code | Implemented for local and remote, including the "implied directories" semantics of `-R`. | L |
 | E-10 | **Metadata beyond `-a`.** `-H` hard links, `-X` xattrs, `-A` ACLs, `-N` creation times, `-U` atimes, BSD file flags, `-E`, `--chmod`, `--chown`. Also an inconsistency to resolve: the clone path already carries xattrs and ACLs while the byte-copy and remote paths drop them. | code | `-H` and `-X` first (most used on macOS). Without `-X`, both paths behave the same — either strip on clone or document that clones are a superset. | XL |
 | E-11 | **Backup-style options.** `--backup`/`--backup-dir`, `--link-dest`, `--compare-dest`, `--remove-source-files`, `--append`, real `-S` sparse handling, `--preallocate`. | code | Prioritise `--link-dest` (snapshot backups) and `-S`; the rest fall back to rsync via R-02 until needed. | L |
@@ -1186,3 +1186,45 @@ Verified artifact manifest (source `864bd37edf14`):
   merge modifiers `C e n w`, `-F`, CVS rules/`-C` and `-m` still need implementation
   and differential coverage. QA builds include both macOS architectures; release
   artifacts remain the completed E-07 set above, and installed helpers were unchanged.
+
+### E-08 — in progress: merge files and directory contexts (2026-10-09)
+
+- Added single-instance (`.`/`merge`) and per-directory (`:`/`dir-merge`)
+  filters, nested merge files, ancestor scans, scoped anchors, independent
+  sender/receiver files, and `-F`/`-FF`. Child rules precede inherited rules
+  within their merge slot; `!` clears that slot without clearing global rules.
+  Directory contexts are immutable and carried through local transfers,
+  remote traversal, listings and recursive destination removal. Duplicate
+  merge filenames, including self-references, retain their first active slot.
+- Merge defaults support `C e n w + - / p r s x`. Single-instance files are
+  expanded on the client; configured `.` rules are rejected on the wire before
+  file access. Per-directory files negotiate `PF_MERGE_FILTERS` (4096) in
+  addition to `PF_FILTERS`; helpers with only global-filter support refuse
+  before destination creation. Frozen protocol-3 peers still accept expanded
+  single-instance files containing basic include/exclude rules.
+- Fixed transfer-root and path semantics found by differential tests: a named
+  source does not read ordinary merge files from its parent, and relative
+  merge filenames are resolved during traversal. Ancestor checks remove `.`
+  components while retaining `..`, matching both reference versions tested.
+  Strengthened the global fuzzer's fixtures so source/destination file sizes
+  differ and comparisons verify which bytes transfer rather than quick-check
+  skips.
+- Checked in `tests/filter_merge_test.py`: 294 local/push/pull comparisons
+  (34 directed cases, `-F` repetitions, named roots and 24 random seeds per
+  direction), plus 24 listing comparisons with multiple roots and different
+  working directories. All seven methods pass on macOS ARM, Rosetta and real
+  Linux SSH. An additional 128 local random seeds plus 74 directed comparisons
+  pass on ARM. Unit checks total **32,924**, all green on ARM, Rosetta and Linux.
+  Native tests separately cover documented CVS word-list clearing because
+  the released rsync 3.2.7/3.4.4 references reject `!` in these lists; word-mode
+  differential cases use their accepted underscore prefix separator.
+- macOS P0 (13) and listing (7) checks pass. Hostile filter-wire checks (4)
+  pass on ARM, Rosetta and Linux. Expanded mixed-version protocol checks (6)
+  pass on macOS and real Linux SSH. The strengthened global differential
+  suite's 234 comparisons pass on ARM, Rosetta and real Linux SSH.
+- Forced byte-copy sorted itemization remains **230/231**, with only
+  `include_exclude_prune_empty` failing. **E-08 remains in progress:** global
+  CVS rules/`-C`, prune-empty directories/`-m`, and `--delete-after` reloading
+  newly transferred receiver merge files still need implementation and
+  differential coverage. Release artifacts remain the completed E-07 set;
+  QA builds cover both macOS architectures and installed helpers were unchanged.

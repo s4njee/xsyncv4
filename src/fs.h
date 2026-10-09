@@ -50,6 +50,8 @@ struct DirWork {
   std::string rel;       // path relative to the transfer root ("" for the root)
   std::string src_path;  // local mode: source directory
   std::vector<std::string> src_paths;  // per-entry source path (root listing only)
+  std::vector<std::shared_ptr<const FilterList>> source_contexts;
+  std::shared_ptr<const FilterList> source_filter, receiver_filter;
   std::vector<std::string> output_sources;  // Display-only paths supplied by a remote sender.
   std::string attr_source;  // Display-only source path for this directory's attributes.
   DirList src;           // source entries, sorted by name

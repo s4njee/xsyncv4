@@ -17,6 +17,7 @@
 #include "output.h"
 #include "hardlink.h"
 #include "rate_limit.h"
+#include "engine.h"
 
 #ifdef __APPLE__
 #include <sys/attr.h>
@@ -423,7 +424,7 @@ void src_path_of(const DirWork& w, u32 i, std::string& out) {
 
 namespace {
 
-struct DeleteCandidate { std::string path, rel, parent; u8 type; };
+struct DeleteCandidate { std::string path, rel, parent; u8 type; std::shared_ptr<const FilterList> filters; };
 struct FinalDirectory {
   std::string path, rel, source;
   Entry attrs;
@@ -487,7 +488,8 @@ void item_delete(Worker& t, std::string_view rel, bool is_dir) {
   t.logf(l);
 }
 
-bool remove_tree(const std::string& path, u8 type, const std::string& rel, Worker& t, bool limited = false, bool report = true) {
+bool remove_tree(const std::string& path, u8 type, const std::string& rel, Worker& t, bool limited = false, bool report = true,
+                 std::shared_ptr<const FilterList> context = {}) {
   auto permit = [&] {
     if (!limited || g_opt.max_delete < 0 || deletion_count < (u64)g_opt.max_delete) return true;
     if (!deletion_limit_reported) {
@@ -498,6 +500,8 @@ bool remove_tree(const std::string& path, u8 type, const std::string& rel, Worke
   };
   if (!permit()) return false;
   if (type == T_DIR) {
+    context = directory_filters(context, path, true);
+    const FilterList& filters = context ? *context : g_opt.filters;
     DirList l;
     int e = destination_list_dir(path.c_str(), l, 0);
     if (e == EACCES && check_attr(destination_chmod(path.c_str(), 0700), path.c_str(), "permissions")) e = destination_list_dir(path.c_str(), l, 0);
@@ -511,13 +515,13 @@ bool remove_tree(const std::string& path, u8 type, const std::string& rel, Worke
       std::string crel = rel_join(rel, l.name_sv(c));
       // Excluded files are protected from deletion, which keeps their directory alive too.
       std::string absolute;
-      if (g_opt.filters.has_absolute()) absolute = FilterList::absolute_path(path_join(path, l.name_sv(c)));
-      if (g_opt.filters.protected_from_deletion(crel, c.type == T_DIR, g_opt.delete_excluded, true, absolute)) {
+      if (filters.has_absolute()) absolute = FilterList::absolute_path(path_join(path, l.name_sv(c)));
+      if (filters.protected_from_deletion(crel, c.type == T_DIR, g_opt.delete_excluded, true, absolute)) {
         if (ok && !g_opt.quiet) t.logf("cannot delete non-empty directory: " + rel);
         ok = false;
         continue;
       }
-      ok &= remove_tree(path_join(path, l.name_sv(c)), c.type, crel, t, limited);
+      ok &= remove_tree(path_join(path, l.name_sv(c)), c.type, crel, t, limited, true, context);
     }
     if (!ok) return false;
     if (!permit()) return false;
@@ -536,14 +540,15 @@ bool remove_tree(const std::string& path, u8 type, const std::string& rel, Worke
 }
 
 // Remove whatever occupies `path` so that something of a different type can replace it.
-bool make_way(const std::string& path, const Entry& d, const std::string& rel, const char* what, Worker& t) {
+bool make_way(const std::string& path, const Entry& d, const std::string& rel, const char* what, Worker& t,
+              const std::shared_ptr<const FilterList>& context) {
   if (d.type == T_DIR && !g_opt.force && !g_opt.del) {
     // Without --force/--delete only an empty directory may be replaced.
     if (g_opt.dry_run || destination_rmdir(path.c_str()) == 0) return true;
     err_line(RERR_PARTIAL, "could not make way for new %s: %s", what, rel.c_str());
     return false;
   }
-  return remove_tree(path, d.type, rel, t, false, false);
+  return remove_tree(path, d.type, rel, t, false, false, context);
 }
 
 // Bring owner/group/mode/mtime of an existing, up-to-date destination entry in line.
@@ -591,6 +596,8 @@ void skip_unsafe_links(DirWork& w, Worker& t) {
 
 void generate(DirWork& w, Worker& t) {
   const Options& o = g_opt;
+  if (w.has_attrs || !w.rel.empty()) w.receiver_filter = directory_filters(w.receiver_filter, w.dst_path, true);
+  const FilterList& filters = w.receiver_filter ? *w.receiver_filter : o.filters;
   DirList& src = w.src;
   DirList& dl = t.dl;
   dl.clear();
@@ -652,10 +659,10 @@ void generate(DirWork& w, Worker& t) {
     if (!o.del || w.no_delete || !w.rename_to.empty()) return;
     set_names(dl.name_sv(d));
     std::string absolute;
-    if (o.filters.has_absolute()) absolute = FilterList::absolute_path(path);
-    if (o.filters.protected_from_deletion(rel, d.type == T_DIR, o.delete_excluded, false, absolute)) return;
+    if (filters.has_absolute()) absolute = FilterList::absolute_path(path);
+    if (filters.protected_from_deletion(rel, d.type == T_DIR, o.delete_excluded, false, absolute)) return;
     std::lock_guard<std::mutex> lock(final_mu);
-    delete_candidates.push_back({path, rel, w.dst_path, d.type});
+    delete_candidates.push_back({path, rel, w.dst_path, d.type, w.receiver_filter});
   };
 
   size_t j = 0;
@@ -700,7 +707,7 @@ void generate(DirWork& w, Worker& t) {
           if (o.owner && o.am_root && d->uid != s.uid && !o.dry_run) check_attr(destination_chown(path.c_str(), s.uid, (gid_t)-1), path.c_str(), "ownership");
         } else {
           if (!d && o.existing) break;
-          if (d && !make_way(path, *d, rel, "directory", t)) break;
+          if (d && !make_way(path, *d, rel, "directory", t, w.receiver_filter)) break;
           need_dgid();
           if (!d && w.lazy_children && o.recursive && s.rdev != 1) {
             s.flags |= EF_CREATED | EF_DESCEND | EF_LAZY;
@@ -751,7 +758,7 @@ void generate(DirWork& w, Worker& t) {
         } else if (d->type != T_REG) {
           s.item_flags |= IF_NEW_TYPE;
           if (d->type == T_DIR) {
-            if (!make_way(path, *d, rel, "regular file", t)) break;
+            if (!make_way(path, *d, rel, "regular file", t, w.receiver_filter)) break;
             w.modified = true;
             d = nullptr;
           } else {
@@ -836,7 +843,7 @@ void generate(DirWork& w, Worker& t) {
         }
         if (d) {
           if (d->type == T_DIR) {
-            if (!make_way(path, *d, rel, "symlink", t)) break;
+            if (!make_way(path, *d, rel, "symlink", t, w.receiver_filter)) break;
           } else if (!o.dry_run) {
             destination_unlink(path.c_str());
           }
@@ -877,7 +884,7 @@ void generate(DirWork& w, Worker& t) {
         hardlink_prepare(w, (u32)i, d);
         if (d) {
           if (d->type == T_DIR) {
-            if (!make_way(path, *d, rel, "special file", t)) break;
+            if (!make_way(path, *d, rel, "special file", t, w.receiver_filter)) break;
           } else if (!o.dry_run) {
             destination_unlink(path.c_str());
           }
@@ -938,7 +945,7 @@ void finalize_tree() {
     for (const auto& candidate : delete_candidates) {
       if (g_stop.load()) break;
       u64 before = g_stats.deleted.load();
-      remove_tree(candidate.path, candidate.type, candidate.rel, worker, true);
+      remove_tree(candidate.path, candidate.type, candidate.rel, worker, true, true, candidate.filters);
       if (g_stats.deleted.load() != before) dirty.push_back(candidate.parent);
       if (deletion_limit_reported) break;
     }

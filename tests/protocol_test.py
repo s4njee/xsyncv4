@@ -45,19 +45,23 @@ class ProtocolTests(unittest.TestCase):
                     target.chmod(member.mode & 0o777)
         cls.legacy = cls.build(old, cls.root / 'legacy build')
         cls.subset = cls.build(REPO, cls.root / 'subset build', '-DCMAKE_CXX_FLAGS=-DXSYNC_PROTOCOL_FEATURES=1')
+        cls.global_filters = cls.build(REPO, cls.root / 'global filters build', '-DCMAKE_CXX_FLAGS=-DXSYNC_PROTOCOL_FEATURES=4095')
         cls.old_rsh = RSH
         cls.remote_legacy = str(cls.legacy)
         cls.remote_subset = str(cls.subset)
+        cls.remote_global_filters = str(cls.global_filters)
         if HOST:
             import ssh_test
             ssh_test.SSHTests.setUpClass()
             ssh_test.remote_code('import pathlib,sys; pathlib.Path(sys.argv[1]).mkdir(parents=True)', cls.root)
-            for local, name in ((cls.legacy, 'legacy xsync'), (cls.subset, 'subset xsync')):
+            for local, name in ((cls.legacy, 'legacy xsync'), (cls.subset, 'subset xsync'),
+                                (cls.global_filters, 'global filters xsync')):
                 target = cls.root / name
                 subprocess.run(['rsync', '-a', '-e', RSH, str(local), HOST + ':' + str(target)],
                                check=True, capture_output=True, timeout=20)
                 if name.startswith('legacy'): cls.remote_legacy = str(target)
-                else: cls.remote_subset = str(target)
+                elif name.startswith('subset'): cls.remote_subset = str(target)
+                else: cls.remote_global_filters = str(target)
 
     @classmethod
     def build(cls, source, output, *options):
@@ -186,6 +190,56 @@ p=pathlib.Path(sys.argv[1]); print(json.dumps({'hash':hashlib.sha256((p/'file').
                         if HOST:
                             from ssh_test import remote_json
                             self.assertFalse(remote_json('import pathlib,json,sys; print(json.dumps(pathlib.Path(sys.argv[1]).exists()))', target))
+
+    def test_merge_filters_require_their_own_capability(self):
+        source = self.root / 'merge source'
+        source.mkdir()
+        (source / 'file').write_bytes(b'unchanged')
+        for direction in ('push', 'pull'):
+            for flags in (['--filter=: .rules'], ['-F']):
+                with self.subTest(direction=direction, flags=flags):
+                    target = self.root / 'uncreated merge destination'
+                    a, b = str(source) + '/', str(target) + '/'
+                    if HOST and direction == 'pull':
+                        subprocess.run(['rsync', '-a', '-e', RSH, a, HOST + ':' + a], check=True, capture_output=True)
+                    if direction == 'push': b = (HOST or 'fake') + ':' + b
+                    else: a = (HOST or 'fake') + ':' + a
+                    result = subprocess.run([str(BINARY), '--no-fallback', '-r', *flags, '-e', RSH,
+                                             '--rsync-path=' + shlex.quote(self.remote_global_filters), a, b],
+                                            capture_output=True, timeout=20)
+                    self.assertEqual(result.returncode, 4, result.stderr)
+                    self.assertIn(b'peer does not support per-directory filters', result.stderr)
+                    self.assertNotIn(b'falling back', result.stderr)
+                    self.assertFalse(target.exists())
+                    if HOST:
+                        from ssh_test import remote_json
+                        self.assertFalse(remote_json('import pathlib,json,sys; print(json.dumps(pathlib.Path(sys.argv[1]).exists()))', target))
+
+    def test_basic_single_merge_works_with_legacy_helper(self):
+        source = self.root / 'single merge source'
+        source.mkdir()
+        (source / 'file').write_bytes(b'transferred')
+        (source / 'hidden').write_bytes(b'excluded')
+        rules = self.root / 'client-only.rules'
+        rules.write_text('- hidden\n')
+        for direction in ('push', 'pull'):
+            with self.subTest(direction=direction):
+                target = self.root / ('single merge destination ' + direction)
+                a, b = str(source) + '/', str(target) + '/'
+                if HOST and direction == 'pull':
+                    subprocess.run(['rsync', '-a', '-e', RSH, a, HOST + ':' + a], check=True, capture_output=True)
+                if direction == 'push': b = (HOST or 'fake') + ':' + b
+                else: a = (HOST or 'fake') + ':' + a
+                result = subprocess.run([str(BINARY), '--no-fallback', '-r', '--filter=. ' + str(rules),
+                                         '-e', RSH, '--rsync-path=' + shlex.quote(self.remote_legacy), a, b],
+                                        capture_output=True, timeout=20)
+                self.assertEqual(result.returncode, 0, result.stderr)
+                self.assertNotIn(b'falling back', result.stderr)
+                if HOST and direction == 'push':
+                    from ssh_test import remote_json
+                    files = remote_json('import pathlib,json,sys; print(json.dumps({p.name:p.read_text() for p in pathlib.Path(sys.argv[1]).iterdir()}))', target)
+                else: files = {p.name:p.read_text() for p in target.iterdir()}
+                self.assertEqual(files, {'file': 'transferred'})
 
 
 if __name__ == '__main__':

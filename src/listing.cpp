@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <ctime>
 #include <numeric>
+#include <tuple>
 #include <sys/stat.h>
 
 namespace {
@@ -71,9 +72,10 @@ int run_listing(const std::vector<std::string>& sources, const ListingSink& emit
     std::string base, rel;
     size_t index = 0;
     bool files_done = false;
+    std::vector<std::shared_ptr<const FilterList>> contexts;
   };
   std::vector<Frame> stack;
-  stack.push_back({std::move(root.list), std::move(root.src_paths), "", ""});
+  stack.push_back({std::move(root.list), std::move(root.src_paths), "", "", 0, false, std::move(root.source_contexts)});
   while (!stack.empty() && !g_stop.load()) {
     Frame& frame = stack.back();
     if (!frame.files_done) {
@@ -88,18 +90,20 @@ int run_listing(const std::vector<std::string>& sources, const ListingSink& emit
     size_t i = frame.index++;
     const Entry e = frame.list.e[i];
     std::string rel = rel_join(frame.rel, frame.list.name_sv(e));
-    std::vector<std::pair<std::string, Entry>> source_dirs;
-    source_dirs.emplace_back(frame.paths.empty() ? path_join(frame.base, frame.list.name_sv(e)) : frame.paths[i], e);
+    std::vector<std::tuple<std::string, Entry, std::shared_ptr<const FilterList>>> source_dirs;
+    source_dirs.emplace_back(frame.paths.empty() ? path_join(frame.base, frame.list.name_sv(e)) : frame.paths[i], e,
+                             frame.contexts.empty() ? nullptr : frame.contexts[i]);
     while (frame.index < frame.list.e.size() && frame.list.e[frame.index].type == T_DIR &&
            frame.list.name_sv(frame.list.e[frame.index]) == frame.list.name_sv(e)) {
       size_t next = frame.index++;
-      source_dirs.emplace_back(frame.paths.empty() ? path_join(frame.base, frame.list.name_sv(e)) : frame.paths[next], frame.list.e[next]);
+      source_dirs.emplace_back(frame.paths.empty() ? path_join(frame.base, frame.list.name_sv(e)) : frame.paths[next], frame.list.e[next],
+                               frame.contexts.empty() ? nullptr : frame.contexts[next]);
     }
     emit({e, rel, ""});
     if (!g_opt.recursive) continue;
     Frame child;
     child.rel = rel;
-    for (const auto& [source, attrs] : source_dirs) {
+    for (const auto& [source, attrs, inherited] : source_dirs) {
       if (attrs.rdev == 1) continue;
       DirList list;
       int error = list_dir(source.c_str(), list, g_opt.copy_links ? LD_FOLLOW : LD_LINKS);
@@ -107,10 +111,12 @@ int run_listing(const std::vector<std::string>& sources, const ListingSink& emit
         err_line(RERR_PARTIAL, "list source directory \"%s\": %s", source.c_str(), error ? errstr(error).c_str() : "incomplete source listing");
         if (error) continue;
       }
-      prune_source(list, rel, attrs.dev, worker, nullptr, SourceGuard(), source);
+      auto context = directory_filters(inherited, source, false);
+      prune_source(list, rel, attrs.dev, worker, nullptr, SourceGuard(), source, context.get());
       for (Entry item : list.e) {
         auto name = list.name_sv(item);
         child.paths.push_back(path_join(source, name));
+        if (g_opt.filters.has_merges()) child.contexts.push_back(context);
         if (item.type == T_LNK) item.link_off = child.list.add_str(list.link(item));
         item.name_off = child.list.add_str(name);
         child.list.e.push_back(item);
@@ -123,11 +129,13 @@ int run_listing(const std::vector<std::string>& sources, const ListingSink& emit
     });
     auto entries = std::move(child.list.e);
     auto paths = std::move(child.paths);
+    auto contexts = std::move(child.contexts);
     for (size_t index : order) {
       const Entry& item = entries[index];
       if (!child.list.e.empty() && child.list.name_sv(child.list.e.back()) == child.list.name_sv(item) &&
           !(child.list.e.back().type == T_DIR && item.type == T_DIR)) continue;
       child.list.e.push_back(item), child.paths.push_back(std::move(paths[index]));
+      if (!contexts.empty()) child.contexts.push_back(std::move(contexts[index]));
     }
     worker.flush_log();
     stack.push_back(std::move(child));
