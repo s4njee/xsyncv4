@@ -17,7 +17,7 @@ struct XattrSet {
 XattrSet source_xattrs(const std::string& path, u8 type, const FilterList& filters);
 XattrSet source_fd_xattrs(int fd, const std::string& path, u8 type, const FilterList& filters);
 bool source_xattrs_unchanged(const XattrSet& attrs, const std::string& path);
-bool xattrs_differ(const XattrSet& source, const std::string& path, u8 type, const FilterList& filters);
+bool xattrs_differ(const XattrSet& source, const std::string& path, u8 type, const FilterList& filters, bool ownership_changed = false);
 bool apply_xattrs(const XattrSet& source, const std::string& path, u8 type, const FilterList& filters);
 bool apply_fd_xattrs(const XattrSet& source, int fd, const std::string& path, u8 type, const FilterList& filters, bool fresh = false);
 struct DirWork;

@@ -129,8 +129,10 @@ bool supported_type(u8 type) {
   // Darwin cannot set ordinary xattrs on device and special-file inodes.
   return type == T_REG || type == T_DIR || type == T_LNK;
 #else
-  // Linux user attributes are unavailable on symlinks and special files.
-  return type == T_REG || type == T_DIR;
+  // Privileged namespaces are also supported on links and special inodes.
+  // O_PATH plus the /proc descriptor link addresses that inode without opening
+  // a FIFO/device or following the physical symlink to its target.
+  return type >= T_REG && type <= T_BLK;
 #endif
 }
 XattrSet read(const Access& a, const std::string& display, const FilterList& filters, bool source) {
@@ -235,7 +237,7 @@ LocalValues desired(const XattrSet& source, const FilterList& filters) {
   }
   return result;
 }
-bool update(const XattrSet& source, int fd, const std::string& path, u8 type, const FilterList& filters, bool write, bool fresh = false) {
+bool update(const XattrSet& source, int fd, const std::string& path, u8 type, const FilterList& filters, bool write, bool fresh = false, bool ownership_changed = false) {
   if (!source.complete) return false;
   if (!supported_type(type)) {
     bool selected = !desired(source, filters).empty();
@@ -249,6 +251,11 @@ bool update(const XattrSet& source, int fd, const std::string& path, u8 type, co
   // Keep physical destination names: disguised namespaces must still be trimmed.
   auto current = std::move(before.values);
   bool changed = false, opened_mode = false, checked_mode = false;
+#ifndef __APPLE__
+  // chown clears file capabilities even when their pre-change bytes match.
+  // Report the necessary restoration and apply it after ownership changes.
+  if (ownership_changed && wanted.count("security.capability")) changed = true;
+#endif
   mode_t saved_mode = 0;
   auto prepare_write = [&] {
     if (!write || checked_mode) return;
@@ -302,12 +309,12 @@ bool source_xattrs_unchanged(const XattrSet& attrs, const std::string& path) {
   return (u64)leaf.st_dev == attrs.link_dev && (u64)leaf.st_ino == attrs.link_ino &&
          entry.ctime == attrs.link_ctime && entry.ctime_ns == attrs.link_ctime_ns;
 }
-bool xattrs_differ(const XattrSet& source, const std::string& path, u8 type, const FilterList& filters) {
+bool xattrs_differ(const XattrSet& source, const std::string& path, u8 type, const FilterList& filters, bool ownership_changed) {
   if (!source.complete) return false;
   if (!supported_type(type)) return !desired(source, filters).empty();
   Target target(path, type);
   if (target.fd < 0) { file_io_error(errno, path.c_str(), "open extended attributes"); return false; }
-  try { return update(source, target.fd, path, type, filters, false); }
+  try { return update(source, target.fd, path, type, filters, false, false, ownership_changed); }
   catch (const std::system_error& error) { g_source_io_error.store(true); file_io_error(error.code().value(), path.c_str(), "read stored extended attributes"); return false; }
 }
 bool apply_fd_xattrs(const XattrSet& source, int fd, const std::string& path, u8 type, const FilterList& filters, bool fresh) {

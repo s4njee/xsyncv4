@@ -10,6 +10,7 @@ import unittest
 import delta_test as delta
 REPO, BINARY = delta.REPO, delta.BINARY
 from xattrs_test import DARWIN, attr_name, get_attrs, set_attr
+PRIVILEGED_LINKS = sys.platform.startswith('linux') and os.environ.get('XSYNC_TEST_PRIVILEGED_XATTRS') == '1'
 
 
 class XattrRaceTests(unittest.TestCase):
@@ -26,7 +27,8 @@ class XattrRaceTests(unittest.TestCase):
         if link:
             self.source.symlink_to('referent')
         delta.DeltaTests.prepare(self, self.data + b'end', self.data)
-        set_attr(self.source, attr_name('changing'), b'old attribute')
+        changing = 'trusted.xsync-changing' if link and PRIVILEGED_LINKS else attr_name('changing')
+        set_attr(self.source, changing, b'old attribute')
         set_attr(self.dest, attr_name('stale'), b'remove me')
         source_data = self.source.read_bytes()
         marker = self.root / 'source-read'
@@ -62,7 +64,7 @@ class XattrRaceTests(unittest.TestCase):
             deadline = time.monotonic() + 10
             while not observed_marker.exists() and proc.poll() is None and time.monotonic() < deadline: time.sleep(.002)
             self.assertTrue(observed_marker.exists(), 'sender did not reach delayed source read')
-            set_attr(self.source, attr_name('changing'), b'new binary attribute\0\xff')
+            set_attr(self.source, changing, b'new binary attribute\0\xff')
             expected = get_attrs(self.source)
             out, err = proc.communicate(timeout=30)
             self.assertEqual(proc.returncode, 0, (out, err))
@@ -84,7 +86,7 @@ class XattrRaceTests(unittest.TestCase):
                     with self.subTest(direction=direction, whole=whole, inplace=inplace):
                         self.check_race(direction, False, whole, inplace)
 
-    @unittest.skipUnless(DARWIN, 'Darwin permits physical symlink xattrs')
+    @unittest.skipUnless(DARWIN or PRIVILEGED_LINKS, 'physical symlink attrs require Darwin or the privileged Linux fixture')
     def test_followed_link_attributes_refresh_on_retry(self):
         for direction in ('local', 'push', 'pull'):
             for whole in (False, True):

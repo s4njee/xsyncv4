@@ -1639,3 +1639,46 @@ Verified artifact manifest (source `864bd37edf14`):
   the wider metadata options (`-A`, creation/access times, BSD flags, `-E`,
   `--chmod`, `--chown`) and packaging. Installed helpers and release artifacts
   remain unchanged. R-01 still needs a distinct Linux LAN target beyond the Pi.
+
+
+## E-10 progress — 2026-10-09: privileged Linux attributes and capabilities
+
+- E-10 remains **code**, with P1 at **17/22**. Linux `trusted.*` attributes are
+  supported on symlinks, FIFOs, sockets and character/block devices, including
+  fresh destination inodes. Source reads now retain selected attributes on those
+  types. Receiver operations use `O_PATH | O_NOFOLLOW` and the `/proc/self/fd`
+  descriptor link; they address the held inode without opening a device/FIFO or
+  following the physical symlink to its referent. Darwin's supported types are
+  unchanged.
+- Fixed a verified capability-loss case: an otherwise unchanged file had equal
+  `security.capability` bytes but different owner/group IDs. Ownership changes
+  cleared the destination capability; xsync returned success without restoring
+  it, while rsync retained it and itemized an xattr change. Comparisons now account
+  for planned ownership changes when the capability is selected, then restore it
+  after chown. Excluded capabilities retain rsync's behavior.
+- **87 differential cases** pass in an isolated Linux container with
+  `SYS_ADMIN`: local/push/pull, trusted attributes on ordinary and special
+  inodes, binary values, stale-value removal, `-X`/`-XX`, dry runs, filters,
+  `-L`, direct/inplace writes, owner-only/group-only/both ID changes, and mixed
+  root/UID-GID-60000 sender/receiver roles. File data, metadata, all visible
+  attributes, source integrity and itemization match rsync. Selected attributes
+  that an unprivileged receiver cannot remove report the same partial status
+  and resulting metadata as rsync.
+- The Linux source-retry harness now optionally exercises trusted attributes
+  on followed physical symlinks (`XSYNC_TEST_PRIVILEGED_XATTRS=1`). All **18**
+  file/link metadata mutations pass across local/push/pull, whole/delta and
+  inplace paths, confirming the physical-link ctime guard refreshes metadata.
+  The ordinary **19-method** xattr suite passes on ARM, Rosetta and Linux
+  (four Darwin-only skips on Linux); Linux hostile-wire and ordinary retry
+  checks also pass.
+- Evidence: `/tmp/xsync-e10-privileged-final.log`,
+  `/tmp/xsync-e10-privileged-linux-races.log`,
+  `/tmp/xsync-e10-privileged-linux-regression.log`,
+  `/tmp/xsync-e10-privileged-mac-xattrs.log`, and
+  `/tmp/xsync-e10-privileged-rosetta-xattrs.log`. The earlier mixed-role fixture
+  incorrectly inherited root's defaults path and required success from rsync
+  for every selection; the final fixture supplies empty defaults and compares
+  rsync's actual 0/23 status.
+- **Remaining before E-10 completion:** native ACLs (`-A`), creation/access times,
+  BSD flags, `-E`, `--chmod`, `--chown`, and packaging. Installed helpers and
+  release artifacts have not been replaced.

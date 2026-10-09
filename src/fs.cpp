@@ -719,7 +719,10 @@ void generate(DirWork& w, Worker& t) {
     if (o.xattrs && !w.src_xattrs[i].complete) continue;
 
     auto compare_xattrs = [&] {
-      if (o.xattrs && d && d->type == s.type && xattrs_differ(w.src_xattrs[i], path, s.type, filters)) s.item_flags |= IF_XATTR;
+      if (!o.xattrs || !d || d->type != s.type) return;
+      bool ownership_changed = (o.owner && o.am_root && d->uid != s.uid) ||
+                               (o.group && d->gid != s.gid && can_set_gid(s.gid));
+      if (xattrs_differ(w.src_xattrs[i], path, s.type, filters, ownership_changed)) s.item_flags |= IF_XATTR;
     };
     switch (s.type) {
       case T_DIR: {

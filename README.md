@@ -413,7 +413,9 @@ Differences to be aware of:
   values share an 8 MiB memory budget and spill into an unlinked temporary file.
   Large macOS resource forks use descriptor I/O and remote 64 KiB chunks; other
   attribute APIs may still require one contiguous value during a read or write.
-  Temporary storage must have space for the cached values.
+  Temporary storage must have space for the cached values. Linux privileged
+  namespaces also transfer on supported symlinks and special inodes. Ownership
+  updates restore selected Linux file capabilities.
 - **Delegated to rsync** (strict mode rejects them): `-A`,
   `-b`, `--link-dest`/`--compare-dest`/`--copy-dest`,
   `--chmod`, `--append`, `--partial-dir`, and `--remove-source-files`.
@@ -534,6 +536,7 @@ python3 tests/xattrs_test.py                              # local/push/pull xatt
 python3 tests/xattrs_wire_test.py                         # xattr negotiation and hostile metadata
 python3 tests/xattrs_race_test.py                         # fresh file/link attributes after source-read retries
 python3 tests/xattrs_memory_test.py                       # fork RSS scaling, inline quota, descriptor and storage failures
+python3 tests/xattrs_privileged_test.py                   # Linux root trusted/capability parity (isolated SYS_ADMIN rig)
 python3 tests/protocol_test.py                            # frozen N-1 and feature subsets
 python3 tests/output_test.py                              # formats, ordering, log parity
 python3 tests/error_test.py                               # error counts, samples, exit codes and log parity
