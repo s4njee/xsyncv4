@@ -1,7 +1,8 @@
 # xsync backlog — from benchmark winner to daily driver
 
 Initial audit written 2026-10-08 against xsync 0.1.0 (protocol 1).
-All fifteen P0 stories are now complete against protocol 3; per-story evidence is below.
+All fifteen P0 stories completed against protocol 3; per-story evidence is below.
+P1 R-02 through R-06 are complete. Current protocol 4 supports protocol 3; R-07 is next.
 Problem statements retain the original audit findings.
 
 ## What "daily driver" means here
@@ -64,8 +65,9 @@ work, or lies about what it did.
 
 ## P1 — Reach: being able to use it against the machines you sync with
 
-The largest practical blocker. xsync cannot talk to rsync, so today every `host:` argument
-fails unless a matching xsync is already on that host's non-interactive `PATH`.
+At the initial audit, every `host:` argument failed unless matching xsync was on
+the remote PATH. R-02 through R-06 now provide fallback, releases, explicit
+installation, lookup and protocol compatibility. Remaining reach work is below.
 
 | ID | Item | Status | Done when | Size |
 |---|---|---|---|---|
@@ -512,7 +514,8 @@ These change defaults, so they should be chosen rather than inherited from a ben
 - `build-release/xsync --install sanjee@neo.local` explicitly installed the
   matching arm64 release at `/home/sanjee/.local/bin/xsync`. The remote file
   SHA-256 is `b2a44fd2aff99b716f7306c15eb65ae8952afaf2cdeaadb480649fdd3f652ffb`,
-  matching `dist/manifest.json`. `--version` reports commit `29050650e074`.
+  matching that release's `dist/manifest.json` (commit `29050650e074`).
+  `--version` reports commit `29050650e074`.
   Native push/pull, reruns, update/delete, metadata and shell checks pass there.
 
 ### R-05 — complete (2026-10-09)
@@ -578,3 +581,9 @@ These change defaults, so they should be chosen rather than inherited from a ben
 - Current/current real SSH and all eight SIGINT phases pass (maximum server
   shutdown 0.612 s). All 96 root/ID/device differential cases pass. Hostile
   receiver and fallback regressions pass with the updated Hello format.
+- After the final R-06 source commit `e40d07f5fe39`, all three static releases
+  were refreshed. Both musl architectures pass scratch execution and bare Debian
+  local/compressed push/pull tests; the universal binary runs under x86_64 too.
+  Neo intentionally retains the tested protocol-3 release for compatibility.
+- The final strict native differential run remains 212/214: only E-08's native
+  `-m` and protect-filter cases are unsupported. No new failures were introduced.
