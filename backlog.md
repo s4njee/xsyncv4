@@ -1584,3 +1584,58 @@ Verified artifact manifest (source `864bd37edf14`):
   without reopening the file by a mutable pathname. Disk-backed values and
   bounded remote value frames are the next xattr work; privileged namespaces,
   the wider metadata options and packaging also remain pending.
+
+
+## E-10 progress — 2026-10-09: bounded xattr storage and remote streams
+
+- E-10 remains **code**, and P1 remains **17/22**. Cached xattr values now share
+  their bytes across metadata copies. A process-wide **8 MiB** inline budget
+  spills overflow and values larger than **64 KiB** into shared extents in one
+  unlinked, mode-0600 temporary file. Freed extents are reused; descriptor use
+  does not grow with the number of attributes.
+- Large macOS resource forks are read and written through anchored fork file
+  descriptors in **64 KiB** chunks. Remote peers negotiate `PF_XATTR_STREAM`
+  (**524288**) and use bounded START/CHUNK/END frames with XXH3 checksums before
+  metadata references. The xattr producer queue uses an **8 MiB** limit. Frozen
+  protocol-3 options and the protocol version remain unchanged; older X-only
+  helpers delegate or refuse before destination writes.
+- Receiver checks reject bad lengths, overflowing varints, unordered IDs,
+  excessive active streams, gaps/overlaps, oversized chunks, duplicate endings,
+  incomplete/duplicate references, checksum corruption and unreferenced values.
+  Unreferenced streams fail before deletion finalization. Temporary-storage
+  failures protect existing files, attributes and deletion candidates; received
+  storage failures occur before destination work. Active streams are capped at
+  the sender's 64-worker limit; pending value records are capped at 1,048,576.
+- On Apple Silicon, **4/32/128 distinct 4 MiB forks** now peak locally at
+  **11,304,960 / 11,436,032 / 11,649,024 bytes RSS**, versus the prior
+  **32,342,016 / 150,880,256** baseline for 4/32 files. The 128-file directory
+  contains **512 MiB** of attribute data; push/pull peaks are approximately
+  **59.2 MB**, and 512 files with 32 KiB small attributes peak below **70 MB**.
+  Data, exact fork/attribute values, mtimes and source integrity are checked.
+  Rosetta passes the same scaling and storage-failure checks. These are fixture
+  measurements; directory entry/name metadata still scales with entry count,
+  and non-fork platform APIs can require one contiguous attribute value.
+- Verification: **19** xattr differential methods pass on ARM and Rosetta;
+  **10** hostile-stream/configuration methods pass on ARM, Rosetta and Linux;
+  source-retry checks and fallback checks pass on all three. Linux additionally
+  copies **5,000 files with 2 KiB attributes** locally and in both remote
+  directions under a **64-descriptor** limit, forcing small-value spill.
+  Real SSH namespace, attribute-only/idempotence and read-only cases pass.
+  The **nine** frozen-peer/capability protocol methods pass. Private temporary
+  storage is empty after each scaling transfer.
+- Evidence: `/tmp/xsync-e10-stream-memory-final.log`,
+  `/tmp/xsync-e10-stream-memory-rosetta.log`,
+  `/tmp/xsync-e10-stream-wire-final.log`,
+  `/tmp/xsync-e10-stream-linux-final.log`,
+  `/tmp/xsync-e10-stream-linux-tests.log`,
+  `/tmp/xsync-e10-stream-xattrs-{first,rosetta}.log`,
+  `/tmp/xsync-e10-stream-races{,-rosetta}.log`,
+  `/tmp/xsync-e10-stream-fallback-{mac,rosetta}.log`,
+  `/tmp/xsync-e10-stream-protocol-mac.log`, and
+  `/tmp/xsync-e10-stream-real-ssh{,-final}.log` (the first SSH run's namespace
+  method passed; its later request for a disabled method was a harness selection
+  error, corrected in the final run).
+- **Remaining before E-10 completion:** privileged namespace/type behavior,
+  the wider metadata options (`-A`, creation/access times, BSD flags, `-E`,
+  `--chmod`, `--chown`) and packaging. Installed helpers and release artifacts
+  remain unchanged. R-01 still needs a distinct Linux LAN target beyond the Pi.

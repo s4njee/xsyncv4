@@ -21,6 +21,7 @@
 #include <cstdlib>
 #include <climits>
 #include <memory>
+#include <system_error>
 #include <map>
 #include <unordered_map>
 #include <unordered_set>
@@ -47,7 +48,7 @@ namespace {
 
 enum : u8 { F_HELLO = 1, F_DIR, F_NEED, F_DATA, F_LIST_END, F_DATA_END, F_DONE, F_MSG, F_IDMAP, F_DEST, F_OUTPUT, F_OUTPUT_CONFIG,
             F_DELTA_REQUEST, F_DELTA_SIGNATURE, F_DELTA_RETRY_ACK, F_LIST_ENTRY, F_IO_CONFIG, F_KEEPALIVE, F_FILTER_CONFIG, F_DELETE_CONFIG,
-            F_PRUNE_CONFIG, F_RELATIVE_CONFIG, F_FILES_CONFIG, F_FILES_DATA, F_FILES_END, F_XATTR_CONFIG };
+            F_PRUNE_CONFIG, F_RELATIVE_CONFIG, F_FILES_CONFIG, F_FILES_DATA, F_FILES_END, F_XATTR_CONFIG, F_XATTR_START, F_XATTR_CHUNK, F_XATTR_END };
 enum : u8 { DF_ATTRS = 1, DF_SINGLE = 2, DF_NODELETE = 4, DF_ZSTD = 8 };
 enum : u8 { R_WHOLE = 1, R_CHUNK = 2, R_FAIL = 4, R_END = 8, R_LITERAL = 16, R_DELTA_END = 32, R_COPY = 64 };
 constexpr size_t HDR = 5;                  // u32 payload length + u8 type
@@ -72,10 +73,24 @@ void put_str(std::string& s, std::string_view v) {
   s.append(v);
 }
 
+u64 send_xattr_value(const XattrValue& value);
+XattrValue take_xattr_value(u64 id);
+void receive_xattr_value(u8 type, std::string_view payload);
+void check_xattr_values_drained();
+
 void put_xattrs(std::string& s, const XattrSet& attrs) {
   s.push_back((char)attrs.complete);
   put_var(s, attrs.values.size());
-  for (const auto& [name, value] : attrs.values) put_str(s, name), put_str(s, value);
+  for (const auto& [name, value] : attrs.values) {
+    put_str(s, name);
+    if (g_opt.peer_features & PF_XATTR_STREAM) {
+      bool large = value.stored();
+      s.push_back((char)large);
+      if (large) { put_var(s, send_xattr_value(value)); continue; }
+    }
+    put_var(s, value.size());
+    if (!value.append_to(s)) die(RERR_FILEIO, "read stored extended attributes: %s", errstr(errno).c_str());
+  }
 }
 
 void put_file_attrs(std::string& s, const Entry& e, const XattrSet& xattrs) {
@@ -102,6 +117,7 @@ struct RBuf {
     for (int sh = 0; sh < 64; sh += 7) {
       if (p >= e) return bad = true, 0;
       u8 b = *p++;
+      if (sh == 63 && (b & 0xfe)) return bad = true, 0;
       v |= (u64)(b & 0x7f) << sh;
       if (!(b & 0x80)) return v;
     }
@@ -132,10 +148,22 @@ XattrSet get_xattrs(RBuf& r) {
     die(RERR_PROTOCOL, "protocol error: malformed xattr list");
   attrs.complete = complete;
   for (u64 i = 0; i < count; ++i) {
-    auto name = r.str(), value = r.str();
-    if (r.bad || name.empty() || name.size() > 1024 || name.find('\0') != name.npos ||
-        !attrs.values.emplace(std::string(name), std::string(value)).second)
+    auto name = r.str();
+    if (r.bad || name.empty() || name.size() > 1024 || name.find('\0') != name.npos || attrs.values.count(name))
       die(RERR_PROTOCOL, "protocol error: invalid or duplicate xattr name/value");
+    u8 kind = g_opt.peer_features & PF_XATTR_STREAM ? r.byte() : 0;
+    if (r.bad || kind > 1) die(RERR_PROTOCOL, "protocol error: bad xattr value kind");
+    if (kind) {
+      u64 id = r.var();
+      if (r.bad) die(RERR_PROTOCOL, "protocol error: truncated xattr value reference");
+      attrs.values.emplace(std::string(name), take_xattr_value(id));
+    } else {
+      auto value = r.str();
+      if (r.bad || ((g_opt.peer_features & PF_XATTR_STREAM) && value.size() > XattrValue::INLINE_MAX))
+        die(RERR_PROTOCOL, "protocol error: truncated or oversized inline xattr value");
+      try { attrs.values.emplace(std::string(name), XattrValue(std::string(value))); }
+      catch (const std::system_error& error) { die(RERR_FILEIO, "store received extended attributes: %s", error.what()); }
+    }
   }
   return attrs;
 }
@@ -217,12 +245,12 @@ struct Conn {
     wt = std::thread([this] { writer(); });
   }
   // Queue a frame built with new_frame(); `bounded` applies back-pressure to bulk producers.
-  void send(std::string&& f, bool bounded = false) {
+  void send(std::string&& f, bool bounded = false, size_t queue_limit = MAX_Q) {
     if (f.size() < HDR || f.size() - HDR > (1u << 30)) die(RERR_PROTOCOL, "protocol error: oversized outgoing frame");
     u32 len = (u32)(f.size() - HDR);
     memcpy(f.data(), &len, 4);
     std::unique_lock<std::mutex> lk(mu);
-    if (bounded) cv_space.wait(lk, [&] { return qbytes < MAX_Q || closing; });
+    if (bounded) cv_space.wait(lk, [&] { return qbytes < queue_limit || closing; });
     if (closing) return;
     qbytes += f.size();
     q.push_back(std::move(f));
@@ -371,6 +399,11 @@ struct Conn {
       }
       if (type == F_XATTR_CONFIG && (len != 1 || !(g_opt.peer_features & PF_XATTRS)))
         die(RERR_PROTOCOL, "protocol error: malformed or unnegotiated xattr configuration");
+      if (type >= F_XATTR_START && type <= F_XATTR_END) {
+        if (!(g_opt.peer_features & PF_XATTR_STREAM)) die(RERR_PROTOCOL, "protocol error: unnegotiated xattr value stream");
+        if ((type == F_XATTR_START && len > 20) || (type == F_XATTR_CHUNK && (len < 4 || len > 65536 + 32)) ||
+            (type == F_XATTR_END && len > 18)) die(RERR_PROTOCOL, "protocol error: oversized xattr value frame");
+      }
       if (type == F_KEEPALIVE) {
         if (!keepalive.load() || len) die(RERR_PROTOCOL, "protocol error: invalid or unnegotiated keep-alive");
         continue;
@@ -382,6 +415,102 @@ struct Conn {
 };
 
 Conn* g_conn = nullptr;
+
+// Values precede their metadata references. The reader spools bounded chunks;
+// worker threads consume completed values without waiting on other workers.
+u64 send_xattr_value(const XattrValue& value) {
+  static std::mutex start_mu;
+  static u64 next_id = 0;
+  u64 id;
+  {
+    std::lock_guard<std::mutex> lock(start_mu);
+    id = ++next_id;
+    if (!id) die(RERR_PROTOCOL, "xattr stream ID overflow");
+    auto f = new_frame(F_XATTR_START);
+    put_var(f, id), put_var(f, value.size());
+    g_conn->send(std::move(f), true, 8 << 20);
+  }
+  XXH3_state_t hash;
+  XXH3_64bits_reset(&hash);
+  std::array<char, 65536> bytes;
+  for (u64 pos = 0; pos < value.size();) {
+    size_t n = (size_t)std::min<u64>(bytes.size(), value.size() - pos);
+    if (!value.read(bytes.data(), n, pos)) die(RERR_FILEIO, "read stored extended attributes: %s", errstr(errno).c_str());
+    XXH3_64bits_update(&hash, bytes.data(), n);
+    auto f = new_frame(F_XATTR_CHUNK);
+    put_var(f, id), put_var(f, pos), put_str(f, std::string_view(bytes.data(), n));
+    g_conn->send(std::move(f), true, 8 << 20);
+    pos += n;
+  }
+  auto f = new_frame(F_XATTR_END);
+  put_var(f, id);
+  u64 digest = XXH3_64bits_digest(&hash);
+  f.append((const char*)&digest, sizeof digest);
+  g_conn->send(std::move(f), true, 8 << 20);
+  return id;
+}
+struct ReceivedXattr {
+  XattrValue value;
+  u64 received = 0;
+  std::unique_ptr<XXH3_state_t, decltype(&XXH3_freeState)> hash{nullptr, XXH3_freeState};
+};
+std::mutex xattr_values_mu;
+std::unordered_map<u64, ReceivedXattr> xattr_values;
+u64 last_xattr_id = 0;
+size_t active_xattr_values = 0;
+void receive_xattr_value(u8 type, std::string_view payload) {
+  RBuf r(payload);
+  u64 id = r.var();
+  std::lock_guard<std::mutex> lock(xattr_values_mu);
+  if (type == F_XATTR_START) {
+    u64 size = r.var();
+    if (r.bad || !r.empty() || !id || id != last_xattr_id + 1 || !size || size > INT64_MAX || xattr_values.size() >= 1048576 || active_xattr_values >= MAX_WORKERS)
+      die(RERR_PROTOCOL, "protocol error: invalid xattr value start");
+    ReceivedXattr value;
+    if (!XattrValue::allocate(size, value.value)) die(RERR_FILEIO, "store received extended attributes: %s", errstr(errno).c_str());
+    value.hash.reset(XXH3_createState());
+    if (!value.hash) die(RERR_FILEIO, "allocate xattr checksum state");
+    XXH3_64bits_reset(value.hash.get());
+    xattr_values.emplace(id, std::move(value));
+    last_xattr_id = id;
+    ++active_xattr_values;
+    return;
+  }
+  auto it = xattr_values.find(id);
+  if (r.bad || it == xattr_values.end() || !it->second.hash)
+    die(RERR_PROTOCOL, "protocol error: unknown or completed xattr value stream");
+  auto& value = it->second;
+  if (type == F_XATTR_CHUNK) {
+    u64 offset = r.var();
+    auto bytes = r.str();
+    if (r.bad || !r.empty() || bytes.empty() || bytes.size() > 65536 || offset != value.received || bytes.size() > value.value.size() - value.received)
+      die(RERR_PROTOCOL, "protocol error: invalid xattr value chunk");
+    if (!value.value.write(bytes.data(), bytes.size(), offset)) die(RERR_FILEIO, "write received extended attributes: %s", errstr(errno).c_str());
+    XXH3_64bits_update(value.hash.get(), bytes.data(), bytes.size());
+    value.received += bytes.size();
+  } else {
+    auto bytes = r.raw(sizeof(u64));
+    if (r.bad || !r.empty() || value.received != value.value.size())
+      die(RERR_PROTOCOL, "protocol error: incomplete xattr value stream");
+    u64 expected;
+    memcpy(&expected, bytes.data(), sizeof expected);
+    if (expected != XXH3_64bits_digest(value.hash.get())) die(RERR_STREAMIO, "data corruption detected in xattr stream");
+    value.hash.reset();
+    --active_xattr_values;
+  }
+}
+XattrValue take_xattr_value(u64 id) {
+  std::lock_guard<std::mutex> lock(xattr_values_mu);
+  auto it = xattr_values.find(id);
+  if (it == xattr_values.end() || it->second.hash) die(RERR_PROTOCOL, "protocol error: unknown or incomplete xattr value reference");
+  auto value = std::move(it->second.value);
+  xattr_values.erase(it);
+  return value;
+}
+void check_xattr_values_drained() {
+  std::lock_guard<std::mutex> lock(xattr_values_mu);
+  if (!xattr_values.empty()) die(RERR_PROTOCOL, "protocol error: unreferenced xattr value stream");
+}
 
 void send_msg(int kind, int code, std::string_view s) {
   std::string f = new_frame(F_MSG);
@@ -492,6 +621,7 @@ std::string_view unpack(std::string_view in, bool compressed, std::string& scrat
 
 std::string missing_feature(u64 features) {
   if (g_opt.xattrs && !g_opt.list_only && !(features & PF_XATTRS)) return "peer does not support --xattrs";
+  if ((features & PF_XATTRS) && !(features & PF_XATTR_STREAM)) return "peer does not support streamed --xattrs";
   if (g_opt.files_from_set && !(features & PF_FILES_FROM)) return "peer does not support --files-from";
   if (g_opt.relative && !(features & PF_RELATIVE)) return "peer does not support --relative";
   if (g_opt.prune_empty && !(features & PF_PRUNE_EMPTY)) return "peer does not support --prune-empty-dirs";
@@ -1847,6 +1977,9 @@ struct Receiver {
       }
       if (ended) die(RERR_PROTOCOL, "protocol error: frame after DATA_END");
       switch (type) {
+        case F_XATTR_START:
+        case F_XATTR_CHUNK:
+        case F_XATTR_END: receive_xattr_value(type, payload); break;
         case F_DIR: on_dir(payload); break;
         case F_DELTA_REQUEST: on_delta_request(payload); break;
         case F_DATA: {
@@ -1910,6 +2043,7 @@ struct Receiver {
     if (g_stop.load()) exit_signal();
     pool.join();
     g_stats.scan_done.store(true);
+    check_xattr_values_drained();
     // DATA_END cannot turn missing records or an undrained attempt into success.
     if (!big.empty()) die(RERR_PROTOCOL, "protocol error: incomplete file data");
     for (RDir* d : dirs)
@@ -2148,7 +2282,7 @@ int run_client(const std::vector<std::string>& srcs, const std::string& dest, u3
   if (!o.relative) advertised &= ~PF_RELATIVE;
   if (!o.files_from_set) advertised &= ~PF_FILES_FROM;
   if (!o.hard_links) advertised &= ~PF_HLINK;
-  if (!o.xattrs) advertised &= ~PF_XATTRS;
+  if (!o.xattrs) advertised &= ~(PF_XATTRS | PF_XATTR_STREAM);
   if (!output_enabled()) advertised &= ~(PF_OUTPUT | PF_DIR_OUTPUT);
   if (wire_version >= 4) put_var(f, advertised);
   put_options(f);
@@ -2326,6 +2460,8 @@ int run_server() {
   o.am_server = true;
   o.wire_version = ver;
   o.peer_features = advertised & PROTO_FEATURES;
+  if ((o.peer_features & PF_XATTR_STREAM) && !(o.peer_features & PF_XATTRS))
+    die(RERR_PROTOCOL, "protocol error: xattr streaming requires xattr metadata");
   o.list_only = o.peer_features & PF_LIST;
   o.hard_links = o.peer_features & PF_HLINK;
   get_options(r);

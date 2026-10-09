@@ -408,8 +408,12 @@ Differences to be aware of:
   and supported symlinks. `-XX` also copies rsync internal attributes. Attribute-only
   updates and per-file APFS clones apply the same attribute selection as byte copies.
   Whole-directory clones are disabled with `-X` so every entry is handled individually.
-  Local and remote transfers support xattrs. Helpers without the xattr capability
-  delegate before destination writes, or refuse in strict mode.
+  Local and remote transfers support xattrs. Helpers without the xattr and streaming capabilities
+  delegate before destination writes, or refuse in strict mode. Cached attribute
+  values share an 8 MiB memory budget and spill into an unlinked temporary file.
+  Large macOS resource forks use descriptor I/O and remote 64 KiB chunks; other
+  attribute APIs may still require one contiguous value during a read or write.
+  Temporary storage must have space for the cached values.
 - **Delegated to rsync** (strict mode rejects them): `-A`,
   `-b`, `--link-dest`/`--compare-dest`/`--copy-dest`,
   `--chmod`, `--append`, `--partial-dir`, and `--remove-source-files`.
@@ -529,6 +533,7 @@ python3 tests/fallback_test.py                            # local fallback check
 python3 tests/xattrs_test.py                              # local/push/pull xattrs, filters, clones and resource forks
 python3 tests/xattrs_wire_test.py                         # xattr negotiation and hostile metadata
 python3 tests/xattrs_race_test.py                         # fresh file/link attributes after source-read retries
+python3 tests/xattrs_memory_test.py                       # fork RSS scaling, inline quota, descriptor and storage failures
 python3 tests/protocol_test.py                            # frozen N-1 and feature subsets
 python3 tests/output_test.py                              # formats, ordering, log parity
 python3 tests/error_test.py                               # error counts, samples, exit codes and log parity

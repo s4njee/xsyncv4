@@ -57,10 +57,15 @@ if case=='missing': sys.exit(127)
 elif case=='mismatch': frame(1,b'XSYNC\\x01\\x00')
 elif case=='fatal_mismatch': frame(8,b'\\x02\\x02protocol version mismatch: test peer')
 elif case=='banner': print('welcome to a broken shell',flush=True)
-elif case in ('disconnect','capability'):
+elif case in ('disconnect','capability','xattr_legacy'):
  import re,pathlib
  version=int(re.search(r'PROTO_VERSION = (\\d+)',pathlib.Path(sys.argv[2]).read_text())[1])
- frame(1,b'XSYNC\\x01'+bytes([version])+(b'\\x0f' if version>=4 else b''))
+ features = 262159 if case=='xattr_legacy' else 15
+ def var(value):
+  result=bytearray()
+  while value>=128: result.append((value&127)|128); value>>=7
+  return bytes(result)+bytes([value])
+ frame(1,b'XSYNC\\x01'+bytes([version])+(var(features) if version>=4 else b''))
 else: sys.exit(255)
 ''')
         # The fake rsync branch drops the Python fixture arguments before invoking
@@ -143,13 +148,13 @@ else: sys.exit(255)
         set_attr(source, attr_name('fallback-binary'), b'\0\xff\r\n')
         before = get_attrs(source)
         rsh = self.fake_shell()
-        for direction in ('push', 'pull'):
+        for direction, peer in ((direction, peer) for direction in ('push', 'pull') for peer in ('capability', 'xattr_legacy')):
             for flags in ('-aX', '-aXX'):
-                with self.subTest(direction=direction, flags=flags):
-                    dest = self.root / (direction + flags)
+                with self.subTest(direction=direction, flags=flags, peer=peer):
+                    dest = self.root / (direction + peer + flags)
                     a, b = str(self.src) + '/', str(dest)
                     a, b = (a, 'fake:' + b) if direction == 'push' else ('fake:' + a, b)
-                    environment = dict(self.env, XSYNC_TEST_PEER='capability')
+                    environment = dict(self.env, XSYNC_TEST_PEER=peer)
                     result = self.run_sync('--no-fallback', flags, '-e', rsh, a, b, env=environment)
                     self.assertEqual(result.returncode, 4, result.stderr)
                     self.assertFalse(dest.exists())

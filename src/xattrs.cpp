@@ -6,6 +6,8 @@
 #include <unistd.h>
 #include <algorithm>
 #include <cerrno>
+#include <array>
+#include <system_error>
 
 namespace {
 struct Access {
@@ -25,6 +27,38 @@ struct Access {
 #else
     return link ? lgetxattr(path.c_str(), name, data, size) : getxattr(path.c_str(), name, data, size);
 #endif
+  }
+  int set_value(const char* name, const XattrValue& value) const {
+#ifdef __APPLE__
+    if (std::string_view(name) == "com.apple.ResourceFork" && value.size() > XattrValue::INLINE_MAX) {
+      int fork = openat(fd, "..namedfork/rsrc", O_WRONLY | O_CREAT | O_NOFOLLOW | O_CLOEXEC, 0600);
+      if (fork < 0) return -1;
+      bool ok = value.size() <= (u64)INT64_MAX && ftruncate(fork, (off_t)value.size()) == 0;
+      std::array<char, 65536> bytes;
+      for (u64 pos = 0; ok && pos < value.size();) {
+        size_t n = (size_t)std::min<u64>(bytes.size(), value.size() - pos);
+        ok = value.read(bytes.data(), n, pos);
+        size_t done = 0;
+        while (ok && done < n) {
+          ssize_t k = pwrite(fork, bytes.data() + done, n - done, (off_t)(pos + done));
+          if (k < 0 && errno == EINTR) continue;
+          if (k <= 0) { if (!k) errno = EIO; ok = false; break; }
+          done += (size_t)k;
+        }
+        pos += n;
+      }
+      int error = errno;
+      if (close(fork) != 0 && ok) return -1;
+      errno = error;
+      return ok ? 0 : -1;
+    }
+#endif
+    // Non-fork APIs require one contiguous value. Large source/destination
+    // caches still stay on disk; materialize only this attribute for its call.
+    if (!value.stored()) return set(name, value.inline_bytes().data(), value.inline_bytes().size());
+    std::string bytes;
+    if (!value.append_to(bytes)) return -1;
+    return set(name, bytes.data(), bytes.size());
   }
   int set(const char* name, const void* data, size_t size) const {
 #ifdef __APPLE__
@@ -126,10 +160,33 @@ XattrSet read(const Access& a, const std::string& display, const FilterList& fil
     start = (size_t)(end - names.begin()) + 1;
     if (!eligible(name, filters, source)) continue;
     std::string value;
+    XattrValue stored;
+    bool streamed = false;
     bool done = false;
     for (int attempt = 0; attempt < 4; ++attempt) {
       ssize_t count = a.get(name.c_str(), nullptr, 0);
       if (count < 0) { fail("read extended attribute"); return result; }
+#ifdef __APPLE__
+      if (name == "com.apple.ResourceFork" && count > (ssize_t)XattrValue::INLINE_MAX) {
+        int source = a.fd;
+        bool owned = source < 0;
+        if (owned) {
+          struct stat st;
+          if (lstat(a.path.c_str(), &st) != 0) { fail("open resource fork attributes"); return result; }
+          source = open(a.path.c_str(), O_EVTONLY | O_CLOEXEC | (S_ISLNK(st.st_mode) ? O_SYMLINK : O_NOFOLLOW));
+        }
+        int fork = source < 0 ? -1 : openat(source, "..namedfork/rsrc", O_RDONLY | O_NOFOLLOW | O_CLOEXEC);
+        int error = errno;
+        if (owned && source >= 0) close(source);
+        if (fork < 0) { errno = error; fail("open resource fork attributes"); return result; }
+        bool ok = XattrValue::from_fd(fork, (u64)count, stored);
+        error = errno;
+        close(fork);
+        if (!ok) { errno = error; fail("read resource fork attributes"); return result; }
+        streamed = done = true;
+        break;
+      }
+#endif
       value.resize((size_t)count);
       if (!count) { done = true; break; }
       count = a.get(name.c_str(), value.data(), value.size());
@@ -139,7 +196,12 @@ XattrSet read(const Access& a, const std::string& display, const FilterList& fil
     if (!done) { fail("read extended attribute"); return result; }
     // rsync applies later enumerated attributes last when physical names
     // collapse to the same protocol name (foo and rsync.user.foo on Darwin).
-    result.values.insert_or_assign(source ? wire_name(name) : name, std::move(value));
+    try {
+      if (!streamed) stored = XattrValue(std::move(value));
+      result.values.insert_or_assign(source ? wire_name(name) : name, std::move(stored));
+    } catch (const std::system_error& error) {
+      errno = error.code().value(); fail("store extended attribute"); return result;
+    }
   }
   return result;
 }
@@ -163,7 +225,7 @@ struct Target {
   }
   ~Target() { if (fd >= 0) close(fd); }
 };
-using LocalValues = std::map<std::string, std::string, std::less<>>;
+using LocalValues = std::map<std::string, XattrValue, std::less<>>;
 LocalValues desired(const XattrSet& source, const FilterList& filters) {
   LocalValues result;
   for (const auto& [name, value] : source.values) {
@@ -202,7 +264,7 @@ bool update(const XattrSet& source, int fd, const std::string& path, u8 type, co
     auto found = current.find(name);
     if (found != current.end() && found->second == value) continue;
     changed = true;
-    if (write) { prepare_write(); check_attr(access.set(name.c_str(), value.data(), value.size()), path.c_str(), "extended attribute"); }
+    if (write) { prepare_write(); check_attr(access.set_value(name.c_str(), value), path.c_str(), "extended attribute"); }
   }
   for (const auto& [name, value] : current) {
     if (wanted.count(name) || (!fresh && (write ? g_opt.filters : filters).xattr_excluded(name, true, g_opt.delete_excluded))) continue;
@@ -245,10 +307,12 @@ bool xattrs_differ(const XattrSet& source, const std::string& path, u8 type, con
   if (!supported_type(type)) return !desired(source, filters).empty();
   Target target(path, type);
   if (target.fd < 0) { file_io_error(errno, path.c_str(), "open extended attributes"); return false; }
-  return update(source, target.fd, path, type, filters, false);
+  try { return update(source, target.fd, path, type, filters, false); }
+  catch (const std::system_error& error) { g_source_io_error.store(true); file_io_error(error.code().value(), path.c_str(), "read stored extended attributes"); return false; }
 }
 bool apply_fd_xattrs(const XattrSet& source, int fd, const std::string& path, u8 type, const FilterList& filters, bool fresh) {
-  return update(source, fd, path, type, filters, !g_opt.dry_run, fresh);
+  try { return update(source, fd, path, type, filters, !g_opt.dry_run, fresh); }
+  catch (const std::system_error& error) { g_source_io_error.store(true); file_io_error(error.code().value(), path.c_str(), "read stored extended attributes"); return false; }
 }
 bool apply_xattrs(const XattrSet& source, const std::string& path, u8 type, const FilterList& filters) {
   if (g_opt.dry_run || !source.complete) return false;
@@ -259,7 +323,8 @@ bool apply_xattrs(const XattrSet& source, const std::string& path, u8 type, cons
   }
   Target target(path, type);
   if (target.fd < 0) { file_io_error(errno, path.c_str(), "open extended attributes"); return false; }
-  return update(source, target.fd, path, type, filters, true);
+  try { return update(source, target.fd, path, type, filters, true); }
+  catch (const std::system_error& error) { g_source_io_error.store(true); file_io_error(error.code().value(), path.c_str(), "read stored extended attributes"); return false; }
 }
 void collect_source_xattrs(DirWork& work) {
   if (!g_opt.xattrs || work.xattrs_loaded) return;

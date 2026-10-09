@@ -1,11 +1,12 @@
 #pragma once
 #include "common.h"
+#include "xattr_value.h"
 #include <map>
 
 // Names use Linux-style protocol namespaces on every OS. Source read failures
 // remain distinguishable from an empty list, so they cannot erase attributes.
 struct XattrSet {
-  std::map<std::string, std::string, std::less<>> values;
+  std::map<std::string, XattrValue, std::less<>> values;
   bool complete = true;
   // Local-only guard for -L's physical symlink attributes. Never sent on wire.
   bool guarded_link = false;
