@@ -701,7 +701,7 @@ These change defaults, so they should be chosen rather than inherited from a ben
   writes, waits for active writes and retains only the contiguous prefix, trimming
   out-of-order holes before rename. Existing inplace files retain their length.
   Receiver chunks reject overlaps, inconsistent lengths and unoffered prefixes.
-- `tests/resume_test.py` passes all six methods on Linux (five applicable methods
+- `tests/resume_test.py` passes all seven methods on Linux (six applicable methods
   on macOS). It stops 64 MiB transfers at the 32 MiB write boundary: local and
   remote SIGINT, sender SIGKILL/disconnect in both directions, then restart. The
   retained 33 MiB prefix matches the source, and each restart sends only the
@@ -717,3 +717,10 @@ These change defaults, so they should be chosen rather than inherited from a ben
   and unoffered prefixes/overlapping chunks fail. All 12 P0 trust methods and the
   original hostile-wire test pass. Six fallback regressions pass. Strict native
   differentials remain 212/214, with only E-08's pending filter features failing.
+- A sparse 4 GiB prefix plus a 1 MiB tail passes on macOS and Linux, checking
+  64-bit offsets, preserved prefix samples and transfer of only the tail. The
+  full seven-method Linux resume suite passes against the final source build.
+- Static release artifacts at source commit `e77fcadcceb7` pass standalone
+  execution and compressed resume transfers in scratch and bare Debian. The
+  universal macOS binary passes ARM-client/x86_64-peer push and pull: a 2 MiB
+  prefix in a 4 MiB file sends 2,097,435 and 2,097,355 bytes respectively.

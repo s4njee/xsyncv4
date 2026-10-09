@@ -191,6 +191,32 @@ class ResumeTests(unittest.TestCase):
                     self.assertGreaterEqual(cost, remaining)
                     self.assertLess(cost, remaining + 256 * 1024)
 
+    def test_prefix_and_offsets_above_four_gib(self):
+        # Sparse fixtures cover 64-bit offsets without allocating gigabytes.
+        with tempfile.TemporaryDirectory() as tmp:
+            root = pathlib.Path(tmp)
+            source, target = root / 'source', root / 'target'
+            prefix = 1 << 32
+            tail = os.urandom(MIB)
+            with source.open('wb') as stream:
+                stream.seek(prefix)
+                stream.write(tail)
+            with target.open('wb') as stream: stream.truncate(prefix)
+            command = [str(BINARY), '--no-fallback', '-aP', '--inplace', '--stats', '-j4',
+                       '-e', shlex.join([sys.executable, str(REPO / 'tests/fault_ssh.py')]),
+                       '--rsync-path=' + str(BINARY), str(source), 'fake:' + str(target)]
+            result = subprocess.run(command, capture_output=True, timeout=45)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(target.stat().st_size, prefix + MIB)
+            with target.open('rb') as stream:
+                self.assertEqual(stream.read(MIB), bytes(MIB))
+                stream.seek(prefix - MIB)
+                self.assertEqual(stream.read(MIB), bytes(MIB))
+                self.assertEqual(stream.read(), tail)
+            cost = self.wire_bytes(result, 'push')
+            self.assertGreaterEqual(cost, MIB)
+            self.assertLess(cost, MIB + 256 * 1024)
+
     @unittest.skipUnless(HOST, 'real SSH resume runs in the isolated Linux rig')
     def test_real_ssh_halfway_resume(self):
         import ssh_test
