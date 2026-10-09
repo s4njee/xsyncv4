@@ -138,7 +138,7 @@ void reject_name_collisions(DirWork& w) {
   std::unordered_map<std::string, std::vector<u32>> names;
   for (u32 i = 0; i < w.src.e.size(); i++) {
     Entry& entry = w.src.e[i];
-    if (entry.type == T_NONE) continue;
+    if (entry.type == T_NONE || (entry.item_flags & IF_PRUNED)) continue;
     std::string_view name = w.src.name_sv(entry);
     auto& group = names[name_key(name, rules)];
     bool collision = false;

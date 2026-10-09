@@ -27,8 +27,9 @@ constexpr u64 PF_FILTERS = 2048;
 constexpr u64 PF_MERGE_FILTERS = 4096;
 constexpr u64 PF_CVS_FILTERS = 8192;
 constexpr u64 PF_DELETE_AFTER = 16384;
+constexpr u64 PF_PRUNE_EMPTY = 32768;
 #ifndef XSYNC_PROTOCOL_FEATURES
-#define XSYNC_PROTOCOL_FEATURES 32767
+#define XSYNC_PROTOCOL_FEATURES 65535
 #endif
 constexpr u64 PROTO_FEATURES = XSYNC_PROTOCOL_FEATURES;
 constexpr u64 LEGACY_V3_FEATURES = 15;
@@ -66,6 +67,7 @@ struct Options {
   bool hard_links = false;  // Negotiated separately from the frozen v3 options.
   bool delete_before = false;  // Deletion is still deferred for sender-read safety.
   bool delete_after = false;   // Scan extras and merge files after transfers finish.
+  bool prune_empty = false;   // Receiver file-list pruning; outside the frozen hello.
   bool cvs_exclude = false;  // Added at the end of explicit rules, outside the frozen hello.
   bool list_only = false, dirs_explicit = false, human_ungrouped = false;
   u64 bwlimit = 0;  // Bytes/second; outside the frozen v3 option layout.
@@ -112,7 +114,7 @@ struct Entry {
   i64 ctime = 0;
   u32 ctime_ns = 0;
 };
-enum : u8 { IF_PERMS = 1, IF_OWNER = 2, IF_GROUP = 4, IF_NEW_TYPE = 8 };
+enum : u8 { IF_PERMS = 1, IF_OWNER = 2, IF_GROUP = 4, IF_NEW_TYPE = 8, IF_PRUNED = 16 };
 
 struct DirList {
   std::vector<Entry> e;

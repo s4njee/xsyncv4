@@ -463,8 +463,15 @@ therefore apply to that deletion pass, and files created during transfer are
 included in the scan. Source I/O errors suppress deletion unless
 `--ignore-errors` is set. The option negotiates `PF_DELETE_AFTER`; helpers
 missing it refuse or delegate before destination creation. Conflicting
-`--delete-WHEN` options are rejected. Pruning empty directories with `-m`
-remains pending under E-08.
+`--delete-WHEN` options are rejected.
+
+`-m`/`--prune-empty-dirs` removes empty directory chains from the filtered source
+list before generating transfers or listings. Global receiver protection keeps
+matching empty directories and their ancestors. Transfer restrictions such as
+`--min-size`, `--existing`, and `--safe-links` do not make a directory empty in
+that list. The option requires a complete source walk and negotiates
+`PF_PRUNE_EMPTY` before transfer; helpers missing it refuse or delegate the
+request. `--no-prune-empty-dirs` disables it.
 
 xsync-only options: `-j N`/`--jobs=N` (worker threads; default is the number of
 performance cores), `--no-clone`, `--atomic` (default), `--no-atomic`.

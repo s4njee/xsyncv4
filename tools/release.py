@@ -146,6 +146,30 @@ set -e
 test "$status" = 30
 test ! -s /tmp/timeout.stdout
 grep -F 'idle timeout (code 30): 1 error' /tmp/timeout.stderr
+mkdir -p /tmp/filter-source/chain/empty /tmp/filter-source/data
+printf 'actual data' >/tmp/filter-source/data/file
+printf '# newly transferred receiver rules\nP stale\n' >/tmp/filter-source/.rules
+for direction in local push pull; do
+  target=/tmp/filter-$direction
+  mkdir "$target"
+  printf 'R stale\n' >"$target/.rules"
+  printf 'must survive refreshed protection' >"$target/stale"
+  source=/tmp/filter-source/
+  destination=$target/
+  test "$direction" != push || destination=fake:$destination
+  test "$direction" != pull || source=fake:$source
+  "$bin" --no-fallback -amC --delete-after --filter=': .rules' --stats \
+    -e /tmp/fakessh --rsync-path="$bin" "$source" "$destination" >"$target.stats"
+  cmp /tmp/filter-source/data/file "$target/data/file"
+  cmp /tmp/filter-source/.rules "$target/.rules"
+  test -f "$target/stale"
+  test ! -e "$target/chain"
+  grep -F 'Number of files: 3 (reg: 2, dir: 1)' "$target.stats"
+done
+"$bin" --no-fallback -rmC --filter=': .rules' -e /tmp/fakessh --rsync-path="$bin" \
+  fake:/tmp/filter-source/ >/tmp/filter.list
+grep -F 'data/file' /tmp/filter.list
+test "$(grep -c chain /tmp/filter.list)" = 0
 "$bin" --version
 '''.replace('ARCH', arch)
             run('docker', 'run', '--rm', '--platform', 'linux/' + arch,

@@ -62,6 +62,8 @@ struct DirWork {
   std::vector<std::string> output_sources;  // Display-only paths supplied by a remote sender.
   std::string attr_source;  // Display-only source path for this directory's attributes.
   DirList src;           // source entries, sorted by name
+  std::vector<std::unique_ptr<DirWork>> prepared_children;  // Full source walk for -m.
+  bool scan_failed = false;
   Entry attrs;           // source directory attributes
   bool has_attrs = false;
   bool created = false;   // destination directory was just created: nothing to compare against

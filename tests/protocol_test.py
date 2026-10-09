@@ -47,24 +47,28 @@ class ProtocolTests(unittest.TestCase):
         cls.subset = cls.build(REPO, cls.root / 'subset build', '-DCMAKE_CXX_FLAGS=-DXSYNC_PROTOCOL_FEATURES=1')
         cls.global_filters = cls.build(REPO, cls.root / 'global filters build', '-DCMAKE_CXX_FLAGS=-DXSYNC_PROTOCOL_FEATURES=4095')
         cls.merge_filters = cls.build(REPO, cls.root / 'merge filters build', '-DCMAKE_CXX_FLAGS=-DXSYNC_PROTOCOL_FEATURES=8191')
+        cls.after_filters = cls.build(REPO, cls.root / 'after filters build', '-DCMAKE_CXX_FLAGS=-DXSYNC_PROTOCOL_FEATURES=32767')
         cls.old_rsh = RSH
         cls.remote_legacy = str(cls.legacy)
         cls.remote_subset = str(cls.subset)
         cls.remote_global_filters = str(cls.global_filters)
         cls.remote_merge_filters = str(cls.merge_filters)
+        cls.remote_after_filters = str(cls.after_filters)
         if HOST:
             import ssh_test
             ssh_test.SSHTests.setUpClass()
             ssh_test.remote_code('import pathlib,sys; pathlib.Path(sys.argv[1]).mkdir(parents=True)', cls.root)
             for local, name in ((cls.legacy, 'legacy xsync'), (cls.subset, 'subset xsync'),
-                                (cls.global_filters, 'global filters xsync'), (cls.merge_filters, 'merge filters xsync')):
+                                (cls.global_filters, 'global filters xsync'), (cls.merge_filters, 'merge filters xsync'),
+                                (cls.after_filters, 'after filters xsync')):
                 target = cls.root / name
                 subprocess.run(['rsync', '-a', '-e', RSH, str(local), HOST + ':' + str(target)],
                                check=True, capture_output=True, timeout=20)
                 if name.startswith('legacy'): cls.remote_legacy = str(target)
                 elif name.startswith('subset'): cls.remote_subset = str(target)
                 elif name.startswith('global'): cls.remote_global_filters = str(target)
-                else: cls.remote_merge_filters = str(target)
+                elif name.startswith('merge'): cls.remote_merge_filters = str(target)
+                else: cls.remote_after_filters = str(target)
 
     @classmethod
     def build(cls, source, output, *options):
@@ -261,6 +265,31 @@ p=pathlib.Path(sys.argv[1]); print(json.dumps({'hash':hashlib.sha256((p/'file').
                                             capture_output=True, timeout=20)
                     self.assertEqual(result.returncode, 4, result.stderr)
                     self.assertIn(b'peer does not support --delete-after', result.stderr)
+                    self.assertFalse(target.exists())
+                    self.assertEqual((source / 'file').read_bytes(), b'unchanged')
+                    if HOST:
+                        from ssh_test import remote_json
+                        self.assertFalse(remote_json('import pathlib,json,sys; print(json.dumps(pathlib.Path(sys.argv[1]).exists()))', target))
+
+    def test_prune_empty_requires_its_own_capability(self):
+        source = self.root / 'prune source'
+        source.mkdir()
+        (source / 'file').write_bytes(b'unchanged')
+        for direction in ('push', 'pull', 'listing'):
+            for filters in ([], ['--filter=P stale.*']):
+                with self.subTest(direction=direction, filters=filters):
+                    target = self.root / 'uncreated prune destination'
+                    a, b = str(source) + '/', str(target) + '/'
+                    if HOST and direction != 'push':
+                        subprocess.run(['rsync', '-a', '-e', RSH, a, HOST + ':' + a], check=True, capture_output=True)
+                    if direction == 'push': b = (HOST or 'fake') + ':' + b
+                    else: a = (HOST or 'fake') + ':' + a
+                    result = subprocess.run([str(BINARY), '--no-fallback', '-rm', *filters,
+                                             '-e', RSH, '--rsync-path=' + shlex.quote(self.remote_after_filters),
+                                             *([a] if direction == 'listing' else [a, b])],
+                                            capture_output=True, timeout=20)
+                    self.assertEqual(result.returncode, 4, result.stderr)
+                    self.assertIn(b'peer does not support --prune-empty-dirs', result.stderr)
                     self.assertFalse(target.exists())
                     self.assertEqual((source / 'file').read_bytes(), b'unchanged')
                     if HOST:

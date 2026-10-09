@@ -76,6 +76,7 @@ Options (same meaning as rsync):
      --ignore-existing    skip updating files that exist on receiver
      --delete             delete extraneous files from dest dirs
      --delete-after       scan deletions and merge files after transfer
+ -m, --prune-empty-dirs    omit empty directory chains from the file list
      --delete-excluded    also delete excluded files from dest dirs
      --ignore-errors      delete even when the sender encountered I/O errors
      --max-delete=NUM     delete at most NUM entries (exit 25 if exceeded)
@@ -297,7 +298,8 @@ Parsed parse(int argc, char** argv) {
         if (comma == std::string::npos) break;
         start = comma + 1;
       } while (true);
-    } else if (flag(o.hard_links, "hard-links") || flag(o.whole_file, "whole-file") || flag(o.raw_names, "8-bit-output")) {}
+    } else if (flag(o.hard_links, "hard-links") || flag(o.whole_file, "whole-file") || flag(o.raw_names, "8-bit-output") ||
+               flag(o.prune_empty, "prune-empty-dirs")) {}
     else if (name == "protect-args" || name == "secluded-args" ||
                name == "blocking-io" || name == "no-blocking-io" || name == "no-motd") {
       // These intrinsic behaviours are listed with their reasons in --help.
@@ -306,7 +308,7 @@ Parsed parse(int argc, char** argv) {
           "acls", "xattrs", "backup", "backup-dir", "suffix", "link-dest", "compare-dest", "copy-dest", "files-from",
           "from0", "relative", "chmod", "chown", "usermap", "groupmap", "append", "append-verify", "partial-dir",
           "delay-updates", "fuzzy", "remove-source-files", "keep-dirlinks", "copy-dirlinks", "copy-unsafe-links",
-          "munge-links", "executability", "atimes", "crtimes", "prune-empty-dirs", "daemon", "port", "password-file",
+          "munge-links", "executability", "atimes", "crtimes", "daemon", "port", "password-file",
           "write-batch", "read-batch", "only-write-batch", "super", "fake-super", "temp-dir",
           "iconv", "checksum-seed", "address", "sockopts", "stop-after", "stop-at", "max-alloc", "write-devices", "copy-devices",
           "delete-missing-args", "ignore-missing-args", "trust-sender", "copy-as", "early-input", "remote-option",
@@ -400,7 +402,7 @@ Parsed parse(int argc, char** argv) {
             if (!o.filters.add_filter(": /.rsync-filter", &err)) usage_error(err);
           } else if (filter_files == 2) o.filters.add_pattern(".rsync-filter", false);
           break;
-        case 'm': usage_error("--prune-empty-dirs is not supported by xsync");
+        case 'm': o.prune_empty = true; break;
         case 'y': usage_error("--fuzzy is not supported by xsync");
         default: usage_error(std::string("-") + c + ": unknown option");
       }

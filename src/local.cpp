@@ -84,6 +84,35 @@ std::shared_ptr<const FilterList> directory_filters(const std::shared_ptr<const 
   return context;
 }
 
+void EmptyDirectoryPruner::add(const Entry& entry, std::string path, std::string_view absolute) {
+  if (entry.type == T_NONE) return;
+  if (entry.type == T_DIR) {
+    if (!g_opt.filters.protected_from_deletion(path, true, g_opt.delete_excluded, false, absolute)) return;
+    retained.insert(path);
+  }
+  for (;;) {
+    size_t slash = path.rfind('/');
+    if (slash == path.npos) break;
+    path.resize(slash);
+    if (!retained.insert(path).second) break;
+  }
+}
+
+void prune_empty_directories(const std::vector<DirWork*>& directories, std::string_view destination) {
+  EmptyDirectoryPruner pruner;
+  for (const auto* directory : directories) {
+    for (const auto& entry : directory->src.e) {
+      std::string rel = rel_join(directory->rel, directory->src.name_sv(entry));
+      std::string absolute = g_opt.filters.has_absolute() ? FilterList::absolute_path(path_join(destination, rel)) : "";
+      pruner.add(entry, std::move(rel), absolute);
+    }
+  }
+  for (auto* directory : directories)
+    for (auto& entry : directory->src.e)
+      if (entry.type == T_DIR && !pruner.keep(rel_join(directory->rel, directory->src.name_sv(entry))))
+        entry.item_flags |= IF_PRUNED;
+}
+
 void prune_source(DirList& l, std::string_view rel, u32 parent_dev, Worker& t, std::vector<std::string>* paths,
                   const SourceGuard& guard, std::string_view base, const FilterList* context) {
   const Options& o = g_opt;
@@ -274,7 +303,8 @@ bool setup_dest(const std::string& dest_arg, DirWork& root, bool single) {
   std::string dest = dest_arg.empty() ? "." : dest_arg;
   bool dest_slash = dest.back() == '/';
   while (dest.size() > 1 && dest.back() == '/') dest.pop_back();
-  if (root.src.e.empty() && !root.has_attrs) return false;
+  if (!root.has_attrs && std::none_of(root.src.e.begin(), root.src.e.end(),
+                                    [](const Entry& e) { return !(e.item_flags & IF_PRUNED); })) return false;
   if (!anchor_destination(dest)) die(RERR_FILESELECT, "cannot open destination anchor: %s", errstr(errno).c_str());
   struct stat st;
   bool exists = destination_stat(dest.c_str(), &st) == 0;
@@ -447,7 +477,7 @@ struct Local {
         return;
       }
     }
-    if (list_err) {
+    if (list_err || d->scan_failed) {
       finish_dir(*d);
       delete d;
       return;
@@ -459,11 +489,12 @@ struct Local {
       for (size_t i = 0; i < d->src.e.size(); i++) {
         const Entry& s = d->src.e[i];
         if (s.type != T_DIR || !(s.flags & EF_DESCEND)) continue;
-        DirWork* c = new DirWork;
+        DirWork* c = o.prune_empty ? d->prepared_children[i].release() : new DirWork;
+        if (!c) continue;
         std::string_view nm = d->src.name_sv(s);
         if (d->src_paths.empty()) c->src_path = path_join(d->src_path, nm);
         else c->src_path = d->src_paths[i];
-        c->source_filter = d->source_contexts.empty() ? d->source_filter : d->source_contexts[i];
+        if (!o.prune_empty) c->source_filter = d->source_contexts.empty() ? d->source_filter : d->source_contexts[i];
         c->receiver_filter = d->receiver_filter;
         c->receiver_filter_node = d->receiver_filter_node;
         c->dst_path = path_join(d->dst_path, nm);
@@ -481,7 +512,7 @@ struct Local {
           c->waiter = d;
           d->pending.fetch_add(1);
         }
-        push_scan(c, false);
+        push_scan(c, o.prune_empty);
       }
     }
     size_t n = d->need.size();
@@ -696,6 +727,38 @@ int run_local(const std::vector<std::string>& srcs, const std::string& dest) {
   root->attr_source = std::move(rl.attr_source);
   root->has_attrs = rl.has_attrs;
   root->no_delete = !rl.has_attrs;  // only the contents of "SRC/" own the destination directory
+  if (g_opt.prune_empty) {
+    std::vector<DirWork*> directories{root};
+    for (size_t index = 0; index < directories.size() && !g_stop.load(); ++index) {
+      DirWork* directory = directories[index];
+      directory->prepared_children.resize(directory->src.e.size());
+      if (!g_opt.recursive) continue;
+      for (size_t i = 0; i < directory->src.e.size(); ++i) {
+        const Entry& entry = directory->src.e[i];
+        if (entry.type != T_DIR || entry.rdev == 1) continue;
+        auto child = std::make_unique<DirWork>();
+        auto name = directory->src.name_sv(entry);
+        child->src_path = directory->src_paths.empty() ? path_join(directory->src_path, name) : directory->src_paths[i];
+        child->rel = rel_join(directory->rel, name);
+        child->attrs = entry;
+        child->has_attrs = true;
+        child->source_filter = directory->source_contexts.empty() ? directory->source_filter : directory->source_contexts[i];
+        int error = list_dir(child->src_path.c_str(), child->src, g_opt.copy_links ? LD_FOLLOW : g_opt.links ? LD_LINKS : 0);
+        if (error || child->src.incomplete) {
+          g_source_io_error.store(true);
+          child->no_delete = true;
+          child->scan_failed = error != 0;
+          err_line(RERR_PARTIAL, "list source directory \"%s\": %s", child->src_path.c_str(),
+                   error ? errstr(error).c_str() : "incomplete source listing");
+        }
+        child->source_filter = directory_filters(child->source_filter, child->src_path, false);
+        prune_source(child->src, child->rel, entry.dev, w0, nullptr, L.guard, child->src_path, child->source_filter.get());
+        directories.push_back(child.get());
+        directory->prepared_children[i] = std::move(child);
+      }
+    }
+    prune_empty_directories(directories, dest.empty() ? "." : dest);
+  }
   if (g_opt.verbose > 0) w0.logf("sending incremental file list");
   w0.flush_log();
   if (!setup_dest(dest, *root, rl.single)) {
@@ -707,7 +770,7 @@ int run_local(const std::vector<std::string>& srcs, const std::string& dest) {
   // Whole-directory clones are only equivalent to a per-file sync when nothing could make us
   // treat any entry specially.
   L.lazy_ok = o.clone && o.recursive && o.links && !o.copy_links && o.perms && o.times && !o.omit_dir_times && !o.omit_link_times &&
-              !o.dry_run && !o.inplace && !o.one_fs && !o.existing && o.max_size <= 0 && o.min_size <= 0 && o.filters.empty();
+              !o.dry_run && !o.inplace && !o.one_fs && !o.existing && !o.prune_empty && o.max_size <= 0 && o.min_size <= 0 && o.filters.empty();
 #endif
   int n = default_jobs();
   progress_start(n);

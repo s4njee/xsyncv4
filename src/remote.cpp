@@ -46,7 +46,8 @@
 namespace {
 
 enum : u8 { F_HELLO = 1, F_DIR, F_NEED, F_DATA, F_LIST_END, F_DATA_END, F_DONE, F_MSG, F_IDMAP, F_DEST, F_OUTPUT, F_OUTPUT_CONFIG,
-            F_DELTA_REQUEST, F_DELTA_SIGNATURE, F_DELTA_RETRY_ACK, F_LIST_ENTRY, F_IO_CONFIG, F_KEEPALIVE, F_FILTER_CONFIG, F_DELETE_CONFIG };
+            F_DELTA_REQUEST, F_DELTA_SIGNATURE, F_DELTA_RETRY_ACK, F_LIST_ENTRY, F_IO_CONFIG, F_KEEPALIVE, F_FILTER_CONFIG, F_DELETE_CONFIG,
+            F_PRUNE_CONFIG };
 enum : u8 { DF_ATTRS = 1, DF_SINGLE = 2, DF_NODELETE = 4, DF_ZSTD = 8 };
 enum : u8 { R_WHOLE = 1, R_CHUNK = 2, R_FAIL = 4, R_END = 8, R_LITERAL = 16, R_DELTA_END = 32, R_COPY = 64 };
 constexpr size_t HDR = 5;                  // u32 payload length + u8 type
@@ -454,6 +455,7 @@ std::string_view unpack(std::string_view in, bool compressed, std::string& scrat
 // ---------------------------------------------------------------- options on the wire
 
 std::string missing_feature(u64 features) {
+  if (g_opt.prune_empty && !(features & PF_PRUNE_EMPTY)) return "peer does not support --prune-empty-dirs";
   if (!g_opt.list_only && g_opt.delete_after && !(features & PF_DELETE_AFTER))
     return "peer does not support --delete-after";
   if (!(features & PF_CORE)) return "peer does not support the required core transfer features";
@@ -556,7 +558,7 @@ struct IdMaps {
 
 // ---------------------------------------------------------------- sender
 
-enum { K_WALK = 1, K_READ = 2, K_GEN = 3, K_DATA = 4, K_SIGNATURE = 5 };
+enum { K_WALK = 1, K_READ = 2, K_GEN = 3, K_DATA = 4, K_SIGNATURE = 5, K_PRUNE = 6 };
 
 struct SDir {
   std::string src_path, rel, attr_source;
@@ -781,6 +783,7 @@ struct Sender {
   void on_need(std::string_view payload) {
     RBuf r(payload);
     u32 id = (u32)r.var();
+    u64 pruned = g_opt.peer_features & PF_PRUNE_EMPTY ? r.var() : 0;
     size_t n = (size_t)r.var();
     SDir* d;
     {
@@ -789,6 +792,9 @@ struct Sender {
       if (d) dirs[id] = nullptr;
     }
     if (!d || r.bad || n > d->list.e.size()) die(RERR_PROTOCOL, "protocol error: bad NEED frame");
+    if (pruned > (u64)std::count_if(d->list.e.begin(), d->list.e.end(), [](const Entry& e) { return e.type == T_DIR; }))
+      die(RERR_PROTOCOL, "protocol error: bad pruned directory count");
+    if (client && pruned) g_stats.dirs_seen.fetch_sub(pruned, std::memory_order_relaxed);
     if (n == 0) {
       if (d->pending.fetch_sub(1) == 1) delete d;
     } else {
@@ -1170,6 +1176,7 @@ struct Receiver {
   std::string dest;
   std::mutex dmu;
   std::vector<RDir*> dirs;
+  std::vector<Task> staged;
   std::mutex bmu;
   std::unordered_map<u64, std::shared_ptr<BigFile>> big;
   std::unordered_set<u64> closed_attempts;
@@ -1255,7 +1262,7 @@ struct Receiver {
     c.send(std::move(f), true);
   }
 
-  void gen(RDir* d, std::string& payload, Worker& t) {
+  void parse_dir(RDir* d, std::string& payload, Worker& t) {
     const Options& o = g_opt;
     DirWork& w = d->w;
     RBuf h(payload);
@@ -1344,7 +1351,21 @@ struct Receiver {
       ids.map(w.attrs);
       for (Entry& e : l.e) ids.map(e);
     }
+    if (!d->parent_plus1) {
+      if (!w.rel.empty()) die(RERR_PROTOCOL, "protocol error: nonempty root path");
+    } else {
+      RDir* parent = dir(d->parent_plus1 - 1);
+      if (!parent || d->pidx >= parent->w.src.e.size()) die(RERR_PROTOCOL, "protocol error: bad parent in DIR frame");
+      const auto& entry = parent->w.src.e[d->pidx];
+      if ((entry.type != T_DIR && entry.type != T_NONE) || w.rel != rel_join(parent->w.rel, parent->w.src.name_sv(entry)))
+        die(RERR_PROTOCOL, "protocol error: inconsistent directory path");
+    }
+  }
 
+  void generate_dir(RDir* d, Worker& t) {
+    const Options& o = g_opt;
+    DirWork& w = d->w;
+    DirList& l = w.src;
     bool go = true;
     w.no_delete = d->flags & DF_NODELETE;
     if (d->parent_plus1 == 0) {
@@ -1370,6 +1391,8 @@ struct Receiver {
     w.pending.store(1);
     std::string f = new_frame(F_NEED);
     put_var(f, d->id);
+    if (o.peer_features & PF_PRUNE_EMPTY)
+      put_var(f, std::count_if(l.e.begin(), l.e.end(), [](const Entry& e) { return e.item_flags & IF_PRUNED; }));
     if (go) {
       generate(w, t);
       if (o.dry_run) {
@@ -1410,6 +1433,28 @@ struct Receiver {
     for (Task& x : wait) pool.push(0, std::move(x));
     done_one(*d);
     if (gens.fetch_sub(1) == 1 && list_end.load()) g_stats.scan_done.store(true);
+  }
+
+  void gen(RDir* d, std::string& payload, Worker& worker) {
+    parse_dir(d, payload, worker);
+    generate_dir(d, worker);
+  }
+
+  void prune_and_generate(Worker& worker) {
+    std::vector<DirWork*> directories;
+    directories.reserve(staged.size());
+    for (auto& task : staged) {
+      auto* directory = static_cast<RDir*>(task.ptr);
+      parse_dir(directory, task.s, worker);
+      std::string().swap(task.s);
+      directories.push_back(&directory->w);
+    }
+    prune_empty_directories(directories, dest.empty() ? "." : dest);
+    for (auto& task : staged) {
+      if (g_stop.load()) break;
+      generate_dir(static_cast<RDir*>(task.ptr), worker);
+    }
+    staged.clear();
   }
 
   void get_file_attrs(RBuf& r, Entry& attrs) {
@@ -1644,6 +1689,7 @@ struct Receiver {
   }
 
   void on_dir(std::string& payload) {
+    if (list_end.load()) die(RERR_PROTOCOL, "protocol error: DIR after LIST_END");
     RBuf h(payload);
     RDir* d = new RDir;
     d->id = (u32)h.var();
@@ -1665,11 +1711,12 @@ struct Receiver {
       if (d->parent_plus1) {
         RDir* p = d->parent_plus1 - 1 < dirs.size() ? dirs[d->parent_plus1 - 1] : nullptr;
         if (!p) die(RERR_PROTOCOL, "protocol error: DIR frame before its parent");
-        if (!p->gen_done) {
+        if (!g_opt.prune_empty && !p->gen_done) {
           p->waiters.push_back(std::move(t));
           return;
         }
       }
+      if (g_opt.prune_empty) { staged.push_back(std::move(t)); return; }
     }
     pool.push_bounded(0, std::move(t));
   }
@@ -1700,7 +1747,12 @@ struct Receiver {
           break;
         case F_MSG: handle_msg(payload); break;
         case F_LIST_END:
-          list_end.store(true);
+          if (list_end.exchange(true)) die(RERR_PROTOCOL, "protocol error: duplicate LIST_END");
+          if (g_opt.prune_empty) {
+            Task task;
+            task.kind = K_PRUNE;
+            pool.push(0, std::move(task));
+          }
           if (gens.load() == 0) g_stats.scan_done.store(true);
           break;
         case F_DATA_END: {
@@ -1731,7 +1783,8 @@ struct Receiver {
     pool.idle_check = [this] { return data_end; };
     std::thread rt([this] { reader(); });
     pool.start(n, [this](Task& t, Worker& w) {
-      if (t.kind == K_GEN) gen((RDir*)t.ptr, t.s, w);
+      if (t.kind == K_PRUNE) prune_and_generate(w);
+      else if (t.kind == K_GEN) gen((RDir*)t.ptr, t.s, w);
       else if (t.kind == K_SIGNATURE) signature(*(RDir*)t.ptr, t.a, w);
       else data(t.s, w);
     });
@@ -1776,9 +1829,10 @@ int receive_listing(Conn& c) {
       if (r.bad || !r.empty() || code > 255 || expected != count)
         die(RERR_PROTOCOL, "protocol error: malformed listing completion");
       for (const auto& entry : pending) {
-        if (entry.path != "." && g_opt.filters.excluded(entry.path, entry.attrs.type == T_DIR, entry.source))
+        if (verify && entry.path != "." && g_opt.filters.excluded(entry.path, entry.attrs.type == T_DIR, entry.source))
           die(RERR_UNSUPPORTED, "rejecting excluded file-list name: %s", entry.path.c_str());
       }
+      if (g_opt.prune_empty) prune_listing(pending);
       for (const auto& entry : pending) listing_output(entry);
       report_peer_error((int)code, "errors were reported while listing remote sources");
       c.finish();
@@ -1805,7 +1859,7 @@ int receive_listing(Conn& c) {
         entry.source.find('\0') != entry.source.npos ||
         (entry.attrs.type != T_LNK && !entry.target.empty()))
       die(RERR_PROTOCOL, "protocol error: malformed listing entry");
-    if (verify) pending.push_back(std::move(entry));
+    if (verify || g_opt.prune_empty) pending.push_back(std::move(entry));
     else listing_output(entry);
     ++count;
   }
@@ -1916,12 +1970,13 @@ int run_client(const std::vector<std::string>& srcs, const std::string& dest, u3
   put_var(f, wire_version);
   f.push_back(push ? 'R' : 'S');
   u64 advertised = PROTO_FEATURES & (o.whole_file ? ~(PF_RESUME | PF_DELTA) : ~u64(0));
-  if (o.list_only) advertised &= PF_CORE | PF_ZSTD | PF_LIST | PF_IO_CONTROL | PF_FILTERS | PF_MERGE_FILTERS | PF_CVS_FILTERS;
+  if (o.list_only) advertised &= PF_CORE | PF_ZSTD | PF_LIST | PF_IO_CONTROL | PF_FILTERS | PF_MERGE_FILTERS | PF_CVS_FILTERS | PF_PRUNE_EMPTY;
   else advertised &= ~PF_LIST;
   if (!o.filters.needs_extended()) advertised &= ~PF_FILTERS;
   if (!o.filters.has_merges()) advertised &= ~PF_MERGE_FILTERS;
   if (!o.filters.has_cvs() && !o.filters.has_merges()) advertised &= ~PF_CVS_FILTERS;
   if (!o.delete_after) advertised &= ~PF_DELETE_AFTER;
+  if (!o.prune_empty) advertised &= ~PF_PRUNE_EMPTY;
   if (!o.hard_links) advertised &= ~PF_HLINK;
   if (!output_enabled()) advertised &= ~(PF_OUTPUT | PF_DIR_OUTPUT);
   if (wire_version >= 4) put_var(f, advertised);
@@ -2015,6 +2070,7 @@ int run_client(const std::vector<std::string>& srcs, const std::string& dest, u3
     c.send(std::move(config));
   }
   if (o.peer_features & PF_DELETE_AFTER) c.send(new_frame(F_DELETE_CONFIG) + '\1');
+  if (o.peer_features & PF_PRUNE_EMPTY) c.send(new_frame(F_PRUNE_CONFIG) + '\1');
   if (o.peer_features & PF_DIR_OUTPUT) {
     std::string config = new_frame(F_OUTPUT_CONFIG);
     config.push_back((char)o.output_attrs);
@@ -2138,6 +2194,12 @@ int run_server() {
     if (type != F_DELETE_CONFIG || payload != std::string(1, '\1') || !o.del)
       die(RERR_PROTOCOL, "protocol error: malformed delete-after configuration");
     o.delete_after = true;
+  }
+  if (o.peer_features & PF_PRUNE_EMPTY) {
+    if (!c.read_frame(type, payload)) conn_lost();
+    if (type != F_PRUNE_CONFIG || payload != std::string(1, '\1'))
+      die(RERR_PROTOCOL, "protocol error: malformed prune-empty configuration");
+    o.prune_empty = true;
   }
   if (o.peer_features & PF_DIR_OUTPUT) {
     if (!c.read_frame(type, payload)) conn_lost();

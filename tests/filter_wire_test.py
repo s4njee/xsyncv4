@@ -80,6 +80,14 @@ class FilterWireTests(unittest.TestCase):
         proc, target = self.server(features=1, deleting=True)
         self.rejected(proc, target, frame(20, b'\1'))
 
+    def test_prune_empty_configuration(self):
+        for payload in (b'', b'\0', b'\2', b'\1x'):
+            with self.subTest(payload=payload):
+                proc, target = self.server(features=32769)
+                self.rejected(proc, target, frame(21, payload))
+        proc, target = self.server(features=1)
+        self.rejected(proc, target, frame(21, b'\1'))
+
     def test_cvs_configuration(self):
         for label, payload in (
             ('missing-flag', b''), ('invalid-flag', b'\2\0'),
@@ -130,7 +138,8 @@ class FilterWireTests(unittest.TestCase):
         capture.write_text('#!' + sys.executable + '\nimport sys,json\nprint(json.dumps(sys.argv[1:]));sys.exit(19)\n')
         capture.chmod(0o755)
         for flags, diagnostic in ((['--delete', '--filter=P stale.*'], b'extended filters'),
-                                  (['--delete-after'], b'--delete-after')):
+                                  (['--delete-after'], b'--delete-after'),
+                                  (['-m'], b'--prune-empty-dirs')):
             with self.subTest(flags=flags):
                 original = ['-a', *flags, '-e', rsh, '--rsync-path=unused', str(source), 'fake:' + str(target)]
                 env['XSYNC_FALLBACK'] = '0'

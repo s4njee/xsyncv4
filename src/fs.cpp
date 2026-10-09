@@ -495,8 +495,8 @@ void item_delete(Worker& t, std::string_view rel, bool is_dir) {
 }
 
 void order_deletions(DirList& list) {
-  if (!g_opt.delete_after) return;
-  // The non-incremental file list used by delete-after groups a directory's
+  if (!g_opt.delete_after && !g_opt.prune_empty) return;
+  // The non-incremental file list used by delete-after and -m groups a directory's
   // files before its subdirectories. Deletion walks that list backwards.
   std::sort(list.e.begin(), list.e.end(), [&](const Entry& a, const Entry& b) {
     if ((a.type == T_DIR) != (b.type == T_DIR)) return a.type != T_DIR;
@@ -653,7 +653,8 @@ void generate(DirWork& w, Worker& t) {
   if (o.del && o.delete_after && !w.no_delete && w.rename_to.empty()) {
     DeleteScan scan{w.dst_path, w.rel, {}, w.receiver_filter_node};
     scan.names.reserve(n);
-    for (size_t i = 0; i < n; ++i) scan.names.emplace_back(w.dst_name((u32)i));
+    for (size_t i = 0; i < n; ++i)
+      if (!(src.e[i].item_flags & IF_PRUNED)) scan.names.emplace_back(w.dst_name((u32)i));
     std::sort(scan.names.begin(), scan.names.end(), [](const auto& a, const auto& b) { return name_cmp(a, b) < 0; });
     std::lock_guard<std::mutex> lock(final_mu);
     delete_scans.push_back(std::move(scan));
@@ -708,6 +709,7 @@ void generate(DirWork& w, Worker& t) {
       if (c == 0) d = &dl.e[j++];
       break;
     }
+    if (s.item_flags & IF_PRUNED) { if (d) extra(*d); continue; }
     set_names(name);
 
     switch (s.type) {
@@ -1013,7 +1015,13 @@ void finalize_tree() {
       }
     }
     // rsync processes a directory's extras from the end of its sorted file list.
-    std::sort(delete_candidates.begin(), delete_candidates.end(), [](const auto& a, const auto& b) { return a.path > b.path; });
+    std::sort(delete_candidates.begin(), delete_candidates.end(), [](const auto& a, const auto& b) {
+      if (g_opt.prune_empty) {
+        if (a.parent != b.parent) return name_cmp(a.parent, b.parent) < 0;
+        if ((a.type == T_DIR) != (b.type == T_DIR)) return a.type == T_DIR;
+      }
+      return a.path > b.path;
+    });
     for (const auto& candidate : delete_candidates) {
       if (g_stop.load()) break;
       u64 before = g_stats.deleted.load();

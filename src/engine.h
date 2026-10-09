@@ -2,6 +2,16 @@
 #pragma once
 #include "fs.h"
 #include "pool.h"
+#include <unordered_set>
+
+// Pruning depends on file-list presence and global receiver protection, before
+// transfer restrictions or per-directory receiver rules are applied.
+struct EmptyDirectoryPruner {
+  std::unordered_set<std::string> retained;
+  void add(const Entry& entry, std::string path, std::string_view absolute);
+  bool keep(std::string_view path) const { return retained.count(std::string(path)); }
+};
+void prune_empty_directories(const std::vector<DirWork*>& directories, std::string_view destination);
 
 // The top-level listing built from the SRC arguments: directories given with a trailing slash
 // contribute their contents, everything else contributes itself.
