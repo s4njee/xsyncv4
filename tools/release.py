@@ -101,6 +101,15 @@ inode=$(stat -c %d:%i /tmp/delta-pulled)
 test "$(stat -c %d:%i /tmp/delta-pulled)" = "$inode"
 for target in /tmp/delta-local /tmp/delta-pushed /tmp/delta-pulled; do cmp /tmp/delta-source "$target"; done
 for stats in /tmp/delta-local.stats /tmp/delta-push.stats /tmp/delta-pull.stats; do grep -E 'Delta matched data: [1-9]' "$stats"; done
+"$bin" --no-fallback -al --list-only /tmp/source/ /tmp/uncreated-list-target >/tmp/list-local.stdout
+"$bin" --no-fallback -al -e /tmp/fakessh --rsync-path="$bin" fake:/tmp/source/ >/tmp/list-remote.stdout
+cmp /tmp/list-local.stdout /tmp/list-remote.stdout
+test ! -e /tmp/uncreated-list-target
+grep -E '^d.* \\.$' /tmp/list-local.stdout
+grep -F 'space link -> file' /tmp/list-local.stdout
+grep -E '^p.* pipe$' /tmp/list-local.stdout
+"$bin" --no-fallback -c --stats /tmp/delta-source >/tmp/list.stats
+grep -F 'Number of regular files transferred: 0' /tmp/list.stats
 "$bin" --version
 '''.replace('ARCH', arch)
             run('docker', 'run', '--rm', '--platform', 'linux/' + arch,

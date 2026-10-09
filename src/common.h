@@ -21,8 +21,9 @@ constexpr u32 PROTO_VERSION = 4;
 constexpr u32 PROTO_MIN_VERSION = PROTO_VERSION - 1;
 constexpr u64 PF_CORE = 1, PF_ZSTD = 2, PF_IDMAP = 4, PF_SAFE_LINKS = 8, PF_RESUME = 16, PF_OUTPUT = 32;
 constexpr u64 PF_DIR_OUTPUT = 64, PF_HLINK = 128, PF_DELTA = 256;
+constexpr u64 PF_LIST = 512;
 #ifndef XSYNC_PROTOCOL_FEATURES
-#define XSYNC_PROTOCOL_FEATURES 511
+#define XSYNC_PROTOCOL_FEATURES 1023
 #endif
 constexpr u64 PROTO_FEATURES = XSYNC_PROTOCOL_FEATURES;
 constexpr u64 LEGACY_V3_FEATURES = 15;
@@ -59,6 +60,7 @@ struct Options {
   bool output_attrs = false, output_unchanged = false;  // Configured before workers start.
   bool hard_links = false;  // Negotiated separately from the frozen v3 options.
   bool delete_before = false;  // Deletion is still deferred for sender-read safety.
+  bool list_only = false, dirs_explicit = false, human_ungrouped = false;
   FilterList filters;
   // Set at runtime, not parsed.
   bool am_root = false;

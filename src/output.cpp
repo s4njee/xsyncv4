@@ -122,6 +122,7 @@ void log_error(int error) {
 bool output_enabled() {
   return g_opt.itemize || g_opt.verbose > 0 || g_opt.out_format_set || !g_opt.log_file.empty();
 }
+std::string output_escape(std::string_view name) { return escaped(name); }
 
 bool output_format_supported(std::string_view format) {
   for (size_t i = 0; i < format.size(); ++i) if (format[i] == '%') {

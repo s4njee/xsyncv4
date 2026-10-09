@@ -32,6 +32,7 @@
 #include "transport.h"
 #include "output.h"
 #include "delta.h"
+#include "listing.h"
 
 #ifndef O_CLOEXEC
 #define O_CLOEXEC 0
@@ -40,7 +41,7 @@
 namespace {
 
 enum : u8 { F_HELLO = 1, F_DIR, F_NEED, F_DATA, F_LIST_END, F_DATA_END, F_DONE, F_MSG, F_IDMAP, F_DEST, F_OUTPUT, F_OUTPUT_CONFIG,
-            F_DELTA_REQUEST, F_DELTA_SIGNATURE, F_DELTA_RETRY_ACK };
+            F_DELTA_REQUEST, F_DELTA_SIGNATURE, F_DELTA_RETRY_ACK, F_LIST_ENTRY };
 enum : u8 { DF_ATTRS = 1, DF_SINGLE = 2, DF_NODELETE = 4, DF_ZSTD = 8 };
 enum : u8 { R_WHOLE = 1, R_CHUNK = 2, R_FAIL = 4, R_END = 8, R_LITERAL = 16, R_DELTA_END = 32, R_COPY = 64 };
 constexpr size_t HDR = 5;                  // u32 payload length + u8 type
@@ -332,6 +333,7 @@ std::string_view unpack(std::string_view in, bool compressed, std::string& scrat
 
 std::string missing_feature(u64 features) {
   if (!(features & PF_CORE)) return "peer does not support the required core transfer features";
+  if (g_opt.list_only) return features & PF_LIST ? "" : "peer does not support source listing";
   if (g_opt.safe_links && !(features & PF_SAFE_LINKS)) return "peer does not support --safe-links";
   if (!g_opt.numeric_ids && (g_opt.owner || g_opt.group) && !(features & PF_IDMAP))
     return "peer does not support user/group name mapping (use --numeric-ids)";
@@ -1599,6 +1601,46 @@ struct Receiver {
 
 // ---------------------------------------------------------------- client / server glue
 
+int receive_listing(Conn& c) {
+  u64 count = 0;
+  u8 type;
+  std::string payload;
+  for (;;) {
+    if (!c.read_frame(type, payload)) conn_lost();
+    if (type == F_MSG) { handle_msg(payload); continue; }
+    if (type == F_LIST_END) {
+      RBuf r(payload);
+      u64 code = r.var(), expected = r.var();
+      if (r.bad || !r.empty() || code > 255 || expected != count)
+        die(RERR_PROTOCOL, "protocol error: malformed listing completion");
+      if (code) err_line((int)code, "errors were reported while listing remote sources");
+      c.finish();
+      close(c.wfd);
+      c.wfd = -1;
+      char trailing;
+      if (c.read_exact(&trailing, 1)) die(RERR_PROTOCOL, "protocol error: data after listing completion");
+      return (int)code;
+    }
+    if (type != F_LIST_ENTRY) die(RERR_PROTOCOL, "protocol error: unexpected listing frame %u", type);
+    RBuf r(payload);
+    ListingEntry entry;
+    entry.path = r.str();
+    entry.attrs.type = r.byte();
+    u64 mode = r.var();
+    entry.attrs.mode = (u32)mode;
+    entry.attrs.size = (i64)r.var();
+    entry.attrs.mtime = r.svar();
+    entry.target = r.str();
+    if (r.bad || !r.empty() || !listing_path_valid(entry.path) || mode > 07777 ||
+        entry.attrs.type < T_REG || entry.attrs.type > T_BLK || entry.attrs.size < 0 ||
+        entry.target.size() > (1 << 20) || entry.target.find('\0') != entry.target.npos ||
+        (entry.attrs.type != T_LNK && !entry.target.empty()))
+      die(RERR_PROTOCOL, "protocol error: malformed listing entry");
+    listing_output(entry);
+    ++count;
+  }
+}
+
 std::string expand_remote_home(const std::string& path) {
   if (path.empty() || path[0] != '~') return path;
   size_t slash = path.find('/');
@@ -1702,6 +1744,8 @@ int run_client(const std::vector<std::string>& srcs, const std::string& dest, u3
   put_var(f, wire_version);
   f.push_back(push ? 'R' : 'S');
   u64 advertised = PROTO_FEATURES & (o.whole_file ? ~(PF_RESUME | PF_DELTA) : ~u64(0));
+  if (o.list_only) advertised &= PF_CORE | PF_ZSTD | PF_LIST;
+  else advertised &= ~PF_LIST;
   if (!o.hard_links) advertised &= ~PF_HLINK;
   if (!output_enabled()) advertised &= ~(PF_OUTPUT | PF_DIR_OUTPUT);
   if (wire_version >= 4) put_var(f, advertised);
@@ -1773,12 +1817,12 @@ int run_client(const std::vector<std::string>& srcs, const std::string& dest, u3
     o.peer_features = features & advertised;
     std::string missing = missing_feature(o.peer_features);
     if (!missing.empty()) fallback(missing, RERR_UNSUPPORTED);
-    if ((o.out_format_set || !o.log_file.empty()) && !structured_output())
+    if (!o.list_only && (o.out_format_set || !o.log_file.empty()) && !structured_output())
       fallback("peer does not support structured file output", RERR_UNSUPPORTED);
-    if ((o.out_format_set || o.output_unchanged) && !(o.peer_features & PF_DIR_OUTPUT))
+    if (!o.list_only && (o.out_format_set || o.output_unchanged) && !(o.peer_features & PF_DIR_OUTPUT))
       fallback("peer does not support directory output metadata", RERR_UNSUPPORTED);
     if (!(o.peer_features & PF_ZSTD)) o.compress = false;
-    if (o.hard_links && !(o.peer_features & PF_HLINK))
+    if (!o.list_only && o.hard_links && !(o.peer_features & PF_HLINK))
       fallback("peer does not support hard-link preservation", RERR_UNSUPPORTED);
     break;
   }
@@ -1791,21 +1835,26 @@ int run_client(const std::vector<std::string>& srcs, const std::string& dest, u3
     c.send(std::move(config));
   }
   output_start();
-  if (o.verbose > 0) out_line(push ? "sending incremental file list" : "receiving incremental file list");
-  progress_start(default_jobs());
+  if (!o.list_only && o.verbose > 0) out_line(push ? "sending incremental file list" : "receiving incremental file list");
+  if (!o.list_only) progress_start(default_jobs());
   int rc;
-  if (push) {
+  if (o.list_only) rc = receive_listing(c);
+  else if (push) {
     Sender s(c, true);
     rc = s.run(srcs);
   } else {
     Receiver r(c, true);
     rc = r.run(dest);
   }
-  close(c.wfd);
+  if (c.wfd >= 0) close(c.wfd);
   int st = 0;
   waitpid(pid, &st, 0);
   close(c.rfd);
   g_conn = nullptr;
+  if (o.list_only && !rc && (!WIFEXITED(st) || WEXITSTATUS(st))) {
+    rc = WIFEXITED(st) ? WEXITSTATUS(st) : RERR_STREAMIO;
+    err_line(rc, "remote shell exited after listing with code %d", rc);
+  }
   return rc;
 }
 
@@ -1835,10 +1884,12 @@ int run_server() {
   o.am_server = true;
   o.wire_version = ver;
   o.peer_features = advertised & PROTO_FEATURES;
+  o.list_only = o.peer_features & PF_LIST;
   o.hard_links = o.peer_features & PF_HLINK;
   get_options(r);
   o.output_attrs = o.itemize;
   if (r.bad || (role != 'R' && role != 'S')) die(RERR_PROTOCOL, "protocol error: malformed hello options or role");
+  if (o.list_only && role != 'S') die(RERR_PROTOCOL, "protocol error: listing requires sender role");
   std::string missing = missing_feature(o.peer_features);
   if (!missing.empty()) die(RERR_UNSUPPORTED, "%s", missing.c_str());
   if (ver == 3 && o.compress && !(o.peer_features & PF_ZSTD))
@@ -1867,7 +1918,22 @@ int run_server() {
     o.delete_before = payload[3];
   }
   int rc;
-  if (role == 'R') {
+  if (o.list_only) {
+    u64 count = 0;
+    rc = run_listing(expand_remote_sources(paths), [&](const ListingEntry& entry) {
+      std::string f = new_frame(F_LIST_ENTRY);
+      put_str(f, entry.path);
+      f.push_back((char)entry.attrs.type);
+      put_var(f, entry.attrs.mode), put_var(f, (u64)entry.attrs.size);
+      put_svar(f, entry.attrs.mtime), put_str(f, entry.target);
+      c.send(std::move(f), true);
+      ++count;
+    });
+    std::string f = new_frame(F_LIST_END);
+    put_var(f, (u64)rc), put_var(f, count);
+    c.send(std::move(f));
+    c.finish();
+  } else if (role == 'R') {
     Receiver rv(c, false);
     rc = rv.run(paths[0]);
   } else {

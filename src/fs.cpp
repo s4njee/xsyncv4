@@ -296,7 +296,7 @@ static int list_dir_fd(int fd, DirList& out, unsigned flags) {
       }
       if (e.type != T_REG) {
         e.size = 0;
-        if (output_enabled()) {
+        if (output_enabled() || g_opt.list_only) {
           struct stat st;
           std::string name(nm, nlen);
           if (fstatat(fd, name.c_str(), &st, AT_SYMLINK_NOFOLLOW) == 0) e.size = st.st_size;

@@ -125,7 +125,7 @@ void prune_source(DirList& l, std::string_view rel, u32 parent_dev, Worker& t, s
       case T_BLK: skip = !o.devices; break;
       default: break;
     }
-    if (skip) {
+    if (skip && !o.list_only) {
       if (!o.quiet) t.logf("skipping non-regular file \"" + full() + "\"");
       continue;
     }
@@ -141,7 +141,7 @@ void prune_source(DirList& l, std::string_view rel, u32 parent_dev, Worker& t, s
 
 void build_root(const std::vector<std::string>& srcs, RootList& r, Worker& t, const SourceGuard& guard) {
   const Options& o = g_opt;
-  unsigned lflags = o.copy_links ? LD_FOLLOW : o.links ? LD_LINKS : 0;
+  unsigned lflags = o.copy_links ? LD_FOLLOW : o.links || o.list_only ? LD_LINKS : 0;
   DirList merged;
   std::vector<std::string> paths;
   bool any_slash = false;
@@ -199,9 +199,13 @@ void build_root(const std::vector<std::string>& srcs, RootList& r, Worker& t, co
       DirList one;
       e.name_off = one.add_str(nm);
       e.name_len = (u16)nm.size();
-      if (e.type == T_LNK && o.links) {
+      if (e.type == T_LNK && (o.links || o.list_only)) {
         char buf[PATH_MAX];
         ssize_t n = readlink(a, buf, sizeof buf - 1);
+        if (n < 0 && o.list_only) {
+          err_line(RERR_PARTIAL, "readlink \"%s\" failed: %s", a, errstr(errno).c_str());
+          continue;
+        }
         e.link_off = one.add_str({buf, n > 0 ? (size_t)n : 0});
       }
       one.e.push_back(e);

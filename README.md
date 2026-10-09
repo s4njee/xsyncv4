@@ -8,6 +8,8 @@ xsync -a  src/ dst/                      # local
 xsync -az src/ user@host:/backup/src/    # push over ssh
 xsync -az --delete host:/data/ data/     # pull, mirroring deletions
 xsync -a --progress src/ dst/            # live per-file + whole-transfer progress
+xsync src/                              # list immediate local entries
+xsync -r host:/data/                     # list remote entries recursively
 ```
 
 ## Build
@@ -140,6 +142,24 @@ the path, including `host:dir/a::b` and local `./a::b`, remain filename characte
 Daemon detection applies to the host separator (`host::module`) or an rsync URL.
 The parser's host/user choices are checked against
 [rsync's implementation](https://github.com/RsyncProject/rsync/blob/v3.4.1/options.c#L2893).
+
+## Listing sources
+
+A single source argument lists metadata instead of copying. A directory argument
+without a trailing slash lists that entry; a trailing slash lists `.` and its
+immediate contents. Use `-r` (or `-a`) to include descendants. Listings show type,
+permissions, byte size, local modification time and escaped names; `-l` adds
+symlink targets. `-h`/`-hh` select readable sizes and `--no-h` removes digit
+separators. Filters, `-L`, `--no-dirs` and quiet mode apply.
+
+`--list-only SRC [SRC]... DEST` also lists, leaving DEST untouched. It supports
+multiple sources, merges duplicate directory arguments, ignores transfer-only
+flags, and reads no regular-file contents. Listing statistics report zero
+transfers/creations/deletions; an explicit log file records the same stdout.
+Remote listing requests `PF_LIST` (512) with the sender role and receives only
+validated metadata and a counted completion. No transfer receiver is created.
+Peers without native listing use rsync fallback, or fail with code 4 in strict
+mode. The frozen protocol-3 options and ordinary transfer layout are unchanged.
 
 ## Protocol compatibility
 
@@ -395,6 +415,9 @@ python3 tests/mount_test.py                               # macOS: disposable AP
 python3 tests/fallback_test.py                            # local fallback checks
 python3 tests/protocol_test.py                            # frozen N-1 and feature subsets
 python3 tests/output_test.py                              # formats, ordering, log parity
+python3 tests/list_test.py                                # listing parity and no destination writes
+python3 tests/list_wire_test.py                           # hostile listing metadata and fallback
+./tests/ssh-rig.sh list_test.py                            # real SSH listing parity
 python3 tests/delta_test.py                               # local/push/pull matching and races
 python3 tests/delta_wire_test.py                          # signatures, references, integrity
 XSYNC_DELTA_LARGE=1 python3 tests/delta_remote_test.py     # 64 MiB + 2 GiB wire cost vs rsync

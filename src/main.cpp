@@ -15,6 +15,7 @@
 #include "transport.h"
 #include "arguments.h"
 #include "output.h"
+#include "listing.h"
 
 namespace {
 
@@ -36,6 +37,7 @@ void print_help() {
   print_version();
   fputs(R"(
 Usage: xsync [OPTION]... SRC [SRC]... DEST
+  or   xsync [OPTION]... SRC
   or   xsync [OPTION]... SRC [SRC]... [USER@]HOST:DEST
   or   xsync [OPTION]... [USER@]HOST:SRC [DEST]
 
@@ -46,6 +48,7 @@ Options (same meaning as rsync):
  -a, --archive            archive mode; equals -rlptgoD
  -r, --recursive          recurse into directories
  -d, --dirs               transfer directories without recursing
+     --list-only          list source entries; do not transfer or change DEST
  -H, --hard-links         preserve hard links within the transferred tree
  -l, --links              copy symlinks as symlinks
      --safe-links         skip symlinks that point outside the transfer tree
@@ -178,6 +181,7 @@ Parsed parse(int argc, char** argv) {
     else if (name == "itemize-changes") o.itemize = true, ++o.itemize_level;
     else if (name == "no-itemize-changes") o.itemize = false, o.itemize_level = 0;
     else if (name == "archive") set_archive(o);
+    else if (flag(o.list_only, "list-only")) {}
     else if (flag(o.recursive, "recursive") || flag(o.dirs, "dirs") || flag(o.links, "links") || flag(o.copy_links, "copy-links") ||
              flag(o.perms, "perms") || flag(o.times, "times") || flag(o.group, "group") || flag(o.owner, "owner") ||
              flag(o.devices, "devices") || flag(o.specials, "specials") || flag(o.compress, "compress") || flag(o.dry_run, "dry-run") ||
@@ -187,6 +191,7 @@ Parsed parse(int argc, char** argv) {
              flag(o.omit_link_times, "omit-link-times") || flag(o.numeric_ids, "numeric-ids") ||
              flag(o.partial, "partial") || flag(o.progress, "progress") || flag(o.stats, "stats") || flag(o.mkpath, "mkpath") ||
              flag(o.clone, "clone") || flag(o.ignore_errors, "ignore-errors") || flag(o.safe_links, "safe-links")) {
+      if (name == "dirs" || name == "no-dirs") o.dirs_explicit = true;
     } else if (name == "ignore-non-existing") o.existing = true;
     else if (name == "no-D") o.devices = o.specials = false;
     else if (name == "atomic") o.direct_new = false;
@@ -196,8 +201,8 @@ Parsed parse(int argc, char** argv) {
              name == "delete-after")
       o.del = true;
     else if (name == "delete-excluded") o.del = o.delete_excluded = true;
-    else if (name == "human-readable") o.human++;
-    else if (name == "no-human-readable") o.human = 0;
+    else if (name == "human-readable") o.human++, o.human_ungrouped = false;
+    else if (name == "no-human-readable" || name == "no-h") o.human = 0, o.human_ungrouped = true;
     else if (name == "rsh") o.rsh = need(), o.rsh_set = true;
     else if (name == "rsync-path") o.rsync_path = need();
     else if (name == "out-format") {
@@ -256,7 +261,7 @@ Parsed parse(int argc, char** argv) {
           "from0", "relative", "chmod", "chown", "usermap", "groupmap", "bwlimit", "append", "append-verify", "partial-dir",
           "delay-updates", "fuzzy", "remove-source-files", "keep-dirlinks", "copy-dirlinks", "copy-unsafe-links",
           "munge-links", "executability", "atimes", "crtimes", "cvs-exclude", "prune-empty-dirs", "daemon", "port", "password-file",
-          "write-batch", "read-batch", "only-write-batch", "super", "fake-super", "temp-dir", "list-only",
+          "write-batch", "read-batch", "only-write-batch", "super", "fake-super", "temp-dir",
           "iconv", "checksum-seed", "address", "sockopts", "stop-after", "stop-at", "max-alloc", "write-devices", "copy-devices",
           "delete-missing-args", "ignore-missing-args", "trust-sender", "copy-as", "early-input", "remote-option",
           "timeout", "contimeout", "sparse", "no-sparse", "fsync", "preallocate", "skip-compress",
@@ -303,7 +308,7 @@ Parsed parse(int argc, char** argv) {
         case 'q': o.quiet = true; break;
         case 'a': set_archive(o); break;
         case 'r': o.recursive = true; break;
-        case 'd': o.dirs = true; break;
+        case 'd': o.dirs = o.dirs_explicit = true; break;
         case 'l': o.links = true; break;
         case 'L': o.copy_links = true; break;
         case 'p': o.perms = true; break;
@@ -320,7 +325,7 @@ Parsed parse(int argc, char** argv) {
         case 'O': o.omit_dir_times = true; break;
         case 'J': o.omit_link_times = true; break;
         case 'i': o.itemize = true; ++o.itemize_level; break;
-        case 'h': o.human++; break;
+        case 'h': o.human++; o.human_ungrouped = false; break;
         case 'P': o.partial = o.progress = true; break;
         case 'W': o.whole_file = true; break;
         case 's': break;  // documented compatibility no-op
@@ -352,6 +357,8 @@ Parsed parse(int argc, char** argv) {
     }
   }
   if (o.copy_links) o.links = false;
+  if (!p.server && p.install.empty() && p.args.size() == 1) o.list_only = true;
+  if (o.list_only && !o.dirs_explicit && !o.recursive) o.dirs = true;
   if (o.compress_level == -1000) o.compress_level = 3;
   if (o.del && !o.recursive && !o.dirs) usage_error("--delete does not work without --recursive (-r) or --dirs (-d).");
   if (o.quiet) o.verbose = 0;
@@ -455,22 +462,22 @@ int main(int argc, char** argv) {
     fprintf(stderr, "xsync error: syntax or usage error (code 1)\n");
     return RERR_SYNTAX;
   }
-  if (p.args.size() < 2) usage_error("a destination is required (listing a single SRC is not supported)");
-  std::string dest = p.args.back();
-  std::vector<std::string> srcs(p.args.begin(), p.args.end() - 1);
+  std::string dest = p.args.size() == 1 ? "" : p.args.back();
+  std::vector<std::string> srcs(p.args.begin(), p.args.end() - (p.args.size() > 1 ? 1 : 0));
   RemoteSpec destination = parse_remote_spec(dest);
-  bool remote_dest = destination.remote, remote_src = false;
+  bool remote_dest = !g_opt.list_only && destination.remote, remote_src = false;
   for (auto& s : srcs) {
     RemoteSpec source = parse_remote_spec(s);
     if (source.daemon) usage_error("rsync daemon transfers are not supported by xsync");
     remote_src |= source.remote;
   }
-  if (destination.daemon) usage_error("rsync daemon transfers are not supported by xsync");
+  if (destination.daemon && !g_opt.list_only) usage_error("rsync daemon transfers are not supported by xsync");
   if (remote_src && remote_dest) usage_error("The source and destination cannot both be remote.");
 
   u64 t0 = now_ns();
   if (!remote_src && !remote_dest) output_start();
-  int rc = (remote_src || remote_dest) ? run_client(srcs, dest) : run_local(srcs, dest);
+  int rc = remote_src || remote_dest ? run_client(srcs, g_opt.list_only ? "" : dest) :
+    g_opt.list_only ? run_listing(srcs, listing_output) : run_local(srcs, dest);
   if (g_stop.load()) rc = RERR_SIGNAL;
   if (!rc) rc = g_exit_code.load();
   progress_stop(rc == 0 || rc == RERR_PARTIAL || rc == RERR_VANISHED);
