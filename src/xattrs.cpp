@@ -120,6 +120,7 @@ bool eligible(std::string_view name, const FilterList& filters, bool source) {
   if (source && name == "rsync.") return false;  // Empty disguised namespace.
 #endif
 #ifndef __APPLE__
+  if (g_opt.acls && (name == "system.posix_acl_access" || name == "system.posix_acl_default")) return false;
   if (!filters.has_xattr_filters() && ((source || g_opt.am_root) ? name.starts_with("system.") : !name.starts_with("user."))) return false;
 #endif
   return !source || !filters.xattr_excluded(name);
@@ -283,23 +284,36 @@ bool update(const XattrSet& source, int fd, const std::string& path, u8 type, co
 }
 }
 
+namespace {
+void include_acls(XattrSet& attrs, AclSet acl) {
+  attrs.complete &= acl.complete;
+  if (!acl.complete || acl.access.size() || acl.defaults.size()) attrs.acls = std::make_shared<AclSet>(std::move(acl));
+}
+}
 XattrSet source_xattrs(const std::string& path, u8 type, const FilterList& filters) {
-  if (!supported_type(type)) return {};
-  Access a; a.path = path; a.link = true;
-  return read(a, path, filters, true);
+  XattrSet attrs;
+  if (g_opt.xattrs && supported_type(type)) {
+    Access access; access.path = path; access.link = true;
+    attrs = read(access, path, filters, true);
+  }
+  if (g_opt.acls) { include_acls(attrs, source_acls(path, type)); }
+  return attrs;
 }
 XattrSet source_fd_xattrs(int fd, const std::string& path, u8 type, const FilterList& filters) {
-  if (!supported_type(type)) return {};
-  struct stat leaf;
-  if (lstat(path.c_str(), &leaf) == 0 && S_ISLNK(leaf.st_mode)) {
-    auto attrs = source_xattrs(path, type, filters);
-    Entry entry; entry_from_stat(leaf, entry);
-    attrs.guarded_link = true;
-    attrs.link_dev = leaf.st_dev, attrs.link_ino = leaf.st_ino;
-    attrs.link_ctime = entry.ctime, attrs.link_ctime_ns = entry.ctime_ns;
-    return attrs;
+  XattrSet attrs;
+  if (g_opt.xattrs && supported_type(type)) {
+    struct stat leaf;
+    if (lstat(path.c_str(), &leaf) == 0 && S_ISLNK(leaf.st_mode)) {
+      Access access; access.path = path; access.link = true;
+      attrs = read(access, path, filters, true);
+      Entry entry; entry_from_stat(leaf, entry);
+      attrs.guarded_link = true;
+      attrs.link_dev = leaf.st_dev, attrs.link_ino = leaf.st_ino;
+      attrs.link_ctime = entry.ctime, attrs.link_ctime_ns = entry.ctime_ns;
+    } else attrs = read(access_fd(fd), path, filters, true);
   }
-  return read(access_fd(fd), path, filters, true);
+  if (g_opt.acls) { include_acls(attrs, source_fd_acls(fd, path, type)); }
+  return attrs;
 }
 bool source_xattrs_unchanged(const XattrSet& attrs, const std::string& path) {
   if (!attrs.guarded_link) return true;
@@ -334,7 +348,7 @@ bool apply_xattrs(const XattrSet& source, const std::string& path, u8 type, cons
   catch (const std::system_error& error) { g_source_io_error.store(true); file_io_error(error.code().value(), path.c_str(), "read stored extended attributes"); return false; }
 }
 void collect_source_xattrs(DirWork& work) {
-  if (!g_opt.xattrs || work.xattrs_loaded) return;
+  if (!metadata_enabled() || work.xattrs_loaded) return;
   const FilterList& base = work.source_filter ? *work.source_filter : g_opt.filters;
   if (work.has_attrs && !work.attrs_xattrs_loaded) {
     auto path = work.attr_source.empty() ? work.src_path : work.attr_source;

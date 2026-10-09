@@ -23,17 +23,27 @@ class XattrRaceTests(unittest.TestCase):
     tearDownClass = delta.DeltaTests.__dict__['tearDownClass']
     setUp = delta.DeltaTests.setUp
 
-    def check_race(self, direction, link, whole, inplace):
+    def check_race(self, direction, link, whole, inplace, acl=False):
+        def attribute_snapshot(path):
+            result = get_attrs(path)
+            if acl:
+                for name in ('system.posix_acl_access', 'system.posix_acl_default'): result.pop(name, None)
+            return result
         if link:
+            if self.source.exists() or self.source.is_symlink(): self.source.unlink()
             self.source.symlink_to('referent')
         delta.DeltaTests.prepare(self, self.data + b'end', self.data)
         changing = 'trusted.xsync-changing' if link and PRIVILEGED_LINKS else attr_name('changing')
-        set_attr(self.source, changing, b'old attribute')
+        if acl:
+            from acls_test import get_acl, set_acl
+            set_acl(self.source.resolve(), 0)
+            set_acl(self.dest, 0)
+        else: set_attr(self.source, changing, b'old attribute')
         set_attr(self.dest, attr_name('stale'), b'remove me')
         source_data = self.source.read_bytes()
         marker = self.root / 'source-read'
         source, dest = str(self.source), str(self.dest)
-        command = [str(BINARY), '--no-fallback', '--no-clone', '-aXL', '-j8']
+        command = [str(BINARY), '--no-fallback', '--no-clone', '-aAXL' if acl else '-aXL', '-j8']
         if whole: command += ['--whole-file']
         if inplace: command += ['--inplace']
         if direction != 'local':
@@ -64,14 +74,19 @@ class XattrRaceTests(unittest.TestCase):
             deadline = time.monotonic() + 10
             while not observed_marker.exists() and proc.poll() is None and time.monotonic() < deadline: time.sleep(.002)
             self.assertTrue(observed_marker.exists(), 'sender did not reach delayed source read')
-            set_attr(self.source, changing, b'new binary attribute\0\xff')
-            expected = get_attrs(self.source)
+            if acl: set_acl(self.source.resolve(), 1)
+            else: set_attr(self.source, changing, b'new binary attribute\0\xff')
+            expected = attribute_snapshot(self.source)
+            if acl: expected_acl = get_acl(self.source.resolve())
             out, err = proc.communicate(timeout=30)
             self.assertEqual(proc.returncode, 0, (out, err))
             self.assertEqual(self.dest.read_bytes(), source_data)
-            self.assertEqual(get_attrs(self.dest), expected)
+            self.assertEqual(attribute_snapshot(self.dest), expected)
             self.assertEqual(self.source.read_bytes(), source_data)
-            self.assertEqual(get_attrs(self.source), expected)
+            self.assertEqual(attribute_snapshot(self.source), expected)
+            if acl:
+                self.assertEqual(get_acl(self.dest), expected_acl)
+                self.assertEqual(get_acl(self.source.resolve()), expected_acl)
             self.assertEqual(self.dest.stat().st_mtime_ns, self.source.stat().st_mtime_ns)
         finally:
             if proc.poll() is None: proc.kill()
@@ -85,6 +100,13 @@ class XattrRaceTests(unittest.TestCase):
                 for inplace in (False, True):
                     with self.subTest(direction=direction, whole=whole, inplace=inplace):
                         self.check_race(direction, False, whole, inplace)
+
+    def test_local_acls_refresh_on_retry(self):
+        for link in (False, True):
+            for whole in (False, True):
+                for inplace in (False, True):
+                    with self.subTest(link=link, whole=whole, inplace=inplace):
+                        self.check_race('local', link, whole, inplace, acl=True)
 
     @unittest.skipUnless(DARWIN or PRIVILEGED_LINKS, 'physical symlink attrs require Darwin or the privileged Linux fixture')
     def test_followed_link_attributes_refresh_on_retry(self):

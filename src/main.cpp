@@ -64,6 +64,7 @@ Options (same meaning as rsync):
  -o, --owner              preserve owner (super-user only)
  -g, --group              preserve group
  -D                       same as --devices --specials
+ -A, --acls               preserve local ACLs (implies --perms)
  -t, --times              preserve modification times
  -O, --omit-dir-times     omit directories from --times
  -J, --omit-link-times    omit symlinks from --times
@@ -314,14 +315,16 @@ Parsed parse(int argc, char** argv) {
         if (comma == std::string::npos) break;
         start = comma + 1;
       } while (true);
-    } else if (flag(o.hard_links, "hard-links") || flag(o.whole_file, "whole-file") || flag(o.raw_names, "8-bit-output") ||
+    } else if (name == "acls") { o.acls = o.perms = true; }
+    else if (name == "no-acls") o.acls = false;
+    else if (flag(o.hard_links, "hard-links") || flag(o.whole_file, "whole-file") || flag(o.raw_names, "8-bit-output") ||
                flag(o.prune_empty, "prune-empty-dirs")) {}
     else if (name == "protect-args" || name == "secluded-args" ||
                name == "blocking-io" || name == "no-blocking-io" || name == "no-motd") {
       // These intrinsic behaviours are listed with their reasons in --help.
     } else {
       static const char* unsupported[] = {
-          "acls", "backup", "backup-dir", "suffix", "link-dest", "compare-dest", "copy-dest",
+          "backup", "backup-dir", "suffix", "link-dest", "compare-dest", "copy-dest",
           "chmod", "chown", "usermap", "groupmap", "append", "append-verify", "partial-dir",
           "delay-updates", "fuzzy", "remove-source-files", "keep-dirlinks", "copy-dirlinks", "copy-unsafe-links",
           "munge-links", "executability", "atimes", "crtimes", "daemon", "port", "password-file",
@@ -409,7 +412,7 @@ Parsed parse(int argc, char** argv) {
         case 'T': usage_error("--temp-dir is not supported by xsync");
         case 'M': usage_error("--remote-option is not supported by xsync");
         case 'H': o.hard_links = true; break;
-        case 'A': usage_error("--acls is not supported by xsync");
+        case 'A': o.acls = o.perms = true; break;
         case 'X': o.xattrs = std::min(o.xattrs + 1, 2); break;
         case 'R': o.relative = true; relative_explicit = true; break;
         case 'b': usage_error("--backup is not supported by xsync");

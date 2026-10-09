@@ -620,6 +620,7 @@ std::string_view unpack(std::string_view in, bool compressed, std::string& scrat
 // ---------------------------------------------------------------- options on the wire
 
 std::string missing_feature(u64 features) {
+  if (g_opt.acls && !g_opt.list_only) return "native remote --acls is not yet supported";
   if (g_opt.xattrs && !g_opt.list_only && !(features & PF_XATTRS)) return "peer does not support --xattrs";
   if ((features & PF_XATTRS) && !(features & PF_XATTR_STREAM)) return "peer does not support streamed --xattrs";
   if (g_opt.files_from_set && !(features & PF_FILES_FROM)) return "peer does not support --files-from";
@@ -2446,6 +2447,7 @@ int run_server() {
   char role = (char)r.byte();
   c.start();
   g_msg_sink = send_msg;
+  if (o.acls) die(RERR_UNSUPPORTED, "native remote --acls is not yet supported");
   if (r.bad || magic != std::string_view(MAGIC, sizeof MAGIC - 1)) die(RERR_PROTOCOL, "protocol error: bad hello from client");
   if (ver < PROTO_MIN_VERSION || ver > PROTO_VERSION)
     die(RERR_PROTOCOL, "protocol version mismatch: client %u, server %u (supports %u and %u)",

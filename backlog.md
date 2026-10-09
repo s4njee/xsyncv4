@@ -2,7 +2,7 @@
 
 Initial audit written 2026-10-08 against xsync 0.1.0 (protocol 1).
 All fifteen P0 stories completed against protocol 3; per-story evidence is below.
-P1 R-02 through R-09 and E-01 through E-09 are complete (17 of 22 stories). Current protocol 4 supports protocol 3; E-10 is in progress (local and remote xattrs implemented; wider metadata pending).
+P1 R-02 through R-09 and E-01 through E-09 are complete (17 of 22 stories). Current protocol 4 supports protocol 3; E-10 is in progress (local/remote xattrs and local ACLs implemented; remote ACLs and wider metadata pending).
 Problem statements retain the original audit findings.
 
 ## What "daily driver" means here
@@ -1682,3 +1682,55 @@ Verified artifact manifest (source `864bd37edf14`):
 - **Remaining before E-10 completion:** native ACLs (`-A`), creation/access times,
   BSD flags, `-E`, `--chmod`, `--chown`, and packaging. Installed helpers and
   release artifacts have not been replaced.
+
+## E-10 progress — 2026-10-09: native local ACLs
+
+- E-10 remains **code**, and P1 remains **17/22**. Local `-A`/`--acls` now
+  preserves macOS extended ACLs and Linux access/default ACLs. It implies
+  `--perms`, while an explicit `--no-perms` retains destination permissions and
+  respects inherited restrictions on newly created files. ACL-only changes
+  itemize as `a`; mode-only changes do not falsely itemize an ACL change.
+- Source ACLs use held descriptors during file transfers and share the bounded
+  metadata value cache. Destination ACL reads/writes address held inodes through
+  the existing destination directory anchors. FIFO and other supported special
+  inodes are handled without opening them for data I/O. Physical symlink ACLs
+  are skipped, matching the reference; `-L` carries the referent's ACL.
+- Per-file APFS clones apply explicit ACL selection; whole-directory shortcuts
+  are disabled with `-A`. ACL handling is independent of xattr filters, including
+  `-AX --filter='-x *'`. On Linux this prevents xattr cleanup from removing ACLs
+  managed by `-A`. Directory working permissions remain writable while children
+  are created and final ACL-linked permission bits are restored afterward.
+- **16 differential cases** pass on native ARM and Rosetta macOS; **13** pass
+  as both root and UID/GID 60000 on Linux (the three APFS clone cases are skipped).
+  Checks include ACL-only updates, stale ACL removal, ordinary xattr selection,
+  dry runs, checksum, atomic/direct/inplace/partial paths, inherited ACLs,
+  permissions disabled, read-only directories, and exact itemization. A second
+  sync produces no changes. Source data and ACLs remain unchanged.
+- All **eight** local source-read ACL mutations pass on ARM, Rosetta and
+  unprivileged Linux: file/followed-link, whole/delta, and atomic/inplace. The
+  retry refreshes the ACL from the held source descriptor. The ordinary macOS
+  **19-method** xattr suite remains green after the shared metadata integration.
+- Native remote ACL serialization and ID mapping are still pending. Push/pull
+  `-A`/`-AX` refuse in strict mode or delegate before any destination write.
+  Explicit `--server -A`/`--server --acls` also refuse rather than silently
+  dropping the option. The **nine-method** fallback suite passes on ARM,
+  Rosetta and unprivileged Linux; its generic unsupported-option fixtures now
+  use `-b` because local `-A` is supported. All **nine** frozen protocol-3 and
+  feature-subset checks pass; the frozen option layout remains unchanged.
+- Evidence: `/tmp/xsync-e10-acls-edges-mac.log`,
+  `/tmp/xsync-e10-acls-edges-rosetta.log`,
+  `/tmp/xsync-e10-acls-linux-final.log`,
+  `/tmp/xsync-e10-acls-linux-root-final.log`,
+  `/tmp/xsync-e10-acls-races-mac.log`,
+  `/tmp/xsync-e10-acls-races-rosetta.log`,
+  `/tmp/xsync-e10-acls-fallback-final.log`,
+  `/tmp/xsync-e10-acls-fallback-rosetta-final.log`, and
+  `/tmp/xsync-e10-acls-xattrs-mac.log`, and
+  `/tmp/xsync-e10-acls-protocol.log`. Early retry fixtures accidentally
+  reused a regular source path as a symlink and compared Linux ACL xattrs as
+  ordinary physical-link attributes; the final fixtures compare referent ACLs
+  separately and retain the ordinary xattr checks.
+- **Remaining before E-10 completion:** native remote ACLs and principal ID
+  mapping, broader ACL flag/identity cases, creation/access times, BSD flags,
+  `-E`, `--chmod`, `--chown`, and packaging. Installed helpers and release
+  artifacts have not been replaced.

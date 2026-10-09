@@ -77,22 +77,22 @@ else: sys.exit(255)
 
     def test_original_arguments_and_extensions(self):
         self.fake_rsync()
-        original = ['-aAX', '-e', 'ssh -i "a key"', '--out-format=%i %n',
+        original = ['-abX', '-e', 'ssh -i "a key"', '--out-format=%i %n',
                     '--rsync-path=custom wrapper', 'source with spaces/', 'user@host:dest with spaces/']
         result = self.run_sync('--no-clone', '-j8', '--atomic', *original, mask=0o077)
         self.assertEqual(result.returncode, 19, result.stderr)
         self.assertEqual(json.loads(result.stdout), {'args': original, 'umask': 0o077})
         self.assertEqual(result.stderr.count(b'falling back to rsync:'), 1)
         self.assertEqual(len(result.stderr.splitlines()), 1)
-        result = self.run_sync('-avj', '3', '-A', 'a', 'b')
-        self.assertEqual(json.loads(result.stdout)['args'], ['-av', '-A', 'a', 'b'])
+        result = self.run_sync('-avj', '3', '-b', 'a', 'b')
+        self.assertEqual(json.loads(result.stdout)['args'], ['-av', '-b', 'a', 'b'])
 
     def test_strict_switches_and_invalid_options(self):
         self.fake_rsync()
-        for flags, env in ((['-A', '--no-fallback'], self.env),
-                           (['--no-fallback', '-A'], self.env),
-                           (['-A'], dict(self.env, XSYNC_FALLBACK='0')),
-                           (['-A', '--server'], self.env),
+        for flags, env in ((['-b', '--no-fallback'], self.env),
+                           (['--no-fallback', '-b'], self.env),
+                           (['-b'], dict(self.env, XSYNC_FALLBACK='0')),
+                           (['-b', '--server'], self.env),
                            (['--not-a-real-option'], self.env),
                            (['-f', 'invalid rule'], self.env),
                            (['--max-delete=invalid'], self.env)):
@@ -102,13 +102,13 @@ else: sys.exit(255)
                 self.assertNotIn(b'falling back', result.stderr)
                 self.assertEqual(result.stdout, b'')
                 self.assertFalse((self.root / 'dest').exists())
-        result = self.run_sync('-A', '--fallback', 'src', 'dst', env=dict(self.env, XSYNC_FALLBACK='0'))
+        result = self.run_sync('-b', '--fallback', 'src', 'dst', env=dict(self.env, XSYNC_FALLBACK='0'))
         self.assertEqual(result.returncode, 19)
         # A value resembling a control flag is still an option value.
-        result = self.run_sync('-A', '-e', '--no-fallback', 'src', 'dst')
-        self.assertEqual(json.loads(result.stdout)['args'], ['-A', '-e', '--no-fallback', 'src', 'dst'])
-        result = self.run_sync('-A', '--', '--no-fallback', 'dst')
-        self.assertEqual(json.loads(result.stdout)['args'], ['-A', '--', '--no-fallback', 'dst'])
+        result = self.run_sync('-b', '-e', '--no-fallback', 'src', 'dst')
+        self.assertEqual(json.loads(result.stdout)['args'], ['-b', '-e', '--no-fallback', 'src', 'dst'])
+        result = self.run_sync('-b', '--', '--no-fallback', 'dst')
+        self.assertEqual(json.loads(result.stdout)['args'], ['-b', '--', '--no-fallback', 'dst'])
 
     def test_native_hardlinks_and_umask(self):
         dest = self.root / 'destination'
@@ -124,7 +124,7 @@ else: sys.exit(255)
     def test_daemon_arguments_and_filters(self):
         self.fake_rsync()
         for args in (['-a', 'rsync://host/module', 'dst'], ['-a', 'src', 'host::module'],
-                     ['-aA', '-f', 'P keep', 'src', 'dst'], ['-aA', '-F', 'src', 'dst']):
+                     ['-ab', '-f', 'P keep', 'src', 'dst'], ['-ab', '-F', 'src', 'dst']):
             with self.subTest(args=args):
                 result = self.run_sync(*args)
                 self.assertEqual(result.returncode, 19, result.stderr)
@@ -135,12 +135,61 @@ else: sys.exit(255)
         directory.mkdir()
         (directory / 'rsync').symlink_to(SELF_BINARY)
         self.env['PATH'] = str(directory)
-        result = self.run_sync('-A', 'src', 'dst')
+        result = self.run_sync('-b', 'src', 'dst')
         self.assertEqual(result.returncode, 127)
         self.assertIn(b'no real rsync', result.stderr)
         (directory / 'rsync').unlink()
-        result = self.run_sync('-A', 'src', 'dst')
+        result = self.run_sync('-b', 'src', 'dst')
         self.assertEqual(result.returncode, 127)
+
+    def test_remote_acls_refuse_or_delegate_before_writes(self):
+        from acls_test import get_acl, set_acl
+        source = self.src / 'file with spaces'
+        set_acl(source)
+        before = get_acl(source)
+        rsh = shlex.quote(str(REPO / 'tests/fakessh.sh'))
+        for direction in ('push', 'pull'):
+            for flags in ('-aA', '-aAX'):
+                with self.subTest(direction=direction, flags=flags):
+                    dest = self.root / (direction + flags)
+                    a, b = str(self.src) + '/', str(dest)
+                    a, b = (a, 'fake:' + b) if direction == 'push' else ('fake:' + a, b)
+                    arguments = [flags, '-e', rsh, '--rsync-path=' + shlex.quote(str(BINARY)), a, b]
+                    result = self.run_sync('--no-fallback', *arguments)
+                    self.assertEqual(result.returncode, 4, result.stderr)
+                    self.assertFalse(dest.exists())
+                    # Use rsync as the explicit fallback peer; the client's
+                    # native negotiation fails before it sends any directory.
+                    environment = dict(self.env, XSYNC_TEST_PEER='capability')
+                    fallback_arguments = [flags, '-e', self.fake_shell(), a, b]
+                    result = self.run_sync(*fallback_arguments, env=environment)
+                    self.assertEqual(result.returncode, 0, result.stderr)
+                    self.assertEqual(result.stderr.count(b'falling back'), 1)
+                    self.assertEqual(get_acl(dest / source.name), before)
+                    self.assertEqual(get_acl(source), before)
+
+    def test_explicit_server_acl_option_refuses_before_writes(self):
+        import wire_test as wire
+        target = self.root / 'server ACL destination'
+        options = bytes(name == 'recursive' for name in wire.BOOLS)
+        options += b''.join(wire.var(2 if name == 'jobs' else 0) for name in wire.INTS)
+        hello = b'XSYNC\1' + wire.var(wire.VERSION) + b'R' + wire.var(15) + options + b'\0\1' + wire.string(str(target))
+        for flag in ('-A', '--acls'):
+            with self.subTest(flag=flag):
+                proc = subprocess.Popen([str(BINARY), '--server', flag], stdin=subprocess.PIPE,
+                                        stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=self.env)
+                try:
+                    proc.stdin.write(wire.frame(1, hello)); proc.stdin.flush()
+                    kind, message = wire.read_frame(proc)
+                    self.assertEqual(kind, 8)
+                    self.assertEqual(message[:2], b'\2\4')
+                    self.assertIn(b'native remote --acls', message)
+                    proc.communicate(timeout=10)
+                    self.assertEqual(proc.returncode, 4)
+                    self.assertFalse(target.exists())
+                finally:
+                    if proc.poll() is None: proc.kill()
+                    proc.communicate()
 
     def test_remote_xattrs_capability_guard(self):
         from xattrs_test import attr_name, get_attrs, set_attr

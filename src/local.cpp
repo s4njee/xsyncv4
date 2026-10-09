@@ -343,6 +343,7 @@ bool setup_dest(const std::string& dest_arg, DirWork& root, bool single) {
     auto xattr_filters = o.xattrs ? directory_filters(root.receiver_filter, dest, true) : root.receiver_filter;
     const FilterList& metadata_filters = xattr_filters ? *xattr_filters : o.filters;
     if (o.xattrs && exists && !root.created && xattrs_differ(root.attrs_xattrs, dest, T_DIR, metadata_filters)) root.attrs.item_flags |= IF_XATTR;
+    if (o.acls && exists && !root.created && acls_differ(root.attrs_xattrs.acl(), dest, T_DIR)) root.attrs.item_flags |= IF_ACL;
     Worker worker;
     note_directory(root, (exists && !root.created) || (root.created && o.mkpath) ? &d : nullptr,
                    root.created && !o.mkpath, worker);
@@ -363,6 +364,7 @@ bool setup_dest(const std::string& dest_arg, DirWork& root, bool single) {
       }
       if (changed_owner && (final_mode & 06000)) root.mode_ok = false;
     }
+    if (o.acls && exists) apply_acls(root.attrs_xattrs.acl(), dest, T_DIR, final_mode);
     if (o.xattrs && exists && (root.created || (root.attrs.item_flags & IF_XATTR))) apply_xattrs(root.attrs_xattrs, dest, T_DIR, metadata_filters);
     root.time_ok = exists && d.mtime == root.attrs.mtime && !(root.attrs.item_flags & IF_XATTR);
   }
@@ -417,7 +419,7 @@ struct Local {
   bool clone_leaf(DirWork* d, size_t listed, Worker& w) {
     const Options& o = g_opt;
     const DirList& l = d->src;
-    if (o.xattrs || o.hard_links || !clone_ok.load(std::memory_order_relaxed) || l.e.size() != listed || l.e.empty() || l.e.size() > 4096 || l.incomplete) return false;
+    if (metadata_enabled() || o.hard_links || !clone_ok.load(std::memory_order_relaxed) || l.e.size() != listed || l.e.empty() || l.e.size() > 4096 || l.incomplete) return false;
     if ((d->attrs.mode & 07000) || (d->attrs.mode & 0700) != 0700) return false;
     u32 gid = d->waiter ? d->waiter->dgid : d->attrs.gid;
     if (o.group && d->attrs.gid != gid) return false;
@@ -519,7 +521,7 @@ struct Local {
           c->no_delete = selected.no_delete;
           c->attr_source = std::move(selected.source);
         }
-        if (o.xattrs) {
+        if (metadata_enabled()) {
           c->attrs_xattrs = d->src_xattrs[i];
           c->attrs_xattrs_loaded = true;
         }
@@ -608,7 +610,7 @@ struct Local {
         else err_line(RERR_PARTIAL, "send_files failed to open \"%s\": %s", w.p2.c_str(), errstr(error).c_str());
         return fail(0);
       }
-      if (o.xattrs) {
+      if (metadata_enabled()) {
         const auto& context = d.source_contexts.empty() ? d.source_filter : d.source_contexts[idx];
         d.src_xattrs[idx] = source_fd_xattrs(in, w.p2, T_REG, context ? *context : o.filters);
         if (!d.src_xattrs[idx].complete) { close(in); return fail(0); }
@@ -643,7 +645,7 @@ struct Local {
           slot_add(w.id, size);
           return true;
         });
-        bool stable = result.ok && source_unchanged(in, w.p2, before) && (!o.xattrs || source_xattrs_unchanged(d.src_xattrs[idx], w.p2));
+        bool stable = result.ok && source_unchanged(in, w.p2, before) && (!metadata_enabled() || source_xattrs_unchanged(d.src_xattrs[idx], w.p2));
         close(in);
         f.size = s.size;
         if (output_ok && !stable && attempt == 0) {
@@ -705,7 +707,7 @@ struct Local {
         slot_add(w.id, n);
         if (g_stop.load()) { ok = false; break; }
       }
-      bool stable = total == s.size && source_unchanged(in, w.p2, before) && (!o.xattrs || source_xattrs_unchanged(d.src_xattrs[idx], w.p2));
+      bool stable = total == s.size && source_unchanged(in, w.p2, before) && (!metadata_enabled() || source_xattrs_unchanged(d.src_xattrs[idx], w.p2));
       close(in);
       f.size = total;
       if (ok && !stable && attempt == 0) {
@@ -813,7 +815,7 @@ int run_local(const std::vector<std::string>& srcs, const std::string& dest) {
   // Whole-directory clones are only equivalent to a per-file sync when nothing could make us
   // treat any entry specially.
   L.lazy_ok = o.clone && o.recursive && o.links && !o.copy_links && o.perms && o.times && !o.omit_dir_times && !o.omit_link_times &&
-              !o.xattrs && !o.dry_run && !o.inplace && !o.one_fs && !o.existing && !o.prune_empty && !root->selection && o.max_size <= 0 && o.min_size <= 0 && o.filters.empty();
+              !metadata_enabled() && !o.dry_run && !o.inplace && !o.one_fs && !o.existing && !o.prune_empty && !root->selection && o.max_size <= 0 && o.min_size <= 0 && o.filters.empty();
 #endif
   int n = default_jobs();
   progress_start(n);

@@ -416,7 +416,13 @@ Differences to be aware of:
   Temporary storage must have space for the cached values. Linux privileged
   namespaces also transfer on supported symlinks and special inodes. Ownership
   updates restore selected Linux file capabilities.
-- **Delegated to rsync** (strict mode rejects them): `-A`,
+- **Access control lists.** Local `-A`/`--acls` transfers preserve macOS extended
+  ACLs and Linux access/default ACLs, including ACL-only updates and per-file
+  clones. `-A` implies `--perms`; `--no-perms` retains rsync's permission behavior.
+  ACLs are handled independently of `-X` attribute filters. Physical symlink
+  ACLs are skipped; `-L` preserves the referent's ACL. Native remote ACLs are
+  pending: remote `-A` delegates before destination writes, or refuses in strict mode.
+- **Delegated to rsync** (strict mode rejects them): remote `-A`,
   `-b`, `--link-dest`/`--compare-dest`/`--copy-dest`,
   `--chmod`, `--append`, `--partial-dir`, and `--remove-source-files`.
 - **Unsupported options fall back before transfer; strict mode fails.** This includes
@@ -537,6 +543,7 @@ python3 tests/xattrs_wire_test.py                         # xattr negotiation an
 python3 tests/xattrs_race_test.py                         # fresh file/link attributes after source-read retries
 python3 tests/xattrs_memory_test.py                       # fork RSS scaling, inline quota, descriptor and storage failures
 python3 tests/xattrs_privileged_test.py                   # Linux root trusted/capability parity (isolated SYS_ADMIN rig)
+python3 tests/acls_test.py                               # local ACLs, inherited modes, itemization and clones
 python3 tests/protocol_test.py                            # frozen N-1 and feature subsets
 python3 tests/output_test.py                              # formats, ordering, log parity
 python3 tests/error_test.py                               # error counts, samples, exit codes and log parity

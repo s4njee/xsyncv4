@@ -70,6 +70,7 @@ struct Options {
   bool raw_names = false;  // -8: retain invalid high bytes; escape unsafe control bytes.
   int itemize_level = 0;
   bool output_attrs = false, output_unchanged = false;  // Configured before workers start.
+  bool acls = false;  // Outside the frozen v3 options.
   int xattrs = 0;  // 1: ordinary attributes; 2: include rsync internal attributes.
   bool hard_links = false;  // Negotiated separately from the frozen v3 options.
   bool delete_before = false;  // Deletion is still deferred for sender-read safety.
@@ -96,6 +97,7 @@ struct Options {
 };
 
 extern Options g_opt;
+inline bool metadata_enabled() { return g_opt.xattrs || g_opt.acls; }
 extern u32 g_umask;
 
 // ---------------------------------------------------------------- entries
@@ -127,7 +129,7 @@ struct Entry {
   i64 ctime = 0;
   u32 ctime_ns = 0;
 };
-enum : u8 { IF_PERMS = 1, IF_OWNER = 2, IF_GROUP = 4, IF_NEW_TYPE = 8, IF_PRUNED = 16, IF_SELECTED_CHILD = 32, IF_XATTR = 64 };
+enum : u8 { IF_PERMS = 1, IF_OWNER = 2, IF_GROUP = 4, IF_NEW_TYPE = 8, IF_PRUNED = 16, IF_SELECTED_CHILD = 32, IF_XATTR = 64, IF_ACL = 128 };
 
 struct DirList {
   std::vector<Entry> e;
