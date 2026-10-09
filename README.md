@@ -404,7 +404,7 @@ Differences to be aware of:
 - **Clones carry extended attributes and ACLs** along, which `rsync -a` (without `-X -A`)
   does not. Use `--no-clone` if that matters.
 - **Output order.** File lines are sorted by path when stdout is not a terminal.
-- **Delegated to rsync** (strict mode rejects them): `-A`, `-X`, `-R`,
+- **Delegated to rsync** (strict mode rejects them): `-A`, `-X`,
   `-b`, `--files-from`, `--link-dest`/`--compare-dest`/`--copy-dest`,
   `--chmod`, `--append`, `--partial-dir`, and `--remove-source-files`.
 - **Unsupported options fall back before transfer; strict mode fails.** This includes
@@ -431,6 +431,14 @@ command-line files opened after the option; directory merge files use the
 final setting. `--no-from0` restores line mode. As in rsync, ordinary SSH
 helpers retain line mode unless explicitly configured, for example with
 `--rsync-path='xsync --from0'`.
+
+`-R`/`--relative` preserves source path components, creating real implied
+directories with their source attributes. A `/./` component cuts off the
+prefix: `xsync -aR /data/./project/file dest/` creates `dest/project/file`.
+Selecting an individual file leaves unlisted siblings in its implied parents
+alone, including with `--delete`. `-R` does not enable recursion; use `-r` or
+`-a` to walk explicitly selected directory trees. `--no-relative` restores
+ordinary source basename handling. `--no-implied-dirs` still delegates to rsync.
 The `x` modifier applies to xattr names and does not filter filenames; native
 `-X` support is still pending. Extended filters negotiate `PF_FILTERS` before
 their rule text is sent. Older helpers refuse or delegate these requests before

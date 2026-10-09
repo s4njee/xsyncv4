@@ -52,6 +52,7 @@ Options (same meaning as rsync):
  -a, --archive            archive mode; equals -rlptgoD
  -r, --recursive          recurse into directories
  -d, --dirs               transfer directories without recursing
+ -R, --relative           preserve source path components and implied directories
      --list-only          list source entries; do not transfer or change DEST
  -H, --hard-links         preserve hard links within the transferred tree
  -l, --links              copy symlinks as symlinks
@@ -225,6 +226,8 @@ Parsed parse(int argc, char** argv) {
     else if (name == "itemize-changes") o.itemize = true, ++o.itemize_level;
     else if (name == "no-itemize-changes") o.itemize = false, o.itemize_level = 0;
     else if (name == "archive") set_archive(o);
+    else if (flag(o.relative, "relative")) {}
+    else if (name == "no-R") o.relative = false;
     else if (name == "from0" || name == "no-from0") {
       o.from0 = name == "from0";
       o.filters.set_from0(o.from0);
@@ -311,7 +314,7 @@ Parsed parse(int argc, char** argv) {
     } else {
       static const char* unsupported[] = {
           "acls", "xattrs", "backup", "backup-dir", "suffix", "link-dest", "compare-dest", "copy-dest", "files-from",
-          "relative", "chmod", "chown", "usermap", "groupmap", "append", "append-verify", "partial-dir",
+          "chmod", "chown", "usermap", "groupmap", "append", "append-verify", "partial-dir",
           "delay-updates", "fuzzy", "remove-source-files", "keep-dirlinks", "copy-dirlinks", "copy-unsafe-links",
           "munge-links", "executability", "atimes", "crtimes", "daemon", "port", "password-file",
           "write-batch", "read-batch", "only-write-batch", "super", "fake-super", "temp-dir",
@@ -400,7 +403,7 @@ Parsed parse(int argc, char** argv) {
         case 'H': o.hard_links = true; break;
         case 'A': usage_error("--acls is not supported by xsync");
         case 'X': usage_error("--xattrs is not supported by xsync");
-        case 'R': usage_error("--relative is not supported by xsync");
+        case 'R': o.relative = true; break;
         case 'b': usage_error("--backup is not supported by xsync");
         case 'C': o.cvs_exclude = true; break;
         case 'F':

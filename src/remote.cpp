@@ -47,7 +47,7 @@ namespace {
 
 enum : u8 { F_HELLO = 1, F_DIR, F_NEED, F_DATA, F_LIST_END, F_DATA_END, F_DONE, F_MSG, F_IDMAP, F_DEST, F_OUTPUT, F_OUTPUT_CONFIG,
             F_DELTA_REQUEST, F_DELTA_SIGNATURE, F_DELTA_RETRY_ACK, F_LIST_ENTRY, F_IO_CONFIG, F_KEEPALIVE, F_FILTER_CONFIG, F_DELETE_CONFIG,
-            F_PRUNE_CONFIG };
+            F_PRUNE_CONFIG, F_RELATIVE_CONFIG };
 enum : u8 { DF_ATTRS = 1, DF_SINGLE = 2, DF_NODELETE = 4, DF_ZSTD = 8 };
 enum : u8 { R_WHOLE = 1, R_CHUNK = 2, R_FAIL = 4, R_END = 8, R_LITERAL = 16, R_DELTA_END = 32, R_COPY = 64 };
 constexpr size_t HDR = 5;                  // u32 payload length + u8 type
@@ -335,6 +335,8 @@ struct Conn {
         die(RERR_PROTOCOL, "protocol error: oversized filter configuration");
       if (type == F_FILTER_CONFIG && !(g_opt.peer_features & PF_FILTERS))
         die(RERR_PROTOCOL, "protocol error: unnegotiated filter configuration");
+      if (type == F_RELATIVE_CONFIG && (len != 1 || !(g_opt.peer_features & PF_RELATIVE)))
+        die(RERR_PROTOCOL, "protocol error: malformed or unnegotiated relative configuration");
       if (type == F_KEEPALIVE) {
         if (!keepalive.load() || len) die(RERR_PROTOCOL, "protocol error: invalid or unnegotiated keep-alive");
         continue;
@@ -455,6 +457,7 @@ std::string_view unpack(std::string_view in, bool compressed, std::string& scrat
 // ---------------------------------------------------------------- options on the wire
 
 std::string missing_feature(u64 features) {
+  if (g_opt.relative && !(features & PF_RELATIVE)) return "peer does not support --relative";
   if (g_opt.prune_empty && !(features & PF_PRUNE_EMPTY)) return "peer does not support --prune-empty-dirs";
   if (!g_opt.list_only && g_opt.delete_after && !(features & PF_DELETE_AFTER))
     return "peer does not support --delete-after";
@@ -572,6 +575,7 @@ struct SDir {
   u8 flags = 0;
   u32 id = 0;
   bool prelisted = false;
+  std::shared_ptr<SelectedSource> selection;
   std::atomic<int> pending{2};  // walker and outstanding NEED; reads add references
 };
 
@@ -720,7 +724,11 @@ struct Sender {
           if (o.checksum) body.append((const char*)&l.sums[2 * i], 16);
           nf++, nb += (u64)e.size;
           break;
-        case T_DIR: put_var(body, e.rdev == 1), nd++; break;
+        case T_DIR:
+          put_var(body, e.rdev == 1);
+          if (o.peer_features & PF_RELATIVE) body.push_back((char)(bool)(e.item_flags & IF_SELECTED_CHILD));
+          nd++;
+          break;
         case T_LNK: put_str(body, l.link(e)), nl++; break;
         case T_CHR:
         case T_BLK: put_var(body, e.rdev); [[fallthrough]];
@@ -734,7 +742,7 @@ struct Sender {
         if (e.type != T_REG) put_var(body, (u64)e.size);
         put_str(body, d->src_paths.empty() ? path_join(d->src_path, l.name_sv(e)) : d->src_paths[i]);
       }
-      if (o.peer_features & PF_CVS_FILTERS)
+      if (o.peer_features & (PF_CVS_FILTERS | PF_RELATIVE))
         put_str(body, FilterList::absolute_path(d->src_paths.empty() ? path_join(d->src_path, l.name_sv(e)) : d->src_paths[i]));
     }
     if (client) {
@@ -760,7 +768,7 @@ struct Sender {
     ids.describe(c, l, d->attrs);
     dirs_sent_a.fetch_add(1);
     c.send(std::move(f), true);
-    if (!o.recursive) return true;
+    if (!o.recursive && !d->selection) return true;
     for (size_t i = 0; i < l.e.size(); i++) {
       const Entry& e = l.e[i];
       if (e.type != T_DIR || e.rdev == 1) continue;
@@ -771,6 +779,16 @@ struct Sender {
       ch->rel = rel_join(d->rel, nm);
       ch->attrs = e;
       ch->flags = DF_ATTRS;
+      ch->selection = d->selection;
+      if (ch->selection) {
+        auto selected = ch->selection->take(ch->rel);
+        ch->list = std::move(selected.list);
+        ch->src_paths = std::move(selected.paths);
+        ch->source_contexts = std::move(selected.contexts);
+        ch->attr_source = std::move(selected.source);
+        ch->prelisted = true;
+        if (selected.no_delete) ch->flags |= DF_NODELETE;
+      }
       // The same name coming from two source arguments is merged, so neither may delete.
       if (!d->src_paths.empty() && ((i > 0 && l.name_sv(l.e[i - 1]) == nm) || (i + 1 < l.e.size() && l.name_sv(l.e[i + 1]) == nm)))
         ch->flags |= DF_NODELETE;
@@ -1095,7 +1113,8 @@ struct Sender {
     root->source_contexts = std::move(rl.source_contexts);
     root->attrs = rl.attrs;
     root->attr_source = std::move(rl.attr_source);
-    root->flags = (rl.has_attrs ? DF_ATTRS : DF_NODELETE) | (rl.single ? DF_SINGLE : 0);
+    root->flags = (rl.has_attrs ? DF_ATTRS : 0) | (rl.no_delete ? DF_NODELETE : 0) | (rl.single ? DF_SINGLE : 0);
+    root->selection = std::move(rl.selection);
     root->prelisted = true;
     int n = default_jobs();
     pool.scan_workers = std::max(1, n / 2);
@@ -1286,7 +1305,7 @@ struct Receiver {
     DirList& l = w.src;
     l.e.resize(n);
     std::vector<std::string> filter_sources;
-    if (o.peer_features & PF_CVS_FILTERS) filter_sources.resize(n);
+    if (o.peer_features & (PF_CVS_FILTERS | PF_RELATIVE)) filter_sources.resize(n);
     if (structured_output()) w.output_sources.resize(n);
     if (o.checksum) l.sums.assign(n * 2, 0);
     for (size_t i = 0; i < n; i++) {
@@ -1314,7 +1333,14 @@ struct Receiver {
           e.link_off = l.add_str(target);
           break;
         }
-        case T_DIR: e.rdev = (u32)r.var(); break;
+        case T_DIR:
+          e.rdev = (u32)r.var();
+          if (o.peer_features & PF_RELATIVE) {
+            u8 selected = r.byte();
+            if (selected > 1) die(RERR_PROTOCOL, "protocol error: bad selected directory flag");
+            if (selected) e.item_flags |= IF_SELECTED_CHILD;
+          }
+          break;
         case T_CHR:
         case T_BLK: e.rdev = (u32)r.var(); break;
         default: break;
@@ -1328,16 +1354,16 @@ struct Receiver {
         w.output_sources[i] = r.str();
         if (e.size < 0) die(RERR_PROTOCOL, "protocol error: negative file size");
       }
-      if (o.peer_features & PF_CVS_FILTERS) {
+      if (o.peer_features & (PF_CVS_FILTERS | PF_RELATIVE)) {
         filter_sources[i] = r.str();
         if (filter_sources[i].find('\0') != std::string::npos)
           die(RERR_PROTOCOL, "protocol error: NUL in filter source path");
       }
     }
-    if (r.bad) die(RERR_PROTOCOL, "protocol error: truncated DIR frame");
+    if (r.bad || !r.empty()) die(RERR_PROTOCOL, "protocol error: truncated or trailing DIR frame");
     // A per-directory merge delegates selection to the sender. Otherwise a
     // global CVS list must also agree with the pulling client's settings.
-    if (client && o.filters.has_cvs() && !o.filters.trusts_sender_filters()) {
+    if (client && (o.relative || o.filters.has_cvs()) && !o.filters.trusts_sender_filters()) {
       for (size_t i = 0; i < l.e.size(); ++i) {
         const Entry& e = l.e[i];
         auto name = l.name_sv(e);
@@ -1819,7 +1845,7 @@ struct Receiver {
 
 int receive_listing(Conn& c) {
   u64 count = 0;
-  const bool verify = g_opt.filters.has_cvs() && !g_opt.filters.trusts_sender_filters();
+  const bool verify = (g_opt.relative || g_opt.filters.has_cvs()) && !g_opt.filters.trusts_sender_filters();
   std::vector<ListingEntry> pending;
   u8 type;
   std::string payload;
@@ -1855,7 +1881,7 @@ int receive_listing(Conn& c) {
     entry.attrs.size = (i64)r.var();
     entry.attrs.mtime = r.svar();
     entry.target = r.str();
-    if (g_opt.peer_features & PF_CVS_FILTERS) entry.source = r.str();
+    if (g_opt.peer_features & (PF_CVS_FILTERS | PF_RELATIVE)) entry.source = r.str();
     if (r.bad || !r.empty() || !listing_path_valid(entry.path) || mode > 07777 ||
         entry.attrs.type < T_REG || entry.attrs.type > T_BLK || entry.attrs.size < 0 ||
         entry.target.size() > (1 << 20) || entry.target.find('\0') != entry.target.npos ||
@@ -1973,13 +1999,14 @@ int run_client(const std::vector<std::string>& srcs, const std::string& dest, u3
   put_var(f, wire_version);
   f.push_back(push ? 'R' : 'S');
   u64 advertised = PROTO_FEATURES & (o.whole_file ? ~(PF_RESUME | PF_DELTA) : ~u64(0));
-  if (o.list_only) advertised &= PF_CORE | PF_ZSTD | PF_LIST | PF_IO_CONTROL | PF_FILTERS | PF_MERGE_FILTERS | PF_CVS_FILTERS | PF_PRUNE_EMPTY;
+  if (o.list_only) advertised &= PF_CORE | PF_ZSTD | PF_LIST | PF_IO_CONTROL | PF_FILTERS | PF_MERGE_FILTERS | PF_CVS_FILTERS | PF_PRUNE_EMPTY | PF_RELATIVE;
   else advertised &= ~PF_LIST;
   if (!o.filters.needs_extended()) advertised &= ~PF_FILTERS;
   if (!o.filters.has_merges()) advertised &= ~PF_MERGE_FILTERS;
   if (!o.filters.has_cvs() && !o.filters.has_merges()) advertised &= ~PF_CVS_FILTERS;
   if (!o.delete_after) advertised &= ~PF_DELETE_AFTER;
   if (!o.prune_empty) advertised &= ~PF_PRUNE_EMPTY;
+  if (!o.relative) advertised &= ~PF_RELATIVE;
   if (!o.hard_links) advertised &= ~PF_HLINK;
   if (!output_enabled()) advertised &= ~(PF_OUTPUT | PF_DIR_OUTPUT);
   if (wire_version >= 4) put_var(f, advertised);
@@ -2062,6 +2089,7 @@ int run_client(const std::vector<std::string>& srcs, const std::string& dest, u3
     c.configure(o.bwlimit, o.timeout, true);
     c.send(std::move(config));
   }
+  if (o.peer_features & PF_RELATIVE) c.send(new_frame(F_RELATIVE_CONFIG) + '\1');
   if (o.peer_features & PF_FILTERS) {
     std::string config = new_frame(F_FILTER_CONFIG);
     if (o.peer_features & PF_CVS_FILTERS) config.push_back((char)o.cvs_exclude);
@@ -2174,6 +2202,12 @@ int run_server() {
     o.timeout = (u32)seconds;
     c.configure(rate, (u32)seconds, true);
   }
+  if (o.peer_features & PF_RELATIVE) {
+    if (!c.read_frame(type, payload)) conn_lost();
+    if (type != F_RELATIVE_CONFIG || payload != std::string(1, '\1'))
+      die(RERR_PROTOCOL, "protocol error: malformed relative configuration");
+    o.relative = true;
+  }
   if (o.peer_features & PF_FILTERS) {
     if (!c.read_frame(type, payload)) conn_lost();
     RBuf config(payload);
@@ -2230,7 +2264,7 @@ int run_server() {
       f.push_back((char)entry.attrs.type);
       put_var(f, entry.attrs.mode), put_var(f, (u64)entry.attrs.size);
       put_svar(f, entry.attrs.mtime), put_str(f, entry.target);
-      if (o.peer_features & PF_CVS_FILTERS) put_str(f, entry.source);
+      if (o.peer_features & (PF_CVS_FILTERS | PF_RELATIVE)) put_str(f, entry.source);
       c.send(std::move(f), true);
       ++count;
     });

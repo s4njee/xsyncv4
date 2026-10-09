@@ -1367,9 +1367,48 @@ Verified artifact manifest (source `864bd37edf14`):
   local/push/pull, **5** stdin comparisons and **2** listing comparisons,
   including source integrity, metadata, deletion, rule sides, nested merges,
   CVS, pruning and delete-after. ARM and Rosetta checks pass. Linux SSH
-  transfer/stdio checks and its separate listing check pass; merge regression
-  checks are finishing. Unit checks remain **32,940**, green on all three.
+  transfer/stdio checks and its separate listing check pass. Existing merge
+  regression checks (7) pass on ARM and Linux, and filter-wire checks (8)
+  pass on Linux. Unit checks remain **32,940**, green on all three.
 - **E-09 remains partial and P1 remains 16/22.** `--files-from` and `-R`,
   including local/remote file-list input and implied directory behavior,
   still require implementation and acceptance checks. Packaged releases and
   installed helpers remain at the completed E-08 baseline.
+
+### E-09 progress — relative paths and implied directories (2026-10-09)
+
+- Implemented `-R`/`--relative` and `--no-relative` using a selected source
+  tree shared by local transfers, remote senders and listing. Absolute source
+  paths preserve their components below the destination; `/./` cuts off a
+  physical prefix. Implied parents are real directories with source metadata,
+  including when a source component is a symlink. A requested descendant takes
+  directory priority over an explicitly selected symlink at the same name,
+  regardless of argument order.
+- Implied/partial parents protect unlisted destination siblings during deletion;
+  explicitly scanned directory contents own their deletion pass. Non-recursive
+  selections walk only their selected nodes. Selected trees are built before
+  writes, preserve source/filter contexts, and use per-file cloning rather than
+  whole-directory cloning. Pruning, hard links, transfer restrictions, dry runs,
+  checksums and refreshed deletion rules share the existing receiver paths.
+- Added separately negotiated `PF_RELATIVE` and configuration frame 22.
+  Selected directory flags and absolute source paths are capability-gated;
+  protocol 3's frozen HELLO remains unchanged. Missing helpers refuse or fall
+  back with original arguments before destination creation. Pulls validate
+  globally excluded implied names, matching rsync's rejection behavior.
+- Added `tests/relative_test.py`: **171** transfer comparisons (including clone,
+  source alias/overlap and absolute-path output checks), **48** listing
+  comparisons, plus native invalid-path checks in all three directions.
+  The baseline suite passes on ARM, Rosetta and real Linux SSH; later overlap,
+  absolute-output and local regression checks pass separately on all three.
+  Final filter-wire checks (10) pass on all three, including malformed selected
+  metadata and original-argument fallback. ARM receiver-wire checks (2) pass.
+- Fixed sender `%n`/`%f` rendering for absolute relative paths and physical
+  prefixes containing `..`. Complete DIR frames reject trailing data. A fatal
+  protocol error retains its exit code if the reader concurrently sees EOF;
+  the new Linux hostile-frame check exposed and now verifies that race.
+- Existing forced byte-copy itemization remains **231/231** on ARM. The full
+  NUL-input suite remains green after relative support was added. **E-09 and
+  the overall P1 goal remain in progress (16/22 stories complete):** the
+  remaining E-09 work is `--files-from`, including client/remote files, stdin,
+  NUL input, option defaults and selected directory semantics. Release
+  artifacts and installed helpers remain at the E-08 baseline.

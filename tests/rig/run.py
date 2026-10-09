@@ -40,8 +40,9 @@ def main():
             modules = sys.argv[1:] or ["ssh_test.py"]
             for module in modules:
                 print("Running " + module + " over real SSH", flush=True)
+                filename, _, method = module.partition(':')
                 docker("exec", "-e", "XSYNC_RIG_HOST=server", "-e", "XSYNC_TEST_BINARY=/usr/local/bin/xsync",
-                       client, "python3", "/work/tests/" + module, "-v")
+                       client, "python3", "/work/tests/" + filename, "-v", *([method] if method else []))
         except Exception:
             if server in created:
                 subprocess.run(["docker", "exec", server, "cat", "/rig/sshd.log"])

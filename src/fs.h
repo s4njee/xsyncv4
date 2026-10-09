@@ -7,6 +7,7 @@
 #include "destination.h"
 
 struct stat;
+struct SelectedSource;
 
 // Per-thread scratch state.
 struct Worker {
@@ -63,6 +64,7 @@ struct DirWork {
   std::string attr_source;  // Display-only source path for this directory's attributes.
   DirList src;           // source entries, sorted by name
   std::vector<std::unique_ptr<DirWork>> prepared_children;  // Full source walk for -m.
+  std::shared_ptr<SelectedSource> selection;
   bool scan_failed = false;
   Entry attrs;           // source directory attributes
   bool has_attrs = false;

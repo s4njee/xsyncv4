@@ -57,7 +57,16 @@ std::string render(const OutputEvent& event) {
   std::string source = g_opt.receiving || event.source.empty() ? path : event.source;
   bool source_dot = source.ends_with("/.");
   // The client's receiving side uses the short name; senders use the source path.
-  source = std::filesystem::path(source).lexically_normal().string();
+  if (o.relative && !o.receiving) {
+    bool cut = source.find("/./") != source.npos || source.starts_with("./");
+    std::filesystem::path cleaned;
+    for (const auto& component : std::filesystem::path(source))
+      if (component != ".") cleaned /= component;
+    source = cleaned.string();
+    // Absolute -R names keep the slash in sender %n output, while %f still
+    // omits it. Dot-dot in the cut-off physical prefix remains visible in %f.
+    if (!cut && source.starts_with('/') && source.substr(1) == path) path.insert(path.begin(), '/');
+  } else source = std::filesystem::path(source).lexically_normal().string();
   if (source.starts_with('/')) source.erase(0, 1);
   if (source.size() > 1 && source.back() == '/') source.pop_back();
   if (source_dot && source != ".") source += "/.";

@@ -2,6 +2,7 @@
 #pragma once
 #include "fs.h"
 #include "pool.h"
+#include "selection.h"
 #include <unordered_set>
 
 // Pruning depends on file-list presence and global receiver protection, before
@@ -23,6 +24,8 @@ struct RootList {
   std::string attr_source;
   bool has_attrs = false;
   bool single = false;                 // exactly one non-directory source argument
+  bool no_delete = true;               // implied/partial parents do not own unlisted siblings
+  std::shared_ptr<SelectedSource> selection;
 };
 // Immutable once scanning starts. Paths cover a destination not created yet;
 // device/inode also catches aliases to an existing destination directory.
@@ -36,6 +39,7 @@ struct SourceGuard {
 };
 std::string machine_identity();
 void build_root(const std::vector<std::string>& srcs, RootList& r, Worker& t, const SourceGuard& guard = SourceGuard());
+void build_selected_root(const std::vector<std::string>& sources, RootList& root, Worker& worker, const SourceGuard& guard);
 // Drop entries the sender must not transfer (filtered, unsupported or unrequested types).
 void prune_source(DirList& l, std::string_view rel, u32 parent_dev, Worker& t, std::vector<std::string>* paths = nullptr,
                   const SourceGuard& guard = SourceGuard(), std::string_view base = "", const FilterList* filters = nullptr);

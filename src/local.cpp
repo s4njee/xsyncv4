@@ -186,6 +186,7 @@ void prune_source(DirList& l, std::string_view rel, u32 parent_dev, Worker& t, s
 
 void build_root(const std::vector<std::string>& srcs, RootList& r, Worker& t, const SourceGuard& guard) {
   const Options& o = g_opt;
+  if (o.relative) return build_selected_root(srcs, r, t, guard);
   unsigned lflags = o.copy_links ? LD_FOLLOW : o.links || o.list_only ? LD_LINKS : 0;
   DirList merged;
   std::vector<std::string> paths;
@@ -286,6 +287,7 @@ void build_root(const std::vector<std::string>& srcs, RootList& r, Worker& t, co
     r.src_paths.push_back(std::move(paths[x]));
     if (!contexts.empty()) r.source_contexts.push_back(std::move(contexts[x]));
   }
+  r.no_delete = !r.has_attrs;
 }
 
 static bool mkdir_p(const std::string& path, mode_t mode) {
@@ -485,7 +487,7 @@ struct Local {
     d->pending.store(1);
     d->lazy_children = lazy_ok;
     generate(*d, w);
-    if (o.recursive) {
+    if (o.recursive || d->selection) {
       for (size_t i = 0; i < d->src.e.size(); i++) {
         const Entry& s = d->src.e[i];
         if (s.type != T_DIR || !(s.flags & EF_DESCEND)) continue;
@@ -499,6 +501,15 @@ struct Local {
         c->receiver_filter_node = d->receiver_filter_node;
         c->dst_path = path_join(d->dst_path, nm);
         c->rel = rel_join(d->rel, nm);
+        c->selection = d->selection;
+        if (c->selection && !o.prune_empty) {
+          auto selected = c->selection->take(c->rel);
+          c->src = std::move(selected.list);
+          c->src_paths = std::move(selected.paths);
+          c->source_contexts = std::move(selected.contexts);
+          c->no_delete = selected.no_delete;
+          c->attr_source = std::move(selected.source);
+        }
         c->attrs = s;
         c->has_attrs = true;
         c->created = s.flags & EF_CREATED;
@@ -512,7 +523,7 @@ struct Local {
           c->waiter = d;
           d->pending.fetch_add(1);
         }
-        push_scan(c, o.prune_empty);
+        push_scan(c, o.prune_empty || (bool)c->selection);
       }
     }
     size_t n = d->need.size();
@@ -726,7 +737,8 @@ int run_local(const std::vector<std::string>& srcs, const std::string& dest) {
   root->attrs = rl.attrs;
   root->attr_source = std::move(rl.attr_source);
   root->has_attrs = rl.has_attrs;
-  root->no_delete = !rl.has_attrs;  // only the contents of "SRC/" own the destination directory
+  root->no_delete = rl.no_delete;
+  root->selection = std::move(rl.selection);
   if (g_opt.verbose > 0) w0.logf(g_opt.prune_empty ? "building file list" : "sending incremental file list");
   w0.flush_log();
   if (g_opt.prune_empty) {
@@ -734,7 +746,7 @@ int run_local(const std::vector<std::string>& srcs, const std::string& dest) {
     for (size_t index = 0; index < directories.size() && !g_stop.load(); ++index) {
       DirWork* directory = directories[index];
       directory->prepared_children.resize(directory->src.e.size());
-      if (!g_opt.recursive) continue;
+      if (!g_opt.recursive && !directory->selection) continue;
       for (size_t i = 0; i < directory->src.e.size(); ++i) {
         const Entry& entry = directory->src.e[i];
         if (entry.type != T_DIR || entry.rdev == 1) continue;
@@ -745,6 +757,18 @@ int run_local(const std::vector<std::string>& srcs, const std::string& dest) {
         child->attrs = entry;
         child->has_attrs = true;
         child->source_filter = directory->source_contexts.empty() ? directory->source_filter : directory->source_contexts[i];
+        child->selection = directory->selection;
+        if (child->selection) {
+          auto selected = child->selection->take(child->rel);
+          child->src = std::move(selected.list);
+          child->src_paths = std::move(selected.paths);
+          child->source_contexts = std::move(selected.contexts);
+          child->no_delete = selected.no_delete;
+          child->attr_source = std::move(selected.source);
+          directories.push_back(child.get());
+          directory->prepared_children[i] = std::move(child);
+          continue;
+        }
         int error = list_dir(child->src_path.c_str(), child->src, g_opt.copy_links ? LD_FOLLOW : g_opt.links ? LD_LINKS : 0);
         if (error || child->src.incomplete) {
           g_source_io_error.store(true);
@@ -770,7 +794,7 @@ int run_local(const std::vector<std::string>& srcs, const std::string& dest) {
   // Whole-directory clones are only equivalent to a per-file sync when nothing could make us
   // treat any entry specially.
   L.lazy_ok = o.clone && o.recursive && o.links && !o.copy_links && o.perms && o.times && !o.omit_dir_times && !o.omit_link_times &&
-              !o.dry_run && !o.inplace && !o.one_fs && !o.existing && !o.prune_empty && o.max_size <= 0 && o.min_size <= 0 && o.filters.empty();
+              !o.dry_run && !o.inplace && !o.one_fs && !o.existing && !o.prune_empty && !root->selection && o.max_size <= 0 && o.min_size <= 0 && o.filters.empty();
 #endif
   int n = default_jobs();
   progress_start(n);

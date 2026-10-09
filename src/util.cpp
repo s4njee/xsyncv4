@@ -143,6 +143,11 @@ void err_line(int code, const char* fmt, ...) {
 }
 
 void die(int code, const char* fmt, ...) {
+  // A worker may report a fatal protocol error while the reader observes EOF.
+  // Keep the first fatal code instead of letting that disconnect replace it.
+  static std::atomic<int> fatal_code{0};
+  int previous = 0;
+  if (!fatal_code.compare_exchange_strong(previous, code)) _Exit(previous);
   va_list ap;
   va_start(ap, fmt);
   std::string s = vformat(fmt, ap);

@@ -76,7 +76,7 @@ int run_listing(const std::vector<std::string>& sources, const ListingSink& emit
     else emit(entry);
   };
   auto source_path = [](std::string_view path) {
-    return g_opt.am_server && (g_opt.peer_features & PF_CVS_FILTERS) ? FilterList::absolute_path(path) : std::string();
+    return g_opt.am_server && (g_opt.peer_features & (PF_CVS_FILTERS | PF_RELATIVE)) ? FilterList::absolute_path(path) : std::string();
   };
   Worker worker;
   RootList root;
@@ -122,9 +122,17 @@ int run_listing(const std::vector<std::string>& sources, const ListingSink& emit
                                frame.contexts.empty() ? nullptr : frame.contexts[next]);
     }
     emit_entry({e, rel, "", source_path(std::get<0>(source_dirs.front()))});
-    if (!g_opt.recursive) continue;
+    if (!g_opt.recursive && !root.selection) continue;
     Frame child;
     child.rel = rel;
+    if (root.selection) {
+      auto selected = root.selection->take(rel);
+      child.list = std::move(selected.list);
+      child.paths = std::move(selected.paths);
+      child.contexts = std::move(selected.contexts);
+      stack.push_back(std::move(child));
+      continue;
+    }
     for (const auto& [source, attrs, inherited] : source_dirs) {
       if (attrs.rdev == 1) continue;
       DirList list;

@@ -101,6 +101,28 @@ class FilterWireTests(unittest.TestCase):
         proc, target = self.server(features=10241)  # CVS without per-directory support.
         self.rejected(proc, target, frame(19, b'\1\0'))
 
+    def test_relative_configuration(self):
+        for payload in (b'', b'\0', b'\2', b'\1x'):
+            with self.subTest(payload=payload):
+                proc, target = self.server(features=65537)
+                self.rejected(proc, target, frame(22, payload))
+        proc, target = self.server(features=1)
+        self.rejected(proc, target, frame(22, b'\1'))
+        proc, target = self.server(features=65537)
+        self.rejected(proc, target, struct.pack('<IB', 1024 * 1024, 22))
+
+    def test_relative_directory_metadata(self):
+        for label, data in (
+            ('invalid-selection-flag', wire.directory([('dir', 2, var(0) + b'\2' + string('/source/dir'))])),
+            ('truncated-selection-flag', wire.directory([('dir', 2, var(0))])),
+            ('nul-source', wire.directory([('dir', 2, var(0) + b'\1' + string(b'/source\0/dir'))])),
+            ('trailing-directory', frame(2, wire.directory()[5:] + b'x')),
+        ):
+            with self.subTest(label=label):
+                proc, target = self.server(features=65537)
+                proc.stdin.write(frame(22, b'\1')); proc.stdin.flush()
+                self.rejected(proc, target, data)
+
     def test_unnegotiated_cvs_cannot_read_home(self):
         # A FIFO makes accidental HOME access observable as a timeout.
         home = self.root / 'home'; home.mkdir()
@@ -139,7 +161,8 @@ class FilterWireTests(unittest.TestCase):
         capture.chmod(0o755)
         for flags, diagnostic in ((['--delete', '--filter=P stale.*'], b'extended filters'),
                                   (['--delete-after'], b'--delete-after'),
-                                  (['-m'], b'--prune-empty-dirs')):
+                                  (['-m'], b'--prune-empty-dirs'),
+                                  (['-R'], b'--relative')):
             with self.subTest(flags=flags):
                 original = ['-a', *flags, '-e', rsh, '--rsync-path=unused', str(source), 'fake:' + str(target)]
                 env['XSYNC_FALLBACK'] = '0'

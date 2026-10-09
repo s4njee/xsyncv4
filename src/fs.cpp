@@ -764,7 +764,7 @@ void generate(DirWork& w, Worker& t) {
           }
         }
         s.mode = final_mode;
-        if (!o.recursive || s.rdev == 1) {
+        if ((!o.recursive && !(s.item_flags & IF_SELECTED_CHILD)) || s.rdev == 1) {
           // Not descended into: finish its attributes right away.
           if (!o.dry_run) {
             if (!(s.flags & EF_MODE_OK)) check_attr(destination_chmod(path.c_str(), final_mode), path.c_str(), "permissions");
