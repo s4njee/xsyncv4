@@ -209,7 +209,7 @@ class TrustTests(unittest.TestCase):
                        "--cc=md5", "--log-file-format=%n", "--debug=ALL", "-B4096",
                        "-T/tmp", "-M--fake-super", "-4", "-6", "--ipv4", "--ipv6",
                        "--inc-recursive", "--no-inc-recursive", "--i-r", "--no-i-r",
-                       "--old-args", "--no-protect-args", "--open-noatime",
+                       "--old-args", "--no-protect-args",
                        "--new-compress", "--old-compress", "--msgs2stderr", "--no-msgs2stderr",
                        "--implied-dirs", "--no-implied-dirs", "--outbuf=L",
                        "--compress-choice=zlib", "--zc=invalid", "--info=name1"]
@@ -223,7 +223,7 @@ class TrustTests(unittest.TestCase):
                     self.assertFalse((root / "dest").exists())
             help_text = self.run_sync(["--help"], root).stdout
             noops = ["--whole-file", "--no-whole-file", "--protect-args", "--secluded-args", "--blocking-io",
-                     "--no-blocking-io", "--8-bit-output", "--no-motd"]
+                     "--no-blocking-io", "--8-bit-output", "--no-motd", "--open-noatime"]
             for option in noops:
                 self.assertIn(option.encode(), help_text)
                 self.run_sync([option, "source", "dest"], root)
@@ -233,11 +233,12 @@ class TrustTests(unittest.TestCase):
             self.run_sync(["--info=PROGRESS0,STATS0", "source", "dest"], root)
 
     def test_receiver_symlink_swaps(self):
-        scenarios = ("atomic", "direct", "inplace", "clone", "file_swap", "metadata", "times", "delete", "interrupt", "partial")
+        scenarios = ("atomic", "direct", "inplace", "clone", "file_swap", "metadata", "times", "access_times", "creation_times", "delete", "interrupt", "partial")
         for transport in ("local", "push", "pull"):
             for scenario in scenarios:
                 if scenario == "clone" and transport != "local":
                     continue
+                if scenario == "creation_times" and sys.platform != "darwin": continue
                 with self.subTest(transport=transport, scenario=scenario), tempfile.TemporaryDirectory() as tmp:
                     root = pathlib.Path(tmp).resolve()
                     src, dst, outside = root / "src", root / "dst", root / "outside"
@@ -249,6 +250,7 @@ class TrustTests(unittest.TestCase):
                         os.utime(outside / name, ns=(1234567890000000000, 1234567890123456789))
                     before = {p.name: (p.read_bytes(), p.stat().st_mode, p.stat().st_mtime_ns) for p in outside.iterdir()}
                     directory_before = (outside.stat().st_mode, outside.stat().st_mtime_ns)
+                    births_before = {p.name: p.lstat().st_birthtime for p in outside.iterdir()} if sys.platform == "darwin" else None
                     flags = ["-a", "-j1"]
                     if scenario != "clone":
                         flags.append("--no-clone")
@@ -266,7 +268,7 @@ class TrustTests(unittest.TestCase):
                         elif scenario == "direct":
                             flags.append("--no-atomic")
                             match, prefix = "file", False
-                        elif scenario in ("metadata", "times"):
+                        elif scenario in ("metadata", "times", "access_times", "creation_times"):
                             (dst / "hot/file").write_bytes((src / "hot/file").read_bytes())
                             flags.append("--size-only")
                             (src / "hot/file").chmod(0o640)
@@ -274,6 +276,8 @@ class TrustTests(unittest.TestCase):
                             os.utime(src / "hot/file", (1000000000, 1000000000))
                             os.utime(dst / "hot/file", (2000000000, 2000000000))
                             operation = ("chmod" if sys.platform == "darwin" else "open") if scenario == "metadata" else "times"
+                            if scenario == "access_times": flags.append('-U')
+                            if scenario == "creation_times": flags.append('-N'); operation = 'open'
                             match, prefix = "file", False
                         if scenario == "partial":
                             flags.append("--partial")
@@ -296,7 +300,7 @@ class TrustTests(unittest.TestCase):
                         while not marker.exists() and proc.poll() is None and time.monotonic() < deadline:
                             time.sleep(0.005)
                         self.assertTrue(marker.exists(), "receiver never reached the selected syscall")
-                        if scenario in ("file_swap", "metadata", "times"):
+                        if scenario in ("file_swap", "metadata", "times", "access_times", "creation_times"):
                             (dst / "hot/file").unlink()
                             (dst / "hot/file").symlink_to(outside / "file")
                         else:
@@ -309,6 +313,8 @@ class TrustTests(unittest.TestCase):
                         after = {p.name: (p.read_bytes(), p.stat().st_mode, p.stat().st_mtime_ns) for p in outside.iterdir()}
                         self.assertEqual(before, after)
                         self.assertEqual(directory_before, (outside.stat().st_mode, outside.stat().st_mtime_ns))
+                        if births_before is not None:
+                            self.assertEqual(births_before, {p.name: p.lstat().st_birthtime for p in outside.iterdir()})
                         parked = root / "parked"
                         if parked.exists():
                             self.assertFalse(any(p.name.startswith(".file.") for p in parked.iterdir()))

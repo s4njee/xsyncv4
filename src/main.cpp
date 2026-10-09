@@ -66,8 +66,11 @@ Options (same meaning as rsync):
  -D                       same as --devices --specials
  -A, --acls               preserve ACLs (implies --perms)
  -t, --times              preserve modification times
- -O, --omit-dir-times     omit directories from --times
- -J, --omit-link-times    omit symlinks from --times
+ -U, --atimes             preserve file access times (twice enables --open-noatime)
+ -N, --crtimes            preserve creation times (macOS)
+     --open-noatime       avoid read access-time updates where supported
+ -O, --omit-dir-times     omit directory modification/access/creation times
+ -J, --omit-link-times    omit symlink modification/access/creation times
  -n, --dry-run            perform a trial run with no changes made
  -W, --whole-file         send the whole file; disable resume and block matching
      --no-whole-file      enable verified-prefix resume again
@@ -233,6 +236,10 @@ Parsed parse(int argc, char** argv) {
     else if (name == "archive") set_archive(o);
     else if (name == "xattrs") o.xattrs = std::min(o.xattrs + 1, 2);
     else if (name == "no-xattrs" || name == "no-X") o.xattrs = 0;
+    else if (name == "atimes") { if (++o.atimes > 1) o.open_noatime = true; }
+    else if (name == "no-atimes" || name == "no-U") o.atimes = 0;
+    else if (name == "no-N") o.crtimes = false;
+    else if (flag(o.crtimes, "crtimes") || flag(o.open_noatime, "open-noatime")) {}
     else if (flag(o.relative, "relative")) relative_explicit = true;
     else if (name == "no-R") o.relative = false, relative_explicit = true;
     else if (name == "files-from") o.files_from = need(), o.files_from_set = true;
@@ -327,7 +334,7 @@ Parsed parse(int argc, char** argv) {
           "backup", "backup-dir", "suffix", "link-dest", "compare-dest", "copy-dest",
           "chmod", "chown", "usermap", "groupmap", "append", "append-verify", "partial-dir",
           "delay-updates", "fuzzy", "remove-source-files", "keep-dirlinks", "copy-dirlinks", "copy-unsafe-links",
-          "munge-links", "executability", "atimes", "crtimes", "daemon", "port", "password-file",
+          "munge-links", "executability", "daemon", "port", "password-file",
           "write-batch", "read-batch", "only-write-batch", "super", "fake-super", "temp-dir",
           "iconv", "checksum-seed", "address", "sockopts", "stop-after", "stop-at", "max-alloc", "write-devices", "copy-devices",
           "delete-missing-args", "ignore-missing-args", "trust-sender", "copy-as", "early-input", "remote-option",
@@ -335,7 +342,7 @@ Parsed parse(int argc, char** argv) {
           "block-size", "checksum-choice", "cc", "log-file-format", "debug", "outbuf",
           "inc-recursive", "no-inc-recursive", "i-r", "no-i-r", "no-protect-args", "old-args",
           "ipv4", "ipv6", "msgs2stderr", "no-msgs2stderr", "new-compress", "old-compress", "no-implied-dirs",
-          "implied-dirs", "open-noatime"};
+          "implied-dirs"};
       for (const char* u : unsupported)
         if (name == u) usage_error("--" + name + " is not supported by xsync");
       usage_error("--" + name + ": unknown option");
@@ -381,6 +388,8 @@ Parsed parse(int argc, char** argv) {
         case 'L': o.copy_links = true; break;
         case 'p': o.perms = true; break;
         case 't': o.times = true; break;
+        case 'U': if (++o.atimes > 1) o.open_noatime = true; break;
+        case 'N': o.crtimes = true; break;
         case 'g': o.group = true; break;
         case 'o': o.owner = true; break;
         case 'D': o.devices = o.specials = true; break;
@@ -436,6 +445,9 @@ Parsed parse(int argc, char** argv) {
     if (!o.dirs_explicit) o.dirs = true;
   }
   if (o.copy_links) o.links = false;
+#ifndef __APPLE__
+  if (o.crtimes) usage_error("--crtimes is not supported on this platform");
+#endif
   if (!p.server && p.install.empty() && p.args.size() == 1) o.list_only = true;
   if (o.list_only && !o.dirs_explicit && !o.recursive) o.dirs = true;
   if (o.compress_level == -1000) o.compress_level = 3;

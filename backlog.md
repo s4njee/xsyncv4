@@ -2,7 +2,7 @@
 
 Initial audit written 2026-10-08 against xsync 0.1.0 (protocol 1).
 All fifteen P0 stories completed against protocol 3; per-story evidence is below.
-P1 R-02 through R-09 and E-01 through E-09 are complete (17 of 22 stories). Current protocol 4 supports protocol 3; E-10 is in progress (local/remote xattrs and matching-style ACLs implemented, cross-style compatibility guarded; wider metadata pending).
+P1 R-02 through R-09 and E-01 through E-09 are complete (17 of 22 stories). Current protocol 4 supports protocol 3; E-10 is in progress (local/remote xattrs, matching-style ACLs and access/creation times implemented, cross-style compatibility guarded; flags, identity overrides and packaging pending).
 Problem statements retain the original audit findings.
 
 ## What "daily driver" means here
@@ -1863,3 +1863,78 @@ Verified artifact manifest (source `864bd37edf14`):
   helpers and release artifacts have not been replaced. `sanjee@neo.local`
   currently fails DNS resolution, so R-01's outstanding physical-host checks
   remain pending.
+
+## E-10 progress — 2026-10-09: native access and creation times
+
+- E-10 remains **code**, and P1 remains **17/22**. Local and native push/pull
+  `-U`/`--atimes` now preserve regular/special-inode access times. Repeated `-U`
+  enables `--open-noatime`; supported systems request `O_NOATIME` on source,
+  checksum, resume and destination-basis reads. macOS has no such read flag and
+  ignores it as rsync does. On Linux it can require ownership or privilege.
+  Directory and physical-link access times retain rsync's omission.
+- `-N`/`--crtimes` now preserves Darwin creation times on regular files,
+  directories, physical symlinks and supported special inodes. Creation-time
+  writes pin the destination object with event-only descriptors, including
+  `O_SYMLINK` for links and nonblocking opens for FIFOs. Atomic file outputs use
+  their already-open descriptor. Linux's missing arbitrary birth-time setter
+  is rejected before transfer. Directory finalization restores requested times
+  after children/deletions; rsync's volume-root creation-time guard is retained.
+- Three capabilities negotiate access times (**8388608**), creation times
+  (**16777216**, Darwin only) and no-atime reads (**33554432**) outside the
+  frozen v3 options. Root, entry and fresh DATA records carry signed time
+  fields only when negotiated. Explicit helper time flags also require peer
+  support. Protocol **4** still supports **3**; older peers delegate or refuse
+  before destination writes.
+- Comparisons and changed-value writes use whole seconds, matching rsync.
+  Unchanged existing access/create times retain their fractional seconds.
+  Checksum reads cannot replace the sender's listed access time. `-O` and `-J`
+  omit directory/link time writes, including creation times; rsync still
+  itemizes differing omitted creation times. Slot **8** uses `u`, `n` or `b`.
+  Hard-link aliases suppress the anchor's creation-time itemization while
+  retaining rsync's access-time reporting.
+- Per-file APFS clones correct explicitly requested times. Whole-directory
+  clone shortcuts are disabled with `-U`/`-N`. Without those options, clones
+  retain source access/create times as additional metadata; this is documented
+  alongside the existing xattr/ACL superset. Without preservation, access times
+  can differ due to incidental reads, and new timestamps are checked against
+  the actual transfer clock window rather than compared as fixed metadata.
+- The **14-method** time/wire suite passes on ARM and Rosetta (two Linux-only
+  methods skip). It includes **113** Darwin differentials: local/push/pull,
+  data/metadata-only updates, dry runs, inplace, checksum, omissions, negated
+  options, followed links, APFS clones, hard links, ACL/xattr compositions,
+  unchanged fractional timestamps, and 3 MiB whole/delta/inplace/resume paths.
+  Repeat-sync checks and five wire methods
+  verify truncated/overflowing records before publication, fresh time fields,
+  unsupported platforms and unnegotiated helper flags. Linux covers **57**
+  differentials plus repeat-sync and explicit unsupported-creation checks.
+  All **41** Linux time/wire, trust, output and hard-link methods pass, with
+  four platform/root skips.
+- A disposable real-SSH Darwin/Linux rig passes **four** additional access-time
+  differentials (`-U`/`-UU`, push/pull), checking exact destination times, data
+  and itemization. Its first output comparison included rsync's destination
+  creation banner; the corrected test compares itemized rows separately.
+- All **13** macOS trust methods pass, including new local/push/pull access and
+  creation-time symlink swaps. Outside data/modes/modification/create times
+  remain intact. The broader **53-method** macOS regression run passed every
+  method except its obsolete unsupported-`--open-noatime` assertion; that
+  assertion was updated for the implemented option and the full trust suite
+  rerun successfully. Output, hard-link, ACL and xattr methods passed. All
+  **ten** protocol compatibility methods pass with additional time requests
+  against feature subsets and the frozen v3 helper.
+- Evidence: `/tmp/xsync-e10-times-mac-final.log`,
+  `/tmp/xsync-e10-times-rosetta-final.log`,
+  `/tmp/xsync-e10-times-linux-final.log`,
+  `/tmp/xsync-e10-times-cross-final.log`,
+  `/tmp/xsync-e10-times-trust-final-mac.log`,
+  `/tmp/xsync-e10-times-regression-mac.log`,
+  `/tmp/xsync-e10-times-option-check.log` and
+  `/tmp/xsync-e10-times-protocol.log`. Initial probes exposed a blocked FIFO
+  open, conflicting symlink open flags, checksum-induced atime drift, and
+  unnecessary fractional-time writes; these were corrected and retested.
+  The Linux trust fixture initially lacked a passwd entry for UID 60000; final
+  verification runs as a real disposable rig user. Semantics were checked
+  against [rsync's official manual](https://download.samba.org/pub/rsync/rsync.1)
+  and its 3.4.4 source.
+- **Remaining before E-10 completion:** BSD flags, `-E`, `--chmod`, `--chown`,
+  final metadata composition checks and packaging. Installed helpers and
+  release artifacts have not been replaced.

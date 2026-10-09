@@ -36,17 +36,18 @@ constexpr u64 PF_XATTR_STREAM = 524288;
 constexpr u64 PF_ACL_POSIX = 1048576, PF_ACL_DARWIN = 2097152;
 constexpr u64 PF_ACLS = PF_ACL_POSIX | PF_ACL_DARWIN;
 constexpr u64 PF_ACL_UUID = 4194304;
+constexpr u64 PF_ATIMES = 8388608, PF_CRTIMES = 16777216, PF_OPEN_NOATIME = 33554432;
 #ifdef __APPLE__
 constexpr u64 PF_NATIVE_ACL = PF_ACL_DARWIN;
-constexpr u64 PF_FOREIGN_ACL = PF_ACL_POSIX;
+constexpr u64 PF_UNSUPPORTED_NATIVE = PF_ACL_POSIX;
 #else
 constexpr u64 PF_NATIVE_ACL = PF_ACL_POSIX;
-constexpr u64 PF_FOREIGN_ACL = PF_ACL_DARWIN | PF_ACL_UUID;
+constexpr u64 PF_UNSUPPORTED_NATIVE = PF_ACL_DARWIN | PF_ACL_UUID | PF_CRTIMES;
 #endif
 #ifndef XSYNC_PROTOCOL_FEATURES
-#define XSYNC_PROTOCOL_FEATURES 8388607
+#define XSYNC_PROTOCOL_FEATURES 67108863
 #endif
-constexpr u64 PROTO_FEATURES = XSYNC_PROTOCOL_FEATURES & ~PF_FOREIGN_ACL;
+constexpr u64 PROTO_FEATURES = XSYNC_PROTOCOL_FEATURES & ~PF_UNSUPPORTED_NATIVE;
 constexpr u64 LEGACY_V3_FEATURES = 15;
 
 // ---------------------------------------------------------------- options
@@ -81,6 +82,8 @@ struct Options {
   int itemize_level = 0;
   bool output_attrs = false, output_unchanged = false;  // Configured before workers start.
   bool acls = false;  // Outside the frozen v3 options.
+  int atimes = 0;
+  bool crtimes = false, open_noatime = false;  // Negotiated outside v3 options.
   int xattrs = 0;  // 1: ordinary attributes; 2: include rsync internal attributes.
   bool hard_links = false;  // Negotiated separately from the frozen v3 options.
   bool delete_before = false;  // Deletion is still deferred for sender-read safety.
@@ -138,6 +141,8 @@ struct Entry {
   u64 hdev = 0, ino = 0, nlink = 0;
   i64 ctime = 0;
   u32 ctime_ns = 0;
+  i64 atime = 0, crtime = 0;  // rsync transports these in whole seconds.
+  u8 time_flags = 0;  // Compared access/create times; itemization slot 8.
 };
 enum : u8 { IF_PERMS = 1, IF_OWNER = 2, IF_GROUP = 4, IF_NEW_TYPE = 8, IF_PRUNED = 16, IF_SELECTED_CHILD = 32, IF_XATTR = 64, IF_ACL = 128 };
 

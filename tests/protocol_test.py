@@ -9,6 +9,7 @@ import shutil
 import subprocess
 import tarfile
 import tempfile
+import sys
 import unittest
 
 REPO = pathlib.Path(__file__).resolve().parent.parent
@@ -157,7 +158,7 @@ p=pathlib.Path(sys.argv[1]); print(json.dumps({'hash':hashlib.sha256((p/'file').
     def test_requested_feature_is_never_silently_dropped(self):
         source = self.root / 'feature source'
         source.write_bytes(b'unchanged')
-        for flags in (['-rl', '--safe-links'], ['-a'], ['-H'], ['-A'], ['-AX'], ['--bwlimit=256'], ['--timeout=1'], ['--filter=P stale']):
+        for flags in (['-rl', '--safe-links'], ['-a'], ['-H'], ['-A'], ['-AX'], ['-U'], ['-UU'], ['--open-noatime'], ['--bwlimit=256'], ['--timeout=1'], ['--filter=P stale']):
             with self.subTest(flags=flags):
                 target = self.root / 'unsupported feature destination'
                 result = subprocess.run([str(BINARY), '--no-fallback', *flags, '-e', RSH,
@@ -171,10 +172,10 @@ p=pathlib.Path(sys.argv[1]); print(json.dumps({'hash':hashlib.sha256((p/'file').
                     from ssh_test import remote_json
                     self.assertFalse(remote_json('import pathlib,json,sys; print(json.dumps(pathlib.Path(sys.argv[1]).exists()))', target))
 
-    def test_legacy_acl_requests_refuse_before_destination_writes(self):
+    def test_legacy_metadata_requests_refuse_before_destination_writes(self):
         source = self.root / 'ACL feature source'; source.mkdir()
         (source / 'file').write_bytes(b'unchanged')
-        for flags in ('-aA', '-aAX'):
+        for flags in ('-aA', '-aAX', '-aU', '-aUU', *(['-aN', '-aUN'] if sys.platform == 'darwin' else [])):
             for direction in ('push', 'pull'):
                 with self.subTest(flags=flags, direction=direction):
                     target = self.root / ('ACL refused ' + flags + direction)

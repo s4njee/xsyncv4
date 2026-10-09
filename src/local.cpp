@@ -600,7 +600,7 @@ struct Local {
 
     static thread_local OutFile f;
     for (int attempt = 0; attempt < 2; attempt++) {
-      int in = open(w.p2.c_str(), O_RDONLY | O_CLOEXEC | (o.copy_links || !d.src_paths.empty() ? 0 : O_NOFOLLOW));
+      int in = open(w.p2.c_str(), O_RDONLY | O_CLOEXEC | read_time_flags() | (o.copy_links || !d.src_paths.empty() ? 0 : O_NOFOLLOW));
       struct stat before;
       if (in < 0 || fstat(in, &before) != 0 || !S_ISREG(before.st_mode)) {
         int error = in < 0 ? errno : EIO;
@@ -814,7 +814,7 @@ int run_local(const std::vector<std::string>& srcs, const std::string& dest) {
   const Options& o = g_opt;
   // Whole-directory clones are only equivalent to a per-file sync when nothing could make us
   // treat any entry specially.
-  L.lazy_ok = o.clone && o.recursive && o.links && !o.copy_links && o.perms && o.times && !o.omit_dir_times && !o.omit_link_times &&
+  L.lazy_ok = o.clone && !o.atimes && !o.crtimes && o.recursive && o.links && !o.copy_links && o.perms && o.times && !o.omit_dir_times && !o.omit_link_times &&
               !metadata_enabled() && !o.dry_run && !o.inplace && !o.one_fs && !o.existing && !o.prune_empty && !root->selection && o.max_size <= 0 && o.min_size <= 0 && o.filters.empty();
 #endif
   int n = default_jobs();

@@ -375,7 +375,7 @@ second is printed. `-v` and `-i` lines scroll above the live region. `NO_COLOR` 
 
 ## Compatibility with rsync
 
-Supported with rsync's meaning: `-a -r -d -H -R -0 -l -L -p -t -g -o -D -O -J -n -u -c -I -x -z -v -q
+Supported with rsync's meaning: `-a -r -d -H -X -A -U -R -0 -l -L -p -t -g -o -D -O -J -n -u -c -I -x -z -v -q
 -i -h -P -e -f`, `--delete` (and `--del`, `--delete-before/-during/-after/-delay`),
 `--delete-excluded`, `--force`, `--exclude`, `--include`, `--exclude-from`,
 `--include-from`, `--files-from`, `--relative`, `--from0`, `--filter` (`+`/`-`, `H`/`S`, `P`/`R`, `!`, and modifiers
@@ -401,7 +401,8 @@ Differences to be aware of:
   followed by writes, metadata operations or cleanup. `--safe-links` skips links
   outside the transfer tree and protects their existing destination entries from
   deletion. The explicit destination path is resolved once at setup.
-- **Clones carry extended attributes and ACLs** along, which `rsync -a` (without `-X -A`)
+- **Clones carry extended attributes, ACLs, access and creation times** along,
+  which `rsync -a` (without `-X -A -U -N`)
   does not. Use `--no-clone` if that matters.
 - **Output order.** File lines are sorted by path when stdout is not a terminal.
 - **Extended attributes.** `-X`/`--xattrs` copies xattrs on files, directories
@@ -432,6 +433,17 @@ Differences to be aware of:
   directions, so fallback does not guarantee cross-platform ACL conversion.
   As with rsync, a remote push's
   receiver re-enables `--perms` for `-A`, including after `--no-perms`.
+- **Additional times.** `-U`/`--atimes` preserves file and special-inode access
+  times; directories and physical symlinks retain rsync's omission. `-UU` also
+  enables `--open-noatime`, which requests `O_NOATIME` on systems that provide it
+  and may require file ownership or privilege. macOS ignores that read flag.
+  `-N`/`--crtimes` preserves creation times on macOS, including directories and
+  symlinks. Linux creation-time preservation is unsupported. Both time values
+  use whole seconds, as rsync does. `-O`/`-J` omit directory/symlink time writes;
+  rsync's creation-time itemization can still report an omitted difference.
+  Native remote transfers negotiate these options before writes and older
+  helpers delegate or refuse. Whole-directory cloning is disabled when `-U`
+  or `-N` needs per-entry handling; file clones correct the requested times.
 - **Delegated to rsync** (strict mode rejects them): incompatible remote `-A`,
   `-b`, `--link-dest`/`--compare-dest`/`--copy-dest`,
   `--chmod`, `--append`, `--partial-dir`, and `--remove-source-files`.

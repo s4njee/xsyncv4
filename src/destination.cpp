@@ -5,6 +5,7 @@
 #include <algorithm>
 #ifdef __APPLE__
 #include <sys/clonefile.h>
+#include <sys/attr.h>
 #endif
 
 namespace {
@@ -122,6 +123,35 @@ int destination_times(const char* path, const timespec times[2]) {
   auto p = destination_path(path);
   return p.fd < 0 ? -1 : p.name == "." ? futimens(p.fd, times) :
     utimensat(p.fd, p.name.c_str(), times, AT_SYMLINK_NOFOLLOW);
+}
+int fd_crtime(int fd, time_t seconds) {
+#ifdef __APPLE__
+  attrlist attributes{};
+  attributes.bitmapcount = ATTR_BIT_MAP_COUNT;
+  attributes.commonattr = ATTR_CMN_CRTIME;
+  timespec time{seconds, 0};
+  return fsetattrlist(fd, &attributes, &time, sizeof time, 0);
+#else
+  errno = ENOTSUP;
+  return -1;
+#endif
+}
+int destination_crtime(const char* path, time_t seconds) {
+#ifdef __APPLE__
+  auto p = destination_path(path);
+  if (p.fd < 0) return -1;
+  if (p.name == ".") return fd_crtime(p.fd, seconds);
+  // O_SYMLINK opens a link itself; combining it with O_NOFOLLOW rejects links.
+  int fd = openat(p.fd, p.name.c_str(), O_EVTONLY | O_SYMLINK | O_NONBLOCK | O_CLOEXEC);
+  if (fd < 0) return -1;
+  int result = fd_crtime(fd, seconds), error = errno;
+  close(fd);
+  errno = error;
+  return result;
+#else
+  errno = ENOTSUP;
+  return -1;
+#endif
 }
 int destination_mkdir(const char* path, mode_t mode) {
   auto p = destination_path(path);

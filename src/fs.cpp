@@ -97,6 +97,26 @@ bool can_set_gid(u32 gid) {
   if (g_opt.am_root) return true;
   return std::find(my_groups.begin(), my_groups.end(), (gid_t)gid) != my_groups.end();
 }
+int read_time_flags() {
+#ifdef O_NOATIME
+  return g_opt.open_noatime ? O_NOATIME : 0;
+#else
+  return 0;
+#endif
+}
+bool preserve_atime(const Entry& entry) {
+  return g_opt.atimes && entry.type != T_DIR && entry.type != T_LNK;
+}
+bool preserve_crtime(const Entry& entry) {
+  return g_opt.crtimes && !(entry.type == T_DIR && g_opt.omit_dir_times) &&
+         !(entry.type == T_LNK && g_opt.omit_link_times);
+}
+char extra_time_code(const Entry& source, const Entry& dest) {
+  bool access = preserve_atime(source) && source.atime != dest.atime;
+  // rsync itemizes differing create times even when -O/-J omits their writes.
+  bool create = g_opt.crtimes && source.crtime != dest.crtime;
+  return access && create ? 'b' : access ? 'u' : create ? 'n' : '.';
+}
 
 // ---------------------------------------------------------------- listing
 
@@ -118,9 +138,11 @@ void entry_from_stat(const struct stat& st, Entry& e) {
 #ifdef __APPLE__
   e.mtime = st.st_mtimespec.tv_sec;
   e.mtime_ns = (u32)st.st_mtimespec.tv_nsec;
+  e.atime = st.st_atimespec.tv_sec, e.crtime = st.st_birthtimespec.tv_sec;
 #else
   e.mtime = st.st_mtim.tv_sec;
   e.mtime_ns = (u32)st.st_mtim.tv_nsec;
+  e.atime = st.st_atim.tv_sec;
 #endif
   e.rdev = (e.type == T_CHR || e.type == T_BLK) ? (u32)st.st_rdev : 0;
   e.dev = (u32)st.st_dev;
@@ -138,6 +160,8 @@ Entry source_snapshot(const Entry& scanned, const struct stat& st) {
   e.name_off = scanned.name_off, e.name_len = scanned.name_len;
   e.link_off = scanned.link_off, e.flags = scanned.flags;
   e.item_flags = scanned.item_flags;
+  e.time_flags = scanned.time_flags;
+  if (g_opt.atimes) e.atime = scanned.atime;  // checksum/read activity must not replace the listed atime.
   if (!g_opt.perms) e.mode = scanned.mode;
   return e;
 }
@@ -220,6 +244,8 @@ static int list_dir_fd(int fd, DirList& out, unsigned flags) {
   al.bitmapcount = ATTR_BIT_MAP_COUNT;
   al.commonattr = ATTR_CMN_RETURNED_ATTRS | ATTR_CMN_ERROR | ATTR_CMN_NAME | ATTR_CMN_DEVID | ATTR_CMN_OBJTYPE |
                   ATTR_CMN_MODTIME | ATTR_CMN_OWNERID | ATTR_CMN_GRPID | ATTR_CMN_ACCESSMASK;
+  if (g_opt.atimes) al.commonattr |= ATTR_CMN_ACCTIME;
+  if (g_opt.crtimes) al.commonattr |= ATTR_CMN_CRTIME;
   al.fileattr = ATTR_FILE_DEVTYPE | ATTR_FILE_DATALENGTH;
   static thread_local std::vector<char> abuf(128 * 1024);
   bool fallback = false;
@@ -259,11 +285,19 @@ static int list_dir_fd(int fd, DirList& out, unsigned flags) {
       u32 objtype = 0, v32;
       if (ret.commonattr & ATTR_CMN_DEVID) memcpy(&v32, f, 4), e.dev = v32, f += 4;
       if (ret.commonattr & ATTR_CMN_OBJTYPE) memcpy(&objtype, f, 4), f += 4;
+      if (ret.commonattr & ATTR_CMN_CRTIME) {
+        timespec ts; memcpy(&ts, f, sizeof ts); f += sizeof ts;
+        e.crtime = ts.tv_sec;
+      }
       if (ret.commonattr & ATTR_CMN_MODTIME) {
         timespec ts;
         memcpy(&ts, f, sizeof ts);
         e.mtime = ts.tv_sec, e.mtime_ns = (u32)ts.tv_nsec;
         f += sizeof ts;
+      }
+      if (ret.commonattr & ATTR_CMN_ACCTIME) {
+        timespec ts; memcpy(&ts, f, sizeof ts); f += sizeof ts;
+        e.atime = ts.tv_sec;
       }
       if (ret.commonattr & ATTR_CMN_OWNERID) memcpy(&e.uid, f, 4), f += 4;
       if (ret.commonattr & ATTR_CMN_GRPID) memcpy(&e.gid, f, 4), f += 4;
@@ -285,7 +319,8 @@ static int list_dir_fd(int fd, DirList& out, unsigned flags) {
         case VBLK: e.type = T_BLK; break;
         default: e.type = T_NONE;
       }
-      const u32 want = ATTR_CMN_OBJTYPE | ATTR_CMN_MODTIME | ATTR_CMN_ACCESSMASK;
+      const u32 want = ATTR_CMN_OBJTYPE | ATTR_CMN_MODTIME | ATTR_CMN_ACCESSMASK |
+                       (g_opt.atimes ? ATTR_CMN_ACCTIME : 0) | (g_opt.crtimes ? ATTR_CMN_CRTIME : 0);
       if (g_opt.hard_links || err || (ret.commonattr & want) != want || (e.type == T_REG && !(ret.fileattr & ATTR_FILE_DATALENGTH))) {
         // Attributes missing for this entry: fall back to a plain lstat.
         struct stat st;
@@ -364,12 +399,12 @@ static bool hash_fd(int fd, u64 out[2]) {
 }
 
 bool hash_file(const char* path, u64 out[2]) {
-  return hash_fd(open(path, O_RDONLY | O_CLOEXEC), out);
+  return hash_fd(open(path, O_RDONLY | O_CLOEXEC | read_time_flags()), out);
 }
 bool destination_hash_file(const char* path, u64 out[2]) {
   auto p = destination_path(path);
   if (p.fd < 0) return false;
-  int fd = openat(p.fd, p.name.c_str(), O_RDONLY | O_CLOEXEC | O_NOFOLLOW | O_NONBLOCK);
+  int fd = openat(p.fd, p.name.c_str(), O_RDONLY | O_CLOEXEC | O_NOFOLLOW | O_NONBLOCK | read_time_flags());
   struct stat st;
   if (fd >= 0 && (fstat(fd, &st) != 0 || !S_ISREG(st.st_mode))) {
     close(fd);
@@ -401,7 +436,7 @@ ResumePrefix destination_resume_prefix(const char* path, i64 limit) {
   ResumePrefix prefix;
   auto target = destination_path(path);
   if (target.fd < 0 || limit <= 0) return prefix;
-  int fd = openat(target.fd, target.name.c_str(), O_RDONLY | O_CLOEXEC | O_NOFOLLOW | O_NONBLOCK);
+  int fd = openat(target.fd, target.name.c_str(), O_RDONLY | O_CLOEXEC | O_NOFOLLOW | O_NONBLOCK | read_time_flags());
   struct stat before;
   if (fd >= 0 && fstat(fd, &before) == 0 && S_ISREG(before.st_mode) && before.st_size > 0) {
     prefix.size = std::min<i64>(before.st_size, limit);
@@ -457,6 +492,23 @@ void set_mtime(const char* path, const Entry& s, bool nofollow) {
   ts[0].tv_sec = 0, ts[0].tv_nsec = UTIME_OMIT;
   ts[1].tv_sec = s.mtime, ts[1].tv_nsec = s.mtime_ns;
   check_attr(destination_times(path, ts), path, "times");
+}
+void set_extra_times(const char* path, const Entry& s, bool access_needed = true) {
+  if (g_opt.dry_run) return;
+  if (preserve_crtime(s)) {
+    struct stat current;
+    bool different = true;
+    if (destination_stat(path, &current) == 0) {
+      Entry before; entry_from_stat(current, before);
+      // rsync excludes a Darwin volume's root directory from creation-time writes.
+      different = !(current.st_ino == 2 && S_ISDIR(current.st_mode)) && before.crtime != s.crtime;
+    }
+    if (different) check_attr(destination_crtime(path, s.crtime), path, "creation time");
+  }
+  if (preserve_atime(s) && access_needed) {
+    timespec times[2] = {{s.atime, 0}, {0, UTIME_OMIT}};
+    check_attr(destination_times(path, times), path, "access time");
+  }
 }
 
 void set_mode(const char* path, u32 mode, bool link) {
@@ -576,6 +628,8 @@ void tweak_attrs(const char* path, const Entry& s, const Entry& d, std::string_v
   char code[12] = ".f.........";
   code[1] = kind;
   bool changed = false;
+  code[8] = extra_time_code(s, d);
+  if (code[8] != '.') changed = true;
   if (o.group && d.gid != s.gid && can_set_gid(s.gid)) {
     if (!o.dry_run) check_attr(destination_chown(path, (uid_t)-1, s.gid), path, "ownership");
     code[7] = 'g', changed = true;
@@ -598,6 +652,7 @@ void tweak_attrs(const char* path, const Entry& s, const Entry& d, std::string_v
     if (s.item_flags & IF_XATTR) code[10] = 'x', changed = true;
     if (s.item_flags & IF_XATTR) apply_xattrs(work.src_xattrs[index], path, s.type, filters);
   }
+  set_extra_times(path, s, s.atime != d.atime || (o.checksum && s.type == T_REG));
   if (o.times && !(link && o.omit_link_times) && (!time_same || (s.item_flags & IF_XATTR))) {
     if (!o.dry_run) set_mtime(path, s, link);
     if (!same_secs(s, d)) code[4] = 't', changed = true;
@@ -790,6 +845,7 @@ void generate(DirWork& w, Worker& t) {
           // Not descended into: finish its attributes right away.
           if (!o.dry_run) {
             if (!(s.flags & EF_MODE_OK)) check_attr(destination_chmod(path.c_str(), final_mode), path.c_str(), "permissions");
+            set_extra_times(path.c_str(), s);
             if (o.times && !o.omit_dir_times && !time_ok) set_mtime(path.c_str(), s, false);
           }
           s.flags &= (u8)~EF_DESCEND;
@@ -852,6 +908,8 @@ void generate(DirWork& w, Worker& t) {
           }
           s.flags |= EF_EXISTS | EF_INPLACE_SAFE;
           if (d->size != s.size) s.flags |= EF_DIFF_SIZE;
+          if (preserve_atime(s) && d->atime != s.atime) s.time_flags |= 1;
+          if (preserve_crtime(s) && d->crtime != s.crtime) s.time_flags |= 2;
           if (!same_secs(s, *d)) s.flags |= EF_DIFF_TIME;
           if (o.perms && d->mode != s.mode) s.item_flags |= IF_PERMS;
           if (o.owner && o.am_root && d->uid != s.uid) s.item_flags |= IF_OWNER;
@@ -896,6 +954,7 @@ void generate(DirWork& w, Worker& t) {
           if (o.owner && o.am_root && d->uid != s.uid) link_code[6] = 'o';
           if (o.group && d->gid != s.gid && can_set_gid(s.gid)) link_code[7] = 'g';
           if (s.item_flags & IF_XATTR) link_code[10] = 'x';
+          link_code[8] = extra_time_code(s, *d);
         }
         if (d) {
           if (d->type == T_DIR) {
@@ -914,6 +973,7 @@ void generate(DirWork& w, Worker& t) {
           if (o.group && s.gid != w.dgid && can_set_gid(s.gid)) check_attr(destination_chown(path.c_str(), (uid_t)-1, s.gid), path.c_str(), "ownership");
           if (o.owner && o.am_root && s.uid != my_uid) check_attr(destination_chown(path.c_str(), s.uid, (gid_t)-1), path.c_str(), "ownership");
           if (o.xattrs) apply_xattrs(w.src_xattrs[i], path, T_LNK, filters);
+          set_extra_times(path.c_str(), s);
           if (o.times && !o.omit_link_times) set_mtime(path.c_str(), s, true);
         }
         w.modified = true;
@@ -962,6 +1022,7 @@ void generate(DirWork& w, Worker& t) {
           if (o.owner && o.am_root && s.uid != my_uid) check_attr(destination_chown(path.c_str(), s.uid, (gid_t)-1), path.c_str(), "ownership");
           if (o.acls) apply_acls(w.src_xattrs[i].acl(), path, s.type, final_mode);
           if (o.xattrs) apply_xattrs(w.src_xattrs[i], path, s.type, filters);
+          set_extra_times(path.c_str(), s);
           if (o.times) set_mtime(path.c_str(), s, false);
         }
         w.modified = true;
@@ -1070,6 +1131,7 @@ void finalize_tree() {
         !g_opt.omit_dir_times && std::find(dirty.begin(), dirty.end(), dir.path) != dirty.end())
       item(worker, ".d..t......", dir.rel, dir.attrs, dir.source);
     if (!dir.mode_ok) check_attr(destination_chmod(dir.path.c_str(), dir.attrs.mode), dir.path.c_str(), "permissions");
+    set_extra_times(dir.path.c_str(), dir.attrs);
     if (g_opt.times && !g_opt.omit_dir_times && (!dir.time_ok || dir.modified || std::find(dirty.begin(), dirty.end(), dir.path) != dirty.end()))
       set_mtime(dir.path.c_str(), dir.attrs, false);
   }
@@ -1168,7 +1230,7 @@ bool out_write(OutFile& f, const char* bytes, size_t size, i64 offset) {
 }
 
 bool out_restore_prefix(OutFile& f, const ResumePrefix& prefix) {
-  int fd = openat(f.dir_fd, f.name.c_str(), O_RDONLY | O_CLOEXEC | O_NOFOLLOW | O_NONBLOCK);
+  int fd = openat(f.dir_fd, f.name.c_str(), O_RDONLY | O_CLOEXEC | O_NOFOLLOW | O_NONBLOCK | read_time_flags());
   struct stat before;
   if (fd < 0) return false;
   if (fstat(fd, &before) != 0 || !S_ISREG(before.st_mode) || before.st_size < prefix.size) {
@@ -1236,7 +1298,7 @@ bool out_open(OutFile& f, DirWork& w, u32 idx, Worker& t, bool force_temp, bool 
   mode_t mode = s.mode & 0777;
   f.created_mode = mode;
   if (f.existed && o.inplace && (s.flags & EF_INPLACE_SAFE)) {
-    f.fd = openat(f.dir_fd, f.name.c_str(), (readable ? O_RDWR : O_WRONLY) | O_CLOEXEC | O_NOFOLLOW | O_NONBLOCK);
+    f.fd = openat(f.dir_fd, f.name.c_str(), (readable ? O_RDWR : O_WRONLY) | O_CLOEXEC | O_NOFOLLOW | O_NONBLOCK | (readable ? read_time_flags() : 0));
     if (f.fd < 0) return failed("open --inplace");
     struct stat st;
     if (fstat(f.fd, &st) != 0 || !S_ISREG(st.st_mode)) {
@@ -1317,8 +1379,10 @@ bool out_finish(OutFile& f, DirWork& w, u32 idx, Worker&, bool ok, const Entry* 
   if (o.acls) apply_fd_acls((xattrs ? *xattrs : w.src_xattrs[idx]).acl(), f.fd, f.path, T_REG, final_mode);
   if (o.xattrs) apply_fd_xattrs(xattrs ? *xattrs : w.src_xattrs[idx], f.fd, f.path, T_REG,
                               w.receiver_filter ? *w.receiver_filter : o.filters, f.temp || !f.existed);
-  if (o.times) {
-    timespec ts[2] = {{0, UTIME_OMIT}, {s.mtime, (long)s.mtime_ns}};
+  if (preserve_crtime(s)) check_attr(fd_crtime(f.fd, s.crtime), f.path.c_str(), "creation time");
+  if (o.times || o.atimes) {
+    timespec ts[2] = {{o.atimes ? s.atime : 0, o.atimes ? 0L : UTIME_OMIT},
+                      {o.times ? s.mtime : 0, o.times ? (long)s.mtime_ns : UTIME_OMIT}};
     check_attr(futimens(f.fd, ts), f.path.c_str(), "times");
   }
   struct stat published;
@@ -1354,8 +1418,8 @@ bool clone_copy(DirWork& w, u32 idx, const char* source, unsigned flags, Worker&
   Entry fresh;
   int source_fd = -1;
   struct stat before;
-  if (g_opt.hard_links || metadata_enabled()) {
-    source_fd = open(source, O_RDONLY | O_CLOEXEC | (g_opt.copy_links || !w.src_paths.empty() ? 0 : O_NOFOLLOW));
+  if (g_opt.hard_links || metadata_enabled() || g_opt.atimes || g_opt.crtimes) {
+    source_fd = open(source, O_RDONLY | O_CLOEXEC | read_time_flags() | (g_opt.copy_links || !w.src_paths.empty() ? 0 : O_NOFOLLOW));
     if (source_fd < 0 || fstat(source_fd, &before) != 0 || !S_ISREG(before.st_mode)) {
       if (source_fd >= 0) close(source_fd);
       return false;
@@ -1400,7 +1464,7 @@ bool clone_copy(DirWork& w, u32 idx, const char* source, unsigned flags, Worker&
   f.fd = fd;
   f.created_mode = st.st_mode & 07777;
   register_output(f);
-  return out_finish(f, w, idx, t, true, g_opt.hard_links || metadata_enabled() ? &fresh : nullptr);
+  return out_finish(f, w, idx, t, true, g_opt.hard_links || metadata_enabled() || g_opt.atimes || g_opt.crtimes ? &fresh : nullptr);
 #else
   errno = ENOTSUP;
   return false;
@@ -1441,6 +1505,8 @@ void note_directory(DirWork& w, const Entry* before, bool created, Worker& t) {
     if (o.perms && source.mode != before->mode) code[5] = 'p', changed = true;
     if (o.owner && o.am_root && source.uid != before->uid) code[6] = 'o', changed = true;
     if (o.group && source.gid != before->gid && can_set_gid(source.gid)) code[7] = 'g', changed = true;
+    code[8] = extra_time_code(source, *before);
+    if (code[8] != '.') changed = true;
     if (source.item_flags & IF_ACL) code[9] = 'a', changed = true;
     if (source.item_flags & IF_XATTR) code[10] = 'x', changed = true;
   }
@@ -1466,6 +1532,7 @@ void note_transferred(DirWork& w, u32 idx, i64 bytes, Worker& t, i64 final_size)
     if (s.item_flags & IF_PERMS) code[5] = 'p';
     if (s.item_flags & IF_OWNER) code[6] = 'o';
     if (s.item_flags & IF_GROUP) code[7] = 'g';
+    code[8] = s.time_flags == 3 ? 'b' : s.time_flags == 1 ? 'u' : s.time_flags == 2 ? 'n' : '.';
     if (s.item_flags & IF_ACL) code[9] = 'a';
     if (s.item_flags & IF_XATTR) code[10] = 'x';
   }

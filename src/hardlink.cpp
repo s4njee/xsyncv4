@@ -78,6 +78,8 @@ OutputEvent linked_event(const Member& member, const Member& anchor, bool alread
   // itemizes their writes on the anchor, not again on the published hard link.
   if (event.code[9] == 'a') event.code[9] = '.';
   if (event.code[10] == 'x') event.code[10] = '.';
+  if (event.code[8] == 'n') event.code[8] = '.';
+  else if (event.code[8] == 'b') event.code[8] = 'u';
   return event;
 }
 }

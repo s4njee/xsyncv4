@@ -68,7 +68,7 @@ DeltaBasis::~DeltaBasis() { if (fd >= 0) close(fd); }
 std::shared_ptr<DeltaBasis> destination_delta_basis(const std::string& path, bool snapshot) {
   auto parent = destination_path(path);
   if (parent.fd < 0) return {};
-  int fd = openat(parent.fd, parent.name.c_str(), O_RDONLY | O_CLOEXEC | O_NOFOLLOW | O_NONBLOCK);
+  int fd = openat(parent.fd, parent.name.c_str(), O_RDONLY | O_CLOEXEC | O_NOFOLLOW | O_NONBLOCK | read_time_flags());
   if (fd < 0) return {};
   auto basis = std::make_shared<DeltaBasis>();
   basis->fd = fd;

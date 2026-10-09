@@ -22,6 +22,8 @@ int destination_stat(const char* path, struct stat* st);
 int destination_chmod(const char* path, mode_t mode);
 int destination_chown(const char* path, uid_t uid, gid_t gid);
 int destination_times(const char* path, const timespec times[2]);
+int destination_crtime(const char* path, time_t seconds);
+int fd_crtime(int fd, time_t seconds);
 int destination_mkdir(const char* path, mode_t mode);
 int destination_unlink(const char* path);
 int destination_rmdir(const char* path);

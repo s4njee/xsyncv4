@@ -133,3 +133,7 @@ bool check_attr(int result, const char* path, const char* attribute);
 void file_io_error(int error, const char* path, const char* operation);
 void init_ids();
 bool can_set_gid(u32 gid);
+int read_time_flags();
+bool preserve_atime(const Entry& entry);
+bool preserve_crtime(const Entry& entry);
+char extra_time_code(const Entry& source, const Entry& dest);
