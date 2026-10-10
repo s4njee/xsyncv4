@@ -39,7 +39,8 @@ For scalar options and on/off flags, precedence is **command-line flags, then
 environment, then config**. Within one layer, the last value wins. Repeatable
 options such as filters accumulate from config, then environment, then flags;
 `--filter='!'` clears earlier
-filter rules. There is no automatic change to progress defaults.
+filter rules. Progress defaults to enabled when stderr is a terminal and
+disabled when stderr is redirected or piped.
 
 The optional config file is `$XDG_CONFIG_HOME/xsync/config`, or
 `~/.config/xsync/config` when `XDG_CONFIG_HOME` is unset. `XSYNC_CONFIG` selects
@@ -64,6 +65,10 @@ such as `--install`, `--server`, `--help` and `--version` are not defaults.
 shell in `XSYNC_OPTS`, then one in config, then `ssh`. `XSYNC_FALLBACK` overrides
 a fallback switch in `XSYNC_OPTS` or config; an explicit command-line
 `--fallback`/`--no-fallback` wins. Empty remote-shell values fail clearly.
+`XSYNC_PROGRESS=0` disables progress and `XSYNC_PROGRESS=1` enables it,
+overriding config and `XSYNC_OPTS`; explicit `--progress`/`--no-progress` wins.
+`XSYNC_PROGRESS=auto` leaves config/options and the terminal default in effect.
+`--quiet` suppresses progress along with other non-error messages.
 Fallback passes the effective defaults and original transfer arguments to rsync
 after stripping xsync's extensions. `--help`, `--version` and protocol-server
 invocations bypass personal defaults; servers use the client's wire options.
@@ -365,7 +370,9 @@ Things worth knowing when reading these numbers:
 
 ## Progress display
 
-`--progress`, `-P` or `--info=progress2` shows up to four detail rows and a bar
+Progress is enabled by default when stderr is a terminal. `--no-progress` or
+`XSYNC_PROGRESS=0` disables it. `--progress`, `-P` or `--info=progress2` enables
+it explicitly, including when stderr is redirected. The display shows up to four detail rows and a bar
 for the whole transfer. Files receive a row after 200 ms in flight; faster files
 share one `small files` row with a completion rate. Longer transfers show their
 own speed and ETA. Remote pulls retain the same file record across chunks and

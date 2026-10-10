@@ -119,7 +119,8 @@ Options (same meaning as rsync):
  -0, --from0              use NUL delimiters in list and filter merge files
      --stats              give some file-transfer stats
  -h, --human-readable     output numbers in a human-readable format
-     --progress           show live per-file and whole-transfer progress
+     --progress           show progress (default when stderr is a terminal)
+     --no-progress        suppress progress; XSYNC_PROGRESS=0 also disables it
  -P                       same as --partial --progress
  -i, --itemize-changes    output a change-summary for all updates
  -8, --8-bit-output       retain high bytes in names; escape unsafe control bytes
@@ -213,6 +214,7 @@ Parsed parse(int argc, char** argv) {
   o.compress_level = 3;
   o.direct_new = false;
   o.clone = true;
+  o.progress = isatty(STDERR_FILENO);
   o.max_delete = -1;
   bool no_more = false;
   std::string err;
@@ -482,7 +484,7 @@ Parsed parse(int argc, char** argv) {
   if (o.compress_level == -1000) o.compress_level = 3;
   if (o.del && !o.recursive && !o.dirs) usage_error("--delete does not work without --recursive (-r) or --dirs (-d).");
   if (delete_modes && (delete_modes & (delete_modes - 1))) usage_error("You may not combine multiple --delete-WHEN options.");
-  if (o.quiet) o.verbose = 0;
+  if (o.quiet) o.verbose = 0, o.progress = false;
   if (o.bwlimit) o.clone = false;  // A clone must not bypass a requested copy rate.
   if (o.cvs_exclude && !o.filters.add_cvs_option(&err)) usage_error(err);
   return p;

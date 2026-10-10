@@ -171,8 +171,8 @@ These change defaults, so they should be chosen rather than inherited from a ben
    default for P0 trust hardening. `--no-atomic` restores direct new-file writes;
    `--inplace` remains an explicit opt-in to direct writing.
 3. **Progress on by default when stderr is a terminal** — accepted by the user
-   on 2026-10-10. U-06 will enable this, with `--no-progress` and an environment
-   override; scripts stay silent unless progress is explicitly requested.
+   on 2026-10-10. U-06 enables this, with `--no-progress` and `XSYNC_PROGRESS`;
+   scripts stay silent unless progress is explicitly requested.
 4. **Fallback to rsync — resolved by R-02.** Automatic with a one-line stderr notice,
    as specified in its acceptance criteria. `--no-fallback` or `XSYNC_FALLBACK=0`
    selects strict failure; `--fallback` overrides the environment.
@@ -2786,3 +2786,20 @@ Verified artifact manifest (source `864bd37edf14`):
   `/tmp/xsync-u05-progress.log`, `/tmp/xsync-u05-real-ssh-final.log`,
   `/tmp/xsync-u05-protocol.log`, `/tmp/xsync-u05-releases.log` and
   `/tmp/xsync-u05-release-{mac-arm,mac-intel,linux-arm64,linux-amd64}.log`.
+
+## U-06 progress — 2026-10-10: terminal default and overrides
+
+- Progress now defaults to enabled when stderr is a terminal. Redirected
+  stderr stays silent by default; `--quiet` also suppresses progress. Explicit
+  `--progress`, `-P`, `--info=progress2`, and their disabling options retain
+  normal command-line precedence.
+- `XSYNC_PROGRESS=0`/`1` disables/enables progress after config and
+  `XSYNC_OPTS`, before explicit command-line options. `auto` leaves lower-layer
+  defaults in effect. Invalid values fail clearly; help, version and protocol
+  server invocations bypass personal defaults. README/help/completion explain
+  the accepted terminal default and overrides.
+- Development defaults acceptance passes all **10 methods**, including actual
+  PTY default behavior, piped script silence, quiet mode, flag/config/environment
+  precedence, invalid values and server isolation. The old fallback fixture
+  incorrectly used now-supported `-H`; it now uses unsupported `-b` to exercise
+  fallback behavior. Progress regression and release validation follow.

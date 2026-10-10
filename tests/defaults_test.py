@@ -8,6 +8,8 @@ import subprocess
 import tempfile
 import unittest
 
+from progress_test import capture
+
 REPO = pathlib.Path(__file__).resolve().parent.parent
 BINARY = pathlib.Path(os.environ.get('XSYNC_TEST_BINARY', REPO / 'build/xsync')).resolve()
 
@@ -18,7 +20,7 @@ class DefaultsTests(unittest.TestCase):
         self.addCleanup(self.tmp.cleanup)
         self.root = pathlib.Path(self.tmp.name)
         self.env = {key: value for key, value in os.environ.items()
-                    if key not in ('XSYNC_OPTS', 'XSYNC_RSH', 'RSYNC_RSH', 'XSYNC_CONFIG', 'XSYNC_FALLBACK', 'XDG_CONFIG_HOME')}
+                    if key not in ('XSYNC_OPTS', 'XSYNC_RSH', 'RSYNC_RSH', 'XSYNC_CONFIG', 'XSYNC_FALLBACK', 'XSYNC_PROGRESS', 'XDG_CONFIG_HOME')}
         self.env['HOME'] = str(self.root)
         self.config = self.root / '.config/xsync/config'
         self.config.parent.mkdir(parents=True)
@@ -47,6 +49,60 @@ class DefaultsTests(unittest.TestCase):
         self.env['XSYNC_OPTS'] = '--dry-run'
         self.copy('--no-dry-run')
         self.assertEqual(self.dest.read_bytes(), self.source.read_bytes())
+
+    def terminal_copy(self, *flags):
+        self.env['TERM'] = 'xterm-256color'
+        code, output = capture([str(BINARY), '--no-fallback', '-a', *flags,
+                                str(self.source), str(self.dest)], env=self.env)
+        self.assertEqual(code, 0, output)
+        self.assertEqual(self.dest.read_bytes(), self.source.read_bytes())
+        self.dest.unlink()
+        return output
+
+    def test_progress_terminal_default_and_script_silence(self):
+        output = self.terminal_copy()
+        self.assertIn(b'\x1b[?25l', output)
+        self.assertIn(b'\x1b[?25h', output)
+        self.assertIn(b'1 file', output)
+        self.assertEqual(self.terminal_copy('--no-progress'), b'')
+        self.assertEqual(self.terminal_copy('-q'), b'')
+        self.assertEqual(self.terminal_copy('--progress', '-q'), b'')
+        result = self.copy()
+        self.assertEqual(result.stderr, b'')
+        self.assertEqual(result.stdout, b'')
+
+    def test_progress_environment_and_config_precedence(self):
+        self.config.write_text('--no-progress\n')
+        self.assertEqual(self.terminal_copy(), b'')
+        self.env['XSYNC_OPTS'] = '--progress'
+        self.assertIn(b'1 file', self.terminal_copy())
+        self.env['XSYNC_PROGRESS'] = '0'
+        self.assertEqual(self.terminal_copy(), b'')
+        self.assertIn(b'1 file', self.terminal_copy('--progress'))
+        self.env['XSYNC_PROGRESS'] = '1'
+        self.assertIn(b'1 file', self.terminal_copy())
+        self.assertEqual(self.terminal_copy('--no-progress'), b'')
+        self.env['XSYNC_PROGRESS'] = 'auto'
+        self.env['XSYNC_OPTS'] = ''
+        self.assertEqual(self.terminal_copy(), b'')
+        self.config.unlink()
+        self.assertIn(b'1 file', self.terminal_copy())
+        self.env['XSYNC_PROGRESS'] = '1'
+        result = self.copy()
+        self.assertIn(b'1 file', result.stderr)
+        self.assertNotIn(b'\x1b[', result.stderr)
+
+    def test_invalid_progress_environment_and_control_isolation(self):
+        self.env['XSYNC_PROGRESS'] = 'yes'
+        result = self.run_xsync('-a', str(self.source), str(self.dest))
+        self.assertEqual(result.returncode, 1)
+        self.assertIn(b'XSYNC_PROGRESS must be 0, 1, or auto', result.stderr)
+        self.assertFalse(self.dest.exists())
+        self.assertEqual(self.run_xsync('--help').returncode, 0)
+        self.assertEqual(self.run_xsync('--version').returncode, 0)
+        server = self.run_xsync('--server', input=b'')
+        self.assertEqual(server.returncode, 2)
+        self.assertNotIn(b'XSYNC_PROGRESS', server.stderr)
 
     def test_paths_and_shell_word_quoting(self):
         source = self.root / 'tree'
@@ -150,13 +206,13 @@ class DefaultsTests(unittest.TestCase):
         self.env['PATH'] = str(commands) + ':' + os.environ['PATH']
         self.config.write_text('--fallback --jobs=2 --exclude="space name"\n')
         self.env['XSYNC_FALLBACK'] = '0'
-        result = self.run_xsync('-H', str(self.source), str(self.dest))
+        result = self.run_xsync('-b', str(self.source), str(self.dest))
         self.assertEqual(result.returncode, 1)
         self.assertFalse(capture.exists())
         self.env['XSYNC_OPTS'] = '--jobs=3 --no-clone'
-        result = self.run_xsync('--fallback', '-H', str(self.source), str(self.dest))
+        result = self.run_xsync('--fallback', '-b', str(self.source), str(self.dest))
         self.assertEqual(result.returncode, 37, result.stderr)
-        self.assertEqual(json.loads(capture.read_text()), ['--exclude=space name', '-H', str(self.source), str(self.dest)])
+        self.assertEqual(json.loads(capture.read_text()), ['--exclude=space name', '-b', str(self.source), str(self.dest)])
         self.assertEqual(result.stderr.count(b'falling back to rsync'), 1)
 
 

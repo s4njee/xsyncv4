@@ -101,6 +101,12 @@ std::vector<std::string> effective_arguments(int argc, char** argv) {
   if (!rsh) rsh = getenv("RSYNC_RSH");
   if (rsh) result.insert(result.end(), {"--rsh", rsh});
   if (const char* fallback = getenv("XSYNC_FALLBACK")) result.push_back(strcmp(fallback, "0") == 0 ? "--no-fallback" : "--fallback");
+  if (const char* progress = getenv("XSYNC_PROGRESS")) {
+    if (strcmp(progress, "0") == 0) result.push_back("--no-progress");
+    else if (strcmp(progress, "1") == 0) result.push_back("--progress");
+    else if (strcmp(progress, "auto") != 0)
+      die(RERR_SYNTAX, "XSYNC_PROGRESS must be 0, 1, or auto");
+  }
   result.insert(result.end(), argv + 1, argv + argc);
   return result;
 }
