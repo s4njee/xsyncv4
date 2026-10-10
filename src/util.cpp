@@ -9,6 +9,7 @@
 #include "fs.h"
 #include "progress.h"
 #include "output.h"
+#include "engine.h"
 
 Options g_opt;
 u32 g_umask = 022;
@@ -83,6 +84,7 @@ const char* error_kind(size_t code) {
     case RERR_STARTCLIENT: return "protocol startup";
     case RERR_FILEIO: return "file IO";
     case RERR_STREAMIO: return "stream IO";
+    case RERR_MESSAGEIO: return "diagnostic IO";
     case RERR_IPC: return "IPC";
     case RERR_SIGNAL: return "interruption";
     case RERR_PARTIAL: return "partial transfer";
@@ -167,9 +169,22 @@ void die(int code, const char* fmt, ...) {
 }
 
 void exit_signal() {
+  // Reader, writer and main can observe the same output failure together.
+  // One thread owns cleanup; the others wait until it exits the process.
+  static std::mutex exit_mu;
+  std::lock_guard<std::mutex> lock(exit_mu);
+  if (output_error()) cancel_remote_peer();
   cleanup_open_outputs();
   progress_stop(false);
-  output_flush();
+  if (!output_error()) output_flush();
+  if (int error = output_error()) {
+    cancel_remote_peer();
+    remember_error(RERR_MESSAGEIO, "write stdout failed: " + errstr(error));
+    print_error_summary();
+    fprintf(stderr, "xsync error: errors with program diagnostics (code %d)\n", RERR_MESSAGEIO);
+    fflush(stderr);
+    _Exit(RERR_MESSAGEIO);
+  }
   print_error_summary();
   if (!g_opt.am_server) fprintf(stderr, "\nxsync error: received SIGINT, SIGTERM, or SIGHUP (code %d)\n", RERR_SIGNAL);
   _Exit(RERR_SIGNAL);

@@ -10,6 +10,8 @@
 #include <mutex>
 #include <unordered_set>
 #include <unistd.h>
+#include <poll.h>
+#include <sys/stat.h>
 
 void (*g_output_sink)(const OutputEvent&) = nullptr;
 namespace {
@@ -18,6 +20,7 @@ struct Line { std::string path, text; };
 std::vector<Line> lines;
 int log_fd = -1;
 bool ordered = false;
+std::atomic<int> stdout_error{0};
 std::unordered_set<std::string> created_directories;
 
 // Keep script output one line per name, as rsync does for control bytes.
@@ -115,6 +118,7 @@ std::string render(const OutputEvent& event) {
 
 int emit(std::string_view text) {
   ui_write(false, text);
+  if (output_error()) return 0;
   if (log_fd >= 0 && !write_all(log_fd, text.data(), text.size())) {
     int error = errno;
     close(log_fd);
@@ -126,6 +130,31 @@ int emit(std::string_view text) {
 void log_error(int error) {
   if (error) err_line(RERR_FILEIO, "write log file \"%s\" failed: %s", g_opt.log_file.c_str(), errstr(error).c_str());
 }
+}
+
+void output_failure(int error) {
+  int none = 0;
+  if (stdout_error.compare_exchange_strong(none, error ? error : EIO)) {
+    int running = 0;
+    g_stop.compare_exchange_strong(running, 1);
+  }
+}
+int output_error() { return stdout_error.load(); }
+void output_check() {
+  bool events = output_enabled() && (!g_opt.out_format_set || !g_opt.out_format.empty());
+  if (g_opt.am_server || g_opt.quiet || output_error() ||
+      !(events || g_opt.verbose > 0 || g_opt.stats || g_opt.list_only)) return;
+  // Sorted file events can wait until the transfer finishes. Observe the pipe
+  // independently so a vanished consumer still cancels active work promptly.
+  static const bool monitor = [] {
+    struct stat st;
+    return fstat(STDOUT_FILENO, &st) != 0 || S_ISFIFO(st.st_mode) || S_ISSOCK(st.st_mode);
+  }();
+  if (!monitor) return;
+  pollfd descriptor{STDOUT_FILENO, POLLOUT, 0};
+  int result = poll(&descriptor, 1, 0);
+  if (result > 0 && (descriptor.revents & (POLLERR | POLLHUP | POLLNVAL)))
+    output_failure(descriptor.revents & POLLNVAL ? EBADF : EPIPE);
 }
 
 bool output_enabled() {
@@ -228,7 +257,10 @@ void output_flush() {
       int order = name_cmp(a.path, b.path);
       return order ? order < 0 : a.text < b.text;
     });
-    for (const auto& line : lines) if (!error) error = emit(line.text);
+    for (const auto& line : lines) {
+      if (output_error()) break;
+      if (!error) error = emit(line.text);
+    }
     lines.clear();
   }
   log_error(error);

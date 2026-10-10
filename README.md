@@ -230,6 +230,12 @@ and sorted by transfer-relative path. A terminal receives events as they finish.
 Progress stays on stderr. `--log-file=FILE` appends exactly the same stdout
 stream, including summaries, without timestamps or prefixes added to the log.
 An empty output format suppresses file lines; `-q` suppresses the stream.
+When an output consumer closes its pipe (for example, `xsync -av SRC DEST | head`),
+xsync stops active copying, cancels the remote peer and exits 13 with a stderr
+diagnostic. Cleanup follows the usual interruption policy: temporary outputs
+are removed, or `--partial` retains the completed prefix for a later resume.
+Silent transfers do not require a stdout reader. Other stdout write failures,
+including a full output device, also return 13.
 Transfer errors end with a stderr error count and the first ten diagnostics, grouped
 by exit-code kind, before the existing exit-code line. Quiet mode retains errors.
 Remote completion codes do not duplicate errors already reported by the peer;
@@ -667,6 +673,7 @@ python3 tests/executability_race_test.py                  # execution bits refre
 python3 tests/protocol_test.py                            # frozen N-1 and feature subsets
 python3 tests/output_test.py                              # formats, ordering, log parity
 python3 tests/error_test.py                               # error counts, samples, exit codes and log parity
+python3 tests/broken_stdout_test.py                       # closed pipes, cancellation, cleanup and resume
 python3 tests/io_limit_test.py                            # pacing, deadlines, keep-alives and negotiation
 ./tests/ssh-rig.sh io_limit_test.py                        # real SSH pacing and interruption
 python3 tests/list_test.py                                # listing parity and no destination writes

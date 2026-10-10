@@ -20,3 +20,7 @@ void output_text(std::string_view text);
 // Plain file lines from an older peer, whose wire layout remains frozen.
 void output_legacy(std::string_view text);
 void output_flush();
+// Record stdout failures without unwinding while UI/output locks are held.
+void output_failure(int error);
+int output_error();
+void output_check();

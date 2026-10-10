@@ -224,6 +224,10 @@ std::string new_frame(u8 type) {
 
 // ---------------------------------------------------------------- connection
 
+std::mutex peer_guard;
+pid_t current_remote_peer = -1;
+bool peer_cancelled = false;
+
 struct Conn {
   int rfd = -1, wfd = -1;
   pid_t peer_pid = -1;
@@ -249,6 +253,8 @@ struct Conn {
     keepalive = heartbeat;
   }
   void check_timeout(u64 write_progress = 0) {
+    output_check();
+    if (output_error()) return;  // Preserve the diagnostic failure as the exit reason.
     u64 deadline = idle_ns.load();
     u64 now = now_ns(), last = write_progress ? write_progress : last_activity.load();
     if (!deadline || now < last || now - last < deadline) return;
@@ -276,10 +282,17 @@ struct Conn {
   int wait_peer() {
     int status = 0;
     for (;;) {
-      pid_t result = waitpid(peer_pid, &status, WNOHANG);
-      if (result == peer_pid) return status;
-      if (result < 0 && errno != EINTR) return status;
-      if (g_stop.load()) { kill(peer_pid, SIGTERM); exit_signal(); }
+      {
+        // Serialize reaping with cancellation so a reused PID is never killed.
+        std::lock_guard<std::mutex> lock(peer_guard);
+        pid_t result = waitpid(peer_pid, &status, WNOHANG);
+        if (result == peer_pid || (result < 0 && errno != EINTR)) {
+          if (current_remote_peer == peer_pid) current_remote_peer = -1;
+          return status;
+        }
+      }
+      output_check();
+      if (g_stop.load()) { cancel_remote_peer(); exit_signal(); }
       check_timeout();
       usleep(25000);
     }
@@ -2282,6 +2295,16 @@ std::vector<std::string> expand_remote_sources(const std::vector<std::string>& p
 
 }  // namespace
 
+void cancel_remote_peer() {
+  std::lock_guard<std::mutex> lock(peer_guard);
+  // A second SIGTERM makes xsync bypass cleanup. Cancellation may be noticed
+  // by both transport threads, so signal this child exactly once.
+  if (current_remote_peer > 0 && !peer_cancelled) {
+    peer_cancelled = true;
+    kill(current_remote_peer, SIGTERM);
+  }
+}
+
 namespace {
 void send_file_frames(Conn& connection, const std::string& path, bool allow_stdin, bool from0,
                       std::vector<std::string>* names, bool forwarded) {
@@ -2389,6 +2412,11 @@ int run_client(const std::vector<std::string>& srcs, const std::string& dest, u3
   Conn c;
   c.rfd = from_child[0], c.wfd = to_child[1];
   c.peer_pid = pid;
+  {
+    std::lock_guard<std::mutex> lock(peer_guard);
+    current_remote_peer = pid;
+    peer_cancelled = false;
+  }
   c.configure(0, o.timeout, false);  // Also covers authentication and hello waits.
   g_conn = &c;
   o.pushing = push;

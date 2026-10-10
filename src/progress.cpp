@@ -4,8 +4,10 @@
 #include <unistd.h>
 
 #include <algorithm>
+#include <cerrno>
 #include <cstdlib>
 #include <mutex>
+#include "output.h"
 
 Slot g_slots[MAX_WORKERS];
 bool g_progress_on = false;
@@ -228,8 +230,9 @@ void ui_write(bool is_err, std::string_view text) {
     raw(out);
   }
   FILE* f = is_err ? stderr : stdout;
-  fwrite(text.data(), 1, text.size(), f);
-  if (live) fflush(f);
+  if (!is_err && output_error()) return;
+  if (fwrite(text.data(), 1, text.size(), f) != text.size() && !is_err) output_failure(errno);
+  if ((live || !is_err) && fflush(f) != 0 && !is_err) output_failure(errno);
 }
 
 void progress_start(int n) {
@@ -249,6 +252,7 @@ void progress_start(int n) {
 }
 
 void progress_tick() {
+  output_check();
   if (!g_progress_on) return;
   std::lock_guard<std::mutex> lk(ui_mu);
   draw_locked();

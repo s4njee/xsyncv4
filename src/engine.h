@@ -56,4 +56,5 @@ void wait_pool(Pool& pool);
 int run_local(const std::vector<std::string>& srcs, const std::string& dest);
 int run_client(const std::vector<std::string>& srcs, const std::string& dest, u32 wire_version = PROTO_VERSION);
 int run_server();
+void cancel_remote_peer();
 void print_summary(u64 t0);

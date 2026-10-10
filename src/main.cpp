@@ -35,6 +35,7 @@ void print_version() {
   printf("xsync  version %s  protocol version %u  git %s\n", XSYNC_VERSION, PROTO_VERSION, XSYNC_GIT_HASH);
   printf("A fast, parallel rsync work-alike. Native transfers use xsync on both ends;\n"
          "missing remote support falls back to rsync unless --no-fallback is set.\n");
+  if (ferror(stdout)) { output_failure(errno); exit_signal(); }
 }
 
 void print_help() {
@@ -143,6 +144,7 @@ xsync extensions:
      --no-atomic          create new byte-copied files directly (fewer renames;
                           a crash can leave truncated files under final names)
 )", stdout);
+  if (ferror(stdout)) { output_failure(errno); exit_signal(); }
 }
 
 i64 parse_size(const std::string& s, const char* opt) {
@@ -503,6 +505,7 @@ const char* rerr_name(int c) {
     case RERR_STARTCLIENT: return "error starting client-server protocol";
     case RERR_FILEIO: return "error in file IO";
     case RERR_STREAMIO: return "error in rsync protocol data stream";
+    case RERR_MESSAGEIO: return "errors with program diagnostics";
     case RERR_IPC: return "error in IPC code";
     case RERR_SIGNAL: return "received SIGINT, SIGTERM, or SIGHUP";
     case RERR_PARTIAL: return "some files/attrs were not transferred (see previous errors)";
@@ -557,6 +560,7 @@ void print_summary(u64 t0) {
 
 int main(int argc, char** argv) {
   signal(SIGPIPE, SIG_IGN);
+  setvbuf(stdout, nullptr, _IONBF, 0);
   auto arguments = effective_arguments(argc, argv);
   std::vector<char*> effective;
   for (auto& argument : arguments) effective.push_back(argument.data());
@@ -604,14 +608,18 @@ int main(int argc, char** argv) {
   if (remote_src && remote_dest) usage_error("The source and destination cannot both be remote.");
 
   u64 t0 = now_ns();
+  output_check();
+  if (g_stop.load()) exit_signal();
   if (!remote_src && !remote_dest) output_start();
   int rc = remote_src || remote_dest ? run_client(srcs, g_opt.list_only ? "" : dest) :
     g_opt.list_only ? run_listing(srcs, listing_output) : run_local(srcs, dest);
-  if (g_stop.load()) rc = RERR_SIGNAL;
+  if (g_stop.load()) exit_signal();
   if (!rc) rc = g_exit_code.load();
   progress_stop(rc == 0 || rc == RERR_PARTIAL || rc == RERR_VANISHED);
   output_flush();
+  if (g_stop.load()) exit_signal();
   if (rc != RERR_SIGNAL) print_summary(t0);
+  if (g_stop.load()) exit_signal();
   if (!rc) rc = g_exit_code.load();
   fflush(stdout);
   print_error_summary();

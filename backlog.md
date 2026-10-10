@@ -99,7 +99,7 @@ coverage clarification remains open.
 | E-10 | **Metadata beyond `-a`.** `-H` hard links, `-X` xattrs, `-A` ACLs, `-N` creation times, `-U` atimes, BSD file flags, `-E`, `--chmod`, `--chown`. Also an inconsistency to resolve: the clone path already carries xattrs and ACLs while the byte-copy and remote paths drop them. | **done** | `-H` and `-X` first (most used on macOS). Without `-X`, both paths behave the same — either strip on clone or document that clones are a superset. | XL |
 | E-11 | **Backup-style options.** `--backup`/`--backup-dir`, `--link-dest`, `--compare-dest`, `--remove-source-files`, `--append`, real `-S` sparse handling, `--preallocate`. | **done** | Native `-S` and `--link-dest` are implemented and verified on universal/static releases. Other backup options fall back to rsync via R-02 until needed. | L |
 | E-12 | **macOS specifics.** Dataless iCloud files (reading triggers a download; cloning may not), immutable (`uchg`) destination files, sockets (rsync creates them, xsync skips silently), paths beyond `PATH_MAX` (tested to 40 levels only). | **done** | Regression fixtures cover all four cases on the universal/static releases; dataless policy, immutable writes, sockets and path-length failures are documented. Real iCloud hydration remains an explicitly opted-in fixture. | M |
-| E-13 | **Broken stdout.** `xsync -av … \| head` — rsync dies on EPIPE; xsync's behaviour is unknown. | unverified | Exits promptly with the right code and does not keep copying silently. | S |
+| E-13 | **Broken stdout.** `xsync -av … \| head` — rsync dies on EPIPE; xsync's behaviour is unknown. | partial | Exits promptly with the right code and does not keep copying silently. | S |
 
 ## P2 — Progress and feel: the reason to switch
 
@@ -2491,3 +2491,39 @@ Verified artifact manifest (source `864bd37edf14`):
   `/tmp/xsync-e12-release-mac-arm.log`, `/tmp/xsync-e12-release-mac-intel.log`,
   `/tmp/xsync-e12-release-linux-amd64.log`, and
   `/tmp/xsync-e12-release-linux-arm64.log`.
+
+## E-13 progress — 2026-10-09: diagnostic output cancellation
+
+- Confirmed the original failure: a closed stdout pipe could return success and
+  let copying continue. Stdout writes and flushes now record the first failure,
+  request cancellation, and report diagnostic I/O exit **13**. Help/version and
+  final summaries use the same exit behavior. Silent/quiet transfers and an
+  empty output format do not require a stdout reader.
+- Pipe closure is checked during local worker waits and transport waits/pacing,
+  including when non-terminal file events remain sorted in memory. Cancellation
+  signals a tracked remote child once, serializes process cleanup, and avoids
+  killing a reused PID. A repeated test exposed duplicate SIGTERM delivery that
+  could bypass helper cleanup; cancellation is now idempotent.
+- Closed-before-start, first-line closure, closure during paced transfers,
+  listing, dry-run and help/version fixtures cover local/push/pull. Temporary
+  outputs are removed; --partial retains a completed prefix and resumes on a
+  later run. Linux also exercises /dev/full diagnostic failures. Rsync's
+  --outbuf=N makes fwrite observe EPIPE directly for the exit-13 comparison;
+  some libc/iconv builds otherwise ignore a failed fflush and return success.
+- Initial macOS closure and output/error/pacing suites pass **8 methods** (one
+  Linux-device skip) and **37 methods** respectively. Protocol/fallback/trust
+  regressions pass **30 methods**. Linux output/error/pacing/closure regressions
+  pass **45 methods**. E-13 remains partial pending the repeated cleanup checks,
+  final real-SSH run and release validation; P1 remains **20/22**.
+- Final development verification: the macOS cancellation/cleanup pair passes
+  **five repeated runs**, including local/push/pull and partial resume. The real
+  two-container SSH run passes **8** closure methods, **2** transfer/interrupt
+  methods and **10** output methods. Remote SIGINT shutdown peaks at **0.517s**.
+  Final Linux regressions pass **45 methods**; the macOS output/error/pacing
+  regressions pass **37 methods**. Logs:
+  `/tmp/xsync-e13-mac-final4.log`,
+  `/tmp/xsync-e13-mac-cancellation-repeat.log`,
+  `/tmp/xsync-e13-real-ssh-final2.log`,
+  `/tmp/xsync-e13-linux-regressions-final.log`,
+  `/tmp/xsync-e13-mac-regressions-final.log`, and
+  `/tmp/xsync-e13-protocol-regressions.log`.
