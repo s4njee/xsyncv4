@@ -2,7 +2,7 @@
 
 Initial audit written 2026-10-08 against xsync 0.1.0 (protocol 1).
 All fifteen P0 stories completed against protocol 3; per-story evidence is below.
-P1 R-02 through R-09 and E-01 through E-11 are complete (19 of 22 stories). Current protocol 4 supports protocol 3. Remaining P1 stories are R-01, E-12 and E-13.
+P1 R-02 through R-09 and E-01 through E-12 are complete (20 of 22 stories). Current protocol 4 supports protocol 3. Remaining P1 stories are R-01 and E-13.
 Problem statements retain the original audit findings.
 
 ## What "daily driver" means here
@@ -98,7 +98,7 @@ coverage clarification remains open.
 | E-09 | **`--files-from`, `-R`, `--from0`.** Common in backup scripts and with `find … -print0`. | **done** | Implemented for local and remote, including the "implied directories" semantics of `-R`. | L |
 | E-10 | **Metadata beyond `-a`.** `-H` hard links, `-X` xattrs, `-A` ACLs, `-N` creation times, `-U` atimes, BSD file flags, `-E`, `--chmod`, `--chown`. Also an inconsistency to resolve: the clone path already carries xattrs and ACLs while the byte-copy and remote paths drop them. | **done** | `-H` and `-X` first (most used on macOS). Without `-X`, both paths behave the same — either strip on clone or document that clones are a superset. | XL |
 | E-11 | **Backup-style options.** `--backup`/`--backup-dir`, `--link-dest`, `--compare-dest`, `--remove-source-files`, `--append`, real `-S` sparse handling, `--preallocate`. | **done** | Native `-S` and `--link-dest` are implemented and verified on universal/static releases. Other backup options fall back to rsync via R-02 until needed. | L |
-| E-12 | **macOS specifics.** Dataless iCloud files (reading triggers a download; cloning may not), immutable (`uchg`) destination files, sockets (rsync creates them, xsync skips silently), paths beyond `PATH_MAX` (tested to 40 levels only). | **in progress** | Regression fixtures cover all four cases; dataless files avoid clones, sockets are created and failures reported. Universal/static release validation remains; real iCloud hydration is an opt-in fixture. | M |
+| E-12 | **macOS specifics.** Dataless iCloud files (reading triggers a download; cloning may not), immutable (`uchg`) destination files, sockets (rsync creates them, xsync skips silently), paths beyond `PATH_MAX` (tested to 40 levels only). | **done** | Regression fixtures cover all four cases on the universal/static releases; dataless policy, immutable writes, sockets and path-length failures are documented. Real iCloud hydration remains an explicitly opted-in fixture. | M |
 | E-13 | **Broken stdout.** `xsync -av … \| head` — rsync dies on EPIPE; xsync's behaviour is unknown. | unverified | Exits promptly with the right code and does not keep copying silently. | S |
 
 ## P2 — Progress and feel: the reason to switch
@@ -2467,3 +2467,27 @@ Verified artifact manifest (source `864bd37edf14`):
   skip). Logs: `/tmp/xsync-e12-mac-final4.log`,
   `/tmp/xsync-e12-regressions.log`, and `/tmp/xsync-e12-linux-regressions.log`.
   E-12 remains in progress for release validation; P1 remains **19/22**.
+
+
+## E-12 complete — 2026-10-09: release validation
+
+- **Done; P1 is 20/22.** All four requested macOS edge cases have regression
+  fixtures and documented behavior. E-13 is next; R-01 still needs the physical
+  host clarification/reachability checks. The real iCloud download fixture is
+  available but skipped without an explicitly selected cloud file; synthetic
+  file/directory flags verify clone exclusion and ordinary reads independently.
+- Clean releases identify source **92186d817578**. The universal executable
+  passes macOS-specific, hard-link, snapshot and metadata checks on ARM and
+  Intel: **29 methods** each, with the real-cloud and real-SSH fixtures skipped.
+  Directory-only dataless flags prevent directory cloning while allowing checked
+  resident per-file clones. Actual interposition runs on both architectures.
+- Static Linux amd64/arm64 checks pass **36 methods** each: hard links, snapshot
+  differentials, metadata composition and wire guards. Build-time sparse and
+  small-stack xattr units and the scratch/transfer release smoke tests pass.
+  dist/manifest.json records all three artifacts; the source package is refreshed
+  after this journal update. No physical helper or installed local binary was
+  changed.
+- Logs: `/tmp/xsync-e12-clean-releases.log`,
+  `/tmp/xsync-e12-release-mac-arm.log`, `/tmp/xsync-e12-release-mac-intel.log`,
+  `/tmp/xsync-e12-release-linux-amd64.log`, and
+  `/tmp/xsync-e12-release-linux-arm64.log`.

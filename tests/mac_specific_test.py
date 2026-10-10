@@ -187,7 +187,7 @@ class MacSpecificTests(unittest.TestCase):
         # Synthetic SF_DATALESS verifies the control path without requiring a
         # user's iCloud file or claiming a real cloud hydration test.
         for directory in (False, True):
-            for dataless in (False, True):
+            for dataless in (['resident', 'file', 'directory'] if directory else ['resident', 'file']):
                 source = self.root / 'source'; target = self.root / 'target'
                 for path in (source, target):
                     if path.exists(): shutil.rmtree(path) if path.is_dir() else path.unlink()
@@ -201,14 +201,16 @@ class MacSpecificTests(unittest.TestCase):
                     if marker.exists(): marker.unlink()
                 env = self.environment(source)
                 env.update(XSYNC_FAULT_CLONE_NOTIFY=str(clone), XSYNC_FAULT_READ_NOTIFY=str(read))
-                if dataless: env['XSYNC_FAULT_DATALESS'] = '1'
+                if dataless == 'file': env['XSYNC_FAULT_DATALESS'] = '1'
+                if dataless == 'directory': env['XSYNC_FAULT_DATALESS_DIRECTORY'] = '1'
                 a = str(source) + ('/' if directory else '')
                 args = [str(self.injected_binary), '--no-fallback', '-a', '--clone', a, str(target)]
                 result = subprocess.run(args, env=env, capture_output=True, timeout=20)
                 self.assertEqual(result.returncode, 0, result.stderr)
                 self.assertEqual((target / 'leaf/file' if directory else target).read_bytes(), file.read_bytes())
-                self.assertEqual(clone.exists(), not dataless)
-                if dataless: self.assertTrue(read.with_name('read.1').exists())
+                self.assertEqual(clone.exists(), dataless != 'file')
+                if dataless == 'file': self.assertTrue(read.with_name('read.1').exists())
+                if dataless == 'directory': self.assertEqual(clone.read_text(), str(file))
 
     @unittest.skipUnless(os.environ.get('XSYNC_ICLOUD_FILE'), 'set XSYNC_ICLOUD_FILE to an opted-in dataless file')
     def test_opted_in_icloud_file_becomes_a_resident_copy(self):
