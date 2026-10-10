@@ -141,7 +141,8 @@ void output_failure(int error) {
 }
 int output_error() { return stdout_error.load(); }
 void output_check() {
-  bool events = output_enabled() && (!g_opt.out_format_set || !g_opt.out_format.empty());
+  bool events = (g_opt.itemize || g_opt.verbose > 0 || g_opt.out_format_set || !g_opt.log_file.empty()) &&
+                (!g_opt.out_format_set || !g_opt.out_format.empty());
   if (g_opt.am_server || g_opt.quiet || output_error() ||
       !(events || g_opt.verbose > 0 || g_opt.stats || g_opt.list_only)) return;
   // Sorted file events can wait until the transfer finishes. Observe the pipe
@@ -158,7 +159,9 @@ void output_check() {
 }
 
 bool output_enabled() {
-  return g_opt.itemize || g_opt.verbose > 0 || g_opt.out_format_set || !g_opt.log_file.empty();
+  return g_opt.itemize || g_opt.verbose > 0 || g_opt.out_format_set || !g_opt.log_file.empty() ||
+         (g_opt.progress && g_opt.progress_mode == Options::Json) ||
+         (g_opt.am_server && (g_opt.peer_features & PF_OUTPUT));
 }
 std::string output_escape(std::string_view name) { return escaped(name); }
 
@@ -204,6 +207,8 @@ void output_event(OutputEvent event) {
   }
   if (g_output_sink) { g_output_sink(event); return; }
   if (g_opt.am_server) return;  // Older peers receive the existing Worker log instead.
+  progress_file_event(event);
+  if (!(g_opt.itemize || g_opt.verbose > 0 || g_opt.out_format_set || !g_opt.log_file.empty())) return;
   if (g_opt.out_format_set && g_opt.out_format.empty()) return;
   std::string text = render(event) + '\n';
   int error = 0;

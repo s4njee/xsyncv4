@@ -717,6 +717,8 @@ u32 get_identity(RBuf& r) {
 }
 
 std::string missing_feature(u64 features) {
+  if (!g_opt.am_server && g_opt.progress && g_opt.progress_mode == Options::Json && !(features & PF_OUTPUT))
+    return "peer does not support JSON file events";
   if (!g_opt.link_dest.empty() && !g_opt.list_only && !(features & PF_LINK_DEST)) return "peer does not support --link-dest";
   if (g_opt.sparse && !g_opt.list_only && !(features & PF_SPARSE)) return "peer does not support --sparse";
   if (g_opt.ownership.requested() && !g_opt.list_only && !(features & PF_CHOWN)) return "peer does not support --chown";

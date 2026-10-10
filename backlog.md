@@ -2813,3 +2813,22 @@ Verified artifact manifest (source `864bd37edf14`):
   `/tmp/xsync-u06-release-linux-amd64.log` and
   `/tmp/xsync-u06-release-linux-arm64-final.log`. Source packaging is refreshed
   after this entry; installed executables and physical helpers are unchanged.
+
+## U-07 progress — 2026-10-10: machine-readable progress
+
+- Off a terminal, `--info=progress2` now uses rsync's byte/percent/rate/time
+  and `(xfr#N, to-chk=R/T)` line shape, including a final line. While scanning
+  it uses `ir-chk`. Ordinary `--progress` retains its plain display on pipes.
+- `--progress=json` emits newline-delimited tick, file and completion records
+  on stderr, without terminal escapes. Counters are raw integers; UTF-8 and
+  control bytes are JSON-safe and `path_bytes_hex` retains exact path bytes.
+  Existing structured file events provide destination-confirmed regular-file
+  records for local transfers, clones, hard-link aliases and remote transfers.
+  Dry-run events represent planned work. JSON requires a native structured
+  helper; fallback fails clearly regardless of option ordering. Explicit
+  mode overrides, quiet mode and no-progress work normally.
+- Development machine acceptance passes **8 methods** (local/push/pull,
+  timed ticks, filenames, PTY output, precedence, dry runs, APFS clones and
+  unsupported peers). Real SSH passes the same eight with one APFS skip;
+  all 10 ordinary output and 10 defaults methods pass. All 15 protocol
+  compatibility methods pass. Release validation follows.

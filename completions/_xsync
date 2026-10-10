@@ -23,6 +23,7 @@ flags=(
   '--atomic:publish new files by rename'
   '--no-atomic:write new files directly'
   '--no-progress:suppress progress (enabled by default on terminals)'
+  '--progress=json:emit JSON progress and file events on stderr'
 )
 values=(
   '--jobs=:number of worker threads'

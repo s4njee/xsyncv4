@@ -119,7 +119,7 @@ Options (same meaning as rsync):
  -0, --from0              use NUL delimiters in list and filter merge files
      --stats              give some file-transfer stats
  -h, --human-readable     output numbers in a human-readable format
-     --progress           show progress (default when stderr is a terminal)
+     --progress[=json]    show progress (default on terminals), or JSON events
      --no-progress        suppress progress; XSYNC_PROGRESS=0 also disables it
  -P                       same as --partial --progress
  -i, --itemize-changes    output a change-summary for all updates
@@ -268,6 +268,11 @@ Parsed parse(int argc, char** argv) {
     else if (name == "atimes") { if (++o.atimes > 1) o.open_noatime = true; }
     else if (name == "no-atimes" || name == "no-U") o.atimes = 0;
     else if (name == "no-N") o.crtimes = false;
+    else if (name == "progress" || name == "no-progress") {
+      if (val && (name != "progress" || *val != "json")) usage_error("--progress accepts only =json");
+      o.progress = name == "progress";
+      o.progress_mode = val ? Options::Json : Options::Display;
+    }
     else if (flag(o.crtimes, "crtimes") || flag(o.open_noatime, "open-noatime")) {}
     else if (flag(o.relative, "relative")) relative_explicit = true;
     else if (name == "no-R") o.relative = false, relative_explicit = true;
@@ -285,7 +290,7 @@ Parsed parse(int argc, char** argv) {
              flag(o.ignore_times, "ignore-times") || flag(o.ignore_existing, "ignore-existing") || flag(o.existing, "existing") ||
              flag(o.one_fs, "one-file-system") || flag(o.inplace, "inplace") || flag(o.omit_dir_times, "omit-dir-times") ||
              flag(o.omit_link_times, "omit-link-times") || flag(o.numeric_ids, "numeric-ids") ||
-             flag(o.partial, "partial") || flag(o.progress, "progress") || flag(o.stats, "stats") || flag(o.mkpath, "mkpath") ||
+             flag(o.partial, "partial") || flag(o.stats, "stats") || flag(o.mkpath, "mkpath") ||
              flag(o.clone, "clone") || flag(o.ignore_errors, "ignore-errors") || flag(o.safe_links, "safe-links")) {
       if (name == "dirs" || name == "no-dirs") o.dirs_explicit = true;
     } else if (name == "ignore-non-existing") o.existing = true;
@@ -343,7 +348,7 @@ Parsed parse(int argc, char** argv) {
         size_t comma = v.find(',', start);
         std::string item = v.substr(start, comma == std::string::npos ? comma : comma - start);
         std::transform(item.begin(), item.end(), item.begin(), [](unsigned char c) { return (char)tolower(c); });
-        if (item == "progress2") o.progress = true;
+        if (item == "progress2") o.progress = true, o.progress_mode = Options::Progress2;
         else if (item == "progress0") o.progress = false;
         else if (item == "stats2") o.stats = true;
         else if (item == "stats0") o.stats = false;
@@ -433,7 +438,7 @@ Parsed parse(int argc, char** argv) {
         case 'J': o.omit_link_times = true; break;
         case 'i': o.itemize = true; ++o.itemize_level; break;
         case 'h': o.human++; o.human_ungrouped = false; break;
-        case 'P': o.partial = o.progress = true; break;
+        case 'P': o.partial = o.progress = true; o.progress_mode = Options::Display; break;
         case 'W': o.whole_file = true; break;
         case 's': break;  // documented compatibility no-op
         case '8': o.raw_names = true; break;

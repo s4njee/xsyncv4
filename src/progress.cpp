@@ -242,6 +242,55 @@ Totals totals() {
   return t;
 }
 
+std::string json_string(std::string_view value) {
+  std::string result = "\"";
+  while (!value.empty()) {
+    unsigned char c = value.front();
+    size_t n = char_size(value);
+    if (c == '\\' || c == '"') result += '\\', result += (char)c;
+    else if (c < 32 || (c >= 128 && n == 1)) {
+      char escaped[7];
+      snprintf(escaped, sizeof escaped, "\\u%04x", c);
+      result += escaped;
+    } else result.append(value.substr(0, n));
+    value.remove_prefix(n);
+  }
+  return result + '"';
+}
+
+void json_totals(const Totals& t, u64 now, bool complete = false, bool ok = false) {
+  u64 elapsed = now > t_start ? now - t_start : 0;
+  u64 wire = g_opt.pushing ? g_stats.wire_sent.load() : g_stats.wire_recv.load();
+  std::string out = std::string("{\"type\":\"") + (complete ? "complete" : "progress") +
+      "\",\"elapsed_ms\":" + std::to_string(elapsed / 1000000) +
+      ",\"files\":" + std::to_string(t.files) + ",\"files_total\":" + std::to_string(t.files_total) +
+      ",\"bytes\":" + std::to_string(t.bytes) + ",\"bytes_total\":" + std::to_string(t.bytes_total) +
+      ",\"files_seen\":" + std::to_string(t.seen) + ",\"wire_bytes\":" + std::to_string(wire) +
+      ",\"scanning\":" + (t.scanning ? "true" : "false") +
+      ",\"dry_run\":" + (g_opt.dry_run ? "true" : "false");
+  if (complete) out += std::string(",\"success\":") + (ok && !g_exit_code.load() ? "true" : "false") +
+      ",\"exit_code\":" + (!ok && !g_exit_code.load() ? "null" : std::to_string(g_exit_code.load()));
+  raw(out + "}\n");
+}
+
+void progress2_line(const Totals& t, u64 now, bool complete = false) {
+  double elapsed = std::max(1e-9, (double)(now - t_start) / 1e9);
+  double rate = complete ? (double)t.bytes / elapsed : rate_b;
+  double time = !complete && rate > 0 && t.bytes < t.bytes_total ? (double)(t.bytes_total - t.bytes) / rate : elapsed;
+  u64 seconds = (u64)time;
+  const char* units[] = {"B/s", "kB/s", "MB/s", "GB/s", "TB/s"};
+  int unit = 0;
+  while (rate >= 1000 && unit < 4) rate /= 1000, ++unit;
+  char tail[160];
+  snprintf(tail, sizeof tail, " %3d%% %7.2f%s %4llu:%02llu:%02llu (xfr#%llu, %s-chk=%llu/%llu)\n",
+      (int)(std::clamp(t.frac, 0.0, 1.0) * 100), rate, units[unit],
+      (unsigned long long)(seconds / 3600), (unsigned long long)(seconds / 60 % 60), (unsigned long long)(seconds % 60),
+      (unsigned long long)t.files, t.scanning ? "ir" : "to",
+      (unsigned long long)(t.files_total - t.files), (unsigned long long)t.seen);
+  std::string bytes = fmt_num(t.bytes);
+  raw(std::string(bytes.size() < 15 ? 15 - bytes.size() : 0, ' ') + bytes + tail);
+}
+
 void draw_locked() {
   LocaleScope locale;
   u64 now = now_ns();
@@ -260,6 +309,11 @@ void draw_locked() {
     rate_small += ((double)(small - last_small) / dt - rate_small) * a;
     last_small = small;
     last_bytes = t.bytes, last_files = t.files, t_last = now;
+  }
+  if (g_opt.progress_mode == Options::Json) { json_totals(t, now); return; }
+  if (!tty && g_opt.progress_mode == Options::Progress2) {
+    if (now - t_plain >= 1000000000ull) { t_plain = now; progress2_line(t, now); }
+    return;
   }
   static const char* frames[] = {"⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"};
   static const char* ascii_frames[] = {"|", "/", "-", "\\"};
@@ -424,6 +478,19 @@ const char* limiting_stage() {
   return reading >= network ? "reading" : "network";
 }
 
+void progress_file_event(const OutputEvent& event) {
+  if (!g_progress_on || g_opt.progress_mode != Options::Json || event.type != T_REG ||
+      event.code.empty() || (event.code.front() != '>' && event.code.front() != '<' && event.code.front() != 'h')) return;
+  std::lock_guard<std::mutex> lock(ui_mu);
+  if (!g_progress_on) return;
+  std::string hex;
+  static const char digits[] = "0123456789abcdef";
+  for (unsigned char c : event.path) hex += digits[c >> 4], hex += digits[c & 15];
+  raw("{\"type\":\"file\",\"path\":" + json_string(event.path) + ",\"path_bytes_hex\":\"" + hex +
+      "\",\"code\":" + json_string(event.code) + ",\"size\":" + std::to_string(event.size) +
+      ",\"bytes\":" + std::to_string(event.bytes) + ",\"dry_run\":" + (g_opt.dry_run ? "true" : "false") + "}\n");
+}
+
 void ui_write(bool is_err, std::string_view text) {
   std::lock_guard<std::mutex> lk(ui_mu);
   if (live && drawn) {
@@ -444,7 +511,7 @@ void progress_start(int n) {
   g_progress_on = true;
   tty = isatty(2);
   const char* term = getenv("TERM");
-  tty = tty && term && *term && strcmp(term, "dumb") != 0;
+  tty = tty && term && *term && strcmp(term, "dumb") != 0 && g_opt.progress_mode != Options::Json;
   auto locale = render_locale().value;
   const char* codeset = locale ? nl_langinfo_l(CODESET, locale) : "";
   unicode = strcasecmp(codeset, "UTF-8") == 0 || strcasecmp(codeset, "UTF8") == 0;
@@ -458,6 +525,7 @@ void progress_start(int n) {
     winch_installed = sigaction(SIGWINCH, &action, &previous_winch) == 0;
     raw("\x1b[?25l");
   }
+  if (g_opt.progress_mode == Options::Json) json_totals(totals(), t_start);
 }
 
 void progress_tick() {
@@ -475,6 +543,8 @@ void progress_stop(bool ok) {
   std::lock_guard<std::mutex> lk(ui_mu);
   if (!g_progress_on) return;
   g_progress_on = false;
+  if (g_opt.progress_mode == Options::Json) { json_totals(totals(), now_ns(), true, ok); return; }
+  if (!tty && g_opt.progress_mode == Options::Progress2) { progress2_line(totals(), now_ns(), true); return; }
   LocaleScope locale;
   std::string out;
   if (live) {

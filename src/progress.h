@@ -33,6 +33,8 @@ void slot_end(int wid, bool completed = false);
 void progress_start(int nworkers);
 void progress_tick();
 void progress_stop(bool ok);
+struct OutputEvent;
+void progress_file_event(const OutputEvent& event);
 // Print text (complete lines) above the live region.
 void ui_write(bool is_err, std::string_view text);
 

@@ -410,8 +410,26 @@ time includes transport waits and requested pacing, and write time includes
 receiver DATA processing. Current helpers exchange these optional metrics;
 older helpers continue transferring without a stage estimate.
 
-It is drawn on stderr and only when that is a terminal; otherwise one summary line per
-second is printed. `-v` and `-i` lines scroll above the live region. `NO_COLOR` is honoured.
+Progress uses stderr. The live display is used on terminals; explicit
+`--progress` prints one plain line per second on pipes. `--info=progress2`
+uses rsync's byte/percent/rate/time and `(xfr#N, to-chk=R/T)` line shape on
+pipes, with `ir-chk` while scanning; the final line is always printed.
+`--progress=json` emits newline-delimited JSON on stderr, on both terminals
+and pipes, without cursor escapes. `progress` records contain elapsed
+milliseconds, completed/planned files and bytes, files seen, wire bytes,
+scanning and dry-run flags. `file` records identify each transferred regular
+file (including clones and hard-link aliases), its itemization code, size and
+literal bytes; they are emitted after the destination operation succeeds,
+or represent planned operations in dry runs. `complete` records include final
+counters, success and an exit code (null if cleanup precedes the fatal code).
+All JSON counters are raw integers. `path` retains valid UTF-8; control bytes
+are JSON-escaped and invalid bytes are represented as Unicode byte values.
+`path_bytes_hex` preserves the original path bytes exactly. JSON remote
+transfers require a helper with structured file events; rsync fallback cannot
+provide JSON and fails clearly. Ordinary stdout remains available for `-v`,
+`-i`, formats and stats. The last progress-mode option wins; `--no-progress`
+or `--quiet` suppresses events.
+`-v` and `-i` lines scroll above the live region. `NO_COLOR` is honoured.
 The renderer respects the actual terminal width, including very narrow windows,
 and redraws after `SIGWINCH`. Bars use the terminal's foreground color so they
 remain readable on light backgrounds. `TERM=dumb` receives plain ASCII lines

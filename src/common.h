@@ -81,6 +81,7 @@ struct Options {
   INT_OPTS(X)
 #undef X
   bool quiet = false, progress = false, stats = false, mkpath = false;
+  enum ProgressMode { Display, Progress2, Json } progress_mode = Display;
   int human = 0;
   std::string rsh, rsync_path;
   bool rsh_set = false;  // Client-only; an explicit empty command is an error.

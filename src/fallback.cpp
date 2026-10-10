@@ -15,6 +15,7 @@
 namespace {
 std::vector<std::string> arguments;
 bool enabled = true;
+bool json_progress = false;
 mode_t original_umask;
 struct stat self_stat {};
 bool have_self_stat = false;
@@ -73,10 +74,27 @@ void init_fallback(int argc, char** argv) {
   enabled = !setting || strcmp(setting, "0") != 0;
   bool operands = false;
   bool server = false;
+  bool quiet = false;
+  auto info_mode = [](const std::string& value) {
+    size_t start = 0;
+    do {
+      size_t end = value.find(',', start);
+      std::string item = value.substr(start, end == value.npos ? end : end - start);
+      std::transform(item.begin(), item.end(), item.begin(), [](unsigned char c) { return (char)tolower(c); });
+      if (item == "progress2" || item == "progress0") json_progress = false;
+      if (end == value.npos) break;
+      start = end + 1;
+    } while (true);
+  };
   for (int i = 1; i < argc; ++i) {
     std::string a = argv[i];
     if (operands || a.size() < 2 || a[0] != '-') { arguments.push_back(a); continue; }
     if (a == "--") { operands = true; arguments.push_back(a); continue; }
+    if (a == "--progress=json") json_progress = true;
+    if (a == "--progress" || a == "--no-progress") json_progress = false;
+    if (a == "--quiet") quiet = true;
+    if (a.rfind("--info=", 0) == 0) info_mode(a.substr(7));
+    if (a == "--info" && i + 1 < argc) info_mode(argv[i + 1]);
     if (a == "--server" || a == "--install" || a.rfind("--install=", 0) == 0) server = true;
     if (a == "--no-fallback") { enabled = false; continue; }
     if (a == "--fallback") { enabled = true; continue; }
@@ -86,7 +104,7 @@ void init_fallback(int argc, char** argv) {
       continue;
     }
     if (a.rfind("--", 0) == 0) {
-      arguments.push_back(a);
+      arguments.push_back(a == "--progress=json" ? "--progress" : a);
       if (a.find('=') == std::string::npos && long_option_takes_value(a.substr(2)) && i + 1 < argc) arguments.push_back(argv[++i]);
       continue;
     }
@@ -94,6 +112,8 @@ void init_fallback(int argc, char** argv) {
     std::string short_flags = "-";
     for (size_t k = 1; k < a.size(); ++k) {
       char flag = a[k];
+      if (flag == 'P') json_progress = false;
+      if (flag == 'q') quiet = true;
       if (flag != 'j') short_flags += flag;
       if (std::strchr("ej@fBTM", flag)) {
         if (flag != 'j') short_flags += a.substr(k + 1);
@@ -109,6 +129,7 @@ void init_fallback(int argc, char** argv) {
     if (short_flags.size() > 1) arguments.push_back(short_flags);
   }
   if (server) enabled = false;  // The binary protocol server must never exec rsync.
+  if (quiet) json_progress = false;
   if (enabled) FilterList::set_stdin_reader(replayable_stdin);
 }
 
@@ -116,6 +137,10 @@ bool fallback_enabled() { return enabled; }
 
 [[noreturn]] void fallback_to_rsync(const std::string& reason, int strict_code) {
   progress_stop(false);
+  if (json_progress) {
+    fprintf(stderr, "xsync: %s; JSON progress requires a native transfer\n", reason.c_str());
+    std::exit(strict_code);
+  }
   if (!enabled) {
     fprintf(stderr, "xsync: %s (fallback disabled)\n", reason.c_str());
     std::exit(strict_code);
