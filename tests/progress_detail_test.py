@@ -49,7 +49,7 @@ class ProgressDetailTests(unittest.TestCase):
         if HOST:
             rsh = RSH
             variables = [key+'='+value for key,value in env.items() if key.startswith('XSYNC_FAULT_')]
-            peer = shlex.join(['env','LD_PRELOAD=/work/build/fault_io.so',*variables,'/usr/local/bin/xsync'])
+            peer = shlex.join(['env','LD_PRELOAD=/work/build/fault_io.so',*variables,'/usr/local/bin/xs'])
         if direction == 'push': target = (HOST or 'fake')+':'+target
         else:
             if HOST:

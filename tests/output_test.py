@@ -11,7 +11,7 @@ import tempfile
 import unittest
 
 REPO = pathlib.Path(__file__).resolve().parent.parent
-BINARY = pathlib.Path(os.environ.get('XSYNC_TEST_BINARY', REPO / 'build/xsync')).resolve()
+BINARY = pathlib.Path(os.environ.get('XSYNC_TEST_BINARY', REPO / 'build/xs')).resolve()
 HOST = os.environ.get('XSYNC_RIG_HOST')
 SSH = ['ssh', '-i', '/keys/id test', '-oBatchMode=yes', '-oStrictHostKeyChecking=no',
        '-oUserKnownHostsFile=/dev/null', '-oLogLevel=ERROR']
@@ -52,7 +52,7 @@ class OutputTests(unittest.TestCase):
         command = [str(BINARY), '--no-fallback', '-a', '--no-clone', '-j8', *flags]
         if log is not None: command += ['--log-file=' + str(log)]
         if direction != 'local':
-            command += ['-e', RSH, '--rsync-path=' + shlex.quote(server or ('/usr/local/bin/xsync' if HOST else str(BINARY)))]
+            command += ['-e', RSH, '--rsync-path=' + shlex.quote(server or ('/usr/local/bin/xs' if HOST else str(BINARY)))]
             if direction == 'push': target = (HOST or 'fake') + ':' + target
             else: source = (HOST or 'fake') + ':' + source
         return subprocess.run(command + [source, target], capture_output=True, timeout=30)

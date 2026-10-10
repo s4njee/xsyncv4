@@ -94,7 +94,7 @@ print(json.dumps(d))
                             self.fixture(direction, symlink_attrs)
                             command = [str(transfer.BINARY) if native else RSYNC, *flags]
                             if native: command += ['--no-fallback','--no-clone','-j8']
-                            server = '/usr/local/bin/xsync' if native else 'rsync'
+                            server = '/usr/local/bin/xs' if native else 'rsync'
                             command += ['-e',transfer.RSH,'--rsync-path=' + shlex.join(['docker','exec','-i',CONTAINER,server])]
                             command += ['--filter=' + rule for rule in rules]
                             src, dst = str(self.root / 'src') + '/', str(self.root / 'dst') + '/'

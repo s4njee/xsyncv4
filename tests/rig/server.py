@@ -10,4 +10,4 @@ with open(config["pid"], "w") as stream:
     stream.write(str(os.getpid()))
 env = dict(os.environ)
 env.update(config.get("env", {}))
-os.execve("/usr/local/bin/xsync", ["xsync", *sys.argv[1:]], env)
+os.execve("/usr/local/bin/xs", ["xs", *sys.argv[1:]], env)

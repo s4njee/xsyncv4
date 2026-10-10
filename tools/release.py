@@ -31,7 +31,7 @@ def main():
         dependencies = run('otool', '-L', args.native, capture_output=True, text=True).stdout
         if any('/opt/' in line or '/usr/local/' in line for line in dependencies.splitlines()[1:]):
             raise RuntimeError('macOS release still depends on third-party dynamic libraries')
-        binary = out / 'xsync-darwin-universal'
+        binary = out / 'xs-darwin-universal'
         shutil.copy2(args.native, binary)
         artifacts.append(binary)
     for arch in ('amd64', 'arm64'):
@@ -40,10 +40,10 @@ def main():
             '-t', image, '-f', REPO / 'tools/release.Dockerfile', REPO)
         container = 'xsync-release-' + uuid.uuid4().hex[:10]
         try:
-            run('docker', 'create', '--platform', 'linux/' + arch, '--name', container, image, '/xsync', '--version',
+            run('docker', 'create', '--platform', 'linux/' + arch, '--name', container, image, '/xs', '--version',
                 stdout=subprocess.DEVNULL)
-            binary = out / ('xsync-linux-' + arch)
-            run('docker', 'cp', container + ':/xsync', binary)
+            binary = out / ('xs-linux-' + arch)
+            run('docker', 'cp', container + ':/xs', binary)
             binary.chmod(0o755)
             # A scratch image has no loader, libc, ICU data, or compression libraries.
             run('docker', 'start', '-a', container)
@@ -52,7 +52,7 @@ def main():
             if status != '0':
                 raise RuntimeError('standalone Linux executable failed: ' + status)
             smoke = r'''set -eu
-bin=/releases/xsync-linux-ARCH
+bin=/releases/xs-linux-ARCH
 mkdir /tmp/source
 head -c 2097152 /dev/zero >/tmp/source/file
 printf 'unicode contents\n' >'/tmp/source/straße with spaces'
@@ -116,16 +116,16 @@ status=$?
 set -e
 test "$status" = 23
 test ! -s /tmp/errors.stdout
-grep -F 'xsync: error summary: 2 errors (showing first 2)' /tmp/errors.stderr
+grep -F 'xs: error summary: 2 errors (showing first 2)' /tmp/errors.stderr
 grep -F 'partial transfer (code 23): 2 errors' /tmp/errors.stderr
-test "$(tail -n 1 /tmp/errors.stderr)" = 'xsync error: some files/attrs were not transferred (see previous errors) (code 23)'
+test "$(tail -n 1 /tmp/errors.stderr)" = 'xs error: some files/attrs were not transferred (see previous errors) (code 23)'
 set +e
 "$bin" --no-fallback --list-only -e /tmp/fakessh --rsync-path="$bin" fake:/tmp/missing-one fake:/tmp/missing-two /tmp/ignored >/tmp/errors-remote.stdout 2>/tmp/errors-remote.stderr
 status=$?
 set -e
 test "$status" = 23
 test ! -s /tmp/errors-remote.stdout
-grep -F 'xsync: error summary: 2 errors (showing first 2)' /tmp/errors-remote.stderr
+grep -F 'xs: error summary: 2 errors (showing first 2)' /tmp/errors-remote.stderr
 head -c 393216 /dev/zero >/tmp/rate-source
 for direction in local push pull; do
   source=/tmp/rate-source
@@ -222,6 +222,9 @@ test ! -e /tmp/uncreated-selected
     manifest = {p.name: {'sha256': hashlib.sha256(p.read_bytes()).hexdigest(),
                          'bytes': p.stat().st_size, 'git': args.revision} for p in artifacts}
     (out / 'manifest.json').write_text(json.dumps(manifest, indent=2) + '\n')
+    # Retire the previously generated binary names after the new set is verified.
+    for name in ('xsync-linux-amd64', 'xsync-linux-arm64', 'xsync-darwin-universal'):
+        (out/name).unlink(missing_ok=True)
     print('Verified releases: ' + ', '.join(manifest), flush=True)
 
 

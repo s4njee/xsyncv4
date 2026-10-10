@@ -124,7 +124,7 @@ class From0Differentials(filters.FilterDifferentials):
                 if native: command += ['--no-fallback']
                 source = str(self.root / 'src') + '/'
                 if remote:
-                    server = ('/usr/local/bin/xsync' if transfer.HOST else str(transfer.BINARY)) if native else 'rsync'
+                    server = ('/usr/local/bin/xs' if transfer.HOST else str(transfer.BINARY)) if native else 'rsync'
                     command += ['-e', transfer.RSH, '--rsync-path=' + shlex.quote(server) + ' --from0']
                     source = (transfer.HOST or 'fake') + ':' + source
                 result = subprocess.run(command + [source], capture_output=True, timeout=20,

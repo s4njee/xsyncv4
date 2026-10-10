@@ -56,7 +56,7 @@ class ProgressAckTests(unittest.TestCase):
             rsh = RSH
             server = shlex.join(['env', 'LD_PRELOAD=/work/build/fault_io.so',
                                  'XSYNC_FAULT_PATH='+str(self.dest), 'XSYNC_FAULT_WRITE_DELAY_US=500000',
-                                 'XSYNC_FAULT_WRITE_NOTIFY='+str(marker), '/usr/local/bin/xsync'])
+                                 'XSYNC_FAULT_WRITE_NOTIFY='+str(marker), '/usr/local/bin/xs'])
         command = [str(BINARY), '--no-fallback', '-a', '--progress', '-j1', '-e', rsh,
                    '--rsync-path='+server, str(self.source)+'/', (HOST or 'fake')+':'+str(self.dest)+'/']
         code, data = capture(command, width=160, env=env)
@@ -108,7 +108,7 @@ class ProgressAckTests(unittest.TestCase):
                         target.mkdir(); (target/'large').write_bytes(b'x'*4*1024*1024)
                     with (self.source/'large').open('r+b') as f: f.seek(123456); f.write(b'changed bytes')
                 elif mode == 'sparse': (self.source/'large').write_bytes(b'\0'*4*1024*1024)
-                peer = '/usr/local/bin/xsync' if HOST else str(BINARY)
+                peer = '/usr/local/bin/xs' if HOST else str(BINARY)
                 command = [str(BINARY), '--no-fallback','-a','-hh','--progress','-j2','-e',RSH,
                            '--rsync-path='+shlex.quote(peer), *flags, str(self.source)+'/',(HOST or 'fake')+':'+str(target)+'/']
                 code, data = capture(command, width=160)

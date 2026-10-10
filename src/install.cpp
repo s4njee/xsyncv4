@@ -31,7 +31,7 @@ int remote_command(const std::string& host, const std::string& command, int inpu
     for (auto& a : args) argv.push_back(a.data());
     argv.push_back(nullptr);
     execvp(argv[0], argv.data());
-    fprintf(stderr, "xsync: installer cannot execute %s: %s\n", argv[0], strerror(errno));
+    fprintf(stderr, "xs: installer cannot execute %s: %s\n", argv[0], strerror(errno));
     _exit(127);
   }
   close(pipefd[1]);
@@ -58,7 +58,7 @@ int remote_command(const std::string& host, const std::string& command, int inpu
 }
 
 bool version(const std::string& text, std::array<int, 3>& v) {
-  return sscanf(text.c_str(), "xsync version %d.%d.%d", &v[0], &v[1], &v[2]) == 3 &&
+  return sscanf(text.c_str(), "xs version %d.%d.%d", &v[0], &v[1], &v[2]) == 3 &&
          v[0] >= 0 && v[1] >= 0 && v[2] >= 0;
 }
 
@@ -67,7 +67,7 @@ std::filesystem::path release_binary(const std::string& name) {
   if (const char* env = getenv("XSYNC_RELEASE_DIR")) dirs.emplace_back(env);
   else {
     auto exe = std::filesystem::path(executable_path()).parent_path();
-    dirs = {exe, exe / "../dist", exe / "../share/xsync/releases"};
+    dirs = {exe, exe / "../dist", exe / "../share/xs/releases"};
   }
   for (auto& dir : dirs) {
     std::error_code error;
@@ -83,8 +83,8 @@ int install_remote(const std::string& host, bool force) {
     die(RERR_SYNTAX, "invalid install host");
   std::string output;
   int code = remote_command(host,
-      "set -e; uname -s; uname -m; target=\"$HOME/.local/bin/xsync\"; "
-      "if [ -e \"$target\" ] && [ ! -f \"$target\" ]; then echo 'xsync: install target is not a regular file' >&2; exit 4; fi; "
+      "set -e; uname -s; uname -m; target=\"$HOME/.local/bin/xs\"; "
+      "if [ -e \"$target\" ] && [ ! -f \"$target\" ]; then echo 'xs: install target is not a regular file' >&2; exit 4; fi; "
       "if [ -x \"$target\" ]; then \"$target\" --version 2>/dev/null | head -n 1; else printf '\\n'; fi", -1, output);
   if (code) return code;
   std::istringstream lines(output);
@@ -92,12 +92,12 @@ int install_remote(const std::string& host, bool force) {
   if (!std::getline(lines, system) || !std::getline(lines, arch) || !std::getline(lines, installed) || std::getline(lines, extra))
     die(RERR_PROTOCOL, "invalid remote platform response (check shell startup output)");
   std::string name;
-  if (system == "Linux" && (arch == "x86_64" || arch == "amd64")) name = "xsync-linux-amd64";
-  else if (system == "Linux" && (arch == "aarch64" || arch == "arm64")) name = "xsync-linux-arm64";
-  else if (system == "Darwin" && (arch == "arm64" || arch == "x86_64")) name = "xsync-darwin-universal";
+  if (system == "Linux" && (arch == "x86_64" || arch == "amd64")) name = "xs-linux-amd64";
+  else if (system == "Linux" && (arch == "aarch64" || arch == "arm64")) name = "xs-linux-arm64";
+  else if (system == "Darwin" && (arch == "arm64" || arch == "x86_64")) name = "xs-darwin-universal";
   else die(RERR_UNSUPPORTED, "no release binary for remote platform %s/%s", system.c_str(), arch.c_str());
   std::array<int, 3> current{}, ours{};
-  version(std::string("xsync version ") + XSYNC_VERSION, ours);
+  version(std::string("xs version ") + XSYNC_VERSION, ours);
   if (!force && !installed.empty() && (!version(installed, current) || current > ours))
     die(RERR_UNSUPPORTED, "refusing to overwrite remote version '%s'; use --force", installed.c_str());
   auto binary = release_binary(name);
@@ -106,21 +106,21 @@ int install_remote(const std::string& host, bool force) {
   // The receiving shell performs the version check again before publishing.
   // mktemp and rename keep an interrupted upload from changing the old binary.
   std::string script =
-      "set -eu; umask 077; mkdir -p \"$HOME/.local/bin\"; target=\"$HOME/.local/bin/xsync\"; "
-      "tmp=$(mktemp \"$HOME/.local/bin/.xsync-install.XXXXXXXX\"); "
+      "set -eu; umask 077; mkdir -p \"$HOME/.local/bin\"; target=\"$HOME/.local/bin/xs\"; "
+      "tmp=$(mktemp \"$HOME/.local/bin/.xs-install.XXXXXXXX\"); "
       "trap 'rm -f \"$tmp\"' EXIT; trap 'exit 20' HUP INT TERM; "
       "cat >\"$tmp\"; chmod 755 \"$tmp\"; "
       "new=$(\"$tmp\" --version | head -n 1); "
-      "case \"$new\" in 'xsync  version " XSYNC_VERSION "  '*) ;; *) echo 'xsync: release version mismatch' >&2; exit 4;; esac; ";
+      "case \"$new\" in 'xs  version " XSYNC_VERSION "  '*) ;; *) echo 'xs: release version mismatch' >&2; exit 4;; esac; ";
   if (!force) script +=
       "current=''; if [ -x \"$target\" ]; then current=$(\"$target\" --version 2>/dev/null | head -n 1); fi; "
       "if [ \"$current\" != " + shell_quote(installed) +
-      " ]; then echo 'xsync: remote version changed during install; retry or use --force' >&2; exit 4; fi; ";
-  script += "if [ -e \"$target\" ] && [ ! -f \"$target\" ]; then echo 'xsync: install target is not a regular file' >&2; exit 4; fi; "
+      " ]; then echo 'xs: remote version changed during install; retry or use --force' >&2; exit 4; fi; ";
+  script += "if [ -e \"$target\" ] && [ ! -f \"$target\" ]; then echo 'xs: install target is not a regular file' >&2; exit 4; fi; "
             "mv -f \"$tmp\" \"$target\"; printf '%s\\n' \"$new\"";
   output.clear();
   code = remote_command(host, script, fd, output);
   close(fd);
-  if (!code) printf("Installed %s on %s at ~/.local/bin/xsync\n%s", name.c_str(), host.c_str(), output.c_str());
+  if (!code) printf("Installed %s on %s at ~/.local/bin/xs\n%s", name.c_str(), host.c_str(), output.c_str());
   return code;
 }

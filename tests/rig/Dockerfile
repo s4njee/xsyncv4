@@ -10,7 +10,7 @@ COPY tests ./tests
 COPY tools ./tools
 COPY completions ./completions
 RUN cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release \
-    && cmake --build build && cp build/xsync /usr/local/bin/xsync \
+    && cmake --build build && cp build/xs /usr/local/bin/xs \
     && c++ -std=c++20 -shared -fPIC tests/fault_io.cpp -ldl -o build/fault_io.so
 RUN mkdir -p /run/sshd /root/.ssh && ssh-keygen -A \
     && printf '\nPermitRootLogin prohibit-password\nPasswordAuthentication no\n' >> /etc/ssh/sshd_config

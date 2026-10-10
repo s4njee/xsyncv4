@@ -114,7 +114,7 @@ void print_error_summary() {
   u64 total = 0;
   for (u64 n : counts) total += n;
   if (!total) return;
-  std::string summary = "xsync: error summary: " + std::to_string(total) +
+  std::string summary = "xs: error summary: " + std::to_string(total) +
     (total == 1 ? " error" : " errors") + " (showing first " + std::to_string(shown) + ")\n";
   for (size_t group = 1; group < counts.size(); ++group) {
     if (!counts[group]) continue;
@@ -141,7 +141,7 @@ void err_line(int code, const char* fmt, ...) {
   record_code(code);
   remember_error(code, s);
   if (g_msg_sink) return g_msg_sink(1, code, s);
-  ui_write(true, "xsync: " + s + "\n");
+  ui_write(true, "xs: " + s + "\n");
 }
 
 void die(int code, const char* fmt, ...) {
@@ -160,9 +160,9 @@ void die(int code, const char* fmt, ...) {
     progress_stop(false);
     output_flush();
     remember_error(code, s);
-    fprintf(stderr, "xsync: %s\n", s.c_str());
+    fprintf(stderr, "xs: %s\n", s.c_str());
     print_error_summary();
-    fprintf(stderr, "xsync error: exiting (code %d)\n", code);
+    fprintf(stderr, "xs error: exiting (code %d)\n", code);
   }
   fflush(nullptr);
   progress_restore_cursor();
@@ -182,13 +182,13 @@ void exit_signal() {
     cancel_remote_peer();
     remember_error(RERR_MESSAGEIO, "write stdout failed: " + errstr(error));
     print_error_summary();
-    fprintf(stderr, "xsync error: errors with program diagnostics (code %d)\n", RERR_MESSAGEIO);
+    fprintf(stderr, "xs error: errors with program diagnostics (code %d)\n", RERR_MESSAGEIO);
     fflush(stderr);
     progress_restore_cursor();
     _Exit(RERR_MESSAGEIO);
   }
   print_error_summary();
-  if (!g_opt.am_server) fprintf(stderr, "\nxsync error: received SIGINT, SIGTERM, or SIGHUP (code %d)\n", RERR_SIGNAL);
+  if (!g_opt.am_server) fprintf(stderr, "\nxs error: received SIGINT, SIGTERM, or SIGHUP (code %d)\n", RERR_SIGNAL);
   progress_restore_cursor();
   _Exit(RERR_SIGNAL);
 }

@@ -51,7 +51,7 @@ import zlib
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(HERE)
-DEFAULT_XSYNC = os.path.join(REPO, "build", "xsync")
+DEFAULT_XSYNC = os.path.join(REPO, "build", "xs")
 DEFAULT_RSYNC = "/opt/homebrew/bin/rsync"
 FAKESSH = os.path.join(HERE, "fakessh.sh")
 
@@ -1774,7 +1774,7 @@ def main():
         description="Differential tests: run rsync and xsync on identical fixtures "
                     "and compare the resulting trees and exit codes.")
     ap.add_argument("--xsync", default=DEFAULT_XSYNC, metavar="PATH",
-                    help="binary under test (default: build/xsync in the repo)")
+                    help="binary under test (default: build/xs in the repo)")
     ap.add_argument("--rsync", default=DEFAULT_RSYNC, metavar="PATH",
                     help="reference rsync (default: %(default)s)")
     ap.add_argument("--keep", action="store_true",

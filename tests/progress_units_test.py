@@ -36,7 +36,7 @@ class ProgressUnitsTests(unittest.TestCase):
         source, dest = str(self.source) + '/', str(self.root / str(self.serial)) + '/'
         args = [str(BINARY), '--no-fallback', '-a', '--no-clone', *flags]
         if direction != 'local':
-            args += ['-e', RSH, '--rsync-path=' + shlex.quote('/usr/local/bin/xsync' if HOST else str(BINARY))]
+            args += ['-e', RSH, '--rsync-path=' + shlex.quote('/usr/local/bin/xs' if HOST else str(BINARY))]
             if direction == 'push': dest = (HOST or 'fake') + ':' + dest
             else:
                 if HOST: subprocess.run(['rsync', '-a', '-e', RSH, source, HOST + ':' + source], check=True, capture_output=True)

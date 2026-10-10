@@ -75,7 +75,7 @@ class ListTests(unittest.TestCase):
         if native: command += ['--no-fallback']
         if log: command += ['--log-file=' + str(log)]
         if remote:
-            peer = ('/usr/local/bin/xsync' if native else '/usr/bin/rsync') if HOST else str(binary)
+            peer = ('/usr/local/bin/xs' if native else '/usr/bin/rsync') if HOST else str(binary)
             command += ['-e', RSH, '--rsync-path=' + shlex.quote(peer)]
         if explicit: command += ['--list-only']
         args = [(HOST or 'fake') + ':' + str(p) if remote else str(p) for p in sources]

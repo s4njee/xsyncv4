@@ -11,7 +11,7 @@ import time
 import unittest
 
 REPO = pathlib.Path(__file__).resolve().parent.parent
-BINARY = pathlib.Path(os.environ.get("XSYNC_TEST_BINARY", REPO / "build/xsync")).resolve()
+BINARY = pathlib.Path(os.environ.get("XSYNC_TEST_BINARY", REPO / "build/xs")).resolve()
 SSH = REPO / "tests/fakessh.sh"
 
 
@@ -218,7 +218,7 @@ class TrustTests(unittest.TestCase):
             for option in unsupported:
                 with self.subTest(option=option):
                     result = self.run_sync(["--no-fallback", option, "source", "dest"], root, rc=1)
-                    self.assertIn(b"xsync:", result.stderr)
+                    self.assertIn(b"xs:", result.stderr)
                     self.assertFalse((root / "dest").exists())
             help_text = self.run_sync(["--help"], root).stdout
             noops = ["--whole-file", "--no-whole-file", "--protect-args", "--secluded-args", "--blocking-io",
@@ -363,7 +363,7 @@ class TrustTests(unittest.TestCase):
                             args = ["fake:" + arg for arg in args]
                     result = self.run_sync([*flags, *args, dest], root, rc=23 if collides else 0)
                     if collides:
-                        diagnostics = result.stderr.split(b"xsync: error summary:")[0]
+                        diagnostics = result.stderr.split(b"xs: error summary:")[0]
                         self.assertEqual(diagnostics.count(b"destination name collision"), 1)
                         self.assertIn(b"error summary: 1 error (showing first 1)", result.stderr)
                         self.assertFalse((dst / first).exists())
@@ -398,7 +398,7 @@ class TrustTests(unittest.TestCase):
                         sources = ["fake:" + s for s in sources]
                 result = self.run_sync([*flags, *sources, dest], root, rc=23 if collides else 0)
                 if collides:
-                    diagnostics = result.stderr.split(b"xsync: error summary:")[0]
+                    diagnostics = result.stderr.split(b"xs: error summary:")[0]
                     self.assertEqual(diagnostics.count(b"destination name collision"), 1)
                     self.assertIn(b"error summary: 1 error (showing first 1)", result.stderr)
                     self.assertEqual(sorted(p.name for p in dst.iterdir()), ["extra"])

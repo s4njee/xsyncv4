@@ -48,8 +48,8 @@ class ErrorTests(unittest.TestCase):
 
     def summary(self, result, count, shown=None, code=23):
         self.assertEqual(result.returncode, code, result.stderr)
-        self.assertEqual(result.stderr.count(b'xsync: error summary:'), 1, result.stderr)
-        summary = result.stderr.split(b'xsync: error summary: ')[1]
+        self.assertEqual(result.stderr.count(b'xs: error summary:'), 1, result.stderr)
+        summary = result.stderr.split(b'xs: error summary: ')[1]
         header = f'{count} error' + ('s' if count != 1 else '')
         header += f' (showing first {min(count, 10) if shown is None else shown})\n'
         self.assertTrue(summary.startswith(header.encode()), summary)
@@ -64,7 +64,7 @@ class ErrorTests(unittest.TestCase):
         destination = str(self.root/('target-' + direction)) + '/'
         command = [str(BINARY), '--no-fallback', '-a', '--no-clone', '-j8', *flags]
         if direction != 'local':
-            command += ['-e', RSH, '--rsync-path=' + shlex.quote('/usr/local/bin/xsync' if HOST else str(BINARY))]
+            command += ['-e', RSH, '--rsync-path=' + shlex.quote('/usr/local/bin/xs' if HOST else str(BINARY))]
             if direction == 'push': destination = (HOST or 'fake') + ':' + destination
             else: sources = [(HOST or 'fake') + ':' + s for s in sources]
         return subprocess.run(command + sources + [destination], capture_output=True, timeout=30, env=ENV)
@@ -104,7 +104,7 @@ class ErrorTests(unittest.TestCase):
                         '[(p/f"blocked-{i:02}").mkdir() for i in range(17)]; '
                         '[(p/f"blocked-{i:02}"/"keep").write_text("protected") for i in range(17)]', target)
         result = subprocess.run([str(BINARY), '--no-fallback', '-a', '--no-clone', '-j8',
-                                 '-e', RSH, '--rsync-path=' + shlex.quote('/usr/local/bin/xsync' if HOST else str(BINARY)),
+                                 '-e', RSH, '--rsync-path=' + shlex.quote('/usr/local/bin/xs' if HOST else str(BINARY)),
                                  str(source)+'/', (HOST or 'fake') + ':' + str(target)+'/'],
                                 capture_output=True, timeout=30, env=ENV)
         summary = self.summary(result, 17)
@@ -162,7 +162,7 @@ class ErrorTests(unittest.TestCase):
         summary = self.summary(result, 2, code=12)
         self.assertIn(b'partial transfer (code 23): 1 error', summary)
         self.assertIn(b'stream IO (code 12): 1 error', summary)
-        self.assertTrue(summary.endswith(b'xsync error: exiting (code 12)\n'), summary)
+        self.assertTrue(summary.endswith(b'xs error: exiting (code 12)\n'), summary)
 
     def test_interruption_retains_prior_diagnostics(self):
         # No completion: wait after one diagnostic, then interrupt the client.
@@ -199,7 +199,7 @@ class ErrorTests(unittest.TestCase):
         result = self.run_peer([(1, 24, b'source vanished')], final=24)
         summary = self.summary(result, 1, code=24)
         self.assertIn(b'vanished source files (code 24): 1 error', summary)
-        self.assertTrue(summary.splitlines()[-1].startswith(b'xsync warning:'), summary)
+        self.assertTrue(summary.splitlines()[-1].startswith(b'xs warning:'), summary)
         result = self.run_peer([(1, 0, b'warning only')], final=0)
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn(b'warning only', result.stderr)

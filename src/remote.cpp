@@ -2518,13 +2518,13 @@ int run_client(const std::vector<std::string>& srcs, const std::string& dest, u3
   else {
     const char* override_path = getenv("XSYNC_REMOTE_PATH");
     std::string lookup =
-        "if command -v xsync >/dev/null 2>&1; then exec xsync \"$@\"; "
-        "elif [ -x \"$HOME/.local/bin/xsync\" ]; then exec \"$HOME/.local/bin/xsync\" \"$@\"; fi; ";
+        "if command -v xs >/dev/null 2>&1; then exec xs \"$@\"; "
+        "elif [ -x \"$HOME/.local/bin/xs\" ]; then exec \"$HOME/.local/bin/xs\" \"$@\"; fi; ";
     if (override_path && *override_path) lookup += "extra=" + shell_quote(override_path) + "; ";
     else lookup += "extra=${XSYNC_REMOTE_PATH:-}; ";
     lookup += "case \"$extra\" in '~/'*) extra=\"$HOME/${extra#??}\";; esac; "
               "if [ -n \"$extra\" ] && [ -x \"$extra\" ]; then exec \"$extra\" \"$@\"; fi; exit 127";
-    cmd.push_back("sh -c " + shell_quote(lookup) + " xsync");
+    cmd.push_back("sh -c " + shell_quote(lookup) + " xs");
   }
   cmd.push_back("--server");
 
@@ -2541,7 +2541,7 @@ int run_client(const std::vector<std::string>& srcs, const std::string& dest, u3
     for (auto& s : cmd) argv.push_back(s.data());
     argv.push_back(nullptr);
     execvp(argv[0], argv.data());
-    fprintf(stderr, "xsync: failed to exec %s: %s\n", argv[0], strerror(errno));
+    fprintf(stderr, "xs: failed to exec %s: %s\n", argv[0], strerror(errno));
     _exit(RERR_CMD_NOTFOUND);
   }
   close(to_child[0]), close(from_child[1]);

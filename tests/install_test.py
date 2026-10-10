@@ -11,7 +11,7 @@ import tempfile
 import unittest
 
 REPO = pathlib.Path(__file__).resolve().parent.parent
-BINARY = pathlib.Path(os.environ.get('XSYNC_TEST_BINARY', REPO / 'build/xsync')).resolve()
+BINARY = pathlib.Path(os.environ.get('XSYNC_TEST_BINARY', REPO / 'build/xs')).resolve()
 
 
 class InstallerTests(unittest.TestCase):
@@ -21,11 +21,11 @@ class InstallerTests(unittest.TestCase):
         self.root = pathlib.Path(self.tmp.name)
         self.home = self.root / 'remote home'
         self.home.mkdir()
-        self.target = self.home / '.local/bin/xsync'
+        self.target = self.home / '.local/bin/xs'
         self.releases = self.root / 'release files'
         self.releases.mkdir()
         for name in ('linux-amd64', 'linux-arm64', 'darwin-universal'):
-            shutil.copy2(BINARY, self.releases / ('xsync-' + name))
+            shutil.copy2(BINARY, self.releases / ('xs-' + name))
         commands = self.root / 'commands'
         commands.mkdir()
         uname = commands / 'uname'
@@ -52,7 +52,7 @@ os.execv('/bin/sh',['sh','-c',sys.argv[-1]])
 
     def fixture_version(self, version):
         self.target.parent.mkdir(parents=True, exist_ok=True)
-        self.target.write_text('#!/bin/sh\nprintf "%s\\n" "xsync  version ' + version + '  protocol version 3"\n')
+        self.target.write_text('#!/bin/sh\nprintf "%s\\n" "xs  version ' + version + '  protocol version 3"\n')
         self.target.chmod(0o755)
         return self.target.read_bytes()
 
@@ -63,10 +63,10 @@ os.execv('/bin/sh',['sh','-c',sys.argv[-1]])
                 if self.target.exists(): self.target.unlink()
                 result = self.install(env=dict(self.env, XSYNC_TEST_SYSTEM=system, XSYNC_TEST_ARCH=arch))
                 self.assertEqual(result.returncode, 0, result.stderr)
-                self.assertIn(('Installed xsync-' + artifact).encode(), result.stdout)
+                self.assertIn(('Installed xs-' + artifact).encode(), result.stdout)
                 self.assertEqual(self.target.read_bytes(), BINARY.read_bytes())
                 self.assertEqual(self.target.stat().st_mode & 0o777, 0o755)
-                self.assertEqual(list(self.target.parent.glob('.xsync-install.*')), [])
+                self.assertEqual(list(self.target.parent.glob('.xs-install.*')), [])
                 version = subprocess.run([str(self.target), '--version'], capture_output=True)
                 self.assertEqual(version.returncode, 0)
 
@@ -87,7 +87,7 @@ os.execv('/bin/sh',['sh','-c',sys.argv[-1]])
         result = self.install(env=dict(self.env, XSYNC_TEST_TRUNCATE='1'))
         self.assertNotEqual(result.returncode, 0)
         self.assertEqual(self.target.read_bytes(), previous)
-        self.assertEqual(list(self.target.parent.glob('.xsync-install.*')), [])
+        self.assertEqual(list(self.target.parent.glob('.xs-install.*')), [])
 
     def test_platform_banner_and_missing_artifact(self):
         for env, code in ((dict(self.env, XSYNC_TEST_ARCH='riscv64'), 4),

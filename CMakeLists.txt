@@ -52,6 +52,7 @@ endif()
 add_executable(xsync
   src/main.cpp src/util.cpp src/progress.cpp src/fs.cpp src/filter.cpp
   src/local.cpp src/remote.cpp src/names.cpp src/destination.cpp src/fallback.cpp src/transport.cpp src/install.cpp src/arguments.cpp src/output.cpp src/hardlink.cpp src/delta.cpp src/listing.cpp src/rate_limit.cpp src/selection.cpp src/xattrs.cpp src/xattr_value.cpp src/acls.cpp src/permissions.cpp src/ownership.cpp src/sparse.cpp src/link_dest.cpp)
+set_target_properties(xsync PROPERTIES OUTPUT_NAME xs)
 target_include_directories(xsync PRIVATE src ${ZSTD_INCLUDE_DIR} ${XXHASH_INCLUDE_DIR} ${XSYNC_ICU_INCLUDE_DIR})
 target_link_libraries(xsync PRIVATE ${ZSTD_LIBRARY} Threads::Threads ${XSYNC_ICU_LIBRARIES})
 target_compile_definitions(xsync PRIVATE XSYNC_GIT_HASH="${XSYNC_GIT_HASH}")
@@ -65,22 +66,22 @@ target_compile_options(xsync PRIVATE -Wall -Wextra -Wno-unused-parameter)
 
 include(GNUInstallDirs)
 find_package(Python3 REQUIRED COMPONENTS Interpreter)
-set(XSYNC_MAN_PAGE "${CMAKE_BINARY_DIR}/man/xsync.1")
+set(XSYNC_MAN_PAGE "${CMAKE_BINARY_DIR}/man/xs.1")
 add_custom_command(OUTPUT "${XSYNC_MAN_PAGE}"
   COMMAND ${Python3_EXECUTABLE} "${CMAKE_SOURCE_DIR}/tools/help_to_man.py" "$<TARGET_FILE:xsync>" "${XSYNC_MAN_PAGE}"
   DEPENDS xsync "${CMAKE_SOURCE_DIR}/tools/help_to_man.py" VERBATIM)
 add_custom_target(man-page ALL DEPENDS "${XSYNC_MAN_PAGE}")
 install(TARGETS xsync RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 install(FILES "${XSYNC_MAN_PAGE}" DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
-install(FILES completions/_xsync DESTINATION ${CMAKE_INSTALL_DATADIR}/zsh/site-functions)
+install(FILES completions/_xs DESTINATION ${CMAKE_INSTALL_DATADIR}/zsh/site-functions)
 
 if(EXISTS "${CMAKE_SOURCE_DIR}/dist/manifest.json")
-  foreach(release xsync-linux-amd64 xsync-linux-arm64 xsync-darwin-universal)
+  foreach(release xs-linux-amd64 xs-linux-arm64 xs-darwin-universal)
     if(EXISTS "${CMAKE_SOURCE_DIR}/dist/${release}")
-      install(PROGRAMS "${CMAKE_SOURCE_DIR}/dist/${release}" DESTINATION ${CMAKE_INSTALL_DATADIR}/xsync/releases)
+      install(PROGRAMS "${CMAKE_SOURCE_DIR}/dist/${release}" DESTINATION ${CMAKE_INSTALL_DATADIR}/xs/releases)
     endif()
   endforeach()
-  install(FILES "${CMAKE_SOURCE_DIR}/dist/manifest.json" DESTINATION ${CMAKE_INSTALL_DATADIR}/xsync/releases)
+  install(FILES "${CMAKE_SOURCE_DIR}/dist/manifest.json" DESTINATION ${CMAKE_INSTALL_DATADIR}/xs/releases)
 endif()
 
 if(XSYNC_BUILD_RELEASE_SET)

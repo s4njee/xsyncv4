@@ -1,4 +1,4 @@
-#compdef xsync
+#compdef xs
 
 autoload -Uz _rsync
 
@@ -30,8 +30,8 @@ values=(
   '--install=:explicitly install the matching release on a host'
 )
 if [[ $PREFIX = -* ]]; then
-  _describe -t options 'xsync option' flags && ret=0
-  _describe -t options 'xsync option' values -S '' && ret=0
+  _describe -t options 'xs option' flags && ret=0
+  _describe -t options 'xs option' values -S '' && ret=0
 fi
 _rsync "$@" && ret=0
 return ret

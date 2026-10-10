@@ -120,7 +120,7 @@ class PruneDifferentials(after.AfterDifferentials):
                         command = [str(transfer.BINARY) if native else filters.RSYNC, '-am']
                         if native: command += ['--no-fallback']
                         if direction != 'local':
-                            server = ('/usr/local/bin/xsync' if transfer.HOST else str(transfer.BINARY)) if native else 'rsync'
+                            server = ('/usr/local/bin/xs' if transfer.HOST else str(transfer.BINARY)) if native else 'rsync'
                             command += ['-e', transfer.RSH, '--rsync-path=' + shlex.quote(server)]
                             if direction == 'push': target = (transfer.HOST or 'fake') + ':' + target
                             else: source = (transfer.HOST or 'fake') + ':' + source
@@ -150,7 +150,7 @@ class PruneDifferentials(after.AfterDifferentials):
                             command += ['--filter=' + rule for rule in rules]
                             sources = [str(self.root / root) + ('/' if root.endswith('/') else '') for root in roots]
                             if remote:
-                                server = ('/usr/local/bin/xsync' if transfer.HOST else str(transfer.BINARY)) if native else 'rsync'
+                                server = ('/usr/local/bin/xs' if transfer.HOST else str(transfer.BINARY)) if native else 'rsync'
                                 command += ['-e', transfer.RSH, '--rsync-path=' + shlex.quote(server)]
                                 sources = [(transfer.HOST or 'fake') + ':' + source for source in sources]
                             if len(sources) > 1:

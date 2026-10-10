@@ -72,7 +72,7 @@ class CrossStyleAclTests(unittest.TestCase):
         self.remote('python3', '-c', LINUX_FIXTURE)
         # Explicit --rsync-path is kept by fallback, so this fixture dispatches
         # native and rsync server invocations to their respective binaries.
-        wrapper = '#!/bin/sh\nif [ "$#" = 1 ] && [ "$1" = --server ]; then exec /usr/local/bin/xsync "$@"; fi\nexec /usr/bin/rsync "$@"\n'
+        wrapper = '#!/bin/sh\nif [ "$#" = 1 ] && [ "$1" = --server ]; then exec /usr/local/bin/xs "$@"; fi\nexec /usr/bin/rsync "$@"\n'
         self.remote('python3', '-c', "import pathlib,sys; p=pathlib.Path('/rig/helper'); p.write_text(sys.argv[1]); p.chmod(0o755)", wrapper)
 
     def remote_snapshot(self, path):

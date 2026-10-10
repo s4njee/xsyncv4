@@ -140,16 +140,16 @@ bool fallback_enabled() { return enabled; }
 [[noreturn]] void fallback_to_rsync(const std::string& reason, int strict_code) {
   progress_stop(false);
   if (json_progress) {
-    fprintf(stderr, "xsync: %s; JSON progress requires a native transfer\n", reason.c_str());
+    fprintf(stderr, "xs: %s; JSON progress requires a native transfer\n", reason.c_str());
     std::exit(strict_code);
   }
   if (!enabled) {
-    fprintf(stderr, "xsync: %s (fallback disabled)\n", reason.c_str());
+    fprintf(stderr, "xs: %s (fallback disabled)\n", reason.c_str());
     std::exit(strict_code);
   }
   std::string binary = find_rsync();
   if (binary.empty()) {
-    fprintf(stderr, "xsync: %s; no real rsync executable found in PATH\n", reason.c_str());
+    fprintf(stderr, "xs: %s; no real rsync executable found in PATH\n", reason.c_str());
     std::exit(127);
   }
   // An explicit --rsync-path is a command, and is preserved exactly. If it names
@@ -159,7 +159,7 @@ bool fallback_enabled() { return enabled; }
   args.push_back(nullptr);
   std::string notice = reason;
   for (char& ch : notice) if (ch == '\n' || ch == '\r') ch = ' ';
-  fprintf(stderr, "xsync: falling back to rsync: %s\n", notice.c_str());
+  fprintf(stderr, "xs: falling back to rsync: %s\n", notice.c_str());
   fflush(nullptr);
   if (saved_stdin) {
     if (std::fseek(saved_stdin, 0, SEEK_SET) || dup2(fileno(saved_stdin), STDIN_FILENO) < 0)
@@ -167,6 +167,6 @@ bool fallback_enabled() { return enabled; }
   }
   umask(original_umask);
   execv(binary.c_str(), args.data());
-  fprintf(stderr, "xsync: cannot execute rsync: %s\n", strerror(errno));
+  fprintf(stderr, "xs: cannot execute rsync: %s\n", strerror(errno));
   std::exit(127);
 }

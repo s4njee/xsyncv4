@@ -90,7 +90,7 @@ print(child.pid)
         remote_code("import os,signal,sys,shutil; os.kill(int(sys.argv[1]),signal.SIGTERM); shutil.rmtree(sys.argv[2])", cls.daemon, cls.root)
         cls.scratch.cleanup()
 
-    def command(self, shell, name, program="/usr/local/bin/xsync"):
+    def command(self, shell, name, program="/usr/local/bin/xs"):
         return [BINARY, "-a", "--progress", "-e", shlex.join(shell), "--rsync-path=" + program,
                 str(self.src), HOST + ":" + str(self.root / name)]
 
@@ -144,14 +144,14 @@ print(child.pid)
     def test_shell_stdout_and_stderr(self):
         for message in ("hello", "hi", "welcome to the remote shell\\n"):
             script = self.root / ("banner-" + str(len(message)))
-            program = "#!/bin/sh\nprintf '%s' " + shlex.quote(message) + "\nexec /usr/local/bin/xsync \"$@\"\n"
+            program = "#!/bin/sh\nprintf '%s' " + shlex.quote(message) + "\nexec /usr/local/bin/xs \"$@\"\n"
             remote_code("import pathlib,sys; p=pathlib.Path(sys.argv[1]); p.write_text(sys.argv[2]); p.chmod(0o755)", script, program)
             result = subprocess.run(self.command(SSH, "banner-result", str(script)), capture_output=True, timeout=10)
             self.assertEqual(result.returncode, 2, result.stderr.decode())
             self.assertIn(b"remote shell is printing text", result.stderr)
             self.assertNotIn(ESC + b"[?25l", result.stderr)
         script = self.root / "stderr"
-        program = "#!/bin/sh\nprintf '%s\\n' 'remote stderr stays visible' >&2\nexec /usr/local/bin/xsync \"$@\"\n"
+        program = "#!/bin/sh\nprintf '%s\\n' 'remote stderr stays visible' >&2\nexec /usr/local/bin/xs \"$@\"\n"
         remote_code("import pathlib,sys; p=pathlib.Path(sys.argv[1]); p.write_text(sys.argv[2]); p.chmod(0o755)", script, program)
         result = subprocess.run(self.command(SSH, "stderr-result", str(script)), capture_output=True, timeout=15)
         self.assertEqual(result.returncode, 0, result.stderr.decode())

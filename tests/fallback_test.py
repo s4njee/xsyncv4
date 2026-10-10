@@ -11,7 +11,7 @@ import tempfile
 import unittest
 
 REPO = pathlib.Path(__file__).resolve().parent.parent
-BINARY = pathlib.Path(os.environ.get('XSYNC_TEST_BINARY', REPO / 'build/xsync')).resolve()
+BINARY = pathlib.Path(os.environ.get('XSYNC_TEST_BINARY', REPO / 'build/xs')).resolve()
 SELF_BINARY = pathlib.Path(os.environ.get('XSYNC_TEST_EXECUTABLE', BINARY)).resolve()
 
 

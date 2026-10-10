@@ -94,7 +94,7 @@ class ProgressTests(unittest.TestCase):
         source, dest = str(self.source)+'/', str(self.root/target)+'/'
         args = [str(BINARY), '-a', '--no-fallback', '--no-clone', '--progress', '-j1', '--bwlimit=1024', *flags]
         if direction != 'local':
-            args += ['-e', RSH, '--rsync-path='+shlex.quote('/usr/local/bin/xsync' if HOST else str(BINARY))]
+            args += ['-e', RSH, '--rsync-path='+shlex.quote('/usr/local/bin/xs' if HOST else str(BINARY))]
             if direction == 'push': dest = (HOST or 'fake')+':'+dest
             else: source = (HOST or 'fake')+':'+source
         return args+[source, dest]

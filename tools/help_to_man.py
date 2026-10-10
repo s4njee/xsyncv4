@@ -18,8 +18,8 @@ def generate(binary, output):
         escaped.append(line)
     epoch = int(os.environ.get('SOURCE_DATE_EPOCH', '0'))
     date = datetime.datetime.fromtimestamp(epoch, datetime.timezone.utc).strftime('%Y-%m-%d') if epoch else datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%d')
-    page = f'.TH XSYNC 1 "{date}" "xsync {version}" "User Commands"\n'
-    page += '.SH NAME\nxsync \\- parallel rsync work-alike\n.SH SYNOPSIS AND OPTIONS\n.nf\n'
+    page = f'.TH XS 1 "{date}" "xs {version}" "User Commands"\n'
+    page += '.SH NAME\nxs \\- parallel rsync work-alike\n.SH SYNOPSIS AND OPTIONS\n.nf\n'
     page += '\n'.join(escaped) + '\n.fi\n'
     page += '''.SH ENVIRONMENT
 .TP
@@ -42,7 +42,7 @@ RSYNC_RSH
 Remote shell command when --rsh and XSYNC_RSH are absent.
 .TP
 XSYNC_REMOTE_PATH
-Additional remote executable path, after PATH and ~/.local/bin/xsync.
+Additional remote executable path, after PATH and ~/.local/bin/xs.
 .TP
 XSYNC_RELEASE_DIR
 Directory containing release artifacts for the explicit --install command.

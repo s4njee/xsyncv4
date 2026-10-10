@@ -68,7 +68,7 @@ class RemoteDeltaTests(unittest.TestCase):
         source, destination = str(self.root / 'source'), str(path)
         if direction == 'push': destination = (HOST or 'fake') + ':' + destination
         else: source = (HOST or 'fake') + ':' + source
-        peer = ('/usr/local/bin/xsync' if native else '/usr/bin/rsync') if HOST else str(binary)
+        peer = ('/usr/local/bin/xs' if native else '/usr/bin/rsync') if HOST else str(binary)
         command = [str(binary), '-a', '--stats', '-e', RSH, '--rsync-path=' + shlex.quote(peer), *flags]
         if native: command += ['--no-fallback', '--out-format=%i|%n|%b', '-j4']
         result = subprocess.run(command + [source, destination], capture_output=True, timeout=180)

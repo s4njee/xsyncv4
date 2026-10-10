@@ -10,7 +10,7 @@ import tempfile
 import unittest
 
 REPO = pathlib.Path(__file__).resolve().parent.parent
-BINARY = pathlib.Path(os.environ.get("XSYNC_TEST_BINARY", REPO / "build/xsync")).resolve()
+BINARY = pathlib.Path(os.environ.get("XSYNC_TEST_BINARY", REPO / "build/xs")).resolve()
 SSH = REPO / "tests/fakessh.sh"
 
 
@@ -96,7 +96,7 @@ class MountTests(unittest.TestCase):
                                                           ["-a", "--no-clone", "--atomic", "-j4"]),
                                                 capture_output=True, timeout=10)
                         self.assertEqual(result.returncode, 11, result.stderr.decode())
-                        diagnostics = result.stderr.split(b"xsync: error summary:")[0]
+                        diagnostics = result.stderr.split(b"xs: error summary:")[0]
                         self.assertEqual(diagnostics.lower().count(b"no space left"), 1, result.stderr.decode())
                         self.assertIn(b"error summary: 1 error (showing first 1)", result.stderr)
                         self.assertEqual(list(dst.glob(".large.*")), [])

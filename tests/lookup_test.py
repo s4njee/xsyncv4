@@ -27,17 +27,17 @@ class LookupTests(unittest.TestCase):
             remote_code('''import pathlib,sys
 root=pathlib.Path(sys.argv[1]); (root/'bin').mkdir(parents=True); (root/'bin/sh').symlink_to('/bin/sh')
 (root/'home/.local/bin').mkdir(parents=True)
-for relative,tag in [('bin/xsync','path'),('home/.local/bin/xsync','home'),("env 'program",'env'),('local program','local')]:
- p=root/relative; p.write_text('#!/bin/sh\\necho LOOKUP:'+tag+' >&2\\nexec /usr/local/bin/xsync "$@"\\n'); p.chmod(0o755)
+for relative,tag in [('bin/xs','path'),('home/.local/bin/xs','home'),("env 'program",'env'),('local program','local')]:
+ p=root/relative; p.write_text('#!/bin/sh\\necho LOOKUP:'+tag+' >&2\\nexec /usr/local/bin/xs "$@"\\n'); p.chmod(0o755)
 ''', root)
             try:
                 rsh = shlex.join([sys.executable, '/work/tests/rig/lookup_shell.py'])
                 for case in ('path', 'home', 'env', 'local', 'explicit', 'missing'):
                     with self.subTest(case=case):
                         if case == 'home':
-                            remote_code("import pathlib,sys; (pathlib.Path(sys.argv[1])/'bin/xsync').unlink()", root)
+                            remote_code("import pathlib,sys; (pathlib.Path(sys.argv[1])/'bin/xs').unlink()", root)
                         if case == 'env':
-                            remote_code("import pathlib,sys; (pathlib.Path(sys.argv[1])/'home/.local/bin/xsync').unlink()", root)
+                            remote_code("import pathlib,sys; (pathlib.Path(sys.argv[1])/'home/.local/bin/xs').unlink()", root)
                         config = {'PATH': str(root / 'bin'), 'HOME': str(root / 'home'),
                                   'XSYNC_REMOTE_PATH': str(root / "env 'program")}
                         env = dict(os.environ, XSYNC_TEST_LOOKUP=json.dumps(config))

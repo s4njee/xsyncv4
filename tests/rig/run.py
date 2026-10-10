@@ -41,7 +41,7 @@ def main():
             for module in modules:
                 print("Running " + module + " over real SSH", flush=True)
                 filename, _, method = module.partition(':')
-                docker("exec", "-e", "XSYNC_RIG_HOST=server", "-e", "XSYNC_TEST_BINARY=/usr/local/bin/xsync",
+                docker("exec", "-e", "XSYNC_RIG_HOST=server", "-e", "XSYNC_TEST_BINARY=/usr/local/bin/xs",
                        client, "python3", "/work/tests/" + filename, "-v", *([method] if method else []))
         except Exception:
             if server in created:

@@ -1,15 +1,15 @@
-# xsync
+# xs (xsyncv4)
 
 A fast, parallel rsync work-alike in C++20. Same command line as rsync, a modern live
 progress display, and an engine built for trees of many small files.
 
 ```sh
-xsync -a  src/ dst/                      # local
-xsync -az src/ user@host:/backup/src/    # push over ssh
-xsync -az --delete host:/data/ data/     # pull, mirroring deletions
-xsync -a --progress src/ dst/            # live per-file + whole-transfer progress
-xsync src/                              # list immediate local entries
-xsync -r host:/data/                     # list remote entries recursively
+xs -a  src/ dst/                      # local
+xs -az src/ user@host:/backup/src/    # push over ssh
+xs -az --delete host:/data/ data/     # pull, mirroring deletions
+xs -a --progress src/ dst/            # live per-file + whole-transfer progress
+xs src/                              # list immediate local entries
+xs -r host:/data/                     # list remote entries recursively
 ```
 
 ## Build
@@ -21,10 +21,12 @@ Needs Python 3, a C++20 compiler, CMake, zstd, xxhash and ICU (`brew install zst
 cmake -S . -B build -G Ninja && cmake --build build
 ```
 
-The binary is `build/xsync`. It builds on macOS and Linux (checked with clang 21 and
-gcc 12). Native remote transfers use a common supported xsync protocol on both machines
-(`--rsync-path=/path/to/xsync` if it is not on the remote `PATH`). If the remote
-helper is missing or has no supported protocol in common, xsync re-executes a real
+The executable is named `xs` in every build and installation. The existing
+`XSYNC_*` environment variables and `xsync/config` defaults remain supported.
+The development binary is `build/xs`. It builds on macOS and Linux (checked with clang 21 and
+gcc 12). Native remote transfers use a common supported xs protocol on both machines
+(`--rsync-path=/path/to/xs` if it is not on the remote `PATH`). If the remote
+helper is missing or has no supported protocol in common, xs re-executes a real
 rsync from PATH with one stderr notice. Unsupported rsync options and daemon
 URLs also use this fallback before any transfer. It never installs a helper.
 Use `--no-fallback` or `XSYNC_FALLBACK=0` for strict native-only operation;
@@ -70,7 +72,7 @@ overriding config and `XSYNC_OPTS`; explicit `--progress`/`--no-progress` wins.
 `XSYNC_PROGRESS=auto` leaves config/options and the terminal default in effect.
 `--quiet` suppresses progress along with other non-error messages.
 Fallback passes the effective defaults and original transfer arguments to rsync
-after stripping xsync's extensions. `--help`, `--version` and protocol-server
+after stripping extensions for xs. `--help`, `--version` and protocol-server
 invocations bypass personal defaults; servers use the client's wire options.
 
 ## Install locally
@@ -83,24 +85,24 @@ cmake --install build --prefix "$HOME/.local"
 
 Add that prefix's `bin` to `PATH`. For zsh, put
 `fpath=("$HOME/.local/share/zsh/site-functions" $fpath)` before `compinit` in
-`.zshrc`. The completer uses zsh's rsync completion and adds xsync's extensions.
+`.zshrc`. The completer uses zsh's rsync completion and adds extensions for xs.
 The manual is generated from the built executable's `--help`.
 
 For a local Homebrew tap, generate the source archive and formula from this checkout:
 
 ```sh
 python3 tools/package.py
-brew tap-new xsync/local
-cp dist/homebrew/Formula/xsync.rb "$(brew --repository xsync/local)/Formula/"
-brew install --build-from-source xsync/local/xsync
-brew test xsync/local/xsync
+brew tap-new xs/local
+cp dist/homebrew/Formula/xs.rb "$(brew --repository xs/local)/Formula/"
+brew install --build-from-source xs/local/xs
+brew test xs/local/xs
 ```
 
 If the local tap already exists, skip `tap-new`; use `brew reinstall` to replace an
 installed copy. The generated formula points to this checkout's source archive
 and builds its hash-checked vendored dependencies. No public tap is published.
 Release helpers already present in `dist/` are included under
-`share/xsync/releases/` for explicit remote installation.
+`share/xs/releases/` for explicit remote installation.
 
 ## Release binaries and explicit remote install
 
@@ -112,8 +114,8 @@ cmake --preset release-static
 cmake --build --preset release-static
 ```
 
-The preset creates `dist/xsync-linux-amd64`, `dist/xsync-linux-arm64` and
-`dist/xsync-darwin-universal`, plus a SHA-256 manifest. Linux uses musl and is
+The preset creates `dist/xs-linux-amd64`, `dist/xs-linux-arm64` and
+`dist/xs-darwin-universal`, plus a SHA-256 manifest. Linux uses musl and is
 fully static; macOS contains both architectures and links only Apple system
 libraries. zstd, xxHash and ICU source archives are vendored and hash checked,
 including ICU's Unicode name comparison support. Linux outputs run without
@@ -123,19 +125,19 @@ includes the source Git revision (`-dirty` for modified application sources). Ex
 `-DXSYNC_GIT_HASH=REVISION` to CMake.
 
 ```sh
-build/xsync --install sanjee@neo.local
-build/xsync --install user@host --force  # explicitly replace a newer version
+build/xs --install sanjee@neo.local
+build/xs --install user@host --force  # explicitly replace a newer version
 ```
 
 `--install HOST` probes the host's OS and architecture, chooses the matching
-release, and atomically installs it at `~/.local/bin/xsync`. It refuses newer or
+release, and atomically installs it at `~/.local/bin/xs`. It refuses newer or
 unrecognized existing versions unless `--force` is given. An interrupted or
 invalid upload leaves the previous executable intact. Release files are searched
 beside the local executable, in its sibling `dist/`, or in
-`../share/xsync/releases/`; `XSYNC_RELEASE_DIR` explicitly selects another directory.
+`../share/xs/releases/`; `XSYNC_RELEASE_DIR` explicitly selects another directory.
 Only the install command uploads an executable; transfers never install one.
 
-Normal transfers search the remote PATH for `xsync`, then `~/.local/bin/xsync`,
+Normal transfers search the remote PATH for `xs`, then `~/.local/bin/xs`,
 then the executable named by `XSYNC_REMOTE_PATH` (local environment first,
 otherwise the remote environment). That path can contain spaces or begin `~/`.
 An explicit `--rsync-path` supplies the remote command and bypasses this lookup.
@@ -235,8 +237,8 @@ and sorted by transfer-relative path. A terminal receives events as they finish.
 Progress stays on stderr. `--log-file=FILE` appends exactly the same stdout
 stream, including summaries, without timestamps or prefixes added to the log.
 An empty output format suppresses file lines; `-q` suppresses the stream.
-When an output consumer closes its pipe (for example, `xsync -av SRC DEST | head`),
-xsync stops active copying, cancels the remote peer and exits 13 with a stderr
+When an output consumer closes its pipe (for example, `xs -av SRC DEST | head`),
+xs stops active copying, cancels the remote peer and exits 13 with a stderr
 diagnostic. Cleanup follows the usual interruption policy: temporary outputs
 are removed, or `--partial` retains the completed prefix for a later resume.
 Silent transfers do not require a stdout reader. Other stdout write failures,
@@ -317,7 +319,7 @@ copied on an M1 Max to the same APFS volume. rsync is 3.4.4 from Homebrew.
 These baseline numbers predate the P0 trust fixes and the atomic-write default.
 Rerun the benchmark when comparing the current binary's performance.
 
-| scenario                        | rsync   | xsync      | speed-up |
+| scenario                        | rsync   | xs      | speed-up |
 |---------------------------------|--------:|-----------:|---------:|
 | local `-a`, fresh copy          | 15.02 s | **2.02 s** | 7.4×     |
 | local `-az`, fresh copy         | 15.05 s | **1.97 s** | 7.6×     |
@@ -348,7 +350,7 @@ Things worth knowing when reading these numbers:
 - `-z` is accepted but does nothing for a local copy: there is no wire to compress for.
   rsync does compress and decompress locally, which costs it nothing here because
   creation dominates.
-- A destination filesystem that scales with threads (ext4, XFS) should favour xsync's
+- A destination filesystem that scales with threads (ext4, XFS) should favour xs's
   parallel receiver more than APFS does; that has not been measured here.
 
 ## How it gets its speed
@@ -483,7 +485,7 @@ Supported with rsync's meaning: `-a -r -d -H -X -A -E -U -R -0 -l -L -p -t -g -o
 
 Differences to be aware of:
 
-- **Not wire-compatible.** xsync speaks its own protocol, so it needs xsync on both ends
+- **Not wire-compatible.** xs speaks its own protocol, so it needs xs on both ends
   and delegates rsync daemon transfers (`host::module`, `rsync://`) to rsync.
 - **Large local and remote transfers reuse verified blocks** from an existing
   destination. `-W` requests whole-file transfers; APFS cloning remains preferred
@@ -539,7 +541,7 @@ Differences to be aware of:
   `-L` applies it to regular referents. Older helpers delegate or refuse before
   writes when `-E` requires its negotiated capability. This follows modern
   rsync's executability meaning; Apple's system rsync uses `-E` for extended
-  attributes, for which xsync uses `-X`. Fallback retains the original arguments,
+  attributes, for which xs uses `-X`. Fallback retains the original arguments,
   so system rsync's interpretation also applies after delegation; use
   `--executability` for unambiguous fallback.
 - **Permission overrides.** `--chmod=CHMOD` changes incoming permissions using
@@ -656,7 +658,7 @@ attributes but does not enable recursion: add `-r` to copy directory trees.
 An entry `dir/` also selects its immediate contents without recursion, while
 `dir` selects the directory itself. These defaults do not depend on option order.
 
-For example, `find . -type f -print0 | xsync -a0 --files-from=- ./ host:backup/`
+For example, `find . -type f -print0 | xs -a0 --files-from=- ./ host:backup/`
 copies selected files with their implied parents. Leading slashes in the list
 refer to the source root; `..` components cannot escape that root. Lists travel
 in bounded frames after capability checks. A pulling client validates locally
@@ -668,11 +670,11 @@ command-line files opened after the option; directory merge files use the
 final setting; file lists also use the final setting. `--no-from0` restores line mode.
 For transfers without `--files-from`, ordinary SSH
 helpers retain line mode unless explicitly configured, for example with
-`--rsync-path='xsync --from0'`.
+`--rsync-path='xs --from0'`.
 
 `-R`/`--relative` preserves source path components, creating real implied
 directories with their source attributes. A `/./` component cuts off the
-prefix: `xsync -aR /data/./project/file dest/` creates `dest/project/file`.
+prefix: `xs -aR /data/./project/file dest/` creates `dest/project/file`.
 Selecting an individual file leaves unlisted siblings in its implied parents
 alone, including with `--delete`. `-R` does not enable recursion; use `-r` or
 `-a` to walk explicitly selected directory trees. `--no-relative` restores
@@ -723,19 +725,19 @@ that list. The option requires a complete source walk and negotiates
 `PF_PRUNE_EMPTY` before transfer; helpers missing it refuse or delegate the
 request. `--no-prune-empty-dirs` disables it.
 
-xsync-only options: `-j N`/`--jobs=N` (worker threads; default is the number of
+xs-only options: `-j N`/`--jobs=N` (worker threads; default is the number of
 performance cores), `--no-clone`, `--atomic` (default), `--no-atomic`.
 
 ## Tests
 
-`tests/difftest.py` runs 231 scenarios on macOS through both rsync and xsync and compares the
+`tests/difftest.py` runs 231 scenarios on macOS through both rsync and xs and compares the
 resulting trees (names, types, contents, modes, nanosecond mtimes, symlink targets) and exit
 codes — local and remote, fresh copies and updates, deletions, filters, odd file names,
 permissions, type changes.
 
 ```sh
 XSYNC_FALLBACK=0 python3 tests/difftest.py                  # native clone paths
-XSYNC_FALLBACK=0 python3 tests/difftest.py --xsync tests/xsync-noclone.sh # byte-copy
+XSYNC_FALLBACK=0 python3 tests/difftest.py --xsync tests/xs-noclone.sh # byte-copy
 cmake --build build --target filter_test && build/filter_test
 cmake --build build --target xattr_value_test && build/xattr_value_test
 cmake --build build --target sparse_test && build/sparse_test

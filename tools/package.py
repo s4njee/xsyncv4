@@ -18,10 +18,10 @@ def main():
     if dirty: revision += '-dirty'
     output = REPO / 'dist'
     output.mkdir(exist_ok=True)
-    archive = output / f'xsync-{version}-source.tar.gz'
+    archive = output / f'xs-{version}-source.tar.gz'
     inputs = ['CMakeLists.txt', 'CMakePresets.json', 'README.md', 'backlog.md', 'src', 'cmake', 'tools',
               'completions', 'third_party', 'tests/filter_test.cpp', 'tests/xattr_value_test.cpp', 'tests/sparse_test.cpp']
-    for name in ('xsync-linux-amd64', 'xsync-linux-arm64', 'xsync-darwin-universal', 'manifest.json'):
+    for name in ('xs-linux-amd64', 'xs-linux-arm64', 'xs-darwin-universal', 'manifest.json'):
         if (output / name).is_file(): inputs.append('dist/' + name)
     files = []
     for item in inputs:
@@ -30,13 +30,13 @@ def main():
     with archive.open('wb') as raw, gzip.GzipFile(fileobj=raw, mode='wb', mtime=0, filename='') as compressed:
         with tarfile.open(fileobj=compressed, mode='w') as tar:
             for path in sorted(files):
-                info = tar.gettarinfo(str(path), arcname=f'xsync-{version}/' + str(path.relative_to(REPO)))
+                info = tar.gettarinfo(str(path), arcname=f'xs-{version}/' + str(path.relative_to(REPO)))
                 info.uid = info.gid = info.mtime = 0
                 info.uname = info.gname = ''
                 with path.open('rb') as contents: tar.addfile(info, contents)
     digest = hashlib.sha256(archive.read_bytes()).hexdigest()
     # Generated formula is local to this checkout; no public hosting is inferred.
-    formula = f'''class Xsync < Formula
+    formula = f'''class Xs < Formula
   desc "Parallel rsync work-alike with native SSH transfers and rsync fallback"
   url "{archive.as_uri()}"
   version "{version}"
@@ -57,16 +57,18 @@ def main():
 
   test do
     (testpath/"source").write "installed executable works\\n"
-    system bin/"xsync", "--no-fallback", "-a", testpath/"source", testpath/"destination"
+    system bin/"xs", "--no-fallback", "-a", testpath/"source", testpath/"destination"
     assert_equal (testpath/"source").read, (testpath/"destination").read
-    assert_path_exists man1/"xsync.1"
-    assert_path_exists share/"zsh/site-functions/_xsync"
+    assert_path_exists man1/"xs.1"
+    assert_path_exists share/"zsh/site-functions/_xs"
   end
 end
 '''
-    path = output / 'homebrew/Formula/xsync.rb'
+    path = output / 'homebrew/Formula/xs.rb'
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(formula)
+    (output/f'xsync-{version}-source.tar.gz').unlink(missing_ok=True)
+    (output/'homebrew/Formula/xsync.rb').unlink(missing_ok=True)
     print(f'Source: {archive}\nSHA-256: {digest}\nFormula: {path}')
 
 

@@ -28,7 +28,7 @@ class FilesFromDifferentials(filters.FilterDifferentials):
         elif self.list_mode == 'remote': listpath = ':' + listpath
         elif self.list_mode == 'host': listpath = (transfer.HOST or 'fake') + ':' + listpath
         if direction != 'local':
-            server = ('/usr/local/bin/xsync' if transfer.HOST else str(transfer.BINARY)) if native else 'rsync'
+            server = ('/usr/local/bin/xs' if transfer.HOST else str(transfer.BINARY)) if native else 'rsync'
             command += ['-e', transfer.RSH, '--rsync-path=' + shlex.join([server, *getattr(self, 'server_flags', [])])]
             if direction == 'push': destination = (transfer.HOST or 'fake') + ':' + destination
             else: source = (transfer.HOST or 'fake') + ':' + source
@@ -157,7 +157,7 @@ class FilesFromDifferentials(filters.FilterDifferentials):
                                 source = str(self.root / 'src') + '/'
                                 listpath = str(self.root / 'names') if mode != 'stdin' else '-'
                                 if remote:
-                                    server = ('/usr/local/bin/xsync' if transfer.HOST else str(transfer.BINARY)) if native else 'rsync'
+                                    server = ('/usr/local/bin/xs' if transfer.HOST else str(transfer.BINARY)) if native else 'rsync'
                                     command += ['-e', transfer.RSH, '--rsync-path=' + shlex.quote(server)]
                                     source = (transfer.HOST or 'fake') + ':' + source
                                     if mode == 'remote': listpath = ':' + listpath
@@ -187,7 +187,7 @@ class FilesFromDifferentials(filters.FilterDifferentials):
                         command = [str(transfer.BINARY) if native else RSYNC, '-a', '--files-from=' + str(self.root / list_name)]
                         if native: command += ['--no-fallback']
                         if direction != 'local':
-                            server = ('/usr/local/bin/xsync' if transfer.HOST else str(transfer.BINARY)) if native else 'rsync'
+                            server = ('/usr/local/bin/xs' if transfer.HOST else str(transfer.BINARY)) if native else 'rsync'
                             command += ['-e', transfer.RSH, '--rsync-path=' + shlex.quote(server)]
                             if direction == 'push': destination = (transfer.HOST or 'fake') + ':' + destination
                             else: source = (transfer.HOST or 'fake') + ':' + source

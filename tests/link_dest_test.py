@@ -433,7 +433,7 @@ print(json.dumps(result))'''
                         subprocess.run([RSYNC, '-aHX', '-e', transfer.RSH, str(source) + '/', transfer.HOST + ':' + str(source) + '/'], check=True, capture_output=True)
                     a = (transfer.HOST + ':' if direction == 'pull' else '') + str(source) + '/'
                     remote_prefix = transfer.HOST + ':' if direction == 'push' else ''
-                    args = [str(transfer.BINARY), '--no-fallback', '-aHSX', '--stats', '-e', transfer.RSH, '--rsync-path=/usr/local/bin/xsync']
+                    args = [str(transfer.BINARY), '--no-fallback', '-aHSX', '--stats', '-e', transfer.RSH, '--rsync-path=/usr/local/bin/xs']
                     first = subprocess.run(args + [a, remote_prefix + str(basis) + '/'], capture_output=True, timeout=30)
                     self.assertEqual(first.returncode, 0, first.stderr)
                     def state(path):

@@ -50,7 +50,7 @@ class RelativeDifferentials(filters.FilterDifferentials):
         if delete_excluded: command += ['--delete-excluded']
         command += ['--filter=' + rule for rule in rules]
         if direction != 'local':
-            server = ('/usr/local/bin/xsync' if transfer.HOST else str(transfer.BINARY)) if native else 'rsync'
+            server = ('/usr/local/bin/xs' if transfer.HOST else str(transfer.BINARY)) if native else 'rsync'
             command += ['-e', transfer.RSH, '--rsync-path=' + shlex.quote(server)]
             if direction == 'push': destination = (transfer.HOST or 'fake') + ':' + destination
             else: sources = [(transfer.HOST or 'fake') + ':' + source for source in sources]
@@ -166,7 +166,7 @@ class RelativeDifferentials(filters.FilterDifferentials):
                             if native: command += ['--no-fallback']
                             args = [source.format(root=self.root) for source in sources]
                             if remote:
-                                server = ('/usr/local/bin/xsync' if transfer.HOST else str(transfer.BINARY)) if native else 'rsync'
+                                server = ('/usr/local/bin/xs' if transfer.HOST else str(transfer.BINARY)) if native else 'rsync'
                                 command += ['-e', transfer.RSH, '--rsync-path=' + shlex.quote(server)]
                                 args = [(transfer.HOST or 'fake') + ':' + source for source in args]
                             result = subprocess.run(command + args + [str(self.root / 'unused')], capture_output=True, timeout=20,

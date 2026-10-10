@@ -61,7 +61,7 @@ class HardlinkTests(unittest.TestCase):
         command = [str(binary), '-aH', '-j8' if binary == BINARY else '-i', *flags]
         if binary == BINARY: command += ['--no-fallback', '-i']
         if direction != 'local':
-            peer = '/usr/local/bin/xsync' if HOST and binary == BINARY else '/usr/bin/rsync' if HOST else str(binary)
+            peer = '/usr/local/bin/xs' if HOST and binary == BINARY else '/usr/bin/rsync' if HOST else str(binary)
             command += ['-e', RSH, '--rsync-path=' + shlex.quote(peer)]
             if direction == 'push': dest = (HOST or 'fake') + ':' + dest
             else: source = (HOST or 'fake') + ':' + source

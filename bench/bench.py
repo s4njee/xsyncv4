@@ -29,7 +29,7 @@ def main():
     ap.add_argument("--runs", type=int, default=3)
     ap.add_argument("--only", default="")
     ap.add_argument("--rsync", default="/opt/homebrew/bin/rsync")
-    ap.add_argument("--xsync", default=os.path.join(ROOT, "build", "xsync"))
+    ap.add_argument("--xsync", default=os.path.join(ROOT, "build", "xs"))
     args = ap.parse_args()
 
     src = args.corpus.rstrip("/") + "/"

@@ -13,7 +13,7 @@ import sys
 import unittest
 
 REPO = pathlib.Path(__file__).resolve().parent.parent
-BINARY = pathlib.Path(os.environ.get('XSYNC_TEST_BINARY', REPO / 'build/xsync')).resolve()
+BINARY = pathlib.Path(os.environ.get('XSYNC_TEST_BINARY', REPO / 'build/xs')).resolve()
 HOST = os.environ.get('XSYNC_RIG_HOST')
 SSH = ['ssh', '-i', '/keys/id test', '-oBatchMode=yes', '-oStrictHostKeyChecking=no',
        '-oUserKnownHostsFile=/dev/null', '-oLogLevel=ERROR']
@@ -78,7 +78,7 @@ class ProtocolTests(unittest.TestCase):
             result = subprocess.run(args, capture_output=True, timeout=120)
             if result.returncode:
                 raise RuntimeError(result.stdout.decode(errors='replace') + result.stderr.decode(errors='replace'))
-        return output / 'xsync'
+        return output / ('xs' if (output/'xs').exists() else 'xsync')
 
     @classmethod
     def tearDownClass(cls):
@@ -89,7 +89,7 @@ class ProtocolTests(unittest.TestCase):
 
     def test_mixed_version_push_pull(self):
         for client, server, label in ((BINARY, self.remote_legacy, 'new-old'),
-                                       (self.legacy, '/usr/local/bin/xsync' if HOST else str(BINARY), 'old-new')):
+                                       (self.legacy, '/usr/local/bin/xs' if HOST else str(BINARY), 'old-new')):
             for direction in ('push', 'pull'):
                 with self.subTest(versions=label, direction=direction):
                     root = self.root / (label + direction)

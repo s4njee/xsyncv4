@@ -12,7 +12,7 @@ import tempfile
 import unittest
 
 REPO = pathlib.Path(__file__).resolve().parent.parent
-BINARY = pathlib.Path(os.environ.get("XSYNC_TEST_BINARY", REPO / "build/xsync")).resolve()
+BINARY = pathlib.Path(os.environ.get("XSYNC_TEST_BINARY", REPO / "build/xs")).resolve()
 HEADER = (REPO / "src/common.h").read_text()
 VERSION = int(re.search(r"PROTO_VERSION = (\d+)", HEADER)[1])
 BOOLS = re.findall(r"X\((\w+)\)", HEADER.split("#define WIRE_V3_BOOL_OPTS(X)")[1].split("#define WIRE_V3_INT_OPTS(X)")[0])

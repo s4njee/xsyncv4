@@ -27,7 +27,9 @@ class PackagingTests(unittest.TestCase):
         result = subprocess.run(['cmake', '--install', str(BUILD), '--prefix', str(self.prefix)],
                                 capture_output=True, timeout=15)
         self.assertEqual(result.returncode, 0, result.stderr)
-        self.binary = self.prefix / 'bin/xsync'
+        self.binary = self.prefix / 'bin/xs'
+        self.assertTrue(self.binary.is_file())
+        self.assertFalse((self.prefix/'bin/xsync').exists())
 
     def test_installed_executable_and_manual(self):
         source = self.root / 'source'
@@ -37,7 +39,7 @@ class PackagingTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual((self.root / 'dest').read_bytes(), source.read_bytes())
         self.assertEqual((self.root / 'dest').stat().st_mtime_ns, source.stat().st_mtime_ns)
-        manual = self.prefix / 'share/man/man1/xsync.1'
+        manual = self.prefix / 'share/man/man1/xs.1'
         result = subprocess.run(['mandoc', '-Tlint', str(manual)], capture_output=True, timeout=10)
         self.assertEqual(result.returncode, 0, result.stderr)
         plain = subprocess.check_output(['mandoc', '-Tascii', str(manual)]).decode()
@@ -49,7 +51,9 @@ class PackagingTests(unittest.TestCase):
                        '--chown', '--chmod', '--hard-links', '--xattrs', '--acls',
                        '--atimes', '--crtimes', '--fileflags', '--executability'):
             self.assertIn(option, plain)
-        self.assertTrue((self.prefix / 'share/zsh/site-functions/_xsync').exists())
+        self.assertTrue((self.prefix / 'share/zsh/site-functions/_xs').exists())
+        self.assertFalse((self.prefix / 'share/man/man1/xsync.1').exists())
+        self.assertFalse((self.prefix / 'share/zsh/site-functions/_xsync').exists())
         self.assertFalse((self.prefix / 'include').exists(), 'dependency headers leaked into the package')
         self.assertFalse((self.prefix / 'lib').exists(), 'dependency libraries leaked into the package')
 
@@ -79,10 +83,10 @@ class PackagingTests(unittest.TestCase):
             os.write(master, setup.encode())
             read_until(b'\r\nREADY_R07\r\n')
             for prefix, expected in (('--no-fall', '--no-fallback '), ('--jo', '--jobs='), ('--dry-ru', '--dry-run ')):
-                os.write(master, ('xsync ' + prefix + '\t').encode())
+                os.write(master, ('xs ' + prefix + '\t').encode())
                 # The completion widget runs synchronously before the next key.
                 os.write(master, b'\x18')
-                read_until(('CAPTURE=xsync ' + expected).encode())
+                read_until(('CAPTURE=xs ' + expected).encode())
         finally:
             os.write(master, b'\x04')
             try: proc.wait(timeout=3)

@@ -188,7 +188,7 @@ class XattrDifferentials(unittest.TestCase):
             command += ['--filter=' + rule for rule in rules]
             src, dst = str(self.root) + '/' + source, str(self.root / 'dst') + '/'
             if direction != 'local':
-                server = ('/usr/local/bin/xsync' if transfer.HOST else str(transfer.BINARY)) if native else RSYNC
+                server = ('/usr/local/bin/xs' if transfer.HOST else str(transfer.BINARY)) if native else RSYNC
                 command += ['-e', transfer.RSH, '--rsync-path=' + shlex.quote(server)]
                 if direction == 'push': dst = (transfer.HOST or 'fake') + ':' + dst
                 else: src = (transfer.HOST or 'fake') + ':' + src
@@ -341,7 +341,7 @@ class RemoteXattrDifferentials(XattrDifferentials):
                 if direction == 'push': dst = (transfer.HOST or 'fake') + ':' + dst
                 else: src = (transfer.HOST or 'fake') + ':' + src
                 command = [str(transfer.BINARY), '--no-fallback', '-aXii', '--out-format=%i|%n', '-e', transfer.RSH,
-                           '--rsync-path=' + shlex.quote('/usr/local/bin/xsync' if transfer.HOST else str(transfer.BINARY)), src, dst]
+                           '--rsync-path=' + shlex.quote('/usr/local/bin/xs' if transfer.HOST else str(transfer.BINARY)), src, dst]
                 result = subprocess.run(command, capture_output=True, timeout=30)
                 self.assertEqual(result.returncode, 0, result.stderr)
                 self.assertNotIn(b'x|', result.stdout)

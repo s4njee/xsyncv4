@@ -35,7 +35,7 @@ class PhaseProgressTests(unittest.TestCase):
             if HOST:
                 rsh = RSH
                 variables = [k + '=' + v for k, v in env.items() if k.startswith('XSYNC_FAULT_')]
-                peer = shlex.join(['env', 'LD_PRELOAD=/work/build/fault_io.so', *variables, '/usr/local/bin/xsync'])
+                peer = shlex.join(['env', 'LD_PRELOAD=/work/build/fault_io.so', *variables, '/usr/local/bin/xs'])
             args += ['-e', rsh, '--rsync-path=' + peer]
             if direction == 'push': dest = (HOST or 'fake') + ':' + dest
             else:

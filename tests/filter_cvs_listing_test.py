@@ -31,7 +31,7 @@ class CvsListingTests(unittest.TestCase):
                 with self.subTest(remote=remote, flags=flags, rules=rules):
                     results = []
                     for native in (False, True):
-                        server = ('/usr/local/bin/xsync' if filters.transfer.HOST else str(filters.transfer.BINARY)) if native else 'rsync'
+                        server = ('/usr/local/bin/xs' if filters.transfer.HOST else str(filters.transfer.BINARY)) if native else 'rsync'
                         command = [str(filters.transfer.BINARY) if native else filters.RSYNC, '-rl', *flags]
                         if native: command += ['--no-fallback']
                         command += ['--filter=' + rule for rule in rules]

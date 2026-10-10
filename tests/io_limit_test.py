@@ -79,7 +79,7 @@ class IOLimitTests(unittest.TestCase):
         dest = str(self.root/(name or direction))+'/'
         args = [str(BINARY), '--no-fallback', '-a', '--no-clone', '-j8', *flags]
         if direction != 'local':
-            args += ['-e', RSH, '--rsync-path='+shlex.quote('/usr/local/bin/xsync' if HOST else str(BINARY))]
+            args += ['-e', RSH, '--rsync-path='+shlex.quote('/usr/local/bin/xs' if HOST else str(BINARY))]
             if direction == 'push': dest = (HOST or 'fake')+':'+dest
             else: source = (HOST or 'fake')+':'+source
         return args+[source,dest]
@@ -123,7 +123,7 @@ class IOLimitTests(unittest.TestCase):
             else:source=(HOST or 'fake')+':'+source
             start=time.monotonic()
             result=subprocess.run([str(BINARY),'--no-fallback','-azW','--bwlimit=128','--timeout=1',
-                                   '-e',RSH,'--rsync-path='+shlex.quote('/usr/local/bin/xsync' if HOST else str(BINARY)),source,target],
+                                   '-e',RSH,'--rsync-path='+shlex.quote('/usr/local/bin/xs' if HOST else str(BINARY)),source,target],
                                   capture_output=True,env=ENV,timeout=8)
             self.assertEqual(result.returncode,0,result.stderr)
             # Three MiB of content would take 24 seconds if charged before zstd.

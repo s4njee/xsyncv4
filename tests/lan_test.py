@@ -13,7 +13,7 @@ import tempfile
 import unittest
 
 REPO = pathlib.Path(__file__).resolve().parent.parent
-BINARY = pathlib.Path(os.environ.get('XSYNC_TEST_BINARY', REPO / 'build/xsync')).resolve()
+BINARY = pathlib.Path(os.environ.get('XSYNC_TEST_BINARY', REPO / 'build/xs')).resolve()
 HOST = os.environ.get('XSYNC_LAN_HOST')
 NATIVE = os.environ.get('XSYNC_LAN_NATIVE') == '1'
 SSH = ['ssh', '-oBatchMode=yes', '-oConnectTimeout=8']
@@ -30,7 +30,7 @@ class LANTests(unittest.TestCase):
     def test_missing_helper_fallback(self):
         if NATIVE:
             self.skipTest('native checklist selected')
-        helper = self.remote("import shutil; print(shutil.which('xsync') or '')")
+        helper = self.remote("import shutil; print(shutil.which('xs') or '')")
         if helper:
             self.skipTest('remote xsync already installed; use the native LAN checklist')
         remote_root = self.remote("import tempfile; print(tempfile.mkdtemp(prefix='xsync-lan-'))")
@@ -121,7 +121,7 @@ print(json.dumps(tree,sort_keys=True))
                     self.assertEqual(expected, remote_tree)
                     for stream, code in (('stdout', 2), ('stderr', 0)):
                         command = "printf 'LAN shell banner\\n'" + (' >&2' if stream == 'stderr' else '')
-                        command += '; exec "$HOME/.local/bin/xsync"'
+                        command += '; exec "$HOME/.local/bin/xs"'
                         result = subprocess.run([*flags, '--rsync-path=' + command, str(source) + '/', target],
                                                 capture_output=True, timeout=25)
                         self.assertEqual(result.returncode, code, result.stderr)

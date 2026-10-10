@@ -131,7 +131,7 @@ class MergeDifferentials(global_filters.FilterDifferentials):
                             command = [str(transfer.BINARY) if native else RSYNC, '-rl', '--filter=' + rule]
                             if native: command += ['--no-fallback']
                             if remote:
-                                server = ('/usr/local/bin/xsync' if transfer.HOST else str(transfer.BINARY)) if native else 'rsync'
+                                server = ('/usr/local/bin/xs' if transfer.HOST else str(transfer.BINARY)) if native else 'rsync'
                                 command += ['-e', transfer.RSH, '--rsync-path=' + shlex.quote(server)]
                             args = [(transfer.HOST or 'fake') + ':' + path if remote else path for path in sources]
                             if len(sources) > 1:

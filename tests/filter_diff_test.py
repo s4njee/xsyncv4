@@ -68,7 +68,7 @@ class FilterDifferentials(unittest.TestCase):
         if delete_excluded: command.append('--delete-excluded')
         command += ['--filter=' + rule for rule in rules]
         if direction != 'local':
-            server = ('/usr/local/bin/xsync' if transfer.HOST else str(transfer.BINARY)) if native else 'rsync'
+            server = ('/usr/local/bin/xs' if transfer.HOST else str(transfer.BINARY)) if native else 'rsync'
             server_command = shlex.quote(server)
             if getattr(self, 'server_flags', None): server_command += ' ' + shlex.join(self.server_flags)
             if getattr(self, 'server_env', None):

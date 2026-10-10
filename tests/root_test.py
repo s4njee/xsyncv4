@@ -107,7 +107,7 @@ class RootTests(unittest.TestCase):
                             source_snapshot = remote_json if direction == 'pull' else lambda code, path: json.loads(local_code(code, path))
                             before = source_snapshot(ACL_SNAPSHOT, root / 'src')
                             results = []
-                            for tool, destination in (('/usr/bin/rsync', 'ref'), ('/usr/local/bin/xsync', 'got')):
+                            for tool, destination in (('/usr/bin/rsync', 'ref'), ('/usr/local/bin/xs', 'got')):
                                 source, target = str(root / 'src') + '/', str(root / destination) + '/'
                                 command = [tool, '-i', '--out-format=%i|%n', *flags]
                                 if tool.endswith('xsync'): command += ['--no-fallback', '--no-clone', '-j8']
@@ -159,7 +159,7 @@ class RootTests(unittest.TestCase):
                                 else: local_code(code, root)
                             src = str(root / "src") + "/"
                             for tool, destname in (("rsync", "ref"), ("xsync", "got")):
-                                path = "/usr/bin/rsync" if tool == "rsync" else "/usr/local/bin/xsync"
+                                path = "/usr/bin/rsync" if tool == "rsync" else "/usr/local/bin/xs"
                                 command = [path, *flags]
                                 dest = str(root / destname) + "/"
                                 if transport != "local":

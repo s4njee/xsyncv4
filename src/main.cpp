@@ -1,4 +1,4 @@
-// xsync — rsync-compatible command line front end.
+// xs — rsync-compatible command line front end.
 #include <sys/stat.h>
 #include <unistd.h>
 
@@ -27,13 +27,13 @@ namespace {
   if (msg.find("not supported") != std::string::npos || msg.rfind("unsupported", 0) == 0 ||
       msg.rfind("--info supports", 0) == 0 || msg.find("supports only zstd or none") != std::string::npos)
     fallback_to_rsync(msg);
-  fprintf(stderr, "xsync: %s\nxsync error: syntax or usage error (code 1)\n", msg.c_str());
+  fprintf(stderr, "xs: %s\nxs error: syntax or usage error (code 1)\n", msg.c_str());
   exit(RERR_SYNTAX);
 }
 
 void print_version() {
-  printf("xsync  version %s  protocol version %u  git %s\n", XSYNC_VERSION, PROTO_VERSION, XSYNC_GIT_HASH);
-  printf("A fast, parallel rsync work-alike. Native transfers use xsync on both ends;\n"
+  printf("xs  version %s  protocol version %u  git %s\n", XSYNC_VERSION, PROTO_VERSION, XSYNC_GIT_HASH);
+  printf("A fast, parallel rsync work-alike. Native transfers use xs on both ends;\n"
          "missing remote support falls back to rsync unless --no-fallback is set.\n");
   if (ferror(stdout)) { output_failure(errno); exit_signal(); }
 }
@@ -41,10 +41,10 @@ void print_version() {
 void print_help() {
   print_version();
   fputs(R"(
-Usage: xsync [OPTION]... SRC [SRC]... DEST
-  or   xsync [OPTION]... SRC
-  or   xsync [OPTION]... SRC [SRC]... [USER@]HOST:DEST
-  or   xsync [OPTION]... [USER@]HOST:SRC [DEST]
+Usage: xs [OPTION]... SRC [SRC]... DEST
+  or   xs [OPTION]... SRC
+  or   xs [OPTION]... SRC [SRC]... [USER@]HOST:DEST
+  or   xs [OPTION]... [USER@]HOST:SRC [DEST]
 
 Options (same meaning as rsync):
  -v, --verbose            increase verbosity
@@ -83,7 +83,7 @@ Options (same meaning as rsync):
      --no-whole-file      enable verified-prefix resume again
  -x, --one-file-system    don't cross filesystem boundaries
  -e, --rsh=COMMAND        specify the remote shell to use
-     --rsync-path=PROGRAM specify the xsync to run on the remote machine
+     --rsync-path=PROGRAM specify the xs to run on the remote machine
      --no-fallback        fail instead of re-executing rsync for missing support
      --fallback           enable fallback (overrides XSYNC_FALLBACK=0)
      --existing           skip creating new files on receiver
@@ -135,7 +135,7 @@ Documented compatibility no-ops:
                           transport polling handles either pipe mode internally
      --no-motd            no daemon transport or daemon greeting exists
 
-xsync extensions:
+xs extensions:
      --install=HOST       explicitly install the matching release at ~/.local/bin
                           refuses newer versions unless --force is supplied
  -j, --jobs=N             number of worker threads (default: performance cores)
@@ -378,7 +378,7 @@ Parsed parse(int argc, char** argv) {
           "ipv4", "ipv6", "msgs2stderr", "no-msgs2stderr", "new-compress", "old-compress", "no-implied-dirs",
           "implied-dirs"};
       for (const char* u : unsupported)
-        if (name == u) usage_error("--" + name + " is not supported by xsync");
+        if (name == u) usage_error("--" + name + " is not supported by xs");
       usage_error("--" + name + ": unknown option");
     }
   };
@@ -443,8 +443,8 @@ Parsed parse(int argc, char** argv) {
         case 's': break;  // documented compatibility no-op
         case '8': o.raw_names = true; break;
         case 'S': o.sparse = true; break;
-        case '4': usage_error("--ipv4 is not supported by xsync");
-        case '6': usage_error("--ipv6 is not supported by xsync");
+        case '4': usage_error("--ipv4 is not supported by xs");
+        case '6': usage_error("--ipv6 is not supported by xs");
         case 'e': o.rsh = need(); o.rsh_set = true; break;
         case 'j': o.jobs = atoi(need().c_str()); break;
         case '@': o.modify_window = atoi(need().c_str()); break;
@@ -452,14 +452,14 @@ Parsed parse(int argc, char** argv) {
           if (!o.filters.add_filter(need(), &err)) usage_error(err);
           break;
         case 'V': print_version(); exit(0);
-        case 'B': usage_error("--block-size is not supported by xsync");
-        case 'T': usage_error("--temp-dir is not supported by xsync");
-        case 'M': usage_error("--remote-option is not supported by xsync");
+        case 'B': usage_error("--block-size is not supported by xs");
+        case 'T': usage_error("--temp-dir is not supported by xs");
+        case 'M': usage_error("--remote-option is not supported by xs");
         case 'H': o.hard_links = true; break;
         case 'A': o.acls = o.perms = true; break;
         case 'X': o.xattrs = std::min(o.xattrs + 1, 2); break;
         case 'R': o.relative = true; relative_explicit = true; break;
-        case 'b': usage_error("--backup is not supported by xsync");
+        case 'b': usage_error("--backup is not supported by xs");
         case 'C': o.cvs_exclude = true; break;
         case 'F':
           if (++filter_files == 1) {
@@ -467,7 +467,7 @@ Parsed parse(int argc, char** argv) {
           } else if (filter_files == 2) o.filters.add_pattern(".rsync-filter", false);
           break;
         case 'm': o.prune_empty = true; break;
-        case 'y': usage_error("--fuzzy is not supported by xsync");
+        case 'y': usage_error("--fuzzy is not supported by xs");
         default: usage_error(std::string("-") + c + ": unknown option");
       }
     }
@@ -600,7 +600,7 @@ int main(int argc, char** argv) {
 
   if (p.args.empty()) {
     print_help();
-    fprintf(stderr, "xsync error: syntax or usage error (code 1)\n");
+    fprintf(stderr, "xs error: syntax or usage error (code 1)\n");
     return RERR_SYNTAX;
   }
   std::string dest = p.args.size() == 1 ? "" : p.args.back();
@@ -609,10 +609,10 @@ int main(int argc, char** argv) {
   bool remote_dest = !g_opt.list_only && destination.remote, remote_src = false;
   for (auto& s : srcs) {
     RemoteSpec source = parse_remote_spec(s);
-    if (source.daemon) usage_error("rsync daemon transfers are not supported by xsync");
+    if (source.daemon) usage_error("rsync daemon transfers are not supported by xs");
     remote_src |= source.remote;
   }
-  if (destination.daemon && !g_opt.list_only) usage_error("rsync daemon transfers are not supported by xsync");
+  if (destination.daemon && !g_opt.list_only) usage_error("rsync daemon transfers are not supported by xs");
   if (g_opt.files_from_set) {
     if (p.args.size() < 2) usage_error("--files-from requires a source directory and a destination");
     if (srcs.size() != 1) usage_error("--files-from requires exactly one source directory");
@@ -638,8 +638,8 @@ int main(int argc, char** argv) {
   if (!rc) rc = g_exit_code.load();
   fflush(stdout);
   print_error_summary();
-  if (rc == RERR_VANISHED) fprintf(stderr, "xsync warning: %s (code %d)\n", rerr_name(rc), rc);
-  else if (rc) fprintf(stderr, "xsync error: %s (code %d)\n", rerr_name(rc), rc);
+  if (rc == RERR_VANISHED) fprintf(stderr, "xs warning: %s (code %d)\n", rerr_name(rc), rc);
+  else if (rc) fprintf(stderr, "xs error: %s (code %d)\n", rerr_name(rc), rc);
   if (rc == RERR_SIGNAL) _exit(rc);  // workers may still be parked in syscalls
   return rc;
 }

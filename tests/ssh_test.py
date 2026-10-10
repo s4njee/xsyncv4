@@ -18,7 +18,7 @@ import time
 import unittest
 
 HOST = os.environ.get("XSYNC_RIG_HOST")
-BINARY = os.environ.get("XSYNC_TEST_BINARY", "/usr/local/bin/xsync")
+BINARY = os.environ.get("XSYNC_TEST_BINARY", "/usr/local/bin/xs")
 SSH = ["ssh", "-i", "/keys/id test", "-oBatchMode=yes", "-oStrictHostKeyChecking=no",
        "-oUserKnownHostsFile=/dev/null", "-oLogLevel=ERROR"]
 RSH = shlex.join(SSH)

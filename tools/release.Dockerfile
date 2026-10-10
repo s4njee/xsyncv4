@@ -20,6 +20,6 @@ RUN cmake -S . -B /tmp/build -G Ninja -DCMAKE_BUILD_TYPE=Release \
     && cmake --build /tmp/build -j8 \
     && cmake --build /tmp/build --target xattr_value_test -j8 && /tmp/build/xattr_value_test \
     && cmake --build /tmp/build --target sparse_test -j8 && /tmp/build/sparse_test \
-    && mkdir /release && cp /tmp/build/xsync /release/xsync && /release/xsync --version
+    && mkdir /release && cp /tmp/build/xs /release/xs && /release/xs --version
 FROM scratch
-COPY --from=build /release/xsync /xsync
+COPY --from=build /release/xs /xs

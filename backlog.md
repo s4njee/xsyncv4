@@ -2950,3 +2950,23 @@ Verified artifact manifest (source `864bd37edf14`):
 - U-01 manual GUI checks were reported passed by the user on 2026-10-10. The
   saved evidence path is requested so the screenshots can be inspected and
   the terminal checklist completed. U-01 remains partial pending that entry.
+
+
+## Executable rename requested — 2026-10-10
+
+- All final executable outputs are now named `xs`: CMake builds/installs
+  `xs`, the manual is `xs.1`, and zsh completion is `_xs`. Version/help and
+  diagnostics use the command name. The release set is
+  `xs-darwin-universal`, `xs-linux-amd64`, `xs-linux-arm64`; source packaging
+  and the local Homebrew formula use `xs` too. Successful generation retires
+  the previous generated release/archive/formula names.
+- Explicit remote installation publishes `~/.local/bin/xs`; native transfers
+  discover `xs` on PATH, then in that user-local path. An explicit
+  `--rsync-path` can continue to select an older helper. Existing `XSYNC_*`
+  environment/config settings and the wire protocol are unchanged.
+- Documentation, installer fixtures, SSH rig, differential harness, benchmark
+  defaults and command-path tests are updated. Disposable-prefix packaging
+  verifies only `xs` is installed and its manual and live zsh completion work.
+- The user requested a new GitHub repository named `xsyncv4` and a push after
+  P2 is complete. The authenticated owner is `s4njee`; that repository does
+  not currently exist. GUI evidence for U-01 remains pending.
