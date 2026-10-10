@@ -103,12 +103,13 @@ coverage clarification remains open.
 
 ## P2 — Progress and feel: the reason to switch
 
-The display has automated PTY, tmux and real-SSH checks. Native GUI visual
-coverage is tracked in `tests/progress-terminal.md` and remains incomplete.
+P2 is closed: U-02 through U-11 are complete. U-01 is skipped at the user’s
+request on 2026-10-10. Automated PTY, tmux and real-SSH coverage passes; the
+unreviewed GUI evidence is recorded in `tests/progress-terminal.md`.
 
 | ID | Item | Status | Done when | Size |
 |---|---|---|---|---|
-| U-01 | **Real-terminal pass.** Terminal.app, iTerm, tmux, over ssh, narrow widths, resize mid-run, light themes, `TERM=dumb`, non-UTF-8 locales (needs an ASCII bar fallback). | partial | Checklist with screenshots; SIGWINCH handled; ASCII fallback when `LC_CTYPE` is not UTF-8. | M |
+| U-01 | **Real-terminal pass.** Terminal.app, iTerm, tmux, over ssh, narrow widths, resize mid-run, light themes, `TERM=dumb`, non-UTF-8 locales (needs an ASCII bar fallback). | **skipped — user request** | Checklist with screenshots; SIGWINCH handled; ASCII fallback when `LC_CTYPE` is not UTF-8. | M |
 | U-02 | **Rows are noise for small files.** At 12,000 files/s each row shows a random file at 0 % or 100 %. | **done** | Rows are reserved for files that have been in flight for more than ~200 ms; small files collapse into one "small files" row with a rate. Large files show their own speed and ETA. | M |
 | U-03 | **Clone mode shows nothing per file.** Whole directories complete in one call, so the rows stay empty and the bar moves in jumps. | **done** | Rows show the directory being cloned; the bar advances per directory. | S |
 | U-04 | **Push progress counts bytes read, not bytes landed.** The bar can sit at 100 % while the receiver is still writing. | **done** | Receiver acknowledges completed bytes; the client bar reflects acknowledged work, with "sent" shown separately. | M |
@@ -3013,3 +3014,20 @@ Verified artifact manifest (source `864bd37edf14`):
 
 Packaging is refreshed after this entry. GitHub creation/push remains queued
 after U-01's evidence entry completes P2, as requested by the user.
+
+
+## P2 closed — 2026-10-10: U-01 excluded by user request
+
+- The user explicitly instructed “ignore U-01.” U-01 is skipped, without
+  claiming its screenshot acceptance was completed. The reported manual pass
+  and existing automated coverage remain recorded in the terminal checklist.
+- **P2 closed: 10 stories complete, 1 skipped at user request.** U-02 through
+  U-11 meet their acceptance criteria. The saved U-01 evidence path is no
+  longer required for this work.
+- Executable, release, manual, completion, archive and Homebrew outputs use
+  `xs`. Release hashes and platform/protocol/differential acceptance are
+  recorded in the preceding U-11 entry. Packaging and the development build
+  are verified; old final executable names have been removed.
+- Proceeding with the user-authorized creation of private GitHub repository
+  `s4njee/xsyncv4` and push of the committed project history. Unrelated local
+  untracked GUI work is not part of this push.

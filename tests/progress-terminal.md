@@ -1,8 +1,9 @@
 # Progress terminal verification
 
-U-01 is **partial** as of 2026-10-10. Automated checks pass; native GUI
-visual pass was reported successful by the user; its saved evidence path
-is pending inspection.
+U-01 is **skipped at the user’s request** as of 2026-10-10. Automated checks
+pass, and the manual GUI visual pass was reported successful by the user.
+Saved screenshots and terminal versions have not been inspected; they are
+not required to close the current P2 work.
 
 Run `python3 tests/progress_test.py -v` for local PTY/tmux checks, and
 `tests/ssh-rig.sh progress_test.py` for the isolated Linux real-SSH checks.
@@ -18,14 +19,14 @@ Each run uses disposable transfer directories and removes its own tmux server.
 | `NO_COLOR=1`, resize then interrupt | Pass: no SGR colors, cursor restored, exit 20 |
 | tmux 3.7b, 120 → 18 → 90 columns | Pass: pre-transfer sentinel survives, no stale live bars after completion, cursor visible |
 | Push over real SSH, Linux arm64 | Pass: same client renderer and cursor cleanup; no GUI terminal attached |
-| Terminal.app, dark and light profiles | User reported manual pass on 2026-10-10; screenshots/version evidence path pending |
-| iTerm, dark and light profiles | User reported manual pass on 2026-10-10; screenshots/version evidence path pending |
+| Terminal.app, dark and light profiles | User reported manual pass on 2026-10-10; saved screenshots/versions unreviewed; waived for current P2 |
+| iTerm, dark and light profiles | User reported manual pass on 2026-10-10; saved screenshots/versions unreviewed; waived for current P2 |
 
 Local log: `/tmp/xsync-u01-pty2.log` (6 methods); real SSH log:
 `/tmp/xsync-u01-real-ssh.log` (5 methods, tmux unavailable in the rig).
 Output regression log: `/tmp/xsync-u01-output.log` (10 methods).
 
-For the remaining visual pass, create a disposable source with a large file,
+If U-01 is revisited, create a disposable source with a large file,
 then run the development binary with `-a --no-clone --progress --bwlimit=512`.
 Capture a frame at 80 columns, a narrow frame, and a light-profile frame. Resize
 while transferring; verify earlier output survives, rows do not wrap, and the
