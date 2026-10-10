@@ -3771,3 +3771,16 @@ after U-01's evidence entry completes P2, as requested by the user.
   nearly full. Host load and both filesystem metadata are recorded; this
   comparison does not alone isolate physical backing-store fullness. Results
   and filesystem worker selection remain pending. F-07 stays partial.
+
+### F-09 freya local memory measurement passed — 2026-10-10
+
+- The clean ed8b84137035 native product copies all 5,000,000 regular files and
+  passes independent rsync checksum/metadata verification. Its measured process
+  peak is 49,598,464 bytes (47.3 MiB), below the stated 512 MiB limit.
+- One fresh sample per tool takes xs 242.60 s and rsync 368.79 s. This qualifies
+  the tested local memory case; it is not a repeated throughput median. Complete
+  JSON, transfer output and the frozen products' source identities/hashes are
+  retained in `benchmarks/results/20261010-f09-*`.
+- Neo's fixture preparation remains queued behind the ext4 comparison. Pi-local
+  and paired measurements, including the receiving endpoint's peak, remain
+  required. F-09 stays partial.

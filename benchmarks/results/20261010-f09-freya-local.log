@@ -1,0 +1,17 @@
+lto-wrapper: warning: using serial compilation of 16 LTRANS jobs
+lto-wrapper: note: see the '-flto' option documentation for more information
+xs  version 0.1.0  protocol version 4  git ed8b84137035
+A fast, parallel rsync work-alike. Native transfers use xs on both ends;
+missing remote support falls back to rsync unless --no-fallback is set.
+large-tree-ed8 push fresh rsync 1/1: 368.793s verified
+large-tree-ed8 push fresh xs 1/1: 242.596s verified
+[
+  {
+    "scenario": "fresh",
+    "median_seconds": {
+      "rsync": 368.79276041919366,
+      "xs": 242.59597366396338
+    },
+    "xs_speedup": 1.5201932449630604
+  }
+]

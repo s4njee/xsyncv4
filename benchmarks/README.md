@@ -99,7 +99,11 @@ Run local and paired `run.py --scenarios fresh` cases separately after other
 physical-host benchmarks finish. Each copy needs independent checksum/metadata
 verification. The stated F-09 budget is 512 MiB per measured xs process peak;
 this is not the summed simultaneous RSS across SSH and both endpoints. The
-five-million-file measurements remain pending.
+first [five-million-file local copy on freya](results/20261010-f09-freya-local.json)
+completes and passes independent verification. The clean ed8b84137035 product
+peaks at 47.3 MiB and takes 242.60 s; rsync takes 368.79 s. These are one sample
+per tool for memory qualification, not repeated throughput medians. Pi-local
+and paired endpoint measurements remain pending.
 
 `path_walks.py` compares the old anchored destination walk with descriptor reuse
 at one, two, four and eight workers, plus rsync. It measures fresh byte copies

@@ -1,0 +1,19 @@
+{
+  "utc": "2026-10-10T20:50:00.901648+00:00",
+  "source_revision": "ed8b84137035db210118b9977d94d42cbfa1d791",
+  "source_archive_sha256": "bf008b455a4ede4f2869486fde01d48c75bf289d3cc7870df1fe3468deed27e7",
+  "fixture_harness_sha256": "5f4851cd5fdb9f5c7ae211e1fba8a7106598b141b5c2504eb1cf2b1f73e5e0ac",
+  "rss_limit_mib_per_measured_xs_process": 512,
+  "products": {
+    "neo": {
+      "sha256": "567c35f9c108243104ab35305668b597452db7dd376a613e7b1c7e7a49ee704a",
+      "version": "xs  version 0.1.0  protocol version 4  git ed8b84137035",
+      "build": "Release static musl, CMake/Ninja, O3/LTO"
+    },
+    "freya": {
+      "sha256": "c9525ea30565e7801587a5170ff5e6183bdb683410f852c7990facdb2b15d5b6",
+      "version": "xs  version 0.1.0  protocol version 4  git ed8b84137035",
+      "build": "Native GCC 16.2.1, C++20, O3/DNDEBUG/LTO/pthread, system zstd 1.5.7 and ICU 78.3"
+    }
+  }
+}
