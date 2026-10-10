@@ -312,6 +312,32 @@ against rsync on edited 64 MiB and 2 GiB files, with a maximum ratio of 1.20.
 
 ## Benchmark
 
+Current SSH measurements use neo (Raspberry Pi 5, ext4) and freya (Ryzen 7950X,
+ZFS), each with a 1 Gb/s NIC. Source revision `415900091024`, three samples per
+tool, alternating order; every sample passed a checksum rsync dry run. These
+runs retain existing OS caches. Cold-cache and full-corpus results are pending.
+
+| Dataset / direction | Flags | rsync median | xs median | Speedup |
+|---|---|---:|---:|---:|
+| 10,002 files, 578 MB, neo → freya | `-a` | 5.422 s | 5.388 s | 1.01× |
+| 10,002 files, 578 MB, freya → neo | `-a` | 5.455 s | 5.249 s | 1.04× |
+| 10,002 files, 578 MB, neo → freya | `-az` | 3.538 s | 3.149 s | 1.12× |
+| 10,002 files, 578 MB, freya → neo | `-az` | 3.548 s | 2.777 s | 1.28× |
+| Two files, 2 GiB, neo → freya | `-a` | 18.716 s | 18.795 s | 1.00× |
+| Two files, 2 GiB, freya → neo | `-a` | 18.605 s | 18.625 s | 1.00× |
+| Two files, 2 GiB, freya → neo | `-az` | 11.607 s | 9.652 s | 1.20× |
+| One file, 19 bytes, neo → freya | `-a` | 0.186 s | 0.163 s | 1.14× |
+| One file, 19 bytes, freya → neo | `-a` | 0.159 s | 0.166 s | 0.96× |
+
+The available data-only Congress snapshot contains 914,106 files, 417,408
+directories and 10,528,134,423 logical bytes (10.53 GB), rather than the
+historical 14 GB estimate. A separate update fixture changes 9,141 files.
+See [benchmark instructions](benchmarks/README.md) and the
+[complete result table and JSON evidence](benchmarks/results/20261010T144748Z-715fa0-summary.md).
+`bench/bench.py --target host:absolute-root` runs the SSH harness.
+
+### Historical local baseline
+
 `bench/bench.py`, 3 runs per tool, best time shown. Corpus: the 109th Congress slice of the
 congress data (76,838 files in 19,073 directories, 494 MiB of content, average file 6.4 KiB),
 copied on an M1 Max to the same APFS volume. rsync is 3.4.4 from Homebrew.

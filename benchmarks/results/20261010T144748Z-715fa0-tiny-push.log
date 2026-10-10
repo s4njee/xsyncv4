@@ -1,0 +1,16 @@
+tiny push tiny rsync 1/3: 0.185s verified
+tiny push tiny xs 1/3: 0.163s verified
+tiny push tiny xs 2/3: 0.162s verified
+tiny push tiny rsync 2/3: 0.186s verified
+tiny push tiny rsync 3/3: 0.187s verified
+tiny push tiny xs 3/3: 0.164s verified
+[
+  {
+    "scenario": "tiny",
+    "median_seconds": {
+      "rsync": 0.18623495195060968,
+      "xs": 0.16330044995993376
+    },
+    "xs_speedup": 1.1404435933661112
+  }
+]

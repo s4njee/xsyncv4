@@ -29,3 +29,28 @@ The initial Congress-slice/APFS table in the main README is historical. New
 measurements identify source revisions, architectures, filesystems, corpus
 sizes, tool versions and verification outcomes. They must not be merged with
 old results without those labels.
+
+The first paired run is `20261010T144748Z-715fa0`; its
+[result table](results/20261010T144748Z-715fa0-summary.md) includes only completed,
+verified cases. [The manifest](results/20261010T144748Z-715fa0-run-manifest.json)
+records the source revision, harness hashes and dataset counts. Congress is
+the entire available `congress/data` snapshot, 10.53 GB in 914,106 files; the
+historical backlog estimate of 14 GB does not match this snapshot. Its update
+fixture replaces 9,141 files (approximately 1%) without changing the baseline.
+
+To reproduce the paired run with already prepared owned fixtures:
+
+```sh
+python3 benchmarks/pair.py --runs 3
+python3 benchmarks/report.py --run-id RUN_ID --output benchmarks/results/RUN_ID-summary.md
+```
+
+`pair.py` reads the explicitly staged host/root information from
+`.bench/p3-state.json`. It runs one case at a time and resumes cases whose local
+JSON is not marked complete. Do not start another runner against the same work
+directory; `run.py` holds an exclusive lock to protect its destinations.
+
+`python3 benchmarks/test_harness.py` checks destination ownership, concurrent
+run rejection, independent corruption detection and transparent wire/status
+measurement. `snapshot.py --target user@host --output path.json` records small
+read-only load, memory, block-I/O and ZFS ARC snapshots for cache interpretation.

@@ -2,6 +2,7 @@
 """Verified, interleaved local or direct SSH benchmarks with JSON evidence."""
 import argparse
 import datetime
+import fcntl
 import json
 import os
 import pathlib
@@ -59,6 +60,9 @@ def main(argv=None):
     marker=work/'.xs-benchmark-work'
     if any(work.iterdir()) and not marker.exists(): p.error('nonempty work directory has no benchmark ownership marker')
     marker.write_text('owned by benchmarks/run.py\n')
+    lock=(work/'.xs-benchmark-lock').open('a+')
+    try: fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
+    except BlockingIOError: p.error('another benchmark owns this work directory')
     rsh=shlex.split(args.rsh)
     def remote(command, **kwargs):
         return subprocess.run([*rsh,host,command],check=True,**kwargs)

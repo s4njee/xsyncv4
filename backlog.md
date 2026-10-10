@@ -3072,3 +3072,25 @@ after U-01's evidence entry completes P2, as requested by the user.
   Its current size will be recorded rather than assuming the historical
   “14 GB” corpus size. Cold-cache coverage remains pending: freya lacks
   passwordless sudo and ZFS ARC residency must be checked independently.
+
+### F-01 measurement checkpoint — 2026-10-10
+
+- Both hosts now have verified inventories for the complete data-only snapshot:
+  914,106 files, 417,408 directories, 10,528,134,423 logical bytes. The separate
+  update fixture changes 9,141 files by replacing their inodes, preserving the
+  baseline despite its hardlink-based preparation.
+- Three interleaved repetitions per tool have completed for the mixed tree in
+  both directions, the 2 GiB large-file tree in both directions, and one tiny
+  file in both directions (108 verified samples). Every measured result
+  passed independent checksum/metadata verification. Plain large-file transfer
+  is approximately 114 MB/s, near the measured NIC's 1 Gb/s capacity; further
+  cipher measurements are needed before deciding F-03.
+- README now distinguishes current SSH medians from the historical APFS best
+  times, and links the raw JSON/resource evidence and harness source hashes.
+  Full-corpus and 1% update cases run sequentially. F-01 remains partial until
+  those and cold-cache coverage finish. Five harness safeguard tests pass,
+  including rejecting corruption even when a tool exits successfully.
+- Tiny-file medians are 23 ms faster than rsync neo→freya and 7 ms slower in
+  the reverse direction. Further repetitions will confirm F-13's 10 ms target.
+  The large-file checksum pull is slower (3.986 s versus 2.585 s); the full
+  corpus checksum measurements will help distinguish cache/I/O from scan work.

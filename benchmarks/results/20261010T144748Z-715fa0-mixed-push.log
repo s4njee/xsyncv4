@@ -1,0 +1,58 @@
+mixed push fresh rsync 1/3: 5.423s verified
+mixed push fresh xs 1/3: 5.377s verified
+mixed push fresh xs 2/3: 5.388s verified
+mixed push fresh rsync 2/3: 5.422s verified
+mixed push fresh rsync 3/3: 5.392s verified
+mixed push fresh xs 3/3: 5.510s verified
+mixed push fresh-z rsync 1/3: 3.538s verified
+mixed push fresh-z xs 1/3: 3.207s verified
+mixed push fresh-z xs 2/3: 3.138s verified
+mixed push fresh-z rsync 2/3: 3.527s verified
+mixed push fresh-z rsync 3/3: 3.563s verified
+mixed push fresh-z xs 3/3: 3.149s verified
+mixed push noop rsync 1/3: 0.228s verified
+mixed push noop xs 1/3: 0.196s verified
+mixed push noop xs 2/3: 0.200s verified
+mixed push noop rsync 2/3: 0.232s verified
+mixed push noop rsync 3/3: 0.225s verified
+mixed push noop xs 3/3: 0.202s verified
+mixed push checksum rsync 1/3: 0.500s verified
+mixed push checksum xs 1/3: 0.675s verified
+mixed push checksum xs 2/3: 0.556s verified
+mixed push checksum rsync 2/3: 0.564s verified
+mixed push checksum rsync 3/3: 0.558s verified
+mixed push checksum xs 3/3: 0.574s verified
+[
+  {
+    "scenario": "fresh",
+    "median_seconds": {
+      "rsync": 5.422496767248958,
+      "xs": 5.387862725183368
+    },
+    "xs_speedup": 1.0064281597049063
+  },
+  {
+    "scenario": "fresh-z",
+    "median_seconds": {
+      "rsync": 3.538185566663742,
+      "xs": 3.1494126273319125
+    },
+    "xs_speedup": 1.1234429988493397
+  },
+  {
+    "scenario": "noop",
+    "median_seconds": {
+      "rsync": 0.22773871896788478,
+      "xs": 0.19954188913106918
+    },
+    "xs_speedup": 1.14130782243068
+  },
+  {
+    "scenario": "checksum",
+    "median_seconds": {
+      "rsync": 0.5582226449623704,
+      "xs": 0.5736114648170769
+    },
+    "xs_speedup": 0.973172049726004
+  }
+]
