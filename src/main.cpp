@@ -555,6 +555,7 @@ void print_summary(u64 t0) {
     out += "\nsent " + fmt_num(sent) + " bytes  received " + fmt_num(recv) + " bytes  " + r + " bytes/sec\n";
     out += "total size is " + fmt_num(total) + "  speedup is " + speedup + (o.dry_run ? " (DRY RUN)" : "") + "\n";
   }
+  if (o.verbose > 1) if (const char* stage = limiting_stage()) out += std::string("limiting stage: ") + stage + " (service time estimate)\n";
   if (!out.empty()) output_text(out);
 }
 

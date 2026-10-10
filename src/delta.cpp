@@ -1,4 +1,5 @@
 #include "delta.h"
+#include "progress.h"
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -25,6 +26,7 @@ u32 roll(u32 sum, u8 old, u8 next, u32 size) {
   return a | (b << 16);
 }
 bool read_exact(int fd, char* bytes, size_t size, i64 offset) {
+  StageTimer timing(g_stats.read_ns);
   while (size) {
     if (g_stop.load()) { errno = EINTR; return false; }
     ssize_t n = pread(fd, bytes, size, offset);

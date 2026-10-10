@@ -30,10 +30,10 @@ def columns(text):
     return sum(0 if unicodedata.combining(c) else 2 if unicodedata.east_asian_width(c) in ('W', 'F') else 1 for c in text)
 
 
-def capture(command, width=80, env=None, resize=(), interrupt=False):
+def capture(command, width=80, env=None, resize=(), interrupt=False, stdout=None):
     master, slave = pty.openpty()
     fcntl.ioctl(slave, termios.TIOCSWINSZ, struct.pack('HHHH', 24, width, 0, 0))
-    proc = subprocess.Popen(command, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+    proc = subprocess.Popen(command, stdin=subprocess.DEVNULL, stdout=stdout if stdout is not None else subprocess.DEVNULL,
                             stderr=slave, env=env or ENV, start_new_session=True)
     os.close(slave)
     data = bytearray()

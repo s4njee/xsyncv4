@@ -2755,3 +2755,20 @@ Verified artifact manifest (source `864bd37edf14`):
   `/tmp/xsync-u04-release-{mac-arm,mac-intel,linux-arm64,linux-amd64}.log`.
   The source package/formula is refreshed after this entry; installed local
   executables and physical remote helpers are unchanged.
+
+## U-05 progress — 2026-10-10: wire detail and measured stage estimates
+
+- Compressed remote progress shows wire rate and DATA payload compression
+  ratio, including in the completion line for fast transfers. Raw/compressed
+  record-byte counters agree on push/pull; incompressible blocks report 1.0x.
+- `-vv` reports a limiting-stage estimate from accumulated source read/
+  compression, transport/pacing and receiver DATA-processing service times.
+  Parallel stages can overlap, so the documentation explicitly calls this an
+  estimate. An optional protocol-4 capability carries bounded snapshots; older
+  helpers remain compatible without a stage estimate.
+- Development detail acceptance passes **5 methods**, including six delayed
+  read/network/write cases across push/pull, compressible/incompressible ratios,
+  four invalid stage-frame cases and a missing receiver-time field. Existing
+  ACK acceptance passes **3 methods** and progress/clone checks pass **11**.
+  Initial real-SSH detail/ACK validation also passes; expanded final SSH,
+  protocol compatibility and release checks follow. U-05 remains uncompleted.

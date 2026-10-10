@@ -392,6 +392,17 @@ acknowledged count. Older helpers that lack this optional protocol-4 capability
 keep the bar at zero until they report successful completion, while still
 showing sent wire bytes.
 
+With `-z`, the total and completion lines show wire rate and the DATA payload
+compression ratio (raw record bytes divided by transmitted record bytes,
+including compression framing). Incompressible blocks report about `1.0x`.
+`-vv` adds a limiting-stage estimate: `reading`, `network`, or `writing`,
+both live when space permits and in the final verbose summary. It compares
+cumulative service time measured on the two sides; parallel stages can overlap,
+so this is an estimate. Read time includes source reads and compression, network
+time includes transport waits and requested pacing, and write time includes
+receiver DATA processing. Current helpers exchange these optional metrics;
+older helpers continue transferring without a stage estimate.
+
 It is drawn on stderr and only when that is a terminal; otherwise one summary line per
 second is printed. `-v` and `-i` lines scroll above the live region. `NO_COLOR` is honoured.
 The renderer respects the actual terminal width, including very narrow windows,

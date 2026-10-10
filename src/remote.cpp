@@ -49,7 +49,7 @@ namespace {
 
 enum : u8 { F_HELLO = 1, F_DIR, F_NEED, F_DATA, F_LIST_END, F_DATA_END, F_DONE, F_MSG, F_IDMAP, F_DEST, F_OUTPUT, F_OUTPUT_CONFIG,
             F_DELTA_REQUEST, F_DELTA_SIGNATURE, F_DELTA_RETRY_ACK, F_LIST_ENTRY, F_IO_CONFIG, F_KEEPALIVE, F_FILTER_CONFIG, F_DELETE_CONFIG,
-            F_PRUNE_CONFIG, F_RELATIVE_CONFIG, F_FILES_CONFIG, F_FILES_DATA, F_FILES_END, F_XATTR_CONFIG, F_XATTR_START, F_XATTR_CHUNK, F_XATTR_END, F_ACL_CONFIG, F_CHOWN_CONFIG, F_SPARSE_CONFIG, F_LINKDEST_CONFIG, F_PROGRESS };
+            F_PRUNE_CONFIG, F_RELATIVE_CONFIG, F_FILES_CONFIG, F_FILES_DATA, F_FILES_END, F_XATTR_CONFIG, F_XATTR_START, F_XATTR_CHUNK, F_XATTR_END, F_ACL_CONFIG, F_CHOWN_CONFIG, F_SPARSE_CONFIG, F_LINKDEST_CONFIG, F_PROGRESS, F_STAGE };
 enum : u8 { DF_ATTRS = 1, DF_SINGLE = 2, DF_NODELETE = 4, DF_ZSTD = 8 };
 enum : u8 { R_WHOLE = 1, R_CHUNK = 2, R_FAIL = 4, R_END = 8, R_LITERAL = 16, R_DELTA_END = 32, R_COPY = 64 };
 constexpr size_t HDR = 5;                  // u32 payload length + u8 type
@@ -337,6 +337,7 @@ struct Conn {
     std::string small;
     std::deque<std::string> batch;
     auto out = [&](const char* p, size_t n, bool activity = true) {
+      StageTimer timing(g_stats.network_ns);
       bool ok = true;
       u64 progress = now_ns();
       while (n) {
@@ -451,8 +452,10 @@ struct Conn {
       if (hello && type != F_HELLO && type != F_MSG)
         die(RERR_PROTOCOL, "the remote shell is printing text on stdout (or --rsync-path is not xsync); remove shell startup output");
       if (len > (1u << 30)) die(RERR_PROTOCOL, "protocol error: oversized frame");
-      if (type == F_PROGRESS && (len > 20 || !(g_opt.peer_features & PF_PROGRESS_ACK)))
+      if (type == F_PROGRESS && (len > (g_opt.peer_features & PF_STAGE_METRICS ? 30u : 20u) || !(g_opt.peer_features & PF_PROGRESS_ACK)))
         die(RERR_PROTOCOL, "protocol error: oversized or unnegotiated progress acknowledgment");
+      if (type == F_STAGE && (len > 20 || !(g_opt.peer_features & PF_STAGE_METRICS)))
+        die(RERR_PROTOCOL, "protocol error: oversized or unnegotiated stage metrics");
       if (type == F_IO_CONFIG && len > 20) die(RERR_PROTOCOL, "protocol error: malformed I/O configuration (oversized)");
       if (type == F_CHOWN_CONFIG && len > 1024 * 1024)
         die(RERR_PROTOCOL, "protocol error: oversized ownership configuration");
@@ -667,6 +670,7 @@ void handle_output(std::string_view payload) {
 
 // Optionally compress `raw` into `f` (appending). Returns true if compressed.
 bool pack(std::string& f, std::string_view raw, Worker& w) {
+  StageTimer timing(g_stats.read_ns);
   if (!g_opt.compress || raw.size() < 128) return false;
   if (!w.zc) w.zc = ZSTD_createCCtx();
   size_t base = f.size(), bound = ZSTD_compressBound(raw.size());
@@ -860,6 +864,19 @@ struct Sender {
   std::mutex smu;
   std::vector<SDir*> dirs;
   std::atomic<u32> next_id{0};
+  std::mutex stage_mu;
+  u64 stage_last = 0;
+
+  void stage_snapshot(bool force = false) {
+    if (client || !(g_opt.peer_features & PF_STAGE_METRICS)) return;
+    std::lock_guard<std::mutex> lock(stage_mu);
+    u64 now = now_ns();
+    if (!force && now - stage_last < 100000000) return;
+    std::string frame = new_frame(F_STAGE);
+    put_var(frame, g_stats.read_ns), put_var(frame, g_stats.network_ns);
+    c.send(std::move(frame));
+    stage_last = now;
+  }
   std::atomic<int> walks{0};
   u64 dirs_sent = 0, needs_recv = 0;  // guarded by the pool lock
   std::atomic<u64> dirs_sent_a{0};
@@ -1192,7 +1209,10 @@ struct Sender {
       f[HDR] = 0;
       memcpy(f.data() + HDR + 1, &h, 8);
     }
+    g_stats.compression_raw.fetch_add(raw.size());
+    g_stats.compression_wire.fetch_add(f.size() - DATA_PREFIX);
     c.send(std::move(f), true);
+    stage_snapshot();
     begin_block(w);
   }
 
@@ -1244,6 +1264,7 @@ struct Sender {
       planned = fresh.size;
       bool ok = true;
       auto read_some = [&](char* dst, size_t want) {
+        StageTimer timing(g_stats.read_ns);
         size_t n = 0;
         while (n < want && !g_stop.load()) {
           ssize_t k = read(in, dst + n, want - n);
@@ -1389,10 +1410,12 @@ struct Sender {
         case F_PROGRESS: {
           RBuf r(payload);
           u64 bytes = r.var(), files = r.var();
+          u64 writing = g_opt.peer_features & PF_STAGE_METRICS ? r.var() : 0;
           if (r.bad || !r.empty()) die(RERR_PROTOCOL, "protocol error: malformed progress acknowledgment");
           if (client) {
             g_stats.acknowledged_bytes.store(bytes);
             g_stats.acknowledged_files.store(files);
+            g_stats.peer_write_ns.store(writing);
           }
           break;
         }
@@ -1403,6 +1426,9 @@ struct Sender {
             report_peer_error(code, "errors were reported by the receiver");
             g_stats.created_files = r.var(), g_stats.created_dirs = r.var(), g_stats.created_links = r.var();
             g_stats.created_specials = r.var(), g_stats.deleted = r.var();
+            if (g_opt.peer_features & PF_STAGE_METRICS) g_stats.peer_write_ns = r.var();
+            if ((g_opt.peer_features & PF_STAGE_METRICS) && (r.bad || !r.empty()))
+              die(RERR_PROTOCOL, "protocol error: malformed receiver stage metrics");
             if (!(g_opt.peer_features & PF_PROGRESS_ACK) && code == 0) {
               g_stats.acknowledged_bytes = g_stats.xfer_bytes.load();
               g_stats.acknowledged_files = g_stats.xfer_files.load();
@@ -1484,6 +1510,7 @@ struct Sender {
     }
     if (g_stop.load()) exit_signal();
     rt.join();
+    stage_snapshot(true);
     c.finish();
     return g_exit_code.load();
   }
@@ -1562,6 +1589,7 @@ struct Receiver {
         bytes >= progress_last_bytes && bytes - progress_last_bytes < BLOCK_TARGET))) return;
     std::string frame = new_frame(F_PROGRESS);
     put_var(frame, bytes), put_var(frame, files);
+    if (g_opt.peer_features & PF_STAGE_METRICS) put_var(frame, g_stats.write_ns);
     c.send(std::move(frame));
     progress_last_bytes = bytes, progress_last_files = files, progress_last_time = now;
   }
@@ -1906,11 +1934,14 @@ struct Receiver {
   }
 
   void data(std::string& payload, Worker& t) {
+    StageTimer timing(g_stats.write_ns);
     if (payload.size() < 9) die(RERR_PROTOCOL, "protocol error: short DATA frame");
     u64 want;
     memcpy(&want, payload.data() + 1, 8);
     static thread_local std::string scratch;
     std::string_view raw = unpack(std::string_view(payload).substr(9), payload[0] & 1, scratch, t);
+    g_stats.compression_raw.fetch_add(raw.size());
+    g_stats.compression_wire.fetch_add(payload.size() - 9);
     if (XXH3_64bits(raw.data(), raw.size()) != want) die(RERR_STREAMIO, "data corruption detected in transfer stream");
     RBuf r(raw);
     RDir* d = nullptr;
@@ -2172,8 +2203,16 @@ struct Receiver {
         if (allow_disconnect.load()) return;
         conn_lost();
       }
-      if (ended) die(RERR_PROTOCOL, "protocol error: frame after DATA_END");
+      if (ended && type != F_STAGE) die(RERR_PROTOCOL, "protocol error: frame after DATA_END");
       switch (type) {
+        case F_STAGE: {
+          if (!client) die(RERR_PROTOCOL, "protocol error: sender-stage metrics in a push");
+          RBuf r(payload);
+          u64 reading = r.var(), network = r.var();
+          if (r.bad || !r.empty()) die(RERR_PROTOCOL, "protocol error: malformed stage metrics");
+          g_stats.peer_read_ns = reading, g_stats.peer_network_ns = network;
+          break;
+        }
         case F_XATTR_START:
         case F_XATTR_CHUNK:
         case F_XATTR_END: receive_xattr_value(type, payload); break;
@@ -2255,6 +2294,7 @@ struct Receiver {
     put_var(f, (u64)g_exit_code.load());
     put_var(f, g_stats.created_files), put_var(f, g_stats.created_dirs), put_var(f, g_stats.created_links);
     put_var(f, g_stats.created_specials), put_var(f, g_stats.deleted);
+    if (g_opt.peer_features & PF_STAGE_METRICS) put_var(f, g_stats.write_ns);
     c.send(std::move(f));
     c.finish();
     rt.join();
@@ -2487,6 +2527,7 @@ int run_client(const std::vector<std::string>& srcs, const std::string& dest, u3
   f.push_back(push ? 'R' : 'S');
   u64 advertised = PROTO_FEATURES & (o.whole_file ? ~(PF_RESUME | PF_DELTA) : ~u64(0));
   if (!push || !o.progress) advertised &= ~PF_PROGRESS_ACK;
+  if (o.verbose < 2) advertised &= ~PF_STAGE_METRICS;
   if (o.list_only) advertised &= PF_CORE | PF_ZSTD | PF_LIST | PF_IO_CONTROL | PF_FILTERS | PF_MERGE_FILTERS | PF_CVS_FILTERS | PF_PRUNE_EMPTY | PF_RELATIVE | PF_FILES_FROM;
   else advertised &= ~PF_LIST;
   if (!o.filters.needs_extended()) advertised &= ~PF_FILTERS;

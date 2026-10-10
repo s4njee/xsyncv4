@@ -33,7 +33,8 @@ int drawn = 0;  // lines currently occupied by the live region
 u64 t_start = 0, t_last = 0, t_plain = 0;
 u64 t_draw = 0;
 u64 last_bytes = 0, last_files = 0;
-double rate_b = 0, rate_f = 0;
+u64 last_wire = 0;
+double rate_b = 0, rate_f = 0, rate_wire = 0;
 unsigned spin = 0;
 
 constexpr int MAX_ROWS = 4;
@@ -191,6 +192,13 @@ std::string fmt_eta(double sec) {
   else snprintf(b, sizeof b, "%llu:%02llu", (unsigned long long)(s / 60), (unsigned long long)(s % 60));
   return b;
 }
+std::string compression_ratio() {
+  u64 bytes = g_stats.compression_wire.load();
+  if (!bytes) return "ratio n/a";
+  char result[48];
+  snprintf(result, sizeof result, "ratio %.1fx", (double)g_stats.compression_raw.load() / (double)bytes);
+  return result;
+}
 
 Snap sample(int w) {
   Snap sn;
@@ -245,6 +253,9 @@ void draw_locked() {
     double a = t_last == t_start ? 1.0 : std::min(1.0, dt / 1.0);
     rate_b += (ib - rate_b) * a;
     rate_f += (inf - rate_f) * a;
+    u64 wire = g_opt.pushing ? g_stats.wire_sent.load() : g_stats.wire_recv.load();
+    rate_wire += ((double)(wire - last_wire) / dt - rate_wire) * a;
+    last_wire = wire;
     u64 small = small_completed.load(std::memory_order_relaxed);
     rate_small += ((double)(small - last_small) / dt - rate_small) * a;
     last_small = small;
@@ -265,12 +276,18 @@ void draw_locked() {
     fields.push_back(fmt_num(t.files) + "/" + fmt_num(t.files_total) + " files");
     if (g_stats.clone_dirs_total.load()) fields.push_back(fmt_num(g_stats.cloned_dirs) + "/" + fmt_num(g_stats.clone_dirs_total) + " directories cloned");
     fields.push_back(fmt_size((double)t.bytes) + "/" + fmt_size((double)t.bytes_total));
-    if (g_opt.pushing) fields.push_back("sent " + fmt_size((double)g_stats.wire_sent.load()) + " wire");
-    fields.push_back(fmt_size(rate_b) + "/s");
+    bool remote_compressed = g_opt.compress && (g_opt.pushing || g_opt.receiving);
+    if (remote_compressed) {
+      fields.push_back("wire " + fmt_size(rate_wire) + "/s");
+      fields.push_back(compression_ratio());
+    }
+    if (g_opt.pushing) fields.push_back("sent " + fmt_size((double)g_stats.wire_sent.load()) + (remote_compressed ? "" : " wire"));
+    if (!remote_compressed) fields.push_back(fmt_size(rate_b) + "/s");
+    if (g_opt.verbose > 1) if (const char* stage = limiting_stage()) fields.push_back(std::string("limiting: ") + stage);
     fields.push_back(fmt_count(rate_f) + " files/s");
     if (t.scanning) fields.push_back(unicode ? "scanning…" : "scanning...");
     else if (rate_b > 1 && t.bytes_total > t.bytes) fields.push_back("ETA " + fmt_eta((double)(t.bytes_total - t.bytes) / rate_b));
-    int bw = tty && columns >= 32 ? std::clamp(columns - 70, 8, 30) : 0;
+    int bw = tty && columns >= 32 ? (remote_compressed ? 8 : std::clamp(columns - 70, 8, 30)) : 0;
     total = (bw ? " " + bar(t.frac, bw) + " " : "") + std::to_string(pct) + "%";
     for (const auto& field : fields) {
       std::string between = &field == &fields[0] ? "  " : separator();
@@ -397,6 +414,16 @@ void slot_end(int wid, bool completed) {
   s.active.store(false, std::memory_order_relaxed);
 }
 
+const char* limiting_stage() {
+  if (!(g_opt.peer_features & PF_STAGE_METRICS)) return nullptr;
+  u64 reading = g_opt.receiving ? g_stats.peer_read_ns.load() : g_stats.read_ns.load();
+  u64 network = g_opt.receiving ? g_stats.peer_network_ns.load() : g_stats.network_ns.load();
+  u64 writing = g_opt.pushing ? g_stats.peer_write_ns.load() : g_stats.write_ns.load();
+  if (!reading && !network && !writing) return nullptr;
+  if (writing >= reading && writing >= network) return "writing";
+  return reading >= network ? "reading" : "network";
+}
+
 void ui_write(bool is_err, std::string_view text) {
   std::lock_guard<std::mutex> lk(ui_mu);
   if (live && drawn) {
@@ -469,9 +496,13 @@ void progress_stop(bool ok) {
       const char* result = g_exit_code.load() ? (g_opt.pushing ? "no files acknowledged" : "no files completed") : "up to date";
       complete += std::string(result) + separator() + fmt_num(t.seen) + " files checked in " + secs;
     } else {
-      complete += fmt_num(t.files) + (t.files == 1 ? " file" : " files") + separator() + fmt_size((double)t.bytes) + " in " + secs + separator() +
-             fmt_size((double)t.bytes / el) + "/s" + separator() +
-             fmt_count((double)t.files / el) + " files/s";
+      complete += fmt_num(t.files) + (t.files == 1 ? " file" : " files") + separator();
+      if (g_opt.compress && (g_opt.pushing || g_opt.receiving)) {
+        u64 wire = g_opt.pushing ? g_stats.wire_sent.load() : g_stats.wire_recv.load();
+        complete += "wire " + fmt_size((double)wire / el) + "/s" + separator() + compression_ratio() + separator();
+      }
+      complete += fmt_size((double)t.bytes) + " in " + secs + separator() + fmt_size((double)t.bytes / el) + "/s" + separator() +
+                  fmt_count((double)t.files / el) + " files/s";
     }
     if (g_opt.dry_run) complete += "  (dry run)";
     if (g_stats.cloned_dirs.load()) complete += separator() + fmt_num(g_stats.cloned_dirs) + " directories cloned";

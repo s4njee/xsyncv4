@@ -35,3 +35,12 @@ void progress_tick();
 void progress_stop(bool ok);
 // Print text (complete lines) above the live region.
 void ui_write(bool is_err, std::string_view text);
+
+// Optional remote profiling; counters measure accumulated service time.
+struct StageTimer {
+  std::atomic<u64>& counter;
+  u64 started;
+  explicit StageTimer(std::atomic<u64>& target) : counter(target), started(g_opt.peer_features & PF_STAGE_METRICS ? now_ns() : 0) {}
+  ~StageTimer() { if (started) counter.fetch_add(now_ns() - started, std::memory_order_relaxed); }
+};
+const char* limiting_stage();
