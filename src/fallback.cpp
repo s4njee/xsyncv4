@@ -7,6 +7,8 @@
 #include <mach-o/dyld.h>
 #endif
 #include <cerrno>
+#include <algorithm>
+#include <cctype>
 #include <cstdlib>
 #include <cstring>
 #include <vector>
