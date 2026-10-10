@@ -139,7 +139,7 @@ The benchmark so far is one corpus slice, one machine, one filesystem, no networ
 | F-10 | **Whole-subtree clones.** Only leaf directories are cloned in one call. A missing subtree could be one call, at the price of a long volume-wide lock. | new | Bounded version (subtrees under N entries, known from the scan) measured against the leaf-only path. | M |
 | F-11 | **Clones when `-a` is incomplete.** `-rt` or `-rlt` fall back to byte copies because the clone would bring the wrong mode. | **done** | Clone, then correct mode/owner; still cheaper than create+write. | S |
 | F-12 | **Deletion is single-threaded.** Removing the 96,000-entry benchmark tree takes about 10 s with `rm`; `--delete` of a large stale subtree will feel the same. | **done** | Parallel removal by subtree. | S |
-| F-13 | **Tiny transfers.** For one file over ssh the fixed costs dominate: thread pool start, handshake round trip. | unverified | A single small file over ssh is within 10 ms of rsync. | S |
+| F-13 | **Tiny transfers.** For one file over ssh the fixed costs dominate: thread pool start, handshake round trip. | done | A single small file over ssh is within 10 ms of rsync. | S |
 | F-14 | **`-c` at scale.** Sender hashes in the walkers, receiver hashes inline in the generator; unmeasured. | unverified | Benchmarked against `rsync -c`; hashing gets its own pool if it starves the scan. | S |
 
 ## P4 — Engineering base
@@ -3681,3 +3681,18 @@ after U-01's evidence entry completes P2, as requested by the user.
 - Compression remains off unless requested. Raw JSON, all six sample lines,
   host load/cache snapshots and a comparison table are retained. This result
   does not establish behavior on a faster network or a different cipher.
+
+## P3 / F-13 completed — 2026-10-10
+
+- Revision f7e187827157 on both hosts completes 48 independently verified tiny
+  transfers: 12 samples per tool in each direction, with six samples per tool
+  order. A fresh destination is used every time and compression/connection
+  sharing remain disabled. The source is one 19-byte file.
+- Push medians are rsync 189.135 ms and xs 168.813 ms. Pull medians are rsync
+  168.058 ms and xs 177.005 ms, a cost of 8.947 ms. Both direction medians meet
+  the 10 ms target; this is not a guarantee for every individual sample.
+- Raw samples, timing ranges, build/source identities, binary hashes, native
+  freya build output and host load/cache snapshots are retained. No startup
+  optimization is needed to satisfy the measured target on this pair.
+- F-06's full-corpus local ext4 no-op comparison starts separately after these
+  checks finish. F-06 remains partial until its verified samples complete.

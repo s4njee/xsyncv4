@@ -1,0 +1,18 @@
+{
+  "source_revision": "f7e187827157ac4e90f54b9b2477fa493cd17f8d",
+  "source_archive_sha256": "de9e07a3027f82f29f25d4217ef73c49e64d131d24ba0065b0e094632c932a1d",
+  "products": {
+    "neo": {
+      "sha256": "92bf4fe9931942185c35bbd96a9170c80e32770ad06a3ef82ca7e9330ed9882e",
+      "version": "xs  version 0.1.0  protocol version 4  git f7e187827157",
+      "build": "Release, musl static, CMake/Ninja, O3/LTO",
+      "build_command": null
+    },
+    "freya": {
+      "sha256": "8573cc9d83fd128eafd71f5aa5006f4c124674a34a9204e5575bed6c05d4f288",
+      "version": "xs  version 0.1.0  protocol version 4  git f7e187827157",
+      "build": "GCC 16.2.1 native x86_64, C++20, O3/DNDEBUG/LTO/pthread, system zstd 1.5.7 and ICU 78.3",
+      "build_command": "c++ -std=c++20 -O3 -DNDEBUG -flto -pthread -Isrc -DXSYNC_GIT_HASH=\"f7e187827157\" src/*.cpp -lzstd -licuuc -o ROOT/bin/xs-f7e187827157"
+    }
+  }
+}

@@ -85,6 +85,9 @@ The [completed capacity probe](results/20261010-f03-stream-summary.md) reaches
 114.58/112.71 MB/s in the two directions. The uncompressed large-file push
 already reaches the disk-free capacity on this 1 Gb/s pair; multiple SSH
 streams are not justified by these measurements.
+The [current-product tiny-transfer check](results/20261010-f13-tiny-summary.md)
+verifies 48 fresh transfers. Push medians favor xs by 20.32 ms; pull medians
+cost an extra 8.95 ms, meeting the 10 ms target in both directions.
 
 The [APFS no-op diagnostic](results/20261010T152712Z-apfs-baseline-summary.md)
 records the current binary's cost at 1, 2, 4 and 8 threads. Its host had high
