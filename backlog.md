@@ -129,7 +129,7 @@ The benchmark so far is one corpus slice, one machine, one filesystem, no networ
 |---|---|---|---|---|
 | F-01 | **Benchmark the real targets.** Over ssh to a Linux LAN host (ext4/XFS) and to the Pi; the full 14 GB corpus (needs disk space freed first); an update run with ~1 % of files changed; a mixed tree with large files; cold cache. | partial | `bench/bench.py --target host:path` and a results table per target in the README; this decides the order of everything below. | M |
 | F-02 | **Regression gate.** Nothing stops a change from losing the lead. | **done** | CI job fails if any scenario drops below a recorded ratio to rsync on the same runner. | M |
-| F-03 | **ssh is one stream on one core.** On a fast LAN the cipher becomes the ceiling long before the disks do. | unverified | Measured first. Then, if it is the limit: `--streams N` (several ssh connections sharing one transfer) and no compression by default on links faster than the compressor. | L |
+| F-03 | **ssh is one stream on one core.** On a fast LAN the cipher becomes the ceiling long before the disks do. | done | Measured first. Then, if it is the limit: `--streams N` (several ssh connections sharing one transfer) and no compression by default on links faster than the compressor. | L |
 | F-04 | **Adaptive compression.** `-z` compresses every block at level 3 regardless of content or link. | **done** | Incompressible blocks are detected from a sample and sent raw; `--skip-compress` suffixes honoured; level chosen from measured link speed unless set. | M |
 | F-05 | **Large files.** One thread reads and one stream carries each large file; local copies on Linux use a plain read/write loop. | **done** | Parallel ranges within a file on both ends; `copy_file_range`/`FICLONE` on Linux (reflinks on btrfs/XFS mirror the APFS clone path); `F_NOCACHE` above a size so a 50 GB copy does not evict the page cache. | L |
 | F-06 | **Linux scan path.** macOS uses `getattrlistbulk`; Linux uses `readdir` plus one `fstatat` per entry. | partial | `getdents64` + `statx`, optionally batched with io_uring; measured against rsync on a no-op re-sync of the corpus on ext4. | M |
@@ -3666,3 +3666,18 @@ after U-01's evidence entry completes P2, as requested by the user.
 - F-01 remains partial pending cold-cache access and verification on freya.
   Raw SSH throughput and further tiny-transfer repetitions run separately
   after the suite, so they do not compete with corpus transfers.
+
+## P3 / F-03 completed — 2026-10-10
+
+- Six separate 2 GiB memory-to-memory SSH samples finish with exact byte-count
+  checks and successful processes at both endpoints. Compression and connection
+  sharing are disabled; no file I/O occurs inside the timed stream. Median
+  throughput is 114.583 MB/s pushing and 112.706 MB/s pulling on the 1 Gb/s link.
+- The baseline 2 GiB file push reaches 114.267 MB/s, effectively the same as
+  the disk-free push. Client process-tree CPU medians are 6.985/8.817 seconds
+  for 18.742/19.054 seconds of wall time. This pair provides no evidence of a
+  cipher ceiling that additional streams would usefully remove; conditional
+  multi-stream implementation is therefore unnecessary on the measured link.
+- Compression remains off unless requested. Raw JSON, all six sample lines,
+  host load/cache snapshots and a comparison table are retained. This result
+  does not establish behavior on a faster network or a different cipher.

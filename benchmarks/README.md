@@ -81,6 +81,10 @@ neo with `--host sanjee@freya.local --remote-root ROOT --direction push` (or
 `pull`) and `--output ROOT/logs/stream-DIRECTION.json`. Run this separately
 from corpus transfers; it helps distinguish cipher/transport capacity from
 filesystem work. Both endpoints must receive the exact expected byte count.
+The [completed capacity probe](results/20261010-f03-stream-summary.md) reaches
+114.58/112.71 MB/s in the two directions. The uncompressed large-file push
+already reaches the disk-free capacity on this 1 Gb/s pair; multiple SSH
+streams are not justified by these measurements.
 
 The [APFS no-op diagnostic](results/20261010T152712Z-apfs-baseline-summary.md)
 records the current binary's cost at 1, 2, 4 and 8 threads. Its host had high

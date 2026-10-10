@@ -1,0 +1,524 @@
+{
+  "snapshots": [
+    {
+      "utc": "2026-10-10T20:19:29.159294+00:00",
+      "host": "neo",
+      "loadavg": [
+        0.443359375,
+        1.0185546875,
+        1.466796875
+      ],
+      "memory": {
+        "MemTotal": "4142208 kB",
+        "MemAvailable": "3544928 kB",
+        "Buffers": "2187040 kB",
+        "Cached": "162640 kB",
+        "SwapTotal": "6291424 kB",
+        "SwapFree": "5750992 kB",
+        "Dirty": "80 kB",
+        "Writeback": "0 kB",
+        "SReclaimable": "112656 kB"
+      },
+      "cpu_jiffies": "cpu  10673813 345936 5326182 849937423 662875 0 155372 0 0 0",
+      "disks": {
+        "nvme0n1": {
+          "reads": 111731997,
+          "read_sectors": 2645537457,
+          "writes": 9516402,
+          "write_sectors": 966140325,
+          "inflight": 0,
+          "io_ms": 6874140
+        },
+        "nvme0n1p1": {
+          "reads": 1768,
+          "read_sectors": 45671,
+          "writes": 5,
+          "write_sectors": 5,
+          "inflight": 0,
+          "io_ms": 160
+        },
+        "nvme0n1p2": {
+          "reads": 111729952,
+          "read_sectors": 2645477594,
+          "writes": 9516362,
+          "write_sectors": 966140320,
+          "inflight": 0,
+          "io_ms": 7390084
+        }
+      }
+    },
+    {
+      "utc": "2026-10-10T20:19:29.995470+00:00",
+      "host": "freya",
+      "loadavg": [
+        0.23486328125,
+        0.3583984375,
+        0.572265625
+      ],
+      "memory": {
+        "MemTotal": "64868336 kB",
+        "MemAvailable": "35181880 kB",
+        "Buffers": "3012 kB",
+        "Cached": "3846976 kB",
+        "SwapTotal": "64867324 kB",
+        "SwapFree": "62019440 kB",
+        "Dirty": "524 kB",
+        "Writeback": "0 kB",
+        "SReclaimable": "6206760 kB"
+      },
+      "cpu_jiffies": "cpu  82092396 7698295 61252803 9672786028 49227761 4892148 5427969 0 0 0",
+      "disks": {
+        "nvme1n1": {
+          "reads": 14515590,
+          "read_sectors": 3462994874,
+          "writes": 4026187,
+          "write_sectors": 989381632,
+          "inflight": 0,
+          "io_ms": 2253297
+        },
+        "nvme1n1p1": {
+          "reads": 39,
+          "read_sectors": 3312,
+          "writes": 0,
+          "write_sectors": 0,
+          "inflight": 0,
+          "io_ms": 3
+        },
+        "nvme1n1p2": {
+          "reads": 14515478,
+          "read_sectors": 3462987978,
+          "writes": 4026187,
+          "write_sectors": 989381632,
+          "inflight": 0,
+          "io_ms": 2480000
+        },
+        "nvme0n1": {
+          "reads": 34959276,
+          "read_sectors": 917619456,
+          "writes": 90362253,
+          "write_sectors": 4312706819,
+          "inflight": 0,
+          "io_ms": 8347666
+        },
+        "nvme0n1p1": {
+          "reads": 6927,
+          "read_sectors": 44104,
+          "writes": 13,
+          "write_sectors": 11,
+          "inflight": 0,
+          "io_ms": 628
+        },
+        "nvme0n1p2": {
+          "reads": 34952280,
+          "read_sectors": 917572840,
+          "writes": 90362240,
+          "write_sectors": 4312706808,
+          "inflight": 0,
+          "io_ms": 14020234
+        },
+        "sde": {
+          "reads": 22654547,
+          "read_sectors": 2641565680,
+          "writes": 24805665,
+          "write_sectors": 950303424,
+          "inflight": 0,
+          "io_ms": 92762452
+        },
+        "sde1": {
+          "reads": 22654475,
+          "read_sectors": 2641557184,
+          "writes": 24805665,
+          "write_sectors": 950303424,
+          "inflight": 0,
+          "io_ms": 99404829
+        },
+        "sde9": {
+          "reads": 21,
+          "read_sectors": 2816,
+          "writes": 0,
+          "write_sectors": 0,
+          "inflight": 0,
+          "io_ms": 97
+        },
+        "sda": {
+          "reads": 22695112,
+          "read_sectors": 2641588104,
+          "writes": 25126521,
+          "write_sectors": 952346224,
+          "inflight": 0,
+          "io_ms": 88970709
+        },
+        "sda1": {
+          "reads": 22695040,
+          "read_sectors": 2641579608,
+          "writes": 25126521,
+          "write_sectors": 952346224,
+          "inflight": 0,
+          "io_ms": 95067834
+        },
+        "sda9": {
+          "reads": 21,
+          "read_sectors": 2816,
+          "writes": 0,
+          "write_sectors": 0,
+          "inflight": 0,
+          "io_ms": 101
+        },
+        "sdb": {
+          "reads": 22590808,
+          "read_sectors": 2641447928,
+          "writes": 25096279,
+          "write_sectors": 952107576,
+          "inflight": 0,
+          "io_ms": 89905482
+        },
+        "sdb1": {
+          "reads": 22590740,
+          "read_sectors": 2641439944,
+          "writes": 25096279,
+          "write_sectors": 952107576,
+          "inflight": 0,
+          "io_ms": 95948440
+        },
+        "sdb9": {
+          "reads": 21,
+          "read_sectors": 2816,
+          "writes": 0,
+          "write_sectors": 0,
+          "inflight": 0,
+          "io_ms": 113
+        },
+        "sdc": {
+          "reads": 22695719,
+          "read_sectors": 2641365880,
+          "writes": 25168561,
+          "write_sectors": 952609000,
+          "inflight": 0,
+          "io_ms": 89603475
+        },
+        "sdc1": {
+          "reads": 22695647,
+          "read_sectors": 2641357384,
+          "writes": 25168561,
+          "write_sectors": 952609000,
+          "inflight": 0,
+          "io_ms": 95504332
+        },
+        "sdc9": {
+          "reads": 21,
+          "read_sectors": 2816,
+          "writes": 0,
+          "write_sectors": 0,
+          "inflight": 0,
+          "io_ms": 76
+        },
+        "sdf": {
+          "reads": 22660346,
+          "read_sectors": 2642458520,
+          "writes": 24951898,
+          "write_sectors": 951508472,
+          "inflight": 0,
+          "io_ms": 91132096
+        },
+        "sdf1": {
+          "reads": 22660274,
+          "read_sectors": 2642450024,
+          "writes": 24951898,
+          "write_sectors": 951508472,
+          "inflight": 0,
+          "io_ms": 97370096
+        },
+        "sdf9": {
+          "reads": 21,
+          "read_sectors": 2816,
+          "writes": 0,
+          "write_sectors": 0,
+          "inflight": 0,
+          "io_ms": 147
+        },
+        "sdd": {
+          "reads": 22667492,
+          "read_sectors": 2641437552,
+          "writes": 25090378,
+          "write_sectors": 951890528,
+          "inflight": 0,
+          "io_ms": 89839354
+        },
+        "sdd1": {
+          "reads": 22667420,
+          "read_sectors": 2641429056,
+          "writes": 25090378,
+          "write_sectors": 951890528,
+          "inflight": 0,
+          "io_ms": 95907341
+        },
+        "sdd9": {
+          "reads": 21,
+          "read_sectors": 2816,
+          "writes": 0,
+          "write_sectors": 0,
+          "inflight": 0,
+          "io_ms": 75
+        },
+        "sdg": {
+          "reads": 22672811,
+          "read_sectors": 2641333008,
+          "writes": 24605548,
+          "write_sectors": 951107520,
+          "inflight": 0,
+          "io_ms": 129741654
+        },
+        "sdg1": {
+          "reads": 22672718,
+          "read_sectors": 2641321776,
+          "writes": 24605548,
+          "write_sectors": 951107520,
+          "inflight": 0,
+          "io_ms": 138621504
+        },
+        "sdg9": {
+          "reads": 21,
+          "read_sectors": 2816,
+          "writes": 0,
+          "write_sectors": 0,
+          "inflight": 0,
+          "io_ms": 91
+        },
+        "sdh": {
+          "reads": 22647279,
+          "read_sectors": 2641628104,
+          "writes": 24670257,
+          "write_sectors": 951704680,
+          "inflight": 0,
+          "io_ms": 130449479
+        },
+        "sdh1": {
+          "reads": 22647207,
+          "read_sectors": 2641619608,
+          "writes": 24670257,
+          "write_sectors": 951704680,
+          "inflight": 0,
+          "io_ms": 139140201
+        },
+        "sdh9": {
+          "reads": 21,
+          "read_sectors": 2816,
+          "writes": 0,
+          "write_sectors": 0,
+          "inflight": 0,
+          "io_ms": 130
+        },
+        "sdi": {
+          "reads": 22639091,
+          "read_sectors": 2641669688,
+          "writes": 25113841,
+          "write_sectors": 952408296,
+          "inflight": 0,
+          "io_ms": 89683882
+        },
+        "sdi1": {
+          "reads": 22639019,
+          "read_sectors": 2641661192,
+          "writes": 25113841,
+          "write_sectors": 952408296,
+          "inflight": 0,
+          "io_ms": 95932709
+        },
+        "sdi9": {
+          "reads": 21,
+          "read_sectors": 2816,
+          "writes": 0,
+          "write_sectors": 0,
+          "inflight": 0,
+          "io_ms": 86
+        },
+        "sdk": {
+          "reads": 22740195,
+          "read_sectors": 2641832064,
+          "writes": 24945828,
+          "write_sectors": 951632688,
+          "inflight": 0,
+          "io_ms": 91081548
+        },
+        "sdk1": {
+          "reads": 22740123,
+          "read_sectors": 2641823568,
+          "writes": 24945828,
+          "write_sectors": 951632688,
+          "inflight": 0,
+          "io_ms": 96942080
+        },
+        "sdk9": {
+          "reads": 21,
+          "read_sectors": 2816,
+          "writes": 0,
+          "write_sectors": 0,
+          "inflight": 0,
+          "io_ms": 72
+        },
+        "sdp": {
+          "reads": 22653405,
+          "read_sectors": 2641997112,
+          "writes": 24657778,
+          "write_sectors": 951703880,
+          "inflight": 0,
+          "io_ms": 129766739
+        },
+        "sdp1": {
+          "reads": 22653334,
+          "read_sectors": 2641988680,
+          "writes": 24657778,
+          "write_sectors": 951703880,
+          "inflight": 0,
+          "io_ms": 138468377
+        },
+        "sdp9": {
+          "reads": 20,
+          "read_sectors": 2752,
+          "writes": 0,
+          "write_sectors": 0,
+          "inflight": 0,
+          "io_ms": 85
+        },
+        "sdj": {
+          "reads": 22712429,
+          "read_sectors": 2641233104,
+          "writes": 25198212,
+          "write_sectors": 953110368,
+          "inflight": 0,
+          "io_ms": 89275884
+        },
+        "sdj1": {
+          "reads": 22712357,
+          "read_sectors": 2641224608,
+          "writes": 25198212,
+          "write_sectors": 953110368,
+          "inflight": 0,
+          "io_ms": 95383452
+        },
+        "sdj9": {
+          "reads": 21,
+          "read_sectors": 2816,
+          "writes": 0,
+          "write_sectors": 0,
+          "inflight": 0,
+          "io_ms": 102
+        },
+        "sdm": {
+          "reads": 22666966,
+          "read_sectors": 2641820744,
+          "writes": 25046678,
+          "write_sectors": 951765640,
+          "inflight": 0,
+          "io_ms": 90331089
+        },
+        "sdm1": {
+          "reads": 22666894,
+          "read_sectors": 2641812248,
+          "writes": 25046678,
+          "write_sectors": 951765640,
+          "inflight": 0,
+          "io_ms": 96706959
+        },
+        "sdm9": {
+          "reads": 21,
+          "read_sectors": 2816,
+          "writes": 0,
+          "write_sectors": 0,
+          "inflight": 0,
+          "io_ms": 79
+        },
+        "sdn": {
+          "reads": 22570058,
+          "read_sectors": 2641761840,
+          "writes": 25114689,
+          "write_sectors": 952542088,
+          "inflight": 0,
+          "io_ms": 94206152
+        },
+        "sdn1": {
+          "reads": 22569986,
+          "read_sectors": 2641753344,
+          "writes": 25114689,
+          "write_sectors": 952542088,
+          "inflight": 0,
+          "io_ms": 100458342
+        },
+        "sdn9": {
+          "reads": 21,
+          "read_sectors": 2816,
+          "writes": 0,
+          "write_sectors": 0,
+          "inflight": 0,
+          "io_ms": 140
+        },
+        "sdl": {
+          "reads": 22638115,
+          "read_sectors": 2641952288,
+          "writes": 25072650,
+          "write_sectors": 952078744,
+          "inflight": 0,
+          "io_ms": 94039264
+        },
+        "sdl1": {
+          "reads": 22638043,
+          "read_sectors": 2641943792,
+          "writes": 25072650,
+          "write_sectors": 952078744,
+          "inflight": 0,
+          "io_ms": 100308926
+        },
+        "sdl9": {
+          "reads": 21,
+          "read_sectors": 2816,
+          "writes": 0,
+          "write_sectors": 0,
+          "inflight": 0,
+          "io_ms": 71
+        },
+        "sdo": {
+          "reads": 22647957,
+          "read_sectors": 2641331408,
+          "writes": 25137297,
+          "write_sectors": 952611416,
+          "inflight": 0,
+          "io_ms": 91359827
+        },
+        "sdo1": {
+          "reads": 22647886,
+          "read_sectors": 2641322912,
+          "writes": 25137297,
+          "write_sectors": 952611416,
+          "inflight": 0,
+          "io_ms": 97677328
+        },
+        "sdo9": {
+          "reads": 20,
+          "read_sectors": 2816,
+          "writes": 0,
+          "write_sectors": 0,
+          "inflight": 0,
+          "io_ms": 118
+        }
+      },
+      "zfs_arc": {
+        "hits": 19038777063,
+        "misses": 87728514,
+        "demand_data_hits": 4152020303,
+        "demand_data_misses": 42546322,
+        "demand_metadata_hits": 14879925878,
+        "demand_metadata_misses": 20708516,
+        "prefetch_data_hits": 1892966,
+        "prefetch_data_misses": 23415039,
+        "c": 19553428200,
+        "c_min": 2075786752,
+        "c_max": 65351434240,
+        "size": 19351294232,
+        "compressed_size": 12973471744,
+        "uncompressed_size": 23806038016,
+        "data_size": 12590332416,
+        "metadata_size": 2547773952
+      }
+    }
+  ]
+}
