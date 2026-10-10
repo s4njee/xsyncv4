@@ -4092,3 +4092,23 @@ after U-01's evidence entry completes P2, as requested by the user.
   tests are running against the unchanged validated native product, and Linux
   checks remain required. Publishing and product staging reject the failed
   precondition; no new physical-host measurement starts on that failed proof.
+
+### F-09 memory follow-up regression validation passed — 2026-10-10
+
+- The corrected staged-list fixture passes all three 69,632-file cases on
+  macOS and Linux. It retains independent checksum/metadata verification and
+  tests both pruning directions and validated files-from with explicit root
+  attributes. The complete failures and rsync semantic probe remain retained.
+- macOS passes 231 differential, nine directory-lifetime, fifteen mixed
+  protocol and thirteen P0 cases. Linux passes the admission unit, 227
+  differential, nine lifetime, fifteen mixed-protocol, thirteen P0 cases (two
+  existing skips) and the three large staged-list cases.
+- Production source trees for the native 027e14d8b03f product and corrected
+  1f3a912f94eb export are identical; only fixtures/docs changed. The macOS
+  passing regressions are reused and the changed fixture rerun. Linux builds
+  and tests the corrected export. Proof/logs are retained with the
+  `20261010-f09-window` prefix, including exact source/product identities.
+- Validated source 1f3a912f94eb is pushed. Fresh static Pi/native freya products
+  are building before another local/push/pull qualification. The 512 MiB
+  per-process limit is unchanged. F-09 stays partial until full-size results;
+  F-14 profiling is queued behind that successful qualification.

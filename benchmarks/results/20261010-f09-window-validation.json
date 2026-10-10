@@ -1,0 +1,24 @@
+{
+  "revision": "1f3a912f94ebcf5ee0757b1fe4bcd47b27799550",
+  "complete": true,
+  "stages": [
+    "macos-regressions-existing",
+    "listing_window-macos",
+    "linux"
+  ],
+  "native_validation_product": {
+    "revision": "027e14d8b03f9531be5b80571357cb21e0050070",
+    "sha256": "e0a41fac2a470803c932f59dc01ab8c1c23c6f07ce95c916aab75af125fcfa6e",
+    "note": "Production source identical; reuse passing native regressions and rerun changed staged-list fixture only",
+    "stages": [
+      "configure-macos",
+      "build-macos",
+      "admission-macos",
+      "differential-macos",
+      "directory_lifetime-macos",
+      "protocol-macos",
+      "p0-macos"
+    ],
+    "listing_log": ".bench/p3-f09-window-v3-listing_window-macos.log"
+  }
+}
