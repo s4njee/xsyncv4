@@ -2,7 +2,7 @@
 
 Initial audit written 2026-10-08 against xsync 0.1.0 (protocol 1).
 All fifteen P0 stories completed against protocol 3; per-story evidence is below.
-P1 R-02 through R-09 and E-01 through E-12 are complete (20 of 22 stories). Current protocol 4 supports protocol 3. Remaining P1 stories are R-01 and E-13.
+P1 R-02 through R-09 and E-01 through E-13 are complete (21 of 22 stories). Current protocol 4 supports protocol 3. The remaining P1 story is R-01.
 Problem statements retain the original audit findings.
 
 ## What "daily driver" means here
@@ -99,7 +99,7 @@ coverage clarification remains open.
 | E-10 | **Metadata beyond `-a`.** `-H` hard links, `-X` xattrs, `-A` ACLs, `-N` creation times, `-U` atimes, BSD file flags, `-E`, `--chmod`, `--chown`. Also an inconsistency to resolve: the clone path already carries xattrs and ACLs while the byte-copy and remote paths drop them. | **done** | `-H` and `-X` first (most used on macOS). Without `-X`, both paths behave the same — either strip on clone or document that clones are a superset. | XL |
 | E-11 | **Backup-style options.** `--backup`/`--backup-dir`, `--link-dest`, `--compare-dest`, `--remove-source-files`, `--append`, real `-S` sparse handling, `--preallocate`. | **done** | Native `-S` and `--link-dest` are implemented and verified on universal/static releases. Other backup options fall back to rsync via R-02 until needed. | L |
 | E-12 | **macOS specifics.** Dataless iCloud files (reading triggers a download; cloning may not), immutable (`uchg`) destination files, sockets (rsync creates them, xsync skips silently), paths beyond `PATH_MAX` (tested to 40 levels only). | **done** | Regression fixtures cover all four cases on the universal/static releases; dataless policy, immutable writes, sockets and path-length failures are documented. Real iCloud hydration remains an explicitly opted-in fixture. | M |
-| E-13 | **Broken stdout.** `xsync -av … \| head` — rsync dies on EPIPE; xsync's behaviour is unknown. | partial | Exits promptly with the right code and does not keep copying silently. | S |
+| E-13 | **Broken stdout.** `xsync -av … \| head` — rsync dies on EPIPE; xsync's behaviour is unknown. | done | Exits promptly with the right code and does not keep copying silently. | S |
 
 ## P2 — Progress and feel: the reason to switch
 
@@ -2533,3 +2533,53 @@ Verified artifact manifest (source `864bd37edf14`):
   owner. Connection loss now checks/join-waits the active timeout path before
   reporting another fatal error. Source/release validation is being repeated;
   E-13 is still partial.
+
+### R-01 reachability follow-up — 2026-10-09
+
+- The earlier physical Neo checklist remains valid evidence; its log is
+  `/tmp/xsync-r01-pi-native.log`. Neo is a Raspberry Pi running Linux on the LAN.
+  The pending clarification is whether Neo plus the isolated Linux SSH rig is
+  the intended coverage, or a second physical Linux host is also required.
+- Fresh SSH attempts to the supplied `sanjee@neo.local` still fail name
+  resolution. A bounded mDNS lookup produced no address, and the SSH config and
+  Neo's trusted host-key aliases contain no usable IP override. The same
+  reachability issue has persisted through the E-09, E-10, E-11 and E-12
+  checkpoints. A reachable IP/target is needed for additional physical checks;
+  the existing request for that information remains pending. No helper was
+  installed or changed on a physical host during E-13.
+
+## E-13 complete — 2026-10-09: release validation
+
+- **Done; P1 is 21/22.** Closed diagnostic pipes cancel local and remote copies
+  promptly and return **13**, with a stderr diagnostic. File cleanup, partial
+  resume, silent/quiet transfers, listing and help/version output are covered.
+  The adjacent simultaneous-timeout race also preserves its single diagnostic
+  and exit 30. R-01 is the only remaining P1 story, awaiting the physical-host
+  clarification/reachability information recorded above.
+- Clean release artifacts identify source **3b686e385923**. macOS ARM and Intel
+  each pass **43 methods** (one Linux /dev/full skip); static Linux arm64 passes
+  **43**, and static Linux amd64 passes **47**, including four additional runs
+  of the four-case simultaneous-timeout fixture. Each artifact is checked
+  against dist/manifest.json's source revision and SHA-256.
+- Static artifacts cannot use Linux LD_PRELOAD, and the Intel launcher does not
+  preserve ordinary DYLD injection. Two existing interposition methods are
+  excluded from the artifact suite and independently pass in development:
+  Linux's complete output/error/pacing/closure suite passes **45 methods**, and
+  macOS's closure/pacing suite plus five repeated timeout methods passes **29**
+  (one Linux-device skip). Earlier macOS output/error/pacing and protocol/
+  fallback/trust checks pass **37** and **30** respectively.
+- Final real SSH verification passes **8** closure methods, **1** simultaneous
+  timeout method and **2** transfer/interrupt methods; maximum measured remote
+  SIGINT shutdown is **0.336s**. The output suite also passed **10 methods** in
+  the preceding real-SSH run. Build-time Linux xattr/sparse units and scratch/
+  transfer smoke checks pass. macOS xattr/sparse units pass on ARM and Intel.
+- Logs: `/tmp/xsync-e13-clean-releases-final.log`,
+  `/tmp/xsync-e13-release-mac-arm-final.log`,
+  `/tmp/xsync-e13-release-mac-intel-final.log`,
+  `/tmp/xsync-e13-release-linux-amd64-final.log`,
+  `/tmp/xsync-e13-release-linux-arm64-final.log`,
+  `/tmp/xsync-e13-timeout-cancellation-final.log`,
+  `/tmp/xsync-e13-linux-regressions-final2.log`, and
+  `/tmp/xsync-e13-real-ssh-final3.log`. The source package is refreshed after
+  this completion entry. No installed local executable or physical helper was
+  changed.
