@@ -29,7 +29,9 @@ class ListingWindowTests(unittest.TestCase):
             for i in range(1024):
                 (directory / f'file-{i:04}').touch()
         cls.names = cls.root / 'files-from'
-        cls.names.write_text(''.join(f'dir-{d:03}/\n' for d in range(68)))
+        # Select the source root too, so archive mode requests its timestamp.
+        # An implied destination parent does not inherit the source root attrs.
+        cls.names.write_text('./\n' + ''.join(f'dir-{d:03}/\n' for d in range(68)))
 
     @classmethod
     def tearDownClass(cls):

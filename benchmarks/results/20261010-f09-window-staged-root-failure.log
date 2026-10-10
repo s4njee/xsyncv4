@@ -1,0 +1,22 @@
+test_pruning_pull_defers_need_without_deadlock (__main__.ListingWindowTests.test_pruning_pull_defers_need_without_deadlock) ... ok
+test_pruning_push_defers_need_without_deadlock (__main__.ListingWindowTests.test_pruning_push_defers_need_without_deadlock) ... ok
+test_validated_files_from_pull_defers_need_without_deadlock (__main__.ListingWindowTests.test_validated_files_from_pull_defers_need_without_deadlock) ... FAIL
+
+======================================================================
+FAIL: test_validated_files_from_pull_defers_need_without_deadlock (__main__.ListingWindowTests.test_validated_files_from_pull_defers_need_without_deadlock)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/sanjee/projects/xsyncv4/.bench/p3-f09-window-v2-source/tests/listing_window_test.py", line 66, in test_validated_files_from_pull_defers_need_without_deadlock
+    self.copy('pull', ['-ar', '--files-from=' + str(self.names)])
+    ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/sanjee/projects/xsyncv4/.bench/p3-f09-window-v2-source/tests/listing_window_test.py", line 55, in copy
+    self.assertEqual(proof.stdout, '', 'independent checksum/metadata verification differs')
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: '.d..t...... ./\n' != ''
+- .d..t...... ./
+ : independent checksum/metadata verification differs
+
+----------------------------------------------------------------------
+Ran 3 tests in 71.935s
+
+FAILED (failures=1)

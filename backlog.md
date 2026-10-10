@@ -4076,3 +4076,19 @@ after U-01's evidence entry completes P2, as requested by the user.
 - Full clean-source regression validation must run again. The first product
   coordinator exits before building or staging new Neo/Freya binaries, so
   no paired memory pass is claimed and F-09 remains partial.
+
+### F-09 staged-list root-selection correction — 2026-10-10
+
+- Clean 027e14d8b03f passes all 231 macOS differential cases, nine directory
+  lifetime tests, fifteen mixed-protocol tests, and the thirteen-case P0 suite.
+  Both large pruning directions pass. The files-from test finishes its transfer
+  but the verifier reports the source root's timestamp was not copied.
+- A separate rsync/native probe confirms that an unlisted source root's
+  timestamp is not requested by `-ar --files-from`; both tools give the implied
+  destination parent its creation timestamp. With `./` explicitly selected,
+  both tools preserve the source root timestamp and exact verification passes.
+  The fixture now explicitly selects `./`, retaining the complete verifier.
+- Initial failure/probe evidence is retained. The corrected 69,632-file staged
+  tests are running against the unchanged validated native product, and Linux
+  checks remain required. Publishing and product staging reject the failed
+  precondition; no new physical-host measurement starts on that failed proof.
