@@ -136,7 +136,7 @@ The benchmark so far is one corpus slice, one machine, one filesystem, no networ
 | F-07 | **APFS byte-copy ceiling.** Creation is ~100 µs per file and does not scale with threads here; system time triples from 2 to 8 threads for no gain. Unknown: how much is path-lookup contention versus the filesystem itself, and how much is the nearly full volume. | done | Re-measure on a volume with free space; try `openat`-relative creation; pick the thread count per filesystem instead of always using all performance cores. | M |
 | F-08 | **No-op re-sync burns CPU.** 0.40 s wall but 2.7 s of system time at 8 threads. | confirmed | Wall time unchanged or better with under 1 s of CPU; or an opt-in manifest that skips listing the destination entirely. | M |
 | F-09 | **Memory on very large trees.** The receiver keeps every directory record until exit; the local engine holds up to 200,000 pending files. Never run beyond 77k files. | partial | A 5-million-file synthetic tree syncs within a stated memory bound; receiver frees a directory once it and its children are finished. | M |
-| F-10 | **Whole-subtree clones.** Only leaf directories are cloned in one call. A missing subtree could be one call, at the price of a long volume-wide lock. | partial | Bounded version (subtrees under N entries, known from the scan) measured against the leaf-only path. | M |
+| F-10 | **Whole-subtree clones.** Only leaf directories are cloned in one call. A missing subtree could be one call, at the price of a long volume-wide lock. | done | Bounded version (subtrees under N entries, known from the scan) measured against the leaf-only path. | M |
 | F-11 | **Clones when `-a` is incomplete.** `-rt` or `-rlt` fall back to byte copies because the clone would bring the wrong mode. | **done** | Clone, then correct mode/owner; still cheaper than create+write. | S |
 | F-12 | **Deletion is single-threaded.** Removing the 96,000-entry benchmark tree takes about 10 s with `rm`; `--delete` of a large stale subtree will feel the same. | **done** | Parallel removal by subtree. | S |
 | F-13 | **Tiny transfers.** For one file over ssh the fixed costs dominate: thread pool start, handshake round trip. | done | A single small file over ssh is within 10 ms of rsync. | S |
@@ -4043,3 +4043,22 @@ after U-01's evidence entry completes P2, as requested by the user.
   directory opens and identity checks. It does not establish CPU attribution
   or the F-08 target. Raw stacks and product identity are retained with the
   `20261010-f08-apfs-profile` prefix; F-08 remains open.
+
+## P3 / F-10 completed — 2026-10-10
+
+- Clean 732f70718369 completes all 108 timed samples and 18 excluded warmups
+  against leaf-only 0822c3728055 and rsync at four workers. Independent
+  checksum/metadata and source-immutability verification passes for every copy.
+- Bounded, near-limit and oversized `-rlt` wall medians improve by 2.9%, 5.1%
+  and 12.2%, respectively. `-a` remains 6.5%, 15.1% and 14.0% slower than
+  leaf-only, with 31.0%, 29.7% and 19.4% lower CPU. This is a measured tradeoff,
+  not a universal wall-time improvement; both negative and positive findings
+  are retained in `20261010-f10-parallel-summary.md` and its linked evidence.
+- Each transaction remains limited to 4,096 descendant entries and 32 levels.
+  Per-directory corrections use verified descriptors and at most four workers.
+  Six focused subtree tests, fourteen macOS-specific cases (one existing skip),
+  all 231 macOS differential cases and the Linux build pass. The newer source
+  still needs its own hosted production gate after the memory regression checks.
+- F-10's bounded implementation and measured leaf-only comparison are complete.
+  The earlier serial correction regression and busy/nearly-full APFS limits
+  remain documented. F-09's expanded-payload/listing validation has now started.

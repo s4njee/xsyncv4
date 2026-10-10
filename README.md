@@ -358,12 +358,20 @@ See [benchmark instructions](benchmarks/README.md) and the
 [complete result table and JSON evidence](benchmarks/results/20261010T144748Z-715fa0-summary.md).
 `bench/bench.py --target host:absolute-root` runs the SSH harness.
 
-APFS `-rt` and `-rlt` now use file and eligible leaf-directory clones, then
+APFS `-rt` and `-rlt` use file and eligible directory clones, then
 correct omitted permissions and selected ownership. On a busy M1 Max, five
 samples per tool showed a 1 GiB read-only file dropping from about 0.30 s to
 0.008–0.009 s, and a 1,000-file tree from about 0.29 s to 0.04 s. Every sample
 matched rsync data and metadata. These results come from a 98%-full volume;
 see [the measured comparison and caveats](benchmarks/results/20261010-f11-clone-modes-summary.md).
+
+Missing compatible APFS subtrees can now clone in one transaction, limited to
+4,096 descendant entries and 32 levels. Oversized or incompatible trees fall
+back to ordinary walking, which can clone eligible smaller children. In the
+six-sample leaf-only comparison, bounded cloning uses less CPU in all cases;
+`-rlt` wall medians improve by 3–12%, while `-a` remains 6–15% slower.
+See [the full comparison and host limits](benchmarks/results/20261010-f10-parallel-summary.md).
+
 
 ### Historical local baseline
 
@@ -420,7 +428,8 @@ Things worth knowing when reading these numbers:
   backlog grows. Local copies switch priority at 512 batches of up to 64 files.
 - **Copy-on-write clones.** On APFS, a local copy with `-a`, `-rt` or `-rlt` clones files
   instead of copying bytes, then applies the requested mode and ownership. An
-  eligible new directory that holds only files and symlinks is cloned in a single call.
+  eligible new subtree is cloned in a single call after its inventory is checked
+  against the 4,096-entry and 32-level limits.
   Clones are independent files sharing storage until one is modified. Disable with
   `--no-clone`.
 - **A pipelined wire protocol.** Over ssh the sender streams directory listings, the
