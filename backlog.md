@@ -2706,3 +2706,24 @@ Verified artifact manifest (source `864bd37edf14`):
   `/tmp/xsync-u03-release-linux-amd64.log`. The source package/formula is
   refreshed after this completion entry; installed executables and physical
   helpers are unchanged.
+
+## U-04 progress — 2026-10-10: receiver-acknowledged push bytes
+
+- Push totals follow receiver acknowledgments of successful writes, with
+  separately measured `sent … wire` bytes. Logical progress includes verified
+  resume prefixes and reconstructed delta blocks. Failed/retried attempts
+  subtract their earlier acknowledgments; 100% requires file completion.
+- An optional protocol-4 capability adds bounded progress frames (at most two
+  64-bit varints), serialized across receiver writers and coalesced per MiB or
+  100 ms, plus a final snapshot. Unnegotiated, oversized and malformed frames
+  are rejected. Older helpers remain compatible; their bars wait for a
+  successful DONE before showing completed totals.
+- Development acceptance passes **3 methods** covering a delayed receiver's
+  0/25/50/75% stages, separate sent bytes, compressed/delta/inplace/sparse
+  completions, and four invalid-frame fixtures. The delayed receiver also
+  passes over actual SSH in the Linux rig. Existing progress/clone checks pass
+  **11 methods**; source-change/retry checks pass with progress enabled.
+- Protocol regressions pass **15 methods**. Progress-enabled frozen v3 and
+  core-only compatibility checks are being finalized. The real-SSH suites
+  pass 7 progress, 7 resume and 4 delta methods (platform/opt-in skips recorded
+  in logs). U-04 remains uncompleted until final release verification.

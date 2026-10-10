@@ -44,6 +44,7 @@ constexpr u64 PF_FILEFLAGS = 134217728;
 constexpr u64 PF_CHOWN = 268435456;
 constexpr u64 PF_SPARSE = 536870912;
 constexpr u64 PF_LINK_DEST = 1073741824;
+constexpr u64 PF_PROGRESS_ACK = 2147483648;
 #ifdef __APPLE__
 constexpr u64 PF_NATIVE_ACL = PF_ACL_DARWIN;
 constexpr u64 PF_UNSUPPORTED_NATIVE = PF_ACL_POSIX;
@@ -52,7 +53,7 @@ constexpr u64 PF_NATIVE_ACL = PF_ACL_POSIX;
 constexpr u64 PF_UNSUPPORTED_NATIVE = PF_ACL_DARWIN | PF_ACL_UUID | PF_CRTIMES | PF_FILEFLAGS;
 #endif
 #ifndef XSYNC_PROTOCOL_FEATURES
-#define XSYNC_PROTOCOL_FEATURES 2147483647
+#define XSYNC_PROTOCOL_FEATURES 4294967295ULL
 #endif
 constexpr u64 PROTO_FEATURES = XSYNC_PROTOCOL_FEATURES & ~PF_UNSUPPORTED_NATIVE;
 constexpr u64 LEGACY_V3_FEATURES = 15;
@@ -197,6 +198,8 @@ struct Stats {
   std::atomic<u64> created_files{0}, created_dirs{0}, created_links{0}, created_specials{0};
   std::atomic<u64> deleted{0};
   std::atomic<u64> wire_sent{0}, wire_recv{0};
+  std::atomic<u64> acknowledged_bytes{0}, acknowledged_files{0};
+  std::atomic<bool> receiver_done{false};
   std::atomic<u64> delta_files{0}, delta_literal_bytes{0}, delta_matched_bytes{0};
   std::atomic<u64> cloned_dirs{0}, clone_dirs_total{0};  // Local whole-directory clones.
   std::atomic<bool> scan_done{false};

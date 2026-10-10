@@ -49,7 +49,7 @@ namespace {
 
 enum : u8 { F_HELLO = 1, F_DIR, F_NEED, F_DATA, F_LIST_END, F_DATA_END, F_DONE, F_MSG, F_IDMAP, F_DEST, F_OUTPUT, F_OUTPUT_CONFIG,
             F_DELTA_REQUEST, F_DELTA_SIGNATURE, F_DELTA_RETRY_ACK, F_LIST_ENTRY, F_IO_CONFIG, F_KEEPALIVE, F_FILTER_CONFIG, F_DELETE_CONFIG,
-            F_PRUNE_CONFIG, F_RELATIVE_CONFIG, F_FILES_CONFIG, F_FILES_DATA, F_FILES_END, F_XATTR_CONFIG, F_XATTR_START, F_XATTR_CHUNK, F_XATTR_END, F_ACL_CONFIG, F_CHOWN_CONFIG, F_SPARSE_CONFIG, F_LINKDEST_CONFIG };
+            F_PRUNE_CONFIG, F_RELATIVE_CONFIG, F_FILES_CONFIG, F_FILES_DATA, F_FILES_END, F_XATTR_CONFIG, F_XATTR_START, F_XATTR_CHUNK, F_XATTR_END, F_ACL_CONFIG, F_CHOWN_CONFIG, F_SPARSE_CONFIG, F_LINKDEST_CONFIG, F_PROGRESS };
 enum : u8 { DF_ATTRS = 1, DF_SINGLE = 2, DF_NODELETE = 4, DF_ZSTD = 8 };
 enum : u8 { R_WHOLE = 1, R_CHUNK = 2, R_FAIL = 4, R_END = 8, R_LITERAL = 16, R_DELTA_END = 32, R_COPY = 64 };
 constexpr size_t HDR = 5;                  // u32 payload length + u8 type
@@ -451,6 +451,8 @@ struct Conn {
       if (hello && type != F_HELLO && type != F_MSG)
         die(RERR_PROTOCOL, "the remote shell is printing text on stdout (or --rsync-path is not xsync); remove shell startup output");
       if (len > (1u << 30)) die(RERR_PROTOCOL, "protocol error: oversized frame");
+      if (type == F_PROGRESS && (len > 20 || !(g_opt.peer_features & PF_PROGRESS_ACK)))
+        die(RERR_PROTOCOL, "protocol error: oversized or unnegotiated progress acknowledgment");
       if (type == F_IO_CONFIG && len > 20) die(RERR_PROTOCOL, "protocol error: malformed I/O configuration (oversized)");
       if (type == F_CHOWN_CONFIG && len > 1024 * 1024)
         die(RERR_PROTOCOL, "protocol error: oversized ownership configuration");
@@ -1384,6 +1386,16 @@ struct Sender {
         case F_DELTA_RETRY_ACK: on_delta_reply(payload, true); break;
         case F_MSG: handle_msg(payload); break;
         case F_OUTPUT: handle_output(payload); break;
+        case F_PROGRESS: {
+          RBuf r(payload);
+          u64 bytes = r.var(), files = r.var();
+          if (r.bad || !r.empty()) die(RERR_PROTOCOL, "protocol error: malformed progress acknowledgment");
+          if (client) {
+            g_stats.acknowledged_bytes.store(bytes);
+            g_stats.acknowledged_files.store(files);
+          }
+          break;
+        }
         case F_DONE: {
           RBuf r(payload);
           int code = (int)r.var();
@@ -1391,6 +1403,11 @@ struct Sender {
             report_peer_error(code, "errors were reported by the receiver");
             g_stats.created_files = r.var(), g_stats.created_dirs = r.var(), g_stats.created_links = r.var();
             g_stats.created_specials = r.var(), g_stats.deleted = r.var();
+            if (!(g_opt.peer_features & PF_PROGRESS_ACK) && code == 0) {
+              g_stats.acknowledged_bytes = g_stats.xfer_bytes.load();
+              g_stats.acknowledged_files = g_stats.xfer_files.load();
+            }
+            g_stats.receiver_done = true;
           }
           std::lock_guard<std::mutex> lk(done_mu);
           got_done = true;
@@ -1504,6 +1521,7 @@ struct BigFile {
   i64 literal_bytes = 0;
   u64 sum[2] = {};
   int progress_slot = -1;
+  i64 acknowledged = 0;
 };
 
 struct Receiver {
@@ -1523,6 +1541,30 @@ struct Receiver {
   std::atomic<bool> list_end{false};
   int sender_code = 0;
   bool client;
+
+  std::mutex progress_mu;
+  u64 progress_bytes = 0, progress_last_bytes = 0, progress_last_files = 0, progress_last_time = 0;
+
+  // Serialize snapshots with updates so parallel writers cannot reorder ACKs.
+  // Bound traffic to one per MiB or 100ms, plus the final snapshot.
+  void acknowledge(i64 delta = 0, bool force = false) {
+    if (client || !(g_opt.peer_features & PF_PROGRESS_ACK)) return;
+    std::lock_guard<std::mutex> lock(progress_mu);
+    if (delta < 0) {
+      u64 removed = (u64)(-delta);
+      if (removed > progress_bytes) die(RERR_PROTOCOL, "progress byte accounting underflow");
+      progress_bytes -= removed;
+    } else progress_bytes += (u64)delta;
+    u64 bytes = g_opt.dry_run ? g_stats.xfer_bytes.load() : progress_bytes;
+    u64 files = g_stats.xfer_files.load(), now = now_ns();
+    bool changed = bytes != progress_last_bytes || files != progress_last_files;
+    if (!force && (!changed || (now - progress_last_time < 100000000 &&
+        bytes >= progress_last_bytes && bytes - progress_last_bytes < BLOCK_TARGET))) return;
+    std::string frame = new_frame(F_PROGRESS);
+    put_var(frame, bytes), put_var(frame, files);
+    c.send(std::move(frame));
+    progress_last_bytes = bytes, progress_last_files = files, progress_last_time = now;
+  }
 
   Receiver(Conn& conn, bool is_client) : c(conn), client(is_client) {}
 
@@ -1919,6 +1961,7 @@ struct Receiver {
           if ((i64)bytes.size() >= s.size) g_stats.xfer_bytes_total.fetch_add(bytes.size() - (u64)s.size);
           else g_stats.xfer_bytes_total.fetch_sub((u64)s.size - bytes.size());
           note_transferred(w, idx, (i64)bytes.size(), t, (i64)bytes.size());
+          acknowledge((i64)bytes.size());
         } else {
           g_stats.xfer_files_total.fetch_sub(1);
           g_stats.xfer_bytes_total.fetch_sub((u64)s.size);
@@ -1992,6 +2035,7 @@ struct Receiver {
             file_io_error(errno, b->f.path.c_str(), "reuse partial prefix");
             b->prefix_ok = b->ok = false;
           }
+          if (b->ok && prefix) acknowledge(prefix), b->acknowledged += prefix;
         }
         if (b->prefix != prefix || b->delta != delta) die(RERR_PROTOCOL, "protocol error: inconsistent transfer method");
         if (ending) {
@@ -2025,7 +2069,8 @@ struct Receiver {
           if (b->ok) {
             bool wrote = count ? delta_copy_blocks(b->f, *basis, first, count, off, t.buf) :
               out_write(b->f, bytes.data(), bytes.size(), off);
-            if (!wrote) {
+            if (wrote) acknowledge(length), b->acknowledged += length;
+            else {
               file_io_error(errno, b->f.path.c_str(), count ? "reconstruct delta" : "write");
               g_source_io_error.store(true);
               b->ok = false;
@@ -2075,6 +2120,8 @@ struct Receiver {
             put_var(ack, id), put_var(ack, idx);
             c.send(std::move(ack));
           }
+          if (!ok && b->acknowledged) acknowledge(-b->acknowledged);
+          else acknowledge();
           slot_end(b->progress_slot, ok);
         }
       } else {
@@ -2203,6 +2250,7 @@ struct Receiver {
     finalize_tree();
     if (g_stop.load()) exit_signal();
     allow_disconnect.store(true);
+    acknowledge(0, true);
     std::string f = new_frame(F_DONE);
     put_var(f, (u64)g_exit_code.load());
     put_var(f, g_stats.created_files), put_var(f, g_stats.created_dirs), put_var(f, g_stats.created_links);
@@ -2438,6 +2486,7 @@ int run_client(const std::vector<std::string>& srcs, const std::string& dest, u3
   put_var(f, wire_version);
   f.push_back(push ? 'R' : 'S');
   u64 advertised = PROTO_FEATURES & (o.whole_file ? ~(PF_RESUME | PF_DELTA) : ~u64(0));
+  if (!push || !o.progress) advertised &= ~PF_PROGRESS_ACK;
   if (o.list_only) advertised &= PF_CORE | PF_ZSTD | PF_LIST | PF_IO_CONTROL | PF_FILTERS | PF_MERGE_FILTERS | PF_CVS_FILTERS | PF_PRUNE_EMPTY | PF_RELATIVE | PF_FILES_FROM;
   else advertised &= ~PF_LIST;
   if (!o.filters.needs_extended()) advertised &= ~PF_FILTERS;

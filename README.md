@@ -383,6 +383,15 @@ line reports how many directories were cloned. Planned file/byte counters
 advance with each directory and are reversed if a clone falls back to copying.
 Display updates are limited to roughly 16 frames per second.
 
+On a push, the total bar follows receiver acknowledgments after successful
+writes. It stays below 100% until the files are completed on the receiver;
+`sent … wire` reports the separately measured bytes sent, including compressed
+data and protocol overhead. Resume prefixes and reconstructed delta blocks
+count as logical file progress. Retried/aborted writes are removed from the
+acknowledged count. Older helpers that lack this optional protocol-4 capability
+keep the bar at zero until they report successful completion, while still
+showing sent wire bytes.
+
 It is drawn on stderr and only when that is a terminal; otherwise one summary line per
 second is printed. `-v` and `-i` lines scroll above the live region. `NO_COLOR` is honoured.
 The renderer respects the actual terminal width, including very narrow windows,

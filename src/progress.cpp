@@ -220,12 +220,17 @@ Totals totals() {
   t.files_total = g_stats.xfer_files_total.load(std::memory_order_relaxed);
   t.bytes = g_stats.xfer_bytes.load(std::memory_order_relaxed);
   t.bytes_total = g_stats.xfer_bytes_total.load(std::memory_order_relaxed);
+  if (g_opt.pushing) {
+    t.bytes = g_stats.acknowledged_bytes.load(std::memory_order_relaxed);
+    t.files = g_stats.acknowledged_files.load(std::memory_order_relaxed);
+  }
   t.seen = g_stats.files_seen.load(std::memory_order_relaxed);
   t.scanning = !g_stats.scan_done.load(std::memory_order_relaxed);
   t.files_total = std::max(t.files_total, t.files);
   t.bytes_total = std::max(t.bytes_total, t.bytes);
   t.frac = t.bytes_total ? (double)t.bytes / (double)t.bytes_total
                          : t.files_total ? (double)t.files / (double)t.files_total : (t.scanning ? 0.0 : 1.0);
+  if (g_opt.pushing && t.files < t.files_total) t.frac = std::min(t.frac, .99);
   return t;
 }
 
@@ -260,6 +265,7 @@ void draw_locked() {
     fields.push_back(fmt_num(t.files) + "/" + fmt_num(t.files_total) + " files");
     if (g_stats.clone_dirs_total.load()) fields.push_back(fmt_num(g_stats.cloned_dirs) + "/" + fmt_num(g_stats.clone_dirs_total) + " directories cloned");
     fields.push_back(fmt_size((double)t.bytes) + "/" + fmt_size((double)t.bytes_total));
+    if (g_opt.pushing) fields.push_back("sent " + fmt_size((double)g_stats.wire_sent.load()) + " wire");
     fields.push_back(fmt_size(rate_b) + "/s");
     fields.push_back(fmt_count(rate_f) + " files/s");
     if (t.scanning) fields.push_back(unicode ? "scanning…" : "scanning...");
@@ -460,7 +466,8 @@ void progress_stop(bool ok) {
     snprintf(secs, sizeof secs, "%.2fs", el);
     std::string complete = unicode ? " ✓ " : " OK ";
     if (t.files == 0) {
-      complete += "up to date" + std::string(separator()) + fmt_num(t.seen) + " files checked in " + secs;
+      const char* result = g_exit_code.load() ? (g_opt.pushing ? "no files acknowledged" : "no files completed") : "up to date";
+      complete += std::string(result) + separator() + fmt_num(t.seen) + " files checked in " + secs;
     } else {
       complete += fmt_num(t.files) + (t.files == 1 ? " file" : " files") + separator() + fmt_size((double)t.bytes) + " in " + secs + separator() +
              fmt_size((double)t.bytes / el) + "/s" + separator() +

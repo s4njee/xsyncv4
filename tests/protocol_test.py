@@ -107,7 +107,7 @@ class ProtocolTests(unittest.TestCase):
                             subprocess.run(['rsync', '-a', '-e', RSH, a, host + ':' + a], check=True, capture_output=True)
                     if direction == 'push': b = host + ':' + b
                     else: a = host + ':' + a
-                    command = [str(client), '--no-fallback', '-az', '--partial', '--safe-links', '--delete', '-e', RSH,
+                    command = [str(client), '--no-fallback', '-az', '--partial', '--progress', '--safe-links', '--delete', '-e', RSH,
                                '--rsync-path=' + shlex.quote(server), a, b]
                     for _ in range(2):
                         result = subprocess.run(command, capture_output=True, timeout=20)
@@ -143,7 +143,7 @@ p=pathlib.Path(sys.argv[1]); print(json.dumps({'hash':hashlib.sha256((p/'file').
                         subprocess.run(['rsync', '-a', '-e', RSH, a, host + ':' + a], check=True, capture_output=True)
                 if direction == 'push': b = host + ':' + b
                 else: a = host + ':' + a
-                result = subprocess.run([str(BINARY), '--no-fallback', '-rz', '-e', RSH,
+                result = subprocess.run([str(BINARY), '--no-fallback', '-rz', '--progress', '-e', RSH,
                                          '--rsync-path=' + shlex.quote(self.remote_subset), a, b],
                                         capture_output=True, timeout=20)
                 self.assertEqual(result.returncode, 0, result.stderr)
