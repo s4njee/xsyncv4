@@ -111,8 +111,8 @@ document.querySelectorAll('[data-copy]').forEach(button=>button.addEventListener
 }));
 document.querySelectorAll('[data-platform]').forEach(button=>button.addEventListener('click',()=>{
   document.querySelectorAll('[data-platform]').forEach(option=>option.setAttribute('aria-pressed',String(option===button)));
-  $('#install-command').textContent=(button.dataset.platform==='mac'?'brew install cmake ninja zstd xxhash icu4c':'sudo apt install build-essential cmake ninja-build libzstd-dev libxxhash-dev libicu-dev')+'\ncmake -S . -B build -G Ninja\ncmake --build build\nbuild/xs -aP src/ dst/';
-  $('#install-label').textContent=button.dataset.platform==='mac'?'BUILD FROM THE XSYNC SOURCE DIRECTORY':'DEBIAN / UBUNTU — FROM THE SOURCE DIRECTORY';
+  $('#install-command').textContent=(button.dataset.platform==='mac'?'brew install git cmake ninja zstd xxhash icu4c':'sudo apt install git build-essential cmake ninja-build python3 libzstd-dev libxxhash-dev libicu-dev')+'\ngit clone https://github.com/s4njee/xsyncv4.git\ncd xsyncv4\ncmake -S . -B build -G Ninja\ncmake --build build\nbuild/xs -aP src/ dst/';
+  $('#install-label').textContent=button.dataset.platform==='mac'?'CLONE AND BUILD · MACOS':'CLONE AND BUILD · DEBIAN / UBUNTU';
 }));
 if('IntersectionObserver' in window&&motionAllowed(root)){
   const observer=new IntersectionObserver(entries=>entries.forEach(entry=>{if(entry.isIntersecting){entry.target.inert=false;enter(entry.target);observer.unobserve(entry.target);}}),{threshold:.15});
