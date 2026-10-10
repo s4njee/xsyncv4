@@ -13,6 +13,7 @@ struct SelectedSource;
 // Per-thread scratch state.
 struct Worker {
   int id = 0;
+  u64 deleted_entries = 0; // Per-worker count, also detects partial subtree changes.
   std::vector<char> buf;  // file data buffer
   DirList dl;             // destination listing scratch
   std::string p1, p2;     // path scratch

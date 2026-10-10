@@ -621,6 +621,7 @@ void order_deletions(DirList& list) {
 
 bool remove_tree(const std::string& path, u8 type, const std::string& rel, Worker& t, bool limited = false, bool report = true,
                  std::shared_ptr<const FilterList> context = {}) {
+  if (g_stop.load()) return false;
   ProgressPhase phase(g_stats.deleting_active);
   auto permit = [&] {
     if (!limited || g_opt.max_delete < 0 || deletion_count < (u64)g_opt.max_delete) return true;
@@ -668,9 +669,41 @@ bool remove_tree(const std::string& path, u8 type, const std::string& rel, Worke
   }
   if (report) item_delete(t, rel, type == T_DIR);
   g_stats.deleted.fetch_add(1, std::memory_order_relaxed);
+  ++t.deleted_entries;
   if (g_progress_on || g_phase_sink) progress_tick();
-  if (limited) deletion_count++;
+  // Finite limits retain the serial, rsync-compatible deletion order. Unlimited
+  // subtree workers do not share this otherwise unused counter.
+  if (limited && g_opt.max_delete >= 0) deletion_count++;
   return true;
+}
+
+void delete_subtrees(std::vector<std::string>& dirty) {
+  // Candidates are disjoint extras: source scanning never descends into an
+  // absent subtree. Each worker removes a whole subtree in postorder, retaining
+  // its inherited receiver filters and the anchored NOFOLLOW operations.
+  const int count = std::min<size_t>(default_jobs(), delete_candidates.size());
+  if (!count) return;
+  std::atomic<size_t> next{0};
+  std::mutex dirty_mu;
+  auto run = [&] {
+    Worker worker;
+    std::vector<std::string> changed;
+    while (!g_stop.load()) {
+      size_t index = next.fetch_add(1, std::memory_order_relaxed);
+      if (index >= delete_candidates.size()) break;
+      const auto& candidate = delete_candidates[index];
+      u64 before = worker.deleted_entries;
+      remove_tree(candidate.path, candidate.type, candidate.rel, worker, true, true, candidate.filters);
+      if (worker.deleted_entries != before) changed.push_back(candidate.parent);
+    }
+    worker.flush_log();
+    std::lock_guard<std::mutex> lock(dirty_mu);
+    dirty.insert(dirty.end(), std::make_move_iterator(changed.begin()), std::make_move_iterator(changed.end()));
+  };
+  std::vector<std::thread> threads;
+  for (int i = 1; i < count; ++i) threads.emplace_back(run);
+  run();
+  for (auto& thread : threads) thread.join();
 }
 
 // Remove whatever occupies `path` so that something of a different type can replace it.
@@ -1212,6 +1245,7 @@ void finish_dir(DirWork& w) {
 void finalize_tree() {
   Worker worker;
   std::vector<std::string> dirty = hardlink_finalize();
+  const bool parallel_delete = !g_opt.dry_run && g_opt.max_delete < 0 && default_jobs() > 1;
   if (g_source_io_error.load() && !g_opt.ignore_errors && g_opt.del) {
     err_line(0, "IO error encountered -- skipping file deletion");
   } else {
@@ -1252,6 +1286,12 @@ void finalize_tree() {
           std::string path = path_join(scan.path, name), rel = rel_join(scan.rel, name);
           std::string absolute = filters.has_absolute() ? FilterList::absolute_path(path) : "";
           if (filters.protected_from_deletion(rel, entry.type == T_DIR, g_opt.delete_excluded, false, absolute)) continue;
+          if (parallel_delete) {
+            // Resolve all parent merge contexts before workers can remove the
+            // merge files themselves during delete-after.
+            delete_candidates.push_back({path, rel, scan.path, entry.type, context});
+            continue;
+          }
           u64 before = g_stats.deleted.load();
           remove_tree(path, entry.type, rel, worker, true, true, context);
           if (g_stats.deleted.load() != before) dirty.push_back(scan.path);
@@ -1267,7 +1307,8 @@ void finalize_tree() {
       }
       return a.path > b.path;
     });
-    for (const auto& candidate : delete_candidates) {
+    if (parallel_delete) delete_subtrees(dirty);
+    else for (const auto& candidate : delete_candidates) {
       if (g_stop.load()) break;
       u64 before = g_stats.deleted.load();
       remove_tree(candidate.path, candidate.type, candidate.rel, worker, true, true, candidate.filters);

@@ -138,7 +138,7 @@ The benchmark so far is one corpus slice, one machine, one filesystem, no networ
 | F-09 | **Memory on very large trees.** The receiver keeps every directory record until exit; the local engine holds up to 200,000 pending files. Never run beyond 77k files. | code | A 5-million-file synthetic tree syncs within a stated memory bound; receiver frees a directory once it and its children are finished. | M |
 | F-10 | **Whole-subtree clones.** Only leaf directories are cloned in one call. A missing subtree could be one call, at the price of a long volume-wide lock. | new | Bounded version (subtrees under N entries, known from the scan) measured against the leaf-only path. | M |
 | F-11 | **Clones when `-a` is incomplete.** `-rt` or `-rlt` fall back to byte copies because the clone would bring the wrong mode. | **done** | Clone, then correct mode/owner; still cheaper than create+write. | S |
-| F-12 | **Deletion is single-threaded.** Removing the 96,000-entry benchmark tree takes about 10 s with `rm`; `--delete` of a large stale subtree will feel the same. | code | Parallel removal by subtree. | S |
+| F-12 | **Deletion is single-threaded.** Removing the 96,000-entry benchmark tree takes about 10 s with `rm`; `--delete` of a large stale subtree will feel the same. | partial | Parallel removal by subtree. | S |
 | F-13 | **Tiny transfers.** For one file over ssh the fixed costs dominate: thread pool start, handshake round trip. | unverified | A single small file over ssh is within 10 ms of rsync. | S |
 | F-14 | **`-c` at scale.** Sender hashes in the walkers, receiver hashes inline in the generator; unmeasured. | unverified | Benchmarked against `rsync -c`; hashing gets its own pool if it starves the scan. | S |
 
@@ -3259,3 +3259,23 @@ after U-01's evidence entry completes P2, as requested by the user.
   the expanded matrix has 15 scenarios, 270 timed samples and 45 warmups per
   platform. The job timeout is 45 minutes. All three healthy/slowdown/corruption
   behavior tests and all seven harness safeguard tests pass locally.
+
+
+### F-12 parallel subtree implementation — 2026-10-10
+
+- Unlimited real deletions now dispatch disjoint stale subtrees to at most
+  the configured worker count. Each subtree retains postorder removal,
+  receiver filter inheritance and anchored no-follow operations. Parent
+  metadata is restored after all workers finish. Per-worker counters identify
+  partially changed parents without relying on a shared global count.
+- Finite `--max-delete` limits and dry runs keep serial selection/order.
+  Delete-after resolves parent merge contexts before workers can delete the
+  merge files. Cancellation is checked between subtree entries.
+- All 231 itemized macOS differential cases and 227 Linux data/metadata/exit
+  cases pass. The existing four filter differential tests pass, and four new
+  deletion tests pass on both platforms: local/push/pull, delete-after, parent
+  merge protection, outside symlink sentinels, finite limits and dry runs.
+- `benchmarks/deletion.py` measures and independently verifies 65,536-file
+  many-subtree and single-stale-root cases against the prior product and rsync,
+  with a one-worker control. F-12 remains partial pending measured results;
+  the current scheduler does not split one stale root across workers.
