@@ -234,6 +234,7 @@ struct Conn {
   RateLimiter limiter;
   std::atomic<u64> idle_ns{0}, last_activity{now_ns()}, last_send{now_ns()}, heartbeat_ns{10000000000ull};
   std::atomic<bool> keepalive{false};
+  std::atomic<bool> timed_out{false};
   std::mutex timeout_mu;
   std::mutex mu;
   std::condition_variable cv, cv_space;
@@ -253,6 +254,10 @@ struct Conn {
     keepalive = heartbeat;
   }
   void check_timeout(u64 write_progress = 0) {
+    if (timed_out.load()) {
+      std::lock_guard<std::mutex> lock(timeout_mu);
+      return;  // The timeout owner exits while holding this mutex.
+    }
     output_check();
     if (output_error()) return;  // Preserve the diagnostic failure as the exit reason.
     u64 deadline = idle_ns.load();
@@ -261,6 +266,7 @@ struct Conn {
     // Read and write waits can expire together. Only one thread owns cleanup
     // and the final diagnostic; the others wait until that thread exits.
     std::lock_guard<std::mutex> timeout_lock(timeout_mu);
+    timed_out = true;
     // A stalled writer cannot safely drain a fatal frame, especially mid-frame.
     // Both peers have the deadline; the client also recognizes shell exit 30.
     if (peer_pid > 0) kill(peer_pid, SIGTERM);
@@ -593,6 +599,9 @@ void send_msg(int kind, int code, std::string_view s) {
 }
 
 [[noreturn]] void conn_lost() {
+  // A timeout closes the peer before printing its diagnostic. Join that fatal
+  // path instead of racing it with a second die() that could exit too early.
+  if (g_conn) g_conn->check_timeout();
   // A broken connection cannot carry the fatal message back to the peer.
   g_msg_sink = nullptr;
   g_output_sink = nullptr;

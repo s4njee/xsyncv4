@@ -2518,7 +2518,7 @@ Verified artifact manifest (source `864bd37edf14`):
 - Final development verification: the macOS cancellation/cleanup pair passes
   **five repeated runs**, including local/push/pull and partial resume. The real
   two-container SSH run passes **8** closure methods, **2** transfer/interrupt
-  methods and **10** output methods. Remote SIGINT shutdown peaks at **0.517s**.
+  methods and **10** output methods. Remote SIGINT shutdown peaks at **0.339s**.
   Final Linux regressions pass **45 methods**; the macOS output/error/pacing
   regressions pass **37 methods**. Logs:
   `/tmp/xsync-e13-mac-final4.log`,
@@ -2527,3 +2527,9 @@ Verified artifact manifest (source `864bd37edf14`):
   `/tmp/xsync-e13-linux-regressions-final.log`,
   `/tmp/xsync-e13-mac-regressions-final.log`, and
   `/tmp/xsync-e13-protocol-regressions.log`.
+- Release validation found a separate fatal-path race in the simultaneous
+  timeout fixture: amd64 returned 30 but could exit before the diagnostic was
+  printed. Closing the peer let connection-loss reporting race the timeout
+  owner. Connection loss now checks/join-waits the active timeout path before
+  reporting another fatal error. Source/release validation is being repeated;
+  E-13 is still partial.
