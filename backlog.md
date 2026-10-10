@@ -4002,3 +4002,24 @@ after U-01's evidence entry completes P2, as requested by the user.
   cancellation and expanded-payload admission, plus staged lists exceeding
   the real entry threshold. These changes need build/regression validation
   and a new full-size local/paired qualification before any memory pass claim.
+
+### Hosted gate and completed failed memory qualification — 2026-10-10
+
+- Run 38088401309 completes successfully on Linux and macOS. Each platform
+  passes all 18 production scenarios, 1,296 verified timed records and 54
+  warmups with 24 samples per tool/case and the unchanged 85% floor. The
+  worst relative medians are 99.48% on Linux and 91.28% on macOS. Raw results
+  and healthy/slowdown/corruption proof artifacts are retained with that run
+  ID. These results qualify source 433d1ed18a7e, not the newer follow-ups.
+- The original five-million-file push finishes cleanup and its qualification
+  rejects the memory result: source 417.52 MiB, receiver 810.36 MiB, despite
+  both native return codes being zero and independent verification passing.
+  xs takes 233.09 s versus rsync's 480.15 s, one sample per tool. Complete
+  outputs are retained as `20261010-f09-ed8-push.json`,
+  `20261010-f09-ed8-qualification.json` and the qualification log.
+- Pull is not started after the budget failure. The queued F-14 coordinator
+  also stops before any profiling; its failed precondition state/log are
+  retained. It needs a successful new qualification before being re-queued.
+- Clean bd57acdeed94 build/regression validation is queued after the serialized
+  APFS budget/profile and parallel-clone checks. New source remains local
+  pending validation; the hosted run is not canceled by another source push.

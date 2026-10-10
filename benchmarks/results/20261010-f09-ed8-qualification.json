@@ -1,0 +1,70 @@
+{
+  "schema": 1,
+  "utc": "2026-10-10T21:15:15.190885+00:00",
+  "root": "/home/sanjee/benchmarks/xsyncv4/20261010T144748Z-715fa0",
+  "peer": "sanjee@freya.local",
+  "revision": "ed8b84137035",
+  "rss_limit_mib_per_measured_xs_process": 512,
+  "harness_sha256": "b687388e1718c9b86e77172a4ca55b961003175d5d542fd41bcd89b0676213f3",
+  "complete": false,
+  "stages": [
+    {
+      "stage": "local",
+      "output": "/home/sanjee/benchmarks/xsyncv4/20261010T144748Z-715fa0/logs/large-tree-ed8-local.json",
+      "passed": true
+    }
+  ],
+  "fixture": {
+    "schema": 1,
+    "dataset": "large-tree",
+    "path": "/home/sanjee/benchmarks/xsyncv4/20261010T144748Z-715fa0/data/large-tree",
+    "utc": "2026-10-10T21:19:18.489307+00:00",
+    "requested_files": 5000000,
+    "files_per_directory": 1000,
+    "record_bytes": 16,
+    "payload": "little-endian uint64 index, index XOR 0x58534d454d4f5259",
+    "mtime_ns": 1500000000000000000,
+    "prepared_files": 5000000,
+    "space_before": {
+      "available_bytes": 365146476544,
+      "available_inodes": 24599463
+    },
+    "reserved_bytes": 81920000000,
+    "complete": true,
+    "files": 5000000,
+    "directories": 5000,
+    "bytes": 80000000,
+    "prepared_seconds": 449.0900925430469
+  },
+  "local_product": {
+    "version": "xs  version 0.1.0  protocol version 4  git ed8b84137035",
+    "sha256": "567c35f9c108243104ab35305668b597452db7dd376a613e7b1c7e7a49ee704a"
+  },
+  "peer_product": {
+    "fixture": {
+      "schema": 1,
+      "dataset": "large-tree",
+      "path": "/home/sanjee/benchmarks/xsyncv4/20261010T144748Z-715fa0/data/large-tree",
+      "utc": "2026-10-10T20:40:14.645792+00:00",
+      "requested_files": 5000000,
+      "files_per_directory": 1000,
+      "record_bytes": 16,
+      "payload": "little-endian uint64 index, index XOR 0x58534d454d4f5259",
+      "mtime_ns": 1500000000000000000,
+      "prepared_files": 5000000,
+      "space_before": {
+        "available_bytes": 1801774039040,
+        "available_inodes": 3519090032
+      },
+      "reserved_bytes": 81920000000,
+      "complete": true,
+      "files": 5000000,
+      "directories": 5000,
+      "bytes": 80000000,
+      "prepared_seconds": 250.8031997140497
+    },
+    "version": "xs  version 0.1.0  protocol version 4  git ed8b84137035",
+    "sha256": "c9525ea30565e7801587a5170ff5e6183bdb683410f852c7990facdb2b15d5b6"
+  },
+  "error": "RuntimeError('xs process peak exceeds the stated memory budget')"
+}

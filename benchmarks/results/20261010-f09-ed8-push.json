@@ -1,0 +1,101 @@
+{
+  "schema": 1,
+  "utc": "2026-10-10T22:07:46.270148+00:00",
+  "client": "neo",
+  "target": "sanjee@freya.local:/home/sanjee/benchmarks/xsyncv4/20261010T144748Z-715fa0",
+  "direction": "push",
+  "label": "large-tree-ed8",
+  "cache": "warm",
+  "versions": {
+    "xs": "xs  version 0.1.0  protocol version 4  git ed8b84137035",
+    "rsync": "rsync  version 3.4.1  protocol version 32"
+  },
+  "argv": [
+    "/home/sanjee/benchmarks/xsyncv4/20261010T144748Z-715fa0/bin/run.py",
+    "--corpus",
+    "/home/sanjee/benchmarks/xsyncv4/20261010T144748Z-715fa0/data/large-tree",
+    "--work",
+    "/home/sanjee/benchmarks/xsyncv4/20261010T144748Z-715fa0/work-large-tree-pair",
+    "--xsync",
+    "/home/sanjee/benchmarks/xsyncv4/20261010T144748Z-715fa0/bin/xs-ed8b84137035",
+    "--runs",
+    "1",
+    "--scenarios",
+    "fresh",
+    "--label",
+    "large-tree-ed8",
+    "--output",
+    "/home/sanjee/benchmarks/xsyncv4/20261010T144748Z-715fa0/logs/large-tree-ed8-push.json",
+    "--target",
+    "sanjee@freya.local:/home/sanjee/benchmarks/xsyncv4/20261010T144748Z-715fa0",
+    "--direction",
+    "push",
+    "--remote-xs",
+    "/home/sanjee/benchmarks/xsyncv4/20261010T144748Z-715fa0/bin/xs-ed8b84137035",
+    "--remote-measure",
+    "/home/sanjee/benchmarks/xsyncv4/20261010T144748Z-715fa0/bin/measure.py",
+    "--rsh",
+    "ssh -oBatchMode=yes -oCompression=no -oControlMaster=no -oConnectTimeout=10"
+  ],
+  "records": [
+    {
+      "returncode": 0,
+      "wall_seconds": 480.1537811458111,
+      "user_seconds": 18.391095,
+      "system_seconds": 108.026754,
+      "max_rss_bytes": 13926400,
+      "voluntary_switches": 5077058,
+      "involuntary_switches": 610,
+      "scenario": "fresh",
+      "tool": "rsync",
+      "run": 1,
+      "verified": true,
+      "remote": {
+        "returncode": 0,
+        "wall_seconds": 479.9606786542572,
+        "user_seconds": 24.513933,
+        "system_seconds": 279.635635,
+        "max_rss_bytes": 13561856,
+        "voluntary_switches": 20724,
+        "involuntary_switches": 69709
+      },
+      "stdout": "\nNumber of files: 5,005,001 (reg: 5,000,000, dir: 5,001)\nNumber of created files: 5,005,001 (reg: 5,000,000, dir: 5,001)\nNumber of deleted files: 0\nNumber of regular files transferred: 5,000,000\nTotal file size: 80,000,000 bytes\nTotal transferred file size: 80,000,000 bytes\nLiteral data: 80,000,000 bytes\nMatched data: 0 bytes\nFile list size: 0\nFile list generation time: 0.822 seconds\nFile list transfer time: 0.000 seconds\nTotal bytes sent: 364,665,467\nTotal bytes received: 95,052,693\n\nsent 364,665,467 bytes  received 95,052,693 bytes  956,749.55 bytes/sec\ntotal size is 80,000,000  speedup is 0.17\n",
+      "stderr": ""
+    },
+    {
+      "returncode": 0,
+      "wall_seconds": 233.0904074148275,
+      "user_seconds": 20.198558,
+      "system_seconds": 167.864715,
+      "max_rss_bytes": 437796864,
+      "voluntary_switches": 5077069,
+      "involuntary_switches": 42802,
+      "scenario": "fresh",
+      "tool": "xs",
+      "run": 1,
+      "verified": true,
+      "remote": {
+        "returncode": 0,
+        "wall_seconds": 232.93178666988388,
+        "user_seconds": 39.040598,
+        "system_seconds": 227.392461,
+        "max_rss_bytes": 849719296,
+        "voluntary_switches": 10001953,
+        "involuntary_switches": 63555
+      },
+      "stdout": "\nNumber of files: 5,005,000 (reg: 5,000,000, dir: 5,000)\nNumber of created files: 5,005,000 (reg: 5,000,000, dir: 5,000)\nNumber of deleted files: 0\nNumber of regular files transferred: 5,000,000\nTotal file size: 80,000,000 bytes\nTotal transferred file size: 80,000,000 bytes\nDelta literal data: 0 bytes\nDelta matched data: 0 bytes\nTotal bytes sent: 339,565,291\nTotal bytes received: 10,045,112\n\nsent 339,565,291 bytes  received 10,045,112 bytes  1,499,972.72 bytes/sec\ntotal size is 80,000,000  speedup is 0.23\n",
+      "stderr": ""
+    }
+  ],
+  "summary": [
+    {
+      "scenario": "fresh",
+      "median_seconds": {
+        "rsync": 480.1537811458111,
+        "xs": 233.0904074148275
+      },
+      "xs_speedup": 2.0599465523747984
+    }
+  ],
+  "complete": true
+}
