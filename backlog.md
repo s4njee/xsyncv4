@@ -116,7 +116,7 @@ coverage is tracked in `tests/progress-terminal.md` and remains incomplete.
 | U-06 | **Progress by default on a terminal?** rsync is silent without `-P`. A daily driver might show the bar whenever stderr is a tty and stay silent in scripts. See "Decisions". | **done** | Decision recorded; `--no-progress` and env override exist either way. | S |
 | U-07 | **Machine-readable progress.** Off a terminal, `--progress` prints a line a second. Scripts and wrappers want rsync's `--info=progress2` single line or JSON events. | **done** | `--info=progress2` output is line-compatible with rsync off a tty; `--progress=json` emits one object per tick and per file. | M |
 | U-08 | **Phases that look like hangs.** Deleting a large tree, waiting for the remote to finish, hashing with `-c`: the display says "scanning" or sits at 100 %. | **done** | Each phase has its own label and counter (`deleting 12,410`, `verifying`, `waiting for receiver`). | S |
-| U-09 | **Dry-run summary.** `-n` prints names only with `-v`. | new | `-n` always ends with "would transfer N files (X), delete M". | S |
+| U-09 | **Dry-run summary.** `-n` prints names only with `-v`. | **done** | `-n` always ends with "would transfer N files (X), delete M". | S |
 | U-10 | **`-h` consistency.** The summary follows rsync's `-h` (1000-based, 1024 with `-hh`); the progress display is always 1024-based. | code | One rule, applied everywhere, documented. | S |
 | U-11 | **Suspend/resume and cursor hygiene.** Ctrl-Z / `fg`, and every exit path (including `die()` from a worker thread) restoring the cursor. | unverified | SIGTSTP/SIGCONT redraw; cursor restored in a single exit hook. | S |
 
@@ -2894,4 +2894,15 @@ Verified artifact manifest (source `864bd37edf14`):
   new/no-op/changed/filtered plans, recursive/protected deletion counts,
   unchanged destination data/metadata/inodes and old-peer quiet compatibility.
   All 10 output, eight machine-progress and 10 defaults methods pass.
-  Real-SSH and release checks follow.
+  Real SSH passes the four dry-summary methods plus all 10 ordinary output and
+  eight machine-progress methods (one APFS skip). All 15 protocol checks pass.
+- **Done; P2 is 8/11 complete.** Release artifacts are rebuilt/verified from
+  `f60fd1858839`. All four summary methods pass on macOS ARM, Intel and both
+  static Linux architectures without skips, including destination immutability
+  and compatibility without summaries on older quiet helpers.
+- Logs: `/tmp/xsync-u09-summary-final.log`,
+  `/tmp/xsync-u09-{output,machine,defaults,protocol}.log`,
+  `/tmp/xsync-u09-real-ssh.log`, `/tmp/xsync-u09-releases.log` and
+  `/tmp/xsync-u09-release-{mac-arm,mac-intel,linux-amd64,linux-arm64}.log`.
+  Packaging is refreshed after this entry. U-10 is next; U-01 still needs
+  GUI terminal verification.
