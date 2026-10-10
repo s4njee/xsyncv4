@@ -77,6 +77,10 @@ def main():
                 for tool in order:
                     destination = destinations / tool
                     if destination.exists(): shutil.rmtree(destination)
+                    if result['filesystem'] == 'btrfs':
+                        # Settle delayed frees/writeback before the next timed
+                        # copy, without flushing unrelated mounts.
+                        subprocess.run(['sync', '-f', str(work)], check=True)
                     command = [tools[tool], '-aW' + ('z' if case == 'pipe-z' else ''), '--stats']
                     if tool != 'rsync':
                         command += ['--no-fallback', '--no-progress', '-j1' if tool == 'candidate-j1' else '-j4']
