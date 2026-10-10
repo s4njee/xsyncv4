@@ -96,6 +96,8 @@ python3 benchmarks/deletion.py --reference /path/to/prior/xs --candidate /path/t
 
 Fixtures and logs stay in the owned work directory; results identify binary
 hashes, versions, load and free space. Partial runs do not establish completion.
+The [completed F-12 comparison](results/20261010-f12-deletion-summary.md) records
+all 32 verified samples, the single-root result and the additional CPU cost.
 
 ## Regression gate
 

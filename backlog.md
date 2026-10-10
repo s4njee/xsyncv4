@@ -138,7 +138,7 @@ The benchmark so far is one corpus slice, one machine, one filesystem, no networ
 | F-09 | **Memory on very large trees.** The receiver keeps every directory record until exit; the local engine holds up to 200,000 pending files. Never run beyond 77k files. | code | A 5-million-file synthetic tree syncs within a stated memory bound; receiver frees a directory once it and its children are finished. | M |
 | F-10 | **Whole-subtree clones.** Only leaf directories are cloned in one call. A missing subtree could be one call, at the price of a long volume-wide lock. | new | Bounded version (subtrees under N entries, known from the scan) measured against the leaf-only path. | M |
 | F-11 | **Clones when `-a` is incomplete.** `-rt` or `-rlt` fall back to byte copies because the clone would bring the wrong mode. | **done** | Clone, then correct mode/owner; still cheaper than create+write. | S |
-| F-12 | **Deletion is single-threaded.** Removing the 96,000-entry benchmark tree takes about 10 s with `rm`; `--delete` of a large stale subtree will feel the same. | partial | Parallel removal by subtree. | S |
+| F-12 | **Deletion is single-threaded.** Removing the 96,000-entry benchmark tree takes about 10 s with `rm`; `--delete` of a large stale subtree will feel the same. | **done** | Parallel removal by subtree. | S |
 | F-13 | **Tiny transfers.** For one file over ssh the fixed costs dominate: thread pool start, handshake round trip. | unverified | A single small file over ssh is within 10 ms of rsync. | S |
 | F-14 | **`-c` at scale.** Sender hashes in the walkers, receiver hashes inline in the generator; unmeasured. | unverified | Benchmarked against `rsync -c`; hashing gets its own pool if it starves the scan. | S |
 
@@ -3300,3 +3300,24 @@ after U-01's evidence entry completes P2, as requested by the user.
   and 45 warmups independently verified. Relative candidate/reference ratios
   range from 0.996 to 1.055. Raw Linux evidence is retained; macOS is still
   running. F-02 and F-12 remain partial.
+
+
+## P3 / F-12 completed — 2026-10-10
+
+- Product `0f84904e1ad7` supports bounded parallel removal across stale roots
+  and within one stale root, including single-child chains. Finite limits and
+  dry runs retain serial order; filters, anchored no-follow operations and
+  postorder parent removal remain enforced. Five deletion tests pass on each
+  platform, along with all 231 macOS itemized and 227 Linux data/metadata cases.
+- All 32 deletion measurements verify independently against rsync. All reported
+  deletion totals match the 65,536-file fixtures exactly. Four-sample medians:
+  many subtrees old 5.823 s / four workers 2.868 s (2.03×); single stale root
+  old 5.794 s / four workers 3.340 s (1.73×), versus rsync 3.278 s.
+- Parallel deletion uses approximately twice the serial CPU. The host was busy
+  and its APFS volume 98% full; this does not settle F-07's filesystem defaults.
+  Raw results and caveats are in `20261010-f12-deletion-summary.md`.
+- Run 38072489810 verifies all 270 timed samples and 45 warmups on macOS.
+  Fourteen ratios pass; local-checksum reaches 0.838 of reference against the
+  unchanged 0.85 floor, so the job correctly exits 1. Linux passes all fifteen.
+  Raw macOS evidence is preserved. F-02 remains partial while repeatability
+  on the shared macOS runner is addressed.
