@@ -3,9 +3,12 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "docs:refresh": "python3 scripts/refresh-inputs.py",
+    "docs:review": "python3 scripts/check-docs.py --review",
     "docs:generate": "python3 scripts/generate-docs.py",
     "docs:dev": "vitepress dev docs",
     "build": "python3 scripts/generate-docs.py && vitepress build docs && node scripts/finish-docs-build.mjs",
+    "check": "python3 scripts/check-docs.py",
     "preview": "python3 -m http.server 4173 --directory dist --bind 127.0.0.1"
   },
   "devDependencies": {

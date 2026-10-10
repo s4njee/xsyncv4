@@ -2,7 +2,8 @@
 
 Written 2026-10-10 against `sites/xsync` at `70da4f0` (VitePress 1.6.4, 13 generated
 manual pages, product page with recorded terminal playback). The CLI it documents is
-`xs` 0.1.0, protocol 4, at the same commit.
+`xs` 0.1.0, protocol 4, at the same commit. S0 is complete; its evidence is in the
+completion log at the end.
 
 ## What "fully fleshed out" means here
 
@@ -86,14 +87,14 @@ and it fails.
 
 | ID | Item | Status | Done when | Size |
 |---|---|---|---|---|
-| S-01 | **Commands use the old executable name.** Every example on every page is `xsync …`. Getting started says `build/xsync --version`. The SSH page says helpers are looked up at `~/.local/bin/xsync`, but `src/remote.cpp:2522` and `src/install.cpp:86` use `~/.local/bin/xs`. The product page install panel (`dist/app.js`, `dist/index.html`) and `sites/xsync/README.md` (`build/xsync`) are wrong too. | **confirmed** | All runnable commands use `xs`. The product name stays whatever Decision 1 says. `grep -rn '\bxsync ' docs/*.md dist/*.html dist/app.js` finds only product-name prose, never a command. | S |
-| S-02 | **Captured help is stale and mis-parsed.** `docs-inputs/xsync-help.txt` reads `xsync version 0.1.0 … git 2f3e27633fac-dirty`. In `generate-docs.py` the `\s{2,}` split folds `--rsync-path=PROGRAM specify…` and `--compress-level=NUM explicitly…` into the option cell with an empty description. `--version, --help` has no description, and the no-op rows keep a leading space. | **confirmed** | Help and `xs.1` are recaptured from the current `build/xs`. The parser handles single-space separation (options never contain a space before their argument). A generator test asserts every row has a non-empty description. | S |
-| S-03 | **Development page is out of date.** It shows U-01 as "partial", but `backlog.md` says skipped at the user's request. It shows U-11 as "unverified", but it is done and P2 is closed. It omits F-01 (partial) and the P3/P4 tiers. Its GUI roadmap cites `backlog-gui.md`, which this repository does not contain. | **confirmed** | The status table is generated from the `backlog.md` tier tables (ID, status, item title), not hand-copied. The GUI section is removed or points to a file that exists (Decision 5). | M |
-| S-04 | **Source fingerprints are never checked.** `docs/public/sources.json` records SHA-256 for `README.md` (`ce77da…`) and `backlog.md` (`5b29f3…`). Both now hash differently (`1b7e40…`, `ba63a3…`). | **confirmed** | `npm run build` compares each fingerprint and lists the pages whose sources changed. CI treats a mismatch as a failure. `npm run docs:review` updates `reviewed_at` and the hashes after a person has re-read those pages. | S |
-| S-05 | **Exit-code table is incomplete.** Codes 124 and 127 (`RERR_CMD_FAILED`, `RERR_CMD_NOTFOUND` in `src/common.h:236`) are real. 127 is how a missing remote helper is detected (`src/remote.cpp:2627`). Neither is listed. | **confirmed** | The table is generated from the `RERR_*` enum plus the message strings in `src/util.cpp`, with curated "what to do" text per code. | S |
-| S-06 | **Version and protocol are hard-coded.** `Layout.vue` prints `VERSION 0.1.0` and `NATIVE PROTOCOL 4`, and `app.js` prints `protocol 4`. | **code** | Both come from the captured `--version` line through VitePress `themeConfig` and `sessions.json`. | S |
-| S-07 | **Root-relative URLs assume a domain root.** `/favicon.svg`, `/vendor/holocss/…`, `href="/"` in `Layout.vue`, `/docs/xs.1` and `base: '/docs/'` all break if the site is served from a subpath, such as a GitHub Pages project site at `/xsyncv4/`. | **code** | One `SITE_BASE` setting drives both the product page and VitePress `base`. A build at `/xsyncv4/` passes the link checker (S-54). | S |
-| S-08 | **Committed `dist/` can't be reproduced.** Running `npm run build` on a clean checkout deletes and renames hashed files under `dist/docs/assets/`. Reviewers can't tell whether the committed site matches the source. | **confirmed** | Decision 2 is applied. Either `dist/docs/` is untracked and built in CI, or CI rebuilds and fails on `git diff --exit-code dist/`. | S |
+| S-01 | **Commands use the old executable name.** Every example on every page is `xsync …`. Getting started says `build/xsync --version`. The SSH page says helpers are looked up at `~/.local/bin/xsync`, but `src/remote.cpp:2522` and `src/install.cpp:86` use `~/.local/bin/xs`. The product page install panel (`dist/app.js`, `dist/index.html`) and `sites/xsync/README.md` (`build/xsync`) are wrong too. | **done** | All runnable commands use `xs`. The product name stays whatever Decision 1 says. `grep -rn '\bxsync ' docs/*.md dist/*.html dist/app.js` finds only product-name prose, never a command. | S |
+| S-02 | **Captured help is stale and mis-parsed.** `docs-inputs/xsync-help.txt` reads `xsync version 0.1.0 … git 2f3e27633fac-dirty`. In `generate-docs.py` the `\s{2,}` split folds `--rsync-path=PROGRAM specify…` and `--compress-level=NUM explicitly…` into the option cell with an empty description. `--version, --help` has no description, and the no-op rows keep a leading space. | **done** | Help and `xs.1` are recaptured from the current `build/xs`. The parser handles single-space separation (options never contain a space before their argument). A generator test asserts every row has a non-empty description. | S |
+| S-03 | **Development page is out of date.** It shows U-01 as "partial", but `backlog.md` says skipped at the user's request. It shows U-11 as "unverified", but it is done and P2 is closed. It omits F-01 (partial) and the P3/P4 tiers. Its GUI roadmap cites `backlog-gui.md`, which this repository does not contain. | **done** | The status table is generated from the `backlog.md` tier tables (ID, status, item title), not hand-copied. The GUI section is removed or points to a file that exists (Decision 5). | M |
+| S-04 | **Source fingerprints are never checked.** `docs/public/sources.json` records SHA-256 for `README.md` (`ce77da…`) and `backlog.md` (`5b29f3…`). Both now hash differently (`1b7e40…`, `ba63a3…`). | **done** | `npm run build` compares each fingerprint and lists the pages whose sources changed. CI treats a mismatch as a failure. `npm run docs:review` updates `reviewed_at` and the hashes after a person has re-read those pages. | S |
+| S-05 | **Exit-code table is incomplete.** 127 (`RERR_CMD_NOTFOUND`, `src/common.h:236`) is how a missing remote helper is reported under `--no-fallback` (`src/remote.cpp:2627`), and 255 is passed through when ssh itself fails (`src/remote.cpp:2628`). Neither is listed. (The original audit also named 124; it is defined but never returned.) | **done** | The table is generated from the `RERR_*` enum plus the message strings in `src/util.cpp`, with curated "what to do" text per code. | S |
+| S-06 | **Version and protocol are hard-coded.** `Layout.vue` prints `VERSION 0.1.0` and `NATIVE PROTOCOL 4`, and `app.js` prints `protocol 4`. | **done** | Both come from the captured `--version` line through VitePress `themeConfig` and `sessions.json`. | S |
+| S-07 | **Root-relative URLs assume a domain root.** `/favicon.svg`, `/vendor/holocss/…`, `href="/"` in `Layout.vue`, `/docs/xs.1` and `base: '/docs/'` all break if the site is served from a subpath, such as a GitHub Pages project site at `/xsyncv4/`. | **done** | One `SITE_BASE` setting drives both the product page and VitePress `base`. A build at `/xsyncv4/` passes the link checker (S-54). | S |
+| S-08 | **Committed `dist/` can't be reproduced.** Running `npm run build` on a clean checkout deletes and renames hashed files under `dist/docs/assets/`. Reviewers can't tell whether the committed site matches the source. | **done** | Decision 2 is applied. Either `dist/docs/` is untracked and built in CI, or CI rebuilds and fails on `git diff --exit-code dist/`. | S |
 
 ## S1 — Complete: content the CLI has that the site doesn't
 
@@ -172,12 +173,14 @@ fixtures. The site should meet the same bar.
 
 ## Decisions needed from you
 
-1. **Product name versus command name.** The executable is `xs`, the README title is
+Decisions 1, 2 and 5 were made on 2026-10-10 and are applied by S0; see the completion log.
+
+1. **Product name versus command name.** *Resolved: xsync brand, `xs` in every command.* The executable is `xs`, the README title is
    "xs (xsyncv4)", and the config directory and environment variables are `xsync`. The site
    brands everything "xsync". Recommendation: keep **xsync** as the product name and `xs` in
    every command. `src/remote.cpp:2627` also still prints "remote xsync is not installed",
    which should follow the same rule.
-2. **Committed build output.** Either stop committing `dist/docs/` and build it in CI, or keep
+2. **Committed build output.** *Resolved: keep `dist/docs/` committed; `npm run check` proves a rebuild reproduces it.* Either stop committing `dist/docs/` and build it in CI, or keep
    it committed with a CI diff check. Recommendation: stop committing it. The product page in
    `dist/` is hand-written source and stays committed.
 3. **WebAssembly or ports for widgets.** Compiling `filter.cpp` and the option parser with
@@ -186,7 +189,7 @@ fixtures. The site should meet the same bar.
    playground (S-32), where the semantics are deepest; ports with shared vectors for the rest.
 4. **Hosting target and base path.** Keep the existing host named in `.openai/hosting.json`,
    or use GitHub Pages at `/xsyncv4/`. This decides S-07 and S-64.
-5. **GUI roadmap.** The development page describes G-01 to G-24 from a `backlog-gui.md` that
+5. **GUI roadmap.** *Resolved: keep the section, marked as maintained outside this repository and unchecked.* The development page describes G-01 to G-24 from a `backlog-gui.md` that
    is not in this repository. Add that file here, or remove the section.
 6. **Light theme.** The grayscale dark look is deliberate. Should light mode be offered (S-63)?
 7. **CLI support for the site.** S-38 is far simpler and more trustworthy if `xs` can print
@@ -208,3 +211,56 @@ fixtures. The site should meet the same bar.
 8. **Run every example** — S-50, then S-18 recipes on top of it.
 9. **Polish** — S-61 and S-62 early if time allows (they are cheap); then S-63 to S-68, S-13,
    S-20 to S-22.
+
+---
+
+## S0 completion log — 2026-10-10
+
+All eight S0 items are done. Evidence, from `sites/xsync`:
+
+- **S-01.** Every runnable command uses `xs` across the 13 manuals, the product page and
+  `README.md`. That includes helper lookup at `~/.local/bin/xs`, `--rsync-path=/opt/bin/xs` and
+  `build/xs`. Manual page names follow the command (`xs(1)`, `xs-ssh(1)`, …). Prose keeps the
+  product name xsync, and `~/.config/xsync/config` keeps its real path. Recordings were
+  recaptured from `build/xs` at `1fff2a09ae2c` on Linux: transfer exit 0 with 130 files
+  verified by SHA-256, checksum run exit 0, SIGINT exit 20, missing source exit 23.
+- **S-02.** The help moved to `docs-inputs/xs-help.txt`, captured by `npm run docs:refresh`.
+  That command also regenerates `docs/public/xs.1`, dated by the source commit so it
+  reproduces. Option specs are now matched as comma-separated forms, whatever spacing
+  follows them. All 88 rows have descriptions; `--rsync-path` and `--compress-level` were
+  fixed, and `--blocking-io, --no-blocking-io` and `-s, --protect-args, --secluded-args` were
+  split correctly. The generator exits with an error if any row has no description.
+  `--version, --help` gets the one curated description (`HELP_DESCRIPTIONS`).
+- **S-03.** The tier summary and open-item tables on `development.html` are generated from
+  the `backlog.md` tier tables via `docs-inputs/backlog-status.json`. They now show P2 with 10
+  done and U-01 closed, and P3 and P4 open with R-01 and F-01 partial. The GUI roadmap is
+  kept and labeled external and unchecked (Decision 5).
+- **S-04.** `npm run check` fails on a stale fingerprint. It was confirmed to fail against
+  the old `ce77da…` README hash before review. `npm run docs:review` records new hashes and
+  the date, and `npm run build` warns. The README was re-fingerprinted after checking its
+  changes since `4159000`: the Site pointer and benchmark tables, neither covered by a
+  curated page yet. `backlog.md` is not fingerprinted any more. Its status content is
+  generated, and the derived-input check catches a changed tier table without failing on
+  every completion-log entry.
+- **S-05.** The exit-code table comes from the `RERR_*` enum (`src/common.h`) and
+  `error_kind` (`src/util.cpp`), joined with curated meanings in `EXIT_CODES`. The build fails
+  if the source adds or drops a code. 127 and 255 are listed; both statuses and messages were
+  reproduced with `-e "sh -c 'exit N'"`. 124 is noted as defined but not returned.
+- **S-06.** `docs/.vitepress/site-meta.json` is written from the captured help. The colophon
+  shows `xs VERSION 0.1.0`, the sidebar shows `NATIVE PROTOCOL 4`, and the product page parses
+  program, version and protocol from `sessions.json`.
+- **S-07.** `SITE_BASE` (default `/`) drives the VitePress `base`, the head links, the product
+  link and the downloads. `npm run check` builds at `/xsyncv4/` and resolves every internal
+  `href`/`src`. A negative test showed the checker reporting 407 out-of-base links when a
+  root build is checked as `/xsyncv4/`, and a missing `xs.1` when one is deleted.
+- **S-08.** The rebuilds were not reproducible because VitePress indexed pages for search
+  concurrently, numbering entries in completion order. `buildConcurrency: 1` fixes this:
+  three consecutive builds were byte-identical. `npm run check` rebuilds on a clean tree and
+  fails on any `git status` change under `docs/`, `dist/` or `docs-inputs/`.
+
+`npm run check` also verifies that `docs-inputs/` matches the parent sources and `build/xs
+--help` (ignoring the git revision), and that the recordings were captured from the same
+binary as the help. That second check is part of S-53.
+
+The CLI still prints `remote xsync is not installed` (`src/remote.cpp:2627`). That is a
+CLI change outside the Site, left for Decision 1's follow-up.

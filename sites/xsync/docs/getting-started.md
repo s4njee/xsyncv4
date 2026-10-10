@@ -1,18 +1,18 @@
 ---
-title: "xsync-setup(1)"
+title: "xs-setup(1)"
 description: "Build the binary, install it locally, and make your first transfer."
-manual: "xsync-setup(1)"
+manual: "xs-setup(1)"
 manualName: "Getting started"
 sectionNumber: "1"
 ---
 
-# xsync-setup(1)
+# xs-setup(1)
 
 <div class="manual-deck"><strong>Getting started</strong><p>Build the binary, install it locally, and make your first transfer.</p></div>
 
 ## NAME {#name}
 
-<p><strong>xsync-setup</strong> — build and install xsync from a source checkout.</p>
+<p><strong>xs-setup</strong> — build and install xs from the xsync source checkout.</p>
 
 
 
@@ -47,7 +47,7 @@ sudo apt install build-essential cmake ninja-build python3 libzstd-dev libxxhash
 ```sh
 cmake -S . -B build -G Ninja
 cmake --build build
-build/xsync --version
+build/xs --version
 ```
 
 
@@ -84,7 +84,7 @@ compinit
 <div class="example-caption">Copy source contents into the destination</div>
 
 ```sh
-xsync -aP src/ dst/
+xs -aP src/ dst/
 ```
 
 <p>Replace both paths with your own. Progress is automatic when stderr is a terminal; <code>-P</code> also preserves partial transfer data for a later retry.</p>

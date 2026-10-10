@@ -111,3 +111,4 @@ html { scroll-behavior: smooth; }
   .manual-colophon { font-size: 8px; letter-spacing: 0; }
 }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } *, *::before, *::after { animation: none !important; transition: none !important; } }
+.vp-doc code.nowrap { white-space: nowrap; word-break: keep-all; overflow-wrap: normal; }

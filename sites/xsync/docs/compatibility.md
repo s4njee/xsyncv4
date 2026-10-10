@@ -1,12 +1,12 @@
 ---
-title: "xsync-compat(7)"
+title: "xs-compat(7)"
 description: "Know the native path, delegation behavior, and platform boundaries."
-manual: "xsync-compat(7)"
+manual: "xs-compat(7)"
 manualName: "Compatibility"
 sectionNumber: "7"
 ---
 
-# xsync-compat(7)
+# xs-compat(7)
 
 <div class="manual-deck"><strong>Compatibility</strong><p>Know the native path, delegation behavior, and platform boundaries.</p></div>
 
@@ -23,10 +23,10 @@ sectionNumber: "7"
 <div class="example-caption">Require native xsync</div>
 
 ```sh
-xsync --no-fallback -azP src/ user@host:/backup/
+xs --no-fallback -azP src/ user@host:/backup/
 ```
 
-<p>By default, unsupported flags, missing remote helpers, unsupported protocol versions, and daemon URLs can re-execute a real rsync from PATH. One stderr notice explains the delegation. Original arguments are retained after xsync-only worker/clone/atomic extensions are removed.</p>
+<p>By default, unsupported flags, missing remote helpers, unsupported protocol versions, and daemon URLs can re-execute a real rsync from PATH. One stderr notice explains the delegation. Original arguments are retained after xs-only worker/clone/atomic extensions are removed.</p>
 
 <p>Malformed protocol data and failures during a transfer do not trigger fallback. An explicit <code>--rsync-path</code> is retained, so it must also be an appropriate rsync command if delegation is needed.</p>
 

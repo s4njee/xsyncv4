@@ -111,7 +111,7 @@ document.querySelectorAll('[data-copy]').forEach(button=>button.addEventListener
 }));
 document.querySelectorAll('[data-platform]').forEach(button=>button.addEventListener('click',()=>{
   document.querySelectorAll('[data-platform]').forEach(option=>option.setAttribute('aria-pressed',String(option===button)));
-  $('#install-command').textContent=(button.dataset.platform==='mac'?'brew install cmake ninja zstd xxhash icu4c':'sudo apt install build-essential cmake ninja-build libzstd-dev libxxhash-dev libicu-dev')+'\ncmake -S . -B build -G Ninja\ncmake --build build\nbuild/xsync -aP src/ dst/';
+  $('#install-command').textContent=(button.dataset.platform==='mac'?'brew install cmake ninja zstd xxhash icu4c':'sudo apt install build-essential cmake ninja-build libzstd-dev libxxhash-dev libicu-dev')+'\ncmake -S . -B build -G Ninja\ncmake --build build\nbuild/xs -aP src/ dst/';
   $('#install-label').textContent=button.dataset.platform==='mac'?'BUILD FROM THE XSYNC SOURCE DIRECTORY':'DEBIAN / UBUNTU — FROM THE SOURCE DIRECTORY';
 }));
 if('IntersectionObserver' in window&&motionAllowed(root)){
@@ -124,7 +124,8 @@ try{
   const response=await fetch('./recordings/sessions.json');
   if(!response.ok)throw new Error('Recording unavailable');
   recordings=await response.json();
-  $('#recording-source').textContent=`Captured from xsync ${recordings.binary_version.match(/version ([\d.]+)/)?.[1]||''} · protocol 4 · local filesystem. Playback does not access your files.`;
+  const [,program='xs',version='',protocol='']=recordings.binary_version.match(/^(\S+)\s+version ([\d.]+)\s+protocol version (\d+)/)||[];
+  $('#recording-source').textContent=`Captured from ${program} ${version}${protocol?` · protocol ${protocol}`:''} · local filesystem. Playback does not access your files.`;
   const events=recordings.json.events;
   const event=events.find(event=>event.type==='progress'&&event.bytes>0)||events[0];
   const jsonResponse=await fetch('./recordings/progress.ndjson');

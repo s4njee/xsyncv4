@@ -1,12 +1,12 @@
 ---
-title: "xsync-ssh(1)"
+title: "xs-ssh(1)"
 description: "Choose a shell, prepare the remote helper, and bound idle connections."
-manual: "xsync-ssh(1)"
+manual: "xs-ssh(1)"
 manualName: "SSH & remote helpers"
 sectionNumber: "1"
 ---
 
-# xsync-ssh(1)
+# xs-ssh(1)
 
 <div class="manual-deck"><strong>SSH &amp; remote helpers</strong><p>Choose a shell, prepare the remote helper, and bound idle connections.</p></div>
 
@@ -23,7 +23,7 @@ sectionNumber: "1"
 <div class="example-caption">Use a specific SSH identity</div>
 
 ```sh
-xsync -azP -e "ssh -i ~/.ssh/backup_key" src/ user@host:/backup/
+xs -azP -e "ssh -i ~/.ssh/backup_key" src/ user@host:/backup/
 ```
 
 
@@ -31,7 +31,7 @@ xsync -azP -e "ssh -i ~/.ssh/backup_key" src/ user@host:/backup/
 <div class="example-caption">Use a different SSH port</div>
 
 ```sh
-xsync -azP -e "ssh -p 2222" src/ user@host:/backup/
+xs -azP -e "ssh -p 2222" src/ user@host:/backup/
 ```
 
 
@@ -39,7 +39,7 @@ xsync -azP -e "ssh -p 2222" src/ user@host:/backup/
 <div class="example-caption">Bracketed IPv6 host</div>
 
 ```sh
-xsync -aP src/ "user@[::1]:backup/"
+xs -aP src/ "user@[::1]:backup/"
 ```
 
 <p>An empty remote path, <code>host:</code>, refers to the remote current directory. Leading <code>~</code> and <code>~user</code> expand on the server; quote remote wildcards to prevent your local shell from expanding them.</p>
@@ -48,26 +48,26 @@ xsync -aP src/ "user@[::1]:backup/"
 
 ## HELPER LOOKUP {#helper}
 
-<p>Transfers try <code>xsync</code> on remote PATH, then <code>~/.local/bin/xsync</code>, then <code>XSYNC_REMOTE_PATH</code>. The local environment value takes precedence over the remote value.</p>
+<p>Transfers try <code>xs</code> on remote PATH, then <code>~/.local/bin/xs</code>, then <code>XSYNC_REMOTE_PATH</code>. The local environment value takes precedence over the remote value.</p>
 
 
 
 <div class="example-caption">Choose an explicit helper</div>
 
 ```sh
-xsync -azP --rsync-path=/opt/bin/xsync src/ user@host:/backup/
+xs -azP --rsync-path=/opt/bin/xs src/ user@host:/backup/
 ```
 
-<aside class="manual-note"><span>NOTE</span><p>An explicit <code>--rsync-path</code> bypasses automatic lookup. If fallback is needed, that same command must support rsync. An explicit xsync-only executable may therefore prevent fallback.</p></aside>
+<aside class="manual-note"><span>NOTE</span><p>An explicit <code>--rsync-path</code> bypasses automatic lookup. If fallback is needed, that same command must support rsync. An explicit xs-only executable may therefore prevent fallback.</p></aside>
 
 ## EXPLICIT REMOTE INSTALL {#install}
 
 
 
-<div class="example-caption">Install the matching release at ~/.local/bin/xsync</div>
+<div class="example-caption">Install the matching release at ~/.local/bin/xs</div>
 
 ```sh
-xsync --install user@host
+xs --install user@host
 ```
 
 <p>The install command probes the remote OS and architecture and chooses the matching release artifact. Existing newer or unrecognized versions are refused unless <code>--force</code> is given. This requires matching release binaries to be available locally.</p>
@@ -81,7 +81,7 @@ xsync --install user@host
 <div class="example-caption">Limit bandwidth and remote idle time</div>
 
 ```sh
-xsync -azP --bwlimit=10M --timeout=60 src/ user@host:/backup/
+xs -azP --bwlimit=10M --timeout=60 src/ user@host:/backup/
 ```
 
 <p>Bare bandwidth numbers are KiB/s. Suffixed rates accept binary and decimal units; <code>0</code> disables the limit. Compression limits serialized wire bytes remotely; local workers share a limit on bytes written.</p>
