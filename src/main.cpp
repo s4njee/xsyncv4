@@ -497,8 +497,8 @@ Parsed parse(int argc, char** argv) {
 
 void on_signal(int) {
   if (g_stop.fetch_add(1) >= 1) {
-    static const char show[] = "\x1b[?25h\n";
-    if (g_progress_on) (void)!write(2, show, sizeof show - 1);
+    progress_restore_cursor();
+    if (g_progress_on) (void)!write(2, "\n", 1);
     _exit(RERR_SIGNAL);
   }
 }
@@ -573,6 +573,7 @@ void print_summary(u64 t0) {
 }
 
 int main(int argc, char** argv) {
+  std::atexit(progress_restore_cursor);
   signal(SIGPIPE, SIG_IGN);
   setvbuf(stdout, nullptr, _IONBF, 0);
   auto arguments = effective_arguments(argc, argv);

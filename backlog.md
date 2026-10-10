@@ -2928,3 +2928,25 @@ Verified artifact manifest (source `864bd37edf14`):
   `/tmp/xsync-u10-release-{mac-arm,mac-intel,linux-amd64,linux-arm64}.log`.
   Packaging is refreshed after this entry. U-11 is next; U-01 still requires
   GUI terminal evidence, for which the user has been asked.
+
+
+## U-11 progress — 2026-10-10: suspension and fatal-exit cursor restoration
+
+- Live terminal SIGTSTP/SIGCONT handlers only set lock-free flags. At the next
+  refresh the renderer clears its rows, restores the cursor, and stops all
+  threads; resume refreshes terminal dimensions and redraws.
+- A shared signal-safe restore hook handles normal exit, worker `die()`,
+  competing fatal exits, diagnostic failures and repeated interrupts. JSON
+  and non-terminal output do not emit cursor escapes. Progress phase refreshes
+  preserve errno so hashing diagnostics retain their original error.
+- Four native macOS acceptance methods pass: actual Ctrl-Z/`fg` inside an
+  owned tmux/bash session (including stopped destination sizes and resize),
+  nine worker/EOF fatal cases, repeated INT/TERM with display and JSON modes,
+  and closing stdout during an active display. Evidence:
+  `/tmp/xsync-u11-suspend.log`. Broken-stdout regressions pass (8 methods, one
+  Linux-only skip), and error-summary regressions pass (11 methods). Full
+  progress and isolated real-SSH verification are running; release acceptance
+  remains pending.
+- U-01 manual GUI checks were reported passed by the user on 2026-10-10. The
+  saved evidence path is requested so the screenshots can be inspected and
+  the terminal checklist completed. U-01 remains partial pending that entry.

@@ -26,8 +26,12 @@ u64 last_small = 0;
 double rate_small = 0;
 bool tty = false, color = false, live = false;
 bool unicode = false, winch_installed = false;
+bool tstp_installed = false, cont_installed = false;
+std::atomic<bool> cursor_used{false}, suspend_requested{false}, resume_requested{false};
+static_assert(std::atomic<bool>::is_always_lock_free);
 volatile sig_atomic_t window_changed = 0;
 struct sigaction previous_winch {};
+struct sigaction previous_tstp {}, previous_cont {};
 std::vector<int> drawn_widths;
 int drawn_cols = 80;
 int drawn = 0;  // lines currently occupied by the live region
@@ -61,6 +65,8 @@ struct LocaleScope {
   ~LocaleScope() { if (previous) uselocale(previous); }
 };
 void on_winch(int) { window_changed = 1; }
+void on_tstp(int) { suspend_requested.store(true, std::memory_order_relaxed); }
+void on_cont(int) { resume_requested.store(true, std::memory_order_relaxed); }
 int term_cols() {
   winsize ws{};
   return ioctl(2, TIOCGWINSZ, &ws) == 0 && ws.ws_col ? ws.ws_col : 80;
@@ -504,6 +510,13 @@ const char* limiting_stage() {
   return reading >= network ? "reading" : "network";
 }
 
+void progress_restore_cursor() {
+  if (!cursor_used.load(std::memory_order_relaxed)) return;
+  int saved_errno = errno;
+  raw("\x1b[?25h");
+  errno = saved_errno;
+}
+
 void progress_file_event(const OutputEvent& event) {
   if (!g_progress_on || g_opt.progress_mode != Options::Json || event.type != T_REG ||
       event.code.empty() || (event.code.front() != '>' && event.code.front() != '<' && event.code.front() != 'h')) return;
@@ -549,6 +562,11 @@ void progress_start(int n) {
     action.sa_handler = on_winch;
     sigemptyset(&action.sa_mask);
     winch_installed = sigaction(SIGWINCH, &action, &previous_winch) == 0;
+    action.sa_handler = on_tstp;
+    tstp_installed = sigaction(SIGTSTP, &action, &previous_tstp) == 0;
+    action.sa_handler = on_cont;
+    cont_installed = sigaction(SIGCONT, &action, &previous_cont) == 0;
+    cursor_used.store(true, std::memory_order_relaxed);
     raw("\x1b[?25l");
   }
   if (g_opt.progress_mode == Options::Json) json_totals(totals(), t_start);
@@ -560,6 +578,23 @@ void progress_tick() {
   if (!g_progress_on) return;
   std::lock_guard<std::mutex> lk(ui_mu);
   if (!g_progress_on) return;
+  if (suspend_requested.exchange(false, std::memory_order_relaxed) && live) {
+    // Clean up under the UI lock, then stop all threads at once. A signal
+    // handler cannot take this lock or safely inspect the drawn region.
+    std::string out;
+    erase(out);
+    raw(out);
+    progress_restore_cursor();
+    raw("\n");
+    kill(getpid(), SIGSTOP);
+    resume_requested.store(true, std::memory_order_relaxed);
+  }
+  if (resume_requested.exchange(false, std::memory_order_relaxed)) {
+    window_changed = 1;
+    t_draw = 0;
+    if (live && !g_stop.load()) raw("\x1b[?25l");
+  }
+  if (g_stop.load()) return;
   u64 now = now_ns();
   if (now - t_draw < 60000000) return;
   t_draw = now;
@@ -576,13 +611,17 @@ void progress_stop(bool ok) {
   std::string out;
   if (live) {
     erase(out);
-    out += "\x1b[?25h";
+    raw(out);
+    out.clear();
+    progress_restore_cursor();
     live = false;
   }
   if (winch_installed) {
     sigaction(SIGWINCH, &previous_winch, nullptr);
     winch_installed = false;
   }
+  if (tstp_installed) sigaction(SIGTSTP, &previous_tstp, nullptr), tstp_installed = false;
+  if (cont_installed) sigaction(SIGCONT, &previous_cont, nullptr), cont_installed = false;
   if (ok) {
     Totals t = totals();
     double el = std::max(1e-9, (double)(now_ns() - t_start) / 1e9);

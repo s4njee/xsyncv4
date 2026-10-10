@@ -462,6 +462,12 @@ without cursor escapes. Non-UTF-8 locales use ASCII bars and escaped filenames;
 UTF-8 names are clipped by display columns, with control bytes escaped even under
 `-8`. The terminal verification checklist is in [tests/progress-terminal.md](tests/progress-terminal.md).
 
+On a live terminal, Ctrl-Z clears the display and restores the cursor before
+suspending all threads at the next progress refresh. `fg` redraws using the
+current window size. A shared signal-safe cursor hook covers normal returns,
+worker failures, cancellation and repeated interrupts; JSON and plain pipe
+output never acquire a hidden cursor.
+
 ## Compatibility with rsync
 
 Supported with rsync's meaning: `-a -r -d -H -X -A -E -U -R -0 -l -L -p -t -g -o -D -O -J -n -u -c -I -x -z -v -q

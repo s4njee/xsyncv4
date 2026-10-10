@@ -30,7 +30,7 @@ def columns(text):
     return sum(0 if unicodedata.combining(c) else 2 if unicodedata.east_asian_width(c) in ('W', 'F') else 1 for c in text)
 
 
-def capture(command, width=80, env=None, resize=(), interrupt=False, stdout=None):
+def capture(command, width=80, env=None, resize=(), interrupt=False, stdout=None, signals=()):
     master, slave = pty.openpty()
     fcntl.ioctl(slave, termios.TIOCSWINSZ, struct.pack('HHHH', 24, width, 0, 0))
     proc = subprocess.Popen(command, stdin=subprocess.DEVNULL, stdout=stdout if stdout is not None else subprocess.DEVNULL,
@@ -39,6 +39,7 @@ def capture(command, width=80, env=None, resize=(), interrupt=False, stdout=None
     data = bytearray()
     started = time.monotonic()
     pending = list(resize)
+    pending_signals = list(signals)
     try:
         while True:
             elapsed = time.monotonic() - started
@@ -51,6 +52,10 @@ def capture(command, width=80, env=None, resize=(), interrupt=False, stdout=None
             if interrupt and elapsed >= .5:
                 proc.send_signal(signal.SIGINT)
                 interrupt = False
+            while pending_signals and elapsed >= pending_signals[0][0]:
+                _, signum = pending_signals.pop(0)
+                try: proc.send_signal(signum)
+                except ProcessLookupError: break
             if select.select([master], [], [], .03)[0]:
                 try:
                     chunk = os.read(master, 65536)

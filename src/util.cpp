@@ -149,7 +149,7 @@ void die(int code, const char* fmt, ...) {
   // Keep the first fatal code instead of letting that disconnect replace it.
   static std::atomic<int> fatal_code{0};
   int previous = 0;
-  if (!fatal_code.compare_exchange_strong(previous, code)) _Exit(previous);
+  if (!fatal_code.compare_exchange_strong(previous, code)) { progress_restore_cursor(); _Exit(previous); }
   va_list ap;
   va_start(ap, fmt);
   std::string s = vformat(fmt, ap);
@@ -165,6 +165,7 @@ void die(int code, const char* fmt, ...) {
     fprintf(stderr, "xsync error: exiting (code %d)\n", code);
   }
   fflush(nullptr);
+  progress_restore_cursor();
   _Exit(code);
 }
 
@@ -183,10 +184,12 @@ void exit_signal() {
     print_error_summary();
     fprintf(stderr, "xsync error: errors with program diagnostics (code %d)\n", RERR_MESSAGEIO);
     fflush(stderr);
+    progress_restore_cursor();
     _Exit(RERR_MESSAGEIO);
   }
   print_error_summary();
   if (!g_opt.am_server) fprintf(stderr, "\nxsync error: received SIGINT, SIGTERM, or SIGHUP (code %d)\n", RERR_SIGNAL);
+  progress_restore_cursor();
   _Exit(RERR_SIGNAL);
 }
 

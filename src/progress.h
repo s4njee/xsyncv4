@@ -2,6 +2,7 @@
 #pragma once
 #include "common.h"
 #include <mutex>
+#include <cerrno>
 
 constexpr int MAX_WORKERS = 64;
 
@@ -33,18 +34,24 @@ void slot_end(int wid, bool completed = false);
 void progress_start(int nworkers);
 void progress_tick();
 void progress_stop(bool ok);
+// Signal-safe last-resort cursor restore, shared by every process exit path.
+void progress_restore_cursor();
 struct OutputEvent;
 void progress_file_event(const OutputEvent& event);
 extern void (*g_phase_sink)();
 struct ProgressPhase {
   std::atomic<u32>& active;
   explicit ProgressPhase(std::atomic<u32>& counter) : active(counter) {
+    int saved_errno = errno;
     active.fetch_add(1, std::memory_order_relaxed);
     if (g_progress_on || g_phase_sink) progress_tick();
+    errno = saved_errno;
   }
   ~ProgressPhase() {
+    int saved_errno = errno;
     active.fetch_sub(1, std::memory_order_relaxed);
     if (g_progress_on || g_phase_sink) progress_tick();
+    errno = saved_errno;
   }
 };
 // Print text (complete lines) above the live region.
