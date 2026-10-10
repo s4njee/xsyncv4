@@ -368,9 +368,10 @@ fallback, build and release, testing, and this site.
 The page states plainly that xs does **not** use BLAKE3. Every transfer-path hash is
 XXH3-64 or XXH3-128, and the only BLAKE-family hash is the test harness's `blake2b`.
 It explains where a cryptographic hash would matter. Because the repository records no
-design rationale, the page labels its reasons as trade-offs, not quotes. On phones, the
-product header now hides "Transfer demo" below 420 px (the hero links there) so the new
-link fits.
+design rationale, the page labels its reasons as trade-offs, not quotes. The product
+header now has only Docs, Tech and Get started. The "Transfer demo" and "Why xsync" links
+were removed at the user's request, along with the phone-width rules that hid header
+links by position.
 
 ### GitHub Pages deployment (2026-10-10)
 
