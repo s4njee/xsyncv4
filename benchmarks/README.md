@@ -111,6 +111,17 @@ per tool for memory qualification, not repeated throughput medians. The
 passes verification, peaking at 17.23 MiB and taking 387.73 s versus rsync's
 465.33 s. Paired endpoint measurements remain pending.
 
+The first native paired push exceeds the bound: its
+[receiver resource measurement](results/20261010-f09-ed8-push-receiver-metrics.json)
+peaks at 810.36 MiB. The local passes do not qualify the paired requirement.
+The follow-up limits retained incremental sender listings to a 65,536-entry
+admission window and receiver queued DATA to about 16 MiB of expanded payload
+cost. Active callbacks, the largest current list and one incoming frame are
+additional; these are scheduling budgets, not a general process-RSS guarantee.
+Pruning/validated files-from modes require full-list staging and bypass the
+incremental listing window. Repeat the complete five-million-file qualification
+with identified products before treating this follow-up as a memory pass.
+
 `large_tree_runs.py --root ROOT --peer user@host --revision CLEAN_12_DIGIT_REV`
 waits for the Pi's complete fixture and the prior ext4 work lock, then runs
 Pi-local, push and pull cases sequentially. Both fixtures and products must

@@ -16,6 +16,8 @@ struct Task {
   std::shared_ptr<void> owner;  // optional lifetime for work removed from a registry
   u32 a = 0, b = 0;
   std::string s;
+  size_t charge = 0; // Optional expanded payload cost, e.g. compressed DATA.
+  size_t queued_bytes() const { return std::max(charge, s.size()); }
 };
 
 class Pool {
@@ -26,20 +28,21 @@ class Pool {
   size_t q1_soft_limit = SIZE_MAX; // above this backlog everyone prefers queue 1
   size_t max_bytes = SIZE_MAX;     // push_bounded() blocks above this many queued payload bytes
   bool lifo0 = false;
+  std::function<bool()> scan_ready;        // locked; admission for queue 0, e.g. retained listing budget
   std::function<bool()> idle_check;        // locked; nothing queued or running: true = finished
   std::function<bool(Worker&)> on_idle;    // unlocked, before a worker sleeps; true = did work
   std::function<void(Worker&)> on_exit;
 
   void push(int q, Task&& t) {
     std::lock_guard<std::mutex> lk(mu_);
-    bytes_ += t.s.size();
+    bytes_ += t.queued_bytes();
     q_[q].push_back(std::move(t));
     cv_.notify_one();
   }
   void push_bounded(int q, Task&& t) {
     std::unique_lock<std::mutex> lk(mu_);
     cv_space_.wait(lk, [&] { return bytes_ < max_bytes || done_; });
-    bytes_ += t.s.size();
+    bytes_ += t.queued_bytes();
     q_[q].push_back(std::move(t));
     cv_.notify_one();
   }
@@ -125,14 +128,16 @@ class Pool {
     for (;;) {
       if (done_) break;
       int pref = (id < scan_workers && q_[1].size() < q1_soft_limit) ? 0 : 1;
-      int k = !q_[pref].empty() ? pref : !q_[1 - pref].empty() ? 1 - pref : -1;
+      bool scan = !q_[0].empty() && (!scan_ready || scan_ready());
+      int k = pref == 0 ? (scan ? 0 : !q_[1].empty() ? 1 : -1) :
+                          (!q_[1].empty() ? 1 : scan ? 0 : -1);
       if (k < 0 && ranges_.empty()) {
         lk.unlock();
         bool did = on_idle && on_idle(w);
         w.flush_log();
         lk.lock();
-        if (did || !q_[0].empty() || !q_[1].empty() || !ranges_.empty()) continue;
-        if (active_ == 0 && (!idle_check || idle_check())) {
+        if (did || (!q_[0].empty() && (!scan_ready || scan_ready())) || !q_[1].empty() || !ranges_.empty()) continue;
+        if (active_ == 0 && q_[0].empty() && q_[1].empty() && (!idle_check || idle_check())) {
           done_ = true;
           cv_.notify_all();
           cv_done_.notify_all();
@@ -155,7 +160,7 @@ class Pool {
         q_[k].pop_front();
       }
       bool was_full = bytes_ >= max_bytes;
-      bytes_ -= t.s.size();
+      bytes_ -= t.queued_bytes();
       if (was_full && bytes_ < max_bytes) cv_space_.notify_all();
       active_++;
       lk.unlock();

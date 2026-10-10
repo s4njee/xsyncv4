@@ -899,6 +899,7 @@ struct SDir {
   u8 flags = 0;
   u32 id = 0;
   bool prelisted = false, file_ranges = true;
+  size_t accounted_entries = 0;
   std::shared_ptr<SelectedSource> selection;
   std::atomic<int> pending{2};  // walker and outstanding NEED; reads add references
 };
@@ -911,6 +912,7 @@ struct Sender {
   std::mutex smu;
   std::vector<SDir*> dirs;
   std::atomic<u32> next_id{0};
+  std::atomic<size_t> retained_entries{0};
   std::mutex stage_mu;
   u64 stage_last = 0;
 
@@ -940,6 +942,12 @@ struct Sender {
   std::unordered_map<u64, std::shared_ptr<DeltaReply>> signatures, retry_acks;
 
   Sender(Conn& conn, bool is_client) : c(conn), client(is_client) {}
+
+  void release(SDir* d) {
+    size_t count = d->accounted_entries;
+    delete d;
+    pool.update([&] { retained_entries.fetch_sub(count, std::memory_order_relaxed); });
+  }
 
   void put_fresh_attrs(std::string& body, const Entry& attrs, const XattrSet& xattrs) {
     // A source retry can reveal an owner/group absent from its original list.
@@ -1031,6 +1039,8 @@ struct Sender {
       prune_source(d->list, d->rel, d->attrs.dev, w, nullptr, guard, d->src_path, d->source_filter.get());
     }
     DirList& l = d->list;
+    d->accounted_entries = std::max<size_t>(1, l.e.size());
+    retained_entries.fetch_add(d->accounted_entries, std::memory_order_relaxed);
     if (metadata_enabled()) {
       const FilterList& base = d->source_filter ? *d->source_filter : o.filters;
       if ((d->flags & DF_ATTRS) && !d->attrs_xattrs_loaded) {
@@ -1187,7 +1197,7 @@ struct Sender {
       die(RERR_PROTOCOL, "protocol error: bad pruned directory count");
     if (client && pruned) g_stats.dirs_seen.fetch_sub(pruned, std::memory_order_relaxed);
     if (n == 0) {
-      if (d->pending.fetch_sub(1) == 1) delete d;
+      if (d->pending.fetch_sub(1) == 1) release(d);
     } else {
       std::vector<u32> idx(n);
       u32 prev = 0;
@@ -1493,7 +1503,7 @@ struct Sender {
   void run_task(Task& t, Worker& w) {
     SDir* d = (SDir*)t.ptr;
     if (t.kind == K_WALK) {
-      if (walk(d, t.a, t.b, w) && d->pending.fetch_sub(1) == 1) delete d;
+      if (walk(d, t.a, t.b, w) && d->pending.fetch_sub(1) == 1) release(d);
       if (walks.fetch_sub(1) == 1) c.send(new_frame(F_LIST_END));
       return;
     }
@@ -1503,7 +1513,7 @@ struct Sender {
       memcpy(&idx, t.s.data() + i * sizeof(u32), sizeof idx);
       read_one(*d, idx, w);
     }
-    if (d->pending.fetch_sub(1) == 1) delete d;
+    if (d->pending.fetch_sub(1) == 1) release(d);
   }
 
   void reader() {
@@ -1593,6 +1603,11 @@ struct Sender {
     int n = default_jobs();
     pool.scan_workers = std::max(1, n / 2);
     pool.q1_soft_limit = 64;  // drain reads before keeping more source listings
+    // NEED/read completion releases a listing and wakes parked scanners. Full
+    // list validation/pruning defers NEED until LIST_END, so those modes cannot
+    // apply this incremental window without a different staging mechanism.
+    if (!g_opt.prune_empty && !g_opt.files_from_set)
+      pool.scan_ready = [this] { return retained_entries.load(std::memory_order_relaxed) < 65536; };
     pool.idle_check = [this] {
       if (walks.load() != 0 || needs_recv != dirs_sent_a.load()) return false;
       g_stats.scan_done.store(true);
@@ -2407,6 +2422,14 @@ struct Receiver {
         case F_DATA: {
           Task t;
           t.kind = K_DATA;
+          if (payload.size() < 9) die(RERR_PROTOCOL, "protocol error: short DATA frame");
+          if (payload[0] & 1) {
+            if (!(g_opt.peer_features & PF_ZSTD)) die(RERR_PROTOCOL, "compressed data without negotiated zstd support");
+            RBuf raw(std::string_view(payload).substr(9));
+            u64 size = raw.var();
+            if (raw.bad || size > (1u << 30)) die(RERR_PROTOCOL, "protocol error: bad compressed frame");
+            t.charge = (size_t)size + 9;
+          }
           t.s = std::move(payload);
           pool.push_bounded(1, std::move(t));
           break;
@@ -2460,7 +2483,9 @@ struct Receiver {
     put_var(identity, guard.dev), put_var(identity, guard.ino);
     c.send(std::move(identity));
     int n = default_jobs(dest.empty() ? "." : dest);
-    pool.max_bytes = 64 << 20;
+    // Small DATA records expand into much larger retained Entry records. Keep
+    // the wire backlog small as well as bounding the sender's live listings.
+    pool.max_bytes = 16 << 20;
     pool.scan_workers = std::max(1, n / 2);
     pool.q1_soft_limit = 16;  // DATA backlog takes priority over more generators
     pool.idle_check = [this] { return data_end; };

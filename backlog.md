@@ -3982,3 +3982,23 @@ after U-01's evidence entry completes P2, as requested by the user.
   inventory/depth limits stay unchanged, and directory attributes remain
   applied through their verified descriptors. Focused correctness checks and
   a new complete comparison are required for this follow-up. F-10 stays partial.
+
+### F-09 paired push exceeds the memory bound — 2026-10-10
+
+- The first five-million-file push with clean ed8b84137035 completes its
+  native transfer and passes independent checksum/metadata verification.
+  Its receiver's final measured peak is 810.36 MiB, exceeding the stated
+  512 MiB per-process bound. The peer measurement is retained as
+  `20261010-f09-ed8-push-receiver-metrics.json`; complete run/qualification
+  outputs will follow after cleanup. Local memory passes do not prove this
+  paired requirement. F-09 remains partial.
+- The sender now parks new incremental walks once 65,536 listing entries
+  remain retained for NEED/read work, and wakes scanners when those listings
+  are released. The receiver admits about 16 MiB of queued DATA payload cost,
+  including declared decompressed bytes, so compression cannot bypass that
+  queue budget. Active callbacks and a single incoming frame are additional.
+- Pruning and validated files-from modes defer NEED until LIST_END and cannot
+  use the incremental window. Tests cover scanner wakeups, idle-buffer work,
+  cancellation and expanded-payload admission, plus staged lists exceeding
+  the real entry threshold. These changes need build/regression validation
+  and a new full-size local/paired qualification before any memory pass claim.
