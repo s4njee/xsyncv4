@@ -10,6 +10,27 @@
 #include <fcntl.h>
 #include <limits.h>
 #include <unistd.h>
+#ifdef __APPLE__
+#include <sys/attr.h>
+#include <sys/clonefile.h>
+#include <sys/socket.h>
+#include <sys/un.h>
+static int fault_bind(int fd, const sockaddr* address, socklen_t length) {
+  const char* error = getenv("XSYNC_FAULT_BIND_ERROR");
+  if (error && address->sa_family == AF_UNIX &&
+      strncmp(((const sockaddr_un*)address)->sun_path, ".xsync-socket-", 14) == 0) {
+    errno = atoi(error); return -1;
+  }
+  return bind(fd, address, length);
+}
+static int fault_lstat(const char* path, struct stat* st) {
+  int result = lstat(path, st);
+  const char* prefix = getenv("XSYNC_FAULT_PATH");
+  if (!result && getenv("XSYNC_FAULT_DATALESS") && prefix && S_ISREG(st->st_mode) &&
+      strncmp(path, prefix, strlen(prefix)) == 0) st->st_flags |= SF_DATALESS;
+  return result;
+}
+#endif
 
 static bool selected(int fd) {
   const char* prefix = getenv("XSYNC_FAULT_PATH");
@@ -26,6 +47,28 @@ static bool selected(int fd) {
 #endif
   return strncmp(path, prefix, strlen(prefix)) == 0;
 }
+
+#ifdef __APPLE__
+static int fault_fstatat(int fd, const char* path, struct stat* st, int flags) {
+  int result = fstatat(fd, path, st, flags);
+  if (!result && getenv("XSYNC_FAULT_DATALESS") && S_ISREG(st->st_mode) && selected(fd)) st->st_flags |= SF_DATALESS;
+  return result;
+}
+static int fault_getattrlistbulk(int fd, struct attrlist* attrs, void* bytes, size_t size, uint64_t flags) {
+  // Exercise the production fallback scanner with a synthetic dataless flag.
+  if (getenv("XSYNC_FAULT_DATALESS") && selected(fd)) { errno = ENOTSUP; return -1; }
+  return getattrlistbulk(fd, attrs, bytes, size, flags);
+}
+static int fault_clonefileat(int from_fd, const char* from, int to_fd, const char* to, int flags) {
+  const char* prefix = getenv("XSYNC_FAULT_PATH");
+  const char* marker = getenv("XSYNC_FAULT_CLONE_NOTIFY");
+  if (prefix && marker && strncmp(from, prefix, strlen(prefix)) == 0) {
+    int fd = open(marker, O_WRONLY | O_CREAT | O_EXCL, 0600);
+    if (fd >= 0) close(fd);
+  }
+  return clonefileat(from_fd, from, to_fd, to, flags);
+}
+#endif
 
 // Pause after the receiver has selected a directory descriptor, immediately
 // before the requested syscall. Tests can replace that directory or final name.
@@ -179,6 +222,16 @@ static ssize_t fault_write(int fd, const void* bytes, size_t len) {
 }
 
 #ifdef __APPLE__
+__attribute__((used)) static struct { const void* replacement; const void* original; }
+interpose_bind __attribute__((section("__DATA,__interpose"))) = {(const void*)fault_bind, (const void*)bind};
+__attribute__((used)) static struct { const void* replacement; const void* original; }
+interpose_lstat __attribute__((section("__DATA,__interpose"))) = {(const void*)fault_lstat, (const void*)lstat};
+__attribute__((used)) static struct { const void* replacement; const void* original; }
+interpose_fstatat __attribute__((section("__DATA,__interpose"))) = {(const void*)fault_fstatat, (const void*)fstatat};
+__attribute__((used)) static struct { const void* replacement; const void* original; }
+interpose_getattrlistbulk __attribute__((section("__DATA,__interpose"))) = {(const void*)fault_getattrlistbulk, (const void*)getattrlistbulk};
+__attribute__((used)) static struct { const void* replacement; const void* original; }
+interpose_clonefileat __attribute__((section("__DATA,__interpose"))) = {(const void*)fault_clonefileat, (const void*)clonefileat};
 __attribute__((used)) static struct { const void* replacement; const void* original; }
 interpose_read __attribute__((section("__DATA,__interpose"))) = {(const void*)fault_read, (const void*)read};
 __attribute__((used)) static struct { const void* replacement; const void* original; }

@@ -111,7 +111,8 @@ bool publish(DirWork& work, u32 index, const DestPath& basis, const struct stat&
 #else
     int fd = openat(target.fd, temp.c_str(), O_PATH | O_NOFOLLOW | O_CLOEXEC);
 #endif
-    ok = ok && fd >= 0 && attrs_match(work, index, current, fd, destination);
+    bool metadata_available = fd >= 0 || (current.type == T_SOCK && !g_opt.acls);
+    ok = ok && metadata_available && attrs_match(work, index, current, fd, destination);
     if (fd >= 0) close(fd);
   }
   if (!ok) errno = ESTALE;
@@ -339,6 +340,7 @@ bool link_dest_nonregular(DirWork& work, u32 index, Worker& worker, std::optiona
             attrs_match(work, index, candidate, fd, roots[root]->display)) score = 3;
         close(fd);
       }
+      else if (source.type == T_SOCK && !g_opt.acls && attrs_match(work, index, candidate, -1, roots[root]->display)) score = 3;
     }
     if (score > level) { selected = root; before = candidate; expected = stat; level = score; }
     if (score == 3) break;

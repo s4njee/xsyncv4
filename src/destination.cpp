@@ -6,6 +6,12 @@
 #ifdef __APPLE__
 #include <sys/clonefile.h>
 #include <sys/attr.h>
+#include <sys/socket.h>
+#include <sys/un.h>
+#include <sys/wait.h>
+#include <atomic>
+#include <cstring>
+#include <cstddef>
 #endif
 
 namespace {
@@ -155,6 +161,13 @@ int destination_fileflags(const char* path, uint32_t flags, bool delay,
 #ifdef __APPLE__
   auto p = destination_path(path);
   if (p.fd < 0) return -1;
+  struct stat socket_stat;
+  if (fstatat(p.fd, p.name.c_str(), &socket_stat, AT_SYMLINK_NOFOLLOW) == 0 && S_ISSOCK(socket_stat.st_mode)) {
+    if (expected_ino && ((uint64_t)socket_stat.st_dev != expected_dev || (uint64_t)socket_stat.st_ino != expected_ino)) {
+      errno = ESTALE; return -1;
+    }
+    if (socket_stat.st_flags == flags) return 0;
+  }
   int fd = p.name == "." ? p.release() :
     openat(p.fd, p.name.c_str(), O_EVTONLY | O_NOFOLLOW | O_NONBLOCK | O_CLOEXEC);
   if (fd < 0) return -1;
@@ -224,7 +237,65 @@ ssize_t destination_readlink(const char* path, char* buf, size_t size) {
 }
 int destination_mknod(const char* path, mode_t mode, dev_t dev) {
   auto p = destination_path(path);
-  return p.fd < 0 ? -1 : mknodat(p.fd, p.name.c_str(), mode, dev);
+  if (p.fd < 0) return -1;
+#ifdef __APPLE__
+  if (S_ISSOCK(mode)) {
+    // Darwin has no bindat and /dev/fd cannot name a directory's children.
+    // Only the child changes cwd; the threaded receiver keeps its cwd intact.
+    // All child operations are async-signal-safe after fork.
+    static std::atomic<unsigned long> sequence{0};
+    std::string temp = ".xsync-socket-" + std::to_string(getpid()) + "-" + std::to_string(sequence.fetch_add(1));
+    int reservation = openat(p.fd, temp.c_str(), O_CREAT | O_EXCL | O_WRONLY | O_CLOEXEC, 0600);
+    if (reservation < 0) return -1;
+    close(reservation);
+    if (unlinkat(p.fd, temp.c_str(), 0) != 0) return -1;
+    int socket_fd = socket(AF_UNIX, SOCK_DGRAM, 0);
+    if (socket_fd < 0) return -1;
+    sockaddr_un address{};
+    address.sun_family = AF_UNIX;
+    memcpy(address.sun_path, temp.c_str(), temp.size() + 1);
+    address.sun_len = (unsigned char)(offsetof(sockaddr_un, sun_path) + temp.size() + 1);
+    pid_t child = fork();
+    if (child == 0) {
+      int result = fchdir(p.fd) == 0 ? bind(socket_fd, (sockaddr*)&address, address.sun_len) : -1;
+      int error = result == 0 ? 0 : errno;
+      _exit(error < 256 ? error : EIO);
+    }
+    int error = errno;
+    close(socket_fd);
+    if (child < 0) { errno = error; return -1; }
+    int status;
+    pid_t waited;
+    do { waited = waitpid(child, &status, 0); } while (waited < 0 && errno == EINTR);
+    if (waited < 0 || !WIFEXITED(status) || WEXITSTATUS(status)) {
+      error = waited < 0 ? errno : WIFEXITED(status) ? WEXITSTATUS(status) : EIO;
+      if (error != EADDRINUSE) unlinkat(p.fd, temp.c_str(), 0);
+      errno = error;
+      return -1;
+    }
+    struct stat created;
+    if (fstatat(p.fd, temp.c_str(), &created, AT_SYMLINK_NOFOLLOW) != 0 || !S_ISSOCK(created.st_mode)) {
+      error = errno ? errno : ESTALE;
+      unlinkat(p.fd, temp.c_str(), 0);
+      errno = error;
+      return -1;
+    }
+    if (fchmodat(p.fd, temp.c_str(), mode & 07777, AT_SYMLINK_NOFOLLOW) != 0) {
+      error = errno;
+      unlinkat(p.fd, temp.c_str(), 0);
+      errno = error;
+      return -1;
+    }
+    if (renameat(p.fd, temp.c_str(), p.fd, p.name.c_str()) != 0) {
+      error = errno;
+      unlinkat(p.fd, temp.c_str(), 0);
+      errno = error;
+      return -1;
+    }
+    return 0;
+  }
+#endif
+  return mknodat(p.fd, p.name.c_str(), mode, dev);
 }
 int destination_mkfifo(const char* path, mode_t mode) {
   auto p = destination_path(path);

@@ -98,7 +98,7 @@ coverage clarification remains open.
 | E-09 | **`--files-from`, `-R`, `--from0`.** Common in backup scripts and with `find … -print0`. | **done** | Implemented for local and remote, including the "implied directories" semantics of `-R`. | L |
 | E-10 | **Metadata beyond `-a`.** `-H` hard links, `-X` xattrs, `-A` ACLs, `-N` creation times, `-U` atimes, BSD file flags, `-E`, `--chmod`, `--chown`. Also an inconsistency to resolve: the clone path already carries xattrs and ACLs while the byte-copy and remote paths drop them. | **done** | `-H` and `-X` first (most used on macOS). Without `-X`, both paths behave the same — either strip on clone or document that clones are a superset. | XL |
 | E-11 | **Backup-style options.** `--backup`/`--backup-dir`, `--link-dest`, `--compare-dest`, `--remove-source-files`, `--append`, real `-S` sparse handling, `--preallocate`. | **done** | Native `-S` and `--link-dest` are implemented and verified on universal/static releases. Other backup options fall back to rsync via R-02 until needed. | L |
-| E-12 | **macOS specifics.** Dataless iCloud files (reading triggers a download; cloning may not), immutable (`uchg`) destination files, sockets (rsync creates them, xsync skips silently), paths beyond `PATH_MAX` (tested to 40 levels only). | unverified | One test each; behaviour documented where it differs. | M |
+| E-12 | **macOS specifics.** Dataless iCloud files (reading triggers a download; cloning may not), immutable (`uchg`) destination files, sockets (rsync creates them, xsync skips silently), paths beyond `PATH_MAX` (tested to 40 levels only). | **in progress** | Regression fixtures cover all four cases; dataless files avoid clones, sockets are created and failures reported. Universal/static release validation remains; real iCloud hydration is an opt-in fixture. | M |
 | E-13 | **Broken stdout.** `xsync -av … \| head` — rsync dies on EPIPE; xsync's behaviour is unknown. | unverified | Exits promptly with the right code and does not keep copying silently. | S |
 
 ## P2 — Progress and feel: the reason to switch
@@ -2435,3 +2435,35 @@ Verified artifact manifest (source `864bd37edf14`):
   `/tmp/xsync-e11-linkdest-dest-guards2.log`.
   Failed diagnostic runs are excluded from this evidence. Releases and the
   source archive are local artifacts; no remote helper was installed or PR pushed.
+
+
+## E-12 progress — 2026-10-09: macOS edge-case regressions
+
+- Socket creation now uses a short temporary Unix bind name in the pinned
+  receiver parent and atomically renames it to the requested leaf. A small
+  child changes cwd, leaving the threaded receiver's cwd untouched. Failure
+  paths report exit 23 and remove temporary nodes. Long socket filenames,
+  ordinary a/H/X metadata, hard-link aliases and link-dest reuse are verified.
+  Darwin cannot open socket vnodes, so hard-link/snapshot publication validates
+  their pinned-parent identity and the temporary inode rather than requiring
+  O_EVTONLY. Unchanged socket BSD flags need no write; unsupported socket ACL,
+  changed creation-time and changed-flag requests report errors explicitly.
+- Dataless SF_DATALESS flags are requested even without --fileflags. Known
+  dataless directories/files bypass whole-directory/per-file cloning; per-file
+  clones recheck the source and reject a dataless result before publication.
+  Ordinary reads then perform the data transfer. Synthetic flags verify actual
+  read calls and the absence of clone calls, with resident controls confirming
+  the clone path still runs. Real cloud hydration is a separate opted-in fixture
+  using XSYNC_ICLOUD_FILE; it is skipped here because no file was supplied.
+- Immutable existing destinations retain inode/data/mode/flags/mtime when
+  atomic or in-place replacement fails, matching rsync's exit 23. Deep source
+  paths beyond the filesystem's PATH_MAX also return 23 and a path-length
+  error; the macOS rsync 3.4.4 reference rejects the same deep paths.
+- The macOS-specific suite passes **10 methods** (one real-cloud skip), covering
+  local/push/pull, failed binds, pinned-parent replacement, socket aliases,
+  long names, snapshot reuse, metadata limits, immutable writes, dataless policy
+  and deep paths. Broader hard-link/snapshot/metadata/namespace regressions pass
+  **21 methods** (one SSH skip); Linux regressions pass **20 methods** (one SSH
+  skip). Logs: `/tmp/xsync-e12-mac-final4.log`,
+  `/tmp/xsync-e12-regressions.log`, and `/tmp/xsync-e12-linux-regressions.log`.
+  E-12 remains in progress for release validation; P1 remains **19/22**.

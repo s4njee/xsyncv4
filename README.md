@@ -523,6 +523,15 @@ Differences to be aware of:
   Missing or empty snapshot paths warn and are skipped; newly created
   directories are itemized as new when no basis exists. Native remote helpers
   negotiate snapshot support before writes; older helpers delegate or refuse.
+- **macOS edge cases.** Dataless files bypass cloning and use ordinary reads,
+  which may ask the file provider to download their content. Immutable existing
+  files keep their protection; unsuccessful data replacements report exit 23.
+  Unix sockets copy as inactive filesystem nodes, including hard-link aliases
+  and long filenames. Socket creation errors are reported. Socket ACLs and
+  changes to socket creation times or BSD flags currently report exit 23;
+  use rsync for those metadata requests. Source paths beyond `PATH_MAX` report
+  a partial transfer with a path-length error. The macOS rsync 3.4.4 reference
+  also rejects the tested deep paths.
 - **Delegated to rsync** (strict mode rejects them): incompatible remote `-A`,
   `-b`, `--compare-dest`/`--copy-dest`,
   `--append`, `--partial-dir`, and `--remove-source-files`.
@@ -637,6 +646,8 @@ cmake --build build --target xattr_value_test && build/xattr_value_test
 cmake --build build --target sparse_test && build/sparse_test
 XSYNC_TEST_RSYNC=/path/to/rsync-3.4.4 python3 tests/sparse_test.py  # allocation, delta, metadata, interruption and source races
 XSYNC_TEST_RSYNC=/path/to/rsync-3.4.4 python3 tests/link_dest_test.py  # snapshot selection, metadata, delta and publication races
+python3 tests/mac_specific_test.py  # sockets, immutable files, dataless policy and deep paths
+# Optional real cloud hydration: XSYNC_ICLOUD_FILE=/path/to/an/opted-in/dataless/file python3 tests/mac_specific_test.py
 python3 tests/p0_test.py                                  # trust and injected I/O races
 python3 tests/wire_test.py                                # hostile receiver protocol peers
 python3 tests/mount_test.py                               # macOS: disposable APFS image

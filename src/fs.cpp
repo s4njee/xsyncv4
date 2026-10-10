@@ -273,7 +273,7 @@ static int list_dir_fd(int fd, DirList& out, unsigned flags) {
                   ATTR_CMN_MODTIME | ATTR_CMN_OWNERID | ATTR_CMN_GRPID | ATTR_CMN_ACCESSMASK;
   if (g_opt.atimes) al.commonattr |= ATTR_CMN_ACCTIME;
   if (g_opt.crtimes) al.commonattr |= ATTR_CMN_CRTIME;
-  if (g_opt.fileflags) al.commonattr |= ATTR_CMN_FLAGS;
+  al.commonattr |= ATTR_CMN_FLAGS;  // SF_DATALESS also controls clone eligibility.
   al.fileattr = ATTR_FILE_LINKCOUNT | ATTR_FILE_DEVTYPE | ATTR_FILE_DATALENGTH;
   static thread_local std::vector<char> abuf(128 * 1024);
   bool fallback = false;
@@ -351,7 +351,7 @@ static int list_dir_fd(int fd, DirList& out, unsigned flags) {
       }
       const u32 want = ATTR_CMN_OBJTYPE | ATTR_CMN_MODTIME | ATTR_CMN_ACCESSMASK |
                        (g_opt.atimes ? ATTR_CMN_ACCTIME : 0) | (g_opt.crtimes ? ATTR_CMN_CRTIME : 0) |
-                       (g_opt.fileflags ? ATTR_CMN_FLAGS : 0);
+                       ATTR_CMN_FLAGS;
       if (g_opt.hard_links || err || (ret.commonattr & want) != want ||
           (e.type != T_DIR && !(ret.fileattr & ATTR_FILE_LINKCOUNT)) || (e.type == T_REG && !(ret.fileattr & ATTR_FILE_DATALENGTH))) {
         // Attributes missing for this entry: fall back to a plain lstat.
@@ -1142,7 +1142,7 @@ void generate(DirWork& w, Worker& t) {
           if (s.type == T_FIFO) r = destination_mkfifo(path.c_str(), final_mode);
           else r = destination_mknod(path.c_str(), (s.type == T_SOCK ? S_IFSOCK : s.type == T_CHR ? S_IFCHR : S_IFBLK) | final_mode, (dev_t)s.rdev);
           if (r != 0) {
-            if (s.type != T_SOCK || errno == ENOSPC || errno == EDQUOT) file_io_error(errno, path.c_str(), "mknod");
+            file_io_error(errno, path.c_str(), s.type == T_SOCK ? "create socket" : "mknod");
             break;
           }
           if (o.perms) check_attr(destination_chmod(path.c_str(), final_mode), path.c_str(), "permissions");
@@ -1625,6 +1625,8 @@ bool out_finish(OutFile& f, DirWork& w, u32 idx, Worker&, bool ok, const Entry* 
 
 bool clone_copy(DirWork& w, u32 idx, const char* source, unsigned flags, Worker& t) {
 #ifdef __APPLE__
+  struct stat resident;
+  if (lstat(source, &resident) != 0 || (resident.st_flags & SF_DATALESS)) return false;
   std::lock_guard<std::recursive_mutex> lock(output_mu);
   OutFile f;
   Entry fresh;
@@ -1658,7 +1660,7 @@ bool clone_copy(DirWork& w, u32 idx, const char* source, unsigned flags, Worker&
   }
   int flags_fd = openat(f.dir_fd, f.tmp_name.c_str(), O_EVTONLY | O_NOFOLLOW | O_CLOEXEC | O_NONBLOCK);
   struct stat clone_stat;
-  if (flags_fd < 0 || fstat(flags_fd, &clone_stat) != 0 || !S_ISREG(clone_stat.st_mode)) {
+  if (flags_fd < 0 || fstat(flags_fd, &clone_stat) != 0 || !S_ISREG(clone_stat.st_mode) || (clone_stat.st_flags & SF_DATALESS)) {
     if (flags_fd >= 0) close(flags_fd);
     close_source();
     out_abort(f);

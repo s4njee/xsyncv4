@@ -426,11 +426,12 @@ struct Local {
     const Options& o = g_opt;
     const DirList& l = d->src;
     if (metadata_enabled() || o.hard_links || !clone_ok.load(std::memory_order_relaxed) || l.e.size() != listed || l.e.empty() || l.e.size() > 4096 || l.incomplete) return false;
-    if ((d->attrs.mode & 07000) || (d->attrs.mode & 0700) != 0700) return false;
+    if ((d->attrs.fileflags & SF_DATALESS) || (d->attrs.mode & 07000) || (d->attrs.mode & 0700) != 0700) return false;
     u32 gid = d->waiter ? d->waiter->dgid : d->attrs.gid;
     if (o.group && d->attrs.gid != gid) return false;
     for (const Entry& e : l.e) {
       if (e.type != T_REG && e.type != T_LNK) return false;
+      if (e.fileflags & SF_DATALESS) return false;
       if ((e.mode & 07000) || (o.group && e.gid != gid)) return false;
     }
     if (destination_clone(d->src_path.c_str(), d->dst_path.c_str(), CLONE_NOFOLLOW | (o.owner && o.am_root ? 0 : CLONE_NOOWNERCOPY)) != 0) {
@@ -592,7 +593,7 @@ struct Local {
 #ifdef __APPLE__
     // A clone carries data, mode and mtime in one metadata operation. Not for set-id files:
     // the kernel strips those bits when ownership is not copied.
-    if (o.clone && !o.sparse && o.perms && o.times && !o.inplace && !(s.mode & 07000) && clone_ok.load(std::memory_order_relaxed)) {
+    if (o.clone && !o.sparse && o.perms && o.times && !o.inplace && !(s.mode & 07000) && !(s.fileflags & SF_DATALESS) && clone_ok.load(std::memory_order_relaxed)) {
       u32 fl = (o.copy_links ? 0 : CLONE_NOFOLLOW) | (o.owner && o.am_root ? 0 : CLONE_NOOWNERCOPY);
       if (clone_copy(d, idx, w.p2.c_str(), fl, w)) {
         g_stats.xfer_bytes.fetch_add((u64)s.size, std::memory_order_relaxed);

@@ -39,7 +39,14 @@ bool publish(const Member& anchor, const Member& member) {
   int pin_flags = O_PATH | O_CLOEXEC | O_NOFOLLOW;
 #endif
   DestPath pinned(openat(from.fd, from.name.c_str(), pin_flags), {});
-  if (pinned.fd < 0 || fstat(pinned.fd, &source) != 0 || !matches(anchor, source)) {
+  bool source_ok = pinned.fd >= 0 && fstat(pinned.fd, &source) == 0;
+#ifdef __APPLE__
+  // Darwin cannot open socket inodes, even with O_EVTONLY. Pin their parent
+  // and validate identity both here and on the temporary hard link below.
+  if (!source_ok && anchor.attrs.type == T_SOCK)
+    source_ok = fstatat(from.fd, from.name.c_str(), &source, AT_SYMLINK_NOFOLLOW) == 0;
+#endif
+  if (!source_ok || !matches(anchor, source)) {
     errno = ESTALE; return false;
   }
   if (fstatat(to.fd, to.name.c_str(), &target, AT_SYMLINK_NOFOLLOW) != 0 || !matches(member, target)) {
