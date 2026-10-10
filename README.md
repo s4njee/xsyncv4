@@ -332,7 +332,8 @@ against rsync on edited 64 MiB and 2 GiB files, with a maximum ratio of 1.20.
 Current SSH measurements use neo (Raspberry Pi 5, ext4) and freya (Ryzen 7950X,
 ZFS), each with a 1 Gb/s NIC. Source revision `415900091024`, three samples per
 tool, alternating order; every sample passed a checksum rsync dry run. These
-runs retain existing OS caches. Cold-cache and full-corpus results are pending.
+runs retain existing OS caches. Cold-cache, reverse full-corpus and 1% update
+results are pending.
 
 | Dataset / direction | Flags | rsync median | xs median | Speedup |
 |---|---|---:|---:|---:|
@@ -345,6 +346,10 @@ runs retain existing OS caches. Cold-cache and full-corpus results are pending.
 | Two files, 2 GiB, freya → neo | `-az` | 11.607 s | 9.652 s | 1.20× |
 | One file, 19 bytes, neo → freya | `-a` | 0.186 s | 0.163 s | 1.14× |
 | One file, 19 bytes, freya → neo | `-a` | 0.159 s | 0.166 s | 0.96× |
+| Full Congress, 10.53 GB, neo → freya | `-a`, fresh | 122.717 s | 125.154 s | 0.98× |
+| Full Congress, 10.53 GB, neo → freya | `-az`, fresh | 153.572 s | 117.980 s | 1.30× |
+| Full Congress, 10.53 GB, neo → freya | `-a`, no-op | 19.536 s | 26.372 s | 0.74× |
+| Full Congress, 10.53 GB, neo → freya | `-ac`, no-op | 121.693 s | 53.476 s | 2.28× |
 
 The available data-only Congress snapshot contains 914,106 files, 417,408
 directories and 10,528,134,423 logical bytes (10.53 GB), rather than the
@@ -352,6 +357,13 @@ historical 14 GB estimate. A separate update fixture changes 9,141 files.
 See [benchmark instructions](benchmarks/README.md) and the
 [complete result table and JSON evidence](benchmarks/results/20261010T144748Z-715fa0-summary.md).
 `bench/bench.py --target host:absolute-root` runs the SSH harness.
+
+APFS `-rt` and `-rlt` now use file and eligible leaf-directory clones, then
+correct omitted permissions and selected ownership. On a busy M1 Max, five
+samples per tool showed a 1 GiB read-only file dropping from about 0.30 s to
+0.008–0.009 s, and a 1,000-file tree from about 0.29 s to 0.04 s. Every sample
+matched rsync data and metadata. These results come from a 98%-full volume;
+see [the measured comparison and caveats](benchmarks/results/20261010-f11-clone-modes-summary.md).
 
 ### Historical local baseline
 
@@ -389,7 +401,9 @@ Things worth knowing when reading these numbers:
   many threads ask. That is why the byte-copying paths top out around 2.3× while clones,
   which need one metadata transaction per directory instead of several per file, reach 7×.
 - The local numbers with clones are only available on the same APFS volume with `-a`
-  (or at least `-pt`). Across volumes, or with `--no-clone`, expect the 2.3× row.
+  (or at least `-pt`). Current per-file clones also support `-rt` and `-rlt`,
+  correcting omitted permissions before publication. Across volumes, or with
+  `--no-clone`, these historical measurements used the byte-copy path.
 - `-z` is accepted but does nothing for a local copy: there is no wire to compress for.
   rsync does compress and decompress locally, which costs it nothing here because
   creation dominates.
@@ -403,8 +417,9 @@ Things worth knowing when reading these numbers:
   listings are merge-joined to decide what to do.
 - **Parallel transfer.** Files are copied by a thread pool in batches per directory. The
   scan runs ahead of the copy, so totals are known almost immediately.
-- **Copy-on-write clones.** On APFS, a local copy with `-a` clones files instead of copying
-  bytes, and a new directory that holds only files and symlinks is cloned in a single call.
+- **Copy-on-write clones.** On APFS, a local copy with `-a`, `-rt` or `-rlt` clones files
+  instead of copying bytes, then applies the requested mode and ownership. An
+  eligible new directory that holds only files and symlinks is cloned in a single call.
   Clones are independent files sharing storage until one is modified. Disable with
   `--no-clone`.
 - **A pipelined wire protocol.** Over ssh the sender streams directory listings, the

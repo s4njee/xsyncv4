@@ -78,6 +78,12 @@ background load and the volume was 98% full; quieter/free-volume measurements
 are still required before choosing filesystem defaults. `profile_apfs.py`
 samples a separate no-op with `/usr/bin/sample`, then verifies it independently.
 
+`clone_modes.py` compares omitted-permission clones with the pinned old binary,
+candidate byte copies and rsync. It requires a fresh owned work directory and
+checks every timed result against an untimed rsync oracle, including exact
+modes, identities and mtimes. The [completed F-11 comparison](results/20261010-f11-clone-modes-summary.md)
+retains both the initial small-file regression and the final improved path.
+
 ## Regression gate
 
 `.github/workflows/performance.yml` builds the pinned reference and candidate

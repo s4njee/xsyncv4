@@ -137,7 +137,7 @@ The benchmark so far is one corpus slice, one machine, one filesystem, no networ
 | F-08 | **No-op re-sync burns CPU.** 0.40 s wall but 2.7 s of system time at 8 threads. | confirmed | Wall time unchanged or better with under 1 s of CPU; or an opt-in manifest that skips listing the destination entirely. | M |
 | F-09 | **Memory on very large trees.** The receiver keeps every directory record until exit; the local engine holds up to 200,000 pending files. Never run beyond 77k files. | code | A 5-million-file synthetic tree syncs within a stated memory bound; receiver frees a directory once it and its children are finished. | M |
 | F-10 | **Whole-subtree clones.** Only leaf directories are cloned in one call. A missing subtree could be one call, at the price of a long volume-wide lock. | new | Bounded version (subtrees under N entries, known from the scan) measured against the leaf-only path. | M |
-| F-11 | **Clones when `-a` is incomplete.** `-rt` or `-rlt` fall back to byte copies because the clone would bring the wrong mode. | partial | Clone, then correct mode/owner; still cheaper than create+write. | S |
+| F-11 | **Clones when `-a` is incomplete.** `-rt` or `-rlt` fall back to byte copies because the clone would bring the wrong mode. | **done** | Clone, then correct mode/owner; still cheaper than create+write. | S |
 | F-12 | **Deletion is single-threaded.** Removing the 96,000-entry benchmark tree takes about 10 s with `rm`; `--delete` of a large stale subtree will feel the same. | code | Parallel removal by subtree. | S |
 | F-13 | **Tiny transfers.** For one file over ssh the fixed costs dominate: thread pool start, handshake round trip. | unverified | A single small file over ssh is within 10 ms of rsync. | S |
 | F-14 | **`-c` at scale.** Sender hashes in the walkers, receiver hashes inline in the generator; unmeasured. | unverified | Benchmarked against `rsync -c`; hashing gets its own pool if it starves the scan. | S |
@@ -3200,3 +3200,22 @@ after U-01's evidence entry completes P2, as requested by the user.
   instability on the shared macOS runner, rather than a product regression.
 - Both failed raw measurements are preserved. The six-order/warmup revision
   retains the original floor and will receive a new hosted validation run.
+
+## P3 / F-11 completed — 2026-10-10
+
+- Product commit `3c8ec2d2216544641eba78ff7032d4d05296be7d` combines corrected
+  per-file and leaf-directory clones for `-rt`/`-rlt`. Requested ownership is
+  applied independently; new modes obey umask and existing-file modes survive.
+- The final matrix verifies all 80 samples against rsync data, selected entries,
+  exact mode/uid/gid and nanosecond mtime. Five-sample medians for a read-only
+  1 GiB file: old xs 0.297/0.309 s (`-rt`/`-rlt`), new 0.008/0.009 s. For the
+  1,000-file leaf tree: old 0.292/0.281 s, new 0.041/0.044 s. Byte-copy controls
+  remain about 0.29 s. Results and the load/free-space caveat are in
+  `benchmarks/results/20261010-f11-clone-modes-summary.md`.
+- Verification: all 231 itemized differential cases, 14 macOS behavior tests
+  (one optional iCloud skip), 13 permission tests (two Linux-only skips), three
+  clone-progress checks and all ten BSD-flag tests pass. The flag comparison
+  uses the pinned patched rsync reference; its dry-run comparisons now allow
+  U-09's existing summary, whose behavior is tested separately.
+- These measurements do not satisfy F-07's quiet/free-volume requirements.
+  Frozen neo/freya baseline transfers continue without changing their binaries.

@@ -93,7 +93,9 @@ class FileflagsDifferentials(unittest.TestCase):
             result = self.run_sync(native, flags, direction, clone)
             after = snapshot(self.root / 'dst')
             if '-n' in flags: self.assertEqual(after, before)
-            results.append((after, sorted(result.stdout.splitlines())))
+            # U-09's xs-only dry-run summary has its own test suite.
+            results.append((after, sorted(line for line in result.stdout.splitlines()
+                                          if not line.startswith(b'would transfer '))))
         self.assertEqual(results[1], results[0], (flags, direction, clone))
 
     def test_data_metadata_specials_and_itemization(self):
