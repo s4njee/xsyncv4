@@ -66,11 +66,16 @@ python3 bench/bench.py --target user@host:/absolute/root
 
 <p>The full procedure, including fixture preparation, cache-reset requirements and the SSH stream probe, is in <a href="https://github.com/s4njee/xsyncv4/blob/main/benchmarks/README.md">benchmarks/README.md ↗</a>. After adding a run to <code>benchmarks/results/</code>, run <code>npm run docs:refresh</code> in <code>sites/xsync</code>; the new run appears on this page without hand edits.</p>
 
+## REGRESSION GATE {#gate}
+
+<p>CI protects these numbers from silent regressions (backlog F-02). On each Linux and macOS runner, <a href="https://github.com/s4njee/xsyncv4/blob/main/.github/workflows/performance.yml">.github/workflows/performance.yml ↗</a> builds a pinned reference commit and the candidate with the same Release settings. It runs 13 scenarios: fresh, no-op, checksum and 1% update, both local and through the pipe transport, plus compressed pipe copies, large copies and a tiny pipe transfer. Each tool gets five samples in rotated order, with independent rsync verification after every sample.</p>
+
+<p>The job fails if any candidate speedup over rsync falls below 85% of the reference’s speedup on the same runner, or if any transfer or verification fails. The reference commit is pinned in <code>benchmarks/ci-policy.json</code> and moves forward after a verified improvement. The gate’s results are uploaded as workflow artifacts, not shown on this page, because CI runners are not the physical hosts measured above.</p>
+
 ## NOT YET MEASURED {#gaps}
 
 <ul>
 <li>Cold-cache runs on either host.</li>
 <li>The full 10.53 GB Congress corpus in both directions (the push above is still in progress), and the 1% update fixture.</li>
 <li>Local copies on Linux filesystems such as ext4 and XFS, where a parallel receiver should matter more than on APFS.</li>
-<li>A regression gate that fails CI when a scenario loses ground (backlog F-02).</li>
 </ul>

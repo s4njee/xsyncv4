@@ -105,7 +105,7 @@ sectionNumber: "7"
 
 ## TESTING {#testing}
 
-<p>The main test strategy is differential. <code>tests/difftest.py</code> and the area-specific suites build the same fixture twice, run real rsync and xs against it, and compare names, types, contents, modes, nanosecond times, link targets and exit codes. Unit tests cover the filter matcher (a table generated from rsync 3.4.4), attribute storage and sparse writes. Fault injection interposes libc calls (<code>tests/fault_io.cpp</code>) to test races and I/O errors. A two-container Docker rig runs suites over a real sshd. The <a href="contributing.html#tests">contributing page</a> has the full matrix.</p>
+<p>The main test strategy is differential. <code>tests/difftest.py</code> and the area-specific suites build the same fixture twice, run real rsync and xs against it, and compare names, types, contents, modes, nanosecond times, link targets and exit codes. Unit tests cover the filter matcher (a table generated from rsync 3.4.4), attribute storage and sparse writes. Fault injection interposes libc calls (<code>tests/fault_io.cpp</code>) to test races and I/O errors. A two-container Docker rig runs suites over a real sshd. A CI performance gate fails a change that loses speed against rsync relative to a pinned reference (<a href="performance.html#gate">regression gate</a>). The <a href="contributing.html#tests">contributing page</a> has the full matrix.</p>
 
 
 ## THIS SITE {#site}

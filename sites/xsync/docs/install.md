@@ -1,6 +1,6 @@
 ---
 title: "xs-install(1)"
-description: "Install locally, build static release binaries, and put the helper on the machines you sync with."
+description: "Clone and build from GitHub, install locally, build static release binaries, and put the helper on the machines you sync with."
 manual: "xs-install(1)"
 manualName: "Install & releases"
 sectionNumber: "1"
@@ -8,11 +8,46 @@ sectionNumber: "1"
 
 # xs-install(1)
 
-<div class="manual-deck"><strong>Install &amp; releases</strong><p>Install locally, build static release binaries, and put the helper on the machines you sync with.</p></div>
+<div class="manual-deck"><strong>Install &amp; releases</strong><p>Clone and build from GitHub, install locally, build static release binaries, and put the helper on the machines you sync with.</p></div>
+
+## FROM SOURCE {#from-source}
+
+<p>xs is installed from its source repository. These commands go from nothing to an installed <code>xs</code> on macOS or on Debian and Ubuntu. <a href="getting-started.html">Getting started</a> explains each step, and the CMake version needed (3.24 or later).</p>
+
+<div class="example-caption">macOS</div>
+
+```sh
+xcode-select --install
+brew install git cmake ninja zstd xxhash icu4c
+git clone https://github.com/s4njee/xsyncv4.git
+cd xsyncv4
+cmake -S . -B build -G Ninja
+cmake --build build
+cmake --install build --prefix "$HOME/.local"
+export PATH="$HOME/.local/bin:$PATH"
+xs --version
+```
+
+<div class="example-caption">Debian / Ubuntu</div>
+
+```sh
+sudo apt update
+sudo apt install git build-essential cmake ninja-build python3 libzstd-dev libxxhash-dev libicu-dev
+git clone https://github.com/s4njee/xsyncv4.git
+cd xsyncv4
+cmake -S . -B build -G Ninja
+cmake --build build
+cmake --install build --prefix "$HOME/.local"
+export PATH="$HOME/.local/bin:$PATH"
+xs --version
+```
+
+<p>To update later, run <code>git pull</code> in <code>xsyncv4</code>, then the <code>cmake --build</code> and <code>cmake --install</code> lines again.</p>
+
 
 ## LOCAL INSTALL {#local}
 
-<div class="example-caption">From a built checkout (see <a href="getting-started.html#build">getting started</a>)</div>
+<div class="example-caption">From inside the cloned <code>xsyncv4</code> directory, after building</div>
 
 ```sh
 cmake --install build --prefix "$HOME/.local"
@@ -24,7 +59,7 @@ export PATH="$HOME/.local/bin:$PATH"
 
 ## HOMEBREW (LOCAL TAP) {#homebrew}
 
-<div class="example-caption">A formula for this checkout, in a tap on your machine</div>
+<div class="example-caption">From inside the cloned <code>xsyncv4</code> directory: a formula for this checkout, in a tap on your machine</div>
 
 ```sh
 python3 tools/package.py
@@ -39,7 +74,7 @@ brew test xs/local/xs
 
 ## RELEASE BINARIES {#releases}
 
-<div class="example-caption">Static binaries for every supported target</div>
+<div class="example-caption">From inside the cloned <code>xsyncv4</code> directory: static binaries for every supported target</div>
 
 ```sh
 cmake --preset release-static

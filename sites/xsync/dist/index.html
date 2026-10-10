@@ -57,8 +57,10 @@
     </section>
 
     <section id="start" class="start-section wrap">
-      <div class="start-intro"><span class="micro">03 / GET STARTED</span><h2>Your next transfer.<br>A little more transparent.</h2><p>Build xsync with a C++20 compiler, CMake, zstd,<br>xxHash, and ICU. Available for macOS and Linux.</p><a class="text-link" href="docs/getting-started.html">Read the manual <span aria-hidden="true">↗</span></a><div class="platform-buttons" role="group" aria-label="Select build instructions"><button data-platform="mac" aria-pressed="true">macOS</button><button data-platform="linux" aria-pressed="false">Linux</button></div></div>
-      <div class="install-panel"><div class="install-heading"><span id="install-label" class="micro">BUILD FROM THE XSYNC SOURCE DIRECTORY</span><button class="text-button" data-copy="install-command">Copy commands <span aria-hidden="true">⧉</span></button></div><pre><code id="install-command">brew install cmake ninja zstd xxhash icu4c
+      <div class="start-intro"><span class="micro">03 / GET STARTED</span><h2>Your next transfer.<br>A little more transparent.</h2><p>Clone the repository and build xsync with a C++20<br>compiler, CMake, zstd, xxHash, and ICU. macOS and Linux.</p><a class="text-link" href="docs/getting-started.html">Read the manual <span aria-hidden="true">↗</span></a><div class="platform-buttons" role="group" aria-label="Select build instructions"><button data-platform="mac" aria-pressed="true">macOS</button><button data-platform="linux" aria-pressed="false">Linux</button></div></div>
+      <div class="install-panel"><div class="install-heading"><span id="install-label" class="micro">CLONE AND BUILD · MACOS</span><button class="text-button" data-copy="install-command">Copy commands <span aria-hidden="true">⧉</span></button></div><pre><code id="install-command">brew install git cmake ninja zstd xxhash icu4c
+git clone https://github.com/s4njee/xsyncv4.git
+cd xsyncv4
 cmake -S . -B build -G Ninja
 cmake --build build
 build/xs -aP src/ dst/</code></pre><div class="install-note"><span aria-hidden="true">↳</span> Already built? Add <code>--progress</code> to your next transfer.</div></div>
