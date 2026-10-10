@@ -187,6 +187,51 @@ int main(int argc, char** argv) {
       if (error) std::rethrow_exception(error);
       require(fs::exists(dest / "old-a" / "nested" / "thread-inherited") && fs::is_empty(outside),
               "parent capability did not cross worker lifetime safely");
+    } else if (test == "operation-low-limit") {
+      rlimit original{};
+      require(getrlimit(RLIMIT_NOFILE, &original) == 0, "descriptor limit lookup failed");
+      rlimit low = original;
+      low.rlim_cur = 64;
+      require(setrlimit(RLIMIT_NOFILE, &low) == 0, "cannot lower descriptor limit");
+      size_t before = descriptors();
+      {
+        DestinationDirectory pin(a.string());
+        std::vector<int> fillers;
+        for (;;) {
+          int fd = open("/dev/null", O_RDONLY | O_CLOEXEC);
+          if (fd < 0) break;
+          fillers.push_back(fd);
+        }
+        require(errno == EMFILE, "descriptor exhaustion was not reached");
+        struct stat st{};
+        require(destination_stat(a.c_str(), &st) == 0 && S_ISDIR(st.st_mode),
+                "pinned root metadata needs an extra descriptor");
+        require(destination_mkdir((a / "direct-child").c_str(), 0700) == 0,
+                "pinned child creation needs an extra descriptor");
+        require(destination_stat((a / "direct-child").c_str(), &st) == 0,
+                "pinned child metadata needs an extra descriptor");
+        require(destination_mkdir((a / "nested" / "indirect-child").c_str(), 0700) < 0 && errno == EMFILE,
+                "descendant walk bypassed its descriptor requirement");
+        for (int fd : fillers) close(fd);
+        write_file(a / "after-operations");
+      }
+      require(descriptors() == before, "synchronous operations leaked or closed a pin");
+      require(setrlimit(RLIMIT_NOFILE, &original) == 0, "cannot restore descriptor limit");
+    } else if (test == "owned-path-lifetime") {
+      // Public lookups remain independently owned after the directory scope ends.
+      int fd = -1;
+      {
+        DestinationDirectory pin(a.string());
+        auto path = destination_path((a / "retained").string());
+        fd = path.release();
+      }
+      require(fd >= 0, "owned lookup failed");
+      fs::rename(a, dest / "old-a");
+      fs::create_directory_symlink(outside, a);
+      require(mkdirat(fd, "retained", 0700) == 0, "owned lookup expired with its scope");
+      close(fd);
+      require(fs::exists(dest / "old-a" / "retained") && fs::is_empty(outside),
+              "owned lookup followed a replacement symlink");
     } else if (test == "parent-low-limit") {
       rlimit original{};
       require(getrlimit(RLIMIT_NOFILE, &original) == 0, "descriptor limit lookup failed");

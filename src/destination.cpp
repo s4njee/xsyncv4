@@ -106,7 +106,7 @@ bool anchor_destination(const std::string& path) {
   }
 }
 
-DestPath destination_path(const std::string& path) {
+DestPath destination_path_impl(const std::string& path, bool owned) {
   auto p = absolute(path);
   if (root_fd < 0 || p.empty() || (p != root_path &&
       !(p.starts_with(root_path) && (root_path == "/" || p[root_path.size()] == '/')))) {
@@ -128,6 +128,10 @@ DestPath destination_path(const std::string& path) {
   size_t slash = rel.find_last_of('/');
   std::string name(slash == std::string_view::npos ? rel : rel.substr(slash + 1));
   if (name.empty()) name = ".";
+  // Synchronous operations can use an existing pin directly. The public
+  // lookup still owns its descriptor, and descendant walks still use NOFOLLOW.
+  if (!owned && slash == std::string_view::npos)
+    return {base, std::move(name), false};
   int fd = dup(base);
   if (fd < 0) return {};
   fd = walk(fd, slash == std::string_view::npos ? std::string_view() : rel.substr(0, slash));
@@ -135,8 +139,12 @@ DestPath destination_path(const std::string& path) {
   return {fd, std::move(name)};
 }
 
+DestPath destination_path(const std::string& path) {
+  return destination_path_impl(path, true);
+}
+
 int destination_open_dir(const char* path) {
-  auto p = destination_path(path);
+  auto p = destination_path_impl(path, false);
   return p.fd < 0 ? -1 : openat(p.fd, p.name.c_str(), O_RDONLY | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC);
 }
 DestinationParent::~DestinationParent() {
@@ -177,11 +185,11 @@ DestinationDirectory::~DestinationDirectory() {
   }
 }
 int destination_stat(const char* path, struct stat* st) {
-  auto p = destination_path(path);
+  auto p = destination_path_impl(path, false);
   return p.fd < 0 ? -1 : fstatat(p.fd, p.name.c_str(), st, AT_SYMLINK_NOFOLLOW);
 }
 int destination_chmod(const char* path, mode_t mode) {
-  auto p = destination_path(path);
+  auto p = destination_path_impl(path, false);
   if (p.fd < 0) return -1;
   if (p.name == ".") return fchmod(p.fd, mode);
 #ifndef __APPLE__
@@ -205,12 +213,12 @@ int destination_chmod(const char* path, mode_t mode) {
 #endif
 }
 int destination_chown(const char* path, uid_t uid, gid_t gid) {
-  auto p = destination_path(path);
+  auto p = destination_path_impl(path, false);
   return p.fd < 0 ? -1 : p.name == "." ? fchown(p.fd, uid, gid) :
     fchownat(p.fd, p.name.c_str(), uid, gid, AT_SYMLINK_NOFOLLOW);
 }
 int destination_times(const char* path, const timespec times[2]) {
-  auto p = destination_path(path);
+  auto p = destination_path_impl(path, false);
   return p.fd < 0 ? -1 : p.name == "." ? futimens(p.fd, times) :
     utimensat(p.fd, p.name.c_str(), times, AT_SYMLINK_NOFOLLOW);
 }
@@ -243,7 +251,7 @@ int fd_fileflags(int fd, uint32_t flags, bool delay) {
 int destination_fileflags(const char* path, uint32_t flags, bool delay,
                           uint64_t expected_dev, uint64_t expected_ino) {
 #ifdef __APPLE__
-  auto p = destination_path(path);
+  auto p = destination_path_impl(path, false);
   if (p.fd < 0) return -1;
   struct stat socket_stat;
   if (fstatat(p.fd, p.name.c_str(), &socket_stat, AT_SYMLINK_NOFOLLOW) == 0 && S_ISSOCK(socket_stat.st_mode)) {
@@ -284,7 +292,7 @@ int fd_crtime(int fd, time_t seconds) {
 }
 int destination_crtime(const char* path, time_t seconds) {
 #ifdef __APPLE__
-  auto p = destination_path(path);
+  auto p = destination_path_impl(path, false);
   if (p.fd < 0) return -1;
   if (p.name == ".") return fd_crtime(p.fd, seconds);
   // O_SYMLINK opens a link itself; combining it with O_NOFOLLOW rejects links.
@@ -300,27 +308,27 @@ int destination_crtime(const char* path, time_t seconds) {
 #endif
 }
 int destination_mkdir(const char* path, mode_t mode) {
-  auto p = destination_path(path);
+  auto p = destination_path_impl(path, false);
   return p.fd < 0 ? -1 : mkdirat(p.fd, p.name.c_str(), mode);
 }
 int destination_unlink(const char* path) {
-  auto p = destination_path(path);
+  auto p = destination_path_impl(path, false);
   return p.fd < 0 ? -1 : unlinkat(p.fd, p.name.c_str(), 0);
 }
 int destination_rmdir(const char* path) {
-  auto p = destination_path(path);
+  auto p = destination_path_impl(path, false);
   return p.fd < 0 ? -1 : unlinkat(p.fd, p.name.c_str(), AT_REMOVEDIR);
 }
 int destination_symlink(const char* target, const char* path) {
-  auto p = destination_path(path);
+  auto p = destination_path_impl(path, false);
   return p.fd < 0 ? -1 : symlinkat(target, p.fd, p.name.c_str());
 }
 ssize_t destination_readlink(const char* path, char* buf, size_t size) {
-  auto p = destination_path(path);
+  auto p = destination_path_impl(path, false);
   return p.fd < 0 ? -1 : readlinkat(p.fd, p.name.c_str(), buf, size);
 }
 int destination_mknod(const char* path, mode_t mode, dev_t dev) {
-  auto p = destination_path(path);
+  auto p = destination_path_impl(path, false);
   if (p.fd < 0) return -1;
 #ifdef __APPLE__
   if (S_ISSOCK(mode)) {
@@ -382,12 +390,12 @@ int destination_mknod(const char* path, mode_t mode, dev_t dev) {
   return mknodat(p.fd, p.name.c_str(), mode, dev);
 }
 int destination_mkfifo(const char* path, mode_t mode) {
-  auto p = destination_path(path);
+  auto p = destination_path_impl(path, false);
   return p.fd < 0 ? -1 : mkfifoat(p.fd, p.name.c_str(), mode);
 }
 int destination_clone(const char* source, const char* path, unsigned flags) {
 #ifdef __APPLE__
-  auto p = destination_path(path);
+  auto p = destination_path_impl(path, false);
   return p.fd < 0 ? -1 : clonefileat(AT_FDCWD, source, p.fd, p.name.c_str(), flags);
 #else
   errno = ENOTSUP;

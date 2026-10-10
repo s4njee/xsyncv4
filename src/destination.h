@@ -2,6 +2,7 @@
 #include <string>
 #include <cstdint>
 #include <memory>
+#include <fcntl.h>
 #include <sys/stat.h>
 #include <unistd.h>
 
@@ -13,9 +14,17 @@ struct DestPath {
   DestPath() = default;
   DestPath(int f, std::string n) : fd(f), name(std::move(n)) {}
   DestPath(const DestPath&) = delete;
-  DestPath(DestPath&& p) noexcept : fd(p.fd), name(std::move(p.name)) { p.fd = -1; }
-  ~DestPath() { if (fd >= 0) close(fd); }
-  int release() { int f = fd; fd = -1; return f; }
+  DestPath(DestPath&& p) noexcept : fd(p.fd), name(std::move(p.name)), owned_(p.owned_) { p.fd = -1; }
+  ~DestPath() { if (owned_ && fd >= 0) close(fd); }
+  int release() {
+    int f = owned_ || fd < 0 ? fd : fcntl(fd, F_DUPFD_CLOEXEC, 0);
+    fd = -1;
+    return f;
+  }
+ private:
+  friend DestPath destination_path_impl(const std::string&, bool);
+  DestPath(int f, std::string n, bool owned) : fd(f), name(std::move(n)), owned_(owned) {}
+  bool owned_ = true;
 };
 bool anchor_destination(const std::string& path);
 DestPath destination_path(const std::string& path);
@@ -46,6 +55,7 @@ class DestinationDirectory {
   DestinationDirectory& operator=(const DestinationDirectory&) = delete;
  private:
   friend DestPath destination_path(const std::string& path);
+  friend DestPath destination_path_impl(const std::string& path, bool owned);
   DestinationDirectory* previous_ = nullptr;
   int fd_ = -1;
   std::string path_;

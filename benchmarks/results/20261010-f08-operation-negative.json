@@ -1,0 +1,19 @@
+{
+  "schema": 1,
+  "revision": "c8a0164f11bda303a08057bbe63af87818cb83d6",
+  "control": "frozen pre-borrow source with current operation-low-limit fixture",
+  "compile_command": [
+    "c++",
+    "-std=c++20",
+    "-pthread",
+    "-I/Users/sanjee/projects/xsyncv4/.bench/p3-f08-headroom-source/src",
+    "/Users/sanjee/projects/xsyncv4/tests/destination_scope_test.cpp",
+    "/Users/sanjee/projects/xsyncv4/.bench/p3-f08-headroom-source/src/destination.cpp",
+    "-o",
+    "/Users/sanjee/projects/xsyncv4/.bench/p3-f08-operation-negative"
+  ],
+  "returncode": 1,
+  "stderr": "pinned root metadata needs an extra descriptor\n",
+  "binary_sha256": "cf99774bbba53421f834305de1ed053266b1101079a17039259e121df29fa8ac",
+  "test_sha256": "fea1e557082a0df0560ebb3f061e4ba248869fb6ef4e745e5209d79a7cc71fcd"
+}

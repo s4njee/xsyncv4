@@ -4180,3 +4180,19 @@ after U-01's evidence entry completes P2, as requested by the user.
 - The busy Mac and 99%-full physical storage limit throughput conclusions.
   CPU still exceeds one second; no manifest is implemented and F-08 stays open.
   The newer low-descriptor-limit policy requires separate clean validation.
+
+### F-08 synchronous pinned operations implemented — 2026-10-10
+
+- Destination metadata, creation and removal helpers can use an existing
+  directory pin directly for its root or immediate children, avoiding a
+  duplicate-and-close pair. Descendant component walks still use NOFOLLOW;
+  public destination-path lookups retain independently owned descriptors.
+  Releasing an internal borrowed descriptor duplicates it before ownership
+  escapes, including the root file-flags operation.
+- Fourteen focused scope tests pass on macOS and Linux. A new exhausted
+  64-descriptor test proves direct metadata/creation still works while deeper
+  walks correctly require another descriptor. The frozen pre-change control
+  fails that test, and the negative evidence is retained. Another test proves
+  public lookup descriptors survive their scope and namespace replacement.
+- Full clean regression checks and a CPU comparison remain required. This
+  implementation does not establish the F-08 one-second target.
