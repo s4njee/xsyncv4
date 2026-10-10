@@ -3656,3 +3656,13 @@ after U-01's evidence entry completes P2, as requested by the user.
   85% floor and matched automatic worker budgets. The raw result is retained.
 - macOS remains active in the same run. No new code push will cancel it before
   it finishes; source changes and their targeted validation continue locally.
+
+### F-01 1% update pull completed — 2026-10-10
+
+- The reverse update completes all six balanced, independently verified
+  samples. Median rsync/xs times are 82.847/30.641 s (2.70x). The paired suite
+  has finished; its table now contains 28 complete scenario rows, and the raw
+  reverse-update results and log are retained.
+- F-01 remains partial pending cold-cache access and verification on freya.
+  Raw SSH throughput and further tiny-transfer repetitions run separately
+  after the suite, so they do not compete with corpus transfers.

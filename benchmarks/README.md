@@ -44,8 +44,9 @@ freya and 2.16x faster from freya to neo. No-op results differ by direction:
 xs takes 26.37 s versus rsync's 19.54 s pushing, and 27.79 s versus 80.30 s
 pulling. The linked table retains fresh-copy regressions and memory costs too.
 The 1% update push completes all six verified samples: xs takes 26.99 s versus
-rsync's 31.59 s (1.17x). The reverse update measurements are running; cold-cache
-measurements remain pending access to reset and verify freya's ZFS cache.
+rsync's 31.59 s (1.17x). The reverse update completes six verified samples:
+xs takes 30.64 s versus rsync's 82.85 s (2.70x). Cold-cache measurements remain
+pending access to reset and verify freya's ZFS cache.
 
 To reproduce the paired run with already prepared owned fixtures:
 
