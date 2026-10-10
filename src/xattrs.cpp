@@ -238,9 +238,11 @@ LocalValues desired(const XattrSet& source, const FilterList& filters) {
   }
   return result;
 }
-bool update(const XattrSet& source, int fd, const std::string& path, u8 type, const FilterList& filters, bool write, bool fresh = false, bool ownership_changed = false) {
+bool update(const XattrSet& source, int fd, const std::string& path, u8 type, const FilterList& filters, bool write, bool fresh = false, bool ownership_changed = false, bool* valid = nullptr) {
+  if (valid) *valid = false;
   if (!source.complete) return false;
   if (!supported_type(type)) {
+    if (valid) *valid = true;
     bool selected = !desired(source, filters).empty();
     if (selected && write) file_io_error(ENOTSUP, path.c_str(), "set extended attributes on unsupported file type");
     return selected;
@@ -280,6 +282,7 @@ bool update(const XattrSet& source, int fd, const std::string& path, u8 type, co
     if (write) { prepare_write(); check_attr(access.remove(name.c_str()), path.c_str(), "extended attribute"); }
   }
   if (opened_mode) check_attr(access.chmod(saved_mode), path.c_str(), "restore xattr permissions");
+  if (valid) *valid = true;
   return changed;
 }
 }
@@ -330,6 +333,13 @@ bool xattrs_differ(const XattrSet& source, const std::string& path, u8 type, con
   if (target.fd < 0) { file_io_error(errno, path.c_str(), "open extended attributes"); return false; }
   try { return update(source, target.fd, path, type, filters, false, false, ownership_changed); }
   catch (const std::system_error& error) { g_source_io_error.store(true); file_io_error(error.code().value(), path.c_str(), "read stored extended attributes"); return false; }
+}
+bool xattrs_fd_match(const XattrSet& source, int fd, const std::string& path, u8 type, const FilterList& filters) {
+  try {
+    bool valid = false;
+    bool differs = update(source, fd, path, type, filters, false, false, false, &valid);
+    return valid && !differs;
+  } catch (const std::system_error&) { return false; }
 }
 bool apply_fd_xattrs(const XattrSet& source, int fd, const std::string& path, u8 type, const FilterList& filters, bool fresh) {
   try { return update(source, fd, path, type, filters, !g_opt.dry_run, fresh); }

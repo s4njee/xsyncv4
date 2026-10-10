@@ -76,6 +76,36 @@ class FilterWireTests(unittest.TestCase):
                 self.assertEqual(proc.returncode, 4)
                 self.assertFalse(target.exists())
 
+    def test_link_dest_configurations(self):
+        feature = 1073741824
+        for label, data in (
+            ('wrong-frame', frame(2, b'')), ('empty', frame(33, b'')),
+            ('truncated-count', frame(33, b'\x80')), ('zero-directories', frame(33, b'\0')),
+            ('too-many', frame(33, var(21))), ('missing-path', frame(33, b'\1')),
+            ('nul-path', frame(33, b'\1' + string(b'a\0b'))),
+            ('trailing', frame(33, b'\1' + string('../snapshot') + b'x')),
+            ('oversized-header', struct.pack('<IB', 1024 * 1024 + 1, 33)),
+        ):
+            with self.subTest(label=label):
+                proc, target = self.server(features=1 | feature)
+                self.rejected(proc, target, data)
+        proc, target = self.server(features=1)
+        self.rejected(proc, target, frame(33, b'\1' + string('../snapshot')))
+        from chown_wire_test import OwnershipWireTests
+        for features, payload in ((1 | feature, b'\1' + string('../snapshot')), (1 | feature | 512, b'\0')):
+            proc, target = OwnershipWireTests.server(self, features=features, role=b'S')
+            self.assertEqual(read_frame(proc)[0], 1)
+            self.rejected(proc, target, frame(33, payload))
+
+    def test_explicit_link_dest_helper_requires_negotiation(self):
+        from chown_wire_test import OwnershipWireTests
+        proc, target = OwnershipWireTests.server(self, features=1, helper=['--link-dest=../snapshot'])
+        kind, message = read_frame(proc)
+        self.assertEqual((kind, message[:2]), (8, b'\2\4'))
+        proc.communicate(timeout=10)
+        self.assertEqual(proc.returncode, 4)
+        self.assertFalse(target.exists())
+
     def test_bad_configurations(self):
         for label, data in (
             ('wrong-frame', frame(2, b'')),

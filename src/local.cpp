@@ -14,6 +14,7 @@
 #include "output.h"
 #include "delta.h"
 #include "rate_limit.h"
+#include "link_dest.h"
 
 #ifdef __APPLE__
 #include <sys/clonefile.h>
@@ -321,16 +322,18 @@ bool setup_dest(const std::string& dest_arg, DirWork& root, bool single) {
     root.rename_to = sl == std::string::npos ? dest : dest.substr(sl + 1);
     root.has_attrs = false;
     root.no_delete = true;
+    init_link_dest(root.dst_path);
     return true;
   }
   if (exists && !is_dir) die(RERR_FILESELECT, "ERROR: destination must be a directory when copying more than 1 file");
   if (!exists) {
     if (!o.dry_run && !mkdir_p(dest, 0777 & ~g_umask)) die(RERR_FILEIO, "mkdir \"%s\" failed: %s", dest.c_str(), errstr(errno).c_str());
-    if (o.verbose > 0) out_line("created directory " + dest);
+    if (o.verbose > 0 || (!o.link_dest.empty() && output_enabled())) out_line("created directory " + dest);
     root.created = true;
     exists = !o.dry_run && destination_stat(dest.c_str(), &st) == 0;
   }
   root.dst_path = dest;
+  init_link_dest(root.dst_path);
   if (root.has_attrs) {
     root.attrs.mode = incoming_mode(root.attrs.mode, root.attrs.type);
     incoming_ownership(root.attrs);
@@ -347,8 +350,9 @@ bool setup_dest(const std::string& dest_arg, DirWork& root, bool single) {
     if (o.xattrs && exists && !root.created && xattrs_differ(root.attrs_xattrs, dest, T_DIR, metadata_filters)) root.attrs.item_flags |= IF_XATTR;
     if (o.acls && exists && !root.created && acls_differ(root.attrs_xattrs.acl(), dest, T_DIR, &root.attrs.access_acl_differ)) root.attrs.item_flags |= IF_ACL;
     Worker worker;
-    note_directory(root, (exists && !root.created) || (root.created && o.mkpath) ? &d : nullptr,
-                   root.created && !o.mkpath, worker);
+    auto alternate = root.created && !o.mkpath ? link_dest_directory("", root.attrs, root.attrs_xattrs, metadata_filters) : std::nullopt;
+    note_directory(root, alternate ? &*alternate : (exists && !root.created) || (root.created && o.mkpath) ? &d : nullptr,
+                   root.created && !o.mkpath && !alternate, worker, (bool)alternate);
     worker.flush_log();
     u32 final_mode = o.perms ? root.attrs.mode : root.created ? (root.attrs.mode & 0777 & ~g_umask) : d.mode;
     root.attrs.mode = final_mode;
@@ -629,7 +633,8 @@ struct Local {
         if (prefix.size && (!hash_prefix_fd(in, prefix.size, digest) || digest[0] != prefix.sum[0] || digest[1] != prefix.sum[1])) prefix = {};
       }
       auto basis = !prefix.size && !o.whole_file && s.size > DELTA_THRESHOLD
-                       ? destination_delta_basis(path_join(d.dst_path, d.dst_name(idx)), o.inplace) : nullptr;
+                       ? (s.link_basis != 255 ? link_dest_delta_basis(d, idx) :
+                          destination_delta_basis(path_join(d.dst_path, d.dst_name(idx)), o.inplace)) : nullptr;
       if (basis) {
         if (!out_open(f, d, idx, w, false, true)) { close(in); return fail(0); }
         bool output_ok = true;
@@ -817,7 +822,7 @@ int run_local(const std::vector<std::string>& srcs, const std::string& dest) {
   const Options& o = g_opt;
   // Whole-directory clones are only equivalent to a per-file sync when nothing could make us
   // treat any entry specially.
-  L.lazy_ok = o.clone && !o.sparse && o.chmod_rules.empty() && !o.ownership.requested() && !o.atimes && !o.crtimes && !o.fileflags && o.recursive && o.links && !o.copy_links && o.perms && o.times && !o.omit_dir_times && !o.omit_link_times &&
+  L.lazy_ok = o.clone && !o.sparse && o.link_dest.empty() && o.chmod_rules.empty() && !o.ownership.requested() && !o.atimes && !o.crtimes && !o.fileflags && o.recursive && o.links && !o.copy_links && o.perms && o.times && !o.omit_dir_times && !o.omit_link_times &&
               !metadata_enabled() && !o.dry_run && !o.inplace && !o.one_fs && !o.existing && !o.prune_empty && !root->selection && o.max_size <= 0 && o.min_size <= 0 && o.filters.empty();
 #endif
   int n = default_jobs();

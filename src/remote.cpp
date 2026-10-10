@@ -32,6 +32,7 @@
 #include <xxhash.h>
 
 #include "engine.h"
+#include "link_dest.h"
 #include "progress.h"
 #include "fallback.h"
 #include "transport.h"
@@ -48,7 +49,7 @@ namespace {
 
 enum : u8 { F_HELLO = 1, F_DIR, F_NEED, F_DATA, F_LIST_END, F_DATA_END, F_DONE, F_MSG, F_IDMAP, F_DEST, F_OUTPUT, F_OUTPUT_CONFIG,
             F_DELTA_REQUEST, F_DELTA_SIGNATURE, F_DELTA_RETRY_ACK, F_LIST_ENTRY, F_IO_CONFIG, F_KEEPALIVE, F_FILTER_CONFIG, F_DELETE_CONFIG,
-            F_PRUNE_CONFIG, F_RELATIVE_CONFIG, F_FILES_CONFIG, F_FILES_DATA, F_FILES_END, F_XATTR_CONFIG, F_XATTR_START, F_XATTR_CHUNK, F_XATTR_END, F_ACL_CONFIG, F_CHOWN_CONFIG, F_SPARSE_CONFIG };
+            F_PRUNE_CONFIG, F_RELATIVE_CONFIG, F_FILES_CONFIG, F_FILES_DATA, F_FILES_END, F_XATTR_CONFIG, F_XATTR_START, F_XATTR_CHUNK, F_XATTR_END, F_ACL_CONFIG, F_CHOWN_CONFIG, F_SPARSE_CONFIG, F_LINKDEST_CONFIG };
 enum : u8 { DF_ATTRS = 1, DF_SINGLE = 2, DF_NODELETE = 4, DF_ZSTD = 8 };
 enum : u8 { R_WHOLE = 1, R_CHUNK = 2, R_FAIL = 4, R_END = 8, R_LITERAL = 16, R_DELTA_END = 32, R_COPY = 64 };
 constexpr size_t HDR = 5;                  // u32 payload length + u8 type
@@ -438,6 +439,8 @@ struct Conn {
         die(RERR_PROTOCOL, "protocol error: unnegotiated ownership configuration");
       if (type == F_SPARSE_CONFIG && (len > 1 || !(g_opt.peer_features & PF_SPARSE)))
         die(RERR_PROTOCOL, "protocol error: malformed or unnegotiated sparse configuration");
+      if (type == F_LINKDEST_CONFIG && (len > 1024 * 1024 || !(g_opt.peer_features & PF_LINK_DEST)))
+        die(RERR_PROTOCOL, "protocol error: oversized or unnegotiated link-dest configuration");
       if (type == F_FILTER_CONFIG && len > 1024 * 1024)
         die(RERR_PROTOCOL, "protocol error: oversized filter configuration");
       if (type == F_FILTER_CONFIG && !(g_opt.peer_features & PF_FILTERS))
@@ -686,6 +689,7 @@ u32 get_identity(RBuf& r) {
 }
 
 std::string missing_feature(u64 features) {
+  if (!g_opt.link_dest.empty() && !g_opt.list_only && !(features & PF_LINK_DEST)) return "peer does not support --link-dest";
   if (g_opt.sparse && !g_opt.list_only && !(features & PF_SPARSE)) return "peer does not support --sparse";
   if (g_opt.ownership.requested() && !g_opt.list_only && !(features & PF_CHOWN)) return "peer does not support --chown";
   if (g_opt.fileflags && !g_opt.list_only && !(features & PF_FILEFLAGS)) return "peer does not support --fileflags";
@@ -1528,7 +1532,7 @@ struct Receiver {
       if (!d || !d->gen_done) die(RERR_PROTOCOL, "protocol error: premature delta request");
     }
     if (r.bad || !r.empty() || idx >= d->w.src.e.size() || d->w.src.e[(size_t)idx].type != T_REG ||
-        !(d->w.src.e[(size_t)idx].flags & EF_INPLACE_SAFE) ||
+        (!(d->w.src.e[(size_t)idx].flags & EF_INPLACE_SAFE) && d->w.src.e[(size_t)idx].link_basis == 255) ||
         !std::binary_search(d->w.need.begin(), d->w.need.end(), (u32)idx))
       die(RERR_PROTOCOL, "protocol error: unrequested delta basis");
     {
@@ -1551,7 +1555,8 @@ struct Receiver {
     // A retry of a legacy prefix attempt may still be draining; decline rather
     // than snapshotting an inplace destination while that attempt is writing it.
     auto basis = active ? std::shared_ptr<DeltaBasis>() :
-      destination_delta_basis(path_join(d.w.dst_path, d.w.dst_name(idx)), g_opt.inplace);
+      (d.w.src.e[idx].link_basis != 255 ? link_dest_delta_basis(d.w, idx) :
+       destination_delta_basis(path_join(d.w.dst_path, d.w.dst_name(idx)), g_opt.inplace));
     std::string f = new_frame(F_DELTA_SIGNATURE);
     put_var(f, d.id), put_var(f, idx);
     size_t flag_at = f.size();
@@ -1773,7 +1778,7 @@ struct Receiver {
           d->prefixes.emplace(i, prefix);
         }
       }
-      if (delta_enabled()) f.push_back((l.e[i].flags & EF_INPLACE_SAFE) ? 1 : 0);
+      if (delta_enabled()) f.push_back(((l.e[i].flags & EF_INPLACE_SAFE) || l.e[i].link_basis != 255) ? 1 : 0);
     }
     std::vector<Task> wait;
     {
@@ -1827,7 +1832,7 @@ struct Receiver {
       incoming_acl_mode(xattrs.acls, source_mode, T_REG);
     }
     if (g_opt.perms) attrs.mode = mode;
-    else if (g_opt.executability && (attrs.flags & EF_INPLACE_SAFE)) attrs.mode = execution_mode(mode, attrs.basis_mode);
+    else if (g_opt.executability && ((attrs.flags & EF_INPLACE_SAFE) || attrs.link_basis != 255)) attrs.mode = execution_mode(mode, attrs.basis_mode);
     if ((g_opt.owner || g_opt.group) && !g_opt.numeric_ids) {
       std::lock_guard<std::mutex> lock(ids.mu);
       ids.map(attrs);
@@ -2412,6 +2417,7 @@ int run_client(const std::vector<std::string>& srcs, const std::string& dest, u3
   if (!o.fileflags) advertised &= ~PF_FILEFLAGS;
   if (!o.ownership.requested()) advertised &= ~PF_CHOWN;
   if (!o.sparse) advertised &= ~PF_SPARSE;
+  if (o.link_dest.empty()) advertised &= ~PF_LINK_DEST;
   if (!o.open_noatime) advertised &= ~PF_OPEN_NOATIME;
   if (!output_enabled()) advertised &= ~(PF_OUTPUT | PF_DIR_OUTPUT);
   if (wire_version >= 4) put_var(f, advertised);
@@ -2503,6 +2509,12 @@ int run_client(const std::vector<std::string>& srcs, const std::string& dest, u3
     c.send(std::move(config));
   }
   if (o.peer_features & PF_SPARSE) c.send(new_frame(F_SPARSE_CONFIG) + '\1');
+  if (o.peer_features & PF_LINK_DEST) {
+    std::string config = new_frame(F_LINKDEST_CONFIG);
+    put_var(config, push ? o.link_dest.size() : 0);
+    if (push) for (const auto& path : o.link_dest) put_str(config, path);
+    c.send(std::move(config));
+  }
   if (o.peer_features & PF_RELATIVE) c.send(new_frame(F_RELATIVE_CONFIG) + '\1');
   if (o.peer_features & PF_FILES_FROM) {
     std::string config = new_frame(F_FILES_CONFIG);
@@ -2598,17 +2610,22 @@ int run_server() {
   auto server_ownership = std::move(o.ownership);
   const bool server_fileflags = o.fileflags;
   const bool server_sparse = o.sparse;
+  auto server_link_dest = std::move(o.link_dest);
   const bool server_executability = o.executability && !o.perms;
   const bool server_atimes = o.atimes, server_crtimes = o.crtimes, server_noatime = o.open_noatime;
   o = Options();
   o.chmod_rules = server_chmod;
   o.ownership = std::move(server_ownership);
   o.sparse = server_sparse;
+  o.link_dest = std::move(server_link_dest);
   o.from0 = server_from0;
   o.filters.set_from0(server_from0);
   o.am_server = true;
   o.wire_version = ver;
   o.peer_features = advertised & PROTO_FEATURES;
+  if ((advertised & PF_LINK_DEST) && !(PROTO_FEATURES & PF_LINK_DEST)) die(RERR_UNSUPPORTED, "peer does not support --link-dest");
+  if (!o.link_dest.empty() && !(o.peer_features & PF_LINK_DEST) && !(o.peer_features & PF_LIST))
+    die(RERR_UNSUPPORTED, "explicit helper --link-dest requires negotiated snapshot bases");
   if ((advertised & PF_SPARSE) && !(PROTO_FEATURES & PF_SPARSE)) die(RERR_UNSUPPORTED, "peer does not support --sparse");
   if (server_sparse && !(o.peer_features & PF_SPARSE) && !(o.peer_features & PF_LIST))
     die(RERR_UNSUPPORTED, "explicit helper --sparse requires negotiated sparse writes");
@@ -2705,6 +2722,20 @@ int run_server() {
     if (type != F_SPARSE_CONFIG || payload != std::string(1, '\1') || o.list_only)
       die(RERR_PROTOCOL, "protocol error: malformed sparse configuration");
     o.sparse = role == 'R';
+  }
+  if (o.peer_features & PF_LINK_DEST) {
+    if (!c.read_frame(type, payload)) conn_lost();
+    RBuf config(payload);
+    u64 count = config.var();
+    if (type != F_LINKDEST_CONFIG || count > 20 || o.list_only || (role == 'R' ? count == 0 : count != 0))
+      die(RERR_PROTOCOL, "protocol error: malformed link-dest configuration");
+    for (u64 index = 0; index < count; ++index) {
+      std::string path(config.str());
+      if (path.find('\0') != std::string::npos) config.bad = true;
+      o.link_dest.push_back(std::move(path));
+    }
+    if (config.bad || !config.empty() || o.link_dest.size() > 20)
+      die(RERR_PROTOCOL, "protocol error: malformed link-dest directories");
   }
   if (o.peer_features & PF_RELATIVE) {
     if (!c.read_frame(type, payload)) conn_lost();

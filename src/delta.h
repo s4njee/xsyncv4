@@ -26,6 +26,8 @@ struct DeltaBasis {
 // The basis is anchored and opened without following a receiver-owned symlink.
 // Inplace writes require an anonymous snapshot so moved blocks remain readable.
 std::shared_ptr<DeltaBasis> destination_delta_basis(const std::string& path, bool snapshot);
+// Takes ownership of an already anchored read-only descriptor.
+std::shared_ptr<DeltaBasis> readonly_delta_basis(int fd);
 
 struct DeltaOp {
   i64 offset = 0;

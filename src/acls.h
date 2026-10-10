@@ -31,6 +31,7 @@ struct AclSet {
 AclSet source_acls(const std::string& path, u8 type);
 AclSet source_fd_acls(int fd, const std::string& path, u8 type);
 bool acls_differ(const AclSet& source, const std::string& path, u8 type, bool* access_changed = nullptr);
+bool acls_fd_match(const AclSet& source, int fd, const std::string& path, u8 type);
 bool apply_acls(const AclSet& source, const std::string& path, u8 type, u32 mode);
 bool apply_fd_acls(const AclSet& source, int fd, const std::string& path, u8 type, u32 mode);
 AclRecords export_acls(const AclSet& source);

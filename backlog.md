@@ -2,7 +2,7 @@
 
 Initial audit written 2026-10-08 against xsync 0.1.0 (protocol 1).
 All fifteen P0 stories completed against protocol 3; per-story evidence is below.
-P1 R-02 through R-09 and E-01 through E-10 are complete (18 of 22 stories). Current protocol 4 supports protocol 3. E-11's native sparse milestone is verified; `--link-dest` remains. Remaining P1 stories are R-01 and E-11 through E-13.
+P1 R-02 through R-09 and E-01 through E-10 are complete (18 of 22 stories). Current protocol 4 supports protocol 3. E-11's sparse and snapshot implementations are verified; release validation remains. Remaining P1 stories are R-01 and E-11 through E-13.
 Problem statements retain the original audit findings.
 
 ## What "daily driver" means here
@@ -97,7 +97,7 @@ coverage clarification remains open.
 | E-08 | **Filter completeness.** Global rule sides, single/per-directory merge files, `-F`, merge modifiers, global CVS rules/`-C`, `-m`, and `--delete-after` reloading newly transferred receiver merge files are implemented and verified. | **done** | 231/231 difftest (expanded from 159); a differential fuzzer against rsync for the new rule kinds, checked into `tests/`. | L |
 | E-09 | **`--files-from`, `-R`, `--from0`.** Common in backup scripts and with `find … -print0`. | **done** | Implemented for local and remote, including the "implied directories" semantics of `-R`. | L |
 | E-10 | **Metadata beyond `-a`.** `-H` hard links, `-X` xattrs, `-A` ACLs, `-N` creation times, `-U` atimes, BSD file flags, `-E`, `--chmod`, `--chown`. Also an inconsistency to resolve: the clone path already carries xattrs and ACLs while the byte-copy and remote paths drop them. | **done** | `-H` and `-X` first (most used on macOS). Without `-X`, both paths behave the same — either strip on clone or document that clones are a superset. | XL |
-| E-11 | **Backup-style options.** `--backup`/`--backup-dir`, `--link-dest`, `--compare-dest`, `--remove-source-files`, `--append`, real `-S` sparse handling, `--preallocate`. | **in progress** | Native `-S` is implemented and verified. `--link-dest` remains; other backup options fall back to rsync via R-02 until needed. | L |
+| E-11 | **Backup-style options.** `--backup`/`--backup-dir`, `--link-dest`, `--compare-dest`, `--remove-source-files`, `--append`, real `-S` sparse handling, `--preallocate`. | **in progress** | Native `-S` and `--link-dest` are implemented and verified; release validation remains. Other backup options fall back to rsync via R-02 until needed. | L |
 | E-12 | **macOS specifics.** Dataless iCloud files (reading triggers a download; cloning may not), immutable (`uchg`) destination files, sockets (rsync creates them, xsync skips silently), paths beyond `PATH_MAX` (tested to 40 levels only). | unverified | One test each; behaviour documented where it differs. | M |
 | E-13 | **Broken stdout.** `xsync -av … \| head` — rsync dies on EPIPE; xsync's behaviour is unknown. | unverified | Exits promptly with the right code and does not keep copying silently. | S |
 
@@ -2349,3 +2349,52 @@ Verified artifact manifest (source `864bd37edf14`):
   in eight remote sparse/in-place cases; rebuilding the primary 3.4.4 source
   with ACL support resolves those reference failures. Failed diagnostic runs
   are not counted as passing evidence.
+
+
+## E-11 progress — 2026-10-09: native snapshot reuse
+
+- `--link-dest` now supports local/push/pull, up to 20 ordered receiver-side
+  roots, relative paths, explicit root symlinks, single-file destination names,
+  files-from/relative selections and dry runs. Regular files, symlinks, FIFOs
+  and source hard-link groups can share unchanged prior inodes. Data matches
+  with differing requested metadata produce independent local copies; changed
+  large files use read-only prior snapshots for deltas, including `--inplace`.
+- Matching covers requested permissions/executability, ownership, timestamps,
+  xattrs, ACLs and BSD flags. Sparse and H/AX/chmod composition is covered.
+  Basis roots and descendant parents are pinned, descendants reject symlink
+  traversal, and atomic publication validates inode identity, times and metadata.
+  Cross-device link failures copy independently. Swapped leaves, leaf symlinks,
+  pinned-parent replacements and metadata changes cannot publish unchecked links.
+  Prior data/mode/IDs/mtime/xattrs/ACLs remain unchanged for fresh snapshots;
+  basis reads may naturally advance atimes without O_NOATIME. Already shared
+  destinations retain ordinary rsync update semantics.
+- Capability **1073741824** and configuration frame **33** preserve the frozen
+  protocol-3 layout. Receiver roots are bounded to 20 and wire payloads to 1 MiB;
+  source-role configs contain zero roots. Oversized, malformed, NUL-containing,
+  wrong-role, unnegotiated and listing configs fail before writes. Empty paths
+  warn and skip. Frozen/subset peers refuse requested snapshots before writes;
+  list-only requests need no snapshot capability. Unsupported-peer fallback
+  delegates once with the original arguments.
+- Snapshot differential/fault checks against rsync 3.4.4 pass **13 methods**
+  (one real-SSH skip) on macOS and Linux, including Linux nonroot. Existing-destination guard checks pass separately on macOS; the expanded
+  Linux suite passes **14 methods** (one SSH skip).
+  Coverage includes repeated itemization, checksum/ignore-times/size-only,
+  multiple and maximum roots, metadata inheritance, root aliases,
+  symlink/FIFO and hard-link fixtures.
+  Device-node fixtures remain outside this snapshot corpus.
+- Explicit differences: native -U requires matching requested atimes before
+  sharing, while reference rsync can share and update the prior inode's atime.
+  If every snapshot path is unavailable, native newly created directories use
+  ordinary new-directory itemization rather than rsync's dummy-basis comparison.
+- Broader sparse/delta/metadata/hard-link/wire/fallback regressions pass
+  **72 methods** (one real-SSH skip); protocol compatibility passes **15 methods**.
+  Real SSH passes snapshot reuse followed by a changed 8 MiB delta in each
+  direction, with wire totals below 1 MiB and prior snapshots unchanged, plus
+  **24** sparse transfer checks. No physical helper was installed.
+- Logs: `/tmp/xsync-e11-linkdest-mac-verified.log`,
+  `/tmp/xsync-e11-linkdest-linux-verified.log`,
+  `/tmp/xsync-e11-linkdest-linux-nonroot.log`,
+  `/tmp/xsync-e11-linkdest-regressions.log`,
+  `/tmp/xsync-e11-linkdest-protocol.log`, and `/tmp/xsync-e11-backup-ssh.log`.
+  E-11 remains in progress until universal/static releases are rebuilt and tested;
+  P1 remains **18/22**. R-01 still needs reachable physical-host targets.

@@ -35,6 +35,7 @@ enum { LD_LINKS = 1, LD_FOLLOW = 2, LD_SUMS = 4 };
 int list_dir(const char* path, DirList& out, unsigned flags);
 int destination_list_dir(const char* path, DirList& out, unsigned flags);
 void entry_from_stat(const struct stat& st, Entry& e);
+bool same_entry_time(const Entry& source, const Entry& destination, bool exact = false);
 u32 execution_mode(u32 source, u32 destination);
 Entry source_snapshot(const Entry& scanned, const struct stat& st, bool receiver = true);
 bool source_unchanged(int fd, const std::string& path, const struct stat& before);
@@ -133,7 +134,7 @@ bool write_whole(DirWork& w, u32 idx, const char* data, size_t len, Worker& t);
 // Report a completed transfer (-v / -i output and counters).
 void note_transferred(DirWork& w, u32 idx, i64 bytes, Worker& t, i64 final_size = -1);
 void note_item(DirWork& w, u32 idx, const char* code, i64 bytes, Worker& t, i64 size = -1);
-void note_directory(DirWork& w, const Entry* before, bool created, Worker& t);
+void note_directory(DirWork& w, const Entry* before, bool created, Worker& t, bool alternate = false);
 
 void src_path_of(const DirWork& w, u32 i, std::string& out);
 bool write_all(int fd, const char* p, size_t n);

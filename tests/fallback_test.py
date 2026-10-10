@@ -168,6 +168,25 @@ else: sys.exit(255)
                     else: self.assertEqual((dest / source.name).stat().st_mode & 0o7777, source.stat().st_mode & 0o777 & ~0o022)
                     self.assertEqual(get_acl(source), before)
 
+    def test_remote_link_dest_refuses_or_delegates_before_writes(self):
+        import shutil
+        basis = self.root / 'previous snapshot'
+        shutil.copytree(self.src, basis)
+        for direction in ('push', 'pull'):
+            with self.subTest(direction=direction):
+                dest = self.root / ('snapshot-' + direction)
+                a, b = str(self.src) + '/', str(dest)
+                a, b = (a, 'fake:' + b) if direction == 'push' else ('fake:' + a, b)
+                environment = dict(self.env, XSYNC_TEST_PEER='capability')
+                arguments = ['-a', '--link-dest=' + str(basis), '-e', self.fake_shell(), a, b]
+                result = self.run_sync('--no-fallback', *arguments, env=environment)
+                self.assertEqual(result.returncode, 4, result.stderr)
+                self.assertFalse(dest.exists())
+                result = self.run_sync(*arguments, env=environment)
+                self.assertEqual(result.returncode, 0, result.stderr)
+                self.assertEqual(result.stderr.count(b'falling back'), 1)
+                self.assertEqual((dest / 'file with spaces').stat().st_ino, (basis / 'file with spaces').stat().st_ino)
+
     def test_remote_sparse_refuses_or_delegates_before_writes(self):
         for direction in ('push', 'pull'):
             with self.subTest(direction=direction):

@@ -262,6 +262,31 @@ p=pathlib.Path(sys.argv[1]); print(json.dumps({'hash':hashlib.sha256((p/'file').
                         elif not HOST or direction == 'pull':
                             self.assertEqual((target / 'file').read_bytes(), (source / 'file').read_bytes())
 
+    def test_link_dest_requires_capability_and_listing_does_not(self):
+        source = self.root / 'snapshot source'; source.mkdir()
+        (source / 'file').write_bytes(b'data')
+        for peer in (self.remote_subset, self.remote_legacy):
+            for direction in ('push', 'pull'):
+                with self.subTest(peer=peer, direction=direction):
+                    target = self.root / ('snapshot ' + pathlib.Path(peer).parent.name + direction)
+                    if HOST and direction == 'pull':
+                        subprocess.run(['rsync', '-a', '-e', RSH, str(source) + '/', HOST + ':' + str(source) + '/'], check=True, capture_output=True, timeout=20)
+                    a, b = str(source) + '/', str(target) + '/'
+                    if direction == 'push': b = (HOST or 'fake') + ':' + b
+                    else: a = (HOST or 'fake') + ':' + a
+                    result = subprocess.run([str(BINARY), '--no-fallback', '-r', '--link-dest=../previous', '-e', RSH,
+                                             '--rsync-path=' + shlex.quote(peer), a, b], capture_output=True, timeout=20)
+                    self.assertEqual(result.returncode, 4, result.stderr)
+                    self.assertIn(b'peer does not support --link-dest', result.stderr)
+                    self.assertFalse(target.exists())
+        if HOST:
+            subprocess.run(['rsync', '-a', '-e', RSH, str(source) + '/', HOST + ':' + str(source) + '/'], check=True, capture_output=True, timeout=20)
+        result = subprocess.run([str(BINARY), '--no-fallback', '-r', '--list-only', '--link-dest=../unused',
+                                 '-e', RSH, '--rsync-path=' + shlex.quote(self.remote_global_filters),
+                                 (HOST or 'fake') + ':' + str(source) + '/'], capture_output=True, timeout=20)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn(b'file', result.stdout)
+
     def test_chown_requires_capability_but_empty_fields_remain_compatible(self):
         source = self.root / 'ownership overrides'; source.mkdir()
         (source / 'file').write_bytes(b'data')

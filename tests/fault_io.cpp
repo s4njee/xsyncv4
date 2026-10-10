@@ -70,6 +70,7 @@ static int fault_linkat(int from_fd, const char* from, int to_fd, const char* to
   static auto original = (int (*)(int, const char*, int, const char*, int))dlsym(RTLD_NEXT, "linkat");
 #endif
   at_pause("link", from_fd, from);
+  if (selected(from_fd) && getenv("XSYNC_FAULT_LINK_EXDEV")) { errno = EXDEV; return -1; }
   return original(from_fd, from, to_fd, to, flags);
 }
 static int fault_fchmodat(int fd, const char* name, mode_t mode, int flags) {

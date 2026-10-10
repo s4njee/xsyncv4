@@ -13,6 +13,7 @@ struct Member {
   std::string path, rel, parent, source, target;
   Entry attrs, before;
   bool existed = false, ready = false, restore_flags = false;
+  bool alternate = false;
   u64 dest_dev = 0, dest_ino = 0;
   std::optional<OutputEvent> event;
 };
@@ -69,7 +70,7 @@ OutputEvent linked_event(const Member& member, const Member& anchor, bool alread
   event.size = member.attrs.size;
   event.target = already ? member.target : anchor.rel;
   event.hardlink_target = !already;
-  if (!member.existed || member.before.type != member.attrs.type) event.code = "hf+++++++++";
+  if (!member.existed || member.before.type != member.attrs.type || (member.alternate && !already)) event.code = "hf+++++++++";
   else if (event.code.empty()) event.code = ".f         ";
   if (already && g_opt.dry_run) {
     // No anchor metadata has been written yet. Retain the alias's planned
@@ -100,10 +101,11 @@ bool hardlink_participant(const DirWork& w, u32 index) {
   return members.contains(key(w, index));
 }
 
-void hardlink_prepare(DirWork& w, u32 index, const Entry* before) {
+void hardlink_prepare(DirWork& w, u32 index, const Entry* before, bool alternate) {
   const Entry& entry = w.src.e[index];
   if (!g_opt.hard_links || entry.nlink < 2 || entry.type == T_DIR || entry.type == T_NONE) return;
   Member member;
+  member.alternate = alternate;
   member.path = key(w, index);
   member.parent = w.dst_path;
   member.rel = rel_join(w.rel, w.src.name_sv(entry));

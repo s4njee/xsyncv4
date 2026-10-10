@@ -19,6 +19,7 @@
 #include "rate_limit.h"
 #include "engine.h"
 #include "sparse.h"
+#include "link_dest.h"
 
 #ifdef __APPLE__
 #include <sys/attr.h>
@@ -162,6 +163,13 @@ u32 execution_mode(u32 source, u32 destination) {
   return destination;
 }
 
+bool same_entry_time(const Entry& source, const Entry& destination, bool exact) {
+  if (!g_opt.modify_window)
+    return source.mtime == destination.mtime && (!exact || source.mtime_ns == destination.mtime_ns);
+  i64 difference = source.mtime - destination.mtime;
+  return (difference < 0 ? -difference : difference) <= g_opt.modify_window;
+}
+
 Entry source_snapshot(const Entry& scanned, const struct stat& st, bool receiver) {
   Entry e;
   entry_from_stat(st, e);
@@ -175,9 +183,10 @@ Entry source_snapshot(const Entry& scanned, const struct stat& st, bool receiver
   e.access_acl_differ = scanned.access_acl_differ;
   if (g_opt.atimes) e.atime = scanned.atime;  // checksum/read activity must not replace the listed atime.
   e.basis_mode = scanned.basis_mode;
+  e.link_basis = scanned.link_basis;
   // Send fresh source bits; receivers retain their original destination classes.
   if (!g_opt.perms && (receiver || !g_opt.executability)) {
-    if (g_opt.executability && (scanned.flags & EF_INPLACE_SAFE))
+    if (g_opt.executability && ((scanned.flags & EF_INPLACE_SAFE) || scanned.link_basis != 255))
       e.mode = execution_mode(e.mode, scanned.basis_mode);
     else e.mode = receiver ? scanned.mode : incoming_mode(scanned.mode, scanned.type);
   }
@@ -886,6 +895,17 @@ void generate(DirWork& w, Worker& t) {
       case T_DIR: {
         seen_dirs++;
         bool keep = d && d->type == T_DIR;
+        auto note_created = [&] {
+          const XattrSet empty;
+          auto alternate = link_dest_directory(rel, s, metadata_enabled() ? w.src_xattrs[i] : empty, filters);
+          if (!alternate) { note_item(w, (u32)i, "cd+++++++++", 0, t); return; }
+          DirWork directory;
+          directory.rel = rel;
+          directory.attrs = s;
+          if (!w.output_sources.empty()) directory.attr_source = w.output_sources[i];
+          else src_path_of(w, (u32)i, directory.attr_source);
+          note_directory(directory, &*alternate, false, t, true);
+        };
         compare_xattrs();
         if (keep && output_enabled()) {
           DirWork directory;
@@ -915,7 +935,7 @@ void generate(DirWork& w, Worker& t) {
             if ((final_mode | 0700) == final_mode && !(final_mode & 07000)) s.flags |= EF_MODE_OK;
             w.modified = true;
             g_stats.created_dirs.fetch_add(1, std::memory_order_relaxed);
-            note_item(w, (u32)i, "cd+++++++++", 0, t);
+            note_created();
           } else if (!o.dry_run && destination_mkdir(path.c_str(), final_mode | 0700) != 0) {
             if (errno != EEXIST) {
               file_io_error(errno, path.c_str(), "recv_generator: mkdir");
@@ -927,7 +947,7 @@ void generate(DirWork& w, Worker& t) {
             if ((final_mode | 0700) == final_mode && !(final_mode & 07000)) s.flags |= EF_MODE_OK;
             w.modified = true;
             g_stats.created_dirs.fetch_add(1, std::memory_order_relaxed);
-            note_item(w, (u32)i, "cd+++++++++", 0, t);
+            note_created();
             if (!o.dry_run) {
               if (o.group && s.gid != w.dgid && can_set_gid(s.gid)) check_attr(destination_chown(path.c_str(), (uid_t)-1, s.gid), path.c_str(), "ownership");
               if (o.owner && o.am_root && s.uid != my_uid) check_attr(destination_chown(path.c_str(), s.uid, (gid_t)-1), path.c_str(), "ownership");
@@ -956,6 +976,10 @@ void generate(DirWork& w, Worker& t) {
         seen_files++;
         seen_bytes += (u64)s.size;
         if ((o.max_size > 0 && s.size > o.max_size) || (o.min_size > 0 && s.size < o.min_size)) break;
+        if (!o.link_dest.empty() && (!d || d->type == T_REG) &&
+            !(o.existing && !d) && !(o.ignore_existing && d) &&
+            !(o.update && d && (d->mtime > s.mtime || (d->mtime == s.mtime && d->mtime_ns > s.mtime_ns))) &&
+            link_dest_regular(w, (u32)i, t, d)) break;
         bool transfer = false;
         if (!d) {
           if (o.existing) break;
@@ -1043,17 +1067,20 @@ void generate(DirWork& w, Worker& t) {
           }
         }
         if (d ? o.ignore_existing : o.existing) break;
+        std::optional<Entry> alternate;
+        if (!d && link_dest_nonregular(w, (u32)i, t, alternate)) break;
         hardlink_prepare(w, (u32)i, d);
         u32 lmode = o.perms ? s.mode : (d && d->type == T_LNK) ? d->mode : (s.mode & 0777 & ~g_umask);
         char link_code[12] = "cL+++++++++";
-        if (d && d->type == T_LNK) {
+        const Entry* comparison = d ? d : alternate ? &*alternate : nullptr;
+        if (comparison && comparison->type == T_LNK) {
           memcpy(link_code + 2, "c........", 9);
-          if (!same_secs(s, *d) || !o.times || o.omit_link_times) link_code[4] = o.times && !o.omit_link_times ? 't' : 'T';
-          if (o.perms && lmode != d->mode) link_code[5] = 'p';
-          if (o.owner && o.am_root && d->uid != s.uid) link_code[6] = 'o';
-          if (o.group && d->gid != s.gid && can_set_gid(s.gid)) link_code[7] = 'g';
+          if (!same_secs(s, *comparison) || !o.times || o.omit_link_times) link_code[4] = o.times && !o.omit_link_times ? 't' : 'T';
+          if (o.perms && lmode != comparison->mode) link_code[5] = 'p';
+          if (o.owner && o.am_root && comparison->uid != s.uid) link_code[6] = 'o';
+          if (o.group && comparison->gid != s.gid && can_set_gid(s.gid)) link_code[7] = 'g';
           if (s.item_flags & IF_XATTR) link_code[10] = 'x';
-          link_code[8] = extra_time_code(s, *d);
+          link_code[8] = extra_time_code(s, *comparison);
         }
         if (d) {
           if (d->type == T_DIR) {
@@ -1099,6 +1126,8 @@ void generate(DirWork& w, Worker& t) {
           break;
         }
         if (d ? o.ignore_existing : o.existing) break;
+        std::optional<Entry> alternate;
+        if (!d && link_dest_nonregular(w, (u32)i, t, alternate)) break;
         hardlink_prepare(w, (u32)i, d);
         if (d) {
           if (d->type == T_DIR) {
@@ -1128,7 +1157,19 @@ void generate(DirWork& w, Worker& t) {
         w.modified = true;
         g_stats.created_specials.fetch_add(1, std::memory_order_relaxed);
         hardlink_complete(w, (u32)i, s);
-        note_item(w, (u32)i, dev ? "cD+++++++++" : "cS+++++++++", 0, t);
+        char special_code[12] = "cS+++++++++";
+        special_code[1] = dev ? 'D' : 'S';
+        if (alternate) {
+          memcpy(special_code + 2, "c........", 9);
+          if ((s.flags & EF_DIFF_TIME) || !o.times) special_code[4] = o.times ? 't' : 'T';
+          if (s.item_flags & IF_PERMS) special_code[5] = 'p';
+          if (s.item_flags & IF_OWNER) special_code[6] = 'o';
+          if (s.item_flags & IF_GROUP) special_code[7] = 'g';
+          special_code[8] = extra_time_code(s, *alternate);
+          if (s.item_flags & IF_ACL) special_code[9] = 'a';
+          if (s.item_flags & IF_XATTR) special_code[10] = 'x';
+        }
+        note_item(w, (u32)i, special_code, 0, t);
         break;
       }
       default: break;
@@ -1416,6 +1457,14 @@ bool out_open(OutFile& f, DirWork& w, u32 idx, Worker& t, bool force_temp, bool 
       f.basis_uid = basis.st_uid, f.basis_gid = basis.st_gid;
     }
   }
+  if (!f.existed && s.link_basis != 255 && o.output_attrs && (o.owner || o.group)) {
+    auto parent = link_dest_path(w, idx);
+    struct stat basis;
+    if (parent.fd >= 0 && fstatat(parent.fd, parent.name.c_str(), &basis, AT_SYMLINK_NOFOLLOW) == 0 && S_ISREG(basis.st_mode)) {
+      f.basis_identity = true;
+      f.basis_uid = basis.st_uid, f.basis_gid = basis.st_gid;
+    }
+  }
   auto failed = [&](const char* operation) {
     int error = errno;
     close(f.dir_fd);
@@ -1670,12 +1719,13 @@ void note_item(DirWork& w, u32 idx, const char* code, i64 bytes, Worker& t, i64 
        entry.type == T_LNK ? w.src.link(entry) : nullptr, bytes, size);
 }
 
-void note_directory(DirWork& w, const Entry* before, bool created, Worker& t) {
+void note_directory(DirWork& w, const Entry* before, bool created, Worker& t, bool alternate) {
   if (!output_enabled()) return;
   const Options& o = g_opt;
   Entry source = w.attrs;
   source.fileflags_differ = o.fileflags && before && source.fileflags != before->fileflags;
   char code[12] = ".d.........";
+  if (alternate) code[0] = 'c';
   bool changed = created || source.fileflags_differ;
   if (created) memcpy(code, "cd+++++++++", 11);
   else if (before) {
@@ -1703,7 +1753,7 @@ void note_transferred(DirWork& w, u32 idx, i64 bytes, Worker& t, i64 final_size)
   if (!output_enabled()) return;
   char code[12] = ">f+++++++++";
   if (o.pushing) code[0] = '<';
-  if ((s.flags & EF_EXISTS) && !(s.item_flags & IF_NEW_TYPE)) {
+  if (((s.flags & EF_EXISTS) || s.link_basis != 255) && !(s.item_flags & IF_NEW_TYPE)) {
     memcpy(code + 2, ".........", 9);
     if (o.checksum) code[2] = 'c';
     if (s.flags & EF_DIFF_SIZE) code[3] = 's';

@@ -43,6 +43,7 @@ constexpr u64 PF_EXECUTABILITY = 67108864;
 constexpr u64 PF_FILEFLAGS = 134217728;
 constexpr u64 PF_CHOWN = 268435456;
 constexpr u64 PF_SPARSE = 536870912;
+constexpr u64 PF_LINK_DEST = 1073741824;
 #ifdef __APPLE__
 constexpr u64 PF_NATIVE_ACL = PF_ACL_DARWIN;
 constexpr u64 PF_UNSUPPORTED_NATIVE = PF_ACL_POSIX;
@@ -51,7 +52,7 @@ constexpr u64 PF_NATIVE_ACL = PF_ACL_POSIX;
 constexpr u64 PF_UNSUPPORTED_NATIVE = PF_ACL_DARWIN | PF_ACL_UUID | PF_CRTIMES | PF_FILEFLAGS;
 #endif
 #ifndef XSYNC_PROTOCOL_FEATURES
-#define XSYNC_PROTOCOL_FEATURES 1073741823
+#define XSYNC_PROTOCOL_FEATURES 2147483647
 #endif
 constexpr u64 PROTO_FEATURES = XSYNC_PROTOCOL_FEATURES & ~PF_UNSUPPORTED_NATIVE;
 constexpr u64 LEGACY_V3_FEATURES = 15;
@@ -97,6 +98,7 @@ struct Options {
   int xattrs = 0;  // 1: ordinary attributes; 2: include rsync internal attributes.
   bool hard_links = false;  // Negotiated separately from the frozen v3 options.
   bool sparse = false;  // Receiver allocation policy; outside the frozen v3 options.
+  std::vector<std::string> link_dest;  // Receiver-local snapshot bases.
   bool delete_before = false;  // Deletion is still deferred for sender-read safety.
   bool delete_after = false;   // Scan extras and merge files after transfers finish.
   bool prune_empty = false;   // Receiver file-list pruning; outside the frozen hello.
@@ -158,6 +160,7 @@ struct Entry {
   u8 time_flags = 0;  // Compared access/create times; itemization slot 8.
   bool fileflags_differ = false;
   bool access_acl_differ = false;  // POSIX metadata-only itemization of mode-linked ACL writes.
+  u8 link_basis = 255;  // Receiver-only alternate directory used for comparison/delta.
 };
 enum : u8 { IF_PERMS = 1, IF_OWNER = 2, IF_GROUP = 4, IF_NEW_TYPE = 8, IF_PRUNED = 16, IF_SELECTED_CHILD = 32, IF_XATTR = 64, IF_ACL = 128 };
 

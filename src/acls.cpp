@@ -230,6 +230,14 @@ bool apply_fd_acls(const AclSet& source, int fd, const std::string& path, u8 typ
   try { return apply(source, fd, path, type, mode); }
   catch (const std::system_error& error) { g_source_io_error.store(true); file_io_error(error.code().value(), path.c_str(), "read stored ACL"); return false; }
 }
+bool acls_fd_match(const AclSet& source, int fd, const std::string& path, u8 type) {
+  if (!source.complete) return false;
+  if (!supported(type)) return true;
+  try {
+    auto current = read(fd, path, type, false);
+    return current.complete && same(source, current);
+  } catch (const std::system_error&) { return false; }
+}
 bool apply_acls(const AclSet& source, const std::string& path, u8 type, u32 mode) {
   if (g_opt.dry_run || !source.complete || !supported(type)) return false;
   Pin pin; pin.open(path, type, false);

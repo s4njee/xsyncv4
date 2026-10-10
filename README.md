@@ -509,8 +509,22 @@ Differences to be aware of:
   in-place files that cannot be read for refinement, retain correct bytes but
   may allocate more space. Remote helpers negotiate the option before writes;
   older helpers delegate or refuse in strict mode.
+- **Backup snapshots.** `--link-dest=DIR` searches up to 20 previous snapshots
+  on the receiver. Relative paths start at the destination directory, including
+  an explicitly symlinked destination root. Unchanged files with matching
+  requested metadata become hard links; differing metadata and cross-device
+  links produce independent copies. Changed files can use a read-only snapshot
+  as their delta basis, including with `--inplace`, `-H`, `-X`, `-A` and `-S`.
+  Snapshot roots may be explicit symlinks; descendants are traversed without
+  following symlinks. Basis reads can advance access times on systems without
+  `O_NOATIME`. Unlike rsync's `-U` reuse, differing requested access times require
+  an independent copy. An already shared destination retains ordinary update
+  semantics: changing its metadata or writing in place can change other links.
+  Missing or empty snapshot paths warn and are skipped; newly created
+  directories are itemized as new when no basis exists. Native remote helpers
+  negotiate snapshot support before writes; older helpers delegate or refuse.
 - **Delegated to rsync** (strict mode rejects them): incompatible remote `-A`,
-  `-b`, `--link-dest`/`--compare-dest`/`--copy-dest`,
+  `-b`, `--compare-dest`/`--copy-dest`,
   `--append`, `--partial-dir`, and `--remove-source-files`.
 - **Unsupported options fall back before transfer; strict mode fails.** This includes
   `--contimeout`, `--fsync`, `--preallocate`,
@@ -622,6 +636,7 @@ cmake --build build --target filter_test && build/filter_test
 cmake --build build --target xattr_value_test && build/xattr_value_test
 cmake --build build --target sparse_test && build/sparse_test
 XSYNC_TEST_RSYNC=/path/to/rsync-3.4.4 python3 tests/sparse_test.py  # allocation, delta, metadata, interruption and source races
+XSYNC_TEST_RSYNC=/path/to/rsync-3.4.4 python3 tests/link_dest_test.py  # snapshot selection, metadata, delta and publication races
 python3 tests/p0_test.py                                  # trust and injected I/O races
 python3 tests/wire_test.py                                # hostile receiver protocol peers
 python3 tests/mount_test.py                               # macOS: disposable APFS image

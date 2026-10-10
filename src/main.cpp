@@ -58,6 +58,7 @@ Options (same meaning as rsync):
  -X, --xattrs             preserve extended attributes (twice includes rsync internals)
  -H, --hard-links         preserve hard links within the transferred tree
  -S, --sparse             create holes for zero-filled file regions
+     --link-dest=DIR       reuse unchanged files from a previous snapshot
  -l, --links              copy symlinks as symlinks
      --safe-links         skip symlinks that point outside the transfer tree
  -L, --copy-links         transform symlink into referent file/dir
@@ -243,6 +244,10 @@ Parsed parse(int argc, char** argv) {
     else if (name == "no-xattrs" || name == "no-X") o.xattrs = 0;
     else if (flag(o.sparse, "sparse")) {}
     else if (name == "no-S") o.sparse = false;
+    else if (name == "link-dest") {
+      if (o.link_dest.size() == 20) usage_error("at most 20 --link-dest directories are supported");
+      o.link_dest.push_back(need());
+    }
     else if (name == "executability") o.executability = true;
     else if (name == "chmod") {
       std::string mode = need();
@@ -351,7 +356,7 @@ Parsed parse(int argc, char** argv) {
       // These intrinsic behaviours are listed with their reasons in --help.
     } else {
       static const char* unsupported[] = {
-          "backup", "backup-dir", "suffix", "link-dest", "compare-dest", "copy-dest",
+          "backup", "backup-dir", "suffix", "compare-dest", "copy-dest",
           "usermap", "groupmap", "append", "append-verify", "partial-dir",
           "delay-updates", "fuzzy", "remove-source-files", "keep-dirlinks", "copy-dirlinks", "copy-unsafe-links",
           "munge-links", "daemon", "port", "password-file",

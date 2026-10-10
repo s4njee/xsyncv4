@@ -109,6 +109,34 @@ std::shared_ptr<DeltaBasis> destination_delta_basis(const std::string& path, boo
   return basis;
 }
 
+std::shared_ptr<DeltaBasis> readonly_delta_basis(int fd) {
+  if (fd < 0) return {};
+  auto basis = std::make_shared<DeltaBasis>();
+  basis->fd = fd;
+  struct stat before;
+  if (fstat(fd, &before) != 0 || !S_ISREG(before.st_mode) || before.st_size < 1024) return {};
+  auto& signature = basis->signature;
+  signature.size = before.st_size;
+  signature.block_size = (u32)std::clamp<double>(2 * std::sqrt((double)signature.size), 1024, DELTA_MAX_BLOCK) & ~u32(7);
+  u64 count = (u64)((signature.size - 1) / signature.block_size + 1);
+  if (count > DELTA_MAX_BLOCKS) { errno = EFBIG; return {}; }
+  signature.blocks.resize((size_t)count);
+  std::vector<char> bytes(signature.block_size);
+  for (u32 index = 0; index < count; ++index) {
+    size_t size = (size_t)signature.length(index);
+    if (!read_exact(fd, bytes.data(), size, (i64)index * signature.block_size)) return {};
+    signature.blocks[index] = {weak_sum(bytes.data(), size), XXH3_64bits(bytes.data(), size)};
+  }
+  struct stat after;
+  Entry first, last;
+  entry_from_stat(before, first);
+  if (fstat(fd, &after) != 0) return {};
+  entry_from_stat(after, last);
+  if (first.size != last.size || first.mtime != last.mtime || first.mtime_ns != last.mtime_ns ||
+      first.ctime != last.ctime || first.ctime_ns != last.ctime_ns) { errno = ESTALE; return {}; }
+  return basis;
+}
+
 DeltaResult delta_match_fd(int fd, i64 size, const DeltaSignature& signature,
                           const std::function<bool(const DeltaOp&)>& emit) {
   DeltaResult result;
