@@ -4208,3 +4208,13 @@ after U-01's evidence entry completes P2, as requested by the user.
   its own clean validation, followed by a matched one-worker CPU comparison.
   Hosted and paired memory qualification continue on the identified earlier
   products. No newer source is substituted into their live runs.
+
+### F-09 new local memory measurement verified — 2026-10-10
+
+- Frozen 1f3a912f94eb completes the five-million-file local xs copy and passes
+  independent checksum/metadata verification on neo. Peak process RSS is
+  18.53 MiB (19,431,424 bytes), below the unchanged 512 MiB bound.
+- xs takes 341.02 s versus rsync's 463.91 s, one sample per tool for memory
+  qualification. The observed raw result is retained as
+  `20261010-f09-window-local-observed.json`. Cleanup remains in progress;
+  paired push and pull measurements are still required and F-09 stays partial.
