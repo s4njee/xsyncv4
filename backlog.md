@@ -3237,3 +3237,25 @@ after U-01's evidence entry completes P2, as requested by the user.
 - macOS and both Linux builds succeed. F-06 remains partial until a separately
   labelled candidate is measured against rsync on the full ext4 corpus. The
   active neo/freya baseline retains its frozen binaries and quiet hosts.
+
+
+### F-02 expanded gate and hosted evidence — 2026-10-10
+
+- Run 38070772015 passes all 13 Linux ratios with 234 verified timed samples
+  and 39 verified warmups. Its macOS job stopped at the three-sample healthy
+  behavior test: identical binaries differed by approximately 10 versus 17 ms.
+  The healthy test now balances all six orders, like production measurements.
+- The separately triggered push run 38071224426 completed both platforms.
+  Linux again passes all ratios. macOS verifies every transfer but fails
+  local-update, pipe-noop, large-local and tiny-pipe ratios (relative ratios
+  0.769, 0.848, 0.772 and 0.818). Raw results are retained for both platforms;
+  the 85% production threshold remains unchanged. macOS timing repeatability
+  is still unresolved, so F-02 remains partial.
+- Added local `-rt`/`-rlt` scenarios and read-only/umask-sensitive fixtures.
+  Their untimed rsync oracle checks the permissions actually requested, rather
+  than incorrectly expecting source permissions without `-p`. Update fixture
+  creation preserves read-only modes. Full-size fixture creation succeeds.
+- The reference advances to verified F-11 product revision `3c8ec2d221654`;
+  the expanded matrix has 15 scenarios, 270 timed samples and 45 warmups per
+  platform. The job timeout is 45 minutes. All three healthy/slowdown/corruption
+  behavior tests and all seven harness safeguard tests pass locally.

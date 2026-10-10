@@ -88,8 +88,10 @@ retains both the initial small-file regression and the final improved path.
 
 `.github/workflows/performance.yml` builds the pinned reference and candidate
 with the same Release configuration on each Linux and macOS runner. It measures
-13 scenarios: fresh/no-op/checksum/1% update locally and through the pipe
+15 scenarios: fresh/no-op/checksum/1% update locally and through the pipe
 transport, compressed pipe copies, large copies and a tiny pipe transfer.
+Local `-rt`/`-rlt` cases also protect F-11's clone improvements; fixtures include
+read-only and umask-sensitive file modes.
 Each tool receives one verified warmup excluded from the ratios and six samples
 in all six orders, with independent rsync
 checksum/metadata verification after every sample. Setup is untimed.

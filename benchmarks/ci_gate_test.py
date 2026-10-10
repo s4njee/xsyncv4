@@ -33,7 +33,7 @@ class GateTests(unittest.TestCase):
                    '--work', str(self.root / 'work'), '--output', str(output),
                    '--policy', str(self.policy), '--samples', str(samples),
                    '--smoke-fixtures', '--scenarios', scenarios]
-        result = subprocess.run(command, capture_output=True, text=True, timeout=120)
+        result = subprocess.run(command, capture_output=True, text=True, timeout=240)
         data = json.loads(output.read_text())
         return result, data
 
@@ -44,12 +44,12 @@ class GateTests(unittest.TestCase):
         return path
 
     def test_healthy_local_pipe_checksum_and_update_scenarios_pass(self):
-        result, data = self.gate(BINARY, 'local-fresh,local-noop,pipe-fresh,pipe-checksum,local-update,pipe-update,large-pipe,tiny-pipe')
+        result, data = self.gate(BINARY, 'local-fresh,local-noop,local-rt,local-rlt,pipe-fresh,pipe-checksum,local-update,pipe-update,large-pipe,tiny-pipe', samples=6)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertTrue(data['complete'])
         self.assertTrue(data['passed'])
-        self.assertEqual(len(data['records']), 8 * 3 * 3)
-        self.assertEqual(len(data['warmups']), 8 * 3)
+        self.assertEqual(len(data['records']), 10 * 6 * 3)
+        self.assertEqual(len(data['warmups']), 10 * 3)
         self.assertTrue(all(r['verified'] and r['warmup'] for r in data['warmups']))
         self.assertTrue(all(not r['warmup'] for r in data['records']))
         self.assertTrue(all(r['verified'] for r in data['records']))

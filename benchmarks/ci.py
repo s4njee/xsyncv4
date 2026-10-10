@@ -26,6 +26,8 @@ CASES = {
     'local-noop': ('small', ['-a'], False, True),
     'local-checksum': ('small', ['-ac'], False, True),
     'local-update': ('update', ['-a'], False, True),
+    'local-rt': ('small', ['-rt'], False, False),
+    'local-rlt': ('small', ['-rlt'], False, False),
     'pipe-fresh': ('small', ['-a'], True, False),
     'pipe-compressed': ('small', ['-az'], True, False),
     'pipe-noop': ('small', ['-a'], True, True),
@@ -52,6 +54,7 @@ def fixtures(root, seed, smoke):
             prefix = f'{{"leaf":{leaf},"file":{index},"value":"'.encode()
             payload = prefix + b'x' * ((512 if smoke else 4096) - len(prefix) - 3) + b'"}\n'
             path.write_bytes(payload)
+            path.chmod(0o666 if index == 0 else 0o444 if index == 1 else 0o644)
             os.utime(path, ns=(1700000000000000000, 1700000000000000000))
             files.append(path)
     update = root / 'update'
@@ -60,7 +63,10 @@ def fixtures(root, seed, smoke):
     for path in files[:changed]:
         target = update / path.relative_to(small)
         data = target.read_bytes()
+        mode = target.stat().st_mode & 0o777
+        target.chmod(mode | 0o200)
         target.write_bytes(bytes([data[0] ^ 1]) + data[1:])
+        target.chmod(mode)
         os.utime(target, ns=(1700000002000000000, 1700000002000000000))
     large = root / 'large'
     large.mkdir()
@@ -133,6 +139,14 @@ def main(argv=None):
         orders = list(itertools.permutations(('rsync', 'reference', 'candidate')))
         for case in cases:
             dataset, flags, pipe, seeded = CASES[case]
+            verification_source = source / dataset
+            if case in ('local-rt', 'local-rlt'):
+                # Without -p, newly created modes are limited by the inherited
+                # umask. Compare against rsync's result, not source permissions.
+                verification_source = work / ('oracle-' + case)
+                subprocess.run([binaries['rsync'], *flags, str(source / dataset) + '/',
+                                str(verification_source) + '/'], check=True,
+                               stdout=subprocess.DEVNULL)
             # Warm code and fixture caches equally, then rotate through all six
             # orders in production so no tool is favored by its position.
             for run in range(-1, samples):
@@ -165,7 +179,7 @@ def main(argv=None):
                     peer = json.loads(peer_path.read_text()) if pipe else None
                     if peer and peer['returncode']:
                         raise RuntimeError('remote helper failed: ' + repr(peer))
-                    verified = subprocess.run([binaries['rsync'], '-anci', '--delete', str(source / dataset) + '/', str(destination) + '/'],
+                    verified = subprocess.run([binaries['rsync'], '-anci', '--delete', str(verification_source) + '/', str(destination) + '/'],
                                               capture_output=True, text=True)
                     if verified.returncode or verified.stdout.strip():
                         raise RuntimeError(f'{case} {tool} verification failed: ' + verified.stdout[:4000] + verified.stderr[:4000])
