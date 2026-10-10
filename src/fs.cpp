@@ -1354,11 +1354,23 @@ void finalize_tree() {
     if (dir.rel.empty() && !dir.reported && g_opt.delete_before && g_opt.output_attrs && g_opt.times &&
         !g_opt.omit_dir_times && std::find(dirty.begin(), dirty.end(), dir.path) != dirty.end())
       item(worker, ".d..t......", dir.rel, dir.attrs, dir.source);
-    if (!dir.mode_ok) check_attr(destination_chmod(dir.path.c_str(), dir.attrs.mode), dir.path.c_str(), "permissions");
+    const bool time_needed = g_opt.times && !g_opt.omit_dir_times &&
+      (!dir.time_ok || dir.modified || std::find(dirty.begin(), dirty.end(), dir.path) != dirty.end());
+    if (dir.mode_ok && !time_needed && !preserve_atime(dir.attrs) &&
+        !preserve_crtime(dir.attrs) && !g_opt.fileflags) continue;
+    int fd = destination_open_dir(dir.path.c_str());
+    if (fd < 0) {
+      check_attr(-1, dir.path.c_str(), "open directory for final attributes");
+      continue;
+    }
+    if (!dir.mode_ok) check_attr(fchmod(fd, dir.attrs.mode), dir.path.c_str(), "permissions");
     set_extra_times(dir.path.c_str(), dir.attrs);
-    if (g_opt.times && !g_opt.omit_dir_times && (!dir.time_ok || dir.modified || std::find(dirty.begin(), dirty.end(), dir.path) != dirty.end()))
-      set_mtime(dir.path.c_str(), dir.attrs, false);
+    if (time_needed) {
+      timespec times[2] = {{0, UTIME_OMIT}, {dir.attrs.mtime, dir.attrs.mtime_ns}};
+      check_attr(futimens(fd, times), dir.path.c_str(), "times");
+    }
     set_fileflags(dir.path.c_str(), dir.attrs);
+    close(fd);
   }
   worker.flush_log();
   delete_candidates.clear();
