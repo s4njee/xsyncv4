@@ -141,7 +141,7 @@ xs extensions:
                           refuses newer versions unless --force is supplied
  -j, --jobs=N             number of worker threads (default: performance cores)
      --no-clone           always copy file data, even where a copy-on-write clone
-                          (APFS, same volume, with -pt) would be possible
+                          (APFS or Linux reflinks) would be possible
      --atomic             create new files via temp file + rename (default)
      --no-atomic          create new byte-copied files directly (fewer renames;
                           a crash can leave truncated files under final names)

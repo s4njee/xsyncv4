@@ -1304,6 +1304,7 @@ struct Sender {
         return;
       }
       Entry fresh = source_snapshot(scanned, before, false);
+      large_file_cache_policy(in, fresh.size);
       XattrSet xattrs;
       if (metadata_enabled()) {
         const auto& context = d.source_contexts.empty() ? d.source_filter : d.source_contexts[idx];

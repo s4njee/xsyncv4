@@ -22,6 +22,11 @@
 #include "link_dest.h"
 #include "linux_scan.h"
 
+#ifdef __linux__
+#include <linux/fs.h>
+#include <sys/ioctl.h>
+#endif
+
 #ifdef __APPLE__
 #include <sys/attr.h>
 #include <sys/vnode.h>
@@ -1379,6 +1384,7 @@ std::unordered_map<int, OpenOutput> open_outputs;
 std::atomic<bool> output_shutdown{false};
 
 void register_output(OutFile& f) {
+  large_file_cache_policy(f.fd, f.sparse_size_hint);
   f.progress = g_opt.partial ? std::make_shared<OutputProgress>() : nullptr;
   open_outputs[f.fd] = {f.dir_fd, f.name, f.tmp_name, f.temp, f.existed, g_opt.partial, true, f.progress};
 }
@@ -1406,6 +1412,74 @@ void cleanup_open_outputs() {
     close(f.dir_fd);
   }
   open_outputs.clear();
+}
+
+// Called while the shared output I/O lock protects the descriptor from cleanup.
+static void record_output_range(OutFile& f, size_t size, i64 offset) {
+  if (g_opt.partial && size) {
+    auto& progress = *f.progress;
+    std::lock_guard<std::mutex> lock(progress.mu);
+    i64 end = offset + (i64)size;
+    auto next = progress.ranges.lower_bound(offset);
+    if (next != progress.ranges.begin()) {
+      auto previous = std::prev(next);
+      if (previous->second >= offset) offset = previous->first, end = std::max(end, previous->second), next = progress.ranges.erase(previous);
+    }
+    while (next != progress.ranges.end() && next->first <= end) {
+      end = std::max(end, next->second);
+      next = progress.ranges.erase(next);
+    }
+    if (offset <= progress.prefix) progress.prefix = std::max(progress.prefix, end);
+    else progress.ranges.emplace(offset, end);
+    while (!progress.ranges.empty() && progress.ranges.begin()->first <= progress.prefix) {
+      progress.prefix = std::max(progress.prefix, progress.ranges.begin()->second);
+      progress.ranges.erase(progress.ranges.begin());
+    }
+  }
+}
+
+void large_file_cache_policy(int fd, i64 size) {
+#ifdef __APPLE__
+  if (size >= (1LL << 30)) (void)fcntl(fd, F_NOCACHE, 1);
+#else
+  (void)fd; (void)size;
+#endif
+}
+
+int out_clone_data(OutFile& f, int source, i64 size) {
+#ifdef __linux__
+  std::shared_lock<std::shared_mutex> io_lock(output_io_mu);
+  if (output_shutdown) { errno = ECANCELED; return -1; }
+  if (ioctl(f.fd, FICLONE, source) == 0) {
+    record_output_range(f, (size_t)size, 0);
+    return 1;
+  }
+  if (errno == EXDEV || errno == EOPNOTSUPP || errno == ENOTTY || errno == EINVAL || errno == ENOSYS || errno == EPERM) {
+    // Only empty private/new outputs are eligible. Discard any partial result
+    // before falling back, without touching an existing --inplace inode.
+    if (ftruncate(f.fd, 0) != 0) return -1;
+    return 0;
+  }
+  return -1;
+#else
+  (void)f; (void)source; (void)size;
+  return 0;
+#endif
+}
+
+ssize_t out_copy_range(OutFile& f, int source, size_t size, i64 offset) {
+#ifdef __linux__
+  std::shared_lock<std::shared_mutex> io_lock(output_io_mu);
+  if (output_shutdown) { errno = ECANCELED; return -1; }
+  off_t input_offset = offset, output_offset = offset;
+  ssize_t count = copy_file_range(source, &input_offset, f.fd, &output_offset, size, 0);
+  if (count > 0) record_output_range(f, (size_t)count, offset);
+  return count;
+#else
+  (void)f; (void)source; (void)size; (void)offset;
+  errno = ENOTSUP;
+  return -1;
+#endif
 }
 
 bool out_write(OutFile& f, const char* bytes, size_t size, i64 offset) {
@@ -1436,26 +1510,7 @@ bool out_write(OutFile& f, const char* bytes, size_t size, i64 offset) {
     if (n <= 0) { if (!n) errno = EIO; return false; }
     done += (size_t)n;
   }
-  if (g_opt.partial && size) {
-    auto& progress = *f.progress;
-    std::lock_guard<std::mutex> lock(progress.mu);
-    i64 end = offset + (i64)size;
-    auto next = progress.ranges.lower_bound(offset);
-    if (next != progress.ranges.begin()) {
-      auto previous = std::prev(next);
-      if (previous->second >= offset) offset = previous->first, end = std::max(end, previous->second), next = progress.ranges.erase(previous);
-    }
-    while (next != progress.ranges.end() && next->first <= end) {
-      end = std::max(end, next->second);
-      next = progress.ranges.erase(next);
-    }
-    if (offset <= progress.prefix) progress.prefix = std::max(progress.prefix, end);
-    else progress.ranges.emplace(offset, end);
-    while (!progress.ranges.empty() && progress.ranges.begin()->first <= progress.prefix) {
-      progress.prefix = std::max(progress.prefix, progress.ranges.begin()->second);
-      progress.ranges.erase(progress.ranges.begin());
-    }
-  }
+  record_output_range(f, size, offset);
   return true;
 }
 

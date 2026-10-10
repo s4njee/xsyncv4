@@ -548,6 +548,13 @@ Differences to be aware of:
 - **Large local and remote transfers reuse verified blocks** from an existing
   destination. `-W` requests whole-file transfers; APFS cloning remains preferred
   for eligible local copies.
+- **Large Linux local copies use kernel acceleration.** Files of at least 1 MiB
+  try a reflink with `FICLONE`, then same-device `copy_file_range`, before falling
+  back to byte copying. Short copies, interrupted calls and unsupported operations
+  retain the correct offset. `--no-clone`, sparse copies and bandwidth limits
+  use the byte path. Source consistency checks and output metadata finalization
+  still apply. macOS disables data caching on source and output descriptors for
+  copies of at least 1 GiB with `F_NOCACHE`.
 - **Compression is opt-in with `-z`.** Large blocks are sampled before compression;
   incompressible blocks travel raw. The automatic zstd level starts at 3 and
   uses active transport-write measurements after 256 KiB: level 1 at 64 MiB/s

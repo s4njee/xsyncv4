@@ -93,6 +93,26 @@ class ResumeTests(unittest.TestCase):
                         self.assertIsNone(proc.poll(), 'transfer finished before the half-way stop')
                         self.assertLess(time.monotonic(), deadline, 'half-way transfer timeout')
                         time.sleep(.001)
+                    # A worker reaching offset 32 MiB does not prove earlier
+                    # workers have finished. Wait for a verified contiguous
+                    # prefix so this test actually interrupts at half way.
+                    with self.source.open('rb') as original:
+                        halfway_digest = hashlib.sha256(original.read(32 * MIB)).digest()
+                    while True:
+                        candidates = [target, *root.glob('.large.*')]
+                        contiguous = False
+                        for candidate in candidates:
+                            try:
+                                with candidate.open('rb') as pending:
+                                    prefix = pending.read(32 * MIB)
+                                contiguous = len(prefix) == 32 * MIB and hashlib.sha256(prefix).digest() == halfway_digest
+                            except FileNotFoundError:
+                                continue
+                            if contiguous: break
+                        if contiguous: break
+                        self.assertIsNone(proc.poll(), 'transfer finished before a contiguous half-way prefix')
+                        self.assertLess(time.monotonic(), deadline, 'contiguous half-way prefix timeout')
+                        time.sleep(.001)
                     if event == 'signal': proc.send_signal(signal.SIGINT)
                     else:
                         victim = proc.pid if transport == 'push' else int((root / 'server.pid').read_text())

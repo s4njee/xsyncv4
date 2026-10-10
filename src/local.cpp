@@ -669,6 +669,7 @@ struct Local {
       if (fresh.size >= s.size) g_stats.xfer_bytes_total.fetch_add((u64)(fresh.size - s.size));
       else g_stats.xfer_bytes_total.fetch_sub((u64)(s.size - fresh.size));
       s = fresh;
+      large_file_cache_policy(in, s.size);
       slot_begin(w.id, d.rel, d.src.name_sv(s), s.size);
       ResumePrefix prefix;
       if (o.partial && !o.whole_file && attempt == 0 && s.size > (512 << 10)) {
@@ -738,7 +739,56 @@ struct Local {
         g_stats.xfer_bytes.fetch_add((u64)total);
         slot_add(w.id, total);
       }
-      while (total < s.size) {
+      bool kernel_copy = false;
+#ifdef __linux__
+      // Avoid probing unsupported ioctls for every tiny file. Sparse copies and
+      // bandwidth-limited writes retain the existing userspace path.
+      kernel_copy = o.clone && s.size >= (1 << 20) && !o.sparse && !o.bwlimit;
+      if (!prefix.size && kernel_copy && o.clone && !o.inplace) {
+        int result = out_clone_data(f, in, s.size);
+        if (result > 0) {
+          total = s.size;
+          g_stats.xfer_bytes.fetch_add((u64)total);
+          slot_add(w.id, total);
+        } else if (result < 0) {
+          file_io_error(errno, f.path.c_str(), "clone file data");
+          ok = false;
+        }
+      }
+      // Linux 5.3–5.18 could report false success on unsupported cross-filesystem
+      // copies. Use the byte path across devices on every kernel version.
+      struct stat output_stat;
+      if (kernel_copy && (fstat(f.fd, &output_stat) != 0 || before.st_dev != output_stat.st_dev)) kernel_copy = false;
+#endif
+      bool byte_positioned = !kernel_copy;
+      while (ok && total < s.size) {
+        if (g_stop.load()) { ok = false; break; }
+        if (kernel_copy) {
+          size_t count = (size_t)std::min<i64>(8 << 20, s.size - total);
+          ssize_t n = out_copy_range(f, in, count, total);
+          if (n < 0 && errno == EINTR) continue;
+          if (n > 0) {
+            total += n;
+            g_stats.xfer_bytes.fetch_add((u64)n);
+            slot_add(w.id, n);
+            continue;
+          }
+          if (!n || errno == EXDEV || errno == EOPNOTSUPP || errno == ENOSYS || errno == EINVAL || errno == EPERM) kernel_copy = false;
+          else {
+            file_io_error(errno, f.path.c_str(), "copy file range");
+            ok = false;
+            break;
+          }
+        }
+        if (!byte_positioned) {
+          if (lseek(in, total, SEEK_SET) < 0) {
+            g_source_io_error.store(true);
+            err_line(RERR_PARTIAL, "failed to seek source \"%s\": %s", w.p2.c_str(), errstr(errno).c_str());
+            ok = false;
+            break;
+          }
+          byte_positioned = true;
+        }
         size_t want = (size_t)std::min<i64>((i64)w.buf.size(), s.size - total);
         ssize_t n = read(in, w.buf.data(), want);
         if (n < 0 && errno == EINTR) continue;
