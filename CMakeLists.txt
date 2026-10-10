@@ -92,3 +92,10 @@ endif()
 
 add_executable(filter_test EXCLUDE_FROM_ALL tests/filter_test.cpp src/filter.cpp)
 target_include_directories(filter_test PRIVATE src)
+
+add_executable(xattr_value_test EXCLUDE_FROM_ALL tests/xattr_value_test.cpp src/xattr_value.cpp)
+target_include_directories(xattr_value_test PRIVATE src)
+target_link_libraries(xattr_value_test PRIVATE Threads::Threads)
+if(XSYNC_RELEASE_STATIC AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  target_link_options(xattr_value_test PRIVATE -static)
+endif()

@@ -4,7 +4,7 @@
 #include <filesystem>
 #include <map>
 #include <mutex>
-#include <array>
+#include <vector>
 #include <cerrno>
 #include <climits>
 
@@ -131,7 +131,7 @@ bool XattrValue::from_fd(int fd, u64 size, XattrValue& out) {
     if (!backing || !backing->allocate(size, offset)) return false;
     auto blob = std::make_shared<XattrBlob>();
     blob->store = backing, blob->offset = offset, blob->size = size;
-    std::array<char, CHUNK> bytes;
+    std::vector<char> bytes(CHUNK);
     for (u64 pos = 0; pos < size;) {
       size_t n = (size_t)std::min<u64>(bytes.size(), size - pos);
       if (!io(fd, bytes.data(), n, pos, false) || !io(backing->fd, bytes.data(), n, offset + pos, true)) return false;
@@ -169,7 +169,7 @@ bool XattrValue::read(char* bytes, size_t n, u64 offset) const {
   return true;
 }
 bool XattrValue::append_to(std::string& output) const {
-  std::array<char, CHUNK> bytes;
+  std::vector<char> bytes(CHUNK);
   for (u64 pos = 0; pos < size();) {
     size_t n = (size_t)std::min<u64>(bytes.size(), size() - pos);
     if (!read(bytes.data(), n, pos)) return false;
@@ -180,12 +180,17 @@ bool XattrValue::append_to(std::string& output) const {
 }
 bool XattrValue::operator==(const XattrValue& other) const {
   if (size() != other.size()) return false;
-  if (blob_ == other.blob_ && (blob_ || bytes_ == other.bytes_ || inline_bytes() == other.inline_bytes())) return true;
-  std::array<char, CHUNK> a, b;
+  if (!blob_ && !other.blob_) return bytes_ == other.bytes_ || inline_bytes() == other.inline_bytes();
+  if (blob_ && blob_ == other.blob_) return true;
+  // musl workers have a small default stack. Reserve these comparison buffers
+  // only for stored values, on the heap; two 64 KiB arrays exceed that stack.
+  std::vector<char> buffers(2 * CHUNK);
+  char* a = buffers.data();
+  char* b = a + CHUNK;
   for (u64 pos = 0; pos < size();) {
-    size_t n = (size_t)std::min<u64>(a.size(), size() - pos);
-    if (!read(a.data(), n, pos) || !other.read(b.data(), n, pos)) throw std::system_error(errno, std::generic_category(), "read xattr temporary storage");
-    if (memcmp(a.data(), b.data(), n)) return false;
+    size_t n = (size_t)std::min<u64>(CHUNK, size() - pos);
+    if (!read(a, n, pos) || !other.read(b, n, pos)) throw std::system_error(errno, std::generic_category(), "read xattr temporary storage");
+    if (memcmp(a, b, n)) return false;
     pos += n;
   }
   return true;

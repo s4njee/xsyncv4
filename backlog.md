@@ -2231,3 +2231,32 @@ Verified artifact manifest (source `864bd37edf14`):
   output failures were reproduced, repaired and rerun.
 - **Remaining before E-10 completion:** release builds, packaged metadata
   checks and installation/manual verification. P1 remains **17/22**.
+
+## E-10 progress — 2026-10-09: static worker-stack regression
+
+- Packaged musl binaries exposed a crash in xattr equality: two automatic
+  64 KiB comparison buffers exhausted a worker's small stack, even for inline
+  attributes. The reproducible ARM debugger backtrace reaches
+  `XattrValue::operator==` from `xattrs_differ`/`generate`; development builds
+  and basic release smoke transfers had passed. E-10 was kept open.
+- Equality now compares inline values directly and allocates stored-value
+  buffers on the heap only when needed. Stored-value streaming/import buffers
+  also use the heap. The 8 MiB inline quota, 64 KiB chunks and shared unlinked
+  spool remain unchanged.
+- `tests/xattr_value_test.cpp` exercises inline/stored/mixed comparisons,
+  differing stored bytes, allocation, import and streaming on a **64 KiB**
+  pthread stack. The old musl implementation exits **-11**, while the fix
+  passes. Linux release builds compile and run this regression before exporting
+  binaries; Docker/source packages include its source. The macOS universal
+  target also passes. README lists the regression command.
+- The patched musl ARM build passes **11** composition/ownership/quota methods
+  (one Darwin-only skip), including **5,000** xattr files in each direction and
+  a 64-descriptor limit. Darwin composition/resource-fork regressions pass
+  **four** methods (one Linux-only skip), with per-process RSS below **70 MiB**
+  for the tested 512 MiB resource-fork directory and inline overflow. Logs:
+  `/tmp/xsync-e10-static-debug2.log`,
+  `/tmp/xsync-e10-stack-musl-baseline2.log`,
+  `/tmp/xsync-e10-stack-arm-verified.log`, and
+  `/tmp/xsync-e10-stack-mac-verified.log`.
+- **Remaining:** rebuild the clean release set and repeat packaged checks.
+  The failing pre-fix release runs are not counted as passing evidence.

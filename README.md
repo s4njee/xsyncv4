@@ -610,6 +610,7 @@ permissions, type changes.
 XSYNC_FALLBACK=0 python3 tests/difftest.py                  # native clone paths
 XSYNC_FALLBACK=0 python3 tests/difftest.py --xsync tests/xsync-noclone.sh # byte-copy
 cmake --build build --target filter_test && build/filter_test
+cmake --build build --target xattr_value_test && build/xattr_value_test
 python3 tests/p0_test.py                                  # trust and injected I/O races
 python3 tests/wire_test.py                                # hostile receiver protocol peers
 python3 tests/mount_test.py                               # macOS: disposable APFS image
