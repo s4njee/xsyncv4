@@ -132,6 +132,6 @@ the platform and workflow run.
 
 `python3 benchmarks/ci_gate_test.py --xsync build/xs --rsync /path/to/rsync`
 exercises real transfers with a healthy binary, an intentionally delayed binary
-and a corrupt binary that exits successfully. Its small fixtures and relaxed
-test policy validate gate behavior on busy developer machines; CI's production
+and a corrupt binary that exits successfully. Its small fixtures, relaxed test policy and
+24-sample healthy comparison validate gate behavior on busy developer machines; CI's production
 measurements use the checked-in 24-sample, 85% policy and larger fixtures.

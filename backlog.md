@@ -3369,5 +3369,13 @@ after U-01's evidence entry completes P2, as requested by the user.
   measurements retained. There are no selective retries or discarded samples.
 - The median ratio and 85% floor are unchanged. Each platform now verifies
   1,080 timed transfers and 45 untimed warmups; the workflow timeout is 60
-  minutes. Small behavior tests retain their explicit six-sample override.
+  minutes. The healthy behavior test also uses 24 samples: its previous six-sample
+  comparison of identical binaries failed on macOS large-pipe in run
+  38076127519. Negative slowdown/corruption checks retain their small sample
+  counts. That run passes all Linux production ratios; macOS production was
+  skipped after the behavior-test failure.
   F-02 remains partial until this policy has completed hosted validation.
+
+- The revised 24-sample healthy comparison verifies all 720 timed transfers
+  and 30 warmups locally. All three healthy/slowdown/corruption behavior tests
+  and seven harness safeguard tests pass. Hosted validation remains pending.
