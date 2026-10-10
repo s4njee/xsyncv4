@@ -131,7 +131,7 @@ The benchmark so far is one corpus slice, one machine, one filesystem, no networ
 | F-02 | **Regression gate.** Nothing stops a change from losing the lead. | **done** | CI job fails if any scenario drops below a recorded ratio to rsync on the same runner. | M |
 | F-03 | **ssh is one stream on one core.** On a fast LAN the cipher becomes the ceiling long before the disks do. | unverified | Measured first. Then, if it is the limit: `--streams N` (several ssh connections sharing one transfer) and no compression by default on links faster than the compressor. | L |
 | F-04 | **Adaptive compression.** `-z` compresses every block at level 3 regardless of content or link. | **done** | Incompressible blocks are detected from a sample and sent raw; `--skip-compress` suffixes honoured; level chosen from measured link speed unless set. | M |
-| F-05 | **Large files.** One thread reads and one stream carries each large file; local copies on Linux use a plain read/write loop. | partial | Parallel ranges within a file on both ends; `copy_file_range`/`FICLONE` on Linux (reflinks on btrfs/XFS mirror the APFS clone path); `F_NOCACHE` above a size so a 50 GB copy does not evict the page cache. | L |
+| F-05 | **Large files.** One thread reads and one stream carries each large file; local copies on Linux use a plain read/write loop. | **done** | Parallel ranges within a file on both ends; `copy_file_range`/`FICLONE` on Linux (reflinks on btrfs/XFS mirror the APFS clone path); `F_NOCACHE` above a size so a 50 GB copy does not evict the page cache. | L |
 | F-06 | **Linux scan path.** macOS uses `getattrlistbulk`; Linux uses `readdir` plus one `fstatat` per entry. | partial | `getdents64` + `statx`, optionally batched with io_uring; measured against rsync on a no-op re-sync of the corpus on ext4. | M |
 | F-07 | **APFS byte-copy ceiling.** Creation is ~100 µs per file and does not scale with threads here; system time triples from 2 to 8 threads for no gain. Unknown: how much is path-lookup contention versus the filesystem itself, and how much is the nearly full volume. | confirmed | Re-measure on a volume with free space; try `openat`-relative creation; pick the thread count per filesystem instead of always using all performance cores. | M |
 | F-08 | **No-op re-sync burns CPU.** 0.40 s wall but 2.7 s of system time at 8 threads. | confirmed | Wall time unchanged or better with under 1 s of CPU; or an opt-in manifest that skips listing the destination entirely. | M |
@@ -3602,3 +3602,25 @@ after U-01's evidence entry completes P2, as requested by the user.
   Raw results, the log and the paired table are retained.
 - The reverse update case starts next on the same frozen baseline products.
   F-01 remains partial pending that result and cold-cache access on freya.
+
+
+## P3 / F-05 completed — 2026-10-10
+
+- Clean product `7c3072c821cc` completes all 336 default-policy timed samples
+  and 84 warmups across macOS, Linux overlay and loop-backed btrfs. Every copy
+  passes independent checksum/metadata verification, and all 21 median ratios
+  exceed 85% of the pre-F-05 reference. The table explicitly identifies the
+  reference's four-worker budget and the candidate's automatic budget. CI uses
+  matched automatic budgets and remains a separate product acceptance check.
+- Btrfs automatic copies improve 11.62x. Single-file defaults recover while
+  explicit `-jN` still permits ranges, including the observed compressed-pipe
+  benefit and byte-copy costs. Intermediate negative results remain retained.
+- Five instrumented range tests pass per platform, including default serial
+  single-file I/O, explicit overlap, frozen peers and all-worker producers.
+  Final glibc and static-musl products pass all 12 positive btrfs/XFS tests.
+  The existing full differential, kernel fault, compression and resume results
+  cover the range implementation; the selection change has focused coverage.
+- Native Linux reflinks/range copies, atomic fallback, source retries, metadata
+  correction and macOS F_NOCACHE above 1 GiB are implemented. No new protocol
+  field is required. F-05 is marked done. Expanded hosted run 38080678548 is
+  still active; its outcome is not assumed successful.

@@ -124,9 +124,11 @@ Use `--file-mib` to change file size and `--cases` to select known cases.
 requests intra-file ranges explicitly. The one-worker control is always kept.
 The [revision 98eeb171c94d comparison](results/20261010-f05-98eeb17-summary.md)
 retains all 336 timed samples across macOS, Linux overlay and loop-backed btrfs,
-including single-file regressions. F-05 remains partial while its range policy
-is investigated; reflink correctness passes on actual btrfs and XFS volumes
-with both glibc and static-musl products.
+including single-file regressions. The [completed F-05 comparison](results/20261010-f05-7c3072c-summary.md)
+records restored defaults across all seven cases on three filesystems and
+explicit range selection with `-jN`. Reflink correctness passes on actual btrfs
+and XFS volumes with both final glibc and static-musl products. The expanded
+hosted gate remains a separate acceptance check for the product.
 
 ## Regression gate
 
