@@ -137,7 +137,7 @@ The benchmark so far is one corpus slice, one machine, one filesystem, no networ
 | F-08 | **No-op re-sync burns CPU.** 0.40 s wall but 2.7 s of system time at 8 threads. | confirmed | Wall time unchanged or better with under 1 s of CPU; or an opt-in manifest that skips listing the destination entirely. | M |
 | F-09 | **Memory on very large trees.** The receiver keeps every directory record until exit; the local engine holds up to 200,000 pending files. Never run beyond 77k files. | code | A 5-million-file synthetic tree syncs within a stated memory bound; receiver frees a directory once it and its children are finished. | M |
 | F-10 | **Whole-subtree clones.** Only leaf directories are cloned in one call. A missing subtree could be one call, at the price of a long volume-wide lock. | new | Bounded version (subtrees under N entries, known from the scan) measured against the leaf-only path. | M |
-| F-11 | **Clones when `-a` is incomplete.** `-rt` or `-rlt` fall back to byte copies because the clone would bring the wrong mode. | code | Clone, then correct mode/owner; still cheaper than create+write. | S |
+| F-11 | **Clones when `-a` is incomplete.** `-rt` or `-rlt` fall back to byte copies because the clone would bring the wrong mode. | partial | Clone, then correct mode/owner; still cheaper than create+write. | S |
 | F-12 | **Deletion is single-threaded.** Removing the 96,000-entry benchmark tree takes about 10 s with `rm`; `--delete` of a large stale subtree will feel the same. | code | Parallel removal by subtree. | S |
 | F-13 | **Tiny transfers.** For one file over ssh the fixed costs dominate: thread pool start, handshake round trip. | unverified | A single small file over ssh is within 10 ms of rsync. | S |
 | F-14 | **`-c` at scale.** Sender hashes in the walkers, receiver hashes inline in the generator; unmeasured. | unverified | Benchmarked against `rsync -c`; hashing gets its own pool if it starves the scan. | S |
@@ -3128,3 +3128,22 @@ after U-01's evidence entry completes P2, as requested by the user.
   existing harness safeguard tests also pass. Hosted CI validation is pending.
 - F-01 remains partial, including the pending cold-cache access on freya.
   Its staged production binary and measurement scripts remain unchanged.
+
+## P3 / F-11 implementation checkpoint — 2026-10-10
+
+- APFS regular-file cloning now accepts `-rt`/`-rlt` without `-p`. The normal
+  output finalizer applies umask to new files, retains existing-file modes,
+  and applies only requested owner/group changes before atomic publication.
+- Read-only clones are opened for finalization through their private temporary
+  inode; their final modes are restored before rename. Clones start with normal
+  creation ownership, so preserving an owner does not accidentally preserve an
+  omitted group. Whole-directory eligibility remains conservative.
+- Thirteen macOS behavior tests pass (one optional iCloud fixture skipped),
+  including clone/read interposition for mode, umask, group and fallback checks.
+  The permission suite passes 13 tests (two Linux-only cases skipped) after
+  allowing U-09's already documented dry-run summary in output comparisons.
+  Full differential testing passes all 231 cases with itemization.
+- `benchmarks/clone_modes.py` compares the reference, corrected clones, byte
+  copies and rsync on a 1 GiB read-only file and a 1,000-file tree. Independent
+  rsync checksums and exact mode/owner/group/time comparisons verify each result.
+  F-11 remains partial until the completed measurements are recorded.

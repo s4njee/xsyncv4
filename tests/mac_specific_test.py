@@ -38,6 +38,97 @@ class MacSpecificTests(unittest.TestCase):
             else: a = 'fake:' + a
         return args + [a, b]
 
+    def test_file_clones_without_perms_match_rsync(self):
+        # Omitting -p must retain existing destination modes and mask new modes.
+        # Interposition proves these copies clone rather than quietly falling
+        # back to byte copies, including read-only source and target modes.
+        for flags in (['-rt'], ['-rlt'], ['-rltg'], ['-rlt', '--executability']):
+            for mask in (0o22, 0o77):
+                with self.subTest(flags=flags, umask=mask):
+                    source = self.root / 'source'
+                    if source.exists(): shutil.rmtree(source)
+                    source.mkdir()
+                    for mode in (0o400, 0o600, 0o644, 0o755, 0o4755):
+                        for kind in ('new', 'existing'):
+                            file = source / f'{kind}-{mode:o}'
+                            file.write_bytes(b'new clone contents' * 1024)
+                            file.chmod(mode)
+                            os.utime(file, ns=(1500000000123456789, 1500000000123456789))
+                    os.utime(source, ns=(1500000000123456789, 1500000000123456789))
+                    before = [(p.name, p.stat().st_mode, p.stat().st_uid, p.stat().st_gid,
+                               p.stat().st_mtime_ns, p.read_bytes()) for p in sorted(source.iterdir())]
+                    results = []
+                    for native in (False, True):
+                        target = self.root / ('xs' if native else 'rsync')
+                        if target.exists(): shutil.rmtree(target)
+                        target.mkdir()
+                        for path in source.glob('existing-*'):
+                            file = target / path.name
+                            file.write_bytes(b'old')
+                            file.chmod(0o400 if path.name.endswith('400') else 0o600)
+                        os.utime(target, ns=(1500000000123456789, 1500000000123456789))
+                        marker, read = self.root / 'clone-notify', self.root / 'read-notify'
+                        for path in (marker, read.with_name('read-notify.1')):
+                            if path.exists(): path.unlink()
+                        env = self.environment(source)
+                        env.update(XSYNC_FAULT_CLONE_NOTIFY=str(marker), XSYNC_FAULT_READ_NOTIFY=str(read))
+                        command = self.command(native, str(source) + '/', str(target) + '/', 'local', *flags)
+                        if native: command[0] = str(self.injected_binary)
+                        result = subprocess.run(command, env=env, capture_output=True, timeout=20, umask=mask)
+                        self.assertEqual(result.returncode, 0, result.stderr)
+                        state = [(p.name, p.stat().st_mode, p.stat().st_uid, p.stat().st_gid,
+                                  p.stat().st_mtime_ns, p.read_bytes()) for p in sorted(target.iterdir())]
+                        results.append((state, sorted(result.stdout.splitlines())))
+                        if native:
+                            self.assertTrue(marker.exists(), 'clone path was not used')
+                            self.assertFalse(read.with_name('read-notify.1').exists(), 'clone fell back to byte copying')
+                    self.assertEqual(results[0], results[1])
+                    after = [(p.name, p.stat().st_mode, p.stat().st_uid, p.stat().st_gid,
+                              p.stat().st_mtime_ns, p.read_bytes()) for p in sorted(source.iterdir())]
+                    self.assertEqual(before, after)
+
+    def test_no_perms_clone_failure_falls_back(self):
+        source, target = self.root / 'source', self.root / 'target'
+        source.write_bytes(b'cross-volume copy' * 1024)
+        source.chmod(0o444)
+        marker, read = self.root / 'clone-notify', self.root / 'read-notify'
+        env = self.environment(source)
+        env.update(XSYNC_FAULT_CLONE_EXDEV='1', XSYNC_FAULT_CLONE_NOTIFY=str(marker),
+                   XSYNC_FAULT_READ_NOTIFY=str(read))
+        result = subprocess.run([str(self.injected_binary), '--no-fallback', '-rt', str(source), str(target)],
+                                env=env, capture_output=True, timeout=20, umask=0o77)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertTrue(marker.exists())
+        self.assertTrue(read.with_name('read-notify.1').exists())
+        self.assertEqual(target.read_bytes(), source.read_bytes())
+        self.assertEqual(stat.S_IMODE(target.stat().st_mode), 0o400)
+
+    def test_clone_preserves_only_requested_group(self):
+        groups = [group for group in os.getgroups() if group != os.getegid()]
+        if not groups: self.skipTest('requires membership in a second group')
+        source = self.root / 'source'
+        source.write_bytes(b'group correction' * 1024)
+        os.chown(source, -1, groups[0])
+        os.utime(source, (1500000000, 1500000000))
+        for flags in (['-rt'], ['-rtg'], ['-rto'], ['-rtog']):
+            with self.subTest(flags=flags):
+                results = []
+                for native in (False, True):
+                    target = self.root / ('xs' if native else 'rsync')
+                    if target.exists(): target.unlink()
+                    marker = self.root / 'clone-notify'
+                    if marker.exists(): marker.unlink()
+                    env = self.environment(source)
+                    env['XSYNC_FAULT_CLONE_NOTIFY'] = str(marker)
+                    command = self.command(native, str(source), str(target), 'local', *flags)
+                    if native: command[0] = str(self.injected_binary)
+                    result = subprocess.run(command, env=env, capture_output=True, timeout=20)
+                    self.assertEqual(result.returncode, 0, result.stderr)
+                    st = target.stat()
+                    results.append((st.st_mode, st.st_uid, st.st_gid, st.st_mtime_ns, target.read_bytes()))
+                    if native: self.assertTrue(marker.exists())
+                self.assertEqual(results[0], results[1])
+
     def test_sockets_and_hard_link_aliases(self):
         for direction in ('local', 'push', 'pull'):
             for flags in (['-a'], ['-aH'], ['-aHX'], ['-rlt', '--specials']):

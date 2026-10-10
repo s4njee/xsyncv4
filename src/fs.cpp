@@ -1636,7 +1636,8 @@ bool clone_copy(DirWork& w, u32 idx, const char* source, unsigned flags, Worker&
   Entry fresh;
   int source_fd = -1;
   struct stat before;
-  if (g_opt.hard_links || metadata_enabled() || g_opt.atimes || g_opt.crtimes || g_opt.fileflags || !g_opt.chmod_rules.empty() || g_opt.ownership.requested()) {
+  const bool snapshot = !g_opt.perms || g_opt.hard_links || metadata_enabled() || g_opt.atimes || g_opt.crtimes || g_opt.fileflags || !g_opt.chmod_rules.empty() || g_opt.ownership.requested();
+  if (snapshot) {
     source_fd = open(source, O_RDONLY | O_CLOEXEC | read_time_flags() | (g_opt.copy_links || !w.src_paths.empty() ? 0 : O_NOFOLLOW));
     if (source_fd < 0 || fstat(source_fd, &before) != 0 || !S_ISREG(before.st_mode)) {
       if (source_fd >= 0) close(source_fd);
@@ -1675,6 +1676,11 @@ bool clone_copy(DirWork& w, u32 idx, const char* source, unsigned flags, Worker&
   if (f.cloned_flags && fd_fileflags(flags_fd, clone_stat.st_flags & ~blocking_fileflags(clone_stat.st_flags)) != 0) {
     close(flags_fd); close_source(); out_abort(f); return false;
   }
+  // A read-only source produces a read-only clone. Open the private temporary
+  // inode for finalization; out_finish restores the desired mode before rename.
+  if (!(clone_stat.st_mode & S_IWUSR) && fchmod(flags_fd, (clone_stat.st_mode & 07777) | S_IWUSR) != 0) {
+    close(flags_fd); close_source(); out_abort(f); return false;
+  }
   close(flags_fd);
   if (source_fd >= 0 && (!source_unchanged(source_fd, source, before) ||
       (g_opt.xattrs && !source_xattrs_unchanged(w.src_xattrs[idx], source)))) {
@@ -1696,7 +1702,7 @@ bool clone_copy(DirWork& w, u32 idx, const char* source, unsigned flags, Worker&
   f.fd = fd;
   f.created_mode = st.st_mode & 07777;
   register_output(f);
-  return out_finish(f, w, idx, t, true, g_opt.hard_links || metadata_enabled() || g_opt.atimes || g_opt.crtimes || g_opt.fileflags || !g_opt.chmod_rules.empty() || g_opt.ownership.requested() ? &fresh : nullptr);
+  return out_finish(f, w, idx, t, true, snapshot ? &fresh : nullptr);
 #else
   errno = ENOTSUP;
   return false;

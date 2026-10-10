@@ -113,7 +113,10 @@ class ChmodDifferentials(unittest.TestCase):
             if any('H' in f and f.startswith('-') and not f.startswith('--') for f in flags) and '-n' not in flags:
                 self.assertEqual((self.root / 'dst/anchor').stat().st_ino, (self.root / 'dst/alias').stat().st_ino)
             extra = (get_acl(self.root / 'dst/anchor'), get_attrs(self.root / 'dst/anchor')) if any('AX' in f for f in flags) else None
-            results.append((after, extra, sorted(result.stdout.splitlines())))
+            # U-09 intentionally adds a dry-run summary that rsync omits;
+            # dry_summary_test.py checks it independently of itemization.
+            results.append((after, extra, sorted(line for line in result.stdout.splitlines()
+                                                if not line.startswith(b'would transfer '))))
         self.assertEqual(results[1], results[0], (flags, direction, clone, umask))
 
     def test_numeric_symbolic_directory_file_and_special_modes(self):
@@ -167,7 +170,8 @@ class ChmodDifferentials(unittest.TestCase):
                             self.assertEqual(result.returncode, 0, result.stderr)
                             state = snapshot(self.root / 'dst')
                             results.append((state, tuple(get_acl(self.root / 'dst' / n) for n in ('.', 'sub', 'sub/file')),
-                                            sorted(result.stdout.splitlines())))
+                                            sorted(line for line in result.stdout.splitlines()
+                                                   if not line.startswith(b'would transfer '))))
                         self.assertEqual(results[1], results[0])
 
     @unittest.skipIf(DARWIN, 'POSIX default ACLs')

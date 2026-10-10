@@ -605,10 +605,10 @@ struct Local {
     };
 
 #ifdef __APPLE__
-    // A clone carries data, mode and mtime in one metadata operation. Not for set-id files:
-    // the kernel strips those bits when ownership is not copied.
-    if (o.clone && !o.sparse && o.perms && o.times && !o.inplace && !(s.mode & 07000) && !(s.fileflags & SF_DATALESS) && clone_ok.load(std::memory_order_relaxed)) {
-      u32 fl = (o.copy_links ? 0 : CLONE_NOFOLLOW) | (o.owner && o.am_root ? 0 : CLONE_NOOWNERCOPY);
+    // The output finalizer corrects a clone's mode and selected ownership,
+    // including umask/new-file and existing-file modes when -p is omitted.
+    if (o.clone && !o.sparse && o.times && !o.inplace && !(s.mode & 07000) && !(s.fileflags & SF_DATALESS) && clone_ok.load(std::memory_order_relaxed)) {
+      u32 fl = (o.copy_links ? 0 : CLONE_NOFOLLOW) | CLONE_NOOWNERCOPY;
       if (clone_copy(d, idx, w.p2.c_str(), fl, w)) {
         g_stats.xfer_bytes.fetch_add((u64)s.size, std::memory_order_relaxed);
         note_transferred(d, idx, 0, w);
