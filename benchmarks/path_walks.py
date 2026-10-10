@@ -25,9 +25,18 @@ def main():
     p.add_argument('--rsync', default='rsync')
     p.add_argument('--samples', type=int, default=6)
     p.add_argument('--cases', default='fresh-byte,noop')
+    p.add_argument('--reference-jobs', type=int, default=4,
+                   help='reference workers; 0 uses automatic selection')
+    p.add_argument('--candidate-jobs', default='1,2,4,8',
+                   help='distinct worker counts; 0 uses automatic selection')
     p.add_argument('--output', type=pathlib.Path, required=True)
     args = p.parse_args()
     if args.samples < 1: p.error('samples must be positive')
+    try: candidate_jobs = [int(n) for n in args.candidate_jobs.split(',')]
+    except ValueError: p.error('candidate jobs must be comma-separated integers')
+    if (not candidate_jobs or len(set(candidate_jobs)) != len(candidate_jobs) or
+            any(n < 0 or n > 64 for n in candidate_jobs) or not 0 <= args.reference_jobs <= 64):
+        p.error('provide distinct worker counts between 0 and 64')
     cases = args.cases.split(',')
     if not cases or len(set(cases)) != len(cases) or any(c not in ('fresh-byte', 'noop') for c in cases):
         p.error('cases must be distinct fresh-byte/noop values')
@@ -41,7 +50,8 @@ def main():
     os.environ['XSYNC_CONFIG'] = os.environ['XSYNC_OPTS'] = ''
     binaries = {'reference': str(args.reference.resolve()), 'candidate': str(args.candidate.resolve()),
                 'rsync': shutil.which(args.rsync) or args.rsync}
-    tools = [('reference-j4', 'reference', 4), *[(f'candidate-j{n}', 'candidate', n) for n in (1, 2, 4, 8)],
+    tools = [(f'reference-j{args.reference_jobs}', 'reference', args.reference_jobs),
+             *[(f'candidate-j{n}', 'candidate', n) for n in candidate_jobs],
              ('rsync', 'rsync', None)]
     data = {'schema': 1, 'utc': datetime.datetime.now(datetime.timezone.utc).isoformat(),
             'platform': platform.platform(), 'host': platform.node(), 'cpus': os.cpu_count(),
@@ -74,7 +84,9 @@ def main():
                         subprocess.run([binaries['rsync'], '-a', str(source) + '/', str(destination) + '/'],
                                        check=True, capture_output=True)
                     command = [binaries[binary], '-a']
-                    if jobs: command += ['--no-fallback', '--no-progress', '--no-clone', '-j' + str(jobs)]
+                    if binary != 'rsync':
+                        command += ['--no-fallback', '--no-progress', '--no-clone']
+                        if jobs: command += ['-j' + str(jobs)]
                     command += [str(source) + '/', str(destination) + '/']
                     with (work / 'stdout').open('wb') as out, (work / 'stderr').open('wb') as err:
                         record = measure(command, stdout=out, stderr=err)

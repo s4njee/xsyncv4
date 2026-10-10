@@ -157,6 +157,11 @@ eight on fresh byte copies with lower CPU; eight improves no-op wall time at
 a larger CPU cost. These busy-host measurements leave automatic filesystem
 worker selection unresolved.
 
+Use `path_walks.py --reference-jobs 0 --candidate-jobs 0,4,8` to compare
+automatic selection with explicit budgets. Zero omits `-j`, while every xs
+case still disables cloning and terminal progress. Choose a sample count
+that balances complete rotations for the resulting number of tools.
+
 The [APFS no-op diagnostic](results/20261010T152712Z-apfs-baseline-summary.md)
 records the current binary's cost at 1, 2, 4 and 8 threads. Its host had high
 background load and the volume was 98% full; quieter/free-volume measurements

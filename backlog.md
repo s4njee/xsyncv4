@@ -3922,3 +3922,19 @@ after U-01's evidence entry completes P2, as requested by the user.
   finishes and the coordinator advances to the push memory test; pull follows
   sequentially. Both paired endpoint memory measurements remain required,
   so F-09 stays partial.
+
+### F-07 filesystem budget implementation checkpoint — 2026-10-10
+
+- Automatic local and receiver worker pools now inspect the destination
+  filesystem, using its nearest existing ancestor when the path is missing.
+  APFS uses at most four workers; other filesystems retain the CPU budget.
+  Explicit `-j` still wins and automatic selection does not set the option
+  that enables intra-file ranges.
+- Four is selected for the measured fresh-copy wall/CPU tradeoff. The
+  eight-worker no-op advantage and busy-host limitations remain recorded.
+  The path-walk harness can now compare automatic selection with explicit
+  four/eight-worker controls without accidentally enabling cloning for the
+  automatic case.
+- Build, correctness and default-budget performance validation are queued
+  after the frozen normalization/subtree comparisons. The current hosted
+  433d1ed18a7e run is left uninterrupted. F-07 stays partial until validation.

@@ -2459,7 +2459,7 @@ struct Receiver {
     put_str(identity, guard.path);
     put_var(identity, guard.dev), put_var(identity, guard.ino);
     c.send(std::move(identity));
-    int n = default_jobs();
+    int n = default_jobs(dest.empty() ? "." : dest);
     pool.max_bytes = 64 << 20;
     pool.scan_workers = std::max(1, n / 2);
     pool.q1_soft_limit = 16;  // DATA backlog takes priority over more generators

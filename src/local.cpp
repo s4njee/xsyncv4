@@ -18,6 +18,7 @@
 
 #ifdef __APPLE__
 #include <sys/clonefile.h>
+#include <sys/mount.h>
 #include <sys/sysctl.h>
 #endif
 
@@ -27,7 +28,7 @@
 
 // ---------------------------------------------------------------- shared setup
 
-int default_jobs() {
+int default_jobs(const std::string& destination) {
   if (g_opt.jobs > 0) return (int)std::min<i64>(g_opt.jobs, MAX_WORKERS);
   int n = (int)std::thread::hardware_concurrency();
 #ifdef __APPLE__
@@ -35,6 +36,23 @@ int default_jobs() {
   int p = 0;
   size_t len = sizeof p;
   if (sysctlbyname("hw.perflevel0.logicalcpu", &p, &len, nullptr, 0) == 0 && p > 0) n = p;
+  if (!destination.empty()) {
+    // A missing destination inherits its nearest existing ancestor's filesystem.
+    // Four APFS workers match eight on measured byte creation with lower CPU.
+    std::filesystem::path probe(destination);
+    struct statfs fs;
+    for (;;) {
+      if (statfs(probe.c_str(), &fs) == 0) {
+        if (std::string_view(fs.f_fstypename) == "apfs") n = std::min(n, 4);
+        break;
+      }
+      if (errno != ENOENT && errno != ENOTDIR) break;
+      auto parent = probe.parent_path();
+      if (parent.empty()) parent = ".";
+      if (parent == probe) break;
+      probe = std::move(parent);
+    }
+  }
 #endif
   return std::clamp(n, 1, 16);
 }
@@ -1018,7 +1036,7 @@ int run_local(const std::vector<std::string>& srcs, const std::string& dest) {
   L.lazy_ok = o.clone && !o.sparse && o.link_dest.empty() && o.chmod_rules.empty() && !o.ownership.requested() && !o.atimes && !o.crtimes && !o.fileflags && o.recursive && !o.copy_links && o.times && !o.omit_dir_times && !o.omit_link_times &&
               !metadata_enabled() && !o.dry_run && !o.inplace && !o.one_fs && !o.existing && !o.prune_empty && !root->selection && o.max_size <= 0 && o.min_size <= 0 && o.filters.empty();
 #endif
-  int n = default_jobs();
+  int n = default_jobs(dest.empty() ? "." : dest);
   progress_start(n);
   // Scanning has priority so that totals are known before the bulk of the copying starts; the
   // backlog limit bounds memory on huge trees.

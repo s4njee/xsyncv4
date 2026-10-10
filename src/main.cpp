@@ -139,7 +139,7 @@ Documented compatibility no-ops:
 xs extensions:
      --install=HOST       explicitly install the matching release at ~/.local/bin
                           refuses newer versions unless --force is supplied
- -j, --jobs=N             number of worker threads (default: performance cores)
+ -j, --jobs=N             worker threads (default: CPU budget; APFS copies max 4)
      --no-clone           always copy file data, even where a copy-on-write clone
                           (APFS or Linux reflinks) would be possible
      --atomic             create new files via temp file + rename (default)

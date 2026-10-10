@@ -49,7 +49,8 @@ std::shared_ptr<const FilterList> directory_filters(const std::shared_ptr<const 
 // Returns false when there is nothing to do.
 bool setup_dest(const std::string& dest, DirWork& root, bool single);
 
-int default_jobs();
+// Destination pools can apply a measured filesystem budget. Explicit -j wins.
+int default_jobs(const std::string& destination = {});
 // Drive the UI until the pool has finished; handles interruption.
 void wait_pool(Pool& pool);
 
