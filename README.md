@@ -378,6 +378,12 @@ and a bar for the whole transfer:
 
 It is drawn on stderr and only when that is a terminal; otherwise one summary line per
 second is printed. `-v` and `-i` lines scroll above the live region. `NO_COLOR` is honoured.
+The renderer respects the actual terminal width, including very narrow windows,
+and redraws after `SIGWINCH`. Bars use the terminal's foreground color so they
+remain readable on light backgrounds. `TERM=dumb` receives plain ASCII lines
+without cursor escapes. Non-UTF-8 locales use ASCII bars and escaped filenames;
+UTF-8 names are clipped by display columns, with control bytes escaped even under
+`-8`. The terminal verification checklist is in [tests/progress-terminal.md](tests/progress-terminal.md).
 
 ## Compatibility with rsync
 

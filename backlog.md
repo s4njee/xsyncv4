@@ -103,11 +103,12 @@ coverage clarification remains open.
 
 ## P2 — Progress and feel: the reason to switch
 
-The display has only been checked by capturing frames from a pseudo-terminal.
+The display has automated PTY, tmux and real-SSH checks. Native GUI visual
+coverage is tracked in `tests/progress-terminal.md` and remains incomplete.
 
 | ID | Item | Status | Done when | Size |
 |---|---|---|---|---|
-| U-01 | **Real-terminal pass.** Terminal.app, iTerm, tmux, over ssh, narrow widths, resize mid-run, light themes, `TERM=dumb`, non-UTF-8 locales (needs an ASCII bar fallback). | unverified | Checklist with screenshots; SIGWINCH handled; ASCII fallback when `LC_CTYPE` is not UTF-8. | M |
+| U-01 | **Real-terminal pass.** Terminal.app, iTerm, tmux, over ssh, narrow widths, resize mid-run, light themes, `TERM=dumb`, non-UTF-8 locales (needs an ASCII bar fallback). | partial | Checklist with screenshots; SIGWINCH handled; ASCII fallback when `LC_CTYPE` is not UTF-8. | M |
 | U-02 | **Rows are noise for small files.** At 12,000 files/s each row shows a random file at 0 % or 100 %. | confirmed | Rows are reserved for files that have been in flight for more than ~200 ms; small files collapse into one "small files" row with a rate. Large files show their own speed and ETA. | M |
 | U-03 | **Clone mode shows nothing per file.** Whole directories complete in one call, so the rows stay empty and the bar moves in jumps. | code | Rows show the directory being cloned; the bar advances per directory. | S |
 | U-04 | **Push progress counts bytes read, not bytes landed.** The bar can sit at 100 % while the receiver is still writing. | code | Receiver acknowledges completed bytes; the client bar reflects acknowledged work, with "sent" shown separately. | M |
@@ -169,7 +170,9 @@ These change defaults, so they should be chosen rather than inherited from a ben
 2. **New files written in place — resolved by T-11.** Atomic writes are now the
    default for P0 trust hardening. `--no-atomic` restores direct new-file writes;
    `--inplace` remains an explicit opt-in to direct writing.
-3. **Progress on by default when stderr is a terminal** (current: off, as in rsync).
+3. **Progress on by default when stderr is a terminal** — accepted by the user
+   on 2026-10-10. U-06 will enable this, with `--no-progress` and an environment
+   override; scripts stay silent unless progress is explicitly requested.
 4. **Fallback to rsync — resolved by R-02.** Automatic with a one-line stderr notice,
    as specified in its acceptance criteria. `--no-fallback` or `XSYNC_FALLBACK=0`
    selects strict failure; `--fallback` overrides the environment.
@@ -2606,3 +2609,23 @@ Verified artifact manifest (source `864bd37edf14`):
   pending scope clarification: whether Neo (the Pi/Linux LAN host) plus the
   isolated Linux SSH rig is sufficient, or a second physical Linux host should
   be included. P1 remains **21/22**; all P0 stories remain complete.
+
+## U-01 progress — 2026-10-10: terminal rendering and automated checks
+
+- **Partial.** SIGWINCH is handled by a signal-safe flag and the next UI tick;
+  actual widths down to one column are respected. UTF-8 clipping uses display
+  widths for CJK/combining characters; C locales use ASCII bars and escaped
+  names. `TERM=dumb` has no cursor escapes. Control/invalid filename bytes are
+  escaped in live rows even with `-8`; bars use the default foreground color.
+- macOS PTY/tmux validation passes **6 methods**, including 120 → 18 → 90
+  column resize, preservation of prior output, no stale bars, interrupt/cursor
+  cleanup, C locale and dumb terminals. Existing output tests pass **10**.
+  Linux arm64 real-SSH validation passes **5 methods**, with the tmux method
+  skipped because the isolated rig has no tmux; Linux also covers invalid
+  UTF-8 filenames, which APFS rejects.
+- `tests/progress-terminal.md` records the checklist and log paths. GUI access
+  to Terminal.app and Alacritty was denied by the computer-use tool; iTerm is
+  not installed. Terminal.app/iTerm screenshots and visual light-theme
+  verification therefore remain pending. U-01 is not marked done.
+- U-06 decision recorded: the user chose progress enabled by default on
+  terminals. Implementation follows in backlog order.
