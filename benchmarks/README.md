@@ -88,6 +88,10 @@ streams are not justified by these measurements.
 The [current-product tiny-transfer check](results/20261010-f13-tiny-summary.md)
 verifies 48 fresh transfers. Push medians favor xs by 20.32 ms; pull medians
 cost an extra 8.95 ms, meeting the 10 ms target in both directions.
+The [full-corpus local ext4 no-op comparison](results/20261010-f06-ext4-noop-summary.md)
+completes eight verified samples on neo: xs takes 42.07 s versus rsync's
+99.88 s (2.37x), with similar summed CPU. This product includes Linux scanning
+and anchored directory reuse; their individual contributions are not isolated.
 
 `large_tree.py --root ROOT` prepares the memory-story fixture: 5,000,000 regular
 files in 5,000 directories, with 16-byte index-derived payloads and fixed modes
@@ -104,6 +108,14 @@ completes and passes independent verification. The clean ed8b84137035 product
 peaks at 47.3 MiB and takes 242.60 s; rsync takes 368.79 s. These are one sample
 per tool for memory qualification, not repeated throughput medians. Pi-local
 and paired endpoint measurements remain pending.
+
+`large_tree_runs.py --root ROOT --peer user@host --revision CLEAN_12_DIGIT_REV`
+waits for the Pi's complete fixture and the prior ext4 work lock, then runs
+Pi-local, push and pull cases sequentially. Both fixtures and products must
+identify the requested inventory/revision. It rejects a failed verification
+or either measured xs process peak above 512 MiB, and records each stage before
+starting the next. Existing qualification outputs require inspection before
+another invocation; the runner does not silently repeat partial measurements.
 
 `path_walks.py` compares the old anchored destination walk with descriptor reuse
 at one, two, four and eight workers, plus rsync. It measures fresh byte copies

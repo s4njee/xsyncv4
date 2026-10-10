@@ -24,9 +24,13 @@ def main():
     p.add_argument('--candidate', type=pathlib.Path, required=True)
     p.add_argument('--rsync', default='rsync')
     p.add_argument('--samples', type=int, default=6)
+    p.add_argument('--cases', default='fresh-byte,noop')
     p.add_argument('--output', type=pathlib.Path, required=True)
     args = p.parse_args()
     if args.samples < 1: p.error('samples must be positive')
+    cases = args.cases.split(',')
+    if not cases or len(set(cases)) != len(cases) or any(c not in ('fresh-byte', 'noop') for c in cases):
+        p.error('cases must be distinct fresh-byte/noop values')
     source, work = args.corpus.resolve(), args.work.resolve()
     if not source.is_dir(): p.error('corpus is missing')
     if source == work or source in work.parents or work in source.parents:
@@ -42,6 +46,7 @@ def main():
     data = {'schema': 1, 'utc': datetime.datetime.now(datetime.timezone.utc).isoformat(),
             'platform': platform.platform(), 'host': platform.node(), 'cpus': os.cpu_count(),
             'initial_loadavg': list(os.getloadavg()), 'cache': 'retained OS caches',
+            'cases': cases,
             'corpus': {'path': str(source), **inventory(source)},
             'disk': subprocess.check_output(['df', '-k', str(source), str(work)], text=True),
             'harness_sha256': hashlib.sha256(pathlib.Path(__file__).read_bytes()).hexdigest(),
@@ -60,7 +65,7 @@ def main():
 
     save()
     try:
-        for case in ('fresh-byte', 'noop'):
+        for case in cases:
             for run in range(args.samples + 1):
                 order = tools[run % len(tools):] + tools[:run % len(tools)]
                 for label, binary, jobs in order:
@@ -89,7 +94,7 @@ def main():
             if case == 'noop':
                 for label, _, _ in tools: shutil.rmtree(work / (case + '-' + label))
         data['summary'] = []
-        for case in ('fresh-byte', 'noop'):
+        for case in cases:
             row = {'case': case, 'tools': {}}
             for label, _, _ in tools:
                 records = [r for r in data['records'] if r['case'] == case and r['tool'] == label]

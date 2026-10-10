@@ -132,7 +132,7 @@ The benchmark so far is one corpus slice, one machine, one filesystem, no networ
 | F-03 | **ssh is one stream on one core.** On a fast LAN the cipher becomes the ceiling long before the disks do. | done | Measured first. Then, if it is the limit: `--streams N` (several ssh connections sharing one transfer) and no compression by default on links faster than the compressor. | L |
 | F-04 | **Adaptive compression.** `-z` compresses every block at level 3 regardless of content or link. | **done** | Incompressible blocks are detected from a sample and sent raw; `--skip-compress` suffixes honoured; level chosen from measured link speed unless set. | M |
 | F-05 | **Large files.** One thread reads and one stream carries each large file; local copies on Linux use a plain read/write loop. | **done** | Parallel ranges within a file on both ends; `copy_file_range`/`FICLONE` on Linux (reflinks on btrfs/XFS mirror the APFS clone path); `F_NOCACHE` above a size so a 50 GB copy does not evict the page cache. | L |
-| F-06 | **Linux scan path.** macOS uses `getattrlistbulk`; Linux uses `readdir` plus one `fstatat` per entry. | partial | `getdents64` + `statx`, optionally batched with io_uring; measured against rsync on a no-op re-sync of the corpus on ext4. | M |
+| F-06 | **Linux scan path.** macOS uses `getattrlistbulk`; Linux uses `readdir` plus one `fstatat` per entry. | done | `getdents64` + `statx`, optionally batched with io_uring; measured against rsync on a no-op re-sync of the corpus on ext4. | M |
 | F-07 | **APFS byte-copy ceiling.** Creation is ~100 µs per file and does not scale with threads here; system time triples from 2 to 8 threads for no gain. Unknown: how much is path-lookup contention versus the filesystem itself, and how much is the nearly full volume. | partial | Re-measure on a volume with free space; try `openat`-relative creation; pick the thread count per filesystem instead of always using all performance cores. | M |
 | F-08 | **No-op re-sync burns CPU.** 0.40 s wall but 2.7 s of system time at 8 threads. | confirmed | Wall time unchanged or better with under 1 s of CPU; or an opt-in manifest that skips listing the destination entirely. | M |
 | F-09 | **Memory on very large trees.** The receiver keeps every directory record until exit; the local engine holds up to 200,000 pending files. Never run beyond 77k files. | partial | A 5-million-file synthetic tree syncs within a stated memory bound; receiver frees a directory once it and its children are finished. | M |
@@ -3784,3 +3784,18 @@ after U-01's evidence entry completes P2, as requested by the user.
 - Neo's fixture preparation remains queued behind the ext4 comparison. Pi-local
   and paired measurements, including the receiving endpoint's peak, remain
   required. F-09 stays partial.
+
+## P3 / F-06 completed — 2026-10-10
+
+- All eight full-corpus local ext4 no-op samples on neo complete and pass
+  independent checksum/metadata verification. The corpus has 914,106 regular
+  files, 417,408 directories and 10.53 GB of logical data. Cleanup completes
+  before five-million-file fixture preparation starts under the same work lock.
+- Clean f7e187827157 xs takes 42.066 s versus rsync's 99.884 s by four-sample
+  median (2.37x). Summed CPU medians are 82.200/80.856 s, respectively, and
+  measured process peaks are 198.84/284.25 MiB. The product includes directory
+  pinning as well as the Linux scan path; individual contributions are not
+  isolated. Retained caches do not imply this larger-than-RAM corpus is resident.
+- The existing five scan/ABI/fallback tests pass on glibc and static musl, with
+  227 Linux differential cases. Raw results, logs and the qualified product
+  identities are linked from `benchmarks/results/20261010-f06-ext4-noop-summary.md`.
