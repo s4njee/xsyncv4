@@ -1,0 +1,164 @@
+fresh-byte reference-j4 0/6: 34.7862s verified
+fresh-byte candidate-j1 0/6: 31.5359s verified
+fresh-byte candidate-j2 0/6: 26.0787s verified
+fresh-byte candidate-j4 0/6: 28.2772s verified
+fresh-byte candidate-j8 0/6: 26.7385s verified
+fresh-byte rsync 0/6: 26.6918s verified
+fresh-byte candidate-j1 1/6: 32.0216s verified
+fresh-byte candidate-j2 1/6: 51.1360s verified
+fresh-byte candidate-j4 1/6: 26.6514s verified
+fresh-byte candidate-j8 1/6: 25.8654s verified
+fresh-byte rsync 1/6: 27.2737s verified
+fresh-byte reference-j4 1/6: 29.5864s verified
+fresh-byte candidate-j2 2/6: 28.5341s verified
+fresh-byte candidate-j4 2/6: 27.9515s verified
+fresh-byte candidate-j8 2/6: 27.6591s verified
+fresh-byte rsync 2/6: 28.9331s verified
+fresh-byte reference-j4 2/6: 90.7750s verified
+fresh-byte candidate-j1 2/6: 43.9468s verified
+fresh-byte candidate-j4 3/6: 29.6176s verified
+fresh-byte candidate-j8 3/6: 37.1573s verified
+fresh-byte rsync 3/6: 27.0600s verified
+fresh-byte reference-j4 3/6: 32.8674s verified
+fresh-byte candidate-j1 3/6: 34.2184s verified
+fresh-byte candidate-j2 3/6: 29.6264s verified
+fresh-byte candidate-j8 4/6: 27.7711s verified
+fresh-byte rsync 4/6: 29.2053s verified
+fresh-byte reference-j4 4/6: 41.5249s verified
+fresh-byte candidate-j1 4/6: 50.7802s verified
+fresh-byte candidate-j2 4/6: 28.4016s verified
+fresh-byte candidate-j4 4/6: 38.6493s verified
+fresh-byte rsync 5/6: 28.7757s verified
+fresh-byte reference-j4 5/6: 40.8168s verified
+fresh-byte candidate-j1 5/6: 36.6564s verified
+fresh-byte candidate-j2 5/6: 46.3641s verified
+fresh-byte candidate-j4 5/6: 34.2189s verified
+fresh-byte candidate-j8 5/6: 35.3465s verified
+fresh-byte reference-j4 6/6: 34.5099s verified
+fresh-byte candidate-j1 6/6: 39.8255s verified
+fresh-byte candidate-j2 6/6: 31.6947s verified
+fresh-byte candidate-j4 6/6: 30.0474s verified
+fresh-byte candidate-j8 6/6: 32.0482s verified
+fresh-byte rsync 6/6: 28.3372s verified
+noop reference-j4 0/6: 2.6842s verified
+noop candidate-j1 0/6: 3.3749s verified
+noop candidate-j2 0/6: 2.7170s verified
+noop candidate-j4 0/6: 1.7241s verified
+noop candidate-j8 0/6: 1.6032s verified
+noop rsync 0/6: 1.6563s verified
+noop candidate-j1 1/6: 5.3364s verified
+noop candidate-j2 1/6: 3.5452s verified
+noop candidate-j4 1/6: 2.4615s verified
+noop candidate-j8 1/6: 2.1711s verified
+noop rsync 1/6: 2.2643s verified
+noop reference-j4 1/6: 3.8883s verified
+noop candidate-j2 2/6: 3.8781s verified
+noop candidate-j4 2/6: 2.4820s verified
+noop candidate-j8 2/6: 2.1086s verified
+noop rsync 2/6: 2.1935s verified
+noop reference-j4 2/6: 4.5838s verified
+noop candidate-j1 2/6: 5.1378s verified
+noop candidate-j4 3/6: 2.8977s verified
+noop candidate-j8 3/6: 2.5507s verified
+noop rsync 3/6: 5.2030s verified
+noop reference-j4 3/6: 4.7786s verified
+noop candidate-j1 3/6: 5.3742s verified
+noop candidate-j2 3/6: 3.8783s verified
+noop candidate-j8 4/6: 2.5022s verified
+noop rsync 4/6: 2.2584s verified
+noop reference-j4 4/6: 4.7586s verified
+noop candidate-j1 4/6: 5.2168s verified
+noop candidate-j2 4/6: 3.8683s verified
+noop candidate-j4 4/6: 3.5220s verified
+noop rsync 5/6: 2.4064s verified
+noop reference-j4 5/6: 3.7906s verified
+noop candidate-j1 5/6: 5.2283s verified
+noop candidate-j2 5/6: 3.8829s verified
+noop candidate-j4 5/6: 2.4189s verified
+noop candidate-j8 5/6: 2.2428s verified
+noop reference-j4 6/6: 4.2732s verified
+noop candidate-j1 6/6: 5.5149s verified
+noop candidate-j2 6/6: 3.4450s verified
+noop candidate-j4 6/6: 2.7552s verified
+noop candidate-j8 6/6: 2.5654s verified
+noop rsync 6/6: 7.2939s verified
+[
+  {
+    "case": "fresh-byte",
+    "tools": {
+      "reference-j4": {
+        "wall_seconds": 37.663344228989445,
+        "cpu_seconds": 39.704274,
+        "peak_rss_bytes": 64798720
+      },
+      "candidate-j1": {
+        "wall_seconds": 38.240957229514606,
+        "cpu_seconds": 22.633973500000003,
+        "peak_rss_bytes": 61472768
+      },
+      "candidate-j2": {
+        "wall_seconds": 30.660573395434767,
+        "cpu_seconds": 26.376134,
+        "peak_rss_bytes": 62455808
+      },
+      "candidate-j4": {
+        "wall_seconds": 29.832531062536873,
+        "cpu_seconds": 29.105435,
+        "peak_rss_bytes": 66355200
+      },
+      "candidate-j8": {
+        "wall_seconds": 29.909660646459088,
+        "cpu_seconds": 32.648964,
+        "peak_rss_bytes": 71467008
+      },
+      "rsync": {
+        "wall_seconds": 28.55642864550464,
+        "cpu_seconds": 23.843076500000002,
+        "peak_rss_bytes": 39337984
+      }
+    }
+  },
+  {
+    "case": "noop",
+    "tools": {
+      "reference-j4": {
+        "wall_seconds": 4.428464083466679,
+        "cpu_seconds": 10.9903805,
+        "peak_rss_bytes": 39878656
+      },
+      "candidate-j1": {
+        "wall_seconds": 5.282312750001438,
+        "cpu_seconds": 4.115943,
+        "peak_rss_bytes": 32440320
+      },
+      "candidate-j2": {
+        "wall_seconds": 3.8732306874589995,
+        "cpu_seconds": 4.9710265,
+        "peak_rss_bytes": 34979840
+      },
+      "candidate-j4": {
+        "wall_seconds": 2.618589041987434,
+        "cpu_seconds": 6.757289,
+        "peak_rss_bytes": 41943040
+      },
+      "candidate-j8": {
+        "wall_seconds": 2.372492416878231,
+        "cpu_seconds": 9.1943085,
+        "peak_rss_bytes": 49168384
+      },
+      "rsync": {
+        "wall_seconds": 2.3353326249634847,
+        "cpu_seconds": 2.544493,
+        "peak_rss_bytes": 27869184
+      }
+    }
+  }
+]
+Traceback (most recent call last):
+  File "/Users/sanjee/projects/xsyncv4/.bench/p3-f07-free-volume.py", line 16, in <module>
+    subprocess.run(['hdiutil','detach','-quiet',str(mount)],check=True)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.8/Frameworks/Python.framework/Versions/3.14/lib/python3.14/subprocess.py", line 578, in run
+    raise CalledProcessError(retcode, process.args,
+                             output=stdout, stderr=stderr)
+subprocess.CalledProcessError: Command '['hdiutil', 'detach', '-quiet', '/Users/sanjee/projects/xsyncv4/.bench/p3-f07-free-volume/mount']' returned non-zero exit status 16.

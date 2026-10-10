@@ -3891,3 +3891,22 @@ after U-01's evidence entry completes P2, as requested by the user.
   stacks will need interpretation alongside existing resource measurements;
   preparing the profiler does not prove scan starvation or its absence.
   F-14 stays unverified until those profiles finish and are assessed.
+
+### F-07 free-container comparison complete — 2026-10-10
+
+- All 72 timed samples and 12 excluded warmups pass independent checksum and
+  metadata verification, with six rotated samples per tool/case. Clean
+  24b82c5d5134 at four workers takes 29.83 s for fresh byte copies and 2.62 s
+  for no-op scans, versus 37.66/4.43 s for clean 7c3072c821cc at four workers.
+- Four and eight candidate workers have similar fresh-copy medians, while
+  eight uses 12.2% more CPU. Eight improves no-op wall time by 9.4% relative
+  to four at a 36.1% CPU cost. Results and all outliers are retained in
+  `20261010-f07-free-container-summary.md` and its linked evidence.
+- The 16 GiB APFS container has free space, but its backing volume is 98%
+  full. Host load rises from 46.7/29.4/26.7 to 96.3/53.8/45.2, and early
+  fresh-copy samples overlap local builds and other validation. This cannot
+  establish quiet physical-disk behavior or isolate free-space effects.
+- The runner saves its complete result before normal image detach fails
+  because a virtualization process holds handles. The owned disposable image
+  is then detached successfully; no VM is terminated. Filesystem defaults still require selection
+  and validation; F-07 remains partial.

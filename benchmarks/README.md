@@ -149,6 +149,12 @@ container's free-space behavior, but its backing volume and host load must also
 be recorded; it does not establish performance on an otherwise empty physical
 disk.
 
+The [completed free-container comparison](results/20261010-f07-free-container-summary.md)
+retains all 84 verified copies and the host limitations. Four workers match
+eight on fresh byte copies with lower CPU; eight improves no-op wall time at
+a larger CPU cost. These busy-host measurements leave automatic filesystem
+worker selection unresolved.
+
 The [APFS no-op diagnostic](results/20261010T152712Z-apfs-baseline-summary.md)
 records the current binary's cost at 1, 2, 4 and 8 threads. Its host had high
 background load and the volume was 98% full; quieter/free-volume measurements
