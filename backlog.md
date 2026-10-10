@@ -3965,3 +3965,20 @@ after U-01's evidence entry completes P2, as requested by the user.
   `20261010-f08-normalization-summary.md` and its linked evidence. A new
   independently verified call-stack sample is queued after the automatic
   filesystem-budget comparison. F-08 remains confirmed and open.
+
+### F-10 initial comparison and attribute correction follow-up — 2026-10-10
+
+- Clean 0822c3728055 leaf-only and 433d1ed18a7e subtree products complete
+  all 108 timed samples and 18 excluded warmups at the same explicit
+  four-worker budget. Every copy passes independent checksum/metadata and
+  source-immutability verification. The full first result is retained in
+  `20261010-f10-initial-summary.md` and its linked evidence.
+- The subtree version uses less CPU but has longer wall time in every case.
+  Near the entry limit, omitted-permission copies take 0.1756 versus 0.1154 s
+  (52.2% slower) while using 48.6% less CPU. This negative result is retained;
+  remaining faster than rsync alone does not settle the leaf-only comparison.
+- Corrections for independent cloned directories now use the existing pool
+  with at most four participating workers. The clone transaction and its
+  inventory/depth limits stay unchanged, and directory attributes remain
+  applied through their verified descriptors. Focused correctness checks and
+  a new complete comparison are required for this follow-up. F-10 stays partial.

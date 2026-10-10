@@ -506,7 +506,10 @@ struct Local {
     // through mkdir, using the same pinned parent that received the clone.
     timespec parent_times[2] = {{0, UTIME_OMIT}, {0, UTIME_NOW}};
     check_attr(futimens(destination.fd, parent_times), d->waiter->dst_path.c_str(), "times");
-    for (DirWork* dir : directories) {
+    // The clone transaction is complete. Independent directories can now fix
+    // their selected attributes in parallel, with a bounded APFS worker budget.
+    pool.parallel(directories.size(), w, [&](size_t index, Worker& worker) {
+      DirWork* dir = directories[index];
       const DirList& listing = dir->src;
       int fd = destination_open_dir(dir->dst_path.c_str());
       struct stat cloned{};
@@ -539,10 +542,10 @@ struct Local {
       if (fd >= 0) close(fd);
       for (u32 i = 0; i < listing.e.size(); ++i) {
         const Entry& e = listing.e[i];
-        note_item(*dir, i, e.type == T_REG ? ">f+++++++++" : e.type == T_DIR ? "cd+++++++++" : "cL+++++++++", 0, w);
+        note_item(*dir, i, e.type == T_REG ? ">f+++++++++" : e.type == T_DIR ? "cd+++++++++" : "cL+++++++++", 0, worker);
       }
       if (dir != d) finish_dir(*dir);
-    }
+    }, 4);
     g_stats.files_seen.fetch_add(nf, std::memory_order_relaxed);
     g_stats.dirs_seen.fetch_add(nd, std::memory_order_relaxed);
     g_stats.links_seen.fetch_add(nl, std::memory_order_relaxed);
