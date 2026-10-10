@@ -3874,3 +3874,20 @@ after U-01's evidence entry completes P2, as requested by the user.
   records and 18 warmups, independently verified. Its small harness matrix
   passes all 126 copies. Full-size frozen-product performance measurements
   remain required; F-10 stays partial.
+
+### F-14 profiler preparation checkpoint — 2026-10-10
+
+- Freya's disposable benchmark prefix now contains perf 7.2.5-1 and its
+  dependencies. Package hashes match its root-protected pacman metadata;
+  the user-CPU event probe succeeds without elevated privileges. Product
+  provenance and the probe output are retained in
+  `20261010-f14-profiler-products.json`.
+- Paired no-op/checksum profiles are queued behind the five-million-file
+  local and paired memory qualification. They use clean ed8b84137035 products
+  and retain independent checksum/metadata verification. The peer wrapper
+  checks the product hash and labels source/receiver from the measured flow,
+  because native `--server` argv does not expose the negotiated role.
+- Instrumented timings include profiler overhead. The 99 Hz user-CPU call
+  stacks will need interpretation alongside existing resource measurements;
+  preparing the profiler does not prove scan starvation or its absence.
+  F-14 stays unverified until those profiles finish and are assessed.

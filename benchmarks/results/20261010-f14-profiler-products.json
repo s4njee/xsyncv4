@@ -1,0 +1,41 @@
+{
+  "utc": "2026-10-10T21:48:47.108009+00:00",
+  "prefix": "/home/sanjee/benchmarks/xsyncv4/20261010T144748Z-715fa0/tools/perf",
+  "packages": [
+    {
+      "name": "numactl",
+      "version": "2.0.19-1",
+      "url": "https://archlinux.cachyos.org/repo/extra/os/x86_64/numactl-2.0.19-1-x86_64.pkg.tar.zst",
+      "sha256": "699bce74daee11fa49de93999ba4e023f132bc51a7768dec845b2979d54f367d",
+      "metadata_database": "/var/lib/pacman/sync/extra.db"
+    },
+    {
+      "name": "libtraceevent",
+      "version": "1:1.9.0-1.1",
+      "url": "https://mirror.krfoss.org/cachyos/repo/x86_64_v4/cachyos-extra-znver4/libtraceevent-1:1.9.0-1.1-x86_64_v4.pkg.tar.zst",
+      "sha256": "cd46d75385d0f6c2ba01ee4f3021f80392b4c9a528212930fb1e333517da787a",
+      "metadata_database": "/var/lib/pacman/sync/cachyos-extra-znver4.db"
+    },
+    {
+      "name": "libpfm",
+      "version": "4.13.0+r83+g91970fe-1.1",
+      "url": "https://mirror.krfoss.org/cachyos/repo/x86_64_v4/cachyos-extra-znver4/libpfm-4.13.0+r83+g91970fe-1.1-x86_64_v4.pkg.tar.zst",
+      "sha256": "f17a59625f4efa9b2f11e47edcf8e6354134d9654072ebed44d8e70e30267384",
+      "metadata_database": "/var/lib/pacman/sync/cachyos-extra-znver4.db"
+    },
+    {
+      "name": "perf",
+      "version": "7.2.5-1",
+      "url": "https://archive.archlinux.org/packages/p/perf/perf-7.2.5-1-x86_64.pkg.tar.zst",
+      "sha256": "3b24a7effa1b2b0313d9720b5e586f4ef3f6358291c7ea1119efb50823b53f9b",
+      "metadata_database": "/var/lib/pacman/sync/extra.db"
+    }
+  ],
+  "complete": true,
+  "version": "perf version 7.2.5-1",
+  "user_event_probe": {
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "\n Performance counter stats for '/bin/true':\n\n              0.21 msec cpu-clock:u                                                           \n\n       0.000614913 seconds time elapsed\n\n       0.000516000 seconds user\n       0.000000000 seconds sys\n\n\n"
+  }
+}

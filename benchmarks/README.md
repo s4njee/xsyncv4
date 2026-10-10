@@ -117,6 +117,28 @@ or either measured xs process peak above 512 MiB, and records each stage before
 starting the next. Existing qualification outputs require inspection before
 another invocation; the runner does not silently repeat partial measurements.
 
+`checksum_profile.py --root ROOT --peer user@host --revision CLEAN_12_DIGIT_REV`
+waits for that complete memory qualification, then serializes paired no-op and
+checksum cases. Stage `profile_peer.py` as the peer's `ROOT/bin/xs-f14-profile`.
+It needs `logs/f14-profile-config.json` containing the clean `revision` and
+`xs_sha256`, and a qualified profiler at `tools/perf/usr/bin/perf` with its
+libraries beneath `tools/perf/usr/lib`. The
+[freya profiler qualification](results/20261010-f14-profiler-products.json)
+records package hashes checked against the host's pacman databases and a
+successful unprivileged user-event probe. No system package installation is
+required.
+
+The wrapper records 99 Hz user-CPU samples with DWARF call stacks and leaves
+the protocol streams untouched. Its index associates each recording with the
+flow, scenario, native product hash and measured peer role; native roles are
+negotiated in the protocol, so `--server` alone cannot identify the role.
+Every transfer still requires independent rsync verification. Instrumented
+timings and RSS include profiler overhead and do not replace the repeated
+throughput or memory qualifications. User-only CPU samples cannot establish
+kernel costs, I/O waits or scan starvation by themselves; compare them with
+the retained resource measurements before deciding whether a hashing pool
+is needed. Existing profile state requires inspection before another run.
+
 `path_walks.py` compares the old anchored destination walk with descriptor reuse
 at one, two, four and eight workers, plus rsync. It measures fresh byte copies
 with cloning disabled and no-op re-syncs, records wall time/CPU/peak process RSS,
