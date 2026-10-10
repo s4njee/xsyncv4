@@ -114,7 +114,7 @@ coverage is tracked in `tests/progress-terminal.md` and remains incomplete.
 | U-04 | **Push progress counts bytes read, not bytes landed.** The bar can sit at 100 % while the receiver is still writing. | **done** | Receiver acknowledges completed bytes; the client bar reflects acknowledged work, with "sent" shown separately. | M |
 | U-05 | **Remote detail.** Wire bytes, compression ratio, and which side is the bottleneck (reading, network, writing) are known internally and not shown. | **done** | Total line shows wire rate and ratio with `-z`; `-vv` names the limiting stage. | M |
 | U-06 | **Progress by default on a terminal?** rsync is silent without `-P`. A daily driver might show the bar whenever stderr is a tty and stay silent in scripts. See "Decisions". | **done** | Decision recorded; `--no-progress` and env override exist either way. | S |
-| U-07 | **Machine-readable progress.** Off a terminal, `--progress` prints a line a second. Scripts and wrappers want rsync's `--info=progress2` single line or JSON events. | code | `--info=progress2` output is line-compatible with rsync off a tty; `--progress=json` emits one object per tick and per file. | M |
+| U-07 | **Machine-readable progress.** Off a terminal, `--progress` prints a line a second. Scripts and wrappers want rsync's `--info=progress2` single line or JSON events. | **done** | `--info=progress2` output is line-compatible with rsync off a tty; `--progress=json` emits one object per tick and per file. | M |
 | U-08 | **Phases that look like hangs.** Deleting a large tree, waiting for the remote to finish, hashing with `-c`: the display says "scanning" or sits at 100 %. | code | Each phase has its own label and counter (`deleting 12,410`, `verifying`, `waiting for receiver`). | S |
 | U-09 | **Dry-run summary.** `-n` prints names only with `-v`. | new | `-n` always ends with "would transfer N files (X), delete M". | S |
 | U-10 | **`-h` consistency.** The summary follows rsync's `-h` (1000-based, 1024 with `-hh`); the progress display is always 1024-based. | code | One rule, applied everywhere, documented. | S |
@@ -2831,4 +2831,16 @@ Verified artifact manifest (source `864bd37edf14`):
   timed ticks, filenames, PTY output, precedence, dry runs, APFS clones and
   unsupported peers). Real SSH passes the same eight with one APFS skip;
   all 10 ordinary output and 10 defaults methods pass. All 15 protocol
-  compatibility methods pass. Release validation follows.
+  compatibility methods and all 11 live progress regression methods pass.
+- **Done; P2 is 6/11 complete.** The Linux build caught a missing explicit
+  `<algorithm>` include in the fallback mode parser; the corrected release
+  source is `b6aa0a153e4e`. All three artifacts are rebuilt and verified. All
+  eight machine-progress methods pass on macOS ARM and Intel; each static
+  Linux artifact passes with only the APFS clone method skipped.
+- Logs: `/tmp/xsync-u07-machine-final2.log`, `/tmp/xsync-u07-output.log`,
+  `/tmp/xsync-u07-defaults-final.log`, `/tmp/xsync-u07-protocol.log`,
+  `/tmp/xsync-u07-progress.log`, `/tmp/xsync-u07-real-ssh-expanded.log`,
+  `/tmp/xsync-u07-releases-final.log`,
+  `/tmp/xsync-u07-release-mac-{arm,intel}-final.log` and
+  `/tmp/xsync-u07-release-linux-{amd64,arm64}.log`. Packaging is refreshed
+  after this entry. U-08 is next; U-01 remains partial for GUI verification.
