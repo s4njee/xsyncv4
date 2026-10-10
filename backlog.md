@@ -4169,3 +4169,14 @@ after U-01's evidence entry completes P2, as requested by the user.
 - The frozen comparison continues uninterrupted on 9f260833c926. Its results
   do not alone qualify the newer low-limit policy; that policy needs its own
   clean validation. No CPU target pass is assumed, and F-08 remains open.
+
+### F-08 parent-capability comparison completed — 2026-10-10
+
+- Frozen 9f260833c926 completes eighteen verified timed samples and three
+  excluded warmups against matched one-worker reference and rsync. Median CPU
+  falls from 3.646458 to 2.821936 s (22.6%); wall falls from 4.461870 to
+  3.822005 s (14.3%). All samples and correctness logs are retained in
+  `20261010-f08-parent-summary.md` and its linked evidence.
+- The busy Mac and 99%-full physical storage limit throughput conclusions.
+  CPU still exceeds one second; no manifest is implemented and F-08 stays open.
+  The newer low-descriptor-limit policy requires separate clean validation.

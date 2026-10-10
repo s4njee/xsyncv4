@@ -1,0 +1,546 @@
+{
+  "schema": 1,
+  "utc": "2026-10-10T23:33:04.449722+00:00",
+  "platform": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
+  "host": "MacBookPro",
+  "cpus": 10,
+  "initial_loadavg": [
+    33.57861328125,
+    38.63916015625,
+    35.33837890625
+  ],
+  "cache": "retained OS caches",
+  "cases": [
+    "noop"
+  ],
+  "corpus": {
+    "path": "/Users/sanjee/projects/xsyncv4/.bench/corpus",
+    "files": 76838,
+    "directories": 19072,
+    "bytes": 517808080
+  },
+  "disk": "Filesystem   1024-blocks       Used Available Capacity  iused     ifree %iused  Mounted on\n/dev/disk3s5  3902665360 3810995364  62204988    99% 23291599 622049880    4%   /System/Volumes/Data\n/dev/disk3s5  3902665360 3810995364  62204988    99% 23291599 622049880    4%   /System/Volumes/Data\n",
+  "harness_sha256": "e59df70d0f72afd6b324df28805d5d34abe77a3206afea8597e9379bf91b83fb",
+  "binaries": {
+    "reference": {
+      "version": "xs  version 0.1.0  protocol version 4  git 027e14d8b03f",
+      "sha256": "e0a41fac2a470803c932f59dc01ab8c1c23c6f07ce95c916aab75af125fcfa6e"
+    },
+    "candidate": {
+      "version": "xs  version 0.1.0  protocol version 4  git 9f260833c926",
+      "sha256": "9a28cb686b9625ea9fd18f4c01265ba58f09e5606d2c64b44c37d2def0aa04d9"
+    },
+    "rsync": {
+      "version": "rsync  version 3.4.4  protocol version 32",
+      "sha256": "98d3d56b3e7ee67412203236afc6da8f4021527e98eaa72909340d2b40bcf98c"
+    }
+  },
+  "records": [
+    {
+      "returncode": 0,
+      "wall_seconds": 3.2206390840001404,
+      "user_seconds": 0.274382,
+      "system_seconds": 2.354692,
+      "max_rss_bytes": 30621696,
+      "voluntary_switches": 6142,
+      "involuntary_switches": 6067,
+      "case": "noop",
+      "tool": "candidate-j1",
+      "sample": 1,
+      "command": [
+        "/Users/sanjee/projects/xsyncv4/.bench/p3-f08-parent-macos/xs",
+        "-a",
+        "--no-fallback",
+        "--no-progress",
+        "--no-clone",
+        "-j1",
+        "/Users/sanjee/projects/xsyncv4/.bench/corpus/",
+        "/Users/sanjee/projects/xsyncv4/.bench/p3-f08-parent-work/noop-candidate-j1/"
+      ],
+      "verified": true,
+      "stderr": ""
+    },
+    {
+      "returncode": 0,
+      "wall_seconds": 1.7748839170672,
+      "user_seconds": 0.208726,
+      "system_seconds": 2.306053,
+      "max_rss_bytes": 25575424,
+      "voluntary_switches": 4664,
+      "involuntary_switches": 5597,
+      "case": "noop",
+      "tool": "rsync",
+      "sample": 1,
+      "command": [
+        "/opt/homebrew/bin/rsync",
+        "-a",
+        "/Users/sanjee/projects/xsyncv4/.bench/corpus/",
+        "/Users/sanjee/projects/xsyncv4/.bench/p3-f08-parent-work/noop-rsync/"
+      ],
+      "verified": true,
+      "stderr": ""
+    },
+    {
+      "returncode": 0,
+      "wall_seconds": 4.062602291116491,
+      "user_seconds": 0.29115399999999997,
+      "system_seconds": 3.064643,
+      "max_rss_bytes": 30048256,
+      "voluntary_switches": 8523,
+      "involuntary_switches": 5097,
+      "case": "noop",
+      "tool": "reference-j1",
+      "sample": 1,
+      "command": [
+        "/Users/sanjee/projects/xsyncv4/.bench/p3-f09-window-v2-macos/xs",
+        "-a",
+        "--no-fallback",
+        "--no-progress",
+        "--no-clone",
+        "-j1",
+        "/Users/sanjee/projects/xsyncv4/.bench/corpus/",
+        "/Users/sanjee/projects/xsyncv4/.bench/p3-f08-parent-work/noop-reference-j1/"
+      ],
+      "verified": true,
+      "stderr": ""
+    },
+    {
+      "returncode": 0,
+      "wall_seconds": 1.7277459579054266,
+      "user_seconds": 0.20685699999999999,
+      "system_seconds": 2.240161,
+      "max_rss_bytes": 24461312,
+      "voluntary_switches": 956,
+      "involuntary_switches": 5848,
+      "case": "noop",
+      "tool": "rsync",
+      "sample": 2,
+      "command": [
+        "/opt/homebrew/bin/rsync",
+        "-a",
+        "/Users/sanjee/projects/xsyncv4/.bench/corpus/",
+        "/Users/sanjee/projects/xsyncv4/.bench/p3-f08-parent-work/noop-rsync/"
+      ],
+      "verified": true,
+      "stderr": ""
+    },
+    {
+      "returncode": 0,
+      "wall_seconds": 3.569688874995336,
+      "user_seconds": 0.280927,
+      "system_seconds": 3.020448,
+      "max_rss_bytes": 29376512,
+      "voluntary_switches": 1044,
+      "involuntary_switches": 3790,
+      "case": "noop",
+      "tool": "reference-j1",
+      "sample": 2,
+      "command": [
+        "/Users/sanjee/projects/xsyncv4/.bench/p3-f09-window-v2-macos/xs",
+        "-a",
+        "--no-fallback",
+        "--no-progress",
+        "--no-clone",
+        "-j1",
+        "/Users/sanjee/projects/xsyncv4/.bench/corpus/",
+        "/Users/sanjee/projects/xsyncv4/.bench/p3-f08-parent-work/noop-reference-j1/"
+      ],
+      "verified": true,
+      "stderr": ""
+    },
+    {
+      "returncode": 0,
+      "wall_seconds": 3.3983604579698294,
+      "user_seconds": 0.272068,
+      "system_seconds": 2.324235,
+      "max_rss_bytes": 29491200,
+      "voluntary_switches": 8772,
+      "involuntary_switches": 4634,
+      "case": "noop",
+      "tool": "candidate-j1",
+      "sample": 2,
+      "command": [
+        "/Users/sanjee/projects/xsyncv4/.bench/p3-f08-parent-macos/xs",
+        "-a",
+        "--no-fallback",
+        "--no-progress",
+        "--no-clone",
+        "-j1",
+        "/Users/sanjee/projects/xsyncv4/.bench/corpus/",
+        "/Users/sanjee/projects/xsyncv4/.bench/p3-f08-parent-work/noop-candidate-j1/"
+      ],
+      "verified": true,
+      "stderr": ""
+    },
+    {
+      "returncode": 0,
+      "wall_seconds": 4.568836665945128,
+      "user_seconds": 0.315581,
+      "system_seconds": 3.352673,
+      "max_rss_bytes": 31555584,
+      "voluntary_switches": 7548,
+      "involuntary_switches": 8261,
+      "case": "noop",
+      "tool": "reference-j1",
+      "sample": 3,
+      "command": [
+        "/Users/sanjee/projects/xsyncv4/.bench/p3-f09-window-v2-macos/xs",
+        "-a",
+        "--no-fallback",
+        "--no-progress",
+        "--no-clone",
+        "-j1",
+        "/Users/sanjee/projects/xsyncv4/.bench/corpus/",
+        "/Users/sanjee/projects/xsyncv4/.bench/p3-f08-parent-work/noop-reference-j1/"
+      ],
+      "verified": true,
+      "stderr": ""
+    },
+    {
+      "returncode": 0,
+      "wall_seconds": 3.902611750178039,
+      "user_seconds": 0.291124,
+      "system_seconds": 2.519066,
+      "max_rss_bytes": 31080448,
+      "voluntary_switches": 7841,
+      "involuntary_switches": 7918,
+      "case": "noop",
+      "tool": "candidate-j1",
+      "sample": 3,
+      "command": [
+        "/Users/sanjee/projects/xsyncv4/.bench/p3-f08-parent-macos/xs",
+        "-a",
+        "--no-fallback",
+        "--no-progress",
+        "--no-clone",
+        "-j1",
+        "/Users/sanjee/projects/xsyncv4/.bench/corpus/",
+        "/Users/sanjee/projects/xsyncv4/.bench/p3-f08-parent-work/noop-candidate-j1/"
+      ],
+      "verified": true,
+      "stderr": ""
+    },
+    {
+      "returncode": 0,
+      "wall_seconds": 3.5115644161123782,
+      "user_seconds": 0.26666,
+      "system_seconds": 2.878445,
+      "max_rss_bytes": 27344896,
+      "voluntary_switches": 9458,
+      "involuntary_switches": 21645,
+      "case": "noop",
+      "tool": "rsync",
+      "sample": 3,
+      "command": [
+        "/opt/homebrew/bin/rsync",
+        "-a",
+        "/Users/sanjee/projects/xsyncv4/.bench/corpus/",
+        "/Users/sanjee/projects/xsyncv4/.bench/p3-f08-parent-work/noop-rsync/"
+      ],
+      "verified": true,
+      "stderr": ""
+    },
+    {
+      "returncode": 0,
+      "wall_seconds": 4.711440167156979,
+      "user_seconds": 0.317046,
+      "system_seconds": 2.861429,
+      "max_rss_bytes": 30179328,
+      "voluntary_switches": 8607,
+      "involuntary_switches": 13976,
+      "case": "noop",
+      "tool": "candidate-j1",
+      "sample": 4,
+      "command": [
+        "/Users/sanjee/projects/xsyncv4/.bench/p3-f08-parent-macos/xs",
+        "-a",
+        "--no-fallback",
+        "--no-progress",
+        "--no-clone",
+        "-j1",
+        "/Users/sanjee/projects/xsyncv4/.bench/corpus/",
+        "/Users/sanjee/projects/xsyncv4/.bench/p3-f08-parent-work/noop-candidate-j1/"
+      ],
+      "verified": true,
+      "stderr": ""
+    },
+    {
+      "returncode": 0,
+      "wall_seconds": 2.2789365421049297,
+      "user_seconds": 0.241577,
+      "system_seconds": 2.725213,
+      "max_rss_bytes": 23937024,
+      "voluntary_switches": 9425,
+      "involuntary_switches": 15984,
+      "case": "noop",
+      "tool": "rsync",
+      "sample": 4,
+      "command": [
+        "/opt/homebrew/bin/rsync",
+        "-a",
+        "/Users/sanjee/projects/xsyncv4/.bench/corpus/",
+        "/Users/sanjee/projects/xsyncv4/.bench/p3-f08-parent-work/noop-rsync/"
+      ],
+      "verified": true,
+      "stderr": ""
+    },
+    {
+      "returncode": 0,
+      "wall_seconds": 4.878233375027776,
+      "user_seconds": 0.342393,
+      "system_seconds": 3.545408,
+      "max_rss_bytes": 29999104,
+      "voluntary_switches": 8947,
+      "involuntary_switches": 13955,
+      "case": "noop",
+      "tool": "reference-j1",
+      "sample": 4,
+      "command": [
+        "/Users/sanjee/projects/xsyncv4/.bench/p3-f09-window-v2-macos/xs",
+        "-a",
+        "--no-fallback",
+        "--no-progress",
+        "--no-clone",
+        "-j1",
+        "/Users/sanjee/projects/xsyncv4/.bench/corpus/",
+        "/Users/sanjee/projects/xsyncv4/.bench/p3-f08-parent-work/noop-reference-j1/"
+      ],
+      "verified": true,
+      "stderr": ""
+    },
+    {
+      "returncode": 0,
+      "wall_seconds": 3.330525124911219,
+      "user_seconds": 0.265816,
+      "system_seconds": 2.756271,
+      "max_rss_bytes": 24035328,
+      "voluntary_switches": 9486,
+      "involuntary_switches": 16028,
+      "case": "noop",
+      "tool": "rsync",
+      "sample": 5,
+      "command": [
+        "/opt/homebrew/bin/rsync",
+        "-a",
+        "/Users/sanjee/projects/xsyncv4/.bench/corpus/",
+        "/Users/sanjee/projects/xsyncv4/.bench/p3-f08-parent-work/noop-rsync/"
+      ],
+      "verified": true,
+      "stderr": ""
+    },
+    {
+      "returncode": 0,
+      "wall_seconds": 4.354903458151966,
+      "user_seconds": 0.313613,
+      "system_seconds": 3.311048,
+      "max_rss_bytes": 30441472,
+      "voluntary_switches": 5134,
+      "involuntary_switches": 7988,
+      "case": "noop",
+      "tool": "reference-j1",
+      "sample": 5,
+      "command": [
+        "/Users/sanjee/projects/xsyncv4/.bench/p3-f09-window-v2-macos/xs",
+        "-a",
+        "--no-fallback",
+        "--no-progress",
+        "--no-clone",
+        "-j1",
+        "/Users/sanjee/projects/xsyncv4/.bench/corpus/",
+        "/Users/sanjee/projects/xsyncv4/.bench/p3-f08-parent-work/noop-reference-j1/"
+      ],
+      "verified": true,
+      "stderr": ""
+    },
+    {
+      "returncode": 0,
+      "wall_seconds": 3.871168666984886,
+      "user_seconds": 0.29078499999999996,
+      "system_seconds": 2.542896,
+      "max_rss_bytes": 29655040,
+      "voluntary_switches": 8786,
+      "involuntary_switches": 7752,
+      "case": "noop",
+      "tool": "candidate-j1",
+      "sample": 5,
+      "command": [
+        "/Users/sanjee/projects/xsyncv4/.bench/p3-f08-parent-macos/xs",
+        "-a",
+        "--no-fallback",
+        "--no-progress",
+        "--no-clone",
+        "-j1",
+        "/Users/sanjee/projects/xsyncv4/.bench/corpus/",
+        "/Users/sanjee/projects/xsyncv4/.bench/p3-f08-parent-work/noop-candidate-j1/"
+      ],
+      "verified": true,
+      "stderr": ""
+    },
+    {
+      "returncode": 0,
+      "wall_seconds": 6.793008458102122,
+      "user_seconds": 0.372232,
+      "system_seconds": 3.902863,
+      "max_rss_bytes": 30965760,
+      "voluntary_switches": 6954,
+      "involuntary_switches": 16357,
+      "case": "noop",
+      "tool": "reference-j1",
+      "sample": 6,
+      "command": [
+        "/Users/sanjee/projects/xsyncv4/.bench/p3-f09-window-v2-macos/xs",
+        "-a",
+        "--no-fallback",
+        "--no-progress",
+        "--no-clone",
+        "-j1",
+        "/Users/sanjee/projects/xsyncv4/.bench/corpus/",
+        "/Users/sanjee/projects/xsyncv4/.bench/p3-f08-parent-work/noop-reference-j1/"
+      ],
+      "verified": true,
+      "stderr": ""
+    },
+    {
+      "returncode": 0,
+      "wall_seconds": 3.7728407089598477,
+      "user_seconds": 0.297721,
+      "system_seconds": 2.618385,
+      "max_rss_bytes": 28426240,
+      "voluntary_switches": 9039,
+      "involuntary_switches": 8920,
+      "case": "noop",
+      "tool": "candidate-j1",
+      "sample": 6,
+      "command": [
+        "/Users/sanjee/projects/xsyncv4/.bench/p3-f08-parent-macos/xs",
+        "-a",
+        "--no-fallback",
+        "--no-progress",
+        "--no-clone",
+        "-j1",
+        "/Users/sanjee/projects/xsyncv4/.bench/corpus/",
+        "/Users/sanjee/projects/xsyncv4/.bench/p3-f08-parent-work/noop-candidate-j1/"
+      ],
+      "verified": true,
+      "stderr": ""
+    },
+    {
+      "returncode": 0,
+      "wall_seconds": 2.0850964169949293,
+      "user_seconds": 0.229712,
+      "system_seconds": 2.626693,
+      "max_rss_bytes": 25575424,
+      "voluntary_switches": 9396,
+      "involuntary_switches": 11865,
+      "case": "noop",
+      "tool": "rsync",
+      "sample": 6,
+      "command": [
+        "/opt/homebrew/bin/rsync",
+        "-a",
+        "/Users/sanjee/projects/xsyncv4/.bench/corpus/",
+        "/Users/sanjee/projects/xsyncv4/.bench/p3-f08-parent-work/noop-rsync/"
+      ],
+      "verified": true,
+      "stderr": ""
+    }
+  ],
+  "warmups": [
+    {
+      "returncode": 0,
+      "wall_seconds": 3.0622152080759406,
+      "user_seconds": 0.274842,
+      "system_seconds": 2.728533,
+      "max_rss_bytes": 30097408,
+      "voluntary_switches": 0,
+      "involuntary_switches": 3021,
+      "case": "noop",
+      "tool": "reference-j1",
+      "sample": 0,
+      "command": [
+        "/Users/sanjee/projects/xsyncv4/.bench/p3-f09-window-v2-macos/xs",
+        "-a",
+        "--no-fallback",
+        "--no-progress",
+        "--no-clone",
+        "-j1",
+        "/Users/sanjee/projects/xsyncv4/.bench/corpus/",
+        "/Users/sanjee/projects/xsyncv4/.bench/p3-f08-parent-work/noop-reference-j1/"
+      ],
+      "verified": true,
+      "stderr": ""
+    },
+    {
+      "returncode": 0,
+      "wall_seconds": 2.4655682500451803,
+      "user_seconds": 0.257791,
+      "system_seconds": 2.117351,
+      "max_rss_bytes": 29917184,
+      "voluntary_switches": 0,
+      "involuntary_switches": 2342,
+      "case": "noop",
+      "tool": "candidate-j1",
+      "sample": 0,
+      "command": [
+        "/Users/sanjee/projects/xsyncv4/.bench/p3-f08-parent-macos/xs",
+        "-a",
+        "--no-fallback",
+        "--no-progress",
+        "--no-clone",
+        "-j1",
+        "/Users/sanjee/projects/xsyncv4/.bench/corpus/",
+        "/Users/sanjee/projects/xsyncv4/.bench/p3-f08-parent-work/noop-candidate-j1/"
+      ],
+      "verified": true,
+      "stderr": ""
+    },
+    {
+      "returncode": 0,
+      "wall_seconds": 1.84703587484546,
+      "user_seconds": 0.21300999999999998,
+      "system_seconds": 2.298991,
+      "max_rss_bytes": 26050560,
+      "voluntary_switches": 931,
+      "involuntary_switches": 8619,
+      "case": "noop",
+      "tool": "rsync",
+      "sample": 0,
+      "command": [
+        "/opt/homebrew/bin/rsync",
+        "-a",
+        "/Users/sanjee/projects/xsyncv4/.bench/corpus/",
+        "/Users/sanjee/projects/xsyncv4/.bench/p3-f08-parent-work/noop-rsync/"
+      ],
+      "verified": true,
+      "stderr": ""
+    }
+  ],
+  "summary": [
+    {
+      "case": "noop",
+      "tools": {
+        "reference-j1": {
+          "wall_seconds": 4.461870062048547,
+          "cpu_seconds": 3.6464575,
+          "peak_rss_bytes": 31555584
+        },
+        "candidate-j1": {
+          "wall_seconds": 3.822004687972367,
+          "cpu_seconds": 2.8219355,
+          "peak_rss_bytes": 31080448
+        },
+        "rsync": {
+          "wall_seconds": 2.1820164795499295,
+          "cpu_seconds": 2.9115975,
+          "peak_rss_bytes": 27344896
+        }
+      }
+    }
+  ],
+  "complete": true,
+  "final_loadavg": [
+    56.21826171875,
+    44.62109375,
+    39.09619140625
+  ]
+}
