@@ -49,6 +49,15 @@ python3 benchmarks/report.py --run-id RUN_ID --output benchmarks/results/RUN_ID-
 `.bench/p3-state.json`. It runs one case at a time and resumes cases whose local
 JSON is not marked complete. Do not start another runner against the same work
 directory; `run.py` holds an exclusive lock to protect its destinations.
+For a long-running case, `python3 benchmarks/checkpoint.py --dataset congress
+--direction push` fetches its verified incremental JSON without restarting the
+job. Partial cases remain excluded from the summary table.
+
+CPU includes waited-for descendants. RSS uses `wait4` resource high-water
+marks, which report the largest process rather than simultaneous memory of
+the complete process tree on Linux; see [getrusage(2)](https://www.man7.org/linux/man-pages/man2/getrusage.2.html).
+Tables select the larger process peak from the two endpoints. Dataset
+directory inventories exclude the dataset root; logical bytes count regular files.
 
 `python3 benchmarks/test_harness.py` checks destination ownership, concurrent
 run rejection, independent corruption detection and transparent wire/status
@@ -62,3 +71,9 @@ neo with `--host sanjee@freya.local --remote-root ROOT --direction push` (or
 `pull`) and `--output ROOT/logs/stream-DIRECTION.json`. Run this separately
 from corpus transfers; it helps distinguish cipher/transport capacity from
 filesystem work. Both endpoints must receive the exact expected byte count.
+
+The [APFS no-op diagnostic](results/20261010T152712Z-apfs-baseline-summary.md)
+records the current binary's cost at 1, 2, 4 and 8 threads. Its host had high
+background load and the volume was 98% full; quieter/free-volume measurements
+are still required before choosing filesystem defaults. `profile_apfs.py`
+samples a separate no-op with `/usr/bin/sample`, then verifies it independently.
