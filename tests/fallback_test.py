@@ -168,6 +168,22 @@ else: sys.exit(255)
                     else: self.assertEqual((dest / source.name).stat().st_mode & 0o7777, source.stat().st_mode & 0o777 & ~0o022)
                     self.assertEqual(get_acl(source), before)
 
+    def test_remote_chown_refuses_or_delegates_before_writes(self):
+        for direction in ('push', 'pull'):
+            with self.subTest(direction=direction):
+                dest = self.root / ('chown-' + direction)
+                a, b = str(self.src) + '/', str(dest)
+                a, b = (a, 'fake:' + b) if direction == 'push' else ('fake:' + a, b)
+                environment = dict(self.env, XSYNC_TEST_PEER='capability')
+                arguments = ['-a', f'--chown={os.getuid()}:{os.getgid()}', '-e', self.fake_shell(), a, b]
+                result = self.run_sync('--no-fallback', *arguments, env=environment)
+                self.assertEqual(result.returncode, 4, result.stderr)
+                self.assertFalse(dest.exists())
+                result = self.run_sync(*arguments, env=environment)
+                self.assertEqual(result.returncode, 0, result.stderr)
+                self.assertEqual(result.stderr.count(b'falling back'), 1)
+                self.assertEqual((dest / 'file with spaces').read_bytes(), (self.src / 'file with spaces').read_bytes())
+
     def test_explicit_server_acl_option_refuses_before_writes(self):
         import wire_test as wire
         target = self.root / 'server ACL destination'

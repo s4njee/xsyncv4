@@ -168,7 +168,16 @@ bool apply(const AclSet& source, int fd, const std::string& path, u8 type, u32 m
 }
 }
 AclSet source_fd_acls(int fd, const std::string& path, u8 type) {
-  return supported(type) ? read(fd, path, type, true) : AclSet{};
+  auto result = supported(type) ? read(fd, path, type, true) : AclSet{};
+  if (result.complete && (g_opt.ownership.uid_set || g_opt.ownership.gid_set)) {
+    try { result = import_acls(export_acls(result)); }
+    catch (const std::system_error& error) {
+      g_source_io_error.store(true);
+      file_io_error(error.code().value(), path.c_str(), "map ACL ownership");
+      result = {}; result.complete = false;
+    }
+  }
+  return result;
 }
 void incoming_acl_mode(std::shared_ptr<const AclSet>& attrs, u32 source_mode, u8 type) {
 #ifndef __APPLE__
@@ -199,7 +208,7 @@ void incoming_acl_mode(std::shared_ptr<const AclSet>& attrs, u32 source_mode, u8
 AclSet source_acls(const std::string& path, u8 type) {
   if (!supported(type)) return {};
   Pin pin; pin.open(path, type, true);
-  if (pin.fd >= 0) return read(pin.fd, path, type, true);
+  if (pin.fd >= 0) return source_fd_acls(pin.fd, path, type);
   AclSet result; failure(result, path, "open ACL", true); return result;
 }
 bool acls_differ(const AclSet& source, const std::string& path, u8 type, bool* access_changed) {
@@ -265,6 +274,8 @@ std::string principal_name(bool group, u32 id) {
   return name;
 }
 u32 principal_id(bool group, u32 id, const std::string& name) {
+  if (group ? g_opt.ownership.gid_set : g_opt.ownership.uid_set)
+    return group ? ownership_gid(id) : ownership_uid(id);
   if (g_opt.numeric_ids || name.empty()) return id;
   std::lock_guard<std::mutex> lock(names_mutex);
   auto key = std::make_pair(group, name);
@@ -332,7 +343,7 @@ std::vector<AclRecord> linux_records(const XattrValue& value) {
 }
 XattrValue linux_value(std::vector<AclRecord> records) {
   if (records.empty()) return {};
-  std::sort(records.begin(), records.end(), [](const auto& a, const auto& b) {
+  std::stable_sort(records.begin(), records.end(), [](const auto& a, const auto& b) {
     return a.tag == b.tag ? a.id < b.id : a.tag < b.tag;
   });
   std::string data(4, '\0'); data[0] = 2;
@@ -420,7 +431,10 @@ bool valid_acl_records(const AclRecords& records, u8 type) {
         if (record.name.size() > 255 || record.name.find('\0') != record.name.npos) return false;
         if (record.permissions > 7 || record.flags || record.tag < previous_tag) return false;
         if (named(record)) {
-          if (record.id == UINT32_MAX || (record.tag == previous_tag && record.id <= previous_id)) return false;
+          // Receiver mappings can make distinct named entries share an ID.
+          // Linux preserves those ordered entries; their relative order is
+          // significant, so accept equal IDs while rejecting descending IDs.
+          if (record.id == UINT32_MAX || (record.tag == previous_tag && record.id < previous_id)) return false;
           have_names = true;
         } else {
           if (record.id != UINT32_MAX || !record.name.empty()) return false;

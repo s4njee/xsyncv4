@@ -1,6 +1,7 @@
 // xsync — shared types, options, global state and small helpers.
 #pragma once
 #include "permissions.h"
+#include "ownership.h"
 #include <atomic>
 #include <cstdint>
 #include <cstdio>
@@ -40,6 +41,7 @@ constexpr u64 PF_ACL_UUID = 4194304;
 constexpr u64 PF_ATIMES = 8388608, PF_CRTIMES = 16777216, PF_OPEN_NOATIME = 33554432;
 constexpr u64 PF_EXECUTABILITY = 67108864;
 constexpr u64 PF_FILEFLAGS = 134217728;
+constexpr u64 PF_CHOWN = 268435456;
 #ifdef __APPLE__
 constexpr u64 PF_NATIVE_ACL = PF_ACL_DARWIN;
 constexpr u64 PF_UNSUPPORTED_NATIVE = PF_ACL_POSIX;
@@ -48,7 +50,7 @@ constexpr u64 PF_NATIVE_ACL = PF_ACL_POSIX;
 constexpr u64 PF_UNSUPPORTED_NATIVE = PF_ACL_DARWIN | PF_ACL_UUID | PF_CRTIMES | PF_FILEFLAGS;
 #endif
 #ifndef XSYNC_PROTOCOL_FEATURES
-#define XSYNC_PROTOCOL_FEATURES 268435455
+#define XSYNC_PROTOCOL_FEATURES 536870911
 #endif
 constexpr u64 PROTO_FEATURES = XSYNC_PROTOCOL_FEATURES & ~PF_UNSUPPORTED_NATIVE;
 constexpr u64 LEGACY_V3_FEATURES = 15;
@@ -89,6 +91,7 @@ struct Options {
   bool executability = false;
   bool fileflags = false;  // Darwin st_flags, negotiated outside v3 options.
   std::vector<PermissionRule> chmod_rules;  // Client-side incoming modes; no wire-layout change.
+  OwnershipOverride ownership;  // Resolved on the destination host.
   bool crtimes = false, open_noatime = false;  // Negotiated outside v3 options.
   int xattrs = 0;  // 1: ordinary attributes; 2: include rsync internal attributes.
   bool hard_links = false;  // Negotiated separately from the frozen v3 options.

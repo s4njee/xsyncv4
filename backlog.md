@@ -2,7 +2,7 @@
 
 Initial audit written 2026-10-08 against xsync 0.1.0 (protocol 1).
 All fifteen P0 stories completed against protocol 3; per-story evidence is below.
-P1 R-02 through R-09 and E-01 through E-09 are complete (17 of 22 stories). Current protocol 4 supports protocol 3; E-10 is in progress (local/remote xattrs, matching-style ACLs, executability, access/creation times, BSD flags and permission overrides implemented, cross-style compatibility guarded; ownership overrides and packaging pending).
+P1 R-02 through R-09 and E-01 through E-09 are complete (17 of 22 stories). Current protocol 4 supports protocol 3; E-10 is in progress (local/remote xattrs, matching-style ACLs, executability, access/creation times, BSD flags, permission and ownership overrides implemented, cross-style compatibility guarded; final composition and packaging pending).
 Problem statements retain the original audit findings.
 
 ## What "daily driver" means here
@@ -2142,3 +2142,61 @@ Verified artifact manifest (source `864bd37edf14`):
   and this behavior. Installed helpers and release artifacts are unchanged.
 - **Remaining before E-10 completion:** `--chown`, final metadata composition
   checks and packaging. No complete-story count has been advanced.
+
+## E-10 progress — 2026-10-09: native incoming ownership overrides
+
+- E-10 remains **code**, with P1 at **17/22**. `--chown=USER:GROUP` now works
+  in local/push/pull transfers. Names resolve on the receiver; numeric IDs,
+  omitted/empty fields, disjoint repeated fields, `--numeric-ids` and normal
+  privilege checks are supported. Unknown receiver names warn without changing
+  the successful transfer status; overlapping fields and numeric overflow fail
+  before writes. Source data, basic metadata, ACLs and xattrs remain unchanged.
+- **Data paths and compatibility:** roots, entries, metadata-only updates,
+  whole/delta retries and per-file APFS clones apply incoming overrides.
+  Whole-directory clones are disabled. Capability `PF_CHOWN` guards the bounded
+  receiver configuration and complete entry identities; protocol-3 and older
+  feature-subset helpers refuse or delegate before writes. Empty overrides
+  remain compatible. Explicit helper options require negotiation and overlapping
+  client/helper fields fail before writes. Pulling helpers retain source IDs.
+- **Fresh identities:** sender retries describe newly encountered UID/GID names
+  before their DATA records. Four real-SSH Mac-to-Linux group mutations use
+  deliberately different numeric group IDs to verify receiver name mapping
+  after whole/delta and atomic/in-place retries. Another **36** Linux root
+  ownership mutations verify overrides and fresh omitted fields in all three
+  directions. Oversized/truncated configurations and root/entry/DATA identity
+  overflow fail before file publication.
+- **ACL composition:** explicit overrides map named principals even with
+  `--numeric-ids`. Linux accepts ordered duplicate named identities when distinct
+  principals map to the same ID; stable sorting preserves their relative order,
+  and a subsequent ordinary `-aA` transfer can read them again. This corrects
+  the earlier blanket duplicate rejection: duplicate base entries and descending
+  named identities still fail validation. Three Darwin deny-delete differentials
+  verify exit 23 and preservation of existing data when a mapped ACL prevents
+  publication.
+- **Verification:** the main matrix covers **64** Darwin, **68** non-root Linux
+  and **77** root Linux rsync differential transfers. It includes ownership-only,
+  data, dry-run, in-place, H/AX/chmod composition, option order and clones.
+  Six unknown-name cases, six invalid arguments, three explicit native helper
+  cases and malformed-peer checks supplement it. Real SSH adds **10** normal
+  ownership differentials and a contradictory-option boundary check.
+  Intel ownership/wire/ACL tests pass **20** methods (one platform skip), Linux
+  root mutation/ownership/wire/ACL tests pass **21** (two skips), Linux non-root
+  metadata regressions pass **80** (ten skips), and protocol/fallback tests pass
+  **24**. Logs: `/tmp/xsync-e10-chown-intel-verified.log`,
+  `/tmp/xsync-e10-chown-linux-root-verified.log`,
+  `/tmp/xsync-e10-chown-linux-user-verified.log`,
+  `/tmp/xsync-e10-chown-compat-verified.log`, and
+  `/tmp/xsync-e10-chown-cross-final.log`.
+  ARM ownership/wire/ACL/xattr/H/chmod/time/executability/output regressions
+  also pass **88** methods (four skips), recorded in
+  `/tmp/xsync-e10-chown-metadata-verified.log`. Initial wire fixtures omitted
+  name-map negotiation; they were corrected and rerun before counting results.
+- **Documented boundaries:** with a pushing client's later `--no-owner` or
+  `--no-group`, rsync can omit identities then attempt owner/group 0 on its
+  receiver, failing for non-root group changes. Native negotiated transfers
+  retain identities and apply the requested receiver override. Local/pull
+  transfers honor later disabling options. README describes this distinction.
+  Installed helpers and release artifacts have not yet been updated.
+- **Remaining:** final metadata composition and packaging. Combined dry-run
+  checks exposed missing permission/ownership/time/ACL markers on existing
+  hard-link aliases; this must be repaired before E-10 can be marked complete.

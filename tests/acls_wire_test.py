@@ -112,7 +112,7 @@ class AclWireTests(unittest.TestCase):
                        acl([record(2, ident=UNDEFINED)]), acl([record(2)]),
                        acl([record(1, ident=UNDEFINED)] * 2),
                        acl([record(32, ident=UNDEFINED), record(1, ident=UNDEFINED)]),
-                       acl([record(1, ident=UNDEFINED), record(2), record(2), record(4, ident=UNDEFINED),
+                       acl([record(1, ident=UNDEFINED), record(2, ident=2), record(2, ident=1), record(4, ident=UNDEFINED),
                             record(16, ident=UNDEFINED), record(32, ident=UNDEFINED)])]
         return common
 

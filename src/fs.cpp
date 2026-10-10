@@ -165,6 +165,7 @@ Entry source_snapshot(const Entry& scanned, const struct stat& st, bool receiver
   Entry e;
   entry_from_stat(st, e);
   e.mode = incoming_mode(e.mode, e.type);
+  incoming_ownership(e);
   e.name_off = scanned.name_off, e.name_len = scanned.name_len;
   e.link_off = scanned.link_off, e.flags = scanned.flags;
   e.item_flags = scanned.item_flags;
@@ -824,8 +825,9 @@ void generate(DirWork& w, Worker& t) {
           (o.update && (before.mtime > source.mtime ||
                        (before.mtime == source.mtime && before.mtime_ns > source.mtime_ns))))) continue;
       set_names(name);
-      bool ownership_changed = (o.owner && o.am_root && before.uid != source.uid) ||
-                               (o.group && before.gid != source.gid && can_set_gid(source.gid));
+      u32 uid = ownership_uid(source.uid), gid = ownership_gid(source.gid);
+      bool ownership_changed = (o.owner && o.am_root && before.uid != uid) ||
+                               (o.group && before.gid != gid && can_set_gid(gid));
       if (xattrs_differ(w.src_xattrs[i], path, source.type, filters, ownership_changed)) source.item_flags |= IF_XATTR;
       shared_xattrs_checked[i] = true;
     }
@@ -845,6 +847,7 @@ void generate(DirWork& w, Worker& t) {
     }
     if (s.item_flags & IF_PRUNED) { if (d) extra(*d); continue; }
     s.mode = incoming_mode(s.mode, s.type);
+    incoming_ownership(s);
     set_names(name);
     if (metadata_enabled() && !w.src_xattrs[i].complete) continue;
 
@@ -1536,7 +1539,7 @@ bool clone_copy(DirWork& w, u32 idx, const char* source, unsigned flags, Worker&
   Entry fresh;
   int source_fd = -1;
   struct stat before;
-  if (g_opt.hard_links || metadata_enabled() || g_opt.atimes || g_opt.crtimes || g_opt.fileflags || !g_opt.chmod_rules.empty()) {
+  if (g_opt.hard_links || metadata_enabled() || g_opt.atimes || g_opt.crtimes || g_opt.fileflags || !g_opt.chmod_rules.empty() || g_opt.ownership.requested()) {
     source_fd = open(source, O_RDONLY | O_CLOEXEC | read_time_flags() | (g_opt.copy_links || !w.src_paths.empty() ? 0 : O_NOFOLLOW));
     if (source_fd < 0 || fstat(source_fd, &before) != 0 || !S_ISREG(before.st_mode)) {
       if (source_fd >= 0) close(source_fd);
@@ -1596,7 +1599,7 @@ bool clone_copy(DirWork& w, u32 idx, const char* source, unsigned flags, Worker&
   f.fd = fd;
   f.created_mode = st.st_mode & 07777;
   register_output(f);
-  return out_finish(f, w, idx, t, true, g_opt.hard_links || metadata_enabled() || g_opt.atimes || g_opt.crtimes || g_opt.fileflags || !g_opt.chmod_rules.empty() ? &fresh : nullptr);
+  return out_finish(f, w, idx, t, true, g_opt.hard_links || metadata_enabled() || g_opt.atimes || g_opt.crtimes || g_opt.fileflags || !g_opt.chmod_rules.empty() || g_opt.ownership.requested() ? &fresh : nullptr);
 #else
   errno = ENOTSUP;
   return false;

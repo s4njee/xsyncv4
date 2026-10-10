@@ -459,6 +459,25 @@ Differences to be aware of:
   lose pathname access and report a partial transfer when a root loses search
   permission. Remote overrides use existing mode fields and work with protocol 3
   and feature-subset peers; no new wire capability is required.
+- **Ownership overrides.** `--chown=USER:GROUP` sets incoming ownership using
+  names resolved on the destination host or numeric IDs. Either field may be
+  omitted; empty fields preserve the ordinary mapping. Separate repeated
+  options may set the user and group once each. Overrides imply the corresponding
+  `--owner`/`--group` options and still require the normal filesystem privileges.
+  Unknown names warn and leave the ordinary mapping in effect. `--numeric-ids`
+  does not disable explicit overrides. With `-A`, overrides also map named ACL
+  principals; Linux retains ordered entries when several principals map to the
+  same ID. A mapped Darwin deny-delete ACL can prevent publication and report
+  exit 23, preserving the previous destination's data.
+  Native remote transfers negotiate ownership overrides before writes; older
+  helpers delegate or refuse. Explicit helper overrides also require that
+  capability, and overlapping client/helper fields fail before writes.
+  On a push, the receiver applies requested overrides even after a later
+  `--no-owner`/`--no-group`: native transfers retain the source identities needed
+  for this. Rsync can instead omit those identities and attempt owner/group 0,
+  which may fail without privilege. Local and pull transfers honor those later
+  disabling options. Whole-directory clones are disabled for ownership overrides;
+  per-file clones apply the requested ownership.
 - **Additional times.** `-U`/`--atimes` preserves file and special-inode access
   times; directories and physical symlinks retain rsync's omission. `-UU` also
   enables `--open-noatime`, which requests `O_NOATIME` on systems that provide it

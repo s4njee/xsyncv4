@@ -66,6 +66,7 @@ Options (same meaning as rsync):
      --fileflags          preserve BSD file flags (macOS)
  -o, --owner              preserve owner (super-user only)
  -g, --group              preserve group
+     --chown=USER:GROUP   change destination owner/group (names or IDs)
  -D                       same as --devices --specials
  -A, --acls               preserve ACLs (implies --perms)
  -t, --times              preserve modification times
@@ -244,6 +245,13 @@ Parsed parse(int argc, char** argv) {
       std::string mode = need();
       if (!parse_permissions(mode, o.chmod_rules)) usage_error("Invalid argument passed to --chmod (" + mode + ")");
     }
+    else if (name == "chown") {
+      std::string target = need();
+      bool had_user = o.ownership.user_set, had_group = o.ownership.group_set;
+      if (!parse_ownership(target, o.ownership)) usage_error("Invalid or repeated --chown (" + target + ")");
+      if (o.ownership.user_set && !had_user) o.owner = true;
+      if (o.ownership.group_set && !had_group) o.group = true;
+    }
     else if (flag(o.fileflags, "fileflags")) {}
     else if (name == "atimes") { if (++o.atimes > 1) o.open_noatime = true; }
     else if (name == "no-atimes" || name == "no-U") o.atimes = 0;
@@ -341,7 +349,7 @@ Parsed parse(int argc, char** argv) {
     } else {
       static const char* unsupported[] = {
           "backup", "backup-dir", "suffix", "link-dest", "compare-dest", "copy-dest",
-          "chown", "usermap", "groupmap", "append", "append-verify", "partial-dir",
+          "usermap", "groupmap", "append", "append-verify", "partial-dir",
           "delay-updates", "fuzzy", "remove-source-files", "keep-dirlinks", "copy-dirlinks", "copy-unsafe-links",
           "munge-links", "daemon", "port", "password-file",
           "write-batch", "read-batch", "only-write-batch", "super", "fake-super", "temp-dir",

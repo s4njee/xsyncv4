@@ -333,6 +333,7 @@ bool setup_dest(const std::string& dest_arg, DirWork& root, bool single) {
   root.dst_path = dest;
   if (root.has_attrs) {
     root.attrs.mode = incoming_mode(root.attrs.mode, root.attrs.type);
+    incoming_ownership(root.attrs);
     Entry d;
     if (exists) entry_from_stat(st, d);
     else if (root.created && o.mkpath) {
@@ -744,6 +745,7 @@ struct Local {
 }  // namespace
 
 int run_local(const std::vector<std::string>& srcs, const std::string& dest) {
+  init_ownership();
   g_local_limiter.configure(g_opt.bwlimit);
   Local L;
   L.guard = SourceGuard(dest.empty() ? "." : dest);
@@ -815,7 +817,7 @@ int run_local(const std::vector<std::string>& srcs, const std::string& dest) {
   const Options& o = g_opt;
   // Whole-directory clones are only equivalent to a per-file sync when nothing could make us
   // treat any entry specially.
-  L.lazy_ok = o.clone && o.chmod_rules.empty() && !o.atimes && !o.crtimes && !o.fileflags && o.recursive && o.links && !o.copy_links && o.perms && o.times && !o.omit_dir_times && !o.omit_link_times &&
+  L.lazy_ok = o.clone && o.chmod_rules.empty() && !o.ownership.requested() && !o.atimes && !o.crtimes && !o.fileflags && o.recursive && o.links && !o.copy_links && o.perms && o.times && !o.omit_dir_times && !o.omit_link_times &&
               !metadata_enabled() && !o.dry_run && !o.inplace && !o.one_fs && !o.existing && !o.prune_empty && !root->selection && o.max_size <= 0 && o.min_size <= 0 && o.filters.empty();
 #endif
   int n = default_jobs();

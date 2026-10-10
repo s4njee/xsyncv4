@@ -237,6 +237,31 @@ p=pathlib.Path(sys.argv[1]); print(json.dumps({'hash':hashlib.sha256((p/'file').
                 else: mode = (target / 'file').stat().st_mode & 0o7777
                 self.assertEqual(mode, 0o640)
 
+    def test_chown_requires_capability_but_empty_fields_remain_compatible(self):
+        source = self.root / 'ownership overrides'; source.mkdir()
+        (source / 'file').write_bytes(b'data')
+        for peer in (self.remote_subset, self.remote_legacy):
+            for direction in ('push', 'pull'):
+                for requested in (True, False):
+                    with self.subTest(peer=peer, direction=direction, requested=requested):
+                        target = self.root / ('chown ' + pathlib.Path(peer).parent.name + direction + str(requested))
+                        if HOST and direction == 'pull':
+                            subprocess.run(['rsync', '-a', '-e', RSH, str(source) + '/', HOST + ':' + str(source) + '/'],
+                                           check=True, capture_output=True, timeout=20)
+                        a, b = str(source) + '/', str(target) + '/'
+                        if direction == 'push': b = (HOST or 'fake') + ':' + b
+                        else: a = (HOST or 'fake') + ':' + a
+                        result = subprocess.run([str(BINARY), '--no-fallback', '-r', '--numeric-ids',
+                                                 '--chown=' + (f'{os.getuid()}:{os.getgid()}' if requested else ':'),
+                                                 '-e', RSH, '--rsync-path=' + shlex.quote(peer), a, b],
+                                                capture_output=True, timeout=20)
+                        self.assertEqual(result.returncode, 4 if requested else 0, result.stderr)
+                        if requested:
+                            self.assertIn(b'peer does not support --chown', result.stderr)
+                            self.assertFalse(target.exists())
+                        elif not HOST or direction == 'pull':
+                            self.assertEqual((target / 'file').read_bytes(), b'data')
+
     def test_formatted_output_requires_negotiated_support(self):
         source = self.root / 'format source'
         source.write_bytes(b'unchanged')
