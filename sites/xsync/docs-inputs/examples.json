@@ -1,5 +1,5 @@
 {
-  "binary_version": "xs  version 0.1.0  protocol version 4  git 1fff2a09ae2c",
+  "binary_version": "xs  version 0.1.0  protocol version 4  git d3a49f8872fd",
   "rsync_version": "rsync  version 3.2.7  protocol version 31",
   "platform": "Linux",
   "examples": {
@@ -79,7 +79,7 @@
       "caption": "Transfer statistics",
       "command": "xs -a --stats src/ dst/",
       "exit_code": 0,
-      "stdout": "\nNumber of files: 10 (reg: 5, dir: 4, link: 1)\nNumber of created files: 10 (reg: 5, dir: 4, link: 1)\nNumber of deleted files: 0\nNumber of regular files transferred: 5\nTotal file size: 1,289,005 bytes\nTotal transferred file size: 1,289,005 bytes\nDelta literal data: 0 bytes\nDelta matched data: 0 bytes\nTotal bytes sent: 1,289,005\nTotal bytes received: 0\n\nsent 1,289,005 bytes  received 0 bytes  420,767,144.64 bytes/sec\ntotal size is 1,289,005  speedup is 1.00\n",
+      "stdout": "\nNumber of files: 10 (reg: 5, dir: 4, link: 1)\nNumber of created files: 10 (reg: 5, dir: 4, link: 1)\nNumber of deleted files: 0\nNumber of regular files transferred: 5\nTotal file size: 1,289,005 bytes\nTotal transferred file size: 1,289,005 bytes\nDelta literal data: 0 bytes\nDelta matched data: 0 bytes\nTotal bytes sent: 1,289,005\nTotal bytes received: 0\n\nsent 1,289,005 bytes  received 0 bytes  271,018,632.93 bytes/sec\ntotal size is 1,289,005  speedup is 1.00\n",
       "stderr": "",
       "remote": false,
       "remote_helper": "current"
@@ -169,7 +169,7 @@
       "caption": "Wire and compression totals for a push",
       "command": "xs -az --stats src/ host:backup/",
       "exit_code": 0,
-      "stdout": "\nNumber of files: 10 (reg: 5, dir: 4, link: 1)\nNumber of created files: 10 (reg: 5, dir: 4, link: 1)\nNumber of deleted files: 0\nNumber of regular files transferred: 5\nTotal file size: 1,289,005 bytes\nTotal transferred file size: 1,289,005 bytes\nDelta literal data: 0 bytes\nDelta matched data: 0 bytes\nTotal bytes sent: 114,184\nTotal bytes received: 132\n\nsent 114,184 bytes  received 132 bytes  1,996,295.30 bytes/sec\ntotal size is 1,289,005  speedup is 11.28\n",
+      "stdout": "\nNumber of files: 10 (reg: 5, dir: 4, link: 1)\nNumber of created files: 10 (reg: 5, dir: 4, link: 1)\nNumber of deleted files: 0\nNumber of regular files transferred: 5\nTotal file size: 1,289,005 bytes\nTotal transferred file size: 1,289,005 bytes\nDelta literal data: 0 bytes\nDelta matched data: 0 bytes\nTotal bytes sent: 114,170\nTotal bytes received: 132\n\nsent 114,170 bytes  received 132 bytes  2,399,162.63 bytes/sec\ntotal size is 1,289,005  speedup is 11.28\n",
       "stderr": "",
       "remote": true,
       "remote_helper": "current"
@@ -197,7 +197,7 @@
       "command": "xs -az src/ host:backup/; echo \"exit status: $?\"",
       "exit_code": 0,
       "stdout": "exit status: 0\n",
-      "stderr": "xs: falling back to rsync: remote xsync is not installed on host\n",
+      "stderr": "xs: falling back to rsync: remote xs is not installed on host\n",
       "remote": true,
       "remote_helper": "none"
     },
@@ -206,7 +206,7 @@
       "command": "xs --no-fallback -az src/ host:backup/; echo \"exit status: $?\"",
       "exit_code": 0,
       "stdout": "exit status: 127\n",
-      "stderr": "xs: remote xsync is not installed on host (fallback disabled)\n",
+      "stderr": "xs: remote xs is not installed on host (fallback disabled)\n",
       "remote": true,
       "remote_helper": "none"
     },
@@ -268,7 +268,7 @@
       "caption": "Install xs on a host that does not have it, then push natively",
       "command": "export XSYNC_RELEASE_DIR=releases\nxs --install user@pi\nxs -azi --no-fallback src/ user@pi:backup/ | tail -n 3",
       "exit_code": 0,
-      "stdout": "Installed xs-linux-amd64 on user@pi at ~/.local/bin/xs\nxs  version 0.1.0  protocol version 4  git 1fff2a09ae2c\n<f+++++++++ notes.txt\ncd+++++++++ scripts/\n<f+++++++++ scripts/build.sh\n",
+      "stdout": "Installed xs-linux-amd64 on user@pi at ~/.local/bin/xs\nxs  version 0.1.0  protocol version 4  git d3a49f8872fd\n<f+++++++++ notes.txt\ncd+++++++++ scripts/\n<f+++++++++ scripts/build.sh\n",
       "stderr": "",
       "remote": true,
       "remote_helper": "none"
@@ -286,7 +286,7 @@
       "caption": "A scheduled backup that logs and keeps the exit status",
       "command": "cat > backup.sh <<'SH'\n#!/bin/sh\nlog=backup.log\nxs -a --delete --log-file=\"$log\" --out-format='%t %i %n' src/ dst/ > /dev/null\nstatus=$?\necho \"$(date -u '+%Y/%m/%d %H:%M:%S') finished with exit status $status\" >> \"$log\"\nexit $status\nSH\nsh backup.sh; echo \"exit status: $?\"\nhead -n 3 backup.log; tail -n 1 backup.log",
       "exit_code": 0,
-      "stdout": "exit status: 0\n2026/10/10 16:17:47 cd+++++++++ ./\n2026/10/10 16:17:47 cd+++++++++ archive/\n2026/10/10 16:17:47 >f+++++++++ archive/2026-q3.log\n2026/10/10 16:17:47 finished with exit status 0\n",
+      "stdout": "exit status: 0\n2026/10/10 16:32:52 cd+++++++++ ./\n2026/10/10 16:32:52 cd+++++++++ archive/\n2026/10/10 16:32:52 >f+++++++++ archive/2026-q3.log\n2026/10/10 16:32:52 finished with exit status 0\n",
       "stderr": "",
       "remote": false,
       "remote_helper": "current"
@@ -295,7 +295,7 @@
       "caption": "A bandwidth-limited push that gives up on a stalled link",
       "command": "xs -az --bwlimit=2M --timeout=60 --stats src/ host:backup/ | tail -n 4",
       "exit_code": 0,
-      "stdout": "Total bytes received: 138\n\nsent 114,187 bytes  received 138 bytes  1,215,787.92 bytes/sec\ntotal size is 1,289,005  speedup is 11.27\n",
+      "stdout": "Total bytes received: 138\n\nsent 114,201 bytes  received 138 bytes  1,239,824.17 bytes/sec\ntotal size is 1,289,005  speedup is 11.27\n",
       "stderr": "",
       "remote": true,
       "remote_helper": "current"
@@ -313,7 +313,7 @@
       "caption": "The final JSON record of a transfer",
       "command": "xs -a --progress=json src/ dst/ 2>&1 >/dev/null | jq -c 'select(.type == \"complete\")'",
       "exit_code": 0,
-      "stdout": "{\"type\":\"complete\",\"elapsed_ms\":3,\"files\":5,\"files_total\":5,\"bytes\":1289005,\"bytes_total\":1289005,\"files_seen\":5,\"wire_bytes\":0,\"phase\":\"complete\",\"deleted\":0,\"verified\":0,\"scanning\":false,\"dry_run\":false,\"success\":true,\"exit_code\":0}\n",
+      "stdout": "{\"type\":\"complete\",\"elapsed_ms\":2,\"files\":5,\"files_total\":5,\"bytes\":1289005,\"bytes_total\":1289005,\"files_seen\":5,\"wire_bytes\":0,\"phase\":\"complete\",\"deleted\":0,\"verified\":0,\"scanning\":false,\"dry_run\":false,\"success\":true,\"exit_code\":0}\n",
       "stderr": "",
       "remote": false,
       "remote_helper": "current"
@@ -340,7 +340,7 @@
       "caption": "rsync-shaped progress lines on a pipe",
       "command": "xs -a --info=progress2 src/ dst/ 2>&1 | tail -1",
       "exit_code": 0,
-      "stdout": "      1,289,005 100%  293.02MB/s    0:00:00 (xfr#5, to-chk=0/5)\n",
+      "stdout": "      1,289,005 100%  347.89MB/s    0:00:00 (xfr#5, to-chk=0/5)\n",
       "stderr": "",
       "remote": false,
       "remote_helper": "current"

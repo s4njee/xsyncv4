@@ -87,7 +87,7 @@ xs --install user@pi
 xs -azi --no-fallback src/ user@pi:backup/ | tail -n 3
 ```
 
-<div class="captured-doc-output example-output" v-pre><span class="micro">ACTUAL OUTPUT · EXIT 0</span><pre><code>Installed xs-linux-amd64 on user@pi at ~/.local/bin/xs&#10;xs  version 0.1.0  protocol version 4  git 1fff2a09ae2c&#10;&lt;f+++++++++ notes.txt&#10;cd+++++++++ scripts/&#10;&lt;f+++++++++ scripts/build.sh</code></pre><p class="example-provenance">Captured through <code>tests/fakessh.sh</code>, an ssh stand-in that runs the remote side on the same machine.</p></div>
+<div class="captured-doc-output example-output" v-pre><span class="micro">ACTUAL OUTPUT · EXIT 0</span><pre><code>Installed xs-linux-amd64 on user@pi at ~/.local/bin/xs&#10;xs  version 0.1.0  protocol version 4  git d3a49f8872fd&#10;&lt;f+++++++++ notes.txt&#10;cd+++++++++ scripts/&#10;&lt;f+++++++++ scripts/build.sh</code></pre><p class="example-provenance">Captured through <code>tests/fakessh.sh</code>, an ssh stand-in that runs the remote side on the same machine.</p></div>
 
 
 
@@ -130,7 +130,7 @@ sh backup.sh; echo "exit status: $?"
 head -n 3 backup.log; tail -n 1 backup.log
 ```
 
-<div class="captured-doc-output example-output" v-pre><span class="micro">ACTUAL OUTPUT · EXIT 0</span><pre><code>exit status: 0&#10;2026/10/10 16:17:47 cd+++++++++ ./&#10;2026/10/10 16:17:47 cd+++++++++ archive/&#10;2026/10/10 16:17:47 &gt;f+++++++++ archive/2026-q3.log&#10;2026/10/10 16:17:47 finished with exit status 0</code></pre></div>
+<div class="captured-doc-output example-output" v-pre><span class="micro">ACTUAL OUTPUT · EXIT 0</span><pre><code>exit status: 0&#10;2026/10/10 16:32:52 cd+++++++++ ./&#10;2026/10/10 16:32:52 cd+++++++++ archive/&#10;2026/10/10 16:32:52 &gt;f+++++++++ archive/2026-q3.log&#10;2026/10/10 16:32:52 finished with exit status 0</code></pre></div>
 
 
 
@@ -191,7 +191,7 @@ PY
 xs -az --bwlimit=2M --timeout=60 --stats src/ host:backup/ | tail -n 4
 ```
 
-<div class="captured-doc-output example-output" v-pre><span class="micro">ACTUAL OUTPUT · EXIT 0</span><pre><code>Total bytes received: 138&#10;&#10;sent 114,187 bytes  received 138 bytes  1,215,787.92 bytes/sec&#10;total size is 1,289,005  speedup is 11.27</code></pre><p class="example-provenance">Captured through <code>tests/fakessh.sh</code>, an ssh stand-in that runs the remote side on the same machine.</p></div>
+<div class="captured-doc-output example-output" v-pre><span class="micro">ACTUAL OUTPUT · EXIT 0</span><pre><code>Total bytes received: 138&#10;&#10;sent 114,201 bytes  received 138 bytes  1,239,824.17 bytes/sec&#10;total size is 1,289,005  speedup is 11.27</code></pre><p class="example-provenance">Captured through <code>tests/fakessh.sh</code>, an ssh stand-in that runs the remote side on the same machine.</p></div>
 
 
 

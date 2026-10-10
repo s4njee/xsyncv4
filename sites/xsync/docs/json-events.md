@@ -50,7 +50,7 @@ xs -a --progress=json SRC/ DEST/ 2> events.ndjson
 xs -a --progress=json src/ dst/ 2>&1 >/dev/null | jq -c 'select(.type == "complete")'
 ```
 
-<div class="captured-doc-output example-output" v-pre><span class="micro">ACTUAL OUTPUT · EXIT 0</span><pre><code>{&quot;type&quot;:&quot;complete&quot;,&quot;elapsed_ms&quot;:3,&quot;files&quot;:5,&quot;files_total&quot;:5,&quot;bytes&quot;:1289005,&quot;bytes_total&quot;:1289005,&quot;files_seen&quot;:5,&quot;wire_bytes&quot;:0,&quot;phase&quot;:&quot;complete&quot;,&quot;deleted&quot;:0,&quot;verified&quot;:0,&quot;scanning&quot;:false,&quot;dry_run&quot;:false,&quot;success&quot;:true,&quot;exit_code&quot;:0}</code></pre></div>
+<div class="captured-doc-output example-output" v-pre><span class="micro">ACTUAL OUTPUT · EXIT 0</span><pre><code>{&quot;type&quot;:&quot;complete&quot;,&quot;elapsed_ms&quot;:2,&quot;files&quot;:5,&quot;files_total&quot;:5,&quot;bytes&quot;:1289005,&quot;bytes_total&quot;:1289005,&quot;files_seen&quot;:5,&quot;wire_bytes&quot;:0,&quot;phase&quot;:&quot;complete&quot;,&quot;deleted&quot;:0,&quot;verified&quot;:0,&quot;scanning&quot;:false,&quot;dry_run&quot;:false,&quot;success&quot;:true,&quot;exit_code&quot;:0}</code></pre></div>
 
 
 

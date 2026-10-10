@@ -178,8 +178,7 @@ Decisions 1, 2 and 5 were made on 2026-10-10 and are applied by S0; see the comp
 1. **Product name versus command name.** *Resolved: xsync brand, `xs` in every command.* The executable is `xs`, the README title is
    "xs (xsyncv4)", and the config directory and environment variables are `xsync`. The site
    brands everything "xsync". Recommendation: keep **xsync** as the product name and `xs` in
-   every command. `src/remote.cpp:2627` also still prints "remote xsync is not installed",
-   which should follow the same rule.
+   every command. The CLI diagnostics now follow the same rule (`d3a49f8`).
 2. **Committed build output.** *Resolved: keep `dist/docs/` committed; `npm run check` proves a rebuild reproduces it.* Either stop committing `dist/docs/` and build it in CI, or keep
    it committed with a CI diff check. Recommendation: stop committing it. The product page in
    `dist/` is hand-written source and stays committed.
@@ -351,7 +350,10 @@ not show them. `sites/xsync/.gitignore` now re-includes `dist/`, and `npm run ch
 any output under `dist/`, `docs/*.md`, `docs/public/` or `docs-inputs/` is ignored. This
 was negative-tested.
 
-Two CLI issues turned up while capturing, and both are left as suggested tasks rather
-than changed here: diagnostics still say "remote xsync", and an older helper prints its
+Two CLI issues turned up while capturing, and both were queued as suggested tasks rather
+than changed here: diagnostics still said "remote xsync", and an older helper prints its
 own "connection unexpectedly closed (code 12)" lines before the client's real
-message.
+message. The first is now fixed (`d3a49f8`): the missing-helper, shell-banner and
+wrong-magic diagnostics say `xs`, `tests/fallback_test.py` asserts their wording, and
+the site's examples and recordings were recaptured. Decision 1 is resolved, and so is
+its CLI follow-up.

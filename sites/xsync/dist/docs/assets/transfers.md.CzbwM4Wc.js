@@ -26,10 +26,10 @@ Total file size: 1,289,005 bytes
 Total transferred file size: 1,289,005 bytes
 Delta literal data: 0 bytes
 Delta matched data: 0 bytes
-Total bytes sent: 114,184
+Total bytes sent: 114,170
 Total bytes received: 132
 
-sent 114,184 bytes  received 132 bytes  1,996,295.30 bytes/sec
+sent 114,170 bytes  received 132 bytes  2,399,162.63 bytes/sec
 total size is 1,289,005  speedup is 11.28</code></pre><p class="example-provenance">Captured through <code>tests/fakessh.sh</code>, an ssh stand-in that runs the remote side on the same machine.</p></div><h2 id="listing" tabindex="-1">LISTING <a class="header-anchor" href="#listing" aria-label="Permalink to &quot;LISTING {#listing}&quot;">​</a></h2><div class="example-caption">List immediate entries, or recurse remotely</div><div class="language-sh"><button title="Copy Code" class="copy"></button><span class="lang">sh</span><pre class="shiki xsync-greyscale vp-code" tabindex="0"><code><span class="line"><span style="color:#DEDEDE;">xs </span><span style="color:#DEDEDE;">src/</span></span>
 <span class="line"><span style="color:#DEDEDE;">xs </span><span style="color:#DEDEDE;">-r</span><span style="color:#DEDEDE;"> user@host:/data/</span></span></code></pre></div><div class="example-caption">Inspect sources without modifying the destination</div><div class="language-sh"><button title="Copy Code" class="copy"></button><span class="lang">sh</span><pre class="shiki xsync-greyscale vp-code" tabindex="0"><code><span class="line"><span style="color:#DEDEDE;">xs </span><span style="color:#DEDEDE;">--list-only</span><span style="color:#DEDEDE;"> -a</span><span style="color:#DEDEDE;"> src/</span><span style="color:#DEDEDE;"> dst/</span></span></code></pre></div><p>A single source argument lists metadata. A slash lists a directory’s immediate contents; <code>-r</code> includes descendants. Listings show type, permissions, byte size, modification time, and names. <code>-l</code> adds symlink targets.</p><div class="example-caption">List a directory’s entries</div><div class="language-sh"><button title="Copy Code" class="copy"></button><span class="lang">sh</span><pre class="shiki xsync-greyscale vp-code" tabindex="0"><code><span class="line"><span style="color:#DEDEDE;">xs </span><span style="color:#DEDEDE;">src/</span></span></code></pre></div><div class="captured-doc-output example-output"><span class="micro">ACTUAL OUTPUT · EXIT 0</span><pre><code>drwxr-xr-x          4,096 2026/10/10 12:00:00 .
 lrwxrwxrwx              9 2026/10/10 12:00:00 latest

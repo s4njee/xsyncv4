@@ -12,7 +12,7 @@ sectionNumber: "1"
 
 ## SOURCE {#source}
 
-<p>Captured from <code>xs  version 0.1.0  protocol version 4  git 1fff2a09ae2c</code>. Every option <code>xs --help</code> lists is below, with a stable link: <code>options.html#delete</code> for a long option, <code>options.html#z</code> for its short form. Open <em>Details</em> for what each one implies, which remote-helper features it needs, and where it is explained.</p>
+<p>Captured from <code>xs  version 0.1.0  protocol version 4  git d3a49f8872fd</code>. Every option <code>xs --help</code> lists is below, with a stable link: <code>options.html#delete</code> for a long option, <code>options.html#z</code> for its short form. Open <em>Details</em> for what each one implies, which remote-helper features it needs, and where it is explained.</p>
 
 <p><a href="xs-help.txt" download>Original help ↓</a> &nbsp; / &nbsp; <a href="xs.1" download>Manpage ↓</a> &nbsp; / &nbsp; <a href="options.json" download>Option data (JSON) ↓</a></p>
 

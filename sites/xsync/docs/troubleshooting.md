@@ -16,7 +16,7 @@ sectionNumber: "7"
 
 <div class="manual-table-wrap"><table><thead><tr><th scope="col">Cause</th><th scope="col">Notice names</th><th scope="col">With <code>--no-fallback</code></th></tr></thead><tbody>
 <tr><td>An option xs does not implement</td><td><code>--backup is not supported by xs</code></td><td>exit 1</td></tr>
-<tr><td>No xs on the remote host</td><td><code>remote xsync is not installed on HOST</code></td><td>exit 127</td></tr>
+<tr><td>No xs on the remote host</td><td><code>remote xs is not installed on HOST</code></td><td>exit 127</td></tr>
 <tr><td>The remote xs is too old for a requested option</td><td><code>peer does not support …</code></td><td>exit 4</td></tr>
 </tbody></table></div>
 
@@ -61,7 +61,7 @@ xs --no-fallback -a --backup src/ dst/; echo "exit status: $?"
 xs -az src/ host:backup/; echo "exit status: $?"
 ```
 
-<div class="captured-doc-output example-output" v-pre><span class="micro">ACTUAL OUTPUT</span><pre><code>exit status: 0</code></pre><span class="micro stream-label">STDERR</span><pre><code>xs: falling back to rsync: remote xsync is not installed on host</code></pre><p class="example-provenance">Captured through <code>tests/fakessh.sh</code>, an ssh stand-in that runs the remote side on the same machine.</p></div>
+<div class="captured-doc-output example-output" v-pre><span class="micro">ACTUAL OUTPUT</span><pre><code>exit status: 0</code></pre><span class="micro stream-label">STDERR</span><pre><code>xs: falling back to rsync: remote xs is not installed on host</code></pre><p class="example-provenance">Captured through <code>tests/fakessh.sh</code>, an ssh stand-in that runs the remote side on the same machine.</p></div>
 
 
 
@@ -73,11 +73,11 @@ xs -az src/ host:backup/; echo "exit status: $?"
 xs --no-fallback -az src/ host:backup/; echo "exit status: $?"
 ```
 
-<div class="captured-doc-output example-output" v-pre><span class="micro">ACTUAL OUTPUT</span><pre><code>exit status: 127</code></pre><span class="micro stream-label">STDERR</span><pre><code>xs: remote xsync is not installed on host (fallback disabled)</code></pre><p class="example-provenance">Captured through <code>tests/fakessh.sh</code>, an ssh stand-in that runs the remote side on the same machine.</p></div>
+<div class="captured-doc-output example-output" v-pre><span class="micro">ACTUAL OUTPUT</span><pre><code>exit status: 127</code></pre><span class="micro stream-label">STDERR</span><pre><code>xs: remote xs is not installed on host (fallback disabled)</code></pre><p class="example-provenance">Captured through <code>tests/fakessh.sh</code>, an ssh stand-in that runs the remote side on the same machine.</p></div>
 
 
 
-<p>Install the helper with <code>xs --install user@host</code> (see <a href="install.html#remote">remote install</a>), put <code>xs</code> on the remote <code>PATH</code> or in <code>~/.local/bin</code>, or name it with <code>--rsync-path</code>. The notice still says “xsync”, the project’s old executable name.</p>
+<p>Install the helper with <code>xs --install user@host</code> (see <a href="install.html#remote">remote install</a>), put <code>xs</code> on the remote <code>PATH</code> or in <code>~/.local/bin</code>, or name it with <code>--rsync-path</code>.</p>
 
 ### The remote xs is too old
 

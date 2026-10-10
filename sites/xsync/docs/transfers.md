@@ -100,7 +100,7 @@ xs -azi host:backup/ restore/
 xs -az --stats src/ host:backup/
 ```
 
-<div class="captured-doc-output example-output" v-pre><span class="micro">ACTUAL OUTPUT · EXIT 0</span><pre><code>Number of files: 10 (reg: 5, dir: 4, link: 1)&#10;Number of created files: 10 (reg: 5, dir: 4, link: 1)&#10;Number of deleted files: 0&#10;Number of regular files transferred: 5&#10;Total file size: 1,289,005 bytes&#10;Total transferred file size: 1,289,005 bytes&#10;Delta literal data: 0 bytes&#10;Delta matched data: 0 bytes&#10;Total bytes sent: 114,184&#10;Total bytes received: 132&#10;&#10;sent 114,184 bytes  received 132 bytes  1,996,295.30 bytes/sec&#10;total size is 1,289,005  speedup is 11.28</code></pre><p class="example-provenance">Captured through <code>tests/fakessh.sh</code>, an ssh stand-in that runs the remote side on the same machine.</p></div>
+<div class="captured-doc-output example-output" v-pre><span class="micro">ACTUAL OUTPUT · EXIT 0</span><pre><code>Number of files: 10 (reg: 5, dir: 4, link: 1)&#10;Number of created files: 10 (reg: 5, dir: 4, link: 1)&#10;Number of deleted files: 0&#10;Number of regular files transferred: 5&#10;Total file size: 1,289,005 bytes&#10;Total transferred file size: 1,289,005 bytes&#10;Delta literal data: 0 bytes&#10;Delta matched data: 0 bytes&#10;Total bytes sent: 114,170&#10;Total bytes received: 132&#10;&#10;sent 114,170 bytes  received 132 bytes  2,399,162.63 bytes/sec&#10;total size is 1,289,005  speedup is 11.28</code></pre><p class="example-provenance">Captured through <code>tests/fakessh.sh</code>, an ssh stand-in that runs the remote side on the same machine.</p></div>
 
 
 

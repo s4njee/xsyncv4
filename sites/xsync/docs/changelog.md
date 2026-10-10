@@ -24,7 +24,8 @@ current `main`.
 
 - The executable is now `xs` in every build, install and release (`xs-linux-amd64`,
   `xs-linux-arm64`, `xs-darwin-universal`). `XSYNC_*` environment variables and
-  `~/.config/xsync/config` keep their names.
+  `~/.config/xsync/config` keep their names. Diagnostics name the executable `xs` too,
+  for example `remote xs is not installed on HOST`.
 - Native remote transfers use protocol 4 and still interoperate with protocol-3 peers.
   Optional capabilities are negotiated as feature bits instead of requiring equal
   versions (R-06).

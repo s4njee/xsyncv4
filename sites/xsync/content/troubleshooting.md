@@ -13,7 +13,7 @@ after: exit-status
 
 <div class="manual-table-wrap"><table><thead><tr><th scope="col">Cause</th><th scope="col">Notice names</th><th scope="col">With <code>--no-fallback</code></th></tr></thead><tbody>
 <tr><td>An option xs does not implement</td><td><code>--backup is not supported by xs</code></td><td>exit 1</td></tr>
-<tr><td>No xs on the remote host</td><td><code>remote xsync is not installed on HOST</code></td><td>exit 127</td></tr>
+<tr><td>No xs on the remote host</td><td><code>remote xs is not installed on HOST</code></td><td>exit 127</td></tr>
 <tr><td>The remote xs is too old for a requested option</td><td><code>peer does not support …</code></td><td>exit 4</td></tr>
 </tbody></table></div>
 
@@ -33,7 +33,7 @@ after: exit-status
 
 <!--example:strict-helper-->
 
-<p>Install the helper with <code>xs --install user@host</code> (see <a href="install.html#remote">remote install</a>), put <code>xs</code> on the remote <code>PATH</code> or in <code>~/.local/bin</code>, or name it with <code>--rsync-path</code>. The notice still says “xsync”, the project’s old executable name.</p>
+<p>Install the helper with <code>xs --install user@host</code> (see <a href="install.html#remote">remote install</a>), put <code>xs</code> on the remote <code>PATH</code> or in <code>~/.local/bin</code>, or name it with <code>--rsync-path</code>.</p>
 
 ### The remote xs is too old
 

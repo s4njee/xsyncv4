@@ -77,7 +77,7 @@ xs --install user@pi
 xs -azi --no-fallback src/ user@pi:backup/ | tail -n 3
 ```
 
-<div class="captured-doc-output example-output" v-pre><span class="micro">ACTUAL OUTPUT · EXIT 0</span><pre><code>Installed xs-linux-amd64 on user@pi at ~/.local/bin/xs&#10;xs  version 0.1.0  protocol version 4  git 1fff2a09ae2c&#10;&lt;f+++++++++ notes.txt&#10;cd+++++++++ scripts/&#10;&lt;f+++++++++ scripts/build.sh</code></pre><p class="example-provenance">Captured through <code>tests/fakessh.sh</code>, an ssh stand-in that runs the remote side on the same machine.</p></div>
+<div class="captured-doc-output example-output" v-pre><span class="micro">ACTUAL OUTPUT · EXIT 0</span><pre><code>Installed xs-linux-amd64 on user@pi at ~/.local/bin/xs&#10;xs  version 0.1.0  protocol version 4  git d3a49f8872fd&#10;&lt;f+++++++++ notes.txt&#10;cd+++++++++ scripts/&#10;&lt;f+++++++++ scripts/build.sh</code></pre><p class="example-provenance">Captured through <code>tests/fakessh.sh</code>, an ssh stand-in that runs the remote side on the same machine.</p></div>
 
 
 
