@@ -139,6 +139,7 @@ void entry_from_stat(const struct stat& st, Entry& e) {
   e.mtime = st.st_mtimespec.tv_sec;
   e.mtime_ns = (u32)st.st_mtimespec.tv_nsec;
   e.atime = st.st_atimespec.tv_sec, e.crtime = st.st_birthtimespec.tv_sec;
+  e.fileflags = st.st_flags;
 #else
   e.mtime = st.st_mtim.tv_sec;
   e.mtime_ns = (u32)st.st_mtim.tv_nsec;
@@ -167,6 +168,7 @@ Entry source_snapshot(const Entry& scanned, const struct stat& st, bool receiver
   e.link_off = scanned.link_off, e.flags = scanned.flags;
   e.item_flags = scanned.item_flags;
   e.time_flags = scanned.time_flags;
+  e.fileflags_differ = scanned.fileflags_differ;
   if (g_opt.atimes) e.atime = scanned.atime;  // checksum/read activity must not replace the listed atime.
   e.basis_mode = scanned.basis_mode;
   // Send fresh source bits; receivers retain their original destination classes.
@@ -258,6 +260,7 @@ static int list_dir_fd(int fd, DirList& out, unsigned flags) {
                   ATTR_CMN_MODTIME | ATTR_CMN_OWNERID | ATTR_CMN_GRPID | ATTR_CMN_ACCESSMASK;
   if (g_opt.atimes) al.commonattr |= ATTR_CMN_ACCTIME;
   if (g_opt.crtimes) al.commonattr |= ATTR_CMN_CRTIME;
+  if (g_opt.fileflags) al.commonattr |= ATTR_CMN_FLAGS;
   al.fileattr = ATTR_FILE_DEVTYPE | ATTR_FILE_DATALENGTH;
   static thread_local std::vector<char> abuf(128 * 1024);
   bool fallback = false;
@@ -314,6 +317,7 @@ static int list_dir_fd(int fd, DirList& out, unsigned flags) {
       if (ret.commonattr & ATTR_CMN_OWNERID) memcpy(&e.uid, f, 4), f += 4;
       if (ret.commonattr & ATTR_CMN_GRPID) memcpy(&e.gid, f, 4), f += 4;
       if (ret.commonattr & ATTR_CMN_ACCESSMASK) memcpy(&v32, f, 4), e.mode = v32 & 07777, f += 4;
+      if (ret.commonattr & ATTR_CMN_FLAGS) memcpy(&e.fileflags, f, 4), f += 4;
       if (ret.fileattr & ATTR_FILE_DEVTYPE) memcpy(&e.rdev, f, 4), f += 4;
       if (ret.fileattr & ATTR_FILE_DATALENGTH) memcpy(&e.size, f, 8), f += 8;
       p += len;
@@ -332,7 +336,8 @@ static int list_dir_fd(int fd, DirList& out, unsigned flags) {
         default: e.type = T_NONE;
       }
       const u32 want = ATTR_CMN_OBJTYPE | ATTR_CMN_MODTIME | ATTR_CMN_ACCESSMASK |
-                       (g_opt.atimes ? ATTR_CMN_ACCTIME : 0) | (g_opt.crtimes ? ATTR_CMN_CRTIME : 0);
+                       (g_opt.atimes ? ATTR_CMN_ACCTIME : 0) | (g_opt.crtimes ? ATTR_CMN_CRTIME : 0) |
+                       (g_opt.fileflags ? ATTR_CMN_FLAGS : 0);
       if (g_opt.hard_links || err || (ret.commonattr & want) != want || (e.type == T_REG && !(ret.fileattr & ATTR_FILE_DATALENGTH))) {
         // Attributes missing for this entry: fall back to a plain lstat.
         struct stat st;
@@ -458,6 +463,17 @@ ResumePrefix destination_resume_prefix(const char* path, i64 limit) {
   return prefix;
 }
 
+std::string item_code(const char* code, const Entry& entry) {
+  std::string result(code);
+  if (g_opt.fileflags && result.size() == 11 && result[0] != '*')
+    result.push_back(result[2] == '+' ? '+' : result[2] == ' ' ? ' ' : entry.fileflags_differ ? 'f' : '.');
+  return result;
+}
+void set_fileflags(const char* path, const Entry& entry) {
+  if (g_opt.fileflags && !g_opt.dry_run && entry.type != T_LNK)
+    check_attr(destination_fileflags(path, entry.fileflags, g_opt.hard_links && entry.nlink > 1 && entry.type != T_DIR), path, "file flags");
+}
+
 // ---------------------------------------------------------------- generator
 
 void src_path_of(const DirWork& w, u32 i, std::string& out) {
@@ -534,12 +550,12 @@ void item(Worker& t, const char* code, std::string_view rel, const Entry& entry,
           std::string_view source = {}, const char* target = nullptr, i64 bytes = 0, i64 size = -1) {
   if (!output_enabled()) return;
   if (!g_opt.am_server || g_output_sink) {
-    output_event({code, std::string(rel), std::string(source), target ? target : "", entry.type, size < 0 ? entry.size : size, bytes});
+    output_event({item_code(code, entry), std::string(rel), std::string(source), target ? target : "", entry.type, size < 0 ? entry.size : size, bytes});
     return;
   }
   bool is_dir = entry.type == T_DIR;
   std::string l;
-  if (g_opt.itemize) l.append(code).push_back(' ');
+  if (g_opt.itemize) l.append(item_code(code, entry)).push_back(' ');
   l.append(rel.empty() ? "." : rel);
   if (is_dir) l.push_back('/');
   if (target) l.append(" -> ").append(target);
@@ -669,6 +685,8 @@ void tweak_attrs(const char* path, const Entry& s, const Entry& d, std::string_v
     if (!o.dry_run) set_mtime(path, s, link);
     if (!same_secs(s, d)) code[4] = 't', changed = true;
   }
+  if (s.fileflags_differ) changed = true;
+  set_fileflags(path, s);
   if (changed && o.output_attrs) note_item(work, index, code, 0, t);
   else if (!changed && o.output_unchanged) {
     memset(code + 2, ' ', 9);
@@ -789,6 +807,24 @@ void generate(DirWork& w, Worker& t) {
     set_names(name);
     if (metadata_enabled() && !w.src_xattrs[i].complete) continue;
 
+    Entry metadata_before;
+    if ((o.fileflags || o.atimes || o.crtimes) && d && d->type == s.type) {
+      // A prior metadata-only update may already have changed this inode via
+      // another destination name, even when -H was not requested.
+      struct stat current;
+      metadata_before = *d;
+      if (destination_stat(path.c_str(), &current) == 0) {
+        Entry fresh;
+        entry_from_stat(current, fresh);
+        if (fresh.type == d->type) {
+          metadata_before.fileflags = fresh.fileflags;
+          metadata_before.atime = fresh.atime;
+          metadata_before.crtime = fresh.crtime;
+        }
+      }
+      d = &metadata_before;
+      if (o.fileflags && s.type != T_LNK) s.fileflags_differ = s.fileflags != d->fileflags;
+    }
     auto compare_xattrs = [&] {
       if (!metadata_enabled() || !d || d->type != s.type) return;
       bool ownership_changed = (o.owner && o.am_root && d->uid != s.uid) ||
@@ -859,6 +895,7 @@ void generate(DirWork& w, Worker& t) {
             if (!(s.flags & EF_MODE_OK)) check_attr(destination_chmod(path.c_str(), final_mode), path.c_str(), "permissions");
             set_extra_times(path.c_str(), s);
             if (o.times && !o.omit_dir_times && !time_ok) set_mtime(path.c_str(), s, false);
+            set_fileflags(path.c_str(), s);
           }
           s.flags &= (u8)~EF_DESCEND;
         }
@@ -1036,6 +1073,7 @@ void generate(DirWork& w, Worker& t) {
           if (o.xattrs) apply_xattrs(w.src_xattrs[i], path, s.type, filters);
           set_extra_times(path.c_str(), s);
           if (o.times) set_mtime(path.c_str(), s, false);
+          set_fileflags(path.c_str(), s);
         }
         w.modified = true;
         g_stats.created_specials.fetch_add(1, std::memory_order_relaxed);
@@ -1146,6 +1184,7 @@ void finalize_tree() {
     set_extra_times(dir.path.c_str(), dir.attrs);
     if (g_opt.times && !g_opt.omit_dir_times && (!dir.time_ok || dir.modified || std::find(dirty.begin(), dirty.end(), dir.path) != dirty.end()))
       set_mtime(dir.path.c_str(), dir.attrs, false);
+    set_fileflags(dir.path.c_str(), dir.attrs);
   }
   worker.flush_log();
   delete_candidates.clear();
@@ -1291,6 +1330,7 @@ bool out_open(OutFile& f, DirWork& w, u32 idx, Worker& t, bool force_temp, bool 
   f.path = path_join(w.dst_path, name);
   f.fd = f.dir_fd = -1;
   f.temp = false;
+  f.cloned_flags = false, f.clone_fileflags = 0;
   f.size = -1;
   f.existed = s.flags & EF_EXISTS;
   auto p = destination_path(f.path);
@@ -1399,27 +1439,47 @@ bool out_finish(OutFile& f, DirWork& w, u32 idx, Worker&, bool ok, const Entry* 
   }
   struct stat published;
   bool have_published = o.hard_links && fstat(f.fd, &published) == 0;
+  u32 desired_flags = o.fileflags ? s.fileflags : f.clone_fileflags;
+  bool flags_requested = o.fileflags || f.cloned_flags;
+  bool defer_links = hardlink_participant(w, idx);
+  int immutable_fd = -1;
+  if (flags_requested) {
+    if (f.temp && !defer_links && blocking_fileflags(desired_flags)) {
+      immutable_fd = fcntl(f.fd, F_DUPFD_CLOEXEC, 0);
+      if (immutable_fd < 0) { file_io_error(errno, f.path.c_str(), "retain flags descriptor"); out_abort(f); return false; }
+    }
+    u32 preliminary = f.temp ? desired_flags & ~blocking_fileflags(desired_flags) : desired_flags;
+    check_attr(fd_fileflags(f.fd, preliminary, defer_links && !f.temp), f.path.c_str(), "file flags");
+  }
   int fd = f.fd;
   f.fd = -1;
   int closed = close(fd);
   open_outputs.at(fd).fd_open = false;
   if (closed != 0) {
-    file_io_error(errno, f.path.c_str(), "close");
+    int error = errno;
+    if (immutable_fd >= 0) close(immutable_fd);
+    file_io_error(error, f.path.c_str(), "close");
     open_outputs.erase(fd);
     out_abort(f);
     return false;
   }
   if (f.temp && renameat(f.dir_fd, f.tmp_name.c_str(), f.dir_fd, f.name.c_str()) != 0) {
-    file_io_error(errno, f.path.c_str(), "rename");
+    int error = errno;
+    if (immutable_fd >= 0) close(immutable_fd);
+    file_io_error(error, f.path.c_str(), "rename");
     open_outputs.erase(fd);
     out_abort(f);
     return false;
+  }
+  if (immutable_fd >= 0) {
+    check_attr(fd_fileflags(immutable_fd, desired_flags), f.path.c_str(), "file flags");
+    close(immutable_fd);
   }
   open_outputs.erase(fd);
   close(f.dir_fd);
   f.dir_fd = -1;
   w.modified.store(true, std::memory_order_relaxed);
-  if (have_published) hardlink_complete(w, idx, s, &published);
+  if (have_published) hardlink_complete(w, idx, s, &published, f.cloned_flags && defer_links);
   return true;
 }
 
@@ -1430,7 +1490,7 @@ bool clone_copy(DirWork& w, u32 idx, const char* source, unsigned flags, Worker&
   Entry fresh;
   int source_fd = -1;
   struct stat before;
-  if (g_opt.hard_links || metadata_enabled() || g_opt.atimes || g_opt.crtimes) {
+  if (g_opt.hard_links || metadata_enabled() || g_opt.atimes || g_opt.crtimes || g_opt.fileflags) {
     source_fd = open(source, O_RDONLY | O_CLOEXEC | read_time_flags() | (g_opt.copy_links || !w.src_paths.empty() ? 0 : O_NOFOLLOW));
     if (source_fd < 0 || fstat(source_fd, &before) != 0 || !S_ISREG(before.st_mode)) {
       if (source_fd >= 0) close(source_fd);
@@ -1456,6 +1516,20 @@ bool clone_copy(DirWork& w, u32 idx, const char* source, unsigned flags, Worker&
     close_source();
     return false;
   }
+  int flags_fd = openat(f.dir_fd, f.tmp_name.c_str(), O_EVTONLY | O_NOFOLLOW | O_CLOEXEC | O_NONBLOCK);
+  struct stat clone_stat;
+  if (flags_fd < 0 || fstat(flags_fd, &clone_stat) != 0 || !S_ISREG(clone_stat.st_mode)) {
+    if (flags_fd >= 0) close(flags_fd);
+    close_source();
+    out_abort(f);
+    return false;
+  }
+  f.clone_fileflags = clone_stat.st_flags;
+  f.cloned_flags = blocking_fileflags(clone_stat.st_flags) != 0;
+  if (f.cloned_flags && fd_fileflags(flags_fd, clone_stat.st_flags & ~blocking_fileflags(clone_stat.st_flags)) != 0) {
+    close(flags_fd); close_source(); out_abort(f); return false;
+  }
+  close(flags_fd);
   if (source_fd >= 0 && (!source_unchanged(source_fd, source, before) ||
       (g_opt.xattrs && !source_xattrs_unchanged(w.src_xattrs[idx], source)))) {
     close_source();
@@ -1476,7 +1550,7 @@ bool clone_copy(DirWork& w, u32 idx, const char* source, unsigned flags, Worker&
   f.fd = fd;
   f.created_mode = st.st_mode & 07777;
   register_output(f);
-  return out_finish(f, w, idx, t, true, g_opt.hard_links || metadata_enabled() || g_opt.atimes || g_opt.crtimes ? &fresh : nullptr);
+  return out_finish(f, w, idx, t, true, g_opt.hard_links || metadata_enabled() || g_opt.atimes || g_opt.crtimes || g_opt.fileflags ? &fresh : nullptr);
 #else
   errno = ENOTSUP;
   return false;
@@ -1499,7 +1573,7 @@ void note_item(DirWork& w, u32 idx, const char* code, i64 bytes, Worker& t, i64 
   // A remote receiver has source paths only for logging, never for filesystem use.
   if (!w.output_sources.empty()) source = w.output_sources[idx];
   else if (!w.src_path.empty() || !w.src_paths.empty()) src_path_of(w, idx, source);
-  if (hardlink_defer(w, idx, {code, rel_join(w.rel, w.src.name_sv(entry)), source,
+  if (hardlink_defer(w, idx, {item_code(code, entry), rel_join(w.rel, w.src.name_sv(entry)), source,
        entry.type == T_LNK ? w.src.link(entry) : "", entry.type, size < 0 ? entry.size : size, bytes})) return;
   item(t, code, rel_join(w.rel, w.src.name_sv(entry)), entry, source,
        entry.type == T_LNK ? w.src.link(entry) : nullptr, bytes, size);
@@ -1508,9 +1582,10 @@ void note_item(DirWork& w, u32 idx, const char* code, i64 bytes, Worker& t, i64 
 void note_directory(DirWork& w, const Entry* before, bool created, Worker& t) {
   if (!output_enabled()) return;
   const Options& o = g_opt;
-  const Entry& source = w.attrs;
+  Entry source = w.attrs;
+  source.fileflags_differ = o.fileflags && before && source.fileflags != before->fileflags;
   char code[12] = ".d.........";
-  bool changed = created;
+  bool changed = created || source.fileflags_differ;
   if (created) memcpy(code, "cd+++++++++", 11);
   else if (before) {
     if (o.times && !o.omit_dir_times && !same_secs(source, *before)) code[4] = 't', changed = true;

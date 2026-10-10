@@ -114,6 +114,7 @@ void put_file_attrs(std::string& s, const Entry& e, const XattrSet& xattrs) {
   put_svar(s, e.mtime), put_var(s, e.mtime_ns);
   if (g_opt.peer_features & PF_ATIMES) put_svar(s, e.atime);
   if (g_opt.peer_features & PF_CRTIMES) put_svar(s, e.crtime);
+  if (g_opt.peer_features & PF_FILEFLAGS) put_var(s, e.fileflags);
   if (g_opt.peer_features & PF_HLINK) {
     put_var(s, e.hdev), put_var(s, e.ino), put_var(s, e.nlink);
     put_svar(s, e.ctime), put_var(s, e.ctime_ns);
@@ -625,7 +626,7 @@ void handle_output(std::string_view payload) {
     event.hardlink_target = hardlink;
   }
   if (r.bad || !r.empty() || event.type > T_BLK || event.size < 0 || event.bytes < 0 ||
-      (event.code.size() != 11 && event.code != "*deleting  ") ||
+      (event.code.size() != ((g_opt.peer_features & PF_FILEFLAGS) ? 12 : 11) && event.code != "*deleting  ") ||
       std::any_of(event.code.begin(), event.code.end(), [](unsigned char c) { return c < 32 || c >= 127; }))
     die(RERR_PROTOCOL, "protocol error: malformed file output");
   output_event(std::move(event));
@@ -667,7 +668,14 @@ std::string_view unpack(std::string_view in, bool compressed, std::string& scrat
 
 // ---------------------------------------------------------------- options on the wire
 
+u32 get_fileflags(RBuf& r) {
+  u64 flags = r.var();
+  if (r.bad || flags > UINT32_MAX) die(RERR_PROTOCOL, "protocol error: bad file flags");
+  return (u32)flags;
+}
+
 std::string missing_feature(u64 features) {
+  if (g_opt.fileflags && !g_opt.list_only && !(features & PF_FILEFLAGS)) return "peer does not support --fileflags";
   if (g_opt.executability && !g_opt.perms && !g_opt.list_only && !(features & PF_EXECUTABILITY)) return "peer does not support --executability";
   if (g_opt.atimes && !g_opt.list_only && !(features & PF_ATIMES)) return "peer does not support --atimes";
   if (g_opt.crtimes && !g_opt.list_only && !(features & PF_CRTIMES)) return "peer does not support --crtimes";
@@ -943,6 +951,7 @@ struct Sender {
     put_var(body, d->attrs.gid);
     if (o.peer_features & PF_ATIMES) put_svar(body, d->attrs.atime);
     if (o.peer_features & PF_CRTIMES) put_svar(body, d->attrs.crtime);
+    if (o.peer_features & PF_FILEFLAGS) put_var(body, d->attrs.fileflags);
     if (o.peer_features & PF_DIR_OUTPUT) {
       put_var(body, (u64)d->attrs.size);
       put_str(body, d->attr_source.empty() ? d->src_path : d->attr_source);
@@ -962,6 +971,7 @@ struct Sender {
       if (o.group) put_var(body, e.gid);
       if (o.peer_features & PF_ATIMES) put_svar(body, e.atime);
       if (o.peer_features & PF_CRTIMES) put_svar(body, e.crtime);
+      if (o.peer_features & PF_FILEFLAGS) put_var(body, e.fileflags);
       switch (e.type) {
         case T_REG:
           put_var(body, (u64)e.size);
@@ -1557,6 +1567,7 @@ struct Receiver {
     w.attrs.gid = (u32)r.var();
     if (o.peer_features & PF_ATIMES) w.attrs.atime = r.svar();
     if (o.peer_features & PF_CRTIMES) w.attrs.crtime = r.svar();
+    if (o.peer_features & PF_FILEFLAGS) w.attrs.fileflags = get_fileflags(r);
     if (o.peer_features & PF_DIR_OUTPUT) {
       w.attrs.size = (i64)r.var();
       w.attr_source = r.str();
@@ -1595,6 +1606,7 @@ struct Receiver {
       if (o.group) e.gid = (u32)r.var();
       if (o.peer_features & PF_ATIMES) e.atime = r.svar();
       if (o.peer_features & PF_CRTIMES) e.crtime = r.svar();
+      if (o.peer_features & PF_FILEFLAGS) e.fileflags = get_fileflags(r);
       switch (e.type) {
         case T_REG:
           e.size = (i64)r.var();
@@ -1774,6 +1786,7 @@ struct Receiver {
     attrs.mtime = r.svar(), attrs.mtime_ns = (u32)r.var();
     if (g_opt.peer_features & PF_ATIMES) attrs.atime = r.svar();
     if (g_opt.peer_features & PF_CRTIMES) attrs.crtime = r.svar();
+    if (g_opt.peer_features & PF_FILEFLAGS) attrs.fileflags = get_fileflags(r);
     if (g_opt.peer_features & PF_HLINK) {
       attrs.hdev = r.var(), attrs.ino = r.var(), attrs.nlink = r.var();
       attrs.ctime = r.svar(), attrs.ctime_ns = (u32)r.var();
@@ -2361,6 +2374,7 @@ int run_client(const std::vector<std::string>& srcs, const std::string& dest, u3
   if (!o.executability || o.perms) advertised &= ~PF_EXECUTABILITY;
   if (!o.atimes) advertised &= ~PF_ATIMES;
   if (!o.crtimes) advertised &= ~PF_CRTIMES;
+  if (!o.fileflags) advertised &= ~PF_FILEFLAGS;
   if (!o.open_noatime) advertised &= ~PF_OPEN_NOATIME;
   if (!output_enabled()) advertised &= ~(PF_OUTPUT | PF_DIR_OUTPUT);
   if (wire_version >= 4) put_var(f, advertised);
@@ -2535,6 +2549,7 @@ int run_server() {
   // Like rsync, an explicitly configured helper may set its own input
   // delimiter. Ordinary SSH invocations do not forward the client's -0.
   const bool server_from0 = o.from0;
+  const bool server_fileflags = o.fileflags;
   const bool server_executability = o.executability && !o.perms;
   const bool server_atimes = o.atimes, server_crtimes = o.crtimes, server_noatime = o.open_noatime;
   o = Options();
@@ -2543,6 +2558,9 @@ int run_server() {
   o.am_server = true;
   o.wire_version = ver;
   o.peer_features = advertised & PROTO_FEATURES;
+  if ((advertised & PF_FILEFLAGS) && !(PROTO_FEATURES & PF_FILEFLAGS))
+    die(RERR_UNSUPPORTED, "peer does not support --fileflags");
+  if (server_fileflags && !(o.peer_features & PF_FILEFLAGS)) die(RERR_UNSUPPORTED, "peer does not support --fileflags");
   if ((advertised & PF_CRTIMES) && !(PROTO_FEATURES & PF_CRTIMES))
     die(RERR_UNSUPPORTED, "peer does not support --crtimes");
   if (server_executability && !(o.peer_features & PF_EXECUTABILITY)) die(RERR_UNSUPPORTED, "peer does not support --executability");
@@ -2562,6 +2580,7 @@ int run_server() {
   o.executability = o.peer_features & PF_EXECUTABILITY;
   o.atimes = (o.peer_features & PF_ATIMES) ? 1 : 0;
   o.crtimes = o.peer_features & PF_CRTIMES;
+  o.fileflags = o.peer_features & PF_FILEFLAGS;
   o.open_noatime = o.peer_features & PF_OPEN_NOATIME;
   get_options(r);
   // rsync's remote receiver parses -A after the client's options and thereby

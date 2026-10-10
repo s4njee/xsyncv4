@@ -38,6 +38,8 @@ void entry_from_stat(const struct stat& st, Entry& e);
 u32 execution_mode(u32 source, u32 destination);
 Entry source_snapshot(const Entry& scanned, const struct stat& st, bool receiver = true);
 bool source_unchanged(int fd, const std::string& path, const struct stat& before);
+std::string item_code(const char* code, const Entry& entry);
+void set_fileflags(const char* path, const Entry& entry);
 bool hash_file(const char* path, u64 out[2]);
 bool destination_hash_file(const char* path, u64 out[2]);
 struct ResumePrefix {
@@ -108,6 +110,8 @@ struct OutFile {
   bool temp = false;
   bool existed = false;
   u32 created_mode = 0;
+  bool cloned_flags = false;
+  u32 clone_fileflags = 0;
   i64 size = -1;  // final length when known (needed to truncate --inplace updates)
   std::string path, tmp;
   std::string name, tmp_name;

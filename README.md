@@ -458,6 +458,17 @@ Differences to be aware of:
   Native remote transfers negotiate these options before writes and older
   helpers delegate or refuse. Whole-directory cloning is disabled when `-U`
   or `-N` needs per-entry handling; file clones correct the requested times.
+- **BSD file flags.** `--fileflags` preserves macOS `st_flags` on files,
+  directories and special inodes. Physical symlinks are skipped; `-L` preserves
+  their referents' flags. Archive mode does not imply it, and `--no-fileflags`
+  disables it. Requested flags add a twelfth `%i` character (`f` when changed).
+  Flags that block writes or links are applied after publication and hard-link
+  creation; existing immutable destinations are not automatically made writable
+  for data replacement. Failed or silently ignored flag updates report exit 23.
+  File clones retain their flag superset without this option. Whole-directory
+  cloning is disabled when flags are requested. Linux refuses native flag
+  preservation; older helpers delegate or refuse before writes. Fallback needs
+  a flags-capable rsync; standard upstream builds do not include `--fileflags`.
 - **Delegated to rsync** (strict mode rejects them): incompatible remote `-A`,
   `-b`, `--link-dest`/`--compare-dest`/`--copy-dest`,
   `--chmod`, `--append`, `--partial-dir`, and `--remove-source-files`.

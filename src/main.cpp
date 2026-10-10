@@ -62,6 +62,7 @@ Options (same meaning as rsync):
  -L, --copy-links         transform symlink into referent file/dir
  -p, --perms              preserve permissions
  -E, --executability      preserve executability of regular files
+     --fileflags          preserve BSD file flags (macOS)
  -o, --owner              preserve owner (super-user only)
  -g, --group              preserve group
  -D                       same as --devices --specials
@@ -238,6 +239,7 @@ Parsed parse(int argc, char** argv) {
     else if (name == "xattrs") o.xattrs = std::min(o.xattrs + 1, 2);
     else if (name == "no-xattrs" || name == "no-X") o.xattrs = 0;
     else if (name == "executability") o.executability = true;
+    else if (flag(o.fileflags, "fileflags")) {}
     else if (name == "atimes") { if (++o.atimes > 1) o.open_noatime = true; }
     else if (name == "no-atimes" || name == "no-U") o.atimes = 0;
     else if (name == "no-N") o.crtimes = false;
@@ -450,6 +452,7 @@ Parsed parse(int argc, char** argv) {
   if (o.copy_links) o.links = false;
 #ifndef __APPLE__
   if (o.crtimes) usage_error("--crtimes is not supported on this platform");
+  if (o.fileflags) usage_error("--fileflags is not supported on this platform");
 #endif
   if (!p.server && p.install.empty() && p.args.size() == 1) o.list_only = true;
   if (o.list_only && !o.dirs_explicit && !o.recursive) o.dirs = true;

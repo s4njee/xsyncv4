@@ -185,6 +185,21 @@ class TimeDifferentials(unittest.TestCase):
                         self.assertEqual(file.stat().st_atime_ns, ACCESS * 10**9 + 987654321)
                     self.assertEqual(results[1], results[0])
 
+    def test_metadata_only_shared_inode_refreshes_times_without_H(self):
+        for direction in ('local', 'push', 'pull'):
+            for flags in (['-aU'], *([['-aUN']] if DARWIN else [])):
+                with self.subTest(direction=direction, flags=flags):
+                    results = []
+                    for native in (False, True):
+                        self.fixture()
+                        for side in ('src', 'dst'):
+                            os.link(self.root / side / 'same', self.root / side / 'alias')
+                            os.utime(self.root / side, (ACCESS, MODIFY))
+                        result = self.run_sync(native, flags, direction)
+                        rows = snapshot(self.root / 'dst')
+                        results.append(({n: rows[n] for n in ('alias', 'same')}, sorted(result.stdout.splitlines())))
+                    self.assertEqual(results[1], results[0])
+
     def test_large_whole_delta_inplace_and_resume_paths(self):
         content = b'a' * (3 * 1024 * 1024)
         changed = content[:1024 * 1024] + b'new block' + content[1024 * 1024 + 9:]

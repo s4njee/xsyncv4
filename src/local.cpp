@@ -814,7 +814,7 @@ int run_local(const std::vector<std::string>& srcs, const std::string& dest) {
   const Options& o = g_opt;
   // Whole-directory clones are only equivalent to a per-file sync when nothing could make us
   // treat any entry specially.
-  L.lazy_ok = o.clone && !o.atimes && !o.crtimes && o.recursive && o.links && !o.copy_links && o.perms && o.times && !o.omit_dir_times && !o.omit_link_times &&
+  L.lazy_ok = o.clone && !o.atimes && !o.crtimes && !o.fileflags && o.recursive && o.links && !o.copy_links && o.perms && o.times && !o.omit_dir_times && !o.omit_link_times &&
               !metadata_enabled() && !o.dry_run && !o.inplace && !o.one_fs && !o.existing && !o.prune_empty && !root->selection && o.max_size <= 0 && o.min_size <= 0 && o.filters.empty();
 #endif
   int n = default_jobs();

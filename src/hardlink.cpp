@@ -12,7 +12,7 @@ namespace {
 struct Member {
   std::string path, rel, parent, source, target;
   Entry attrs, before;
-  bool existed = false, ready = false;
+  bool existed = false, ready = false, restore_flags = false;
   u64 dest_dev = 0, dest_ino = 0;
   std::optional<OutputEvent> event;
 };
@@ -72,16 +72,24 @@ OutputEvent linked_event(const Member& member, const Member& anchor, bool alread
   if (!member.existed || member.before.type != member.attrs.type) event.code = "hf+++++++++";
   else if (event.code.empty()) event.code = ".f         ";
   if (already) event.code = "hf         ";
+  event.code = item_code(event.code.c_str(), member.attrs);
   event.code[0] = 'h';
   event.code[1] = kind(member.attrs.type);
   // The alias inherits these attributes from the completed anchor. rsync
   // itemizes their writes on the anchor, not again on the published hard link.
   if (event.code[9] == 'a') event.code[9] = '.';
   if (event.code[10] == 'x') event.code[10] = '.';
+  if (event.code.size() == 12 && event.code[11] == 'f') event.code[11] = '.';
   if (event.code[8] == 'n') event.code[8] = '.';
   else if (event.code[8] == 'b') event.code[8] = 'u';
   return event;
 }
+}
+
+bool hardlink_participant(const DirWork& w, u32 index) {
+  if (!g_opt.hard_links) return false;
+  std::lock_guard<std::mutex> lock(mutex);
+  return members.contains(key(w, index));
 }
 
 void hardlink_prepare(DirWork& w, u32 index, const Entry* before) {
@@ -100,13 +108,14 @@ void hardlink_prepare(DirWork& w, u32 index, const Entry* before) {
   members.emplace(member.path, std::move(member));
 }
 
-void hardlink_complete(DirWork& w, u32 index, const Entry& source, const struct stat* published) {
+void hardlink_complete(DirWork& w, u32 index, const Entry& source, const struct stat* published, bool restore_flags) {
   if (!g_opt.hard_links) return;
   std::lock_guard<std::mutex> lock(mutex);
   auto it = members.find(key(w, index));
   if (it == members.end()) return;
   Member& member = it->second;
   member.attrs = source;
+  member.restore_flags = restore_flags;
   if (!g_opt.dry_run) {
     struct stat st;
     if (!published) {
@@ -163,6 +172,9 @@ std::vector<std::string> hardlink_finalize() {
       }
       if (!already || g_opt.output_unchanged) output_event(linked_event(*member, *anchor, already));
     }
+    if ((g_opt.fileflags || anchor->restore_flags) && !g_opt.dry_run && anchor->attrs.type != T_LNK)
+      check_attr(destination_fileflags(anchor->path.c_str(), anchor->attrs.fileflags, false,
+                                      anchor->dest_dev, anchor->dest_ino), anchor->path.c_str(), "file flags");
   }
   members.clear();
   return dirty;

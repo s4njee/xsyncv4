@@ -169,7 +169,7 @@ void output_start() {
 void output_event(OutputEvent event) {
   if (!output_enabled() || g_opt.quiet) return;
   if (!event.time) event.time = time(nullptr);
-  if (event.type == T_DIR && event.code == "cd+++++++++") {
+  if (event.type == T_DIR && (event.code == "cd+++++++++" || event.code == "cd++++++++++")) {
     std::lock_guard<std::mutex> lock(mutex);
     if (!created_directories.insert(event.path).second) return;
   }

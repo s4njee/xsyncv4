@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <cstdint>
 #include <sys/stat.h>
 #include <unistd.h>
 
@@ -24,6 +25,10 @@ int destination_chown(const char* path, uid_t uid, gid_t gid);
 int destination_times(const char* path, const timespec times[2]);
 int destination_crtime(const char* path, time_t seconds);
 int fd_crtime(int fd, time_t seconds);
+uint32_t blocking_fileflags(uint32_t flags);
+int fd_fileflags(int fd, uint32_t flags, bool delay = false);
+int destination_fileflags(const char* path, uint32_t flags, bool delay = false,
+                          uint64_t expected_dev = 0, uint64_t expected_ino = 0);
 int destination_mkdir(const char* path, mode_t mode);
 int destination_unlink(const char* path);
 int destination_rmdir(const char* path);

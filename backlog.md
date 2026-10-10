@@ -2,7 +2,7 @@
 
 Initial audit written 2026-10-08 against xsync 0.1.0 (protocol 1).
 All fifteen P0 stories completed against protocol 3; per-story evidence is below.
-P1 R-02 through R-09 and E-01 through E-09 are complete (17 of 22 stories). Current protocol 4 supports protocol 3; E-10 is in progress (local/remote xattrs, matching-style ACLs, executability and access/creation times implemented, cross-style compatibility guarded; flags, identity overrides and packaging pending).
+P1 R-02 through R-09 and E-01 through E-09 are complete (17 of 22 stories). Current protocol 4 supports protocol 3; E-10 is in progress (local/remote xattrs, matching-style ACLs, executability, access/creation times and BSD flags implemented, cross-style compatibility guarded; identity overrides and packaging pending).
 Problem statements retain the original audit findings.
 
 ## What "daily driver" means here
@@ -2004,3 +2004,81 @@ Verified artifact manifest (source `864bd37edf14`):
   `--fileflags`; upstream's separate `fileflags.diff` does not apply cleanly to
   rsync 3.4.4, so the next milestone needs a compatible flags reference rather
   than treating an unknown option as a successful comparison.
+
+
+## E-10 progress — 2026-10-09: negotiated BSD file flags
+
+- E-10 remains **code**, with P1 at **17/22**. Native local/push/pull
+  `--fileflags` preserves Darwin `st_flags` on regular files, directories and
+  special inodes. Physical symlinks are skipped; `-L` preserves referents.
+  Archive mode does not imply flags, and `--no-fileflags` disables them. Flags
+  add a twelfth `%i` character only when requested (`f` for changed flags).
+  Directory flags are finalized after children/deletions; immutable/append
+  flags on new files wait until checked data closure and publication, and on
+  hard-link anchors until aliases exist. Existing immutable receivers are not
+  implicitly made writable for data replacement. Failed or silently ignored
+  flag writes report exit 23, including compression/synthetic bits that Darwin
+  accepts without applying. All flag setters use pinned, non-following FDs.
+- **Protocol:** `PF_FILEFLAGS=134217728` leaves the frozen protocol-3 layout
+  intact. Root/entry and fresh DATA flags are separately negotiated bounded
+  32-bit fields; malformed/truncated/overflow values fail before publication.
+  Fresh source flags survive retries. Older helpers strictly refuse with code 4
+  or delegate once before writes. Linux CLI requests fail with code 1 and a
+  raw advertised flags capability fails with code 4 before writes; no BSD/Linux
+  flag translation is invented. Structured output validates the negotiated
+  itemization width. Installed helpers and release artifacts remain unchanged.
+- **Clone handling:** APFS clones carry source flags even without the option.
+  New cloned immutable/append flags are temporarily cleared before metadata
+  writes/rename, then restored using the pinned inode; hard-link clones restore
+  them after alias publication. Failed source validation can clean up its clone.
+  Whole-directory cloning is disabled when per-entry flag handling is requested.
+  README/help document the clone superset and native/fallback boundaries.
+- **Reference:** standard rsync 3.4.4 and the system rsync lack `--fileflags`.
+  `tests/build_fileflags_reference.py` reproducibly builds rsync **3.3.0** with
+  upstream `fileflags.diff` at patch commit
+  `10ab5e57446d10ef641ceb045ef3094e7d2bd439`, checking pinned archive/patch
+  SHA-256 hashes and applying every hunk without fuzz in a disposable directory.
+  It never installs a binary; use its printed path as `XSYNC_FILEFLAGS_RSYNC`.
+  The recipe was executed successfully; log:
+  `/tmp/xsync-e10-fileflags-reference-recipe.log`.
+- **Reference defect retained as evidence:** that upstream patch writes flags
+  before atime but reads flags after atime in `flist.c`. With `-U --fileflags`,
+  a source atime of 1200000000 and `UF_HIDDEN` can become destination atime 128
+  and an invalid flags request `0x868c0047`, causing exit 23. A minimal pinned
+  reference regression reproduces it. **11** native combined U/N/ACL/xattr/H
+  transfers instead check exact flags, timestamps, data and identities against
+  independently captured expectations. No reference code was patched to make
+  the comparisons pass. Creation-time combinations without U still compare
+  native data/metadata and itemized output directly against that reference.
+- **Verification:** **56** rsync differential transfers cover local/push/pull,
+  bytes/clones, metadata-only updates, new files, FIFOs, physical/followed links,
+  hard links, N/AX/E composition, checksum, in-place, deletion, dry-run,
+  unchanged output, option cancellation and existing immutable failures.
+  Another **4** native immutable hard-link transfers and one no-option clone
+  check verify publication/restoration ordering. **24** source-flag mutation
+  cases exercise whole/delta and atomic/in-place retries in all directions.
+  Wire cases cover nine malformed root/entry/DATA fields, four listed/fresh
+  flag combinations, three failed/ignored flag values and explicit helper
+  negotiation. Older-helper tests verify refusal and flags-capable fallback.
+  Receiver symlink swaps now check outside flags as well as data/modes/times.
+- Composition found and fixed duplicate time itemization through shared inodes:
+  requested destination flags/access/creation times are refreshed after an
+  earlier metadata-only alias update, even without H. **6** modern rsync
+  shared-inode time differentials pass on each macOS architecture; the **3**
+  supported Linux cases also pass. The fixture resets directory mtimes after
+  creating links and compares fixed alias metadata, excluding unrequested
+  current-clock creation times on unrelated new files.
+- **Logs:** ARM macOS **58** methods (three skips), Intel macOS **17** flags
+  methods (one skip), Linux **44** methods (18 platform skips), plus one shared
+  time method on each platform pass. Logs are
+  `/tmp/xsync-e10-fileflags-mac-verified.log`,
+  `/tmp/xsync-e10-fileflags-rosetta-verified.log`,
+  `/tmp/xsync-e10-fileflags-linux-verified.log`, and
+  `/tmp/xsync-e10-fileflags-shared-times{,-rosetta,-linux}.log`.
+  The feature/frozen protocol suite passed **11** methods; a separate pre-final
+  metadata regression passed **57** (two skips). Earlier incorrect flag-update
+  and clone assumptions, and the U/reference composition failure, were resolved
+  and rerun rather than counted as passing. The supplied `sanjee@neo.local`
+  target still fails DNS resolution; R-01 physical-host coverage remains open.
+- **Remaining before E-10 completion:** `--chmod`, `--chown`, final metadata
+  composition checks and packaging. No complete-story count has been advanced.

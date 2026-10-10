@@ -124,6 +124,55 @@ int destination_times(const char* path, const timespec times[2]) {
   return p.fd < 0 ? -1 : p.name == "." ? futimens(p.fd, times) :
     utimensat(p.fd, p.name.c_str(), times, AT_SYMLINK_NOFOLLOW);
 }
+uint32_t blocking_fileflags(uint32_t flags) {
+#ifdef __APPLE__
+  return flags & (UF_IMMUTABLE | UF_APPEND | SF_IMMUTABLE | SF_APPEND | SF_NOUNLINK);
+#else
+  return 0;
+#endif
+}
+int fd_fileflags(int fd, uint32_t flags, bool delay) {
+#ifdef __APPLE__
+  struct stat st;
+  if (fstat(fd, &st) != 0) return -1;
+  if (S_ISLNK(st.st_mode)) { errno = ELOOP; return -1; }
+  // Existing immutable objects stay immutable unless the requested flags clear
+  // them. New immutable bits wait until hard-link aliases have been published.
+  if (delay) flags = (flags & ~blocking_fileflags(flags)) | blocking_fileflags(st.st_flags & flags);
+  if (st.st_flags == flags) return 0;
+  if (fchflags(fd, flags) != 0 || fstat(fd, &st) != 0) return -1;
+  // Darwin silently ignores some storage/synthetic bits. Do not report that
+  // the requested flags were preserved when the filesystem did not apply them.
+  if (st.st_flags != flags) { errno = ENOTSUP; return -1; }
+  return 0;
+#else
+  errno = ENOTSUP;
+  return -1;
+#endif
+}
+int destination_fileflags(const char* path, uint32_t flags, bool delay,
+                          uint64_t expected_dev, uint64_t expected_ino) {
+#ifdef __APPLE__
+  auto p = destination_path(path);
+  if (p.fd < 0) return -1;
+  int fd = p.name == "." ? p.release() :
+    openat(p.fd, p.name.c_str(), O_EVTONLY | O_NOFOLLOW | O_NONBLOCK | O_CLOEXEC);
+  if (fd < 0) return -1;
+  struct stat st;
+  int result = fstat(fd, &st);
+  if (!result && expected_ino && ((uint64_t)st.st_dev != expected_dev || (uint64_t)st.st_ino != expected_ino))
+    errno = ESTALE, result = -1;
+  if (!result) result = fd_fileflags(fd, flags, delay);
+  int error = errno;
+  close(fd);
+  errno = error;
+  return result;
+#else
+  errno = ENOTSUP;
+  return -1;
+#endif
+}
+
 int fd_crtime(int fd, time_t seconds) {
 #ifdef __APPLE__
   attrlist attributes{};

@@ -158,7 +158,7 @@ p=pathlib.Path(sys.argv[1]); print(json.dumps({'hash':hashlib.sha256((p/'file').
     def test_requested_feature_is_never_silently_dropped(self):
         source = self.root / 'feature source'
         source.write_bytes(b'unchanged')
-        for flags in (['-rl', '--safe-links'], ['-a'], ['-E'], ['-H'], ['-A'], ['-AX'], ['-U'], ['-UU'], ['--open-noatime'], ['--bwlimit=256'], ['--timeout=1'], ['--filter=P stale']):
+        for flags in (['-rl', '--safe-links'], ['-a'], ['-E'], ['-H'], ['-A'], ['-AX'], ['-U'], ['-UU'], ['--open-noatime'], *([['--fileflags']] if sys.platform == 'darwin' else []), ['--bwlimit=256'], ['--timeout=1'], ['--filter=P stale']):
             with self.subTest(flags=flags):
                 target = self.root / 'unsupported feature destination'
                 result = subprocess.run([str(BINARY), '--no-fallback', *flags, '-e', RSH,
@@ -175,7 +175,7 @@ p=pathlib.Path(sys.argv[1]); print(json.dumps({'hash':hashlib.sha256((p/'file').
     def test_legacy_metadata_requests_refuse_before_destination_writes(self):
         source = self.root / 'ACL feature source'; source.mkdir()
         (source / 'file').write_bytes(b'unchanged')
-        for flags in ('-rltE', '-aA', '-aAX', '-aU', '-aUU', *(['-aN', '-aUN'] if sys.platform == 'darwin' else [])):
+        for flags in ('-rltE', '-aA', '-aAX', '-aU', '-aUU', *(['--fileflags', '-aN', '-aUN'] if sys.platform == 'darwin' else [])):
             for direction in ('push', 'pull'):
                 with self.subTest(flags=flags, direction=direction):
                     target = self.root / ('ACL refused ' + flags + direction)
