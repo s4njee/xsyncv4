@@ -118,7 +118,7 @@ Options (same meaning as rsync):
      --include-from=FILE  read include patterns from FILE
  -0, --from0              use NUL delimiters in list and filter merge files
      --stats              give some file-transfer stats
- -h, --human-readable     output numbers in a human-readable format
+ -h, --human-readable     use 1000-based units (-hh uses 1024)
      --progress[=json]    show progress (default on terminals), or JSON events
      --no-progress        suppress progress; XSYNC_PROGRESS=0 also disables it
  -P                       same as --partial --progress
@@ -557,6 +557,9 @@ void print_summary(u64 t0) {
     if (!o.human) {  // add thousands separators to the integer part
       size_t dot = r.find('.');
       r = fmt_num(strtoull(r.substr(0, dot).c_str(), nullptr, 10)) + r.substr(dot);
+    } else {
+      r = fmt_size((double)(sent + recv) / el);
+      if (r.ends_with('B')) r.pop_back();
     }
     snprintf(speedup, sizeof speedup, "%.2f", sent + recv ? (double)total / (double)(sent + recv) : 0.0);
     out += "\nsent " + fmt_num(sent) + " bytes  received " + fmt_num(recv) + " bytes  " + r + " bytes/sec\n";

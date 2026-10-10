@@ -241,6 +241,7 @@ enum { RERR_SYNTAX = 1, RERR_PROTOCOL = 2, RERR_FILESELECT = 3, RERR_UNSUPPORTED
 u64 now_ns();
 std::string fmt_num(u64 v);         // 1,234,567 (or human-readable with -h)
 std::string fmt_size(double v);     // 12.3M
+double human_base();               // 1000 by default/-h, 1024 with -hh.
 std::string fmt_count(double v);    // 12.3k
 inline std::string path_join(std::string_view a, std::string_view b) {
   std::string r;

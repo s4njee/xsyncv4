@@ -2906,3 +2906,15 @@ Verified artifact manifest (source `864bd37edf14`):
   `/tmp/xsync-u09-release-{mac-arm,mac-intel,linux-amd64,linux-arm64}.log`.
   Packaging is refreshed after this entry. U-10 is next; U-01 still needs
   GUI terminal verification.
+
+## U-10 progress — 2026-10-10: consistent size units
+
+- One shared base now drives compact progress/wire/dry-run amounts, human
+  summary counters and progress2 rates: 1000 by default/`-h`, 1024 with `-hh`.
+  Human verbose summary rates are compact as well. Below-base values remain
+  unscaled (including 1000–1023 with `-hh`); JSON keeps raw integers.
+  README and help describe the rule and the 1.05M versus 1.00M example.
+- All **4 unit acceptance methods** pass: 45 progress/stats combinations
+  across local/push/pull and five byte boundaries, nine dry-run combinations,
+  three JSON modes and three progress2 human byte columns. Existing four
+  dry-summary and three ACK methods pass. Real SSH and release checks follow.

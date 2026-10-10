@@ -294,8 +294,9 @@ void progress2_line(const Totals& t, u64 now, bool complete = false) {
   double time = !complete && rate > 0 && t.bytes < t.bytes_total ? (double)(t.bytes_total - t.bytes) / rate : elapsed;
   u64 seconds = (u64)time;
   const char* units[] = {"B/s", "kB/s", "MB/s", "GB/s", "TB/s"};
+  double base = human_base();
   int unit = 0;
-  while (rate >= 1000 && unit < 4) rate /= 1000, ++unit;
+  while (rate >= base && unit < 4) rate /= base, ++unit;
   char tail[160];
   snprintf(tail, sizeof tail, " %3d%% %7.2f%s %4llu:%02llu:%02llu (xfr#%llu, %s-chk=%llu/%llu)\n",
       (int)(std::clamp(t.frac, 0.0, 1.0) * 100), rate, units[unit],

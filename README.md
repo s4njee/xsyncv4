@@ -428,6 +428,13 @@ without dry-run total acknowledgments delegates before transfer or fails in
 strict mode; `-n --quiet` can still use such a helper without a summary. Rsync
 fallback uses rsync's own dry-run output.
 
+Size units use one base throughout progress, wire rates, dry-run plans and
+summaries: decimal (1000) by default and with `-h`, binary (1024) with `-hh`.
+Progress and plans use compact `K`/`M`/`G` amounts; ordinary summary counters
+retain full integers unless `-h` is requested. For example, 1,048,576 bytes
+appears as `1.05M` with decimal units or `1.00M` with `-hh`. Values below the
+chosen base remain unscaled. JSON always retains raw integer counts and bytes.
+
 Progress uses stderr. The live display is used on terminals; explicit
 `--progress` prints one plain line per second on pipes. `--info=progress2`
 uses rsync's byte/percent/rate/time and `(xfr#N, to-chk=R/T)` line shape on

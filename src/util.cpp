@@ -190,10 +190,13 @@ void exit_signal() {
   _Exit(RERR_SIGNAL);
 }
 
+double human_base() { return g_opt.human > 1 ? 1024.0 : 1000.0; }
+
 std::string fmt_size(double v) {
   static const char* u[] = {"B", "K", "M", "G", "T", "P"};
+  double unit = human_base();
   int i = 0;
-  while (v >= 1000.0 && i < 5) v /= 1024.0, i++;
+  while (v >= unit && i < 5) v /= unit, i++;
   char b[32];
   if (i == 0) snprintf(b, sizeof b, "%.0fB", v);
   else snprintf(b, sizeof b, v >= 100 ? "%.0f%s" : v >= 10 ? "%.1f%s" : "%.2f%s", v, u[i]);
@@ -210,9 +213,9 @@ std::string fmt_count(double v) {
 
 std::string fmt_num(u64 v) {
   if (g_opt.human) {
-    if (v < 1000) return std::to_string(v);
     static const char* u[] = {"", "K", "M", "G", "T", "P"};
-    double d = (double)v, unit = g_opt.human > 1 ? 1024.0 : 1000.0;
+    double d = (double)v, unit = human_base();
+    if (d < unit) return std::to_string(v);
     int i = 0;
     while (d >= unit && i < 5) d /= unit, i++;
     char b[32];
