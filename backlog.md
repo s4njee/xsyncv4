@@ -148,7 +148,7 @@ The benchmark so far is one corpus slice, one machine, one filesystem, no networ
 | Q-01 | **Version control.** The directory is not a git repository. | confirmed | `git init`, first commit, `.gitignore` already present. | S |
 | Q-02 | **CI.** Nothing runs automatically. | new | GitHub Actions on macOS and Linux: build, `filter_test`, difftest (clone and no-clone), warnings as errors. | M |
 | Q-03 | **difftest on Linux.** The harness was written and validated on macOS only; the Linux check so far is a hand-written smoke script in a container. | confirmed | Full harness passes against Debian's rsync, with macOS-only expectations (symlink modes, clones) gated. | M |
-| Q-04 | **Sanitizers.** Never built with ASan, UBSan or TSan. The progress slots use a seqlock that TSan will flag and needs annotating. | new | Clean runs of the full difftest under each; TSan suppressions limited to the documented seqlock. | M |
+| Q-04 | **Sanitizers.** Never built with ASan, UBSan or TSan. U-02 replaces the progress slot seqlock with mutex-protected metadata and atomic counters. | new | Clean runs of the full difftest under each; any TSan suppressions must be narrowly documented. | M |
 | Q-05 | **Fuzz the wire decoders.** `DIR`, `NEED`, `DATA`, hello and options parsing take bytes from the other side. Name validation exists; nothing else is adversarially tested. | new | libFuzzer targets for each frame type and for `get_options`; a day of fuzzing with no crashes; corpus checked in. | M |
 | Q-06 | **Two-machine test rig.** A pair of containers with a real sshd, for R-01, T-08, T-14 and network fault injection (`tc` delay, loss, mid-transfer disconnect). | new | `tests/ssh-rig.sh` runs the remote difftest group over real ssh and three fault cases. | M |
 | Q-07 | **Kill and converge.** `kill -9` either side at random points, re-run, compare to rsync's result. | new | 200 random kill points, local and remote, always converge with no stray files. | M |
@@ -2629,3 +2629,20 @@ Verified artifact manifest (source `864bd37edf14`):
   verification therefore remain pending. U-01 is not marked done.
 - U-06 decision recorded: the user chose progress enabled by default on
   terminals. Implementation follows in backlog order.
+
+## U-02 progress — 2026-10-10: calm rows and file rates
+
+- Files receive a detail row only after **200 ms** in flight. Faster completed
+  files share one row with their completion rate; unused placeholder rows are
+  removed. Longer transfers show speed and ETA when the terminal is wide enough.
+- Remote receivers retain a file's progress record across chunks and worker
+  changes, updating it after writes rather than resetting a worker slot for
+  every chunk. The existing seqlock was replaced with mutex-protected metadata
+  and atomic byte counters, removing its unsynchronized metadata reads.
+- The progress suite now covers many small files, local/push/pull long-file
+  rates and ETA, queue backpressure, and the U-01 terminal regressions. Initial
+  fixtures were adjusted to use multi-chunk files and a push larger than the
+  sender queue: quickly reading a file into that queue is not a slow worker
+  transfer. Receiver acknowledgments for queued push work remain U-04.
+- Development macOS and isolated Linux real-SSH validation are being finalized;
+  release artifacts will be rebuilt before the story is marked done.

@@ -15,10 +15,14 @@
 #include "output.h"
 
 Slot g_slots[MAX_WORKERS];
-bool g_progress_on = false;
+std::atomic<bool> g_progress_on{false};
 
 namespace {
 std::mutex ui_mu;
+std::mutex claim_mu;
+std::atomic<u64> small_completed{0};
+u64 last_small = 0;
+double rate_small = 0;
 bool tty = false, color = false, live = false;
 bool unicode = false, winch_installed = false;
 volatile sig_atomic_t window_changed = 0;
@@ -26,18 +30,20 @@ struct sigaction previous_winch {};
 std::vector<int> drawn_widths;
 int drawn_cols = 80;
 int drawn = 0;  // lines currently occupied by the live region
-int nworkers = 0;
 u64 t_start = 0, t_last = 0, t_plain = 0;
 u64 last_bytes = 0, last_files = 0;
 double rate_b = 0, rate_f = 0;
 unsigned spin = 0;
 
 constexpr int MAX_ROWS = 4;
-int row_w[MAX_ROWS];
+constexpr u64 ROW_DELAY = 200000000;
+struct FileRate { u64 started = 0, time = 0; i64 bytes = 0; double rate = 0; };
+FileRate file_rates[MAX_WORKERS];
 
 struct Snap {
   bool active = false;
   i64 size = 0, done = 0;
+  u64 started = 0;
   std::string name;
 };
 
@@ -187,14 +193,14 @@ std::string fmt_eta(double sec) {
 Snap sample(int w) {
   Snap sn;
   Slot& s = g_slots[w];
-  for (int tries = 0; tries < 4; tries++) {
-    u32 a = s.seq.load(std::memory_order_acquire);
-    if (a & 1) continue;
+  std::unique_lock<std::mutex> lock(s.mutex, std::try_to_lock);
+  if (lock.owns_lock()) {
     sn.active = s.active.load(std::memory_order_relaxed);
     sn.size = s.size;
+    sn.started = s.started;
     sn.done = s.done.load(std::memory_order_relaxed);
     sn.name.assign(s.name, std::min<size_t>(s.len, sizeof s.name));
-    if (s.seq.load(std::memory_order_acquire) == a) return sn;
+    return sn;
   }
   sn.active = false;
   return sn;
@@ -226,10 +232,14 @@ void draw_locked() {
   Totals t = totals();
   double dt = (double)(now - t_last) / 1e9;
   if (dt >= 0.05) {
-    double ib = (double)(t.bytes - last_bytes) / dt, inf = (double)(t.files - last_files) / dt;
+    double ib = (double)(t.bytes >= last_bytes ? t.bytes - last_bytes : 0) / dt;
+    double inf = (double)(t.files >= last_files ? t.files - last_files : 0) / dt;
     double a = t_last == t_start ? 1.0 : std::min(1.0, dt / 1.0);
     rate_b += (ib - rate_b) * a;
     rate_f += (inf - rate_f) * a;
+    u64 small = small_completed.load(std::memory_order_relaxed);
+    rate_small += ((double)(small - last_small) / dt - rate_small) * a;
+    last_small = small;
     last_bytes = t.bytes, last_files = t.files, t_last = now;
   }
   static const char* frames[] = {"⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"};
@@ -269,32 +279,57 @@ void draw_locked() {
 
   std::string out = "\x1b[?2026h";
   erase(out);
-  int rows = std::min({nworkers, MAX_ROWS, std::max(0, term_rows() - 2)});
+  int rows = std::min(MAX_ROWS, std::max(0, term_rows() - 2));
   Snap snaps[MAX_WORKERS];
-  for (int w = 0; w < nworkers; w++) snaps[w] = sample(w);
-  auto big = [&](int w) { return snaps[w].active && snaps[w].size >= (1 << 20); };
-  for (int w = 0; w < nworkers; w++) {
-    if (!big(w) || std::find(row_w, row_w + rows, w) != row_w + rows) continue;
-    for (int r = 0; r < rows; r++)
-      if (!big(row_w[r])) { row_w[r] = w; break; }
+  std::vector<int> visible;
+  bool small_active = false;
+  for (int w = 0; w < MAX_WORKERS; w++) {
+    snaps[w] = sample(w);
+    const Snap& s = snaps[w];
+    if (!s.active) continue;
+    if (now <= s.started || now - s.started < ROW_DELAY) { small_active = true; continue; }
+    visible.push_back(w);
+    FileRate& f = file_rates[w];
+    if (f.started != s.started) f = {s.started, now, s.done, (double)s.done / ((double)(now - s.started) / 1e9)};
+    else if (now > f.time) {
+      double elapsed = (double)(now - f.time) / 1e9;
+      double rate = (double)std::max<i64>(0, s.done - f.bytes) / elapsed;
+      f.rate += (rate - f.rate) * std::min(1.0, elapsed);
+      f.time = now, f.bytes = s.done;
+    }
   }
-  for (int r = 0; r < rows; r++) {
-    const Snap& s = snaps[row_w[r]];
+  std::stable_sort(visible.begin(), visible.end(), [&](int a, int b) { return snaps[a].started < snaps[b].started; });
+  u64 small = small_completed.load(std::memory_order_relaxed);
+  bool show_small = rows && (small_active || small);
+  if (show_small) --rows;
+  for (int w : visible) {
+    if (rows-- <= 0) break;
+    const Snap& s = snaps[w];
     std::string line;
-    if (!s.active) line = unicode ? "  ·" : "  -";
-    else {
+    {
       double fr = s.size > 0 ? (double)s.done / (double)s.size : 1.0;
       std::string pct = std::to_string((int)(std::clamp(fr, 0.0, 1.0) * 100)) + "%";
       std::string tail = " " + pct;
-      if (columns >= 40) {
+      if (columns >= 55) {
+        double rate = file_rates[w].rate;
+        tail += " " + fmt_size(rate) + "/s";
+        if (rate > 1 && s.size > s.done) tail += " ETA " + fmt_eta((double)(s.size - s.done) / rate);
+      }
+      if (columns >= 95) {
         std::string size = fmt_size((double)s.size);
         size.insert(0, size.size() < 7 ? 7 - size.size() : 0, ' ');
-        tail = " " + size + " " + bar(fr, 12) + " " + pct;
+        tail = " " + size + " " + bar(fr, 12) + tail;
       }
       int namew = std::max(0, columns - 2 - width(tail));
       line = "  " + fit_left(display_name(s.name), namew) + tail;
     }
     line = clip(line, columns);
+    out += line + '\n';
+    drawn_widths.push_back(width(line));
+    ++drawn;
+  }
+  if (show_small) {
+    std::string line = clip("  small files  " + fmt_num(small) + separator() + fmt_count(rate_small) + " files/s", columns);
     out += line + '\n';
     drawn_widths.push_back(width(line));
     ++drawn;
@@ -309,6 +344,46 @@ void draw_locked() {
 }
 
 }  // namespace
+
+void slot_begin(int wid, std::string_view dir, std::string_view name, i64 size) {
+  if (!g_progress_on || wid < 0) return;
+  Slot& s = g_slots[wid];
+  std::lock_guard<std::mutex> lock(s.mutex);
+  size_t n = 0, cap = sizeof s.name;
+  if (!dir.empty()) {
+    if (dir.size() + 1 + name.size() > cap) dir.remove_prefix(std::min(dir.size(), dir.size() + 1 + name.size() - cap));
+    memcpy(s.name, dir.data(), dir.size());
+    n = dir.size();
+    if (n < cap) s.name[n++] = '/';
+  }
+  size_t m = std::min(name.size(), cap - n);
+  memcpy(s.name + n, name.data(), m);
+  s.len = (u16)(n + m);
+  s.size = size;
+  s.started = now_ns();
+  s.done.store(0, std::memory_order_relaxed);
+  s.active.store(true, std::memory_order_relaxed);
+}
+
+int slot_claim(std::string_view dir, std::string_view name, i64 size) {
+  if (!g_progress_on) return -1;
+  std::lock_guard<std::mutex> lock(claim_mu);
+  for (int w = 0; w < MAX_WORKERS; w++) {
+    if (g_slots[w].active.load(std::memory_order_relaxed)) continue;
+    slot_begin(w, dir, name, size);
+    return w;
+  }
+  return -1;
+}
+
+void slot_end(int wid, bool completed) {
+  if (!g_progress_on || wid < 0) return;
+  Slot& s = g_slots[wid];
+  std::lock_guard<std::mutex> lock(s.mutex);
+  if (completed && s.active.load(std::memory_order_relaxed) && now_ns() - s.started < ROW_DELAY)
+    small_completed.fetch_add(1, std::memory_order_relaxed);
+  s.active.store(false, std::memory_order_relaxed);
+}
 
 void ui_write(bool is_err, std::string_view text) {
   std::lock_guard<std::mutex> lk(ui_mu);
@@ -325,7 +400,6 @@ void ui_write(bool is_err, std::string_view text) {
 
 void progress_start(int n) {
   std::lock_guard<std::mutex> lk(ui_mu);
-  nworkers = std::min(n, MAX_WORKERS);
   t_start = t_last = now_ns();
   if (!g_opt.progress || g_opt.am_server) return;
   g_progress_on = true;
@@ -337,7 +411,6 @@ void progress_start(int n) {
   unicode = strcasecmp(codeset, "UTF-8") == 0 || strcasecmp(codeset, "UTF8") == 0;
   if (term && strcmp(term, "dumb") == 0) unicode = false;
   color = tty && !getenv("NO_COLOR");
-  for (int r = 0; r < MAX_ROWS; r++) row_w[r] = r;
   if (tty) {
     live = true;
     struct sigaction action {};

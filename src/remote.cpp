@@ -1345,7 +1345,7 @@ struct Sender {
       if (client) {
         if (stable && ok) g_stats.xfer_bytes.fetch_add((u64)fresh.size), g_stats.xfer_files.fetch_add(1);
         else g_stats.xfer_files_total.fetch_sub(1), g_stats.xfer_bytes_total.fetch_sub((u64)planned);
-        slot_end(w.id);
+        slot_end(w.id, stable && ok);
         if (delta && stable && ok) {
           g_stats.delta_files.fetch_add(1);
           g_stats.delta_literal_bytes.fetch_add((u64)delta_result.literal_bytes);
@@ -1503,6 +1503,7 @@ struct BigFile {
   std::shared_ptr<DeltaBasis> basis;
   i64 literal_bytes = 0;
   u64 sum[2] = {};
+  int progress_slot = -1;
 };
 
 struct Receiver {
@@ -1904,7 +1905,7 @@ struct Receiver {
         std::string_view bytes = r.str();
         attrs.size = (i64)bytes.size();
         if (r.bad || !xattrs.complete) die(RERR_PROTOCOL, "protocol error: truncated DATA record or incomplete file xattrs");
-        slot_begin(t.id, w.rel, w.src.name_sv(s), (i64)bytes.size());
+        int progress_slot = slot_claim(w.rel, w.src.name_sv(s), (i64)bytes.size());
         OutFile file;
         bool ok = out_open(file, w, idx, t);
         if (ok) {
@@ -1922,7 +1923,8 @@ struct Receiver {
           g_stats.xfer_files_total.fetch_sub(1);
           g_stats.xfer_bytes_total.fetch_sub((u64)s.size);
         }
-        slot_end(t.id);
+        slot_set(progress_slot, ok ? (i64)bytes.size() : 0);
+        slot_end(progress_slot, ok);
         complete_file(*d, idx);
       } else if (kind == R_CHUNK || kind == R_END || delta) {
         u64 raw_attempt = r.var();
@@ -1979,6 +1981,7 @@ struct Receiver {
         if (b->finished) die(RERR_PROTOCOL, "protocol error: data after file completion");
         if (!b->opened) {
           b->opened = true;
+          b->progress_slot = slot_claim(w.rel, w.src.name_sv(s), total);
           b->attrs = s;
           b->delta = delta, b->basis = basis;
           b->ok = out_open(b->f, w, idx, t, false, delta);
@@ -2003,8 +2006,6 @@ struct Receiver {
           if (b->total < 0) b->total = total;
           if (b->total != total || (b->status >= 0 && (off + length > b->expected ||
               ((delta ? b->status == 0 : b->status != 2) && total != b->expected)))) die(RERR_PROTOCOL, "protocol error: inconsistent file size");
-          slot_begin(t.id, w.rel, w.src.name_sv(s), total);
-          slot_add(t.id, off + length);
           auto next = b->chunks.lower_bound(off);
           i64 end = off + length;
           if ((next != b->chunks.end() && next->first < end) ||
@@ -2032,6 +2033,7 @@ struct Receiver {
           }
           if (delta && !count) b->literal_bytes += length;
           b->received += length;
+          if (b->ok) slot_set(b->progress_slot, b->received);
         }
         if (b->status >= 0 && b->received == b->expected) {
           b->finished = true;
@@ -2073,7 +2075,7 @@ struct Receiver {
             put_var(ack, id), put_var(ack, idx);
             c.send(std::move(ack));
           }
-          slot_end(t.id);
+          slot_end(b->progress_slot, ok);
         }
       } else {
         die(RERR_PROTOCOL, "protocol error: unknown DATA record");

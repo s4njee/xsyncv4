@@ -365,14 +365,15 @@ Things worth knowing when reading these numbers:
 
 ## Progress display
 
-`--progress`, `-P` or `--info=progress2` shows up to four rows of files currently in flight
-and a bar for the whole transfer:
+`--progress`, `-P` or `--info=progress2` shows up to four detail rows and a bar
+for the whole transfer. Files receive a row after 200 ms in flight; faster files
+share one `small files` row with a completion rate. Longer transfers show their
+own speed and ETA. Remote pulls retain the same file record across chunks and
+worker changes:
 
 ```
-  data/109/bills/hr/hr1248/fdsys_billstatus.xml           14.9K ━━━━━━━━━━━━ 100%
-  data/109/votes/2005/h671/data.json                       212K ━━━━━━╸━━━━━  54%
-  data/109/bills/s/s3415/fdsys_billstatus.xml             4.74K ━━━━━━━━━━━━   0%
-  data/109/bills/hr/hr1246/data.xml                       13.1K ━━━━━━━━━━━━ 100%
+  data/archive.dat                       240M ━━━━━━╸───── 54% 18.2M/s ETA 0:06
+  small files  46,869 · 12.9k files/s
  ━━━━━━━━━━━━━━━━━━╸━━━━━━━━━━━  61%  46,870/76,838 files  · 301M/494M  · 84.7M/s  · 12.9k files/s  · ETA 0:02
 ```
 

@@ -598,7 +598,7 @@ struct Local {
       if (clone_copy(d, idx, w.p2.c_str(), fl, w)) {
         g_stats.xfer_bytes.fetch_add((u64)s.size, std::memory_order_relaxed);
         note_transferred(d, idx, 0, w);
-        slot_end(w.id);
+        slot_end(w.id, true);
         return;
       }
       if (errno == EXDEV || errno == ENOTSUP) clone_ok.store(false, std::memory_order_relaxed);
@@ -677,7 +677,7 @@ struct Local {
         g_stats.delta_literal_bytes.fetch_add((u64)result.literal_bytes);
         g_stats.delta_matched_bytes.fetch_add((u64)(s.size - result.literal_bytes));
         note_transferred(d, idx, result.literal_bytes, w);
-        slot_end(w.id);
+        slot_end(w.id, true);
         return;
       }
       if (!out_open(f, d, idx, w)) { close(in); return fail(0); }
@@ -731,7 +731,7 @@ struct Local {
       ok = out_finish(f, d, idx, w, ok) && ok;
       if (!ok) return fail(total);
       note_transferred(d, idx, total - prefix.size, w);
-      slot_end(w.id);
+      slot_end(w.id, true);
       return;
     }
   }

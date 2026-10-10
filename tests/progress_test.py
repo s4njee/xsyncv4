@@ -144,6 +144,41 @@ class ProgressTests(unittest.TestCase):
         self.assertEqual(code, 0, data)
         self.assertIn(b'\x1b[?25h', data)
 
+    def test_long_file_delay_speed_and_eta(self):
+        for direction in ('local', 'push', 'pull'):
+            with self.subTest(direction=direction):
+                # Push exceeds the bounded writer queue, so the sender is
+                # genuinely in flight rather than finishing a quick disk read.
+                next(self.source.iterdir()).write_bytes(b'x' * ((128 if direction == 'push' else 4) * 1024 * 1024))
+                if HOST and direction == 'pull':
+                    subprocess.run(['rsync','-a','-e',RSH,str(self.source)+'/',HOST+':'+str(self.source)+'/'], check=True, capture_output=True)
+                limit = '--bwlimit=32768' if direction == 'push' else '--bwlimit=1024'
+                code, data = capture(self.command((limit,), direction=direction, target=direction), width=120)
+                self.assertEqual(code, 0, data)
+                frames = re.findall(rb'\x1b\[\?2026h(.*?)\x1b\[\?2026l', data, re.S)
+                self.assertGreater(len(frames), 3)
+                # First tick precedes 200ms: only the collapsed row is visible.
+                first = CSI.sub(b'', frames[0])
+                self.assertNotIn(b'wide-', first)
+                if direction != 'pull': self.assertIn(b'small files', first)
+                rows = [line for frame in frames for line in CSI.sub(b'', frame).splitlines() if b'wide-' in line]
+                self.assertGreater(len(rows), 2, data[:1200])
+                self.assertTrue(any(b'/s' in row and b'ETA ' in row for row in rows), rows[:5])
+                # A receiver retains its record across chunk/worker changes.
+                self.assertTrue(any(re.search(rb' [1-9]\d?%', row) for row in rows), rows)
+
+    def test_many_small_files_have_one_collapsed_row(self):
+        for path in self.source.iterdir(): path.unlink()
+        for n in range(120): (self.source/f'tiny-{n:03d}').write_bytes(b'x'*4096)
+        code, data = capture(self.command(('--bwlimit=256',)))
+        self.assertEqual(code, 0, data)
+        self.assertNotIn(b'tiny-', data)
+        frames = re.findall(rb'\x1b\[\?2026h(.*?)\x1b\[\?2026l', data, re.S)
+        self.assertGreater(len(frames), 3)
+        for frame in frames:
+            self.assertEqual(CSI.sub(b'', frame).count(b'small files'), 1)
+        self.assertRegex(data, rb'small files  [1-9]\d*.*files/s')
+
     @unittest.skipUnless(shutil.which('tmux'), 'tmux is not installed')
     def test_tmux_resize_keeps_prior_output(self):
         socket = str(self.root/'tmux.sock')
