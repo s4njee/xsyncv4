@@ -4196,3 +4196,15 @@ after U-01's evidence entry completes P2, as requested by the user.
   public lookup descriptors survive their scope and namespace replacement.
 - Full clean regression checks and a CPU comparison remain required. This
   implementation does not establish the F-08 one-second target.
+
+### F-08 descriptor headroom clean validation passed — 2026-10-10
+
+- Frozen c8a0164f11bd passes the full macOS/Linux validation: 231/227
+  differential cases, twelve scope, nine lifetime, fifteen mixed-protocol,
+  thirteen P0 cases (existing Linux skips), plus all three large staged-list
+  cases per platform. macOS subtree and platform-specific checks pass too.
+  State and exact logs are retained with the `20261010-f08-headroom` prefix.
+- The subsequent synchronous-operation candidate 94155e41456d now starts
+  its own clean validation, followed by a matched one-worker CPU comparison.
+  Hosted and paired memory qualification continue on the identified earlier
+  products. No newer source is substituted into their live runs.
