@@ -3358,3 +3358,16 @@ after U-01's evidence entry completes P2, as requested by the user.
   relative speedup 0.658 against the unchanged 0.85 floor. Raw results for both
   platforms are retained. The failed scenario differs from earlier runs, so
   timing repeatability remains unresolved and F-02 stays partial.
+
+
+### F-02 fixed sampling improvement — 2026-10-10
+
+- Recent macOS tiny-pipe reference samples range from 73 to 257 ms across
+  completed runs. The failing scenario shifts between runs, while all Linux
+  scenarios pass. Production sampling now uses a fixed 24 measurements per
+  tool and scenario: four complete cycles of all six tool orders, with all
+  measurements retained. There are no selective retries or discarded samples.
+- The median ratio and 85% floor are unchanged. Each platform now verifies
+  1,080 timed transfers and 45 untimed warmups; the workflow timeout is 60
+  minutes. Small behavior tests retain their explicit six-sample override.
+  F-02 remains partial until this policy has completed hosted validation.

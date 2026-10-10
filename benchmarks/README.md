@@ -107,9 +107,13 @@ with the same Release configuration on each Linux and macOS runner. It measures
 transport, compressed pipe copies, large copies and a tiny pipe transfer.
 Local `-rt`/`-rlt` cases also protect F-11's clone improvements; fixtures include
 read-only and umask-sensitive file modes.
-Each tool receives one verified warmup excluded from the ratios and six samples
-in all six orders, with independent rsync
+Each tool receives one verified warmup excluded from the ratios and 24 samples
+in four complete cycles of all six orders, with independent rsync
 checksum/metadata verification after every sample. Setup is untimed.
+The fixed production matrix collects 1,080 timed samples and 45 warmups per
+platform. All samples contribute to the medians; failures do not trigger
+selective retries. The larger sample count addresses the substantial timing
+variation observed on shared macOS runners.
 
 For each scenario, the job records a minimum speedup relative to rsync equal
 to 85% of the pinned reference's measured speedup on that same runner. It exits
@@ -130,4 +134,4 @@ the platform and workflow run.
 exercises real transfers with a healthy binary, an intentionally delayed binary
 and a corrupt binary that exits successfully. Its small fixtures and relaxed
 test policy validate gate behavior on busy developer machines; CI's production
-measurements use the checked-in six-sample, 85% policy and larger fixtures.
+measurements use the checked-in 24-sample, 85% policy and larger fixtures.
