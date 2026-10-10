@@ -113,7 +113,7 @@ coverage is tracked in `tests/progress-terminal.md` and remains incomplete.
 | U-03 | **Clone mode shows nothing per file.** Whole directories complete in one call, so the rows stay empty and the bar moves in jumps. | **done** | Rows show the directory being cloned; the bar advances per directory. | S |
 | U-04 | **Push progress counts bytes read, not bytes landed.** The bar can sit at 100 % while the receiver is still writing. | **done** | Receiver acknowledges completed bytes; the client bar reflects acknowledged work, with "sent" shown separately. | M |
 | U-05 | **Remote detail.** Wire bytes, compression ratio, and which side is the bottleneck (reading, network, writing) are known internally and not shown. | **done** | Total line shows wire rate and ratio with `-z`; `-vv` names the limiting stage. | M |
-| U-06 | **Progress by default on a terminal?** rsync is silent without `-P`. A daily driver might show the bar whenever stderr is a tty and stay silent in scripts. See "Decisions". | new | Decision recorded; `--no-progress` and env override exist either way. | S |
+| U-06 | **Progress by default on a terminal?** rsync is silent without `-P`. A daily driver might show the bar whenever stderr is a tty and stay silent in scripts. See "Decisions". | **done** | Decision recorded; `--no-progress` and env override exist either way. | S |
 | U-07 | **Machine-readable progress.** Off a terminal, `--progress` prints a line a second. Scripts and wrappers want rsync's `--info=progress2` single line or JSON events. | code | `--info=progress2` output is line-compatible with rsync off a tty; `--progress=json` emits one object per tick and per file. | M |
 | U-08 | **Phases that look like hangs.** Deleting a large tree, waiting for the remote to finish, hashing with `-c`: the display says "scanning" or sits at 100 %. | code | Each phase has its own label and counter (`deleting 12,410`, `verifying`, `waiting for receiver`). | S |
 | U-09 | **Dry-run summary.** `-n` prints names only with `-v`. | new | `-n` always ends with "would transfer N files (X), delete M". | S |
@@ -2802,4 +2802,14 @@ Verified artifact manifest (source `864bd37edf14`):
   PTY default behavior, piped script silence, quiet mode, flag/config/environment
   precedence, invalid values and server isolation. The old fallback fixture
   incorrectly used now-supported `-H`; it now uses unsupported `-b` to exercise
-  fallback behavior. Progress regression and release validation follow.
+  fallback behavior. All 11 progress/clone/tmux regression methods pass.
+- **Done; P2 is 5/11 complete.** Release artifacts are verified from source
+  `52aac823ceda`; all 10 defaults methods pass on native macOS ARM, Intel under
+  Rosetta, static Linux amd64 and static Linux arm64, without skips. The first
+  arm64 check ran before its artifact was replaced; the final check after
+  release completion passes. U-07 is next; U-01 still needs its GUI pass.
+- Logs: `/tmp/xsync-u06-defaults-final.log`, `/tmp/xsync-u06-progress.log`,
+  `/tmp/xsync-u06-releases.log`, `/tmp/xsync-u06-release-mac-{arm,intel}.log`,
+  `/tmp/xsync-u06-release-linux-amd64.log` and
+  `/tmp/xsync-u06-release-linux-arm64-final.log`. Source packaging is refreshed
+  after this entry; installed executables and physical helpers are unchanged.
