@@ -132,7 +132,7 @@ The benchmark so far is one corpus slice, one machine, one filesystem, no networ
 | F-03 | **ssh is one stream on one core.** On a fast LAN the cipher becomes the ceiling long before the disks do. | unverified | Measured first. Then, if it is the limit: `--streams N` (several ssh connections sharing one transfer) and no compression by default on links faster than the compressor. | L |
 | F-04 | **Adaptive compression.** `-z` compresses every block at level 3 regardless of content or link. | code | Incompressible blocks are detected from a sample and sent raw; `--skip-compress` suffixes honoured; level chosen from measured link speed unless set. | M |
 | F-05 | **Large files.** One thread reads and one stream carries each large file; local copies on Linux use a plain read/write loop. | code | Parallel ranges within a file on both ends; `copy_file_range`/`FICLONE` on Linux (reflinks on btrfs/XFS mirror the APFS clone path); `F_NOCACHE` above a size so a 50 GB copy does not evict the page cache. | L |
-| F-06 | **Linux scan path.** macOS uses `getattrlistbulk`; Linux uses `readdir` plus one `fstatat` per entry. | code | `getdents64` + `statx`, optionally batched with io_uring; measured against rsync on a no-op re-sync of the corpus on ext4. | M |
+| F-06 | **Linux scan path.** macOS uses `getattrlistbulk`; Linux uses `readdir` plus one `fstatat` per entry. | partial | `getdents64` + `statx`, optionally batched with io_uring; measured against rsync on a no-op re-sync of the corpus on ext4. | M |
 | F-07 | **APFS byte-copy ceiling.** Creation is ~100 µs per file and does not scale with threads here; system time triples from 2 to 8 threads for no gain. Unknown: how much is path-lookup contention versus the filesystem itself, and how much is the nearly full volume. | confirmed | Re-measure on a volume with free space; try `openat`-relative creation; pick the thread count per filesystem instead of always using all performance cores. | M |
 | F-08 | **No-op re-sync burns CPU.** 0.40 s wall but 2.7 s of system time at 8 threads. | confirmed | Wall time unchanged or better with under 1 s of CPU; or an opt-in manifest that skips listing the destination entirely. | M |
 | F-09 | **Memory on very large trees.** The receiver keeps every directory record until exit; the local engine holds up to 200,000 pending files. Never run beyond 77k files. | code | A 5-million-file synthetic tree syncs within a stated memory bound; receiver frees a directory once it and its children are finished. | M |
@@ -3219,3 +3219,21 @@ after U-01's evidence entry completes P2, as requested by the user.
   U-09's existing summary, whose behavior is tested separately.
 - These measurements do not satisfy F-07's quiet/free-volume requirements.
   Frozen neo/freya baseline transfers continue without changing their binaries.
+
+
+### F-06 Linux scan implementation — 2026-10-10
+
+- Linux now reads directory records with a bounded 64 KiB `getdents64` buffer
+  and obtains authoritative metadata with `statx`. It preserves no-follow and
+  normal filesystem synchronization semantics; unsupported or seccomp-hidden
+  statx falls back to `fstatat`. Real scan errors mark the listing incomplete,
+  preserving destination entries when `--delete` is requested.
+- Five syscall/metadata tests pass on both glibc and static musl builds. They
+  cover multiple batches, maximum-length and non-UTF-8 names, links, FIFOs,
+  sockets, device numbers, nanosecond timestamps, fallback and deletion guards.
+  All 227 Linux data/metadata/exit-code differential cases pass. Four Unicode
+  itemization comparisons differ from Debian rsync 3.2.7 in both this candidate
+  and the unchanged release; these are not counted as passing itemization tests.
+- macOS and both Linux builds succeed. F-06 remains partial until a separately
+  labelled candidate is measured against rsync on the full ext4 corpus. The
+  active neo/freya baseline retains its frozen binaries and quiet hosts.

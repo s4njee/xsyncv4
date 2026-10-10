@@ -20,6 +20,7 @@
 #include "engine.h"
 #include "sparse.h"
 #include "link_dest.h"
+#include "linux_scan.h"
 
 #ifdef __APPLE__
 #include <sys/attr.h>
@@ -231,6 +232,7 @@ static void resolve_links(int fd, DirList& out, size_t first, unsigned flags) {
   }
 }
 
+#ifndef __linux__
 static int list_dir_generic(int fd, DirList& out) {
   DIR* dir = fdopendir(fd);
   if (!dir) {
@@ -262,6 +264,7 @@ static int list_dir_generic(int fd, DirList& out) {
   closedir(dir);  // owns the duplicated descriptor passed to fdopendir
   return 0;
 }
+#endif
 
 static int list_dir_fd(int fd, DirList& out, unsigned flags) {
   if (fd < 0) return errno;
@@ -385,6 +388,11 @@ static int list_dir_fd(int fd, DirList& out, unsigned flags) {
       close(fd);
       return e ? e : EIO;
     }
+  }
+#elif defined(__linux__)
+  {
+    int error = list_dir_linux(fd, out);
+    if (error) { close(fd); return error; }
   }
 #else
   {
