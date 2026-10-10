@@ -4112,3 +4112,20 @@ after U-01's evidence entry completes P2, as requested by the user.
   are building before another local/push/pull qualification. The 512 MiB
   per-process limit is unchanged. F-09 stays partial until full-size results;
   F-14 profiling is queued behind that successful qualification.
+
+### F-09 full-size follow-up started — 2026-10-10
+
+- Fresh 1f3a912f94eb static musl/native GCC products are built, version/hash
+  checked and staged in the owned benchmark prefix on neo/freya. The static
+  scanner admission test passes too. Product identities and exact native
+  build command are retained as `20261010-f09-window-products.json`.
+- Coordinator PID 685764 on neo starts local five-million-file qualification;
+  paired push and pull follow sequentially. Both independently inventoried
+  fixtures are reused, and the unchanged 512 MiB process budget is enforced
+  after every verified xs copy. Product staging does not prove a memory pass.
+- Hosted run 38094293056 starts for source 1f3a912f94eb, on both Linux/macOS,
+  with the original production policy. The source push succeeds despite its
+  first metadata query failing; a separate successful API/remote-ref query
+  confirms the live run. It is not restarted.
+- F-14 profiles wait for successful local/push/pull qualification. The old
+  precondition failure remains preserved, and no new profiles have run yet.
