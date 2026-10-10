@@ -1,0 +1,122 @@
+fresh-byte reference-j0 0/5: 19.4193s verified
+fresh-byte candidate-j0 0/5: 19.0654s verified
+fresh-byte candidate-j4 0/5: 19.2574s verified
+fresh-byte candidate-j8 0/5: 19.1534s verified
+fresh-byte rsync 0/5: 20.6103s verified
+fresh-byte candidate-j0 1/5: 19.0614s verified
+fresh-byte candidate-j4 1/5: 23.0328s verified
+fresh-byte candidate-j8 1/5: 20.2532s verified
+fresh-byte rsync 1/5: 21.6320s verified
+fresh-byte reference-j0 1/5: 18.9473s verified
+fresh-byte candidate-j4 2/5: 19.1486s verified
+fresh-byte candidate-j8 2/5: 21.2198s verified
+fresh-byte rsync 2/5: 22.0778s verified
+fresh-byte reference-j0 2/5: 20.0951s verified
+fresh-byte candidate-j0 2/5: 19.9185s verified
+fresh-byte candidate-j8 3/5: 19.3650s verified
+fresh-byte rsync 3/5: 22.6541s verified
+fresh-byte reference-j0 3/5: 19.7046s verified
+fresh-byte candidate-j0 3/5: 19.1933s verified
+fresh-byte candidate-j4 3/5: 19.3494s verified
+fresh-byte rsync 4/5: 20.7621s verified
+fresh-byte reference-j0 4/5: 20.1635s verified
+fresh-byte candidate-j0 4/5: 19.2052s verified
+fresh-byte candidate-j4 4/5: 19.6117s verified
+fresh-byte candidate-j8 4/5: 19.3091s verified
+fresh-byte reference-j0 5/5: 19.3968s verified
+fresh-byte candidate-j0 5/5: 19.2295s verified
+fresh-byte candidate-j4 5/5: 19.1300s verified
+fresh-byte candidate-j8 5/5: 20.0772s verified
+fresh-byte rsync 5/5: 20.9784s verified
+noop reference-j0 0/5: 2.0297s verified
+noop candidate-j0 0/5: 1.9581s verified
+noop candidate-j4 0/5: 2.0261s verified
+noop candidate-j8 0/5: 2.0172s verified
+noop rsync 0/5: 2.0514s verified
+noop candidate-j0 1/5: 2.2652s verified
+noop candidate-j4 1/5: 2.3702s verified
+noop candidate-j8 1/5: 2.1523s verified
+noop rsync 1/5: 2.2924s verified
+noop reference-j0 1/5: 2.1069s verified
+noop candidate-j4 2/5: 2.3464s verified
+noop candidate-j8 2/5: 2.0949s verified
+noop rsync 2/5: 2.3812s verified
+noop reference-j0 2/5: 2.2316s verified
+noop candidate-j0 2/5: 2.3373s verified
+noop candidate-j8 3/5: 2.1458s verified
+noop rsync 3/5: 2.2717s verified
+noop reference-j0 3/5: 2.2081s verified
+noop candidate-j0 3/5: 2.3752s verified
+noop candidate-j4 3/5: 2.3441s verified
+noop rsync 4/5: 2.2424s verified
+noop reference-j0 4/5: 2.2722s verified
+noop candidate-j0 4/5: 2.4215s verified
+noop candidate-j4 4/5: 2.2990s verified
+noop candidate-j8 4/5: 2.2671s verified
+noop reference-j0 5/5: 2.2723s verified
+noop candidate-j0 5/5: 2.2806s verified
+noop candidate-j4 5/5: 2.2905s verified
+noop candidate-j8 5/5: 2.2419s verified
+noop rsync 5/5: 2.3361s verified
+[
+  {
+    "case": "fresh-byte",
+    "tools": {
+      "reference-j0": {
+        "wall_seconds": 19.70456700003706,
+        "cpu_seconds": 33.421003999999996,
+        "peak_rss_bytes": 48988160
+      },
+      "candidate-j0": {
+        "wall_seconds": 19.205217459006235,
+        "cpu_seconds": 32.028331,
+        "peak_rss_bytes": 36470784
+      },
+      "candidate-j4": {
+        "wall_seconds": 19.349432667018846,
+        "cpu_seconds": 32.0445,
+        "peak_rss_bytes": 35291136
+      },
+      "candidate-j8": {
+        "wall_seconds": 20.077212542062625,
+        "cpu_seconds": 33.620087999999996,
+        "peak_rss_bytes": 50987008
+      },
+      "rsync": {
+        "wall_seconds": 21.6320341671817,
+        "cpu_seconds": 26.165122,
+        "peak_rss_bytes": 41041920
+      }
+    }
+  },
+  {
+    "case": "noop",
+    "tools": {
+      "reference-j0": {
+        "wall_seconds": 2.2315664160996675,
+        "cpu_seconds": 10.032077,
+        "peak_rss_bytes": 41877504
+      },
+      "candidate-j0": {
+        "wall_seconds": 2.3373306661378592,
+        "cpu_seconds": 7.000765,
+        "peak_rss_bytes": 39550976
+      },
+      "candidate-j4": {
+        "wall_seconds": 2.3441465420182794,
+        "cpu_seconds": 6.997387,
+        "peak_rss_bytes": 39682048
+      },
+      "candidate-j8": {
+        "wall_seconds": 2.1523421248421073,
+        "cpu_seconds": 10.073224000000002,
+        "peak_rss_bytes": 42369024
+      },
+      "rsync": {
+        "wall_seconds": 2.2924340420868248,
+        "cpu_seconds": 2.846053,
+        "peak_rss_bytes": 26230784
+      }
+    }
+  }
+]
