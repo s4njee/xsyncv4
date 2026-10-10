@@ -71,6 +71,14 @@ Run this before committing Site changes. It fails when:
 
 `npm run build` itself only warns about stale fingerprints. Checks that need the parent repository or a built `xs` are skipped with a notice when those are absent.
 
+### GitHub Pages
+
+The site is published at <https://s4njee.github.io/xsyncv4/> (manual: `/docs/`) from the
+`gh-pages` branch. `.github/workflows/pages.yml` rebuilds it on every push to `main` that
+touches `sites/xsync`: it runs `scripts/check-docs.py --no-build`, builds with
+`SITE_BASE=/xsyncv4/`, and commits the result to `gh-pages`. It can also be run by hand from
+the Actions tab. Pages must serve the `gh-pages` branch from `/ (root)` (Settings → Pages).
+
 ### Serving from a subpath
 
 The Site assumes it is served from the domain root, with the manual at `/docs/`. To serve it elsewhere, for example a GitHub Pages project site, build with `SITE_BASE`:

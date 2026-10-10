@@ -39,7 +39,8 @@ Worker, clone and atomic extensions are stripped before invoking rsync.
 
 The product page and VitePress manual live in [sites/xsync](sites/xsync/README.md).
 The [hosted manual](https://xsync-transfer.s4njee.chatgpt.site/docs/) includes command
-examples, option reference, actual captured output, and development status.
+examples, option reference, actual captured output, and development status. It is also
+published on GitHub Pages at <https://s4njee.github.io/xsyncv4/docs/>.
 
 ```sh
 cd sites/xsync

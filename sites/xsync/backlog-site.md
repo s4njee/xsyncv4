@@ -371,3 +371,16 @@ It explains where a cryptographic hash would matter. Because the repository reco
 design rationale, the page labels its reasons as trade-offs, not quotes. On phones, the
 product header now hides "Transfer demo" below 420 px (the hero links there) so the new
 link fits.
+
+### GitHub Pages deployment (2026-10-10)
+
+Published at <https://s4njee.github.io/xsyncv4/>. The `gh-pages` branch holds a
+`SITE_BASE=/xsyncv4/` build: the product page at the root, the manual under `docs/`, and
+`.nojekyll`. It passed the link checker at that base and a browser pass with no errors or
+failed requests, and search works. Pages switched on automatically when the branch was
+pushed.
+
+`.github/workflows/pages.yml` redeploys on pushes to `main` that touch the site. A
+rehearsal on a fresh clone reproduced the published build byte for byte. This advances
+S-64, Decision 4: GitHub Pages at `/xsyncv4/` alongside the existing host. PR preview
+deploys are still open.
