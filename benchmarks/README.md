@@ -109,11 +109,13 @@ peaks at 47.3 MiB and takes 242.60 s; rsync takes 368.79 s. These are one sample
 per tool for memory qualification, not repeated throughput medians. The
 [Pi-local copy on neo](results/20261010-f09-neo-local.json) also completes and
 passes verification, peaking at 17.23 MiB and taking 387.73 s versus rsync's
-465.33 s. Paired endpoint measurements remain pending.
+465.33 s. These local passes do not qualify paired endpoint memory use.
 
 The first native paired push exceeds the bound: its
 [receiver resource measurement](results/20261010-f09-ed8-push-receiver-metrics.json)
-peaks at 810.36 MiB. The local passes do not qualify the paired requirement.
+peaks at 810.36 MiB. The independently verified copy completes, but the
+[qualification rejects that peak](results/20261010-f09-ed8-qualification.json)
+and stops before pull. The local passes do not qualify the paired requirement.
 The follow-up limits retained incremental sender listings to a 65,536-entry
 admission window and receiver queued DATA to about 16 MiB of expanded payload
 cost. Active callbacks, the largest current list and one incoming frame are
@@ -165,8 +167,13 @@ disk.
 The [completed free-container comparison](results/20261010-f07-free-container-summary.md)
 retains all 84 verified copies and the host limitations. Four workers match
 eight on fresh byte copies with lower CPU; eight improves no-op wall time at
-a larger CPU cost. These busy-host measurements leave automatic filesystem
-worker selection unresolved.
+a larger CPU cost. The subsequent
+[automatic-budget validation](results/20261010-f07-default-budget-summary.md)
+completes 50 timed copies and ten warmups with all independent verifications.
+Automatic APFS selection now caps the destination worker budget at four;
+explicit `-j` overrides it. No-op CPU drops 30.2% against the prior automatic
+budget, with 4.7% longer wall time, while fresh copies improve slightly.
+The busy-host and nearly full physical-backing limitations remain documented.
 
 Use `path_walks.py --reference-jobs 0 --candidate-jobs 0,4,8` to compare
 automatic selection with explicit budgets. Zero omits `-j`, while every xs
@@ -175,9 +182,11 @@ that balances complete rotations for the resulting number of tools.
 
 The [APFS no-op diagnostic](results/20261010T152712Z-apfs-baseline-summary.md)
 records the current binary's cost at 1, 2, 4 and 8 threads. Its host had high
-background load and the volume was 98% full; quieter/free-volume measurements
-are still required before choosing filesystem defaults. `profile_apfs.py`
-samples a separate no-op with `/usr/bin/sample`, then verifies it independently.
+background load and the volume was 98% full. `profile_apfs.py` samples a separate
+no-op with `/usr/bin/sample`, then verifies it independently. The
+[verified follow-up call stacks](results/20261010-f08-apfs-profile-summary.md)
+identify frequent directory opens and identity checks; sampled thread locations
+are not CPU attribution, and F-08's under-one-second CPU target remains unmet.
 
 `clone_modes.py` compares omitted-permission clones with the pinned old binary,
 candidate byte copies and rsync. It requires a fresh owned work directory and
@@ -208,6 +217,11 @@ All 108 timed copies and 18 warmups require independent checksum/metadata
 verification; source metadata must remain unchanged. Use a fresh owned work
 directory and clean identified products. `--smoke-fixtures` checks the harness
 on small fixtures and does not qualify full-size performance.
+
+The [completed bounded-clone comparison](results/20261010-f10-parallel-summary.md)
+retains all 126 verified copies. Candidate CPU is lower in all six cases;
+`-rlt` wall medians improve by 3–12%, while `-a` remains 6–15% slower than
+leaf-only. The earlier serial correction regression is retained separately.
 
 `large_files.py` compares the prior product, one- and four-worker candidates,
 and rsync on two-file and single-file fixtures. It covers local byte copies,
