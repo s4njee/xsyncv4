@@ -115,7 +115,7 @@ coverage is tracked in `tests/progress-terminal.md` and remains incomplete.
 | U-05 | **Remote detail.** Wire bytes, compression ratio, and which side is the bottleneck (reading, network, writing) are known internally and not shown. | **done** | Total line shows wire rate and ratio with `-z`; `-vv` names the limiting stage. | M |
 | U-06 | **Progress by default on a terminal?** rsync is silent without `-P`. A daily driver might show the bar whenever stderr is a tty and stay silent in scripts. See "Decisions". | **done** | Decision recorded; `--no-progress` and env override exist either way. | S |
 | U-07 | **Machine-readable progress.** Off a terminal, `--progress` prints a line a second. Scripts and wrappers want rsync's `--info=progress2` single line or JSON events. | **done** | `--info=progress2` output is line-compatible with rsync off a tty; `--progress=json` emits one object per tick and per file. | M |
-| U-08 | **Phases that look like hangs.** Deleting a large tree, waiting for the remote to finish, hashing with `-c`: the display says "scanning" or sits at 100 %. | code | Each phase has its own label and counter (`deleting 12,410`, `verifying`, `waiting for receiver`). | S |
+| U-08 | **Phases that look like hangs.** Deleting a large tree, waiting for the remote to finish, hashing with `-c`: the display says "scanning" or sits at 100 %. | **done** | Each phase has its own label and counter (`deleting 12,410`, `verifying`, `waiting for receiver`). | S |
 | U-09 | **Dry-run summary.** `-n` prints names only with `-v`. | new | `-n` always ends with "would transfer N files (X), delete M". | S |
 | U-10 | **`-h` consistency.** The summary follows rsync's `-h` (1000-based, 1024 with `-hh`); the progress display is always 1024-based. | code | One rule, applied everywhere, documented. | S |
 | U-11 | **Suspend/resume and cursor hygiene.** Ctrl-Z / `fg`, and every exit path (including `die()` from a worker thread) restoring the cursor. | unverified | SIGTSTP/SIGCONT redraw; cursor restored in a single exit hook. | S |
@@ -2859,5 +2859,21 @@ Verified artifact manifest (source `864bd37edf14`):
 - Development phase acceptance passes **4 methods**, including delayed
   verification and deletion across local/push/pull, waiting for receiver,
   JSON deletion counts and five invalid/unnegotiated phase-frame cases.
-  All three existing ACK methods still pass. Real SSH, protocol and release
-  validation follow.
+  All three existing ACK methods still pass. A fifth method verifies final
+  JSON check/deletion counters without fault injection across all directions.
+- **Done; P2 is 7/11 complete.** Final native macOS and real-SSH phase
+  acceptance passes all five methods. All 15 protocol, 11 live progress,
+  five wire-detail and eight machine-progress regression methods pass.
+  Release artifacts are rebuilt/verified from `7b88603cbe1c`, including a fix
+  that snapshots a changing phase label once per JSON record. macOS ARM
+  passes all five phase methods. Intel and both static Linux artifacts complete
+  five methods with seven skip entries (six delayed verify/delete subcases
+  and the delayed receiver fixture); malformed frames and final JSON counts
+  pass without skips. Delayed acceptance is covered by native macOS and SSH.
+- Logs: `/tmp/xsync-u08-phase-final.log`, `/tmp/xsync-u08-ack.log`,
+  `/tmp/xsync-u08-real-ssh-final.log`, `/tmp/xsync-u08-protocol.log`,
+  `/tmp/xsync-u08-{progress,detail,machine}.log`,
+  `/tmp/xsync-u08-releases-final.log`,
+  `/tmp/xsync-u08-release-mac-{arm,intel}-final.log` and
+  `/tmp/xsync-u08-release-linux-{amd64,arm64}.log`. Packaging is refreshed
+  after this entry. U-09 is next; U-01 remains partial for GUI verification.
