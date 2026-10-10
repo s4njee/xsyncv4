@@ -38,7 +38,7 @@ class ResumeTests(unittest.TestCase):
         subprocess.run(command, check=True, capture_output=True)
         cls.source = cls.root / 'large'
         with cls.source.open('wb') as stream:
-            for _ in range(64): stream.write(os.urandom(MIB))
+            for _ in range(256): stream.write(os.urandom(MIB))
         cls.digest = sha(cls.source)
         cls.source.chmod(0o640)
         os.utime(cls.source, ns=(1600000000123456789, 1600000000123456789))
@@ -82,7 +82,8 @@ class ResumeTests(unittest.TestCase):
                 target = root / 'large'
                 env = self.fault_env(root)
                 marker = root / 'halfway'
-                env.update(XSYNC_FAULT_WRITE_DELAY_US='400000', XSYNC_FAULT_WRITE_FROM_OFFSET=str(32 * MIB),
+                halfway = self.source.stat().st_size // 2
+                env.update(XSYNC_FAULT_WRITE_DELAY_US='400000', XSYNC_FAULT_WRITE_FROM_OFFSET=str(halfway),
                            XSYNC_FAULT_WRITE_NOTIFY=str(marker), XSYNC_FAULT_SERVER_PID=str(root / 'server.pid'))
                 proc = subprocess.Popen(self.command(transport, target), env=env,
                                         stdout=subprocess.PIPE, stderr=subprocess.PIPE, start_new_session=True)
@@ -93,19 +94,19 @@ class ResumeTests(unittest.TestCase):
                         self.assertIsNone(proc.poll(), 'transfer finished before the half-way stop')
                         self.assertLess(time.monotonic(), deadline, 'half-way transfer timeout')
                         time.sleep(.001)
-                    # A worker reaching offset 32 MiB does not prove earlier
+                    # A worker reaching the halfway offset does not prove earlier
                     # workers have finished. Wait for a verified contiguous
                     # prefix so this test actually interrupts at half way.
                     with self.source.open('rb') as original:
-                        halfway_digest = hashlib.sha256(original.read(32 * MIB)).digest()
+                        halfway_digest = hashlib.sha256(original.read(halfway)).digest()
                     while True:
                         candidates = [target, *root.glob('.large.*')]
                         contiguous = False
                         for candidate in candidates:
                             try:
                                 with candidate.open('rb') as pending:
-                                    prefix = pending.read(32 * MIB)
-                                contiguous = len(prefix) == 32 * MIB and hashlib.sha256(prefix).digest() == halfway_digest
+                                    prefix = pending.read(halfway)
+                                contiguous = len(prefix) == halfway and hashlib.sha256(prefix).digest() == halfway_digest
                             except FileNotFoundError:
                                 continue
                             if contiguous: break
@@ -125,7 +126,7 @@ class ResumeTests(unittest.TestCase):
                         self.assertLess(time.monotonic(), deadline, 'partial cleanup timeout')
                         time.sleep(.005)
                     kept = target.stat().st_size
-                    self.assertGreaterEqual(kept, 31 * MIB)
+                    self.assertGreaterEqual(kept, halfway - MIB)
                     # Parallel ranges may already have queued later blocks.
                     # Retained data must still be a strict, verified prefix,
                     # and the retry below must send only its remaining bytes.

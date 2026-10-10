@@ -18,7 +18,7 @@ from measure import measure
 
 HERE = pathlib.Path(__file__).resolve().parent
 ROOT = HERE.parent
-CASES = ('byte-local', 'auto-local', 'pipe', 'pipe-z')
+CASES = ('byte-local', 'auto-local', 'pipe', 'pipe-z', 'single-byte-local', 'single-pipe', 'single-pipe-z')
 
 
 def main():
@@ -72,6 +72,14 @@ def main():
             with path.open('rb') as stream: result['fixture_hashes'][path.name] = hashlib.file_digest(stream, 'sha256').hexdigest()
         ordered = list(tools)
         for case in cases:
+            single = case.startswith('single-')
+            pipe = 'pipe' in case
+            verification_source = source
+            if single:
+                verification_source = work / ('source-' + case)
+                verification_source.mkdir()
+                name = 'compressible.bin' if case.endswith('-z') else 'random.bin'
+                os.link(source / name, verification_source / name)
             for run in range(-1, args.samples):
                 order = ordered[run % 4:] + ordered[:run % 4]
                 for tool in order:
@@ -81,23 +89,23 @@ def main():
                         # Settle delayed frees/writeback before the next timed
                         # copy, without flushing unrelated mounts.
                         subprocess.run(['sync', '-f', str(work)], check=True)
-                    command = [tools[tool], '-aW' + ('z' if case == 'pipe-z' else ''), '--stats']
+                    command = [tools[tool], '-aW' + ('z' if case.endswith('-z') else ''), '--stats']
                     if tool != 'rsync':
                         command += ['--no-fallback', '--no-progress', '-j1' if tool == 'candidate-j1' else '-j4']
-                        if case == 'byte-local': command += ['--no-clone']
+                        if case.endswith('byte-local'): command += ['--no-clone']
                     peer_path = logs / 'peer.json'
-                    if case.startswith('pipe'):
+                    if pipe:
                         helper = shlex.join([__import__('sys').executable, str(HERE / 'measure.py'), '--metrics', str(peer_path), '--', tools[tool]])
                         command += ['-e', str(ROOT / 'tests/fakessh.sh'), '--rsync-path=' + helper]
-                    command += [str(source) + '/', ('test:' if case.startswith('pipe') else '') + str(destination) + '/']
+                    command += [str(verification_source) + '/', ('test:' if pipe else '') + str(destination) + '/']
                     stdout, stderr = logs / 'stdout', logs / 'stderr'
                     with stdout.open('wb') as out, stderr.open('wb') as err: metrics = measure(command, stdout=out, stderr=err)
                     if metrics['returncode']: raise RuntimeError('transfer failed: ' + stderr.read_text(errors='replace'))
-                    remote = json.loads(peer_path.read_text()) if case.startswith('pipe') else None
+                    remote = json.loads(peer_path.read_text()) if pipe else None
                     if remote and remote['returncode']: raise RuntimeError('peer failed: ' + repr(remote))
-                    verified = subprocess.run([tools['rsync'], '-anci', '--delete', str(source) + '/', str(destination) + '/'], capture_output=True, text=True)
+                    verified = subprocess.run([tools['rsync'], '-anci', '--delete', str(verification_source) + '/', str(destination) + '/'], capture_output=True, text=True)
                     if verified.returncode or verified.stdout.strip(): raise RuntimeError('verification failed: ' + verified.stdout + verified.stderr)
-                    metrics.update(case=case, tool=tool, run=run+1, verified=True, remote=remote, command=command,
+                    metrics.update(case=case, tool=tool, run=run+1, verified=True, logical_bytes=args.file_mib * 2**20 * (1 if single else 2), remote=remote, command=command,
                                    stdout=stdout.read_text(errors='replace'), stderr=stderr.read_text(errors='replace'))
                     result['warmups' if run < 0 else 'records'].append(metrics)
                     save()

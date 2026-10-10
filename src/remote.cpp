@@ -1388,13 +1388,14 @@ struct Sender {
         w.buf.resize(BLOCK_TARGET);
         if (fresh.size - off >= (32 << 20) && default_jobs() > 1 && d.file_ranges) {
           i64 start = off;
-          size_t ranges = (size_t)((fresh.size - start + BLOCK_TARGET - 1) / BLOCK_TARGET);
+          constexpr size_t span = 4 << 20;
+          size_t ranges = (size_t)((fresh.size - start + span - 1) / span);
           std::atomic<bool> input_ok{true};
           pool.parallel(ranges, w, [&](size_t range, Worker& worker) {
             if (g_stop.load()) return;
-            i64 offset = start + (i64)range * BLOCK_TARGET;
-            size_t want = (size_t)std::min<i64>(BLOCK_TARGET, fresh.size - offset);
-            worker.buf.resize(BLOCK_TARGET);
+            i64 offset = start + (i64)range * span;
+            size_t want = (size_t)std::min<i64>(span, fresh.size - offset);
+            worker.buf.resize(span);
             size_t n = 0;
             {
               StageTimer timing(g_stats.read_ns);

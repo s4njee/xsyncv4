@@ -1,5 +1,6 @@
 // Worker pool with two task queues (0 = scan/generate, 1 = transfer).
 #pragma once
+#include <algorithm>
 #include <atomic>
 #include <condition_variable>
 #include <deque>
@@ -56,10 +57,10 @@ class Pool {
   // Called by a pool worker, with callbacks that do not themselves call
   // parallel(). Waiting producers help only range tickets, never recursively
   // start another file. Thus all workers may produce ranges without deadlock.
-  void parallel(size_t count, Worker& worker, std::function<void(size_t, Worker&)> fn) {
+  void parallel(size_t count, Worker& worker, std::function<void(size_t, Worker&)> fn, size_t maximum_workers = SIZE_MAX) {
     if (!count) return;
     ParallelWork work(count, std::move(fn));
-    int tickets = (int)std::min<size_t>(worker_count_, count);
+    int tickets = (int)std::min<size_t>({(size_t)worker_count_, count, maximum_workers});
     work.remaining = tickets;
     {
       std::lock_guard<std::mutex> lock(mu_);

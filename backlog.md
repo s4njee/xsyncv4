@@ -3474,3 +3474,22 @@ after U-01's evidence entry completes P2, as requested by the user.
   child directories so every producer still exercises range scheduling.
 - Seven kernel-policy/fault tests and four range tests per platform pass after
   selecting single-file ranges. Fresh complete comparisons are pending.
+
+
+### F-05 final scheduling and syscall tuning — 2026-10-10
+
+- Filesystem selection now precedes both the clone probe and range copying,
+  avoiding failed-clone truncation on ext4/overlay. Independent large files
+  retain file-level parallelism. Local byte ranges use at most two workers;
+  native sender ranges use 4 MiB blocks to reduce per-frame overhead.
+- The resume fixture is 256 MiB, with the stop offset derived from its midpoint.
+  This keeps the file larger than the read/write queues and makes disconnection
+  happen before the complete transfer is buffered. Byte-exact retained prefixes
+  and remaining wire bounds still pass on both platforms (seven tests each,
+  one existing real-rig skip).
+- Added single-file local/plain-pipe/compressed-pipe measurements. A driver
+  oracle initially compared the one-file destination with the two-file base
+  fixture and correctly failed verification; it now verifies the selected
+  fixture. Diagnostic binaries rebuilt with a stale forced revision label are
+  not used as qualified completion evidence. Final measured binaries must use
+  the actual committed source revision and remain frozen for the entire run.

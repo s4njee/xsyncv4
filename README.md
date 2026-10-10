@@ -549,12 +549,14 @@ Differences to be aware of:
   destination. `-W` requests whole-file transfers; APFS cloning remains preferred
   for eligible local copies.
 - **Large Linux local copies use kernel acceleration.** Files of at least 1 MiB
-  try a reflink with `FICLONE`, then same-device `copy_file_range` on btrfs/XFS, before falling
+  on btrfs/XFS try a reflink with `FICLONE`, then same-device
+  `copy_file_range`, before falling
   back to byte copying. Short copies, interrupted calls and unsupported operations
   retain the correct offset. `--no-clone`, sparse copies and bandwidth limits
   use the byte path. Source consistency checks and output metadata finalization
   still apply. Files with at least 32 MiB remaining also spread disjoint ranges
-  across the configured worker pool when the directory requests one large file;
+  across the configured worker pool when the directory requests one large file
+  (local byte copies use at most two range workers);
   multiple large files retain file-level parallelism to avoid inode contention.
   Native transfers parallelize reads and
   receiver writes while retaining source retries and partial-prefix verification.

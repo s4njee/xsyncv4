@@ -744,7 +744,7 @@ struct Local {
 #ifdef __linux__
       // Avoid probing unsupported ioctls for every tiny file. Sparse copies and
       // bandwidth-limited writes retain the existing userspace path.
-      kernel_copy = o.clone && s.size >= (1 << 20) && !o.sparse && !o.bwlimit;
+      kernel_copy = o.clone && s.size >= (1 << 20) && !o.sparse && !o.bwlimit && native_copy_ranges(in, f.fd);
       if (!prefix.size && kernel_copy && o.clone && !o.inplace) {
         int result = out_clone_data(f, in, s.size);
         if (result > 0) {
@@ -806,7 +806,7 @@ struct Local {
             g_stats.xfer_bytes.fetch_add((u64)n);
             slot_add(w.id, n);
           }
-        });
+        }, 2);
         total += copied.load();
         ok = !failed.load() && !g_stop.load();
         if (total != s.size && ok) {
