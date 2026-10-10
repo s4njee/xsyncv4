@@ -16,6 +16,7 @@
 
 Slot g_slots[MAX_WORKERS];
 std::atomic<bool> g_progress_on{false};
+void (*g_phase_sink)() = nullptr;
 
 namespace {
 std::mutex ui_mu;
@@ -242,6 +243,16 @@ Totals totals() {
   return t;
 }
 
+const char* active_phase() {
+  u32 peer = g_stats.peer_phase.load();
+  if (g_stats.deleting_active.load() || (peer & 1)) return "deleting";
+  if (g_stats.verifying_active.load() || (peer & 2)) return "verifying";
+  if (g_stats.waiting_peer.load()) return g_opt.pushing ? "waiting for receiver" : "waiting for sender";
+  return nullptr;
+}
+u64 deleted_count() { return std::max(g_stats.deleted.load(), g_stats.peer_deleted.load()); }
+u64 verified_count() { return g_stats.verified.load() + g_stats.peer_verified.load(); }
+
 std::string json_string(std::string_view value) {
   std::string result = "\"";
   while (!value.empty()) {
@@ -266,6 +277,8 @@ void json_totals(const Totals& t, u64 now, bool complete = false, bool ok = fals
       ",\"files\":" + std::to_string(t.files) + ",\"files_total\":" + std::to_string(t.files_total) +
       ",\"bytes\":" + std::to_string(t.bytes) + ",\"bytes_total\":" + std::to_string(t.bytes_total) +
       ",\"files_seen\":" + std::to_string(t.seen) + ",\"wire_bytes\":" + std::to_string(wire) +
+      ",\"phase\":" + json_string(complete ? "complete" : active_phase() ? active_phase() : t.scanning ? "scanning" : "transferring") +
+      ",\"deleted\":" + std::to_string(deleted_count()) + ",\"verified\":" + std::to_string(verified_count()) +
       ",\"scanning\":" + (t.scanning ? "true" : "false") +
       ",\"dry_run\":" + (g_opt.dry_run ? "true" : "false");
   if (complete) out += std::string(",\"success\":") + (ok && !g_exit_code.load() ? "true" : "false") +
@@ -319,7 +332,17 @@ void draw_locked() {
   static const char* ascii_frames[] = {"|", "/", "-", "\\"};
   int columns = tty ? std::max(0, term_cols() - 1) : 99;
   std::string total;
-  if (t.scanning && t.files == 0 && t.bytes == 0) {
+  if (const char* phase = active_phase()) {
+    total = std::string(" ") + (unicode ? frames[spin++ % 10] : ascii_frames[spin++ % 4]) + " " + phase + "  ";
+    if (strcmp(phase, "deleting") == 0) total += fmt_num(deleted_count());
+    else if (strcmp(phase, "verifying") == 0) total += fmt_num(verified_count()) + " checks";
+    else {
+      total += std::to_string((int)(std::clamp(t.frac, 0.0, 1.0) * 100)) + "% " +
+               fmt_num(t.files) + "/" + fmt_num(t.files_total) + " files" + separator() + fmt_size((double)t.bytes);
+      if (g_opt.pushing) total += std::string(separator()) + "sent " + fmt_size((double)g_stats.wire_sent.load()) + " wire";
+    }
+    total = clip(total, columns);
+  } else if (t.scanning && t.files == 0 && t.bytes == 0) {
     total = std::string(" ") + (unicode ? frames[spin++ % 10] : ascii_frames[spin++ % 4]) +
             " scanning  " + fmt_num(t.seen) + " files";
     if (t.files_total) total += separator() + fmt_num(t.files_total) + " to transfer (" + fmt_size((double)t.bytes_total) + ")";
@@ -530,6 +553,7 @@ void progress_start(int n) {
 
 void progress_tick() {
   output_check();
+  if (g_phase_sink) g_phase_sink();
   if (!g_progress_on) return;
   std::lock_guard<std::mutex> lk(ui_mu);
   if (!g_progress_on) return;

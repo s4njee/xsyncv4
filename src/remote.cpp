@@ -49,7 +49,7 @@ namespace {
 
 enum : u8 { F_HELLO = 1, F_DIR, F_NEED, F_DATA, F_LIST_END, F_DATA_END, F_DONE, F_MSG, F_IDMAP, F_DEST, F_OUTPUT, F_OUTPUT_CONFIG,
             F_DELTA_REQUEST, F_DELTA_SIGNATURE, F_DELTA_RETRY_ACK, F_LIST_ENTRY, F_IO_CONFIG, F_KEEPALIVE, F_FILTER_CONFIG, F_DELETE_CONFIG,
-            F_PRUNE_CONFIG, F_RELATIVE_CONFIG, F_FILES_CONFIG, F_FILES_DATA, F_FILES_END, F_XATTR_CONFIG, F_XATTR_START, F_XATTR_CHUNK, F_XATTR_END, F_ACL_CONFIG, F_CHOWN_CONFIG, F_SPARSE_CONFIG, F_LINKDEST_CONFIG, F_PROGRESS, F_STAGE };
+            F_PRUNE_CONFIG, F_RELATIVE_CONFIG, F_FILES_CONFIG, F_FILES_DATA, F_FILES_END, F_XATTR_CONFIG, F_XATTR_START, F_XATTR_CHUNK, F_XATTR_END, F_ACL_CONFIG, F_CHOWN_CONFIG, F_SPARSE_CONFIG, F_LINKDEST_CONFIG, F_PROGRESS, F_STAGE, F_PHASE };
 enum : u8 { DF_ATTRS = 1, DF_SINGLE = 2, DF_NODELETE = 4, DF_ZSTD = 8 };
 enum : u8 { R_WHOLE = 1, R_CHUNK = 2, R_FAIL = 4, R_END = 8, R_LITERAL = 16, R_DELTA_END = 32, R_COPY = 64 };
 constexpr size_t HDR = 5;                  // u32 payload length + u8 type
@@ -299,6 +299,7 @@ struct Conn {
       }
       output_check();
       if (g_stop.load()) { cancel_remote_peer(); exit_signal(); }
+      progress_tick();
       check_timeout();
       usleep(25000);
     }
@@ -456,6 +457,8 @@ struct Conn {
         die(RERR_PROTOCOL, "protocol error: oversized or unnegotiated progress acknowledgment");
       if (type == F_STAGE && (len > 20 || !(g_opt.peer_features & PF_STAGE_METRICS)))
         die(RERR_PROTOCOL, "protocol error: oversized or unnegotiated stage metrics");
+      if (type == F_PHASE && (len > 21 || !(g_opt.peer_features & PF_PROGRESS_PHASE)))
+        die(RERR_PROTOCOL, "protocol error: oversized or unnegotiated progress phase");
       if (type == F_IO_CONFIG && len > 20) die(RERR_PROTOCOL, "protocol error: malformed I/O configuration (oversized)");
       if (type == F_CHOWN_CONFIG && len > 1024 * 1024)
         die(RERR_PROTOCOL, "protocol error: oversized ownership configuration");
@@ -497,6 +500,29 @@ struct Conn {
 };
 
 Conn* g_conn = nullptr;
+
+void phase_snapshot(bool force = false) {
+  if (!g_opt.am_server || !(g_opt.peer_features & PF_PROGRESS_PHASE)) return;
+  static std::mutex mutex;
+  static u64 last = 0;
+  std::lock_guard<std::mutex> lock(mutex);
+  u64 now = now_ns();
+  if (!force && now - last < 100000000) return;
+  last = now;
+  std::string frame = new_frame(F_PHASE);
+  frame.push_back((char)((g_stats.deleting_active.load() ? 1 : 0) | (g_stats.verifying_active.load() ? 2 : 0)));
+  put_var(frame, g_stats.verified.load()), put_var(frame, g_stats.deleted.load());
+  g_conn->send(std::move(frame));
+}
+void phase_tick() { phase_snapshot(); }
+void handle_phase(std::string_view payload) {
+  if (g_opt.am_server) die(RERR_PROTOCOL, "protocol error: client progress phase");
+  RBuf r(payload);
+  u8 active = r.byte();
+  u64 verified = r.var(), deleted = r.var();
+  if (active > 3 || r.bad || !r.empty()) die(RERR_PROTOCOL, "protocol error: malformed progress phase");
+  g_stats.peer_phase = active, g_stats.peer_verified = verified, g_stats.peer_deleted = deleted;
+}
 
 // Values precede their metadata references. The reader spools bounded chunks;
 // worker threads consume completed values without waiting on other workers.
@@ -1409,6 +1435,7 @@ struct Sender {
         case F_DELTA_RETRY_ACK: on_delta_reply(payload, true); break;
         case F_MSG: handle_msg(payload); break;
         case F_OUTPUT: handle_output(payload); break;
+        case F_PHASE: handle_phase(payload); break;
         case F_PROGRESS: {
           RBuf r(payload);
           u64 bytes = r.var(), files = r.var();
@@ -1498,6 +1525,7 @@ struct Sender {
     std::string f = new_frame(F_DATA_END);
     put_var(f, (u64)g_exit_code.load());
     c.send(std::move(f));
+    if (client) g_stats.waiting_peer = true;
     {
       std::unique_lock<std::mutex> lk(done_mu);
       while (!got_done) {
@@ -1512,6 +1540,8 @@ struct Sender {
     }
     if (g_stop.load()) exit_signal();
     rt.join();
+    if (client) g_stats.waiting_peer = false;
+    phase_snapshot(true);
     stage_snapshot(true);
     c.finish();
     return g_exit_code.load();
@@ -2205,8 +2235,9 @@ struct Receiver {
         if (allow_disconnect.load()) return;
         conn_lost();
       }
-      if (ended && type != F_STAGE) die(RERR_PROTOCOL, "protocol error: frame after DATA_END");
+      if (ended && type != F_STAGE && type != F_PHASE) die(RERR_PROTOCOL, "protocol error: frame after DATA_END");
       switch (type) {
+        case F_PHASE: handle_phase(payload); break;
         case F_STAGE: {
           if (!client) die(RERR_PROTOCOL, "protocol error: sender-stage metrics in a push");
           RBuf r(payload);
@@ -2292,6 +2323,7 @@ struct Receiver {
     if (g_stop.load()) exit_signal();
     allow_disconnect.store(true);
     acknowledge(0, true);
+    phase_snapshot(true);
     std::string f = new_frame(F_DONE);
     put_var(f, (u64)g_exit_code.load());
     put_var(f, g_stats.created_files), put_var(f, g_stats.created_dirs), put_var(f, g_stats.created_links);
@@ -2530,6 +2562,7 @@ int run_client(const std::vector<std::string>& srcs, const std::string& dest, u3
   u64 advertised = PROTO_FEATURES & (o.whole_file ? ~(PF_RESUME | PF_DELTA) : ~u64(0));
   if (!push || !o.progress) advertised &= ~PF_PROGRESS_ACK;
   if (o.verbose < 2) advertised &= ~PF_STAGE_METRICS;
+  if (!o.progress) advertised &= ~PF_PROGRESS_PHASE;
   if (o.list_only) advertised &= PF_CORE | PF_ZSTD | PF_LIST | PF_IO_CONTROL | PF_FILTERS | PF_MERGE_FILTERS | PF_CVS_FILTERS | PF_PRUNE_EMPTY | PF_RELATIVE | PF_FILES_FROM;
   else advertised &= ~PF_LIST;
   if (!o.filters.needs_extended()) advertised &= ~PF_FILTERS;
@@ -2701,7 +2734,9 @@ int run_client(const std::vector<std::string>& srcs, const std::string& dest, u3
     rc = r.run(dest);
   }
   if (c.wfd >= 0) close(c.wfd);
+  g_stats.waiting_peer = true;
   int st = c.wait_peer();
+  g_stats.waiting_peer = false;
   close(c.rfd);
   g_conn = nullptr;
   if (o.list_only && !rc && (!WIFEXITED(st) || WEXITSTATUS(st))) {
@@ -2813,6 +2848,7 @@ int run_server() {
   put_var(f, ver);
   if (ver >= 4) put_var(f, o.peer_features);
   if (structured_output()) g_output_sink = send_output;
+  if (o.peer_features & PF_PROGRESS_PHASE) g_phase_sink = phase_tick;
   c.send(std::move(f));
   if (o.peer_features & PF_IO_CONTROL) {
     if (!c.read_frame(type, payload)) conn_lost();

@@ -410,6 +410,15 @@ time includes transport waits and requested pacing, and write time includes
 receiver DATA processing. Current helpers exchange these optional metrics;
 older helpers continue transferring without a stage estimate.
 
+Checksum hashing shows `verifying N checks`; successful source and destination
+hashes each count as a check. Deletion shows `deleting N`, with the count of
+removed entries. A push waiting for final writes or cleanup shows
+`waiting for receiver`, retaining acknowledged progress and sent wire bytes.
+Waiting for a pull helper to exit shows `waiting for sender`. Current helpers
+send optional, bounded phase snapshots; older helpers remain compatible with
+the client's local phases and wait label. JSON records include `phase`,
+`verified` and `deleted` counters.
+
 Progress uses stderr. The live display is used on terminals; explicit
 `--progress` prints one plain line per second on pipes. `--info=progress2`
 uses rsync's byte/percent/rate/time and `(xfr#N, to-chk=R/T)` line shape on

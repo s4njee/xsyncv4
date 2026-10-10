@@ -411,6 +411,7 @@ int destination_list_dir(const char* path, DirList& out, unsigned flags) {
 
 static bool hash_fd(int fd, u64 out[2]) {
   if (fd < 0) return false;
+  ProgressPhase phase(g_stats.verifying_active);
   static thread_local std::vector<char> hb(256 * 1024);
   XXH3_state_t st;
   XXH3_128bits_reset(&st);
@@ -427,6 +428,7 @@ static bool hash_fd(int fd, u64 out[2]) {
   close(fd);
   XXH128_hash_t h = XXH3_128bits_digest(&st);
   out[0] = h.low64, out[1] = h.high64;
+  g_stats.verified.fetch_add(1, std::memory_order_relaxed);
   return true;
 }
 
@@ -611,6 +613,7 @@ void order_deletions(DirList& list) {
 
 bool remove_tree(const std::string& path, u8 type, const std::string& rel, Worker& t, bool limited = false, bool report = true,
                  std::shared_ptr<const FilterList> context = {}) {
+  ProgressPhase phase(g_stats.deleting_active);
   auto permit = [&] {
     if (!limited || g_opt.max_delete < 0 || deletion_count < (u64)g_opt.max_delete) return true;
     if (!deletion_limit_reported) {
@@ -657,6 +660,7 @@ bool remove_tree(const std::string& path, u8 type, const std::string& rel, Worke
   }
   if (report) item_delete(t, rel, type == T_DIR);
   g_stats.deleted.fetch_add(1, std::memory_order_relaxed);
+  if (g_progress_on || g_phase_sink) progress_tick();
   if (limited) deletion_count++;
   return true;
 }

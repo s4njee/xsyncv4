@@ -110,6 +110,15 @@ static int fault_unlinkat(int fd, const char* name, int flags) {
   static auto original = (int (*)(int, const char*, int))dlsym(RTLD_NEXT, "unlinkat");
 #endif
   at_pause("unlink", fd, name);
+  if (selected(fd)) {
+    if (const char* delay = getenv("XSYNC_FAULT_UNLINK_DELAY_US")) {
+      if (const char* marker = getenv("XSYNC_FAULT_UNLINK_NOTIFY")) {
+        int notify = open(marker, O_WRONLY | O_CREAT | O_EXCL, 0600);
+        if (notify >= 0) close(notify);
+      }
+      usleep((useconds_t)strtoul(delay, nullptr, 10));
+    }
+  }
   return original(fd, name, flags);
 }
 static int fault_linkat(int from_fd, const char* from, int to_fd, const char* to, int flags) {

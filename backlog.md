@@ -2844,3 +2844,20 @@ Verified artifact manifest (source `864bd37edf14`):
   `/tmp/xsync-u07-release-mac-{arm,intel}-final.log` and
   `/tmp/xsync-u07-release-linux-{amd64,arm64}.log`. Packaging is refreshed
   after this entry. U-08 is next; U-01 remains partial for GUI verification.
+
+## U-08 progress — 2026-10-10: explicit work and wait phases
+
+- Checksum hashing and recursive removal track active work and completed
+  checks/deletions. The display shows `verifying N checks`, `deleting N`, and
+  `waiting for receiver`/`waiting for sender` instead of an ambiguous scanning
+  label or an unexplained 100% bar. Receiver waits retain acknowledged
+  percentages/file counts and sent wire bytes. JSON includes the phase and
+  check/deletion counters.
+- Optional protocol-4 phase snapshots are bounded to 21 bytes and coalesced
+  to 100 ms; final snapshots clear active phases and retain final counters.
+  Older helpers remain compatible without remote phase detail.
+- Development phase acceptance passes **4 methods**, including delayed
+  verification and deletion across local/push/pull, waiting for receiver,
+  JSON deletion counts and five invalid/unnegotiated phase-frame cases.
+  All three existing ACK methods still pass. Real SSH, protocol and release
+  validation follow.

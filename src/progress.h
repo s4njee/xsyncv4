@@ -35,6 +35,18 @@ void progress_tick();
 void progress_stop(bool ok);
 struct OutputEvent;
 void progress_file_event(const OutputEvent& event);
+extern void (*g_phase_sink)();
+struct ProgressPhase {
+  std::atomic<u32>& active;
+  explicit ProgressPhase(std::atomic<u32>& counter) : active(counter) {
+    active.fetch_add(1, std::memory_order_relaxed);
+    if (g_progress_on || g_phase_sink) progress_tick();
+  }
+  ~ProgressPhase() {
+    active.fetch_sub(1, std::memory_order_relaxed);
+    if (g_progress_on || g_phase_sink) progress_tick();
+  }
+};
 // Print text (complete lines) above the live region.
 void ui_write(bool is_err, std::string_view text);
 
