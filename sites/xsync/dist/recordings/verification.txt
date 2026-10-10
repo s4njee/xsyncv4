@@ -1,27 +1,39 @@
-xsync -acP --no-clone ./checks-data/ ./checks-backup/
+xs -acP --no-clone ./checks-data/ ./checks-backup/
 
 [0.005s]
  ⠋ verifying  0 checks
 
-[0.071s]
+[0.065s]
  ⠙ scanning  0 files
 
-[0.136s]
+[0.126s]
  ⠹ scanning  0 files
 
-[0.210s]
+[0.194s]
  ⠸ scanning  0 files
 
-[0.283s]
- ⠼ verifying  17 checks
+[0.260s]
+ ⠼ scanning  0 files
 
-[0.343s]
+[0.333s]
  ⠴ scanning  0 files
 
-[0.416s]
- ⠦ scanning  0 files
+[0.401s]
+ ⠦ verifying  17 checks
 
-[0.461s]
- ✓ up to date · 15 files checked in 0.46s
+[0.468s]
+ ⠧ verifying  20 checks
+
+[0.534s]
+ ⠇ verifying  23 checks
+
+[0.600s]
+ ⠏ verifying  26 checks
+
+[0.666s]
+ ⠋ verifying  29 checks
+
+[0.682s]
+ ✓ up to date · 15 files checked in 0.68s
 
 Process exit code: 0

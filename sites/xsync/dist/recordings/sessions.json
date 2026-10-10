@@ -1,439 +1,399 @@
 {
-  "captured_at": "2026-10-10T14:17:35.039166+00:00",
-  "binary_version": "xsync  version 0.1.0  protocol version 4  git 2f3e27633fac-dirty",
+  "captured_at": "2026-10-10T16:33:05.072648+00:00",
+  "binary_version": "xs  version 0.1.0  protocol version 4  git d3a49f8872fd",
   "terminal_columns": 120,
   "transport": "Local filesystem",
   "fixture_files": 130,
   "transfer": {
-    "command": "xsync -aP --no-clone --jobs=2 --bwlimit=1M ./demo-data/ ./backup/",
+    "command": "xs -aP --no-clone --jobs=2 --bwlimit=1M ./demo-data/ ./backup/",
     "exit_code": 0,
     "frames": [
       {
-        "at_ms": 72,
-        "text": "  small files  85 · 1.3k files/s\n ────────────────────────────── 1%  85/130 files · 66.0K/6.16M · 982K/s · 1.3k files/s · ETA 0:06"
+        "at_ms": 70,
+        "text": "  small files  104 · 1.6k files/s\n ────────────────────────────── 1%  104/130 files · 83.0K/6.46M · 1.25M/s · 1.6k files/s · ETA 0:05"
       },
       {
-        "at_ms": 143,
-        "text": "  small files  128 · 1.2k files/s\n ────────────────────────────── 1%  128/130 files · 101K/6.16M · 946K/s · 1.2k files/s · ETA 0:07"
+        "at_ms": 136,
+        "text": "  small files  128 · 1.5k files/s\n ────────────────────────────── 1%  128/130 files · 103K/6.46M · 1.19M/s · 1.5k files/s · ETA 0:05"
       },
       {
-        "at_ms": 211,
-        "text": "  archive.tar                                                                                3.25M ──────────── 0% 0B/s\n  small files  128 · 1.1k files/s\n ────────────────────────────── 1%  128/130 files · 101K/6.16M · 882K/s · 1.1k files/s · ETA 0:07"
+        "at_ms": 203,
+        "text": "  small files  128 · 1.4k files/s\n ────────────────────────────── 1%  128/130 files · 103K/6.46M · 1.11M/s · 1.4k files/s · ETA 0:06"
       },
       {
-        "at_ms": 282,
-        "text": "  archive.tar                                                                                3.25M ──────────── 0% 0B/s\n  small files  128 · 1.1k files/s\n ────────────────────────────── 1%  128/130 files · 101K/6.16M · 819K/s · 1.1k files/s · ETA 0:08"
+        "at_ms": 269,
+        "text": "  archive.tar                                                                                3.41M ──────────── 0% 0B/s\n  small files  128 · 1.3k files/s\n ────────────────────────────── 1%  128/130 files · 103K/6.46M · 1.03M/s · 1.3k files/s · ETA 0:06"
       },
       {
-        "at_ms": 351,
-        "text": "  archive.tar                                                                                3.25M ──────────── 0% 0B/s\n  small files  128 · 980 files/s\n ────────────────────────────── 1%  128/130 files · 101K/6.16M · 763K/s · 980 files/s · ETA 0:08"
+        "at_ms": 335,
+        "text": "  archive.tar                                                                                3.41M ──────────── 0% 0B/s\n  small files  128 · 1.2k files/s\n ────────────────────────────── 1%  128/130 files · 103K/6.46M · 966K/s · 1.2k files/s · ETA 0:07"
       },
       {
-        "at_ms": 418,
-        "text": "  archive.tar                                                                                3.25M ──────────── 0% 0B/s\n  small files  128 · 915 files/s\n ────────────────────────────── 1%  128/130 files · 101K/6.16M · 711K/s · 915 files/s · ETA 0:09"
+        "at_ms": 402,
+        "text": "  archive.tar                                                                                3.41M ──────────── 0% 0B/s\n  small files  128 · 1.1k files/s\n ────────────────────────────── 1%  128/130 files · 103K/6.46M · 902K/s · 1.1k files/s · ETA 0:07"
       },
       {
-        "at_ms": 485,
-        "text": "  archive.tar                                                                                3.25M ──────────── 0% 0B/s\n  small files  128 · 853 files/s\n ────────────────────────────── 1%  128/130 files · 101K/6.16M · 664K/s · 853 files/s · ETA 0:09"
+        "at_ms": 468,
+        "text": "  archive.tar                                                                                3.41M ──────────── 0% 0B/s\n  small files  128 · 1.1k files/s\n ────────────────────────────── 1%  128/130 files · 103K/6.46M · 842K/s · 1.1k files/s · ETA 0:08"
       },
       {
-        "at_ms": 554,
-        "text": "  archive.tar                                                                                3.25M ──────────── 0% 0B/s\n  small files  128 · 794 files/s\n ────────────────────────────── 1%  128/130 files · 101K/6.16M · 618K/s · 794 files/s · ETA 0:10"
+        "at_ms": 534,
+        "text": "  archive.tar                                                                                3.41M ──────────── 0% 0B/s\n  small files  128 · 984 files/s\n ────────────────────────────── 1%  128/130 files · 103K/6.46M · 786K/s · 984 files/s · ETA 0:08"
       },
       {
-        "at_ms": 623,
-        "text": "  archive.tar                                                                                3.25M ──────────── 0% 0B/s\n  small files  128 · 740 files/s\n ────────────────────────────── 1%  128/130 files · 101K/6.16M · 575K/s · 740 files/s · ETA 0:11"
+        "at_ms": 601,
+        "text": "  archive.tar                                                                                3.41M ──────────── 0% 0B/s\n  small files  128 · 919 files/s\n ────────────────────────────── 1%  128/130 files · 103K/6.46M · 734K/s · 919 files/s · ETA 0:09"
       },
       {
-        "at_ms": 694,
-        "text": "  archive.tar                                                                                3.25M ──────────── 0% 0B/s\n  small files  128 · 688 files/s\n ────────────────────────────── 1%  128/130 files · 101K/6.16M · 535K/s · 688 files/s · ETA 0:12"
+        "at_ms": 667,
+        "text": "  archive.tar                                                                                3.41M ──────────── 0% 0B/s\n  small files  128 · 858 files/s\n ────────────────────────────── 1%  128/130 files · 103K/6.46M · 685K/s · 858 files/s · ETA 0:09"
       },
       {
-        "at_ms": 761,
-        "text": "  archive.tar                                                                                3.25M ──────────── 0% 0B/s\n  small files  128 · 642 files/s\n ────────────────────────────── 1%  128/130 files · 101K/6.16M · 499K/s · 642 files/s · ETA 0:12"
+        "at_ms": 733,
+        "text": "  archive.tar                                                                                3.41M ──────────── 0% 0B/s\n  small files  128 · 801 files/s\n ────────────────────────────── 1%  128/130 files · 103K/6.46M · 640K/s · 801 files/s · ETA 0:10"
       },
       {
-        "at_ms": 831,
-        "text": "  archive.tar                                                                                3.25M ──────────── 0% 0B/s\n  small files  128 · 596 files/s\n ────────────────────────────── 1%  128/130 files · 101K/6.16M · 464K/s · 596 files/s · ETA 0:13"
+        "at_ms": 799,
+        "text": "  archive.tar                                                                                3.41M ──────────── 0% 0B/s\n  small files  128 · 748 files/s\n ────────────────────────────── 1%  128/130 files · 103K/6.46M · 597K/s · 748 files/s · ETA 0:11"
       },
       {
-        "at_ms": 902,
-        "text": "  archive.tar                                                                                3.25M ──────────── 0% 0B/s\n  small files  128 · 554 files/s\n ────────────────────────────── 1%  128/130 files · 101K/6.16M · 431K/s · 554 files/s · ETA 0:14"
+        "at_ms": 866,
+        "text": "  archive.tar                                                                                3.41M ──────────── 0% 0B/s\n  small files  128 · 699 files/s\n ────────────────────────────── 1%  128/130 files · 103K/6.46M · 558K/s · 699 files/s · ETA 0:11"
       },
       {
-        "at_ms": 973,
-        "text": "  archive.tar                                                                                3.25M ──────────── 0% 0B/s\n  small files  128 · 515 files/s\n ────────────────────────────── 1%  128/130 files · 101K/6.16M · 400K/s · 515 files/s · ETA 0:16"
+        "at_ms": 932,
+        "text": "  archive.tar                                                                                3.41M ──────────── 0% 0B/s\n  small files  128 · 652 files/s\n ────────────────────────────── 1%  128/130 files · 103K/6.46M · 521K/s · 652 files/s · ETA 0:12"
       },
       {
-        "at_ms": 1043,
-        "text": "  archive.tar                                                                                3.25M ──────────── 0% 0B/s\n  small files  128 · 479 files/s\n ────────────────────────────── 1%  128/130 files · 101K/6.16M · 372K/s · 479 files/s · ETA 0:17"
+        "at_ms": 998,
+        "text": "  archive.tar                                                                                3.41M ──────────── 0% 0B/s\n  small files  128 · 609 files/s\n ────────────────────────────── 1%  128/130 files · 103K/6.46M · 486K/s · 609 files/s · ETA 0:13"
       },
       {
-        "at_ms": 1111,
-        "text": "  archive.tar                                                                                3.25M ──────────── 0% 0B/s\n  small files  128 · 446 files/s\n ────────────────────────────── 1%  128/130 files · 101K/6.16M · 347K/s · 446 files/s · ETA 0:18"
+        "at_ms": 1064,
+        "text": "  archive.tar                                                                                3.41M ──────────── 0% 0B/s\n  small files  128 · 569 files/s\n ────────────────────────────── 1%  128/130 files · 103K/6.46M · 454K/s · 569 files/s · ETA 0:14"
       },
       {
-        "at_ms": 1179,
-        "text": "  archive.tar                                                                                3.25M ──────────── 0% 0B/s\n  small files  128 · 416 files/s\n ────────────────────────────── 1%  128/130 files · 101K/6.16M · 323K/s · 416 files/s · ETA 0:19"
+        "at_ms": 1131,
+        "text": "  archive.tar                                                                   3.41M ━━━╸──────── 30% 1.05M/s ETA 0:02\n  small files  128 · 531 files/s\n ━━━━━───────────────────────── 17%  128/130 files · 1.15M/6.46M · 1.47M/s · 531 files/s · ETA 0:04"
       },
       {
-        "at_ms": 1246,
-        "text": "  archive.tar                                                                                3.25M ──────────── 0% 0B/s\n  small files  128 · 388 files/s\n ────────────────────────────── 1%  128/130 files · 101K/6.16M · 302K/s · 388 files/s · ETA 0:21"
+        "at_ms": 1197,
+        "text": "  archive.tar                                                                    3.41M ━━━╸──────── 30% 979K/s ETA 0:02\n  small files  128 · 496 files/s\n ━━━━━───────────────────────── 17%  128/130 files · 1.15M/6.46M · 1.37M/s · 496 files/s · ETA 0:04"
       },
       {
-        "at_ms": 1314,
-        "text": "  archive.tar                                                                   3.25M ━━━╸──────── 30% 1.00M/s ETA 0:02\n  small files  128 · 362 files/s\n ━━━━━───────────────────────── 17%  128/130 files · 1.10M/6.16M · 1.27M/s · 362 files/s · ETA 0:04"
+        "at_ms": 1263,
+        "text": "  archive.tar                                                                    3.41M ━━━╸──────── 30% 914K/s ETA 0:03\n  small files  128 · 463 files/s\n ━━━━━───────────────────────── 17%  128/130 files · 1.15M/6.46M · 1.28M/s · 463 files/s · ETA 0:04"
       },
       {
-        "at_ms": 1385,
-        "text": "  archive.tar                                                                    3.25M ━━━╸──────── 30% 952K/s ETA 0:02\n  small files  128 · 336 files/s\n ━━━━━───────────────────────── 17%  128/130 files · 1.10M/6.16M · 1.18M/s · 336 files/s · ETA 0:04"
+        "at_ms": 1330,
+        "text": "  archive.tar                                                                    3.41M ━━━╸──────── 30% 854K/s ETA 0:03\n  small files  128 · 432 files/s\n ━━━━━───────────────────────── 17%  128/130 files · 1.15M/6.46M · 1.20M/s · 432 files/s · ETA 0:04"
       },
       {
-        "at_ms": 1456,
-        "text": "  archive.tar                                                                    3.25M ━━━╸──────── 30% 884K/s ETA 0:03\n  small files  128 · 312 files/s\n ━━━━━───────────────────────── 17%  128/130 files · 1.10M/6.16M · 1.10M/s · 312 files/s · ETA 0:05"
+        "at_ms": 1396,
+        "text": "  archive.tar                                                                    3.41M ━━━╸──────── 30% 797K/s ETA 0:03\n  small files  128 · 404 files/s\n ━━━━━───────────────────────── 17%  128/130 files · 1.15M/6.46M · 1.12M/s · 404 files/s · ETA 0:05"
       },
       {
-        "at_ms": 1526,
-        "text": "  archive.tar                                                                    3.25M ━━━╸──────── 30% 822K/s ETA 0:03\n  small files  128 · 290 files/s\n ━━━━━───────────────────────── 17%  128/130 files · 1.10M/6.16M · 1.02M/s · 290 files/s · ETA 0:05"
+        "at_ms": 1463,
+        "text": "  archive.tar                                                                    3.41M ━━━╸──────── 30% 744K/s ETA 0:03\n  small files  128 · 377 files/s\n ━━━━━───────────────────────── 17%  128/130 files · 1.15M/6.46M · 1.04M/s · 377 files/s · ETA 0:05"
       },
       {
-        "at_ms": 1597,
-        "text": "  archive.tar                                                                    3.25M ━━━╸──────── 30% 763K/s ETA 0:03\n  small files  128 · 270 files/s\n ━━━━━───────────────────────── 17%  128/130 files · 1.10M/6.16M · 973K/s · 270 files/s · ETA 0:05"
+        "at_ms": 1529,
+        "text": "  archive.tar                                                                    3.41M ━━━╸──────── 30% 695K/s ETA 0:03\n  small files  128 · 352 files/s\n ━━━━━───────────────────────── 17%  128/130 files · 1.15M/6.46M · 976K/s · 352 files/s · ETA 0:05"
       },
       {
-        "at_ms": 1669,
-        "text": "  archive.tar                                                                    3.25M ━━━╸──────── 30% 708K/s ETA 0:03\n  small files  128 · 250 files/s\n ━━━━━───────────────────────── 17%  128/130 files · 1.10M/6.16M · 903K/s · 250 files/s · ETA 0:06"
+        "at_ms": 1595,
+        "text": "  archive.tar                                                                    3.41M ━━━╸──────── 30% 649K/s ETA 0:04\n  small files  128 · 329 files/s\n ━━━━━───────────────────────── 17%  128/130 files · 1.15M/6.46M · 911K/s · 329 files/s · ETA 0:06"
       },
       {
-        "at_ms": 1739,
-        "text": "  archive.tar                                                                    3.25M ━━━╸──────── 30% 659K/s ETA 0:03\n  small files  128 · 233 files/s\n ━━━━━───────────────────────── 17%  128/130 files · 1.10M/6.16M · 840K/s · 233 files/s · ETA 0:06"
+        "at_ms": 1661,
+        "text": "  archive.tar                                                                    3.41M ━━━╸──────── 30% 606K/s ETA 0:04\n  small files  128 · 307 files/s\n ━━━━━───────────────────────── 17%  128/130 files · 1.15M/6.46M · 851K/s · 307 files/s · ETA 0:06"
       },
       {
-        "at_ms": 1809,
-        "text": "  archive.tar                                                                    3.25M ━━━╸──────── 30% 613K/s ETA 0:04\n  small files  128 · 216 files/s\n ━━━━━───────────────────────── 17%  128/130 files · 1.10M/6.16M · 781K/s · 216 files/s · ETA 0:07"
+        "at_ms": 1727,
+        "text": "  archive.tar                                                                    3.41M ━━━╸──────── 30% 566K/s ETA 0:04\n  small files  128 · 286 files/s\n ━━━━━───────────────────────── 17%  128/130 files · 1.15M/6.46M · 794K/s · 286 files/s · ETA 0:07"
       },
       {
-        "at_ms": 1888,
-        "text": "  archive.tar                                                                    3.25M ━━━╸──────── 30% 565K/s ETA 0:04\n  small files  128 · 200 files/s\n ━━━━━───────────────────────── 17%  128/130 files · 1.10M/6.16M · 720K/s · 200 files/s · ETA 0:07"
+        "at_ms": 1794,
+        "text": "  archive.tar                                                                    3.41M ━━━╸──────── 30% 528K/s ETA 0:04\n  small files  128 · 267 files/s\n ━━━━━───────────────────────── 17%  128/130 files · 1.15M/6.46M · 742K/s · 267 files/s · ETA 0:07"
       },
       {
-        "at_ms": 1954,
-        "text": "  archive.tar                                                                    3.25M ━━━╸──────── 30% 527K/s ETA 0:04\n  small files  128 · 186 files/s\n ━━━━━───────────────────────── 17%  128/130 files · 1.10M/6.16M · 672K/s · 186 files/s · ETA 0:08"
+        "at_ms": 1860,
+        "text": "  archive.tar                                                                    3.41M ━━━╸──────── 30% 493K/s ETA 0:05\n  small files  128 · 250 files/s\n ━━━━━───────────────────────── 17%  128/130 files · 1.15M/6.46M · 692K/s · 250 files/s · ETA 0:08"
       },
       {
-        "at_ms": 2025,
-        "text": "  archive.tar                                                                    3.25M ━━━╸──────── 30% 490K/s ETA 0:05\n  small files  128 · 173 files/s\n ━━━━━───────────────────────── 17%  128/130 files · 1.10M/6.16M · 624K/s · 173 files/s · ETA 0:08"
+        "at_ms": 1926,
+        "text": "  archive.tar                                                                    3.41M ━━━╸──────── 30% 460K/s ETA 0:05\n  small files  128 · 233 files/s\n ━━━━━───────────────────────── 17%  128/130 files · 1.15M/6.46M · 647K/s · 233 files/s · ETA 0:08"
       },
       {
-        "at_ms": 2096,
-        "text": "  archive.tar                                                                    3.25M ━━━╸──────── 30% 455K/s ETA 0:05\n  small files  128 · 161 files/s\n ━━━━━───────────────────────── 17%  128/130 files · 1.10M/6.16M · 580K/s · 161 files/s · ETA 0:09"
+        "at_ms": 1993,
+        "text": "  archive.tar                                                                    3.41M ━━━╸──────── 30% 430K/s ETA 0:05\n  small files  128 · 218 files/s\n ━━━━━───────────────────────── 17%  128/130 files · 1.15M/6.46M · 604K/s · 218 files/s · ETA 0:09"
       },
       {
-        "at_ms": 2164,
-        "text": "  archive.tar                                                                    3.25M ━━━╸──────── 30% 424K/s ETA 0:05\n  small files  128 · 150 files/s\n ━━━━━───────────────────────── 17%  128/130 files · 1.10M/6.16M · 541K/s · 150 files/s · ETA 0:10"
+        "at_ms": 2059,
+        "text": "  archive.tar                                                                    3.41M ━━━╸──────── 30% 401K/s ETA 0:06\n  small files  128 · 203 files/s\n ━━━━━───────────────────────── 17%  128/130 files · 1.15M/6.46M · 564K/s · 203 files/s · ETA 0:09"
       },
       {
-        "at_ms": 2237,
-        "text": "  archive.tar                                                                    3.25M ━━━╸──────── 30% 394K/s ETA 0:06\n  small files  128 · 139 files/s\n ━━━━━───────────────────────── 17%  128/130 files · 1.10M/6.16M · 502K/s · 139 files/s · ETA 0:10"
+        "at_ms": 2125,
+        "text": "  archive.tar                                                                   3.41M ━━━━━━━───── 61% 1.42M/s ETA 0:01\n  small files  128 · 190 files/s\n ━━━━━━━━━━──────────────────── 34%  128/130 files · 2.20M/6.46M · 1.57M/s · 190 files/s · ETA 0:03"
       },
       {
-        "at_ms": 2303,
-        "text": "  archive.tar                                                                    3.25M ━━━╸──────── 30% 367K/s ETA 0:06\n  small files  128 · 130 files/s\n ━━━━━───────────────────────── 17%  128/130 files · 1.10M/6.16M · 468K/s · 130 files/s · ETA 0:11"
+        "at_ms": 2192,
+        "text": "  archive.tar                                                                   3.41M ━━━━━━━───── 61% 1.33M/s ETA 0:01\n  small files  128 · 177 files/s\n ━━━━━━━━━━──────────────────── 34%  128/130 files · 2.20M/6.46M · 1.47M/s · 177 files/s · ETA 0:03"
       },
       {
-        "at_ms": 2372,
-        "text": "  archive.tar                                                                    3.25M ━━━╸──────── 30% 342K/s ETA 0:07\n  small files  128 · 121 files/s\n ━━━━━───────────────────────── 17%  128/130 files · 1.10M/6.16M · 436K/s · 121 files/s · ETA 0:12"
+        "at_ms": 2258,
+        "text": "  archive.tar                                                                   3.41M ━━━━━━━───── 61% 1.24M/s ETA 0:01\n  small files  128 · 165 files/s\n ━━━━━━━━━━──────────────────── 34%  128/130 files · 2.20M/6.46M · 1.37M/s · 165 files/s · ETA 0:03"
       },
       {
-        "at_ms": 2446,
-        "text": "  archive.tar                                                                   3.25M ━━━━━━━───── 61% 1.31M/s ETA 0:01\n  small files  128 · 112 files/s\n ━━━━━━━━━━──────────────────── 34%  128/130 files · 2.10M/6.16M · 1.40M/s · 112 files/s · ETA 0:03"
+        "at_ms": 2324,
+        "text": "  archive.tar                                                                   3.41M ━━━━━━━───── 61% 1.16M/s ETA 0:01\n  small files  128 · 154 files/s\n ━━━━━━━━━━──────────────────── 34%  128/130 files · 2.20M/6.46M · 1.28M/s · 154 files/s · ETA 0:03"
       },
       {
-        "at_ms": 2515,
-        "text": "  archive.tar                                                                   3.25M ━━━━━━━───── 61% 1.22M/s ETA 0:01\n  small files  128 · 104 files/s\n ━━━━━━━━━━──────────────────── 34%  128/130 files · 2.10M/6.16M · 1.29M/s · 104 files/s · ETA 0:03"
+        "at_ms": 2391,
+        "text": "  archive.tar                                                                   3.41M ━━━━━━━───── 61% 1.08M/s ETA 0:01\n  small files  128 · 144 files/s\n ━━━━━━━━━━──────────────────── 34%  128/130 files · 2.20M/6.46M · 1.20M/s · 144 files/s · ETA 0:04"
       },
       {
-        "at_ms": 2588,
-        "text": "  archive.tar                                                                   3.25M ━━━━━━━───── 61% 1.13M/s ETA 0:01\n  small files  128 · 96 files/s\n ━━━━━━━━━━──────────────────── 34%  128/130 files · 2.10M/6.16M · 1.20M/s · 96 files/s · ETA 0:03"
+        "at_ms": 2457,
+        "text": "  archive.tar                                                                   3.41M ━━━━━━━───── 61% 1.01M/s ETA 0:01\n  small files  128 · 135 files/s\n ━━━━━━━━━━──────────────────── 34%  128/130 files · 2.20M/6.46M · 1.12M/s · 135 files/s · ETA 0:04"
       },
       {
-        "at_ms": 2659,
-        "text": "  archive.tar                                                                   3.25M ━━━━━━━───── 61% 1.05M/s ETA 0:01\n  small files  128 · 90 files/s\n ━━━━━━━━━━──────────────────── 34%  128/130 files · 2.10M/6.16M · 1.12M/s · 90 files/s · ETA 0:04"
+        "at_ms": 2523,
+        "text": "  archive.tar                                                                    3.41M ━━━━━━━───── 61% 943K/s ETA 0:01\n  small files  128 · 126 files/s\n ━━━━━━━━━━──────────────────── 34%  128/130 files · 2.20M/6.46M · 1.04M/s · 126 files/s · ETA 0:04"
       },
       {
-        "at_ms": 2730,
-        "text": "  archive.tar                                                                    3.25M ━━━━━━━───── 61% 996K/s ETA 0:01\n  small files  128 · 83 files/s\n ━━━━━━━━━━──────────────────── 34%  128/130 files · 2.10M/6.16M · 1.04M/s · 83 files/s · ETA 0:04"
+        "at_ms": 2589,
+        "text": "  archive.tar                                                                    3.41M ━━━━━━━───── 61% 881K/s ETA 0:01\n  small files  128 · 117 files/s\n ━━━━━━━━━━──────────────────── 34%  128/130 files · 2.20M/6.46M · 974K/s · 117 files/s · ETA 0:04"
       },
       {
-        "at_ms": 2796,
-        "text": "  archive.tar                                                                    3.25M ━━━━━━━───── 61% 930K/s ETA 0:01\n  small files  128 · 78 files/s\n ━━━━━━━━━━──────────────────── 34%  128/130 files · 2.10M/6.16M · 990K/s · 78 files/s · ETA 0:04"
+        "at_ms": 2656,
+        "text": "  archive.tar                                                                    3.41M ━━━━━━━───── 61% 822K/s ETA 0:02\n  small files  128 · 110 files/s\n ━━━━━━━━━━──────────────────── 34%  128/130 files · 2.20M/6.46M · 910K/s · 110 files/s · ETA 0:05"
       },
       {
-        "at_ms": 2868,
-        "text": "  archive.tar                                                                    3.25M ━━━━━━━───── 61% 864K/s ETA 0:01\n  small files  128 · 72 files/s\n ━━━━━━━━━━──────────────────── 34%  128/130 files · 2.10M/6.16M · 920K/s · 72 files/s · ETA 0:05"
+        "at_ms": 2722,
+        "text": "  archive.tar                                                                    3.41M ━━━━━━━───── 61% 768K/s ETA 0:02\n  small files  128 · 102 files/s\n ━━━━━━━━━━──────────────────── 34%  128/130 files · 2.20M/6.46M · 849K/s · 102 files/s · ETA 0:05"
       },
       {
-        "at_ms": 2939,
-        "text": "  archive.tar                                                                    3.25M ━━━━━━━───── 61% 802K/s ETA 0:02\n  small files  128 · 67 files/s\n ━━━━━━━━━━──────────────────── 34%  128/130 files · 2.10M/6.16M · 854K/s · 67 files/s · ETA 0:05"
+        "at_ms": 2788,
+        "text": "  archive.tar                                                                    3.41M ━━━━━━━───── 61% 717K/s ETA 0:02\n  small files  128 · 96 files/s\n ━━━━━━━━━━──────────────────── 34%  128/130 files · 2.20M/6.46M · 793K/s · 96 files/s · ETA 0:05"
       },
       {
-        "at_ms": 3012,
-        "text": "  archive.tar                                                                    3.25M ━━━━━━━───── 61% 744K/s ETA 0:02\n  small files  128 · 62 files/s\n ━━━━━━━━━━──────────────────── 34%  128/130 files · 2.10M/6.16M · 793K/s · 62 files/s · ETA 0:05"
+        "at_ms": 2855,
+        "text": "  archive.tar                                                                    3.41M ━━━━━━━───── 61% 669K/s ETA 0:02\n  small files  128 · 89 files/s\n ━━━━━━━━━━──────────────────── 34%  128/130 files · 2.20M/6.46M · 741K/s · 89 files/s · ETA 0:06"
       },
       {
-        "at_ms": 3080,
-        "text": "  archive.tar                                                                    3.25M ━━━━━━━───── 61% 694K/s ETA 0:02\n  small files  128 · 58 files/s\n ━━━━━━━━━━──────────────────── 34%  128/130 files · 2.10M/6.16M · 739K/s · 58 files/s · ETA 0:06"
+        "at_ms": 2921,
+        "text": "  archive.tar                                                                    3.41M ━━━━━━━───── 61% 625K/s ETA 0:02\n  small files  128 · 83 files/s\n ━━━━━━━━━━──────────────────── 34%  128/130 files · 2.20M/6.46M · 691K/s · 83 files/s · ETA 0:06"
       },
       {
-        "at_ms": 3148,
-        "text": "  archive.tar                                                                    3.25M ━━━━━━━───── 61% 646K/s ETA 0:02\n  small files  128 · 54 files/s\n ━━━━━━━━━━──────────────────── 34%  128/130 files · 2.10M/6.16M · 688K/s · 54 files/s · ETA 0:06"
+        "at_ms": 2987,
+        "text": "  archive.tar                                                                    3.41M ━━━━━━━───── 61% 583K/s ETA 0:02\n  small files  128 · 78 files/s\n ━━━━━━━━━━──────────────────── 34%  128/130 files · 2.20M/6.46M · 646K/s · 78 files/s · ETA 0:07"
       },
       {
-        "at_ms": 3217,
-        "text": "  archive.tar                                                                    3.25M ━━━━━━━───── 61% 601K/s ETA 0:02\n  small files  128 · 50 files/s\n ━━━━━━━━━━──────────────────── 34%  128/130 files · 2.10M/6.16M · 640K/s · 50 files/s · ETA 0:06"
+        "at_ms": 3054,
+        "text": "  archive.tar                                                                    3.41M ━━━━━━━───── 61% 545K/s ETA 0:02\n  small files  128 · 73 files/s\n ━━━━━━━━━━──────────────────── 34%  128/130 files · 2.20M/6.46M · 603K/s · 73 files/s · ETA 0:07"
       },
       {
-        "at_ms": 3287,
-        "text": "  archive.tar                                                                    3.25M ━━━━━━━───── 61% 559K/s ETA 0:02\n  small files  128 · 47 files/s\n ━━━━━━━━━━──────────────────── 34%  128/130 files · 2.10M/6.16M · 596K/s · 47 files/s · ETA 0:07"
+        "at_ms": 3120,
+        "text": "  archive.tar                                                                    3.41M ━━━━━━━───── 61% 509K/s ETA 0:03\n  small files  128 · 68 files/s\n ━━━━━━━━━━──────────────────── 34%  128/130 files · 2.20M/6.46M · 563K/s · 68 files/s · ETA 0:08"
       },
       {
-        "at_ms": 3359,
-        "text": "  archive.tar                                                                    3.25M ━━━━━━━───── 61% 519K/s ETA 0:02\n  small files  128 · 43 files/s\n ━━━━━━━━━━──────────────────── 34%  128/130 files · 2.10M/6.16M · 553K/s · 43 files/s · ETA 0:08"
+        "at_ms": 3186,
+        "text": "  archive.tar                                                                   3.41M ━━━━━━━━━━━─ 92% 1.52M/s ETA 0:00\n  small files  128 · 63 files/s\n ━━━━━━━━━━━━━━━─────────────── 50%  128/130 files · 3.25M/6.46M · 1.57M/s · 63 files/s · ETA 0:02"
       },
       {
-        "at_ms": 3427,
-        "text": "  archive.tar                                                                    3.25M ━━━━━━━───── 61% 484K/s ETA 0:03\n  small files  128 · 40 files/s\n ━━━━━━━━━━──────────────────── 34%  128/130 files · 2.10M/6.16M · 515K/s · 40 files/s · ETA 0:08"
+        "at_ms": 3254,
+        "text": "  archive.tar                                                                   3.41M ━━━━━━━━━━━─ 92% 1.42M/s ETA 0:00\n  small files  128 · 59 files/s\n ━━━━━━━━━━━━━━━─────────────── 50%  128/130 files · 3.25M/6.46M · 1.47M/s · 59 files/s · ETA 0:02"
       },
       {
-        "at_ms": 3498,
-        "text": "  archive.tar                                                                    3.25M ━━━━━━━───── 61% 449K/s ETA 0:03\n  small files  128 · 38 files/s\n ━━━━━━━━━━──────────────────── 34%  128/130 files · 2.10M/6.16M · 478K/s · 38 files/s · ETA 0:09"
+        "at_ms": 3320,
+        "text": "  archive.tar                                                                   3.41M ━━━━━━━━━━━─ 92% 1.33M/s ETA 0:00\n  small files  128 · 55 files/s\n ━━━━━━━━━━━━━━━─────────────── 50%  128/130 files · 3.25M/6.46M · 1.37M/s · 55 files/s · ETA 0:02"
       },
       {
-        "at_ms": 3573,
-        "text": "  archive.tar                                                                    3.25M ━━━━━━━───── 61% 416K/s ETA 0:03\n  small files  128 · 35 files/s\n ━━━━━━━━━━──────────────────── 34%  128/130 files · 2.10M/6.16M · 443K/s · 35 files/s · ETA 0:09"
+        "at_ms": 3387,
+        "text": "  small files  128 · 51 files/s\n ━━━━━━━━━━━━━━━━────────────── 54%  129/130 files · 3.51M/6.46M · 1.54M/s · 52 files/s · ETA 0:02"
       },
       {
-        "at_ms": 3647,
-        "text": "  archive.tar                                                                   3.25M ━━━━━━━━━━━─ 92% 1.38M/s ETA 0:00\n  small files  128 · 32 files/s\n ━━━━━━━━━━━━━━━─────────────── 50%  128/130 files · 3.10M/6.16M · 1.40M/s · 32 files/s · ETA 0:02"
+        "at_ms": 3453,
+        "text": "  small files  128 · 48 files/s\n ━━━━━━━━━━━━━━━━────────────── 54%  129/130 files · 3.51M/6.46M · 1.44M/s · 49 files/s · ETA 0:02"
       },
       {
-        "at_ms": 3718,
-        "text": "  archive.tar                                                                   3.25M ━━━━━━━━━━━─ 92% 1.27M/s ETA 0:00\n  small files  128 · 30 files/s\n ━━━━━━━━━━━━━━━─────────────── 50%  128/130 files · 3.10M/6.16M · 1.30M/s · 30 files/s · ETA 0:02"
+        "at_ms": 3519,
+        "text": "  small files  128 · 45 files/s\n ━━━━━━━━━━━━━━━━────────────── 54%  129/130 files · 3.51M/6.46M · 1.34M/s · 46 files/s · ETA 0:02"
       },
       {
-        "at_ms": 3789,
-        "text": "  archive.tar                                                                   3.25M ━━━━━━━━━━━─ 92% 1.18M/s ETA 0:00\n  small files  128 · 28 files/s\n ━━━━━━━━━━━━━━━─────────────── 50%  128/130 files · 3.10M/6.16M · 1.20M/s · 28 files/s · ETA 0:03"
+        "at_ms": 3610,
+        "text": "  dataset.bin                                                                                2.95M ──────────── 0% 0B/s\n  small files  128 · 41 files/s\n ━━━━━━━━━━━━━━━━────────────── 54%  129/130 files · 3.51M/6.46M · 1.22M/s · 42 files/s · ETA 0:02"
       },
       {
-        "at_ms": 3860,
-        "text": "  archive.tar                                                                   3.25M ━━━━━━━━━━━─ 92% 1.10M/s ETA 0:00\n  small files  128 · 26 files/s\n ━━━━━━━━━━━━━━━─────────────── 50%  128/130 files · 3.10M/6.16M · 1.12M/s · 26 files/s · ETA 0:03"
+        "at_ms": 3676,
+        "text": "  dataset.bin                                                                                2.95M ──────────── 0% 0B/s\n  small files  128 · 38 files/s\n ━━━━━━━━━━━━━━━━────────────── 54%  129/130 files · 3.51M/6.46M · 1.14M/s · 39 files/s · ETA 0:03"
       },
       {
-        "at_ms": 3931,
-        "text": "  archive.tar                                                                   3.25M ━━━━━━━━━━━─ 92% 1.02M/s ETA 0:00\n  small files  128 · 24 files/s\n ━━━━━━━━━━━━━━━─────────────── 50%  128/130 files · 3.10M/6.16M · 1.04M/s · 24 files/s · ETA 0:03"
+        "at_ms": 3742,
+        "text": "  dataset.bin                                                                                2.95M ──────────── 0% 0B/s\n  small files  128 · 36 files/s\n ━━━━━━━━━━━━━━━━────────────── 54%  129/130 files · 3.51M/6.46M · 1.07M/s · 36 files/s · ETA 0:03"
       },
       {
-        "at_ms": 4002,
-        "text": "  small files  128 · 22 files/s\n ━━━━━━━━━━━━━━━━────────────── 54%  129/130 files · 3.35M/6.16M · 1.22M/s · 23 files/s · ETA 0:02"
+        "at_ms": 3809,
+        "text": "  dataset.bin                                                                                2.95M ──────────── 0% 0B/s\n  small files  128 · 33 files/s\n ━━━━━━━━━━━━━━━━────────────── 54%  129/130 files · 3.51M/6.46M · 995K/s · 34 files/s · ETA 0:03"
       },
       {
-        "at_ms": 4068,
-        "text": "  small files  128 · 21 files/s\n ━━━━━━━━━━━━━━━━────────────── 54%  129/130 files · 3.35M/6.16M · 1.14M/s · 22 files/s · ETA 0:02"
+        "at_ms": 3875,
+        "text": "  dataset.bin                                                                                2.95M ──────────── 0% 0B/s\n  small files  128 · 31 files/s\n ━━━━━━━━━━━━━━━━────────────── 54%  129/130 files · 3.51M/6.46M · 929K/s · 32 files/s · ETA 0:03"
       },
       {
-        "at_ms": 4139,
-        "text": "  dataset.bin                                                                                2.81M ──────────── 0% 0B/s\n  small files  128 · 19 files/s\n ━━━━━━━━━━━━━━━━────────────── 54%  129/130 files · 3.35M/6.16M · 1.06M/s · 20 files/s · ETA 0:03"
+        "at_ms": 3941,
+        "text": "  dataset.bin                                                                                2.95M ──────────── 0% 0B/s\n  small files  128 · 29 files/s\n ━━━━━━━━━━━━━━━━────────────── 54%  129/130 files · 3.51M/6.46M · 867K/s · 30 files/s · ETA 0:03"
       },
       {
-        "at_ms": 4210,
-        "text": "  dataset.bin                                                                                2.81M ──────────── 0% 0B/s\n  small files  128 · 18 files/s\n ━━━━━━━━━━━━━━━━────────────── 54%  129/130 files · 3.35M/6.16M · 0.98M/s · 19 files/s · ETA 0:03"
+        "at_ms": 4009,
+        "text": "  dataset.bin                                                                                2.95M ──────────── 0% 0B/s\n  small files  128 · 27 files/s\n ━━━━━━━━━━━━━━━━────────────── 54%  129/130 files · 3.51M/6.46M · 810K/s · 28 files/s · ETA 0:04"
       },
       {
-        "at_ms": 4280,
-        "text": "  dataset.bin                                                                                2.81M ──────────── 0% 0B/s\n  small files  128 · 17 files/s\n ━━━━━━━━━━━━━━━━────────────── 54%  129/130 files · 3.35M/6.16M · 932K/s · 17 files/s · ETA 0:03"
+        "at_ms": 4074,
+        "text": "  dataset.bin                                                                                2.95M ──────────── 0% 0B/s\n  small files  128 · 25 files/s\n ━━━━━━━━━━━━━━━━────────────── 54%  129/130 files · 3.51M/6.46M · 756K/s · 26 files/s · ETA 0:04"
       },
       {
-        "at_ms": 4354,
-        "text": "  dataset.bin                                                                                2.81M ──────────── 0% 0B/s\n  small files  128 · 15 files/s\n ━━━━━━━━━━━━━━━━────────────── 54%  129/130 files · 3.35M/6.16M · 865K/s · 16 files/s · ETA 0:03"
+        "at_ms": 4141,
+        "text": "  dataset.bin                                                                                2.95M ──────────── 0% 0B/s\n  small files  128 · 24 files/s\n ━━━━━━━━━━━━━━━━────────────── 54%  129/130 files · 3.51M/6.46M · 705K/s · 24 files/s · ETA 0:04"
       },
       {
-        "at_ms": 4424,
-        "text": "  dataset.bin                                                                                2.81M ──────────── 0% 0B/s\n  small files  128 · 14 files/s\n ━━━━━━━━━━━━━━━━────────────── 54%  129/130 files · 3.35M/6.16M · 804K/s · 15 files/s · ETA 0:04"
+        "at_ms": 4208,
+        "text": "  dataset.bin                                                                                2.95M ──────────── 0% 0B/s\n  small files  128 · 22 files/s\n ━━━━━━━━━━━━━━━━────────────── 54%  129/130 files · 3.51M/6.46M · 658K/s · 22 files/s · ETA 0:04"
       },
       {
-        "at_ms": 4495,
-        "text": "  dataset.bin                                                                                2.81M ──────────── 0% 0B/s\n  small files  128 · 13 files/s\n ━━━━━━━━━━━━━━━━────────────── 54%  129/130 files · 3.35M/6.16M · 747K/s · 14 files/s · ETA 0:04"
+        "at_ms": 4274,
+        "text": "  dataset.bin                                                                                2.95M ──────────── 0% 0B/s\n  small files  128 · 21 files/s\n ━━━━━━━━━━━━━━━━────────────── 54%  129/130 files · 3.51M/6.46M · 615K/s · 21 files/s · ETA 0:05"
       },
       {
-        "at_ms": 4567,
-        "text": "  dataset.bin                                                                                2.81M ──────────── 0% 0B/s\n  small files  128 · 12 files/s\n ━━━━━━━━━━━━━━━━────────────── 54%  129/130 files · 3.35M/6.16M · 692K/s · 13 files/s · ETA 0:04"
+        "at_ms": 4340,
+        "text": "  dataset.bin                                                                                2.95M ──────────── 0% 0B/s\n  small files  128 · 19 files/s\n ━━━━━━━━━━━━━━━━────────────── 54%  129/130 files · 3.51M/6.46M · 574K/s · 20 files/s · ETA 0:05"
       },
       {
-        "at_ms": 4635,
-        "text": "  dataset.bin                                                                                2.81M ──────────── 0% 0B/s\n  small files  128 · 12 files/s\n ━━━━━━━━━━━━━━━━────────────── 54%  129/130 files · 3.35M/6.16M · 646K/s · 12 files/s · ETA 0:04"
+        "at_ms": 4407,
+        "text": "  dataset.bin                                                                                2.95M ──────────── 0% 0B/s\n  small files  128 · 18 files/s\n ━━━━━━━━━━━━━━━━────────────── 54%  129/130 files · 3.51M/6.46M · 536K/s · 18 files/s · ETA 0:06"
       },
       {
-        "at_ms": 4701,
-        "text": "  dataset.bin                                                                                2.81M ──────────── 0% 0B/s\n  small files  128 · 11 files/s\n ━━━━━━━━━━━━━━━━────────────── 54%  129/130 files · 3.35M/6.16M · 603K/s · 11 files/s · ETA 0:05"
+        "at_ms": 4473,
+        "text": "  dataset.bin                                                                   2.95M ━━━━──────── 35% 1.05M/s ETA 0:02\n  small files  128 · 17 files/s\n ━━━━━━━━━━━━━━━━━━━━━───────── 70%  129/130 files · 4.56M/6.46M · 1.55M/s · 17 files/s · ETA 0:01"
       },
       {
-        "at_ms": 4772,
-        "text": "  dataset.bin                                                                                2.81M ──────────── 0% 0B/s\n  small files  128 · 10 files/s\n ━━━━━━━━━━━━━━━━────────────── 54%  129/130 files · 3.35M/6.16M · 560K/s · 10 files/s · ETA 0:05"
+        "at_ms": 4539,
+        "text": "  dataset.bin                                                                    2.95M ━━━━──────── 35% 979K/s ETA 0:02\n  small files  128 · 16 files/s\n ━━━━━━━━━━━━━━━━━━━━━───────── 70%  129/130 files · 4.56M/6.46M · 1.45M/s · 16 files/s · ETA 0:01"
       },
       {
-        "at_ms": 4843,
-        "text": "  dataset.bin                                                                                2.81M ──────────── 0% 0B/s\n  small files  128 · 9 files/s\n ━━━━━━━━━━━━━━━━────────────── 54%  129/130 files · 3.35M/6.16M · 521K/s · 10 files/s · ETA 0:06"
+        "at_ms": 4606,
+        "text": "  dataset.bin                                                                    2.95M ━━━━──────── 35% 914K/s ETA 0:02\n  small files  128 · 15 files/s\n ━━━━━━━━━━━━━━━━━━━━━───────── 70%  129/130 files · 4.56M/6.46M · 1.35M/s · 15 files/s · ETA 0:01"
       },
       {
-        "at_ms": 4913,
-        "text": "  dataset.bin                                                                                2.81M ──────────── 0% 0B/s\n  small files  128 · 9 files/s\n ━━━━━━━━━━━━━━━━────────────── 54%  129/130 files · 3.35M/6.16M · 484K/s · 9 files/s · ETA 0:06"
+        "at_ms": 4672,
+        "text": "  dataset.bin                                                                    2.95M ━━━━──────── 35% 853K/s ETA 0:02\n  small files  128 · 14 files/s\n ━━━━━━━━━━━━━━━━━━━━━───────── 70%  129/130 files · 4.56M/6.46M · 1.26M/s · 14 files/s · ETA 0:02"
       },
       {
-        "at_ms": 4982,
-        "text": "  dataset.bin                                                                                2.81M ──────────── 0% 0B/s\n  small files  128 · 8 files/s\n ━━━━━━━━━━━━━━━━────────────── 54%  129/130 files · 3.35M/6.16M · 450K/s · 8 files/s · ETA 0:06"
+        "at_ms": 4739,
+        "text": "  dataset.bin                                                                    2.95M ━━━━──────── 35% 797K/s ETA 0:02\n  small files  128 · 13 files/s\n ━━━━━━━━━━━━━━━━━━━━━───────── 70%  129/130 files · 4.56M/6.46M · 1.18M/s · 13 files/s · ETA 0:02"
       },
       {
-        "at_ms": 5049,
-        "text": "  dataset.bin                                                                                2.81M ──────────── 0% 0B/s\n  small files  128 · 8 files/s\n ━━━━━━━━━━━━━━━━────────────── 54%  129/130 files · 3.35M/6.16M · 420K/s · 8 files/s · ETA 0:07"
+        "at_ms": 4805,
+        "text": "  dataset.bin                                                                    2.95M ━━━━──────── 35% 744K/s ETA 0:03\n  small files  128 · 12 files/s\n ━━━━━━━━━━━━━━━━━━━━━───────── 70%  129/130 files · 4.56M/6.46M · 1.10M/s · 12 files/s · ETA 0:02"
       },
       {
-        "at_ms": 5120,
-        "text": "  dataset.bin                                                                                2.81M ──────────── 0% 0B/s\n  small files  128 · 7 files/s\n ━━━━━━━━━━━━━━━━────────────── 54%  129/130 files · 3.35M/6.16M · 390K/s · 7 files/s · ETA 0:07"
+        "at_ms": 4871,
+        "text": "  dataset.bin                                                                    2.95M ━━━━──────── 35% 694K/s ETA 0:03\n  small files  128 · 11 files/s\n ━━━━━━━━━━━━━━━━━━━━━───────── 70%  129/130 files · 4.56M/6.46M · 1.03M/s · 11 files/s · ETA 0:02"
       },
       {
-        "at_ms": 5191,
-        "text": "  dataset.bin                                                                   2.81M ━━━━──────── 35% 1.00M/s ETA 0:02\n  small files  128 · 6 files/s\n ━━━━━━━━━━━━━━━━━━━━━───────── 70%  129/130 files · 4.35M/6.16M · 1.35M/s · 7 files/s · ETA 0:01"
+        "at_ms": 4937,
+        "text": "  dataset.bin                                                                    2.95M ━━━━──────── 35% 648K/s ETA 0:03\n  small files  128 · 10 files/s\n ━━━━━━━━━━━━━━━━━━━━━───────── 70%  129/130 files · 4.56M/6.46M · 958K/s · 11 files/s · ETA 0:02"
       },
       {
-        "at_ms": 5263,
-        "text": "  dataset.bin                                                                    2.81M ━━━━──────── 35% 951K/s ETA 0:02\n  small files  128 · 6 files/s\n ━━━━━━━━━━━━━━━━━━━━━───────── 70%  129/130 files · 4.35M/6.16M · 1.26M/s · 6 files/s · ETA 0:01"
+        "at_ms": 5004,
+        "text": "  dataset.bin                                                                    2.95M ━━━━──────── 35% 605K/s ETA 0:03\n  small files  128 · 10 files/s\n ━━━━━━━━━━━━━━━━━━━━━───────── 70%  129/130 files · 4.56M/6.46M · 894K/s · 10 files/s · ETA 0:02"
       },
       {
-        "at_ms": 5332,
-        "text": "  dataset.bin                                                                    2.81M ━━━━──────── 35% 885K/s ETA 0:02\n  small files  128 · 6 files/s\n ━━━━━━━━━━━━━━━━━━━━━───────── 70%  129/130 files · 4.35M/6.16M · 1.17M/s · 6 files/s · ETA 0:02"
+        "at_ms": 5070,
+        "text": "  dataset.bin                                                                    2.95M ━━━━──────── 35% 565K/s ETA 0:03\n  small files  128 · 9 files/s\n ━━━━━━━━━━━━━━━━━━━━━───────── 70%  129/130 files · 4.56M/6.46M · 835K/s · 9 files/s · ETA 0:02"
       },
       {
-        "at_ms": 5400,
-        "text": "  dataset.bin                                                                    2.81M ━━━━──────── 35% 825K/s ETA 0:02\n  small files  128 · 5 files/s\n ━━━━━━━━━━━━━━━━━━━━━───────── 70%  129/130 files · 4.35M/6.16M · 1.09M/s · 5 files/s · ETA 0:02"
+        "at_ms": 5137,
+        "text": "  dataset.bin                                                                    2.95M ━━━━──────── 35% 528K/s ETA 0:04\n  small files  128 · 8 files/s\n ━━━━━━━━━━━━━━━━━━━━━───────── 70%  129/130 files · 4.56M/6.46M · 780K/s · 9 files/s · ETA 0:02"
       },
       {
-        "at_ms": 5470,
-        "text": "  dataset.bin                                                                    2.81M ━━━━──────── 35% 767K/s ETA 0:02\n  small files  128 · 5 files/s\n ━━━━━━━━━━━━━━━━━━━━━───────── 70%  129/130 files · 4.35M/6.16M · 1.01M/s · 5 files/s · ETA 0:02"
+        "at_ms": 5203,
+        "text": "  dataset.bin                                                                    2.95M ━━━━──────── 35% 493K/s ETA 0:04\n  small files  128 · 8 files/s\n ━━━━━━━━━━━━━━━━━━━━━───────── 70%  129/130 files · 4.56M/6.46M · 728K/s · 8 files/s · ETA 0:03"
       },
       {
-        "at_ms": 5542,
-        "text": "  dataset.bin                                                                    2.81M ━━━━──────── 35% 712K/s ETA 0:03\n  small files  128 · 5 files/s\n ━━━━━━━━━━━━━━━━━━━━━───────── 70%  129/130 files · 4.35M/6.16M · 965K/s · 5 files/s · ETA 0:02"
+        "at_ms": 5269,
+        "text": "  dataset.bin                                                                    2.95M ━━━━──────── 35% 460K/s ETA 0:04\n  small files  128 · 7 files/s\n ━━━━━━━━━━━━━━━━━━━━━───────── 70%  129/130 files · 4.56M/6.46M · 680K/s · 7 files/s · ETA 0:03"
       },
       {
-        "at_ms": 5614,
-        "text": "  dataset.bin                                                                    2.81M ━━━━──────── 35% 661K/s ETA 0:03\n  small files  128 · 4 files/s\n ━━━━━━━━━━━━━━━━━━━━━───────── 70%  129/130 files · 4.35M/6.16M · 895K/s · 4 files/s · ETA 0:02"
+        "at_ms": 5335,
+        "text": "  dataset.bin                                                                    2.95M ━━━━──────── 35% 430K/s ETA 0:04\n  small files  128 · 7 files/s\n ━━━━━━━━━━━━━━━━━━━━━───────── 70%  129/130 files · 4.56M/6.46M · 635K/s · 7 files/s · ETA 0:03"
       },
       {
-        "at_ms": 5680,
-        "text": "  dataset.bin                                                                    2.81M ━━━━──────── 35% 617K/s ETA 0:03\n  small files  128 · 4 files/s\n ━━━━━━━━━━━━━━━━━━━━━───────── 70%  129/130 files · 4.35M/6.16M · 835K/s · 4 files/s · ETA 0:02"
+        "at_ms": 5402,
+        "text": "  dataset.bin                                                                    2.95M ━━━━──────── 35% 401K/s ETA 0:05\n  small files  128 · 6 files/s\n ━━━━━━━━━━━━━━━━━━━━━───────── 70%  129/130 files · 4.56M/6.46M · 593K/s · 7 files/s · ETA 0:03"
       },
       {
-        "at_ms": 5755,
-        "text": "  dataset.bin                                                                    2.81M ━━━━──────── 35% 573K/s ETA 0:03\n  small files  128 · 4 files/s\n ━━━━━━━━━━━━━━━━━━━━━───────── 70%  129/130 files · 4.35M/6.16M · 776K/s · 4 files/s · ETA 0:02"
+        "at_ms": 5468,
+        "text": "  dataset.bin                                                                   2.95M ━━━━━━━━╸─── 71% 1.42M/s ETA 0:01\n  small files  128 · 6 files/s\n ━━━━━━━━━━━━━━━━━━━━━━━━━━──── 86%  129/130 files · 5.61M/6.46M · 1.60M/s · 6 files/s · ETA 0:01"
       },
       {
-        "at_ms": 5823,
-        "text": "  dataset.bin                                                                    2.81M ━━━━──────── 35% 532K/s ETA 0:03\n  small files  128 · 3 files/s\n ━━━━━━━━━━━━━━━━━━━━━───────── 70%  129/130 files · 4.35M/6.16M · 720K/s · 4 files/s · ETA 0:03"
+        "at_ms": 5534,
+        "text": "  dataset.bin                                                                   2.95M ━━━━━━━━╸─── 71% 1.33M/s ETA 0:01\n  small files  128 · 6 files/s\n ━━━━━━━━━━━━━━━━━━━━━━━━━━──── 86%  129/130 files · 5.61M/6.46M · 1.50M/s · 6 files/s · ETA 0:01"
       },
       {
-        "at_ms": 5895,
-        "text": "  dataset.bin                                                                    2.81M ━━━━──────── 35% 494K/s ETA 0:04\n  small files  128 · 3 files/s\n ━━━━━━━━━━━━━━━━━━━━━───────── 70%  129/130 files · 4.35M/6.16M · 669K/s · 3 files/s · ETA 0:03"
+        "at_ms": 5600,
+        "text": "  dataset.bin                                                                   2.95M ━━━━━━━━╸─── 71% 1.24M/s ETA 0:01\n  small files  128 · 5 files/s\n ━━━━━━━━━━━━━━━━━━━━━━━━━━──── 86%  129/130 files · 5.61M/6.46M · 1.40M/s · 5 files/s · ETA 0:01"
       },
       {
-        "at_ms": 5966,
-        "text": "  dataset.bin                                                                    2.81M ━━━━──────── 35% 459K/s ETA 0:04\n  small files  128 · 3 files/s\n ━━━━━━━━━━━━━━━━━━━━━───────── 70%  129/130 files · 4.35M/6.16M · 621K/s · 3 files/s · ETA 0:03"
+        "at_ms": 5667,
+        "text": "  dataset.bin                                                                   2.95M ━━━━━━━━╸─── 71% 1.16M/s ETA 0:01\n  small files  128 · 5 files/s\n ━━━━━━━━━━━━━━━━━━━━━━━━━━──── 86%  129/130 files · 5.61M/6.46M · 1.30M/s · 5 files/s · ETA 0:01"
       },
       {
-        "at_ms": 6035,
-        "text": "  dataset.bin                                                                    2.81M ━━━━──────── 35% 427K/s ETA 0:04\n  small files  128 · 3 files/s\n ━━━━━━━━━━━━━━━━━━━━━───────── 70%  129/130 files · 4.35M/6.16M · 578K/s · 3 files/s · ETA 0:03"
+        "at_ms": 5733,
+        "text": "  dataset.bin                                                                   2.95M ━━━━━━━━╸─── 71% 1.08M/s ETA 0:01\n  small files  128 · 5 files/s\n ━━━━━━━━━━━━━━━━━━━━━━━━━━──── 86%  129/130 files · 5.61M/6.46M · 1.22M/s · 5 files/s · ETA 0:01"
       },
       {
-        "at_ms": 6106,
-        "text": "  dataset.bin                                                                    2.81M ━━━━──────── 35% 397K/s ETA 0:05\n  small files  128 · 3 files/s\n ━━━━━━━━━━━━━━━━━━━━━───────── 70%  129/130 files · 4.35M/6.16M · 537K/s · 3 files/s · ETA 0:03"
+        "at_ms": 5799,
+        "text": "  dataset.bin                                                                   2.95M ━━━━━━━━╸─── 71% 1.01M/s ETA 0:01\n  small files  128 · 4 files/s\n ━━━━━━━━━━━━━━━━━━━━━━━━━━──── 86%  129/130 files · 5.61M/6.46M · 1.14M/s · 4 files/s · ETA 0:01"
       },
       {
-        "at_ms": 6180,
-        "text": "  dataset.bin                                                                    2.81M ━━━━──────── 35% 367K/s ETA 0:05\n  small files  128 · 2 files/s\n ━━━━━━━━━━━━━━━━━━━━━───────── 70%  129/130 files · 4.35M/6.16M · 497K/s · 2 files/s · ETA 0:04"
+        "at_ms": 5866,
+        "text": "  dataset.bin                                                                    2.95M ━━━━━━━━╸─── 71% 943K/s ETA 0:01\n  small files  128 · 4 files/s\n ━━━━━━━━━━━━━━━━━━━━━━━━━━──── 86%  129/130 files · 5.61M/6.46M · 1.06M/s · 4 files/s · ETA 0:01"
       },
       {
-        "at_ms": 6249,
-        "text": "  dataset.bin                                                                    2.81M ━━━━──────── 35% 342K/s ETA 0:05\n  small files  128 · 2 files/s\n ━━━━━━━━━━━━━━━━━━━━━───────── 70%  129/130 files · 4.35M/6.16M · 463K/s · 2 files/s · ETA 0:04"
+        "at_ms": 5932,
+        "text": "  dataset.bin                                                                    2.95M ━━━━━━━━╸─── 71% 881K/s ETA 0:01\n  small files  128 · 4 files/s\n ━━━━━━━━━━━━━━━━━━━━━━━━━━──── 86%  129/130 files · 5.61M/6.46M · 991K/s · 4 files/s · ETA 0:01"
       },
       {
-        "at_ms": 6319,
-        "text": "  dataset.bin                                                                    2.81M ━━━━──────── 35% 318K/s ETA 0:06\n  small files  128 · 2 files/s\n ━━━━━━━━━━━━━━━━━━━━━───────── 70%  129/130 files · 4.35M/6.16M · 431K/s · 2 files/s · ETA 0:04"
+        "at_ms": 5998,
+        "text": "  dataset.bin                                                                    2.95M ━━━━━━━━╸─── 71% 822K/s ETA 0:01\n  small files  128 · 3 files/s\n ━━━━━━━━━━━━━━━━━━━━━━━━━━──── 86%  129/130 files · 5.61M/6.46M · 925K/s · 4 files/s · ETA 0:01"
       },
       {
-        "at_ms": 6389,
-        "text": "  dataset.bin                                                                   2.81M ━━━━━━━━╸─── 71% 1.29M/s ETA 0:01\n  small files  128 · 2 files/s\n ━━━━━━━━━━━━━━━━━━━━━━━━━━──── 86%  129/130 files · 5.35M/6.16M · 1.39M/s · 2 files/s · ETA 0:01"
+        "at_ms": 6065,
+        "text": "  dataset.bin                                                                    2.95M ━━━━━━━━╸─── 71% 768K/s ETA 0:01\n  small files  128 · 3 files/s\n ━━━━━━━━━━━━━━━━━━━━━━━━━━──── 86%  129/130 files · 5.61M/6.46M · 864K/s · 3 files/s · ETA 0:01"
       },
       {
-        "at_ms": 6461,
-        "text": "  dataset.bin                                                                   2.81M ━━━━━━━━╸─── 71% 1.20M/s ETA 0:01\n  small files  128 · 2 files/s\n ━━━━━━━━━━━━━━━━━━━━━━━━━━──── 86%  129/130 files · 5.35M/6.16M · 1.29M/s · 2 files/s · ETA 0:01"
+        "at_ms": 6131,
+        "text": "  dataset.bin                                                                    2.95M ━━━━━━━━╸─── 71% 717K/s ETA 0:01\n  small files  128 · 3 files/s\n ━━━━━━━━━━━━━━━━━━━━━━━━━━──── 86%  129/130 files · 5.61M/6.46M · 807K/s · 3 files/s · ETA 0:01"
       },
       {
-        "at_ms": 6532,
-        "text": "  dataset.bin                                                                   2.81M ━━━━━━━━╸─── 71% 1.12M/s ETA 0:01\n  small files  128 · 2 files/s\n ━━━━━━━━━━━━━━━━━━━━━━━━━━──── 86%  129/130 files · 5.35M/6.16M · 1.21M/s · 2 files/s · ETA 0:01"
+        "at_ms": 6197,
+        "text": "  dataset.bin                                                                    2.95M ━━━━━━━━╸─── 71% 669K/s ETA 0:01\n  small files  128 · 3 files/s\n ━━━━━━━━━━━━━━━━━━━━━━━━━━──── 86%  129/130 files · 5.61M/6.46M · 753K/s · 3 files/s · ETA 0:01"
       },
       {
-        "at_ms": 6603,
-        "text": "  dataset.bin                                                                   2.81M ━━━━━━━━╸─── 71% 1.03M/s ETA 0:01\n  small files  128 · 2 files/s\n ━━━━━━━━━━━━━━━━━━━━━━━━━━──── 86%  129/130 files · 5.35M/6.16M · 1.11M/s · 2 files/s · ETA 0:01"
+        "at_ms": 6263,
+        "text": "  dataset.bin                                                                    2.95M ━━━━━━━━╸─── 71% 625K/s ETA 0:01\n  small files  128 · 3 files/s\n ━━━━━━━━━━━━━━━━━━━━━━━━━━──── 86%  129/130 files · 5.61M/6.46M · 703K/s · 3 files/s · ETA 0:01"
       },
       {
-        "at_ms": 6674,
-        "text": "  dataset.bin                                                                    2.81M ━━━━━━━━╸─── 71% 983K/s ETA 0:01\n  small files  128 · 1 files/s\n ━━━━━━━━━━━━━━━━━━━━━━━━━━──── 86%  129/130 files · 5.35M/6.16M · 1.04M/s · 1 files/s · ETA 0:01"
-      },
-      {
-        "at_ms": 6742,
-        "text": "  dataset.bin                                                                    2.81M ━━━━━━━━╸─── 71% 915K/s ETA 0:01\n  small files  128 · 1 files/s\n ━━━━━━━━━━━━━━━━━━━━━━━━━━──── 86%  129/130 files · 5.35M/6.16M · 988K/s · 1 files/s · ETA 0:01"
-      },
-      {
-        "at_ms": 6810,
-        "text": "  dataset.bin                                                                    2.81M ━━━━━━━━╸─── 71% 854K/s ETA 0:01\n  small files  128 · 1 files/s\n ━━━━━━━━━━━━━━━━━━━━━━━━━━──── 86%  129/130 files · 5.35M/6.16M · 921K/s · 1 files/s · ETA 0:01"
-      },
-      {
-        "at_ms": 6878,
-        "text": "  dataset.bin                                                                    2.81M ━━━━━━━━╸─── 71% 795K/s ETA 0:01\n  small files  128 · 1 files/s\n ━━━━━━━━━━━━━━━━━━━━━━━━━━──── 86%  129/130 files · 5.35M/6.16M · 858K/s · 1 files/s · ETA 0:01"
-      },
-      {
-        "at_ms": 6945,
-        "text": "  dataset.bin                                                                    2.81M ━━━━━━━━╸─── 71% 742K/s ETA 0:01\n  small files  128 · 1 files/s\n ━━━━━━━━━━━━━━━━━━━━━━━━━━──── 86%  129/130 files · 5.35M/6.16M · 801K/s · 1 files/s · ETA 0:01"
-      },
-      {
-        "at_ms": 7016,
-        "text": "  dataset.bin                                                                    2.81M ━━━━━━━━╸─── 71% 689K/s ETA 0:01\n  small files  128 · 1 files/s\n ━━━━━━━━━━━━━━━━━━━━━━━━━━──── 86%  129/130 files · 5.35M/6.16M · 744K/s · 1 files/s · ETA 0:01"
-      },
-      {
-        "at_ms": 7085,
-        "text": "  dataset.bin                                                                    2.81M ━━━━━━━━╸─── 71% 642K/s ETA 0:01\n  small files  128 · 1 files/s\n ━━━━━━━━━━━━━━━━━━━━━━━━━━──── 86%  129/130 files · 5.35M/6.16M · 693K/s · 1 files/s · ETA 0:01"
-      },
-      {
-        "at_ms": 7152,
-        "text": "  dataset.bin                                                                    2.81M ━━━━━━━━╸─── 71% 599K/s ETA 0:01\n  small files  128 · 1 files/s\n ━━━━━━━━━━━━━━━━━━━━━━━━━━──── 86%  129/130 files · 5.35M/6.16M · 646K/s · 1 files/s · ETA 0:01"
-      },
-      {
-        "at_ms": 7219,
-        "text": "  dataset.bin                                                                    2.81M ━━━━━━━━╸─── 71% 558K/s ETA 0:01\n  small files  128 · 1 files/s\n ━━━━━━━━━━━━━━━━━━━━━━━━━━──── 86%  129/130 files · 5.35M/6.16M · 603K/s · 1 files/s · ETA 0:01"
-      },
-      {
-        "at_ms": 7290,
-        "text": "  dataset.bin                                                                    2.81M ━━━━━━━━╸─── 71% 519K/s ETA 0:02\n  small files  128 · 1 files/s\n ━━━━━━━━━━━━━━━━━━━━━━━━━━──── 86%  129/130 files · 5.35M/6.16M · 560K/s · 1 files/s · ETA 0:01"
-      },
-      {
-        "at_ms": 7339,
-        "text": " ✓ 130 files · 6.16M in 7.33s · 860K/s · 18 files/s"
+        "at_ms": 6272,
+        "text": " ✓ 130 files · 6.46M in 6.27s · 1.03M/s · 21 files/s"
       }
     ],
     "raw": "recordings/transfer.ansi",
     "transcript": "recordings/transfer.txt"
   },
   "verification": {
-    "command": "xsync -acP --no-clone ./checks-data/ ./checks-backup/",
+    "command": "xs -acP --no-clone ./checks-data/ ./checks-backup/",
     "exit_code": 0,
     "frames": [
       {
@@ -441,167 +401,187 @@
         "text": " ⠋ verifying  0 checks"
       },
       {
-        "at_ms": 71,
+        "at_ms": 65,
         "text": " ⠙ scanning  0 files"
       },
       {
-        "at_ms": 136,
+        "at_ms": 126,
         "text": " ⠹ scanning  0 files"
       },
       {
-        "at_ms": 210,
+        "at_ms": 194,
         "text": " ⠸ scanning  0 files"
       },
       {
-        "at_ms": 283,
-        "text": " ⠼ verifying  17 checks"
+        "at_ms": 260,
+        "text": " ⠼ scanning  0 files"
       },
       {
-        "at_ms": 343,
+        "at_ms": 333,
         "text": " ⠴ scanning  0 files"
       },
       {
-        "at_ms": 416,
-        "text": " ⠦ scanning  0 files"
+        "at_ms": 401,
+        "text": " ⠦ verifying  17 checks"
       },
       {
-        "at_ms": 461,
-        "text": " ✓ up to date · 15 files checked in 0.46s"
+        "at_ms": 468,
+        "text": " ⠧ verifying  20 checks"
+      },
+      {
+        "at_ms": 534,
+        "text": " ⠇ verifying  23 checks"
+      },
+      {
+        "at_ms": 600,
+        "text": " ⠏ verifying  26 checks"
+      },
+      {
+        "at_ms": 666,
+        "text": " ⠋ verifying  29 checks"
+      },
+      {
+        "at_ms": 682,
+        "text": " ✓ up to date · 15 files checked in 0.68s"
       }
     ],
     "raw": "recordings/verification.ansi",
     "transcript": "recordings/verification.txt"
   },
   "interrupted": {
-    "command": "xsync -aP --no-clone --jobs=2 --bwlimit=1M ./demo-data/ ./interrupted-backup/",
+    "command": "xs -aP --no-clone --jobs=2 --bwlimit=1M ./demo-data/ ./interrupted-backup/",
     "exit_code": 20,
     "frames": [
       {
-        "at_ms": 75,
-        "text": "  small files  92 · 1.3k files/s\n ────────────────────────────── 1%  92/130 files · 71.5K/6.16M · 0.98M/s · 1.3k files/s · ETA 0:06"
+        "at_ms": 69,
+        "text": "  small files  85 · 1.3k files/s\n ────────────────────────────── 1%  85/130 files · 67.6K/6.46M · 1.02M/s · 1.3k files/s · ETA 0:06"
       },
       {
-        "at_ms": 145,
-        "text": "  small files  128 · 1.2k files/s\n ────────────────────────────── 1%  128/130 files · 101K/6.16M · 964K/s · 1.2k files/s · ETA 0:06"
+        "at_ms": 136,
+        "text": "  small files  128 · 1.2k files/s\n ────────────────────────────── 1%  128/130 files · 103K/6.46M · 987K/s · 1.2k files/s · ETA 0:06"
       },
       {
-        "at_ms": 211,
-        "text": "  archive.tar                                                                                3.25M ──────────── 0% 0B/s\n  small files  128 · 1.2k files/s\n ────────────────────────────── 1%  128/130 files · 101K/6.16M · 900K/s · 1.2k files/s · ETA 0:07"
+        "at_ms": 202,
+        "text": "  small files  128 · 1.2k files/s\n ────────────────────────────── 1%  128/130 files · 103K/6.46M · 921K/s · 1.2k files/s · ETA 0:07"
       },
       {
-        "at_ms": 282,
-        "text": "  archive.tar                                                                                3.25M ──────────── 0% 0B/s\n  small files  128 · 1.1k files/s\n ────────────────────────────── 1%  128/130 files · 101K/6.16M · 836K/s · 1.1k files/s · ETA 0:07"
+        "at_ms": 269,
+        "text": "  archive.tar                                                                                3.41M ──────────── 0% 0B/s\n  small files  128 · 1.1k files/s\n ────────────────────────────── 1%  128/130 files · 103K/6.46M · 860K/s · 1.1k files/s · ETA 0:07"
       },
       {
-        "at_ms": 353,
-        "text": "  archive.tar                                                                                3.25M ──────────── 0% 0B/s\n  small files  128 · 999 files/s\n ────────────────────────────── 1%  128/130 files · 101K/6.16M · 777K/s · 999 files/s · ETA 0:08"
+        "at_ms": 335,
+        "text": "  archive.tar                                                                                3.41M ──────────── 0% 0B/s\n  small files  128 · 1.0k files/s\n ────────────────────────────── 1%  128/130 files · 103K/6.46M · 803K/s · 1.0k files/s · ETA 0:08"
       },
       {
-        "at_ms": 424,
-        "text": "  archive.tar                                                                                3.25M ──────────── 0% 0B/s\n  small files  128 · 928 files/s\n ────────────────────────────── 1%  128/130 files · 101K/6.16M · 722K/s · 928 files/s · ETA 0:09"
+        "at_ms": 401,
+        "text": "  archive.tar                                                                                3.41M ──────────── 0% 0B/s\n  small files  128 · 942 files/s\n ────────────────────────────── 1%  128/130 files · 103K/6.46M · 750K/s · 942 files/s · ETA 0:08"
       },
       {
-        "at_ms": 494,
-        "text": "  archive.tar                                                                                3.25M ──────────── 0% 0B/s\n  small files  128 · 863 files/s\n ────────────────────────────── 1%  128/130 files · 101K/6.16M · 672K/s · 863 files/s · ETA 0:09"
+        "at_ms": 467,
+        "text": "  archive.tar                                                                                3.41M ──────────── 0% 0B/s\n  small files  128 · 879 files/s\n ────────────────────────────── 1%  128/130 files · 103K/6.46M · 700K/s · 879 files/s · ETA 0:09"
       },
       {
-        "at_ms": 563,
-        "text": "  archive.tar                                                                                3.25M ──────────── 0% 0B/s\n  small files  128 · 803 files/s\n ────────────────────────────── 1%  128/130 files · 101K/6.16M · 625K/s · 803 files/s · ETA 0:10"
+        "at_ms": 534,
+        "text": "  archive.tar                                                                                3.41M ──────────── 0% 0B/s\n  small files  128 · 821 files/s\n ────────────────────────────── 1%  128/130 files · 103K/6.46M · 654K/s · 821 files/s · ETA 0:10"
       },
       {
-        "at_ms": 631,
-        "text": "  archive.tar                                                                                3.25M ──────────── 0% 0B/s\n  small files  128 · 748 files/s\n ────────────────────────────── 1%  128/130 files · 101K/6.16M · 582K/s · 748 files/s · ETA 0:11"
+        "at_ms": 600,
+        "text": "  archive.tar                                                                                3.41M ──────────── 0% 0B/s\n  small files  128 · 766 files/s\n ────────────────────────────── 1%  128/130 files · 103K/6.46M · 610K/s · 766 files/s · ETA 0:10"
       },
       {
-        "at_ms": 702,
-        "text": "  archive.tar                                                                                3.25M ──────────── 0% 0B/s\n  small files  128 · 695 files/s\n ────────────────────────────── 1%  128/130 files · 101K/6.16M · 541K/s · 695 files/s · ETA 0:11"
+        "at_ms": 666,
+        "text": "  archive.tar                                                                                3.41M ──────────── 0% 0B/s\n  small files  128 · 716 files/s\n ────────────────────────────── 1%  128/130 files · 103K/6.46M · 570K/s · 716 files/s · ETA 0:11"
       },
       {
-        "at_ms": 769,
-        "text": "  archive.tar                                                                                3.25M ──────────── 0% 0B/s\n  small files  128 · 649 files/s\n ────────────────────────────── 1%  128/130 files · 101K/6.16M · 505K/s · 649 files/s · ETA 0:12"
+        "at_ms": 733,
+        "text": "  archive.tar                                                                                3.41M ──────────── 0% 0B/s\n  small files  128 · 668 files/s\n ────────────────────────────── 1%  128/130 files · 103K/6.46M · 532K/s · 668 files/s · ETA 0:12"
       },
       {
-        "at_ms": 837,
-        "text": "  archive.tar                                                                                3.25M ──────────── 0% 0B/s\n  small files  128 · 604 files/s\n ────────────────────────────── 1%  128/130 files · 101K/6.16M · 470K/s · 604 files/s · ETA 0:13"
+        "at_ms": 799,
+        "text": "  archive.tar                                                                                3.41M ──────────── 0% 0B/s\n  small files  128 · 624 files/s\n ────────────────────────────── 1%  128/130 files · 103K/6.46M · 497K/s · 624 files/s · ETA 0:13"
       },
       {
-        "at_ms": 908,
-        "text": "  archive.tar                                                                                3.25M ──────────── 0% 0B/s\n  small files  128 · 561 files/s\n ────────────────────────────── 1%  128/130 files · 101K/6.16M · 437K/s · 561 files/s · ETA 0:14"
+        "at_ms": 865,
+        "text": "  archive.tar                                                                                3.41M ──────────── 0% 0B/s\n  small files  128 · 582 files/s\n ────────────────────────────── 1%  128/130 files · 103K/6.46M · 464K/s · 582 files/s · ETA 0:14"
       },
       {
-        "at_ms": 979,
-        "text": "  archive.tar                                                                                3.25M ──────────── 0% 0B/s\n  small files  128 · 522 files/s\n ────────────────────────────── 1%  128/130 files · 101K/6.16M · 406K/s · 522 files/s · ETA 0:15"
+        "at_ms": 932,
+        "text": "  archive.tar                                                                                3.41M ──────────── 0% 0B/s\n  small files  128 · 544 files/s\n ────────────────────────────── 1%  128/130 files · 103K/6.46M · 433K/s · 544 files/s · ETA 0:15"
       },
       {
-        "at_ms": 1048,
-        "text": "  archive.tar                                                                                3.25M ──────────── 0% 0B/s\n  small files  128 · 486 files/s\n ────────────────────────────── 1%  128/130 files · 101K/6.16M · 378K/s · 486 files/s · ETA 0:16"
+        "at_ms": 998,
+        "text": "  archive.tar                                                                                3.41M ──────────── 0% 0B/s\n  small files  128 · 508 files/s\n ────────────────────────────── 1%  128/130 files · 103K/6.46M · 404K/s · 508 files/s · ETA 0:16"
       },
       {
-        "at_ms": 1119,
-        "text": "  archive.tar                                                                                3.25M ──────────── 0% 0B/s\n  small files  128 · 451 files/s\n ────────────────────────────── 1%  128/130 files · 101K/6.16M · 351K/s · 451 files/s · ETA 0:18"
+        "at_ms": 1064,
+        "text": "  archive.tar                                                                                3.41M ──────────── 0% 0B/s\n  small files  128 · 474 files/s\n ────────────────────────────── 1%  128/130 files · 103K/6.46M · 378K/s · 474 files/s · ETA 0:17"
       },
       {
-        "at_ms": 1185,
-        "text": "  archive.tar                                                                                3.25M ──────────── 0% 0B/s\n  small files  128 · 421 files/s\n ────────────────────────────── 1%  128/130 files · 101K/6.16M · 328K/s · 421 files/s · ETA 0:19"
+        "at_ms": 1131,
+        "text": "  archive.tar                                                                   3.41M ━━━╸──────── 30% 1.05M/s ETA 0:02\n  small files  128 · 443 files/s\n ━━━━━───────────────────────── 17%  128/130 files · 1.15M/6.46M · 1.40M/s · 443 files/s · ETA 0:04"
       },
       {
-        "at_ms": 1256,
-        "text": "  archive.tar                                                                                3.25M ──────────── 0% 0B/s\n  small files  128 · 392 files/s\n ────────────────────────────── 1%  128/130 files · 101K/6.16M · 305K/s · 392 files/s · ETA 0:20"
+        "at_ms": 1197,
+        "text": "  archive.tar                                                                    3.41M ━━━╸──────── 30% 979K/s ETA 0:02\n  small files  128 · 413 files/s\n ━━━━━───────────────────────── 17%  128/130 files · 1.15M/6.46M · 1.31M/s · 413 files/s · ETA 0:04"
       },
       {
-        "at_ms": 1327,
-        "text": "  archive.tar                                                                   3.25M ━━━╸──────── 30% 1.00M/s ETA 0:02\n  small files  128 · 364 files/s\n ━━━━━───────────────────────── 17%  128/130 files · 1.10M/6.16M · 1.28M/s · 364 files/s · ETA 0:04"
+        "at_ms": 1263,
+        "text": "  archive.tar                                                                    3.41M ━━━╸──────── 30% 914K/s ETA 0:03\n  small files  128 · 386 files/s\n ━━━━━───────────────────────── 17%  128/130 files · 1.15M/6.46M · 1.22M/s · 386 files/s · ETA 0:04"
       },
       {
-        "at_ms": 1394,
-        "text": "  archive.tar                                                                    3.25M ━━━╸──────── 30% 955K/s ETA 0:02\n  small files  128 · 339 files/s\n ━━━━━───────────────────────── 17%  128/130 files · 1.10M/6.16M · 1.19M/s · 339 files/s · ETA 0:04"
+        "at_ms": 1330,
+        "text": "  archive.tar                                                                    3.41M ━━━╸──────── 30% 853K/s ETA 0:03\n  small files  128 · 360 files/s\n ━━━━━───────────────────────── 17%  128/130 files · 1.15M/6.46M · 1.14M/s · 360 files/s · ETA 0:05"
       },
       {
-        "at_ms": 1465,
-        "text": "  archive.tar                                                                    3.25M ━━━╸──────── 30% 887K/s ETA 0:03\n  small files  128 · 315 files/s\n ━━━━━───────────────────────── 17%  128/130 files · 1.10M/6.16M · 1.11M/s · 315 files/s · ETA 0:05"
+        "at_ms": 1396,
+        "text": "  archive.tar                                                                    3.41M ━━━╸──────── 30% 797K/s ETA 0:03\n  small files  128 · 336 files/s\n ━━━━━───────────────────────── 17%  128/130 files · 1.15M/6.46M · 1.06M/s · 336 files/s · ETA 0:05"
       },
       {
-        "at_ms": 1535,
-        "text": "  archive.tar                                                                    3.25M ━━━╸──────── 30% 825K/s ETA 0:03\n  small files  128 · 293 files/s\n ━━━━━───────────────────────── 17%  128/130 files · 1.10M/6.16M · 1.03M/s · 293 files/s · ETA 0:05"
+        "at_ms": 1462,
+        "text": "  archive.tar                                                                    3.41M ━━━╸──────── 30% 744K/s ETA 0:03\n  small files  128 · 314 files/s\n ━━━━━───────────────────────── 17%  128/130 files · 1.15M/6.46M · 994K/s · 314 files/s · ETA 0:05"
       },
       {
-        "at_ms": 1605,
-        "text": "  archive.tar                                                                    3.25M ━━━╸──────── 30% 767K/s ETA 0:03\n  small files  128 · 273 files/s\n ━━━━━───────────────────────── 17%  128/130 files · 1.10M/6.16M · 979K/s · 273 files/s · ETA 0:05"
+        "at_ms": 1528,
+        "text": "  archive.tar                                                                    3.41M ━━━╸──────── 30% 695K/s ETA 0:03\n  small files  128 · 293 files/s\n ━━━━━───────────────────────── 17%  128/130 files · 1.15M/6.46M · 928K/s · 293 files/s · ETA 0:06"
       },
       {
-        "at_ms": 1672,
-        "text": "  archive.tar                                                                    3.25M ━━━╸──────── 30% 716K/s ETA 0:03\n  small files  128 · 254 files/s\n ━━━━━───────────────────────── 17%  128/130 files · 1.10M/6.16M · 913K/s · 254 files/s · ETA 0:06"
+        "at_ms": 1595,
+        "text": "  archive.tar                                                                    3.41M ━━━╸──────── 30% 649K/s ETA 0:04\n  small files  128 · 274 files/s\n ━━━━━───────────────────────── 17%  128/130 files · 1.15M/6.46M · 867K/s · 274 files/s · ETA 0:06"
       },
       {
-        "at_ms": 1741,
-        "text": "  archive.tar                                                                    3.25M ━━━╸──────── 30% 667K/s ETA 0:03\n  small files  128 · 237 files/s\n ━━━━━───────────────────────── 17%  128/130 files · 1.10M/6.16M · 851K/s · 237 files/s · ETA 0:06"
+        "at_ms": 1661,
+        "text": "  archive.tar                                                                    3.41M ━━━╸──────── 30% 606K/s ETA 0:04\n  small files  128 · 256 files/s\n ━━━━━───────────────────────── 17%  128/130 files · 1.15M/6.46M · 809K/s · 256 files/s · ETA 0:07"
       },
       {
-        "at_ms": 1812,
-        "text": "  archive.tar                                                                    3.25M ━━━╸──────── 30% 619K/s ETA 0:04\n  small files  128 · 220 files/s\n ━━━━━───────────────────────── 17%  128/130 files · 1.10M/6.16M · 791K/s · 220 files/s · ETA 0:07"
+        "at_ms": 1727,
+        "text": "  archive.tar                                                                    3.41M ━━━╸──────── 30% 566K/s ETA 0:04\n  small files  128 · 239 files/s\n ━━━━━───────────────────────── 17%  128/130 files · 1.15M/6.46M · 756K/s · 239 files/s · ETA 0:07"
       },
       {
-        "at_ms": 1823,
-        "text": "xsync: write failed on \"./interrupted-backup/archive.tar\": Operation canceled (89)\nxsync: error summary: 1 error (showing first 1)\n  partial transfer (code 23): 1 error\n    write failed on \"./interrupted-backup/archive.tar\": Operation canceled (89)\n\nxsync error: received SIGINT, SIGTERM, or SIGHUP (code 20)"
+        "at_ms": 1794,
+        "text": "  archive.tar                                                                    3.41M ━━━╸──────── 30% 528K/s ETA 0:04\n  small files  128 · 223 files/s\n ━━━━━───────────────────────── 17%  128/130 files · 1.15M/6.46M · 706K/s · 223 files/s · ETA 0:08"
+      },
+      {
+        "at_ms": 1825,
+        "text": "xs: write failed on \"./interrupted-backup/archive.tar\": Operation canceled (125)\nxs: error summary: 1 error (showing first 1)\n  partial transfer (code 23): 1 error\n    write failed on \"./interrupted-backup/archive.tar\": Operation canceled (125)\n\nxs error: received SIGINT, SIGTERM, or SIGHUP (code 20)"
       }
     ],
     "raw": "recordings/interrupted.ansi",
     "transcript": "recordings/interrupted.txt"
   },
   "error": {
-    "command": "xsync -aP ./missing-source/ ./unused-backup/",
+    "command": "xs -aP ./missing-source/ ./unused-backup/",
     "exit_code": 23,
     "frames": [
       {
-        "at_ms": 5,
-        "text": "xsync: link_stat \"./missing-source/\" failed: No such file or directory (2)\nxsync: error summary: 1 error (showing first 1)\n  partial transfer (code 23): 1 error\n    link_stat \"./missing-source/\" failed: No such file or directory (2)\nxsync error: some files/attrs were not transferred (see previous errors) (code 23)"
+        "at_ms": 3,
+        "text": "xs: link_stat \"./missing-source/\" failed: No such file or directory (2)\nxs: error summary: 1 error (showing first 1)\n  partial transfer (code 23): 1 error\n    link_stat \"./missing-source/\" failed: No such file or directory (2)\nxs error: some files/attrs were not transferred (see previous errors) (code 23)"
       }
     ],
     "raw": "recordings/error.ansi",
     "transcript": "recordings/error.txt"
   },
   "json": {
-    "command": "xsync -a --no-clone --jobs=2 --bwlimit=2M --progress=json ./demo-data/ ./json-backup/",
+    "command": "xs -a --no-clone --jobs=2 --bwlimit=2M --progress=json ./demo-data/ ./json-backup/",
     "events": [
       {
         "type": "progress",
@@ -1772,7 +1752,7 @@
       },
       {
         "type": "progress",
-        "elapsed_ms": 71,
+        "elapsed_ms": 66,
         "files": 128,
         "files_total": 130,
         "bytes": 103120,
@@ -1787,7 +1767,7 @@
       },
       {
         "type": "progress",
-        "elapsed_ms": 140,
+        "elapsed_ms": 132,
         "files": 128,
         "files_total": 130,
         "bytes": 103120,
@@ -1802,7 +1782,7 @@
       },
       {
         "type": "progress",
-        "elapsed_ms": 208,
+        "elapsed_ms": 198,
         "files": 128,
         "files_total": 130,
         "bytes": 103120,
@@ -1817,7 +1797,7 @@
       },
       {
         "type": "progress",
-        "elapsed_ms": 279,
+        "elapsed_ms": 264,
         "files": 128,
         "files_total": 130,
         "bytes": 103120,
@@ -1832,7 +1812,7 @@
       },
       {
         "type": "progress",
-        "elapsed_ms": 348,
+        "elapsed_ms": 331,
         "files": 128,
         "files_total": 130,
         "bytes": 103120,
@@ -1847,7 +1827,7 @@
       },
       {
         "type": "progress",
-        "elapsed_ms": 419,
+        "elapsed_ms": 397,
         "files": 128,
         "files_total": 130,
         "bytes": 103120,
@@ -1862,7 +1842,7 @@
       },
       {
         "type": "progress",
-        "elapsed_ms": 490,
+        "elapsed_ms": 463,
         "files": 128,
         "files_total": 130,
         "bytes": 103120,
@@ -1877,7 +1857,7 @@
       },
       {
         "type": "progress",
-        "elapsed_ms": 560,
+        "elapsed_ms": 530,
         "files": 128,
         "files_total": 130,
         "bytes": 103120,
@@ -1892,22 +1872,7 @@
       },
       {
         "type": "progress",
-        "elapsed_ms": 631,
-        "files": 128,
-        "files_total": 130,
-        "bytes": 103120,
-        "bytes_total": 6460112,
-        "files_seen": 130,
-        "wire_bytes": 0,
-        "phase": "transferring",
-        "deleted": 0,
-        "verified": 0,
-        "scanning": false,
-        "dry_run": false
-      },
-      {
-        "type": "progress",
-        "elapsed_ms": 701,
+        "elapsed_ms": 596,
         "files": 128,
         "files_total": 130,
         "bytes": 1151696,
@@ -1922,7 +1887,7 @@
       },
       {
         "type": "progress",
-        "elapsed_ms": 771,
+        "elapsed_ms": 662,
         "files": 128,
         "files_total": 130,
         "bytes": 1151696,
@@ -1937,7 +1902,7 @@
       },
       {
         "type": "progress",
-        "elapsed_ms": 841,
+        "elapsed_ms": 729,
         "files": 128,
         "files_total": 130,
         "bytes": 1151696,
@@ -1952,7 +1917,7 @@
       },
       {
         "type": "progress",
-        "elapsed_ms": 911,
+        "elapsed_ms": 795,
         "files": 128,
         "files_total": 130,
         "bytes": 1151696,
@@ -1967,7 +1932,7 @@
       },
       {
         "type": "progress",
-        "elapsed_ms": 982,
+        "elapsed_ms": 861,
         "files": 128,
         "files_total": 130,
         "bytes": 1151696,
@@ -1982,7 +1947,7 @@
       },
       {
         "type": "progress",
-        "elapsed_ms": 1048,
+        "elapsed_ms": 927,
         "files": 128,
         "files_total": 130,
         "bytes": 1151696,
@@ -1997,7 +1962,7 @@
       },
       {
         "type": "progress",
-        "elapsed_ms": 1119,
+        "elapsed_ms": 993,
         "files": 128,
         "files_total": 130,
         "bytes": 1151696,
@@ -2012,7 +1977,7 @@
       },
       {
         "type": "progress",
-        "elapsed_ms": 1190,
+        "elapsed_ms": 1060,
         "files": 128,
         "files_total": 130,
         "bytes": 1151696,
@@ -2027,7 +1992,7 @@
       },
       {
         "type": "progress",
-        "elapsed_ms": 1261,
+        "elapsed_ms": 1126,
         "files": 128,
         "files_total": 130,
         "bytes": 2200272,
@@ -2042,7 +2007,7 @@
       },
       {
         "type": "progress",
-        "elapsed_ms": 1328,
+        "elapsed_ms": 1192,
         "files": 128,
         "files_total": 130,
         "bytes": 2200272,
@@ -2057,7 +2022,7 @@
       },
       {
         "type": "progress",
-        "elapsed_ms": 1399,
+        "elapsed_ms": 1258,
         "files": 128,
         "files_total": 130,
         "bytes": 2200272,
@@ -2072,7 +2037,7 @@
       },
       {
         "type": "progress",
-        "elapsed_ms": 1468,
+        "elapsed_ms": 1324,
         "files": 128,
         "files_total": 130,
         "bytes": 2200272,
@@ -2087,7 +2052,7 @@
       },
       {
         "type": "progress",
-        "elapsed_ms": 1539,
+        "elapsed_ms": 1390,
         "files": 128,
         "files_total": 130,
         "bytes": 2200272,
@@ -2102,7 +2067,7 @@
       },
       {
         "type": "progress",
-        "elapsed_ms": 1606,
+        "elapsed_ms": 1457,
         "files": 128,
         "files_total": 130,
         "bytes": 2200272,
@@ -2117,7 +2082,7 @@
       },
       {
         "type": "progress",
-        "elapsed_ms": 1673,
+        "elapsed_ms": 1523,
         "files": 128,
         "files_total": 130,
         "bytes": 2200272,
@@ -2132,37 +2097,7 @@
       },
       {
         "type": "progress",
-        "elapsed_ms": 1744,
-        "files": 128,
-        "files_total": 130,
-        "bytes": 2200272,
-        "bytes_total": 6460112,
-        "files_seen": 130,
-        "wire_bytes": 0,
-        "phase": "transferring",
-        "deleted": 0,
-        "verified": 0,
-        "scanning": false,
-        "dry_run": false
-      },
-      {
-        "type": "progress",
-        "elapsed_ms": 1815,
-        "files": 128,
-        "files_total": 130,
-        "bytes": 2200272,
-        "bytes_total": 6460112,
-        "files_seen": 130,
-        "wire_bytes": 0,
-        "phase": "transferring",
-        "deleted": 0,
-        "verified": 0,
-        "scanning": false,
-        "dry_run": false
-      },
-      {
-        "type": "progress",
-        "elapsed_ms": 1883,
+        "elapsed_ms": 1589,
         "files": 128,
         "files_total": 130,
         "bytes": 3248848,
@@ -2177,7 +2112,7 @@
       },
       {
         "type": "progress",
-        "elapsed_ms": 1953,
+        "elapsed_ms": 1655,
         "files": 128,
         "files_total": 130,
         "bytes": 3248848,
@@ -2201,7 +2136,7 @@
       },
       {
         "type": "progress",
-        "elapsed_ms": 2024,
+        "elapsed_ms": 1722,
         "files": 129,
         "files_total": 130,
         "bytes": 3510992,
@@ -2216,7 +2151,7 @@
       },
       {
         "type": "progress",
-        "elapsed_ms": 2090,
+        "elapsed_ms": 1788,
         "files": 129,
         "files_total": 130,
         "bytes": 3510992,
@@ -2231,7 +2166,7 @@
       },
       {
         "type": "progress",
-        "elapsed_ms": 2162,
+        "elapsed_ms": 1854,
         "files": 129,
         "files_total": 130,
         "bytes": 3510992,
@@ -2246,7 +2181,7 @@
       },
       {
         "type": "progress",
-        "elapsed_ms": 2245,
+        "elapsed_ms": 1920,
         "files": 129,
         "files_total": 130,
         "bytes": 3510992,
@@ -2261,7 +2196,7 @@
       },
       {
         "type": "progress",
-        "elapsed_ms": 2315,
+        "elapsed_ms": 1987,
         "files": 129,
         "files_total": 130,
         "bytes": 3510992,
@@ -2276,7 +2211,7 @@
       },
       {
         "type": "progress",
-        "elapsed_ms": 2386,
+        "elapsed_ms": 2053,
         "files": 129,
         "files_total": 130,
         "bytes": 3510992,
@@ -2291,7 +2226,7 @@
       },
       {
         "type": "progress",
-        "elapsed_ms": 2453,
+        "elapsed_ms": 2119,
         "files": 129,
         "files_total": 130,
         "bytes": 3510992,
@@ -2306,7 +2241,7 @@
       },
       {
         "type": "progress",
-        "elapsed_ms": 2524,
+        "elapsed_ms": 2186,
         "files": 129,
         "files_total": 130,
         "bytes": 3510992,
@@ -2321,22 +2256,7 @@
       },
       {
         "type": "progress",
-        "elapsed_ms": 2595,
-        "files": 129,
-        "files_total": 130,
-        "bytes": 3510992,
-        "bytes_total": 6460112,
-        "files_seen": 130,
-        "wire_bytes": 0,
-        "phase": "transferring",
-        "deleted": 0,
-        "verified": 0,
-        "scanning": false,
-        "dry_run": false
-      },
-      {
-        "type": "progress",
-        "elapsed_ms": 2666,
+        "elapsed_ms": 2252,
         "files": 129,
         "files_total": 130,
         "bytes": 4559568,
@@ -2351,7 +2271,7 @@
       },
       {
         "type": "progress",
-        "elapsed_ms": 2732,
+        "elapsed_ms": 2318,
         "files": 129,
         "files_total": 130,
         "bytes": 4559568,
@@ -2366,7 +2286,7 @@
       },
       {
         "type": "progress",
-        "elapsed_ms": 2802,
+        "elapsed_ms": 2384,
         "files": 129,
         "files_total": 130,
         "bytes": 4559568,
@@ -2381,7 +2301,7 @@
       },
       {
         "type": "progress",
-        "elapsed_ms": 2874,
+        "elapsed_ms": 2450,
         "files": 129,
         "files_total": 130,
         "bytes": 4559568,
@@ -2396,7 +2316,7 @@
       },
       {
         "type": "progress",
-        "elapsed_ms": 2940,
+        "elapsed_ms": 2517,
         "files": 129,
         "files_total": 130,
         "bytes": 4559568,
@@ -2411,7 +2331,7 @@
       },
       {
         "type": "progress",
-        "elapsed_ms": 3008,
+        "elapsed_ms": 2583,
         "files": 129,
         "files_total": 130,
         "bytes": 4559568,
@@ -2426,7 +2346,7 @@
       },
       {
         "type": "progress",
-        "elapsed_ms": 3079,
+        "elapsed_ms": 2649,
         "files": 129,
         "files_total": 130,
         "bytes": 4559568,
@@ -2441,7 +2361,7 @@
       },
       {
         "type": "progress",
-        "elapsed_ms": 3148,
+        "elapsed_ms": 2715,
         "files": 129,
         "files_total": 130,
         "bytes": 4559568,
@@ -2456,7 +2376,7 @@
       },
       {
         "type": "progress",
-        "elapsed_ms": 3215,
+        "elapsed_ms": 2781,
         "files": 129,
         "files_total": 130,
         "bytes": 5608144,
@@ -2471,7 +2391,7 @@
       },
       {
         "type": "progress",
-        "elapsed_ms": 3285,
+        "elapsed_ms": 2848,
         "files": 129,
         "files_total": 130,
         "bytes": 5608144,
@@ -2486,7 +2406,7 @@
       },
       {
         "type": "progress",
-        "elapsed_ms": 3354,
+        "elapsed_ms": 2914,
         "files": 129,
         "files_total": 130,
         "bytes": 5608144,
@@ -2501,7 +2421,7 @@
       },
       {
         "type": "progress",
-        "elapsed_ms": 3423,
+        "elapsed_ms": 2980,
         "files": 129,
         "files_total": 130,
         "bytes": 5608144,
@@ -2516,7 +2436,7 @@
       },
       {
         "type": "progress",
-        "elapsed_ms": 3493,
+        "elapsed_ms": 3046,
         "files": 129,
         "files_total": 130,
         "bytes": 5608144,
@@ -2531,22 +2451,7 @@
       },
       {
         "type": "progress",
-        "elapsed_ms": 3564,
-        "files": 129,
-        "files_total": 130,
-        "bytes": 5608144,
-        "bytes_total": 6460112,
-        "files_seen": 130,
-        "wire_bytes": 0,
-        "phase": "transferring",
-        "deleted": 0,
-        "verified": 0,
-        "scanning": false,
-        "dry_run": false
-      },
-      {
-        "type": "progress",
-        "elapsed_ms": 3633,
+        "elapsed_ms": 3113,
         "files": 129,
         "files_total": 130,
         "bytes": 5608144,
@@ -2570,7 +2475,7 @@
       },
       {
         "type": "complete",
-        "elapsed_ms": 3678,
+        "elapsed_ms": 3145,
         "files": 130,
         "files_total": 130,
         "bytes": 6460112,

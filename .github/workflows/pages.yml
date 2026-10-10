@@ -1,0 +1,61 @@
+# Publishes sites/xsync to GitHub Pages: https://s4njee.github.io/xsyncv4/
+# The site builds from its committed inputs, so no C++ build is needed here.
+# Pages serves the gh-pages branch (Settings → Pages → Deploy from a branch → gh-pages, / (root)).
+name: Deploy site to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+    paths: ['sites/xsync/**', '.github/workflows/pages.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: sites/xsync
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: sites/xsync/package-lock.json
+
+      - run: npm ci
+
+      - name: Check the site against its sources
+        # Fingerprints, derived inputs and the JSON schema; binary-dependent checks skip.
+        run: python3 scripts/check-docs.py --no-build
+
+      - name: Build for the /xsyncv4/ project path
+        run: |
+          python3 scripts/generate-docs.py
+          site="$RUNNER_TEMP/site"
+          mkdir -p "$site"
+          rsync -a --exclude docs dist/ "$site/"
+          SITE_BASE=/xsyncv4/ npx --no-install vitepress build docs --outDir "$site/docs"
+          touch "$site/.nojekyll"
+
+      - name: Commit the build to gh-pages
+        env:
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          pages="$RUNNER_TEMP/pages"
+          git clone --depth 1 --branch gh-pages "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "$pages"
+          rsync -a --delete --exclude .git "$RUNNER_TEMP/site/" "$pages/"
+          cd "$pages"
+          git add -A
+          if git diff --cached --quiet; then echo "Site unchanged"; exit 0; fi
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' \
+            commit -q -m "Publish site from ${GITHUB_SHA::12}"
+          git push origin gh-pages

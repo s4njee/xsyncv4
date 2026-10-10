@@ -1,522 +1,470 @@
-xsync -aP --no-clone --jobs=2 --bwlimit=1M ./demo-data/ ./backup/
+xs -aP --no-clone --jobs=2 --bwlimit=1M ./demo-data/ ./backup/
 
-[0.072s]
-  small files  85 · 1.3k files/s
- ────────────────────────────── 1%  85/130 files · 66.0K/6.16M · 982K/s · 1.3k files/s · ETA 0:06
+[0.070s]
+  small files  104 · 1.6k files/s
+ ────────────────────────────── 1%  104/130 files · 83.0K/6.46M · 1.25M/s · 1.6k files/s · ETA 0:05
 
-[0.143s]
+[0.136s]
+  small files  128 · 1.5k files/s
+ ────────────────────────────── 1%  128/130 files · 103K/6.46M · 1.19M/s · 1.5k files/s · ETA 0:05
+
+[0.203s]
+  small files  128 · 1.4k files/s
+ ────────────────────────────── 1%  128/130 files · 103K/6.46M · 1.11M/s · 1.4k files/s · ETA 0:06
+
+[0.269s]
+  archive.tar                                                                                3.41M ──────────── 0% 0B/s
+  small files  128 · 1.3k files/s
+ ────────────────────────────── 1%  128/130 files · 103K/6.46M · 1.03M/s · 1.3k files/s · ETA 0:06
+
+[0.335s]
+  archive.tar                                                                                3.41M ──────────── 0% 0B/s
   small files  128 · 1.2k files/s
- ────────────────────────────── 1%  128/130 files · 101K/6.16M · 946K/s · 1.2k files/s · ETA 0:07
+ ────────────────────────────── 1%  128/130 files · 103K/6.46M · 966K/s · 1.2k files/s · ETA 0:07
 
-[0.211s]
-  archive.tar                                                                                3.25M ──────────── 0% 0B/s
+[0.402s]
+  archive.tar                                                                                3.41M ──────────── 0% 0B/s
   small files  128 · 1.1k files/s
- ────────────────────────────── 1%  128/130 files · 101K/6.16M · 882K/s · 1.1k files/s · ETA 0:07
+ ────────────────────────────── 1%  128/130 files · 103K/6.46M · 902K/s · 1.1k files/s · ETA 0:07
 
-[0.282s]
-  archive.tar                                                                                3.25M ──────────── 0% 0B/s
+[0.468s]
+  archive.tar                                                                                3.41M ──────────── 0% 0B/s
   small files  128 · 1.1k files/s
- ────────────────────────────── 1%  128/130 files · 101K/6.16M · 819K/s · 1.1k files/s · ETA 0:08
+ ────────────────────────────── 1%  128/130 files · 103K/6.46M · 842K/s · 1.1k files/s · ETA 0:08
 
-[0.351s]
-  archive.tar                                                                                3.25M ──────────── 0% 0B/s
-  small files  128 · 980 files/s
- ────────────────────────────── 1%  128/130 files · 101K/6.16M · 763K/s · 980 files/s · ETA 0:08
+[0.534s]
+  archive.tar                                                                                3.41M ──────────── 0% 0B/s
+  small files  128 · 984 files/s
+ ────────────────────────────── 1%  128/130 files · 103K/6.46M · 786K/s · 984 files/s · ETA 0:08
 
-[0.418s]
-  archive.tar                                                                                3.25M ──────────── 0% 0B/s
-  small files  128 · 915 files/s
- ────────────────────────────── 1%  128/130 files · 101K/6.16M · 711K/s · 915 files/s · ETA 0:09
+[0.601s]
+  archive.tar                                                                                3.41M ──────────── 0% 0B/s
+  small files  128 · 919 files/s
+ ────────────────────────────── 1%  128/130 files · 103K/6.46M · 734K/s · 919 files/s · ETA 0:09
 
-[0.485s]
-  archive.tar                                                                                3.25M ──────────── 0% 0B/s
-  small files  128 · 853 files/s
- ────────────────────────────── 1%  128/130 files · 101K/6.16M · 664K/s · 853 files/s · ETA 0:09
+[0.667s]
+  archive.tar                                                                                3.41M ──────────── 0% 0B/s
+  small files  128 · 858 files/s
+ ────────────────────────────── 1%  128/130 files · 103K/6.46M · 685K/s · 858 files/s · ETA 0:09
 
-[0.554s]
-  archive.tar                                                                                3.25M ──────────── 0% 0B/s
-  small files  128 · 794 files/s
- ────────────────────────────── 1%  128/130 files · 101K/6.16M · 618K/s · 794 files/s · ETA 0:10
+[0.733s]
+  archive.tar                                                                                3.41M ──────────── 0% 0B/s
+  small files  128 · 801 files/s
+ ────────────────────────────── 1%  128/130 files · 103K/6.46M · 640K/s · 801 files/s · ETA 0:10
 
-[0.623s]
-  archive.tar                                                                                3.25M ──────────── 0% 0B/s
-  small files  128 · 740 files/s
- ────────────────────────────── 1%  128/130 files · 101K/6.16M · 575K/s · 740 files/s · ETA 0:11
+[0.799s]
+  archive.tar                                                                                3.41M ──────────── 0% 0B/s
+  small files  128 · 748 files/s
+ ────────────────────────────── 1%  128/130 files · 103K/6.46M · 597K/s · 748 files/s · ETA 0:11
 
-[0.694s]
-  archive.tar                                                                                3.25M ──────────── 0% 0B/s
-  small files  128 · 688 files/s
- ────────────────────────────── 1%  128/130 files · 101K/6.16M · 535K/s · 688 files/s · ETA 0:12
+[0.866s]
+  archive.tar                                                                                3.41M ──────────── 0% 0B/s
+  small files  128 · 699 files/s
+ ────────────────────────────── 1%  128/130 files · 103K/6.46M · 558K/s · 699 files/s · ETA 0:11
 
-[0.761s]
-  archive.tar                                                                                3.25M ──────────── 0% 0B/s
-  small files  128 · 642 files/s
- ────────────────────────────── 1%  128/130 files · 101K/6.16M · 499K/s · 642 files/s · ETA 0:12
+[0.932s]
+  archive.tar                                                                                3.41M ──────────── 0% 0B/s
+  small files  128 · 652 files/s
+ ────────────────────────────── 1%  128/130 files · 103K/6.46M · 521K/s · 652 files/s · ETA 0:12
 
-[0.831s]
-  archive.tar                                                                                3.25M ──────────── 0% 0B/s
-  small files  128 · 596 files/s
- ────────────────────────────── 1%  128/130 files · 101K/6.16M · 464K/s · 596 files/s · ETA 0:13
+[0.998s]
+  archive.tar                                                                                3.41M ──────────── 0% 0B/s
+  small files  128 · 609 files/s
+ ────────────────────────────── 1%  128/130 files · 103K/6.46M · 486K/s · 609 files/s · ETA 0:13
 
-[0.902s]
-  archive.tar                                                                                3.25M ──────────── 0% 0B/s
-  small files  128 · 554 files/s
- ────────────────────────────── 1%  128/130 files · 101K/6.16M · 431K/s · 554 files/s · ETA 0:14
+[1.064s]
+  archive.tar                                                                                3.41M ──────────── 0% 0B/s
+  small files  128 · 569 files/s
+ ────────────────────────────── 1%  128/130 files · 103K/6.46M · 454K/s · 569 files/s · ETA 0:14
 
-[0.973s]
-  archive.tar                                                                                3.25M ──────────── 0% 0B/s
-  small files  128 · 515 files/s
- ────────────────────────────── 1%  128/130 files · 101K/6.16M · 400K/s · 515 files/s · ETA 0:16
+[1.131s]
+  archive.tar                                                                   3.41M ━━━╸──────── 30% 1.05M/s ETA 0:02
+  small files  128 · 531 files/s
+ ━━━━━───────────────────────── 17%  128/130 files · 1.15M/6.46M · 1.47M/s · 531 files/s · ETA 0:04
 
-[1.043s]
-  archive.tar                                                                                3.25M ──────────── 0% 0B/s
-  small files  128 · 479 files/s
- ────────────────────────────── 1%  128/130 files · 101K/6.16M · 372K/s · 479 files/s · ETA 0:17
+[1.197s]
+  archive.tar                                                                    3.41M ━━━╸──────── 30% 979K/s ETA 0:02
+  small files  128 · 496 files/s
+ ━━━━━───────────────────────── 17%  128/130 files · 1.15M/6.46M · 1.37M/s · 496 files/s · ETA 0:04
 
-[1.111s]
-  archive.tar                                                                                3.25M ──────────── 0% 0B/s
-  small files  128 · 446 files/s
- ────────────────────────────── 1%  128/130 files · 101K/6.16M · 347K/s · 446 files/s · ETA 0:18
+[1.263s]
+  archive.tar                                                                    3.41M ━━━╸──────── 30% 914K/s ETA 0:03
+  small files  128 · 463 files/s
+ ━━━━━───────────────────────── 17%  128/130 files · 1.15M/6.46M · 1.28M/s · 463 files/s · ETA 0:04
 
-[1.179s]
-  archive.tar                                                                                3.25M ──────────── 0% 0B/s
-  small files  128 · 416 files/s
- ────────────────────────────── 1%  128/130 files · 101K/6.16M · 323K/s · 416 files/s · ETA 0:19
+[1.330s]
+  archive.tar                                                                    3.41M ━━━╸──────── 30% 854K/s ETA 0:03
+  small files  128 · 432 files/s
+ ━━━━━───────────────────────── 17%  128/130 files · 1.15M/6.46M · 1.20M/s · 432 files/s · ETA 0:04
 
-[1.246s]
-  archive.tar                                                                                3.25M ──────────── 0% 0B/s
-  small files  128 · 388 files/s
- ────────────────────────────── 1%  128/130 files · 101K/6.16M · 302K/s · 388 files/s · ETA 0:21
+[1.396s]
+  archive.tar                                                                    3.41M ━━━╸──────── 30% 797K/s ETA 0:03
+  small files  128 · 404 files/s
+ ━━━━━───────────────────────── 17%  128/130 files · 1.15M/6.46M · 1.12M/s · 404 files/s · ETA 0:05
 
-[1.314s]
-  archive.tar                                                                   3.25M ━━━╸──────── 30% 1.00M/s ETA 0:02
-  small files  128 · 362 files/s
- ━━━━━───────────────────────── 17%  128/130 files · 1.10M/6.16M · 1.27M/s · 362 files/s · ETA 0:04
+[1.463s]
+  archive.tar                                                                    3.41M ━━━╸──────── 30% 744K/s ETA 0:03
+  small files  128 · 377 files/s
+ ━━━━━───────────────────────── 17%  128/130 files · 1.15M/6.46M · 1.04M/s · 377 files/s · ETA 0:05
 
-[1.385s]
-  archive.tar                                                                    3.25M ━━━╸──────── 30% 952K/s ETA 0:02
-  small files  128 · 336 files/s
- ━━━━━───────────────────────── 17%  128/130 files · 1.10M/6.16M · 1.18M/s · 336 files/s · ETA 0:04
+[1.529s]
+  archive.tar                                                                    3.41M ━━━╸──────── 30% 695K/s ETA 0:03
+  small files  128 · 352 files/s
+ ━━━━━───────────────────────── 17%  128/130 files · 1.15M/6.46M · 976K/s · 352 files/s · ETA 0:05
 
-[1.456s]
-  archive.tar                                                                    3.25M ━━━╸──────── 30% 884K/s ETA 0:03
-  small files  128 · 312 files/s
- ━━━━━───────────────────────── 17%  128/130 files · 1.10M/6.16M · 1.10M/s · 312 files/s · ETA 0:05
+[1.595s]
+  archive.tar                                                                    3.41M ━━━╸──────── 30% 649K/s ETA 0:04
+  small files  128 · 329 files/s
+ ━━━━━───────────────────────── 17%  128/130 files · 1.15M/6.46M · 911K/s · 329 files/s · ETA 0:06
 
-[1.526s]
-  archive.tar                                                                    3.25M ━━━╸──────── 30% 822K/s ETA 0:03
-  small files  128 · 290 files/s
- ━━━━━───────────────────────── 17%  128/130 files · 1.10M/6.16M · 1.02M/s · 290 files/s · ETA 0:05
+[1.661s]
+  archive.tar                                                                    3.41M ━━━╸──────── 30% 606K/s ETA 0:04
+  small files  128 · 307 files/s
+ ━━━━━───────────────────────── 17%  128/130 files · 1.15M/6.46M · 851K/s · 307 files/s · ETA 0:06
 
-[1.597s]
-  archive.tar                                                                    3.25M ━━━╸──────── 30% 763K/s ETA 0:03
-  small files  128 · 270 files/s
- ━━━━━───────────────────────── 17%  128/130 files · 1.10M/6.16M · 973K/s · 270 files/s · ETA 0:05
+[1.727s]
+  archive.tar                                                                    3.41M ━━━╸──────── 30% 566K/s ETA 0:04
+  small files  128 · 286 files/s
+ ━━━━━───────────────────────── 17%  128/130 files · 1.15M/6.46M · 794K/s · 286 files/s · ETA 0:07
 
-[1.669s]
-  archive.tar                                                                    3.25M ━━━╸──────── 30% 708K/s ETA 0:03
+[1.794s]
+  archive.tar                                                                    3.41M ━━━╸──────── 30% 528K/s ETA 0:04
+  small files  128 · 267 files/s
+ ━━━━━───────────────────────── 17%  128/130 files · 1.15M/6.46M · 742K/s · 267 files/s · ETA 0:07
+
+[1.860s]
+  archive.tar                                                                    3.41M ━━━╸──────── 30% 493K/s ETA 0:05
   small files  128 · 250 files/s
- ━━━━━───────────────────────── 17%  128/130 files · 1.10M/6.16M · 903K/s · 250 files/s · ETA 0:06
+ ━━━━━───────────────────────── 17%  128/130 files · 1.15M/6.46M · 692K/s · 250 files/s · ETA 0:08
 
-[1.739s]
-  archive.tar                                                                    3.25M ━━━╸──────── 30% 659K/s ETA 0:03
+[1.926s]
+  archive.tar                                                                    3.41M ━━━╸──────── 30% 460K/s ETA 0:05
   small files  128 · 233 files/s
- ━━━━━───────────────────────── 17%  128/130 files · 1.10M/6.16M · 840K/s · 233 files/s · ETA 0:06
+ ━━━━━───────────────────────── 17%  128/130 files · 1.15M/6.46M · 647K/s · 233 files/s · ETA 0:08
 
-[1.809s]
-  archive.tar                                                                    3.25M ━━━╸──────── 30% 613K/s ETA 0:04
-  small files  128 · 216 files/s
- ━━━━━───────────────────────── 17%  128/130 files · 1.10M/6.16M · 781K/s · 216 files/s · ETA 0:07
+[1.993s]
+  archive.tar                                                                    3.41M ━━━╸──────── 30% 430K/s ETA 0:05
+  small files  128 · 218 files/s
+ ━━━━━───────────────────────── 17%  128/130 files · 1.15M/6.46M · 604K/s · 218 files/s · ETA 0:09
 
-[1.888s]
-  archive.tar                                                                    3.25M ━━━╸──────── 30% 565K/s ETA 0:04
-  small files  128 · 200 files/s
- ━━━━━───────────────────────── 17%  128/130 files · 1.10M/6.16M · 720K/s · 200 files/s · ETA 0:07
+[2.059s]
+  archive.tar                                                                    3.41M ━━━╸──────── 30% 401K/s ETA 0:06
+  small files  128 · 203 files/s
+ ━━━━━───────────────────────── 17%  128/130 files · 1.15M/6.46M · 564K/s · 203 files/s · ETA 0:09
 
-[1.954s]
-  archive.tar                                                                    3.25M ━━━╸──────── 30% 527K/s ETA 0:04
-  small files  128 · 186 files/s
- ━━━━━───────────────────────── 17%  128/130 files · 1.10M/6.16M · 672K/s · 186 files/s · ETA 0:08
+[2.125s]
+  archive.tar                                                                   3.41M ━━━━━━━───── 61% 1.42M/s ETA 0:01
+  small files  128 · 190 files/s
+ ━━━━━━━━━━──────────────────── 34%  128/130 files · 2.20M/6.46M · 1.57M/s · 190 files/s · ETA 0:03
 
-[2.025s]
-  archive.tar                                                                    3.25M ━━━╸──────── 30% 490K/s ETA 0:05
-  small files  128 · 173 files/s
- ━━━━━───────────────────────── 17%  128/130 files · 1.10M/6.16M · 624K/s · 173 files/s · ETA 0:08
+[2.192s]
+  archive.tar                                                                   3.41M ━━━━━━━───── 61% 1.33M/s ETA 0:01
+  small files  128 · 177 files/s
+ ━━━━━━━━━━──────────────────── 34%  128/130 files · 2.20M/6.46M · 1.47M/s · 177 files/s · ETA 0:03
 
-[2.096s]
-  archive.tar                                                                    3.25M ━━━╸──────── 30% 455K/s ETA 0:05
-  small files  128 · 161 files/s
- ━━━━━───────────────────────── 17%  128/130 files · 1.10M/6.16M · 580K/s · 161 files/s · ETA 0:09
+[2.258s]
+  archive.tar                                                                   3.41M ━━━━━━━───── 61% 1.24M/s ETA 0:01
+  small files  128 · 165 files/s
+ ━━━━━━━━━━──────────────────── 34%  128/130 files · 2.20M/6.46M · 1.37M/s · 165 files/s · ETA 0:03
 
-[2.164s]
-  archive.tar                                                                    3.25M ━━━╸──────── 30% 424K/s ETA 0:05
-  small files  128 · 150 files/s
- ━━━━━───────────────────────── 17%  128/130 files · 1.10M/6.16M · 541K/s · 150 files/s · ETA 0:10
+[2.324s]
+  archive.tar                                                                   3.41M ━━━━━━━───── 61% 1.16M/s ETA 0:01
+  small files  128 · 154 files/s
+ ━━━━━━━━━━──────────────────── 34%  128/130 files · 2.20M/6.46M · 1.28M/s · 154 files/s · ETA 0:03
 
-[2.237s]
-  archive.tar                                                                    3.25M ━━━╸──────── 30% 394K/s ETA 0:06
-  small files  128 · 139 files/s
- ━━━━━───────────────────────── 17%  128/130 files · 1.10M/6.16M · 502K/s · 139 files/s · ETA 0:10
+[2.391s]
+  archive.tar                                                                   3.41M ━━━━━━━───── 61% 1.08M/s ETA 0:01
+  small files  128 · 144 files/s
+ ━━━━━━━━━━──────────────────── 34%  128/130 files · 2.20M/6.46M · 1.20M/s · 144 files/s · ETA 0:04
 
-[2.303s]
-  archive.tar                                                                    3.25M ━━━╸──────── 30% 367K/s ETA 0:06
-  small files  128 · 130 files/s
- ━━━━━───────────────────────── 17%  128/130 files · 1.10M/6.16M · 468K/s · 130 files/s · ETA 0:11
+[2.457s]
+  archive.tar                                                                   3.41M ━━━━━━━───── 61% 1.01M/s ETA 0:01
+  small files  128 · 135 files/s
+ ━━━━━━━━━━──────────────────── 34%  128/130 files · 2.20M/6.46M · 1.12M/s · 135 files/s · ETA 0:04
 
-[2.372s]
-  archive.tar                                                                    3.25M ━━━╸──────── 30% 342K/s ETA 0:07
-  small files  128 · 121 files/s
- ━━━━━───────────────────────── 17%  128/130 files · 1.10M/6.16M · 436K/s · 121 files/s · ETA 0:12
+[2.523s]
+  archive.tar                                                                    3.41M ━━━━━━━───── 61% 943K/s ETA 0:01
+  small files  128 · 126 files/s
+ ━━━━━━━━━━──────────────────── 34%  128/130 files · 2.20M/6.46M · 1.04M/s · 126 files/s · ETA 0:04
 
-[2.446s]
-  archive.tar                                                                   3.25M ━━━━━━━───── 61% 1.31M/s ETA 0:01
-  small files  128 · 112 files/s
- ━━━━━━━━━━──────────────────── 34%  128/130 files · 2.10M/6.16M · 1.40M/s · 112 files/s · ETA 0:03
+[2.589s]
+  archive.tar                                                                    3.41M ━━━━━━━───── 61% 881K/s ETA 0:01
+  small files  128 · 117 files/s
+ ━━━━━━━━━━──────────────────── 34%  128/130 files · 2.20M/6.46M · 974K/s · 117 files/s · ETA 0:04
 
-[2.515s]
-  archive.tar                                                                   3.25M ━━━━━━━───── 61% 1.22M/s ETA 0:01
-  small files  128 · 104 files/s
- ━━━━━━━━━━──────────────────── 34%  128/130 files · 2.10M/6.16M · 1.29M/s · 104 files/s · ETA 0:03
+[2.656s]
+  archive.tar                                                                    3.41M ━━━━━━━───── 61% 822K/s ETA 0:02
+  small files  128 · 110 files/s
+ ━━━━━━━━━━──────────────────── 34%  128/130 files · 2.20M/6.46M · 910K/s · 110 files/s · ETA 0:05
 
-[2.588s]
-  archive.tar                                                                   3.25M ━━━━━━━───── 61% 1.13M/s ETA 0:01
+[2.722s]
+  archive.tar                                                                    3.41M ━━━━━━━───── 61% 768K/s ETA 0:02
+  small files  128 · 102 files/s
+ ━━━━━━━━━━──────────────────── 34%  128/130 files · 2.20M/6.46M · 849K/s · 102 files/s · ETA 0:05
+
+[2.788s]
+  archive.tar                                                                    3.41M ━━━━━━━───── 61% 717K/s ETA 0:02
   small files  128 · 96 files/s
- ━━━━━━━━━━──────────────────── 34%  128/130 files · 2.10M/6.16M · 1.20M/s · 96 files/s · ETA 0:03
+ ━━━━━━━━━━──────────────────── 34%  128/130 files · 2.20M/6.46M · 793K/s · 96 files/s · ETA 0:05
 
-[2.659s]
-  archive.tar                                                                   3.25M ━━━━━━━───── 61% 1.05M/s ETA 0:01
-  small files  128 · 90 files/s
- ━━━━━━━━━━──────────────────── 34%  128/130 files · 2.10M/6.16M · 1.12M/s · 90 files/s · ETA 0:04
+[2.855s]
+  archive.tar                                                                    3.41M ━━━━━━━───── 61% 669K/s ETA 0:02
+  small files  128 · 89 files/s
+ ━━━━━━━━━━──────────────────── 34%  128/130 files · 2.20M/6.46M · 741K/s · 89 files/s · ETA 0:06
 
-[2.730s]
-  archive.tar                                                                    3.25M ━━━━━━━───── 61% 996K/s ETA 0:01
+[2.921s]
+  archive.tar                                                                    3.41M ━━━━━━━───── 61% 625K/s ETA 0:02
   small files  128 · 83 files/s
- ━━━━━━━━━━──────────────────── 34%  128/130 files · 2.10M/6.16M · 1.04M/s · 83 files/s · ETA 0:04
+ ━━━━━━━━━━──────────────────── 34%  128/130 files · 2.20M/6.46M · 691K/s · 83 files/s · ETA 0:06
 
-[2.796s]
-  archive.tar                                                                    3.25M ━━━━━━━───── 61% 930K/s ETA 0:01
+[2.987s]
+  archive.tar                                                                    3.41M ━━━━━━━───── 61% 583K/s ETA 0:02
   small files  128 · 78 files/s
- ━━━━━━━━━━──────────────────── 34%  128/130 files · 2.10M/6.16M · 990K/s · 78 files/s · ETA 0:04
+ ━━━━━━━━━━──────────────────── 34%  128/130 files · 2.20M/6.46M · 646K/s · 78 files/s · ETA 0:07
 
-[2.868s]
-  archive.tar                                                                    3.25M ━━━━━━━───── 61% 864K/s ETA 0:01
-  small files  128 · 72 files/s
- ━━━━━━━━━━──────────────────── 34%  128/130 files · 2.10M/6.16M · 920K/s · 72 files/s · ETA 0:05
+[3.054s]
+  archive.tar                                                                    3.41M ━━━━━━━───── 61% 545K/s ETA 0:02
+  small files  128 · 73 files/s
+ ━━━━━━━━━━──────────────────── 34%  128/130 files · 2.20M/6.46M · 603K/s · 73 files/s · ETA 0:07
 
-[2.939s]
-  archive.tar                                                                    3.25M ━━━━━━━───── 61% 802K/s ETA 0:02
-  small files  128 · 67 files/s
- ━━━━━━━━━━──────────────────── 34%  128/130 files · 2.10M/6.16M · 854K/s · 67 files/s · ETA 0:05
+[3.120s]
+  archive.tar                                                                    3.41M ━━━━━━━───── 61% 509K/s ETA 0:03
+  small files  128 · 68 files/s
+ ━━━━━━━━━━──────────────────── 34%  128/130 files · 2.20M/6.46M · 563K/s · 68 files/s · ETA 0:08
 
-[3.012s]
-  archive.tar                                                                    3.25M ━━━━━━━───── 61% 744K/s ETA 0:02
-  small files  128 · 62 files/s
- ━━━━━━━━━━──────────────────── 34%  128/130 files · 2.10M/6.16M · 793K/s · 62 files/s · ETA 0:05
+[3.186s]
+  archive.tar                                                                   3.41M ━━━━━━━━━━━─ 92% 1.52M/s ETA 0:00
+  small files  128 · 63 files/s
+ ━━━━━━━━━━━━━━━─────────────── 50%  128/130 files · 3.25M/6.46M · 1.57M/s · 63 files/s · ETA 0:02
 
-[3.080s]
-  archive.tar                                                                    3.25M ━━━━━━━───── 61% 694K/s ETA 0:02
-  small files  128 · 58 files/s
- ━━━━━━━━━━──────────────────── 34%  128/130 files · 2.10M/6.16M · 739K/s · 58 files/s · ETA 0:06
+[3.254s]
+  archive.tar                                                                   3.41M ━━━━━━━━━━━─ 92% 1.42M/s ETA 0:00
+  small files  128 · 59 files/s
+ ━━━━━━━━━━━━━━━─────────────── 50%  128/130 files · 3.25M/6.46M · 1.47M/s · 59 files/s · ETA 0:02
 
-[3.148s]
-  archive.tar                                                                    3.25M ━━━━━━━───── 61% 646K/s ETA 0:02
-  small files  128 · 54 files/s
- ━━━━━━━━━━──────────────────── 34%  128/130 files · 2.10M/6.16M · 688K/s · 54 files/s · ETA 0:06
+[3.320s]
+  archive.tar                                                                   3.41M ━━━━━━━━━━━─ 92% 1.33M/s ETA 0:00
+  small files  128 · 55 files/s
+ ━━━━━━━━━━━━━━━─────────────── 50%  128/130 files · 3.25M/6.46M · 1.37M/s · 55 files/s · ETA 0:02
 
-[3.217s]
-  archive.tar                                                                    3.25M ━━━━━━━───── 61% 601K/s ETA 0:02
-  small files  128 · 50 files/s
- ━━━━━━━━━━──────────────────── 34%  128/130 files · 2.10M/6.16M · 640K/s · 50 files/s · ETA 0:06
+[3.387s]
+  small files  128 · 51 files/s
+ ━━━━━━━━━━━━━━━━────────────── 54%  129/130 files · 3.51M/6.46M · 1.54M/s · 52 files/s · ETA 0:02
 
-[3.287s]
-  archive.tar                                                                    3.25M ━━━━━━━───── 61% 559K/s ETA 0:02
-  small files  128 · 47 files/s
- ━━━━━━━━━━──────────────────── 34%  128/130 files · 2.10M/6.16M · 596K/s · 47 files/s · ETA 0:07
+[3.453s]
+  small files  128 · 48 files/s
+ ━━━━━━━━━━━━━━━━────────────── 54%  129/130 files · 3.51M/6.46M · 1.44M/s · 49 files/s · ETA 0:02
 
-[3.359s]
-  archive.tar                                                                    3.25M ━━━━━━━───── 61% 519K/s ETA 0:02
-  small files  128 · 43 files/s
- ━━━━━━━━━━──────────────────── 34%  128/130 files · 2.10M/6.16M · 553K/s · 43 files/s · ETA 0:08
+[3.519s]
+  small files  128 · 45 files/s
+ ━━━━━━━━━━━━━━━━────────────── 54%  129/130 files · 3.51M/6.46M · 1.34M/s · 46 files/s · ETA 0:02
 
-[3.427s]
-  archive.tar                                                                    3.25M ━━━━━━━───── 61% 484K/s ETA 0:03
-  small files  128 · 40 files/s
- ━━━━━━━━━━──────────────────── 34%  128/130 files · 2.10M/6.16M · 515K/s · 40 files/s · ETA 0:08
+[3.610s]
+  dataset.bin                                                                                2.95M ──────────── 0% 0B/s
+  small files  128 · 41 files/s
+ ━━━━━━━━━━━━━━━━────────────── 54%  129/130 files · 3.51M/6.46M · 1.22M/s · 42 files/s · ETA 0:02
 
-[3.498s]
-  archive.tar                                                                    3.25M ━━━━━━━───── 61% 449K/s ETA 0:03
+[3.676s]
+  dataset.bin                                                                                2.95M ──────────── 0% 0B/s
   small files  128 · 38 files/s
- ━━━━━━━━━━──────────────────── 34%  128/130 files · 2.10M/6.16M · 478K/s · 38 files/s · ETA 0:09
+ ━━━━━━━━━━━━━━━━────────────── 54%  129/130 files · 3.51M/6.46M · 1.14M/s · 39 files/s · ETA 0:03
 
-[3.573s]
-  archive.tar                                                                    3.25M ━━━━━━━───── 61% 416K/s ETA 0:03
-  small files  128 · 35 files/s
- ━━━━━━━━━━──────────────────── 34%  128/130 files · 2.10M/6.16M · 443K/s · 35 files/s · ETA 0:09
+[3.742s]
+  dataset.bin                                                                                2.95M ──────────── 0% 0B/s
+  small files  128 · 36 files/s
+ ━━━━━━━━━━━━━━━━────────────── 54%  129/130 files · 3.51M/6.46M · 1.07M/s · 36 files/s · ETA 0:03
 
-[3.647s]
-  archive.tar                                                                   3.25M ━━━━━━━━━━━─ 92% 1.38M/s ETA 0:00
-  small files  128 · 32 files/s
- ━━━━━━━━━━━━━━━─────────────── 50%  128/130 files · 3.10M/6.16M · 1.40M/s · 32 files/s · ETA 0:02
+[3.809s]
+  dataset.bin                                                                                2.95M ──────────── 0% 0B/s
+  small files  128 · 33 files/s
+ ━━━━━━━━━━━━━━━━────────────── 54%  129/130 files · 3.51M/6.46M · 995K/s · 34 files/s · ETA 0:03
 
-[3.718s]
-  archive.tar                                                                   3.25M ━━━━━━━━━━━─ 92% 1.27M/s ETA 0:00
-  small files  128 · 30 files/s
- ━━━━━━━━━━━━━━━─────────────── 50%  128/130 files · 3.10M/6.16M · 1.30M/s · 30 files/s · ETA 0:02
+[3.875s]
+  dataset.bin                                                                                2.95M ──────────── 0% 0B/s
+  small files  128 · 31 files/s
+ ━━━━━━━━━━━━━━━━────────────── 54%  129/130 files · 3.51M/6.46M · 929K/s · 32 files/s · ETA 0:03
 
-[3.789s]
-  archive.tar                                                                   3.25M ━━━━━━━━━━━─ 92% 1.18M/s ETA 0:00
-  small files  128 · 28 files/s
- ━━━━━━━━━━━━━━━─────────────── 50%  128/130 files · 3.10M/6.16M · 1.20M/s · 28 files/s · ETA 0:03
+[3.941s]
+  dataset.bin                                                                                2.95M ──────────── 0% 0B/s
+  small files  128 · 29 files/s
+ ━━━━━━━━━━━━━━━━────────────── 54%  129/130 files · 3.51M/6.46M · 867K/s · 30 files/s · ETA 0:03
 
-[3.860s]
-  archive.tar                                                                   3.25M ━━━━━━━━━━━─ 92% 1.10M/s ETA 0:00
-  small files  128 · 26 files/s
- ━━━━━━━━━━━━━━━─────────────── 50%  128/130 files · 3.10M/6.16M · 1.12M/s · 26 files/s · ETA 0:03
+[4.009s]
+  dataset.bin                                                                                2.95M ──────────── 0% 0B/s
+  small files  128 · 27 files/s
+ ━━━━━━━━━━━━━━━━────────────── 54%  129/130 files · 3.51M/6.46M · 810K/s · 28 files/s · ETA 0:04
 
-[3.931s]
-  archive.tar                                                                   3.25M ━━━━━━━━━━━─ 92% 1.02M/s ETA 0:00
+[4.074s]
+  dataset.bin                                                                                2.95M ──────────── 0% 0B/s
+  small files  128 · 25 files/s
+ ━━━━━━━━━━━━━━━━────────────── 54%  129/130 files · 3.51M/6.46M · 756K/s · 26 files/s · ETA 0:04
+
+[4.141s]
+  dataset.bin                                                                                2.95M ──────────── 0% 0B/s
   small files  128 · 24 files/s
- ━━━━━━━━━━━━━━━─────────────── 50%  128/130 files · 3.10M/6.16M · 1.04M/s · 24 files/s · ETA 0:03
+ ━━━━━━━━━━━━━━━━────────────── 54%  129/130 files · 3.51M/6.46M · 705K/s · 24 files/s · ETA 0:04
 
-[4.002s]
+[4.208s]
+  dataset.bin                                                                                2.95M ──────────── 0% 0B/s
   small files  128 · 22 files/s
- ━━━━━━━━━━━━━━━━────────────── 54%  129/130 files · 3.35M/6.16M · 1.22M/s · 23 files/s · ETA 0:02
+ ━━━━━━━━━━━━━━━━────────────── 54%  129/130 files · 3.51M/6.46M · 658K/s · 22 files/s · ETA 0:04
 
-[4.068s]
+[4.274s]
+  dataset.bin                                                                                2.95M ──────────── 0% 0B/s
   small files  128 · 21 files/s
- ━━━━━━━━━━━━━━━━────────────── 54%  129/130 files · 3.35M/6.16M · 1.14M/s · 22 files/s · ETA 0:02
+ ━━━━━━━━━━━━━━━━────────────── 54%  129/130 files · 3.51M/6.46M · 615K/s · 21 files/s · ETA 0:05
 
-[4.139s]
-  dataset.bin                                                                                2.81M ──────────── 0% 0B/s
+[4.340s]
+  dataset.bin                                                                                2.95M ──────────── 0% 0B/s
   small files  128 · 19 files/s
- ━━━━━━━━━━━━━━━━────────────── 54%  129/130 files · 3.35M/6.16M · 1.06M/s · 20 files/s · ETA 0:03
+ ━━━━━━━━━━━━━━━━────────────── 54%  129/130 files · 3.51M/6.46M · 574K/s · 20 files/s · ETA 0:05
 
-[4.210s]
-  dataset.bin                                                                                2.81M ──────────── 0% 0B/s
+[4.407s]
+  dataset.bin                                                                                2.95M ──────────── 0% 0B/s
   small files  128 · 18 files/s
- ━━━━━━━━━━━━━━━━────────────── 54%  129/130 files · 3.35M/6.16M · 0.98M/s · 19 files/s · ETA 0:03
+ ━━━━━━━━━━━━━━━━────────────── 54%  129/130 files · 3.51M/6.46M · 536K/s · 18 files/s · ETA 0:06
 
-[4.280s]
-  dataset.bin                                                                                2.81M ──────────── 0% 0B/s
+[4.473s]
+  dataset.bin                                                                   2.95M ━━━━──────── 35% 1.05M/s ETA 0:02
   small files  128 · 17 files/s
- ━━━━━━━━━━━━━━━━────────────── 54%  129/130 files · 3.35M/6.16M · 932K/s · 17 files/s · ETA 0:03
+ ━━━━━━━━━━━━━━━━━━━━━───────── 70%  129/130 files · 4.56M/6.46M · 1.55M/s · 17 files/s · ETA 0:01
 
-[4.354s]
-  dataset.bin                                                                                2.81M ──────────── 0% 0B/s
+[4.539s]
+  dataset.bin                                                                    2.95M ━━━━──────── 35% 979K/s ETA 0:02
+  small files  128 · 16 files/s
+ ━━━━━━━━━━━━━━━━━━━━━───────── 70%  129/130 files · 4.56M/6.46M · 1.45M/s · 16 files/s · ETA 0:01
+
+[4.606s]
+  dataset.bin                                                                    2.95M ━━━━──────── 35% 914K/s ETA 0:02
   small files  128 · 15 files/s
- ━━━━━━━━━━━━━━━━────────────── 54%  129/130 files · 3.35M/6.16M · 865K/s · 16 files/s · ETA 0:03
+ ━━━━━━━━━━━━━━━━━━━━━───────── 70%  129/130 files · 4.56M/6.46M · 1.35M/s · 15 files/s · ETA 0:01
 
-[4.424s]
-  dataset.bin                                                                                2.81M ──────────── 0% 0B/s
+[4.672s]
+  dataset.bin                                                                    2.95M ━━━━──────── 35% 853K/s ETA 0:02
   small files  128 · 14 files/s
- ━━━━━━━━━━━━━━━━────────────── 54%  129/130 files · 3.35M/6.16M · 804K/s · 15 files/s · ETA 0:04
+ ━━━━━━━━━━━━━━━━━━━━━───────── 70%  129/130 files · 4.56M/6.46M · 1.26M/s · 14 files/s · ETA 0:02
 
-[4.495s]
-  dataset.bin                                                                                2.81M ──────────── 0% 0B/s
+[4.739s]
+  dataset.bin                                                                    2.95M ━━━━──────── 35% 797K/s ETA 0:02
   small files  128 · 13 files/s
- ━━━━━━━━━━━━━━━━────────────── 54%  129/130 files · 3.35M/6.16M · 747K/s · 14 files/s · ETA 0:04
+ ━━━━━━━━━━━━━━━━━━━━━───────── 70%  129/130 files · 4.56M/6.46M · 1.18M/s · 13 files/s · ETA 0:02
 
-[4.567s]
-  dataset.bin                                                                                2.81M ──────────── 0% 0B/s
+[4.805s]
+  dataset.bin                                                                    2.95M ━━━━──────── 35% 744K/s ETA 0:03
   small files  128 · 12 files/s
- ━━━━━━━━━━━━━━━━────────────── 54%  129/130 files · 3.35M/6.16M · 692K/s · 13 files/s · ETA 0:04
+ ━━━━━━━━━━━━━━━━━━━━━───────── 70%  129/130 files · 4.56M/6.46M · 1.10M/s · 12 files/s · ETA 0:02
 
-[4.635s]
-  dataset.bin                                                                                2.81M ──────────── 0% 0B/s
-  small files  128 · 12 files/s
- ━━━━━━━━━━━━━━━━────────────── 54%  129/130 files · 3.35M/6.16M · 646K/s · 12 files/s · ETA 0:04
-
-[4.701s]
-  dataset.bin                                                                                2.81M ──────────── 0% 0B/s
+[4.871s]
+  dataset.bin                                                                    2.95M ━━━━──────── 35% 694K/s ETA 0:03
   small files  128 · 11 files/s
- ━━━━━━━━━━━━━━━━────────────── 54%  129/130 files · 3.35M/6.16M · 603K/s · 11 files/s · ETA 0:05
+ ━━━━━━━━━━━━━━━━━━━━━───────── 70%  129/130 files · 4.56M/6.46M · 1.03M/s · 11 files/s · ETA 0:02
 
-[4.772s]
-  dataset.bin                                                                                2.81M ──────────── 0% 0B/s
+[4.937s]
+  dataset.bin                                                                    2.95M ━━━━──────── 35% 648K/s ETA 0:03
   small files  128 · 10 files/s
- ━━━━━━━━━━━━━━━━────────────── 54%  129/130 files · 3.35M/6.16M · 560K/s · 10 files/s · ETA 0:05
+ ━━━━━━━━━━━━━━━━━━━━━───────── 70%  129/130 files · 4.56M/6.46M · 958K/s · 11 files/s · ETA 0:02
 
-[4.843s]
-  dataset.bin                                                                                2.81M ──────────── 0% 0B/s
+[5.004s]
+  dataset.bin                                                                    2.95M ━━━━──────── 35% 605K/s ETA 0:03
+  small files  128 · 10 files/s
+ ━━━━━━━━━━━━━━━━━━━━━───────── 70%  129/130 files · 4.56M/6.46M · 894K/s · 10 files/s · ETA 0:02
+
+[5.070s]
+  dataset.bin                                                                    2.95M ━━━━──────── 35% 565K/s ETA 0:03
   small files  128 · 9 files/s
- ━━━━━━━━━━━━━━━━────────────── 54%  129/130 files · 3.35M/6.16M · 521K/s · 10 files/s · ETA 0:06
+ ━━━━━━━━━━━━━━━━━━━━━───────── 70%  129/130 files · 4.56M/6.46M · 835K/s · 9 files/s · ETA 0:02
 
-[4.913s]
-  dataset.bin                                                                                2.81M ──────────── 0% 0B/s
-  small files  128 · 9 files/s
- ━━━━━━━━━━━━━━━━────────────── 54%  129/130 files · 3.35M/6.16M · 484K/s · 9 files/s · ETA 0:06
-
-[4.982s]
-  dataset.bin                                                                                2.81M ──────────── 0% 0B/s
+[5.137s]
+  dataset.bin                                                                    2.95M ━━━━──────── 35% 528K/s ETA 0:04
   small files  128 · 8 files/s
- ━━━━━━━━━━━━━━━━────────────── 54%  129/130 files · 3.35M/6.16M · 450K/s · 8 files/s · ETA 0:06
+ ━━━━━━━━━━━━━━━━━━━━━───────── 70%  129/130 files · 4.56M/6.46M · 780K/s · 9 files/s · ETA 0:02
 
-[5.049s]
-  dataset.bin                                                                                2.81M ──────────── 0% 0B/s
+[5.203s]
+  dataset.bin                                                                    2.95M ━━━━──────── 35% 493K/s ETA 0:04
   small files  128 · 8 files/s
- ━━━━━━━━━━━━━━━━────────────── 54%  129/130 files · 3.35M/6.16M · 420K/s · 8 files/s · ETA 0:07
+ ━━━━━━━━━━━━━━━━━━━━━───────── 70%  129/130 files · 4.56M/6.46M · 728K/s · 8 files/s · ETA 0:03
 
-[5.120s]
-  dataset.bin                                                                                2.81M ──────────── 0% 0B/s
+[5.269s]
+  dataset.bin                                                                    2.95M ━━━━──────── 35% 460K/s ETA 0:04
   small files  128 · 7 files/s
- ━━━━━━━━━━━━━━━━────────────── 54%  129/130 files · 3.35M/6.16M · 390K/s · 7 files/s · ETA 0:07
+ ━━━━━━━━━━━━━━━━━━━━━───────── 70%  129/130 files · 4.56M/6.46M · 680K/s · 7 files/s · ETA 0:03
 
-[5.191s]
-  dataset.bin                                                                   2.81M ━━━━──────── 35% 1.00M/s ETA 0:02
+[5.335s]
+  dataset.bin                                                                    2.95M ━━━━──────── 35% 430K/s ETA 0:04
+  small files  128 · 7 files/s
+ ━━━━━━━━━━━━━━━━━━━━━───────── 70%  129/130 files · 4.56M/6.46M · 635K/s · 7 files/s · ETA 0:03
+
+[5.402s]
+  dataset.bin                                                                    2.95M ━━━━──────── 35% 401K/s ETA 0:05
   small files  128 · 6 files/s
- ━━━━━━━━━━━━━━━━━━━━━───────── 70%  129/130 files · 4.35M/6.16M · 1.35M/s · 7 files/s · ETA 0:01
+ ━━━━━━━━━━━━━━━━━━━━━───────── 70%  129/130 files · 4.56M/6.46M · 593K/s · 7 files/s · ETA 0:03
 
-[5.263s]
-  dataset.bin                                                                    2.81M ━━━━──────── 35% 951K/s ETA 0:02
+[5.468s]
+  dataset.bin                                                                   2.95M ━━━━━━━━╸─── 71% 1.42M/s ETA 0:01
   small files  128 · 6 files/s
- ━━━━━━━━━━━━━━━━━━━━━───────── 70%  129/130 files · 4.35M/6.16M · 1.26M/s · 6 files/s · ETA 0:01
+ ━━━━━━━━━━━━━━━━━━━━━━━━━━──── 86%  129/130 files · 5.61M/6.46M · 1.60M/s · 6 files/s · ETA 0:01
 
-[5.332s]
-  dataset.bin                                                                    2.81M ━━━━──────── 35% 885K/s ETA 0:02
+[5.534s]
+  dataset.bin                                                                   2.95M ━━━━━━━━╸─── 71% 1.33M/s ETA 0:01
   small files  128 · 6 files/s
- ━━━━━━━━━━━━━━━━━━━━━───────── 70%  129/130 files · 4.35M/6.16M · 1.17M/s · 6 files/s · ETA 0:02
+ ━━━━━━━━━━━━━━━━━━━━━━━━━━──── 86%  129/130 files · 5.61M/6.46M · 1.50M/s · 6 files/s · ETA 0:01
 
-[5.400s]
-  dataset.bin                                                                    2.81M ━━━━──────── 35% 825K/s ETA 0:02
+[5.600s]
+  dataset.bin                                                                   2.95M ━━━━━━━━╸─── 71% 1.24M/s ETA 0:01
   small files  128 · 5 files/s
- ━━━━━━━━━━━━━━━━━━━━━───────── 70%  129/130 files · 4.35M/6.16M · 1.09M/s · 5 files/s · ETA 0:02
+ ━━━━━━━━━━━━━━━━━━━━━━━━━━──── 86%  129/130 files · 5.61M/6.46M · 1.40M/s · 5 files/s · ETA 0:01
 
-[5.470s]
-  dataset.bin                                                                    2.81M ━━━━──────── 35% 767K/s ETA 0:02
+[5.667s]
+  dataset.bin                                                                   2.95M ━━━━━━━━╸─── 71% 1.16M/s ETA 0:01
   small files  128 · 5 files/s
- ━━━━━━━━━━━━━━━━━━━━━───────── 70%  129/130 files · 4.35M/6.16M · 1.01M/s · 5 files/s · ETA 0:02
+ ━━━━━━━━━━━━━━━━━━━━━━━━━━──── 86%  129/130 files · 5.61M/6.46M · 1.30M/s · 5 files/s · ETA 0:01
 
-[5.542s]
-  dataset.bin                                                                    2.81M ━━━━──────── 35% 712K/s ETA 0:03
+[5.733s]
+  dataset.bin                                                                   2.95M ━━━━━━━━╸─── 71% 1.08M/s ETA 0:01
   small files  128 · 5 files/s
- ━━━━━━━━━━━━━━━━━━━━━───────── 70%  129/130 files · 4.35M/6.16M · 965K/s · 5 files/s · ETA 0:02
+ ━━━━━━━━━━━━━━━━━━━━━━━━━━──── 86%  129/130 files · 5.61M/6.46M · 1.22M/s · 5 files/s · ETA 0:01
 
-[5.614s]
-  dataset.bin                                                                    2.81M ━━━━──────── 35% 661K/s ETA 0:03
+[5.799s]
+  dataset.bin                                                                   2.95M ━━━━━━━━╸─── 71% 1.01M/s ETA 0:01
   small files  128 · 4 files/s
- ━━━━━━━━━━━━━━━━━━━━━───────── 70%  129/130 files · 4.35M/6.16M · 895K/s · 4 files/s · ETA 0:02
+ ━━━━━━━━━━━━━━━━━━━━━━━━━━──── 86%  129/130 files · 5.61M/6.46M · 1.14M/s · 4 files/s · ETA 0:01
 
-[5.680s]
-  dataset.bin                                                                    2.81M ━━━━──────── 35% 617K/s ETA 0:03
+[5.866s]
+  dataset.bin                                                                    2.95M ━━━━━━━━╸─── 71% 943K/s ETA 0:01
   small files  128 · 4 files/s
- ━━━━━━━━━━━━━━━━━━━━━───────── 70%  129/130 files · 4.35M/6.16M · 835K/s · 4 files/s · ETA 0:02
+ ━━━━━━━━━━━━━━━━━━━━━━━━━━──── 86%  129/130 files · 5.61M/6.46M · 1.06M/s · 4 files/s · ETA 0:01
 
-[5.755s]
-  dataset.bin                                                                    2.81M ━━━━──────── 35% 573K/s ETA 0:03
+[5.932s]
+  dataset.bin                                                                    2.95M ━━━━━━━━╸─── 71% 881K/s ETA 0:01
   small files  128 · 4 files/s
- ━━━━━━━━━━━━━━━━━━━━━───────── 70%  129/130 files · 4.35M/6.16M · 776K/s · 4 files/s · ETA 0:02
+ ━━━━━━━━━━━━━━━━━━━━━━━━━━──── 86%  129/130 files · 5.61M/6.46M · 991K/s · 4 files/s · ETA 0:01
 
-[5.823s]
-  dataset.bin                                                                    2.81M ━━━━──────── 35% 532K/s ETA 0:03
+[5.998s]
+  dataset.bin                                                                    2.95M ━━━━━━━━╸─── 71% 822K/s ETA 0:01
   small files  128 · 3 files/s
- ━━━━━━━━━━━━━━━━━━━━━───────── 70%  129/130 files · 4.35M/6.16M · 720K/s · 4 files/s · ETA 0:03
+ ━━━━━━━━━━━━━━━━━━━━━━━━━━──── 86%  129/130 files · 5.61M/6.46M · 925K/s · 4 files/s · ETA 0:01
 
-[5.895s]
-  dataset.bin                                                                    2.81M ━━━━──────── 35% 494K/s ETA 0:04
+[6.065s]
+  dataset.bin                                                                    2.95M ━━━━━━━━╸─── 71% 768K/s ETA 0:01
   small files  128 · 3 files/s
- ━━━━━━━━━━━━━━━━━━━━━───────── 70%  129/130 files · 4.35M/6.16M · 669K/s · 3 files/s · ETA 0:03
+ ━━━━━━━━━━━━━━━━━━━━━━━━━━──── 86%  129/130 files · 5.61M/6.46M · 864K/s · 3 files/s · ETA 0:01
 
-[5.966s]
-  dataset.bin                                                                    2.81M ━━━━──────── 35% 459K/s ETA 0:04
+[6.131s]
+  dataset.bin                                                                    2.95M ━━━━━━━━╸─── 71% 717K/s ETA 0:01
   small files  128 · 3 files/s
- ━━━━━━━━━━━━━━━━━━━━━───────── 70%  129/130 files · 4.35M/6.16M · 621K/s · 3 files/s · ETA 0:03
+ ━━━━━━━━━━━━━━━━━━━━━━━━━━──── 86%  129/130 files · 5.61M/6.46M · 807K/s · 3 files/s · ETA 0:01
 
-[6.035s]
-  dataset.bin                                                                    2.81M ━━━━──────── 35% 427K/s ETA 0:04
+[6.197s]
+  dataset.bin                                                                    2.95M ━━━━━━━━╸─── 71% 669K/s ETA 0:01
   small files  128 · 3 files/s
- ━━━━━━━━━━━━━━━━━━━━━───────── 70%  129/130 files · 4.35M/6.16M · 578K/s · 3 files/s · ETA 0:03
+ ━━━━━━━━━━━━━━━━━━━━━━━━━━──── 86%  129/130 files · 5.61M/6.46M · 753K/s · 3 files/s · ETA 0:01
 
-[6.106s]
-  dataset.bin                                                                    2.81M ━━━━──────── 35% 397K/s ETA 0:05
+[6.263s]
+  dataset.bin                                                                    2.95M ━━━━━━━━╸─── 71% 625K/s ETA 0:01
   small files  128 · 3 files/s
- ━━━━━━━━━━━━━━━━━━━━━───────── 70%  129/130 files · 4.35M/6.16M · 537K/s · 3 files/s · ETA 0:03
+ ━━━━━━━━━━━━━━━━━━━━━━━━━━──── 86%  129/130 files · 5.61M/6.46M · 703K/s · 3 files/s · ETA 0:01
 
-[6.180s]
-  dataset.bin                                                                    2.81M ━━━━──────── 35% 367K/s ETA 0:05
-  small files  128 · 2 files/s
- ━━━━━━━━━━━━━━━━━━━━━───────── 70%  129/130 files · 4.35M/6.16M · 497K/s · 2 files/s · ETA 0:04
-
-[6.249s]
-  dataset.bin                                                                    2.81M ━━━━──────── 35% 342K/s ETA 0:05
-  small files  128 · 2 files/s
- ━━━━━━━━━━━━━━━━━━━━━───────── 70%  129/130 files · 4.35M/6.16M · 463K/s · 2 files/s · ETA 0:04
-
-[6.319s]
-  dataset.bin                                                                    2.81M ━━━━──────── 35% 318K/s ETA 0:06
-  small files  128 · 2 files/s
- ━━━━━━━━━━━━━━━━━━━━━───────── 70%  129/130 files · 4.35M/6.16M · 431K/s · 2 files/s · ETA 0:04
-
-[6.389s]
-  dataset.bin                                                                   2.81M ━━━━━━━━╸─── 71% 1.29M/s ETA 0:01
-  small files  128 · 2 files/s
- ━━━━━━━━━━━━━━━━━━━━━━━━━━──── 86%  129/130 files · 5.35M/6.16M · 1.39M/s · 2 files/s · ETA 0:01
-
-[6.461s]
-  dataset.bin                                                                   2.81M ━━━━━━━━╸─── 71% 1.20M/s ETA 0:01
-  small files  128 · 2 files/s
- ━━━━━━━━━━━━━━━━━━━━━━━━━━──── 86%  129/130 files · 5.35M/6.16M · 1.29M/s · 2 files/s · ETA 0:01
-
-[6.532s]
-  dataset.bin                                                                   2.81M ━━━━━━━━╸─── 71% 1.12M/s ETA 0:01
-  small files  128 · 2 files/s
- ━━━━━━━━━━━━━━━━━━━━━━━━━━──── 86%  129/130 files · 5.35M/6.16M · 1.21M/s · 2 files/s · ETA 0:01
-
-[6.603s]
-  dataset.bin                                                                   2.81M ━━━━━━━━╸─── 71% 1.03M/s ETA 0:01
-  small files  128 · 2 files/s
- ━━━━━━━━━━━━━━━━━━━━━━━━━━──── 86%  129/130 files · 5.35M/6.16M · 1.11M/s · 2 files/s · ETA 0:01
-
-[6.674s]
-  dataset.bin                                                                    2.81M ━━━━━━━━╸─── 71% 983K/s ETA 0:01
-  small files  128 · 1 files/s
- ━━━━━━━━━━━━━━━━━━━━━━━━━━──── 86%  129/130 files · 5.35M/6.16M · 1.04M/s · 1 files/s · ETA 0:01
-
-[6.742s]
-  dataset.bin                                                                    2.81M ━━━━━━━━╸─── 71% 915K/s ETA 0:01
-  small files  128 · 1 files/s
- ━━━━━━━━━━━━━━━━━━━━━━━━━━──── 86%  129/130 files · 5.35M/6.16M · 988K/s · 1 files/s · ETA 0:01
-
-[6.810s]
-  dataset.bin                                                                    2.81M ━━━━━━━━╸─── 71% 854K/s ETA 0:01
-  small files  128 · 1 files/s
- ━━━━━━━━━━━━━━━━━━━━━━━━━━──── 86%  129/130 files · 5.35M/6.16M · 921K/s · 1 files/s · ETA 0:01
-
-[6.878s]
-  dataset.bin                                                                    2.81M ━━━━━━━━╸─── 71% 795K/s ETA 0:01
-  small files  128 · 1 files/s
- ━━━━━━━━━━━━━━━━━━━━━━━━━━──── 86%  129/130 files · 5.35M/6.16M · 858K/s · 1 files/s · ETA 0:01
-
-[6.945s]
-  dataset.bin                                                                    2.81M ━━━━━━━━╸─── 71% 742K/s ETA 0:01
-  small files  128 · 1 files/s
- ━━━━━━━━━━━━━━━━━━━━━━━━━━──── 86%  129/130 files · 5.35M/6.16M · 801K/s · 1 files/s · ETA 0:01
-
-[7.016s]
-  dataset.bin                                                                    2.81M ━━━━━━━━╸─── 71% 689K/s ETA 0:01
-  small files  128 · 1 files/s
- ━━━━━━━━━━━━━━━━━━━━━━━━━━──── 86%  129/130 files · 5.35M/6.16M · 744K/s · 1 files/s · ETA 0:01
-
-[7.085s]
-  dataset.bin                                                                    2.81M ━━━━━━━━╸─── 71% 642K/s ETA 0:01
-  small files  128 · 1 files/s
- ━━━━━━━━━━━━━━━━━━━━━━━━━━──── 86%  129/130 files · 5.35M/6.16M · 693K/s · 1 files/s · ETA 0:01
-
-[7.152s]
-  dataset.bin                                                                    2.81M ━━━━━━━━╸─── 71% 599K/s ETA 0:01
-  small files  128 · 1 files/s
- ━━━━━━━━━━━━━━━━━━━━━━━━━━──── 86%  129/130 files · 5.35M/6.16M · 646K/s · 1 files/s · ETA 0:01
-
-[7.219s]
-  dataset.bin                                                                    2.81M ━━━━━━━━╸─── 71% 558K/s ETA 0:01
-  small files  128 · 1 files/s
- ━━━━━━━━━━━━━━━━━━━━━━━━━━──── 86%  129/130 files · 5.35M/6.16M · 603K/s · 1 files/s · ETA 0:01
-
-[7.290s]
-  dataset.bin                                                                    2.81M ━━━━━━━━╸─── 71% 519K/s ETA 0:02
-  small files  128 · 1 files/s
- ━━━━━━━━━━━━━━━━━━━━━━━━━━──── 86%  129/130 files · 5.35M/6.16M · 560K/s · 1 files/s · ETA 0:01
-
-[7.339s]
- ✓ 130 files · 6.16M in 7.33s · 860K/s · 18 files/s
+[6.272s]
+ ✓ 130 files · 6.46M in 6.27s · 1.03M/s · 21 files/s
 
 Process exit code: 0

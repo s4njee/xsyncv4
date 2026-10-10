@@ -6,3 +6,6 @@ node_modules/
 docs/.vitepress/cache/
 docs/.vitepress/dist/
 scripts/__pycache__/
+
+# The repository root ignores dist/ (release outputs); the Site serves its committed dist/.
+!/dist/

@@ -1,12 +1,12 @@
 ---
-title: "xsync-compat(7)"
+title: "xs-compat(7)"
 description: "Know the native path, delegation behavior, and platform boundaries."
-manual: "xsync-compat(7)"
+manual: "xs-compat(7)"
 manualName: "Compatibility"
 sectionNumber: "7"
 ---
 
-# xsync-compat(7)
+# xs-compat(7)
 
 <div class="manual-deck"><strong>Compatibility</strong><p>Know the native path, delegation behavior, and platform boundaries.</p></div>
 
@@ -20,13 +20,13 @@ sectionNumber: "7"
 
 
 
-<div class="example-caption">Require native xs on both ends</div>
+<div class="example-caption">Require native xsync</div>
 
 ```sh
 xs --no-fallback -azP src/ user@host:/backup/
 ```
 
-<p>By default, unsupported flags, missing remote helpers, unsupported protocol versions, and daemon URLs can re-execute a real rsync from PATH. One stderr notice explains the delegation. Original arguments are retained after xsync-only worker/clone/atomic extensions are removed.</p>
+<p>By default, unsupported flags, missing remote helpers, unsupported protocol versions, and daemon URLs can re-execute a real rsync from PATH. One stderr notice explains the delegation. Original arguments are retained after xs-only worker/clone/atomic extensions are removed.</p>
 
 <p>Malformed protocol data and failures during a transfer do not trigger fallback. An explicit <code>--rsync-path</code> is retained, so it must also be an appropriate rsync command if delegation is needed.</p>
 
@@ -40,7 +40,7 @@ xs --no-fallback -azP src/ user@host:/backup/
 
 ## BEHAVIORAL DIFFERENCES {#differences}
 
-<div class="manual-table-wrap"><table><thead><tr><th scope="col">Area</th><th scope="col">xs behavior</th></tr></thead><tbody><tr><td>New byte-copied files</td><td>Atomic temporary file + rename by default</td></tr><tr><td>Local compression</td><td>-z has no compression effect locally</td></tr><tr><td>APFS clones</td><td>Can preserve more metadata than -a requests</td></tr><tr><td>Output ordering</td><td>Non-terminal file output is sorted at end of run</td></tr><tr><td>%b</td><td>File-content bytes before compression; not rsync wire bytes</td></tr><tr><td>JSON progress</td><td>Requires native structured events; never supplied by fallback</td></tr></tbody></table></div>
+<div class="manual-table-wrap"><table><thead><tr><th scope="col">Area</th><th scope="col">xsync behavior</th></tr></thead><tbody><tr><td>New byte-copied files</td><td>Atomic temporary file + rename by default</td></tr><tr><td>Local compression</td><td>-z has no compression effect locally</td></tr><tr><td>APFS clones</td><td>Can preserve more metadata than -a requests</td></tr><tr><td>Output ordering</td><td>Non-terminal file output is sorted at end of run</td></tr><tr><td>%b</td><td>File-content bytes before compression; not rsync wire bytes</td></tr><tr><td>JSON progress</td><td>Requires native structured events; never supplied by fallback</td></tr></tbody></table></div>
 
 ## PLATFORM BOUNDARIES {#platforms}
 

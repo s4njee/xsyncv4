@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Capture real xsync output against disposable fixture trees. No SSH is used."""
+"""Capture real xs output against disposable fixture trees. No SSH is used."""
 import argparse
 import datetime
 import errno
@@ -15,17 +15,18 @@ import shutil
 import signal
 import struct
 import subprocess
+import sys
 import tempfile
 import termios
 import time
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--binary', type=Path, required=True)
+parser.add_argument('--binary', type=Path, default=Path(__file__).resolve().parents[3] / 'build/xs')
 args = parser.parse_args()
 binary = args.binary.resolve()
 destination = Path(__file__).resolve().parents[1] / 'dist' / 'recordings'
 destination.mkdir(parents=True, exist_ok=True)
-env = dict(os.environ, XSYNC_CONFIG='', XSYNC_OPTS='', XSYNC_PROGRESS='1', NO_COLOR='1', TERM='xterm-256color', LC_ALL='en_US.UTF-8')
+env = dict(os.environ, XSYNC_CONFIG='', XSYNC_OPTS='', XSYNC_PROGRESS='1', NO_COLOR='1', TERM='xterm-256color', LC_ALL='en_US.UTF-8' if sys.platform == 'darwin' else 'C.UTF-8')
 ansi = re.compile(rb'\x1b\[[0-?]*[ -/]*[@-~]')
 frame_pattern = re.compile(rb'\x1b\[\?2026h(.*?)\x1b\[\?2026l', re.S)
 
@@ -77,8 +78,8 @@ def capture(cwd, flags, name, interrupt_after=None):
         raise RuntimeError('No output captured: ' + name)
     (destination / f'{name}.ansi').write_bytes(raw)
     transcript = '\n\n'.join(f'[{frame["at_ms"] / 1000:.3f}s]\n{frame["text"]}' for frame in frames)
-    (destination / f'{name}.txt').write_text('xsync ' + ' '.join(flags) + '\n\n' + transcript + f'\n\nProcess exit code: {code}\n')
-    return {'command':'xsync ' + ' '.join(flags), 'exit_code':code, 'frames':frames, 'raw':f'recordings/{name}.ansi', 'transcript':f'recordings/{name}.txt'}
+    (destination / f'{name}.txt').write_text('xs ' + ' '.join(flags) + '\n\n' + transcript + f'\n\nProcess exit code: {code}\n')
+    return {'command':'xs ' + ' '.join(flags), 'exit_code':code, 'frames':frames, 'raw':f'recordings/{name}.ansi', 'transcript':f'recordings/{name}.txt'}
 
 with tempfile.TemporaryDirectory(prefix='xsync-page-recording-') as temporary:
     work = Path(temporary)
@@ -128,6 +129,6 @@ with tempfile.TemporaryDirectory(prefix='xsync-page-recording-') as temporary:
         raise RuntimeError('JSON transfer did not complete')
     (destination / 'progress.ndjson').write_text(json_run.stderr)
     version = subprocess.check_output([str(binary), '--version'], text=True).splitlines()[0]
-    recording = {'captured_at':datetime.datetime.now(datetime.timezone.utc).isoformat(), 'binary_version':version, 'terminal_columns':120, 'transport':'Local filesystem', 'fixture_files':130, 'transfer':transfer, 'verification':verification, 'interrupted':interrupted, 'error':failed, 'json':{'command':'xsync ' + ' '.join(json_flags), 'events':json_events, 'download':'recordings/progress.ndjson'}}
+    recording = {'captured_at':datetime.datetime.now(datetime.timezone.utc).isoformat(), 'binary_version':version, 'terminal_columns':120, 'transport':'Local filesystem', 'fixture_files':130, 'transfer':transfer, 'verification':verification, 'interrupted':interrupted, 'error':failed, 'json':{'command':'xs ' + ' '.join(json_flags), 'events':json_events, 'download':'recordings/progress.ndjson'}}
     (destination / 'sessions.json').write_text(json.dumps(recording, ensure_ascii=False, indent=2) + '\n')
     print(json.dumps({'version':version, 'frames':{name:len(recording[name]['frames']) for name in ['transfer','verification','interrupted','error']}, 'has_scanning':any('scanning' in frame['text'] for frame in transfer['frames'] + verification['frames']), 'has_verifying':any('verifying' in frame['text'] for frame in verification['frames']), 'json_events':len(json_events), 'verified_files':130, 'exit_codes':{name:recording[name]['exit_code'] for name in ['transfer','verification','interrupted','error']}}))

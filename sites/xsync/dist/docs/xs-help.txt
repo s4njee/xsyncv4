@@ -1,0 +1,107 @@
+xs  version 0.1.0  protocol version 4  git d3a49f8872fd
+A fast, parallel rsync work-alike. Native transfers use xs on both ends;
+missing remote support falls back to rsync unless --no-fallback is set.
+
+Usage: xs [OPTION]... SRC [SRC]... DEST
+  or   xs [OPTION]... SRC
+  or   xs [OPTION]... SRC [SRC]... [USER@]HOST:DEST
+  or   xs [OPTION]... [USER@]HOST:SRC [DEST]
+
+Options (same meaning as rsync):
+ -v, --verbose            increase verbosity
+ -q, --quiet              suppress non-error messages
+ -c, --checksum           skip based on checksum, not mod-time & size
+ -a, --archive            archive mode; equals -rlptgoD
+ -r, --recursive          recurse into directories
+ -d, --dirs               transfer directories without recursing
+ -R, --relative           preserve source path components and implied directories
+     --files-from=FILE    select source names from FILE ("-" reads stdin)
+     --list-only          list source entries; do not transfer or change DEST
+ -X, --xattrs             preserve extended attributes (twice includes rsync internals)
+ -H, --hard-links         preserve hard links within the transferred tree
+ -S, --sparse             create holes for zero-filled file regions
+     --link-dest=DIR       reuse unchanged files from a previous snapshot
+ -l, --links              copy symlinks as symlinks
+     --safe-links         skip symlinks that point outside the transfer tree
+ -L, --copy-links         transform symlink into referent file/dir
+ -p, --perms              preserve permissions
+     --chmod=CHMOD        change incoming file/directory permissions
+ -E, --executability      preserve executability of regular files
+     --fileflags          preserve BSD file flags (macOS)
+ -o, --owner              preserve owner (super-user only)
+ -g, --group              preserve group
+     --chown=USER:GROUP   change destination owner/group (names or IDs)
+ -D                       same as --devices --specials
+ -A, --acls               preserve ACLs (implies --perms)
+ -t, --times              preserve modification times
+ -U, --atimes             preserve file access times (twice enables --open-noatime)
+ -N, --crtimes            preserve creation times (macOS)
+     --open-noatime       avoid read access-time updates where supported
+ -O, --omit-dir-times     omit directory modification/access/creation times
+ -J, --omit-link-times    omit symlink modification/access/creation times
+ -n, --dry-run            perform a trial run with no changes made
+ -W, --whole-file         send the whole file; disable resume and block matching
+     --no-whole-file      enable verified-prefix resume again
+ -x, --one-file-system    don't cross filesystem boundaries
+ -e, --rsh=COMMAND        specify the remote shell to use
+     --rsync-path=PROGRAM specify the xs to run on the remote machine
+     --no-fallback        fail instead of re-executing rsync for missing support
+     --fallback           enable fallback (overrides XSYNC_FALLBACK=0)
+     --existing           skip creating new files on receiver
+     --ignore-existing    skip updating files that exist on receiver
+     --delete             delete extraneous files from dest dirs
+     --delete-after       scan deletions and merge files after transfer
+ -m, --prune-empty-dirs    omit empty directory chains from the file list
+     --delete-excluded    also delete excluded files from dest dirs
+     --ignore-errors      delete even when the sender encountered I/O errors
+     --max-delete=NUM     delete at most NUM entries (exit 25 if exceeded)
+     --force              force deletion of dirs even if not empty
+     --max-size=SIZE      don't transfer any file larger than SIZE
+     --min-size=SIZE      don't transfer any file smaller than SIZE
+     --bwlimit=RATE       limit bytes sent/copied per second (bare RATE: KiB/s)
+     --timeout=SECONDS    remote idle I/O timeout (0 disables; exits with code 30)
+     --partial            keep partially transferred files
+     --inplace            update destination files in-place
+     --mkpath             create the destination's path component
+     --numeric-ids        don't map uid/gid values by user/group name
+ -u, --update             skip files that are newer on the receiver
+ -I, --ignore-times       don't skip files that match size and time
+     --size-only          skip files that match in size
+ -@, --modify-window=NUM  set the accuracy for mod-time comparisons
+ -z, --compress           compress file data during the transfer (zstd)
+     --compress-level=NUM explicitly set compression level
+ -f, --filter=RULE        add a file-filtering RULE
+ -F                       merge .rsync-filter files (twice also excludes them)
+ -C, --cvs-exclude        exclude CVS defaults and .cvsignore patterns
+     --exclude=PATTERN    exclude files matching PATTERN
+     --exclude-from=FILE  read exclude patterns from FILE
+     --include=PATTERN    don't exclude files matching PATTERN
+     --include-from=FILE  read include patterns from FILE
+ -0, --from0              use NUL delimiters in list and filter merge files
+     --stats              give some file-transfer stats
+ -h, --human-readable     use 1000-based units (-hh uses 1024)
+     --progress[=json]    show progress (default on terminals), or JSON events
+     --no-progress        suppress progress; XSYNC_PROGRESS=0 also disables it
+ -P                       same as --partial --progress
+ -i, --itemize-changes    output a change-summary for all updates
+ -8, --8-bit-output       retain high bytes in names; escape unsafe control bytes
+     --out-format=FORMAT  file lines: %i %n %L %l %o %f %b %t %% (optional width)
+     --log-file=FILE      append the same stdout stream to FILE
+     --version, --help
+
+Documented compatibility no-ops:
+ -s, --protect-args, --secluded-args
+                          paths always travel as protocol data, not shell text
+     --blocking-io, --no-blocking-io
+                          transport polling handles either pipe mode internally
+     --no-motd            no daemon transport or daemon greeting exists
+
+xs extensions:
+     --install=HOST       explicitly install the matching release at ~/.local/bin
+                          refuses newer versions unless --force is supplied
+ -j, --jobs=N             number of worker threads (default: performance cores)
+     --no-clone           always copy file data, even where a copy-on-write clone
+                          (APFS, same volume, with -pt) would be possible
+     --atomic             create new files via temp file + rename (default)
+     --no-atomic          create new byte-copied files directly (fewer renames;
+                          a crash can leave truncated files under final names)

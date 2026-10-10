@@ -1,18 +1,18 @@
 ---
-title: "xsync(1)"
+title: "xs(1)"
 description: "Parallel file transfers, familiar commands, and progress you can read."
-manual: "xsync(1)"
+manual: "xs(1)"
 manualName: "The xsync manual"
 sectionNumber: "1"
 ---
 
-# xsync(1)
+# xs(1)
 
 <div class="manual-deck"><strong>The xsync manual</strong><p>Parallel file transfers, familiar commands, and progress you can read.</p></div>
 
 ## NAME {#name}
 
-<p><strong>xsync</strong> — fast, parallel rsync work-alike for macOS and Linux. The executable is named <code>xs</code>.</p>
+<p><strong>xs</strong> — fast, parallel rsync work-alike for macOS and Linux. The xsync project installs a single executable, <code>xs</code>.</p>
 
 
 
@@ -35,7 +35,7 @@ xs [OPTION]... [USER@]HOST:SRC [DEST]
 
 <p>xsync copies file trees locally or over SSH. It uses a C++20 engine, parallel workers, a native transfer protocol, and a live progress display on stderr. A single source argument lists entries instead of copying them.</p>
 
-<p>Use the options you already know from rsync. Native transfers require the <code>xs</code> executable on both machines. Missing remote support and unsupported options can delegate to a real rsync from PATH; <code>--no-fallback</code> requests native-only execution.</p>
+<p>Use the options you already know from rsync. Native transfers require xsync on both machines. Missing remote support and unsupported options can delegate to a real rsync from PATH; <code>--no-fallback</code> requests native-only execution.</p>
 
 
 

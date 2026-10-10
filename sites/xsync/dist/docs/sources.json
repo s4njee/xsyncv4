@@ -1,26 +1,62 @@
 {
   "reviewed_at": "2026-10-10",
-  "binary_help": "xsync-help.txt",
+  "binary_help": "xs-help.txt",
   "sources": [
     {
       "path": "README.md",
-      "sha256": "1b7e40d54cce21bcffe88143101b7fd8d641d7c5416b80e873bf9c2858267130"
+      "sha256": "4b87467c462c8c8de20446218b0e0c16bc55eafa6589b15282289a36bb318f17",
+      "pages": [
+        "index",
+        "getting-started",
+        "transfers",
+        "ssh",
+        "filters",
+        "metadata",
+        "snapshots",
+        "progress",
+        "environment",
+        "exit-status",
+        "compatibility",
+        "development",
+        "performance",
+        "install",
+        "migration",
+        "recipes",
+        "troubleshooting",
+        "itemize",
+        "json-events",
+        "protocol",
+        "architecture",
+        "contributing",
+        "tech"
+      ]
     },
     {
-      "path": "backlog.md",
-      "sha256": "4a1cce9afb9f754d8919b66d13b45700bd1ab4da1116149da8425f69251caa77"
+      "path": "benchmarks/README.md",
+      "sha256": "b7f46f067de2273fe014893859938d31fe1ee7f189cb7c91127483a9f68f3d68",
+      "pages": [
+        "performance"
+      ]
     },
     {
       "path": "backlog-gui.md",
-      "sha256": "533dfb57dd750a5a7849f1f61e7b18c2797befd2f2ff66c3545834870d711aed"
-    },
-    {
-      "path": "src/common.h",
-      "sha256": "ceee066d6328c6e6485c470c862ac67a78f6003488f086b7059b43dc43d6b3c8"
-    },
-    {
-      "path": "ROADMAP.md",
-      "sha256": "ba5d4bc4f4fcd89b24fe320ef2062205b8bfe07975962f0b47e50f5d74daac98"
+      "external": true,
+      "note": "Maintained outside this repository; the GUI roadmap section is not fingerprinted.",
+      "pages": [
+        "development"
+      ]
     }
-  ]
+  ],
+  "derived": {
+    "docs-inputs/xs-help.txt": "xs --help",
+    "docs/public/xs.1": "tools/help_to_man.py",
+    "docs-inputs/exit-codes.json": "src/common.h, src/main.cpp, src/util.cpp",
+    "docs-inputs/backlog-status.json": "backlog.md tier tables (checked by npm run check; not fingerprinted)",
+    "dist/recordings/": "scripts/capture-output.py",
+    "docs-inputs/benchmarks.json": "benchmarks/results/*.json",
+    "docs-inputs/option-source.json": "src/main.cpp option parser",
+    "docs-inputs/protocol.json": "src/common.h, src/remote.cpp",
+    "docs-inputs/examples.json": "scripts/capture-examples.py",
+    "docs-inputs/changelog.md": "CHANGELOG.md"
+  }
 }

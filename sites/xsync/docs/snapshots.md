@@ -1,12 +1,12 @@
 ---
-title: "xsync-snapshot(1)"
+title: "xs-snapshot(1)"
 description: "Resume verified partial data, reuse unchanged snapshot files, and control writes."
-manual: "xsync-snapshot(1)"
+manual: "xs-snapshot(1)"
 manualName: "Resume & snapshots"
 sectionNumber: "1"
 ---
 
-# xsync-snapshot(1)
+# xs-snapshot(1)
 
 <div class="manual-deck"><strong>Resume &amp; snapshots</strong><p>Resume verified partial data, reuse unchanged snapshot files, and control writes.</p></div>
 
@@ -59,6 +59,17 @@ xs -aP --link-dest=../previous/ src/ snapshots/current/
 <p>Relative <code>--link-dest</code> paths start at the destination directory. In this example, the basis is <code>snapshots/previous/</code>. Up to 20 previous snapshot directories may be supplied.</p>
 
 <p>Unchanged files with matching requested metadata become hard links. Changed files, different requested metadata, or cross-device links create independent copies. A previous snapshot may also supply a read-only delta basis.</p>
+
+
+
+<div class="example-caption">A dated snapshot that hard-links unchanged files</div>
+
+```sh
+xs -ai --link-dest=../2026-10-09 src/ snapshots/2026-10-10/
+stat -c "%h links  %n" snapshots/2026-10-10/notes.txt snapshots/2026-10-10/docs/guide.md
+```
+
+<div class="captured-doc-output example-output" v-pre><span class="micro">ACTUAL OUTPUT · EXIT 0</span><pre><code>created directory snapshots/2026-10-10&#10;&gt;f.st...... notes.txt&#10;1 links  snapshots/2026-10-10/notes.txt&#10;2 links  snapshots/2026-10-10/docs/guide.md</code></pre></div>
 
 
 

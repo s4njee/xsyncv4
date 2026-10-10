@@ -1,0 +1,104 @@
+[
+  {
+    "code": 1,
+    "name": "RERR_SYNTAX",
+    "final": "syntax or usage error",
+    "summary": "syntax or usage"
+  },
+  {
+    "code": 2,
+    "name": "RERR_PROTOCOL",
+    "final": "protocol incompatibility",
+    "summary": "protocol incompatibility"
+  },
+  {
+    "code": 3,
+    "name": "RERR_FILESELECT",
+    "final": "errors selecting input/output files, dirs",
+    "summary": "file selection"
+  },
+  {
+    "code": 4,
+    "name": "RERR_UNSUPPORTED",
+    "final": "requested action not supported",
+    "summary": "unsupported action"
+  },
+  {
+    "code": 5,
+    "name": "RERR_STARTCLIENT",
+    "final": "error starting client-server protocol",
+    "summary": "protocol startup"
+  },
+  {
+    "code": 11,
+    "name": "RERR_FILEIO",
+    "final": "error in file IO",
+    "summary": "file IO"
+  },
+  {
+    "code": 12,
+    "name": "RERR_STREAMIO",
+    "final": "error in rsync protocol data stream",
+    "summary": "stream IO"
+  },
+  {
+    "code": 13,
+    "name": "RERR_MESSAGEIO",
+    "final": "errors with program diagnostics",
+    "summary": "diagnostic IO"
+  },
+  {
+    "code": 14,
+    "name": "RERR_IPC",
+    "final": "error in IPC code",
+    "summary": "IPC"
+  },
+  {
+    "code": 20,
+    "name": "RERR_SIGNAL",
+    "final": "received SIGINT, SIGTERM, or SIGHUP",
+    "summary": "interruption"
+  },
+  {
+    "code": 23,
+    "name": "RERR_PARTIAL",
+    "final": "some files/attrs were not transferred (see previous errors)",
+    "summary": "partial transfer"
+  },
+  {
+    "code": 24,
+    "name": "RERR_VANISHED",
+    "final": "some files vanished before they could be transferred",
+    "summary": "vanished source files"
+  },
+  {
+    "code": 25,
+    "name": "RERR_DEL_LIMIT",
+    "final": "the --max-delete limit stopped deletions",
+    "summary": "deletion limit"
+  },
+  {
+    "code": 30,
+    "name": "RERR_TIMEOUT",
+    "final": "timeout in data send/receive",
+    "summary": "idle timeout"
+  },
+  {
+    "code": 124,
+    "name": "RERR_CMD_FAILED",
+    "final": null,
+    "summary": "remote command failed"
+  },
+  {
+    "code": 127,
+    "name": "RERR_CMD_NOTFOUND",
+    "final": "remote command not found",
+    "summary": "remote command not found"
+  },
+  {
+    "code": 255,
+    "name": null,
+    "final": null,
+    "summary": "remote shell failure"
+  }
+]

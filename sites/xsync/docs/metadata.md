@@ -1,12 +1,12 @@
 ---
-title: "xsync-metadata(1)"
+title: "xs-metadata(1)"
 description: "Choose the attributes you preserve and understand platform-specific behavior."
-manual: "xsync-metadata(1)"
+manual: "xs-metadata(1)"
 manualName: "Metadata & filesystems"
 sectionNumber: "1"
 ---
 
-# xsync-metadata(1)
+# xs-metadata(1)
 
 <div class="manual-deck"><strong>Metadata &amp; filesystems</strong><p>Choose the attributes you preserve and understand platform-specific behavior.</p></div>
 

@@ -8,12 +8,13 @@ python3 -m http.server 4173 --directory dist --bind 127.0.0.1
 
 Open http://127.0.0.1:4173. Replay and scrub captured terminal frames, choose recorded scanning/transfer/checksum/completion/interruption/error examples, or inspect original JSON events. Playback does not access visitor files or establish SSH connections.
 
-Recordings in `dist/recordings/` were captured from the parent repository's actual `build/xsync` binary (built before the executable was renamed `xs`) against disposable local fixtures. The successful copy includes 130 files, verified with SHA-256 after the transfer. The capture preserves original output text, stripping only terminal cursor/control escapes for display; original `.ansi` captures and timestamped transcripts remain downloadable. JSON comes from a separate real `--progress=json` run. Runtime measurements reflect the capture machine and the explicit bandwidth limit, not a performance benchmark.
+Recordings in `dist/recordings/` were captured from the parent repository's actual `build/xs` binary against disposable local fixtures. The successful copy includes 130 files, verified with SHA-256 after the transfer. The capture preserves original output text, stripping only terminal cursor/control escapes for display; original `.ansi` captures and timestamped transcripts remain downloadable. JSON comes from a separate real `--progress=json` run. Runtime measurements reflect the capture machine and the explicit bandwidth limit, not a performance benchmark.
 
 Regenerate recordings with:
 
 ```sh
-python3 scripts/capture-output.py --binary /absolute/path/to/build/xs
+python3 scripts/capture-output.py                      # uses ../../build/xs
+python3 scripts/capture-output.py --binary /path/to/xs
 ```
 
 HoloCSS core motion, runtime, keyframes, and view transitions are vendored from `/Users/sanjee/projects/holocss/dist/`, with its MIT license retained in `dist/vendor/holocss/LICENSE`. No network dependencies are needed by the page.
@@ -28,17 +29,65 @@ npm run build
 npm run preview
 ```
 
-The build regenerates 13 Markdown manuals, runs the VitePress static build, then copies it into `dist/docs/` alongside the existing product page. For docs authoring, use `npm run docs:generate` followed by `npm run docs:dev`. Curated content lives in `scripts/docs_content.py`; option descriptions come directly from `docs-inputs/xsync-help.txt`. The captured help and generated `docs/public/xs.1` are retained so this Site can build independently of the C++ checkout.
+The build regenerates every Markdown manual, runs the VitePress static build, then copies it into `dist/docs/` alongside the existing product page. For docs authoring, use `npm run docs:generate` followed by `npm run docs:dev`. Curated content lives in `scripts/docs_content.py`; option descriptions come directly from `docs-inputs/xs-help.txt`. Exit codes (`docs-inputs/exit-codes.json`) are derived from the `RERR_*` definitions in `src/`, and the development status tables (`docs-inputs/backlog-status.json`) from the tier tables in `backlog.md`. These inputs, the recordings and the generated `docs/public/xs.1` are committed so this Site can build independently of the C++ checkout.
 
-Refresh the authoritative command reference after changing the CLI:
+Refresh the derived inputs after changing the CLI, exit codes or backlog status:
 
 ```sh
-../../build/xs --help > docs-inputs/xsync-help.txt
-python3 ../../tools/help_to_man.py ../../build/xs docs/public/xs.1
+(cd ../.. && cmake --build build)
+npm run docs:refresh      # help, manpage, exit codes, backlog status, benchmarks, options, protocol, changelog
+python3 scripts/capture-examples.py --old-helper /tmp/xs-old/xs   # documented examples (see contributing page)
+python3 scripts/capture-output.py   # when output changed; recordings must match the help's binary
 npm run build
 ```
 
-The output and error pages embed the actual existing recordings. `docs/public/sources.json` records SHA-256 fingerprints of the README, both backlogs, and exit-code definitions reviewed for the current documentation. Update those fingerprints and the reviewed date when revising development status. Planned GUI stories remain clearly separate from implemented CLI capabilities.
+Commands on the Site use the executable name `xs`; prose uses the product name xsync.
+
+The output and error pages embed the actual existing recordings. Planned GUI stories remain clearly separate from implemented CLI capabilities; the GUI backlog is maintained outside this repository and is not checked.
+
+### Where content lives
+
+- `content/*.md`: Markdown pages, each with a frontmatter block giving `slug`, `title`, `name`, `summary`, `group` and `after` (the page it follows in the sidebar). Sections are `## TITLE {#id}`.
+- `scripts/docs_content.py`: the original manual pages, written as HTML in Python.
+- `scripts/option_notes.py`: curated facts about each option: what it implies, the helper features it needs, and related sections. The build fails if `--help` gains an option missing here, or if an entry names an option the parser no longer accepts. The joined model is published as `docs/public/options.json`.
+- `scripts/protocol_notes.py`: the meaning of each feature bit, frame and data record. The build fails when the source adds or drops one.
+- `docs/public/progress.schema.json`: the `--progress=json` schema. `npm run check` validates recorded and fresh event streams against it.
+
+Pages pull in generated sections with `<!--generated:NAME-->` (renderers in `scripts/generated.py`) and real command output with `<!--example:NAME-->`. Examples are defined in `scripts/capture-examples.py`, which runs each one in a disposable sandbox against `../../build/xs` and stores the output in `docs-inputs/examples.json`. Remote examples use `tests/fakessh.sh`.
+
+### Checks
+
+```sh
+npm run check
+```
+
+Run this before committing Site changes. It fails when:
+
+- a fingerprinted source in `docs/public/sources.json` (currently the parent `README.md`) changed since the curated pages were reviewed. Re-read the pages it names, update them, then run `npm run docs:review` to record the new fingerprints and review date;
+- `docs-inputs/` no longer matches the parent sources or `../../build/xs --help` (run `npm run docs:refresh`);
+- the recordings and the help were captured from different binaries;
+- `npm run build` does not reproduce the committed `docs/` and `dist/` exactly. This check runs only on a clean tree, so commit first, then run it;
+- an internal link or download does not resolve, either at `/` or when the Site is served from a subpath.
+
+`npm run build` itself only warns about stale fingerprints. Checks that need the parent repository or a built `xs` are skipped with a notice when those are absent.
+
+### GitHub Pages
+
+The site is published at <https://s4njee.github.io/xsyncv4/> (manual: `/docs/`) from the
+`gh-pages` branch. `.github/workflows/pages.yml` rebuilds it on every push to `main` that
+touches `sites/xsync`: it runs `scripts/check-docs.py --no-build`, builds with
+`SITE_BASE=/xsyncv4/`, and commits the result to `gh-pages`. It can also be run by hand from
+the Actions tab. Pages must serve the `gh-pages` branch from `/ (root)` (Settings → Pages).
+
+### Serving from a subpath
+
+The Site assumes it is served from the domain root, with the manual at `/docs/`. To serve it elsewhere, for example a GitHub Pages project site, build with `SITE_BASE`:
+
+```sh
+SITE_BASE=/xsyncv4/ npm run build
+```
+
+The product page uses relative links and needs no change. Commit only the default root build.
 
 ## Product-page fluid motion
 

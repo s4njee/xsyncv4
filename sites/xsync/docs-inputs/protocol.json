@@ -1,0 +1,396 @@
+{
+  "version": 4,
+  "min_version": 3,
+  "default_features": 17179869183,
+  "legacy_v3_features": 15,
+  "bits": [
+    {
+      "name": "PF_CORE",
+      "value": 1
+    },
+    {
+      "name": "PF_ZSTD",
+      "value": 2
+    },
+    {
+      "name": "PF_IDMAP",
+      "value": 4
+    },
+    {
+      "name": "PF_SAFE_LINKS",
+      "value": 8
+    },
+    {
+      "name": "PF_RESUME",
+      "value": 16
+    },
+    {
+      "name": "PF_OUTPUT",
+      "value": 32
+    },
+    {
+      "name": "PF_DIR_OUTPUT",
+      "value": 64
+    },
+    {
+      "name": "PF_HLINK",
+      "value": 128
+    },
+    {
+      "name": "PF_DELTA",
+      "value": 256
+    },
+    {
+      "name": "PF_LIST",
+      "value": 512
+    },
+    {
+      "name": "PF_IO_CONTROL",
+      "value": 1024
+    },
+    {
+      "name": "PF_FILTERS",
+      "value": 2048
+    },
+    {
+      "name": "PF_MERGE_FILTERS",
+      "value": 4096
+    },
+    {
+      "name": "PF_CVS_FILTERS",
+      "value": 8192
+    },
+    {
+      "name": "PF_DELETE_AFTER",
+      "value": 16384
+    },
+    {
+      "name": "PF_PRUNE_EMPTY",
+      "value": 32768
+    },
+    {
+      "name": "PF_RELATIVE",
+      "value": 65536
+    },
+    {
+      "name": "PF_FILES_FROM",
+      "value": 131072
+    },
+    {
+      "name": "PF_XATTRS",
+      "value": 262144
+    },
+    {
+      "name": "PF_XATTR_STREAM",
+      "value": 524288
+    },
+    {
+      "name": "PF_ACL_POSIX",
+      "value": 1048576
+    },
+    {
+      "name": "PF_ACL_DARWIN",
+      "value": 2097152
+    },
+    {
+      "name": "PF_ACL_UUID",
+      "value": 4194304
+    },
+    {
+      "name": "PF_ATIMES",
+      "value": 8388608
+    },
+    {
+      "name": "PF_CRTIMES",
+      "value": 16777216
+    },
+    {
+      "name": "PF_OPEN_NOATIME",
+      "value": 33554432
+    },
+    {
+      "name": "PF_EXECUTABILITY",
+      "value": 67108864
+    },
+    {
+      "name": "PF_FILEFLAGS",
+      "value": 134217728
+    },
+    {
+      "name": "PF_CHOWN",
+      "value": 268435456
+    },
+    {
+      "name": "PF_SPARSE",
+      "value": 536870912
+    },
+    {
+      "name": "PF_LINK_DEST",
+      "value": 1073741824
+    },
+    {
+      "name": "PF_PROGRESS_ACK",
+      "value": 2147483648
+    },
+    {
+      "name": "PF_STAGE_METRICS",
+      "value": 4294967296
+    },
+    {
+      "name": "PF_PROGRESS_PHASE",
+      "value": 8589934592
+    }
+  ],
+  "not_advertised": {
+    "macOS": [
+      "PF_ACL_POSIX"
+    ],
+    "Linux": [
+      "PF_ACL_DARWIN",
+      "PF_ACL_UUID",
+      "PF_CRTIMES",
+      "PF_FILEFLAGS"
+    ]
+  },
+  "v3_bool_options": [
+    "recursive",
+    "dirs",
+    "links",
+    "copy_links",
+    "perms",
+    "times",
+    "group",
+    "owner",
+    "devices",
+    "specials",
+    "compress",
+    "dry_run",
+    "del",
+    "delete_excluded",
+    "force",
+    "update",
+    "checksum",
+    "size_only",
+    "ignore_times",
+    "ignore_existing",
+    "existing",
+    "one_fs",
+    "inplace",
+    "omit_dir_times",
+    "omit_link_times",
+    "numeric_ids",
+    "itemize",
+    "partial",
+    "clone",
+    "direct_new",
+    "ignore_errors",
+    "safe_links"
+  ],
+  "v3_int_options": [
+    "verbose",
+    "compress_level",
+    "max_size",
+    "min_size",
+    "modify_window",
+    "jobs",
+    "max_delete"
+  ],
+  "frames": [
+    {
+      "name": "F_HELLO",
+      "value": 1
+    },
+    {
+      "name": "F_DIR",
+      "value": 2
+    },
+    {
+      "name": "F_NEED",
+      "value": 3
+    },
+    {
+      "name": "F_DATA",
+      "value": 4
+    },
+    {
+      "name": "F_LIST_END",
+      "value": 5
+    },
+    {
+      "name": "F_DATA_END",
+      "value": 6
+    },
+    {
+      "name": "F_DONE",
+      "value": 7
+    },
+    {
+      "name": "F_MSG",
+      "value": 8
+    },
+    {
+      "name": "F_IDMAP",
+      "value": 9
+    },
+    {
+      "name": "F_DEST",
+      "value": 10
+    },
+    {
+      "name": "F_OUTPUT",
+      "value": 11
+    },
+    {
+      "name": "F_OUTPUT_CONFIG",
+      "value": 12
+    },
+    {
+      "name": "F_DELTA_REQUEST",
+      "value": 13
+    },
+    {
+      "name": "F_DELTA_SIGNATURE",
+      "value": 14
+    },
+    {
+      "name": "F_DELTA_RETRY_ACK",
+      "value": 15
+    },
+    {
+      "name": "F_LIST_ENTRY",
+      "value": 16
+    },
+    {
+      "name": "F_IO_CONFIG",
+      "value": 17
+    },
+    {
+      "name": "F_KEEPALIVE",
+      "value": 18
+    },
+    {
+      "name": "F_FILTER_CONFIG",
+      "value": 19
+    },
+    {
+      "name": "F_DELETE_CONFIG",
+      "value": 20
+    },
+    {
+      "name": "F_PRUNE_CONFIG",
+      "value": 21
+    },
+    {
+      "name": "F_RELATIVE_CONFIG",
+      "value": 22
+    },
+    {
+      "name": "F_FILES_CONFIG",
+      "value": 23
+    },
+    {
+      "name": "F_FILES_DATA",
+      "value": 24
+    },
+    {
+      "name": "F_FILES_END",
+      "value": 25
+    },
+    {
+      "name": "F_XATTR_CONFIG",
+      "value": 26
+    },
+    {
+      "name": "F_XATTR_START",
+      "value": 27
+    },
+    {
+      "name": "F_XATTR_CHUNK",
+      "value": 28
+    },
+    {
+      "name": "F_XATTR_END",
+      "value": 29
+    },
+    {
+      "name": "F_ACL_CONFIG",
+      "value": 30
+    },
+    {
+      "name": "F_CHOWN_CONFIG",
+      "value": 31
+    },
+    {
+      "name": "F_SPARSE_CONFIG",
+      "value": 32
+    },
+    {
+      "name": "F_LINKDEST_CONFIG",
+      "value": 33
+    },
+    {
+      "name": "F_PROGRESS",
+      "value": 34
+    },
+    {
+      "name": "F_STAGE",
+      "value": 35
+    },
+    {
+      "name": "F_PHASE",
+      "value": 36
+    }
+  ],
+  "dir_flags": [
+    {
+      "name": "DF_ATTRS",
+      "value": 1
+    },
+    {
+      "name": "DF_SINGLE",
+      "value": 2
+    },
+    {
+      "name": "DF_NODELETE",
+      "value": 4
+    },
+    {
+      "name": "DF_ZSTD",
+      "value": 8
+    }
+  ],
+  "records": [
+    {
+      "name": "R_WHOLE",
+      "value": 1
+    },
+    {
+      "name": "R_CHUNK",
+      "value": 2
+    },
+    {
+      "name": "R_FAIL",
+      "value": 4
+    },
+    {
+      "name": "R_END",
+      "value": 8
+    },
+    {
+      "name": "R_LITERAL",
+      "value": 16
+    },
+    {
+      "name": "R_DELTA_END",
+      "value": 32
+    },
+    {
+      "name": "R_COPY",
+      "value": 64
+    }
+  ],
+  "header_bytes": 5,
+  "block_target": 1048576,
+  "small_max": 524288,
+  "magic": "XSYNC\\x01"
+}

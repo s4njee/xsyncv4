@@ -1,12 +1,12 @@
 ---
-title: "xsync-ssh(1)"
+title: "xs-ssh(1)"
 description: "Choose a shell, prepare the remote helper, and bound idle connections."
-manual: "xsync-ssh(1)"
+manual: "xs-ssh(1)"
 manualName: "SSH & remote helpers"
 sectionNumber: "1"
 ---
 
-# xsync-ssh(1)
+# xs-ssh(1)
 
 <div class="manual-deck"><strong>SSH &amp; remote helpers</strong><p>Choose a shell, prepare the remote helper, and bound idle connections.</p></div>
 
@@ -58,7 +58,7 @@ xs -aP src/ "user@[::1]:backup/"
 xs -azP --rsync-path=/opt/bin/xs src/ user@host:/backup/
 ```
 
-<aside class="manual-note"><span>NOTE</span><p>An explicit <code>--rsync-path</code> bypasses automatic lookup. If fallback is needed, that same command must support rsync. An explicit xsync-only executable may therefore prevent fallback.</p></aside>
+<aside class="manual-note"><span>NOTE</span><p>An explicit <code>--rsync-path</code> bypasses automatic lookup. If fallback is needed, that same command must support rsync. An explicit xs-only executable may therefore prevent fallback.</p></aside>
 
 ## EXPLICIT REMOTE INSTALL {#install}
 

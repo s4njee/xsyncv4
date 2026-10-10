@@ -1,34 +1,40 @@
 ---
-title: "xsync-status(7)"
-description: "Current capabilities and remaining work, reviewed against the project backlog."
-manual: "xsync-status(7)"
+title: "xs-status(7)"
+description: "Current capabilities and remaining work, generated from the project backlog."
+manual: "xs-status(7)"
 manualName: "Development status"
 sectionNumber: "7"
 ---
 
-# xsync-status(7)
+# xs-status(7)
 
-<div class="manual-deck"><strong>Development status</strong><p>Current capabilities and remaining work, reviewed against the project backlog.</p></div>
+<div class="manual-deck"><strong>Development status</strong><p>Current capabilities and remaining work, generated from the project backlog.</p></div>
 
 ## SCOPE {#scope}
 
-<p>Reviewed 10 October 2026 against the current README, executable help, daily-driver backlog, performance roadmap, and GUI backlog. Earlier backlog problem statements are historical; the latest status and completion entries describe the implemented CLI.</p>
+<p>Tier status and open items below are generated from the tier tables in <code>backlog.md</code> on every build. Curated text was last reviewed on 2026-10-10 against the README and executable help. Earlier backlog problem statements are historical; each item’s latest status describes the implemented CLI.</p>
 
 <aside class="manual-note"><span>NOTE</span><p>This page describes development status. Planned capabilities are not part of the command reference.</p></aside>
 
-## IMPLEMENTED CLI {#implemented}
+## TIER STATUS {#tiers}
 
-<div class="manual-table-wrap"><table><thead><tr><th scope="col">Area</th><th scope="col">Current status</th></tr></thead><tbody><tr><td>Trust hardening</td><td>All 15 P0 stories recorded complete</td></tr><tr><td>Reach and everyday CLI</td><td>R-02–R-09 and E-01–E-13 recorded complete (21 of 22 P1 stories); R-01 remains partial</td></tr><tr><td>Progress</td><td>P2 closed: U-02–U-11 recorded complete; U-01 skipped at the user’s request</td></tr><tr><td>Executable name</td><td>Builds, releases, manpage, and zsh completion use <code>xs</code>; existing <code>XSYNC_*</code> settings, the <code>xsync/config</code> file, and the wire protocol are unchanged</td></tr><tr><td>Data reuse</td><td>Verified-prefix resume, large-file delta, sparse output, and link-dest snapshots</td></tr><tr><td>Metadata</td><td>Hard links, xattrs, ACLs, incoming mode/owner overrides, platform-specific times and flags</td></tr><tr><td>Automation</td><td>Itemization, formatted stdout, error summaries, JSON progress, bandwidth limits, idle timeouts</td></tr></tbody></table></div>
+<div class="manual-table-wrap"><table><thead><tr><th scope="col">Tier</th><th scope="col">Items</th><th scope="col">Done</th><th scope="col">Closed</th><th scope="col">Open</th></tr></thead><tbody><tr><td>P0 · Trust: things that are wrong or dangerous today</td><td>15</td><td>15</td><td>0</td><td>0</td></tr><tr><td>P1 · Reach: being able to use it against the machines you sync with</td><td>9</td><td>8</td><td>0</td><td>1</td></tr><tr><td>P1 · Everyday behaviour: the flags in your muscle memory</td><td>13</td><td>13</td><td>0</td><td>0</td></tr><tr><td>P2 · Progress and feel: the reason to switch</td><td>11</td><td>10</td><td>1</td><td>0</td></tr><tr><td>P3 · Performance: holding the lead where you actually sync</td><td>14</td><td>0</td><td>0</td><td>14</td></tr><tr><td>P4 · Engineering base</td><td>13</td><td>0</td><td>0</td><td>13</td></tr></tbody></table></div><p>“Closed” items were set aside without completion, for example at the user’s request. Statuses use the backlog’s own vocabulary: <code>partial</code>, <code>new</code>, <code>code</code>, <code>confirmed</code> and <code>unverified</code>.</p>
 
-## REMAINING VALIDATION {#validation}
 
-<div class="manual-table-wrap"><table><thead><tr><th scope="col">Backlog item</th><th scope="col">Status and remaining work</th></tr></thead><tbody><tr><td><code>R-01</code></td><td>Partial: the native SSH checklist passes against a physical Raspberry Pi; open only on whether a second physical Linux host is required</td></tr><tr><td><code>U-01</code></td><td>Skipped at the user’s request; automated PTY, tmux, and real-SSH progress coverage passes, while the native GUI-terminal screenshot checklist was not completed</td></tr><tr><td><code>F-01</code></td><td>Partial: a verified Pi ↔ workstation SSH matrix and an APFS no-op diagnostic are recorded; full-corpus medians and cold-cache runs remain</td></tr><tr><td><code>F-02</code></td><td>Partial: a Linux and macOS CI gate compares speed relative to rsync against a pinned reference build; hosted CI validation remains</td></tr><tr><td><code>F-03</code>–<code>F-14</code></td><td>Open; ordered with success criteria in the <a href="roadmap.html">roadmap</a></td></tr></tbody></table></div><p>The recorded product demo is a real local execution. It does not establish completion of remaining physical-host acceptance checks. Historical local benchmark speedups predate the trust fixes and the atomic-write default; current measurements are summarised on the <a href="roadmap.html">roadmap</a>.</p>
+
+## IMPLEMENTED CAPABILITIES {#implemented}
+
+<div class="manual-table-wrap"><table><thead><tr><th scope="col">Area</th><th scope="col">Capabilities</th></tr></thead><tbody><tr><td>Data reuse</td><td>Verified-prefix resume, large-file delta, sparse output, and link-dest snapshots</td></tr><tr><td>Metadata</td><td>Hard links, xattrs, ACLs, incoming mode/owner overrides, platform-specific times and flags</td></tr><tr><td>Automation</td><td>Itemization, formatted stdout, error summaries, JSON progress, bandwidth limits, idle timeouts</td></tr></tbody></table></div>
+
+## OPEN ITEMS {#open}
+
+<div class="manual-table-wrap"><table><thead><tr><th scope="col">Tier</th><th scope="col">ID</th><th scope="col">Item</th><th scope="col">Status</th></tr></thead><tbody><tr><td>P1</td><td><code>R-01</code></td><td>Real ssh, end to end</td><td>partial</td></tr><tr><td>P3</td><td><code>F-01</code></td><td>Benchmark the real targets</td><td>partial</td></tr><tr><td>P3</td><td><code>F-02</code></td><td>Regression gate</td><td>partial</td></tr><tr><td>P3</td><td><code>F-03</code></td><td>ssh is one stream on one core</td><td>unverified</td></tr><tr><td>P3</td><td><code>F-04</code></td><td>Adaptive compression</td><td>code</td></tr><tr><td>P3</td><td><code>F-05</code></td><td>Large files</td><td>code</td></tr><tr><td>P3</td><td><code>F-06</code></td><td>Linux scan path</td><td>code</td></tr><tr><td>P3</td><td><code>F-07</code></td><td>APFS byte-copy ceiling</td><td>confirmed</td></tr><tr><td>P3</td><td><code>F-08</code></td><td>No-op re-sync burns CPU</td><td>confirmed</td></tr><tr><td>P3</td><td><code>F-09</code></td><td>Memory on very large trees</td><td>code</td></tr><tr><td>P3</td><td><code>F-10</code></td><td>Whole-subtree clones</td><td>new</td></tr><tr><td>P3</td><td><code>F-11</code></td><td>Clones when <code>-a</code> is incomplete</td><td>code</td></tr><tr><td>P3</td><td><code>F-12</code></td><td>Deletion is single-threaded</td><td>code</td></tr><tr><td>P3</td><td><code>F-13</code></td><td>Tiny transfers</td><td>unverified</td></tr><tr><td>P3</td><td><code>F-14</code></td><td><code>-c</code> at scale</td><td>unverified</td></tr><tr><td>P4</td><td><code>Q-01</code></td><td>Version control</td><td>confirmed</td></tr><tr><td>P4</td><td><code>Q-02</code></td><td>CI</td><td>new</td></tr><tr><td>P4</td><td><code>Q-03</code></td><td>difftest on Linux</td><td>confirmed</td></tr><tr><td>P4</td><td><code>Q-04</code></td><td>Sanitizers</td><td>new</td></tr><tr><td>P4</td><td><code>Q-05</code></td><td>Fuzz the wire decoders</td><td>new</td></tr><tr><td>P4</td><td><code>Q-06</code></td><td>Two-machine test rig</td><td>new</td></tr><tr><td>P4</td><td><code>Q-07</code></td><td>Kill and converge</td><td>new</td></tr><tr><td>P4</td><td><code>Q-08</code></td><td>Randomised differential testing</td><td>new</td></tr><tr><td>P4</td><td><code>Q-09</code></td><td>Large and sparse files</td><td>unverified</td></tr><tr><td>P4</td><td><code>Q-10</code></td><td>Option parser versus popt</td><td>code</td></tr><tr><td>P4</td><td><code>Q-11</code></td><td>Progress rendering tests</td><td>new</td></tr><tr><td>P4</td><td><code>Q-12</code></td><td>Internal cleanups</td><td>code</td></tr><tr><td>P4</td><td><code>Q-13</code></td><td>Docs</td><td>new</td></tr></tbody></table></div><p>The product page recordings are real local executions. They do not establish completion of remaining physical-host or native terminal acceptance checks. Historical benchmark speedups predate trust fixes and the atomic-write default.</p>
 
 
 
 ## GUI ENGINE ROADMAP {#gui}
 
-<p>All GUI backlog stories G-01–G-24 are open. Existing copy, listing, selection, metadata, and progress primitives are foundations for these requirements, rather than evidence that the full GUI contract exists.</p>
+<aside class="manual-note"><span>EXTERNAL</span><p>This roadmap comes from a GUI backlog maintained outside this repository. It is not checked by this build; statuses are as of the 10 October 2026 review.</p></aside><p>All GUI backlog stories G-01–G-24 are open. Existing copy, listing, selection, metadata, and progress primitives are foundations for these requirements, rather than evidence that the full GUI contract exists.</p>
 
 <div class="manual-table-wrap"><table><thead><tr><th scope="col">Priority</th><th scope="col">Proposed work</th></tr></thead><tbody><tr><td>P0 · G-01–G-08</td><td>Versioned machine interface, deterministic execution, structured browsing, authoritative completion, typed per-item errors, headless SSH auth, conflict decisions, job cancellation</td></tr><tr><td>P1 · G-09–G-18</td><td>Rename/move/delete workflows, private partials, persistent queue/recovery, previews, responsive browsing, preflight/refresh, aggregate controls, helper lifecycle, acceptance client</td></tr><tr><td>P2 · G-19–G-24</td><td>Remote-to-remote copies, additional endpoint adapters, Windows support, large-directory budgets, preview/edit, optional embedded library</td></tr></tbody></table></div>
 
@@ -40,9 +46,9 @@ sectionNumber: "7"
 
 ## MAINTENANCE {#sources}
 
-<p>The option reference and downloadable manpage are generated from <code>xs --help</code>. Workflow pages are curated from README behavior. Development status comes from the latest backlog states rather than unresolved wording in the original audit.</p>
+<p>The option reference and downloadable manpage are generated from <code>xs --help</code>. Exit codes come from the <code>RERR_*</code> definitions in the source, and tier status from <code>backlog.md</code>. Workflow pages are curated from README behavior.</p>
 
-<p>Source fingerprints for this documentation build are available in <a href="sources.json">sources.json</a>. Regenerate the docs when command behavior or feature status changes.</p>
+<p>Source fingerprints for the curated pages are in <a href="sources.json">sources.json</a>; <code>npm run check</code> fails when a fingerprinted source has changed since review.</p>
 
 
 

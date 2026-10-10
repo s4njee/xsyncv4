@@ -1,0 +1,106 @@
+---
+slug: tech
+title: xs-stack(7)
+name: Tech stack
+summary: The language, libraries, hashes, system interfaces and tooling behind xs, and the trade-offs behind each choice.
+group: PROJECT
+after: architecture
+---
+
+## AT A GLANCE {#summary}
+
+<div class="manual-table-wrap"><table><thead><tr><th scope="col">Layer</th><th scope="col">Choice</th><th scope="col">Where</th></tr></thead><tbody>
+<tr><td>Language</td><td>C++20, one executable, built <code>-O3</code> with link-time optimization, <code>-Wall -Wextra</code></td><td><code>CMakeLists.txt</code></td></tr>
+<tr><td>Concurrency</td><td>A <code>std::thread</code> pool with two queues, plus a reader and a writer thread per connection</td><td><code>src/pool.h</code>, <code>src/remote.cpp</code></td></tr>
+<tr><td>Hashing</td><td>xxHash 0.8.3: XXH3, 64- and 128-bit</td><td><code>src/remote.cpp</code>, <code>src/delta.cpp</code>, <code>src/fs.cpp</code></td></tr>
+<tr><td>Compression</td><td>Zstandard 1.5.7, level 3 by default, per 1 MiB block</td><td><code>src/remote.cpp</code></td></tr>
+<tr><td>Unicode</td><td>ICU 77.1, statically linked, for normalization and case folding of names</td><td><code>src/names.cpp</code></td></tr>
+<tr><td>Transport</td><td>Any remote shell (normally OpenSSH) over pipes, with xs’s own framed protocol</td><td><code>src/remote.cpp</code>, <code>src/transport.cpp</code></td></tr>
+<tr><td>Build</td><td>CMake and Ninja; dependency sources vendored and SHA-256 checked</td><td><code>cmake/Vendored.cmake</code>, <code>third_party/</code></td></tr>
+<tr><td>Releases</td><td>Fully static Linux binaries (musl, built in Alpine under Docker) and a macOS universal binary</td><td><code>tools/release.py</code></td></tr>
+<tr><td>Tests</td><td>Python differential tests against a real rsync, C++ unit tests, a Docker SSH rig and an <code>LD_PRELOAD</code> fault injector</td><td><code>tests/</code></td></tr>
+<tr><td>This site</td><td>VitePress 1.6.4 plus Python generators; the product page is plain HTML and JavaScript</td><td><code>sites/xsync/</code></td></tr>
+</tbody></table></div>
+
+<aside class="manual-note"><span>ABOUT THE REASONS</span><p>The repository records what was chosen, not why. The reasons on this page are the engineering trade-offs that apply to each choice, so read them as explanation, not as quotes from a design record. The facts are checked against the source.</p></aside>
+
+## WHY C++ {#cpp}
+
+<p>Most of xs’s speed comes from operating-system interfaces that only exist as C calls: <code>getattrlistbulk</code> to list a directory with its attributes in one call, <code>clonefile</code> for APFS clones, <code>openat</code>/<code>fstatat</code> with <code>O_NOFOLLOW</code> relative to an anchored directory, and hole punching for sparse files. A language that calls these directly, with no runtime between it and the kernel, keeps the hot path simple. It also yields one self-contained executable that runs on a Raspberry Pi with nothing installed.</p>
+
+<ul>
+<li><strong>The standard used.</strong> C++20 is used conservatively. Its visible additions here are <code>starts_with</code>/<code>ends_with</code> and <code>contains</code>. The rest is the C++17 standard library: <code>string_view</code> (used throughout), <code>filesystem</code>, <code>optional</code>, threads, atomics and condition variables. There are no coroutines, modules, ranges or concepts. That keeps the code portable across the compilers it is checked with, clang 21 and gcc 12.</li>
+<li><strong>Dependencies.</strong> Only three libraries, all C: zstd, xxHash and ICU. All are vendored, so a release build downloads nothing.</li>
+<li><strong>The cost: memory safety.</strong> C++ does not prevent out-of-bounds reads, and xs parses bytes from another machine. The mitigations are bounds-checked decoders, a size cap on every frame, rejection of frames for features that were not negotiated, and hostile-peer tests (<code>tests/wire_test.py</code> and the <code>*_wire_test.py</code> files). Sanitizer runs and fuzzing of the decoders are still open (backlog Q-04 and Q-05).</li>
+</ul>
+
+## HASHING: XXH3, NOT BLAKE3 {#hashing}
+
+<p>xs does not use BLAKE3. Every hash in the transfer path is xxHash’s XXH3:</p>
+
+<div class="manual-table-wrap"><table><thead><tr><th scope="col">Use</th><th scope="col">Hash</th><th scope="col">Purpose</th></tr></thead><tbody>
+<tr><td>Every <code>F_DATA</code> block on the wire</td><td>XXH3-64</td><td>Detects a corrupted or truncated block; the receiver stops with “data corruption detected in transfer stream”.</td></tr>
+<tr><td>Delta block signatures</td><td>A rolling weak sum, then XXH3-64</td><td>The weak sum finds candidate blocks quickly; XXH3 confirms them before they are reused.</td></tr>
+<tr><td>A rebuilt delta file</td><td>XXH3-128</td><td>Proves the reconstructed file equals the source before it is published.</td></tr>
+<tr><td>Resume prefixes (<code>-P</code>)</td><td>XXH3-128</td><td>Both sides hash the existing prefix; only a match is reused.</td></tr>
+<tr><td>Checksum mode (<code>-c</code>)</td><td>XXH3-128</td><td>Compares file contents when size and time match.</td></tr>
+<tr><td>Streamed extended attributes</td><td>XXH3-64</td><td>Checks large attribute values sent in chunks.</td></tr>
+</tbody></table></div>
+
+<p><strong>Why a non-cryptographic hash fits.</strong> These checks detect accidents: a flipped bit, a truncated stream, a file that changed between scan and read, or a bug. They are not meant to stop an adversary. XXH3 runs at roughly memory-bandwidth speed, so hashing a prefix, a block or a <code>-c</code> pass does not become the bottleneck. Protection against tampering in transit comes from the channel: ssh authenticates both ends and protects every byte cryptographically, so a third party cannot alter data in flight.</p>
+
+<p><strong>Where BLAKE3 would matter.</strong> XXH3 does not resist deliberately constructed collisions. If someone who controls file contents could profit from two different blocks or files hashing alike, a cryptographic hash such as BLAKE3 would be the right tool. BLAKE3 is also very fast and parallelizes across cores, though it is slower than XXH3 per core. Examples are content-addressed deduplication across untrusted sources, or treating <code>-c</code> as proof that files are identical. xs has no such mode today. rsync’s own way to choose the hash, <code>--checksum-choice</code>, is one of the options xs <a href="options.html#delegated">hands to rsync</a>. A cryptographic option would be a deliberate, opt-in addition.</p>
+
+<p>The only BLAKE-family hash in the repository is in the test harness: <code>tests/difftest.py</code> compares result trees with Python’s <code>blake2b</code>. It is independent of xs, so a bug in xs’s hashing cannot hide a wrong result there.</p>
+
+## COMPRESSION: ZSTANDARD {#compression}
+
+<ul>
+<li><strong>Per block.</strong> With <code>-z</code>, each 1 MiB data block is compressed on its own, at level 3 unless <code>--compress-level</code> says otherwise, using a compression context per worker thread. Independent blocks let several threads compress and decompress at once. In the <a href="performance.html#results">measured runs</a>, <code>-z</code> transfers are where xs is furthest ahead.</li>
+<li><strong>Only remote.</strong> A local copy has no connection, so <code>-z</code> does nothing there.</li>
+<li><strong>Choice.</strong> <code>--compress-choice</code> accepts <code>zstd</code> or <code>none</code>. A helper without compression support receives plain data.</li>
+<li><strong>Not yet adaptive.</strong> Incompressible blocks are still compressed, and the level does not follow link speed (backlog F-04).</li>
+</ul>
+
+## UNICODE NAMES: ICU {#unicode}
+
+<p>macOS filesystems are usually case-insensitive, and they treat different Unicode encodings of one name as the same file. <code>Notes.txt</code> and <code>notes.txt</code> are one file there, and so are two spellings of <code>Résumé.txt</code> whose <code>é</code> is written as one code point in one and as <code>e</code> plus a combining accent in the other. Copying both names into such a directory would silently overwrite one with the other. Before scheduling any write, xs checks names with ICU’s normalization and full case folding and refuses colliding names (backlog T-12). ICU is linked statically with its data, so the check behaves the same everywhere and does not depend on the destination system’s Unicode tables. It is the largest of the three dependencies.</p>
+
+## SYSTEM INTERFACES {#syscalls}
+
+<div class="manual-table-wrap"><table><thead><tr><th scope="col">Interface</th><th scope="col">Platform</th><th scope="col">Used for</th></tr></thead><tbody>
+<tr><td><code>getattrlistbulk</code></td><td>macOS</td><td>Listing a directory and its attributes in one call per directory.</td></tr>
+<tr><td><code>readdir</code> + <code>fstatat</code></td><td>Linux</td><td>The same listing, one stat per entry. A <code>getdents64</code>/<code>statx</code> path is backlog F-06.</td></tr>
+<tr><td><code>clonefile</code> family</td><td>macOS (APFS)</td><td>Copy-on-write clones of files and whole directories.</td></tr>
+<tr><td><code>openat</code>/<code>fstatat</code> with <code>O_NOFOLLOW</code></td><td>both</td><td>Every receiver operation relative to an anchored directory, never following a symlink (<code>src/destination.cpp</code>).</td></tr>
+<tr><td><code>fallocate</code> hole punching / <code>F_PUNCHHOLE</code>, <code>SEEK_HOLE</code></td><td>Linux / macOS</td><td>Sparse output and reading allocated extents.</td></tr>
+<tr><td><code>poll</code> on pipes</td><td>both</td><td>The connection to the remote shell, so <code>--blocking-io</code> has nothing to change.</td></tr>
+</tbody></table></div>
+
+<p>Not used yet: <code>copy_file_range</code> and <code>FICLONE</code> reflinks on Linux. Local copies there use a plain read/write loop (backlog F-05).</p>
+
+## OWN PROTOCOL, RSYNC FALLBACK {#protocol}
+
+<p>rsync runs one sender, one generator and one receiver process, and moves files one after another. xs’s protocol is built for parallel workers instead: it streams a listing per directory, answers per directory, and packs many small files into shared blocks. The cost is compatibility: xs must be on both ends, and it cannot talk to rsync daemons. That is why fallback is automatic. A command xs cannot run natively is handed to a real rsync before anything is written. The protocol is versioned with negotiated feature bits, so older helpers keep working (<a href="protocol.html">protocol reference</a>).</p>
+
+## BUILD AND RELEASE {#build}
+
+<ul>
+<li><strong>CMake and Ninja</strong>, Release by default with <code>-O3</code> and link-time optimization. The manpage is generated from the built binary’s own <code>--help</code> (<code>tools/help_to_man.py</code>).</li>
+<li><strong>Vendored dependencies.</strong> The original zstd, xxHash and ICU source archives are checked in under <code>third_party/</code>, and CMake verifies each one’s SHA-256 before extracting it.</li>
+<li><strong>Static Linux binaries</strong> for amd64 and arm64 are built with musl in Alpine containers under Docker, so they run on any distribution with no installed libraries. The macOS binary is universal (Apple silicon and Intel) and links only Apple system libraries.</li>
+<li><strong>Traceable.</strong> <code>xs --version</code> prints the source revision, with <code>-dirty</code> for modified sources, and <code>dist/manifest.json</code> records each binary’s SHA-256.</li>
+</ul>
+
+## TESTING {#testing}
+
+<p>The main test strategy is differential. <code>tests/difftest.py</code> and the area-specific suites build the same fixture twice, run real rsync and xs against it, and compare names, types, contents, modes, nanosecond times, link targets and exit codes. Unit tests cover the filter matcher (a table generated from rsync 3.4.4), attribute storage and sparse writes. Fault injection interposes libc calls (<code>tests/fault_io.cpp</code>) to test races and I/O errors. A two-container Docker rig runs suites over a real sshd. A CI performance gate fails a change that loses speed against rsync relative to a pinned reference (<a href="performance.html#gate">regression gate</a>). The <a href="contributing.html#tests">contributing page</a> has the full matrix.</p>
+
+## THIS SITE {#site}
+
+<ul>
+<li><strong>VitePress 1.6.4</strong> for the manual: static pages, local search, no server. Pages render one at a time (<code>buildConcurrency: 1</code>) so the search index, and therefore every asset hash, is reproducible.</li>
+<li><strong>Python generators</strong> build the reference pages from the binary and the source: options, exit codes, protocol constants, benchmarks, development status and the changelog. <code>npm run check</code> fails when any of them drift.</li>
+<li><strong>Captured output.</strong> Every example and recording is real output from the current binary.</li>
+<li><strong>The product page</strong> is hand-written HTML, CSS and JavaScript with vendored HoloCSS motion and a WebGPU fluid background (HoloGPU), which falls back to a static background without WebGPU. Nothing is loaded from the network.</li>
+</ul>

@@ -1,12 +1,12 @@
 ---
-title: "xsync-filter(1)"
+title: "xs-filter(1)"
 description: "Select files and preview a mirror with explicit deletion behavior."
-manual: "xsync-filter(1)"
+manual: "xs-filter(1)"
 manualName: "Filters & mirroring"
 sectionNumber: "1"
 ---
 
-# xsync-filter(1)
+# xs-filter(1)
 
 <div class="manual-deck"><strong>Filters &amp; mirroring</strong><p>Select files and preview a mirror with explicit deletion behavior.</p></div>
 
@@ -35,6 +35,16 @@ xs -aP --include='*/' --include='*.txt' --exclude='*' src/ dst/
 ```
 
 <p>The directory include comes first so xsync can descend into directories that contain matching files. <code>-m</code> prunes empty directory chains from the filtered source list.</p>
+
+
+
+<div class="example-caption">Copy only Markdown files, keeping their directories</div>
+
+```sh
+xs -ai -m --include='*/' --include='*.md' --exclude='*' src/ dst/
+```
+
+<div class="captured-doc-output example-output" v-pre><span class="micro">ACTUAL OUTPUT · EXIT 0</span><pre><code>cd+++++++++ ./&#10;cd+++++++++ docs/&#10;&gt;f+++++++++ docs/guide.md</code></pre></div>
 
 
 

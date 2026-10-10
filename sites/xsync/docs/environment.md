@@ -1,12 +1,12 @@
 ---
-title: "xsync-config(5)"
+title: "xs-config(5)"
 description: "Set personal defaults and understand which layer wins."
-manual: "xsync-config(5)"
+manual: "xs-config(5)"
 manualName: "Environment & defaults"
 sectionNumber: "5"
 ---
 
-# xsync-config(5)
+# xs-config(5)
 
 <div class="manual-deck"><strong>Environment &amp; defaults</strong><p>Set personal defaults and understand which layer wins.</p></div>
 

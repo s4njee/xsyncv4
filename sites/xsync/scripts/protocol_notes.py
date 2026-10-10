@@ -1,0 +1,95 @@
+"""Curated meaning of each protocol constant derived from src/common.h and src/remote.cpp.
+
+generate-docs.py fails if the source defines a feature bit, frame or record type that is
+missing here, or if an entry here no longer exists in the source.
+
+FEATURES: name -> (what makes the client request or require it, what happens without it)
+"""
+
+FALLBACK = 'Fallback to rsync before any write, or exit 4 with <code>--no-fallback</code>.'
+
+FEATURES = {
+    'PF_CORE': ('Always.', 'The peer cannot speak the native protocol. ' + FALLBACK),
+    'PF_ZSTD': ('Always advertised.', 'Silent: data travels uncompressed. A protocol-3 helper asked for <code>-z</code> without it refuses with exit 4.'),
+    'PF_IDMAP': ('<code>-o</code>, <code>-g</code> or <code>--chown</code> without <code>--numeric-ids</code>: owners and groups are mapped by name.', FALLBACK + ' Use <code>--numeric-ids</code> to avoid it.'),
+    'PF_SAFE_LINKS': ('<code>--safe-links</code>.', FALLBACK),
+    'PF_RESUME': ('Advertised unless <code>-W</code>; used with <code>--partial</code>/<code>-P</code>.', 'Silent: interrupted files are sent in full.'),
+    'PF_OUTPUT': ('<code>--out-format</code>, <code>--log-file</code> or <code>--progress=json</code>.', FALLBACK + ' Plain <code>-v</code>/<code>-i</code> still work through ordinary messages.'),
+    'PF_DIR_OUTPUT': ('<code>--out-format</code> or <code>-ii</code>.', FALLBACK),
+    'PF_HLINK': ('<code>-H</code>.', FALLBACK),
+    'PF_DELTA': ('Advertised unless <code>-W</code>.', 'Silent: changed large files are sent whole (or from a verified prefix).'),
+    'PF_LIST': ('<code>--list-only</code>, or listing a remote source.', FALLBACK),
+    'PF_IO_CONTROL': ('Always advertised; required for a nonzero <code>--bwlimit</code> or <code>--timeout</code>.', FALLBACK + ' Without a limit it is silent, but no keep-alives are exchanged.'),
+    'PF_FILTERS': ('Filter rules beyond plain include/exclude: sides, merge, CVS, absolute, perishable or xattr rules.', FALLBACK),
+    'PF_MERGE_FILTERS': ('Per-directory merge rules, including <code>-F</code>.', FALLBACK),
+    'PF_CVS_FILTERS': ('<code>-C</code> or merge rules.', FALLBACK),
+    'PF_DELETE_AFTER': ('<code>--delete-after</code>.', FALLBACK),
+    'PF_PRUNE_EMPTY': ('<code>-m</code>.', FALLBACK),
+    'PF_RELATIVE': ('<code>-R</code>.', FALLBACK),
+    'PF_FILES_FROM': ('<code>--files-from</code>.', FALLBACK),
+    'PF_XATTRS': ('<code>-X</code>.', FALLBACK),
+    'PF_XATTR_STREAM': ('<code>-X</code>; large values are streamed in chunks.', FALLBACK),
+    'PF_ACL_POSIX': ('<code>-A</code> between Linux hosts. Never advertised on macOS.', FALLBACK + ' Mixed macOS/Linux ACL styles always take this path.'),
+    'PF_ACL_DARWIN': ('<code>-A</code> between macOS hosts. Never advertised on Linux.', FALLBACK),
+    'PF_ACL_UUID': ('<code>-A</code> between macOS hosts, for unresolved UUID principals. Never advertised on Linux.', FALLBACK),
+    'PF_ATIMES': ('<code>-U</code>.', FALLBACK),
+    'PF_CRTIMES': ('<code>-N</code>. Never advertised on Linux.', FALLBACK),
+    'PF_OPEN_NOATIME': ('<code>--open-noatime</code> or <code>-UU</code>.', FALLBACK),
+    'PF_EXECUTABILITY': ('<code>-E</code> without <code>-p</code>.', FALLBACK),
+    'PF_FILEFLAGS': ('<code>--fileflags</code>. Never advertised on Linux.', FALLBACK),
+    'PF_CHOWN': ('<code>--chown</code>.', FALLBACK),
+    'PF_SPARSE': ('<code>-S</code>.', FALLBACK),
+    'PF_LINK_DEST': ('<code>--link-dest</code>.', FALLBACK),
+    'PF_PROGRESS_ACK': ('A push with progress; required for a push dry run that prints its plan.', 'Silent for progress: the bar stays at zero until the helper finishes. A push dry run without <code>-q</code> falls back or exits 4.'),
+    'PF_STAGE_METRICS': ('<code>-vv</code>.', 'Silent: no limiting-stage estimate.'),
+    'PF_PROGRESS_PHASE': ('<code>--progress</code>.', 'Silent: the client shows only its own phases.'),
+}
+
+FRAMES = {
+    'F_HELLO': 'Opens the session. The client sends the magic, its version, its role, its feature mask (protocol 4) and the frozen options; the server answers with the negotiated features.',
+    'F_DIR': 'One directory listing, from sender to receiver, optionally zstd-packed.',
+    'F_NEED': 'The receiver’s answer to a directory: which files it wants, with resume prefixes and delta eligibility.',
+    'F_DATA': 'A block of file records (about 1 MiB), with a compression flag and an XXH3 checksum.',
+    'F_LIST_END': 'The sender has finished walking the source. In list mode, the final frame with status and count.',
+    'F_DATA_END': 'All data is sent; carries the sender’s exit status.',
+    'F_DONE': 'The receiver’s final frame: status and created/deleted counts.',
+    'F_MSG': 'A message in either direction: an output line, an error, or a fatal error with its exit code.',
+    'F_IDMAP': 'User and group names for the ids in the listing.',
+    'F_DEST': 'The receiver’s destination identity, sent first, so a destination inside the source can be refused.',
+    'F_OUTPUT': 'A structured itemize/log event from a remote receiver.',
+    'F_OUTPUT_CONFIG': 'Output settings: attributes, unchanged entries, mkpath, delete-before itemization.',
+    'F_DELTA_REQUEST': 'Asks the receiver for the block signature of an existing file.',
+    'F_DELTA_SIGNATURE': 'The block signature of the receiver’s copy.',
+    'F_DELTA_RETRY_ACK': 'Confirms that an abandoned delta attempt has been drained.',
+    'F_LIST_ENTRY': 'One listed entry in list-only mode.',
+    'F_IO_CONFIG': 'Bandwidth limit and idle timeout.',
+    'F_KEEPALIVE': 'An empty heartbeat, only when I/O control was negotiated.',
+    'F_FILTER_CONFIG': 'Extended filter rules, sent outside the frozen Hello.',
+    'F_DELETE_CONFIG': 'The delete-after setting.',
+    'F_PRUNE_CONFIG': 'The prune-empty-directories setting.',
+    'F_RELATIVE_CONFIG': 'The relative-paths setting.',
+    'F_FILES_CONFIG': 'Where the <code>--files-from</code> list is read, and its delimiter.',
+    'F_FILES_DATA': 'A chunk of the <code>--files-from</code> list.',
+    'F_FILES_END': 'The end of the <code>--files-from</code> list, with its byte count.',
+    'F_XATTR_CONFIG': 'The <code>-X</code> level.',
+    'F_XATTR_START': 'Begins a streamed extended-attribute value.',
+    'F_XATTR_CHUNK': 'A piece of a streamed extended-attribute value.',
+    'F_XATTR_END': 'Ends a streamed value, with its digest.',
+    'F_ACL_CONFIG': 'Enables ACL transfer.',
+    'F_CHOWN_CONFIG': 'The <code>--chown</code> user and group.',
+    'F_SPARSE_CONFIG': 'Enables sparse output.',
+    'F_LINKDEST_CONFIG': 'The <code>--link-dest</code> directories.',
+    'F_PROGRESS': 'Bytes and files a remote receiver has written, for the push progress bar.',
+    'F_STAGE': 'Read and network time from a remote sender, for the limiting-stage estimate.',
+    'F_PHASE': 'Deleting and verifying counts from the helper.',
+}
+
+RECORDS = {
+    'R_WHOLE': 'A whole small file (up to 512 KiB); many share one DATA block.',
+    'R_CHUNK': 'Part of a large file.',
+    'R_FAIL': 'The sender could not read a small file consistently (a read error, or the file changed while being read); it is not published.',
+    'R_END': 'The end of a large file: its final length, whether the source stayed unchanged while it was read, and fresh attributes.',
+    'R_LITERAL': 'Literal bytes in a delta transfer.',
+    'R_DELTA_END': 'The end of a delta transfer: the same status, plus a 16-byte checksum of the reconstructed file.',
+    'R_COPY': 'A run of blocks to copy from the receiver’s existing file.',
+}

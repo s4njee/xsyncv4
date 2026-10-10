@@ -1,12 +1,12 @@
 ---
-title: "xsync-transfer(1)"
+title: "xs-transfer(1)"
 description: "Copy locally, push or pull remotely, and choose exactly what a path means."
-manual: "xsync-transfer(1)"
+manual: "xs-transfer(1)"
 manualName: "Transfers & paths"
 sectionNumber: "1"
 ---
 
-# xsync-transfer(1)
+# xs-transfer(1)
 
 <div class="manual-deck"><strong>Transfers &amp; paths</strong><p>Copy locally, push or pull remotely, and choose exactly what a path means.</p></div>
 
@@ -74,6 +74,36 @@ xs -azP user@host:/data/ data/
 
 
 
+<div class="example-caption">Push over SSH</div>
+
+```sh
+xs -azi src/ host:backup/
+```
+
+<div class="captured-doc-output example-output" v-pre><span class="micro">ACTUAL OUTPUT · EXIT 0</span><pre><code>cd+++++++++ ./&#10;cd+++++++++ archive/&#10;&lt;f+++++++++ archive/2026-q3.log&#10;cd+++++++++ docs/&#10;&lt;f+++++++++ docs/guide.md&#10;cd+++++++++ docs/images/&#10;&lt;f+++++++++ docs/images/diagram.svg&#10;cL+++++++++ latest -&gt; notes.txt&#10;&lt;f+++++++++ notes.txt&#10;cd+++++++++ scripts/&#10;&lt;f+++++++++ scripts/build.sh</code></pre><p class="example-provenance">Captured through <code>tests/fakessh.sh</code>, an ssh stand-in that runs the remote side on the same machine.</p></div>
+
+
+
+<div class="example-caption">Pull over SSH</div>
+
+```sh
+xs -azi host:backup/ restore/
+```
+
+<div class="captured-doc-output example-output" v-pre><span class="micro">ACTUAL OUTPUT · EXIT 0</span><pre><code>cd+++++++++ ./&#10;cd+++++++++ archive/&#10;&gt;f+++++++++ archive/2026-q3.log&#10;cd+++++++++ docs/&#10;&gt;f+++++++++ docs/guide.md&#10;cd+++++++++ docs/images/&#10;&gt;f+++++++++ docs/images/diagram.svg&#10;cL+++++++++ latest -&gt; notes.txt&#10;&gt;f+++++++++ notes.txt&#10;cd+++++++++ scripts/&#10;&gt;f+++++++++ scripts/build.sh</code></pre><p class="example-provenance">Captured through <code>tests/fakessh.sh</code>, an ssh stand-in that runs the remote side on the same machine.</p></div>
+
+
+
+<div class="example-caption">Wire and compression totals for a push</div>
+
+```sh
+xs -az --stats src/ host:backup/
+```
+
+<div class="captured-doc-output example-output" v-pre><span class="micro">ACTUAL OUTPUT · EXIT 0</span><pre><code>Number of files: 10 (reg: 5, dir: 4, link: 1)&#10;Number of created files: 10 (reg: 5, dir: 4, link: 1)&#10;Number of deleted files: 0&#10;Number of regular files transferred: 5&#10;Total file size: 1,289,005 bytes&#10;Total transferred file size: 1,289,005 bytes&#10;Delta literal data: 0 bytes&#10;Delta matched data: 0 bytes&#10;Total bytes sent: 114,170&#10;Total bytes received: 132&#10;&#10;sent 114,170 bytes  received 132 bytes  2,399,162.63 bytes/sec&#10;total size is 1,289,005  speedup is 11.28</code></pre><p class="example-provenance">Captured through <code>tests/fakessh.sh</code>, an ssh stand-in that runs the remote side on the same machine.</p></div>
+
+
+
 ## LISTING {#listing}
 
 
@@ -94,6 +124,26 @@ xs --list-only -a src/ dst/
 ```
 
 <p>A single source argument lists metadata. A slash lists a directory’s immediate contents; <code>-r</code> includes descendants. Listings show type, permissions, byte size, modification time, and names. <code>-l</code> adds symlink targets.</p>
+
+
+
+<div class="example-caption">List a directory’s entries</div>
+
+```sh
+xs src/
+```
+
+<div class="captured-doc-output example-output" v-pre><span class="micro">ACTUAL OUTPUT · EXIT 0</span><pre><code>drwxr-xr-x          4,096 2026/10/10 12:00:00 .&#10;lrwxrwxrwx              9 2026/10/10 12:00:00 latest&#10;-rw-r--r--             14 2026/10/10 12:00:00 notes.txt&#10;drwxr-xr-x          4,096 2026/10/10 12:00:00 archive&#10;drwxr-xr-x          4,096 2026/10/10 12:00:00 docs&#10;drwxr-xr-x          4,096 2026/10/10 12:00:00 scripts</code></pre></div>
+
+
+
+<div class="example-caption">List recursively, with symlink targets</div>
+
+```sh
+xs -r src/docs
+```
+
+<div class="captured-doc-output example-output" v-pre><span class="micro">ACTUAL OUTPUT · EXIT 0</span><pre><code>drwxr-xr-x          4,096 2026/10/10 12:00:00 docs&#10;-rw-r--r--             33 2026/10/10 12:00:00 docs/guide.md&#10;drwxr-xr-x          4,096 2026/10/10 12:00:00 docs/images&#10;-rw-r--r--             42 2026/10/10 12:00:00 docs/images/diagram.svg</code></pre></div>
 
 
 
@@ -118,6 +168,26 @@ find . -type f -print0 | xs -a0 --files-from=- ./ user@host:backup/
 ```
 
 <aside class="manual-note"><span>NOTE</span><p>With a file list, <code>-a</code> preserves attributes but does not imply recursive directory traversal. Add <code>-r</code> when selected directories should be copied recursively.</p></aside>
+
+<div class="example-caption">Keep the path after /./</div>
+
+```sh
+xs -aiR src/./docs/guide.md dst/
+```
+
+<div class="captured-doc-output example-output" v-pre><span class="micro">ACTUAL OUTPUT · EXIT 0</span><pre><code>cd+++++++++ docs/&#10;&gt;f+++++++++ docs/guide.md</code></pre></div>
+
+
+
+<div class="example-caption">Copy a list of names relative to the source</div>
+
+```sh
+printf 'notes.txt\ndocs/guide.md\n' | xs -ai --files-from=- src/ dst/
+```
+
+<div class="captured-doc-output example-output" v-pre><span class="micro">ACTUAL OUTPUT · EXIT 0</span><pre><code>cd+++++++++ docs/&#10;&gt;f+++++++++ docs/guide.md&#10;&gt;f+++++++++ notes.txt</code></pre></div>
+
+
 
 ## EXISTING FILES {#existing}
 

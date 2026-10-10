@@ -247,4 +247,40 @@ html { scroll-behavior: smooth; }
   .holochart-frame { margin: 0; }
   .lesson-figure figcaption, .lesson-data { padding-left: 14px; padding-right: 14px; }
 }
+/* 768–959 px: the logo and sidebar already lead to the manual and options, so the bar keeps room for the rest. */
+@media (min-width: 768px) and (max-width: 959px) {
+  .VPNavBarMenu a.VPNavBarMenuLink[href$="/docs/"], .VPNavBarMenu a.VPNavBarMenuLink[href$="/options.html"] { display: none; }
+}
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } *, *::before, *::after { animation: none !important; transition: none !important; } }
+.vp-doc code.nowrap { white-space: nowrap; word-break: keep-all; overflow-wrap: normal; }
+.example-output .stream-label { display: block; margin-top: 14px; }
+.example-output .example-provenance, .example-output .example-empty { margin: 12px 0 0; font-size: 12px; color: var(--vp-c-text-2); }
+.example-output pre, .example-output code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12px; line-height: 1.7; }
+.option-filter { margin: 28px 0 8px; display: grid; gap: 14px; }
+.option-filter-buttons { display: flex; flex-wrap: wrap; gap: 6px; }
+.option-filter-buttons button { padding: 6px 12px; font-size: 12px; border: 1px solid #3a3a3a; border-radius: 3px; color: #b5b5b5; background: transparent; }
+.option-filter-buttons button[aria-pressed="true"] { background: #e2e2e2; border-color: #e2e2e2; color: #111; }
+.option-filter-search { display: flex; align-items: center; gap: 12px; font-size: 12px; color: #a0a0a0; }
+.option-filter-search input { flex: 1; max-width: 360px; padding: 8px 10px; border: 1px solid #3a3a3a; border-radius: 3px; background: #111; color: #e6e6e6; font-size: 13px; }
+.option-filter-count { margin: 0 !important; font-size: 12px; color: #8a8a8a; }
+.option-anchor { text-decoration: none !important; }
+.option-badges { margin-top: 6px; }
+.option-badge { display: inline-block; margin: 0 6px 4px 0; padding: 1px 6px; font-size: 10px; letter-spacing: .4px; border: 1px solid #444; border-radius: 3px; color: #a8a8a8; }
+.option-table details { margin-top: 8px; font-size: 13px; }
+.option-table details summary { cursor: pointer; color: #9a9a9a; font-size: 12px; }
+.option-table details p { margin: 8px 0 0; }
+.option-row:target { outline: 1px solid #8a8a8a; outline-offset: -1px; }
+.delegated-list { line-height: 2.2; }
+.delegated-list code { margin-right: 4px; white-space: nowrap; }
+.diagram { margin: 28px 0; padding: 20px; border: 1px solid #2c2c2c; background: #0d0d0d; }
+.diagram svg { display: block; width: 100%; height: auto; }
+.diagram rect { fill: #121212; stroke: #4a4a4a; stroke-width: 1; }
+.diagram rect.diagram-strong { fill: #171717; stroke: #8a8a8a; }
+.diagram path { fill: none; stroke: #9a9a9a; stroke-width: 1.2; }
+.diagram .diagram-arrowhead { fill: #9a9a9a; stroke: none; }
+.diagram text { fill: #bdbdbd; font: 12px var(--vp-font-family-base); }
+.diagram text.diagram-title { fill: #f0f0f0; font-weight: 600; font-size: 13px; }
+.diagram text.diagram-note { fill: #8a8a8a; font-size: 11px; }
+.diagram figcaption { margin-top: 14px; font-size: 12px; color: #9a9a9a; }
+.diagram { overflow-x: auto; } .diagram svg { min-width: 620px; }
+.option-table td:first-child { width: 38%; }

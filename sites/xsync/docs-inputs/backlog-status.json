@@ -1,0 +1,488 @@
+[
+  {
+    "tier": "P0",
+    "title": "Trust: things that are wrong or dangerous today",
+    "items": [
+      {
+        "id": "T-01",
+        "title": "Runaway recursion when DEST already exists inside SRC",
+        "status": "done",
+        "size": "S"
+      },
+      {
+        "id": "T-02",
+        "title": "`host:~/path` is not expanded",
+        "status": "done",
+        "size": "S"
+      },
+      {
+        "id": "T-03",
+        "title": "Remote wildcards do not expand",
+        "status": "done",
+        "size": "S"
+      },
+      {
+        "id": "T-04",
+        "title": "Options accepted and silently ignored",
+        "status": "done",
+        "size": "M"
+      },
+      {
+        "id": "T-05",
+        "title": "Attribute failures are silent",
+        "status": "done",
+        "size": "S"
+      },
+      {
+        "id": "T-06",
+        "title": "No detection of files changing while they are read",
+        "status": "done",
+        "size": "M"
+      },
+      {
+        "id": "T-07",
+        "title": "`--delete` keeps going after source I/O errors",
+        "status": "done",
+        "size": "M"
+      },
+      {
+        "id": "T-08",
+        "title": "Interrupted remote transfers leave temp files",
+        "status": "done",
+        "size": "M"
+      },
+      {
+        "id": "T-09",
+        "title": "Disk-full behaviour is untested",
+        "status": "done",
+        "size": "M"
+      },
+      {
+        "id": "T-10",
+        "title": "`-x` has only been tested on a tree with no mount point",
+        "status": "done",
+        "size": "S"
+      },
+      {
+        "id": "T-11",
+        "title": "New files are written under their final name",
+        "status": "done",
+        "size": "S"
+      },
+      {
+        "id": "T-12",
+        "title": "Case and Unicode-normalisation collisions",
+        "status": "done",
+        "size": "M"
+      },
+      {
+        "id": "T-13",
+        "title": "Symlink trust on the receiver",
+        "status": "done",
+        "size": "L"
+      },
+      {
+        "id": "T-14",
+        "title": "Ctrl-C during a remote transfer",
+        "status": "done",
+        "size": "S"
+      },
+      {
+        "id": "T-15",
+        "title": "Root-only paths never ran",
+        "status": "done",
+        "size": "M"
+      }
+    ]
+  },
+  {
+    "tier": "P1",
+    "title": "Reach: being able to use it against the machines you sync with",
+    "items": [
+      {
+        "id": "R-01",
+        "title": "Real ssh, end to end",
+        "status": "partial",
+        "size": "M"
+      },
+      {
+        "id": "R-02",
+        "title": "Fallback to rsync",
+        "status": "done",
+        "size": "M"
+      },
+      {
+        "id": "R-03",
+        "title": "Static release binaries",
+        "status": "done",
+        "size": "M"
+      },
+      {
+        "id": "R-04",
+        "title": "Explicit remote install",
+        "status": "done",
+        "size": "M"
+      },
+      {
+        "id": "R-05",
+        "title": "Find xsync on the remote without `--rsync-path`",
+        "status": "done",
+        "size": "S"
+      },
+      {
+        "id": "R-06",
+        "title": "Protocol negotiation instead of version equality",
+        "status": "done",
+        "size": "M"
+      },
+      {
+        "id": "R-07",
+        "title": "Install on this machine",
+        "status": "done",
+        "size": "M"
+      },
+      {
+        "id": "R-08",
+        "title": "IPv6 literals and odd host specs",
+        "status": "done",
+        "size": "S"
+      },
+      {
+        "id": "R-09",
+        "title": "Defaults without flags",
+        "status": "done",
+        "size": "S"
+      }
+    ]
+  },
+  {
+    "tier": "P1",
+    "title": "Everyday behaviour: the flags in your muscle memory",
+    "items": [
+      {
+        "id": "E-01",
+        "title": "`-P` does not resume",
+        "status": "done",
+        "size": "L"
+      },
+      {
+        "id": "E-02",
+        "title": "`--out-format` and stable script output",
+        "status": "done",
+        "size": "M"
+      },
+      {
+        "id": "E-03",
+        "title": "Itemize parity",
+        "status": "done",
+        "size": "M"
+      },
+      {
+        "id": "E-04",
+        "title": "Delta transfer for large changed files",
+        "status": "done",
+        "size": "XL"
+      },
+      {
+        "id": "E-05",
+        "title": "List mode",
+        "status": "done",
+        "size": "S"
+      },
+      {
+        "id": "E-06",
+        "title": "End-of-run error summary",
+        "status": "done",
+        "size": "S"
+      },
+      {
+        "id": "E-07",
+        "title": "`--bwlimit`, `--timeout`, keep-alive",
+        "status": "done",
+        "size": "M"
+      },
+      {
+        "id": "E-08",
+        "title": "Filter completeness",
+        "status": "done",
+        "size": "L"
+      },
+      {
+        "id": "E-09",
+        "title": "`--files-from`, `-R`, `--from0`",
+        "status": "done",
+        "size": "L"
+      },
+      {
+        "id": "E-10",
+        "title": "Metadata beyond `-a`",
+        "status": "done",
+        "size": "XL"
+      },
+      {
+        "id": "E-11",
+        "title": "Backup-style options",
+        "status": "done",
+        "size": "L"
+      },
+      {
+        "id": "E-12",
+        "title": "macOS specifics",
+        "status": "done",
+        "size": "M"
+      },
+      {
+        "id": "E-13",
+        "title": "Broken stdout",
+        "status": "done",
+        "size": "S"
+      }
+    ]
+  },
+  {
+    "tier": "P2",
+    "title": "Progress and feel: the reason to switch",
+    "items": [
+      {
+        "id": "U-01",
+        "title": "Real-terminal pass",
+        "status": "skipped — user request",
+        "size": "M"
+      },
+      {
+        "id": "U-02",
+        "title": "Rows are noise for small files",
+        "status": "done",
+        "size": "M"
+      },
+      {
+        "id": "U-03",
+        "title": "Clone mode shows nothing per file",
+        "status": "done",
+        "size": "S"
+      },
+      {
+        "id": "U-04",
+        "title": "Push progress counts bytes read, not bytes landed",
+        "status": "done",
+        "size": "M"
+      },
+      {
+        "id": "U-05",
+        "title": "Remote detail",
+        "status": "done",
+        "size": "M"
+      },
+      {
+        "id": "U-06",
+        "title": "Progress by default on a terminal?",
+        "status": "done",
+        "size": "S"
+      },
+      {
+        "id": "U-07",
+        "title": "Machine-readable progress",
+        "status": "done",
+        "size": "M"
+      },
+      {
+        "id": "U-08",
+        "title": "Phases that look like hangs",
+        "status": "done",
+        "size": "S"
+      },
+      {
+        "id": "U-09",
+        "title": "Dry-run summary",
+        "status": "done",
+        "size": "S"
+      },
+      {
+        "id": "U-10",
+        "title": "`-h` consistency",
+        "status": "done",
+        "size": "S"
+      },
+      {
+        "id": "U-11",
+        "title": "Suspend/resume and cursor hygiene",
+        "status": "done",
+        "size": "S"
+      }
+    ]
+  },
+  {
+    "tier": "P3",
+    "title": "Performance: holding the lead where you actually sync",
+    "items": [
+      {
+        "id": "F-01",
+        "title": "Benchmark the real targets",
+        "status": "partial",
+        "size": "M"
+      },
+      {
+        "id": "F-02",
+        "title": "Regression gate",
+        "status": "partial",
+        "size": "M"
+      },
+      {
+        "id": "F-03",
+        "title": "ssh is one stream on one core",
+        "status": "unverified",
+        "size": "L"
+      },
+      {
+        "id": "F-04",
+        "title": "Adaptive compression",
+        "status": "code",
+        "size": "M"
+      },
+      {
+        "id": "F-05",
+        "title": "Large files",
+        "status": "code",
+        "size": "L"
+      },
+      {
+        "id": "F-06",
+        "title": "Linux scan path",
+        "status": "code",
+        "size": "M"
+      },
+      {
+        "id": "F-07",
+        "title": "APFS byte-copy ceiling",
+        "status": "confirmed",
+        "size": "M"
+      },
+      {
+        "id": "F-08",
+        "title": "No-op re-sync burns CPU",
+        "status": "confirmed",
+        "size": "M"
+      },
+      {
+        "id": "F-09",
+        "title": "Memory on very large trees",
+        "status": "code",
+        "size": "M"
+      },
+      {
+        "id": "F-10",
+        "title": "Whole-subtree clones",
+        "status": "new",
+        "size": "M"
+      },
+      {
+        "id": "F-11",
+        "title": "Clones when `-a` is incomplete",
+        "status": "code",
+        "size": "S"
+      },
+      {
+        "id": "F-12",
+        "title": "Deletion is single-threaded",
+        "status": "code",
+        "size": "S"
+      },
+      {
+        "id": "F-13",
+        "title": "Tiny transfers",
+        "status": "unverified",
+        "size": "S"
+      },
+      {
+        "id": "F-14",
+        "title": "`-c` at scale",
+        "status": "unverified",
+        "size": "S"
+      }
+    ]
+  },
+  {
+    "tier": "P4",
+    "title": "Engineering base",
+    "items": [
+      {
+        "id": "Q-01",
+        "title": "Version control",
+        "status": "confirmed",
+        "size": "S"
+      },
+      {
+        "id": "Q-02",
+        "title": "CI",
+        "status": "new",
+        "size": "M"
+      },
+      {
+        "id": "Q-03",
+        "title": "difftest on Linux",
+        "status": "confirmed",
+        "size": "M"
+      },
+      {
+        "id": "Q-04",
+        "title": "Sanitizers",
+        "status": "new",
+        "size": "M"
+      },
+      {
+        "id": "Q-05",
+        "title": "Fuzz the wire decoders",
+        "status": "new",
+        "size": "M"
+      },
+      {
+        "id": "Q-06",
+        "title": "Two-machine test rig",
+        "status": "new",
+        "size": "M"
+      },
+      {
+        "id": "Q-07",
+        "title": "Kill and converge",
+        "status": "new",
+        "size": "M"
+      },
+      {
+        "id": "Q-08",
+        "title": "Randomised differential testing",
+        "status": "new",
+        "size": "L"
+      },
+      {
+        "id": "Q-09",
+        "title": "Large and sparse files",
+        "status": "unverified",
+        "size": "S"
+      },
+      {
+        "id": "Q-10",
+        "title": "Option parser versus popt",
+        "status": "code",
+        "size": "M"
+      },
+      {
+        "id": "Q-11",
+        "title": "Progress rendering tests",
+        "status": "new",
+        "size": "S"
+      },
+      {
+        "id": "Q-12",
+        "title": "Internal cleanups",
+        "status": "code",
+        "size": "M"
+      },
+      {
+        "id": "Q-13",
+        "title": "Docs",
+        "status": "new",
+        "size": "S"
+      }
+    ]
+  }
+]

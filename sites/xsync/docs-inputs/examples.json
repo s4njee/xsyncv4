@@ -1,0 +1,349 @@
+{
+  "binary_version": "xs  version 0.1.0  protocol version 4  git d3a49f8872fd",
+  "rsync_version": "rsync  version 3.2.7  protocol version 31",
+  "platform": "Linux",
+  "examples": {
+    "itemize-new": {
+      "caption": "Itemize a fresh copy",
+      "command": "xs -ai src/ dst/",
+      "exit_code": 0,
+      "stdout": "cd+++++++++ ./\ncd+++++++++ archive/\n>f+++++++++ archive/2026-q3.log\ncd+++++++++ docs/\n>f+++++++++ docs/guide.md\ncd+++++++++ docs/images/\n>f+++++++++ docs/images/diagram.svg\ncL+++++++++ latest -> notes.txt\n>f+++++++++ notes.txt\ncd+++++++++ scripts/\n>f+++++++++ scripts/build.sh\n",
+      "stderr": "",
+      "remote": false,
+      "remote_helper": "current"
+    },
+    "itemize-changes": {
+      "caption": "Itemize every kind of change: content, time, mode, owner, group, access time, ACL, xattr, symlink target, new device and FIFO, deletion",
+      "command": "xs -aiXAUD --delete src/ dst/",
+      "exit_code": 0,
+      "stdout": ".f....o.u.. archive/2026-q3.log\n.d..t...... docs/\n>f+++++++++ docs/faq.md\n>f..t...u.. docs/guide.md\n.d........x docs/images/\n.f......ua. docs/images/diagram.svg\ncLc........ latest -> docs/guide.md\n>f.s...g... notes.txt\ncD+++++++++ null\ncS+++++++++ queue\n.f...p..u.. scripts/build.sh\n*deleting   stale.txt\n",
+      "stderr": "",
+      "remote": false,
+      "remote_helper": "current"
+    },
+    "itemize-unchanged": {
+      "caption": "Repeat -i to list unchanged entries too",
+      "command": "xs -aii src/ dst/",
+      "exit_code": 0,
+      "stdout": ".d          ./\n.d          archive/\n.f          archive/2026-q3.log\n.d          docs/\n.f          docs/guide.md\n.d          docs/images/\n.f          docs/images/diagram.svg\n.L          latest -> notes.txt\n.f          notes.txt\n.d          scripts/\n.f          scripts/build.sh\n",
+      "stderr": "",
+      "remote": false,
+      "remote_helper": "current"
+    },
+    "itemize-hardlinks": {
+      "caption": "Hard-link groups with -H",
+      "command": "xs -aiH src/ dst/",
+      "exit_code": 0,
+      "stdout": "cd+++++++++ ./\ncd+++++++++ archive/\n>f+++++++++ archive/2026-q3.log\ncd+++++++++ docs/\n>f+++++++++ docs/guide.md\ncd+++++++++ docs/images/\n>f+++++++++ docs/images/diagram.svg\n>f+++++++++ docs/notes-link.txt\ncL+++++++++ docs/readme-link.md -> guide.md\nhL+++++++++ docs/readme.md => docs/readme-link.md\ncL+++++++++ latest -> notes.txt\nhf+++++++++ notes.txt => docs/notes-link.txt\ncd+++++++++ scripts/\n>f+++++++++ scripts/build.sh\n",
+      "stderr": "",
+      "remote": false,
+      "remote_helper": "current"
+    },
+    "itemize-checksum": {
+      "caption": "Same size and time, different content: only -c notices",
+      "command": "xs -aci src/ dst/",
+      "exit_code": 0,
+      "stdout": ".f..t...... docs/guide.md\n>fc........ notes.txt\n",
+      "stderr": "",
+      "remote": false,
+      "remote_helper": "current"
+    },
+    "itemize-no-times": {
+      "caption": "Without -t, updated files get the transfer time (T)",
+      "command": "xs -rli src/ dst/",
+      "exit_code": 0,
+      "stdout": ">f.sT...... notes.txt\n",
+      "stderr": "",
+      "remote": false,
+      "remote_helper": "current"
+    },
+    "dry-run-mirror": {
+      "caption": "Preview a mirror",
+      "command": "xs -ani --delete src/ dst/",
+      "exit_code": 0,
+      "stdout": ".d..t...... ./\n.d..t...... docs/\n>f+++++++++ docs/draft.md\n.d..t...... docs/images/\n*deleting   docs/images/diagram.svg\n*deleting   old/\n*deleting   old/a.txt\n*deleting   old/b.txt\nwould transfer 1 files (6B), delete 4\n",
+      "stderr": "",
+      "remote": false,
+      "remote_helper": "current"
+    },
+    "out-format": {
+      "caption": "Choose the fields of each file line",
+      "command": "xs -a --out-format='%o %i %-24n %10l %b' src/ dst/",
+      "exit_code": 0,
+      "stdout": "send cd+++++++++ ./                             4096 0\nsend cd+++++++++ archive/                       4096 0\nsend >f+++++++++ archive/2026-q3.log         1288895 1288895\nsend cd+++++++++ docs/                          4096 0\nsend >f+++++++++ docs/guide.md                    33 33\nsend cd+++++++++ docs/images/                   4096 0\nsend >f+++++++++ docs/images/diagram.svg          42 42\nsend cL+++++++++ latest                            9 0\nsend >f+++++++++ notes.txt                        14 14\nsend cd+++++++++ scripts/                       4096 0\nsend >f+++++++++ scripts/build.sh                 21 21\n",
+      "stderr": "",
+      "remote": false,
+      "remote_helper": "current"
+    },
+    "stats": {
+      "caption": "Transfer statistics",
+      "command": "xs -a --stats src/ dst/",
+      "exit_code": 0,
+      "stdout": "\nNumber of files: 10 (reg: 5, dir: 4, link: 1)\nNumber of created files: 10 (reg: 5, dir: 4, link: 1)\nNumber of deleted files: 0\nNumber of regular files transferred: 5\nTotal file size: 1,289,005 bytes\nTotal transferred file size: 1,289,005 bytes\nDelta literal data: 0 bytes\nDelta matched data: 0 bytes\nTotal bytes sent: 1,289,005\nTotal bytes received: 0\n\nsent 1,289,005 bytes  received 0 bytes  271,018,632.93 bytes/sec\ntotal size is 1,289,005  speedup is 1.00\n",
+      "stderr": "",
+      "remote": false,
+      "remote_helper": "current"
+    },
+    "list": {
+      "caption": "List a directory’s entries",
+      "command": "xs src/",
+      "exit_code": 0,
+      "stdout": "drwxr-xr-x          4,096 2026/10/10 12:00:00 .\nlrwxrwxrwx              9 2026/10/10 12:00:00 latest\n-rw-r--r--             14 2026/10/10 12:00:00 notes.txt\ndrwxr-xr-x          4,096 2026/10/10 12:00:00 archive\ndrwxr-xr-x          4,096 2026/10/10 12:00:00 docs\ndrwxr-xr-x          4,096 2026/10/10 12:00:00 scripts\n",
+      "stderr": "",
+      "remote": false,
+      "remote_helper": "current"
+    },
+    "list-recursive": {
+      "caption": "List recursively, with symlink targets",
+      "command": "xs -r src/docs",
+      "exit_code": 0,
+      "stdout": "drwxr-xr-x          4,096 2026/10/10 12:00:00 docs\n-rw-r--r--             33 2026/10/10 12:00:00 docs/guide.md\ndrwxr-xr-x          4,096 2026/10/10 12:00:00 docs/images\n-rw-r--r--             42 2026/10/10 12:00:00 docs/images/diagram.svg\n",
+      "stderr": "",
+      "remote": false,
+      "remote_helper": "current"
+    },
+    "files-from": {
+      "caption": "Copy a list of names relative to the source",
+      "command": "printf 'notes.txt\\ndocs/guide.md\\n' | xs -ai --files-from=- src/ dst/",
+      "exit_code": 0,
+      "stdout": "cd+++++++++ docs/\n>f+++++++++ docs/guide.md\n>f+++++++++ notes.txt\n",
+      "stderr": "",
+      "remote": false,
+      "remote_helper": "current"
+    },
+    "relative": {
+      "caption": "Keep the path after /./",
+      "command": "xs -aiR src/./docs/guide.md dst/",
+      "exit_code": 0,
+      "stdout": "cd+++++++++ docs/\n>f+++++++++ docs/guide.md\n",
+      "stderr": "",
+      "remote": false,
+      "remote_helper": "current"
+    },
+    "filter-include": {
+      "caption": "Copy only Markdown files, keeping their directories",
+      "command": "xs -ai -m --include='*/' --include='*.md' --exclude='*' src/ dst/",
+      "exit_code": 0,
+      "stdout": "cd+++++++++ ./\ncd+++++++++ docs/\n>f+++++++++ docs/guide.md\n",
+      "stderr": "",
+      "remote": false,
+      "remote_helper": "current"
+    },
+    "max-delete": {
+      "caption": "Stop when a mirror would delete too much",
+      "command": "xs -a --delete --max-delete=1 src/ dst/; echo \"exit status: $?\"",
+      "exit_code": 0,
+      "stdout": "exit status: 25\n",
+      "stderr": "xs: Deletions stopped due to --max-delete limit (1)\nxs: error summary: 1 error (showing first 1)\n  deletion limit (code 25): 1 error\n    Deletions stopped due to --max-delete limit (1)\nxs error: the --max-delete limit stopped deletions (code 25)\n",
+      "remote": false,
+      "remote_helper": "current"
+    },
+    "link-dest": {
+      "caption": "A dated snapshot that hard-links unchanged files",
+      "command": "xs -ai --link-dest=../2026-10-09 src/ snapshots/2026-10-10/\nstat -c \"%h links  %n\" snapshots/2026-10-10/notes.txt snapshots/2026-10-10/docs/guide.md",
+      "exit_code": 0,
+      "stdout": "created directory snapshots/2026-10-10\n>f.st...... notes.txt\n1 links  snapshots/2026-10-10/notes.txt\n2 links  snapshots/2026-10-10/docs/guide.md\n",
+      "stderr": "",
+      "remote": false,
+      "remote_helper": "current"
+    },
+    "push": {
+      "caption": "Push over SSH",
+      "command": "xs -azi src/ host:backup/",
+      "exit_code": 0,
+      "stdout": "cd+++++++++ ./\ncd+++++++++ archive/\n<f+++++++++ archive/2026-q3.log\ncd+++++++++ docs/\n<f+++++++++ docs/guide.md\ncd+++++++++ docs/images/\n<f+++++++++ docs/images/diagram.svg\ncL+++++++++ latest -> notes.txt\n<f+++++++++ notes.txt\ncd+++++++++ scripts/\n<f+++++++++ scripts/build.sh\n",
+      "stderr": "",
+      "remote": true,
+      "remote_helper": "current"
+    },
+    "pull": {
+      "caption": "Pull over SSH",
+      "command": "xs -azi host:backup/ restore/",
+      "exit_code": 0,
+      "stdout": "cd+++++++++ ./\ncd+++++++++ archive/\n>f+++++++++ archive/2026-q3.log\ncd+++++++++ docs/\n>f+++++++++ docs/guide.md\ncd+++++++++ docs/images/\n>f+++++++++ docs/images/diagram.svg\ncL+++++++++ latest -> notes.txt\n>f+++++++++ notes.txt\ncd+++++++++ scripts/\n>f+++++++++ scripts/build.sh\n",
+      "stderr": "",
+      "remote": true,
+      "remote_helper": "current"
+    },
+    "push-stats": {
+      "caption": "Wire and compression totals for a push",
+      "command": "xs -az --stats src/ host:backup/",
+      "exit_code": 0,
+      "stdout": "\nNumber of files: 10 (reg: 5, dir: 4, link: 1)\nNumber of created files: 10 (reg: 5, dir: 4, link: 1)\nNumber of deleted files: 0\nNumber of regular files transferred: 5\nTotal file size: 1,289,005 bytes\nTotal transferred file size: 1,289,005 bytes\nDelta literal data: 0 bytes\nDelta matched data: 0 bytes\nTotal bytes sent: 114,170\nTotal bytes received: 132\n\nsent 114,170 bytes  received 132 bytes  2,399,162.63 bytes/sec\ntotal size is 1,289,005  speedup is 11.28\n",
+      "stderr": "",
+      "remote": true,
+      "remote_helper": "current"
+    },
+    "fallback-option": {
+      "caption": "An option xs does not implement runs rsync instead",
+      "command": "xs -a --backup src/ dst/\nls dst/notes.txt*",
+      "exit_code": 0,
+      "stdout": "dst/notes.txt\ndst/notes.txt~\n",
+      "stderr": "xs: falling back to rsync: --backup is not supported by xs\n",
+      "remote": false,
+      "remote_helper": "current"
+    },
+    "strict-option": {
+      "caption": "The same request with fallback disabled",
+      "command": "xs --no-fallback -a --backup src/ dst/; echo \"exit status: $?\"",
+      "exit_code": 0,
+      "stdout": "exit status: 1\n",
+      "stderr": "xs: --backup is not supported by xs (fallback disabled)\n",
+      "remote": false,
+      "remote_helper": "current"
+    },
+    "fallback-helper": {
+      "caption": "No xs on the remote host: rsync carries the transfer",
+      "command": "xs -az src/ host:backup/; echo \"exit status: $?\"",
+      "exit_code": 0,
+      "stdout": "exit status: 0\n",
+      "stderr": "xs: falling back to rsync: remote xs is not installed on host\n",
+      "remote": true,
+      "remote_helper": "none"
+    },
+    "strict-helper": {
+      "caption": "No xs on the remote host, fallback disabled",
+      "command": "xs --no-fallback -az src/ host:backup/; echo \"exit status: $?\"",
+      "exit_code": 0,
+      "stdout": "exit status: 127\n",
+      "stderr": "xs: remote xs is not installed on host (fallback disabled)\n",
+      "remote": true,
+      "remote_helper": "none"
+    },
+    "usage-error": {
+      "caption": "A malformed value",
+      "command": "xs --no-fallback -a --bwlimit=fast src/ dst/; echo \"exit status: $?\"",
+      "exit_code": 0,
+      "stdout": "exit status: 1\n",
+      "stderr": "xs: --bwlimit requires a nonnegative rate: fast\nxs error: syntax or usage error (code 1)\n",
+      "remote": false,
+      "remote_helper": "current"
+    },
+    "missing-source": {
+      "caption": "A source that does not exist",
+      "command": "xs -a missing/ dst/; echo \"exit status: $?\"",
+      "exit_code": 0,
+      "stdout": "exit status: 23\n",
+      "stderr": "xs: link_stat \"missing/\" failed: No such file or directory (2)\nxs: error summary: 1 error (showing first 1)\n  partial transfer (code 23): 1 error\n    link_stat \"missing/\" failed: No such file or directory (2)\nxs error: some files/attrs were not transferred (see previous errors) (code 23)\n",
+      "remote": false,
+      "remote_helper": "current"
+    },
+    "strict-feature": {
+      "caption": "A helper without hard-link support, fallback disabled",
+      "command": "xs --no-fallback -aH src/ host:backup/; echo \"exit status: $?\"",
+      "exit_code": 0,
+      "stdout": "exit status: 4\n",
+      "stderr": "xs: connection unexpectedly closed\nxs error: exiting (code 12)\nxs: peer does not support hard-link preservation (fallback disabled)\n",
+      "remote": true,
+      "remote_helper": "feature subset"
+    },
+    "fallback-feature": {
+      "caption": "The same helper with fallback enabled",
+      "command": "xs -aH src/ host:backup/; echo \"exit status: $?\"\nstat -c \"%h links  %n\" backup/notes.txt",
+      "exit_code": 0,
+      "stdout": "exit status: 0\n2 links  backup/notes.txt\n",
+      "stderr": "xs: connection unexpectedly closed\nxs error: exiting (code 12)\nxs: falling back to rsync: peer does not support hard-link preservation\n",
+      "remote": true,
+      "remote_helper": "feature subset"
+    },
+    "recipe-snapshots": {
+      "caption": "Dated snapshots that share unchanged files",
+      "command": "snapshot() {\n  previous=$(ls -1 snapshots | tail -n 1)\n  xs -a ${previous:+--link-dest=../$previous} src/ \"snapshots/$1/\"\n}\nsnapshot 2026-10-09\nprintf 'Action items\\n' >> src/notes.txt\nsnapshot 2026-10-10\nls snapshots\nstat -c '%h links  %n' snapshots/*/notes.txt snapshots/*/docs/guide.md",
+      "exit_code": 0,
+      "stdout": "2026-10-09\n2026-10-10\n1 links  snapshots/2026-10-09/notes.txt\n1 links  snapshots/2026-10-10/notes.txt\n2 links  snapshots/2026-10-09/docs/guide.md\n2 links  snapshots/2026-10-10/docs/guide.md\n",
+      "stderr": "",
+      "remote": false,
+      "remote_helper": "current"
+    },
+    "mirror-execute": {
+      "caption": "Run the reviewed mirror with a deletion limit",
+      "command": "xs -ai --delete --max-delete=10 src/ dst/",
+      "exit_code": 0,
+      "stdout": ".d..t...... ./\n.d..t...... docs/\n>f+++++++++ docs/draft.md\n.d..t...... docs/images/\n*deleting   docs/images/diagram.svg\n*deleting   old/\n*deleting   old/a.txt\n*deleting   old/b.txt\n",
+      "stderr": "",
+      "remote": false,
+      "remote_helper": "current"
+    },
+    "recipe-install": {
+      "caption": "Install xs on a host that does not have it, then push natively",
+      "command": "export XSYNC_RELEASE_DIR=releases\nxs --install user@pi\nxs -azi --no-fallback src/ user@pi:backup/ | tail -n 3",
+      "exit_code": 0,
+      "stdout": "Installed xs-linux-amd64 on user@pi at ~/.local/bin/xs\nxs  version 0.1.0  protocol version 4  git d3a49f8872fd\n<f+++++++++ notes.txt\ncd+++++++++ scripts/\n<f+++++++++ scripts/build.sh\n",
+      "stderr": "",
+      "remote": true,
+      "remote_helper": "none"
+    },
+    "recipe-find": {
+      "caption": "Copy the files find selects, with NUL delimiters",
+      "command": "(cd src && find . -name '*.md' -print0) | xs -ai0 --files-from=- src/ dst/",
+      "exit_code": 0,
+      "stdout": "cd+++++++++ ./\ncd+++++++++ docs/\n>f+++++++++ docs/guide.md\n>f+++++++++ docs/odd\\#012name.md\n",
+      "stderr": "",
+      "remote": false,
+      "remote_helper": "current"
+    },
+    "recipe-cron": {
+      "caption": "A scheduled backup that logs and keeps the exit status",
+      "command": "cat > backup.sh <<'SH'\n#!/bin/sh\nlog=backup.log\nxs -a --delete --log-file=\"$log\" --out-format='%t %i %n' src/ dst/ > /dev/null\nstatus=$?\necho \"$(date -u '+%Y/%m/%d %H:%M:%S') finished with exit status $status\" >> \"$log\"\nexit $status\nSH\nsh backup.sh; echo \"exit status: $?\"\nhead -n 3 backup.log; tail -n 1 backup.log",
+      "exit_code": 0,
+      "stdout": "exit status: 0\n2026/10/10 16:32:52 cd+++++++++ ./\n2026/10/10 16:32:52 cd+++++++++ archive/\n2026/10/10 16:32:52 >f+++++++++ archive/2026-q3.log\n2026/10/10 16:32:52 finished with exit status 0\n",
+      "stderr": "",
+      "remote": false,
+      "remote_helper": "current"
+    },
+    "recipe-overnight": {
+      "caption": "A bandwidth-limited push that gives up on a stalled link",
+      "command": "xs -az --bwlimit=2M --timeout=60 --stats src/ host:backup/ | tail -n 4",
+      "exit_code": 0,
+      "stdout": "Total bytes received: 138\n\nsent 114,201 bytes  received 138 bytes  1,239,824.17 bytes/sec\ntotal size is 1,289,005  speedup is 11.27\n",
+      "stderr": "",
+      "remote": true,
+      "remote_helper": "current"
+    },
+    "recipe-preserve": {
+      "caption": "Preserve hard links, ACLs and extended attributes (Linux)",
+      "command": "xs -aHAXi src/ dst/ | head -n 6\ngetfacl -c dst/notes.txt | grep nobody; getfattr -d dst/docs/guide.md 2>/dev/null | grep origin || python3 -c \"import os; print(os.getxattr('dst/docs/guide.md', 'user.origin'))\"",
+      "exit_code": 0,
+      "stdout": "cd+++++++++ ./\ncd+++++++++ archive/\n>f+++++++++ archive/2026-q3.log\ncd+++++++++ docs/\n>f+++++++++ docs/guide.md\ncd+++++++++ docs/images/\nuser:nobody:r--\nb'scanner'\n",
+      "stderr": "",
+      "remote": false,
+      "remote_helper": "current"
+    },
+    "json-complete": {
+      "caption": "The final JSON record of a transfer",
+      "command": "xs -a --progress=json src/ dst/ 2>&1 >/dev/null | jq -c 'select(.type == \"complete\")'",
+      "exit_code": 0,
+      "stdout": "{\"type\":\"complete\",\"elapsed_ms\":2,\"files\":5,\"files_total\":5,\"bytes\":1289005,\"bytes_total\":1289005,\"files_seen\":5,\"wire_bytes\":0,\"phase\":\"complete\",\"deleted\":0,\"verified\":0,\"scanning\":false,\"dry_run\":false,\"success\":true,\"exit_code\":0}\n",
+      "stderr": "",
+      "remote": false,
+      "remote_helper": "current"
+    },
+    "json-files": {
+      "caption": "Transferred files from JSON events",
+      "command": "xs -a --progress=json src/ dst/ 2>&1 >/dev/null | jq -r 'select(.type == \"file\") | [.code, .size, .path] | @tsv' | sort -k3",
+      "exit_code": 0,
+      "stdout": ">f+++++++++\t1288895\tarchive/2026-q3.log\n>f+++++++++\t33\tdocs/guide.md\n>f+++++++++\t42\tdocs/images/diagram.svg\n>f+++++++++\t14\tnotes.txt\n>f+++++++++\t21\tscripts/build.sh\n",
+      "stderr": "",
+      "remote": false,
+      "remote_helper": "current"
+    },
+    "json-python": {
+      "caption": "A Python consumer that ignores diagnostics and reports the outcome",
+      "command": "xs -a --delete --progress=json src/ dst/ 2> events.ndjson\npython3 - events.ndjson <<'PY'\nimport json, sys\nevents = [json.loads(line) for line in open(sys.argv[1]) if line.startswith('{')]\nfiles = [e for e in events if e['type'] == 'file']\ndone = events[-1]\nprint(f\"{len(files)} files, {sum(e['bytes'] for e in files):,} bytes sent\")\nprint(f\"deleted {done['deleted']}, exit {done['exit_code']}, success {done['success']}\")\nPY",
+      "exit_code": 0,
+      "stdout": "5 files, 1,289,005 bytes sent\ndeleted 1, exit 0, success True\n",
+      "stderr": "",
+      "remote": false,
+      "remote_helper": "current"
+    },
+    "progress2": {
+      "caption": "rsync-shaped progress lines on a pipe",
+      "command": "xs -a --info=progress2 src/ dst/ 2>&1 | tail -1",
+      "exit_code": 0,
+      "stdout": "      1,289,005 100%  347.89MB/s    0:00:00 (xfr#5, to-chk=0/5)\n",
+      "stderr": "",
+      "remote": false,
+      "remote_helper": "current"
+    }
+  }
+}
