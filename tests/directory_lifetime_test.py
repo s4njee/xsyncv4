@@ -84,6 +84,13 @@ class DirectoryLifetimeTests(unittest.TestCase):
         self.send(directory(('child',), children=1)); self.need(0)
         self.rejected(wire.frame(5, b'') + wire.frame(6, b'\0'))
 
+    def test_data_end_requires_list_end(self):
+        self.send(directory()); self.need(0)
+        self.rejected(wire.frame(6, b'\0'))
+
+    def test_empty_registry_does_not_allow_a_missing_root(self):
+        self.rejected(wire.frame(5, b'') + wire.frame(6, b'\0'))
+
     def test_count_cannot_exceed_listing(self):
         self.rejected(directory(('child',), children=2))
 

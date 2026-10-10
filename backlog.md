@@ -3713,7 +3713,7 @@ after U-01's evidence entry completes P2, as requested by the user.
   files. It is now 512 batches of at most 64 files. Sender and receiver queues
   prioritize pending read/DATA work instead of accumulating more listings.
   These are scheduling thresholds, not a claim of a strict byte-memory bound.
-- Seven focused lifetime/trust tests pass on macOS and Linux, and all 231/227
+- Nine focused lifetime/trust tests pass on macOS and Linux, and all 231/227
   differential cases pass. The 15 mixed-protocol tests pass; P0, range, resume,
   delta, prune-stream and compression checks also pass with existing skips.
 - `benchmarks/large_tree.py` prepares deterministic 16-byte files in groups of
@@ -3724,3 +3724,23 @@ after U-01's evidence entry completes P2, as requested by the user.
   measurements are next, with a stated limit of 512 MiB for each measured xs
   process peak (not a combined process-tree RSS claim). No such result is
   assumed from the smaller correctness tests.
+
+### F-09 full-size fixture checkpoint — 2026-10-10
+
+- Freya completes and independently inventories 5,000,000 files in 5,000
+  directories, totaling 80,000,000 logical bytes. The generator took 250.8 s.
+  Neo preparation waits on the ext4 runner's work lock and additionally checks
+  its complete, verified result before beginning, so it cannot overlap that
+  filesystem measurement.
+- The generator's initial space estimate incorrectly treated ZFS's 128 KiB
+  statvfs accounting unit as the minimum allocation of each tiny file. It now
+  reserves 4 KiB data plus 4 KiB metadata per file on both source and destination
+  (81.92 GB for this fixture); freya reports about 1.8 TB available. Fixture
+  preparation is exclusively locked, and an empty directory left by a failed
+  setup can be recovered. Inventory/resume/corruption/concurrency checks pass.
+- End-of-transfer validation now requires LIST_END and a root DIR even when
+  every directory has retired. The expanded nine-case tests and all 231/227
+  differential cases pass. Frozen native-peer range tests pass all five cases
+  on each platform with no frozen-peer skip.
+- Transfer memory measurements remain required; preparing the full-size
+  source is not evidence that an xs transfer meets the 512 MiB process budget.

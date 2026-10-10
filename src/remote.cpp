@@ -2435,7 +2435,7 @@ struct Receiver {
           if (gens.load() == 0) g_stats.scan_done.store(true);
           break;
         case F_DATA_END: {
-          if ((g_opt.prune_empty || g_opt.file_requests) && !list_end.load())
+          if (!list_end.load())
             die(RERR_PROTOCOL, "protocol error: DATA_END before LIST_END");
           RBuf r(payload);
           sender_code = (int)r.var();
@@ -2477,6 +2477,7 @@ struct Receiver {
     g_stats.scan_done.store(true);
     check_xattr_values_drained();
     // DATA_END cannot turn missing records or an undrained attempt into success.
+    if (seen_dirs.empty() || !seen_dirs[0]) die(RERR_PROTOCOL, "protocol error: file list has no root directory");
     if (!big.empty()) die(RERR_PROTOCOL, "protocol error: incomplete file data");
     for (auto& d : dirs)
       if (d && (d->w.pending.load() != 0 || !d->gen_done || !d->children_known || d->children_remaining))
