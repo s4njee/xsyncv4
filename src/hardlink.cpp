@@ -71,6 +71,14 @@ OutputEvent linked_event(const Member& member, const Member& anchor, bool alread
   event.hardlink_target = !already;
   if (!member.existed || member.before.type != member.attrs.type) event.code = "hf+++++++++";
   else if (event.code.empty()) event.code = ".f         ";
+  if (already && g_opt.dry_run) {
+    // No anchor metadata has been written yet. Retain the alias's planned
+    // changes instead of replacing them with the post-write shared-inode row.
+    event.code = item_code(event.code.c_str(), member.attrs);
+    event.code[0] = 'h';
+    event.code[1] = kind(member.attrs.type);
+    return event;
+  }
   if (already) event.code = shared_xattrs ? "hf........x" : "hf         ";
   event.code = item_code(event.code.c_str(), member.attrs);
   event.code[0] = 'h';
@@ -173,7 +181,10 @@ std::vector<std::string> hardlink_finalize() {
       // rsync also reports already-linked aliases when a metadata-only anchor
       // changed xattrs. The aliases share the write even without a new link.
       bool shared_xattrs = already && anchor->event && anchor->event->code[0] == '.' && anchor->event->code[10] == 'x';
-      if (!already || shared_xattrs || g_opt.output_unchanged) output_event(linked_event(*member, *anchor, already, shared_xattrs));
+      bool preview_attrs = already && g_opt.dry_run && member->event &&
+                           member->event->code.find_first_not_of(". ", 2) != std::string::npos;
+      if (!already || shared_xattrs || preview_attrs || g_opt.output_unchanged)
+        output_event(linked_event(*member, *anchor, already, shared_xattrs));
     }
     if ((g_opt.fileflags || anchor->restore_flags) && !g_opt.dry_run && anchor->attrs.type != T_LNK)
       check_attr(destination_fileflags(anchor->path.c_str(), anchor->attrs.fileflags, false,

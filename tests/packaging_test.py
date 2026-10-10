@@ -45,7 +45,9 @@ class PackagingTests(unittest.TestCase):
         while '\b' in plain:
             import re
             plain = re.sub('.\x08', '', plain)
-        for option in ('--install', '--no-fallback', '--safe-links', '--atomic', '--delete'):
+        for option in ('--install', '--no-fallback', '--safe-links', '--atomic', '--delete',
+                       '--chown', '--chmod', '--hard-links', '--xattrs', '--acls',
+                       '--atimes', '--crtimes', '--fileflags', '--executability'):
             self.assertIn(option, plain)
         self.assertTrue((self.prefix / 'share/zsh/site-functions/_xsync').exists())
         self.assertFalse((self.prefix / 'include').exists(), 'dependency headers leaked into the package')

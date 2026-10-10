@@ -2200,3 +2200,34 @@ Verified artifact manifest (source `864bd37edf14`):
 - **Remaining:** final metadata composition and packaging. Combined dry-run
   checks exposed missing permission/ownership/time/ACL markers on existing
   hard-link aliases; this must be repaired before E-10 can be marked complete.
+
+## E-10 progress — 2026-10-09: combined metadata and output checks
+
+- Existing hard-link aliases now retain their planned permission, ownership,
+  time, ACL and xattr markers during dry-run. Actual linked-inode updates still
+  report the completed anchor's shared metadata writes. The combined preview
+  originally differed from rsync in all three directions and now matches.
+- Regular-file output captures original destination identities in the transient
+  output object. Whole/delta retries compare final incoming ownership against
+  those identities, adding or clearing owner/group markers correctly. This adds
+  no per-entry file-list memory. **72** root Linux mutation cases cover local,
+  push and pull, atomic/in-place writes, user/group/both overrides, initially
+  matching source IDs and initially matching final IDs.
+- `tests/metadata_composition_test.py` checks **10** Darwin and **nine** Linux
+  rsync differentials combining H/AX/U, chmod/chown and, on Darwin, N/flags.
+  Modes, identities, bytes, ACLs, xattrs, times, hard-link identities and the
+  ordinary itemized fields match modern rsync. Flags are checked independently
+  against source stat because of the upstream U/flags defect recorded above.
+  Dry-run leaves destination metadata/data unchanged. The Darwin clone case
+  clears set-ID bits with its incoming rule and verifies zero transferred bytes
+  for the changed file, so it exercises an actual clone. Blocking source flags
+  are applied after all shared-inode times have been set in the fixture.
+- Passing logs: `/tmp/xsync-e10-composition-mac3.log` (**28** methods, three
+  skips), `/tmp/xsync-e10-composition-mac-verified.log` (**24**, one skip),
+  `/tmp/xsync-e10-composition-intel-verified.log` (**24**, one skip),
+  `/tmp/xsync-e10-composition-linux-final.log` (**16**), and
+  `/tmp/xsync-e10-composition-mac-clone.log`. Initial fixture atime observations
+  and immutable aliases were corrected; the production preview and fresh-ID
+  output failures were reproduced, repaired and rerun.
+- **Remaining before E-10 completion:** release builds, packaged metadata
+  checks and installation/manual verification. P1 remains **17/22**.

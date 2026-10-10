@@ -21,13 +21,20 @@ class OwnershipRaceTests(unittest.TestCase):
         for direction in ('local', 'push', 'pull'):
             for whole in (False, True):
                 for inplace in (False, True):
-                    for target, expected in (('0', (0, 60003)), (':0', (60002, 0)), ('0:0', (0, 0))):
-                        with self.subTest(direction=direction, whole=whole, inplace=inplace, target=target):
+                    for target, expected, basis, marks in (
+                        ('0', (0, 60003), (60000, 60001), b'og'),
+                        (':0', (60002, 0), (60000, 60001), b'og'),
+                        ('0:0', (0, 0), (60000, 60001), b'og'),
+                        ('0', (0, 60003), (60002, 60003), b'o.'),
+                        (':0', (60002, 0), (60002, 60003), b'.g'),
+                        ('0:0', (0, 0), (60002, 60003), b'og'),
+                    ):
+                        with self.subTest(direction=direction, whole=whole, inplace=inplace, target=target, basis=basis):
                             delta.DeltaTests.prepare(self, self.data + b'end', self.data)
-                            os.chown(self.source, 60000, 60001); os.chown(self.dest, 60004, 60005)
+                            os.chown(self.source, 60000, 60001); os.chown(self.dest, *basis)
                             self.source.chmod(0o755); self.dest.chmod(0o640)
                             marker = self.root / 'source-read'
-                            command = [str(delta.BINARY), '--no-fallback', '--no-clone', '-j8', '-a', '--chown=' + target]
+                            command = [str(delta.BINARY), '--no-fallback', '--no-clone', '-j8', '-ai', '--chown=' + target]
                             if whole: command += ['--whole-file']
                             if inplace: command += ['--inplace']
                             source, dest = str(self.source), str(self.dest)
@@ -56,6 +63,9 @@ class OwnershipRaceTests(unittest.TestCase):
                                 st = self.dest.stat()
                                 self.assertEqual((st.st_uid, st.st_gid), expected)
                                 self.assertEqual(st.st_mode & 0o7777, 0o755)
+                                rows = [line for line in out.splitlines() if line[:1] in (b'>', b'<')]
+                                self.assertEqual(len(rows), 1, out)
+                                self.assertEqual(rows[0][6:8], marks, out)
                                 self.assertEqual(self.dest.read_bytes(), self.data + b'end')
                                 st = self.source.stat(); self.assertEqual((st.st_uid, st.st_gid), (60002, 60003))
                             finally:

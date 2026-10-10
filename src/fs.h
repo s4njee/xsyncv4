@@ -110,6 +110,8 @@ struct OutFile {
   bool temp = false;
   bool existed = false;
   u32 created_mode = 0;
+  bool basis_identity = false;
+  u32 basis_uid = 0, basis_gid = 0;  // Original destination for fresh-source itemization.
   bool cloned_flags = false;
   u32 clone_fileflags = 0;
   i64 size = -1;  // final length when known (needed to truncate --inplace updates)

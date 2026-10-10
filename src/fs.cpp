@@ -1382,6 +1382,7 @@ bool out_open(OutFile& f, DirWork& w, u32 idx, Worker& t, bool force_temp, bool 
   f.cloned_flags = false, f.clone_fileflags = 0;
   f.size = -1;
   f.existed = s.flags & EF_EXISTS;
+  f.basis_identity = false;
   auto p = destination_path(f.path);
   if (p.fd < 0) {
     file_io_error(errno, f.path.c_str(), "open destination parent");
@@ -1389,6 +1390,13 @@ bool out_open(OutFile& f, DirWork& w, u32 idx, Worker& t, bool force_temp, bool 
   }
   f.name = p.name;
   f.dir_fd = p.release();
+  if (f.existed && !(s.item_flags & IF_NEW_TYPE) && o.output_attrs && (o.owner || o.group)) {
+    struct stat basis;
+    if (fstatat(f.dir_fd, f.name.c_str(), &basis, AT_SYMLINK_NOFOLLOW) == 0 && S_ISREG(basis.st_mode)) {
+      f.basis_identity = true;
+      f.basis_uid = basis.st_uid, f.basis_gid = basis.st_gid;
+    }
+  }
   auto failed = [&](const char* operation) {
     int error = errno;
     close(f.dir_fd);
@@ -1528,6 +1536,14 @@ bool out_finish(OutFile& f, DirWork& w, u32 idx, Worker&, bool ok, const Entry* 
   close(f.dir_fd);
   f.dir_fd = -1;
   w.modified.store(true, std::memory_order_relaxed);
+  if (f.basis_identity) {
+    // A stable retry can change an omitted owner/group after the list was
+    // compared. Itemize its final incoming identity against the original inode.
+    Entry& listed = w.src.e[idx];
+    listed.item_flags &= (u8)~(IF_OWNER | IF_GROUP);
+    if (o.owner && o.am_root && f.basis_uid != s.uid) listed.item_flags |= IF_OWNER;
+    if (o.group && f.basis_gid != s.gid && can_set_gid(s.gid)) listed.item_flags |= IF_GROUP;
+  }
   if (have_published) hardlink_complete(w, idx, s, &published, f.cloned_flags && defer_links);
   return true;
 }
