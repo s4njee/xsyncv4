@@ -154,6 +154,15 @@ hashes, versions, load and free space. Partial runs do not establish completion.
 The [completed F-12 comparison](results/20261010-f12-deletion-summary.md) records
 all 32 verified samples, the single-root result and the additional CPU cost.
 
+`subtree_clones.py` compares a clean leaf-only reference, the bounded subtree
+candidate and rsync on nested APFS fixtures below, near and above the 4,096
+descendant-entry transaction limit. It measures `-a` and `-rlt` with umask 0077,
+one excluded warmup per tool/case, and six complete tool-order permutations.
+All 108 timed copies and 18 warmups require independent checksum/metadata
+verification; source metadata must remain unchanged. Use a fresh owned work
+directory and clean identified products. `--smoke-fixtures` checks the harness
+on small fixtures and does not qualify full-size performance.
+
 `large_files.py` compares the prior product, one- and four-worker candidates,
 and rsync on two-file and single-file fixtures. It covers local byte copies,
 automatic kernel copies, and plain/compressed pipe transfers. Each tool gets

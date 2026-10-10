@@ -136,7 +136,7 @@ The benchmark so far is one corpus slice, one machine, one filesystem, no networ
 | F-07 | **APFS byte-copy ceiling.** Creation is ~100 µs per file and does not scale with threads here; system time triples from 2 to 8 threads for no gain. Unknown: how much is path-lookup contention versus the filesystem itself, and how much is the nearly full volume. | partial | Re-measure on a volume with free space; try `openat`-relative creation; pick the thread count per filesystem instead of always using all performance cores. | M |
 | F-08 | **No-op re-sync burns CPU.** 0.40 s wall but 2.7 s of system time at 8 threads. | confirmed | Wall time unchanged or better with under 1 s of CPU; or an opt-in manifest that skips listing the destination entirely. | M |
 | F-09 | **Memory on very large trees.** The receiver keeps every directory record until exit; the local engine holds up to 200,000 pending files. Never run beyond 77k files. | partial | A 5-million-file synthetic tree syncs within a stated memory bound; receiver frees a directory once it and its children are finished. | M |
-| F-10 | **Whole-subtree clones.** Only leaf directories are cloned in one call. A missing subtree could be one call, at the price of a long volume-wide lock. | new | Bounded version (subtrees under N entries, known from the scan) measured against the leaf-only path. | M |
+| F-10 | **Whole-subtree clones.** Only leaf directories are cloned in one call. A missing subtree could be one call, at the price of a long volume-wide lock. | partial | Bounded version (subtrees under N entries, known from the scan) measured against the leaf-only path. | M |
 | F-11 | **Clones when `-a` is incomplete.** `-rt` or `-rlt` fall back to byte copies because the clone would bring the wrong mode. | **done** | Clone, then correct mode/owner; still cheaper than create+write. | S |
 | F-12 | **Deletion is single-threaded.** Removing the 96,000-entry benchmark tree takes about 10 s with `rm`; `--delete` of a large stale subtree will feel the same. | **done** | Parallel removal by subtree. | S |
 | F-13 | **Tiny transfers.** For one file over ssh the fixed costs dominate: thread pool start, handshake round trip. | done | A single small file over ssh is within 10 ms of rsync. | S |
@@ -3830,3 +3830,47 @@ after U-01's evidence entry completes P2, as requested by the user.
   negative outcomes, before its temporary fixtures are removed. The production
   reference, 85% floor, 24 samples and actual measured binaries are unchanged.
   This is self-test validation, not a new production performance pass.
+
+### F-09 Pi fixture and hosted Linux checkpoint — 2026-10-10
+
+- Neo completes and independently inventories the second five-million-file
+  fixture: 5,000 directories and 80,000,000 logical bytes in 449.1 s, including
+  the final inventory. Its local memory test starts after preparation releases
+  the prior work lock; both paired directions follow sequentially. Preparing
+  the fixture does not prove the transfer memory bound. F-09 remains partial.
+- Run 38085939767 finishes. Linux passes all 18 production scenarios with
+  exactly 1,296 verified timed records, 54 warmups and 24 samples per tool/case.
+  The worst candidate/reference relative median is 97.64%, above the unchanged
+  85% floor. The clean candidate is 742bbd5fbe38 and its raw JSON is retained.
+- The overall run fails because macOS stopped in the previously recorded
+  healthy self-test; it did not run its production matrix. The repaired
+  self-test and later source changes require a new hosted run.
+
+### F-10 bounded subtree implementation — 2026-10-10
+
+- Missing compatible subtrees can clone in one transaction after their complete
+  source inventory is checked. Each transaction allows at most 4,096 descendant
+  entries and 32 directory levels. Counts include all siblings, files, symlinks
+  and directories. Over-limit, deep, filtered and incompatible subtrees fall
+  back to ordinary walking, which may clone smaller eligible children.
+- Each nested directory receives its own mode/group correction and final
+  timestamp. Files and symlinks retain F-11's omitted-permission/selected-group
+  behavior. A successful directory clone explicitly updates the same pinned
+  parent's mtime: the direct APFS probe shows clonefile/clonefileat leave it
+  unchanged, whereas mkdir updates it. The nontrailing-source differential
+  failures are corrected without changing test expectations.
+- Six focused interposition tests pass, including exact 4,096/4,097-entry
+  boundaries across siblings, depth overflow, unrequested/unsafe links,
+  EXDEV fallback and source immutability. All 231 macOS differential cases
+  and the 14 macOS-specific checks pass (one existing skip).
+- The wider checks reproduce a final-directory swap failure with frozen
+  3fee9c2d9714 before subtree cloning. Final attributes now verify the target
+  is a directory and apply mode/mtime through that descriptor. Unchanged
+  directories need no new open. Both 231/227 differential suites and both
+  thirteen-case P0 suites pass (two existing Linux skips).
+- `benchmarks/subtree_clones.py` compares bounded, near-limit and oversized
+  shapes with the leaf-only reference and rsync, for `-a` and `-rlt`. Six
+  complete tool-order permutations plus excluded warmups produce 108 timed
+  records and 18 warmups, independently verified. Its small harness matrix
+  passes all 126 copies. Full-size frozen-product performance measurements
+  remain required; F-10 stays partial.
