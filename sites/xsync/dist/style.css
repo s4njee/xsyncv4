@@ -24,3 +24,4 @@ body{isolation:isolate}
 @media(max-width:720px){.eyebrow{flex-wrap:wrap}.motion-toggle{font-size:8px;padding:4px 7px}.eyebrow-rule{display:none}#fluid-motion{opacity:.55}}
 @media(prefers-reduced-motion:reduce){#fluid-motion{opacity:.25;transition:none}}
 @media(max-width:390px){.hero h1{font-size:43px}}
+.site-header nav a{white-space:nowrap}@media(max-width:420px){.site-header nav>a:first-child{display:none}}

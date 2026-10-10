@@ -4,7 +4,7 @@ title: xs-changes(7)
 name: Changelog
 summary: What changed in each version, with links to the backlog stories behind each entry.
 group: PROJECT
-after: architecture
+after: tech
 ---
 
 ## CHANGES {#changes}

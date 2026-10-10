@@ -357,3 +357,17 @@ message. The first is now fixed (`d3a49f8`): the missing-helper, shell-banner an
 wrong-magic diagnostics say `xs`, `tests/fallback_test.py` asserts their wording, and
 the site's examples and recordings were recaptured. Decision 1 is resolved, and so is
 its CLI follow-up.
+
+### Added after S1 — Tech stack page (2026-10-10)
+
+`tech.html`, linked as **Tech** in the manual's top nav and in the product-page header,
+explains the stack and the trade-offs behind it: C++20 and the standard-library features
+actually used, XXH3 hashing, zstd, ICU, the system interfaces, the own protocol with rsync
+fallback, build and release, testing, and this site.
+
+The page states plainly that xs does **not** use BLAKE3. Every transfer-path hash is
+XXH3-64 or XXH3-128, and the only BLAKE-family hash is the test harness's `blake2b`.
+It explains where a cryptographic hash would matter. Because the repository records no
+design rationale, the page labels its reasons as trade-offs, not quotes. On phones, the
+product header now hides "Transfer demo" below 420 px (the hero links there) so the new
+link fits.
