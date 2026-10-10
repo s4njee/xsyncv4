@@ -416,7 +416,8 @@ Things worth knowing when reading these numbers:
   one call per directory, no per-file `stat`) by a pool of threads; source and destination
   listings are merge-joined to decide what to do.
 - **Parallel transfer.** Files are copied by a thread pool in batches per directory. The
-  scan runs ahead of the copy, so totals are known almost immediately.
+  scan runs ahead of the copy, while queued transfers take priority once the
+  backlog grows. Local copies switch priority at 512 batches of up to 64 files.
 - **Copy-on-write clones.** On APFS, a local copy with `-a`, `-rt` or `-rlt` clones files
   instead of copying bytes, then applies the requested mode and ownership. An
   eligible new directory that holds only files and symlinks is cloned in a single call.
@@ -427,6 +428,11 @@ Things worth knowing when reading these numbers:
   small files together. Blocks are zstd-compressed (`-z`) and decompressed on multiple
   threads, checksummed with XXH3, and written by a thread pool. Listing, reading,
   compressing and writing all overlap.
+  Peers that negotiate the optional directory-child count release a receiver
+  directory record after its requested files and children finish. Active worker
+  tasks retain their own references. Older peers keep the original wire layout
+  and release completed records after the end of the file list. Final directory
+  metadata and deletion plans remain retained until tree finalization.
 
 ## Progress display
 
@@ -832,6 +838,7 @@ python3 tests/mac_specific_test.py  # sockets, immutable files, dataless policy 
 # Optional real cloud hydration: XSYNC_ICLOUD_FILE=/path/to/an/opted-in/dataless/file python3 tests/mac_specific_test.py
 python3 tests/p0_test.py                                  # trust and injected I/O races
 python3 tests/wire_test.py                                # hostile receiver protocol peers
+python3 tests/directory_lifetime_test.py                  # late/missing children, retired IDs and parent lifetime
 python3 tests/mount_test.py                               # macOS: disposable APFS image
 ./tests/ssh-rig.sh                                        # Docker: real SSH + SIGINT
 ./tests/ssh-rig.sh ssh_reach_test.py fallback_test.py        # prompts + fallback

@@ -984,7 +984,7 @@ int run_local(const std::vector<std::string>& srcs, const std::string& dest) {
   progress_start(n);
   // Scanning has priority so that totals are known before the bulk of the copying starts; the
   // backlog limit bounds memory on huge trees.
-  L.pool.q1_soft_limit = 200000;
+  L.pool.q1_soft_limit = 512;  // batches contain at most 64 files each
   L.pool.lifo0 = true;
   L.pool.idle_check = [] {
     g_stats.scan_done.store(true);

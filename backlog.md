@@ -135,7 +135,7 @@ The benchmark so far is one corpus slice, one machine, one filesystem, no networ
 | F-06 | **Linux scan path.** macOS uses `getattrlistbulk`; Linux uses `readdir` plus one `fstatat` per entry. | partial | `getdents64` + `statx`, optionally batched with io_uring; measured against rsync on a no-op re-sync of the corpus on ext4. | M |
 | F-07 | **APFS byte-copy ceiling.** Creation is ~100 µs per file and does not scale with threads here; system time triples from 2 to 8 threads for no gain. Unknown: how much is path-lookup contention versus the filesystem itself, and how much is the nearly full volume. | partial | Re-measure on a volume with free space; try `openat`-relative creation; pick the thread count per filesystem instead of always using all performance cores. | M |
 | F-08 | **No-op re-sync burns CPU.** 0.40 s wall but 2.7 s of system time at 8 threads. | confirmed | Wall time unchanged or better with under 1 s of CPU; or an opt-in manifest that skips listing the destination entirely. | M |
-| F-09 | **Memory on very large trees.** The receiver keeps every directory record until exit; the local engine holds up to 200,000 pending files. Never run beyond 77k files. | code | A 5-million-file synthetic tree syncs within a stated memory bound; receiver frees a directory once it and its children are finished. | M |
+| F-09 | **Memory on very large trees.** The receiver keeps every directory record until exit; the local engine holds up to 200,000 pending files. Never run beyond 77k files. | partial | A 5-million-file synthetic tree syncs within a stated memory bound; receiver frees a directory once it and its children are finished. | M |
 | F-10 | **Whole-subtree clones.** Only leaf directories are cloned in one call. A missing subtree could be one call, at the price of a long volume-wide lock. | new | Bounded version (subtrees under N entries, known from the scan) measured against the leaf-only path. | M |
 | F-11 | **Clones when `-a` is incomplete.** `-rt` or `-rlt` fall back to byte copies because the clone would bring the wrong mode. | **done** | Clone, then correct mode/owner; still cheaper than create+write. | S |
 | F-12 | **Deletion is single-threaded.** Removing the 96,000-entry benchmark tree takes about 10 s with `rm`; `--delete` of a large stale subtree will feel the same. | **done** | Parallel removal by subtree. | S |
@@ -3696,3 +3696,31 @@ after U-01's evidence entry completes P2, as requested by the user.
   optimization is needed to satisfy the measured target on this pair.
 - F-06's full-corpus local ext4 no-op comparison starts separately after these
   checks finish. F-06 remains partial until its verified samples complete.
+
+### F-09 directory retirement implemented — 2026-10-10
+
+- Native peers negotiate an optional child-count field (feature bit 35) in
+  each DIR body. A receiver releases its registry reference when generation,
+  requested files and all declared children finish. Worker tasks and DATA
+  callbacks hold shared references, and an ID bitmap still rejects duplicate
+  DIRs after retirement. Ancestor release uses a loop rather than recursion.
+- Legacy peers keep their original DIR layout. Their completed directories
+  retire after LIST_END, when all incoming child references are known. Missing
+  declared children, extra children and incomplete file data cannot turn
+  DATA_END into success. Final directory attributes and deletion plans keep
+  their existing end-of-transfer behavior.
+- The local priority threshold was 200,000 *batches*, rather than individual
+  files. It is now 512 batches of at most 64 files. Sender and receiver queues
+  prioritize pending read/DATA work instead of accumulating more listings.
+  These are scheduling thresholds, not a claim of a strict byte-memory bound.
+- Seven focused lifetime/trust tests pass on macOS and Linux, and all 231/227
+  differential cases pass. The 15 mixed-protocol tests pass; P0, range, resume,
+  delta, prune-stream and compression checks also pass with existing skips.
+- `benchmarks/large_tree.py` prepares deterministic 16-byte files in groups of
+  1,000, validates resumed files without overwriting changed payloads, checks
+  disk/inode capacity and records the actual complete inventory. The small
+  harness check verifies inventory, exact resume and corruption refusal.
+- F-09 remains partial. The required 5-million-file local and paired transfer
+  measurements are next, with a stated limit of 512 MiB for each measured xs
+  process peak (not a combined process-tree RSS claim). No such result is
+  assumed from the smaller correctness tests.

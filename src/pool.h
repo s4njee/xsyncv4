@@ -13,6 +13,7 @@
 struct Task {
   int kind = 0;
   void* ptr = nullptr;
+  std::shared_ptr<void> owner;  // optional lifetime for work removed from a registry
   u32 a = 0, b = 0;
   std::string s;
 };

@@ -89,6 +89,18 @@ The [current-product tiny-transfer check](results/20261010-f13-tiny-summary.md)
 verifies 48 fresh transfers. Push medians favor xs by 20.32 ms; pull medians
 cost an extra 8.95 ms, meeting the 10 ms target in both directions.
 
+`large_tree.py --root ROOT` prepares the memory-story fixture: 5,000,000 regular
+files in 5,000 directories, with 16-byte index-derived payloads and fixed modes
+and timestamps. ROOT must have the existing benchmark ownership marker. It
+checks free bytes and inodes, saves durable progress and independently counts
+the finished fixture. `--resume` verifies existing payloads before continuing;
+it refuses to overwrite corruption or adopt unexpected source entries.
+Run local and paired `run.py --scenarios fresh` cases separately after other
+physical-host benchmarks finish. Each copy needs independent checksum/metadata
+verification. The stated F-09 budget is 512 MiB per measured xs process peak;
+this is not the summed simultaneous RSS across SSH and both endpoints. The
+five-million-file measurements remain pending.
+
 The [APFS no-op diagnostic](results/20261010T152712Z-apfs-baseline-summary.md)
 records the current binary's cost at 1, 2, 4 and 8 threads. Its host had high
 background load and the volume was 98% full; quieter/free-volume measurements

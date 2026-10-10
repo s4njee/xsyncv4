@@ -1071,6 +1071,9 @@ struct Sender {
     }
     if (o.peer_features & PF_XATTRS) put_xattrs(body, d->attrs_xattrs);
     if (o.peer_features & PF_NATIVE_ACL) put_acls(body, d->attrs_xattrs);
+    if (o.peer_features & PF_DIR_CHILDREN)
+      put_var(body, (o.recursive || d->selection) ?
+        std::count_if(l.e.begin(), l.e.end(), [](const Entry& e) { return e.type == T_DIR && e.rdev != 1; }) : 0);
     put_var(body, l.e.size());
     u64 nf = 0, nd = 0, nl = 0, ns = 0, nb = 0;
     for (size_t i = 0; i < l.e.size(); i++) {
@@ -1589,6 +1592,7 @@ struct Sender {
     root->prelisted = true;
     int n = default_jobs();
     pool.scan_workers = std::max(1, n / 2);
+    pool.q1_soft_limit = 64;  // drain reads before keeping more source listings
     pool.idle_check = [this] {
       if (walks.load() != 0 || needs_recv != dirs_sent_a.load()) return false;
       g_stats.scan_done.store(true);
@@ -1642,6 +1646,8 @@ struct RDir {
   u32 id = 0, parent_plus1 = 0, pidx = 0;
   u8 flags = 0;
   bool gen_done = false;        // guarded by Receiver::dmu
+  bool children_known = false;  // negotiated count, or legacy LIST_END
+  u64 children_remaining = 0, children_seen = 0, children_expected = 0;
   bool file_ranges = true;
   std::vector<Task> waiters;    // children that arrived before our generator ran
   std::unordered_map<u32, ResumePrefix> prefixes;
@@ -1677,7 +1683,8 @@ struct Receiver {
   IdMaps ids;
   std::string dest;
   std::mutex dmu;
-  std::vector<RDir*> dirs;
+  std::vector<std::shared_ptr<RDir>> dirs;
+  std::vector<bool> seen_dirs;  // retired IDs must still reject duplicate DIRs
   std::vector<Task> staged;
   std::mutex bmu;
   std::unordered_map<u64, std::shared_ptr<BigFile>> big;
@@ -1716,13 +1723,38 @@ struct Receiver {
 
   Receiver(Conn& conn, bool is_client) : c(conn), client(is_client) {}
 
-  RDir* dir(u32 id) {
+  std::shared_ptr<RDir> dir(u32 id) {
     std::lock_guard<std::mutex> lk(dmu);
     return id < dirs.size() ? dirs[id] : nullptr;
   }
 
+  void retire(std::shared_ptr<RDir> d) {
+    // Child completion can release a chain of ancestors. Drop the registry's
+    // ownership under the lock; active DATA/generator/signature tasks retain
+    // their own references until their callbacks finish.
+    while (d) {
+      std::shared_ptr<RDir> parent;
+      {
+        std::lock_guard<std::mutex> lock(dmu);
+        if (!d->gen_done || !d->children_known || d->children_remaining ||
+            d->w.pending.load() || !dirs[d->id]) return;
+        dirs[d->id].reset();
+        if (d->parent_plus1) {
+          parent = dirs[d->parent_plus1 - 1];
+          if (!parent || !parent->children_remaining)
+            die(RERR_PROTOCOL, "protocol error: directory child accounting underflow");
+          --parent->children_remaining;
+        }
+      }
+      d = std::move(parent);
+    }
+  }
+
   void done_one(RDir& d) {
-    if (d.w.pending.fetch_sub(1) == 1) finish_dir(d.w);
+    if (d.w.pending.fetch_sub(1) == 1) {
+      finish_dir(d.w);
+      retire(dir(d.id));
+    }
   }
 
   void complete_file(RDir& d, u32 idx) {
@@ -1738,7 +1770,7 @@ struct Receiver {
     if (!delta_enabled()) die(RERR_PROTOCOL, "protocol error: unnegotiated delta request");
     RBuf r(payload);
     u64 id = r.var(), idx = r.var();
-    RDir* d;
+    std::shared_ptr<RDir> d;
     {
       std::lock_guard<std::mutex> lock(dmu);
       d = id < dirs.size() ? dirs[(size_t)id] : nullptr;
@@ -1754,7 +1786,7 @@ struct Receiver {
         die(RERR_PROTOCOL, "protocol error: duplicate delta request");
     }
     Task task;
-    task.kind = K_SIGNATURE, task.ptr = d, task.a = (u32)idx;
+    task.kind = K_SIGNATURE, task.ptr = d.get(), task.owner = d, task.a = (u32)idx;
     pool.push(0, std::move(task));
   }
 
@@ -1823,8 +1855,19 @@ struct Receiver {
       w.xattrs_loaded = w.attrs_xattrs_loaded = true;
       if (!w.attrs_xattrs.complete) { g_source_io_error.store(true); err_line(RERR_PARTIAL, "incomplete source directory metadata"); }
     }
+    if (o.peer_features & PF_DIR_CHILDREN) {
+      u64 count = r.var();
+      std::lock_guard<std::mutex> lock(dmu);
+      if (r.bad || count > (1u << 28) || d->children_seen > count)
+        die(RERR_PROTOCOL, "protocol error: bad directory child count");
+      d->children_remaining = count;
+      d->children_expected = count;
+      d->children_known = true;
+    }
     size_t n = (size_t)r.var();
     if (r.bad || n > (1u << 28)) die(RERR_PROTOCOL, "protocol error: bad DIR frame");
+    if ((o.peer_features & PF_DIR_CHILDREN) && d->children_expected > n)
+      die(RERR_PROTOCOL, "protocol error: directory child count exceeds listing");
     DirList& l = w.src;
     l.e.resize(n);
     if (metadata_enabled()) w.src_xattrs.resize(n);
@@ -1924,7 +1967,7 @@ struct Receiver {
     if (!d->parent_plus1) {
       if (!w.rel.empty()) die(RERR_PROTOCOL, "protocol error: nonempty root path");
     } else {
-      RDir* parent = dir(d->parent_plus1 - 1);
+      auto parent = dir(d->parent_plus1 - 1);
       if (!parent || d->pidx >= parent->w.src.e.size()) die(RERR_PROTOCOL, "protocol error: bad parent in DIR frame");
       const auto& entry = parent->w.src.e[d->pidx];
       if ((entry.type != T_DIR && entry.type != T_NONE) || w.rel != rel_join(parent->w.rel, parent->w.src.name_sv(entry)))
@@ -1943,7 +1986,7 @@ struct Receiver {
       w.has_attrs = d->flags & DF_ATTRS;
       go = setup_dest(dest, w, d->flags & DF_SINGLE);
     } else {
-      RDir* p = dir(d->parent_plus1 - 1);
+      auto p = dir(d->parent_plus1 - 1);
       if (!p || d->pidx >= p->w.src.e.size()) die(RERR_PROTOCOL, "protocol error: bad parent in DIR frame");
       const Entry& pe = p->w.src.e[d->pidx];
       if ((pe.type != T_DIR && pe.type != T_NONE) || w.rel != rel_join(p->w.rel, p->w.src.name_sv(pe)))
@@ -2065,7 +2108,7 @@ struct Receiver {
     g_stats.compression_wire.fetch_add(payload.size() - 9);
     if (XXH3_64bits(raw.data(), raw.size()) != want) die(RERR_STREAMIO, "data corruption detected in transfer stream");
     RBuf r(raw);
-    RDir* d = nullptr;
+    std::shared_ptr<RDir> d;
     std::optional<DestinationDirectory> directory;
     u32 pinned_id = UINT32_MAX;
     while (!r.empty()) {
@@ -2298,7 +2341,7 @@ struct Receiver {
   void on_dir(std::string& payload) {
     if (list_end.load()) die(RERR_PROTOCOL, "protocol error: DIR after LIST_END");
     RBuf h(payload);
-    RDir* d = new RDir;
+    auto d = std::make_shared<RDir>();
     d->id = (u32)h.var();
     d->parent_plus1 = (u32)h.var();
     d->pidx = (u32)h.var();
@@ -2307,17 +2350,25 @@ struct Receiver {
       die(RERR_PROTOCOL, "protocol error: bad DIR header");
     Task t;
     t.kind = K_GEN;
-    t.ptr = d;
+    t.ptr = d.get();
+    t.owner = d;
     t.s = std::move(payload);
     gens.fetch_add(1);
     {
       std::lock_guard<std::mutex> lk(dmu);
-      if (dirs.size() <= d->id) dirs.resize(std::max<size_t>(d->id + 1, dirs.size() * 2));
-      if (dirs[d->id]) die(RERR_PROTOCOL, "protocol error: duplicate directory");
+      if (dirs.size() <= d->id) {
+        dirs.resize(std::max<size_t>(d->id + 1, dirs.size() * 2));
+        seen_dirs.resize(dirs.size());
+      }
+      if (seen_dirs[d->id]) die(RERR_PROTOCOL, "protocol error: duplicate directory");
+      seen_dirs[d->id] = true;
       dirs[d->id] = d;
       if (d->parent_plus1) {
-        RDir* p = d->parent_plus1 - 1 < dirs.size() ? dirs[d->parent_plus1 - 1] : nullptr;
+        auto p = d->parent_plus1 - 1 < dirs.size() ? dirs[d->parent_plus1 - 1] : nullptr;
         if (!p) die(RERR_PROTOCOL, "protocol error: DIR frame before its parent");
+        if (++p->children_seen > p->children_expected && p->children_known)
+          die(RERR_PROTOCOL, "protocol error: too many child directories");
+        if (!(g_opt.peer_features & PF_DIR_CHILDREN)) ++p->children_remaining;
         if (!g_opt.prune_empty && !g_opt.file_requests && !p->gen_done) {
           p->waiters.push_back(std::move(t));
           return;
@@ -2367,6 +2418,14 @@ struct Receiver {
         case F_MSG: handle_msg(payload); break;
         case F_LIST_END:
           if (list_end.exchange(true)) die(RERR_PROTOCOL, "protocol error: duplicate LIST_END");
+          if (!(g_opt.peer_features & PF_DIR_CHILDREN)) {
+            std::vector<std::shared_ptr<RDir>> completed;
+            {
+              std::lock_guard<std::mutex> lock(dmu);
+              for (auto& d : dirs) if (d) { d->children_known = true; completed.push_back(d); }
+            }
+            for (auto& d : completed) retire(d);
+          }
           if (g_opt.prune_empty || g_opt.file_requests) {
             if (staged.empty()) die(RERR_PROTOCOL, "protocol error: LIST_END without a root directory");
             Task task;
@@ -2402,6 +2461,8 @@ struct Receiver {
     c.send(std::move(identity));
     int n = default_jobs();
     pool.max_bytes = 64 << 20;
+    pool.scan_workers = std::max(1, n / 2);
+    pool.q1_soft_limit = 16;  // DATA backlog takes priority over more generators
     pool.idle_check = [this] { return data_end; };
     std::thread rt([this] { reader(); });
     pool.start(n, [this](Task& t, Worker& w) {
@@ -2417,8 +2478,9 @@ struct Receiver {
     check_xattr_values_drained();
     // DATA_END cannot turn missing records or an undrained attempt into success.
     if (!big.empty()) die(RERR_PROTOCOL, "protocol error: incomplete file data");
-    for (RDir* d : dirs)
-      if (d && d->w.pending.load() != 0) die(RERR_PROTOCOL, "protocol error: missing requested file completion");
+    for (auto& d : dirs)
+      if (d && (d->w.pending.load() != 0 || !d->gen_done || !d->children_known || d->children_remaining))
+        die(RERR_PROTOCOL, "protocol error: incomplete directory or file data");
     if (sender_code) g_source_io_error.store(true);
     if (client) report_peer_error(sender_code, "errors were reported by the sender");
     finalize_tree();
