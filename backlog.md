@@ -3938,3 +3938,16 @@ after U-01's evidence entry completes P2, as requested by the user.
 - Build, correctness and default-budget performance validation are queued
   after the frozen normalization/subtree comparisons. The current hosted
   433d1ed18a7e run is left uninterrupted. F-07 stays partial until validation.
+
+### Hosted Linux gate for subtree source passed — 2026-10-10
+
+- Run 38088401309's Linux job passes all 18 production scenarios with 1,296
+  verified timed records and 54 warmups, exactly 24 samples per tool/case.
+  Its worst candidate/reference relative median is 99.48% on the compressed
+  single-file case, above the unchanged 85% floor.
+- The healthy self-test, verified slowdown rejection and zero-exit corruption
+  rejection also pass their expected verdicts. Their result JSONs and logs,
+  plus the production raw result, are retained with the
+  `20261010-ci-38088401309-linux` prefix.
+- This qualifies clean 433d1ed18a7e on Linux. macOS is still running its
+  production matrix, and the newer APFS worker budget needs its own validation.
