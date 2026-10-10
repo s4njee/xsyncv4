@@ -49,6 +49,9 @@ class GateTests(unittest.TestCase):
         self.assertTrue(data['complete'])
         self.assertTrue(data['passed'])
         self.assertEqual(len(data['records']), 8 * 3 * 3)
+        self.assertEqual(len(data['warmups']), 8 * 3)
+        self.assertTrue(all(r['verified'] and r['warmup'] for r in data['warmups']))
+        self.assertTrue(all(not r['warmup'] for r in data['records']))
         self.assertTrue(all(r['verified'] for r in data['records']))
 
     def test_real_slowdown_fails_after_successful_verification(self):

@@ -84,7 +84,8 @@ samples a separate no-op with `/usr/bin/sample`, then verifies it independently.
 with the same Release configuration on each Linux and macOS runner. It measures
 13 scenarios: fresh/no-op/checksum/1% update locally and through the pipe
 transport, compressed pipe copies, large copies and a tiny pipe transfer.
-Each tool receives five samples in rotated order, with independent rsync
+Each tool receives one verified warmup excluded from the ratios and six samples
+in all six orders, with independent rsync
 checksum/metadata verification after every sample. Setup is untimed.
 
 For each scenario, the job records a minimum speedup relative to rsync equal
@@ -106,4 +107,4 @@ the platform and workflow run.
 exercises real transfers with a healthy binary, an intentionally delayed binary
 and a corrupt binary that exits successfully. Its small fixtures and relaxed
 test policy validate gate behavior on busy developer machines; CI's production
-measurements use the checked-in five-sample, 85% policy and larger fixtures.
+measurements use the checked-in six-sample, 85% policy and larger fixtures.

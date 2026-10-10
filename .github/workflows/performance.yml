@@ -73,7 +73,7 @@ jobs:
           with tarfile.open(fileobj=io.BytesIO(archive)) as tree:
               tree.extractall(source, filter='data')
           subprocess.run(['cmake', '-S', str(source), '-B', 'build-reference', '-G', 'Ninja',
-                          '-DCMAKE_BUILD_TYPE=Release', '-DXSYNC_GIT_HASH='+policy['reference'],
+                          '-DCMAKE_BUILD_TYPE=Release', '-DXSYNC_GIT_HASH='+policy['reference'][:12],
                           '-DICU_ROOT='+os.environ['XS_GATE_ICU_ROOT']], check=True)
           subprocess.run(['cmake', '--build', 'build-reference', '--target', 'xsync', '-j2'], check=True)
           PY

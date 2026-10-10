@@ -113,7 +113,7 @@ def main(argv=None):
                'initial_loadavg': list(os.getloadavg()), 'cache': 'retained OS caches',
                'policy': policy, 'policy_sha256': hashlib.sha256(args.policy.read_bytes()).hexdigest(),
                'samples_per_tool': samples, 'smoke_fixtures': args.smoke_fixtures,
-               'records': [], 'ratios': []}
+               'warmups_per_tool': 1, 'warmups': [], 'records': [], 'ratios': []}
     def save():
         args.output.parent.mkdir(parents=True, exist_ok=True)
         temporary = args.output.with_suffix('.json.tmp')
@@ -133,7 +133,9 @@ def main(argv=None):
         orders = list(itertools.permutations(('rsync', 'reference', 'candidate')))
         for case in cases:
             dataset, flags, pipe, seeded = CASES[case]
-            for run in range(samples):
+            # Warm code and fixture caches equally, then rotate through all six
+            # orders in production so no tool is favored by its position.
+            for run in range(-1, samples):
                 for tool in orders[run % len(orders)]:
                     name = case + '-' + tool
                     destination = destinations / name
@@ -170,9 +172,11 @@ def main(argv=None):
                     metrics.update({'case': case, 'tool': tool, 'run': run + 1, 'verified': True,
                                     'command': command, 'remote': peer,
                                     'stdout': stdout.read_text(errors='replace'), 'stderr': stderr.read_text(errors='replace')})
-                    results['records'].append(metrics)
+                    metrics['warmup'] = run < 0
+                    results['warmups' if run < 0 else 'records'].append(metrics)
                     save()
-                    print(f"{case} {tool} {run+1}/{samples}: {metrics['wall_seconds']:.4f}s verified", flush=True)
+                    label = 'warmup' if run < 0 else f'{run+1}/{samples}'
+                    print(f"{case} {tool} {label}: {metrics['wall_seconds']:.4f}s verified", flush=True)
                     shutil.rmtree(destination)
             medians = {tool: statistics.median(r['wall_seconds'] for r in results['records'] if r['case'] == case and r['tool'] == tool)
                        for tool in binaries}

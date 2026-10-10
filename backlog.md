@@ -3190,3 +3190,13 @@ after U-01's evidence entry completes P2, as requested by the user.
   passes with one optional iCloud skip; all 231 itemized differential cases,
   13 permission tests and three clone-progress checks pass. Final measurement
   of the combined path is pending.
+
+### F-02 repeatability evidence — 2026-10-10
+
+- Run 38068477468 attempt 2 completed and verified all 195 macOS samples.
+  It failed three scenarios: pipe no-op, pipe checksum and large local. The
+  earlier local/update/large-pipe/compression failures passed on this rerun.
+  The shifting failures with unchanged product source establish timing
+  instability on the shared macOS runner, rather than a product regression.
+- Both failed raw measurements are preserved. The six-order/warmup revision
+  retains the original floor and will receive a new hosted validation run.
