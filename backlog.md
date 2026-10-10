@@ -2,7 +2,7 @@
 
 Initial audit written 2026-10-08 against xsync 0.1.0 (protocol 1).
 All fifteen P0 stories completed against protocol 3; per-story evidence is below.
-P1 R-02 through R-09 and E-01 through E-10 are complete (18 of 22 stories). Current protocol 4 supports protocol 3. E-11's sparse and snapshot implementations are verified; release validation remains. Remaining P1 stories are R-01 and E-11 through E-13.
+P1 R-02 through R-09 and E-01 through E-11 are complete (19 of 22 stories). Current protocol 4 supports protocol 3. Remaining P1 stories are R-01, E-12 and E-13.
 Problem statements retain the original audit findings.
 
 ## What "daily driver" means here
@@ -97,7 +97,7 @@ coverage clarification remains open.
 | E-08 | **Filter completeness.** Global rule sides, single/per-directory merge files, `-F`, merge modifiers, global CVS rules/`-C`, `-m`, and `--delete-after` reloading newly transferred receiver merge files are implemented and verified. | **done** | 231/231 difftest (expanded from 159); a differential fuzzer against rsync for the new rule kinds, checked into `tests/`. | L |
 | E-09 | **`--files-from`, `-R`, `--from0`.** Common in backup scripts and with `find … -print0`. | **done** | Implemented for local and remote, including the "implied directories" semantics of `-R`. | L |
 | E-10 | **Metadata beyond `-a`.** `-H` hard links, `-X` xattrs, `-A` ACLs, `-N` creation times, `-U` atimes, BSD file flags, `-E`, `--chmod`, `--chown`. Also an inconsistency to resolve: the clone path already carries xattrs and ACLs while the byte-copy and remote paths drop them. | **done** | `-H` and `-X` first (most used on macOS). Without `-X`, both paths behave the same — either strip on clone or document that clones are a superset. | XL |
-| E-11 | **Backup-style options.** `--backup`/`--backup-dir`, `--link-dest`, `--compare-dest`, `--remove-source-files`, `--append`, real `-S` sparse handling, `--preallocate`. | **in progress** | Native `-S` and `--link-dest` are implemented and verified; release validation remains. Other backup options fall back to rsync via R-02 until needed. | L |
+| E-11 | **Backup-style options.** `--backup`/`--backup-dir`, `--link-dest`, `--compare-dest`, `--remove-source-files`, `--append`, real `-S` sparse handling, `--preallocate`. | **done** | Native `-S` and `--link-dest` are implemented and verified on universal/static releases. Other backup options fall back to rsync via R-02 until needed. | L |
 | E-12 | **macOS specifics.** Dataless iCloud files (reading triggers a download; cloning may not), immutable (`uchg`) destination files, sockets (rsync creates them, xsync skips silently), paths beyond `PATH_MAX` (tested to 40 levels only). | unverified | One test each; behaviour documented where it differs. | M |
 | E-13 | **Broken stdout.** `xsync -av … \| head` — rsync dies on EPIPE; xsync's behaviour is unknown. | unverified | Exits promptly with the right code and does not keep copying silently. | S |
 
@@ -2398,3 +2398,40 @@ Verified artifact manifest (source `864bd37edf14`):
   `/tmp/xsync-e11-linkdest-protocol.log`, and `/tmp/xsync-e11-backup-ssh.log`.
   E-11 remains in progress until universal/static releases are rebuilt and tested;
   P1 remains **18/22**. R-01 still needs reachable physical-host targets.
+
+
+## E-11 complete — 2026-10-09: packaged sparse and snapshot transfers
+
+- **Done; P1 is 19/22.** Native -S and --link-dest cover the backup workflows;
+  backup/backup-dir, compare/copy-dest, append, remove-source-files and preallocate
+  continue using the established rsync fallback. Strict mode rejects those
+  delegated options before transfer. E-12 is next; R-01 remains open.
+- Clean universal macOS and musl Linux amd64/arm64 artifacts identify source
+  commit **c5d66ab422d0**. Linux binaries pass the scratch-image and release smoke
+  checks, including sparse and xattr worker-stack units during their builds.
+  The macOS executable contains both architectures and no third-party dynamic
+  dependencies. All three artifacts are recorded in dist/manifest.json.
+- Packaged snapshot/sparse/metadata checks pass **22 methods** (one SSH skip)
+  on both macOS ARM and Intel. Intel fault tests re-inject the universal test
+  library after arch launches, so cross-device and replacement faults actually
+  run. Packaged Linux checks pass **39 methods** (one permission skip) for each
+  static architecture, covering snapshot differentials, sparse allocation,
+  metadata composition and wire guards. Static Linux cannot use LD_PRELOAD;
+  replacement and EXDEV injection are verified with the corresponding dynamic
+  Linux build rather than counted as static-artifact failures or successes.
+- The final dynamic Linux snapshot suite passes **14 methods** (one SSH skip).
+  Existing/ignore-existing/update guards preserve their normal precedence over
+  prior snapshots; the independent macOS guard method also passes.
+  The macOS universal sparse C++ unit passes, and installation into a disposable
+  prefix passes **two methods** for executable/manual/completion behavior.
+- Logs: `/tmp/xsync-e11-clean-releases.log`,
+  `/tmp/xsync-e11-release-mac-arm.log`,
+  `/tmp/xsync-e11-release-mac-intel2.log`,
+  `/tmp/xsync-e11-release-linux-amd64-verified.log`,
+  `/tmp/xsync-e11-release-linux-arm64-verified.log`,
+  `/tmp/xsync-e11-release-sparse-unit.log`,
+  `/tmp/xsync-e11-release-install.log`,
+  `/tmp/xsync-e11-linkdest-linux-final.log`, and
+  `/tmp/xsync-e11-linkdest-dest-guards2.log`.
+  Failed diagnostic runs are excluded from this evidence. Releases and the
+  source archive are local artifacts; no remote helper was installed or PR pushed.

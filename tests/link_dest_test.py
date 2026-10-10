@@ -328,12 +328,21 @@ class LinkDestFailures(unittest.TestCase):
         if DARWIN: command += ['-arch', 'arm64', '-arch', 'x86_64']
         else: command.append('-ldl')
         subprocess.run(command, check=True, capture_output=True)
+        cls.injected_binary = transfer.BINARY
+        if DARWIN and os.environ.get('XSYNC_TEST_ARCH'):
+            # A system shell clears DYLD variables. Re-inject after arch has
+            # launched, for both the client and the direct fake-SSH helper.
+            cls.injected_binary = Path(cls.library_tmp.name) / 'arch-helper.py'
+            launcher = ['/usr/bin/arch', '-' + os.environ['XSYNC_TEST_ARCH'], '-e',
+                        'DYLD_INSERT_LIBRARIES=' + str(cls.fault), os.environ['XSYNC_TEST_EXECUTABLE']]
+            cls.injected_binary.write_text('#!' + sys.executable + '\nimport os,sys\nos.execv("/usr/bin/arch", ' + repr(launcher) + ' + sys.argv[1:])\n')
+            cls.injected_binary.chmod(0o755)
 
     def command(self, source, basis, target, direction, *flags):
-        args = [str(transfer.BINARY), '--no-fallback', '--no-clone', '-a', '--link-dest=' + str(basis), *flags]
+        args = [str(self.injected_binary), '--no-fallback', '--no-clone', '-a', '--link-dest=' + str(basis), *flags]
         a, b = str(source) + '/', str(target) + '/'
         if direction != 'local':
-            args += ['-e', shlex.join([sys.executable, str(transfer.REPO / 'tests/fault_ssh.py')]), '--rsync-path=' + str(transfer.BINARY)]
+            args += ['-e', shlex.join([sys.executable, str(transfer.REPO / 'tests/fault_ssh.py')]), '--rsync-path=' + str(self.injected_binary)]
             if direction == 'push': b = 'fake:' + b
             else: a = 'fake:' + a
         return args + [a, b]
