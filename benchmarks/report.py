@@ -20,7 +20,7 @@ def main():
             if label in corpora and any(corpora[label][key]!=data[key] for key in ('files','directories','bytes')):
                 raise ValueError('endpoint dataset inventories differ: '+label)
             corpora[label]=data
-        if not data.get('complete') or data.get('label')=='smoke': continue
+        if not data.get('complete') or not data.get('summary') or 'label' not in data or data['label']=='smoke': continue
         records=data.get('records',[])
         if not records or not all(r.get('verified') and r.get('returncode')==0 and
                                    (not r.get('remote') or r['remote']['returncode']==0) for r in records):

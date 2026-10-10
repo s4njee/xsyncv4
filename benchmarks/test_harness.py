@@ -91,6 +91,25 @@ class HarnessTests(unittest.TestCase):
         self.assertEqual(data['returncode'], 7)
         self.assertGreater(data['max_rss_bytes'], 0)
 
+    def test_disk_free_probe_checks_exact_stream_length(self):
+        sender = subprocess.Popen([sys.executable, str(HERE / 'stream_probe.py'),
+                                   '--mode', 'send', '--bytes', '16777219'], stdout=subprocess.PIPE)
+        try:
+            receiver = subprocess.run([sys.executable, str(HERE / 'stream_probe.py'),
+                                       '--mode', 'receive', '--bytes', '16777219'],
+                                      stdin=sender.stdout, capture_output=True, timeout=10)
+        finally:
+            sender.stdout.close()
+        self.assertEqual(sender.wait(timeout=10), 0)
+        self.assertEqual(receiver.returncode, 0, receiver.stderr)
+
+    def test_disk_free_probe_rejects_short_stream(self):
+        receiver = subprocess.run([sys.executable, str(HERE / 'stream_probe.py'),
+                                   '--mode', 'receive', '--bytes', '19'],
+                                  input=b'short', capture_output=True, timeout=10)
+        self.assertNotEqual(receiver.returncode, 0)
+        self.assertIn(b'truncated stream', receiver.stderr)
+
 
 if __name__ == '__main__':
     unittest.main()
