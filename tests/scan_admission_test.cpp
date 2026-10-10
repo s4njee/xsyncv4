@@ -40,8 +40,11 @@ int main() {
     pool.scan_ready = [&] { return allowed; };
     // An idle writer can flush buffered DATA before waiting for a peer reply.
     pool.on_idle = [&](Worker&) {
-      pool.update([&] { allowed = true; });
-      return true;
+      bool flushed = false;
+      pool.update([&] {
+        if (!allowed) allowed = flushed = true;
+      });
+      return flushed;
     };
     Task scan;
     pool.push(0, std::move(scan));

@@ -4062,3 +4062,17 @@ after U-01's evidence entry completes P2, as requested by the user.
 - F-10's bounded implementation and measured leaf-only comparison are complete.
   The earlier serial correction regression and busy/nearly-full APFS limits
   remain documented. F-09's expanded-payload/listing validation has now started.
+
+### F-09 admission-test repair — 2026-10-10
+
+- The clean bd57acdeed94 validation stops at the new scanner admission unit:
+  its simulated idle writer always reports work, even after flushing once,
+  so the pool cannot finish. This is a test callback error; the production
+  idle writer already returns false when its buffer is empty.
+- The callback now reports work only for the first flush. Twenty native
+  macOS runs and a Linux run pass scanner wakeup, expanded-byte admission,
+  idle-buffer handling and parked-scan cancellation assertions. The initial
+  failure state/log and product coordinator's rejected precondition are kept.
+- Full clean-source regression validation must run again. The first product
+  coordinator exits before building or staging new Neo/Freya binaries, so
+  no paired memory pass is claimed and F-09 remains partial.
