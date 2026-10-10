@@ -106,8 +106,10 @@ this is not the summed simultaneous RSS across SSH and both endpoints. The
 first [five-million-file local copy on freya](results/20261010-f09-freya-local.json)
 completes and passes independent verification. The clean ed8b84137035 product
 peaks at 47.3 MiB and takes 242.60 s; rsync takes 368.79 s. These are one sample
-per tool for memory qualification, not repeated throughput medians. Pi-local
-and paired endpoint measurements remain pending.
+per tool for memory qualification, not repeated throughput medians. The
+[Pi-local copy on neo](results/20261010-f09-neo-local.json) also completes and
+passes verification, peaking at 17.23 MiB and taking 387.73 s versus rsync's
+465.33 s. Paired endpoint measurements remain pending.
 
 `large_tree_runs.py --root ROOT --peer user@host --revision CLEAN_12_DIGIT_REV`
 waits for the Pi's complete fixture and the prior ext4 work lock, then runs

@@ -3910,3 +3910,15 @@ after U-01's evidence entry completes P2, as requested by the user.
   because a virtualization process holds handles. The owned disposable image
   is then detached successfully; no VM is terminated. Filesystem defaults still require selection
   and validation; F-07 remains partial.
+
+### F-09 Pi-local memory measurement passed — 2026-10-10
+
+- Neo's clean ed8b84137035 product completes the five-million-file local
+  copy and passes independent checksum/metadata verification. Its measured
+  peak process RSS is 17.23 MiB, below the stated 512 MiB budget. The complete
+  raw result is retained as `20261010-f09-neo-local.json`.
+- xs takes 387.73 s versus rsync's 465.33 s (1.20x). These are one sample per
+  tool for memory qualification, not repeated throughput medians. Cleanup
+  finishes and the coordinator advances to the push memory test; pull follows
+  sequentially. Both paired endpoint memory measurements remain required,
+  so F-09 stays partial.
