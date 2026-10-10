@@ -2583,3 +2583,26 @@ Verified artifact manifest (source `864bd37edf14`):
   `/tmp/xsync-e13-real-ssh-final3.log`. The source package is refreshed after
   this completion entry. No installed local executable or physical helper was
   changed.
+
+### R-01 retest — 2026-10-10: Neo reachable; native checklist passes
+
+- `sanjee@neo.local` resolves and accepts SSH again. The host reports `neo`,
+  Linux and aarch64. Its existing helper identifies protocol **3**, source
+  **29050650e074**; the current macOS universal client identifies protocol **4**,
+  source **3b686e385923**. No helper was uploaded or installed.
+- `XSYNC_CONFIG='' XSYNC_OPTS='' XSYNC_TEST_BINARY=build-release/xsync
+  XSYNC_LAN_HOST=sanjee@neo.local XSYNC_LAN_NATIVE=1
+  python3 tests/lan_test.py -v` passes in **2.239s** with fallback disabled.
+  The native checklist covers compressed push/pull, unchanged reruns,
+  updated/deleted files, 100 small files and a 2 MiB file, spaces/Unicode,
+  symlinks, modes, nanosecond file/directory times and matching SHA-256 trees.
+  ControlMaster reuse/close, stdout banner rejection (exit 2), and preserved
+  stderr banners also pass. Disposable test directories are removed.
+- The runner reports **2 methods**, with the missing-helper fallback fixture
+  intentionally skipped because the native checklist was selected. This also
+  verifies the current client's protocol-3 compatibility on a physical Pi.
+  Log: `/tmp/xsync-r01-neo-20261010.log`.
+- Reachability is resolved. R-01 remains **partial**, solely for the previously
+  pending scope clarification: whether Neo (the Pi/Linux LAN host) plus the
+  isolated Linux SSH rig is sufficient, or a second physical Linux host should
+  be included. P1 remains **21/22**; all P0 stories remain complete.
