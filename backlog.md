@@ -4129,3 +4129,23 @@ after U-01's evidence entry completes P2, as requested by the user.
   confirms the live run. It is not restarted.
 - F-14 profiles wait for successful local/push/pull qualification. The old
   precondition failure remains preserved, and no new profiles have run yet.
+
+### F-08 bounded parent-descriptor experiment — 2026-10-10
+
+- Directory tasks can retain an already-open parent capability and open their
+  own descendant relative to it with NOFOLLOW, instead of reopening every
+  ancestor from the transfer root. Local child scans/copy batches and remote
+  child generators/DATA batches use that capability when available.
+- At most 256 parent descriptors are retained across workers; active scopes
+  are additional. Exhaustion falls back to the existing anchored traversal.
+  Shared parents have independent lifetime, close-on-exec descriptors and no
+  mutable directory-list cursor use. Leaf work does not retain its own parent
+  capability for nonexistent descendants.
+- All eleven focused scope tests pass on macOS and Linux, including lifetime
+  across workers, namespace/symlink replacement, normalized root boundaries,
+  full-budget fallback and capacity release. The first Linux compile exposed
+  a missing direct vector include in the test; that include is corrected.
+- This candidate still requires full correctness checks and an independently
+  verified CPU comparison. It does not establish the under-one-second target
+  or a manifest path. F-08 remains open; current physical-host memory and
+  hosted runs continue on frozen 1f3a912f94eb and are not restarted.

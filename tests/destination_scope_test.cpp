@@ -10,6 +10,7 @@
 #include <stdexcept>
 #include <sys/resource.h>
 #include <thread>
+#include <vector>
 
 namespace fs = std::filesystem;
 void require(bool ok, const char* message) {
@@ -128,6 +129,82 @@ int main(int argc, char** argv) {
       write_file(b / "outside-pin");
       require(fs::exists(a / "root-anchored") && fs::exists(b / "outside-pin"),
               "filesystem root suffix calculation failed");
+    } else if (test == "inherited") {
+      std::shared_ptr<const DestinationParent> parent;
+      {
+        DestinationDirectory pin(a.string());
+        parent = pin.share();
+        require((bool)parent, "parent sharing failed");
+      }
+      fs::rename(a, dest / "old-a");
+      fs::create_directory_symlink(outside, a);
+      {
+        DestinationDirectory child((a / "nested").string(), parent);
+        write_file(a / "nested" / "inherited");
+      }
+      fs::create_directory_symlink(outside, dest / "old-a" / "escape");
+      {
+        DestinationDirectory child((a / "escape").string(), parent);
+        require(destination_mkdir((a / "escape" / "bad").c_str(), 0700) < 0,
+                "inherited descendant followed a symlink");
+      }
+      require(fs::exists(dest / "old-a" / "nested" / "inherited") && fs::is_empty(outside),
+              "inherited parent followed its replacement");
+    } else if (test == "inherited-boundaries") {
+      DestinationDirectory pin(a.string());
+      auto parent = pin.share();
+      {
+        DestinationDirectory sibling(b.string(), parent);
+        write_file(b / "sibling");
+      }
+      {
+        DestinationDirectory normalized(a.string() + "/nested/../nested", parent);
+        write_file(a / "nested" / "normalized");
+      }
+      {
+        DestinationDirectory rejected(outside.string(), parent);
+        require(destination_mkdir((outside / "bad").c_str(), 0700) < 0 && errno == EPERM,
+                "inherited parent crossed the transfer root");
+      }
+      require(fs::exists(b / "sibling") && fs::exists(a / "nested" / "normalized") && fs::is_empty(outside),
+              "inherited prefix fallback or normalization failed");
+    } else if (test == "inherited-thread") {
+      std::shared_ptr<const DestinationParent> parent;
+      {
+        DestinationDirectory pin(a.string());
+        parent = pin.share();
+      }
+      fs::rename(a, dest / "old-a");
+      fs::create_directory_symlink(outside, a);
+      std::exception_ptr error;
+      std::thread worker([&] {
+        try {
+          DestinationDirectory pin((a / "nested").string(), parent);
+          write_file(a / "nested" / "thread-inherited");
+        } catch (...) { error = std::current_exception(); }
+      });
+      worker.join();
+      if (error) std::rethrow_exception(error);
+      require(fs::exists(dest / "old-a" / "nested" / "thread-inherited") && fs::is_empty(outside),
+              "parent capability did not cross worker lifetime safely");
+    } else if (test == "parent-budget") {
+      DestinationDirectory pin(a.string());
+      size_t before = descriptors();
+      std::vector<std::shared_ptr<const DestinationParent>> parents;
+      for (int i = 0; i < 300; ++i) {
+        auto parent = pin.share();
+        if (parent) parents.push_back(std::move(parent));
+      }
+      require(parents.size() == 256 && descriptors() == before + 256,
+              "retained parent descriptors are not bounded");
+      {
+        DestinationDirectory fallback(b.string());
+        require(!fallback.share(), "full descriptor budget admitted another parent");
+        write_file(b / "fallback");
+      }
+      parents.clear();
+      require(descriptors() == before, "retained parent descriptors leaked");
+      require((bool)pin.share(), "released parent capacity was not reusable");
     } else if (test == "descriptors") {
       auto before = descriptors();
       for (int i = 0; i < 200; ++i) {

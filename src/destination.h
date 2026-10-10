@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <cstdint>
+#include <memory>
 #include <sys/stat.h>
 #include <unistd.h>
 
@@ -19,12 +20,27 @@ struct DestPath {
 bool anchor_destination(const std::string& path);
 DestPath destination_path(const std::string& path);
 int destination_open_dir(const char* path);
+// Retained parent capability, independent of the worker that opened it. Only
+// 256 of these descriptors may be retained; active scopes remain additional.
+class DestinationParent {
+ public:
+  ~DestinationParent();
+  DestinationParent(const DestinationParent&) = delete;
+  DestinationParent& operator=(const DestinationParent&) = delete;
+ private:
+  friend class DestinationDirectory;
+  DestinationParent(int fd, std::string path) : fd_(fd), path_(std::move(path)) {}
+  int fd_;
+  std::string path_;
+};
 // A bounded, thread-local pin for one generator/copy batch. Descendants still
 // walk with NOFOLLOW; paths outside the pin retain the transfer-root anchor.
 class DestinationDirectory {
  public:
-  explicit DestinationDirectory(const std::string& path);
+  explicit DestinationDirectory(const std::string& path,
+                                const std::shared_ptr<const DestinationParent>& parent = {});
   ~DestinationDirectory();
+  std::shared_ptr<const DestinationParent> share() const;
   DestinationDirectory(const DestinationDirectory&) = delete;
   DestinationDirectory& operator=(const DestinationDirectory&) = delete;
  private:

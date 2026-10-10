@@ -3,6 +3,7 @@
 #include <filesystem>
 #include <cerrno>
 #include <algorithm>
+#include <atomic>
 #ifdef __APPLE__
 #include <sys/clonefile.h>
 #include <sys/attr.h>
@@ -18,6 +19,7 @@ namespace {
 int root_fd = -1;
 std::string root_path;
 thread_local DestinationDirectory* directory_pin = nullptr;
+std::atomic<unsigned> retained_parents{0};
 std::string absolute(const std::string& path) {
   // Already-normalized engine paths need no filesystem::path component objects.
   if (!path.empty() && path.front() == '/') {
@@ -128,13 +130,36 @@ int destination_open_dir(const char* path) {
   auto p = destination_path(path);
   return p.fd < 0 ? -1 : openat(p.fd, p.name.c_str(), O_RDONLY | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC);
 }
-DestinationDirectory::DestinationDirectory(const std::string& path) {
+DestinationParent::~DestinationParent() {
+  close(fd_);
+  retained_parents.fetch_sub(1, std::memory_order_relaxed);
+}
+DestinationDirectory::DestinationDirectory(const std::string& path,
+                                           const std::shared_ptr<const DestinationParent>& parent) {
   path_ = absolute(path);
   if (path_.empty()) return;
-  fd_ = destination_open_dir(path_.c_str());
+  if (parent && (path_ == parent->path_ || (path_.starts_with(parent->path_) &&
+      (parent->path_ == "/" || path_[parent->path_.size()] == '/')))) {
+    size_t offset = parent->path_ == "/" ? 1 : path_ == parent->path_ ? path_.size() : parent->path_.size() + 1;
+    fd_ = fcntl(parent->fd_, F_DUPFD_CLOEXEC, 0);
+    if (fd_ >= 0) fd_ = walk(fd_, std::string_view(path_).substr(offset));
+  } else fd_ = destination_open_dir(path_.c_str());
   if (fd_ < 0) return;
   previous_ = directory_pin;
   directory_pin = this;
+}
+std::shared_ptr<const DestinationParent> DestinationDirectory::share() const {
+  if (fd_ < 0) return {};
+  unsigned count = retained_parents.load(std::memory_order_relaxed);
+  do {
+    if (count >= 256) return {};
+  } while (!retained_parents.compare_exchange_weak(count, count + 1, std::memory_order_relaxed));
+  int fd = fcntl(fd_, F_DUPFD_CLOEXEC, 0);
+  if (fd < 0) {
+    retained_parents.fetch_sub(1, std::memory_order_relaxed);
+    return {};
+  }
+  return std::shared_ptr<const DestinationParent>(new DestinationParent(fd, path_));
 }
 DestinationDirectory::~DestinationDirectory() {
   if (fd_ >= 0) {

@@ -34,6 +34,10 @@ class DestinationScopeTests(unittest.TestCase):
     def test_descriptors_are_bounded_by_active_scopes(self): self.exercise('descriptors')
     def test_lexical_aliases_and_changed_cwd(self): self.exercise('normalization')
     def test_filesystem_root_anchor(self): self.exercise('root-anchor')
+    def test_inherited_parent_survives_scope_and_rejects_symlinks(self): self.exercise('inherited')
+    def test_inherited_parent_boundaries_and_normalization(self): self.exercise('inherited-boundaries')
+    def test_parent_capability_survives_worker_handoff(self): self.exercise('inherited-thread')
+    def test_retained_parent_budget_and_fallback(self): self.exercise('parent-budget')
 
 
 if __name__ == '__main__':

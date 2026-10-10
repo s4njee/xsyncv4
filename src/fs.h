@@ -63,6 +63,7 @@ struct DirWork {
   std::string dst_path;  // destination directory
   std::string rel;       // path relative to the transfer root ("" for the root)
   std::string src_path;  // local mode: source directory
+  std::shared_ptr<const DestinationParent> destination_parent, child_anchor;
   std::vector<std::string> src_paths;  // per-entry source path (root listing only)
   std::vector<std::shared_ptr<const FilterList>> source_contexts;
   std::shared_ptr<const FilterList> source_filter, receiver_filter;

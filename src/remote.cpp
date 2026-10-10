@@ -2008,6 +2008,7 @@ struct Receiver {
         die(RERR_PROTOCOL, "protocol error: inconsistent directory path");
       go = pe.flags & EF_DESCEND;
       w.dst_path = path_join(p->w.dst_path, p->w.src.name_sv(pe));
+      w.destination_parent = p->w.child_anchor;
       w.receiver_filter = p->w.receiver_filter;
       w.receiver_filter_node = p->w.receiver_filter_node;
       w.attrs.mode = pe.mode;  // final mode as decided by the parent's generator
@@ -2139,7 +2140,7 @@ struct Receiver {
         die(RERR_PROTOCOL, "protocol error: unrequested file data");
       if (pinned_id != id) {
         directory.reset();
-        directory.emplace(w.dst_path);
+        directory.emplace(w.dst_path, w.destination_parent);
         pinned_id = id;
       }
       bool delta = kind == R_LITERAL || kind == R_COPY || kind == R_DELTA_END;

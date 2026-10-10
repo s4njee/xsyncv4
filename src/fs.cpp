@@ -805,7 +805,7 @@ void skip_unsafe_links(DirWork& w, Worker& t) {
 }
 
 void generate(DirWork& w, Worker& t) {
-  DestinationDirectory directory(w.dst_path);
+  DestinationDirectory directory(w.dst_path, w.destination_parent);
   const Options& o = g_opt;
   bool load_filters = w.has_attrs || !w.rel.empty();
   if (o.delete_after)
@@ -1262,6 +1262,9 @@ void generate(DirWork& w, Worker& t) {
     g_stats.xfer_files_total.fetch_add(w.need.size(), std::memory_order_relaxed);
     g_stats.xfer_bytes_total.fetch_add(plan_bytes, std::memory_order_relaxed);
   }
+  if (std::any_of(src.e.begin(), src.e.end(), [](const Entry& e) {
+        return e.type == T_DIR && (e.flags & EF_DESCEND);
+      })) w.child_anchor = directory.share();
 }
 
 void finish_dir(DirWork& w) {

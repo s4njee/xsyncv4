@@ -620,6 +620,7 @@ struct Local {
         c->receiver_filter = d->receiver_filter;
         c->receiver_filter_node = d->receiver_filter_node;
         c->dst_path = path_join(d->dst_path, nm);
+        c->destination_parent = d->child_anchor;
         c->rel = rel_join(d->rel, nm);
         c->selection = d->selection;
         if (c->selection && !o.prune_empty) {
@@ -954,7 +955,7 @@ struct Local {
       return;
     }
     {
-      DestinationDirectory directory(d->dst_path);
+      DestinationDirectory directory(d->dst_path, d->destination_parent);
       for (u32 i = t.a; i < t.b; i++) copy_one(*d, d->need[i], w);
     }
     release(d);
