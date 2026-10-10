@@ -620,7 +620,7 @@ void order_deletions(DirList& list) {
 }
 
 bool remove_tree(const std::string& path, u8 type, const std::string& rel, Worker& t, bool limited = false, bool report = true,
-                 std::shared_ptr<const FilterList> context = {}) {
+                 std::shared_ptr<const FilterList> context = {}, int child_jobs = 1) {
   if (g_stop.load()) return false;
   ProgressPhase phase(g_stats.deleting_active);
   auto permit = [&] {
@@ -643,21 +643,42 @@ bool remove_tree(const std::string& path, u8 type, const std::string& rel, Worke
       return false;
     }
     order_deletions(l);
-    bool ok = true;
-    for (size_t i = l.e.size(); i > 0; i--) {
-      const Entry& c = l.e[i - 1];
-      std::string crel = rel_join(rel, l.name_sv(c));
-      // Excluded files are protected from deletion, which keeps their directory alive too.
-      std::string absolute;
-      if (filters.has_absolute()) absolute = FilterList::absolute_path(path_join(path, l.name_sv(c)));
-      if (filters.protected_from_deletion(crel, c.type == T_DIR, g_opt.delete_excluded, true, absolute)) {
-        if (ok && !g_opt.quiet) t.logf("cannot delete non-empty directory: " + rel);
-        ok = false;
-        continue;
+    std::atomic<bool> ok{true};
+    const int children_workers = std::min<size_t>(child_jobs, l.e.size());
+    std::atomic<size_t> next_child{0};
+    auto children = [&](Worker& worker) {
+      for (;;) {
+        size_t index = next_child.fetch_add(1, std::memory_order_relaxed);
+        if (index >= l.e.size()) break;
+        size_t i = l.e.size() - index;
+        const Entry& c = l.e[i - 1];
+        std::string crel = rel_join(rel, l.name_sv(c));
+        // Excluded files are protected from deletion, which keeps their directory alive too.
+        std::string absolute;
+        if (filters.has_absolute()) absolute = FilterList::absolute_path(path_join(path, l.name_sv(c)));
+        if (filters.protected_from_deletion(crel, c.type == T_DIR, g_opt.delete_excluded, true, absolute)) {
+          if (ok.exchange(false) && !g_opt.quiet) worker.logf("cannot delete non-empty directory: " + rel);
+          continue;
+        }
+        // Keep a single-child chain on this thread until it branches. Once a
+        // directory fans out, its workers own complete subtrees without nesting
+        // further thread groups.
+        if (!remove_tree(path_join(path, l.name_sv(c)), c.type, crel, worker, limited, true, context,
+                         children_workers <= 1 ? child_jobs : 1)) ok.store(false);
       }
-      ok &= remove_tree(path_join(path, l.name_sv(c)), c.type, crel, t, limited, true, context);
-    }
-    if (!ok) return false;
+    };
+    std::atomic<u64> child_deletions{0};
+    std::vector<std::thread> threads;
+    for (int i = 1; i < children_workers; ++i) threads.emplace_back([&] {
+      Worker worker;
+      children(worker);
+      child_deletions.fetch_add(worker.deleted_entries, std::memory_order_relaxed);
+      worker.flush_log();
+    });
+    children(t);
+    for (auto& thread : threads) thread.join();
+    t.deleted_entries += child_deletions.load(std::memory_order_relaxed);
+    if (!ok.load()) return false;
     if (!permit()) return false;
     if (!g_opt.dry_run && destination_rmdir(path.c_str()) != 0) {
       err_line(RERR_PARTIAL, "delete_file: rmdir \"%s\" failed: %s", path.c_str(), errstr(errno).c_str());
@@ -693,7 +714,8 @@ void delete_subtrees(std::vector<std::string>& dirty) {
       if (index >= delete_candidates.size()) break;
       const auto& candidate = delete_candidates[index];
       u64 before = worker.deleted_entries;
-      remove_tree(candidate.path, candidate.type, candidate.rel, worker, true, true, candidate.filters);
+      remove_tree(candidate.path, candidate.type, candidate.rel, worker, true, true, candidate.filters,
+                  std::max(1, default_jobs() / count));
       if (worker.deleted_entries != before) changed.push_back(candidate.parent);
     }
     worker.flush_log();

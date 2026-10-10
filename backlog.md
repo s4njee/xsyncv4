@@ -3279,3 +3279,24 @@ after U-01's evidence entry completes P2, as requested by the user.
   many-subtree and single-stale-root cases against the prior product and rsync,
   with a one-worker control. F-12 remains partial pending measured results;
   the current scheduler does not split one stale root across workers.
+
+
+### F-12 single-root coverage and F-02 Linux validation — 2026-10-10
+
+- Extended deletion scheduling to divide a single stale root among workers.
+  Single-child chains retain their worker budget until they branch; after
+  branching, each worker completes its subtree without nested thread groups.
+  Combined root/child groups stay within the configured worker count, and a
+  parent is removed only after all child workers complete successfully.
+- Five deletion tests pass on macOS and Linux, now including a single stale
+  root behind a single-child chain. All 231 macOS itemized and 227 Linux
+  data/metadata/exit differential cases pass; all four filter tests pass again.
+- The intermediate comparison retained nine verified samples before deliberate
+  cancellation to strengthen single-root handling. Its four-worker samples
+  were 3.126–3.734 s versus prior serial samples 5.004–5.358 s. The explicitly
+  partial `20261010-f12-independent-subtrees-partial.json` is not completion
+  evidence. A fresh comparison of the complete implementation is required.
+- Hosted run 38072489810 passes all 15 Linux ratios, with all 270 timed samples
+  and 45 warmups independently verified. Relative candidate/reference ratios
+  range from 0.996 to 1.055. Raw Linux evidence is retained; macOS is still
+  running. F-02 and F-12 remain partial.

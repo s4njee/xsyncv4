@@ -87,6 +87,18 @@ class DeletionTests(unittest.TestCase):
                 with self.subTest(direction=direction, deletion=deletion):
                     self.compare(direction, [deletion, '--filter=: .rules'])
 
+    def test_single_stale_root_and_single_child_chain(self):
+        old_seed = self.root / 'old-seed'
+        self.seed.rename(old_seed)
+        self.seed.mkdir()
+        chain = self.seed / 'stale' / 'single' / 'chain'
+        chain.mkdir(parents=True)
+        shutil.move(str(old_seed), chain / 'branches')
+        for direction in ('local', 'push', 'pull'):
+            for deletion in ('--delete', '--delete-after'):
+                with self.subTest(direction=direction, deletion=deletion):
+                    self.compare(direction, [deletion])
+
     def test_finite_limits_retain_serial_selection(self):
         for direction in ('local', 'push', 'pull'):
             for limit in (0, 1, 5, 40):

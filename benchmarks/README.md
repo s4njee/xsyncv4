@@ -84,6 +84,19 @@ checks every timed result against an untimed rsync oracle, including exact
 modes, identities and mtimes. The [completed F-11 comparison](results/20261010-f11-clone-modes-summary.md)
 retains both the initial small-file regression and the final improved path.
 
+`deletion.py` compares the prior product, one-worker and four-worker candidates,
+and rsync on 65,536 stale files. It covers independent stale subtrees and a
+single stale root, rotates tool positions, and verifies every result with
+untimed rsync checksums and metadata. Use a fresh owned directory:
+
+```sh
+python3 benchmarks/deletion.py --reference /path/to/prior/xs --candidate /path/to/current/xs \
+  --work .bench/deletion-run --output benchmarks/results/deletion-run.json --rsync /path/to/rsync
+```
+
+Fixtures and logs stay in the owned work directory; results identify binary
+hashes, versions, load and free space. Partial runs do not establish completion.
+
 ## Regression gate
 
 `.github/workflows/performance.yml` builds the pinned reference and candidate
