@@ -131,5 +131,17 @@ class PhaseProgressTests(unittest.TestCase):
                 self.assertEqual(result.returncode, 2, result.stderr)
                 self.assertIn(b'progress phase', result.stderr)
 
+    def test_json_completed_phase_counts(self):
+        for direction in ('local', 'push', 'pull'):
+            with self.subTest(direction=direction):
+                self.prepare_dest(direction, stale=True)
+                result = subprocess.run(self.command(direction, ['--progress=json', '-c', '--delete-after'], ENV),
+                                        env=ENV, capture_output=True, timeout=15)
+                self.assertEqual(result.returncode, 0, result.stderr)
+                rows = [json.loads(line) for line in result.stderr.splitlines()]
+                self.assertEqual(rows[-1]['deleted'], 16)
+                self.assertGreaterEqual(rows[-1]['verified'], 1)
+                self.assertEqual(rows[-1]['phase'], 'complete')
+
 
 if __name__ == '__main__': unittest.main()

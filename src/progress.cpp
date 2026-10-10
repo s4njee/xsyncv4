@@ -272,12 +272,14 @@ std::string json_string(std::string_view value) {
 void json_totals(const Totals& t, u64 now, bool complete = false, bool ok = false) {
   u64 elapsed = now > t_start ? now - t_start : 0;
   u64 wire = g_opt.pushing ? g_stats.wire_sent.load() : g_stats.wire_recv.load();
+  const char* phase = active_phase();
+  phase = complete ? "complete" : phase ? phase : t.scanning ? "scanning" : "transferring";
   std::string out = std::string("{\"type\":\"") + (complete ? "complete" : "progress") +
       "\",\"elapsed_ms\":" + std::to_string(elapsed / 1000000) +
       ",\"files\":" + std::to_string(t.files) + ",\"files_total\":" + std::to_string(t.files_total) +
       ",\"bytes\":" + std::to_string(t.bytes) + ",\"bytes_total\":" + std::to_string(t.bytes_total) +
       ",\"files_seen\":" + std::to_string(t.seen) + ",\"wire_bytes\":" + std::to_string(wire) +
-      ",\"phase\":" + json_string(complete ? "complete" : active_phase() ? active_phase() : t.scanning ? "scanning" : "transferring") +
+      ",\"phase\":" + json_string(phase) +
       ",\"deleted\":" + std::to_string(deleted_count()) + ",\"verified\":" + std::to_string(verified_count()) +
       ",\"scanning\":" + (t.scanning ? "true" : "false") +
       ",\"dry_run\":" + (g_opt.dry_run ? "true" : "false");
