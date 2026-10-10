@@ -115,6 +115,8 @@ struct OutFile {
   bool cloned_flags = false;
   u32 clone_fileflags = 0;
   i64 size = -1;  // final length when known (needed to truncate --inplace updates)
+  i64 sparse_size_hint = 0;
+  bool sparse_prepared = false;
   std::string path, tmp;
   std::string name, tmp_name;
   std::shared_ptr<OutputProgress> progress;

@@ -500,11 +500,20 @@ Differences to be aware of:
   cloning is disabled when flags are requested. Linux refuses native flag
   preservation; older helpers delegate or refuse before writes. Fallback needs
   a flags-capable rsync; standard upstream builds do not include `--fileflags`.
+- **Sparse files.** `-S`/`--sparse` creates holes for zero-filled regions on
+  local, push and pull transfers, including delta, partial/resumed and in-place
+  writes. `--no-sparse`/`--no-S` cancels it. Sparse transfers disable cloning
+  and preserve requested metadata and hard links. A bounded allocation pass
+  joins zeroes split across delta blocks; it reads allocated extents where the
+  file system exposes them. Files without hole-punch support, and write-only
+  in-place files that cannot be read for refinement, retain correct bytes but
+  may allocate more space. Remote helpers negotiate the option before writes;
+  older helpers delegate or refuse in strict mode.
 - **Delegated to rsync** (strict mode rejects them): incompatible remote `-A`,
   `-b`, `--link-dest`/`--compare-dest`/`--copy-dest`,
   `--append`, `--partial-dir`, and `--remove-source-files`.
 - **Unsupported options fall back before transfer; strict mode fails.** This includes
-  `--contimeout`, `-S`/`--sparse`, `--fsync`, `--preallocate`,
+  `--contimeout`, `--fsync`, `--preallocate`,
   `--skip-compress`, `--block-size`, `--checksum-choice`,
   `--log-file-format`, and `--debug`. `--compress-choice` accepts `zstd` or `none`.
   `--info` accepts `progress2`, `progress0`, `stats2`, and `stats0` (comma separated).
@@ -611,6 +620,8 @@ XSYNC_FALLBACK=0 python3 tests/difftest.py                  # native clone paths
 XSYNC_FALLBACK=0 python3 tests/difftest.py --xsync tests/xsync-noclone.sh # byte-copy
 cmake --build build --target filter_test && build/filter_test
 cmake --build build --target xattr_value_test && build/xattr_value_test
+cmake --build build --target sparse_test && build/sparse_test
+XSYNC_TEST_RSYNC=/path/to/rsync-3.4.4 python3 tests/sparse_test.py  # allocation, delta, metadata, interruption and source races
 python3 tests/p0_test.py                                  # trust and injected I/O races
 python3 tests/wire_test.py                                # hostile receiver protocol peers
 python3 tests/mount_test.py                               # macOS: disposable APFS image

@@ -588,7 +588,7 @@ struct Local {
 #ifdef __APPLE__
     // A clone carries data, mode and mtime in one metadata operation. Not for set-id files:
     // the kernel strips those bits when ownership is not copied.
-    if (o.clone && o.perms && o.times && !o.inplace && !(s.mode & 07000) && clone_ok.load(std::memory_order_relaxed)) {
+    if (o.clone && !o.sparse && o.perms && o.times && !o.inplace && !(s.mode & 07000) && clone_ok.load(std::memory_order_relaxed)) {
       u32 fl = (o.copy_links ? 0 : CLONE_NOFOLLOW) | (o.owner && o.am_root ? 0 : CLONE_NOOWNERCOPY);
       if (clone_copy(d, idx, w.p2.c_str(), fl, w)) {
         g_stats.xfer_bytes.fetch_add((u64)s.size, std::memory_order_relaxed);
@@ -817,7 +817,7 @@ int run_local(const std::vector<std::string>& srcs, const std::string& dest) {
   const Options& o = g_opt;
   // Whole-directory clones are only equivalent to a per-file sync when nothing could make us
   // treat any entry specially.
-  L.lazy_ok = o.clone && o.chmod_rules.empty() && !o.ownership.requested() && !o.atimes && !o.crtimes && !o.fileflags && o.recursive && o.links && !o.copy_links && o.perms && o.times && !o.omit_dir_times && !o.omit_link_times &&
+  L.lazy_ok = o.clone && !o.sparse && o.chmod_rules.empty() && !o.ownership.requested() && !o.atimes && !o.crtimes && !o.fileflags && o.recursive && o.links && !o.copy_links && o.perms && o.times && !o.omit_dir_times && !o.omit_link_times &&
               !metadata_enabled() && !o.dry_run && !o.inplace && !o.one_fs && !o.existing && !o.prune_empty && !root->selection && o.max_size <= 0 && o.min_size <= 0 && o.filters.empty();
 #endif
   int n = default_jobs();

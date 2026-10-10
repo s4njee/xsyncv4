@@ -20,7 +20,7 @@ def main():
     output.mkdir(exist_ok=True)
     archive = output / f'xsync-{version}-source.tar.gz'
     inputs = ['CMakeLists.txt', 'CMakePresets.json', 'README.md', 'backlog.md', 'src', 'cmake', 'tools',
-              'completions', 'third_party', 'tests/filter_test.cpp', 'tests/xattr_value_test.cpp']
+              'completions', 'third_party', 'tests/filter_test.cpp', 'tests/xattr_value_test.cpp', 'tests/sparse_test.cpp']
     for name in ('xsync-linux-amd64', 'xsync-linux-arm64', 'xsync-darwin-universal', 'manifest.json'):
         if (output / name).is_file(): inputs.append('dist/' + name)
     files = []

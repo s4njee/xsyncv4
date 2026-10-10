@@ -48,7 +48,7 @@ namespace {
 
 enum : u8 { F_HELLO = 1, F_DIR, F_NEED, F_DATA, F_LIST_END, F_DATA_END, F_DONE, F_MSG, F_IDMAP, F_DEST, F_OUTPUT, F_OUTPUT_CONFIG,
             F_DELTA_REQUEST, F_DELTA_SIGNATURE, F_DELTA_RETRY_ACK, F_LIST_ENTRY, F_IO_CONFIG, F_KEEPALIVE, F_FILTER_CONFIG, F_DELETE_CONFIG,
-            F_PRUNE_CONFIG, F_RELATIVE_CONFIG, F_FILES_CONFIG, F_FILES_DATA, F_FILES_END, F_XATTR_CONFIG, F_XATTR_START, F_XATTR_CHUNK, F_XATTR_END, F_ACL_CONFIG, F_CHOWN_CONFIG };
+            F_PRUNE_CONFIG, F_RELATIVE_CONFIG, F_FILES_CONFIG, F_FILES_DATA, F_FILES_END, F_XATTR_CONFIG, F_XATTR_START, F_XATTR_CHUNK, F_XATTR_END, F_ACL_CONFIG, F_CHOWN_CONFIG, F_SPARSE_CONFIG };
 enum : u8 { DF_ATTRS = 1, DF_SINGLE = 2, DF_NODELETE = 4, DF_ZSTD = 8 };
 enum : u8 { R_WHOLE = 1, R_CHUNK = 2, R_FAIL = 4, R_END = 8, R_LITERAL = 16, R_DELTA_END = 32, R_COPY = 64 };
 constexpr size_t HDR = 5;                  // u32 payload length + u8 type
@@ -436,6 +436,8 @@ struct Conn {
         die(RERR_PROTOCOL, "protocol error: oversized ownership configuration");
       if (type == F_CHOWN_CONFIG && !(g_opt.peer_features & PF_CHOWN))
         die(RERR_PROTOCOL, "protocol error: unnegotiated ownership configuration");
+      if (type == F_SPARSE_CONFIG && (len > 1 || !(g_opt.peer_features & PF_SPARSE)))
+        die(RERR_PROTOCOL, "protocol error: malformed or unnegotiated sparse configuration");
       if (type == F_FILTER_CONFIG && len > 1024 * 1024)
         die(RERR_PROTOCOL, "protocol error: oversized filter configuration");
       if (type == F_FILTER_CONFIG && !(g_opt.peer_features & PF_FILTERS))
@@ -684,6 +686,7 @@ u32 get_identity(RBuf& r) {
 }
 
 std::string missing_feature(u64 features) {
+  if (g_opt.sparse && !g_opt.list_only && !(features & PF_SPARSE)) return "peer does not support --sparse";
   if (g_opt.ownership.requested() && !g_opt.list_only && !(features & PF_CHOWN)) return "peer does not support --chown";
   if (g_opt.fileflags && !g_opt.list_only && !(features & PF_FILEFLAGS)) return "peer does not support --fileflags";
   if (g_opt.executability && !g_opt.perms && !g_opt.list_only && !(features & PF_EXECUTABILITY)) return "peer does not support --executability";
@@ -2408,6 +2411,7 @@ int run_client(const std::vector<std::string>& srcs, const std::string& dest, u3
   if (!o.crtimes) advertised &= ~PF_CRTIMES;
   if (!o.fileflags) advertised &= ~PF_FILEFLAGS;
   if (!o.ownership.requested()) advertised &= ~PF_CHOWN;
+  if (!o.sparse) advertised &= ~PF_SPARSE;
   if (!o.open_noatime) advertised &= ~PF_OPEN_NOATIME;
   if (!output_enabled()) advertised &= ~(PF_OUTPUT | PF_DIR_OUTPUT);
   if (wire_version >= 4) put_var(f, advertised);
@@ -2498,6 +2502,7 @@ int run_client(const std::vector<std::string>& srcs, const std::string& dest, u3
     put_str(config, push ? o.ownership.group : "");
     c.send(std::move(config));
   }
+  if (o.peer_features & PF_SPARSE) c.send(new_frame(F_SPARSE_CONFIG) + '\1');
   if (o.peer_features & PF_RELATIVE) c.send(new_frame(F_RELATIVE_CONFIG) + '\1');
   if (o.peer_features & PF_FILES_FROM) {
     std::string config = new_frame(F_FILES_CONFIG);
@@ -2592,16 +2597,21 @@ int run_server() {
   const auto server_chmod = std::move(o.chmod_rules);
   auto server_ownership = std::move(o.ownership);
   const bool server_fileflags = o.fileflags;
+  const bool server_sparse = o.sparse;
   const bool server_executability = o.executability && !o.perms;
   const bool server_atimes = o.atimes, server_crtimes = o.crtimes, server_noatime = o.open_noatime;
   o = Options();
   o.chmod_rules = server_chmod;
   o.ownership = std::move(server_ownership);
+  o.sparse = server_sparse;
   o.from0 = server_from0;
   o.filters.set_from0(server_from0);
   o.am_server = true;
   o.wire_version = ver;
   o.peer_features = advertised & PROTO_FEATURES;
+  if ((advertised & PF_SPARSE) && !(PROTO_FEATURES & PF_SPARSE)) die(RERR_UNSUPPORTED, "peer does not support --sparse");
+  if (server_sparse && !(o.peer_features & PF_SPARSE) && !(o.peer_features & PF_LIST))
+    die(RERR_UNSUPPORTED, "explicit helper --sparse requires negotiated sparse writes");
   if ((advertised & PF_CHOWN) && !(PROTO_FEATURES & PF_CHOWN)) die(RERR_UNSUPPORTED, "peer does not support --chown");
   if (o.ownership.requested() && !(o.peer_features & PF_CHOWN) && !(o.peer_features & PF_LIST))
     die(RERR_UNSUPPORTED, "explicit helper --chown requires negotiated ownership overrides");
@@ -2689,6 +2699,12 @@ int run_server() {
       die(RERR_SYNTAX, "You can only specify a user/group-affecting --chown once");
     if (!user.empty()) o.ownership.user = std::move(user), o.ownership.user_set = true;
     if (!group.empty()) o.ownership.group = std::move(group), o.ownership.group_set = true;
+  }
+  if (o.peer_features & PF_SPARSE) {
+    if (!c.read_frame(type, payload)) conn_lost();
+    if (type != F_SPARSE_CONFIG || payload != std::string(1, '\1') || o.list_only)
+      die(RERR_PROTOCOL, "protocol error: malformed sparse configuration");
+    o.sparse = role == 'R';
   }
   if (o.peer_features & PF_RELATIVE) {
     if (!c.read_frame(type, payload)) conn_lost();

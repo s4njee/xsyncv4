@@ -2,7 +2,7 @@
 
 Initial audit written 2026-10-08 against xsync 0.1.0 (protocol 1).
 All fifteen P0 stories completed against protocol 3; per-story evidence is below.
-P1 R-02 through R-09 and E-01 through E-10 are complete (18 of 22 stories). Current protocol 4 supports protocol 3. E-10's metadata, composition and release checks are complete; remaining P1 stories are R-01 and E-11 through E-13.
+P1 R-02 through R-09 and E-01 through E-10 are complete (18 of 22 stories). Current protocol 4 supports protocol 3. E-11's native sparse milestone is verified; `--link-dest` remains. Remaining P1 stories are R-01 and E-11 through E-13.
 Problem statements retain the original audit findings.
 
 ## What "daily driver" means here
@@ -97,7 +97,7 @@ coverage clarification remains open.
 | E-08 | **Filter completeness.** Global rule sides, single/per-directory merge files, `-F`, merge modifiers, global CVS rules/`-C`, `-m`, and `--delete-after` reloading newly transferred receiver merge files are implemented and verified. | **done** | 231/231 difftest (expanded from 159); a differential fuzzer against rsync for the new rule kinds, checked into `tests/`. | L |
 | E-09 | **`--files-from`, `-R`, `--from0`.** Common in backup scripts and with `find … -print0`. | **done** | Implemented for local and remote, including the "implied directories" semantics of `-R`. | L |
 | E-10 | **Metadata beyond `-a`.** `-H` hard links, `-X` xattrs, `-A` ACLs, `-N` creation times, `-U` atimes, BSD file flags, `-E`, `--chmod`, `--chown`. Also an inconsistency to resolve: the clone path already carries xattrs and ACLs while the byte-copy and remote paths drop them. | **done** | `-H` and `-X` first (most used on macOS). Without `-X`, both paths behave the same — either strip on clone or document that clones are a superset. | XL |
-| E-11 | **Backup-style options.** `--backup`/`--backup-dir`, `--link-dest`, `--compare-dest`, `--remove-source-files`, `--append`, real `-S` sparse handling, `--preallocate`. | code | Prioritise `--link-dest` (snapshot backups) and `-S`; the rest fall back to rsync via R-02 until needed. | L |
+| E-11 | **Backup-style options.** `--backup`/`--backup-dir`, `--link-dest`, `--compare-dest`, `--remove-source-files`, `--append`, real `-S` sparse handling, `--preallocate`. | **in progress** | Native `-S` is implemented and verified. `--link-dest` remains; other backup options fall back to rsync via R-02 until needed. | L |
 | E-12 | **macOS specifics.** Dataless iCloud files (reading triggers a download; cloning may not), immutable (`uchg`) destination files, sockets (rsync creates them, xsync skips silently), paths beyond `PATH_MAX` (tested to 40 levels only). | unverified | One test each; behaviour documented where it differs. | M |
 | E-13 | **Broken stdout.** `xsync -av … \| head` — rsync dies on EPIPE; xsync's behaviour is unknown. | unverified | Exits promptly with the right code and does not keep copying silently. | S |
 
@@ -2293,3 +2293,59 @@ Verified artifact manifest (source `864bd37edf14`):
   Homebrew formula are regenerated, including the small-stack regression.
   Physical-host checks remain under R-01; `sanjee@neo.local` still fails DNS
   resolution. No helper was installed on that target during these transfers.
+
+## E-11 progress — 2026-10-09: native sparse transfers
+
+- **Sparse milestone complete; E-11 remains in progress and P1 is 18/22.**
+  `-S`/`--sparse` now handles local, push and pull transfers; `--no-sparse`
+  and `--no-S` cancel it. File/directory cloning is disabled when sparse
+  allocation is requested. `--link-dest` is next; the other backup options
+  retain their existing rsync fallback.
+- New outputs skip zeroes; reused inodes clear previous data with aligned
+  hole punching and ordinary writes for partial edge blocks. Unsupported
+  punching falls back to writing zeroes. EOF, metadata, hard links, verified
+  partial prefixes and delta checksums remain correct. A 64 KiB allocation
+  pass joins zeroes split across delta blocks and handles APFS allocation
+  during file growth. It reads allocated extents when supported, otherwise
+  the whole output. Write-only in-place files still accept whole-file copies;
+  they can retain extra allocation when refinement cannot read their data.
+- Sparse capability **536870912** and bounded one-byte configuration frame
+  **32** leave the protocol-3 options layout unchanged. Unsupported helpers
+  refuse with exit 4 before writes or delegate once. Malformed, oversized,
+  unnegotiated and listing configurations fail before publication. Explicit
+  helper options also require negotiation; cancelled sparse flags work with
+  frozen and capability-subset peers.
+- Differential coverage against **rsync 3.4.4**: **120** ordinary sparse
+  cases, plus **six** write-only cases, across local/push/pull. These verify
+  bytes, EOF, allocation, mode/IDs/times and itemization for zero/mixed/trailing
+  regions, empty/small files, whole/delta/in-place writes, checksum, compression,
+  dry runs, cancellation and H/AX/chmod composition. Native `--no-perms`
+  retains a write-only destination's mode; reference rsync changes it to the
+  source mode. The fixture checks this explicit boundary independently.
+- **Five** signal/disconnect cases retain a verified halfway prefix and resume
+  with correct allocation and metadata. **Twelve** source-growth/shrink cases
+  verify fresh EOF and data across atomic/in-place local/push/pull copies.
+  Real SSH passes **24** native allocation/data/metadata transfers. The C++
+  regression verifies unaligned zeroing without erasing neighbors, EOF,
+  invalid offsets, offsets beyond **4 GiB**, and allocation after file growth.
+  Linux release builds run it before exporting binaries; source packages
+  include its source.
+- macOS sparse checks pass **nine** methods (one real-SSH skip), with the clone
+  policy regression passing separately. Linux root sparse/config/fallback
+  checks pass **39** methods (three platform/permission/SSH skips); nonroot
+  sparse checks pass **nine** methods (one SSH skip), plus the separate Linux
+  clone regression. Protocol compatibility passes **14** methods. Delta and
+  metadata/ownership regressions pass **30** methods. New guard checks pass
+  separately; the real SSH method passes in the isolated two-container rig.
+- Logs: `/tmp/xsync-e11-sparse-mac-verified.log`,
+  `/tmp/xsync-e11-sparse-linux-verified.log`,
+  `/tmp/xsync-e11-sparse-linux-nonroot-verified.log`,
+  `/tmp/xsync-e11-sparse-clone-verified.log`,
+  `/tmp/xsync-e11-sparse-linux-clone-verified.log`,
+  `/tmp/xsync-e11-sparse-protocol.log`,
+  `/tmp/xsync-e11-sparse-regressions.log`,
+  `/tmp/xsync-e11-sparse-guards-verified.log`, and
+  `/tmp/xsync-e11-sparse-ssh.log`. Debian's rsync 3.2.7 produced incorrect bytes
+  in eight remote sparse/in-place cases; rebuilding the primary 3.4.4 source
+  with ACL support resolves those reference failures. Failed diagnostic runs
+  are not counted as passing evidence.

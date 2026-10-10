@@ -18,6 +18,7 @@
 #include "hardlink.h"
 #include "rate_limit.h"
 #include "engine.h"
+#include "sparse.h"
 
 #ifdef __APPLE__
 #include <sys/attr.h>
@@ -1294,12 +1295,25 @@ void cleanup_open_outputs() {
 bool out_write(OutFile& f, const char* bytes, size_t size, i64 offset) {
   std::shared_lock<std::shared_mutex> io_lock(output_io_mu);
   if (output_shutdown) { errno = ECANCELED; return false; }
+  if (g_opt.sparse && (offset < 0 || size > (u64)INT64_MAX - (u64)offset)) { errno = EINVAL; return false; }
   size_t done = 0;
   while (done < size) {
     size_t count = size - done;
     if (g_opt.bwlimit && !g_opt.am_server && !g_opt.pushing && !g_opt.receiving) {
       count = g_local_limiter.acquire(count);
       if (!count) { errno = ECANCELED; return false; }
+    }
+    if (g_opt.sparse) {
+      if (!f.sparse_prepared) {
+        struct stat st;
+        if (fstat(f.fd, &st) != 0) return false;
+        if (st.st_size < f.sparse_size_hint && ftruncate(f.fd, f.sparse_size_hint) != 0) return false;
+        f.sparse_size_hint = std::max<i64>(st.st_size, f.sparse_size_hint);
+        f.sparse_prepared = true;
+      }
+      if (!sparse_write(f.fd, bytes + done, count, offset + (i64)done, !f.temp && f.existed)) return false;
+      done += count;
+      continue;
     }
     ssize_t n = pwrite(f.fd, bytes + done, count, offset + (i64)done);
     if (n < 0 && errno == EINTR) continue;
@@ -1381,6 +1395,11 @@ bool out_open(OutFile& f, DirWork& w, u32 idx, Worker& t, bool force_temp, bool 
   f.temp = false;
   f.cloned_flags = false, f.clone_fileflags = 0;
   f.size = -1;
+  f.sparse_size_hint = s.size;
+  f.sparse_prepared = false;
+  // Sparse finalization joins zeroes split across unaligned delta blocks.
+  const bool read_required = readable;
+  readable |= o.sparse;
   f.existed = s.flags & EF_EXISTS;
   f.basis_identity = false;
   auto p = destination_path(f.path);
@@ -1408,6 +1427,8 @@ bool out_open(OutFile& f, DirWork& w, u32 idx, Worker& t, bool force_temp, bool 
   f.created_mode = mode;
   if (f.existed && o.inplace && (s.flags & EF_INPLACE_SAFE)) {
     f.fd = openat(f.dir_fd, f.name.c_str(), (readable ? O_RDWR : O_WRONLY) | O_CLOEXEC | O_NOFOLLOW | O_NONBLOCK | (readable ? read_time_flags() : 0));
+    if (f.fd < 0 && errno == EACCES && o.sparse && !read_required)
+      f.fd = openat(f.dir_fd, f.name.c_str(), O_WRONLY | O_CLOEXEC | O_NOFOLLOW | O_NONBLOCK);
     if (f.fd < 0) return failed("open --inplace");
     struct stat st;
     if (fstat(f.fd, &st) != 0 || !S_ISREG(st.st_mode)) {
@@ -1477,8 +1498,13 @@ bool out_finish(OutFile& f, DirWork& w, u32 idx, Worker&, bool ok, const Entry* 
     if (fstat(f.fd, &created) != 0) { file_io_error(errno, f.path.c_str(), "stat inherited permissions"); out_abort(f); return false; }
     final_mode &= created.st_mode & 07777;
   }
-  if (reused && f.size >= 0 && ftruncate(f.fd, f.size) != 0) {
+  if ((reused || o.sparse) && f.size >= 0 && ftruncate(f.fd, f.size) != 0) {
     file_io_error(errno, f.path.c_str(), "truncate");
+    out_abort(f);
+    return false;
+  }
+  if (o.sparse && !sparse_compact(f.fd, &g_stop)) {
+    file_io_error(errno, f.path.c_str(), "finish sparse allocation");
     out_abort(f);
     return false;
   }

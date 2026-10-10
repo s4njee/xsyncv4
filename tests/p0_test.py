@@ -203,8 +203,7 @@ class TrustTests(unittest.TestCase):
                     proc.communicate()
 
     def test_no_silent_options(self):
-        unsupported = ["--out-format=%p", "--contimeout=1", "-S",
-                       "--sparse", "--no-sparse", "--fsync", "--preallocate",
+        unsupported = ["--out-format=%p", "--contimeout=1", "--fsync", "--preallocate",
                        "--skip-compress=jpg", "--block-size=4096", "--checksum-choice=md5",
                        "--cc=md5", "--log-file-format=%n", "--debug=ALL", "-B4096",
                        "-T/tmp", "-M--fake-super", "-4", "-6", "--ipv4", "--ipv6",

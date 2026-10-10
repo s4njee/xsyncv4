@@ -48,6 +48,34 @@ class FilterWireTests(unittest.TestCase):
         self.assertEqual(proc.returncode, 2)
         self.assertFalse(target.exists())
 
+    def test_sparse_configuration(self):
+        feature = 536870912
+        for payload in (b'', b'\0', b'\2', b'\1x'):
+            with self.subTest(payload=payload):
+                proc, target = self.server(features=1 | feature)
+                self.rejected(proc, target, frame(32, payload))
+        proc, target = self.server(features=1 | feature)
+        self.rejected(proc, target, frame(2, b''))
+        proc, target = self.server(features=1 | feature)
+        self.rejected(proc, target, struct.pack('<IB', 2, 32))
+        proc, target = self.server(features=1)
+        self.rejected(proc, target, frame(32, b'\1'))
+        from chown_wire_test import OwnershipWireTests
+        proc, target = OwnershipWireTests.server(self, features=1 | feature | 512, role=b'S')
+        self.assertEqual(read_frame(proc)[0], 1)
+        self.rejected(proc, target, frame(32, b'\1'))
+
+    def test_explicit_sparse_helper_requires_negotiation(self):
+        from chown_wire_test import OwnershipWireTests
+        for helper in (['-S'], ['--sparse']):
+            with self.subTest(helper=helper):
+                proc, target = OwnershipWireTests.server(self, features=1, helper=helper)
+                kind, message = read_frame(proc)
+                self.assertEqual((kind, message[:2]), (8, b'\2\4'))
+                proc.communicate(timeout=10)
+                self.assertEqual(proc.returncode, 4)
+                self.assertFalse(target.exists())
+
     def test_bad_configurations(self):
         for label, data in (
             ('wrong-frame', frame(2, b'')),

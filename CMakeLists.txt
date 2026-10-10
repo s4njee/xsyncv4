@@ -51,7 +51,7 @@ endif()
 
 add_executable(xsync
   src/main.cpp src/util.cpp src/progress.cpp src/fs.cpp src/filter.cpp
-  src/local.cpp src/remote.cpp src/names.cpp src/destination.cpp src/fallback.cpp src/transport.cpp src/install.cpp src/arguments.cpp src/output.cpp src/hardlink.cpp src/delta.cpp src/listing.cpp src/rate_limit.cpp src/selection.cpp src/xattrs.cpp src/xattr_value.cpp src/acls.cpp src/permissions.cpp src/ownership.cpp)
+  src/local.cpp src/remote.cpp src/names.cpp src/destination.cpp src/fallback.cpp src/transport.cpp src/install.cpp src/arguments.cpp src/output.cpp src/hardlink.cpp src/delta.cpp src/listing.cpp src/rate_limit.cpp src/selection.cpp src/xattrs.cpp src/xattr_value.cpp src/acls.cpp src/permissions.cpp src/ownership.cpp src/sparse.cpp)
 target_include_directories(xsync PRIVATE src ${ZSTD_INCLUDE_DIR} ${XXHASH_INCLUDE_DIR} ${XSYNC_ICU_INCLUDE_DIR})
 target_link_libraries(xsync PRIVATE ${ZSTD_LIBRARY} Threads::Threads ${XSYNC_ICU_LIBRARIES})
 target_compile_definitions(xsync PRIVATE XSYNC_GIT_HASH="${XSYNC_GIT_HASH}")
@@ -98,4 +98,11 @@ target_include_directories(xattr_value_test PRIVATE src)
 target_link_libraries(xattr_value_test PRIVATE Threads::Threads)
 if(XSYNC_RELEASE_STATIC AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
   target_link_options(xattr_value_test PRIVATE -static)
+endif()
+
+add_executable(sparse_test EXCLUDE_FROM_ALL tests/sparse_test.cpp src/sparse.cpp)
+target_include_directories(sparse_test PRIVATE src)
+target_compile_options(sparse_test PRIVATE -UNDEBUG)
+if(XSYNC_RELEASE_STATIC AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  target_link_options(sparse_test PRIVATE -static)
 endif()

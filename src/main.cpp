@@ -57,6 +57,7 @@ Options (same meaning as rsync):
      --list-only          list source entries; do not transfer or change DEST
  -X, --xattrs             preserve extended attributes (twice includes rsync internals)
  -H, --hard-links         preserve hard links within the transferred tree
+ -S, --sparse             create holes for zero-filled file regions
  -l, --links              copy symlinks as symlinks
      --safe-links         skip symlinks that point outside the transfer tree
  -L, --copy-links         transform symlink into referent file/dir
@@ -240,6 +241,8 @@ Parsed parse(int argc, char** argv) {
     else if (name == "archive") set_archive(o);
     else if (name == "xattrs") o.xattrs = std::min(o.xattrs + 1, 2);
     else if (name == "no-xattrs" || name == "no-X") o.xattrs = 0;
+    else if (flag(o.sparse, "sparse")) {}
+    else if (name == "no-S") o.sparse = false;
     else if (name == "executability") o.executability = true;
     else if (name == "chmod") {
       std::string mode = need();
@@ -355,7 +358,7 @@ Parsed parse(int argc, char** argv) {
           "write-batch", "read-batch", "only-write-batch", "super", "fake-super", "temp-dir",
           "iconv", "checksum-seed", "address", "sockopts", "stop-after", "stop-at", "max-alloc", "write-devices", "copy-devices",
           "delete-missing-args", "ignore-missing-args", "trust-sender", "copy-as", "early-input", "remote-option",
-          "contimeout", "sparse", "no-sparse", "fsync", "preallocate", "skip-compress",
+          "contimeout", "fsync", "preallocate", "skip-compress",
           "block-size", "checksum-choice", "cc", "log-file-format", "debug", "outbuf",
           "inc-recursive", "no-inc-recursive", "i-r", "no-i-r", "no-protect-args", "old-args",
           "ipv4", "ipv6", "msgs2stderr", "no-msgs2stderr", "new-compress", "old-compress", "no-implied-dirs",
@@ -425,7 +428,7 @@ Parsed parse(int argc, char** argv) {
         case 'W': o.whole_file = true; break;
         case 's': break;  // documented compatibility no-op
         case '8': o.raw_names = true; break;
-        case 'S': usage_error("--sparse is not supported by xsync");
+        case 'S': o.sparse = true; break;
         case '4': usage_error("--ipv4 is not supported by xsync");
         case '6': usage_error("--ipv6 is not supported by xsync");
         case 'e': o.rsh = need(); o.rsh_set = true; break;
