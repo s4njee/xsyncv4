@@ -110,7 +110,7 @@ coverage is tracked in `tests/progress-terminal.md` and remains incomplete.
 |---|---|---|---|---|
 | U-01 | **Real-terminal pass.** Terminal.app, iTerm, tmux, over ssh, narrow widths, resize mid-run, light themes, `TERM=dumb`, non-UTF-8 locales (needs an ASCII bar fallback). | partial | Checklist with screenshots; SIGWINCH handled; ASCII fallback when `LC_CTYPE` is not UTF-8. | M |
 | U-02 | **Rows are noise for small files.** At 12,000 files/s each row shows a random file at 0 % or 100 %. | **done** | Rows are reserved for files that have been in flight for more than ~200 ms; small files collapse into one "small files" row with a rate. Large files show their own speed and ETA. | M |
-| U-03 | **Clone mode shows nothing per file.** Whole directories complete in one call, so the rows stay empty and the bar moves in jumps. | code | Rows show the directory being cloned; the bar advances per directory. | S |
+| U-03 | **Clone mode shows nothing per file.** Whole directories complete in one call, so the rows stay empty and the bar moves in jumps. | **done** | Rows show the directory being cloned; the bar advances per directory. | S |
 | U-04 | **Push progress counts bytes read, not bytes landed.** The bar can sit at 100 % while the receiver is still writing. | code | Receiver acknowledges completed bytes; the client bar reflects acknowledged work, with "sent" shown separately. | M |
 | U-05 | **Remote detail.** Wire bytes, compression ratio, and which side is the bottleneck (reading, network, writing) are known internally and not shown. | new | Total line shows wire rate and ratio with `-z`; `-vv` names the limiting stage. | M |
 | U-06 | **Progress by default on a terminal?** rsync is silent without `-P`. A daily driver might show the bar whenever stderr is a tty and stay silent in scripts. See "Decisions". | new | Decision recorded; `--no-progress` and env override exist either way. | S |
@@ -2683,3 +2683,26 @@ Verified artifact manifest (source `864bd37edf14`):
   EXDEV reverses the planned counters while copying all six files correctly.
   Existing output regression tests pass 10 methods. Full progress/differential
   verification and release rebuilds follow; U-03 is not yet marked done.
+
+## U-03 complete — 2026-10-10: directory clone progress verified
+
+- **Done; P2 is 2/11 complete.** U-02 and U-03 are complete; U-01 remains
+  partial for native GUI screenshots/visual checks. U-04 is next.
+- macOS development passes **11 progress/clone methods**, **10 output methods**,
+  and **231/231 itemized differential cases** with clones enabled. Clone tests
+  verify immediate directory names, per-directory counter advancement and
+  correct fallback accounting after EXDEV.
+- Artifacts identify source **d6fc1bcb2422**, with verified manifest hashes.
+  Universal macOS passes **11 methods** on ARM. Intel passes **9**, with the
+  two DYLD interposition methods skipped because its launcher strips DYLD;
+  these independently pass in development and the ARM universal artifact.
+  Static Linux arm64 and amd64 each pass **7 methods**, with three APFS-only
+  checks and the absent tmux check skipped. The amd64 executable is emulated.
+  All release build-time units and scratch/transfer smoke checks pass.
+- Logs: `/tmp/xsync-u03-progress.log`, `/tmp/xsync-u03-output.log`,
+  `/tmp/xsync-u03-difftest.log`, `/tmp/xsync-u03-releases.log`,
+  `/tmp/xsync-u03-release-mac-arm.log`, `/tmp/xsync-u03-release-mac-intel.log`,
+  `/tmp/xsync-u03-release-linux-arm64.log`, and
+  `/tmp/xsync-u03-release-linux-amd64.log`. The source package/formula is
+  refreshed after this completion entry; installed executables and physical
+  helpers are unchanged.
