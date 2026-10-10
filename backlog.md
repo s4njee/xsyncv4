@@ -130,7 +130,7 @@ The benchmark so far is one corpus slice, one machine, one filesystem, no networ
 | F-01 | **Benchmark the real targets.** Over ssh to a Linux LAN host (ext4/XFS) and to the Pi; the full 14 GB corpus (needs disk space freed first); an update run with ~1 % of files changed; a mixed tree with large files; cold cache. | partial | `bench/bench.py --target host:path` and a results table per target in the README; this decides the order of everything below. | M |
 | F-02 | **Regression gate.** Nothing stops a change from losing the lead. | partial | CI job fails if any scenario drops below a recorded ratio to rsync on the same runner. | M |
 | F-03 | **ssh is one stream on one core.** On a fast LAN the cipher becomes the ceiling long before the disks do. | unverified | Measured first. Then, if it is the limit: `--streams N` (several ssh connections sharing one transfer) and no compression by default on links faster than the compressor. | L |
-| F-04 | **Adaptive compression.** `-z` compresses every block at level 3 regardless of content or link. | code | Incompressible blocks are detected from a sample and sent raw; `--skip-compress` suffixes honoured; level chosen from measured link speed unless set. | M |
+| F-04 | **Adaptive compression.** `-z` compresses every block at level 3 regardless of content or link. | **done** | Incompressible blocks are detected from a sample and sent raw; `--skip-compress` suffixes honoured; level chosen from measured link speed unless set. | M |
 | F-05 | **Large files.** One thread reads and one stream carries each large file; local copies on Linux use a plain read/write loop. | code | Parallel ranges within a file on both ends; `copy_file_range`/`FICLONE` on Linux (reflinks on btrfs/XFS mirror the APFS clone path); `F_NOCACHE` above a size so a 50 GB copy does not evict the page cache. | L |
 | F-06 | **Linux scan path.** macOS uses `getattrlistbulk`; Linux uses `readdir` plus one `fstatat` per entry. | partial | `getdents64` + `statx`, optionally batched with io_uring; measured against rsync on a no-op re-sync of the corpus on ext4. | M |
 | F-07 | **APFS byte-copy ceiling.** Creation is ~100 µs per file and does not scale with threads here; system time triples from 2 to 8 threads for no gain. Unknown: how much is path-lookup contention versus the filesystem itself, and how much is the nearly full volume. | confirmed | Re-measure on a volume with free space; try `openat`-relative creation; pick the thread count per filesystem instead of always using all performance cores. | M |
@@ -3321,3 +3321,40 @@ after U-01's evidence entry completes P2, as requested by the user.
   unchanged 0.85 floor, so the job correctly exits 1. Linux passes all fifteen.
   Raw macOS evidence is preserved. F-02 remains partial while repeatability
   on the shared macOS runner is addressed.
+
+
+## P3 / F-04 completed — 2026-10-10
+
+- Large DATA blocks sample four spaced regions before full zstd compression;
+  incompressible blocks travel raw. Default compressed-media suffixes and
+  `--skip-compress` overrides are case-insensitive and support literal character
+  classes. Empty overrides disable suffix skipping. Skipped files are isolated
+  from neighboring compressed records, including small shared batches.
+- Automatic compression starts at level 3. Active transport writes, including
+  bandwidth limiting and backpressure but excluding producer idle time, select
+  level 1 at >=64 MiB/s, level 6 below 8 MiB/s, or level 3 between those rates.
+  Explicit levels, including zero and negative levels, remain fixed.
+  `--compress-choice=none` disables compression even before `-z` or a level.
+- The policy uses a negotiated capability and bounded configuration frame;
+  frozen option fields and existing frame IDs remain unchanged. Old-client
+  explicit levels and mixed-peer transfers retain compatibility. Custom suffix
+  policies on pulls require a capable peer and fail before destination creation
+  in strict mode, allowing the normal rsync fallback otherwise.
+- All eleven compression tests and three malformed-wire tests pass on the final
+  static musl ARM64 build. macOS and glibc ARM64 also pass content sampling,
+  suffix isolation, mixed-peer and measured-rate tests, plus the final none-choice
+  ordering check. Actual sustained 7 MiB/s writes select level 6; explicit level
+  9 stays fixed. The fifteen frozen protocol tests, thirteen P0 trust tests,
+  231 macOS itemized differential cases and 227 Linux data/metadata/exit cases
+  pass. The four previously documented Linux Unicode itemization differences
+  remain outside this change. No candidate is deployed over the ongoing LAN
+  baseline binaries.
+
+### F-02 hosted checkpoint — 2026-10-10, run 38074236728
+
+- Both platforms complete all 270 timed samples and 45 warmups with independent
+  verification. Linux passes every ratio. macOS passes fourteen scenarios;
+  tiny-pipe medians are reference 0.1255 s and candidate 0.1908 s, producing
+  relative speedup 0.658 against the unchanged 0.85 floor. Raw results for both
+  platforms are retained. The failed scenario differs from earlier runs, so
+  timing repeatability remains unresolved and F-02 stays partial.

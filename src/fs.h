@@ -23,6 +23,7 @@ struct Worker {
   void* zd = nullptr;     // ZSTD_DCtx
   std::string block;      // sender: pending data records
   u32 block_files = 0;
+  bool block_raw = false; // File suffix policy isolates raw DATA blocks.
   void flush_log();
   void logf(std::string_view s) {
     log.append(s);

@@ -51,7 +51,7 @@ endif()
 
 add_executable(xsync
   src/main.cpp src/util.cpp src/progress.cpp src/fs.cpp src/filter.cpp
-  src/local.cpp src/remote.cpp src/names.cpp src/destination.cpp src/linux_scan.cpp src/fallback.cpp src/transport.cpp src/install.cpp src/arguments.cpp src/output.cpp src/hardlink.cpp src/delta.cpp src/listing.cpp src/rate_limit.cpp src/selection.cpp src/xattrs.cpp src/xattr_value.cpp src/acls.cpp src/permissions.cpp src/ownership.cpp src/sparse.cpp src/link_dest.cpp)
+  src/local.cpp src/remote.cpp src/names.cpp src/destination.cpp src/linux_scan.cpp src/compression.cpp src/fallback.cpp src/transport.cpp src/install.cpp src/arguments.cpp src/output.cpp src/hardlink.cpp src/delta.cpp src/listing.cpp src/rate_limit.cpp src/selection.cpp src/xattrs.cpp src/xattr_value.cpp src/acls.cpp src/permissions.cpp src/ownership.cpp src/sparse.cpp src/link_dest.cpp)
 set_target_properties(xsync PROPERTIES OUTPUT_NAME xs)
 target_include_directories(xsync PRIVATE src ${ZSTD_INCLUDE_DIR} ${XXHASH_INCLUDE_DIR} ${XSYNC_ICU_INCLUDE_DIR})
 target_link_libraries(xsync PRIVATE ${ZSTD_LIBRARY} Threads::Threads ${XSYNC_ICU_LIBRARIES})

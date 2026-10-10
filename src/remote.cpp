@@ -49,7 +49,7 @@ namespace {
 
 enum : u8 { F_HELLO = 1, F_DIR, F_NEED, F_DATA, F_LIST_END, F_DATA_END, F_DONE, F_MSG, F_IDMAP, F_DEST, F_OUTPUT, F_OUTPUT_CONFIG,
             F_DELTA_REQUEST, F_DELTA_SIGNATURE, F_DELTA_RETRY_ACK, F_LIST_ENTRY, F_IO_CONFIG, F_KEEPALIVE, F_FILTER_CONFIG, F_DELETE_CONFIG,
-            F_PRUNE_CONFIG, F_RELATIVE_CONFIG, F_FILES_CONFIG, F_FILES_DATA, F_FILES_END, F_XATTR_CONFIG, F_XATTR_START, F_XATTR_CHUNK, F_XATTR_END, F_ACL_CONFIG, F_CHOWN_CONFIG, F_SPARSE_CONFIG, F_LINKDEST_CONFIG, F_PROGRESS, F_STAGE, F_PHASE };
+            F_PRUNE_CONFIG, F_RELATIVE_CONFIG, F_FILES_CONFIG, F_FILES_DATA, F_FILES_END, F_XATTR_CONFIG, F_XATTR_START, F_XATTR_CHUNK, F_XATTR_END, F_ACL_CONFIG, F_CHOWN_CONFIG, F_SPARSE_CONFIG, F_LINKDEST_CONFIG, F_PROGRESS, F_STAGE, F_PHASE, F_COMPRESS_CONFIG };
 enum : u8 { DF_ATTRS = 1, DF_SINGLE = 2, DF_NODELETE = 4, DF_ZSTD = 8 };
 enum : u8 { R_WHOLE = 1, R_CHUNK = 2, R_FAIL = 4, R_END = 8, R_LITERAL = 16, R_DELTA_END = 32, R_COPY = 64 };
 constexpr size_t HDR = 5;                  // u32 payload length + u8 type
@@ -232,6 +232,8 @@ struct Conn {
   int rfd = -1, wfd = -1;
   pid_t peer_pid = -1;
   RateLimiter limiter;
+  CompressionLink compression_link;
+  std::atomic<bool> compression_observe{false};
   std::atomic<u64> idle_ns{0}, last_activity{now_ns()}, last_send{now_ns()}, heartbeat_ns{10000000000ull};
   std::atomic<bool> keepalive{false};
   std::atomic<bool> timed_out{false};
@@ -339,6 +341,8 @@ struct Conn {
     std::deque<std::string> batch;
     auto out = [&](const char* p, size_t n, bool activity = true) {
       StageTimer timing(g_stats.network_ns);
+      u64 transport_started = activity && compression_observe.load(std::memory_order_relaxed) ? now_ns() : 0;
+      size_t transport_bytes = n;
       bool ok = true;
       u64 progress = now_ns();
       while (n) {
@@ -363,6 +367,7 @@ struct Conn {
         }
         if (!ok) break;
       }
+      if (ok && transport_started) compression_link.observe(transport_bytes, now_ns() - transport_started);
       if (!ok) {
         // The peer may have sent a fatal filesystem error before closing. Let
         // the reader consume it instead of racing it with an EPIPE exit here.
@@ -460,6 +465,8 @@ struct Conn {
       if (type == F_PHASE && (len > 21 || !(g_opt.peer_features & PF_PROGRESS_PHASE)))
         die(RERR_PROTOCOL, "protocol error: oversized or unnegotiated progress phase");
       if (type == F_IO_CONFIG && len > 20) die(RERR_PROTOCOL, "protocol error: malformed I/O configuration (oversized)");
+      if (type == F_COMPRESS_CONFIG && (len > 65536 + 16 || !(g_opt.peer_features & PF_COMPRESS_POLICY)))
+        die(RERR_PROTOCOL, "protocol error: oversized or unnegotiated compression configuration");
       if (type == F_CHOWN_CONFIG && len > 1024 * 1024)
         die(RERR_PROTOCOL, "protocol error: oversized ownership configuration");
       if (type == F_CHOWN_CONFIG && !(g_opt.peer_features & PF_CHOWN))
@@ -699,11 +706,19 @@ bool pack(std::string& f, std::string_view raw, Worker& w) {
   StageTimer timing(g_stats.read_ns);
   if (!g_opt.compress || raw.size() < 128) return false;
   if (!w.zc) w.zc = ZSTD_createCCtx();
+  if (!w.zc || !compression_worthwhile(raw, w.zc)) return false;
   size_t base = f.size(), bound = ZSTD_compressBound(raw.size());
   put_var(f, raw.size());
   size_t at = f.size();
   f.resize(at + bound);
-  size_t n = ZSTD_compressCCtx((ZSTD_CCtx*)w.zc, f.data() + at, bound, raw.data(), raw.size(), (int)g_opt.compress_level);
+  int level = g_conn ? g_conn->compression_link.level(g_opt.compress_level_explicit, (int)g_opt.compress_level, g_opt.bwlimit)
+                     : (int)g_opt.compress_level;
+  level = std::clamp(level, ZSTD_minCLevel(), ZSTD_maxCLevel());
+  if (g_conn) {
+    g_conn->compression_link.last_level.store(level, std::memory_order_relaxed);
+    g_conn->compression_link.used.store(true, std::memory_order_relaxed);
+  }
+  size_t n = ZSTD_compressCCtx((ZSTD_CCtx*)w.zc, f.data() + at, bound, raw.data(), raw.size(), level);
   if (ZSTD_isError(n) || n >= raw.size()) {
     f.resize(base);
     return false;
@@ -743,6 +758,8 @@ u32 get_identity(RBuf& r) {
 }
 
 std::string missing_feature(u64 features) {
+  if (g_opt.compress && g_opt.skip_compress_set && g_opt.receiving && !g_opt.list_only && !(features & PF_COMPRESS_POLICY))
+    return "peer does not support --skip-compress";
   if (!g_opt.am_server && g_opt.pushing && g_opt.dry_run && !g_opt.quiet && !(features & PF_PROGRESS_ACK))
     return "peer does not support dry-run transfer totals (use --quiet to omit the summary)";
   if (!g_opt.am_server && g_opt.progress && g_opt.progress_mode == Options::Json && !(features & PF_OUTPUT))
@@ -1227,7 +1244,7 @@ struct Sender {
     std::string_view raw(w.block.data() + DATA_PREFIX, w.block.size() - DATA_PREFIX);
     u64 h = XXH3_64bits(raw.data(), raw.size());
     std::string f;
-    if (g_opt.compress) {
+    if (g_opt.compress && !w.block_raw) {
       f = new_frame(F_DATA);
       f.push_back(1);
       f.append((const char*)&h, 8);
@@ -1246,9 +1263,22 @@ struct Sender {
     begin_block(w);
   }
 
+  struct RawFileBlock {
+    Sender& sender;
+    Worker& worker;
+    bool skip;
+    RawFileBlock(Sender& sender, Worker& worker, bool skip) : sender(sender), worker(worker), skip(skip) {
+      if (skip) { sender.flush_block(worker); worker.block_raw = true; }
+    }
+    ~RawFileBlock() {
+      if (skip) { sender.flush_block(worker); worker.block_raw = false; }
+    }
+  };
+
   void read_one(SDir& d, u32 idx, Worker& w) {
     const Options& o = g_opt;
     const Entry& scanned = d.list.e[idx];
+    RawFileBlock raw_file(*this, w, o.compress && o.compression_suffixes.matches(d.list.name_sv(scanned)));
     if (w.block.size() < DATA_PREFIX) begin_block(w);
     auto head = [&](u8 kind) {
       put_var(w.block, d.id), put_var(w.block, idx);
@@ -1528,6 +1558,10 @@ struct Sender {
     wait_pool(pool);
     if (g_stop.load()) exit_signal();
     pool.join();
+    if (g_opt.compress && g_opt.verbose >= 2 && c.compression_link.used.load()) {
+      out_line("Compression level: " + std::to_string(c.compression_link.last_level.load()) +
+               (g_opt.compress_level_explicit ? " (explicit)" : " (automatic)"));
+    }
     std::string f = new_frame(F_DATA_END);
     put_var(f, (u64)g_exit_code.load());
     c.send(std::move(f));
@@ -2569,6 +2603,7 @@ int run_client(const std::vector<std::string>& srcs, const std::string& dest, u3
   if (!push || (!o.progress && !(o.dry_run && !o.quiet))) advertised &= ~PF_PROGRESS_ACK;
   if (o.verbose < 2) advertised &= ~PF_STAGE_METRICS;
   if (!o.progress) advertised &= ~PF_PROGRESS_PHASE;
+  if (!o.compress) advertised &= ~PF_COMPRESS_POLICY;
   if (o.list_only) advertised &= PF_CORE | PF_ZSTD | PF_LIST | PF_IO_CONTROL | PF_FILTERS | PF_MERGE_FILTERS | PF_CVS_FILTERS | PF_PRUNE_EMPTY | PF_RELATIVE | PF_FILES_FROM;
   else advertised &= ~PF_LIST;
   if (!o.filters.needs_extended()) advertised &= ~PF_FILTERS;
@@ -2664,10 +2699,17 @@ int run_client(const std::vector<std::string>& srcs, const std::string& dest, u3
       fallback("peer does not support hard-link preservation", RERR_UNSUPPORTED);
     break;
   }
+  c.compression_observe = o.compress;
   if (o.peer_features & PF_IO_CONTROL) {
     std::string config = new_frame(F_IO_CONFIG);
     put_var(config, o.bwlimit), put_var(config, o.timeout);
     c.configure(o.bwlimit, o.timeout, true);
+    c.send(std::move(config));
+  }
+  if (o.peer_features & PF_COMPRESS_POLICY) {
+    std::string config = new_frame(F_COMPRESS_CONFIG);
+    config.push_back((char)o.compress_level_explicit);
+    put_str(config, o.skip_compress);
     c.send(std::move(config));
   }
   if (o.peer_features & PF_XATTRS) c.send(new_frame(F_XATTR_CONFIG) + (char)o.xattrs);
@@ -2829,6 +2871,9 @@ int run_server() {
   o.fileflags = o.peer_features & PF_FILEFLAGS;
   o.open_noatime = o.peer_features & PF_OPEN_NOATIME;
   get_options(r);
+  // Old clients cannot distinguish an explicit level from their default.
+  // Retain their requested level rather than silently adapting it.
+  if (!(o.peer_features & PF_COMPRESS_POLICY)) o.compress_level_explicit = true;
   // rsync's remote receiver parses -A after the client's options and thereby
   // re-enables -p, including when the pushing client used --no-perms.
   if (o.acls && role == 'R') o.perms = true;
@@ -2843,6 +2888,7 @@ int run_server() {
   if (ver == 3 && o.compress && !(o.peer_features & PF_ZSTD))
     die(RERR_UNSUPPORTED, "peer does not support legacy protocol compression");
   if (!(o.peer_features & PF_ZSTD)) o.compress = false;
+  c.compression_observe = o.compress;
   init_ids();
   std::vector<std::string> paths;
   size_t n = (size_t)r.var();
@@ -2865,6 +2911,17 @@ int run_server() {
     o.bwlimit = rate;
     o.timeout = (u32)seconds;
     c.configure(rate, (u32)seconds, true);
+  }
+  if (o.peer_features & PF_COMPRESS_POLICY) {
+    if (!c.read_frame(type, payload)) conn_lost();
+    RBuf config(payload);
+    u8 explicit_level = config.byte();
+    std::string suffixes(config.str());
+    if (type != F_COMPRESS_CONFIG || config.bad || !config.empty() || explicit_level > 1 ||
+        !o.compress || o.list_only || !o.compression_suffixes.assign(suffixes))
+      die(RERR_PROTOCOL, "protocol error: malformed compression configuration");
+    o.compress_level_explicit = explicit_level;
+    o.skip_compress = std::move(suffixes);
   }
   if (o.peer_features & PF_XATTRS) {
     if (!c.read_frame(type, payload)) conn_lost();

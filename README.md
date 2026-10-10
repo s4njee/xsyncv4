@@ -548,6 +548,17 @@ Differences to be aware of:
 - **Large local and remote transfers reuse verified blocks** from an existing
   destination. `-W` requests whole-file transfers; APFS cloning remains preferred
   for eligible local copies.
+- **Compression is opt-in with `-z`.** Large blocks are sampled before compression;
+  incompressible blocks travel raw. The automatic zstd level starts at 3 and
+  uses active transport-write measurements after 256 KiB: level 1 at 64 MiB/s
+  or faster, 6 below 8 MiB/s, and 3 in between. `--compress-level=NUM` fixes the
+  level. `--skip-compress=gz/jpg/mp[34]` replaces the default compressed-media
+  suffix list; an empty list disables suffix skipping. Matching is case-insensitive,
+  and skipped files stay raw even beside compressible files in a shared batch.
+  This implements the suffix syntax in the
+  [rsync manual](https://download.samba.org/pub/rsync/rsync.1#skip-compress),
+  whose current codecs ignore per-file skip requests. Custom suffix policies
+  for pulls require a capable native peer; older peers use rsync fallback.
 - **New byte-copied files are atomic by default.** Files are written to temporary
   names and renamed after verification. `--no-atomic` saves a rename for new files,
   but a crash can leave a truncated file under its final name. `--inplace` explicitly
@@ -692,7 +703,7 @@ Differences to be aware of:
   `--append`, `--partial-dir`, and `--remove-source-files`.
 - **Unsupported options fall back before transfer; strict mode fails.** This includes
   `--contimeout`, `--fsync`, `--preallocate`,
-  `--skip-compress`, `--block-size`, `--checksum-choice`,
+  `--block-size`, `--checksum-choice`,
   `--log-file-format`, and `--debug`. `--compress-choice` accepts `zstd` or `none`.
   `--info` accepts `progress2`, `progress0`, `stats2`, and `stats0` (comma separated).
 - **Compatibility no-ops are listed in `--help` with reasons.**

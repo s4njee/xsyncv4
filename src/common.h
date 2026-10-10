@@ -2,6 +2,7 @@
 #pragma once
 #include "permissions.h"
 #include "ownership.h"
+#include "compression.h"
 #include <atomic>
 #include <cstdint>
 #include <cstdio>
@@ -47,6 +48,7 @@ constexpr u64 PF_LINK_DEST = 1073741824;
 constexpr u64 PF_PROGRESS_ACK = 2147483648;
 constexpr u64 PF_STAGE_METRICS = 4294967296ULL;
 constexpr u64 PF_PROGRESS_PHASE = 8589934592ULL;
+constexpr u64 PF_COMPRESS_POLICY = 17179869184ULL;
 #ifdef __APPLE__
 constexpr u64 PF_NATIVE_ACL = PF_ACL_DARWIN;
 constexpr u64 PF_UNSUPPORTED_NATIVE = PF_ACL_POSIX;
@@ -55,7 +57,7 @@ constexpr u64 PF_NATIVE_ACL = PF_ACL_POSIX;
 constexpr u64 PF_UNSUPPORTED_NATIVE = PF_ACL_DARWIN | PF_ACL_UUID | PF_CRTIMES | PF_FILEFLAGS;
 #endif
 #ifndef XSYNC_PROTOCOL_FEATURES
-#define XSYNC_PROTOCOL_FEATURES 17179869183ULL
+#define XSYNC_PROTOCOL_FEATURES 34359738367ULL
 #endif
 constexpr u64 PROTO_FEATURES = XSYNC_PROTOCOL_FEATURES & ~PF_UNSUPPORTED_NATIVE;
 constexpr u64 LEGACY_V3_FEATURES = 15;
@@ -82,6 +84,9 @@ struct Options {
   INT_OPTS(X)
 #undef X
   bool quiet = false, progress = false, stats = false, mkpath = false;
+  bool compress_level_explicit = false, skip_compress_set = false;
+  std::string skip_compress{DEFAULT_SKIP_COMPRESS};
+  CompressionSuffixes compression_suffixes;
   enum ProgressMode { Display, Progress2, Json } progress_mode = Display;
   int human = 0;
   std::string rsh, rsync_path;

@@ -108,7 +108,8 @@ Options (same meaning as rsync):
      --size-only          skip files that match in size
  -@, --modify-window=NUM  set the accuracy for mod-time comparisons
  -z, --compress           compress file data during the transfer (zstd)
-     --compress-level=NUM explicitly set compression level
+     --compress-level=NUM explicitly set compression level (default: adaptive)
+     --skip-compress=LIST skip suffixes, separated by / (empty disables the list)
  -f, --filter=RULE        add a file-filtering RULE
  -F                       merge .rsync-filter files (twice also excludes them)
  -C, --cvs-exclude        exclude CVS defaults and .cvsignore patterns
@@ -221,6 +222,7 @@ Parsed parse(int argc, char** argv) {
   int filter_files = 0;
   int recursive_setting = 0;
   bool relative_explicit = false;
+  bool compression_none = false;
 
   auto long_opt = [&](const std::string& name, const std::string* val, int& i) {
     auto need = [&]() -> std::string {
@@ -330,10 +332,27 @@ Parsed parse(int argc, char** argv) {
     else if (name == "bwlimit") o.bwlimit = parse_rate(need());
     else if (name == "timeout") o.timeout = parse_timeout(need());
     else if (name == "modify-window") o.modify_window = atoi(need().c_str());
-    else if (name == "compress-level" || name == "zl") o.compress_level = atoi(need().c_str());
+    else if (name == "compress-level" || name == "zl") {
+      std::string value = need();
+      char* end;
+      errno = 0;
+      long long level = strtoll(value.c_str(), &end, 10);
+      if (errno || end == value.c_str() || *end || level < INT_MIN || level > INT_MAX)
+        usage_error("--compress-level requires an integer");
+      o.compress_level = level;
+      o.compress_level_explicit = true;
+      o.compress = true;
+    }
+    else if (name == "skip-compress") {
+      std::string suffixes = need();
+      if (!o.compression_suffixes.assign(suffixes)) usage_error("invalid --skip-compress suffix list");
+      o.skip_compress = std::move(suffixes);
+      o.skip_compress_set = true;
+    }
     else if (name == "compress-choice" || name == "zc") {
       std::string choice = need();
-      if (choice == "none") o.compress = false, o.compress_level = -1000;
+      if (choice == "none") o.compress = false, compression_none = true;
+      else if (choice == "zstd") o.compress = true, compression_none = false;
       else if (choice != "zstd") usage_error("--" + name + " supports only zstd or none");
     } else if (name == "exclude") o.filters.add_pattern(need(), false);
     else if (name == "include") o.filters.add_pattern(need(), true);
@@ -372,7 +391,7 @@ Parsed parse(int argc, char** argv) {
           "write-batch", "read-batch", "only-write-batch", "super", "fake-super", "temp-dir",
           "iconv", "checksum-seed", "address", "sockopts", "stop-after", "stop-at", "max-alloc", "write-devices", "copy-devices",
           "delete-missing-args", "ignore-missing-args", "trust-sender", "copy-as", "early-input", "remote-option",
-          "contimeout", "fsync", "preallocate", "skip-compress",
+          "contimeout", "fsync", "preallocate",
           "block-size", "checksum-choice", "cc", "log-file-format", "debug", "outbuf",
           "inc-recursive", "no-inc-recursive", "i-r", "no-i-r", "no-protect-args", "old-args",
           "ipv4", "ipv6", "msgs2stderr", "no-msgs2stderr", "new-compress", "old-compress", "no-implied-dirs",
@@ -472,6 +491,7 @@ Parsed parse(int argc, char** argv) {
       }
     }
   }
+  if (compression_none) o.compress = false;
   if (o.files_from_set) {
     // These defaults do not depend on the position of --files-from. Archive
     // still preserves metadata but only an explicit -r requests recursion.
@@ -486,7 +506,6 @@ Parsed parse(int argc, char** argv) {
 #endif
   if (!p.server && p.install.empty() && p.args.size() == 1) o.list_only = true;
   if (o.list_only && !o.dirs_explicit && !o.recursive) o.dirs = true;
-  if (o.compress_level == -1000) o.compress_level = 3;
   if (o.del && !o.recursive && !o.dirs) usage_error("--delete does not work without --recursive (-r) or --dirs (-d).");
   if (delete_modes && (delete_modes & (delete_modes - 1))) usage_error("You may not combine multiple --delete-WHEN options.");
   if (o.quiet) o.verbose = 0, o.progress = false;
