@@ -3508,3 +3508,26 @@ after U-01's evidence entry completes P2, as requested by the user.
 - Full-corpus checksum timing is measured in both directions. F-14 still needs
   profiling to decide whether hashing starves scanning; timing gains alone do
   not establish that a separate hashing pool is necessary.
+
+
+### F-05 final-product correctness and comparative evidence — 2026-10-10
+
+- Frozen clean product `98eeb171c94d` completes 112 timed copies and 28 verified
+  warmups on each of macOS, Linux overlay and a disposable loop-backed btrfs
+  volume. All raw results and a comparison table are retained. No stale forced
+  build revision is used for these measurements.
+- Two-file automatic copies recover on overlay (54.0 ms versus reference
+  56.1 ms). Btrfs reflinks take 19.9 ms versus 160.1 ms (8.03x). On the busy
+  Mac, byte copies improve 24%; plain two-file pipe copies improve 2.7%.
+- Single-file parallel byte copies and uncompressed transfers still regress,
+  including 256 MiB btrfs byte copies at 224.7 ms versus 130.9 ms. Compressed
+  single-file pipe copying improves on overlay (1.60x) but regresses on btrfs.
+  F-05 stays partial; these observations require a better range policy, not a
+  claim that parallelism always improves performance. Additional 1 GiB probes
+  are running separately. The physical baseline remains untouched.
+- Final glibc and static-musl products each pass all three actual reflink/COW,
+  omitted-permission and opt-out tests on both btrfs and XFS (12 total). All
+  231 macOS itemized differential cases and 227 Linux data/metadata cases pass.
+  Each platform also passes four range tests including a frozen prior peer,
+  adaptive compression tests, and seven resume tests (one optional real SSH
+  rig skip). The Linux kernel fault/policy suite passes all seven cases.

@@ -107,6 +107,24 @@ hashes, versions, load and free space. Partial runs do not establish completion.
 The [completed F-12 comparison](results/20261010-f12-deletion-summary.md) records
 all 32 verified samples, the single-root result and the additional CPU cost.
 
+`large_files.py` compares the prior product, one- and four-worker candidates,
+and rsync on two-file and single-file fixtures. It covers local byte copies,
+automatic kernel copies, and plain/compressed pipe transfers. Each tool gets
+one verified warmup and four samples in rotated orders. The random file has
+different bytes in every MiB. A fresh owned work directory is required:
+
+```sh
+python3 benchmarks/large_files.py --reference /path/to/prior/xs --candidate /path/to/current/xs \
+  --work .bench/large-run --output benchmarks/results/large-run.json --rsync /path/to/rsync
+```
+
+Use `--file-mib` to change file size and `--cases` to select known cases.
+The [revision 98eeb171c94d comparison](results/20261010-f05-98eeb17-summary.md)
+retains all 336 timed samples across macOS, Linux overlay and loop-backed btrfs,
+including single-file regressions. F-05 remains partial while its range policy
+is investigated; reflink correctness passes on actual btrfs and XFS volumes
+with both glibc and static-musl products.
+
 ## Regression gate
 
 `.github/workflows/performance.yml` builds the pinned reference and candidate
