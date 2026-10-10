@@ -128,7 +128,7 @@ The benchmark so far is one corpus slice, one machine, one filesystem, no networ
 | ID | Item | Status | Done when | Size |
 |---|---|---|---|---|
 | F-01 | **Benchmark the real targets.** Over ssh to a Linux LAN host (ext4/XFS) and to the Pi; the full 14 GB corpus (needs disk space freed first); an update run with ~1 % of files changed; a mixed tree with large files; cold cache. | partial | `bench/bench.py --target host:path` and a results table per target in the README; this decides the order of everything below. | M |
-| F-02 | **Regression gate.** Nothing stops a change from losing the lead. | partial | CI job fails if any scenario drops below a recorded ratio to rsync on the same runner. | M |
+| F-02 | **Regression gate.** Nothing stops a change from losing the lead. | **done** | CI job fails if any scenario drops below a recorded ratio to rsync on the same runner. | M |
 | F-03 | **ssh is one stream on one core.** On a fast LAN the cipher becomes the ceiling long before the disks do. | unverified | Measured first. Then, if it is the limit: `--streams N` (several ssh connections sharing one transfer) and no compression by default on links faster than the compressor. | L |
 | F-04 | **Adaptive compression.** `-z` compresses every block at level 3 regardless of content or link. | **done** | Incompressible blocks are detected from a sample and sent raw; `--skip-compress` suffixes honoured; level chosen from measured link speed unless set. | M |
 | F-05 | **Large files.** One thread reads and one stream carries each large file; local copies on Linux use a plain read/write loop. | partial | Parallel ranges within a file on both ends; `copy_file_range`/`FICLONE` on Linux (reflinks on btrfs/XFS mirror the APFS clone path); `F_NOCACHE` above a size so a 50 GB copy does not evict the page cache. | L |
@@ -3572,3 +3572,23 @@ after U-01's evidence entry completes P2, as requested by the user.
   and 39 warmups verify, the delayed candidate fails on timing, and a corrupt
   zero-exit candidate fails independent verification. Default-policy large-file
   product comparisons and the next hosted gate remain pending.
+
+
+## P3 / F-02 completed — 2026-10-10
+
+- Hosted run 38076729757 completes the fixed 24-sample matrix on both platforms.
+  macOS passes all 15 recorded ratio floors; Linux correctly fails the real
+  large-local regression (59.4 ms reference versus 2.125 s candidate). Both
+  runs retain all 1,080 timed samples and 45 independently verified warmups.
+  Raw artifacts identify the clean products, same-runner reference, resource
+  measurements and unchanged 85% floor. There were no selective retries.
+- Local gate behavior proofs also pass on both platforms: healthy identical
+  products verify, a deliberately delayed product fails the ratio gate, and
+  corrupt output fails even when its producer returns success. The expansion
+  to 18 scenarios additionally protects single-file byte/compressed/default
+  transport behavior. Its next hosted run validates the corrected product; a
+  product regression remains a release blocker, rather than a gate exemption.
+- The measurement step now times out before the job, leaving time for the
+  always-run artifact upload to preserve partial evidence. The backlog records
+  F-02 complete; performance acceptance of the latest F-05 product remains
+  pending its default-policy measurements and hosted gate.
