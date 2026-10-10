@@ -10,6 +10,9 @@
 #include <fcntl.h>
 #include <limits.h>
 #include <unistd.h>
+#include <pthread.h>
+#include <cstdint>
+#include <time.h>
 #ifdef __APPLE__
 #include <sys/attr.h>
 #include <sys/clonefile.h>
@@ -174,6 +177,20 @@ static ssize_t fault_read(int fd, void* bytes, size_t len) {
   return original(fd, bytes, len);
 }
 
+static void range_trace(int fd, const char* operation, bool start) {
+  const char* path = getenv("XSYNC_FAULT_RANGE_TRACE");
+  if (!path || !selected(fd)) return;
+  struct timespec now;
+  clock_gettime(CLOCK_MONOTONIC, &now);
+  char line[192];
+  int length = snprintf(line, sizeof line, "%llu %ld %llu %s %s\n",
+    (unsigned long long)now.tv_sec * 1000000000 + now.tv_nsec, (long)getpid(),
+    (unsigned long long)(uintptr_t)pthread_self(), operation, start ? "start" : "end");
+  int log = open(path, O_WRONLY | O_APPEND | O_CREAT | O_CLOEXEC, 0600);
+  if (log >= 0) { (void)write(log, line, (size_t)length); close(log); }
+  if (start) usleep(20000); // Make overlap observable without timing assertions.
+}
+
 static ssize_t fault_pread(int fd, void* bytes, size_t len, off_t offset) {
 #ifdef __APPLE__
   auto original = pread;
@@ -182,7 +199,9 @@ static ssize_t fault_pread(int fd, void* bytes, size_t len, off_t offset) {
 #endif
   const char* marker = getenv("XSYNC_FAULT_PREAD_NOTIFY");
   const char* minimum = getenv("XSYNC_FAULT_PREAD_MIN_SIZE");
-  if (marker && selected(fd) && (!minimum || len >= strtoull(minimum, nullptr, 10))) {
+  const char* before = getenv("XSYNC_FAULT_PREAD_BEFORE_OFFSET");
+  if (marker && selected(fd) && (!minimum || len >= strtoull(minimum, nullptr, 10)) &&
+      (!before || offset < (off_t)strtoll(before, nullptr, 10))) {
     static std::atomic<bool> notified{false};
     if (!notified.exchange(true)) {
       int file = open(marker, O_WRONLY | O_CREAT | O_EXCL, 0600);
@@ -190,7 +209,12 @@ static ssize_t fault_pread(int fd, void* bytes, size_t len, off_t offset) {
       if (const char* delay = getenv("XSYNC_FAULT_PREAD_DELAY_US")) usleep((useconds_t)strtoul(delay, nullptr, 10));
     }
   }
-  return original(fd, bytes, len, offset);
+  range_trace(fd, "read", true);
+  ssize_t result = original(fd, bytes, len, offset);
+  int error = errno;
+  range_trace(fd, "read", false);
+  errno = error;
+  return result;
 }
 
 static ssize_t fault_pwrite(int fd, const void* bytes, size_t len, off_t offset) {
@@ -207,7 +231,12 @@ static ssize_t fault_pwrite(int fd, const void* bytes, size_t len, off_t offset)
     }
     if (const char* delay = getenv("XSYNC_FAULT_WRITE_DELAY_US")) usleep((useconds_t)strtoul(delay, nullptr, 10));
   }
-  return original(fd, bytes, len, offset);
+  range_trace(fd, "write", true);
+  ssize_t result = original(fd, bytes, len, offset);
+  int error = errno;
+  range_trace(fd, "write", false);
+  errno = error;
+  return result;
 }
 
 static ssize_t fault_write(int fd, const void* bytes, size_t len) {

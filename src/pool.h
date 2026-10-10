@@ -1,5 +1,6 @@
 // Worker pool with two task queues (0 = scan/generate, 1 = transfer).
 #pragma once
+#include <atomic>
 #include <condition_variable>
 #include <deque>
 #include <functional>
@@ -49,7 +50,36 @@ class Pool {
   }
   void start(int n, Fn fn) {
     fn_ = std::move(fn);
+    worker_count_ = n;
     for (int i = 0; i < n; i++) threads_.emplace_back([this, i] { run(i); });
+  }
+  // Called by a pool worker, with callbacks that do not themselves call
+  // parallel(). Waiting producers help only range tickets, never recursively
+  // start another file. Thus all workers may produce ranges without deadlock.
+  void parallel(size_t count, Worker& worker, std::function<void(size_t, Worker&)> fn) {
+    if (!count) return;
+    ParallelWork work(count, std::move(fn));
+    int tickets = (int)std::min<size_t>(worker_count_, count);
+    work.remaining = tickets;
+    {
+      std::lock_guard<std::mutex> lock(mu_);
+      for (int i = 1; i < tickets; ++i) ranges_.push_back(&work);
+      cv_.notify_all();
+    }
+    run_parallel(work, worker);
+    while (work.remaining.load(std::memory_order_acquire)) {
+      ParallelWork* other = nullptr;
+      {
+        std::unique_lock<std::mutex> lock(mu_);
+        if (ranges_.empty()) {
+          cv_.wait_for(lock, std::chrono::milliseconds(1), [&] {
+            return !ranges_.empty() || !work.remaining.load(std::memory_order_acquire);
+          });
+        }
+        if (!ranges_.empty()) { other = ranges_.front(); ranges_.pop_front(); }
+      }
+      if (other) run_parallel(*other, worker);
+    }
   }
   // Wait up to `ms` for completion.
   bool wait_done(int ms) {
@@ -69,6 +99,22 @@ class Pool {
   }
 
  private:
+  struct ParallelWork {
+    size_t count;
+    std::function<void(size_t, Worker&)> fn;
+    std::atomic<size_t> next{0};
+    std::atomic<int> remaining{0};
+    ParallelWork(size_t count, std::function<void(size_t, Worker&)> fn) : count(count), fn(std::move(fn)) {}
+  };
+  void run_parallel(ParallelWork& work, Worker& worker) {
+    for (;;) {
+      size_t index = work.next.fetch_add(1, std::memory_order_relaxed);
+      if (index >= work.count) break;
+      work.fn(index, worker);
+    }
+    work.remaining.fetch_sub(1, std::memory_order_release);
+    cv_.notify_all();
+  }
   void run(int id) {
     Worker w;
     w.id = id;
@@ -78,12 +124,12 @@ class Pool {
       if (done_) break;
       int pref = (id < scan_workers && q_[1].size() < q1_soft_limit) ? 0 : 1;
       int k = !q_[pref].empty() ? pref : !q_[1 - pref].empty() ? 1 - pref : -1;
-      if (k < 0) {
+      if (k < 0 && ranges_.empty()) {
         lk.unlock();
         bool did = on_idle && on_idle(w);
         w.flush_log();
         lk.lock();
-        if (did || !q_[0].empty() || !q_[1].empty()) continue;
+        if (did || !q_[0].empty() || !q_[1].empty() || !ranges_.empty()) continue;
         if (active_ == 0 && (!idle_check || idle_check())) {
           done_ = true;
           cv_.notify_all();
@@ -95,7 +141,11 @@ class Pool {
         continue;
       }
       Task t;
-      if (k == 0 && lifo0) {
+      ParallelWork* range = nullptr;
+      if (!ranges_.empty()) {
+        range = ranges_.front();
+        ranges_.pop_front();
+      } else if (k == 0 && lifo0) {
         t = std::move(q_[0].back());
         q_[0].pop_back();
       } else {
@@ -107,7 +157,8 @@ class Pool {
       if (was_full && bytes_ < max_bytes) cv_space_.notify_all();
       active_++;
       lk.unlock();
-      fn_(t, w);
+      if (range) run_parallel(*range, w);
+      else fn_(t, w);
       t = Task();
       lk.lock();
       active_--;
@@ -120,6 +171,8 @@ class Pool {
   std::mutex mu_;
   std::condition_variable cv_, cv_done_, cv_space_;
   std::deque<Task> q_[2];
+  std::deque<ParallelWork*> ranges_;
+  int worker_count_ = 1;
   size_t bytes_ = 0;
   int active_ = 0;
   bool done_ = false;

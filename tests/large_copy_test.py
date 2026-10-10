@@ -26,7 +26,7 @@ class LargeCopyTests(unittest.TestCase):
         if sys.platform.startswith('linux'):
             subprocess.run(['c++', '-std=c++20', '-shared', '-fPIC', str(ROOT / 'tests/large_copy_fault.cpp'),
                             '-o', str(cls.library), '-ldl'], check=True)
-        cls.data = random.Random(918).randbytes(16 * 1024 * 1024 + 191)
+        cls.data = random.Random(918).randbytes(64 * 1024 * 1024 + 191)
 
     @classmethod
     def tearDownClass(cls):
@@ -72,6 +72,17 @@ class LargeCopyTests(unittest.TestCase):
         self.source.chmod(0o640)
         self.verify(self.copy(fault='mutate'))
         self.assertEqual(self.source.read_bytes()[0], ord('X'))
+
+    @unittest.skipUnless(sys.platform.startswith('linux'), 'Linux kernel-copy faults')
+    def test_source_growth_and_shrink_retry_ranges(self):
+        for fault in ('grow', 'shrink'):
+            with self.subTest(fault=fault):
+                self.source.chmod(0o640)
+                self.source.write_bytes(self.data)
+                self.destination.unlink(missing_ok=True)
+                self.verify(self.copy(fault=fault))
+                expected = len(self.data) + 128 if fault == 'grow' else 32 * 1024 * 1024 + 313
+                self.assertEqual(self.source.stat().st_size, expected)
 
     @unittest.skipUnless(sys.platform.startswith('linux'), 'Linux kernel-copy faults')
     def test_io_failure_preserves_existing_destination(self):

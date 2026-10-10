@@ -36,11 +36,19 @@ extern "C" ssize_t copy_file_range(int in, off_t* input_offset, int out, off_t* 
   if (!strcmp(mode, "partial-fallback") && call >= 3) { errno = EINVAL; return -1; }
   if (!strcmp(mode, "eintr") && call == 0) { errno = EINTR; return -1; }
   ssize_t count = real(in, input_offset, out, output_offset, std::min<size_t>(length, 65537), flags);
-  if (!strcmp(mode, "mutate") && call == 0 && count > 0) {
+  if ((!strcmp(mode, "mutate") || !strcmp(mode, "grow") || !strcmp(mode, "shrink")) && call == 0 && count > 0) {
     const char* path = getenv("XS_LARGE_COPY_SOURCE");
     int changed = open(path, O_RDWR);
     char byte = 'X';
-    if (changed >= 0) { (void)pwrite(changed, &byte, 1, 0); close(changed); }
+    if (changed >= 0) {
+      if (!strcmp(mode, "shrink")) (void)ftruncate(changed, 32 * 1024 * 1024 + 313);
+      else if (!strcmp(mode, "grow")) {
+        struct stat st;
+        char tail[128]{};
+        if (fstat(changed, &st) == 0) (void)pwrite(changed, tail, sizeof tail, st.st_size);
+      } else (void)pwrite(changed, &byte, 1, 0);
+      close(changed);
+    }
   }
   return count;
 }

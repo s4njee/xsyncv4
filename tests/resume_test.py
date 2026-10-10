@@ -126,7 +126,10 @@ class ResumeTests(unittest.TestCase):
                         time.sleep(.005)
                     kept = target.stat().st_size
                     self.assertGreaterEqual(kept, 31 * MIB)
-                    self.assertLessEqual(kept, 36 * MIB)
+                    # Parallel ranges may already have queued later blocks.
+                    # Retained data must still be a strict, verified prefix,
+                    # and the retry below must send only its remaining bytes.
+                    self.assertLess(kept, self.source.stat().st_size)
                     with target.open('rb') as partial, self.source.open('rb') as original:
                         self.assertEqual(hashlib.sha256(partial.read()).digest(), hashlib.sha256(original.read(kept)).digest())
                     result = subprocess.run(self.command(transport, target), capture_output=True, timeout=15,
@@ -185,10 +188,12 @@ class ResumeTests(unittest.TestCase):
                 env['XSYNC_FAULT_READ_NOTIFY'] = str(marker)
                 env['XSYNC_FAULT_PREAD_NOTIFY'] = str(root / 'delta-read')
                 env['XSYNC_FAULT_PREAD_MIN_SIZE'] = str(MIB // 2)
+                env['XSYNC_FAULT_PREAD_BEFORE_OFFSET'] = str(20 * MIB + 123)
                 result = subprocess.run(self.command('local', target), capture_output=True, env=env, timeout=15)
                 self.assertEqual(result.returncode, 0, result.stderr)
                 self.check_file(target)
-                # Prefix hashing uses small preads; actual source data uses read or larger delta preads.
+                # Prefix hashing uses small preads. Larger range/delta reads
+                # must not reread the verified prefix.
                 self.assertEqual((root / 'source-read.1').exists() or (root / 'delta-read').exists(), not valid)
 
     def test_inplace_verified_prefix(self):

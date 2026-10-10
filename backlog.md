@@ -3409,3 +3409,33 @@ after U-01's evidence entry completes P2, as requested by the user.
 - F-05 remains partial: parallel ranges on both ends, positive reflink testing
   on a supporting Linux filesystem and comparative measurements remain required.
   The ongoing neo/freya baseline binaries are unchanged.
+
+
+### F-05 parallel ranges and positive reflink validation — 2026-10-10
+
+- Files with >=32 MiB remaining use disjoint ranges across existing workers,
+  locally and in the native sender. Waiting producers help range tickets,
+  avoiding deadlock when every worker starts a large file. No extra threads are
+  created, and range-ticket memory is bounded by the worker budget. Receiver
+  chunks reserve nonoverlapping ranges under the per-file lock, release it for
+  writes and count completion after writing; END cannot publish an active file.
+  Sparse and delta writes retain their required serialization.
+- Actual I/O traces prove overlapping reads and writes for local/push/pull,
+  with concurrency between two and four using `-j4`. One-worker controls,
+  compressed transfers, frozen-peer interoperability and eight simultaneous
+  large-file producers all pass on macOS and glibc ARM64. Seven Linux large-copy
+  tests cover 64 MiB files, short/fallback calls, source growth/shrink/mutation
+  retries, atomic EIO failures, inplace and sparse behavior.
+- A disposable 2 GiB loop-backed btrfs volume positively validates FICLONE on
+  both glibc and static musl ARM64. strace observes successful actual ioctls;
+  COW independence, xattrs/timestamps/read-only modes, existing omitted-permission
+  correction and `--no-clone` bypass all pass (three tests on each build).
+- All 231 macOS itemized and 227 Linux data/metadata/exit cases pass, along with
+  all eleven compression tests on both platforms. The resume check still requires
+  a strict incomplete byte-exact prefix and the exact remaining transfer bytes.
+  Its former 36 MiB upper bound described the serial queue; parallel buffered
+  ranges can retain more valid bytes after disconnection. Prefix-reread probes
+  now distinguish legitimate remaining-range reads from reading the saved prefix.
+- Comparative measurements against the pre-F-05 product and rsync are next;
+  F-05 stays partial until those results are retained. The physical baseline
+  binaries on neo/freya remain unchanged.

@@ -760,6 +760,63 @@ struct Local {
       struct stat output_stat;
       if (kernel_copy && (fstat(f.fd, &output_stat) != 0 || before.st_dev != output_stat.st_dev)) kernel_copy = false;
 #endif
+      if (ok && total < s.size && s.size - total >= (32 << 20) && default_jobs() > 1 && !o.sparse) {
+        i64 start = total;
+        constexpr i64 span = 8 << 20;
+        size_t ranges = (size_t)((s.size - start + span - 1) / span);
+        std::atomic<i64> copied{0};
+        std::atomic<bool> failed{false};
+        const bool accelerate = kernel_copy;
+        pool.parallel(ranges, w, [&, output = &f](size_t range, Worker& worker) {
+          i64 offset = start + (i64)range * span;
+          i64 end = std::min(s.size, offset + span);
+          bool kernel = accelerate;
+          while (offset < end && !g_stop.load() && !failed.load()) {
+            ssize_t n = 0;
+            bool already_written = false;
+            if (kernel) {
+              n = out_copy_range(*output, in, (size_t)(end - offset), offset);
+              if (n < 0 && errno == EINTR) continue;
+              if (n > 0) already_written = true;
+              else if (!n || errno == EXDEV || errno == EOPNOTSUPP || errno == ENOSYS || errno == EINVAL || errno == EPERM) kernel = false;
+              else {
+                if (!failed.exchange(true)) file_io_error(errno, output->path.c_str(), "copy file range");
+                break;
+              }
+            }
+            if (!already_written) {
+              size_t count = (size_t)std::min<i64>((i64)worker.buf.size(), end - offset);
+              n = pread(in, worker.buf.data(), count, offset);
+              if (n < 0 && errno == EINTR) continue;
+              if (n <= 0) {
+                if (n < 0 && !failed.exchange(true)) {
+                  g_source_io_error.store(true);
+                  err_line(RERR_PARTIAL, "read errors mapping \"%s\": %s", w.p2.c_str(), errstr(errno).c_str());
+                }
+                break;
+              }
+              if (!out_write(*output, worker.buf.data(), (size_t)n, offset)) {
+                if (!failed.exchange(true)) file_io_error(errno, output->path.c_str(), "write");
+                break;
+              }
+            }
+            offset += n;
+            copied.fetch_add(n);
+            g_stats.xfer_bytes.fetch_add((u64)n);
+            slot_add(w.id, n);
+          }
+        });
+        total += copied.load();
+        ok = !failed.load() && !g_stop.load();
+        if (total != s.size && ok) {
+          out_abort(f); close(in);
+          g_stats.xfer_bytes.fetch_sub((u64)total);
+          if (attempt == 0) continue;
+          g_source_io_error.store(true);
+          err_line(RERR_PARTIAL, "file changed during ranged transfer: \"%s\"", w.p2.c_str());
+          return fail(0);
+        }
+      }
       bool byte_positioned = !kernel_copy;
       while (ok && total < s.size) {
         if (g_stop.load()) { ok = false; break; }

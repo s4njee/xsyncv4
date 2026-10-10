@@ -1266,12 +1266,13 @@ struct Sender {
   struct RawFileBlock {
     Sender& sender;
     Worker& worker;
-    bool skip;
-    RawFileBlock(Sender& sender, Worker& worker, bool skip) : sender(sender), worker(worker), skip(skip) {
-      if (skip) { sender.flush_block(worker); worker.block_raw = true; }
+    bool isolate, previous;
+    RawFileBlock(Sender& sender, Worker& worker, bool skip) : sender(sender), worker(worker),
+        isolate(skip || skip != worker.block_raw), previous(worker.block_raw) {
+      if (isolate) { sender.flush_block(worker); worker.block_raw = skip; }
     }
     ~RawFileBlock() {
-      if (skip) { sender.flush_block(worker); worker.block_raw = false; }
+      if (isolate) { sender.flush_block(worker); worker.block_raw = previous; }
     }
   };
 
@@ -1384,6 +1385,49 @@ struct Sender {
       } else {
         flush_block(w);
         w.buf.resize(BLOCK_TARGET);
+        if (fresh.size - off >= (32 << 20) && default_jobs() > 1) {
+          i64 start = off;
+          size_t ranges = (size_t)((fresh.size - start + BLOCK_TARGET - 1) / BLOCK_TARGET);
+          std::atomic<bool> input_ok{true};
+          pool.parallel(ranges, w, [&](size_t range, Worker& worker) {
+            if (g_stop.load()) return;
+            i64 offset = start + (i64)range * BLOCK_TARGET;
+            size_t want = (size_t)std::min<i64>(BLOCK_TARGET, fresh.size - offset);
+            worker.buf.resize(BLOCK_TARGET);
+            size_t n = 0;
+            {
+              StageTimer timing(g_stats.read_ns);
+              while (n < want && !g_stop.load()) {
+                ssize_t count = pread(in, worker.buf.data() + n, want - n, offset + (i64)n);
+                if (count < 0 && errno == EINTR) continue;
+                if (count <= 0) {
+                  if (count < 0 && input_ok.exchange(false))
+                    err_line(RERR_PARTIAL, "read errors mapping \"%s\": %s", w.p2.c_str(), errstr(errno).c_str());
+                  break;
+                }
+                n += (size_t)count;
+              }
+            }
+            if (g_stop.load()) return;
+            // Complete only this abandoned attempt; the usual stable-source
+            // check selects a fresh attempt before output publication.
+            if (n < want) { memset(worker.buf.data() + n, 0, want - n); input_ok = false; }
+            RawFileBlock raw(*this, worker, o.compress && o.compression_suffixes.matches(d.list.name_sv(scanned)));
+            flush_block(worker);
+            if (worker.block.size() < DATA_PREFIX) begin_block(worker);
+            put_var(worker.block, d.id), put_var(worker.block, idx);
+            worker.block.push_back((char)R_CHUNK);
+            put_var(worker.block, attempt);
+            if (resume_enabled()) put_var(worker.block, prefix);
+            put_var(worker.block, (u64)offset), put_var(worker.block, (u64)fresh.size);
+            put_str(worker.block, {worker.buf.data(), want});
+            flush_block(worker);
+            if (client) slot_add(w.id, (i64)want);
+          });
+          if (g_stop.load()) { close(in); return; }
+          off = fresh.size;
+          ok = input_ok.load();
+        }
         while (off < fresh.size && !g_stop.load()) {
           size_t want = (size_t)std::min<i64>((i64)BLOCK_TARGET, fresh.size - off);
           size_t n = read_some(w.buf.data(), want);
@@ -2171,8 +2215,14 @@ struct Receiver {
           }
           b->chunks.emplace(start, end);
           if (b->ok) {
+            // Reserved ranges cannot overlap. Count completion only after the
+            // write returns, so END cannot finalize while any write is active.
+            // Sparse/delta paths retain serialization of their mutable state.
+            bool concurrent = !delta && !g_opt.sparse;
+            if (concurrent) file_lock.unlock();
             bool wrote = count ? delta_copy_blocks(b->f, *basis, first, count, off, t.buf) :
               out_write(b->f, bytes.data(), bytes.size(), off);
+            if (concurrent) file_lock.lock();
             if (wrote) acknowledge(length), b->acknowledged += length;
             else {
               file_io_error(errno, b->f.path.c_str(), count ? "reconstruct delta" : "write");
