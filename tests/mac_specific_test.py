@@ -129,6 +129,51 @@ class MacSpecificTests(unittest.TestCase):
                     if native: self.assertTrue(marker.exists())
                 self.assertEqual(results[0], results[1])
 
+    def test_leaf_clones_correct_modes_and_selected_groups(self):
+        groups = [group for group in os.getgroups() if group != os.getegid()]
+        for flag in ('-rt', '-rlt', '-rtg', '-rltg'):
+            with self.subTest(flags=flag):
+                source = self.root / 'source'
+                if source.exists(): shutil.rmtree(source)
+                leaf = source / 'leaf'
+                leaf.mkdir(parents=True)
+                leaf.chmod(0o755)
+                if groups: os.chown(leaf, -1, groups[0])
+                for number in range(10):
+                    path = leaf / f'file-{number}'
+                    path.write_bytes(b'corrected leaf clone' * 1024)
+                    path.chmod(0o444 if number % 2 else 0o644)
+                    if groups and number % 2: os.chown(path, -1, groups[0])
+                if 'l' in flag: (leaf / 'link').symlink_to('file-0')
+                for path in [source, leaf, *leaf.iterdir()]:
+                    os.utime(path, ns=(1500000000123456789, 1500000000123456789), follow_symlinks=False)
+                results = []
+                for native in (False, True):
+                    target = self.root / ('xs' if native else 'rsync')
+                    if target.exists(): shutil.rmtree(target)
+                    target.mkdir()
+                    os.utime(target, ns=(1500000000123456789, 1500000000123456789))
+                    marker, read = self.root / 'clone-notify', self.root / 'read-notify'
+                    for path in (marker, read.with_name('read-notify.1')):
+                        if path.exists(): path.unlink()
+                    env = self.environment(source)
+                    env.update(XSYNC_FAULT_CLONE_NOTIFY=str(marker), XSYNC_FAULT_READ_NOTIFY=str(read))
+                    command = self.command(native, str(source) + '/', str(target) + '/', 'local', flag)
+                    if native: command[0] = str(self.injected_binary)
+                    result = subprocess.run(command, env=env, capture_output=True, timeout=20, umask=0o77)
+                    self.assertEqual(result.returncode, 0, result.stderr)
+                    state = []
+                    for path in [target, *sorted(target.rglob('*'))]:
+                        st = path.lstat()
+                        state.append((str(path.relative_to(target)), st.st_mode, st.st_uid, st.st_gid,
+                                      st.st_mtime_ns, os.readlink(path) if path.is_symlink() else
+                                      path.read_bytes() if path.is_file() else None))
+                    results.append((state, sorted(result.stdout.splitlines())))
+                    if native:
+                        self.assertEqual(marker.read_text(), str(leaf), 'expected a whole-leaf clone')
+                        self.assertFalse(read.with_name('read-notify.1').exists())
+                self.assertEqual(results[0], results[1])
+
     def test_sockets_and_hard_link_aliases(self):
         for direction in ('local', 'push', 'pull'):
             for flags in (['-a'], ['-aH'], ['-aHX'], ['-rlt', '--specials']):

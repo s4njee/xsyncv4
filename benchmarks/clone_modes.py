@@ -46,7 +46,9 @@ def main():
     binaries = {'reference': str(args.reference.resolve()), 'candidate': str(args.candidate.resolve()),
                 'byte-copy': str(args.candidate.resolve()), 'rsync': shutil.which(args.rsync) or args.rsync}
     result = {'schema': 1, 'utc': datetime.datetime.now(datetime.timezone.utc).isoformat(),
-              'platform': platform.platform(), 'initial_loadavg': list(os.getloadavg()),
+              'platform': platform.platform(), 'host': platform.node(), 'cpus': os.cpu_count(),
+              'initial_loadavg': list(os.getloadavg()),
+              'harness_sha256': hashlib.sha256(pathlib.Path(__file__).read_bytes()).hexdigest(),
               'cache': 'retained OS caches', 'umask': '0077', 'jobs': 4,
               'disk': subprocess.check_output(['df', '-k', str(work)], text=True),
               'binaries': {name: {'sha256': hashlib.sha256(pathlib.Path(binary).read_bytes()).hexdigest(),
@@ -123,6 +125,7 @@ def main():
                                           for tool in binaries}}
                              for dataset in ('large', 'small') for flag in ('-rt', '-rlt')]
         result['complete'] = True
+        result['final_loadavg'] = list(os.getloadavg())
         save()
         shutil.rmtree(sources)
         return 0

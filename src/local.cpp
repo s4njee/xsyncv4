@@ -427,13 +427,15 @@ struct Local {
     const DirList& l = d->src;
     if (metadata_enabled() || o.hard_links || !clone_ok.load(std::memory_order_relaxed) || l.e.size() != listed || l.e.empty() || l.e.size() > 4096 || l.incomplete) return false;
     if ((d->attrs.fileflags & SF_DATALESS) || (d->attrs.mode & 07000) || (d->attrs.mode & 0700) != 0700) return false;
-    u32 gid = d->waiter ? d->waiter->dgid : d->attrs.gid;
-    if (o.group && d->attrs.gid != gid) return false;
     for (const Entry& e : l.e) {
       if (e.type != T_REG && e.type != T_LNK) return false;
       if (e.fileflags & SF_DATALESS) return false;
-      if ((e.mode & 07000) || (o.group && e.gid != gid)) return false;
+      if (e.mode & 07000) return false;
+      // Per-file cloning can temporarily clear and restore blocking flags;
+      // a directory clone cannot safely correct locked child attributes.
+      if (blocking_fileflags(e.fileflags)) return false;
     }
+    if (blocking_fileflags(d->attrs.fileflags)) return false;
     u64 nf = 0, nl = 0, nb = 0;
     for (const Entry& e : l.e) {
       if (e.type == T_REG) nf++, nb += (u64)e.size;
@@ -444,7 +446,7 @@ struct Local {
     g_stats.clone_dirs_total.fetch_add(1, std::memory_order_relaxed);
     slot_begin(w.id, {}, d->rel.empty() ? "./" : d->rel + "/", (i64)nb, true);
     progress_tick();
-    if (destination_clone(d->src_path.c_str(), d->dst_path.c_str(), CLONE_NOFOLLOW | (o.owner && o.am_root ? 0 : CLONE_NOOWNERCOPY)) != 0) {
+    if (destination_clone(d->src_path.c_str(), d->dst_path.c_str(), CLONE_NOFOLLOW | CLONE_NOOWNERCOPY) != 0) {
       int error = errno;
       g_stats.xfer_files_total.fetch_sub(nf, std::memory_order_relaxed);
       g_stats.xfer_bytes_total.fetch_sub(nb, std::memory_order_relaxed);
@@ -455,6 +457,34 @@ struct Local {
       if (errno == EXDEV || errno == ENOTSUP) clone_ok.store(false, std::memory_order_relaxed);
       return false;
     }
+    int fd = destination_open_dir(d->dst_path.c_str());
+    struct stat cloned{};
+    d->mode_ok = false;
+    if (fd < 0 || fstat(fd, &cloned) != 0) {
+      file_io_error(errno, d->dst_path.c_str(), "open cloned directory");
+    } else {
+      // Children were created with this directory's initial group. Correct
+      // selected identities independently rather than copying both uid/gid.
+      const u32 inherited_gid = cloned.st_gid;
+      for (const Entry& e : l.e) {
+        const char* name = l.name(e);
+        std::string path = path_join(d->dst_path, l.name_sv(e));
+        if (o.group && e.gid != inherited_gid && can_set_gid(e.gid))
+          check_attr(fchownat(fd, name, (uid_t)-1, e.gid, AT_SYMLINK_NOFOLLOW), path.c_str(), "ownership");
+        if (o.owner && o.am_root && e.uid != (u32)geteuid())
+          check_attr(fchownat(fd, name, e.uid, (gid_t)-1, AT_SYMLINK_NOFOLLOW), path.c_str(), "ownership");
+        u32 mode = o.perms ? e.mode : e.mode & 0777 & ~g_umask;
+        if (mode != e.mode)
+          check_attr(fchmodat(fd, name, mode, AT_SYMLINK_NOFOLLOW), path.c_str(), "permissions");
+      }
+      if (o.group && d->attrs.gid != inherited_gid && can_set_gid(d->attrs.gid))
+        check_attr(fchown(fd, (uid_t)-1, d->attrs.gid), d->dst_path.c_str(), "ownership");
+      if (o.owner && o.am_root && d->attrs.uid != (u32)geteuid())
+        check_attr(fchown(fd, d->attrs.uid, (gid_t)-1), d->dst_path.c_str(), "ownership");
+      d->mode_ok = (cloned.st_mode & 07777) == d->attrs.mode ||
+                    check_attr(fchmod(fd, d->attrs.mode), d->dst_path.c_str(), "permissions");
+    }
+    if (fd >= 0) close(fd);
     for (u32 i = 0; i < l.e.size(); ++i) {
       const Entry& e = l.e[i];
       note_item(*d, i, e.type == T_REG ? ">f+++++++++" : "cL+++++++++", 0, w);
@@ -503,7 +533,6 @@ struct Local {
       }
       release(d->waiter);
       if (cloned) {
-        d->mode_ok = true;
         finish_dir(*d);
       }
       if (cloned || !made) {
@@ -837,7 +866,7 @@ int run_local(const std::vector<std::string>& srcs, const std::string& dest) {
   const Options& o = g_opt;
   // Whole-directory clones are only equivalent to a per-file sync when nothing could make us
   // treat any entry specially.
-  L.lazy_ok = o.clone && !o.sparse && o.link_dest.empty() && o.chmod_rules.empty() && !o.ownership.requested() && !o.atimes && !o.crtimes && !o.fileflags && o.recursive && o.links && !o.copy_links && o.perms && o.times && !o.omit_dir_times && !o.omit_link_times &&
+  L.lazy_ok = o.clone && !o.sparse && o.link_dest.empty() && o.chmod_rules.empty() && !o.ownership.requested() && !o.atimes && !o.crtimes && !o.fileflags && o.recursive && !o.copy_links && o.times && !o.omit_dir_times && !o.omit_link_times &&
               !metadata_enabled() && !o.dry_run && !o.inplace && !o.one_fs && !o.existing && !o.prune_empty && !root->selection && o.max_size <= 0 && o.min_size <= 0 && o.filters.empty();
 #endif
   int n = default_jobs();

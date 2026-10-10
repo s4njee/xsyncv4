@@ -3147,3 +3147,46 @@ after U-01's evidence entry completes P2, as requested by the user.
   copies and rsync on a 1 GiB read-only file and a 1,000-file tree. Independent
   rsync checksums and exact mode/owner/group/time comparisons verify each result.
   F-11 remains partial until the completed measurements are recorded.
+
+### F-01 full-corpus push completed — 2026-10-10
+
+- All 24 timed samples for neo → freya passed independent checksum and metadata
+  verification. Three-sample medians: fresh `-a` rsync 122.717 s / xs 125.154 s;
+  fresh `-az` 153.572 / 117.980 s; no-op 19.536 / 26.372 s; checksum no-op
+  121.693 / 53.476 s. README and the completed-case table include these results.
+- No-op xs uses 408.803 CPU-seconds across both endpoints versus rsync's 18.752;
+  the largest process peaks at 870.4 MiB. Destination path work and receiver
+  directory lifetime remain priorities despite the 2.28× checksum wall-time gain.
+- The same frozen reference continues with freya → neo, followed by both 1%
+  update directions. Cold-cache validation still needs freya cache-reset access.
+
+### F-02 hosted validation checkpoint — 2026-10-10
+
+- Workflow run 38068477468 attempt 1 measured and verified all 195 samples on
+  each platform. Linux passed all thirteen ratios. macOS failed five timing
+  ratios despite identical product source; the gate returned exit 1 as required.
+  Raw platform results are retained in `benchmarks/results/20261010-ci-38068477468-attempt1-*.json`.
+- The failed macOS job was rerun with the original policy to test reproducibility.
+  The next harness revision retains the 85% floor, adds verified warmups excluded
+  from evaluation, uses six samples to balance all tool positions, and builds the
+  reference with the same twelve-character version-hash format as the candidate.
+  All three healthy/slowdown/corruption behavior tests pass with this revision.
+- F-02 remains partial until the revised hosted gate has been validated.
+
+### F-11 small-file regression found and addressed — 2026-10-10
+
+- The initial per-file-only matrix completed 80 independently verified samples.
+  A 1 GiB read-only file improved from about 0.28 s to 0.008–0.013 s, but the
+  1,000-file tree slowed from 0.25–0.29 s to 0.49–0.50 s. These results remain
+  in `benchmarks/results/20261010-f11-per-file-clone-modes.json`; they do not
+  establish completion of F-11.
+- Leaf-directory clones now accept omitted permissions and `-rt` regular-file
+  leaves. They correct child modes through one anchored directory descriptor
+  and apply owner/group independently to children and the directory itself.
+  Locked/dataless/special/filter-sensitive cases retain the per-file path.
+- Four leaf-clone differential variants cover `-rt`, `-rlt`, `-rtg`, `-rltg`,
+  alternate groups, read-only files, symlinks and umask. Clone/read interposition
+  confirms whole-directory cloning without byte reads. The 14-test macOS suite
+  passes with one optional iCloud skip; all 231 itemized differential cases,
+  13 permission tests and three clone-progress checks pass. Final measurement
+  of the combined path is pending.
