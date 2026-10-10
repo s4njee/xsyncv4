@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en" data-hcss-theme="shadcn-dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080808">
+  <meta name="description" content="xsync is a fast, parallel rsync work-alike. Explore live transfer progress, per-file status, verification, and completion in recordings of real xsync output.">
+  <title>xsync — Move files. Know everything.</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="vendor/holocss/holocss.css">
+  <link rel="stylesheet" href="vendor/holocss/keyframes.css">
+  <link rel="stylesheet" href="vendor/holocss/view-transitions.css">
+  <link rel="stylesheet" href="style.css">
+  <script type="module" src="app.js"></script>
+  <script type="module" src="fluid-motion.js"></script>
+</head>
+<body>
+  <canvas id="fluid-motion" aria-hidden="true" data-state="static"></canvas>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header wrap">
+    <a class="logo" href="#" aria-label="xsync home"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M4 5h7l17 22h-7L4 5Zm17 0h7L11 27H4L21 5Z" fill="currentColor"/></svg>xsync<span class="logo-dot">_</span></a>
+    <nav aria-label="Main navigation"><a href="#demo">Transfer demo</a><a href="#details">Why xsync</a><a href="docs/">Docs</a><a href="docs/tech.html">Tech</a><a class="nav-cta" href="#start">Get started <span aria-hidden="true">↗</span></a></nav>
+  </header>
+  <main id="main">
+    <section class="hero wrap">
+      <div class="eyebrow"><span class="status-light hcss-pulse" aria-hidden="true"></span> THE FILE TRANSFER ENGINE <span class="eyebrow-rule"></span> macOS + Linux <button id="motion-toggle" class="motion-toggle" type="button" aria-pressed="false" hidden>Pause motion</button></div>
+      <h1>Move files.<br><span>Know everything.</span><span class="cursor hcss-pulse" aria-hidden="true">_</span></h1>
+      <div class="hero-bottom"><p>A fast, parallel rsync work-alike.<br>Every file. Every byte. Every step in plain sight.</p><a class="button primary" href="#demo">Explore the transfer <span aria-hidden="true">↓</span></a></div>
+      <div class="capabilities"><span><span aria-hidden="true">⌘</span> Familiar rsync commands</span><span><span aria-hidden="true">⇄</span> Local + SSH</span><span><span aria-hidden="true">▥</span> Parallel by design</span><span>C++20 ENGINE</span></div>
+    </section>
+
+    <section id="demo" class="demo-section wrap" aria-labelledby="demo-heading">
+      <div class="section-caption"><h2 id="demo-heading"><span class="section-index">01 /</span> The actual output. In full view.</h2><span class="demo-label">REAL TERMINAL RECORDING <span aria-hidden="true">↙</span></span></div>
+      <div class="terminal recorded-terminal">
+        <div class="terminal-chrome"><div class="window-dots" aria-hidden="true"><i></i><i></i><i></i></div><span>xsync / captured terminal output</span><span class="chrome-end">LOCAL <span aria-hidden="true">↗</span></span></div>
+        <div class="terminal-command"><span class="prompt" aria-hidden="true">❯</span><code id="demo-command">xs -aP --no-clone --jobs=2 --bwlimit=1M ./demo-data/ ./backup/</code><button class="icon-button" data-copy="demo-command" aria-label="Copy captured transfer command"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="7" y="7" width="10" height="10" rx="1"/><path d="M12 3H3v9"/></svg></button></div>
+        <div class="output-heading"><span class="micro">ACTUAL XSYNC OUTPUT / 120-COLUMN TERMINAL</span><span id="state-badge" class="state-badge">Transferring</span></div>
+        <div class="recorded-output hcss-view" style="--hcss-view-name: transfer-status"><pre id="terminal-output" aria-label="Captured xsync terminal output">Loading the recorded xsync session…</pre></div>
+        <div class="recording-timeline"><span id="recording-time">00:00.000</span><input type="range" id="recording-frame" min="0" max="1" value="0" aria-label="Recording frame"><span id="recording-duration">00:00.000</span></div>
+        <div class="recording-meta"><span id="recording-position">Recorded terminal frames</span><span id="recording-exit">Process exit code: 0</span></div>
+        <div class="demo-controls"><div class="state-buttons" role="group" aria-label="Choose a captured status"><button data-state="scanning" aria-pressed="false">Scanning</button><button data-state="transferring" aria-pressed="true">Transferring</button><button data-state="verifying" aria-pressed="false">Verifying</button><button data-state="complete" aria-pressed="false">Complete</button><button data-state="interrupted" aria-pressed="false">Interrupted</button><button data-state="error" aria-pressed="false">Error</button></div><button id="play-demo" class="play-button" aria-pressed="false" disabled><span aria-hidden="true">▷</span> Play recording</button></div>
+      </div>
+      <div class="demo-description"><p id="state-description">A real local transfer captured from the xs binary. The sample files are copied with two workers and a 1M bandwidth limit so the terminal progress is visible.</p><button id="json-toggle" class="text-button" aria-expanded="false" aria-controls="json-panel">View captured JSON <span aria-hidden="true">↗</span></button></div>
+      <div id="json-panel" class="json-panel" hidden><div><span class="micro">ACTUAL --progress=json STDERR EVENT</span><button class="text-button" data-copy="json-output">Copy event</button></div><p class="json-command" id="json-command"></p><pre><code id="json-output"></code></pre><a class="text-link" href="recordings/progress.ndjson" download>Download full JSON recording <span aria-hidden="true">↓</span></a></div>
+      <div class="recording-provenance"><p id="recording-source">Captured from the xs binary. Isolated sample files; playback runs entirely in your browser.</p><a id="download-transcript" href="recordings/transfer.txt" download>Download transcript <span aria-hidden="true">↓</span></a><a id="download-raw" href="recordings/transfer.ansi" download>Raw terminal recording <span aria-hidden="true">↓</span></a></div>
+      <p id="status-announcement" class="sr-only" role="status" aria-live="polite"></p>
+    </section>
+
+    <section id="details" class="details-section wrap">
+      <div class="section-caption"><h2><span class="section-index">02 /</span> Built for the work between machines.</h2><span class="micro">LESS GUESSWORK. MORE CONTROL.</span></div>
+      <div class="features"><article class="feature reveal hcss-transition hcss-fade hcss-slide-up"><span class="feature-symbol" aria-hidden="true">[⇄]</span><h3>The commands you know.</h3><p>Keep your rsync workflow. Copy locally, push or pull over SSH, and mirror with familiar flags.</p><span class="feature-code">xs -az src/ host:/backup/</span></article><article class="feature reveal hcss-transition hcss-fade hcss-slide-up"><span class="feature-symbol" aria-hidden="true">[▥]</span><h3>Many files. In parallel.</h3><p>An engine built for trees of small files. See active file progress and the rate of completed small files together.</p><span class="feature-code">--jobs=8 --progress</span></article><article class="feature reveal hcss-transition hcss-fade hcss-slide-up"><span class="feature-symbol" aria-hidden="true">[↳]</span><h3>Pick up where you left off.</h3><p>With partial transfers enabled, matching destination prefixes are verified before xsync sends the remaining bytes.</p><span class="feature-code">-P / --partial --progress</span></article></div>
+    </section>
+
+    <section class="states-section wrap" aria-labelledby="states-heading">
+      <div class="states-intro"><span class="micro">NO AMBIGUOUS SPINNERS</span><h2 id="states-heading">A status that<br>actually says something.</h2><p>Progress, checksums, completion, and errors.<br>Read the engine’s own output.</p><a href="#demo" class="text-link">Try every state <span aria-hidden="true">↑</span></a></div>
+      <div class="state-examples"><button class="example-row" data-example="verifying"><span class="example-icon" aria-hidden="true">#</span><span><strong>Verifying</strong><small>Checksum checks, counted as they finish.</small></span><span class="example-terminal">checksum comparison</span><span aria-hidden="true">↗</span></button><button class="example-row" data-example="interrupted"><span class="example-icon" aria-hidden="true">…</span><span><strong>Interrupted</strong><small>A real Ctrl-C, with the original diagnostic.</small></span><span class="example-terminal">SIGINT · exit code 20</span><span aria-hidden="true">↗</span></button><button class="example-row" data-example="complete"><span class="example-icon" aria-hidden="true">✓</span><span><strong>Complete</strong><small>Final counts, elapsed time, and throughput.</small></span><span class="example-terminal">130 files transferred</span><span aria-hidden="true">↗</span></button><button class="example-row" data-example="error"><span class="example-icon" aria-hidden="true">!</span><span><strong>Actionable failure</strong><small>A diagnostic and an exit code you can use.</small></span><span class="example-terminal">missing source · exit 23</span><span aria-hidden="true">↗</span></button></div>
+    </section>
+
+    <section id="start" class="start-section wrap">
+      <div class="start-intro"><span class="micro">03 / GET STARTED</span><h2>Your next transfer.<br>A little more transparent.</h2><p>Build xsync with a C++20 compiler, CMake, zstd,<br>xxHash, and ICU. Available for macOS and Linux.</p><a class="text-link" href="docs/getting-started.html">Read the manual <span aria-hidden="true">↗</span></a><div class="platform-buttons" role="group" aria-label="Select build instructions"><button data-platform="mac" aria-pressed="true">macOS</button><button data-platform="linux" aria-pressed="false">Linux</button></div></div>
+      <div class="install-panel"><div class="install-heading"><span id="install-label" class="micro">BUILD FROM THE XSYNC SOURCE DIRECTORY</span><button class="text-button" data-copy="install-command">Copy commands <span aria-hidden="true">⧉</span></button></div><pre><code id="install-command">brew install cmake ninja zstd xxhash icu4c
+cmake -S . -B build -G Ninja
+cmake --build build
+build/xs -aP src/ dst/</code></pre><div class="install-note"><span aria-hidden="true">↳</span> Already built? Add <code>--progress</code> to your next transfer.</div></div>
+    </section>
+  </main>
+  <footer class="wrap"><a class="logo" href="#">xsync<span class="logo-dot">_</span></a><span>FAST FILES. CLEAR SIGNAL.</span><a href="https://mk7s.dev/holocss/" target="_blank" rel="noopener noreferrer">Motion by HoloCSS <span aria-hidden="true">↗</span></a></footer>
+  <div id="toast" class="toast hcss-transition hcss-fade hcss-slide-up" data-hcss-state="closed" role="status" inert>Copied to clipboard.</div>
+</body>
+</html>
