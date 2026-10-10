@@ -3531,3 +3531,9 @@ after U-01's evidence entry completes P2, as requested by the user.
   Each platform also passes four range tests including a frozen prior peer,
   adaptive compression tests, and seven resume tests (one optional real SSH
   rig skip). The Linux kernel fault/policy suite passes all seven cases.
+
+- The additional frozen-product 1 GiB probes complete 32 timed copies and eight
+  verified warmups on each platform. macOS byte copies improve 3.9%; plain pipe
+  is 8.6% slower. Overlay byte copies remain 23.7% slower and plain pipe is
+  13.0% slower. Raising the range threshold alone does not resolve all observed
+  regressions; these raw results are also retained.
