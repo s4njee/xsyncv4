@@ -3951,3 +3951,17 @@ after U-01's evidence entry completes P2, as requested by the user.
   `20261010-ci-38088401309-linux` prefix.
 - This qualifies clean 433d1ed18a7e on Linux. macOS is still running its
   production matrix, and the newer APFS worker budget needs its own validation.
+
+### F-08 normalization measurement does not meet the target — 2026-10-10
+
+- All 36 timed no-op samples and six excluded warmups pass independent
+  checksum/metadata verification. Clean ed8b84137035 and 3fee9c2d9714 differ
+  only in destination path normalization/decomposition source code.
+- At four workers, median wall time changes from 2.465 to 2.361 s, while CPU
+  changes from 7.078 to 7.108 s. This is not evidence of a CPU reduction.
+  One worker still uses 3.851 s CPU and takes 4.951 s wall. The under-one-second
+  CPU target is unmet, and no opt-in destination manifest exists.
+- The full negative finding, all samples and host load limits are retained in
+  `20261010-f08-normalization-summary.md` and its linked evidence. A new
+  independently verified call-stack sample is queued after the automatic
+  filesystem-budget comparison. F-08 remains confirmed and open.
