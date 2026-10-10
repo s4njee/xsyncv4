@@ -5,6 +5,7 @@ import re
 from pathlib import Path
 from html import escape
 from docs_content import PAGES, doc, section, p, table
+from roadmap_content import ROADMAP_PAGE
 
 ROOT = Path(__file__).resolve().parents[1]
 HELP = (ROOT / 'docs-inputs/xsync-help.txt').read_text()
@@ -27,10 +28,12 @@ for heading, body in re.findall(r'^([^\n]+):\n(.*?)(?=^\S[^\n]+:\n|\Z)', HELP, r
 options = doc('options', 'xsync-options(1)', 'Option reference', 'The complete option list, generated from the executable’s own help.', 'REFERENCE', [section('source', 'SOURCE', p('Captured from <code>' + escape(HELP.splitlines()[0]) + '</code>. This is the current native help; delegated options and platform limits are covered in <a href="compatibility.html">compatibility</a>.') + p('<a href="xsync-help.txt" download>Download original help ↗</a> &nbsp; / &nbsp; <a href="xs.1" download>Download generated manpage ↗</a>')), *sections])
 pages = [*PAGES]
 pages.insert(8, options)
+pages.append(ROADMAP_PAGE)
 for page in pages:
-    front = {'title': page['title'], 'description': page['summary'], 'manual': page['title'], 'manualName': page['name'], 'sectionNumber': re.search(r'\((\d)\)', page['title'])[1]}
+    front = {'title': page['title'], 'description': page['summary'], 'manual': page['title'], 'manualName': page['name'], 'sectionNumber': re.search(r'\((\d)\)', page['title'])[1], **page.get('front', {})}
     text = '---\n' + '\n'.join(f'{k}: {json.dumps(v)}' for k,v in front.items()) + '\n---\n\n'
-    text += f'# {page["title"]}\n\n<div class="manual-deck"><strong>{escape(page["name"])}</strong><p>{escape(page["summary"])}</p></div>\n\n'
+    deck = page.get('deck') or f'<div class="manual-deck"><strong>{escape(page["name"])}</strong><p>{escape(page["summary"])}</p></div>'
+    text += f'# {page["title"]}\n\n{deck}\n\n'
     for item in page['sections']:
         body = item['html']
         # Leave links to the separate product view to the browser, not the docs router.

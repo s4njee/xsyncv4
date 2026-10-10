@@ -29,8 +29,8 @@ verified. The topline:
 |---|---|
 | **Uncompressed transfers are at parity, not ahead.** mixed `-a` gives 1.01× / 1.04×. Large 2 GiB `-a` gives 1.00× both ways at ~114 MB/s, which is the NIC ceiling. | summary table |
 | **The only clear wins come with `-z`**: mixed 1.12× / 1.28×, large pull 1.20×. Large push is only 1.03×. | summary table |
-| **CPU is 1.6–8× rsync's.** Large fresh: 20.1 vs 12.5 s. Mixed push no-op: 0.554 vs 0.071 s. Mixed push checksum: 3.160 vs 0.402 s. | summary table |
-| **Peak RSS is 7–20× rsync's.** 106–298 MiB vs 14–18 MiB. | summary table |
+| **CPU is 1.6–1.9× rsync's on fresh copies, and up to 8× on no-op and checksum runs.** Large fresh: 20.1 vs 12.5 s. Mixed push no-op: 0.554 vs 0.071 s. Mixed push checksum: 3.160 vs 0.402 s. | summary table |
+| **Peak RSS on fresh copies is 6–22× rsync's.** 106–298 MiB vs 14–18 MiB. | summary table |
 | **The full congress corpus (914,106 files) is a wall-time draw that costs ~4× the CPU.** Fresh push: xs 125.2 / 126.5 s, rsync 142.5 / 122.7 s. The freya receiver used **485–507 s CPU (396–414 s system)** against rsync's 83 s. Peak RSS was **990–1001 MiB** on the receiver and 543–550 MiB on the client, against 89 / 47 MiB for rsync. Voluntary context switches on the receiver: 6.2–6.3 M vs 0.46–0.49 M. | `…-congress-push.json` (2 of 3 runs; the case is still incomplete) |
 | **`-c` on large files is slower.** The pull ran at 0.65× (3.986 vs 2.585 s), with CPU about equal (1.230 vs 1.105 s), so the gap is stalls, not compute. | summary table |
 | **The tiny-file fixed cost is about equal:** 0.96× / 1.14×. | summary table |

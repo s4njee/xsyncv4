@@ -22,7 +22,7 @@ sectionNumber: "7"
 
 ## REMAINING VALIDATION {#validation}
 
-<div class="manual-table-wrap"><table><thead><tr><th scope="col">Backlog item</th><th scope="col">Status and remaining work</th></tr></thead><tbody><tr><td><code>R-01</code></td><td>Partial: remaining physical-host SSH checklist coverage</td></tr><tr><td><code>U-01</code></td><td>Partial: native terminal visual checks remain incomplete</td></tr><tr><td><code>U-11</code></td><td>Unverified: suspend/resume and cursor hygiene acceptance</td></tr><tr><td>Performance work</td><td>Broader target benchmarks and regression gates remain tracked</td></tr></tbody></table></div><p>The recorded product demo is a real local execution. It does not establish completion of remaining physical-host or native terminal acceptance checks. Historical benchmark speedups predate trust fixes and the atomic-write default.</p>
+<div class="manual-table-wrap"><table><thead><tr><th scope="col">Backlog item</th><th scope="col">Status and remaining work</th></tr></thead><tbody><tr><td><code>R-01</code></td><td>Partial: remaining physical-host SSH checklist coverage</td></tr><tr><td><code>U-01</code></td><td>Partial: native terminal visual checks remain incomplete</td></tr><tr><td><code>U-11</code></td><td>Unverified: suspend/resume and cursor hygiene acceptance</td></tr><tr><td>Performance work</td><td>Broader target benchmarks and regression gates remain tracked; see the <a href="roadmap.html">roadmap</a></td></tr></tbody></table></div><p>The recorded product demo is a real local execution. It does not establish completion of remaining physical-host or native terminal acceptance checks. Historical benchmark speedups predate trust fixes and the atomic-write default.</p>
 
 
 

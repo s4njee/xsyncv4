@@ -27,7 +27,7 @@ export default defineConfig({
   markdown: { theme: monochrome },
   themeConfig: {
     logo: '/logo.svg',
-    nav: [ { text: 'Manual', link: '/' }, { text: 'Options', link: '/options' } ],
+    nav: [ { text: 'Manual', link: '/' }, { text: 'Options', link: '/options' }, { text: 'Roadmap', link: '/roadmap' } ],
     sidebar,
     outline: { level: 2, label: 'ON THIS PAGE' },
     search: { provider: 'local', options: { detailedView: true, translations: { button: { buttonText: 'Search the manual', buttonAriaLabel: 'Search the xsync manual' } } } },
