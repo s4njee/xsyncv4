@@ -1,0 +1,67 @@
+/*! HoloCSS | MIT License */
+/* src/motion/keyframes/policy.css */
+:where(.hcss-attention, .hcss-entrance, .hcss-loop, .hcss-gradient) {
+  animation-play-state: var(--hcss-animation-play-state, running);
+}
+@media (prefers-reduced-motion: reduce) {
+  :where(.hcss-attention, .hcss-entrance, .hcss-loop, .hcss-gradient) {
+    animation: none !important;
+  }
+}
+:where(.hcss-attention, .hcss-entrance, .hcss-loop, .hcss-gradient):where([data-hcss-motion=none], [data-hcss-motion=none] *, [data-hcss-theme=high-contrast], [data-hcss-theme=high-contrast] *) {
+  animation: none !important;
+}
+@media (prefers-contrast: more) {
+  :where(.hcss-attention, .hcss-entrance, .hcss-loop, .hcss-gradient):where([data-hcss-theme=auto], [data-hcss-theme=auto] *) {
+    animation: none !important;
+  }
+}
+
+/* src/motion/keyframes/entrances.css */
+.hcss-entrance {
+  animation-duration: var(--hcss-duration, var(--hcss-duration-normal, 180ms));
+  animation-timing-function: var( --hcss-easing, var(--hcss-ease-enter, ease-out) );
+  animation-delay: var(--hcss-delay, 0ms);
+  animation-iteration-count: var(--hcss-iterations, 1);
+  animation-fill-mode: backwards;
+}
+.hcss-entrance[data-hcss-state=closed] {
+  animation: none !important;
+}
+.hcss-enter-fade {
+  animation-name: hcss-enter-fade;
+}
+.hcss-enter-slide-up {
+  animation-name: hcss-enter-slide-up;
+}
+.hcss-enter-scale {
+  animation-name: hcss-enter-scale;
+}
+@keyframes hcss-enter-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes hcss-enter-slide-up {
+  from {
+    opacity: 0;
+    translate: 0 var(--hcss-distance, 8px);
+  }
+  to {
+    opacity: 1;
+    translate: 0;
+  }
+}
+@keyframes hcss-enter-scale {
+  from {
+    opacity: 0;
+    scale: var(--hcss-scale-from, 0.98);
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}

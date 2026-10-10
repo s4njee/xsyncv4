@@ -35,6 +35,23 @@ protocol data do not fall back. Original rsync arguments are retained, including
 an explicit `--rsync-path`: that command must support rsync if fallback is needed.
 Worker, clone and atomic extensions are stripped before invoking rsync.
 
+## Product page and docs
+
+The product page and VitePress manual live in [sites/xsync](sites/xsync/README.md).
+The [hosted manual](https://xsync-transfer.s4njee.chatgpt.site/docs/) includes command
+examples, option reference, actual captured output, and development status.
+
+```sh
+cd sites/xsync
+npm ci
+npm run build
+npm run preview
+```
+
+Open `http://127.0.0.1:4173/docs/` for the manual or `/` for the product page.
+The site retains its command-help snapshot and recordings so it builds without
+compiling the C++ application. See the site README for refreshing those inputs.
+
 ## Personal defaults
 
 For scalar options and on/off flags, precedence is **command-line flags, then

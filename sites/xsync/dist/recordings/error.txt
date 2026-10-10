@@ -1,0 +1,10 @@
+xsync -aP ./missing-source/ ./unused-backup/
+
+[0.005s]
+xsync: link_stat "./missing-source/" failed: No such file or directory (2)
+xsync: error summary: 1 error (showing first 1)
+  partial transfer (code 23): 1 error
+    link_stat "./missing-source/" failed: No such file or directory (2)
+xsync error: some files/attrs were not transferred (see previous errors) (code 23)
+
+Process exit code: 23

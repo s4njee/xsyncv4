@@ -1,0 +1,2591 @@
+{
+  "captured_at": "2026-10-10T14:17:35.039166+00:00",
+  "binary_version": "xsync  version 0.1.0  protocol version 4  git 2f3e27633fac-dirty",
+  "terminal_columns": 120,
+  "transport": "Local filesystem",
+  "fixture_files": 130,
+  "transfer": {
+    "command": "xsync -aP --no-clone --jobs=2 --bwlimit=1M ./demo-data/ ./backup/",
+    "exit_code": 0,
+    "frames": [
+      {
+        "at_ms": 72,
+        "text": "  small files  85 · 1.3k files/s\n ────────────────────────────── 1%  85/130 files · 66.0K/6.16M · 982K/s · 1.3k files/s · ETA 0:06"
+      },
+      {
+        "at_ms": 143,
+        "text": "  small files  128 · 1.2k files/s\n ────────────────────────────── 1%  128/130 files · 101K/6.16M · 946K/s · 1.2k files/s · ETA 0:07"
+      },
+      {
+        "at_ms": 211,
+        "text": "  archive.tar                                                                                3.25M ──────────── 0% 0B/s\n  small files  128 · 1.1k files/s\n ────────────────────────────── 1%  128/130 files · 101K/6.16M · 882K/s · 1.1k files/s · ETA 0:07"
+      },
+      {
+        "at_ms": 282,
+        "text": "  archive.tar                                                                                3.25M ──────────── 0% 0B/s\n  small files  128 · 1.1k files/s\n ────────────────────────────── 1%  128/130 files · 101K/6.16M · 819K/s · 1.1k files/s · ETA 0:08"
+      },
+      {
+        "at_ms": 351,
+        "text": "  archive.tar                                                                                3.25M ──────────── 0% 0B/s\n  small files  128 · 980 files/s\n ────────────────────────────── 1%  128/130 files · 101K/6.16M · 763K/s · 980 files/s · ETA 0:08"
+      },
+      {
+        "at_ms": 418,
+        "text": "  archive.tar                                                                                3.25M ──────────── 0% 0B/s\n  small files  128 · 915 files/s\n ────────────────────────────── 1%  128/130 files · 101K/6.16M · 711K/s · 915 files/s · ETA 0:09"
+      },
+      {
+        "at_ms": 485,
+        "text": "  archive.tar                                                                                3.25M ──────────── 0% 0B/s\n  small files  128 · 853 files/s\n ────────────────────────────── 1%  128/130 files · 101K/6.16M · 664K/s · 853 files/s · ETA 0:09"
+      },
+      {
+        "at_ms": 554,
+        "text": "  archive.tar                                                                                3.25M ──────────── 0% 0B/s\n  small files  128 · 794 files/s\n ────────────────────────────── 1%  128/130 files · 101K/6.16M · 618K/s · 794 files/s · ETA 0:10"
+      },
+      {
+        "at_ms": 623,
+        "text": "  archive.tar                                                                                3.25M ──────────── 0% 0B/s\n  small files  128 · 740 files/s\n ────────────────────────────── 1%  128/130 files · 101K/6.16M · 575K/s · 740 files/s · ETA 0:11"
+      },
+      {
+        "at_ms": 694,
+        "text": "  archive.tar                                                                                3.25M ──────────── 0% 0B/s\n  small files  128 · 688 files/s\n ────────────────────────────── 1%  128/130 files · 101K/6.16M · 535K/s · 688 files/s · ETA 0:12"
+      },
+      {
+        "at_ms": 761,
+        "text": "  archive.tar                                                                                3.25M ──────────── 0% 0B/s\n  small files  128 · 642 files/s\n ────────────────────────────── 1%  128/130 files · 101K/6.16M · 499K/s · 642 files/s · ETA 0:12"
+      },
+      {
+        "at_ms": 831,
+        "text": "  archive.tar                                                                                3.25M ──────────── 0% 0B/s\n  small files  128 · 596 files/s\n ────────────────────────────── 1%  128/130 files · 101K/6.16M · 464K/s · 596 files/s · ETA 0:13"
+      },
+      {
+        "at_ms": 902,
+        "text": "  archive.tar                                                                                3.25M ──────────── 0% 0B/s\n  small files  128 · 554 files/s\n ────────────────────────────── 1%  128/130 files · 101K/6.16M · 431K/s · 554 files/s · ETA 0:14"
+      },
+      {
+        "at_ms": 973,
+        "text": "  archive.tar                                                                                3.25M ──────────── 0% 0B/s\n  small files  128 · 515 files/s\n ────────────────────────────── 1%  128/130 files · 101K/6.16M · 400K/s · 515 files/s · ETA 0:16"
+      },
+      {
+        "at_ms": 1043,
+        "text": "  archive.tar                                                                                3.25M ──────────── 0% 0B/s\n  small files  128 · 479 files/s\n ────────────────────────────── 1%  128/130 files · 101K/6.16M · 372K/s · 479 files/s · ETA 0:17"
+      },
+      {
+        "at_ms": 1111,
+        "text": "  archive.tar                                                                                3.25M ──────────── 0% 0B/s\n  small files  128 · 446 files/s\n ────────────────────────────── 1%  128/130 files · 101K/6.16M · 347K/s · 446 files/s · ETA 0:18"
+      },
+      {
+        "at_ms": 1179,
+        "text": "  archive.tar                                                                                3.25M ──────────── 0% 0B/s\n  small files  128 · 416 files/s\n ────────────────────────────── 1%  128/130 files · 101K/6.16M · 323K/s · 416 files/s · ETA 0:19"
+      },
+      {
+        "at_ms": 1246,
+        "text": "  archive.tar                                                                                3.25M ──────────── 0% 0B/s\n  small files  128 · 388 files/s\n ────────────────────────────── 1%  128/130 files · 101K/6.16M · 302K/s · 388 files/s · ETA 0:21"
+      },
+      {
+        "at_ms": 1314,
+        "text": "  archive.tar                                                                   3.25M ━━━╸──────── 30% 1.00M/s ETA 0:02\n  small files  128 · 362 files/s\n ━━━━━───────────────────────── 17%  128/130 files · 1.10M/6.16M · 1.27M/s · 362 files/s · ETA 0:04"
+      },
+      {
+        "at_ms": 1385,
+        "text": "  archive.tar                                                                    3.25M ━━━╸──────── 30% 952K/s ETA 0:02\n  small files  128 · 336 files/s\n ━━━━━───────────────────────── 17%  128/130 files · 1.10M/6.16M · 1.18M/s · 336 files/s · ETA 0:04"
+      },
+      {
+        "at_ms": 1456,
+        "text": "  archive.tar                                                                    3.25M ━━━╸──────── 30% 884K/s ETA 0:03\n  small files  128 · 312 files/s\n ━━━━━───────────────────────── 17%  128/130 files · 1.10M/6.16M · 1.10M/s · 312 files/s · ETA 0:05"
+      },
+      {
+        "at_ms": 1526,
+        "text": "  archive.tar                                                                    3.25M ━━━╸──────── 30% 822K/s ETA 0:03\n  small files  128 · 290 files/s\n ━━━━━───────────────────────── 17%  128/130 files · 1.10M/6.16M · 1.02M/s · 290 files/s · ETA 0:05"
+      },
+      {
+        "at_ms": 1597,
+        "text": "  archive.tar                                                                    3.25M ━━━╸──────── 30% 763K/s ETA 0:03\n  small files  128 · 270 files/s\n ━━━━━───────────────────────── 17%  128/130 files · 1.10M/6.16M · 973K/s · 270 files/s · ETA 0:05"
+      },
+      {
+        "at_ms": 1669,
+        "text": "  archive.tar                                                                    3.25M ━━━╸──────── 30% 708K/s ETA 0:03\n  small files  128 · 250 files/s\n ━━━━━───────────────────────── 17%  128/130 files · 1.10M/6.16M · 903K/s · 250 files/s · ETA 0:06"
+      },
+      {
+        "at_ms": 1739,
+        "text": "  archive.tar                                                                    3.25M ━━━╸──────── 30% 659K/s ETA 0:03\n  small files  128 · 233 files/s\n ━━━━━───────────────────────── 17%  128/130 files · 1.10M/6.16M · 840K/s · 233 files/s · ETA 0:06"
+      },
+      {
+        "at_ms": 1809,
+        "text": "  archive.tar                                                                    3.25M ━━━╸──────── 30% 613K/s ETA 0:04\n  small files  128 · 216 files/s\n ━━━━━───────────────────────── 17%  128/130 files · 1.10M/6.16M · 781K/s · 216 files/s · ETA 0:07"
+      },
+      {
+        "at_ms": 1888,
+        "text": "  archive.tar                                                                    3.25M ━━━╸──────── 30% 565K/s ETA 0:04\n  small files  128 · 200 files/s\n ━━━━━───────────────────────── 17%  128/130 files · 1.10M/6.16M · 720K/s · 200 files/s · ETA 0:07"
+      },
+      {
+        "at_ms": 1954,
+        "text": "  archive.tar                                                                    3.25M ━━━╸──────── 30% 527K/s ETA 0:04\n  small files  128 · 186 files/s\n ━━━━━───────────────────────── 17%  128/130 files · 1.10M/6.16M · 672K/s · 186 files/s · ETA 0:08"
+      },
+      {
+        "at_ms": 2025,
+        "text": "  archive.tar                                                                    3.25M ━━━╸──────── 30% 490K/s ETA 0:05\n  small files  128 · 173 files/s\n ━━━━━───────────────────────── 17%  128/130 files · 1.10M/6.16M · 624K/s · 173 files/s · ETA 0:08"
+      },
+      {
+        "at_ms": 2096,
+        "text": "  archive.tar                                                                    3.25M ━━━╸──────── 30% 455K/s ETA 0:05\n  small files  128 · 161 files/s\n ━━━━━───────────────────────── 17%  128/130 files · 1.10M/6.16M · 580K/s · 161 files/s · ETA 0:09"
+      },
+      {
+        "at_ms": 2164,
+        "text": "  archive.tar                                                                    3.25M ━━━╸──────── 30% 424K/s ETA 0:05\n  small files  128 · 150 files/s\n ━━━━━───────────────────────── 17%  128/130 files · 1.10M/6.16M · 541K/s · 150 files/s · ETA 0:10"
+      },
+      {
+        "at_ms": 2237,
+        "text": "  archive.tar                                                                    3.25M ━━━╸──────── 30% 394K/s ETA 0:06\n  small files  128 · 139 files/s\n ━━━━━───────────────────────── 17%  128/130 files · 1.10M/6.16M · 502K/s · 139 files/s · ETA 0:10"
+      },
+      {
+        "at_ms": 2303,
+        "text": "  archive.tar                                                                    3.25M ━━━╸──────── 30% 367K/s ETA 0:06\n  small files  128 · 130 files/s\n ━━━━━───────────────────────── 17%  128/130 files · 1.10M/6.16M · 468K/s · 130 files/s · ETA 0:11"
+      },
+      {
+        "at_ms": 2372,
+        "text": "  archive.tar                                                                    3.25M ━━━╸──────── 30% 342K/s ETA 0:07\n  small files  128 · 121 files/s\n ━━━━━───────────────────────── 17%  128/130 files · 1.10M/6.16M · 436K/s · 121 files/s · ETA 0:12"
+      },
+      {
+        "at_ms": 2446,
+        "text": "  archive.tar                                                                   3.25M ━━━━━━━───── 61% 1.31M/s ETA 0:01\n  small files  128 · 112 files/s\n ━━━━━━━━━━──────────────────── 34%  128/130 files · 2.10M/6.16M · 1.40M/s · 112 files/s · ETA 0:03"
+      },
+      {
+        "at_ms": 2515,
+        "text": "  archive.tar                                                                   3.25M ━━━━━━━───── 61% 1.22M/s ETA 0:01\n  small files  128 · 104 files/s\n ━━━━━━━━━━──────────────────── 34%  128/130 files · 2.10M/6.16M · 1.29M/s · 104 files/s · ETA 0:03"
+      },
+      {
+        "at_ms": 2588,
+        "text": "  archive.tar                                                                   3.25M ━━━━━━━───── 61% 1.13M/s ETA 0:01\n  small files  128 · 96 files/s\n ━━━━━━━━━━──────────────────── 34%  128/130 files · 2.10M/6.16M · 1.20M/s · 96 files/s · ETA 0:03"
+      },
+      {
+        "at_ms": 2659,
+        "text": "  archive.tar                                                                   3.25M ━━━━━━━───── 61% 1.05M/s ETA 0:01\n  small files  128 · 90 files/s\n ━━━━━━━━━━──────────────────── 34%  128/130 files · 2.10M/6.16M · 1.12M/s · 90 files/s · ETA 0:04"
+      },
+      {
+        "at_ms": 2730,
+        "text": "  archive.tar                                                                    3.25M ━━━━━━━───── 61% 996K/s ETA 0:01\n  small files  128 · 83 files/s\n ━━━━━━━━━━──────────────────── 34%  128/130 files · 2.10M/6.16M · 1.04M/s · 83 files/s · ETA 0:04"
+      },
+      {
+        "at_ms": 2796,
+        "text": "  archive.tar                                                                    3.25M ━━━━━━━───── 61% 930K/s ETA 0:01\n  small files  128 · 78 files/s\n ━━━━━━━━━━──────────────────── 34%  128/130 files · 2.10M/6.16M · 990K/s · 78 files/s · ETA 0:04"
+      },
+      {
+        "at_ms": 2868,
+        "text": "  archive.tar                                                                    3.25M ━━━━━━━───── 61% 864K/s ETA 0:01\n  small files  128 · 72 files/s\n ━━━━━━━━━━──────────────────── 34%  128/130 files · 2.10M/6.16M · 920K/s · 72 files/s · ETA 0:05"
+      },
+      {
+        "at_ms": 2939,
+        "text": "  archive.tar                                                                    3.25M ━━━━━━━───── 61% 802K/s ETA 0:02\n  small files  128 · 67 files/s\n ━━━━━━━━━━──────────────────── 34%  128/130 files · 2.10M/6.16M · 854K/s · 67 files/s · ETA 0:05"
+      },
+      {
+        "at_ms": 3012,
+        "text": "  archive.tar                                                                    3.25M ━━━━━━━───── 61% 744K/s ETA 0:02\n  small files  128 · 62 files/s\n ━━━━━━━━━━──────────────────── 34%  128/130 files · 2.10M/6.16M · 793K/s · 62 files/s · ETA 0:05"
+      },
+      {
+        "at_ms": 3080,
+        "text": "  archive.tar                                                                    3.25M ━━━━━━━───── 61% 694K/s ETA 0:02\n  small files  128 · 58 files/s\n ━━━━━━━━━━──────────────────── 34%  128/130 files · 2.10M/6.16M · 739K/s · 58 files/s · ETA 0:06"
+      },
+      {
+        "at_ms": 3148,
+        "text": "  archive.tar                                                                    3.25M ━━━━━━━───── 61% 646K/s ETA 0:02\n  small files  128 · 54 files/s\n ━━━━━━━━━━──────────────────── 34%  128/130 files · 2.10M/6.16M · 688K/s · 54 files/s · ETA 0:06"
+      },
+      {
+        "at_ms": 3217,
+        "text": "  archive.tar                                                                    3.25M ━━━━━━━───── 61% 601K/s ETA 0:02\n  small files  128 · 50 files/s\n ━━━━━━━━━━──────────────────── 34%  128/130 files · 2.10M/6.16M · 640K/s · 50 files/s · ETA 0:06"
+      },
+      {
+        "at_ms": 3287,
+        "text": "  archive.tar                                                                    3.25M ━━━━━━━───── 61% 559K/s ETA 0:02\n  small files  128 · 47 files/s\n ━━━━━━━━━━──────────────────── 34%  128/130 files · 2.10M/6.16M · 596K/s · 47 files/s · ETA 0:07"
+      },
+      {
+        "at_ms": 3359,
+        "text": "  archive.tar                                                                    3.25M ━━━━━━━───── 61% 519K/s ETA 0:02\n  small files  128 · 43 files/s\n ━━━━━━━━━━──────────────────── 34%  128/130 files · 2.10M/6.16M · 553K/s · 43 files/s · ETA 0:08"
+      },
+      {
+        "at_ms": 3427,
+        "text": "  archive.tar                                                                    3.25M ━━━━━━━───── 61% 484K/s ETA 0:03\n  small files  128 · 40 files/s\n ━━━━━━━━━━──────────────────── 34%  128/130 files · 2.10M/6.16M · 515K/s · 40 files/s · ETA 0:08"
+      },
+      {
+        "at_ms": 3498,
+        "text": "  archive.tar                                                                    3.25M ━━━━━━━───── 61% 449K/s ETA 0:03\n  small files  128 · 38 files/s\n ━━━━━━━━━━──────────────────── 34%  128/130 files · 2.10M/6.16M · 478K/s · 38 files/s · ETA 0:09"
+      },
+      {
+        "at_ms": 3573,
+        "text": "  archive.tar                                                                    3.25M ━━━━━━━───── 61% 416K/s ETA 0:03\n  small files  128 · 35 files/s\n ━━━━━━━━━━──────────────────── 34%  128/130 files · 2.10M/6.16M · 443K/s · 35 files/s · ETA 0:09"
+      },
+      {
+        "at_ms": 3647,
+        "text": "  archive.tar                                                                   3.25M ━━━━━━━━━━━─ 92% 1.38M/s ETA 0:00\n  small files  128 · 32 files/s\n ━━━━━━━━━━━━━━━─────────────── 50%  128/130 files · 3.10M/6.16M · 1.40M/s · 32 files/s · ETA 0:02"
+      },
+      {
+        "at_ms": 3718,
+        "text": "  archive.tar                                                                   3.25M ━━━━━━━━━━━─ 92% 1.27M/s ETA 0:00\n  small files  128 · 30 files/s\n ━━━━━━━━━━━━━━━─────────────── 50%  128/130 files · 3.10M/6.16M · 1.30M/s · 30 files/s · ETA 0:02"
+      },
+      {
+        "at_ms": 3789,
+        "text": "  archive.tar                                                                   3.25M ━━━━━━━━━━━─ 92% 1.18M/s ETA 0:00\n  small files  128 · 28 files/s\n ━━━━━━━━━━━━━━━─────────────── 50%  128/130 files · 3.10M/6.16M · 1.20M/s · 28 files/s · ETA 0:03"
+      },
+      {
+        "at_ms": 3860,
+        "text": "  archive.tar                                                                   3.25M ━━━━━━━━━━━─ 92% 1.10M/s ETA 0:00\n  small files  128 · 26 files/s\n ━━━━━━━━━━━━━━━─────────────── 50%  128/130 files · 3.10M/6.16M · 1.12M/s · 26 files/s · ETA 0:03"
+      },
+      {
+        "at_ms": 3931,
+        "text": "  archive.tar                                                                   3.25M ━━━━━━━━━━━─ 92% 1.02M/s ETA 0:00\n  small files  128 · 24 files/s\n ━━━━━━━━━━━━━━━─────────────── 50%  128/130 files · 3.10M/6.16M · 1.04M/s · 24 files/s · ETA 0:03"
+      },
+      {
+        "at_ms": 4002,
+        "text": "  small files  128 · 22 files/s\n ━━━━━━━━━━━━━━━━────────────── 54%  129/130 files · 3.35M/6.16M · 1.22M/s · 23 files/s · ETA 0:02"
+      },
+      {
+        "at_ms": 4068,
+        "text": "  small files  128 · 21 files/s\n ━━━━━━━━━━━━━━━━────────────── 54%  129/130 files · 3.35M/6.16M · 1.14M/s · 22 files/s · ETA 0:02"
+      },
+      {
+        "at_ms": 4139,
+        "text": "  dataset.bin                                                                                2.81M ──────────── 0% 0B/s\n  small files  128 · 19 files/s\n ━━━━━━━━━━━━━━━━────────────── 54%  129/130 files · 3.35M/6.16M · 1.06M/s · 20 files/s · ETA 0:03"
+      },
+      {
+        "at_ms": 4210,
+        "text": "  dataset.bin                                                                                2.81M ──────────── 0% 0B/s\n  small files  128 · 18 files/s\n ━━━━━━━━━━━━━━━━────────────── 54%  129/130 files · 3.35M/6.16M · 0.98M/s · 19 files/s · ETA 0:03"
+      },
+      {
+        "at_ms": 4280,
+        "text": "  dataset.bin                                                                                2.81M ──────────── 0% 0B/s\n  small files  128 · 17 files/s\n ━━━━━━━━━━━━━━━━────────────── 54%  129/130 files · 3.35M/6.16M · 932K/s · 17 files/s · ETA 0:03"
+      },
+      {
+        "at_ms": 4354,
+        "text": "  dataset.bin                                                                                2.81M ──────────── 0% 0B/s\n  small files  128 · 15 files/s\n ━━━━━━━━━━━━━━━━────────────── 54%  129/130 files · 3.35M/6.16M · 865K/s · 16 files/s · ETA 0:03"
+      },
+      {
+        "at_ms": 4424,
+        "text": "  dataset.bin                                                                                2.81M ──────────── 0% 0B/s\n  small files  128 · 14 files/s\n ━━━━━━━━━━━━━━━━────────────── 54%  129/130 files · 3.35M/6.16M · 804K/s · 15 files/s · ETA 0:04"
+      },
+      {
+        "at_ms": 4495,
+        "text": "  dataset.bin                                                                                2.81M ──────────── 0% 0B/s\n  small files  128 · 13 files/s\n ━━━━━━━━━━━━━━━━────────────── 54%  129/130 files · 3.35M/6.16M · 747K/s · 14 files/s · ETA 0:04"
+      },
+      {
+        "at_ms": 4567,
+        "text": "  dataset.bin                                                                                2.81M ──────────── 0% 0B/s\n  small files  128 · 12 files/s\n ━━━━━━━━━━━━━━━━────────────── 54%  129/130 files · 3.35M/6.16M · 692K/s · 13 files/s · ETA 0:04"
+      },
+      {
+        "at_ms": 4635,
+        "text": "  dataset.bin                                                                                2.81M ──────────── 0% 0B/s\n  small files  128 · 12 files/s\n ━━━━━━━━━━━━━━━━────────────── 54%  129/130 files · 3.35M/6.16M · 646K/s · 12 files/s · ETA 0:04"
+      },
+      {
+        "at_ms": 4701,
+        "text": "  dataset.bin                                                                                2.81M ──────────── 0% 0B/s\n  small files  128 · 11 files/s\n ━━━━━━━━━━━━━━━━────────────── 54%  129/130 files · 3.35M/6.16M · 603K/s · 11 files/s · ETA 0:05"
+      },
+      {
+        "at_ms": 4772,
+        "text": "  dataset.bin                                                                                2.81M ──────────── 0% 0B/s\n  small files  128 · 10 files/s\n ━━━━━━━━━━━━━━━━────────────── 54%  129/130 files · 3.35M/6.16M · 560K/s · 10 files/s · ETA 0:05"
+      },
+      {
+        "at_ms": 4843,
+        "text": "  dataset.bin                                                                                2.81M ──────────── 0% 0B/s\n  small files  128 · 9 files/s\n ━━━━━━━━━━━━━━━━────────────── 54%  129/130 files · 3.35M/6.16M · 521K/s · 10 files/s · ETA 0:06"
+      },
+      {
+        "at_ms": 4913,
+        "text": "  dataset.bin                                                                                2.81M ──────────── 0% 0B/s\n  small files  128 · 9 files/s\n ━━━━━━━━━━━━━━━━────────────── 54%  129/130 files · 3.35M/6.16M · 484K/s · 9 files/s · ETA 0:06"
+      },
+      {
+        "at_ms": 4982,
+        "text": "  dataset.bin                                                                                2.81M ──────────── 0% 0B/s\n  small files  128 · 8 files/s\n ━━━━━━━━━━━━━━━━────────────── 54%  129/130 files · 3.35M/6.16M · 450K/s · 8 files/s · ETA 0:06"
+      },
+      {
+        "at_ms": 5049,
+        "text": "  dataset.bin                                                                                2.81M ──────────── 0% 0B/s\n  small files  128 · 8 files/s\n ━━━━━━━━━━━━━━━━────────────── 54%  129/130 files · 3.35M/6.16M · 420K/s · 8 files/s · ETA 0:07"
+      },
+      {
+        "at_ms": 5120,
+        "text": "  dataset.bin                                                                                2.81M ──────────── 0% 0B/s\n  small files  128 · 7 files/s\n ━━━━━━━━━━━━━━━━────────────── 54%  129/130 files · 3.35M/6.16M · 390K/s · 7 files/s · ETA 0:07"
+      },
+      {
+        "at_ms": 5191,
+        "text": "  dataset.bin                                                                   2.81M ━━━━──────── 35% 1.00M/s ETA 0:02\n  small files  128 · 6 files/s\n ━━━━━━━━━━━━━━━━━━━━━───────── 70%  129/130 files · 4.35M/6.16M · 1.35M/s · 7 files/s · ETA 0:01"
+      },
+      {
+        "at_ms": 5263,
+        "text": "  dataset.bin                                                                    2.81M ━━━━──────── 35% 951K/s ETA 0:02\n  small files  128 · 6 files/s\n ━━━━━━━━━━━━━━━━━━━━━───────── 70%  129/130 files · 4.35M/6.16M · 1.26M/s · 6 files/s · ETA 0:01"
+      },
+      {
+        "at_ms": 5332,
+        "text": "  dataset.bin                                                                    2.81M ━━━━──────── 35% 885K/s ETA 0:02\n  small files  128 · 6 files/s\n ━━━━━━━━━━━━━━━━━━━━━───────── 70%  129/130 files · 4.35M/6.16M · 1.17M/s · 6 files/s · ETA 0:02"
+      },
+      {
+        "at_ms": 5400,
+        "text": "  dataset.bin                                                                    2.81M ━━━━──────── 35% 825K/s ETA 0:02\n  small files  128 · 5 files/s\n ━━━━━━━━━━━━━━━━━━━━━───────── 70%  129/130 files · 4.35M/6.16M · 1.09M/s · 5 files/s · ETA 0:02"
+      },
+      {
+        "at_ms": 5470,
+        "text": "  dataset.bin                                                                    2.81M ━━━━──────── 35% 767K/s ETA 0:02\n  small files  128 · 5 files/s\n ━━━━━━━━━━━━━━━━━━━━━───────── 70%  129/130 files · 4.35M/6.16M · 1.01M/s · 5 files/s · ETA 0:02"
+      },
+      {
+        "at_ms": 5542,
+        "text": "  dataset.bin                                                                    2.81M ━━━━──────── 35% 712K/s ETA 0:03\n  small files  128 · 5 files/s\n ━━━━━━━━━━━━━━━━━━━━━───────── 70%  129/130 files · 4.35M/6.16M · 965K/s · 5 files/s · ETA 0:02"
+      },
+      {
+        "at_ms": 5614,
+        "text": "  dataset.bin                                                                    2.81M ━━━━──────── 35% 661K/s ETA 0:03\n  small files  128 · 4 files/s\n ━━━━━━━━━━━━━━━━━━━━━───────── 70%  129/130 files · 4.35M/6.16M · 895K/s · 4 files/s · ETA 0:02"
+      },
+      {
+        "at_ms": 5680,
+        "text": "  dataset.bin                                                                    2.81M ━━━━──────── 35% 617K/s ETA 0:03\n  small files  128 · 4 files/s\n ━━━━━━━━━━━━━━━━━━━━━───────── 70%  129/130 files · 4.35M/6.16M · 835K/s · 4 files/s · ETA 0:02"
+      },
+      {
+        "at_ms": 5755,
+        "text": "  dataset.bin                                                                    2.81M ━━━━──────── 35% 573K/s ETA 0:03\n  small files  128 · 4 files/s\n ━━━━━━━━━━━━━━━━━━━━━───────── 70%  129/130 files · 4.35M/6.16M · 776K/s · 4 files/s · ETA 0:02"
+      },
+      {
+        "at_ms": 5823,
+        "text": "  dataset.bin                                                                    2.81M ━━━━──────── 35% 532K/s ETA 0:03\n  small files  128 · 3 files/s\n ━━━━━━━━━━━━━━━━━━━━━───────── 70%  129/130 files · 4.35M/6.16M · 720K/s · 4 files/s · ETA 0:03"
+      },
+      {
+        "at_ms": 5895,
+        "text": "  dataset.bin                                                                    2.81M ━━━━──────── 35% 494K/s ETA 0:04\n  small files  128 · 3 files/s\n ━━━━━━━━━━━━━━━━━━━━━───────── 70%  129/130 files · 4.35M/6.16M · 669K/s · 3 files/s · ETA 0:03"
+      },
+      {
+        "at_ms": 5966,
+        "text": "  dataset.bin                                                                    2.81M ━━━━──────── 35% 459K/s ETA 0:04\n  small files  128 · 3 files/s\n ━━━━━━━━━━━━━━━━━━━━━───────── 70%  129/130 files · 4.35M/6.16M · 621K/s · 3 files/s · ETA 0:03"
+      },
+      {
+        "at_ms": 6035,
+        "text": "  dataset.bin                                                                    2.81M ━━━━──────── 35% 427K/s ETA 0:04\n  small files  128 · 3 files/s\n ━━━━━━━━━━━━━━━━━━━━━───────── 70%  129/130 files · 4.35M/6.16M · 578K/s · 3 files/s · ETA 0:03"
+      },
+      {
+        "at_ms": 6106,
+        "text": "  dataset.bin                                                                    2.81M ━━━━──────── 35% 397K/s ETA 0:05\n  small files  128 · 3 files/s\n ━━━━━━━━━━━━━━━━━━━━━───────── 70%  129/130 files · 4.35M/6.16M · 537K/s · 3 files/s · ETA 0:03"
+      },
+      {
+        "at_ms": 6180,
+        "text": "  dataset.bin                                                                    2.81M ━━━━──────── 35% 367K/s ETA 0:05\n  small files  128 · 2 files/s\n ━━━━━━━━━━━━━━━━━━━━━───────── 70%  129/130 files · 4.35M/6.16M · 497K/s · 2 files/s · ETA 0:04"
+      },
+      {
+        "at_ms": 6249,
+        "text": "  dataset.bin                                                                    2.81M ━━━━──────── 35% 342K/s ETA 0:05\n  small files  128 · 2 files/s\n ━━━━━━━━━━━━━━━━━━━━━───────── 70%  129/130 files · 4.35M/6.16M · 463K/s · 2 files/s · ETA 0:04"
+      },
+      {
+        "at_ms": 6319,
+        "text": "  dataset.bin                                                                    2.81M ━━━━──────── 35% 318K/s ETA 0:06\n  small files  128 · 2 files/s\n ━━━━━━━━━━━━━━━━━━━━━───────── 70%  129/130 files · 4.35M/6.16M · 431K/s · 2 files/s · ETA 0:04"
+      },
+      {
+        "at_ms": 6389,
+        "text": "  dataset.bin                                                                   2.81M ━━━━━━━━╸─── 71% 1.29M/s ETA 0:01\n  small files  128 · 2 files/s\n ━━━━━━━━━━━━━━━━━━━━━━━━━━──── 86%  129/130 files · 5.35M/6.16M · 1.39M/s · 2 files/s · ETA 0:01"
+      },
+      {
+        "at_ms": 6461,
+        "text": "  dataset.bin                                                                   2.81M ━━━━━━━━╸─── 71% 1.20M/s ETA 0:01\n  small files  128 · 2 files/s\n ━━━━━━━━━━━━━━━━━━━━━━━━━━──── 86%  129/130 files · 5.35M/6.16M · 1.29M/s · 2 files/s · ETA 0:01"
+      },
+      {
+        "at_ms": 6532,
+        "text": "  dataset.bin                                                                   2.81M ━━━━━━━━╸─── 71% 1.12M/s ETA 0:01\n  small files  128 · 2 files/s\n ━━━━━━━━━━━━━━━━━━━━━━━━━━──── 86%  129/130 files · 5.35M/6.16M · 1.21M/s · 2 files/s · ETA 0:01"
+      },
+      {
+        "at_ms": 6603,
+        "text": "  dataset.bin                                                                   2.81M ━━━━━━━━╸─── 71% 1.03M/s ETA 0:01\n  small files  128 · 2 files/s\n ━━━━━━━━━━━━━━━━━━━━━━━━━━──── 86%  129/130 files · 5.35M/6.16M · 1.11M/s · 2 files/s · ETA 0:01"
+      },
+      {
+        "at_ms": 6674,
+        "text": "  dataset.bin                                                                    2.81M ━━━━━━━━╸─── 71% 983K/s ETA 0:01\n  small files  128 · 1 files/s\n ━━━━━━━━━━━━━━━━━━━━━━━━━━──── 86%  129/130 files · 5.35M/6.16M · 1.04M/s · 1 files/s · ETA 0:01"
+      },
+      {
+        "at_ms": 6742,
+        "text": "  dataset.bin                                                                    2.81M ━━━━━━━━╸─── 71% 915K/s ETA 0:01\n  small files  128 · 1 files/s\n ━━━━━━━━━━━━━━━━━━━━━━━━━━──── 86%  129/130 files · 5.35M/6.16M · 988K/s · 1 files/s · ETA 0:01"
+      },
+      {
+        "at_ms": 6810,
+        "text": "  dataset.bin                                                                    2.81M ━━━━━━━━╸─── 71% 854K/s ETA 0:01\n  small files  128 · 1 files/s\n ━━━━━━━━━━━━━━━━━━━━━━━━━━──── 86%  129/130 files · 5.35M/6.16M · 921K/s · 1 files/s · ETA 0:01"
+      },
+      {
+        "at_ms": 6878,
+        "text": "  dataset.bin                                                                    2.81M ━━━━━━━━╸─── 71% 795K/s ETA 0:01\n  small files  128 · 1 files/s\n ━━━━━━━━━━━━━━━━━━━━━━━━━━──── 86%  129/130 files · 5.35M/6.16M · 858K/s · 1 files/s · ETA 0:01"
+      },
+      {
+        "at_ms": 6945,
+        "text": "  dataset.bin                                                                    2.81M ━━━━━━━━╸─── 71% 742K/s ETA 0:01\n  small files  128 · 1 files/s\n ━━━━━━━━━━━━━━━━━━━━━━━━━━──── 86%  129/130 files · 5.35M/6.16M · 801K/s · 1 files/s · ETA 0:01"
+      },
+      {
+        "at_ms": 7016,
+        "text": "  dataset.bin                                                                    2.81M ━━━━━━━━╸─── 71% 689K/s ETA 0:01\n  small files  128 · 1 files/s\n ━━━━━━━━━━━━━━━━━━━━━━━━━━──── 86%  129/130 files · 5.35M/6.16M · 744K/s · 1 files/s · ETA 0:01"
+      },
+      {
+        "at_ms": 7085,
+        "text": "  dataset.bin                                                                    2.81M ━━━━━━━━╸─── 71% 642K/s ETA 0:01\n  small files  128 · 1 files/s\n ━━━━━━━━━━━━━━━━━━━━━━━━━━──── 86%  129/130 files · 5.35M/6.16M · 693K/s · 1 files/s · ETA 0:01"
+      },
+      {
+        "at_ms": 7152,
+        "text": "  dataset.bin                                                                    2.81M ━━━━━━━━╸─── 71% 599K/s ETA 0:01\n  small files  128 · 1 files/s\n ━━━━━━━━━━━━━━━━━━━━━━━━━━──── 86%  129/130 files · 5.35M/6.16M · 646K/s · 1 files/s · ETA 0:01"
+      },
+      {
+        "at_ms": 7219,
+        "text": "  dataset.bin                                                                    2.81M ━━━━━━━━╸─── 71% 558K/s ETA 0:01\n  small files  128 · 1 files/s\n ━━━━━━━━━━━━━━━━━━━━━━━━━━──── 86%  129/130 files · 5.35M/6.16M · 603K/s · 1 files/s · ETA 0:01"
+      },
+      {
+        "at_ms": 7290,
+        "text": "  dataset.bin                                                                    2.81M ━━━━━━━━╸─── 71% 519K/s ETA 0:02\n  small files  128 · 1 files/s\n ━━━━━━━━━━━━━━━━━━━━━━━━━━──── 86%  129/130 files · 5.35M/6.16M · 560K/s · 1 files/s · ETA 0:01"
+      },
+      {
+        "at_ms": 7339,
+        "text": " ✓ 130 files · 6.16M in 7.33s · 860K/s · 18 files/s"
+      }
+    ],
+    "raw": "recordings/transfer.ansi",
+    "transcript": "recordings/transfer.txt"
+  },
+  "verification": {
+    "command": "xsync -acP --no-clone ./checks-data/ ./checks-backup/",
+    "exit_code": 0,
+    "frames": [
+      {
+        "at_ms": 5,
+        "text": " ⠋ verifying  0 checks"
+      },
+      {
+        "at_ms": 71,
+        "text": " ⠙ scanning  0 files"
+      },
+      {
+        "at_ms": 136,
+        "text": " ⠹ scanning  0 files"
+      },
+      {
+        "at_ms": 210,
+        "text": " ⠸ scanning  0 files"
+      },
+      {
+        "at_ms": 283,
+        "text": " ⠼ verifying  17 checks"
+      },
+      {
+        "at_ms": 343,
+        "text": " ⠴ scanning  0 files"
+      },
+      {
+        "at_ms": 416,
+        "text": " ⠦ scanning  0 files"
+      },
+      {
+        "at_ms": 461,
+        "text": " ✓ up to date · 15 files checked in 0.46s"
+      }
+    ],
+    "raw": "recordings/verification.ansi",
+    "transcript": "recordings/verification.txt"
+  },
+  "interrupted": {
+    "command": "xsync -aP --no-clone --jobs=2 --bwlimit=1M ./demo-data/ ./interrupted-backup/",
+    "exit_code": 20,
+    "frames": [
+      {
+        "at_ms": 75,
+        "text": "  small files  92 · 1.3k files/s\n ────────────────────────────── 1%  92/130 files · 71.5K/6.16M · 0.98M/s · 1.3k files/s · ETA 0:06"
+      },
+      {
+        "at_ms": 145,
+        "text": "  small files  128 · 1.2k files/s\n ────────────────────────────── 1%  128/130 files · 101K/6.16M · 964K/s · 1.2k files/s · ETA 0:06"
+      },
+      {
+        "at_ms": 211,
+        "text": "  archive.tar                                                                                3.25M ──────────── 0% 0B/s\n  small files  128 · 1.2k files/s\n ────────────────────────────── 1%  128/130 files · 101K/6.16M · 900K/s · 1.2k files/s · ETA 0:07"
+      },
+      {
+        "at_ms": 282,
+        "text": "  archive.tar                                                                                3.25M ──────────── 0% 0B/s\n  small files  128 · 1.1k files/s\n ────────────────────────────── 1%  128/130 files · 101K/6.16M · 836K/s · 1.1k files/s · ETA 0:07"
+      },
+      {
+        "at_ms": 353,
+        "text": "  archive.tar                                                                                3.25M ──────────── 0% 0B/s\n  small files  128 · 999 files/s\n ────────────────────────────── 1%  128/130 files · 101K/6.16M · 777K/s · 999 files/s · ETA 0:08"
+      },
+      {
+        "at_ms": 424,
+        "text": "  archive.tar                                                                                3.25M ──────────── 0% 0B/s\n  small files  128 · 928 files/s\n ────────────────────────────── 1%  128/130 files · 101K/6.16M · 722K/s · 928 files/s · ETA 0:09"
+      },
+      {
+        "at_ms": 494,
+        "text": "  archive.tar                                                                                3.25M ──────────── 0% 0B/s\n  small files  128 · 863 files/s\n ────────────────────────────── 1%  128/130 files · 101K/6.16M · 672K/s · 863 files/s · ETA 0:09"
+      },
+      {
+        "at_ms": 563,
+        "text": "  archive.tar                                                                                3.25M ──────────── 0% 0B/s\n  small files  128 · 803 files/s\n ────────────────────────────── 1%  128/130 files · 101K/6.16M · 625K/s · 803 files/s · ETA 0:10"
+      },
+      {
+        "at_ms": 631,
+        "text": "  archive.tar                                                                                3.25M ──────────── 0% 0B/s\n  small files  128 · 748 files/s\n ────────────────────────────── 1%  128/130 files · 101K/6.16M · 582K/s · 748 files/s · ETA 0:11"
+      },
+      {
+        "at_ms": 702,
+        "text": "  archive.tar                                                                                3.25M ──────────── 0% 0B/s\n  small files  128 · 695 files/s\n ────────────────────────────── 1%  128/130 files · 101K/6.16M · 541K/s · 695 files/s · ETA 0:11"
+      },
+      {
+        "at_ms": 769,
+        "text": "  archive.tar                                                                                3.25M ──────────── 0% 0B/s\n  small files  128 · 649 files/s\n ────────────────────────────── 1%  128/130 files · 101K/6.16M · 505K/s · 649 files/s · ETA 0:12"
+      },
+      {
+        "at_ms": 837,
+        "text": "  archive.tar                                                                                3.25M ──────────── 0% 0B/s\n  small files  128 · 604 files/s\n ────────────────────────────── 1%  128/130 files · 101K/6.16M · 470K/s · 604 files/s · ETA 0:13"
+      },
+      {
+        "at_ms": 908,
+        "text": "  archive.tar                                                                                3.25M ──────────── 0% 0B/s\n  small files  128 · 561 files/s\n ────────────────────────────── 1%  128/130 files · 101K/6.16M · 437K/s · 561 files/s · ETA 0:14"
+      },
+      {
+        "at_ms": 979,
+        "text": "  archive.tar                                                                                3.25M ──────────── 0% 0B/s\n  small files  128 · 522 files/s\n ────────────────────────────── 1%  128/130 files · 101K/6.16M · 406K/s · 522 files/s · ETA 0:15"
+      },
+      {
+        "at_ms": 1048,
+        "text": "  archive.tar                                                                                3.25M ──────────── 0% 0B/s\n  small files  128 · 486 files/s\n ────────────────────────────── 1%  128/130 files · 101K/6.16M · 378K/s · 486 files/s · ETA 0:16"
+      },
+      {
+        "at_ms": 1119,
+        "text": "  archive.tar                                                                                3.25M ──────────── 0% 0B/s\n  small files  128 · 451 files/s\n ────────────────────────────── 1%  128/130 files · 101K/6.16M · 351K/s · 451 files/s · ETA 0:18"
+      },
+      {
+        "at_ms": 1185,
+        "text": "  archive.tar                                                                                3.25M ──────────── 0% 0B/s\n  small files  128 · 421 files/s\n ────────────────────────────── 1%  128/130 files · 101K/6.16M · 328K/s · 421 files/s · ETA 0:19"
+      },
+      {
+        "at_ms": 1256,
+        "text": "  archive.tar                                                                                3.25M ──────────── 0% 0B/s\n  small files  128 · 392 files/s\n ────────────────────────────── 1%  128/130 files · 101K/6.16M · 305K/s · 392 files/s · ETA 0:20"
+      },
+      {
+        "at_ms": 1327,
+        "text": "  archive.tar                                                                   3.25M ━━━╸──────── 30% 1.00M/s ETA 0:02\n  small files  128 · 364 files/s\n ━━━━━───────────────────────── 17%  128/130 files · 1.10M/6.16M · 1.28M/s · 364 files/s · ETA 0:04"
+      },
+      {
+        "at_ms": 1394,
+        "text": "  archive.tar                                                                    3.25M ━━━╸──────── 30% 955K/s ETA 0:02\n  small files  128 · 339 files/s\n ━━━━━───────────────────────── 17%  128/130 files · 1.10M/6.16M · 1.19M/s · 339 files/s · ETA 0:04"
+      },
+      {
+        "at_ms": 1465,
+        "text": "  archive.tar                                                                    3.25M ━━━╸──────── 30% 887K/s ETA 0:03\n  small files  128 · 315 files/s\n ━━━━━───────────────────────── 17%  128/130 files · 1.10M/6.16M · 1.11M/s · 315 files/s · ETA 0:05"
+      },
+      {
+        "at_ms": 1535,
+        "text": "  archive.tar                                                                    3.25M ━━━╸──────── 30% 825K/s ETA 0:03\n  small files  128 · 293 files/s\n ━━━━━───────────────────────── 17%  128/130 files · 1.10M/6.16M · 1.03M/s · 293 files/s · ETA 0:05"
+      },
+      {
+        "at_ms": 1605,
+        "text": "  archive.tar                                                                    3.25M ━━━╸──────── 30% 767K/s ETA 0:03\n  small files  128 · 273 files/s\n ━━━━━───────────────────────── 17%  128/130 files · 1.10M/6.16M · 979K/s · 273 files/s · ETA 0:05"
+      },
+      {
+        "at_ms": 1672,
+        "text": "  archive.tar                                                                    3.25M ━━━╸──────── 30% 716K/s ETA 0:03\n  small files  128 · 254 files/s\n ━━━━━───────────────────────── 17%  128/130 files · 1.10M/6.16M · 913K/s · 254 files/s · ETA 0:06"
+      },
+      {
+        "at_ms": 1741,
+        "text": "  archive.tar                                                                    3.25M ━━━╸──────── 30% 667K/s ETA 0:03\n  small files  128 · 237 files/s\n ━━━━━───────────────────────── 17%  128/130 files · 1.10M/6.16M · 851K/s · 237 files/s · ETA 0:06"
+      },
+      {
+        "at_ms": 1812,
+        "text": "  archive.tar                                                                    3.25M ━━━╸──────── 30% 619K/s ETA 0:04\n  small files  128 · 220 files/s\n ━━━━━───────────────────────── 17%  128/130 files · 1.10M/6.16M · 791K/s · 220 files/s · ETA 0:07"
+      },
+      {
+        "at_ms": 1823,
+        "text": "xsync: write failed on \"./interrupted-backup/archive.tar\": Operation canceled (89)\nxsync: error summary: 1 error (showing first 1)\n  partial transfer (code 23): 1 error\n    write failed on \"./interrupted-backup/archive.tar\": Operation canceled (89)\n\nxsync error: received SIGINT, SIGTERM, or SIGHUP (code 20)"
+      }
+    ],
+    "raw": "recordings/interrupted.ansi",
+    "transcript": "recordings/interrupted.txt"
+  },
+  "error": {
+    "command": "xsync -aP ./missing-source/ ./unused-backup/",
+    "exit_code": 23,
+    "frames": [
+      {
+        "at_ms": 5,
+        "text": "xsync: link_stat \"./missing-source/\" failed: No such file or directory (2)\nxsync: error summary: 1 error (showing first 1)\n  partial transfer (code 23): 1 error\n    link_stat \"./missing-source/\" failed: No such file or directory (2)\nxsync error: some files/attrs were not transferred (see previous errors) (code 23)"
+      }
+    ],
+    "raw": "recordings/error.ansi",
+    "transcript": "recordings/error.txt"
+  },
+  "json": {
+    "command": "xsync -a --no-clone --jobs=2 --bwlimit=2M --progress=json ./demo-data/ ./json-backup/",
+    "events": [
+      {
+        "type": "progress",
+        "elapsed_ms": 0,
+        "files": 0,
+        "files_total": 0,
+        "bytes": 0,
+        "bytes_total": 0,
+        "files_seen": 0,
+        "wire_bytes": 0,
+        "phase": "scanning",
+        "deleted": 0,
+        "verified": 0,
+        "scanning": true,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-000.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3030302e747874",
+        "code": ">f+++++++++",
+        "size": 760,
+        "bytes": 760,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-001.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3030312e747874",
+        "code": ">f+++++++++",
+        "size": 760,
+        "bytes": 760,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-002.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3030322e747874",
+        "code": ">f+++++++++",
+        "size": 760,
+        "bytes": 760,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-003.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3030332e747874",
+        "code": ">f+++++++++",
+        "size": 760,
+        "bytes": 760,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-004.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3030342e747874",
+        "code": ">f+++++++++",
+        "size": 760,
+        "bytes": 760,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-005.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3030352e747874",
+        "code": ">f+++++++++",
+        "size": 760,
+        "bytes": 760,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-006.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3030362e747874",
+        "code": ">f+++++++++",
+        "size": 760,
+        "bytes": 760,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-007.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3030372e747874",
+        "code": ">f+++++++++",
+        "size": 760,
+        "bytes": 760,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-008.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3030382e747874",
+        "code": ">f+++++++++",
+        "size": 760,
+        "bytes": 760,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-009.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3030392e747874",
+        "code": ">f+++++++++",
+        "size": 760,
+        "bytes": 760,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-010.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3031302e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-011.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3031312e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-012.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3031322e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-013.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3031332e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-014.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3031342e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-015.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3031352e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-016.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3031362e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-017.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3031372e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-018.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3031382e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-019.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3031392e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-020.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3032302e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-021.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3032312e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-022.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3032322e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-023.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3032332e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-024.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3032342e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-025.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3032352e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-026.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3032362e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-027.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3032372e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-028.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3032382e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-029.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3032392e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-030.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3033302e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-031.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3033312e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-032.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3033322e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-033.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3033332e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-034.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3033342e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-035.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3033352e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-036.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3033362e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-037.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3033372e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-038.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3033382e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-039.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3033392e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-040.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3034302e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-041.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3034312e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-042.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3034322e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-043.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3034332e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-044.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3034342e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-045.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3034352e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-046.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3034362e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-047.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3034372e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-048.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3034382e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-049.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3034392e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-050.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3035302e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-051.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3035312e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-052.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3035322e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-053.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3035332e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-054.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3035342e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-055.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3035352e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-056.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3035362e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-057.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3035372e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-058.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3035382e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-059.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3035392e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-060.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3036302e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-061.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3036312e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-062.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3036322e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-063.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3036332e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-064.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3036342e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-065.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3036352e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-066.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3036362e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-067.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3036372e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-068.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3036382e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-069.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3036392e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-070.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3037302e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-071.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3037312e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-072.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3037322e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-073.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3037332e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-074.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3037342e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-075.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3037352e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-076.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3037362e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-077.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3037372e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-078.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3037382e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-079.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3037392e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-080.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3038302e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-081.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3038312e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-082.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3038322e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-083.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3038332e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-084.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3038342e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-085.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3038352e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-086.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3038362e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-087.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3038372e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-088.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3038382e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-089.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3038392e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-090.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3039302e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-091.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3039312e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-092.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3039322e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-093.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3039332e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-094.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3039342e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-095.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3039352e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-096.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3039362e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-097.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3039372e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-098.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3039382e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-099.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3039392e747874",
+        "code": ">f+++++++++",
+        "size": 800,
+        "bytes": 800,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-100.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3130302e747874",
+        "code": ">f+++++++++",
+        "size": 840,
+        "bytes": 840,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-101.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3130312e747874",
+        "code": ">f+++++++++",
+        "size": 840,
+        "bytes": 840,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-102.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3130322e747874",
+        "code": ">f+++++++++",
+        "size": 840,
+        "bytes": 840,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-103.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3130332e747874",
+        "code": ">f+++++++++",
+        "size": 840,
+        "bytes": 840,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-104.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3130342e747874",
+        "code": ">f+++++++++",
+        "size": 840,
+        "bytes": 840,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-105.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3130352e747874",
+        "code": ">f+++++++++",
+        "size": 840,
+        "bytes": 840,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-106.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3130362e747874",
+        "code": ">f+++++++++",
+        "size": 840,
+        "bytes": 840,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-107.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3130372e747874",
+        "code": ">f+++++++++",
+        "size": 840,
+        "bytes": 840,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-108.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3130382e747874",
+        "code": ">f+++++++++",
+        "size": 840,
+        "bytes": 840,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-109.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3130392e747874",
+        "code": ">f+++++++++",
+        "size": 840,
+        "bytes": 840,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-110.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3131302e747874",
+        "code": ">f+++++++++",
+        "size": 840,
+        "bytes": 840,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-111.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3131312e747874",
+        "code": ">f+++++++++",
+        "size": 840,
+        "bytes": 840,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-112.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3131322e747874",
+        "code": ">f+++++++++",
+        "size": 840,
+        "bytes": 840,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-113.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3131332e747874",
+        "code": ">f+++++++++",
+        "size": 840,
+        "bytes": 840,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-114.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3131342e747874",
+        "code": ">f+++++++++",
+        "size": 840,
+        "bytes": 840,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-115.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3131352e747874",
+        "code": ">f+++++++++",
+        "size": 840,
+        "bytes": 840,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-116.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3131362e747874",
+        "code": ">f+++++++++",
+        "size": 840,
+        "bytes": 840,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-117.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3131372e747874",
+        "code": ">f+++++++++",
+        "size": 840,
+        "bytes": 840,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-118.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3131382e747874",
+        "code": ">f+++++++++",
+        "size": 840,
+        "bytes": 840,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-119.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3131392e747874",
+        "code": ">f+++++++++",
+        "size": 840,
+        "bytes": 840,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-120.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3132302e747874",
+        "code": ">f+++++++++",
+        "size": 840,
+        "bytes": 840,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-121.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3132312e747874",
+        "code": ">f+++++++++",
+        "size": 840,
+        "bytes": 840,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-122.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3132322e747874",
+        "code": ">f+++++++++",
+        "size": 840,
+        "bytes": 840,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-123.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3132332e747874",
+        "code": ">f+++++++++",
+        "size": 840,
+        "bytes": 840,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-124.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3132342e747874",
+        "code": ">f+++++++++",
+        "size": 840,
+        "bytes": 840,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-125.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3132352e747874",
+        "code": ">f+++++++++",
+        "size": 840,
+        "bytes": 840,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-126.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3132362e747874",
+        "code": ">f+++++++++",
+        "size": 840,
+        "bytes": 840,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "documents/note-127.txt",
+        "path_bytes_hex": "646f63756d656e74732f6e6f74652d3132372e747874",
+        "code": ">f+++++++++",
+        "size": 840,
+        "bytes": 840,
+        "dry_run": false
+      },
+      {
+        "type": "progress",
+        "elapsed_ms": 71,
+        "files": 128,
+        "files_total": 130,
+        "bytes": 103120,
+        "bytes_total": 6460112,
+        "files_seen": 130,
+        "wire_bytes": 0,
+        "phase": "transferring",
+        "deleted": 0,
+        "verified": 0,
+        "scanning": false,
+        "dry_run": false
+      },
+      {
+        "type": "progress",
+        "elapsed_ms": 140,
+        "files": 128,
+        "files_total": 130,
+        "bytes": 103120,
+        "bytes_total": 6460112,
+        "files_seen": 130,
+        "wire_bytes": 0,
+        "phase": "transferring",
+        "deleted": 0,
+        "verified": 0,
+        "scanning": false,
+        "dry_run": false
+      },
+      {
+        "type": "progress",
+        "elapsed_ms": 208,
+        "files": 128,
+        "files_total": 130,
+        "bytes": 103120,
+        "bytes_total": 6460112,
+        "files_seen": 130,
+        "wire_bytes": 0,
+        "phase": "transferring",
+        "deleted": 0,
+        "verified": 0,
+        "scanning": false,
+        "dry_run": false
+      },
+      {
+        "type": "progress",
+        "elapsed_ms": 279,
+        "files": 128,
+        "files_total": 130,
+        "bytes": 103120,
+        "bytes_total": 6460112,
+        "files_seen": 130,
+        "wire_bytes": 0,
+        "phase": "transferring",
+        "deleted": 0,
+        "verified": 0,
+        "scanning": false,
+        "dry_run": false
+      },
+      {
+        "type": "progress",
+        "elapsed_ms": 348,
+        "files": 128,
+        "files_total": 130,
+        "bytes": 103120,
+        "bytes_total": 6460112,
+        "files_seen": 130,
+        "wire_bytes": 0,
+        "phase": "transferring",
+        "deleted": 0,
+        "verified": 0,
+        "scanning": false,
+        "dry_run": false
+      },
+      {
+        "type": "progress",
+        "elapsed_ms": 419,
+        "files": 128,
+        "files_total": 130,
+        "bytes": 103120,
+        "bytes_total": 6460112,
+        "files_seen": 130,
+        "wire_bytes": 0,
+        "phase": "transferring",
+        "deleted": 0,
+        "verified": 0,
+        "scanning": false,
+        "dry_run": false
+      },
+      {
+        "type": "progress",
+        "elapsed_ms": 490,
+        "files": 128,
+        "files_total": 130,
+        "bytes": 103120,
+        "bytes_total": 6460112,
+        "files_seen": 130,
+        "wire_bytes": 0,
+        "phase": "transferring",
+        "deleted": 0,
+        "verified": 0,
+        "scanning": false,
+        "dry_run": false
+      },
+      {
+        "type": "progress",
+        "elapsed_ms": 560,
+        "files": 128,
+        "files_total": 130,
+        "bytes": 103120,
+        "bytes_total": 6460112,
+        "files_seen": 130,
+        "wire_bytes": 0,
+        "phase": "transferring",
+        "deleted": 0,
+        "verified": 0,
+        "scanning": false,
+        "dry_run": false
+      },
+      {
+        "type": "progress",
+        "elapsed_ms": 631,
+        "files": 128,
+        "files_total": 130,
+        "bytes": 103120,
+        "bytes_total": 6460112,
+        "files_seen": 130,
+        "wire_bytes": 0,
+        "phase": "transferring",
+        "deleted": 0,
+        "verified": 0,
+        "scanning": false,
+        "dry_run": false
+      },
+      {
+        "type": "progress",
+        "elapsed_ms": 701,
+        "files": 128,
+        "files_total": 130,
+        "bytes": 1151696,
+        "bytes_total": 6460112,
+        "files_seen": 130,
+        "wire_bytes": 0,
+        "phase": "transferring",
+        "deleted": 0,
+        "verified": 0,
+        "scanning": false,
+        "dry_run": false
+      },
+      {
+        "type": "progress",
+        "elapsed_ms": 771,
+        "files": 128,
+        "files_total": 130,
+        "bytes": 1151696,
+        "bytes_total": 6460112,
+        "files_seen": 130,
+        "wire_bytes": 0,
+        "phase": "transferring",
+        "deleted": 0,
+        "verified": 0,
+        "scanning": false,
+        "dry_run": false
+      },
+      {
+        "type": "progress",
+        "elapsed_ms": 841,
+        "files": 128,
+        "files_total": 130,
+        "bytes": 1151696,
+        "bytes_total": 6460112,
+        "files_seen": 130,
+        "wire_bytes": 0,
+        "phase": "transferring",
+        "deleted": 0,
+        "verified": 0,
+        "scanning": false,
+        "dry_run": false
+      },
+      {
+        "type": "progress",
+        "elapsed_ms": 911,
+        "files": 128,
+        "files_total": 130,
+        "bytes": 1151696,
+        "bytes_total": 6460112,
+        "files_seen": 130,
+        "wire_bytes": 0,
+        "phase": "transferring",
+        "deleted": 0,
+        "verified": 0,
+        "scanning": false,
+        "dry_run": false
+      },
+      {
+        "type": "progress",
+        "elapsed_ms": 982,
+        "files": 128,
+        "files_total": 130,
+        "bytes": 1151696,
+        "bytes_total": 6460112,
+        "files_seen": 130,
+        "wire_bytes": 0,
+        "phase": "transferring",
+        "deleted": 0,
+        "verified": 0,
+        "scanning": false,
+        "dry_run": false
+      },
+      {
+        "type": "progress",
+        "elapsed_ms": 1048,
+        "files": 128,
+        "files_total": 130,
+        "bytes": 1151696,
+        "bytes_total": 6460112,
+        "files_seen": 130,
+        "wire_bytes": 0,
+        "phase": "transferring",
+        "deleted": 0,
+        "verified": 0,
+        "scanning": false,
+        "dry_run": false
+      },
+      {
+        "type": "progress",
+        "elapsed_ms": 1119,
+        "files": 128,
+        "files_total": 130,
+        "bytes": 1151696,
+        "bytes_total": 6460112,
+        "files_seen": 130,
+        "wire_bytes": 0,
+        "phase": "transferring",
+        "deleted": 0,
+        "verified": 0,
+        "scanning": false,
+        "dry_run": false
+      },
+      {
+        "type": "progress",
+        "elapsed_ms": 1190,
+        "files": 128,
+        "files_total": 130,
+        "bytes": 1151696,
+        "bytes_total": 6460112,
+        "files_seen": 130,
+        "wire_bytes": 0,
+        "phase": "transferring",
+        "deleted": 0,
+        "verified": 0,
+        "scanning": false,
+        "dry_run": false
+      },
+      {
+        "type": "progress",
+        "elapsed_ms": 1261,
+        "files": 128,
+        "files_total": 130,
+        "bytes": 2200272,
+        "bytes_total": 6460112,
+        "files_seen": 130,
+        "wire_bytes": 0,
+        "phase": "transferring",
+        "deleted": 0,
+        "verified": 0,
+        "scanning": false,
+        "dry_run": false
+      },
+      {
+        "type": "progress",
+        "elapsed_ms": 1328,
+        "files": 128,
+        "files_total": 130,
+        "bytes": 2200272,
+        "bytes_total": 6460112,
+        "files_seen": 130,
+        "wire_bytes": 0,
+        "phase": "transferring",
+        "deleted": 0,
+        "verified": 0,
+        "scanning": false,
+        "dry_run": false
+      },
+      {
+        "type": "progress",
+        "elapsed_ms": 1399,
+        "files": 128,
+        "files_total": 130,
+        "bytes": 2200272,
+        "bytes_total": 6460112,
+        "files_seen": 130,
+        "wire_bytes": 0,
+        "phase": "transferring",
+        "deleted": 0,
+        "verified": 0,
+        "scanning": false,
+        "dry_run": false
+      },
+      {
+        "type": "progress",
+        "elapsed_ms": 1468,
+        "files": 128,
+        "files_total": 130,
+        "bytes": 2200272,
+        "bytes_total": 6460112,
+        "files_seen": 130,
+        "wire_bytes": 0,
+        "phase": "transferring",
+        "deleted": 0,
+        "verified": 0,
+        "scanning": false,
+        "dry_run": false
+      },
+      {
+        "type": "progress",
+        "elapsed_ms": 1539,
+        "files": 128,
+        "files_total": 130,
+        "bytes": 2200272,
+        "bytes_total": 6460112,
+        "files_seen": 130,
+        "wire_bytes": 0,
+        "phase": "transferring",
+        "deleted": 0,
+        "verified": 0,
+        "scanning": false,
+        "dry_run": false
+      },
+      {
+        "type": "progress",
+        "elapsed_ms": 1606,
+        "files": 128,
+        "files_total": 130,
+        "bytes": 2200272,
+        "bytes_total": 6460112,
+        "files_seen": 130,
+        "wire_bytes": 0,
+        "phase": "transferring",
+        "deleted": 0,
+        "verified": 0,
+        "scanning": false,
+        "dry_run": false
+      },
+      {
+        "type": "progress",
+        "elapsed_ms": 1673,
+        "files": 128,
+        "files_total": 130,
+        "bytes": 2200272,
+        "bytes_total": 6460112,
+        "files_seen": 130,
+        "wire_bytes": 0,
+        "phase": "transferring",
+        "deleted": 0,
+        "verified": 0,
+        "scanning": false,
+        "dry_run": false
+      },
+      {
+        "type": "progress",
+        "elapsed_ms": 1744,
+        "files": 128,
+        "files_total": 130,
+        "bytes": 2200272,
+        "bytes_total": 6460112,
+        "files_seen": 130,
+        "wire_bytes": 0,
+        "phase": "transferring",
+        "deleted": 0,
+        "verified": 0,
+        "scanning": false,
+        "dry_run": false
+      },
+      {
+        "type": "progress",
+        "elapsed_ms": 1815,
+        "files": 128,
+        "files_total": 130,
+        "bytes": 2200272,
+        "bytes_total": 6460112,
+        "files_seen": 130,
+        "wire_bytes": 0,
+        "phase": "transferring",
+        "deleted": 0,
+        "verified": 0,
+        "scanning": false,
+        "dry_run": false
+      },
+      {
+        "type": "progress",
+        "elapsed_ms": 1883,
+        "files": 128,
+        "files_total": 130,
+        "bytes": 3248848,
+        "bytes_total": 6460112,
+        "files_seen": 130,
+        "wire_bytes": 0,
+        "phase": "transferring",
+        "deleted": 0,
+        "verified": 0,
+        "scanning": false,
+        "dry_run": false
+      },
+      {
+        "type": "progress",
+        "elapsed_ms": 1953,
+        "files": 128,
+        "files_total": 130,
+        "bytes": 3248848,
+        "bytes_total": 6460112,
+        "files_seen": 130,
+        "wire_bytes": 0,
+        "phase": "transferring",
+        "deleted": 0,
+        "verified": 0,
+        "scanning": false,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "archive.tar",
+        "path_bytes_hex": "617263686976652e746172",
+        "code": ">f+++++++++",
+        "size": 3407872,
+        "bytes": 3407872,
+        "dry_run": false
+      },
+      {
+        "type": "progress",
+        "elapsed_ms": 2024,
+        "files": 129,
+        "files_total": 130,
+        "bytes": 3510992,
+        "bytes_total": 6460112,
+        "files_seen": 130,
+        "wire_bytes": 0,
+        "phase": "transferring",
+        "deleted": 0,
+        "verified": 0,
+        "scanning": false,
+        "dry_run": false
+      },
+      {
+        "type": "progress",
+        "elapsed_ms": 2090,
+        "files": 129,
+        "files_total": 130,
+        "bytes": 3510992,
+        "bytes_total": 6460112,
+        "files_seen": 130,
+        "wire_bytes": 0,
+        "phase": "transferring",
+        "deleted": 0,
+        "verified": 0,
+        "scanning": false,
+        "dry_run": false
+      },
+      {
+        "type": "progress",
+        "elapsed_ms": 2162,
+        "files": 129,
+        "files_total": 130,
+        "bytes": 3510992,
+        "bytes_total": 6460112,
+        "files_seen": 130,
+        "wire_bytes": 0,
+        "phase": "transferring",
+        "deleted": 0,
+        "verified": 0,
+        "scanning": false,
+        "dry_run": false
+      },
+      {
+        "type": "progress",
+        "elapsed_ms": 2245,
+        "files": 129,
+        "files_total": 130,
+        "bytes": 3510992,
+        "bytes_total": 6460112,
+        "files_seen": 130,
+        "wire_bytes": 0,
+        "phase": "transferring",
+        "deleted": 0,
+        "verified": 0,
+        "scanning": false,
+        "dry_run": false
+      },
+      {
+        "type": "progress",
+        "elapsed_ms": 2315,
+        "files": 129,
+        "files_total": 130,
+        "bytes": 3510992,
+        "bytes_total": 6460112,
+        "files_seen": 130,
+        "wire_bytes": 0,
+        "phase": "transferring",
+        "deleted": 0,
+        "verified": 0,
+        "scanning": false,
+        "dry_run": false
+      },
+      {
+        "type": "progress",
+        "elapsed_ms": 2386,
+        "files": 129,
+        "files_total": 130,
+        "bytes": 3510992,
+        "bytes_total": 6460112,
+        "files_seen": 130,
+        "wire_bytes": 0,
+        "phase": "transferring",
+        "deleted": 0,
+        "verified": 0,
+        "scanning": false,
+        "dry_run": false
+      },
+      {
+        "type": "progress",
+        "elapsed_ms": 2453,
+        "files": 129,
+        "files_total": 130,
+        "bytes": 3510992,
+        "bytes_total": 6460112,
+        "files_seen": 130,
+        "wire_bytes": 0,
+        "phase": "transferring",
+        "deleted": 0,
+        "verified": 0,
+        "scanning": false,
+        "dry_run": false
+      },
+      {
+        "type": "progress",
+        "elapsed_ms": 2524,
+        "files": 129,
+        "files_total": 130,
+        "bytes": 3510992,
+        "bytes_total": 6460112,
+        "files_seen": 130,
+        "wire_bytes": 0,
+        "phase": "transferring",
+        "deleted": 0,
+        "verified": 0,
+        "scanning": false,
+        "dry_run": false
+      },
+      {
+        "type": "progress",
+        "elapsed_ms": 2595,
+        "files": 129,
+        "files_total": 130,
+        "bytes": 3510992,
+        "bytes_total": 6460112,
+        "files_seen": 130,
+        "wire_bytes": 0,
+        "phase": "transferring",
+        "deleted": 0,
+        "verified": 0,
+        "scanning": false,
+        "dry_run": false
+      },
+      {
+        "type": "progress",
+        "elapsed_ms": 2666,
+        "files": 129,
+        "files_total": 130,
+        "bytes": 4559568,
+        "bytes_total": 6460112,
+        "files_seen": 130,
+        "wire_bytes": 0,
+        "phase": "transferring",
+        "deleted": 0,
+        "verified": 0,
+        "scanning": false,
+        "dry_run": false
+      },
+      {
+        "type": "progress",
+        "elapsed_ms": 2732,
+        "files": 129,
+        "files_total": 130,
+        "bytes": 4559568,
+        "bytes_total": 6460112,
+        "files_seen": 130,
+        "wire_bytes": 0,
+        "phase": "transferring",
+        "deleted": 0,
+        "verified": 0,
+        "scanning": false,
+        "dry_run": false
+      },
+      {
+        "type": "progress",
+        "elapsed_ms": 2802,
+        "files": 129,
+        "files_total": 130,
+        "bytes": 4559568,
+        "bytes_total": 6460112,
+        "files_seen": 130,
+        "wire_bytes": 0,
+        "phase": "transferring",
+        "deleted": 0,
+        "verified": 0,
+        "scanning": false,
+        "dry_run": false
+      },
+      {
+        "type": "progress",
+        "elapsed_ms": 2874,
+        "files": 129,
+        "files_total": 130,
+        "bytes": 4559568,
+        "bytes_total": 6460112,
+        "files_seen": 130,
+        "wire_bytes": 0,
+        "phase": "transferring",
+        "deleted": 0,
+        "verified": 0,
+        "scanning": false,
+        "dry_run": false
+      },
+      {
+        "type": "progress",
+        "elapsed_ms": 2940,
+        "files": 129,
+        "files_total": 130,
+        "bytes": 4559568,
+        "bytes_total": 6460112,
+        "files_seen": 130,
+        "wire_bytes": 0,
+        "phase": "transferring",
+        "deleted": 0,
+        "verified": 0,
+        "scanning": false,
+        "dry_run": false
+      },
+      {
+        "type": "progress",
+        "elapsed_ms": 3008,
+        "files": 129,
+        "files_total": 130,
+        "bytes": 4559568,
+        "bytes_total": 6460112,
+        "files_seen": 130,
+        "wire_bytes": 0,
+        "phase": "transferring",
+        "deleted": 0,
+        "verified": 0,
+        "scanning": false,
+        "dry_run": false
+      },
+      {
+        "type": "progress",
+        "elapsed_ms": 3079,
+        "files": 129,
+        "files_total": 130,
+        "bytes": 4559568,
+        "bytes_total": 6460112,
+        "files_seen": 130,
+        "wire_bytes": 0,
+        "phase": "transferring",
+        "deleted": 0,
+        "verified": 0,
+        "scanning": false,
+        "dry_run": false
+      },
+      {
+        "type": "progress",
+        "elapsed_ms": 3148,
+        "files": 129,
+        "files_total": 130,
+        "bytes": 4559568,
+        "bytes_total": 6460112,
+        "files_seen": 130,
+        "wire_bytes": 0,
+        "phase": "transferring",
+        "deleted": 0,
+        "verified": 0,
+        "scanning": false,
+        "dry_run": false
+      },
+      {
+        "type": "progress",
+        "elapsed_ms": 3215,
+        "files": 129,
+        "files_total": 130,
+        "bytes": 5608144,
+        "bytes_total": 6460112,
+        "files_seen": 130,
+        "wire_bytes": 0,
+        "phase": "transferring",
+        "deleted": 0,
+        "verified": 0,
+        "scanning": false,
+        "dry_run": false
+      },
+      {
+        "type": "progress",
+        "elapsed_ms": 3285,
+        "files": 129,
+        "files_total": 130,
+        "bytes": 5608144,
+        "bytes_total": 6460112,
+        "files_seen": 130,
+        "wire_bytes": 0,
+        "phase": "transferring",
+        "deleted": 0,
+        "verified": 0,
+        "scanning": false,
+        "dry_run": false
+      },
+      {
+        "type": "progress",
+        "elapsed_ms": 3354,
+        "files": 129,
+        "files_total": 130,
+        "bytes": 5608144,
+        "bytes_total": 6460112,
+        "files_seen": 130,
+        "wire_bytes": 0,
+        "phase": "transferring",
+        "deleted": 0,
+        "verified": 0,
+        "scanning": false,
+        "dry_run": false
+      },
+      {
+        "type": "progress",
+        "elapsed_ms": 3423,
+        "files": 129,
+        "files_total": 130,
+        "bytes": 5608144,
+        "bytes_total": 6460112,
+        "files_seen": 130,
+        "wire_bytes": 0,
+        "phase": "transferring",
+        "deleted": 0,
+        "verified": 0,
+        "scanning": false,
+        "dry_run": false
+      },
+      {
+        "type": "progress",
+        "elapsed_ms": 3493,
+        "files": 129,
+        "files_total": 130,
+        "bytes": 5608144,
+        "bytes_total": 6460112,
+        "files_seen": 130,
+        "wire_bytes": 0,
+        "phase": "transferring",
+        "deleted": 0,
+        "verified": 0,
+        "scanning": false,
+        "dry_run": false
+      },
+      {
+        "type": "progress",
+        "elapsed_ms": 3564,
+        "files": 129,
+        "files_total": 130,
+        "bytes": 5608144,
+        "bytes_total": 6460112,
+        "files_seen": 130,
+        "wire_bytes": 0,
+        "phase": "transferring",
+        "deleted": 0,
+        "verified": 0,
+        "scanning": false,
+        "dry_run": false
+      },
+      {
+        "type": "progress",
+        "elapsed_ms": 3633,
+        "files": 129,
+        "files_total": 130,
+        "bytes": 5608144,
+        "bytes_total": 6460112,
+        "files_seen": 130,
+        "wire_bytes": 0,
+        "phase": "transferring",
+        "deleted": 0,
+        "verified": 0,
+        "scanning": false,
+        "dry_run": false
+      },
+      {
+        "type": "file",
+        "path": "dataset.bin",
+        "path_bytes_hex": "646174617365742e62696e",
+        "code": ">f+++++++++",
+        "size": 2949120,
+        "bytes": 2949120,
+        "dry_run": false
+      },
+      {
+        "type": "complete",
+        "elapsed_ms": 3678,
+        "files": 130,
+        "files_total": 130,
+        "bytes": 6460112,
+        "bytes_total": 6460112,
+        "files_seen": 130,
+        "wire_bytes": 0,
+        "phase": "complete",
+        "deleted": 0,
+        "verified": 0,
+        "scanning": false,
+        "dry_run": false,
+        "success": true,
+        "exit_code": 0
+      }
+    ],
+    "download": "recordings/progress.ndjson"
+  }
+}

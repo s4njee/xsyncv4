@@ -1,0 +1,41 @@
+/*! HoloCSS | MIT License */
+/* src/motion/keyframes.css */
+@keyframes hcss-spin {
+  to {
+    transform: rotate(1turn);
+  }
+}
+@keyframes hcss-pulse {
+  50% {
+    opacity: 0.5;
+  }
+}
+@keyframes hcss-shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+.hcss-spin {
+  animation: hcss-spin var(--hcss-loop-duration, 1s) linear infinite;
+}
+.hcss-pulse {
+  animation: hcss-pulse var(--hcss-loop-duration, 1.6s) ease-in-out infinite;
+}
+.hcss-shimmer {
+  animation: hcss-shimmer var(--hcss-loop-duration, 1.6s) linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  :where(.hcss-spin, .hcss-pulse, .hcss-shimmer) {
+    animation: none !important;
+  }
+}
+:where([data-hcss-motion=none], [data-hcss-theme=high-contrast]) :where(.hcss-spin, .hcss-pulse, .hcss-shimmer),
+:where(.hcss-spin, .hcss-pulse, .hcss-shimmer):where([data-hcss-motion=none], [data-hcss-theme=high-contrast]) {
+  animation: none !important;
+}
+@media (prefers-contrast: more) {
+  :where([data-hcss-motion=none], [data-hcss-theme=auto]) :where(.hcss-spin, .hcss-pulse, .hcss-shimmer),
+  :where(.hcss-spin, .hcss-pulse, .hcss-shimmer):where([data-hcss-motion=none], [data-hcss-theme=auto]) {
+    animation: none !important;
+  }
+}

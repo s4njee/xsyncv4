@@ -1,0 +1,206 @@
+/*! HoloCSS | MIT License */
+/* src/css/tokens.css */
+:root {
+  --hcss-duration-instant: 0ms;
+  --hcss-duration-fast: 100ms;
+  --hcss-duration-normal: 180ms;
+  --hcss-duration-slow: 280ms;
+  --hcss-ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --hcss-ease-enter: cubic-bezier(0, 0, 0.2, 1);
+  --hcss-ease-exit: cubic-bezier(0.4, 0, 1, 1);
+  --hcss-distance-small: 4px;
+  --hcss-distance-medium: 8px;
+  --hcss-distance-large: 16px;
+  --hcss-distance: var(--hcss-distance-medium);
+  --hcss-scale-from: 0.98;
+}
+
+/* src/css/timing.css */
+:where([data-hcss-speed=instant]) {
+  --hcss-duration: var(--hcss-duration-instant, 0ms);
+}
+:where([data-hcss-speed=fast]) {
+  --hcss-duration: var(--hcss-duration-fast, 100ms);
+}
+:where([data-hcss-speed=normal]) {
+  --hcss-duration: var(--hcss-duration-normal, 180ms);
+}
+:where([data-hcss-speed=slow]) {
+  --hcss-duration: var(--hcss-duration-slow, 280ms);
+}
+:where([data-hcss-distance=small]) {
+  --hcss-distance: var(--hcss-distance-small, 4px);
+}
+:where([data-hcss-distance=medium]) {
+  --hcss-distance: var(--hcss-distance-medium, 8px);
+}
+:where([data-hcss-distance=large]) {
+  --hcss-distance: var(--hcss-distance-large, 16px);
+}
+
+/* src/css/base.css */
+.hcss-transition {
+  --hcss-ease-active: var(--hcss-ease-enter, cubic-bezier(0, 0, 0.2, 1));
+  --hcss-translate-x: 0px;
+  --hcss-translate-y: 0px;
+  --hcss-translate-z: 0px;
+  transition: none var(--hcss-duration, var(--hcss-duration-normal, 180ms)) var(--hcss-easing, var(--hcss-ease-active)) var(--hcss-delay, 0ms);
+}
+.hcss-transition:where([data-hcss-state=closed]) {
+  --hcss-ease-active: var(--hcss-ease-exit, cubic-bezier(0.4, 0, 1, 1));
+}
+.hcss-transition:where(.hcss-fade, .hcss-slide-up, .hcss-slide-down, .hcss-slide-left, .hcss-slide-right, .hcss-scale, .hcss-blur, .hcss-zoom, .hcss-rotate, .hcss-wipe, .hcss-width) {
+  visibility: visible;
+  transition-property:
+    opacity,
+    translate,
+    scale,
+    rotate,
+    filter,
+    clip-path,
+    inline-size,
+    visibility;
+  transition-duration:
+    var(--hcss-duration, var(--hcss-duration-normal, 180ms)),
+    var(--hcss-duration, var(--hcss-duration-normal, 180ms)),
+    var(--hcss-duration, var(--hcss-duration-normal, 180ms)),
+    var(--hcss-duration, var(--hcss-duration-normal, 180ms)),
+    var(--hcss-duration, var(--hcss-duration-normal, 180ms)),
+    var(--hcss-duration, var(--hcss-duration-normal, 180ms)),
+    var(--hcss-duration, var(--hcss-duration-normal, 180ms)),
+    0ms;
+  transition-delay:
+    var(--hcss-delay, 0ms),
+    var(--hcss-delay, 0ms),
+    var(--hcss-delay, 0ms),
+    var(--hcss-delay, 0ms),
+    var(--hcss-delay, 0ms),
+    var(--hcss-delay, 0ms),
+    var(--hcss-delay, 0ms),
+    0ms;
+}
+.hcss-transition:where(.hcss-fade, .hcss-slide-up, .hcss-slide-down, .hcss-slide-left, .hcss-slide-right, .hcss-scale, .hcss-blur, .hcss-zoom, .hcss-rotate, .hcss-wipe, .hcss-width):where([data-hcss-state=closed]) {
+  visibility: hidden;
+  pointer-events: none;
+  transition-delay:
+    var(--hcss-delay, 0ms),
+    var(--hcss-delay, 0ms),
+    var(--hcss-delay, 0ms),
+    var(--hcss-delay, 0ms),
+    var(--hcss-delay, 0ms),
+    var(--hcss-delay, 0ms),
+    var(--hcss-delay, 0ms),
+    calc(var(--hcss-duration, var(--hcss-duration-normal, 180ms)) + var(--hcss-delay, 0ms));
+}
+.hcss-transition:where(.hcss-fade, .hcss-slide-up, .hcss-slide-down, .hcss-slide-left, .hcss-slide-right, .hcss-scale, .hcss-blur, .hcss-zoom, .hcss-rotate, .hcss-wipe, .hcss-width):where([data-hcss-state=closed]) :where(.hcss-transition:not([data-hcss-state=closed])) {
+  visibility: inherit;
+}
+
+/* src/css/presets.css */
+.hcss-transition:where(.hcss-fade) {
+  opacity: 1;
+}
+.hcss-transition:where(.hcss-fade):where([data-hcss-state=closed]) {
+  opacity: 0;
+}
+.hcss-transition:where(.hcss-slide-up, .hcss-slide-down, .hcss-slide-left, .hcss-slide-right) {
+  translate: var(--hcss-translate-x) var(--hcss-translate-y) var(--hcss-translate-z);
+}
+.hcss-transition:where(.hcss-slide-up):where([data-hcss-state=closed]) {
+  --hcss-translate-y: var(--hcss-distance, 8px);
+}
+.hcss-transition:where(.hcss-slide-down):where([data-hcss-state=closed]) {
+  --hcss-translate-y: calc(-1 * var(--hcss-distance, 8px));
+}
+.hcss-transition:where(.hcss-slide-left):where([data-hcss-state=closed]) {
+  --hcss-translate-x: var(--hcss-distance, 8px);
+}
+.hcss-transition:where(.hcss-slide-right):where([data-hcss-state=closed]) {
+  --hcss-translate-x: calc(-1 * var(--hcss-distance, 8px));
+}
+.hcss-transition:where(.hcss-scale, .hcss-zoom) {
+  scale: 1;
+}
+.hcss-transition:where(.hcss-scale):where([data-hcss-state=closed]) {
+  scale: var(--hcss-scale-from, 0.98);
+}
+.hcss-transition:where(.hcss-zoom):where([data-hcss-state=closed]) {
+  scale: var(--hcss-zoom-from, 0.85);
+}
+.hcss-transition:where(.hcss-rotate) {
+  rotate: 0deg;
+}
+.hcss-transition:where(.hcss-rotate):where([data-hcss-state=closed]) {
+  rotate: var(--hcss-rotate-from, -8deg);
+}
+.hcss-transition:where(.hcss-blur) {
+  filter: blur(0);
+}
+.hcss-transition:where(.hcss-blur):where([data-hcss-state=closed]) {
+  filter: blur(var(--hcss-blur-from, 6px));
+}
+.hcss-transition:where(.hcss-wipe) {
+  clip-path: inset(0);
+}
+.hcss-transition:where(.hcss-wipe):where([data-hcss-state=closed]) {
+  clip-path: var(--hcss-wipe-from, inset(0 0 100% 0));
+}
+.hcss-transition:where(.hcss-width) {
+  inline-size: var(--hcss-width-open, 100%);
+  overflow: hidden;
+}
+.hcss-transition:where(.hcss-width):where([data-hcss-state=closed]) {
+  inline-size: 0;
+}
+@supports (interpolate-size: allow-keywords) {
+  .hcss-transition:where(.hcss-width[data-hcss-width=intrinsic]) {
+    interpolate-size: allow-keywords;
+    inline-size: auto;
+  }
+  .hcss-transition:where(.hcss-width[data-hcss-width=intrinsic][data-hcss-state=closed]) {
+    inline-size: 0;
+  }
+}
+.hcss-transition:where(.hcss-colors) {
+  --hcss-ease-active: var(--hcss-ease-standard, cubic-bezier(0.4, 0, 0.2, 1));
+  transition-property:
+    color,
+    background-color,
+    border-color;
+  transition-timing-function: var( --hcss-easing, var(--hcss-ease-standard, cubic-bezier(0.4, 0, 0.2, 1)) );
+}
+
+/* src/css/reduced-motion.css */
+@media (prefers-reduced-motion: reduce) {
+  .hcss-transition {
+    transition-property: none !important;
+    transition-duration: 0ms !important;
+    transition-delay: 0ms !important;
+  }
+}
+:where([data-hcss-theme=high-contrast]) {
+  --hcss-duration-instant: 0ms;
+  --hcss-duration-fast: 0ms;
+  --hcss-duration-normal: 0ms;
+  --hcss-duration-slow: 0ms;
+}
+.hcss-transition:where([data-hcss-motion=none], [data-hcss-motion=none] *, [data-hcss-theme=high-contrast], [data-hcss-theme=high-contrast] *) {
+  transition-property: none !important;
+  transition-duration: 0ms !important;
+  transition-delay: 0ms !important;
+}
+@media (prefers-contrast: more) {
+  :where([data-hcss-theme=auto]) {
+    --hcss-duration-instant: 0ms;
+    --hcss-duration-fast: 0ms;
+    --hcss-duration-normal: 0ms;
+    --hcss-duration-slow: 0ms;
+  }
+  .hcss-transition:where([data-hcss-motion=none], [data-hcss-motion=none] *, [data-hcss-theme=auto], [data-hcss-theme=auto] *) {
+    transition-property: none !important;
+    transition-duration: 0ms !important;
+    transition-delay: 0ms !important;
+  }
+}
+
+/* src/css/index.css */

@@ -1,0 +1,107 @@
+/*! HoloCSS | MIT License */
+/* src/view-transitions/index.css */
+@view-transition {
+  navigation: auto;
+}
+.hcss-view {
+  view-transition-name: var(--hcss-view-name, none);
+  view-transition-class: var(--hcss-view-class, hcss-shared);
+}
+.hcss-view-slide {
+  view-transition-class: hcss-slide;
+}
+.hcss-view-scale {
+  view-transition-class: hcss-scale;
+}
+::view-transition-old(.hcss-slide) {
+  animation-name: hcss-view-slide-old;
+}
+::view-transition-new(.hcss-slide) {
+  animation-name: hcss-view-slide-new;
+}
+::view-transition-old(.hcss-scale) {
+  animation-name: hcss-view-scale-old;
+}
+::view-transition-new(.hcss-scale) {
+  animation-name: hcss-view-scale-new;
+}
+:root[data-hcss-view-types~=hcss-slide]::view-transition-old(root) {
+  animation-name: hcss-view-slide-old;
+}
+:root[data-hcss-view-types~=hcss-slide]::view-transition-new(root) {
+  animation-name: hcss-view-slide-new;
+}
+:root[data-hcss-view-types~=hcss-scale]::view-transition-old(root) {
+  animation-name: hcss-view-scale-old;
+}
+:root[data-hcss-view-types~=hcss-scale]::view-transition-new(root) {
+  animation-name: hcss-view-scale-new;
+}
+:root:active-view-transition-type(hcss-slide)::view-transition-old(root) {
+  animation-name: hcss-view-slide-old;
+}
+:root:active-view-transition-type(hcss-slide)::view-transition-new(root) {
+  animation-name: hcss-view-slide-new;
+}
+:root:active-view-transition-type(hcss-scale)::view-transition-old(root) {
+  animation-name: hcss-view-scale-old;
+}
+:root:active-view-transition-type(hcss-scale)::view-transition-new(root) {
+  animation-name: hcss-view-scale-new;
+}
+@keyframes hcss-view-slide-old {
+  to {
+    opacity: 0;
+    transform: translateX(calc(-1 * var(--hcss-view-distance, 24px)));
+  }
+}
+@keyframes hcss-view-slide-new {
+  from {
+    opacity: 0;
+    transform: translateX(var(--hcss-view-distance, 24px));
+  }
+}
+@keyframes hcss-view-scale-old {
+  to {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+@keyframes hcss-view-scale-new {
+  from {
+    opacity: 0;
+    transform: scale(1.04);
+  }
+}
+::view-transition-group(*) {
+  animation-duration: var(--hcss-duration, var(--hcss-duration-normal, 180ms));
+  animation-timing-function: var( --hcss-easing, var(--hcss-ease-enter, cubic-bezier(0, 0, 0.2, 1)) );
+}
+::view-transition-old(*) {
+  animation-timing-function: var( --hcss-easing, var(--hcss-ease-exit, cubic-bezier(0.4, 0, 1, 1)) );
+}
+::view-transition-new(*) {
+  animation-timing-function: var( --hcss-easing, var(--hcss-ease-enter, cubic-bezier(0, 0, 0.2, 1)) );
+}
+@media (prefers-reduced-motion: reduce) {
+  @view-transition {
+    navigation: none;
+  }
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
+:root:where([data-hcss-motion=none], [data-hcss-theme=high-contrast])::view-transition-group(*),
+:root:where([data-hcss-motion=none], [data-hcss-theme=high-contrast])::view-transition-old(*),
+:root:where([data-hcss-motion=none], [data-hcss-theme=high-contrast])::view-transition-new(*) {
+  animation: none !important;
+}
+@media (prefers-contrast: more) {
+  :root:where([data-hcss-motion=none], [data-hcss-theme=auto])::view-transition-group(*),
+  :root:where([data-hcss-motion=none], [data-hcss-theme=auto])::view-transition-old(*),
+  :root:where([data-hcss-motion=none], [data-hcss-theme=auto])::view-transition-new(*) {
+    animation: none !important;
+  }
+}

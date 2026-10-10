@@ -1,0 +1,139 @@
+xsync -aP --no-clone --jobs=2 --bwlimit=1M ./demo-data/ ./interrupted-backup/
+
+[0.075s]
+  small files  92 · 1.3k files/s
+ ────────────────────────────── 1%  92/130 files · 71.5K/6.16M · 0.98M/s · 1.3k files/s · ETA 0:06
+
+[0.145s]
+  small files  128 · 1.2k files/s
+ ────────────────────────────── 1%  128/130 files · 101K/6.16M · 964K/s · 1.2k files/s · ETA 0:06
+
+[0.211s]
+  archive.tar                                                                                3.25M ──────────── 0% 0B/s
+  small files  128 · 1.2k files/s
+ ────────────────────────────── 1%  128/130 files · 101K/6.16M · 900K/s · 1.2k files/s · ETA 0:07
+
+[0.282s]
+  archive.tar                                                                                3.25M ──────────── 0% 0B/s
+  small files  128 · 1.1k files/s
+ ────────────────────────────── 1%  128/130 files · 101K/6.16M · 836K/s · 1.1k files/s · ETA 0:07
+
+[0.353s]
+  archive.tar                                                                                3.25M ──────────── 0% 0B/s
+  small files  128 · 999 files/s
+ ────────────────────────────── 1%  128/130 files · 101K/6.16M · 777K/s · 999 files/s · ETA 0:08
+
+[0.424s]
+  archive.tar                                                                                3.25M ──────────── 0% 0B/s
+  small files  128 · 928 files/s
+ ────────────────────────────── 1%  128/130 files · 101K/6.16M · 722K/s · 928 files/s · ETA 0:09
+
+[0.494s]
+  archive.tar                                                                                3.25M ──────────── 0% 0B/s
+  small files  128 · 863 files/s
+ ────────────────────────────── 1%  128/130 files · 101K/6.16M · 672K/s · 863 files/s · ETA 0:09
+
+[0.563s]
+  archive.tar                                                                                3.25M ──────────── 0% 0B/s
+  small files  128 · 803 files/s
+ ────────────────────────────── 1%  128/130 files · 101K/6.16M · 625K/s · 803 files/s · ETA 0:10
+
+[0.631s]
+  archive.tar                                                                                3.25M ──────────── 0% 0B/s
+  small files  128 · 748 files/s
+ ────────────────────────────── 1%  128/130 files · 101K/6.16M · 582K/s · 748 files/s · ETA 0:11
+
+[0.702s]
+  archive.tar                                                                                3.25M ──────────── 0% 0B/s
+  small files  128 · 695 files/s
+ ────────────────────────────── 1%  128/130 files · 101K/6.16M · 541K/s · 695 files/s · ETA 0:11
+
+[0.769s]
+  archive.tar                                                                                3.25M ──────────── 0% 0B/s
+  small files  128 · 649 files/s
+ ────────────────────────────── 1%  128/130 files · 101K/6.16M · 505K/s · 649 files/s · ETA 0:12
+
+[0.837s]
+  archive.tar                                                                                3.25M ──────────── 0% 0B/s
+  small files  128 · 604 files/s
+ ────────────────────────────── 1%  128/130 files · 101K/6.16M · 470K/s · 604 files/s · ETA 0:13
+
+[0.908s]
+  archive.tar                                                                                3.25M ──────────── 0% 0B/s
+  small files  128 · 561 files/s
+ ────────────────────────────── 1%  128/130 files · 101K/6.16M · 437K/s · 561 files/s · ETA 0:14
+
+[0.979s]
+  archive.tar                                                                                3.25M ──────────── 0% 0B/s
+  small files  128 · 522 files/s
+ ────────────────────────────── 1%  128/130 files · 101K/6.16M · 406K/s · 522 files/s · ETA 0:15
+
+[1.048s]
+  archive.tar                                                                                3.25M ──────────── 0% 0B/s
+  small files  128 · 486 files/s
+ ────────────────────────────── 1%  128/130 files · 101K/6.16M · 378K/s · 486 files/s · ETA 0:16
+
+[1.119s]
+  archive.tar                                                                                3.25M ──────────── 0% 0B/s
+  small files  128 · 451 files/s
+ ────────────────────────────── 1%  128/130 files · 101K/6.16M · 351K/s · 451 files/s · ETA 0:18
+
+[1.185s]
+  archive.tar                                                                                3.25M ──────────── 0% 0B/s
+  small files  128 · 421 files/s
+ ────────────────────────────── 1%  128/130 files · 101K/6.16M · 328K/s · 421 files/s · ETA 0:19
+
+[1.256s]
+  archive.tar                                                                                3.25M ──────────── 0% 0B/s
+  small files  128 · 392 files/s
+ ────────────────────────────── 1%  128/130 files · 101K/6.16M · 305K/s · 392 files/s · ETA 0:20
+
+[1.327s]
+  archive.tar                                                                   3.25M ━━━╸──────── 30% 1.00M/s ETA 0:02
+  small files  128 · 364 files/s
+ ━━━━━───────────────────────── 17%  128/130 files · 1.10M/6.16M · 1.28M/s · 364 files/s · ETA 0:04
+
+[1.394s]
+  archive.tar                                                                    3.25M ━━━╸──────── 30% 955K/s ETA 0:02
+  small files  128 · 339 files/s
+ ━━━━━───────────────────────── 17%  128/130 files · 1.10M/6.16M · 1.19M/s · 339 files/s · ETA 0:04
+
+[1.465s]
+  archive.tar                                                                    3.25M ━━━╸──────── 30% 887K/s ETA 0:03
+  small files  128 · 315 files/s
+ ━━━━━───────────────────────── 17%  128/130 files · 1.10M/6.16M · 1.11M/s · 315 files/s · ETA 0:05
+
+[1.535s]
+  archive.tar                                                                    3.25M ━━━╸──────── 30% 825K/s ETA 0:03
+  small files  128 · 293 files/s
+ ━━━━━───────────────────────── 17%  128/130 files · 1.10M/6.16M · 1.03M/s · 293 files/s · ETA 0:05
+
+[1.605s]
+  archive.tar                                                                    3.25M ━━━╸──────── 30% 767K/s ETA 0:03
+  small files  128 · 273 files/s
+ ━━━━━───────────────────────── 17%  128/130 files · 1.10M/6.16M · 979K/s · 273 files/s · ETA 0:05
+
+[1.672s]
+  archive.tar                                                                    3.25M ━━━╸──────── 30% 716K/s ETA 0:03
+  small files  128 · 254 files/s
+ ━━━━━───────────────────────── 17%  128/130 files · 1.10M/6.16M · 913K/s · 254 files/s · ETA 0:06
+
+[1.741s]
+  archive.tar                                                                    3.25M ━━━╸──────── 30% 667K/s ETA 0:03
+  small files  128 · 237 files/s
+ ━━━━━───────────────────────── 17%  128/130 files · 1.10M/6.16M · 851K/s · 237 files/s · ETA 0:06
+
+[1.812s]
+  archive.tar                                                                    3.25M ━━━╸──────── 30% 619K/s ETA 0:04
+  small files  128 · 220 files/s
+ ━━━━━───────────────────────── 17%  128/130 files · 1.10M/6.16M · 791K/s · 220 files/s · ETA 0:07
+
+[1.823s]
+xsync: write failed on "./interrupted-backup/archive.tar": Operation canceled (89)
+xsync: error summary: 1 error (showing first 1)
+  partial transfer (code 23): 1 error
+    write failed on "./interrupted-backup/archive.tar": Operation canceled (89)
+
+xsync error: received SIGINT, SIGTERM, or SIGHUP (code 20)
+
+Process exit code: 20
