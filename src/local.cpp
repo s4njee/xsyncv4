@@ -758,7 +758,7 @@ struct Local {
       // Linux 5.3–5.18 could report false success on unsupported cross-filesystem
       // copies. Use the byte path across devices on every kernel version.
       struct stat output_stat;
-      if (kernel_copy && (fstat(f.fd, &output_stat) != 0 || before.st_dev != output_stat.st_dev)) kernel_copy = false;
+      if (kernel_copy && (fstat(f.fd, &output_stat) != 0 || before.st_dev != output_stat.st_dev || !native_copy_ranges(in, f.fd))) kernel_copy = false;
 #endif
       if (ok && total < s.size && s.size - total >= (32 << 20) && default_jobs() > 1 && !o.sparse) {
         i64 start = total;

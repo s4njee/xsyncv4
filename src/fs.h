@@ -134,6 +134,7 @@ bool out_restore_prefix(OutFile& f, const ResumePrefix& prefix);
 // Clone callers must provide an empty private/new output, never an existing inode.
 int out_clone_data(OutFile& f, int source, i64 size); // 1 copied, 0 unsupported, -1 error
 ssize_t out_copy_range(OutFile& f, int source, size_t size, i64 offset);
+bool native_copy_ranges(int source, int destination);
 void large_file_cache_policy(int fd, i64 size);
 bool clone_copy(DirWork& w, u32 idx, const char* source, unsigned flags, Worker& t);
 // Whole small file from memory.

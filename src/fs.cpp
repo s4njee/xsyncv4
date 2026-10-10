@@ -24,6 +24,8 @@
 
 #ifdef __linux__
 #include <linux/fs.h>
+#include <linux/magic.h>
+#include <sys/vfs.h>
 #include <sys/ioctl.h>
 #endif
 
@@ -1464,6 +1466,19 @@ int out_clone_data(OutFile& f, int source, i64 size) {
 #else
   (void)f; (void)source; (void)size;
   return 0;
+#endif
+}
+
+bool native_copy_ranges(int source, int destination) {
+#ifdef __linux__
+  struct statfs input{}, output{};
+  if (fstatfs(source, &input) != 0 || fstatfs(destination, &output) != 0 || input.f_type != output.f_type) return false;
+  // Generic kernel splice copies on ext4 can be much slower than buffered
+  // reads/writes. Reserve range copies for native reflink implementations.
+  return input.f_type == BTRFS_SUPER_MAGIC || input.f_type == XFS_SUPER_MAGIC;
+#else
+  (void)source; (void)destination;
+  return false;
 #endif
 }
 

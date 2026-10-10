@@ -3439,3 +3439,26 @@ after U-01's evidence entry completes P2, as requested by the user.
 - Comparative measurements against the pre-F-05 product and rsync are next;
   F-05 stays partial until those results are retained. The physical baseline
   binaries on neo/freya remain unchanged.
+
+
+### F-05 measured regressions and policy correction — 2026-10-10
+
+- Both intermediate comparisons complete all 64 timed samples and 16 warmups,
+  independently verified. On loop-backed btrfs, automatic reflinks reduce the
+  median from 139 ms to 4 ms (34.8x), but byte-local falls from 144 ms to 290 ms.
+  Plain pipe improves 4.8%; compressed pipe is 6.7% slower. On the busy macOS
+  host (initial load 29), byte-local is 20.3% slower and plain/compressed pipe
+  are 14.1%/15.8% slower. Raw results retain these regressions; they are not
+  evidence that F-05 is complete.
+- The 24-sample Linux CI gate verifies all 1,080 timed copies and 45 warmups.
+  Fourteen ratios pass. Large-local falls from reference 59.4 ms to candidate
+  2.125 s with the generic kernel copy path. The unchanged 85% gate correctly
+  fails. Raw evidence is preserved; the macOS job is still running.
+- Range copying is now limited to btrfs/XFS's native reflink implementations.
+  Other filesystems retain buffered reads/writes after a failed clone probe.
+  Range tickets no longer take priority over already queued file transfers,
+  allowing independent files to keep making progress. All seven Linux copy
+  tests and four range tests per platform pass after this correction, including
+  a simulated ext4 policy that fails if copy_file_range is used.
+- Fresh comparisons of the corrected policy remain required. F-02 and F-05
+  remain partial; no physical baseline binary has been replaced.

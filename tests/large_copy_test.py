@@ -62,7 +62,7 @@ class LargeCopyTests(unittest.TestCase):
 
     @unittest.skipUnless(sys.platform.startswith('linux'), 'Linux kernel-copy faults')
     def test_short_calls_interruption_zero_and_partial_fallback(self):
-        for fault in ('short', 'eintr', 'zero', 'enosys', 'partial-fallback'):
+        for fault in ('short', 'eintr', 'zero', 'enosys', 'partial-fallback', 'ext4'):
             with self.subTest(fault=fault):
                 self.destination.unlink(missing_ok=True)
                 self.verify(self.copy(fault=fault))

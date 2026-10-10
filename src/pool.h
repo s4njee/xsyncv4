@@ -142,7 +142,7 @@ class Pool {
       }
       Task t;
       ParallelWork* range = nullptr;
-      if (!ranges_.empty()) {
+      if (k < 0 && !ranges_.empty()) {
         range = ranges_.front();
         ranges_.pop_front();
       } else if (k == 0 && lifo0) {
