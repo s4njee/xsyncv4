@@ -44,12 +44,12 @@ class GateTests(unittest.TestCase):
         return path
 
     def test_healthy_local_pipe_checksum_and_update_scenarios_pass(self):
-        result, data = self.gate(BINARY, 'local-fresh,local-noop,local-rt,local-rlt,pipe-fresh,pipe-checksum,local-update,pipe-update,large-pipe,tiny-pipe', samples=24)
+        result, data = self.gate(BINARY, 'local-fresh,local-noop,local-rt,local-rlt,pipe-fresh,pipe-checksum,local-update,pipe-update,large-pipe,large-single-local,large-single-pipe,large-single-compressed,tiny-pipe', samples=24)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertTrue(data['complete'])
         self.assertTrue(data['passed'])
-        self.assertEqual(len(data['records']), 10 * 24 * 3)
-        self.assertEqual(len(data['warmups']), 10 * 3)
+        self.assertEqual(len(data['records']), 13 * 24 * 3)
+        self.assertEqual(len(data['warmups']), 13 * 3)
         self.assertTrue(all(r['verified'] and r['warmup'] for r in data['warmups']))
         self.assertTrue(all(not r['warmup'] for r in data['records']))
         self.assertTrue(all(r['verified'] for r in data['records']))

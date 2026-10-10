@@ -3549,3 +3549,26 @@ after U-01's evidence entry completes P2, as requested by the user.
 - All 24 samples, 15 scenarios and the unchanged 85% ratio floor remain. No
   selective retry or automatic acceptance was added. The current run is allowed
   to finish before pushing these changes, preserving its original measurement.
+
+
+### F-05 explicit range selection and F-02 single-file coverage — 2026-10-10
+
+- Default worker selection now keeps file-level parallelism. Explicit `-jN`
+  with N > 1 enables single-file ranges; measured gains and losses justify
+  leaving that choice explicit. The existing jobs option already travels over
+  the protocol, so no wire format or capability changes are needed. README
+  documents the selection. Five instrumented range tests pass per platform,
+  proving default single-file serialization, explicit concurrency, a one-worker
+  control, frozen-peer compatibility and multi-producer completion.
+- Setting the output length before parallel writes was tested diagnostically
+  and did not fix Linux regressions. That experiment was removed; its binary
+  labels are not used as clean-product completion evidence.
+- The CI matrix now includes single-file local byte, plain-pipe and compressed
+  pipe cases. Automatic APFS cloning is disabled in the byte case for both xs
+  revisions; rsync keeps its normal byte-copy path. File-level parallelism can
+  no longer hide a single-file regression. The unchanged 24-sample, 85% policy
+  covers 18 cases: 1,296 timed samples and 54 warmups per platform.
+- Expanded gate behavior tests pass on both platforms: all 936 healthy samples
+  and 39 warmups verify, the delayed candidate fails on timing, and a corrupt
+  zero-exit candidate fails independent verification. Default-policy large-file
+  product comparisons and the next hosted gate remain pending.

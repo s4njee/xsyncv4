@@ -29,11 +29,13 @@ def main():
     parser.add_argument('--work', type=pathlib.Path, required=True)
     parser.add_argument('--output', type=pathlib.Path, required=True)
     parser.add_argument('--samples', type=int, default=4)
+    parser.add_argument('--candidate-jobs', type=int, default=4,
+                        help='range budget (2..64); 0 measures automatic worker selection')
     parser.add_argument('--file-mib', type=int, default=256)
     parser.add_argument('--cases', default=','.join(CASES))
     args = parser.parse_args()
     cases = args.cases.split(',')
-    if args.samples < 4 or args.samples % 4 or args.file_mib < 32 or any(c not in CASES for c in cases) or len(set(cases)) != len(cases):
+    if args.samples < 4 or args.samples % 4 or args.file_mib < 32 or any(c not in CASES for c in cases) or len(set(cases)) != len(cases) or args.candidate_jobs not in (0, *range(2, 65)):
         parser.error('use complete four-order cycles, files >=32 MiB and unique known cases')
     work = args.work.resolve()
     if work.exists() and any(work.iterdir()): parser.error('use a fresh empty owned work directory')
@@ -41,14 +43,16 @@ def main():
     (work / '.xs-large-owned').write_text('created by benchmarks/large_files.py\n')
     source, destinations, logs = work / 'source', work / 'destinations', work / 'logs'
     for directory in (source, destinations, logs): directory.mkdir()
+    candidate = 'candidate-default' if not args.candidate_jobs else 'candidate-j' + str(args.candidate_jobs)
     tools = {'reference': str(args.reference.resolve()), 'candidate-j1': str(args.candidate.resolve()),
-             'candidate-j4': str(args.candidate.resolve()), 'rsync': shutil.which(args.rsync) or args.rsync}
+             candidate: str(args.candidate.resolve()), 'rsync': shutil.which(args.rsync) or args.rsync}
     result = {'schema': 1, 'utc': datetime.datetime.now(datetime.timezone.utc).isoformat(),
               'host': socket.gethostname(), 'platform': platform.platform(), 'cpus': os.cpu_count(),
               'loadavg': list(os.getloadavg()), 'cache': 'retained caches, one verified warmup per tool/case',
               'filesystem': subprocess.check_output(['stat', '-f', '-c', '%T', str(work)], text=True).strip() if platform.system() == 'Linux' else 'see host filesystem metadata',
               'disk_usage': dict(zip(('total', 'used', 'free'), shutil.disk_usage(work))),
               'logical_bytes': args.file_mib * 2 * 2**20, 'samples_per_tool': args.samples,
+              'candidate_jobs': args.candidate_jobs,
               'warmups': [], 'records': [], 'summary': []}
     def save():
         args.output.parent.mkdir(parents=True, exist_ok=True)
@@ -91,7 +95,10 @@ def main():
                         subprocess.run(['sync', '-f', str(work)], check=True)
                     command = [tools[tool], '-aW' + ('z' if case.endswith('-z') else ''), '--stats']
                     if tool != 'rsync':
-                        command += ['--no-fallback', '--no-progress', '-j1' if tool == 'candidate-j1' else '-j4']
+                        command += ['--no-fallback', '--no-progress']
+                        if tool == 'reference': command += ['-j4']
+                        elif tool == 'candidate-j1': command += ['-j1']
+                        elif args.candidate_jobs: command += ['-j' + str(args.candidate_jobs)]
                         if case.endswith('byte-local'): command += ['--no-clone']
                     peer_path = logs / 'peer.json'
                     if pipe:
@@ -113,9 +120,9 @@ def main():
                     shutil.rmtree(destination)
             medians = {tool: statistics.median(r['wall_seconds'] for r in result['records'] if r['case'] == case and r['tool'] == tool) for tool in tools}
             result['summary'].append({'case': case, 'median_seconds': medians,
-                                      'candidate_speedup_over_reference': medians['reference']/medians['candidate-j4'],
-                                      'parallel_speedup_over_one_worker': medians['candidate-j1']/medians['candidate-j4'],
-                                      'candidate_speedup_over_rsync': medians['rsync']/medians['candidate-j4']})
+                                      'candidate_speedup_over_reference': medians['reference']/medians[candidate],
+                                      'parallel_speedup_over_one_worker': medians['candidate-j1']/medians[candidate],
+                                      'candidate_speedup_over_rsync': medians['rsync']/medians[candidate]})
             save()
         result['complete'] = True
         save()

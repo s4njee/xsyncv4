@@ -554,10 +554,12 @@ Differences to be aware of:
   back to byte copying. Short copies, interrupted calls and unsupported operations
   retain the correct offset. `--no-clone`, sparse copies and bandwidth limits
   use the byte path. Source consistency checks and output metadata finalization
-  still apply. Files with at least 32 MiB remaining also spread disjoint ranges
-  across the configured worker pool when the directory requests one large file
+  still apply. With explicit `-jN` (`N > 1`), files with at least 32 MiB remaining
+  also spread disjoint ranges across the configured worker pool when the directory requests one large file
   (local byte copies use at most two range workers);
   multiple large files retain file-level parallelism to avoid inode contention.
+  Automatic worker selection keeps file-level parallelism: cached single-file
+  byte copies can slow down with ranges, while compression overlap can benefit.
   Native transfers parallelize reads and
   receiver writes while retaining source retries and partial-prefix verification.
   Sparse and delta receiver writes stay serialized. macOS disables data caching on source and output descriptors for

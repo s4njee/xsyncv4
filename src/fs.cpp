@@ -1470,6 +1470,10 @@ int out_clone_data(OutFile& f, int source, i64 size) {
 }
 
 bool parallel_file_ranges(const DirList& list, const std::vector<u32>& needed) {
+  // Cached byte copies often lose throughput when several workers contend on
+  // one inode. Keep automatic worker selection at file granularity; explicit
+  // -jN permits ranges for workloads that benefit from read/compression overlap.
+  if (g_opt.jobs <= 1) return false;
   int large = 0;
   for (u32 index : needed)
     if (list.e[index].type == T_REG && list.e[index].size >= (32 << 20) && ++large > 1) return false;

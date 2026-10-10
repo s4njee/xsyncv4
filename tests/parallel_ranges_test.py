@@ -52,7 +52,8 @@ class RangeTests(unittest.TestCase):
             env['XSYNC_FAULT_PATH'] = '/'
             env['DYLD_INSERT_LIBRARIES' if sys.platform == 'darwin' else 'LD_PRELOAD'] = str(self.library)
             command = [str(BINARY), '-a' + ('z' if compress else ''), '--no-clone', '--no-fallback',
-                       '--no-progress', '-j' + str(jobs)]
+                       '--no-progress']
+            if jobs is not None: command += ['-j' + str(jobs)]
             source, target = str(self.source), str(destination)
             if direction != 'local':
                 command += ['-e', str(ROOT / 'tests/fakessh.sh'), '--rsync-path=' + shlex.join(['env', ('DYLD_INSERT_LIBRARIES' if sys.platform == 'darwin' else 'LD_PRELOAD') + '=' + str(self.library), str(peer or BINARY)])]
@@ -88,6 +89,13 @@ class RangeTests(unittest.TestCase):
                 self.assertLessEqual(max(peak.values(), default=0), 1)
         self.run_copy('push', compress=True)
         self.run_copy('pull', compress=True)
+
+    def test_default_keeps_single_file_io_serial(self):
+        for direction in ('local', 'push', 'pull'):
+            with self.subTest(direction=direction):
+                peak = self.run_copy(direction, jobs=None)
+                self.assertTrue(peak, 'the instrumented transfer must perform I/O')
+                self.assertLessEqual(max(peak.values()), 1, (direction, peak))
 
     def test_every_worker_can_produce_ranges_without_deadlock(self):
         with tempfile.TemporaryDirectory(prefix='xs-range-producers-') as tmp:

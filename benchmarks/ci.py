@@ -36,6 +36,9 @@ CASES = {
     'large-local': ('large', ['-a'], False, False),
     'large-pipe': ('large', ['-a'], True, False),
     'large-compressed': ('large', ['-az'], True, False),
+    'large-single-local': ('large-single-random', ['-aW'], False, False),
+    'large-single-pipe': ('large-single-random', ['-aW'], True, False),
+    'large-single-compressed': ('large-single-compressible', ['-aWz'], True, False),
     'tiny-pipe': ('tiny', ['-a'], True, False),
 }
 
@@ -75,6 +78,9 @@ def fixtures(root, seed, smoke):
         with (large / (name + '.bin')).open('wb') as out:
             for _ in range(large_bytes // 2**20):
                 out.write(bytes(2**20) if name == 'compressible' else rng.randbytes(2**20))
+        single = root / ('large-single-' + name)
+        single.mkdir()
+        os.link(large / (name + '.bin'), single / (name + '.bin'))
     tiny = root / 'tiny'
     tiny.mkdir()
     (tiny / 'file').write_bytes(b'one small transfer\n')
@@ -162,6 +168,8 @@ def main(argv=None):
                     command = [binaries[tool], *flags, '--stats']
                     if tool != 'rsync':
                         command += ['--no-progress', '--no-fallback']
+                        if case == 'large-single-local':
+                            command += ['--no-clone']
                     peer_path = logs / (name + '-peer.json')
                     if pipe:
                         helper = shlex.join([sys.executable, str(HERE / 'measure.py'), '--metrics', str(peer_path), '--', binaries[tool]])

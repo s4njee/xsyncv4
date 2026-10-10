@@ -119,6 +119,8 @@ python3 benchmarks/large_files.py --reference /path/to/prior/xs --candidate /pat
 ```
 
 Use `--file-mib` to change file size and `--cases` to select known cases.
+`--candidate-jobs 0` measures automatic worker selection; the default value 4
+requests intra-file ranges explicitly. The one-worker control is always kept.
 The [revision 98eeb171c94d comparison](results/20261010-f05-98eeb17-summary.md)
 retains all 336 timed samples across macOS, Linux overlay and loop-backed btrfs,
 including single-file regressions. F-05 remains partial while its range policy
@@ -129,14 +131,15 @@ with both glibc and static-musl products.
 
 `.github/workflows/performance.yml` builds the pinned reference and candidate
 with the same Release configuration on each Linux and macOS runner. It measures
-15 scenarios: fresh/no-op/checksum/1% update locally and through the pipe
+18 scenarios: fresh/no-op/checksum/1% update locally and through the pipe
 transport, compressed pipe copies, large copies and a tiny pipe transfer.
-Local `-rt`/`-rlt` cases also protect F-11's clone improvements; fixtures include
+Single-file local byte/plain-pipe/compressed-pipe cases protect range scheduling
+separately from file-level parallelism. Local `-rt`/`-rlt` cases also protect F-11's clone improvements; fixtures include
 read-only and umask-sensitive file modes.
 Each tool receives one verified warmup excluded from the ratios and 24 samples
 in four complete cycles of all six orders, with independent rsync
 checksum/metadata verification after every sample. Setup is untimed.
-The fixed production matrix collects 1,080 timed samples and 45 warmups per
+The fixed production matrix collects 1,296 timed samples and 54 warmups per
 platform. All samples contribute to the medians; failures do not trigger
 selective retries. The larger sample count addresses the substantial timing
 variation observed on shared macOS runners.
