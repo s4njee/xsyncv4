@@ -12,13 +12,14 @@ struct alignas(128) Slot {
   std::atomic<i64> done{0};
   i64 size = 0;
   u64 started = 0;
+  bool cloning = false;
   u16 len = 0;
   char name[200];
 };
 extern Slot g_slots[MAX_WORKERS];
 extern std::atomic<bool> g_progress_on;
 
-void slot_begin(int wid, std::string_view dir, std::string_view name, i64 size);
+void slot_begin(int wid, std::string_view dir, std::string_view name, i64 size, bool cloning = false);
 // Receivers claim a record for the file's full lifetime, across worker/chunk changes.
 int slot_claim(std::string_view dir, std::string_view name, i64 size);
 inline void slot_add(int wid, i64 n) {

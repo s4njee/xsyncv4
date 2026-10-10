@@ -207,4 +207,60 @@ class ProgressTests(unittest.TestCase):
         self.assertEqual(tmux('display-message','-p','#{cursor_flag}').strip(), b'1')
 
 
+@unittest.skipUnless(sys.platform == 'darwin', 'whole-directory clones require APFS')
+class CloneProgressTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.library_tmp = tempfile.TemporaryDirectory(prefix='xsync-progress-clone-lib-')
+        cls.addClassCleanup(cls.library_tmp.cleanup)
+        cls.library = pathlib.Path(cls.library_tmp.name)/'fault_io.dylib'
+        subprocess.run(['c++','-std=c++20','-dynamiclib','-fPIC','-arch','arm64','-arch','x86_64',
+                        str(REPO/'tests/fault_io.cpp'),'-o',str(cls.library)], check=True, capture_output=True)
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory(prefix='xsync-progress-clone-')
+        self.addCleanup(self.tmp.cleanup)
+        self.root = pathlib.Path(self.tmp.name)
+        self.source = self.root/'source'; self.source.mkdir()
+        for number in range(3):
+            leaf = self.source/f'leaf-{number}'; leaf.mkdir()
+            for name in ('a', 'b'): (leaf/name).write_bytes(b'content'*256)
+        self.dest = self.root/'dest'
+        self.command = [str(BINARY), '-a', '--no-fallback', '--clone', '--progress', '-j1', str(self.source)+'/',str(self.dest)+'/']
+
+    def test_fast_clones_name_directory(self):
+        code, data = capture(self.command, width=160)
+        self.assertEqual(code, 0, data)
+        self.assertIn(b'cloning leaf-', data)
+        self.assertIn(b'3 directories cloned', data)
+        self.assertIn(b'6 files', data)
+        self.assertIn(b'\x1b[?25h', data)
+        for path in self.source.glob('*/*'):
+            self.assertEqual(path.read_bytes(), (self.dest/path.relative_to(self.source)).read_bytes())
+
+    def test_slow_clones_advance_per_directory(self):
+        marker = self.root/'cloned'
+        env = dict(ENV, DYLD_INSERT_LIBRARIES=str(self.library), XSYNC_FAULT_PATH=str(self.source)+'/',
+                   XSYNC_FAULT_CLONE_DELAY_US='300000', XSYNC_FAULT_CLONE_NOTIFY=str(marker))
+        code, data = capture(self.command, width=160, env=env)
+        self.assertEqual(code, 0, data)
+        if not marker.exists(): self.skipTest('launcher did not preserve DYLD interposition')
+        self.assertIn(b'1/2 directories cloned', data)
+        self.assertIn(b'2/3 directories cloned', data)
+        for n in range(3): self.assertIn(f'cloning leaf-{n}/'.encode(), data)
+        self.assertIn(b'3 directories cloned', data)
+
+    def test_failed_clone_reverses_planned_counters(self):
+        marker = self.root/'cloned'
+        env = dict(ENV, DYLD_INSERT_LIBRARIES=str(self.library), XSYNC_FAULT_PATH=str(self.source)+'/',
+                   XSYNC_FAULT_CLONE_EXDEV='1', XSYNC_FAULT_CLONE_NOTIFY=str(marker))
+        code, data = capture(self.command, width=160, env=env)
+        self.assertEqual(code, 0, data)
+        if not marker.exists(): self.skipTest('launcher did not preserve DYLD interposition')
+        self.assertNotIn(b'directories cloned', data)
+        self.assertIn(b'6 files', data)
+        for path in self.source.glob('*/*'):
+            self.assertEqual(path.read_bytes(), (self.dest/path.relative_to(self.source)).read_bytes())
+
+
 if __name__ == '__main__': unittest.main()

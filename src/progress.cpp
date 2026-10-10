@@ -31,6 +31,7 @@ std::vector<int> drawn_widths;
 int drawn_cols = 80;
 int drawn = 0;  // lines currently occupied by the live region
 u64 t_start = 0, t_last = 0, t_plain = 0;
+u64 t_draw = 0;
 u64 last_bytes = 0, last_files = 0;
 double rate_b = 0, rate_f = 0;
 unsigned spin = 0;
@@ -44,6 +45,7 @@ struct Snap {
   bool active = false;
   i64 size = 0, done = 0;
   u64 started = 0;
+  bool cloning = false;
   std::string name;
 };
 
@@ -198,6 +200,7 @@ Snap sample(int w) {
     sn.active = s.active.load(std::memory_order_relaxed);
     sn.size = s.size;
     sn.started = s.started;
+    sn.cloning = s.cloning;
     sn.done = s.done.load(std::memory_order_relaxed);
     sn.name.assign(s.name, std::min<size_t>(s.len, sizeof s.name));
     return sn;
@@ -255,6 +258,7 @@ void draw_locked() {
     int pct = (int)(std::clamp(t.frac, 0.0, 1.0) * 100);
     std::vector<std::string> fields;
     fields.push_back(fmt_num(t.files) + "/" + fmt_num(t.files_total) + " files");
+    if (g_stats.clone_dirs_total.load()) fields.push_back(fmt_num(g_stats.cloned_dirs) + "/" + fmt_num(g_stats.clone_dirs_total) + " directories cloned");
     fields.push_back(fmt_size((double)t.bytes) + "/" + fmt_size((double)t.bytes_total));
     fields.push_back(fmt_size(rate_b) + "/s");
     fields.push_back(fmt_count(rate_f) + " files/s");
@@ -287,10 +291,10 @@ void draw_locked() {
     snaps[w] = sample(w);
     const Snap& s = snaps[w];
     if (!s.active) continue;
-    if (now <= s.started || now - s.started < ROW_DELAY) { small_active = true; continue; }
+    if (!s.cloning && (now <= s.started || now - s.started < ROW_DELAY)) { small_active = true; continue; }
     visible.push_back(w);
     FileRate& f = file_rates[w];
-    if (f.started != s.started) f = {s.started, now, s.done, (double)s.done / ((double)(now - s.started) / 1e9)};
+    if (f.started != s.started) f = {s.started, now, s.done, now > s.started ? (double)s.done / ((double)(now - s.started) / 1e9) : 0};
     else if (now > f.time) {
       double elapsed = (double)(now - f.time) / 1e9;
       double rate = (double)std::max<i64>(0, s.done - f.bytes) / elapsed;
@@ -306,7 +310,8 @@ void draw_locked() {
     if (rows-- <= 0) break;
     const Snap& s = snaps[w];
     std::string line;
-    {
+    if (s.cloning) line = "  cloning " + display_name(s.name);
+    else {
       double fr = s.size > 0 ? (double)s.done / (double)s.size : 1.0;
       std::string pct = std::to_string((int)(std::clamp(fr, 0.0, 1.0) * 100)) + "%";
       std::string tail = " " + pct;
@@ -345,7 +350,7 @@ void draw_locked() {
 
 }  // namespace
 
-void slot_begin(int wid, std::string_view dir, std::string_view name, i64 size) {
+void slot_begin(int wid, std::string_view dir, std::string_view name, i64 size, bool cloning) {
   if (!g_progress_on || wid < 0) return;
   Slot& s = g_slots[wid];
   std::lock_guard<std::mutex> lock(s.mutex);
@@ -361,6 +366,7 @@ void slot_begin(int wid, std::string_view dir, std::string_view name, i64 size) 
   s.len = (u16)(n + m);
   s.size = size;
   s.started = now_ns();
+  s.cloning = cloning;
   s.done.store(0, std::memory_order_relaxed);
   s.active.store(true, std::memory_order_relaxed);
 }
@@ -425,6 +431,10 @@ void progress_tick() {
   output_check();
   if (!g_progress_on) return;
   std::lock_guard<std::mutex> lk(ui_mu);
+  if (!g_progress_on) return;
+  u64 now = now_ns();
+  if (now - t_draw < 60000000) return;
+  t_draw = now;
   draw_locked();
 }
 
@@ -457,6 +467,7 @@ void progress_stop(bool ok) {
              fmt_count((double)t.files / el) + " files/s";
     }
     if (g_opt.dry_run) complete += "  (dry run)";
+    if (g_stats.cloned_dirs.load()) complete += separator() + fmt_num(g_stats.cloned_dirs) + " directories cloned";
     out += (tty ? clip(complete, std::max(0, term_cols() - 1)) : complete) + '\n';
   }
   raw(out);

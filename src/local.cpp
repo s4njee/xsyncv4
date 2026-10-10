@@ -434,27 +434,41 @@ struct Local {
       if (e.fileflags & SF_DATALESS) return false;
       if ((e.mode & 07000) || (o.group && e.gid != gid)) return false;
     }
+    u64 nf = 0, nl = 0, nb = 0;
+    for (const Entry& e : l.e) {
+      if (e.type == T_REG) nf++, nb += (u64)e.size;
+      else nl++;
+    }
+    g_stats.xfer_files_total.fetch_add(nf, std::memory_order_relaxed);
+    g_stats.xfer_bytes_total.fetch_add(nb, std::memory_order_relaxed);
+    g_stats.clone_dirs_total.fetch_add(1, std::memory_order_relaxed);
+    slot_begin(w.id, {}, d->rel.empty() ? "./" : d->rel + "/", (i64)nb, true);
+    progress_tick();
     if (destination_clone(d->src_path.c_str(), d->dst_path.c_str(), CLONE_NOFOLLOW | (o.owner && o.am_root ? 0 : CLONE_NOOWNERCOPY)) != 0) {
+      int error = errno;
+      g_stats.xfer_files_total.fetch_sub(nf, std::memory_order_relaxed);
+      g_stats.xfer_bytes_total.fetch_sub(nb, std::memory_order_relaxed);
+      g_stats.clone_dirs_total.fetch_sub(1, std::memory_order_relaxed);
+      slot_end(w.id);
+      errno = error;
       if (errno == ENOSPC || errno == EDQUOT) file_io_error(errno, d->dst_path.c_str(), "clonefile");
       if (errno == EXDEV || errno == ENOTSUP) clone_ok.store(false, std::memory_order_relaxed);
       return false;
     }
-    u64 nf = 0, nl = 0, nb = 0;
     for (u32 i = 0; i < l.e.size(); ++i) {
       const Entry& e = l.e[i];
-      if (e.type == T_REG) nf++, nb += (u64)e.size;
-      else nl++;
       note_item(*d, i, e.type == T_REG ? ">f+++++++++" : "cL+++++++++", 0, w);
     }
     g_stats.files_seen.fetch_add(nf, std::memory_order_relaxed);
     g_stats.links_seen.fetch_add(nl, std::memory_order_relaxed);
     g_stats.bytes_seen.fetch_add(nb, std::memory_order_relaxed);
-    g_stats.xfer_files_total.fetch_add(nf, std::memory_order_relaxed);
-    g_stats.xfer_bytes_total.fetch_add(nb, std::memory_order_relaxed);
     g_stats.xfer_files.fetch_add(nf, std::memory_order_relaxed);
     g_stats.xfer_bytes.fetch_add(nb, std::memory_order_relaxed);
     g_stats.created_files.fetch_add(nf, std::memory_order_relaxed);
     g_stats.created_links.fetch_add(nl, std::memory_order_relaxed);
+    g_stats.cloned_dirs.fetch_add(1, std::memory_order_relaxed);
+    slot_end(w.id);
+    progress_tick();
     return true;
   }
 #else

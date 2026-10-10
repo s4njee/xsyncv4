@@ -198,6 +198,7 @@ struct Stats {
   std::atomic<u64> deleted{0};
   std::atomic<u64> wire_sent{0}, wire_recv{0};
   std::atomic<u64> delta_files{0}, delta_literal_bytes{0}, delta_matched_bytes{0};
+  std::atomic<u64> cloned_dirs{0}, clone_dirs_total{0};  // Local whole-directory clones.
   std::atomic<bool> scan_done{false};
 };
 extern Stats g_stats;

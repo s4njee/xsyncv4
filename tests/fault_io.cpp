@@ -68,6 +68,10 @@ static int fault_clonefileat(int from_fd, const char* from, int to_fd, const cha
     int fd = open(marker, O_WRONLY | O_CREAT | O_EXCL, 0600);
     if (fd >= 0) { write(fd, from, strlen(from)); close(fd); }
   }
+  if (prefix && strncmp(from, prefix, strlen(prefix)) == 0) {
+    if (const char* delay = getenv("XSYNC_FAULT_CLONE_DELAY_US")) usleep((useconds_t)strtoul(delay, nullptr, 10));
+    if (getenv("XSYNC_FAULT_CLONE_EXDEV")) { errno = EXDEV; return -1; }
+  }
   return clonefileat(from_fd, from, to_fd, to, flags);
 }
 #endif

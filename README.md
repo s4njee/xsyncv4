@@ -377,6 +377,12 @@ worker changes:
  ━━━━━━━━━━━━━━━━━━╸━━━━━━━━━━━  61%  46,870/76,838 files  · 301M/494M  · 84.7M/s  · 12.9k files/s  · ETA 0:02
 ```
 
+Whole-directory APFS clones show `cloning path/` immediately, even for quick
+operations. The total line counts completed directories, and the completion
+line reports how many directories were cloned. Planned file/byte counters
+advance with each directory and are reversed if a clone falls back to copying.
+Display updates are limited to roughly 16 frames per second.
+
 It is drawn on stderr and only when that is a terminal; otherwise one summary line per
 second is printed. `-v` and `-i` lines scroll above the live region. `NO_COLOR` is honoured.
 The renderer respects the actual terminal width, including very narrow windows,

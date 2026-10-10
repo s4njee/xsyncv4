@@ -2668,3 +2668,18 @@ Verified artifact manifest (source `864bd37edf14`):
   `/tmp/xsync-u02-release-linux-arm64.log`, and
   `/tmp/xsync-u02-release-linux-amd64.log`. Installed local executables and
   physical remote helpers were not changed.
+
+## U-03 progress — 2026-10-10: directory clone feedback
+
+- Whole-directory APFS clones show `cloning path/` immediately, bypassing the
+  per-file 200 ms threshold. The total line counts completed directories and
+  the final progress summary reports the directory count. UI ticks are limited
+  to roughly 16 frames/s, including calls from clone workers.
+- Planned file/byte/directory counters are added before the clone, completed
+  after success, and reversed on failure before normal byte-copy generation.
+  A failed clone preserves its errno for existing diagnostics/fallback policy.
+- Three macOS acceptance fixtures pass: fast clones name the active directory,
+  delayed clones expose successive 1/2 and 2/3 directory updates, and injected
+  EXDEV reverses the planned counters while copying all six files correctly.
+  Existing output regression tests pass 10 methods. Full progress/differential
+  verification and release rebuilds follow; U-03 is not yet marked done.
