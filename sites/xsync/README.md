@@ -8,12 +8,12 @@ python3 -m http.server 4173 --directory dist --bind 127.0.0.1
 
 Open http://127.0.0.1:4173. Replay and scrub captured terminal frames, choose recorded scanning/transfer/checksum/completion/interruption/error examples, or inspect original JSON events. Playback does not access visitor files or establish SSH connections.
 
-Recordings in `dist/recordings/` were captured from the parent repository's actual `build/xsync` binary against disposable local fixtures. The successful copy includes 130 files, verified with SHA-256 after the transfer. The capture preserves original output text, stripping only terminal cursor/control escapes for display; original `.ansi` captures and timestamped transcripts remain downloadable. JSON comes from a separate real `--progress=json` run. Runtime measurements reflect the capture machine and the explicit bandwidth limit, not a performance benchmark.
+Recordings in `dist/recordings/` were captured from the parent repository's actual `build/xsync` binary (built before the executable was renamed `xs`) against disposable local fixtures. The successful copy includes 130 files, verified with SHA-256 after the transfer. The capture preserves original output text, stripping only terminal cursor/control escapes for display; original `.ansi` captures and timestamped transcripts remain downloadable. JSON comes from a separate real `--progress=json` run. Runtime measurements reflect the capture machine and the explicit bandwidth limit, not a performance benchmark.
 
 Regenerate recordings with:
 
 ```sh
-python3 scripts/capture-output.py --binary /absolute/path/to/build/xsync
+python3 scripts/capture-output.py --binary /absolute/path/to/build/xs
 ```
 
 HoloCSS core motion, runtime, keyframes, and view transitions are vendored from `/Users/sanjee/projects/holocss/dist/`, with its MIT license retained in `dist/vendor/holocss/LICENSE`. No network dependencies are needed by the page.
@@ -33,8 +33,8 @@ The build regenerates 13 Markdown manuals, runs the VitePress static build, then
 Refresh the authoritative command reference after changing the CLI:
 
 ```sh
-../../build/xsync --help > docs-inputs/xsync-help.txt
-python3 ../../tools/help_to_man.py ../../build/xsync docs/public/xs.1
+../../build/xs --help > docs-inputs/xsync-help.txt
+python3 ../../tools/help_to_man.py ../../build/xs docs/public/xs.1
 npm run build
 ```
 

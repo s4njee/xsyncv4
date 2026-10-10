@@ -23,7 +23,7 @@ sectionNumber: "1"
 <div class="example-caption">Exclude generated and repository internals</div>
 
 ```sh
-xsync -aP --exclude='node_modules/' --exclude='.git/' project/ backup/
+xs -aP --exclude='node_modules/' --exclude='.git/' project/ backup/
 ```
 
 
@@ -31,7 +31,7 @@ xsync -aP --exclude='node_modules/' --exclude='.git/' project/ backup/
 <div class="example-caption">Select text files while keeping directory traversal</div>
 
 ```sh
-xsync -aP --include='*/' --include='*.txt' --exclude='*' src/ dst/
+xs -aP --include='*/' --include='*.txt' --exclude='*' src/ dst/
 ```
 
 <p>The directory include comes first so xsync can descend into directories that contain matching files. <code>-m</code> prunes empty directory chains from the filtered source list.</p>
@@ -45,7 +45,7 @@ xsync -aP --include='*/' --include='*.txt' --exclude='*' src/ dst/
 <div class="example-caption">Dry run — no writes or deletions</div>
 
 ```sh
-xsync -ani --delete src/ dst/
+xs -ani --delete src/ dst/
 ```
 
 <p>Inspect the itemized plan and the <code>would transfer …, delete …</code> summary. When the plan matches your intent, execute the same source and destination with <code>-n</code> removed.</p>
@@ -55,7 +55,7 @@ xsync -ani --delete src/ dst/
 <div class="example-caption">Execute with an explicit deletion limit</div>
 
 ```sh
-xsync -aiP --delete --max-delete=100 src/ dst/
+xs -aiP --delete --max-delete=100 src/ dst/
 ```
 
 <aside class="manual-note"><span>DELETION</span><p><code>--delete</code> removes destination entries absent from the selected source tree. Source I/O errors suppress deletion unless <code>--ignore-errors</code> is explicitly requested. Exceeding <code>--max-delete</code> exits with code 25.</p></aside>
@@ -67,7 +67,7 @@ xsync -aiP --delete --max-delete=100 src/ dst/
 <div class="example-caption">Protect a receiver-only directory</div>
 
 ```sh
-xsync -aP --delete --filter='P local-notes/' src/ dst/
+xs -aP --delete --filter='P local-notes/' src/ dst/
 ```
 
 <p><code>--delete-excluded</code> makes unqualified include/exclude rules sender-only and allows excluded destination entries to be deleted. Explicit receiver protection still applies.</p>
@@ -81,7 +81,7 @@ xsync -aP --delete --filter='P local-notes/' src/ dst/
 <div class="example-caption">Load per-directory .rsync-filter files</div>
 
 ```sh
-xsync -aP -F src/ dst/
+xs -aP -F src/ dst/
 ```
 
 
@@ -89,7 +89,7 @@ xsync -aP -F src/ dst/
 <div class="example-caption">Exclude filter files and defer deletion</div>
 
 ```sh
-xsync -aP -FF --delete-after src/ dst/
+xs -aP -FF --delete-after src/ dst/
 ```
 
 <p>A second <code>-F</code> excludes the merge files themselves. <code>--delete-after</code> reloads receiver rules from the updated tree after transfers finish, so newly transferred protection rules affect that deletion pass.</p>
@@ -103,7 +103,7 @@ xsync -aP -FF --delete-after src/ dst/
 <div class="example-caption">Copy selected directory trees recursively</div>
 
 ```sh
-xsync -arP --files-from=selected.txt src/ dst/
+xs -arP --files-from=selected.txt src/ dst/
 ```
 
 <p>Each list entry is relative to the source root. Leading slashes refer to that root; <code>..</code> cannot escape it. Use <code>-0</code>/<code>--from0</code> for filenames or patterns containing newlines.</p>

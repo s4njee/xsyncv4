@@ -17,7 +17,7 @@ sectionNumber: "1"
 <div class="example-caption">Retain partial data and show progress</div>
 
 ```sh
-xsync -aP src/ dst/
+xs -aP src/ dst/
 ```
 
 <p>With <code>--partial</code> or <code>-P</code>, xsync verifies an existing destination prefix on both sides before reusing it. A matching prefix avoids sending the same bytes again; a mismatch sends the file in full. Retained interrupted output contains its completed contiguous prefix.</p>
@@ -31,7 +31,7 @@ xsync -aP src/ dst/
 <div class="example-caption">Allow verified reuse</div>
 
 ```sh
-xsync -aP --no-whole-file src/ dst/
+xs -aP --no-whole-file src/ dst/
 ```
 
 
@@ -39,7 +39,7 @@ xsync -aP --no-whole-file src/ dst/
 <div class="example-caption">Disable resume and block matching</div>
 
 ```sh
-xsync -aP --whole-file src/ dst/
+xs -aP --whole-file src/ dst/
 ```
 
 <p>Large changed local and remote files can reuse verified blocks from a readable existing destination. Eligible APFS clones remain preferred for local copies. <code>-W</code> disables resume and delta block matching.</p>
@@ -53,7 +53,7 @@ xsync -aP --whole-file src/ dst/
 <div class="example-caption">Reuse a previous snapshot</div>
 
 ```sh
-xsync -aP --link-dest=../previous/ src/ snapshots/current/
+xs -aP --link-dest=../previous/ src/ snapshots/current/
 ```
 
 <p>Relative <code>--link-dest</code> paths start at the destination directory. In this example, the basis is <code>snapshots/previous/</code>. Up to 20 previous snapshot directories may be supplied.</p>
@@ -75,7 +75,7 @@ xsync -aP --link-dest=../previous/ src/ snapshots/current/
 <div class="example-caption">State the default atomic policy explicitly</div>
 
 ```sh
-xsync -aP --atomic src/ dst/
+xs -aP --atomic src/ dst/
 ```
 
 <p>Direct writing changes interruption behavior and can leave incomplete files under final names. Atomic staging and retained partials also need destination disk space.</p>

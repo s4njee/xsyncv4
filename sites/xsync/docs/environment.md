@@ -39,7 +39,7 @@ sectionNumber: "5"
 
 ```sh
 export XSYNC_OPTS='--jobs=8 --no-progress'
-xsync --progress src/ dst/
+xs --progress src/ dst/
 ```
 
 
@@ -58,7 +58,7 @@ xsync --progress src/ dst/
 
 ```sh
 export XSYNC_RSH='ssh -p 2222'
-xsync -azP src/ user@host:/backup/
+xs -azP src/ user@host:/backup/
 ```
 
 
@@ -70,7 +70,7 @@ xsync -azP src/ user@host:/backup/
 <div class="example-caption">Disable personal defaults and require native execution</div>
 
 ```sh
-XSYNC_CONFIG='' XSYNC_OPTS='' xsync --no-fallback --no-progress -a src/ dst/
+XSYNC_CONFIG='' XSYNC_OPTS='' xs --no-fallback --no-progress -a src/ dst/
 ```
 
 <p>Check inherited <code>XSYNC_*</code> and <code>RSYNC_RSH</code> variables when making a fully controlled script. Explicit flags override progress and fallback defaults; supply <code>-e</code> if the remote shell must also be fixed.</p>

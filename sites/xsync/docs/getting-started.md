@@ -47,7 +47,7 @@ sudo apt install build-essential cmake ninja-build python3 libzstd-dev libxxhash
 ```sh
 cmake -S . -B build -G Ninja
 cmake --build build
-build/xsync --version
+build/xs --version
 ```
 
 
@@ -84,7 +84,7 @@ compinit
 <div class="example-caption">Copy source contents into the destination</div>
 
 ```sh
-xsync -aP src/ dst/
+xs -aP src/ dst/
 ```
 
 <p>Replace both paths with your own. Progress is automatic when stderr is a terminal; <code>-P</code> also preserves partial transfer data for a later retry.</p>

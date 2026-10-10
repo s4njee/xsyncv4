@@ -39,6 +39,9 @@ html { scroll-behavior: smooth; }
 .product-link { padding: 0 0 0 28px; margin-left: 24px; border-left: 1px solid #333; color: #aaa; font-size: 12px; white-space: nowrap; }
 .product-link span { margin-left: 14px; }
 .product-link:hover { color: #eee; }
+.github-link { display: flex; align-items: center; margin-left: 24px; color: #aaa; }
+.github-link svg { width: 18px; height: 18px; }
+.github-link:hover { color: #eee; }
 .VPNavBarSearch .DocSearch-Button { border-radius: 2px; border: 1px solid #303030; background: #101010; }
 .VPNavBarSearch .DocSearch-Button-Key { border-radius: 2px; border-color: #333; }
 .VPSidebar { border-right: 1px solid #2b2b2b; }
@@ -95,12 +98,15 @@ html { scroll-behavior: smooth; }
   .VPDoc { padding-top: 30px !important; }
   .VPNavBarSearch .DocSearch-Button { border: 0; }
   .nav-manual-tag { display: none; }
-  .product-link { margin-left: 12px; padding-left: 16px; }
+  .product-link { margin-left: 12px; padding-left: 12px; }
+  .product-link span { margin-left: 8px; }
+  .github-link { margin-left: 8px; }
 }
 @media (max-width: 639px) {
   .VPNavBarTitle .title { font-size: 24px; }
   .product-link { border: 0; margin-left: 8px; padding-left: 8px; font-size: 10px; }
   .product-link span { margin-left: 3px; }
+  .github-link { margin-left: 10px; }
   .manual-ruler { font-size: 8px; letter-spacing: 1px; margin-bottom: 24px; }
   .vp-doc h1 { letter-spacing: -1.5px; }
   .manual-deck { margin-bottom: 28px; }

@@ -23,7 +23,7 @@ sectionNumber: "1"
 <div class="example-caption">Preserve hard links, ACLs, and extended attributes</div>
 
 ```sh
-xsync -aHAXP src/ dst/
+xs -aHAXP src/ dst/
 ```
 
 <p><code>-H</code> preserves selected hard-link groups. <code>-X</code> copies supported extended attributes; <code>-XX</code> also selects rsync-internal attributes. <code>-A</code> preserves ACLs and implies permissions.</p>
@@ -39,7 +39,7 @@ xsync -aHAXP src/ dst/
 <div class="example-caption">Set incoming directory and file modes</div>
 
 ```sh
-xsync -aP --chmod='D755,F644' src/ dst/
+xs -aP --chmod='D755,F644' src/ dst/
 ```
 
 
@@ -47,7 +47,7 @@ xsync -aP --chmod='D755,F644' src/ dst/
 <div class="example-caption">Set incoming owner and group</div>
 
 ```sh
-xsync -aP --chown=backup:backup src/ dst/
+xs -aP --chown=backup:backup src/ dst/
 ```
 
 <p>Names in <code>--chown</code> resolve on the destination host. Overrides do not bypass filesystem privileges. <code>--chmod</code> modifies incoming modes; ordinary preservation rules still determine whether existing modes change.</p>
@@ -69,7 +69,7 @@ xsync -aP --chown=backup:backup src/ dst/
 <div class="example-caption">Force ordinary file data copies</div>
 
 ```sh
-xsync -aP --no-clone src/ dst/
+xs -aP --no-clone src/ dst/
 ```
 
 <p>Eligible local copies on the same APFS volume use copy-on-write clones. Clones are independent files that share storage until modified. They can carry a metadata superset, including xattrs, ACLs, and access/creation times, even without corresponding preservation flags. Use <code>--no-clone</code> when that difference matters.</p>
@@ -83,7 +83,7 @@ xsync -aP --no-clone src/ dst/
 <div class="example-caption">Create holes for zero-filled file regions</div>
 
 ```sh
-xsync -aSP image-tree/ backup/
+xs -aSP image-tree/ backup/
 ```
 
 <p><code>-S</code> disables cloning and creates sparse output on supported filesystems, including local, push, pull, delta, resumed, and in-place writes. If hole refinement is unavailable, bytes remain correct but disk allocation may be larger.</p>

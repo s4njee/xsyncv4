@@ -12,7 +12,7 @@ sectionNumber: "1"
 
 ## NAME {#name}
 
-<p><strong>xsync</strong> — fast, parallel rsync work-alike for macOS and Linux.</p>
+<p><strong>xsync</strong> — fast, parallel rsync work-alike for macOS and Linux. The executable is named <code>xs</code>.</p>
 
 
 
@@ -23,10 +23,10 @@ sectionNumber: "1"
 <div class="example-caption">Command forms</div>
 
 ```sh
-xsync [OPTION]... SRC [SRC]... DEST
-xsync [OPTION]... SRC
-xsync [OPTION]... SRC [SRC]... [USER@]HOST:DEST
-xsync [OPTION]... [USER@]HOST:SRC [DEST]
+xs [OPTION]... SRC [SRC]... DEST
+xs [OPTION]... SRC
+xs [OPTION]... SRC [SRC]... [USER@]HOST:DEST
+xs [OPTION]... [USER@]HOST:SRC [DEST]
 ```
 
 
@@ -35,7 +35,7 @@ xsync [OPTION]... [USER@]HOST:SRC [DEST]
 
 <p>xsync copies file trees locally or over SSH. It uses a C++20 engine, parallel workers, a native transfer protocol, and a live progress display on stderr. A single source argument lists entries instead of copying them.</p>
 
-<p>Use the options you already know from rsync. Native transfers require xsync on both machines. Missing remote support and unsupported options can delegate to a real rsync from PATH; <code>--no-fallback</code> requests native-only execution.</p>
+<p>Use the options you already know from rsync. Native transfers require the <code>xs</code> executable on both machines. Missing remote support and unsupported options can delegate to a real rsync from PATH; <code>--no-fallback</code> requests native-only execution.</p>
 
 
 
@@ -46,7 +46,7 @@ xsync [OPTION]... [USER@]HOST:SRC [DEST]
 <div class="example-caption">Copy a directory’s contents</div>
 
 ```sh
-xsync -aP src/ dst/
+xs -aP src/ dst/
 ```
 
 
@@ -54,7 +54,7 @@ xsync -aP src/ dst/
 <div class="example-caption">Push over SSH</div>
 
 ```sh
-xsync -azP src/ user@host:/backup/src/
+xs -azP src/ user@host:/backup/src/
 ```
 
 
@@ -62,7 +62,7 @@ xsync -azP src/ user@host:/backup/src/
 <div class="example-caption">Pull over SSH</div>
 
 ```sh
-xsync -azP user@host:/data/ data/
+xs -azP user@host:/data/ data/
 ```
 
 
@@ -70,7 +70,7 @@ xsync -azP user@host:/data/ data/
 <div class="example-caption">Preview a mirror before executing</div>
 
 ```sh
-xsync -ani --delete src/ dst/
+xs -ani --delete src/ dst/
 ```
 
 <p>The slash on <code>src/</code> means copy its contents. <code>-P</code> enables partial retention and progress. <code>-n</code> previews changes without writing.</p>

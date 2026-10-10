@@ -27,7 +27,7 @@ sectionNumber: "7"
 <div class="example-caption">Command from the actual error recording</div>
 
 ```sh
-xsync -aP ./missing-source/ ./unused-backup/
+xs -aP ./missing-source/ ./unused-backup/
 ```
 
 <div class="captured-doc-output"><span class="micro">ACTUAL XSYNC DIAGNOSTIC / EXIT 23</span><pre><code id="actual-error-output">xsync: link_stat &quot;./missing-source/&quot; failed: No such file or directory (2)
@@ -45,7 +45,7 @@ xsync error: some files/attrs were not transferred (see previous errors) (code 2
 <div class="example-caption">Retry a partial transfer</div>
 
 ```sh
-xsync -aP src/ dst/
+xs -aP src/ dst/
 ```
 
 <p>A completed-byte prefix can be reused only when it matches the source. Transfers do not invoke fallback after an active copy has failed.</p>
@@ -59,11 +59,11 @@ xsync -aP src/ dst/
 <div class="example-caption">Preserve the command’s original exit status</div>
 
 ```sh
-if xsync -a --no-progress src/ dst/; then
+if xs -a --no-progress src/ dst/; then
   echo "transfer completed"
 else
   status=$?
-  echo "xsync failed with code $status" >&2
+  echo "xs failed with code $status" >&2
   exit "$status"
 fi
 ```

@@ -12,17 +12,17 @@ sectionNumber: "7"
 
 ## SCOPE {#scope}
 
-<p>Reviewed 10 October 2026 against the current README, executable help, daily-driver backlog, and GUI backlog. Earlier backlog problem statements are historical; the latest status and completion entries describe the implemented CLI.</p>
+<p>Reviewed 10 October 2026 against the current README, executable help, daily-driver backlog, performance roadmap, and GUI backlog. Earlier backlog problem statements are historical; the latest status and completion entries describe the implemented CLI.</p>
 
 <aside class="manual-note"><span>NOTE</span><p>This page describes development status. Planned capabilities are not part of the command reference.</p></aside>
 
 ## IMPLEMENTED CLI {#implemented}
 
-<div class="manual-table-wrap"><table><thead><tr><th scope="col">Area</th><th scope="col">Current status</th></tr></thead><tbody><tr><td>Trust hardening</td><td>All 15 P0 stories recorded complete</td></tr><tr><td>Reach and everyday CLI</td><td>R-02–R-09 and E-01–E-13 recorded complete; R-01 remains partial</td></tr><tr><td>Progress</td><td>U-02–U-10 recorded complete</td></tr><tr><td>Data reuse</td><td>Verified-prefix resume, large-file delta, sparse output, and link-dest snapshots</td></tr><tr><td>Metadata</td><td>Hard links, xattrs, ACLs, incoming mode/owner overrides, platform-specific times and flags</td></tr><tr><td>Automation</td><td>Itemization, formatted stdout, error summaries, JSON progress, bandwidth limits, idle timeouts</td></tr></tbody></table></div>
+<div class="manual-table-wrap"><table><thead><tr><th scope="col">Area</th><th scope="col">Current status</th></tr></thead><tbody><tr><td>Trust hardening</td><td>All 15 P0 stories recorded complete</td></tr><tr><td>Reach and everyday CLI</td><td>R-02–R-09 and E-01–E-13 recorded complete (21 of 22 P1 stories); R-01 remains partial</td></tr><tr><td>Progress</td><td>P2 closed: U-02–U-11 recorded complete; U-01 skipped at the user’s request</td></tr><tr><td>Executable name</td><td>Builds, releases, manpage, and zsh completion use <code>xs</code>; existing <code>XSYNC_*</code> settings, the <code>xsync/config</code> file, and the wire protocol are unchanged</td></tr><tr><td>Data reuse</td><td>Verified-prefix resume, large-file delta, sparse output, and link-dest snapshots</td></tr><tr><td>Metadata</td><td>Hard links, xattrs, ACLs, incoming mode/owner overrides, platform-specific times and flags</td></tr><tr><td>Automation</td><td>Itemization, formatted stdout, error summaries, JSON progress, bandwidth limits, idle timeouts</td></tr></tbody></table></div>
 
 ## REMAINING VALIDATION {#validation}
 
-<div class="manual-table-wrap"><table><thead><tr><th scope="col">Backlog item</th><th scope="col">Status and remaining work</th></tr></thead><tbody><tr><td><code>R-01</code></td><td>Partial: remaining physical-host SSH checklist coverage</td></tr><tr><td><code>U-01</code></td><td>Partial: native terminal visual checks remain incomplete</td></tr><tr><td><code>U-11</code></td><td>Unverified: suspend/resume and cursor hygiene acceptance</td></tr><tr><td>Performance work</td><td>Broader target benchmarks and regression gates remain tracked; see the <a href="roadmap.html">roadmap</a></td></tr></tbody></table></div><p>The recorded product demo is a real local execution. It does not establish completion of remaining physical-host or native terminal acceptance checks. Historical benchmark speedups predate trust fixes and the atomic-write default.</p>
+<div class="manual-table-wrap"><table><thead><tr><th scope="col">Backlog item</th><th scope="col">Status and remaining work</th></tr></thead><tbody><tr><td><code>R-01</code></td><td>Partial: the native SSH checklist passes against a physical Raspberry Pi; open only on whether a second physical Linux host is required</td></tr><tr><td><code>U-01</code></td><td>Skipped at the user’s request; automated PTY, tmux, and real-SSH progress coverage passes, while the native GUI-terminal screenshot checklist was not completed</td></tr><tr><td><code>F-01</code></td><td>Partial: a verified Pi ↔ workstation SSH matrix and an APFS no-op diagnostic are recorded; full-corpus medians and cold-cache runs remain</td></tr><tr><td><code>F-02</code></td><td>Partial: a Linux and macOS CI gate compares speed relative to rsync against a pinned reference build; hosted CI validation remains</td></tr><tr><td><code>F-03</code>–<code>F-14</code></td><td>Open; ordered with success criteria in the <a href="roadmap.html">roadmap</a></td></tr></tbody></table></div><p>The recorded product demo is a real local execution. It does not establish completion of remaining physical-host acceptance checks. Historical local benchmark speedups predate the trust fixes and the atomic-write default; current measurements are summarised on the <a href="roadmap.html">roadmap</a>.</p>
 
 
 
@@ -40,7 +40,7 @@ sectionNumber: "7"
 
 ## MAINTENANCE {#sources}
 
-<p>The option reference and downloadable manpage are generated from <code>xsync --help</code>. Workflow pages are curated from README behavior. Development status comes from the latest backlog states rather than unresolved wording in the original audit.</p>
+<p>The option reference and downloadable manpage are generated from <code>xs --help</code>. Workflow pages are curated from README behavior. Development status comes from the latest backlog states rather than unresolved wording in the original audit.</p>
 
 <p>Source fingerprints for this documentation build are available in <a href="sources.json">sources.json</a>. Regenerate the docs when command behavior or feature status changes.</p>
 

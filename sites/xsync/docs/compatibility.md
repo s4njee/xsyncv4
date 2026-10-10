@@ -20,10 +20,10 @@ sectionNumber: "7"
 
 
 
-<div class="example-caption">Require native xsync</div>
+<div class="example-caption">Require native xs on both ends</div>
 
 ```sh
-xsync --no-fallback -azP src/ user@host:/backup/
+xs --no-fallback -azP src/ user@host:/backup/
 ```
 
 <p>By default, unsupported flags, missing remote helpers, unsupported protocol versions, and daemon URLs can re-execute a real rsync from PATH. One stderr notice explains the delegation. Original arguments are retained after xsync-only worker/clone/atomic extensions are removed.</p>
@@ -40,7 +40,7 @@ xsync --no-fallback -azP src/ user@host:/backup/
 
 ## BEHAVIORAL DIFFERENCES {#differences}
 
-<div class="manual-table-wrap"><table><thead><tr><th scope="col">Area</th><th scope="col">xsync behavior</th></tr></thead><tbody><tr><td>New byte-copied files</td><td>Atomic temporary file + rename by default</td></tr><tr><td>Local compression</td><td>-z has no compression effect locally</td></tr><tr><td>APFS clones</td><td>Can preserve more metadata than -a requests</td></tr><tr><td>Output ordering</td><td>Non-terminal file output is sorted at end of run</td></tr><tr><td>%b</td><td>File-content bytes before compression; not rsync wire bytes</td></tr><tr><td>JSON progress</td><td>Requires native structured events; never supplied by fallback</td></tr></tbody></table></div>
+<div class="manual-table-wrap"><table><thead><tr><th scope="col">Area</th><th scope="col">xs behavior</th></tr></thead><tbody><tr><td>New byte-copied files</td><td>Atomic temporary file + rename by default</td></tr><tr><td>Local compression</td><td>-z has no compression effect locally</td></tr><tr><td>APFS clones</td><td>Can preserve more metadata than -a requests</td></tr><tr><td>Output ordering</td><td>Non-terminal file output is sorted at end of run</td></tr><tr><td>%b</td><td>File-content bytes before compression; not rsync wire bytes</td></tr><tr><td>JSON progress</td><td>Requires native structured events; never supplied by fallback</td></tr></tbody></table></div>
 
 ## PLATFORM BOUNDARIES {#platforms}
 

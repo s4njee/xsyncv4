@@ -1,11 +1,11 @@
-xsync  version 0.1.0  protocol version 4  git 2f3e27633fac-dirty
-A fast, parallel rsync work-alike. Native transfers use xsync on both ends;
+xs  version 0.1.0  protocol version 4  git bd888bdc034c
+A fast, parallel rsync work-alike. Native transfers use xs on both ends;
 missing remote support falls back to rsync unless --no-fallback is set.
 
-Usage: xsync [OPTION]... SRC [SRC]... DEST
-  or   xsync [OPTION]... SRC
-  or   xsync [OPTION]... SRC [SRC]... [USER@]HOST:DEST
-  or   xsync [OPTION]... [USER@]HOST:SRC [DEST]
+Usage: xs [OPTION]... SRC [SRC]... DEST
+  or   xs [OPTION]... SRC
+  or   xs [OPTION]... SRC [SRC]... [USER@]HOST:DEST
+  or   xs [OPTION]... [USER@]HOST:SRC [DEST]
 
 Options (same meaning as rsync):
  -v, --verbose            increase verbosity
@@ -44,7 +44,7 @@ Options (same meaning as rsync):
      --no-whole-file      enable verified-prefix resume again
  -x, --one-file-system    don't cross filesystem boundaries
  -e, --rsh=COMMAND        specify the remote shell to use
-     --rsync-path=PROGRAM specify the xsync to run on the remote machine
+     --rsync-path=PROGRAM specify the xs to run on the remote machine
      --no-fallback        fail instead of re-executing rsync for missing support
      --fallback           enable fallback (overrides XSYNC_FALLBACK=0)
      --existing           skip creating new files on receiver
@@ -96,7 +96,7 @@ Documented compatibility no-ops:
                           transport polling handles either pipe mode internally
      --no-motd            no daemon transport or daemon greeting exists
 
-xsync extensions:
+xs extensions:
      --install=HOST       explicitly install the matching release at ~/.local/bin
                           refuses newer versions unless --force is supplied
  -j, --jobs=N             number of worker threads (default: performance cores)
