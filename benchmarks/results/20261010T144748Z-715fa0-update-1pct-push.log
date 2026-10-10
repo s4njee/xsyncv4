@@ -1,0 +1,16 @@
+update-1pct push update-1pct rsync 1/3: 36.031s verified
+update-1pct push update-1pct xs 1/3: 25.940s verified
+update-1pct push update-1pct xs 2/3: 27.297s verified
+update-1pct push update-1pct rsync 2/3: 31.591s verified
+update-1pct push update-1pct rsync 3/3: 31.504s verified
+update-1pct push update-1pct xs 3/3: 26.994s verified
+[
+  {
+    "scenario": "update-1pct",
+    "median_seconds": {
+      "rsync": 31.590676710009575,
+      "xs": 26.994000042323023
+    },
+    "xs_speedup": 1.1702851248603234
+  }
+]

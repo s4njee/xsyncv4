@@ -3592,3 +3592,13 @@ after U-01's evidence entry completes P2, as requested by the user.
   always-run artifact upload to preserve partial evidence. The backlog records
   F-02 complete; performance acceptance of the latest F-05 product remains
   pending its default-policy measurements and hosted gate.
+
+
+### F-01 1% update push completed — 2026-10-10
+
+- The neo-to-freya update completes all six balanced, independently verified
+  samples. Exactly 9,141 of 914,106 regular files were changed without altering
+  the baseline snapshot. Median rsync/xs times are 31.591/26.994 s (1.17x).
+  Raw results, the log and the paired table are retained.
+- The reverse update case starts next on the same frozen baseline products.
+  F-01 remains partial pending that result and cold-cache access on freya.
