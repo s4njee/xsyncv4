@@ -1,0 +1,1390 @@
+﻿2026-10-10T21:00:28.1022740Z Current runner version: '2.337.0'
+2026-10-10T21:00:28.1040350Z ##[group]Runner Image Provisioner
+2026-10-10T21:00:28.1040940Z Hosted Compute Agent
+2026-10-10T21:00:28.1041320Z Version: 20260828.587
+2026-10-10T21:00:28.1041720Z Commit: abac92662cab4cc7352de4f9f9d2e2419aad9c29
+2026-10-10T21:00:28.1042190Z Build Date: 2026-08-28T16:44:25Z
+2026-10-10T21:00:28.1042620Z Worker ID: {a372871e-2978-4496-b541-1fbb58d143e6}
+2026-10-10T21:00:28.1043060Z Azure Region: westus
+2026-10-10T21:00:28.1043420Z ##[endgroup]
+2026-10-10T21:00:28.1045010Z ##[group]Operating System
+2026-10-10T21:00:28.1045440Z macOS
+2026-10-10T21:00:28.1045770Z 15.7.9
+2026-10-10T21:00:28.1046090Z 24G830
+2026-10-10T21:00:28.1046430Z ##[endgroup]
+2026-10-10T21:00:28.1046780Z ##[group]Runner Image
+2026-10-10T21:00:28.1047160Z Image: macos-15-arm64
+2026-10-10T21:00:28.1047520Z Version: 20260907.0337.1
+2026-10-10T21:00:28.1048380Z Included Software: https://github.com/actions/runner-images/blob/macos-15-arm64/20260907.0337/images/macos/macos-15-arm64-Readme.md
+2026-10-10T21:00:28.1049410Z Image Release: https://github.com/actions/runner-images/releases/tag/macos-15-arm64%2F20260907.0337
+2026-10-10T21:00:28.1050060Z ##[endgroup]
+2026-10-10T21:00:28.1050810Z ##[group]GITHUB_TOKEN Permissions
+2026-10-10T21:00:28.1052260Z Contents: read
+2026-10-10T21:00:28.1052640Z Metadata: read
+2026-10-10T21:00:28.1052990Z ##[endgroup]
+2026-10-10T21:00:28.1054810Z Secret source: Actions
+2026-10-10T21:00:28.1055380Z Cache mode: write
+2026-10-10T21:00:28.1055830Z Prepare workflow directory
+2026-10-10T21:00:28.1425680Z Prepare all required actions
+2026-10-10T21:00:28.1476880Z Getting action download info
+2026-10-10T21:00:28.5986690Z Download action repository 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1' (SHA:3d3c42e5aac5ba805825da76410c181273ba90b1)
+2026-10-10T21:00:28.8915150Z Download action repository 'actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97' (SHA:5fda3b95a4ea91299a34e894583c3862153e4b97)
+2026-10-10T21:00:29.0963300Z Download action repository 'actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9' (SHA:cf430e030ddbb5b0abf93d22962f4752f3646cd9)
+2026-10-10T21:00:29.7490110Z Complete job name: ratios (macos-15)
+2026-10-10T21:00:29.8072380Z ##[group]Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+2026-10-10T21:00:29.8073220Z with:
+2026-10-10T21:00:29.8073540Z   fetch-depth: 0
+2026-10-10T21:00:29.8073900Z   persist-credentials: false
+2026-10-10T21:00:29.8074360Z   repository: s4njee/xsyncv4
+2026-10-10T21:00:29.8077200Z   token: ***
+2026-10-10T21:00:29.8077710Z   ssh-strict: true
+2026-10-10T21:00:29.8078050Z   ssh-user: git
+2026-10-10T21:00:29.8078370Z   clean: true
+2026-10-10T21:00:29.8078700Z   sparse-checkout-cone-mode: true
+2026-10-10T21:00:29.8079090Z   fetch-tags: false
+2026-10-10T21:00:29.8079420Z   show-progress: true
+2026-10-10T21:00:29.8079760Z   lfs: false
+2026-10-10T21:00:29.8080060Z   submodules: false
+2026-10-10T21:00:29.8080400Z   set-safe-directory: true
+2026-10-10T21:00:29.8080790Z   allow-unsafe-pr-checkout: false
+2026-10-10T21:00:29.8082460Z ##[endgroup]
+2026-10-10T21:00:30.2617590Z Syncing repository: s4njee/xsyncv4
+2026-10-10T21:00:30.2622480Z ##[group]Getting Git version info
+2026-10-10T21:00:30.2643760Z Working directory is '/Users/runner/work/xsyncv4/xsyncv4'
+2026-10-10T21:00:30.2647790Z [command]/opt/homebrew/bin/git version
+2026-10-10T21:00:30.3726210Z git version 2.55.0
+2026-10-10T21:00:30.3796580Z ##[endgroup]
+2026-10-10T21:00:30.3808740Z Copying '/Users/runner/.gitconfig' to '/Users/runner/work/_temp/74036a04-e5b4-4543-b3b4-0e8318db19ee/.gitconfig'
+2026-10-10T21:00:30.3812140Z Temporarily overriding HOME='/Users/runner/work/_temp/74036a04-e5b4-4543-b3b4-0e8318db19ee' before making global git config changes
+2026-10-10T21:00:30.3815610Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-10T21:00:30.3819140Z [command]/opt/homebrew/bin/git config --global --add safe.directory /Users/runner/work/xsyncv4/xsyncv4
+2026-10-10T21:00:30.3931010Z Deleting the contents of '/Users/runner/work/xsyncv4/xsyncv4'
+2026-10-10T21:00:30.3933600Z ##[group]Determining repository object format
+2026-10-10T21:00:30.3934440Z ##[endgroup]
+2026-10-10T21:00:30.3935200Z ##[group]Initializing the repository
+2026-10-10T21:00:30.3935970Z [command]/opt/homebrew/bin/git init /Users/runner/work/xsyncv4/xsyncv4
+2026-10-10T21:00:30.4204790Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-10-10T21:00:30.4206530Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-10-10T21:00:30.4208290Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-10-10T21:00:30.4209050Z hint: call:
+2026-10-10T21:00:30.4209510Z hint:
+2026-10-10T21:00:30.4210150Z hint: 	git config --global init.defaultBranch <name>
+2026-10-10T21:00:30.4210780Z hint:
+2026-10-10T21:00:30.4211350Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-10-10T21:00:30.4212220Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-10-10T21:00:30.4214810Z hint:
+2026-10-10T21:00:30.4216070Z hint: 	git branch -m <name>
+2026-10-10T21:00:30.4217460Z hint:
+2026-10-10T21:00:30.4218470Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-10-10T21:00:30.4219540Z Initialized empty Git repository in /Users/runner/work/xsyncv4/xsyncv4/.git/
+2026-10-10T21:00:30.4231450Z [command]/opt/homebrew/bin/git remote add origin https://github.com/s4njee/xsyncv4
+2026-10-10T21:00:30.4345470Z ##[endgroup]
+2026-10-10T21:00:30.4349880Z ##[group]Disabling automatic garbage collection
+2026-10-10T21:00:30.4351970Z [command]/opt/homebrew/bin/git config --local gc.auto 0
+2026-10-10T21:00:30.4485350Z ##[endgroup]
+2026-10-10T21:00:30.4488850Z ##[group]Setting up auth
+2026-10-10T21:00:30.4489640Z Removing SSH command configuration
+2026-10-10T21:00:30.4490670Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-10T21:00:30.4578170Z [command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-10T21:00:30.6008710Z Removing HTTP extra header
+2026-10-10T21:00:30.6012450Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-10T21:00:30.6097180Z [command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-10T21:00:30.7370750Z Removing includeIf entries pointing to credentials config files
+2026-10-10T21:00:30.7372190Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-10T21:00:30.7471470Z [command]/opt/homebrew/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-10T21:00:30.9398490Z [command]/opt/homebrew/bin/git config --file /Users/runner/work/_temp/git-credentials-5ed4b075-f3a6-458f-a44e-ef89966d6132.config http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-10-10T21:00:30.9520300Z [command]/opt/homebrew/bin/git config --local includeIf.gitdir:/Users/runner/work/xsyncv4/xsyncv4/.git.path /Users/runner/work/_temp/git-credentials-5ed4b075-f3a6-458f-a44e-ef89966d6132.config
+2026-10-10T21:00:30.9627900Z [command]/opt/homebrew/bin/git config --local includeIf.gitdir:/Users/runner/work/xsyncv4/xsyncv4/.git/worktrees/*.path /Users/runner/work/_temp/git-credentials-5ed4b075-f3a6-458f-a44e-ef89966d6132.config
+2026-10-10T21:00:30.9732190Z [command]/opt/homebrew/bin/git config --local includeIf.gitdir:/github/workspace/.git.path /github/runner_temp/git-credentials-5ed4b075-f3a6-458f-a44e-ef89966d6132.config
+2026-10-10T21:00:30.9847580Z [command]/opt/homebrew/bin/git config --local includeIf.gitdir:/github/workspace/.git/worktrees/*.path /github/runner_temp/git-credentials-5ed4b075-f3a6-458f-a44e-ef89966d6132.config
+2026-10-10T21:00:30.9945450Z ##[endgroup]
+2026-10-10T21:00:30.9948520Z ##[group]Fetching the repository
+2026-10-10T21:00:30.9951330Z [command]/opt/homebrew/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules origin +refs/heads/*:refs/remotes/origin/* +refs/tags/*:refs/tags/*
+2026-10-10T21:00:33.0779640Z From https://github.com/s4njee/xsyncv4
+2026-10-10T21:00:33.0783300Z  * [new branch]      claude/compassionate-mendel-8v92ho -> origin/claude/compassionate-mendel-8v92ho
+2026-10-10T21:00:33.0786390Z  * [new branch]      claude/tender-lamport-rrzha1 -> origin/claude/tender-lamport-rrzha1
+2026-10-10T21:00:33.0787450Z  * [new branch]      gh-pages   -> origin/gh-pages
+2026-10-10T21:00:33.0787880Z  * [new branch]      main       -> origin/main
+2026-10-10T21:00:33.0789940Z [command]/opt/homebrew/bin/git branch --list --remote origin/main
+2026-10-10T21:00:33.0899670Z   origin/main
+2026-10-10T21:00:33.0909670Z [command]/opt/homebrew/bin/git rev-parse refs/remotes/origin/main
+2026-10-10T21:00:33.0986390Z 742bbd5fbe38822a5007035044483bef65464d34
+2026-10-10T21:00:33.0988760Z ##[endgroup]
+2026-10-10T21:00:33.0990010Z ##[group]Determining the checkout info
+2026-10-10T21:00:33.0991000Z ##[endgroup]
+2026-10-10T21:00:33.0997260Z [command]/opt/homebrew/bin/git sparse-checkout disable
+2026-10-10T21:00:33.1138720Z [command]/opt/homebrew/bin/git config --local --unset-all extensions.worktreeConfig
+2026-10-10T21:00:33.1273630Z ##[group]Checking out the ref
+2026-10-10T21:00:33.1278260Z [command]/opt/homebrew/bin/git checkout --progress --force -B main refs/remotes/origin/main
+2026-10-10T21:00:33.3839670Z Switched to a new branch 'main'
+2026-10-10T21:00:33.3900240Z branch 'main' set up to track 'origin/main'.
+2026-10-10T21:00:33.3986320Z ##[endgroup]
+2026-10-10T21:00:33.4074030Z [command]/opt/homebrew/bin/git log -1 --format=%H
+2026-10-10T21:00:33.4200390Z 742bbd5fbe38822a5007035044483bef65464d34
+2026-10-10T21:00:33.4281440Z ##[group]Removing auth
+2026-10-10T21:00:33.4283800Z Removing SSH command configuration
+2026-10-10T21:00:33.4284980Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-10T21:00:33.4295330Z [command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-10T21:00:33.5208330Z Removing HTTP extra header
+2026-10-10T21:00:33.5209260Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-10T21:00:33.5515100Z [command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-10T21:00:33.7154520Z Removing includeIf entries pointing to credentials config files
+2026-10-10T21:00:33.7255500Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-10T21:00:33.7357110Z includeif.gitdir:/Users/runner/work/xsyncv4/xsyncv4/.git.path
+2026-10-10T21:00:33.7458590Z includeif.gitdir:/Users/runner/work/xsyncv4/xsyncv4/.git/worktrees/*.path
+2026-10-10T21:00:33.7560000Z includeif.gitdir:/github/workspace/.git.path
+2026-10-10T21:00:33.7661430Z includeif.gitdir:/github/workspace/.git/worktrees/*.path
+2026-10-10T21:00:33.7933240Z [command]/opt/homebrew/bin/git config --local --get-all includeif.gitdir:/Users/runner/work/xsyncv4/xsyncv4/.git.path
+2026-10-10T21:00:33.7975360Z /Users/runner/work/_temp/git-credentials-5ed4b075-f3a6-458f-a44e-ef89966d6132.config
+2026-10-10T21:00:33.7995000Z [command]/opt/homebrew/bin/git config --local --unset includeif.gitdir:/Users/runner/work/xsyncv4/xsyncv4/.git.path \/Users\/runner\/work\/_temp\/git\-credentials\-5ed4b075\-f3a6\-458f\-a44e\-ef89966d6132\.config
+2026-10-10T21:00:33.8081580Z [command]/opt/homebrew/bin/git config --local --get-all includeif.gitdir:/Users/runner/work/xsyncv4/xsyncv4/.git/worktrees/*.path
+2026-10-10T21:00:33.8085840Z /Users/runner/work/_temp/git-credentials-5ed4b075-f3a6-458f-a44e-ef89966d6132.config
+2026-10-10T21:00:33.8088990Z [command]/opt/homebrew/bin/git config --local --unset includeif.gitdir:/Users/runner/work/xsyncv4/xsyncv4/.git/worktrees/*.path \/Users\/runner\/work\/_temp\/git\-credentials\-5ed4b075\-f3a6\-458f\-a44e\-ef89966d6132\.config
+2026-10-10T21:00:33.8091280Z [command]/opt/homebrew/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git.path
+2026-10-10T21:00:33.8092810Z /github/runner_temp/git-credentials-5ed4b075-f3a6-458f-a44e-ef89966d6132.config
+2026-10-10T21:00:33.8098280Z [command]/opt/homebrew/bin/git config --local --unset includeif.gitdir:/github/workspace/.git.path \/github\/runner_temp\/git\-credentials\-5ed4b075\-f3a6\-458f\-a44e\-ef89966d6132\.config
+2026-10-10T21:00:33.8099930Z [command]/opt/homebrew/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git/worktrees/*.path
+2026-10-10T21:00:33.8101890Z /github/runner_temp/git-credentials-5ed4b075-f3a6-458f-a44e-ef89966d6132.config
+2026-10-10T21:00:33.8103410Z [command]/opt/homebrew/bin/git config --local --unset includeif.gitdir:/github/workspace/.git/worktrees/*.path \/github\/runner_temp\/git\-credentials\-5ed4b075\-f3a6\-458f\-a44e\-ef89966d6132\.config
+2026-10-10T21:00:33.8105780Z [command]/opt/homebrew/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-10T21:00:33.9416250Z Removing credentials config '/Users/runner/work/_temp/git-credentials-5ed4b075-f3a6-458f-a44e-ef89966d6132.config'
+2026-10-10T21:00:33.9421670Z ##[endgroup]
+2026-10-10T21:00:33.9676170Z ##[group]Run actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+2026-10-10T21:00:33.9676520Z with:
+2026-10-10T21:00:33.9676660Z   python-version: 3.13
+2026-10-10T21:00:33.9676820Z   check-latest: false
+2026-10-10T21:00:33.9678890Z   token: ***
+2026-10-10T21:00:33.9679090Z   update-environment: true
+2026-10-10T21:00:33.9679280Z   allow-prereleases: false
+2026-10-10T21:00:33.9679470Z   freethreaded: false
+2026-10-10T21:00:33.9679620Z ##[endgroup]
+2026-10-10T21:00:34.1479430Z ##[group]Installed versions
+2026-10-10T21:00:34.1618690Z Successfully set up CPython (3.13.15)
+2026-10-10T21:00:34.1620120Z ##[endgroup]
+2026-10-10T21:00:34.1773870Z ##[group]Run brew install ninja zstd xxhash icu4c rsync
+2026-10-10T21:00:34.1774430Z [36;1mbrew install ninja zstd xxhash icu4c rsync[0m
+2026-10-10T21:00:34.1774840Z [36;1mprintf 'XS_GATE_RSYNC=%s/bin/rsync\n' "$(brew --prefix)" >> "$GITHUB_ENV"[0m
+2026-10-10T21:00:34.1775340Z [36;1mprintf 'XS_GATE_ICU_ROOT=%s\n' "$(brew --prefix icu4c)" >> "$GITHUB_ENV"[0m
+2026-10-10T21:00:34.1877900Z shell: /bin/bash -e {0}
+2026-10-10T21:00:34.1878180Z env:
+2026-10-10T21:00:34.1878480Z   pythonLocation: /Users/runner/hostedtoolcache/Python/3.13.15/arm64
+2026-10-10T21:00:34.1878970Z   PKG_CONFIG_PATH: /Users/runner/hostedtoolcache/Python/3.13.15/arm64/lib/pkgconfig
+2026-10-10T21:00:34.1879400Z   Python_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.13.15/arm64
+2026-10-10T21:00:34.1895100Z   Python2_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.13.15/arm64
+2026-10-10T21:00:34.1895650Z   Python3_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.13.15/arm64
+2026-10-10T21:00:34.1896120Z ##[endgroup]
+2026-10-10T21:00:36.3269550Z [33mWarning:[0m ninja 1.13.2 is already installed and up-to-date.
+2026-10-10T21:00:36.3270080Z To reinstall 1.13.2, run:
+2026-10-10T21:00:36.3270350Z   brew reinstall ninja
+2026-10-10T21:00:36.3285840Z [33mWarning:[0m zstd 1.5.7_1 is already installed and up-to-date.
+2026-10-10T21:00:36.3286260Z To reinstall 1.5.7_1, run:
+2026-10-10T21:00:36.3286470Z   brew reinstall zstd
+2026-10-10T21:00:36.3315730Z [33mWarning:[0m icu4c@78 78.3 is already installed and up-to-date.
+2026-10-10T21:00:36.3316220Z To reinstall 78.3, run:
+2026-10-10T21:00:36.3316420Z   brew reinstall icu4c@78
+2026-10-10T21:00:36.9871480Z [32m==>[0m [1mDownloading bottle manifests[0m
+2026-10-10T21:00:37.0187480Z ✔︎ Bottle Manifest xxhash (0.8.3)
+2026-10-10T21:00:37.0199410Z [34m==>[0m [1mWould install 2 formulae:[0m
+2026-10-10T21:00:37.0320920Z ✔︎ Bottle Manifest rsync (3.5.0)
+2026-10-10T21:00:37.0321260Z xxhash rsync
+2026-10-10T21:00:37.0838750Z [34m==>[0m [1mWould install 2 dependencies for rsync:[0m
+2026-10-10T21:00:37.0839160Z popt
+2026-10-10T21:00:37.0839330Z xxhash
+2026-10-10T21:00:37.1071040Z [32m==>[0m [1mFetching downloads for: [32mxxhash[39m and [32mrsync[39m[0m
+2026-10-10T21:00:37.3605160Z ✔︎ Bottle Manifest popt (1.19)
+2026-10-10T21:00:37.3879030Z ✔︎ Bottle xxhash (0.8.3)
+2026-10-10T21:00:37.3926700Z ✔︎ Bottle popt (1.19)
+2026-10-10T21:00:37.4196170Z ✔︎ Bottle rsync (3.5.0)
+2026-10-10T21:00:37.4225210Z [34m==>[0m [1mPouring xxhash--0.8.3.arm64_sequoia.bottle.tar.gz[0m
+2026-10-10T21:00:37.5812880Z 🍺  /opt/homebrew/Cellar/xxhash/0.8.3: 28 files, 537.7KB
+2026-10-10T21:00:37.6001850Z [32m==>[0m [1mInstalling rsync dependency: [32mpopt[39m[0m
+2026-10-10T21:00:37.6078240Z [34m==>[0m [1mPouring popt--1.19.arm64_sequoia.bottle.tar.gz[0m
+2026-10-10T21:00:37.6283970Z 🍺  /opt/homebrew/Cellar/popt/1.19: 11 files, 179.8KB
+2026-10-10T21:00:37.6285650Z [32m==>[0m [1mInstalling [32mrsync[39m[0m
+2026-10-10T21:00:37.6357820Z [34m==>[0m [1mPouring rsync--3.5.0.arm64_sequoia.bottle.tar.gz[0m
+2026-10-10T21:00:37.6668570Z 🍺  /opt/homebrew/Cellar/rsync/3.5.0: 14 files, 1.3MB
+2026-10-10T21:00:37.7152330Z ##[group]Run cmake -S . -B build-ci -G Ninja -DCMAKE_BUILD_TYPE=Release "-DICU_ROOT=$XS_GATE_ICU_ROOT"
+2026-10-10T21:00:37.7152970Z [36;1mcmake -S . -B build-ci -G Ninja -DCMAKE_BUILD_TYPE=Release "-DICU_ROOT=$XS_GATE_ICU_ROOT"[0m
+2026-10-10T21:00:37.7153500Z [36;1mcmake --build build-ci --target xsync -j2[0m
+2026-10-10T21:00:37.7197680Z shell: /bin/bash -e {0}
+2026-10-10T21:00:37.7197950Z env:
+2026-10-10T21:00:37.7198280Z   pythonLocation: /Users/runner/hostedtoolcache/Python/3.13.15/arm64
+2026-10-10T21:00:37.7198720Z   PKG_CONFIG_PATH: /Users/runner/hostedtoolcache/Python/3.13.15/arm64/lib/pkgconfig
+2026-10-10T21:00:37.7199210Z   Python_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.13.15/arm64
+2026-10-10T21:00:37.7199600Z   Python2_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.13.15/arm64
+2026-10-10T21:00:37.7200050Z   Python3_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.13.15/arm64
+2026-10-10T21:00:37.7200380Z   XS_GATE_RSYNC: /opt/homebrew/bin/rsync
+2026-10-10T21:00:37.7200750Z   XS_GATE_ICU_ROOT: /opt/homebrew/opt/icu4c@78
+2026-10-10T21:00:37.7201160Z ##[endgroup]
+2026-10-10T21:00:38.4666680Z -- The C compiler identification is AppleClang 17.0.0.17000013
+2026-10-10T21:00:39.7849190Z -- The CXX compiler identification is AppleClang 17.0.0.17000013
+2026-10-10T21:00:39.8134640Z -- Detecting C compiler ABI info
+2026-10-10T21:00:39.9773940Z -- Detecting C compiler ABI info - done
+2026-10-10T21:00:40.0195420Z -- Check for working C compiler: /usr/bin/cc - skipped
+2026-10-10T21:00:40.0201560Z -- Detecting C compile features
+2026-10-10T21:00:40.0207430Z -- Detecting C compile features - done
+2026-10-10T21:00:40.0288700Z -- Detecting CXX compiler ABI info
+2026-10-10T21:00:40.1714300Z -- Detecting CXX compiler ABI info - done
+2026-10-10T21:00:40.2112210Z -- Check for working CXX compiler: /usr/bin/c++ - skipped
+2026-10-10T21:00:40.2118060Z -- Detecting CXX compile features
+2026-10-10T21:00:40.2123240Z -- Detecting CXX compile features - done
+2026-10-10T21:00:40.2482870Z -- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+2026-10-10T21:00:40.4527000Z -- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+2026-10-10T21:00:40.4819750Z -- Found Threads: TRUE
+2026-10-10T21:00:42.5209330Z -- Found ICU: /opt/homebrew/opt/icu4c@78/include (found version "78.3") found components: uc
+2026-10-10T21:00:42.9850540Z -- Found Python3: /Users/runner/hostedtoolcache/Python/3.13.15/arm64/bin/python3.13 (found version "3.13.15") found components: Interpreter
+2026-10-10T21:00:42.9883770Z -- Configuring done (5.2s)
+2026-10-10T21:00:43.6079360Z -- Generating done (0.6s)
+2026-10-10T21:00:43.6285100Z -- Build files have been written to: /Users/runner/work/xsyncv4/xsyncv4/build-ci
+2026-10-10T21:00:46.3148820Z [1/29] Building CXX object CMakeFiles/xsync.dir/src/util.cpp.o
+2026-10-10T21:00:46.4350260Z [2/29] Building CXX object CMakeFiles/xsync.dir/src/main.cpp.o
+2026-10-10T21:00:48.3659250Z [3/29] Building CXX object CMakeFiles/xsync.dir/src/progress.cpp.o
+2026-10-10T21:00:50.1199730Z [4/29] Building CXX object CMakeFiles/xsync.dir/src/filter.cpp.o
+2026-10-10T21:00:51.3878400Z [5/29] Building CXX object CMakeFiles/xsync.dir/src/fs.cpp.o
+2026-10-10T21:00:53.7264620Z [6/29] Building CXX object CMakeFiles/xsync.dir/src/local.cpp.o
+2026-10-10T21:00:55.2204190Z [7/29] Building CXX object CMakeFiles/xsync.dir/src/names.cpp.o
+2026-10-10T21:00:56.5011770Z [8/29] Building CXX object CMakeFiles/xsync.dir/src/destination.cpp.o
+2026-10-10T21:00:57.1665660Z [9/29] Building CXX object CMakeFiles/xsync.dir/src/linux_scan.cpp.o
+2026-10-10T21:00:57.8368690Z [10/29] Building CXX object CMakeFiles/xsync.dir/src/remote.cpp.o
+2026-10-10T21:00:58.0198330Z [11/29] Building CXX object CMakeFiles/xsync.dir/src/compression.cpp.o
+2026-10-10T21:00:58.7583810Z [12/29] Building CXX object CMakeFiles/xsync.dir/src/fallback.cpp.o
+2026-10-10T21:00:58.8490730Z [13/29] Building CXX object CMakeFiles/xsync.dir/src/transport.cpp.o
+2026-10-10T21:00:59.9996660Z [14/29] Building CXX object CMakeFiles/xsync.dir/src/install.cpp.o
+2026-10-10T21:01:00.1861880Z [15/29] Building CXX object CMakeFiles/xsync.dir/src/arguments.cpp.o
+2026-10-10T21:01:01.6926750Z [16/29] Building CXX object CMakeFiles/xsync.dir/src/hardlink.cpp.o
+2026-10-10T21:01:01.7344520Z [17/29] Building CXX object CMakeFiles/xsync.dir/src/output.cpp.o
+2026-10-10T21:01:03.2856270Z [18/29] Building CXX object CMakeFiles/xsync.dir/src/delta.cpp.o
+2026-10-10T21:01:03.6921100Z [19/29] Building CXX object CMakeFiles/xsync.dir/src/listing.cpp.o
+2026-10-10T21:01:04.1375150Z [20/29] Building CXX object CMakeFiles/xsync.dir/src/rate_limit.cpp.o
+2026-10-10T21:01:05.5884410Z [21/29] Building CXX object CMakeFiles/xsync.dir/src/xattrs.cpp.o
+2026-10-10T21:01:05.6659680Z [22/29] Building CXX object CMakeFiles/xsync.dir/src/selection.cpp.o
+2026-10-10T21:01:06.9029830Z [23/29] Building CXX object CMakeFiles/xsync.dir/src/xattr_value.cpp.o
+2026-10-10T21:01:07.1119050Z [24/29] Building CXX object CMakeFiles/xsync.dir/src/acls.cpp.o
+2026-10-10T21:01:07.8468870Z [25/29] Building CXX object CMakeFiles/xsync.dir/src/permissions.cpp.o
+2026-10-10T21:01:08.0065360Z [26/29] Building CXX object CMakeFiles/xsync.dir/src/ownership.cpp.o
+2026-10-10T21:01:08.5808460Z [27/29] Building CXX object CMakeFiles/xsync.dir/src/sparse.cpp.o
+2026-10-10T21:01:09.2420560Z [28/29] Building CXX object CMakeFiles/xsync.dir/src/link_dest.cpp.o
+2026-10-10T21:01:12.8023400Z [29/29] Linking CXX executable xs
+2026-10-10T21:01:12.8316930Z ##[group]Run python3 - <<'PY'
+2026-10-10T21:01:12.8317350Z [36;1mpython3 - <<'PY'[0m
+2026-10-10T21:01:12.8317660Z [36;1mimport io, json, os, pathlib, subprocess, tarfile[0m
+2026-10-10T21:01:12.8318060Z [36;1mpolicy = json.load(open('benchmarks/ci-policy.json'))[0m
+2026-10-10T21:01:12.8318470Z [36;1msource = pathlib.Path(os.environ['RUNNER_TEMP']) / 'xs-reference-source'[0m
+2026-10-10T21:01:12.8318860Z [36;1msource.mkdir()[0m
+2026-10-10T21:01:12.8319300Z [36;1marchive = subprocess.check_output(['git', 'archive', policy['reference']])[0m
+2026-10-10T21:01:12.8319780Z [36;1mwith tarfile.open(fileobj=io.BytesIO(archive)) as tree:[0m
+2026-10-10T21:01:12.8320220Z [36;1m    tree.extractall(source, filter='data')[0m
+2026-10-10T21:01:12.8320630Z [36;1msubprocess.run(['cmake', '-S', str(source), '-B', 'build-reference', '-G', 'Ninja',[0m
+2026-10-10T21:01:12.8321230Z [36;1m                '-DCMAKE_BUILD_TYPE=Release', '-DXSYNC_GIT_HASH='+policy['reference'][:12],[0m
+2026-10-10T21:01:12.8321980Z [36;1m                '-DICU_ROOT='+os.environ['XS_GATE_ICU_ROOT']], check=True)[0m
+2026-10-10T21:01:12.8322440Z [36;1msubprocess.run(['cmake', '--build', 'build-reference', '--target', 'xsync', '-j2'], check=True)[0m
+2026-10-10T21:01:12.8332730Z [36;1mPY[0m
+2026-10-10T21:01:12.8438950Z shell: /bin/bash -e {0}
+2026-10-10T21:01:12.8439250Z env:
+2026-10-10T21:01:12.8439610Z   pythonLocation: /Users/runner/hostedtoolcache/Python/3.13.15/arm64
+2026-10-10T21:01:12.8440140Z   PKG_CONFIG_PATH: /Users/runner/hostedtoolcache/Python/3.13.15/arm64/lib/pkgconfig
+2026-10-10T21:01:12.8440750Z   Python_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.13.15/arm64
+2026-10-10T21:01:12.8441190Z   Python2_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.13.15/arm64
+2026-10-10T21:01:12.8441700Z   Python3_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.13.15/arm64
+2026-10-10T21:01:12.8442160Z   XS_GATE_RSYNC: /opt/homebrew/bin/rsync
+2026-10-10T21:01:12.8442470Z   XS_GATE_ICU_ROOT: /opt/homebrew/opt/icu4c@78
+2026-10-10T21:01:12.8442870Z ##[endgroup]
+2026-10-10T21:01:13.7848920Z -- The C compiler identification is AppleClang 17.0.0.17000013
+2026-10-10T21:01:13.9403520Z -- The CXX compiler identification is AppleClang 17.0.0.17000013
+2026-10-10T21:01:13.9960190Z -- Detecting C compiler ABI info
+2026-10-10T21:01:14.1604530Z -- Detecting C compiler ABI info - done
+2026-10-10T21:01:14.2061800Z -- Check for working C compiler: /usr/bin/cc - skipped
+2026-10-10T21:01:14.2069180Z -- Detecting C compile features
+2026-10-10T21:01:14.2075020Z -- Detecting C compile features - done
+2026-10-10T21:01:14.2160100Z -- Detecting CXX compiler ABI info
+2026-10-10T21:01:14.3986110Z -- Detecting CXX compiler ABI info - done
+2026-10-10T21:01:14.4408310Z -- Check for working CXX compiler: /usr/bin/c++ - skipped
+2026-10-10T21:01:14.4508630Z -- Detecting CXX compile features
+2026-10-10T21:01:14.4578680Z -- Detecting CXX compile features - done
+2026-10-10T21:01:14.4589490Z -- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+2026-10-10T21:01:14.6737610Z -- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+2026-10-10T21:01:14.7010800Z -- Found Threads: TRUE
+2026-10-10T21:01:14.9871660Z -- Found ICU: /opt/homebrew/opt/icu4c@78/include (found version "78.3") found components: uc
+2026-10-10T21:01:15.2463360Z -- Found Python3: /Users/runner/hostedtoolcache/Python/3.13.15/arm64/bin/python3.13 (found version "3.13.15") found components: Interpreter
+2026-10-10T21:01:15.2566680Z -- Configuring done (1.7s)
+2026-10-10T21:01:15.2772500Z -- Generating done (0.0s)
+2026-10-10T21:01:15.2788500Z -- Build files have been written to: /Users/runner/work/xsyncv4/xsyncv4/build-reference
+2026-10-10T21:01:16.7796480Z [1/27] Building CXX object CMakeFiles/xsync.dir/src/util.cpp.o
+2026-10-10T21:01:17.0530330Z [2/27] Building CXX object CMakeFiles/xsync.dir/src/main.cpp.o
+2026-10-10T21:01:18.2038660Z [3/27] Building CXX object CMakeFiles/xsync.dir/src/progress.cpp.o
+2026-10-10T21:01:20.0981700Z [4/27] Building CXX object CMakeFiles/xsync.dir/src/filter.cpp.o
+2026-10-10T21:01:21.5095210Z [5/27] Building CXX object CMakeFiles/xsync.dir/src/fs.cpp.o
+2026-10-10T21:01:23.0162310Z [6/27] Building CXX object CMakeFiles/xsync.dir/src/local.cpp.o
+2026-10-10T21:01:24.4688440Z [7/27] Building CXX object CMakeFiles/xsync.dir/src/names.cpp.o
+2026-10-10T21:01:25.6718360Z [8/27] Building CXX object CMakeFiles/xsync.dir/src/destination.cpp.o
+2026-10-10T21:01:26.6335300Z [9/27] Building CXX object CMakeFiles/xsync.dir/src/fallback.cpp.o
+2026-10-10T21:01:27.1861670Z [10/27] Building CXX object CMakeFiles/xsync.dir/src/remote.cpp.o
+2026-10-10T21:01:27.5432510Z [11/27] Building CXX object CMakeFiles/xsync.dir/src/transport.cpp.o
+2026-10-10T21:01:28.2446900Z [12/27] Building CXX object CMakeFiles/xsync.dir/src/install.cpp.o
+2026-10-10T21:01:28.5095730Z [13/27] Building CXX object CMakeFiles/xsync.dir/src/arguments.cpp.o
+2026-10-10T21:01:29.5802250Z [14/27] Building CXX object CMakeFiles/xsync.dir/src/output.cpp.o
+2026-10-10T21:01:29.8160030Z [15/27] Building CXX object CMakeFiles/xsync.dir/src/hardlink.cpp.o
+2026-10-10T21:01:31.0975680Z [16/27] Building CXX object CMakeFiles/xsync.dir/src/delta.cpp.o
+2026-10-10T21:01:31.5791510Z [17/27] Building CXX object CMakeFiles/xsync.dir/src/listing.cpp.o
+2026-10-10T21:01:31.8015100Z [18/27] Building CXX object CMakeFiles/xsync.dir/src/rate_limit.cpp.o
+2026-10-10T21:01:33.0775760Z [19/27] Building CXX object CMakeFiles/xsync.dir/src/xattrs.cpp.o
+2026-10-10T21:01:33.2876180Z [20/27] Building CXX object CMakeFiles/xsync.dir/src/selection.cpp.o
+2026-10-10T21:01:34.2429700Z [21/27] Building CXX object CMakeFiles/xsync.dir/src/xattr_value.cpp.o
+2026-10-10T21:01:34.5713160Z [22/27] Building CXX object CMakeFiles/xsync.dir/src/acls.cpp.o
+2026-10-10T21:01:34.8675420Z [23/27] Building CXX object CMakeFiles/xsync.dir/src/permissions.cpp.o
+2026-10-10T21:01:35.1144530Z [24/27] Building CXX object CMakeFiles/xsync.dir/src/ownership.cpp.o
+2026-10-10T21:01:35.4786820Z [25/27] Building CXX object CMakeFiles/xsync.dir/src/sparse.cpp.o
+2026-10-10T21:01:36.1952940Z [26/27] Building CXX object CMakeFiles/xsync.dir/src/link_dest.cpp.o
+2026-10-10T21:01:39.3390450Z [27/27] Linking CXX executable xs
+2026-10-10T21:01:39.3744550Z ##[group]Run python3 benchmarks/ci_gate_test.py --xsync build-ci/xs --rsync "$XS_GATE_RSYNC"
+2026-10-10T21:01:39.3745340Z [36;1mpython3 benchmarks/ci_gate_test.py --xsync build-ci/xs --rsync "$XS_GATE_RSYNC"[0m
+2026-10-10T21:01:39.3866560Z shell: /bin/bash -e {0}
+2026-10-10T21:01:39.3867950Z env:
+2026-10-10T21:01:39.3868570Z   pythonLocation: /Users/runner/hostedtoolcache/Python/3.13.15/arm64
+2026-10-10T21:01:39.3869700Z   PKG_CONFIG_PATH: /Users/runner/hostedtoolcache/Python/3.13.15/arm64/lib/pkgconfig
+2026-10-10T21:01:39.3870300Z   Python_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.13.15/arm64
+2026-10-10T21:01:39.3870800Z   Python2_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.13.15/arm64
+2026-10-10T21:01:39.3900920Z   Python3_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.13.15/arm64
+2026-10-10T21:01:39.3902220Z   XS_GATE_RSYNC: /opt/homebrew/bin/rsync
+2026-10-10T21:01:39.3903230Z   XS_GATE_ICU_ROOT: /opt/homebrew/opt/icu4c@78
+2026-10-10T21:01:39.3904180Z ##[endgroup]
+2026-10-10T21:08:25.7121520Z .F.
+2026-10-10T21:08:25.7123140Z ======================================================================
+2026-10-10T21:08:25.7124180Z FAIL: test_healthy_local_pipe_checksum_and_update_scenarios_pass (__main__.GateTests.test_healthy_local_pipe_checksum_and_update_scenarios_pass)
+2026-10-10T21:08:25.7125070Z ----------------------------------------------------------------------
+2026-10-10T21:08:25.7125510Z Traceback (most recent call last):
+2026-10-10T21:08:25.7159210Z   File "/Users/runner/work/xsyncv4/xsyncv4/benchmarks/ci_gate_test.py", line 48, in test_healthy_local_pipe_checksum_and_update_scenarios_pass
+2026-10-10T21:08:25.7160320Z     self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+2026-10-10T21:08:25.7160750Z     ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-10T21:08:25.7161290Z AssertionError: 1 != 0 : local-fresh candidate warmup: 0.0261s verified
+2026-10-10T21:08:25.7162010Z local-fresh reference warmup: 0.0225s verified
+2026-10-10T21:08:25.7162440Z local-fresh rsync warmup: 0.1452s verified
+2026-10-10T21:08:25.7163230Z local-fresh rsync 1/24: 0.1478s verified
+2026-10-10T21:08:25.7163540Z local-fresh reference 1/24: 0.0160s verified
+2026-10-10T21:08:25.7163910Z local-fresh candidate 1/24: 0.0151s verified
+2026-10-10T21:08:25.7164210Z local-fresh rsync 2/24: 0.0782s verified
+2026-10-10T21:08:25.7164650Z local-fresh candidate 2/24: 0.0199s verified
+2026-10-10T21:08:25.7164970Z local-fresh reference 2/24: 0.0197s verified
+2026-10-10T21:08:25.7165360Z local-fresh reference 3/24: 0.0170s verified
+2026-10-10T21:08:25.7165650Z local-fresh rsync 3/24: 0.2436s verified
+2026-10-10T21:08:25.7166040Z local-fresh candidate 3/24: 0.0214s verified
+2026-10-10T21:08:25.7166330Z local-fresh reference 4/24: 0.0204s verified
+2026-10-10T21:08:25.7166820Z local-fresh candidate 4/24: 0.0223s verified
+2026-10-10T21:08:25.7167110Z local-fresh rsync 4/24: 0.1689s verified
+2026-10-10T21:08:25.7167450Z local-fresh candidate 5/24: 0.0180s verified
+2026-10-10T21:08:25.7167750Z local-fresh rsync 5/24: 0.1214s verified
+2026-10-10T21:08:25.7168130Z local-fresh reference 5/24: 0.0149s verified
+2026-10-10T21:08:25.7170610Z local-fresh candidate 6/24: 0.0172s verified
+2026-10-10T21:08:25.7170990Z local-fresh reference 6/24: 0.0207s verified
+2026-10-10T21:08:25.7171270Z local-fresh rsync 6/24: 0.1176s verified
+2026-10-10T21:08:25.7172990Z local-fresh rsync 7/24: 0.3090s verified
+2026-10-10T21:08:25.7173450Z local-fresh reference 7/24: 0.0227s verified
+2026-10-10T21:08:25.7173860Z local-fresh candidate 7/24: 0.0206s verified
+2026-10-10T21:08:25.7174270Z local-fresh rsync 8/24: 0.1565s verified
+2026-10-10T21:08:25.7174950Z local-fresh candidate 8/24: 0.0193s verified
+2026-10-10T21:08:25.7175380Z local-fresh reference 8/24: 0.0182s verified
+2026-10-10T21:08:25.7175730Z local-fresh reference 9/24: 0.0171s verified
+2026-10-10T21:08:25.7176160Z local-fresh rsync 9/24: 0.2953s verified
+2026-10-10T21:08:25.7176450Z local-fresh candidate 9/24: 0.0222s verified
+2026-10-10T21:08:25.7177680Z local-fresh reference 10/24: 0.0168s verified
+2026-10-10T21:08:25.7178120Z local-fresh candidate 10/24: 0.0201s verified
+2026-10-10T21:08:25.7178440Z local-fresh rsync 10/24: 0.2222s verified
+2026-10-10T21:08:25.7178840Z local-fresh candidate 11/24: 0.0209s verified
+2026-10-10T21:08:25.7179190Z local-fresh rsync 11/24: 0.0898s verified
+2026-10-10T21:08:25.7179560Z local-fresh reference 11/24: 0.0172s verified
+2026-10-10T21:08:25.7179910Z local-fresh candidate 12/24: 0.0214s verified
+2026-10-10T21:08:25.7180260Z local-fresh reference 12/24: 0.0134s verified
+2026-10-10T21:08:25.7180560Z local-fresh rsync 12/24: 0.1070s verified
+2026-10-10T21:08:25.7181020Z local-fresh rsync 13/24: 0.2019s verified
+2026-10-10T21:08:25.7183740Z local-fresh reference 13/24: 0.0215s verified
+2026-10-10T21:08:25.7185430Z local-fresh candidate 13/24: 0.0270s verified
+2026-10-10T21:08:25.7186580Z local-fresh rsync 14/24: 0.3560s verified
+2026-10-10T21:08:25.7187500Z local-fresh candidate 14/24: 0.0193s verified
+2026-10-10T21:08:25.7188570Z local-fresh reference 14/24: 0.0192s verified
+2026-10-10T21:08:25.7189490Z local-fresh reference 15/24: 0.0188s verified
+2026-10-10T21:08:25.7190670Z local-fresh rsync 15/24: 0.1618s verified
+2026-10-10T21:08:25.7191550Z local-fresh candidate 15/24: 0.0136s verified
+2026-10-10T21:08:25.7192570Z local-fresh reference 16/24: 0.0178s verified
+2026-10-10T21:08:25.7193500Z local-fresh candidate 16/24: 0.0203s verified
+2026-10-10T21:08:25.7194450Z local-fresh rsync 16/24: 0.1056s verified
+2026-10-10T21:08:25.7195260Z local-fresh candidate 17/24: 0.0164s verified
+2026-10-10T21:08:25.7195950Z local-fresh rsync 17/24: 0.1005s verified
+2026-10-10T21:08:25.7196750Z local-fresh reference 17/24: 0.0167s verified
+2026-10-10T21:08:25.7197910Z local-fresh candidate 18/24: 0.0205s verified
+2026-10-10T21:08:25.7198440Z local-fresh reference 18/24: 0.0173s verified
+2026-10-10T21:08:25.7198760Z local-fresh rsync 18/24: 0.0802s verified
+2026-10-10T21:08:25.7199200Z local-fresh rsync 19/24: 0.1755s verified
+2026-10-10T21:08:25.7200700Z local-fresh reference 19/24: 0.0138s verified
+2026-10-10T21:08:25.7201090Z local-fresh candidate 19/24: 0.0182s verified
+2026-10-10T21:08:25.7201550Z local-fresh rsync 20/24: 0.2328s verified
+2026-10-10T21:08:25.7201940Z local-fresh candidate 20/24: 0.0225s verified
+2026-10-10T21:08:25.7202420Z local-fresh reference 20/24: 0.0190s verified
+2026-10-10T21:08:25.7203250Z local-fresh reference 21/24: 0.0165s verified
+2026-10-10T21:08:25.7203610Z local-fresh rsync 21/24: 0.3245s verified
+2026-10-10T21:08:25.7203960Z local-fresh candidate 21/24: 0.0231s verified
+2026-10-10T21:08:25.7204400Z local-fresh reference 22/24: 0.0232s verified
+2026-10-10T21:08:25.7204980Z local-fresh candidate 22/24: 0.0215s verified
+2026-10-10T21:08:25.7205330Z local-fresh rsync 22/24: 0.2127s verified
+2026-10-10T21:08:25.7205730Z local-fresh candidate 23/24: 0.0179s verified
+2026-10-10T21:08:25.7206120Z local-fresh rsync 23/24: 0.0906s verified
+2026-10-10T21:08:25.7206560Z local-fresh reference 23/24: 0.0236s verified
+2026-10-10T21:08:25.7206990Z local-fresh candidate 24/24: 0.0203s verified
+2026-10-10T21:08:25.7207430Z local-fresh reference 24/24: 0.0253s verified
+2026-10-10T21:08:25.7208760Z local-fresh rsync 24/24: 0.2457s verified
+2026-10-10T21:08:25.7209260Z local-fresh: xs speedup relative to rsync 8.151, recorded minimum 5.506: PASS
+2026-10-10T21:08:25.7209630Z local-noop candidate warmup: 0.0081s verified
+2026-10-10T21:08:25.7209880Z local-noop reference warmup: 0.0141s verified
+2026-10-10T21:08:25.7210260Z local-noop rsync warmup: 0.3203s verified
+2026-10-10T21:08:25.7210510Z local-noop rsync 1/24: 0.1605s verified
+2026-10-10T21:08:25.7210870Z local-noop reference 1/24: 0.0388s verified
+2026-10-10T21:08:25.7211100Z local-noop candidate 1/24: 0.0136s verified
+2026-10-10T21:08:25.7317920Z local-noop rsync 2/24: 0.1516s verified
+2026-10-10T21:08:25.7318180Z local-noop candidate 2/24: 0.0119s verified
+2026-10-10T21:08:25.7318440Z local-noop reference 2/24: 0.0105s verified
+2026-10-10T21:08:25.7319580Z local-noop reference 3/24: 0.0126s verified
+2026-10-10T21:08:25.7319850Z local-noop rsync 3/24: 0.1586s verified
+2026-10-10T21:08:25.7320090Z local-noop candidate 3/24: 0.0108s verified
+2026-10-10T21:08:25.7320360Z local-noop reference 4/24: 0.0208s verified
+2026-10-10T21:08:25.7320630Z local-noop candidate 4/24: 0.0090s verified
+2026-10-10T21:08:25.7320880Z local-noop rsync 4/24: 0.0451s verified
+2026-10-10T21:08:25.7321140Z local-noop candidate 5/24: 0.0114s verified
+2026-10-10T21:08:25.7321370Z local-noop rsync 5/24: 0.2109s verified
+2026-10-10T21:08:25.7321670Z local-noop reference 5/24: 0.0455s verified
+2026-10-10T21:08:25.7321910Z local-noop candidate 6/24: 0.0112s verified
+2026-10-10T21:08:25.7322160Z local-noop reference 6/24: 0.0112s verified
+2026-10-10T21:08:25.7322440Z local-noop rsync 6/24: 0.0769s verified
+2026-10-10T21:08:25.7322770Z local-noop rsync 7/24: 0.1459s verified
+2026-10-10T21:08:25.7323020Z local-noop reference 7/24: 0.0093s verified
+2026-10-10T21:08:25.7323380Z local-noop candidate 7/24: 0.0163s verified
+2026-10-10T21:08:25.7323630Z local-noop rsync 8/24: 0.0948s verified
+2026-10-10T21:08:25.7323870Z local-noop candidate 8/24: 0.0168s verified
+2026-10-10T21:08:25.7324190Z local-noop reference 8/24: 0.0084s verified
+2026-10-10T21:08:25.7324430Z local-noop reference 9/24: 0.0080s verified
+2026-10-10T21:08:25.7324820Z local-noop rsync 9/24: 0.2094s verified
+2026-10-10T21:08:25.7325130Z local-noop candidate 9/24: 0.0146s verified
+2026-10-10T21:08:25.7325480Z local-noop reference 10/24: 0.0077s verified
+2026-10-10T21:08:25.7325730Z local-noop candidate 10/24: 0.0078s verified
+2026-10-10T21:08:25.7326040Z local-noop rsync 10/24: 0.0357s verified
+2026-10-10T21:08:25.7326360Z local-noop candidate 11/24: 0.0110s verified
+2026-10-10T21:08:25.7326730Z local-noop rsync 11/24: 0.2250s verified
+2026-10-10T21:08:25.7326960Z local-noop reference 11/24: 0.0148s verified
+2026-10-10T21:08:25.7327280Z local-noop candidate 12/24: 0.0087s verified
+2026-10-10T21:08:25.7327670Z local-noop reference 12/24: 0.0090s verified
+2026-10-10T21:08:25.7327980Z local-noop rsync 12/24: 0.1841s verified
+2026-10-10T21:08:25.7328270Z local-noop rsync 13/24: 0.2936s verified
+2026-10-10T21:08:25.7328510Z local-noop reference 13/24: 0.0078s verified
+2026-10-10T21:08:25.7328840Z local-noop candidate 13/24: 0.0163s verified
+2026-10-10T21:08:25.7329060Z local-noop rsync 14/24: 0.0503s verified
+2026-10-10T21:08:25.7329820Z local-noop candidate 14/24: 0.0161s verified
+2026-10-10T21:08:25.7330050Z local-noop reference 14/24: 0.0085s verified
+2026-10-10T21:08:25.7330290Z local-noop reference 15/24: 0.0084s verified
+2026-10-10T21:08:25.7330670Z local-noop rsync 15/24: 0.1634s verified
+2026-10-10T21:08:25.7330970Z local-noop candidate 15/24: 0.0122s verified
+2026-10-10T21:08:25.7331340Z local-noop reference 16/24: 0.0149s verified
+2026-10-10T21:08:25.7331710Z local-noop candidate 16/24: 0.0087s verified
+2026-10-10T21:08:25.7332060Z local-noop rsync 16/24: 0.1338s verified
+2026-10-10T21:08:25.7332290Z local-noop candidate 17/24: 0.0156s verified
+2026-10-10T21:08:25.7332510Z local-noop rsync 17/24: 0.1156s verified
+2026-10-10T21:08:25.7332730Z local-noop reference 17/24: 0.0222s verified
+2026-10-10T21:08:25.7333260Z local-noop candidate 18/24: 0.0104s verified
+2026-10-10T21:08:25.7333520Z local-noop reference 18/24: 0.0213s verified
+2026-10-10T21:08:25.7333790Z local-noop rsync 18/24: 0.3350s verified
+2026-10-10T21:08:25.7334040Z local-noop rsync 19/24: 0.0879s verified
+2026-10-10T21:08:25.7334340Z local-noop reference 19/24: 0.0100s verified
+2026-10-10T21:08:25.7334610Z local-noop candidate 19/24: 0.0069s verified
+2026-10-10T21:08:25.7334900Z local-noop rsync 20/24: 0.1514s verified
+2026-10-10T21:08:25.7335160Z local-noop candidate 20/24: 0.0079s verified
+2026-10-10T21:08:25.7335480Z local-noop reference 20/24: 0.0097s verified
+2026-10-10T21:08:25.7335780Z local-noop reference 21/24: 0.0096s verified
+2026-10-10T21:08:25.7336040Z local-noop rsync 21/24: 0.1821s verified
+2026-10-10T21:08:25.7336300Z local-noop candidate 21/24: 0.0080s verified
+2026-10-10T21:08:25.7336730Z local-noop reference 22/24: 0.0191s verified
+2026-10-10T21:08:25.7336990Z local-noop candidate 22/24: 0.0115s verified
+2026-10-10T21:08:25.7337270Z local-noop rsync 22/24: 0.0846s verified
+2026-10-10T21:08:25.7337570Z local-noop candidate 23/24: 0.0145s verified
+2026-10-10T21:08:25.7337840Z local-noop rsync 23/24: 0.1567s verified
+2026-10-10T21:08:25.7338050Z local-noop reference 23/24: 0.0222s verified
+2026-10-10T21:08:25.7338330Z local-noop candidate 24/24: 0.0080s verified
+2026-10-10T21:08:25.7338600Z local-noop reference 24/24: 0.0162s verified
+2026-10-10T21:08:25.7338860Z local-noop rsync 24/24: 0.1252s verified
+2026-10-10T21:08:25.7339200Z local-noop: xs speedup relative to rsync 13.390, recorded minimum 8.371: PASS
+2026-10-10T21:08:25.7339600Z local-rt candidate warmup: 0.0280s verified
+2026-10-10T21:08:25.7339880Z local-rt reference warmup: 0.0167s verified
+2026-10-10T21:08:25.7340180Z local-rt rsync warmup: 0.3614s verified
+2026-10-10T21:08:25.7340440Z local-rt rsync 1/24: 0.3531s verified
+2026-10-10T21:08:25.7340730Z local-rt reference 1/24: 0.0205s verified
+2026-10-10T21:08:25.7341020Z local-rt candidate 1/24: 0.0144s verified
+2026-10-10T21:08:25.7341280Z local-rt rsync 2/24: 0.2812s verified
+2026-10-10T21:08:25.7341530Z local-rt candidate 2/24: 0.0270s verified
+2026-10-10T21:08:25.7341780Z local-rt reference 2/24: 0.0219s verified
+2026-10-10T21:08:25.7342070Z local-rt reference 3/24: 0.0144s verified
+2026-10-10T21:08:25.7342280Z local-rt rsync 3/24: 0.2124s verified
+2026-10-10T21:08:25.7342560Z local-rt candidate 3/24: 0.0206s verified
+2026-10-10T21:08:25.7342820Z local-rt reference 4/24: 0.0203s verified
+2026-10-10T21:08:25.7343030Z local-rt candidate 4/24: 0.0161s verified
+2026-10-10T21:08:25.7343280Z local-rt rsync 4/24: 0.1347s verified
+2026-10-10T21:08:25.7343550Z local-rt candidate 5/24: 0.0197s verified
+2026-10-10T21:08:25.7343870Z local-rt rsync 5/24: 0.2559s verified
+2026-10-10T21:08:25.7344120Z local-rt reference 5/24: 0.0175s verified
+2026-10-10T21:08:25.7344410Z local-rt candidate 6/24: 0.0243s verified
+2026-10-10T21:08:25.7344700Z local-rt reference 6/24: 0.0290s verified
+2026-10-10T21:08:25.7345040Z local-rt rsync 6/24: 0.1468s verified
+2026-10-10T21:08:25.7345300Z local-rt rsync 7/24: 0.1915s verified
+2026-10-10T21:08:25.7345580Z local-rt reference 7/24: 0.0157s verified
+2026-10-10T21:08:25.7345830Z local-rt candidate 7/24: 0.0214s verified
+2026-10-10T21:08:25.7346120Z local-rt rsync 8/24: 0.1269s verified
+2026-10-10T21:08:25.7346370Z local-rt candidate 8/24: 0.0156s verified
+2026-10-10T21:08:25.7346580Z local-rt reference 8/24: 0.0155s verified
+2026-10-10T21:08:25.7346900Z local-rt reference 9/24: 0.0154s verified
+2026-10-10T21:08:25.7347110Z local-rt rsync 9/24: 0.2529s verified
+2026-10-10T21:08:25.7347350Z local-rt candidate 9/24: 0.0170s verified
+2026-10-10T21:08:25.7347660Z local-rt reference 10/24: 0.0164s verified
+2026-10-10T21:08:25.7347950Z local-rt candidate 10/24: 0.0138s verified
+2026-10-10T21:08:25.7348210Z local-rt rsync 10/24: 0.1029s verified
+2026-10-10T21:08:25.7348540Z local-rt candidate 11/24: 0.0152s verified
+2026-10-10T21:08:25.7348870Z local-rt rsync 11/24: 0.2210s verified
+2026-10-10T21:08:25.7349410Z local-rt reference 11/24: 0.0159s verified
+2026-10-10T21:08:25.7349760Z local-rt candidate 12/24: 0.0155s verified
+2026-10-10T21:08:25.7350020Z local-rt reference 12/24: 0.0180s verified
+2026-10-10T21:08:25.7350310Z local-rt rsync 12/24: 0.4030s verified
+2026-10-10T21:08:25.7350610Z local-rt rsync 13/24: 0.3514s verified
+2026-10-10T21:08:25.7350860Z local-rt reference 13/24: 0.0199s verified
+2026-10-10T21:08:25.7351160Z local-rt candidate 13/24: 0.0220s verified
+2026-10-10T21:08:25.7351420Z local-rt rsync 14/24: 0.2635s verified
+2026-10-10T21:08:25.7351710Z local-rt candidate 14/24: 0.0260s verified
+2026-10-10T21:08:25.7352020Z local-rt reference 14/24: 0.0232s verified
+2026-10-10T21:08:25.7352380Z local-rt reference 15/24: 0.0184s verified
+2026-10-10T21:08:25.7352640Z local-rt rsync 15/24: 0.1260s verified
+2026-10-10T21:08:25.7353130Z local-rt candidate 15/24: 0.0180s verified
+2026-10-10T21:08:25.7353450Z local-rt reference 16/24: 0.0210s verified
+2026-10-10T21:08:25.7353720Z local-rt candidate 16/24: 0.0174s verified
+2026-10-10T21:08:25.7354020Z local-rt rsync 16/24: 0.1005s verified
+2026-10-10T21:08:25.7354270Z local-rt candidate 17/24: 0.0157s verified
+2026-10-10T21:08:25.7354560Z local-rt rsync 17/24: 0.2118s verified
+2026-10-10T21:08:25.7354810Z local-rt reference 17/24: 0.0208s verified
+2026-10-10T21:08:25.7355150Z local-rt candidate 18/24: 0.0179s verified
+2026-10-10T21:08:25.7355420Z local-rt reference 18/24: 0.0192s verified
+2026-10-10T21:08:25.7355710Z local-rt rsync 18/24: 0.3231s verified
+2026-10-10T21:08:25.7355960Z local-rt rsync 19/24: 0.3758s verified
+2026-10-10T21:08:25.7356250Z local-rt reference 19/24: 0.0155s verified
+2026-10-10T21:08:25.7356550Z local-rt candidate 19/24: 0.0192s verified
+2026-10-10T21:08:25.7356800Z local-rt rsync 20/24: 0.2198s verified
+2026-10-10T21:08:25.7357110Z local-rt candidate 20/24: 0.0159s verified
+2026-10-10T21:08:25.7357380Z local-rt reference 20/24: 0.0141s verified
+2026-10-10T21:08:25.7357690Z local-rt reference 21/24: 0.0178s verified
+2026-10-10T21:08:25.7357990Z local-rt rsync 21/24: 0.2346s verified
+2026-10-10T21:08:25.7358200Z local-rt candidate 21/24: 0.0146s verified
+2026-10-10T21:08:25.7358490Z local-rt reference 22/24: 0.0165s verified
+2026-10-10T21:08:25.7358750Z local-rt candidate 22/24: 0.0151s verified
+2026-10-10T21:08:25.7359050Z local-rt rsync 22/24: 0.1848s verified
+2026-10-10T21:08:25.7359340Z local-rt candidate 23/24: 0.0186s verified
+2026-10-10T21:08:25.7359590Z local-rt rsync 23/24: 0.2515s verified
+2026-10-10T21:08:25.7359870Z local-rt reference 23/24: 0.0224s verified
+2026-10-10T21:08:25.7360130Z local-rt candidate 24/24: 0.0203s verified
+2026-10-10T21:08:25.7360440Z local-rt reference 24/24: 0.0190s verified
+2026-10-10T21:08:25.7360760Z local-rt rsync 24/24: 0.1600s verified
+2026-10-10T21:08:25.7361140Z local-rt: xs speedup relative to rsync 12.487, recorded minimum 7.261: PASS
+2026-10-10T21:08:25.7361510Z local-rlt candidate warmup: 0.0172s verified
+2026-10-10T21:08:25.7361840Z local-rlt reference warmup: 0.0153s verified
+2026-10-10T21:08:25.7362150Z local-rlt rsync warmup: 0.2293s verified
+2026-10-10T21:08:25.7362420Z local-rlt rsync 1/24: 0.1855s verified
+2026-10-10T21:08:25.7362710Z local-rlt reference 1/24: 0.0191s verified
+2026-10-10T21:08:25.7362960Z local-rlt candidate 1/24: 0.0259s verified
+2026-10-10T21:08:25.7363250Z local-rlt rsync 2/24: 0.2143s verified
+2026-10-10T21:08:25.7363540Z local-rlt candidate 2/24: 0.0161s verified
+2026-10-10T21:08:25.7363890Z local-rlt reference 2/24: 0.0168s verified
+2026-10-10T21:08:25.7364200Z local-rlt reference 3/24: 0.0174s verified
+2026-10-10T21:08:25.7364480Z local-rlt rsync 3/24: 0.2128s verified
+2026-10-10T21:08:25.7364730Z local-rlt candidate 3/24: 0.0147s verified
+2026-10-10T21:08:25.7365060Z local-rlt reference 4/24: 0.0146s verified
+2026-10-10T21:08:25.7365350Z local-rlt candidate 4/24: 0.0162s verified
+2026-10-10T21:08:25.7365610Z local-rlt rsync 4/24: 0.2213s verified
+2026-10-10T21:08:25.7365890Z local-rlt candidate 5/24: 0.0130s verified
+2026-10-10T21:08:25.7366150Z local-rlt rsync 5/24: 0.2302s verified
+2026-10-10T21:08:25.7366730Z local-rlt reference 5/24: 0.0180s verified
+2026-10-10T21:08:25.7366990Z local-rlt candidate 6/24: 0.0216s verified
+2026-10-10T21:08:25.7367280Z local-rlt reference 6/24: 0.0232s verified
+2026-10-10T21:08:25.7367530Z local-rlt rsync 6/24: 0.2377s verified
+2026-10-10T21:08:25.7367820Z local-rlt rsync 7/24: 0.2722s verified
+2026-10-10T21:08:25.7368070Z local-rlt reference 7/24: 0.0190s verified
+2026-10-10T21:08:25.7368330Z local-rlt candidate 7/24: 0.0187s verified
+2026-10-10T21:08:25.7368540Z local-rlt rsync 8/24: 0.2673s verified
+2026-10-10T21:08:25.7368750Z local-rlt candidate 8/24: 0.0131s verified
+2026-10-10T21:08:25.7368950Z local-rlt reference 8/24: 0.0160s verified
+2026-10-10T21:08:25.7369160Z local-rlt reference 9/24: 0.0182s verified
+2026-10-10T21:08:25.7369360Z local-rlt rsync 9/24: 0.1972s verified
+2026-10-10T21:08:25.7369940Z local-rlt candidate 9/24: 0.0152s verified
+2026-10-10T21:08:25.7370180Z local-rlt reference 10/24: 0.0153s verified
+2026-10-10T21:08:25.7370410Z local-rlt candidate 10/24: 0.0151s verified
+2026-10-10T21:08:25.7370620Z local-rlt rsync 10/24: 0.1447s verified
+2026-10-10T21:08:25.7370830Z local-rlt candidate 11/24: 0.0135s verified
+2026-10-10T21:08:25.7371030Z local-rlt rsync 11/24: 0.2228s verified
+2026-10-10T21:08:25.7371250Z local-rlt reference 11/24: 0.0158s verified
+2026-10-10T21:08:25.7371460Z local-rlt candidate 12/24: 0.0191s verified
+2026-10-10T21:08:25.7371670Z local-rlt reference 12/24: 0.0214s verified
+2026-10-10T21:08:25.7371890Z local-rlt rsync 12/24: 0.3170s verified
+2026-10-10T21:08:25.7372090Z local-rlt rsync 13/24: 0.3182s verified
+2026-10-10T21:08:25.7372290Z local-rlt reference 13/24: 0.0212s verified
+2026-10-10T21:08:25.7372510Z local-rlt candidate 13/24: 0.0163s verified
+2026-10-10T21:08:25.7372720Z local-rlt rsync 14/24: 0.2254s verified
+2026-10-10T21:08:25.7372930Z local-rlt candidate 14/24: 0.0187s verified
+2026-10-10T21:08:25.7373140Z local-rlt reference 14/24: 0.0183s verified
+2026-10-10T21:08:25.7373360Z local-rlt reference 15/24: 0.0180s verified
+2026-10-10T21:08:25.7373570Z local-rlt rsync 15/24: 0.3231s verified
+2026-10-10T21:08:25.7373770Z local-rlt candidate 15/24: 0.0175s verified
+2026-10-10T21:08:25.7373990Z local-rlt reference 16/24: 0.0119s verified
+2026-10-10T21:08:25.7374210Z local-rlt candidate 16/24: 0.0194s verified
+2026-10-10T21:08:25.7374410Z local-rlt rsync 16/24: 0.1566s verified
+2026-10-10T21:08:25.7374620Z local-rlt candidate 17/24: 0.0134s verified
+2026-10-10T21:08:25.7374830Z local-rlt rsync 17/24: 0.1973s verified
+2026-10-10T21:08:25.7375030Z local-rlt reference 17/24: 0.0306s verified
+2026-10-10T21:08:25.7375270Z local-rlt candidate 18/24: 0.0157s verified
+2026-10-10T21:08:25.7375490Z local-rlt reference 18/24: 0.0147s verified
+2026-10-10T21:08:25.7375700Z local-rlt rsync 18/24: 0.0815s verified
+2026-10-10T21:08:25.7375900Z local-rlt rsync 19/24: 0.2423s verified
+2026-10-10T21:08:25.7376110Z local-rlt reference 19/24: 0.0175s verified
+2026-10-10T21:08:25.7376320Z local-rlt candidate 19/24: 0.0189s verified
+2026-10-10T21:08:25.7376540Z local-rlt rsync 20/24: 0.2329s verified
+2026-10-10T21:08:25.7376740Z local-rlt candidate 20/24: 0.0149s verified
+2026-10-10T21:08:25.7376950Z local-rlt reference 20/24: 0.0172s verified
+2026-10-10T21:08:25.7377160Z local-rlt reference 21/24: 0.0178s verified
+2026-10-10T21:08:25.7377370Z local-rlt rsync 21/24: 0.2339s verified
+2026-10-10T21:08:25.7377570Z local-rlt candidate 21/24: 0.0204s verified
+2026-10-10T21:08:25.7377780Z local-rlt reference 22/24: 0.0204s verified
+2026-10-10T21:08:25.7378000Z local-rlt candidate 22/24: 0.0202s verified
+2026-10-10T21:08:25.7378200Z local-rlt rsync 22/24: 0.2387s verified
+2026-10-10T21:08:25.7378400Z local-rlt candidate 23/24: 0.0166s verified
+2026-10-10T21:08:25.7378610Z local-rlt rsync 23/24: 0.2173s verified
+2026-10-10T21:08:25.7378820Z local-rlt reference 23/24: 0.0177s verified
+2026-10-10T21:08:25.7379040Z local-rlt candidate 24/24: 0.0158s verified
+2026-10-10T21:08:25.7379250Z local-rlt reference 24/24: 0.0157s verified
+2026-10-10T21:08:25.7379720Z local-rlt rsync 24/24: 0.1069s verified
+2026-10-10T21:08:25.7380010Z local-rlt: xs speedup relative to rsync 13.794, recorded minimum 7.581: PASS
+2026-10-10T21:08:25.7380350Z pipe-fresh candidate warmup: 0.2119s verified
+2026-10-10T21:08:25.7380600Z pipe-fresh reference warmup: 0.1270s verified
+2026-10-10T21:08:25.7380830Z pipe-fresh rsync warmup: 0.1768s verified
+2026-10-10T21:08:25.7381040Z pipe-fresh rsync 1/24: 0.2532s verified
+2026-10-10T21:08:25.7381250Z pipe-fresh reference 1/24: 0.2286s verified
+2026-10-10T21:08:25.7381470Z pipe-fresh candidate 1/24: 0.2580s verified
+2026-10-10T21:08:25.7381680Z pipe-fresh rsync 2/24: 0.2677s verified
+2026-10-10T21:08:25.7381880Z pipe-fresh candidate 2/24: 0.1364s verified
+2026-10-10T21:08:25.7382100Z pipe-fresh reference 2/24: 0.1367s verified
+2026-10-10T21:08:25.7382440Z pipe-fresh reference 3/24: 0.2165s verified
+2026-10-10T21:08:25.7382660Z pipe-fresh rsync 3/24: 0.1514s verified
+2026-10-10T21:08:25.7382870Z pipe-fresh candidate 3/24: 0.1286s verified
+2026-10-10T21:08:25.7383100Z pipe-fresh reference 4/24: 0.1198s verified
+2026-10-10T21:08:25.7383310Z pipe-fresh candidate 4/24: 0.2634s verified
+2026-10-10T21:08:25.7383520Z pipe-fresh rsync 4/24: 0.1874s verified
+2026-10-10T21:08:25.7383730Z pipe-fresh candidate 5/24: 0.1813s verified
+2026-10-10T21:08:25.7384020Z pipe-fresh rsync 5/24: 0.2645s verified
+2026-10-10T21:08:25.7384230Z pipe-fresh reference 5/24: 0.1538s verified
+2026-10-10T21:08:25.7384450Z pipe-fresh candidate 6/24: 0.1747s verified
+2026-10-10T21:08:25.7384660Z pipe-fresh reference 6/24: 0.2411s verified
+2026-10-10T21:08:25.7384870Z pipe-fresh rsync 6/24: 0.3333s verified
+2026-10-10T21:08:25.7385080Z pipe-fresh rsync 7/24: 0.1749s verified
+2026-10-10T21:08:25.7392830Z pipe-fresh reference 7/24: 0.1360s verified
+2026-10-10T21:08:25.7393080Z pipe-fresh candidate 7/24: 0.2009s verified
+2026-10-10T21:08:25.7393330Z pipe-fresh rsync 8/24: 0.3326s verified
+2026-10-10T21:08:25.7393590Z pipe-fresh candidate 8/24: 0.2005s verified
+2026-10-10T21:08:25.7393820Z pipe-fresh reference 8/24: 0.0988s verified
+2026-10-10T21:08:25.7394030Z pipe-fresh reference 9/24: 0.2725s verified
+2026-10-10T21:08:25.7394240Z pipe-fresh rsync 9/24: 0.2491s verified
+2026-10-10T21:08:25.7394450Z pipe-fresh candidate 9/24: 0.1544s verified
+2026-10-10T21:08:25.7394680Z pipe-fresh reference 10/24: 0.1694s verified
+2026-10-10T21:08:25.7394910Z pipe-fresh candidate 10/24: 0.1614s verified
+2026-10-10T21:08:25.7395120Z pipe-fresh rsync 10/24: 0.2454s verified
+2026-10-10T21:08:25.7395340Z pipe-fresh candidate 11/24: 0.1171s verified
+2026-10-10T21:08:25.7395550Z pipe-fresh rsync 11/24: 0.2239s verified
+2026-10-10T21:08:25.7395760Z pipe-fresh reference 11/24: 0.1185s verified
+2026-10-10T21:08:25.7395980Z pipe-fresh candidate 12/24: 0.2734s verified
+2026-10-10T21:08:25.7396210Z pipe-fresh reference 12/24: 0.2436s verified
+2026-10-10T21:08:25.7396430Z pipe-fresh rsync 12/24: 0.3034s verified
+2026-10-10T21:08:25.7396630Z pipe-fresh rsync 13/24: 0.3712s verified
+2026-10-10T21:08:25.7396840Z pipe-fresh reference 13/24: 0.1233s verified
+2026-10-10T21:08:25.7397060Z pipe-fresh candidate 13/24: 0.1879s verified
+2026-10-10T21:08:25.7397280Z pipe-fresh rsync 14/24: 0.1889s verified
+2026-10-10T21:08:25.7397500Z pipe-fresh candidate 14/24: 0.1841s verified
+2026-10-10T21:08:25.7397730Z pipe-fresh reference 14/24: 0.2597s verified
+2026-10-10T21:08:25.7397950Z pipe-fresh reference 15/24: 0.2578s verified
+2026-10-10T21:08:25.7398170Z pipe-fresh rsync 15/24: 0.2265s verified
+2026-10-10T21:08:25.7398380Z pipe-fresh candidate 15/24: 0.1606s verified
+2026-10-10T21:08:25.7398610Z pipe-fresh reference 16/24: 0.1715s verified
+2026-10-10T21:08:25.7398830Z pipe-fresh candidate 16/24: 0.1537s verified
+2026-10-10T21:08:25.7399050Z pipe-fresh rsync 16/24: 0.2781s verified
+2026-10-10T21:08:25.7399310Z pipe-fresh candidate 17/24: 0.1221s verified
+2026-10-10T21:08:25.7399570Z pipe-fresh rsync 17/24: 0.2624s verified
+2026-10-10T21:08:25.7399780Z pipe-fresh reference 17/24: 0.1920s verified
+2026-10-10T21:08:25.7400340Z pipe-fresh candidate 18/24: 0.1515s verified
+2026-10-10T21:08:25.7400550Z pipe-fresh reference 18/24: 0.2574s verified
+2026-10-10T21:08:25.7400780Z pipe-fresh rsync 18/24: 0.1639s verified
+2026-10-10T21:08:25.7400990Z pipe-fresh rsync 19/24: 0.3080s verified
+2026-10-10T21:08:25.7401200Z pipe-fresh reference 19/24: 0.1487s verified
+2026-10-10T21:08:25.7401420Z pipe-fresh candidate 19/24: 0.1496s verified
+2026-10-10T21:08:25.7401630Z pipe-fresh rsync 20/24: 0.1517s verified
+2026-10-10T21:08:25.7401840Z pipe-fresh candidate 20/24: 0.1773s verified
+2026-10-10T21:08:25.7402060Z pipe-fresh reference 20/24: 0.1257s verified
+2026-10-10T21:08:25.7402280Z pipe-fresh reference 21/24: 0.2092s verified
+2026-10-10T21:08:25.7402490Z pipe-fresh rsync 21/24: 0.3743s verified
+2026-10-10T21:08:25.7402750Z pipe-fresh candidate 21/24: 0.2186s verified
+2026-10-10T21:08:25.7403150Z pipe-fresh reference 22/24: 0.1451s verified
+2026-10-10T21:08:25.7403380Z pipe-fresh candidate 22/24: 0.2660s verified
+2026-10-10T21:08:25.7403590Z pipe-fresh rsync 22/24: 0.3015s verified
+2026-10-10T21:08:25.7403800Z pipe-fresh candidate 23/24: 0.1337s verified
+2026-10-10T21:08:25.7404020Z pipe-fresh rsync 23/24: 0.1455s verified
+2026-10-10T21:08:25.7404230Z pipe-fresh reference 23/24: 0.2224s verified
+2026-10-10T21:08:25.7404440Z pipe-fresh candidate 24/24: 0.2272s verified
+2026-10-10T21:08:25.7404670Z pipe-fresh reference 24/24: 0.1901s verified
+2026-10-10T21:08:25.7404890Z pipe-fresh rsync 24/24: 0.3239s verified
+2026-10-10T21:08:25.7405180Z pipe-fresh: xs speedup relative to rsync 1.465, recorded minimum 0.855: PASS
+2026-10-10T21:08:25.7405510Z pipe-checksum candidate warmup: 0.1859s verified
+2026-10-10T21:08:25.7405760Z pipe-checksum reference warmup: 0.2270s verified
+2026-10-10T21:08:25.7406000Z pipe-checksum rsync warmup: 0.1944s verified
+2026-10-10T21:08:25.7406230Z pipe-checksum rsync 1/24: 0.3192s verified
+2026-10-10T21:08:25.7406450Z pipe-checksum reference 1/24: 0.1853s verified
+2026-10-10T21:08:25.7406680Z pipe-checksum candidate 1/24: 0.1252s verified
+2026-10-10T21:08:25.7406920Z pipe-checksum rsync 2/24: 0.1251s verified
+2026-10-10T21:08:25.7407140Z pipe-checksum candidate 2/24: 0.2185s verified
+2026-10-10T21:08:25.7407370Z pipe-checksum reference 2/24: 0.0961s verified
+2026-10-10T21:08:25.7407610Z pipe-checksum reference 3/24: 0.1425s verified
+2026-10-10T21:08:25.7407830Z pipe-checksum rsync 3/24: 0.2882s verified
+2026-10-10T21:08:25.7408050Z pipe-checksum candidate 3/24: 0.2486s verified
+2026-10-10T21:08:25.7408290Z pipe-checksum reference 4/24: 0.1633s verified
+2026-10-10T21:08:25.7408520Z pipe-checksum candidate 4/24: 0.2519s verified
+2026-10-10T21:08:25.7408740Z pipe-checksum rsync 4/24: 0.2781s verified
+2026-10-10T21:08:25.7408960Z pipe-checksum candidate 5/24: 0.1760s verified
+2026-10-10T21:08:25.7409180Z pipe-checksum rsync 5/24: 0.1970s verified
+2026-10-10T21:08:25.7409400Z pipe-checksum reference 5/24: 0.1886s verified
+2026-10-10T21:08:25.7409640Z pipe-checksum candidate 6/24: 0.2391s verified
+2026-10-10T21:08:25.7409860Z pipe-checksum reference 6/24: 0.2289s verified
+2026-10-10T21:08:25.7410090Z pipe-checksum rsync 6/24: 0.2428s verified
+2026-10-10T21:08:25.7410300Z pipe-checksum rsync 7/24: 0.2819s verified
+2026-10-10T21:08:25.7410520Z pipe-checksum reference 7/24: 0.2571s verified
+2026-10-10T21:08:25.7410750Z pipe-checksum candidate 7/24: 0.2434s verified
+2026-10-10T21:08:25.7410970Z pipe-checksum rsync 8/24: 0.2558s verified
+2026-10-10T21:08:25.7411200Z pipe-checksum candidate 8/24: 0.1509s verified
+2026-10-10T21:08:25.7411430Z pipe-checksum reference 8/24: 0.1762s verified
+2026-10-10T21:08:25.7411670Z pipe-checksum reference 9/24: 0.2477s verified
+2026-10-10T21:08:25.7411890Z pipe-checksum rsync 9/24: 0.1331s verified
+2026-10-10T21:08:25.7412110Z pipe-checksum candidate 9/24: 0.2165s verified
+2026-10-10T21:08:25.7412340Z pipe-checksum reference 10/24: 0.1196s verified
+2026-10-10T21:08:25.7412590Z pipe-checksum candidate 10/24: 0.2255s verified
+2026-10-10T21:08:25.7412820Z pipe-checksum rsync 10/24: 0.2398s verified
+2026-10-10T21:08:25.7413180Z pipe-checksum candidate 11/24: 0.2248s verified
+2026-10-10T21:08:25.7413410Z pipe-checksum rsync 11/24: 0.1864s verified
+2026-10-10T21:08:25.7413640Z pipe-checksum reference 11/24: 0.2377s verified
+2026-10-10T21:08:25.7413880Z pipe-checksum candidate 12/24: 0.1531s verified
+2026-10-10T21:08:25.7414110Z pipe-checksum reference 12/24: 0.1168s verified
+2026-10-10T21:08:25.7414340Z pipe-checksum rsync 12/24: 0.1275s verified
+2026-10-10T21:08:25.7414560Z pipe-checksum rsync 13/24: 0.2312s verified
+2026-10-10T21:08:25.7414790Z pipe-checksum reference 13/24: 0.1086s verified
+2026-10-10T21:08:25.7415020Z pipe-checksum candidate 13/24: 0.2370s verified
+2026-10-10T21:08:25.7415260Z pipe-checksum rsync 14/24: 0.3878s verified
+2026-10-10T21:08:25.7415490Z pipe-checksum candidate 14/24: 0.1731s verified
+2026-10-10T21:08:25.7415840Z pipe-checksum reference 14/24: 0.1003s verified
+2026-10-10T21:08:25.7416080Z pipe-checksum reference 15/24: 0.2175s verified
+2026-10-10T21:08:25.7416310Z pipe-checksum rsync 15/24: 0.3191s verified
+2026-10-10T21:08:25.7416540Z pipe-checksum candidate 15/24: 0.2542s verified
+2026-10-10T21:08:25.7416780Z pipe-checksum reference 16/24: 0.0815s verified
+2026-10-10T21:08:25.7417010Z pipe-checksum candidate 16/24: 0.1987s verified
+2026-10-10T21:08:25.7417240Z pipe-checksum rsync 16/24: 0.2015s verified
+2026-10-10T21:08:25.7417470Z pipe-checksum candidate 17/24: 0.1769s verified
+2026-10-10T21:08:25.7417700Z pipe-checksum rsync 17/24: 0.2841s verified
+2026-10-10T21:08:25.7417930Z pipe-checksum reference 17/24: 0.2366s verified
+2026-10-10T21:08:25.7418170Z pipe-checksum candidate 18/24: 0.2563s verified
+2026-10-10T21:08:25.7418410Z pipe-checksum reference 18/24: 0.1430s verified
+2026-10-10T21:08:25.7418640Z pipe-checksum rsync 18/24: 0.3067s verified
+2026-10-10T21:08:25.7418850Z pipe-checksum rsync 19/24: 0.1704s verified
+2026-10-10T21:08:25.7419080Z pipe-checksum reference 19/24: 0.2441s verified
+2026-10-10T21:08:25.7419320Z pipe-checksum candidate 19/24: 0.1238s verified
+2026-10-10T21:08:25.7419560Z pipe-checksum rsync 20/24: 0.2655s verified
+2026-10-10T21:08:25.7419820Z pipe-checksum candidate 20/24: 0.0947s verified
+2026-10-10T21:08:25.7420060Z pipe-checksum reference 20/24: 0.1036s verified
+2026-10-10T21:08:25.7420300Z pipe-checksum reference 21/24: 0.2493s verified
+2026-10-10T21:08:25.7420520Z pipe-checksum rsync 21/24: 0.1512s verified
+2026-10-10T21:08:25.7420750Z pipe-checksum candidate 21/24: 0.2016s verified
+2026-10-10T21:08:25.7420990Z pipe-checksum reference 22/24: 0.1358s verified
+2026-10-10T21:08:25.7421230Z pipe-checksum candidate 22/24: 0.1461s verified
+2026-10-10T21:08:25.7421460Z pipe-checksum rsync 22/24: 0.2552s verified
+2026-10-10T21:08:25.7421690Z pipe-checksum candidate 23/24: 0.2481s verified
+2026-10-10T21:08:25.7421920Z pipe-checksum rsync 23/24: 0.1736s verified
+2026-10-10T21:08:25.7422150Z pipe-checksum reference 23/24: 0.2565s verified
+2026-10-10T21:08:25.7422390Z pipe-checksum candidate 24/24: 0.2345s verified
+2026-10-10T21:08:25.7422630Z pipe-checksum reference 24/24: 0.1051s verified
+2026-10-10T21:08:25.7422860Z pipe-checksum rsync 24/24: 0.1855s verified
+2026-10-10T21:08:25.7423180Z pipe-checksum: xs speedup relative to rsync 1.110, recorded minimum 0.853: PASS
+2026-10-10T21:08:25.7423510Z local-update candidate warmup: 0.0170s verified
+2026-10-10T21:08:25.7423750Z local-update reference warmup: 0.0099s verified
+2026-10-10T21:08:25.7424090Z local-update rsync warmup: 0.0371s verified
+2026-10-10T21:08:25.7424320Z local-update rsync 1/24: 0.1511s verified
+2026-10-10T21:08:25.7424540Z local-update reference 1/24: 0.0116s verified
+2026-10-10T21:08:25.7424770Z local-update candidate 1/24: 0.0201s verified
+2026-10-10T21:08:25.7424990Z local-update rsync 2/24: 0.1949s verified
+2026-10-10T21:08:25.7425210Z local-update candidate 2/24: 0.0147s verified
+2026-10-10T21:08:25.7425440Z local-update reference 2/24: 0.0079s verified
+2026-10-10T21:08:25.7425660Z local-update reference 3/24: 0.0074s verified
+2026-10-10T21:08:25.7425890Z local-update rsync 3/24: 0.2868s verified
+2026-10-10T21:08:25.7426270Z local-update candidate 3/24: 0.0210s verified
+2026-10-10T21:08:25.7426500Z local-update reference 4/24: 0.0149s verified
+2026-10-10T21:08:25.7426730Z local-update candidate 4/24: 0.0150s verified
+2026-10-10T21:08:25.7426940Z local-update rsync 4/24: 0.0742s verified
+2026-10-10T21:08:25.7427160Z local-update candidate 5/24: 0.0148s verified
+2026-10-10T21:08:25.7427380Z local-update rsync 5/24: 0.1658s verified
+2026-10-10T21:08:25.7427590Z local-update reference 5/24: 0.0076s verified
+2026-10-10T21:08:25.7427820Z local-update candidate 6/24: 0.0080s verified
+2026-10-10T21:08:25.7428050Z local-update reference 6/24: 0.0208s verified
+2026-10-10T21:08:25.7428270Z local-update rsync 6/24: 0.3099s verified
+2026-10-10T21:08:25.7428480Z local-update rsync 7/24: 0.2837s verified
+2026-10-10T21:08:25.7428860Z local-update reference 7/24: 0.0087s verified
+2026-10-10T21:08:25.7429100Z local-update candidate 7/24: 0.0094s verified
+2026-10-10T21:08:25.7429320Z local-update rsync 8/24: 0.1651s verified
+2026-10-10T21:08:25.7429540Z local-update candidate 8/24: 0.0132s verified
+2026-10-10T21:08:25.7429770Z local-update reference 8/24: 0.0155s verified
+2026-10-10T21:08:25.7429990Z local-update reference 9/24: 0.0148s verified
+2026-10-10T21:08:25.7430200Z local-update rsync 9/24: 0.3558s verified
+2026-10-10T21:08:25.7430430Z local-update candidate 9/24: 0.0083s verified
+2026-10-10T21:08:25.7430660Z local-update reference 10/24: 0.0084s verified
+2026-10-10T21:08:25.7430890Z local-update candidate 10/24: 0.0082s verified
+2026-10-10T21:08:25.7431120Z local-update rsync 10/24: 0.1210s verified
+2026-10-10T21:08:25.7431340Z local-update candidate 11/24: 0.0150s verified
+2026-10-10T21:08:25.7431560Z local-update rsync 11/24: 0.2589s verified
+2026-10-10T21:08:25.7431780Z local-update reference 11/24: 0.0146s verified
+2026-10-10T21:08:25.7432010Z local-update candidate 12/24: 0.0150s verified
+2026-10-10T21:08:25.7432230Z local-update reference 12/24: 0.0083s verified
+2026-10-10T21:08:25.7432460Z local-update rsync 12/24: 0.2164s verified
+2026-10-10T21:08:25.7432680Z local-update rsync 13/24: 0.0892s verified
+2026-10-10T21:08:25.7432890Z local-update reference 13/24: 0.0106s verified
+2026-10-10T21:08:25.7433120Z local-update candidate 13/24: 0.0152s verified
+2026-10-10T21:08:25.7433340Z local-update rsync 14/24: 0.0791s verified
+2026-10-10T21:08:25.7433560Z local-update candidate 14/24: 0.0155s verified
+2026-10-10T21:08:25.7433800Z local-update reference 14/24: 0.0198s verified
+2026-10-10T21:08:25.7434030Z local-update reference 15/24: 0.0115s verified
+2026-10-10T21:08:25.7434250Z local-update rsync 15/24: 0.1784s verified
+2026-10-10T21:08:25.7434470Z local-update candidate 15/24: 0.0268s verified
+2026-10-10T21:08:25.7434700Z local-update reference 16/24: 0.0084s verified
+2026-10-10T21:08:25.7434930Z local-update candidate 16/24: 0.0128s verified
+2026-10-10T21:08:25.7435150Z local-update rsync 16/24: 0.2195s verified
+2026-10-10T21:08:25.7435370Z local-update candidate 17/24: 0.0160s verified
+2026-10-10T21:08:25.7435590Z local-update rsync 17/24: 0.1299s verified
+2026-10-10T21:08:25.7435810Z local-update reference 17/24: 0.0089s verified
+2026-10-10T21:08:25.7436040Z local-update candidate 18/24: 0.0163s verified
+2026-10-10T21:08:25.7436280Z local-update reference 18/24: 0.0081s verified
+2026-10-10T21:08:25.7436500Z local-update rsync 18/24: 0.2056s verified
+2026-10-10T21:08:25.7436710Z local-update rsync 19/24: 0.0550s verified
+2026-10-10T21:08:25.7436930Z local-update reference 19/24: 0.0084s verified
+2026-10-10T21:08:25.7437160Z local-update candidate 19/24: 0.0085s verified
+2026-10-10T21:08:25.7437390Z local-update rsync 20/24: 0.3015s verified
+2026-10-10T21:08:25.7437600Z local-update candidate 20/24: 0.0160s verified
+2026-10-10T21:08:25.7437830Z local-update reference 20/24: 0.0085s verified
+2026-10-10T21:08:25.7438050Z local-update reference 21/24: 0.0163s verified
+2026-10-10T21:08:25.7438280Z local-update rsync 21/24: 0.1983s verified
+2026-10-10T21:08:25.7438500Z local-update candidate 21/24: 0.0167s verified
+2026-10-10T21:08:25.7438890Z local-update reference 22/24: 0.0078s verified
+2026-10-10T21:08:25.7439130Z local-update candidate 22/24: 0.0079s verified
+2026-10-10T21:08:25.7439350Z local-update rsync 22/24: 0.1950s verified
+2026-10-10T21:08:25.7439570Z local-update candidate 23/24: 0.0161s verified
+2026-10-10T21:08:25.7439790Z local-update rsync 23/24: 0.0645s verified
+2026-10-10T21:08:25.7440010Z local-update reference 23/24: 0.0083s verified
+2026-10-10T21:08:25.7440240Z local-update candidate 24/24: 0.0101s verified
+2026-10-10T21:08:25.7440470Z local-update reference 24/24: 0.0199s verified
+2026-10-10T21:08:25.7440690Z local-update rsync 24/24: 0.1287s verified
+2026-10-10T21:08:25.7441010Z local-update: xs speedup relative to rsync 12.478, recorded minimum 12.723: REGRESSION
+2026-10-10T21:08:25.7441370Z pipe-update candidate warmup: 0.1362s verified
+2026-10-10T21:08:25.7441720Z pipe-update reference warmup: 0.2049s verified
+2026-10-10T21:08:25.7441960Z pipe-update rsync warmup: 0.2411s verified
+2026-10-10T21:08:25.7442180Z pipe-update rsync 1/24: 0.1267s verified
+2026-10-10T21:08:25.7442390Z pipe-update reference 1/24: 0.1738s verified
+2026-10-10T21:08:25.7442620Z pipe-update candidate 1/24: 0.1413s verified
+2026-10-10T21:08:25.7442840Z pipe-update rsync 2/24: 0.1744s verified
+2026-10-10T21:08:25.7443050Z pipe-update candidate 2/24: 0.0967s verified
+2026-10-10T21:08:25.7443270Z pipe-update reference 2/24: 0.0995s verified
+2026-10-10T21:08:25.7443500Z pipe-update reference 3/24: 0.0983s verified
+2026-10-10T21:08:25.7443710Z pipe-update rsync 3/24: 0.2259s verified
+2026-10-10T21:08:25.7443930Z pipe-update candidate 3/24: 0.2382s verified
+2026-10-10T21:08:25.7444160Z pipe-update reference 4/24: 0.2407s verified
+2026-10-10T21:08:25.7444380Z pipe-update candidate 4/24: 0.0867s verified
+2026-10-10T21:08:25.7444610Z pipe-update rsync 4/24: 0.1684s verified
+2026-10-10T21:08:25.7444880Z pipe-update candidate 5/24: 0.2163s verified
+2026-10-10T21:08:25.7445120Z pipe-update rsync 5/24: 0.1804s verified
+2026-10-10T21:08:25.7445330Z pipe-update reference 5/24: 0.1066s verified
+2026-10-10T21:08:25.7445560Z pipe-update candidate 6/24: 0.1170s verified
+2026-10-10T21:08:25.7445780Z pipe-update reference 6/24: 0.1992s verified
+2026-10-10T21:08:25.7446000Z pipe-update rsync 6/24: 0.3015s verified
+2026-10-10T21:08:25.7446210Z pipe-update rsync 7/24: 0.2774s verified
+2026-10-10T21:08:25.7446420Z pipe-update reference 7/24: 0.2336s verified
+2026-10-10T21:08:25.7446640Z pipe-update candidate 7/24: 0.1093s verified
+2026-10-10T21:08:25.7446860Z pipe-update rsync 8/24: 0.1361s verified
+2026-10-10T21:08:25.7447070Z pipe-update candidate 8/24: 0.1141s verified
+2026-10-10T21:08:25.7447290Z pipe-update reference 8/24: 0.1302s verified
+2026-10-10T21:08:25.7447510Z pipe-update reference 9/24: 0.0938s verified
+2026-10-10T21:08:25.7447730Z pipe-update rsync 9/24: 0.1476s verified
+2026-10-10T21:08:25.7447950Z pipe-update candidate 9/24: 0.1051s verified
+2026-10-10T21:08:25.7448170Z pipe-update reference 10/24: 0.2165s verified
+2026-10-10T21:08:25.7448410Z pipe-update candidate 10/24: 0.1267s verified
+2026-10-10T21:08:25.7448640Z pipe-update rsync 10/24: 0.1036s verified
+2026-10-10T21:08:25.7448860Z pipe-update candidate 11/24: 0.0818s verified
+2026-10-10T21:08:25.7449080Z pipe-update rsync 11/24: 0.1482s verified
+2026-10-10T21:08:25.7449300Z pipe-update reference 11/24: 0.1554s verified
+2026-10-10T21:08:25.7449530Z pipe-update candidate 12/24: 0.2373s verified
+2026-10-10T21:08:25.7449750Z pipe-update reference 12/24: 0.2134s verified
+2026-10-10T21:08:25.7449980Z pipe-update rsync 12/24: 0.1806s verified
+2026-10-10T21:08:25.7450190Z pipe-update rsync 13/24: 0.1064s verified
+2026-10-10T21:08:25.7455140Z pipe-update reference 13/24: 0.0897s verified
+2026-10-10T21:08:25.7455400Z pipe-update candidate 13/24: 0.0968s verified
+2026-10-10T21:08:25.7455620Z pipe-update rsync 14/24: 0.1681s verified
+2026-10-10T21:08:25.7455860Z pipe-update candidate 14/24: 0.1525s verified
+2026-10-10T21:08:25.7456090Z pipe-update reference 14/24: 0.0973s verified
+2026-10-10T21:08:25.7456320Z pipe-update reference 15/24: 0.0872s verified
+2026-10-10T21:08:25.7456840Z pipe-update rsync 15/24: 0.2669s verified
+2026-10-10T21:08:25.7457060Z pipe-update candidate 15/24: 0.1391s verified
+2026-10-10T21:08:25.7457290Z pipe-update reference 16/24: 0.2380s verified
+2026-10-10T21:08:25.7457510Z pipe-update candidate 16/24: 0.1929s verified
+2026-10-10T21:08:25.7457730Z pipe-update rsync 16/24: 0.2486s verified
+2026-10-10T21:08:25.7457950Z pipe-update candidate 17/24: 0.1516s verified
+2026-10-10T21:08:25.7458170Z pipe-update rsync 17/24: 0.2967s verified
+2026-10-10T21:08:25.7458390Z pipe-update reference 17/24: 0.1848s verified
+2026-10-10T21:08:25.7458620Z pipe-update candidate 18/24: 0.1932s verified
+2026-10-10T21:08:25.7458840Z pipe-update reference 18/24: 0.3020s verified
+2026-10-10T21:08:25.7459060Z pipe-update rsync 18/24: 0.1830s verified
+2026-10-10T21:08:25.7459510Z pipe-update rsync 19/24: 0.3087s verified
+2026-10-10T21:08:25.7459730Z pipe-update reference 19/24: 0.2289s verified
+2026-10-10T21:08:25.7459970Z pipe-update candidate 19/24: 0.2345s verified
+2026-10-10T21:08:25.7460190Z pipe-update rsync 20/24: 0.2018s verified
+2026-10-10T21:08:25.7460400Z pipe-update candidate 20/24: 0.2076s verified
+2026-10-10T21:08:25.7460630Z pipe-update reference 20/24: 0.2070s verified
+2026-10-10T21:08:25.7460860Z pipe-update reference 21/24: 0.0984s verified
+2026-10-10T21:08:25.7461080Z pipe-update rsync 21/24: 0.2443s verified
+2026-10-10T21:08:25.7461300Z pipe-update candidate 21/24: 0.2535s verified
+2026-10-10T21:08:25.7461530Z pipe-update reference 22/24: 0.1023s verified
+2026-10-10T21:08:25.7461750Z pipe-update candidate 22/24: 0.2447s verified
+2026-10-10T21:08:25.7461970Z pipe-update rsync 22/24: 0.3062s verified
+2026-10-10T21:08:25.7462190Z pipe-update candidate 23/24: 0.1048s verified
+2026-10-10T21:08:25.7462410Z pipe-update rsync 23/24: 0.2026s verified
+2026-10-10T21:08:25.7462630Z pipe-update reference 23/24: 0.2121s verified
+2026-10-10T21:08:25.7462860Z pipe-update candidate 24/24: 0.1885s verified
+2026-10-10T21:08:25.7463090Z pipe-update reference 24/24: 0.2456s verified
+2026-10-10T21:08:25.7463310Z pipe-update rsync 24/24: 0.1713s verified
+2026-10-10T21:08:25.7463620Z pipe-update: xs speedup relative to rsync 1.241, recorded minimum 0.608: PASS
+2026-10-10T21:08:25.7464060Z large-pipe candidate warmup: 0.0852s verified
+2026-10-10T21:08:25.7464290Z large-pipe reference warmup: 0.0869s verified
+2026-10-10T21:08:25.7464520Z large-pipe rsync warmup: 0.1893s verified
+2026-10-10T21:08:25.7464740Z large-pipe rsync 1/24: 0.2486s verified
+2026-10-10T21:08:25.7464950Z large-pipe reference 1/24: 0.2187s verified
+2026-10-10T21:08:25.7465170Z large-pipe candidate 1/24: 0.0879s verified
+2026-10-10T21:08:25.7465380Z large-pipe rsync 2/24: 0.1017s verified
+2026-10-10T21:08:25.7465590Z large-pipe candidate 2/24: 0.0930s verified
+2026-10-10T21:08:25.7465810Z large-pipe reference 2/24: 0.1307s verified
+2026-10-10T21:08:25.7466030Z large-pipe reference 3/24: 0.1307s verified
+2026-10-10T21:08:25.7466230Z large-pipe rsync 3/24: 0.1277s verified
+2026-10-10T21:08:25.7466450Z large-pipe candidate 3/24: 0.0914s verified
+2026-10-10T21:08:25.7466660Z large-pipe reference 4/24: 0.0936s verified
+2026-10-10T21:08:25.7466870Z large-pipe candidate 4/24: 0.1545s verified
+2026-10-10T21:08:25.7467090Z large-pipe rsync 4/24: 0.2476s verified
+2026-10-10T21:08:25.7467300Z large-pipe candidate 5/24: 0.2316s verified
+2026-10-10T21:08:25.7467500Z large-pipe rsync 5/24: 0.2900s verified
+2026-10-10T21:08:25.7467710Z large-pipe reference 5/24: 0.2066s verified
+2026-10-10T21:08:25.7467920Z large-pipe candidate 6/24: 0.1827s verified
+2026-10-10T21:08:25.7468140Z large-pipe reference 6/24: 0.1546s verified
+2026-10-10T21:08:25.7468360Z large-pipe rsync 6/24: 0.1282s verified
+2026-10-10T21:08:25.7468560Z large-pipe rsync 7/24: 0.1583s verified
+2026-10-10T21:08:25.7468770Z large-pipe reference 7/24: 0.0908s verified
+2026-10-10T21:08:25.7468990Z large-pipe candidate 7/24: 0.1798s verified
+2026-10-10T21:08:25.7469210Z large-pipe rsync 8/24: 0.3015s verified
+2026-10-10T21:08:25.7469520Z large-pipe candidate 8/24: 0.2104s verified
+2026-10-10T21:08:25.7469730Z large-pipe reference 8/24: 0.2142s verified
+2026-10-10T21:08:25.7469950Z large-pipe reference 9/24: 0.1514s verified
+2026-10-10T21:08:25.7470160Z large-pipe rsync 9/24: 0.1321s verified
+2026-10-10T21:08:25.7470370Z large-pipe candidate 9/24: 0.1993s verified
+2026-10-10T21:08:25.7470590Z large-pipe reference 10/24: 0.1601s verified
+2026-10-10T21:08:25.7470810Z large-pipe candidate 10/24: 0.1381s verified
+2026-10-10T21:08:25.7471030Z large-pipe rsync 10/24: 0.0984s verified
+2026-10-10T21:08:25.7471250Z large-pipe candidate 11/24: 0.2059s verified
+2026-10-10T21:08:25.7471470Z large-pipe rsync 11/24: 0.1861s verified
+2026-10-10T21:08:25.7471680Z large-pipe reference 11/24: 0.2149s verified
+2026-10-10T21:08:25.7471910Z large-pipe candidate 12/24: 0.1525s verified
+2026-10-10T21:08:25.7472270Z large-pipe reference 12/24: 0.2426s verified
+2026-10-10T21:08:25.7472520Z large-pipe rsync 12/24: 0.2880s verified
+2026-10-10T21:08:25.7472780Z large-pipe rsync 13/24: 0.1484s verified
+2026-10-10T21:08:25.7473020Z large-pipe reference 13/24: 0.2103s verified
+2026-10-10T21:08:25.7473240Z large-pipe candidate 13/24: 0.1959s verified
+2026-10-10T21:08:25.7473450Z large-pipe rsync 14/24: 0.2869s verified
+2026-10-10T21:08:25.7473660Z large-pipe candidate 14/24: 0.2249s verified
+2026-10-10T21:08:25.7473890Z large-pipe reference 14/24: 0.1153s verified
+2026-10-10T21:08:25.7474110Z large-pipe reference 15/24: 0.2325s verified
+2026-10-10T21:08:25.7474320Z large-pipe rsync 15/24: 0.1000s verified
+2026-10-10T21:08:25.7474530Z large-pipe candidate 15/24: 0.1385s verified
+2026-10-10T21:08:25.7474750Z large-pipe reference 16/24: 0.1750s verified
+2026-10-10T21:08:25.7474970Z large-pipe candidate 16/24: 0.0932s verified
+2026-10-10T21:08:25.7475190Z large-pipe rsync 16/24: 0.1298s verified
+2026-10-10T21:08:25.7475460Z large-pipe candidate 17/24: 0.0974s verified
+2026-10-10T21:08:25.7475670Z large-pipe rsync 17/24: 0.3229s verified
+2026-10-10T21:08:25.7475880Z large-pipe reference 17/24: 0.2474s verified
+2026-10-10T21:08:25.7476110Z large-pipe candidate 18/24: 0.2369s verified
+2026-10-10T21:08:25.7476330Z large-pipe reference 18/24: 0.1691s verified
+2026-10-10T21:08:25.7476550Z large-pipe rsync 18/24: 0.1120s verified
+2026-10-10T21:08:25.7476760Z large-pipe rsync 19/24: 0.2599s verified
+2026-10-10T21:08:25.7476970Z large-pipe reference 19/24: 0.1964s verified
+2026-10-10T21:08:25.7477200Z large-pipe candidate 19/24: 0.1622s verified
+2026-10-10T21:08:25.7477420Z large-pipe rsync 20/24: 0.2579s verified
+2026-10-10T21:08:25.7477630Z large-pipe candidate 20/24: 0.0965s verified
+2026-10-10T21:08:25.7477860Z large-pipe reference 20/24: 0.2287s verified
+2026-10-10T21:08:25.7478080Z large-pipe reference 21/24: 0.1727s verified
+2026-10-10T21:08:25.7478300Z large-pipe rsync 21/24: 0.1254s verified
+2026-10-10T21:08:25.7478520Z large-pipe candidate 21/24: 0.1134s verified
+2026-10-10T21:08:25.7478740Z large-pipe reference 22/24: 0.0882s verified
+2026-10-10T21:08:25.7478970Z large-pipe candidate 22/24: 0.1788s verified
+2026-10-10T21:08:25.7479180Z large-pipe rsync 22/24: 0.1019s verified
+2026-10-10T21:08:25.7479390Z large-pipe candidate 23/24: 0.2038s verified
+2026-10-10T21:08:25.7479620Z large-pipe rsync 23/24: 0.3095s verified
+2026-10-10T21:08:25.7479830Z large-pipe reference 23/24: 0.2305s verified
+2026-10-10T21:08:25.7480050Z large-pipe candidate 24/24: 0.1853s verified
+2026-10-10T21:08:25.7480260Z large-pipe reference 24/24: 0.2192s verified
+2026-10-10T21:08:25.7480480Z large-pipe rsync 24/24: 0.2493s verified
+2026-10-10T21:08:25.7480770Z large-pipe: xs speedup relative to rsync 1.010, recorded minimum 0.556: PASS
+2026-10-10T21:08:25.7481110Z large-single-local candidate warmup: 0.0077s verified
+2026-10-10T21:08:25.7481400Z large-single-local reference warmup: 0.0058s verified
+2026-10-10T21:08:25.7481660Z large-single-local rsync warmup: 0.1508s verified
+2026-10-10T21:08:25.7481920Z large-single-local rsync 1/24: 0.0960s verified
+2026-10-10T21:08:25.7482170Z large-single-local reference 1/24: 0.0079s verified
+2026-10-10T21:08:25.7482520Z large-single-local candidate 1/24: 0.0061s verified
+2026-10-10T21:08:25.7482770Z large-single-local rsync 2/24: 0.0728s verified
+2026-10-10T21:08:25.7483020Z large-single-local candidate 2/24: 0.0104s verified
+2026-10-10T21:08:25.7483280Z large-single-local reference 2/24: 0.0106s verified
+2026-10-10T21:08:25.7483540Z large-single-local reference 3/24: 0.0107s verified
+2026-10-10T21:08:25.7483780Z large-single-local rsync 3/24: 0.2319s verified
+2026-10-10T21:08:25.7484030Z large-single-local candidate 3/24: 0.0099s verified
+2026-10-10T21:08:25.7484290Z large-single-local reference 4/24: 0.0123s verified
+2026-10-10T21:08:25.7484550Z large-single-local candidate 4/24: 0.0114s verified
+2026-10-10T21:08:25.7484800Z large-single-local rsync 4/24: 0.0858s verified
+2026-10-10T21:08:25.7485230Z large-single-local candidate 5/24: 0.0070s verified
+2026-10-10T21:08:25.7485500Z large-single-local rsync 5/24: 0.1505s verified
+2026-10-10T21:08:25.7485750Z large-single-local reference 5/24: 0.0110s verified
+2026-10-10T21:08:25.7486010Z large-single-local candidate 6/24: 0.0110s verified
+2026-10-10T21:08:25.7486260Z large-single-local reference 6/24: 0.0072s verified
+2026-10-10T21:08:25.7486520Z large-single-local rsync 6/24: 0.1344s verified
+2026-10-10T21:08:25.7486760Z large-single-local rsync 7/24: 0.1995s verified
+2026-10-10T21:08:25.7487010Z large-single-local reference 7/24: 0.0101s verified
+2026-10-10T21:08:25.7487270Z large-single-local candidate 7/24: 0.0107s verified
+2026-10-10T21:08:25.7487520Z large-single-local rsync 8/24: 0.3439s verified
+2026-10-10T21:08:25.7487760Z large-single-local candidate 8/24: 0.0128s verified
+2026-10-10T21:08:25.7488020Z large-single-local reference 8/24: 0.0113s verified
+2026-10-10T21:08:25.7488280Z large-single-local reference 9/24: 0.0111s verified
+2026-10-10T21:08:25.7488530Z large-single-local rsync 9/24: 0.1064s verified
+2026-10-10T21:08:25.7488780Z large-single-local candidate 9/24: 0.0098s verified
+2026-10-10T21:08:25.7489050Z large-single-local reference 10/24: 0.0076s verified
+2026-10-10T21:08:25.7489320Z large-single-local candidate 10/24: 0.0053s verified
+2026-10-10T21:08:25.7489570Z large-single-local rsync 10/24: 0.1440s verified
+2026-10-10T21:08:25.7489830Z large-single-local candidate 11/24: 0.0113s verified
+2026-10-10T21:08:25.7490080Z large-single-local rsync 11/24: 0.1152s verified
+2026-10-10T21:08:25.7490340Z large-single-local reference 11/24: 0.0094s verified
+2026-10-10T21:08:25.7490600Z large-single-local candidate 12/24: 0.0077s verified
+2026-10-10T21:08:25.7490860Z large-single-local reference 12/24: 0.0114s verified
+2026-10-10T21:08:25.7491120Z large-single-local rsync 12/24: 0.1788s verified
+2026-10-10T21:08:25.7491360Z large-single-local rsync 13/24: 0.0680s verified
+2026-10-10T21:08:25.7491610Z large-single-local reference 13/24: 0.0117s verified
+2026-10-10T21:08:25.7491870Z large-single-local candidate 13/24: 0.0105s verified
+2026-10-10T21:08:25.7492130Z large-single-local rsync 14/24: 0.0593s verified
+2026-10-10T21:08:25.7492390Z large-single-local candidate 14/24: 0.0089s verified
+2026-10-10T21:08:25.7492650Z large-single-local reference 14/24: 0.0099s verified
+2026-10-10T21:08:25.7492910Z large-single-local reference 15/24: 0.0059s verified
+2026-10-10T21:08:25.7493170Z large-single-local rsync 15/24: 0.2038s verified
+2026-10-10T21:08:25.7493420Z large-single-local candidate 15/24: 0.0050s verified
+2026-10-10T21:08:25.7493690Z large-single-local reference 16/24: 0.0057s verified
+2026-10-10T21:08:25.7493950Z large-single-local candidate 16/24: 0.0055s verified
+2026-10-10T21:08:25.7494200Z large-single-local rsync 16/24: 0.1882s verified
+2026-10-10T21:08:25.7494460Z large-single-local candidate 17/24: 0.0105s verified
+2026-10-10T21:08:25.7494710Z large-single-local rsync 17/24: 0.3630s verified
+2026-10-10T21:08:25.7494960Z large-single-local reference 17/24: 0.0108s verified
+2026-10-10T21:08:25.7495220Z large-single-local candidate 18/24: 0.0102s verified
+2026-10-10T21:08:25.7495490Z large-single-local reference 18/24: 0.0137s verified
+2026-10-10T21:08:25.7495850Z large-single-local rsync 18/24: 0.0411s verified
+2026-10-10T21:08:25.7496080Z large-single-local rsync 19/24: 0.2394s verified
+2026-10-10T21:08:25.7496340Z large-single-local reference 19/24: 0.0074s verified
+2026-10-10T21:08:25.7496610Z large-single-local candidate 19/24: 0.0108s verified
+2026-10-10T21:08:25.7496860Z large-single-local rsync 20/24: 0.2874s verified
+2026-10-10T21:08:25.7497110Z large-single-local candidate 20/24: 0.0078s verified
+2026-10-10T21:08:25.7497380Z large-single-local reference 20/24: 0.0100s verified
+2026-10-10T21:08:25.7497640Z large-single-local reference 21/24: 0.0105s verified
+2026-10-10T21:08:25.7497890Z large-single-local rsync 21/24: 0.2253s verified
+2026-10-10T21:08:25.7498140Z large-single-local candidate 21/24: 0.0096s verified
+2026-10-10T21:08:25.7498500Z large-single-local reference 22/24: 0.0109s verified
+2026-10-10T21:08:25.7498780Z large-single-local candidate 22/24: 0.0094s verified
+2026-10-10T21:08:25.7499030Z large-single-local rsync 22/24: 0.1218s verified
+2026-10-10T21:08:25.7499290Z large-single-local candidate 23/24: 0.0110s verified
+2026-10-10T21:08:25.7499540Z large-single-local rsync 23/24: 0.0397s verified
+2026-10-10T21:08:25.7499790Z large-single-local reference 23/24: 0.0136s verified
+2026-10-10T21:08:25.7500050Z large-single-local candidate 24/24: 0.0063s verified
+2026-10-10T21:08:25.7500310Z large-single-local reference 24/24: 0.0137s verified
+2026-10-10T21:08:25.7500570Z large-single-local rsync 24/24: 0.2000s verified
+2026-10-10T21:08:25.7500910Z large-single-local: xs speedup relative to rsync 14.948, recorded minimum 8.310: PASS
+2026-10-10T21:08:25.7501280Z large-single-pipe candidate warmup: 0.1511s verified
+2026-10-10T21:08:25.7501550Z large-single-pipe reference warmup: 0.1224s verified
+2026-10-10T21:08:25.7501820Z large-single-pipe rsync warmup: 0.1805s verified
+2026-10-10T21:08:25.7502060Z large-single-pipe rsync 1/24: 0.1807s verified
+2026-10-10T21:08:25.7502310Z large-single-pipe reference 1/24: 0.2208s verified
+2026-10-10T21:08:25.7502570Z large-single-pipe candidate 1/24: 0.1432s verified
+2026-10-10T21:08:25.7502820Z large-single-pipe rsync 2/24: 0.2099s verified
+2026-10-10T21:08:25.7503070Z large-single-pipe candidate 2/24: 0.2043s verified
+2026-10-10T21:08:25.7503320Z large-single-pipe reference 2/24: 0.1453s verified
+2026-10-10T21:08:25.7503580Z large-single-pipe reference 3/24: 0.1853s verified
+2026-10-10T21:08:25.7503820Z large-single-pipe rsync 3/24: 0.2189s verified
+2026-10-10T21:08:25.7504150Z large-single-pipe candidate 3/24: 0.0963s verified
+2026-10-10T21:08:25.7504400Z large-single-pipe reference 4/24: 0.1829s verified
+2026-10-10T21:08:25.7504650Z large-single-pipe candidate 4/24: 0.1409s verified
+2026-10-10T21:08:25.7504900Z large-single-pipe rsync 4/24: 0.2277s verified
+2026-10-10T21:08:25.7505140Z large-single-pipe candidate 5/24: 0.1920s verified
+2026-10-10T21:08:25.7505390Z large-single-pipe rsync 5/24: 0.2123s verified
+2026-10-10T21:08:25.7505640Z large-single-pipe reference 5/24: 0.2128s verified
+2026-10-10T21:08:25.7505890Z large-single-pipe candidate 6/24: 0.2483s verified
+2026-10-10T21:08:25.7506140Z large-single-pipe reference 6/24: 0.1050s verified
+2026-10-10T21:08:25.7506390Z large-single-pipe rsync 6/24: 0.3119s verified
+2026-10-10T21:08:25.7506620Z large-single-pipe rsync 7/24: 0.1783s verified
+2026-10-10T21:08:25.7506870Z large-single-pipe reference 7/24: 0.2190s verified
+2026-10-10T21:08:25.7507120Z large-single-pipe candidate 7/24: 0.1018s verified
+2026-10-10T21:08:25.7507360Z large-single-pipe rsync 8/24: 0.3100s verified
+2026-10-10T21:08:25.7507610Z large-single-pipe candidate 8/24: 0.2197s verified
+2026-10-10T21:08:25.7507860Z large-single-pipe reference 8/24: 0.1927s verified
+2026-10-10T21:08:25.7508110Z large-single-pipe reference 9/24: 0.1646s verified
+2026-10-10T21:08:25.7508360Z large-single-pipe rsync 9/24: 0.2000s verified
+2026-10-10T21:08:25.7508600Z large-single-pipe candidate 9/24: 0.1997s verified
+2026-10-10T21:08:25.7508860Z large-single-pipe reference 10/24: 0.2357s verified
+2026-10-10T21:08:25.7509280Z large-single-pipe candidate 10/24: 0.2381s verified
+2026-10-10T21:08:25.7509550Z large-single-pipe rsync 10/24: 0.2734s verified
+2026-10-10T21:08:25.7509810Z large-single-pipe candidate 11/24: 0.0918s verified
+2026-10-10T21:08:25.7510060Z large-single-pipe rsync 11/24: 0.1051s verified
+2026-10-10T21:08:25.7510310Z large-single-pipe reference 11/24: 0.1386s verified
+2026-10-10T21:08:25.7510570Z large-single-pipe candidate 12/24: 0.1175s verified
+2026-10-10T21:08:25.7510830Z large-single-pipe reference 12/24: 0.0854s verified
+2026-10-10T21:08:25.7511080Z large-single-pipe rsync 12/24: 0.1665s verified
+2026-10-10T21:08:25.7511320Z large-single-pipe rsync 13/24: 0.2392s verified
+2026-10-10T21:08:25.7511570Z large-single-pipe reference 13/24: 0.1756s verified
+2026-10-10T21:08:25.7511940Z large-single-pipe candidate 13/24: 0.1744s verified
+2026-10-10T21:08:25.7512200Z large-single-pipe rsync 14/24: 0.2383s verified
+2026-10-10T21:08:25.7512470Z large-single-pipe candidate 14/24: 0.2538s verified
+2026-10-10T21:08:25.7512800Z large-single-pipe reference 14/24: 0.1214s verified
+2026-10-10T21:08:25.7513090Z large-single-pipe reference 15/24: 0.1175s verified
+2026-10-10T21:08:25.7513350Z large-single-pipe rsync 15/24: 0.2824s verified
+2026-10-10T21:08:25.7513590Z large-single-pipe candidate 15/24: 0.2402s verified
+2026-10-10T21:08:25.7513850Z large-single-pipe reference 16/24: 0.1742s verified
+2026-10-10T21:08:25.7514110Z large-single-pipe candidate 16/24: 0.1465s verified
+2026-10-10T21:08:25.7514360Z large-single-pipe rsync 16/24: 0.1958s verified
+2026-10-10T21:08:25.7514600Z large-single-pipe candidate 17/24: 0.1811s verified
+2026-10-10T21:08:25.7514850Z large-single-pipe rsync 17/24: 0.2330s verified
+2026-10-10T21:08:25.7515110Z large-single-pipe reference 17/24: 0.1081s verified
+2026-10-10T21:08:25.7515360Z large-single-pipe candidate 18/24: 0.1124s verified
+2026-10-10T21:08:25.7515620Z large-single-pipe reference 18/24: 0.2146s verified
+2026-10-10T21:08:25.7515870Z large-single-pipe rsync 18/24: 0.2064s verified
+2026-10-10T21:08:25.7516130Z large-single-pipe rsync 19/24: 0.0944s verified
+2026-10-10T21:08:25.7520210Z large-single-pipe reference 19/24: 0.1647s verified
+2026-10-10T21:08:25.7520520Z large-single-pipe candidate 19/24: 0.1860s verified
+2026-10-10T21:08:25.7520800Z large-single-pipe rsync 20/24: 0.2237s verified
+2026-10-10T21:08:25.7521110Z large-single-pipe candidate 20/24: 0.2257s verified
+2026-10-10T21:08:25.7521390Z large-single-pipe reference 20/24: 0.2404s verified
+2026-10-10T21:08:25.7521650Z large-single-pipe reference 21/24: 0.0896s verified
+2026-10-10T21:08:25.7521910Z large-single-pipe rsync 21/24: 0.1122s verified
+2026-10-10T21:08:25.7522160Z large-single-pipe candidate 21/24: 0.2307s verified
+2026-10-10T21:08:25.7522410Z large-single-pipe reference 22/24: 0.2372s verified
+2026-10-10T21:08:25.7522680Z large-single-pipe candidate 22/24: 0.0904s verified
+2026-10-10T21:08:25.7522940Z large-single-pipe rsync 22/24: 0.3052s verified
+2026-10-10T21:08:25.7523190Z large-single-pipe candidate 23/24: 0.1611s verified
+2026-10-10T21:08:25.7523440Z large-single-pipe rsync 23/24: 0.1037s verified
+2026-10-10T21:08:25.7523690Z large-single-pipe reference 23/24: 0.1637s verified
+2026-10-10T21:08:25.7523990Z large-single-pipe candidate 24/24: 0.1441s verified
+2026-10-10T21:08:25.7524310Z large-single-pipe reference 24/24: 0.2018s verified
+2026-10-10T21:08:25.7524580Z large-single-pipe rsync 24/24: 0.3443s verified
+2026-10-10T21:08:25.7524990Z large-single-pipe: xs speedup relative to rsync 1.213, recorded minimum 0.740: PASS
+2026-10-10T21:08:25.7525380Z large-single-compressed candidate warmup: 0.1887s verified
+2026-10-10T21:08:25.7525690Z large-single-compressed reference warmup: 0.0867s verified
+2026-10-10T21:08:25.7525990Z large-single-compressed rsync warmup: 0.2405s verified
+2026-10-10T21:08:25.7526280Z large-single-compressed rsync 1/24: 0.2685s verified
+2026-10-10T21:08:25.7526570Z large-single-compressed reference 1/24: 0.0908s verified
+2026-10-10T21:08:25.7526860Z large-single-compressed candidate 1/24: 0.0950s verified
+2026-10-10T21:08:25.7527370Z large-single-compressed rsync 2/24: 0.1756s verified
+2026-10-10T21:08:25.7527650Z large-single-compressed candidate 2/24: 0.1997s verified
+2026-10-10T21:08:25.7527940Z large-single-compressed reference 2/24: 0.1553s verified
+2026-10-10T21:08:25.7528230Z large-single-compressed reference 3/24: 0.2397s verified
+2026-10-10T21:08:25.7528510Z large-single-compressed rsync 3/24: 0.1982s verified
+2026-10-10T21:08:25.7528790Z large-single-compressed candidate 3/24: 0.1528s verified
+2026-10-10T21:08:25.7529080Z large-single-compressed reference 4/24: 0.0803s verified
+2026-10-10T21:08:25.7529370Z large-single-compressed candidate 4/24: 0.2094s verified
+2026-10-10T21:08:25.7529650Z large-single-compressed rsync 4/24: 0.2170s verified
+2026-10-10T21:08:25.7530090Z large-single-compressed candidate 5/24: 0.2108s verified
+2026-10-10T21:08:25.7530380Z large-single-compressed rsync 5/24: 0.2929s verified
+2026-10-10T21:08:25.7530660Z large-single-compressed reference 5/24: 0.2217s verified
+2026-10-10T21:08:25.7530950Z large-single-compressed candidate 6/24: 0.0920s verified
+2026-10-10T21:08:25.7531240Z large-single-compressed reference 6/24: 0.1713s verified
+2026-10-10T21:08:25.7531520Z large-single-compressed rsync 6/24: 0.1878s verified
+2026-10-10T21:08:25.7531800Z large-single-compressed rsync 7/24: 0.1254s verified
+2026-10-10T21:08:25.7532080Z large-single-compressed reference 7/24: 0.0816s verified
+2026-10-10T21:08:25.7532370Z large-single-compressed candidate 7/24: 0.0830s verified
+2026-10-10T21:08:25.7532650Z large-single-compressed rsync 8/24: 0.2298s verified
+2026-10-10T21:08:25.7532930Z large-single-compressed candidate 8/24: 0.0877s verified
+2026-10-10T21:08:25.7533220Z large-single-compressed reference 8/24: 0.1813s verified
+2026-10-10T21:08:25.7533510Z large-single-compressed reference 9/24: 0.0862s verified
+2026-10-10T21:08:25.7533790Z large-single-compressed rsync 9/24: 0.3249s verified
+2026-10-10T21:08:25.7534060Z large-single-compressed candidate 9/24: 0.0975s verified
+2026-10-10T21:08:25.7534360Z large-single-compressed reference 10/24: 0.1231s verified
+2026-10-10T21:08:25.7534650Z large-single-compressed candidate 10/24: 0.1788s verified
+2026-10-10T21:08:25.7534940Z large-single-compressed rsync 10/24: 0.1839s verified
+2026-10-10T21:08:25.7535230Z large-single-compressed candidate 11/24: 0.2286s verified
+2026-10-10T21:08:25.7535510Z large-single-compressed rsync 11/24: 0.2286s verified
+2026-10-10T21:08:25.7535800Z large-single-compressed reference 11/24: 0.2118s verified
+2026-10-10T21:08:25.7536080Z large-single-compressed candidate 12/24: 0.2031s verified
+2026-10-10T21:08:25.7536370Z large-single-compressed reference 12/24: 0.2229s verified
+2026-10-10T21:08:25.7536660Z large-single-compressed rsync 12/24: 0.2158s verified
+2026-10-10T21:08:25.7536950Z large-single-compressed rsync 13/24: 0.1065s verified
+2026-10-10T21:08:25.7537230Z large-single-compressed reference 13/24: 0.0856s verified
+2026-10-10T21:08:25.7537530Z large-single-compressed candidate 13/24: 0.0993s verified
+2026-10-10T21:08:25.7537810Z large-single-compressed rsync 14/24: 0.1471s verified
+2026-10-10T21:08:25.7538100Z large-single-compressed candidate 14/24: 0.1231s verified
+2026-10-10T21:08:25.7538380Z large-single-compressed reference 14/24: 0.1509s verified
+2026-10-10T21:08:25.7538670Z large-single-compressed reference 15/24: 0.2049s verified
+2026-10-10T21:08:25.7538960Z large-single-compressed rsync 15/24: 0.1797s verified
+2026-10-10T21:08:25.7539240Z large-single-compressed candidate 15/24: 0.1509s verified
+2026-10-10T21:08:25.7539530Z large-single-compressed reference 16/24: 0.0881s verified
+2026-10-10T21:08:25.7539810Z large-single-compressed candidate 16/24: 0.1953s verified
+2026-10-10T21:08:25.7540100Z large-single-compressed rsync 16/24: 0.1340s verified
+2026-10-10T21:08:25.7540390Z large-single-compressed candidate 17/24: 0.0999s verified
+2026-10-10T21:08:25.7540670Z large-single-compressed rsync 17/24: 0.2688s verified
+2026-10-10T21:08:25.7540950Z large-single-compressed reference 17/24: 0.2402s verified
+2026-10-10T21:08:25.7541320Z large-single-compressed candidate 18/24: 0.1435s verified
+2026-10-10T21:08:25.7541610Z large-single-compressed reference 18/24: 0.1002s verified
+2026-10-10T21:08:25.7541890Z large-single-compressed rsync 18/24: 0.2803s verified
+2026-10-10T21:08:25.7542170Z large-single-compressed rsync 19/24: 0.2522s verified
+2026-10-10T21:08:25.7542440Z large-single-compressed reference 19/24: 0.1631s verified
+2026-10-10T21:08:25.7542740Z large-single-compressed candidate 19/24: 0.1339s verified
+2026-10-10T21:08:25.7543020Z large-single-compressed rsync 20/24: 0.2937s verified
+2026-10-10T21:08:25.7543300Z large-single-compressed candidate 20/24: 0.1561s verified
+2026-10-10T21:08:25.7543590Z large-single-compressed reference 20/24: 0.0876s verified
+2026-10-10T21:08:25.7544220Z large-single-compressed reference 21/24: 0.2315s verified
+2026-10-10T21:08:25.7544550Z large-single-compressed rsync 21/24: 0.2665s verified
+2026-10-10T21:08:25.7544830Z large-single-compressed candidate 21/24: 0.1627s verified
+2026-10-10T21:08:25.7545130Z large-single-compressed reference 22/24: 0.1576s verified
+2026-10-10T21:08:25.7545420Z large-single-compressed candidate 22/24: 0.1140s verified
+2026-10-10T21:08:25.7545710Z large-single-compressed rsync 22/24: 0.1817s verified
+2026-10-10T21:08:25.7545990Z large-single-compressed candidate 23/24: 0.2419s verified
+2026-10-10T21:08:25.7546280Z large-single-compressed rsync 23/24: 0.3370s verified
+2026-10-10T21:08:25.7546560Z large-single-compressed reference 23/24: 0.1754s verified
+2026-10-10T21:08:25.7546850Z large-single-compressed candidate 24/24: 0.1336s verified
+2026-10-10T21:08:25.7547150Z large-single-compressed reference 24/24: 0.1899s verified
+2026-10-10T21:08:25.7547430Z large-single-compressed rsync 24/24: 0.3163s verified
+2026-10-10T21:08:25.7547810Z large-single-compressed: xs speedup relative to rsync 1.514, recorded minimum 0.834: PASS
+2026-10-10T21:08:25.7548190Z tiny-pipe candidate warmup: 0.1182s verified
+2026-10-10T21:08:25.7548430Z tiny-pipe reference warmup: 0.0908s verified
+2026-10-10T21:08:25.7548660Z tiny-pipe rsync warmup: 0.1436s verified
+2026-10-10T21:08:25.7548870Z tiny-pipe rsync 1/24: 0.1478s verified
+2026-10-10T21:08:25.7549080Z tiny-pipe reference 1/24: 0.0958s verified
+2026-10-10T21:08:25.7549290Z tiny-pipe candidate 1/24: 0.0786s verified
+2026-10-10T21:08:25.7549510Z tiny-pipe rsync 2/24: 0.1335s verified
+2026-10-10T21:08:25.7549720Z tiny-pipe candidate 2/24: 0.1497s verified
+2026-10-10T21:08:25.7549930Z tiny-pipe reference 2/24: 0.0811s verified
+2026-10-10T21:08:25.7550140Z tiny-pipe reference 3/24: 0.1780s verified
+2026-10-10T21:08:25.7550340Z tiny-pipe rsync 3/24: 0.1114s verified
+2026-10-10T21:08:25.7550550Z tiny-pipe candidate 3/24: 0.0808s verified
+2026-10-10T21:08:25.7550760Z tiny-pipe reference 4/24: 0.2334s verified
+2026-10-10T21:08:25.7550980Z tiny-pipe candidate 4/24: 0.2338s verified
+2026-10-10T21:08:25.7551180Z tiny-pipe rsync 4/24: 0.3202s verified
+2026-10-10T21:08:25.7551380Z tiny-pipe candidate 5/24: 0.2585s verified
+2026-10-10T21:08:25.7551590Z tiny-pipe rsync 5/24: 0.2368s verified
+2026-10-10T21:08:25.7551800Z tiny-pipe reference 5/24: 0.1000s verified
+2026-10-10T21:08:25.7552000Z tiny-pipe candidate 6/24: 0.2331s verified
+2026-10-10T21:08:25.7552220Z tiny-pipe reference 6/24: 0.2247s verified
+2026-10-10T21:08:25.7552420Z tiny-pipe rsync 6/24: 0.3073s verified
+2026-10-10T21:08:25.7552620Z tiny-pipe rsync 7/24: 0.2395s verified
+2026-10-10T21:08:25.7552820Z tiny-pipe reference 7/24: 0.2427s verified
+2026-10-10T21:08:25.7553040Z tiny-pipe candidate 7/24: 0.2400s verified
+2026-10-10T21:08:25.7553250Z tiny-pipe rsync 8/24: 0.2467s verified
+2026-10-10T21:08:25.7553450Z tiny-pipe candidate 8/24: 0.2278s verified
+2026-10-10T21:08:25.7553660Z tiny-pipe reference 8/24: 0.2053s verified
+2026-10-10T21:08:25.7553880Z tiny-pipe reference 9/24: 0.1507s verified
+2026-10-10T21:08:25.7554080Z tiny-pipe rsync 9/24: 0.1693s verified
+2026-10-10T21:08:25.7554280Z tiny-pipe candidate 9/24: 0.2300s verified
+2026-10-10T21:08:25.7554640Z tiny-pipe reference 10/24: 0.2427s verified
+2026-10-10T21:08:25.7554870Z tiny-pipe candidate 10/24: 0.1751s verified
+2026-10-10T21:08:25.7555080Z tiny-pipe rsync 10/24: 0.1879s verified
+2026-10-10T21:08:25.7555290Z tiny-pipe candidate 11/24: 0.1158s verified
+2026-10-10T21:08:25.7555510Z tiny-pipe rsync 11/24: 0.3143s verified
+2026-10-10T21:08:25.7555710Z tiny-pipe reference 11/24: 0.2057s verified
+2026-10-10T21:08:25.7555930Z tiny-pipe candidate 12/24: 0.2378s verified
+2026-10-10T21:08:25.7556140Z tiny-pipe reference 12/24: 0.0949s verified
+2026-10-10T21:08:25.7556350Z tiny-pipe rsync 12/24: 0.3219s verified
+2026-10-10T21:08:25.7556560Z tiny-pipe rsync 13/24: 0.1983s verified
+2026-10-10T21:08:25.7556770Z tiny-pipe reference 13/24: 0.1521s verified
+2026-10-10T21:08:25.7557030Z tiny-pipe candidate 13/24: 0.2369s verified
+2026-10-10T21:08:25.7557290Z tiny-pipe rsync 14/24: 0.2666s verified
+2026-10-10T21:08:25.7557510Z tiny-pipe candidate 14/24: 0.1847s verified
+2026-10-10T21:08:25.7557730Z tiny-pipe reference 14/24: 0.0877s verified
+2026-10-10T21:08:25.7557950Z tiny-pipe reference 15/24: 0.1856s verified
+2026-10-10T21:08:25.7558160Z tiny-pipe rsync 15/24: 0.2175s verified
+2026-10-10T21:08:25.7558370Z tiny-pipe candidate 15/24: 0.0937s verified
+2026-10-10T21:08:25.7558590Z tiny-pipe reference 16/24: 0.1972s verified
+2026-10-10T21:08:25.7558810Z tiny-pipe candidate 16/24: 0.1887s verified
+2026-10-10T21:08:25.7559030Z tiny-pipe rsync 16/24: 0.2650s verified
+2026-10-10T21:08:25.7559240Z tiny-pipe candidate 17/24: 0.1134s verified
+2026-10-10T21:08:25.7559450Z tiny-pipe rsync 17/24: 0.1371s verified
+2026-10-10T21:08:25.7559660Z tiny-pipe reference 17/24: 0.2007s verified
+2026-10-10T21:08:25.7559880Z tiny-pipe candidate 18/24: 0.2426s verified
+2026-10-10T21:08:25.7560090Z tiny-pipe reference 18/24: 0.1170s verified
+2026-10-10T21:08:25.7560310Z tiny-pipe rsync 18/24: 0.2717s verified
+2026-10-10T21:08:25.7560520Z tiny-pipe rsync 19/24: 0.2373s verified
+2026-10-10T21:08:25.7560730Z tiny-pipe reference 19/24: 0.0876s verified
+2026-10-10T21:08:25.7560960Z tiny-pipe candidate 19/24: 0.1061s verified
+2026-10-10T21:08:25.7561180Z tiny-pipe rsync 20/24: 0.2419s verified
+2026-10-10T21:08:25.7561390Z tiny-pipe candidate 20/24: 0.2318s verified
+2026-10-10T21:08:25.7561610Z tiny-pipe reference 20/24: 0.0858s verified
+2026-10-10T21:08:25.7561830Z tiny-pipe reference 21/24: 0.1163s verified
+2026-10-10T21:08:25.7562040Z tiny-pipe rsync 21/24: 0.1999s verified
+2026-10-10T21:08:25.7562240Z tiny-pipe candidate 21/24: 0.1566s verified
+2026-10-10T21:08:25.7562470Z tiny-pipe reference 22/24: 0.2305s verified
+2026-10-10T21:08:25.7562680Z tiny-pipe candidate 22/24: 0.2306s verified
+2026-10-10T21:08:25.7562900Z tiny-pipe rsync 22/24: 0.2679s verified
+2026-10-10T21:08:25.7563100Z tiny-pipe candidate 23/24: 0.2232s verified
+2026-10-10T21:08:25.7563320Z tiny-pipe rsync 23/24: 0.2068s verified
+2026-10-10T21:08:25.7563530Z tiny-pipe reference 23/24: 0.1408s verified
+2026-10-10T21:08:25.7563750Z tiny-pipe candidate 24/24: 0.2270s verified
+2026-10-10T21:08:25.7563970Z tiny-pipe reference 24/24: 0.0934s verified
+2026-10-10T21:08:25.7564760Z tiny-pipe rsync 24/24: 0.1261s verified
+2026-10-10T21:08:25.7565110Z tiny-pipe: xs speedup relative to rsync 1.053, recorded minimum 0.939: PASS
+2026-10-10T21:08:25.7565900Z 
+2026-10-10T21:08:25.7565910Z 
+2026-10-10T21:08:25.7566040Z ----------------------------------------------------------------------
+2026-10-10T21:08:25.7566340Z Ran 3 tests in 406.085s
+2026-10-10T21:08:25.7566440Z 
+2026-10-10T21:08:25.7566500Z FAILED (failures=1)
+2026-10-10T21:08:25.7587450Z ##[error]Process completed with exit code 1.
+2026-10-10T21:08:25.7746770Z ##[group]Run actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+2026-10-10T21:08:25.7747110Z with:
+2026-10-10T21:08:25.7747270Z   name: performance-macos-15-38085939767
+2026-10-10T21:08:25.7747490Z   path: benchmarks/ci-results/
+2026-10-10T21:08:25.7747670Z   if-no-files-found: ignore
+2026-10-10T21:08:25.7747840Z   retention-days: 30
+2026-10-10T21:08:25.7748140Z   compression-level: 6
+2026-10-10T21:08:25.7748290Z   overwrite: false
+2026-10-10T21:08:25.7748440Z   include-hidden-files: false
+2026-10-10T21:08:25.7748610Z   archive: true
+2026-10-10T21:08:25.7748740Z env:
+2026-10-10T21:08:25.7749000Z   pythonLocation: /Users/runner/hostedtoolcache/Python/3.13.15/arm64
+2026-10-10T21:08:25.7749460Z   PKG_CONFIG_PATH: /Users/runner/hostedtoolcache/Python/3.13.15/arm64/lib/pkgconfig
+2026-10-10T21:08:25.7749860Z   Python_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.13.15/arm64
+2026-10-10T21:08:25.7750260Z   Python2_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.13.15/arm64
+2026-10-10T21:08:25.7750610Z   Python3_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.13.15/arm64
+2026-10-10T21:08:25.7750900Z   XS_GATE_RSYNC: /opt/homebrew/bin/rsync
+2026-10-10T21:08:25.7751120Z   XS_GATE_ICU_ROOT: /opt/homebrew/opt/icu4c@78
+2026-10-10T21:08:25.7751320Z ##[endgroup]
+2026-10-10T21:08:26.1621510Z No files were found with the provided path: benchmarks/ci-results/. No artifacts will be uploaded.
+2026-10-10T21:08:26.1794190Z Post job cleanup.
+2026-10-10T21:08:26.4132480Z [command]/opt/homebrew/bin/git version
+2026-10-10T21:08:26.4361660Z git version 2.55.0
+2026-10-10T21:08:26.4400980Z Copying '/Users/runner/.gitconfig' to '/Users/runner/work/_temp/bb525bdd-90fe-4521-9477-4099367dfb09/.gitconfig'
+2026-10-10T21:08:26.4416260Z Temporarily overriding HOME='/Users/runner/work/_temp/bb525bdd-90fe-4521-9477-4099367dfb09' before making global git config changes
+2026-10-10T21:08:26.4418610Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-10T21:08:26.4424650Z [command]/opt/homebrew/bin/git config --global --add safe.directory /Users/runner/work/xsyncv4/xsyncv4
+2026-10-10T21:08:26.4622310Z Removing SSH command configuration
+2026-10-10T21:08:26.4636580Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-10T21:08:26.4665720Z [command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-10T21:08:26.5806710Z Removing HTTP extra header
+2026-10-10T21:08:26.5807370Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-10T21:08:26.5863190Z [command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-10T21:08:26.6667510Z Removing includeIf entries pointing to credentials config files
+2026-10-10T21:08:26.6673450Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-10T21:08:26.6734010Z [command]/opt/homebrew/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-10T21:08:26.7596750Z Cleaning up orphan processes

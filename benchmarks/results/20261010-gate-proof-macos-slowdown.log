@@ -1,0 +1,26 @@
+local-noop candidate warmup: 0.3440s verified
+local-noop reference warmup: 0.0109s verified
+local-noop rsync warmup: 0.0631s verified
+local-noop rsync 1/3: 0.0476s verified
+local-noop reference 1/3: 0.0136s verified
+local-noop candidate 1/3: 0.3395s verified
+local-noop rsync 2/3: 0.0590s verified
+local-noop candidate 2/3: 0.3453s verified
+local-noop reference 2/3: 0.0128s verified
+local-noop reference 3/3: 0.0144s verified
+local-noop rsync 3/3: 0.0380s verified
+local-noop candidate 3/3: 0.3439s verified
+local-noop: xs speedup relative to rsync 0.138, recorded minimum 2.104: REGRESSION
+pipe-fresh candidate warmup: 0.8347s verified
+pipe-fresh reference warmup: 0.1563s verified
+pipe-fresh rsync warmup: 0.2026s verified
+pipe-fresh rsync 1/3: 0.2065s verified
+pipe-fresh reference 1/3: 0.1645s verified
+pipe-fresh candidate 1/3: 0.8205s verified
+pipe-fresh rsync 2/3: 0.1935s verified
+pipe-fresh candidate 2/3: 0.8639s verified
+pipe-fresh reference 2/3: 0.1964s verified
+pipe-fresh reference 3/3: 0.2095s verified
+pipe-fresh rsync 3/3: 0.2350s verified
+pipe-fresh candidate 3/3: 0.8333s verified
+pipe-fresh: xs speedup relative to rsync 0.248, recorded minimum 0.631: REGRESSION

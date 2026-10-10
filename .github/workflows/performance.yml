@@ -79,7 +79,7 @@ jobs:
           PY
       - name: Prove the gate rejects slowdown and corruption
         timeout-minutes: 10
-        run: python3 benchmarks/ci_gate_test.py --xsync build-ci/xs --rsync "$XS_GATE_RSYNC"
+        run: python3 benchmarks/ci_gate_test.py --xsync build-ci/xs --rsync "$XS_GATE_RSYNC" --output-root benchmarks/ci-results/gate-proof
       - name: Measure and gate all scenarios
         timeout-minutes: 90
         run: |

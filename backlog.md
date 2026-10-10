@@ -3799,3 +3799,34 @@ after U-01's evidence entry completes P2, as requested by the user.
 - The existing five scan/ABI/fallback tests pass on glibc and static musl, with
   227 Linux differential cases. Raw results, logs and the qualified product
   identities are linked from `benchmarks/results/20261010-f06-ext4-noop-summary.md`.
+
+### F-07/F-08 path decomposition checkpoint — 2026-10-10
+
+- Clean 3fee9c2d9714 avoids constructing filesystem path components for already
+  normalized absolute engine paths and anchored parent walks. Paths with `.` or
+  `..`, repeated slashes and relative paths retain lexical normalization and
+  resolve the current working directory on each call. Root/pin boundaries and
+  no-follow descriptor traversal remain enforced.
+- Seven focused path-scope cases pass on macOS and Linux, including changed cwd
+  and filesystem-root anchors. All 231/227 differential cases pass, as do both
+  thirteen-case P0 suites (two existing Linux skips).
+- A six-sample no-op comparison against clean ed8b84137035 is queued after the
+  existing APFS matrix finishes. Only destination path decomposition differs
+  between those products' source code. There is no measured CPU claim yet;
+  F-07 stays partial and F-08 stays confirmed.
+
+### Hosted gate self-test evidence — 2026-10-10
+
+- Run 38085939767's macOS job stops in the healthy self-test. That self-test uses
+  the same product for both controls, but its small local-update measurements
+  differ enough to fail the separate 60% smoke policy. The production 18-case
+  matrix is skipped on macOS; its Linux job remains active. The complete failed
+  job log is retained as `20261010-ci-38085939767-macos-proof-failure.log`.
+- The healthy behavior test now adds an equal 50 ms startup delay to both
+  controls, so its millisecond copies do not make short scheduling differences
+  decide the self-test verdict. The real delayed-tool and corruption rejection
+  tests remain. All three behavior checks pass on macOS and Linux.
+- CI now retains every behavior check's result JSON and output log, including
+  negative outcomes, before its temporary fixtures are removed. The production
+  reference, 85% floor, 24 samples and actual measured binaries are unchanged.
+  This is self-test validation, not a new production performance pass.

@@ -215,3 +215,7 @@ exercises real transfers with a healthy binary, an intentionally delayed binary
 and a corrupt binary that exits successfully. Its small fixtures, relaxed test policy and
 24-sample healthy comparison validate gate behavior on busy developer machines; CI's production
 measurements use the checked-in 24-sample, 85% policy and larger fixtures.
+The healthy self-test gives both identical controls the same 50 ms startup
+delay to reduce short-interval scheduling noise. Production measurements use
+the actual binaries without that delay. `--output-root PATH` retains each
+self-test's raw JSON and log, including failures, for the CI artifact.
