@@ -4,6 +4,7 @@
 #include <cerrno>
 #include <algorithm>
 #include <atomic>
+#include <sys/resource.h>
 #ifdef __APPLE__
 #include <sys/clonefile.h>
 #include <sys/attr.h>
@@ -20,6 +21,14 @@ int root_fd = -1;
 std::string root_path;
 thread_local DestinationDirectory* directory_pin = nullptr;
 std::atomic<unsigned> retained_parents{0};
+unsigned parent_budget() {
+  static const unsigned budget = [] {
+    rlimit limit{};
+    if (getrlimit(RLIMIT_NOFILE, &limit) != 0 || limit.rlim_cur < 512) return 0u;
+    return (unsigned)std::min<rlim_t>(256, limit.rlim_cur / 8);
+  }();
+  return budget;
+}
 std::string absolute(const std::string& path) {
   // Already-normalized engine paths need no filesystem::path component objects.
   if (!path.empty() && path.front() == '/') {
@@ -152,7 +161,7 @@ std::shared_ptr<const DestinationParent> DestinationDirectory::share() const {
   if (fd_ < 0) return {};
   unsigned count = retained_parents.load(std::memory_order_relaxed);
   do {
-    if (count >= 256) return {};
+    if (count >= parent_budget()) return {};
   } while (!retained_parents.compare_exchange_weak(count, count + 1, std::memory_order_relaxed));
   int fd = fcntl(fd_, F_DUPFD_CLOEXEC, 0);
   if (fd < 0) {

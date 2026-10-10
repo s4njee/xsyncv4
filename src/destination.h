@@ -21,7 +21,8 @@ bool anchor_destination(const std::string& path);
 DestPath destination_path(const std::string& path);
 int destination_open_dir(const char* path);
 // Retained parent capability, independent of the worker that opened it. Only
-// 256 of these descriptors may be retained; active scopes remain additional.
+// 256 of these descriptors may be retained, fewer with low descriptor limits;
+// active scopes remain additional. Limits below 512 disable this cache.
 class DestinationParent {
  public:
   ~DestinationParent();

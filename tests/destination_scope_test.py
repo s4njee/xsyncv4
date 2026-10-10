@@ -38,6 +38,7 @@ class DestinationScopeTests(unittest.TestCase):
     def test_inherited_parent_boundaries_and_normalization(self): self.exercise('inherited-boundaries')
     def test_parent_capability_survives_worker_handoff(self): self.exercise('inherited-thread')
     def test_retained_parent_budget_and_fallback(self): self.exercise('parent-budget')
+    def test_low_descriptor_limit_preserves_uncached_operations(self): self.exercise('parent-low-limit')
 
 
 if __name__ == '__main__':

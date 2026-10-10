@@ -187,6 +187,22 @@ int main(int argc, char** argv) {
       if (error) std::rethrow_exception(error);
       require(fs::exists(dest / "old-a" / "nested" / "thread-inherited") && fs::is_empty(outside),
               "parent capability did not cross worker lifetime safely");
+    } else if (test == "parent-low-limit") {
+      rlimit original{};
+      require(getrlimit(RLIMIT_NOFILE, &original) == 0, "descriptor limit lookup failed");
+      rlimit low = original;
+      low.rlim_cur = 64;
+      require(setrlimit(RLIMIT_NOFILE, &low) == 0, "cannot lower descriptor limit");
+      size_t before = descriptors();
+      {
+        DestinationDirectory pin(a.string());
+        require(!pin.share(), "parent cache consumes a low descriptor budget");
+        write_file(a / "low-limit");
+        DestinationDirectory child((a / "nested").string());
+        write_file(a / "nested" / "low-limit-child");
+      }
+      require(descriptors() == before, "low-limit fallback leaked descriptors");
+      require(setrlimit(RLIMIT_NOFILE, &original) == 0, "cannot restore descriptor limit");
     } else if (test == "parent-budget") {
       DestinationDirectory pin(a.string());
       size_t before = descriptors();

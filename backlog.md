@@ -4149,3 +4149,23 @@ after U-01's evidence entry completes P2, as requested by the user.
   verified CPU comparison. It does not establish the under-one-second target
   or a manifest path. F-08 remains open; current physical-host memory and
   hosted runs continue on frozen 1f3a912f94eb and are not restarted.
+
+### F-08 parent-capability correctness and low-limit guard — 2026-10-10
+
+- Frozen 9f260833c926 passes 231/227 macOS/Linux differential cases,
+  eleven destination-scope cases, nine directory-lifetime, fifteen mixed
+  protocol and thirteen P0 cases per platform (two existing Linux skips).
+  macOS additionally passes subtree and platform-specific checks; all three
+  large staged-list cases pass on both platforms. Its matched one-worker
+  no-op comparison has started after validation, without overlapping builds.
+- A 64-descriptor negative control exposes a resource-policy issue in that
+  frozen prototype: it still retains a parent capability when the process
+  budget is low. The negative result is retained as
+  `20261010-f08-parent-low-limit-negative.json`.
+- The follow-up disables retained parent caching below 512 descriptors and
+  otherwise caps it at one eighth of the initial process limit, at most 256.
+  Existing anchored traversal remains available. All twelve focused tests
+  pass on macOS/Linux, including exact low-limit fallback and descriptor release.
+- The frozen comparison continues uninterrupted on 9f260833c926. Its results
+  do not alone qualify the newer low-limit policy; that policy needs its own
+  clean validation. No CPU target pass is assumed, and F-08 remains open.
