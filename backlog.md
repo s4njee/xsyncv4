@@ -3493,3 +3493,18 @@ after U-01's evidence entry completes P2, as requested by the user.
   fixture. Diagnostic binaries rebuilt with a stale forced revision label are
   not used as qualified completion evidence. Final measured binaries must use
   the actual committed source revision and remain frozen for the entire run.
+
+
+### F-01 full-corpus pull completed — 2026-10-10
+
+- The reverse flow, freya to neo, completes all 24 independently verified
+  samples on the full 914,106-file, 10.53 GB snapshot. Median rsync/xs times:
+  fresh 177.625/190.456 s, compressed fresh 158.539/166.998 s, no-op
+  80.295/27.789 s (2.89x), checksum 145.814/67.640 s (2.16x).
+- Both complete directions are retained in the paired results table, including
+  fresh-copy regressions and process peak memory. The 1% update cases now run
+  sequentially with the original frozen baseline binaries. Cold-cache access
+  on freya remains pending, so F-01 remains partial.
+- Full-corpus checksum timing is measured in both directions. F-14 still needs
+  profiling to decide whether hashing starves scanning; timing gains alone do
+  not establish that a separate hashing pool is necessary.
