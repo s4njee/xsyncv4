@@ -77,3 +77,33 @@ records the current binary's cost at 1, 2, 4 and 8 threads. Its host had high
 background load and the volume was 98% full; quieter/free-volume measurements
 are still required before choosing filesystem defaults. `profile_apfs.py`
 samples a separate no-op with `/usr/bin/sample`, then verifies it independently.
+
+## Regression gate
+
+`.github/workflows/performance.yml` builds the pinned reference and candidate
+with the same Release configuration on each Linux and macOS runner. It measures
+13 scenarios: fresh/no-op/checksum/1% update locally and through the pipe
+transport, compressed pipe copies, large copies and a tiny pipe transfer.
+Each tool receives five samples in rotated order, with independent rsync
+checksum/metadata verification after every sample. Setup is untimed.
+
+For each scenario, the job records a minimum speedup relative to rsync equal
+to 85% of the pinned reference's measured speedup on that same runner. It exits
+nonzero if any candidate speedup falls below its recorded minimum, or if any
+transfer or verification fails. This allows 15% timing variation; the emitted
+JSON records the actual floor, all samples, resource metrics, binary hashes
+and source versions. Pipe cases use `tests/fakessh.sh` on the runner. The
+physical neo/freya measurements are retained separately in `results/`.
+
+`ci-policy.json` pins the reference commit. After a performance improvement is
+verified, advance that reference to the tested product commit so later changes
+protect the new performance. CI builds both revisions before measuring, and
+rejects a reference binary that does not identify the pinned clean revision.
+Actions upload the result JSON even when the gate fails. Artifact names identify
+the platform and workflow run.
+
+`python3 benchmarks/ci_gate_test.py --xsync build/xs --rsync /path/to/rsync`
+exercises real transfers with a healthy binary, an intentionally delayed binary
+and a corrupt binary that exits successfully. Its small fixtures and relaxed
+test policy validate gate behavior on busy developer machines; CI's production
+measurements use the checked-in five-sample, 85% policy and larger fixtures.
