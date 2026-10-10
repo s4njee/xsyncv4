@@ -35,13 +35,14 @@ size_t descriptors() {
 int main(int argc, char** argv) {
   try {
     require(argc == 3, "provide owned temporary root and case");
-    fs::path root(argv[1]), dest = root / "destination", a = dest / "a", b = dest / "b";
+    fs::path root = fs::canonical(argv[1]);
+    fs::path dest = root / "destination", a = dest / "a", b = dest / "b";
     fs::path outside = root / "outside";
     fs::create_directories(a / "nested");
     fs::create_directories(b);
     fs::create_directories(outside);
-    require(anchor_destination(dest.string()), "destination anchoring failed");
     std::string test(argv[2]);
+    require(anchor_destination(test == "root-anchor" ? "/" : dest.string()), "destination anchoring failed");
     if (test == "nested") {
       DestinationDirectory first(a.string());
       write_file(a / "one");
@@ -98,6 +99,35 @@ int main(int argc, char** argv) {
       for (auto& error : errors) if (error) std::rethrow_exception(error);
       require(fs::exists(dest / "old-a" / "thread-file") && fs::exists(dest / "old-b" / "thread-file") &&
               fs::is_empty(outside), "directory pins leaked between threads");
+    } else if (test == "normalization") {
+      DestinationDirectory pin(a.string() + "/./nested/../");
+      write_file(a.string() + "//nested/../normalized");
+      write_file(a / ".name");
+      write_file(a / "...");
+      auto same = destination_path(a.string() + "/nested/.././");
+      require(same.fd >= 0 && same.name == ".", "normalized pin root lookup failed");
+      struct stat st{}, expected{};
+      require(fstat(same.fd, &st) == 0 && stat(a.c_str(), &expected) == 0 &&
+              st.st_dev == expected.st_dev && st.st_ino == expected.st_ino,
+              "normalized root resolved to a different directory");
+      auto rejected = destination_path(dest.string() + "-sibling/file");
+      require(rejected.fd < 0 && errno == EPERM, "prefix sibling crossed the root boundary");
+      auto original = fs::current_path();
+      fs::current_path(dest);
+      write_file("./a/relative-one");
+      fs::current_path(b);
+      write_file("../a/relative-two");
+      fs::current_path(original);
+      require(fs::exists(a / "normalized") && fs::exists(a / "relative-one") &&
+              fs::exists(a / "relative-two"), "normalization or changed cwd lost a file");
+    } else if (test == "root-anchor") {
+      auto same = destination_path("/");
+      require(same.fd >= 0 && same.name == ".", "filesystem root lookup failed");
+      DestinationDirectory pin(a.string());
+      write_file(a / "root-anchored");
+      write_file(b / "outside-pin");
+      require(fs::exists(a / "root-anchored") && fs::exists(b / "outside-pin"),
+              "filesystem root suffix calculation failed");
     } else if (test == "descriptors") {
       auto before = descriptors();
       for (int i = 0; i < 200; ++i) {

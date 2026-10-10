@@ -32,6 +32,8 @@ class DestinationScopeTests(unittest.TestCase):
     def test_renamed_directory_does_not_follow_replacement(self): self.exercise('swap')
     def test_workers_keep_independent_pins(self): self.exercise('threads')
     def test_descriptors_are_bounded_by_active_scopes(self): self.exercise('descriptors')
+    def test_lexical_aliases_and_changed_cwd(self): self.exercise('normalization')
+    def test_filesystem_root_anchor(self): self.exercise('root-anchor')
 
 
 if __name__ == '__main__':

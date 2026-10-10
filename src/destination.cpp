@@ -19,6 +19,26 @@ int root_fd = -1;
 std::string root_path;
 thread_local DestinationDirectory* directory_pin = nullptr;
 std::string absolute(const std::string& path) {
+  // Already-normalized engine paths need no filesystem::path component objects.
+  if (!path.empty() && path.front() == '/') {
+    bool normalized = true;
+    for (size_t start = 1; start < path.size();) {
+      size_t end = path.find('/', start);
+      if (end == std::string::npos) end = path.size();
+      size_t length = end - start;
+      if (!length || (length == 1 && path[start] == '.') ||
+          (length == 2 && path[start] == '.' && path[start + 1] == '.')) {
+        normalized = false;
+        break;
+      }
+      start = end + 1;
+    }
+    if (normalized) {
+      std::string result = path;
+      while (result.size() > 1 && result.back() == '/') result.pop_back();
+      return result;
+    }
+  }
   std::error_code error;
   auto p = std::filesystem::absolute(path.empty() ? "." : path, error);
   if (error) { errno = error.value(); return {}; }
@@ -26,9 +46,12 @@ std::string absolute(const std::string& path) {
   while (result.size() > 1 && result.back() == '/') result.pop_back();
   return result;
 }
-int walk(int fd, const std::filesystem::path& rel) {
-  for (const auto& component : rel) {
-    auto name = component.string();
+int walk(int fd, std::string_view rel) {
+  for (size_t start = 0; start < rel.size();) {
+    size_t end = rel.find('/', start);
+    if (end == std::string_view::npos) end = rel.size();
+    std::string name(rel.substr(start, end - start));
+    start = end + 1;
     if (name.empty() || name == ".") continue;
     if (name == "..") { close(fd); errno = EPERM; return -1; }
     int next = openat(fd, name.c_str(), O_RDONLY | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC);
@@ -57,7 +80,7 @@ bool anchor_destination(const std::string& path) {
     if (error) { errno = error.value(); return false; }
     int fd = open("/", O_RDONLY | O_DIRECTORY | O_CLOEXEC);
     if (fd < 0) return false;
-    fd = walk(fd, resolved.relative_path());
+    fd = walk(fd, resolved.relative_path().native());
     if (fd >= 0) {
       root_path = existing;
       root_fd = fd;
@@ -79,19 +102,24 @@ DestPath destination_path(const std::string& path) {
     errno = EPERM;
     return {};
   }
-  std::filesystem::path rel = std::filesystem::path(p).lexically_relative(root_path);
+  auto suffix = [&](const std::string& path) -> std::string_view {
+    size_t offset = path == "/" ? 1 : p == path ? p.size() : path.size() + 1;
+    return std::string_view(p).substr(offset);
+  };
+  std::string_view rel = suffix(root_path);
   int base = root_fd;
   if (directory_pin && (p == directory_pin->path_ ||
       (p.starts_with(directory_pin->path_) &&
        (directory_pin->path_ == "/" || p[directory_pin->path_.size()] == '/')))) {
     base = directory_pin->fd_;
-    rel = std::filesystem::path(p).lexically_relative(directory_pin->path_);
+    rel = suffix(directory_pin->path_);
   }
-  auto name = rel.filename().string();
+  size_t slash = rel.find_last_of('/');
+  std::string name(slash == std::string_view::npos ? rel : rel.substr(slash + 1));
   if (name.empty()) name = ".";
   int fd = dup(base);
   if (fd < 0) return {};
-  fd = walk(fd, rel.parent_path());
+  fd = walk(fd, slash == std::string_view::npos ? std::string_view() : rel.substr(0, slash));
   if (fd < 0) return {};
   return {fd, std::move(name)};
 }
