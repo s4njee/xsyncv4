@@ -29,13 +29,14 @@ npm run build
 npm run preview
 ```
 
-The build regenerates 13 Markdown manuals, runs the VitePress static build, then copies it into `dist/docs/` alongside the existing product page. For docs authoring, use `npm run docs:generate` followed by `npm run docs:dev`. Curated content lives in `scripts/docs_content.py`; option descriptions come directly from `docs-inputs/xs-help.txt`. Exit codes (`docs-inputs/exit-codes.json`) are derived from the `RERR_*` definitions in `src/`, and the development status tables (`docs-inputs/backlog-status.json`) from the tier tables in `backlog.md`. These inputs, the recordings and the generated `docs/public/xs.1` are committed so this Site can build independently of the C++ checkout.
+The build regenerates every Markdown manual, runs the VitePress static build, then copies it into `dist/docs/` alongside the existing product page. For docs authoring, use `npm run docs:generate` followed by `npm run docs:dev`. Curated content lives in `scripts/docs_content.py`; option descriptions come directly from `docs-inputs/xs-help.txt`. Exit codes (`docs-inputs/exit-codes.json`) are derived from the `RERR_*` definitions in `src/`, and the development status tables (`docs-inputs/backlog-status.json`) from the tier tables in `backlog.md`. These inputs, the recordings and the generated `docs/public/xs.1` are committed so this Site can build independently of the C++ checkout.
 
 Refresh the derived inputs after changing the CLI, exit codes or backlog status:
 
 ```sh
 (cd ../.. && cmake --build build)
-npm run docs:refresh      # help, manpage, exit codes and backlog status from ../../build/xs and ../..
+npm run docs:refresh      # help, manpage, exit codes, backlog status, benchmarks, options, protocol, changelog
+python3 scripts/capture-examples.py --old-helper /tmp/xs-old/xs   # documented examples (see contributing page)
 python3 scripts/capture-output.py   # when output changed; recordings must match the help's binary
 npm run build
 ```
@@ -43,6 +44,16 @@ npm run build
 Commands on the Site use the executable name `xs`; prose uses the product name xsync.
 
 The output and error pages embed the actual existing recordings. Planned GUI stories remain clearly separate from implemented CLI capabilities; the GUI backlog is maintained outside this repository and is not checked.
+
+### Where content lives
+
+- `content/*.md`: Markdown pages, each with a frontmatter block giving `slug`, `title`, `name`, `summary`, `group` and `after` (the page it follows in the sidebar). Sections are `## TITLE {#id}`.
+- `scripts/docs_content.py`: the original manual pages, written as HTML in Python.
+- `scripts/option_notes.py`: curated facts about each option: what it implies, the helper features it needs, and related sections. The build fails if `--help` gains an option missing here, or if an entry names an option the parser no longer accepts. The joined model is published as `docs/public/options.json`.
+- `scripts/protocol_notes.py`: the meaning of each feature bit, frame and data record. The build fails when the source adds or drops one.
+- `docs/public/progress.schema.json`: the `--progress=json` schema. `npm run check` validates recorded and fresh event streams against it.
+
+Pages pull in generated sections with `<!--generated:NAME-->` (renderers in `scripts/generated.py`) and real command output with `<!--example:NAME-->`. Examples are defined in `scripts/capture-examples.py`, which runs each one in a disposable sandbox against `../../build/xs` and stores the output in `docs-inputs/examples.json`. Remote examples use `tests/fakessh.sh`.
 
 ### Checks
 

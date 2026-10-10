@@ -4,7 +4,7 @@
   "sources": [
     {
       "path": "README.md",
-      "sha256": "1b7e40d54cce21bcffe88143101b7fd8d641d7c5416b80e873bf9c2858267130",
+      "sha256": "656babbeab0ad013ad8103c6eb9ce9d639f0f4788957f68d287197f64712f945",
       "pages": [
         "index",
         "getting-started",
@@ -17,7 +17,24 @@
         "environment",
         "exit-status",
         "compatibility",
-        "development"
+        "development",
+        "performance",
+        "install",
+        "migration",
+        "recipes",
+        "troubleshooting",
+        "itemize",
+        "json-events",
+        "protocol",
+        "architecture",
+        "contributing"
+      ]
+    },
+    {
+      "path": "benchmarks/README.md",
+      "sha256": "589797f080372dfeef62981dd5711ce2f0fbd16663e0f3633b58d973d110cf41",
+      "pages": [
+        "performance"
       ]
     },
     {
@@ -34,6 +51,11 @@
     "docs/public/xs.1": "tools/help_to_man.py",
     "docs-inputs/exit-codes.json": "src/common.h, src/main.cpp, src/util.cpp",
     "docs-inputs/backlog-status.json": "backlog.md tier tables (checked by npm run check; not fingerprinted)",
-    "dist/recordings/": "scripts/capture-output.py"
+    "dist/recordings/": "scripts/capture-output.py",
+    "docs-inputs/benchmarks.json": "benchmarks/results/*.json",
+    "docs-inputs/option-source.json": "src/main.cpp option parser",
+    "docs-inputs/protocol.json": "src/common.h, src/remote.cpp",
+    "docs-inputs/examples.json": "scripts/capture-examples.py",
+    "docs-inputs/changelog.md": "CHANGELOG.md"
   }
 }

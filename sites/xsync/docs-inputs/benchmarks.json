@@ -1,0 +1,918 @@
+[
+  {
+    "run_id": "20261010T144748Z-715fa0",
+    "source_revision": "415900091024",
+    "cache": "retained OS caches",
+    "runs_per_tool": 3,
+    "hosts": [
+      {
+        "name": "freya",
+        "arch": "x86_64",
+        "kernel": "Linux 7.1.8-1-cachyos",
+        "cpu": "AMD Ryzen 9 7950X 16-Core Processor",
+        "cpus": 32,
+        "memory": "64868336 kB",
+        "filesystem": "zpcachyos/ROOT/cos/home zfs /home"
+      },
+      {
+        "name": "neo",
+        "arch": "aarch64",
+        "kernel": "Linux 6.18.34+rpt-rpi-2712",
+        "cpu": "Raspberry Pi 5 Model B Rev 1.0",
+        "cpus": 4,
+        "memory": "4142208 kB",
+        "filesystem": "/dev/nvme0n1p2 ext4 /"
+      }
+    ],
+    "datasets": {
+      "congress": {
+        "files": 914106,
+        "directories": 417408,
+        "bytes": 10528134423
+      },
+      "large": {
+        "files": 2,
+        "directories": 0,
+        "bytes": 2147483648
+      },
+      "mixed": {
+        "files": 10002,
+        "directories": 100,
+        "bytes": 577830912
+      },
+      "tiny": {
+        "files": 1,
+        "directories": 0,
+        "bytes": 19
+      },
+      "update-1pct": {
+        "files": 914106,
+        "directories": 417408,
+        "bytes": 10528134423
+      }
+    },
+    "loadavg": null,
+    "results": [
+      {
+        "file": "20261010T144748Z-715fa0-congress-push.json",
+        "label": "congress",
+        "direction": "push",
+        "flow": "neo → freya",
+        "cache": "warm",
+        "threads": null,
+        "complete": false,
+        "samples": 4,
+        "unverified": 0,
+        "versions": {
+          "xs": "xs  version 0.1.0  protocol version 4  git 415900091024",
+          "rsync": "rsync  version 3.4.1  protocol version 32"
+        },
+        "scenarios": [
+          {
+            "scenario": "fresh",
+            "samples": {
+              "rsync": [
+                142.4863,
+                122.7165
+              ],
+              "xs": [
+                125.1535,
+                126.5108
+              ]
+            },
+            "median": {
+              "rsync": 132.60140082845464,
+              "xs": 125.83213639305905
+            },
+            "cpu_median": {
+              "rsync": 177.53392150000002,
+              "xs": 694.0135359999999
+            },
+            "rss_mib": {
+              "rsync": 89.6,
+              "xs": 1002.0
+            },
+            "speedup": 1.053795990670067
+          }
+        ]
+      },
+      {
+        "file": "20261010T144748Z-715fa0-large-pull.json",
+        "label": "large",
+        "direction": "pull",
+        "flow": "freya → neo",
+        "cache": "warm",
+        "threads": null,
+        "complete": true,
+        "samples": 24,
+        "unverified": 0,
+        "versions": {
+          "xs": "xs  version 0.1.0  protocol version 4  git 415900091024",
+          "rsync": "rsync  version 3.4.1  protocol version 32"
+        },
+        "scenarios": [
+          {
+            "scenario": "fresh",
+            "samples": {
+              "rsync": [
+                19.3416,
+                18.6049,
+                18.5993
+              ],
+              "xs": [
+                18.6251,
+                18.5122,
+                18.6428
+              ]
+            },
+            "median": {
+              "rsync": 18.604898885823786,
+              "xs": 18.625080200843513
+            },
+            "cpu_median": {
+              "rsync": 12.536682,
+              "xs": 20.148857999999997
+            },
+            "rss_mib": {
+              "rsync": 14.5,
+              "xs": 115.3
+            },
+            "speedup": 0.9989164441279124
+          },
+          {
+            "scenario": "fresh-z",
+            "samples": {
+              "rsync": [
+                11.485,
+                11.6066,
+                11.8627
+              ],
+              "xs": [
+                9.6517,
+                9.7497,
+                9.4439
+              ]
+            },
+            "median": {
+              "rsync": 11.606625217944384,
+              "xs": 9.651730134151876
+            },
+            "cpu_median": {
+              "rsync": 9.246538999999999,
+              "xs": 17.50602
+            },
+            "rss_mib": {
+              "rsync": 14.4,
+              "xs": 216.6
+            },
+            "speedup": 1.2025434877085164
+          },
+          {
+            "scenario": "noop",
+            "samples": {
+              "rsync": [
+                0.2671,
+                0.1609,
+                0.1678
+              ],
+              "xs": [
+                0.1724,
+                0.1718,
+                0.177
+              ]
+            },
+            "median": {
+              "rsync": 0.16778112901374698,
+              "xs": 0.17236618604511023
+            },
+            "cpu_median": {
+              "rsync": 0.032587,
+              "xs": 0.039328
+            },
+            "rss_mib": {
+              "rsync": 13.9,
+              "xs": 17.0
+            },
+            "speedup": 0.9733993242145342
+          },
+          {
+            "scenario": "checksum",
+            "samples": {
+              "rsync": [
+                2.5854,
+                4.342,
+                2.5332
+              ],
+              "xs": [
+                3.9861,
+                3.3187,
+                4.9944
+              ]
+            },
+            "median": {
+              "rsync": 2.5853854748420417,
+              "xs": 3.9860790711827576
+            },
+            "cpu_median": {
+              "rsync": 1.104781,
+              "xs": 1.2301579999999999
+            },
+            "rss_mib": {
+              "rsync": 13.8,
+              "xs": 17.0
+            },
+            "speedup": 0.6486036600560713
+          }
+        ]
+      },
+      {
+        "file": "20261010T144748Z-715fa0-large-push.json",
+        "label": "large",
+        "direction": "push",
+        "flow": "neo → freya",
+        "cache": "warm",
+        "threads": null,
+        "complete": true,
+        "samples": 24,
+        "unverified": 0,
+        "versions": {
+          "xs": "xs  version 0.1.0  protocol version 4  git 415900091024",
+          "rsync": "rsync  version 3.4.1  protocol version 32"
+        },
+        "scenarios": [
+          {
+            "scenario": "fresh",
+            "samples": {
+              "rsync": [
+                18.7409,
+                18.7165,
+                18.6998
+              ],
+              "xs": [
+                19.0445,
+                18.7537,
+                18.7946
+              ]
+            },
+            "median": {
+              "rsync": 18.716460349038243,
+              "xs": 18.79455185076222
+            },
+            "cpu_median": {
+              "rsync": 10.630192,
+              "xs": 17.606213
+            },
+            "rss_mib": {
+              "rsync": 15.3,
+              "xs": 106.0
+            },
+            "speedup": 0.9958449926157293
+          },
+          {
+            "scenario": "fresh-z",
+            "samples": {
+              "rsync": [
+                11.1769,
+                10.8113,
+                10.7662
+              ],
+              "xs": [
+                10.126,
+                10.7346,
+                10.4878
+              ]
+            },
+            "median": {
+              "rsync": 10.81134561309591,
+              "xs": 10.487805811222643
+            },
+            "cpu_median": {
+              "rsync": 10.384907,
+              "xs": 18.447595
+            },
+            "rss_mib": {
+              "rsync": 13.7,
+              "xs": 292.0
+            },
+            "speedup": 1.0308491411546787
+          },
+          {
+            "scenario": "noop",
+            "samples": {
+              "rsync": [
+                0.1872,
+                0.1771,
+                0.1728
+              ],
+              "xs": [
+                0.1747,
+                0.1633,
+                0.1609
+              ]
+            },
+            "median": {
+              "rsync": 0.1771133546717465,
+              "xs": 0.16332305083051324
+            },
+            "cpu_median": {
+              "rsync": 0.025887999999999998,
+              "xs": 0.039181999999999995
+            },
+            "rss_mib": {
+              "rsync": 13.9,
+              "xs": 17.0
+            },
+            "speedup": 1.0844357472574033
+          },
+          {
+            "scenario": "checksum",
+            "samples": {
+              "rsync": [
+                1.0446,
+                1.0461,
+                1.0496
+              ],
+              "xs": [
+                1.1261,
+                1.0158,
+                1.0646
+              ]
+            },
+            "median": {
+              "rsync": 1.0461380928754807,
+              "xs": 1.0645664730109274
+            },
+            "cpu_median": {
+              "rsync": 0.8958419999999999,
+              "xs": 0.893601
+            },
+            "rss_mib": {
+              "rsync": 13.7,
+              "xs": 17.3
+            },
+            "speedup": 0.9826893100594033
+          }
+        ]
+      },
+      {
+        "file": "20261010T144748Z-715fa0-mixed-pull.json",
+        "label": "mixed",
+        "direction": "pull",
+        "flow": "freya → neo",
+        "cache": "warm",
+        "threads": null,
+        "complete": true,
+        "samples": 24,
+        "unverified": 0,
+        "versions": {
+          "xs": "xs  version 0.1.0  protocol version 4  git 415900091024",
+          "rsync": "rsync  version 3.4.1  protocol version 32"
+        },
+        "scenarios": [
+          {
+            "scenario": "fresh",
+            "samples": {
+              "rsync": [
+                5.4706,
+                5.4545,
+                5.3771
+              ],
+              "xs": [
+                5.1324,
+                5.2852,
+                5.2494
+              ]
+            },
+            "median": {
+              "rsync": 5.454513161908835,
+              "xs": 5.249399312771857
+            },
+            "cpu_median": {
+              "rsync": 4.299826,
+              "xs": 6.880089
+            },
+            "rss_mib": {
+              "rsync": 18.3,
+              "xs": 114.5
+            },
+            "speedup": 1.0390737752866188
+          },
+          {
+            "scenario": "fresh-z",
+            "samples": {
+              "rsync": [
+                3.3879,
+                3.6369,
+                3.5476
+              ],
+              "xs": [
+                2.7591,
+                2.8658,
+                2.7769
+              ]
+            },
+            "median": {
+              "rsync": 3.547564456705004,
+              "xs": 2.7769472668878734
+            },
+            "cpu_median": {
+              "rsync": 3.114253,
+              "xs": 5.999359999999999
+            },
+            "rss_mib": {
+              "rsync": 14.2,
+              "xs": 259.8
+            },
+            "speedup": 1.2775051579142018
+          },
+          {
+            "scenario": "noop",
+            "samples": {
+              "rsync": [
+                0.2352,
+                0.235,
+                0.2349
+              ],
+              "xs": [
+                0.1871,
+                0.1791,
+                0.1812
+              ]
+            },
+            "median": {
+              "rsync": 0.2350089941173792,
+              "xs": 0.18120068311691284
+            },
+            "cpu_median": {
+              "rsync": 0.09088299999999999,
+              "xs": 0.139257
+            },
+            "rss_mib": {
+              "rsync": 14.2,
+              "xs": 17.0
+            },
+            "speedup": 1.296954239216353
+          },
+          {
+            "scenario": "checksum",
+            "samples": {
+              "rsync": [
+                0.585,
+                1.5086,
+                0.6226
+              ],
+              "xs": [
+                0.5821,
+                0.5274,
+                0.8012
+              ]
+            },
+            "median": {
+              "rsync": 0.6226452090777457,
+              "xs": 0.5821122811175883
+            },
+            "cpu_median": {
+              "rsync": 0.449047,
+              "xs": 1.020422
+            },
+            "rss_mib": {
+              "rsync": 14.2,
+              "xs": 21.5
+            },
+            "speedup": 1.069630772747723
+          }
+        ]
+      },
+      {
+        "file": "20261010T144748Z-715fa0-mixed-push.json",
+        "label": "mixed",
+        "direction": "push",
+        "flow": "neo → freya",
+        "cache": "warm",
+        "threads": null,
+        "complete": true,
+        "samples": 24,
+        "unverified": 0,
+        "versions": {
+          "xs": "xs  version 0.1.0  protocol version 4  git 415900091024",
+          "rsync": "rsync  version 3.4.1  protocol version 32"
+        },
+        "scenarios": [
+          {
+            "scenario": "fresh",
+            "samples": {
+              "rsync": [
+                5.4232,
+                5.4225,
+                5.3923
+              ],
+              "xs": [
+                5.3772,
+                5.3879,
+                5.5098
+              ]
+            },
+            "median": {
+              "rsync": 5.422496767248958,
+              "xs": 5.387862725183368
+            },
+            "cpu_median": {
+              "rsync": 3.629343,
+              "xs": 6.427439
+            },
+            "rss_mib": {
+              "rsync": 13.6,
+              "xs": 109.2
+            },
+            "speedup": 1.0064281597049063
+          },
+          {
+            "scenario": "fresh-z",
+            "samples": {
+              "rsync": [
+                3.5382,
+                3.527,
+                3.563
+              ],
+              "xs": [
+                3.2068,
+                3.1375,
+                3.1494
+              ]
+            },
+            "median": {
+              "rsync": 3.538185566663742,
+              "xs": 3.1494126273319125
+            },
+            "cpu_median": {
+              "rsync": 3.779417,
+              "xs": 7.187704999999999
+            },
+            "rss_mib": {
+              "rsync": 13.7,
+              "xs": 298.1
+            },
+            "speedup": 1.1234429988493397
+          },
+          {
+            "scenario": "noop",
+            "samples": {
+              "rsync": [
+                0.2277,
+                0.2323,
+                0.2247
+              ],
+              "xs": [
+                0.1956,
+                0.1995,
+                0.2023
+              ]
+            },
+            "median": {
+              "rsync": 0.22773871896788478,
+              "xs": 0.19954188913106918
+            },
+            "cpu_median": {
+              "rsync": 0.070581,
+              "xs": 0.5542199999999999
+            },
+            "rss_mib": {
+              "rsync": 13.7,
+              "xs": 17.3
+            },
+            "speedup": 1.14130782243068
+          },
+          {
+            "scenario": "checksum",
+            "samples": {
+              "rsync": [
+                0.5,
+                0.5643,
+                0.5582
+              ],
+              "xs": [
+                0.6753,
+                0.5565,
+                0.5736
+              ]
+            },
+            "median": {
+              "rsync": 0.5582226449623704,
+              "xs": 0.5736114648170769
+            },
+            "cpu_median": {
+              "rsync": 0.401995,
+              "xs": 3.1599510000000004
+            },
+            "rss_mib": {
+              "rsync": 13.4,
+              "xs": 21.5
+            },
+            "speedup": 0.973172049726004
+          }
+        ]
+      },
+      {
+        "file": "20261010T144748Z-715fa0-tiny-pull.json",
+        "label": "tiny",
+        "direction": "pull",
+        "flow": "freya → neo",
+        "cache": "warm",
+        "threads": null,
+        "complete": true,
+        "samples": 6,
+        "unverified": 0,
+        "versions": {
+          "xs": "xs  version 0.1.0  protocol version 4  git 415900091024",
+          "rsync": "rsync  version 3.4.1  protocol version 32"
+        },
+        "scenarios": [
+          {
+            "scenario": "tiny",
+            "samples": {
+              "rsync": [
+                0.1594,
+                0.1693,
+                0.1578
+              ],
+              "xs": [
+                0.1663,
+                0.1604,
+                0.1677
+              ]
+            },
+            "median": {
+              "rsync": 0.15937379328534007,
+              "xs": 0.16628890298306942
+            },
+            "cpu_median": {
+              "rsync": 0.026867,
+              "xs": 0.032993
+            },
+            "rss_mib": {
+              "rsync": 13.7,
+              "xs": 16.8
+            },
+            "speedup": 0.9584150861922914
+          }
+        ]
+      },
+      {
+        "file": "20261010T144748Z-715fa0-tiny-push.json",
+        "label": "tiny",
+        "direction": "push",
+        "flow": "neo → freya",
+        "cache": "warm",
+        "threads": null,
+        "complete": true,
+        "samples": 6,
+        "unverified": 0,
+        "versions": {
+          "xs": "xs  version 0.1.0  protocol version 4  git 415900091024",
+          "rsync": "rsync  version 3.4.1  protocol version 32"
+        },
+        "scenarios": [
+          {
+            "scenario": "tiny",
+            "samples": {
+              "rsync": [
+                0.1849,
+                0.1862,
+                0.187
+              ],
+              "xs": [
+                0.1633,
+                0.1618,
+                0.1644
+              ]
+            },
+            "median": {
+              "rsync": 0.18623495195060968,
+              "xs": 0.16330044995993376
+            },
+            "cpu_median": {
+              "rsync": 0.032969,
+              "xs": 0.039896
+            },
+            "rss_mib": {
+              "rsync": 13.8,
+              "xs": 17.0
+            },
+            "speedup": 1.1404435933661112
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "run_id": "20261010T152712Z-apfs-baseline",
+    "source_revision": "415900091024",
+    "cache": "retained OS caches",
+    "runs_per_tool": 3,
+    "hosts": [
+      {
+        "name": "MacBookPro",
+        "arch": null,
+        "kernel": null,
+        "cpu": null,
+        "cpus": null,
+        "memory": "64 GiB",
+        "filesystem": "/dev/disk3s5 3.6Ti 3.5Ti 99Gi 98% 24M 1.0G 2% /System/Volumes/Data"
+      }
+    ],
+    "datasets": {
+      "corpus": {
+        "files": 76838,
+        "directories": 19072,
+        "bytes": 517808080
+      }
+    },
+    "loadavg": [
+      14.763671875,
+      19.9814453125,
+      19.708984375
+    ],
+    "results": [
+      {
+        "file": "20261010T152712Z-apfs-baseline-j1.json",
+        "label": "apfs-noop-j1",
+        "direction": "push",
+        "flow": "local",
+        "cache": "warm",
+        "threads": 1,
+        "complete": true,
+        "samples": 6,
+        "unverified": 0,
+        "versions": {
+          "xs": "xs  version 0.1.0  protocol version 4  git 415900091024",
+          "rsync": "rsync  version 3.4.4  protocol version 32"
+        },
+        "scenarios": [
+          {
+            "scenario": "noop",
+            "samples": {
+              "rsync": [
+                1.408,
+                1.7859,
+                1.6257
+              ],
+              "xs": [
+                5.3773,
+                5.0826,
+                5.1461
+              ]
+            },
+            "median": {
+              "rsync": 1.6257073329761624,
+              "xs": 5.146101959049702
+            },
+            "cpu_median": {
+              "rsync": 2.247765,
+              "xs": 4.919943
+            },
+            "rss_mib": {
+              "rsync": 25.0,
+              "xs": 27.2
+            },
+            "speedup": 0.3159104397683507
+          }
+        ]
+      },
+      {
+        "file": "20261010T152712Z-apfs-baseline-j2.json",
+        "label": "apfs-noop-j2",
+        "direction": "push",
+        "flow": "local",
+        "cache": "warm",
+        "threads": 2,
+        "complete": true,
+        "samples": 6,
+        "unverified": 0,
+        "versions": {
+          "xs": "xs  version 0.1.0  protocol version 4  git 415900091024",
+          "rsync": "rsync  version 3.4.4  protocol version 32"
+        },
+        "scenarios": [
+          {
+            "scenario": "noop",
+            "samples": {
+              "rsync": [
+                1.3946,
+                2.4307,
+                1.8349
+              ],
+              "xs": [
+                3.9546,
+                4.4246,
+                4.5659
+              ]
+            },
+            "median": {
+              "rsync": 1.8349049999378622,
+              "xs": 4.4246240828651935
+            },
+            "cpu_median": {
+              "rsync": 2.437362,
+              "xs": 6.960367
+            },
+            "rss_mib": {
+              "rsync": 25.0,
+              "xs": 30.1
+            },
+            "speedup": 0.4147030268726598
+          }
+        ]
+      },
+      {
+        "file": "20261010T152712Z-apfs-baseline-j4.json",
+        "label": "apfs-noop-j4",
+        "direction": "push",
+        "flow": "local",
+        "cache": "warm",
+        "threads": 4,
+        "complete": true,
+        "samples": 6,
+        "unverified": 0,
+        "versions": {
+          "xs": "xs  version 0.1.0  protocol version 4  git 415900091024",
+          "rsync": "rsync  version 3.4.4  protocol version 32"
+        },
+        "scenarios": [
+          {
+            "scenario": "noop",
+            "samples": {
+              "rsync": [
+                1.2778,
+                2.2217,
+                1.6131
+              ],
+              "xs": [
+                3.2392,
+                2.8609,
+                2.8345
+              ]
+            },
+            "median": {
+              "rsync": 1.6131239589303732,
+              "xs": 2.8609014998655766
+            },
+            "cpu_median": {
+              "rsync": 2.203596,
+              "xs": 10.456268999999999
+            },
+            "rss_mib": {
+              "rsync": 24.7,
+              "xs": 36.3
+            },
+            "speedup": 0.5638516247435181
+          }
+        ]
+      },
+      {
+        "file": "20261010T152712Z-apfs-baseline-j8.json",
+        "label": "apfs-noop-j8",
+        "direction": "push",
+        "flow": "local",
+        "cache": "warm",
+        "threads": 8,
+        "complete": true,
+        "samples": 6,
+        "unverified": 0,
+        "versions": {
+          "xs": "xs  version 0.1.0  protocol version 4  git 415900091024",
+          "rsync": "rsync  version 3.4.4  protocol version 32"
+        },
+        "scenarios": [
+          {
+            "scenario": "noop",
+            "samples": {
+              "rsync": [
+                1.3535,
+                2.6328,
+                1.7403
+              ],
+              "xs": [
+                3.4689,
+                3.903,
+                3.4222
+              ]
+            },
+            "median": {
+              "rsync": 1.7402539169415832,
+              "xs": 3.468914333032444
+            },
+            "cpu_median": {
+              "rsync": 2.2935060000000003,
+              "xs": 18.084706999999998
+            },
+            "rss_mib": {
+              "rsync": 24.7,
+              "xs": 44.1
+            },
+            "speedup": 0.5016710560909972
+          }
+        ]
+      }
+    ]
+  }
+]

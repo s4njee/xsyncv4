@@ -1,17 +1,25 @@
 #!/usr/bin/env python3
-"""Generate VitePress manuals from curated content and captured executable help."""
+"""Generate VitePress manuals from curated content and captured executable help.
+
+Pages come from two places: `scripts/docs_content.py` (the original manuals) and
+`content/*.md` (Markdown pages with a small frontmatter block). Both may contain
+`<!--generated:NAME-->` placeholders, filled from docs-inputs/ by generated.py.
+"""
 import json
 import re
 import sys
 from html import escape
 
 import derive
-from docs_content import EXIT_CODES, PAGES, doc, p, section, table
+import generated
+import options_model
+from docs_content import PAGES, doc, p, section, table
 
 ROOT = derive.SITE
 INPUTS = ROOT / 'docs-inputs'
 HELP = (INPUTS / 'xs-help.txt').read_text()
 META = derive.version_meta(HELP)
+GROUPS = ['MANUAL', 'WORKFLOWS', 'REFERENCE', 'PROJECT']
 recordings = json.loads((ROOT / 'dist/recordings/sessions.json').read_text())
 events = [json.loads(line) for line in (ROOT / 'dist/recordings/progress.ndjson').read_text().splitlines() if line.startswith('{')]
 progress = next(event for event in events if event['type'] == 'progress' and event.get('phase') == 'transferring')
@@ -45,62 +53,115 @@ def help_sections(text):
     return result
 
 
-def exit_code_table():
-    derived = json.loads((INPUTS / 'exit-codes.json').read_text())
-    codes = [0] + [entry['code'] for entry in derived]
-    missing = [code for code in codes if code not in EXIT_CODES]
-    if missing:
-        sys.exit(f'generate-docs: exit codes {missing} are defined in the source but have no meaning in EXIT_CODES')
-    unknown = sorted(set(EXIT_CODES) - set(codes))
-    if unknown:
-        sys.exit(f'generate-docs: EXIT_CODES documents {unknown}, which the source no longer defines')
-    kinds = {entry['code']: entry['summary'] for entry in derived}
-    rows = [(f'<code class="nowrap">{code}</code>', EXIT_CODES[code][0], escape(kinds.get(code) or '—')) for code in codes if EXIT_CODES[code][1]]
-    unused = [code for code in codes if not EXIT_CODES[code][1]]
-    body = table(['Code', 'Meaning', 'Error-summary kind'], rows)
-    if unused:
-        body += p('Code ' + ', '.join(f'<code>{code}</code>' for code in unused) + ' is defined for rsync compatibility but xs does not currently return it.')
-    return body
+BADGES = {'xs-only': 'xs only', 'no-op': 'no-op'}
 
 
-def inline_code(text):
-    """Escape backlog Markdown text, keeping its `code` spans."""
-    return re.sub(r'`([^`]+)`', r'<code>\1</code>', escape(text))
+def see_link(target, pages):
+    """`page#anchor` → a link labeled with the page and section names; fails if either is missing."""
+    slug, _, anchor = target.partition('#')
+    page = next((page for page in pages if page['slug'] == slug), None)
+    title = next((item['title'] for item in (page or {}).get('sections', []) if item['id'] == anchor), None) if anchor else ''
+    if page is None or title is None:
+        sys.exit(f'generate-docs: options: link to {target!r} names a missing page or section')
+    label = escape(page['name']) + (f' › {escape(title.title())}' if anchor else '')
+    return f'<a href="{slug}.html{"#" + anchor if anchor else ""}">{label}</a>'
 
 
-DONE = {'done'}
-CLOSED = {'skipped — user request'}
+def option_row(option, pages):
+    labels = [label for label in [BADGES.get(option['class']), option['platform'] and option['platform'] + ' only',
+                                  option['features'] and 'helper feature'] if label]
+    badges = f'<div class="option-badges">{"".join(f"<span class=\"option-badge\">{label}</span>" for label in labels)}</div>' if labels else ''
+    aliases = ''.join(f'<span id="{escape(alias)}" class="option-alias"></span>' for alias in option['aliases'])
+    facts = []
+    if option['detail']:
+        facts.append(f'<p>{option["detail"]}</p>')
+    if option['implies']:
+        facts.append('<p><strong>Implies</strong> ' + ' '.join(f'<code>{escape(item)}</code>' for item in option['implies']) + '</p>')
+    if option['features']:
+        facts.append('<p><strong>Remote helpers must support</strong> ' + ', '.join(
+            f'<a href="protocol.html#{feature.lower().replace("_", "-")}"><code>{feature}</code></a>' for feature in option['features'])
+            + '. A helper without it causes fallback, or exit 4 with <code>--no-fallback</code>.</p>')
+    if option['see']:
+        facts.append('<p><strong>See</strong> ' + ' · '.join(see_link(target, pages) for target in option['see']) + '</p>')
+    details = f'<details><summary>Details</summary>{"".join(facts)}</details>' if facts else ''
+    search = escape(' '.join([option['spec'], option['help']]).lower())
+    # One code span per form, so a long spec wraps between forms, never inside one.
+    spec = ', '.join(f'<code class="nowrap">{escape(form.strip())}</code>' for form in option['spec'].split(','))
+    return (f'<tr id="{escape(option["id"])}" class="option-row" data-class="{option["class"]}" data-platform="{escape(option["platform"] or "")}" '
+            f'data-feature="{"yes" if option["features"] else "no"}" data-search="{search}">'
+            f'<td>{aliases}<a class="option-anchor" href="#{escape(option["id"])}">{spec}</a>{badges}</td>'
+            f'<td>{escape(option["help"])}{details}</td></tr>')
 
 
-def backlog_tables():
-    tiers = json.loads((INPUTS / 'backlog-status.json').read_text())
-    summary, open_rows = [], []
-    for tier in tiers:
-        items = tier['items']
-        done = [item for item in items if item['status'] in DONE]
-        closed = [item for item in items if item['status'] in CLOSED]
-        rest = [item for item in items if item['status'] not in DONE | CLOSED]
-        summary.append((f'{tier["tier"]} · {escape(tier["title"])}', str(len(items)), str(len(done)), str(len(closed)), str(len(rest))))
-        open_rows += [(tier['tier'], f'<code>{item["id"]}</code>', inline_code(item['title']), escape(item['status'])) for item in rest]
-    tiers_html = table(['Tier', 'Items', 'Done', 'Closed', 'Open'], summary)
-    tiers_html += p('“Closed” items were set aside without completion, for example at the user’s request. Statuses use the backlog’s own vocabulary: <code>partial</code>, <code>new</code>, <code>code</code>, <code>confirmed</code> and <code>unverified</code>.')
-    return tiers_html, table(['Tier', 'ID', 'Item', 'Status'], open_rows)
+def options_page(model, pages):
+    intro = (p('Captured from <code>' + escape(META['line']) + '</code>. Every option <code>xs --help</code> lists is below, with a stable link: '
+               '<code>options.html#delete</code> for a long option, <code>options.html#z</code> for its short form. '
+               'Open <em>Details</em> for what each one implies, which remote-helper features it needs, and where it is explained.')
+             + p('<a href="xs-help.txt" download>Original help ↓</a> &nbsp; / &nbsp; <a href="xs.1" download>Manpage ↓</a> &nbsp; / &nbsp; '
+                 '<a href="options.json" download>Option data (JSON) ↓</a>')
+             + '<OptionFilter />')
+    body = [section('source', 'SOURCE', intro)]
+    for heading in options_model.CLASSES:
+        rows = [option_row(option, pages) for option in model['options'] if option['section'] == heading]
+        body.append(section(re.sub(r'[^a-z0-9]+', '-', heading.lower()).strip('-'), heading.upper(),
+                            '<div class="manual-table-wrap"><table class="option-table"><thead><tr><th scope="col">Option</th><th scope="col">Description</th></tr></thead><tbody>'
+                            + ''.join(rows) + '</tbody></table></div>'))
+    body.append(section('also-accepted', 'ALSO ACCEPTED',
+                        p('These rsync spellings work natively but are not listed in <code>--help</code>.')
+                        + table(['Option', 'Meaning'], [(f'<code>{escape(item["name"])}</code>', escape(item['help'])) for item in model['unlisted']])))
+    body.append(section('delegated', 'DELEGATED TO RSYNC',
+                        p('xs does not implement these rsync options. A command that uses one runs a real rsync from <code>PATH</code> instead, with a one-line notice on stderr. With <code>--no-fallback</code> it exits 1. The list is read from the option parser in <code>src/main.cpp</code>.')
+                        + '<p class="delegated-list">' + ' '.join(f'<code>{escape(item)}</code>' for item in model['delegated']) + '</p>'
+                        + p('See <a href="compatibility.html#fallback">compatibility</a> and <a href="troubleshooting.html#fallback">troubleshooting</a>.')))
+    return doc('options', 'xs-options(1)', 'Option reference', 'Every option, with stable links, what it implies, and what a remote helper must support.', 'REFERENCE', body)
 
 
-tiers_html, open_html = backlog_tables()
-GENERATED = {
-    'exit-codes': exit_code_table(),
-    'backlog-tiers': tiers_html,
-    'backlog-open': open_html,
-    'reviewed-at': escape(sources['reviewed_at']),
-}
+def content_pages():
+    """Markdown pages in content/. Frontmatter keys: slug, title, name, summary, group, after."""
+    pages = []
+    for path in sorted((ROOT / 'content').glob('*.md')):
+        text = path.read_text()
+        match = re.match(r'^---\n(.*?)\n---\n(.*)$', text, re.S)
+        if not match:
+            sys.exit(f'generate-docs: {path.name} has no frontmatter')
+        front = dict(re.findall(r'^(\w+):\s*(.*)$', match[1], re.M))
+        missing = {'slug', 'title', 'name', 'summary', 'group'} - set(front)
+        if missing or front['group'] not in GROUPS:
+            sys.exit(f'generate-docs: {path.name} frontmatter needs {sorted(missing) or "a known group"}')
+        sections = []
+        for heading, ident, body in re.findall(r'^## (.+?) \{#([a-z0-9-]+)\}\n(.*?)(?=^## |\Z)', match[2], re.M | re.S):
+            sections.append(section(ident, heading, body.strip() + '\n'))
+        page = doc(front['slug'], front['title'], front['name'], front['summary'], front['group'], sections)
+        page['after'] = front.get('after')
+        pages.append(page)
+    return pages
 
-sections = [section(re.sub(r'[^a-z0-9]+', '-', heading.lower()).strip('-'), heading.upper(),
-                    table(['OPTION', 'DESCRIPTION'], [(f'<code>{escape(spec)}</code>', escape(text)) for spec, text in rows]))
-            for heading, rows in help_sections(HELP)]
-options = doc('options', 'xs-options(1)', 'Option reference', 'The complete option list, generated from the executable’s own help.', 'REFERENCE', [section('source', 'SOURCE', p('Captured from <code>' + escape(META['line']) + '</code>. This is the current native help; delegated options and platform limits are covered in <a href="compatibility.html">compatibility</a>.') + p('<a href="xs-help.txt" download>Download original help ↗</a> &nbsp; / &nbsp; <a href="xs.1" download>Download generated manpage ↗</a>')), *sections])
+
 pages = [*PAGES]
-pages.insert(8, options)
+# Place content pages after the page each names, resolving chains such as
+# performance → architecture → changelog in whatever order the files sort.
+pending = content_pages()
+while pending:
+    placed = False
+    for page in list(pending):
+        if any(existing['slug'] == page['slug'] for existing in pages):
+            sys.exit(f'generate-docs: duplicate page slug {page["slug"]!r}')
+        if page.get('after') == 'options':  # the options page is added later, at a fixed position
+            sys.exit('generate-docs: content pages cannot be placed after options')
+        anchor = next((index for index, existing in enumerate(pages) if existing['slug'] == page.get('after')), None)
+        if page.get('after') and anchor is None:
+            continue
+        pages.insert(anchor + 1 if anchor is not None else len(pages), page)
+        pending.remove(page)
+        placed = True
+    if not placed:
+        sys.exit('generate-docs: cannot place ' + ', '.join(f'{page["slug"]} (after {page["after"]!r})' for page in pending))
+
+MODEL = options_model.build(help_sections(HELP), json.loads((INPUTS / 'option-source.json').read_text()),
+                            json.loads((INPUTS / 'protocol.json').read_text()))
+pages.insert(8, options_page(MODEL, pages))
+(ROOT / 'docs/public/options.json').write_text(json.dumps({'help_version': META['line'], **MODEL}, indent=2, ensure_ascii=False) + '\n')
+EXTRA = {'reviewed-at': escape(sources['reviewed_at'])}
 for page in pages:
     front = {'title': page['title'], 'description': page['summary'], 'manual': page['title'], 'manualName': page['name'], 'sectionNumber': re.search(r'\((\d)\)', page['title'])[1]}
     text = '---\n' + '\n'.join(f'{k}: {json.dumps(v)}' for k, v in front.items()) + '\n---\n\n'
@@ -111,12 +172,12 @@ for page in pages:
         body = body.replace('href="../index.html#demo"', 'href="../index.html#demo" target="_self"')
         body = body.replace('Loading captured event…', escape(json.dumps(progress, indent=2)))
         body = body.replace('Loading captured diagnostic…', escape(recordings['error']['frames'][-1]['text']))
-        body = re.sub(r'<!--generated:([a-z-]+)-->', lambda match: GENERATED[match[1]], body)
+        body = re.sub(r'<!--generated:([a-z0-9-]+)-->', lambda match: generated.render(match[1], EXTRA), body)
+        body = re.sub(r'<!--example:([a-z0-9-]+)-->', lambda match: generated.example(match[1]), body)
         text += f'## {item["title"]} {{#{item["id"]}}}\n\n{body}\n\n'
     (ROOT / 'docs' / (page['slug'] + '.md')).write_text(text)
-sidebar = []
-for group in ['MANUAL', 'WORKFLOWS', 'REFERENCE', 'PROJECT']:
-    sidebar.append({'text': group, 'items': [{'text': page['name'], 'link': '/' if page['slug'] == 'index' else '/' + page['slug']} for page in pages if page['group'] == group]})
+sidebar = [{'text': group, 'items': [{'text': page['name'], 'link': '/' if page['slug'] == 'index' else '/' + page['slug']}
+                                    for page in pages if page['group'] == group]} for group in GROUPS]
 (ROOT / 'docs/.vitepress/sidebar.json').write_text(json.dumps(sidebar, indent=2) + '\n')
 (ROOT / 'docs/.vitepress/site-meta.json').write_text(json.dumps({k: META[k] for k in ('program', 'version', 'protocol', 'git')}, indent=2) + '\n')
 (ROOT / 'docs/public/xs-help.txt').write_text(HELP)

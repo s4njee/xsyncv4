@@ -2,8 +2,8 @@
 
 Written 2026-10-10 against `sites/xsync` at `70da4f0` (VitePress 1.6.4, 13 generated
 manual pages, product page with recorded terminal playback). The CLI it documents is
-`xs` 0.1.0, protocol 4, at the same commit. S0 is complete; its evidence is in the
-completion log at the end.
+`xs` 0.1.0, protocol 4, at the same commit. S0 and S1 are complete apart from two partial
+items (S-15, S-21); their evidence is in the completion logs at the end.
 
 ## What "fully fleshed out" means here
 
@@ -104,19 +104,19 @@ data where possible, so S2's widgets can reuse them.
 
 | ID | Item | Status | Done when | Size |
 |---|---|---|---|---|
-| S-10 | **Option data model.** Each option is a table row and nothing more. There is nothing to link to and no metadata. | **new** | `data/options.json` is generated from `--help` and joined with a curated annotations file. Each entry has: short/long forms, argument, help text, class (`native`, `delegates`, `no-op`, `xs-only`, `platform:macOS`), implied options (`-a` → `-rlptgoD`, `-A` → `-p`, `-P` → `--partial --progress`), required feature bit, related pages, and an example. The build fails if `--help` lists an option the annotations don't cover. | M |
-| S-11 | **Per-option anchors and detail.** You can't link to `--delete`. | **new** | The options page renders from S-10 with stable anchors (`options#delete`, `options#z`), filters by class, and has an expandable detail for each option. Detail text covers the README nuances, for example `--chown` versus `--no-owner` ordering on push, and `-E` on Apple rsync. | M |
-| S-12 | **Performance page.** The site has no benchmark content. The README has the neo/freya table, the historical APFS baseline and methodology caveats. `benchmarks/results/*.json` has per-sample wall time, CPU and RSS data. | **new** | The page is generated from `benchmarks/results/*-run-manifest.json` and the per-case JSON. It shows: hosts and filesystems, medians with the per-sample spread, CPU and peak RSS, losses as well as wins (`checksum` 0.65×, `tiny` 0.96×), and the cache policy. The historical table is labeled as predating the trust fixes. Adding a new run directory adds it to the page with no hand edits. | M |
-| S-13 | **How it works.** "How it gets its speed" (parallel scan, two-queue pool, APFS clones, pipelined DIR/NEED/DATA protocol) isn't on the site. | **new** | An architecture page with three diagrams: the local engine pipeline, the remote sender/receiver frame flow, and the atomic-write and verified-resume lifecycle. It links to the `src/` files in the README layout table, which must be refreshed: it lists 9 of 26 `.cpp` files. | M |
-| S-14 | **Protocol and feature-bit reference.** There is one paragraph. `src/common.h:25-49` defines 34 `PF_*` bits that decide when a request delegates or fails with code 4. | **new** | The page is generated from `common.h`: bit, value, name, what requests it, and what happens without it (fallback or exit 4). Also covers the N/N-1 window, the frozen protocol-3 fixture (`tests/fixtures/README.md`) and the rule for adding a feature. This covers the protocol half of backlog Q-13 (`docs/protocol.md`). | M |
-| S-15 | **Itemization and `--out-format` reference.** `%i` is never explained. That includes the eleven positions, the twelfth `f` flag for `--fileflags`, `hf`/`hL`/`hS`, `=>` versus `->`, and `\#ooo` escaping. | **new** | A position-by-position reference with real `-ii` output from a fixture covering every character. Each `%` escape has an example and a note on how `%b` differs from rsync. | S |
-| S-16 | **JSON event schema.** The site shows one sample event and describes the fields in prose. | **partial** | `progress`, `file` and `complete` are published as a JSON Schema (`docs/public/progress.schema.json`), validated in CI against a fresh `--progress=json` capture. The page documents `path_bytes_hex`, null `exit_code`, and the fact that the schema is unversioned (the GUI backlog's versioned API is a separate thing). It includes a `jq` and a Python consumer. | S |
-| S-17 | **Migration guide from rsync.** Differences are split across compatibility, metadata and progress pages, and the README has more. | **new** | One page walks through the invocation shapes from `backlog.md` ("What daily driver means"), what changes for each, the fallback notice, `alias rsync=xs` caveats, Apple rsync `-E`, and clones carrying extra metadata. The differences list is generated from the difftest skip/expectation data once Q-13 lands. Until then it is curated and fingerprinted. | M |
-| S-18 | **Recipes.** The examples are one-liners. | **new** | At least eight full, runnable recipes, each with expected output (S-50): rotating `--link-dest` snapshots; safe mirror (dry run → review → `--max-delete`); Raspberry Pi over SSH with `--install`; `find -print0 \| xs --files-from`; cron/launchd with exit-code handling; parsing `--progress=json` for a wrapper; bandwidth-limited overnight push with `--timeout`; preserving everything on macOS (`-aHAXN --fileflags`). | M |
-| S-19 | **Troubleshooting and FAQ.** There is none. | **new** | Entries for: "xs fell back to rsync" (what each notice means, how to see why, `--no-fallback`), exit 4 in strict mode, remote helper not found (127), SSH prompt behavior, why `-z` does nothing locally, why the progress bar stops below 100 % on a push, and clone metadata surprises. Each entry quotes the real diagnostic text. | M |
-| S-20 | **Install and releases page.** Release artifacts, the SHA-256 manifest, the local Homebrew tap, and `--install` are scattered across getting-started and SSH pages. | **partial** | One page covers building, `cmake --install`, the Homebrew tap, release presets, checksum verification, `--install HOST` with its refusal rules, and the helper lookup order shown as a flowchart. If releases are published, each release is listed with its hashes. | S |
-| S-21 | **Changelog and versioned docs.** None exist. | **new** | `CHANGELOG.md` exists (backlog Q-13) and renders on the site. Each tagged release gets a frozen copy of the docs under `/docs/vX.Y/`, with a version switcher. | M |
-| S-22 | **Contributor pages.** The development page is status only. | **partial** | Pages for: the test matrix (from the README Tests section, grouped by area, with platform and privilege needs), the source layout, how to recapture recordings and help, and how the site is built. | S |
+| S-10 | **Option data model.** Each option is a table row and nothing more. There is nothing to link to and no metadata. | **done** | `data/options.json` is generated from `--help` and joined with a curated annotations file. Each entry has: short/long forms, argument, help text, class (`native`, `delegates`, `no-op`, `xs-only`, `platform:macOS`), implied options (`-a` → `-rlptgoD`, `-A` → `-p`, `-P` → `--partial --progress`), required feature bit, related pages, and an example. The build fails if `--help` lists an option the annotations don't cover. | M |
+| S-11 | **Per-option anchors and detail.** You can't link to `--delete`. | **done** | The options page renders from S-10 with stable anchors (`options#delete`, `options#z`), filters by class, and has an expandable detail for each option. Detail text covers the README nuances, for example `--chown` versus `--no-owner` ordering on push, and `-E` on Apple rsync. | M |
+| S-12 | **Performance page.** The site has no benchmark content. The README has the neo/freya table, the historical APFS baseline and methodology caveats. `benchmarks/results/*.json` has per-sample wall time, CPU and RSS data. | **done** | The page is generated from `benchmarks/results/*-run-manifest.json` and the per-case JSON. It shows: hosts and filesystems, medians with the per-sample spread, CPU and peak RSS, losses as well as wins (`checksum` 0.65×, `tiny` 0.96×), and the cache policy. The historical table is labeled as predating the trust fixes. Adding a new run directory adds it to the page with no hand edits. | M |
+| S-13 | **How it works.** "How it gets its speed" (parallel scan, two-queue pool, APFS clones, pipelined DIR/NEED/DATA protocol) isn't on the site. | **done** | An architecture page with three diagrams: the local engine pipeline, the remote sender/receiver frame flow, and the atomic-write and verified-resume lifecycle. It links to the `src/` files in the README layout table, which must be refreshed: it lists 9 of 26 `.cpp` files. | M |
+| S-14 | **Protocol and feature-bit reference.** There is one paragraph. `src/common.h:25-49` defines 34 `PF_*` bits that decide when a request delegates or fails with code 4. | **done** | The page is generated from `common.h`: bit, value, name, what requests it, and what happens without it (fallback or exit 4). Also covers the N/N-1 window, the frozen protocol-3 fixture (`tests/fixtures/README.md`) and the rule for adding a feature. This covers the protocol half of backlog Q-13 (`docs/protocol.md`). | M |
+| S-15 | **Itemization and `--out-format` reference.** `%i` is never explained. That includes the eleven positions, the twelfth `f` flag for `--fileflags`, `hf`/`hL`/`hS`, `=>` versus `->`, and `\#ooo` escaping. | **partial** | A position-by-position reference with real `-ii` output from a fixture covering every character. Each `%` escape has an example and a note on how `%b` differs from rsync. | S |
+| S-16 | **JSON event schema.** The site shows one sample event and describes the fields in prose. | **done** | `progress`, `file` and `complete` are published as a JSON Schema (`docs/public/progress.schema.json`), validated in CI against a fresh `--progress=json` capture. The page documents `path_bytes_hex`, null `exit_code`, and the fact that the schema is unversioned (the GUI backlog's versioned API is a separate thing). It includes a `jq` and a Python consumer. | S |
+| S-17 | **Migration guide from rsync.** Differences are split across compatibility, metadata and progress pages, and the README has more. | **done** | One page walks through the invocation shapes from `backlog.md` ("What daily driver means"), what changes for each, the fallback notice, `alias rsync=xs` caveats, Apple rsync `-E`, and clones carrying extra metadata. The differences list is generated from the difftest skip/expectation data once Q-13 lands. Until then it is curated and fingerprinted. | M |
+| S-18 | **Recipes.** The examples are one-liners. | **done** | At least eight full, runnable recipes, each with expected output (S-50): rotating `--link-dest` snapshots; safe mirror (dry run → review → `--max-delete`); Raspberry Pi over SSH with `--install`; `find -print0 \| xs --files-from`; cron/launchd with exit-code handling; parsing `--progress=json` for a wrapper; bandwidth-limited overnight push with `--timeout`; preserving everything on macOS (`-aHAXN --fileflags`). | M |
+| S-19 | **Troubleshooting and FAQ.** There is none. | **done** | Entries for: "xs fell back to rsync" (what each notice means, how to see why, `--no-fallback`), exit 4 in strict mode, remote helper not found (127), SSH prompt behavior, why `-z` does nothing locally, why the progress bar stops below 100 % on a push, and clone metadata surprises. Each entry quotes the real diagnostic text. | M |
+| S-20 | **Install and releases page.** Release artifacts, the SHA-256 manifest, the local Homebrew tap, and `--install` are scattered across getting-started and SSH pages. | **done** | One page covers building, `cmake --install`, the Homebrew tap, release presets, checksum verification, `--install HOST` with its refusal rules, and the helper lookup order shown as a flowchart. If releases are published, each release is listed with its hashes. | S |
+| S-21 | **Changelog and versioned docs.** None exist. | **partial** | `CHANGELOG.md` exists (backlog Q-13) and renders on the site. Each tagged release gets a frozen copy of the docs under `/docs/vX.Y/`, with a version switcher. | M |
+| S-22 | **Contributor pages.** The development page is status only. | **done** | Pages for: the test matrix (from the README Tests section, grouped by area, with platform and privilege needs), the source layout, how to recapture recordings and help, and how the site is built. | S |
 
 ## S2 — Interactive: let the reader try it before running it
 
@@ -264,3 +264,94 @@ binary as the help. That second check is part of S-53.
 
 The CLI still prints `remote xsync is not installed` (`src/remote.cpp:2627`). That is a
 CLI change outside the Site, left for Decision 1's follow-up.
+
+---
+
+## S1 completion log — 2026-10-10
+
+The manual grew from 13 pages to 24. New pages: Install & releases, Coming from rsync,
+Recipes, Itemize & out-format, JSON progress events, Troubleshooting, Protocol &
+compatibility, Performance, How it works, Changelog and Contributing. The options
+page was rebuilt as well.
+
+Two pieces of infrastructure carry most of S1, and S2 and S3 will reuse them:
+
+- **Markdown pages** in `content/*.md`, merged into the build by frontmatter. They can
+  include `<!--generated:NAME-->` sections from `scripts/generated.py` and captured
+  examples. This is a first step toward S-60.
+- **Captured examples.** `scripts/capture-examples.py` runs 38 documented examples
+  against the real binary in disposable sandboxes and records stdout, stderr and the exit
+  status in `docs-inputs/examples.json`. Remote examples go through `tests/fakessh.sh`.
+  Two of them use a feature-subset helper (`-DXSYNC_PROTOCOL_FEATURES=127`), so the exit-4
+  and fallback paths are real. `npm run check` requires the examples, the recordings and
+  the help to come from one binary.
+
+Per item:
+
+- **S-10.** `docs/public/options.json` joins `--help` (88 rows), `scripts/option_notes.py`
+  and the parser's own tables, which `docs-inputs/option-source.json` derives from
+  `src/main.cpp`: 147 accepted names and 65 refused names. The build fails on a `--help`
+  option without notes, notes for a removed option, a long name the parser does not
+  accept, an unknown feature bit, a duplicate anchor, or a "see" link to a missing page
+  or section.
+- **S-11.** Every option has a stable anchor (`options.html#delete`, `#z`) and a
+  *Details* disclosure: README nuances, implied options, required helper features
+  linked to the protocol table, and related sections. A small Vue filter
+  (`OptionFilter.vue`) narrows rows by class or platform, by helper feature, or by text;
+  without JavaScript every row stays visible. The page also lists 11 accepted spellings
+  `--help` omits, and the options delegated to rsync, both read from the parser.
+- **S-12.** `docs-inputs/benchmarks.json` is derived from `benchmarks/results/*.json`. It
+  covers both runs, `715fa0` (neo/freya over SSH) and the APFS no-op diagnostic, with
+  hosts, datasets, medians, the fastest–slowest range, CPU, peak RSS and evidence links.
+  Losses are marked as such. The in-progress Congress push is listed as incomplete. The
+  historical baseline is labeled. A new run in `benchmarks/results/` appears after
+  `npm run docs:refresh`, with no hand edits.
+- **S-13.** Three inline SVG diagrams (local engine, remote exchange, life of one file)
+  and a source map. The README layout table now lists all 26 source files.
+- **S-14.** `docs-inputs/protocol.json` is derived from `src/common.h` and
+  `src/remote.cpp`: versions, 34 feature bits, the platform exclusions, 36 frame types, 7
+  data records and the frozen protocol-3 option layout. `scripts/protocol_notes.py` adds
+  what requests each bit and what happens without it; the build fails when the two
+  disagree. Facts were checked against the source. For example, `R_END` carries
+  status, not a checksum, and an unsupported option under `--no-fallback` exits 1, not 4.
+- **S-15 (partial).** Real output covers every change-code position except
+  macOS-only ones: the BSD-flag `f`, and `n`/`b` for creation times. Covered are `<`,
+  `>`, `c`, `h`, `.`, `*`, the types `f d L D S`, and `c s t T p o g u a x`. Remaining:
+  capture those positions on macOS.
+- **S-16.** `docs/public/progress.schema.json` describes all three record types, with
+  `additionalProperties: false`. `npm run check` validates the committed recording
+  plus fresh local, dry-run, checksum and push streams with a small built-in validator,
+  which was negative-tested against five kinds of bad event. The page's field tables are
+  generated from the schema.
+- **S-17.** A migration page covers the backlog's invocation shapes, a differences
+  table, and steps for switching a script. It is fingerprinted against the README until
+  Q-13 can generate the differences.
+- **S-18.** Eight recipes, all with captured output. The cron and launchd snippets and the
+  macOS `-N --fileflags` variant are labeled as not captured.
+- **S-19.** Troubleshooting quotes the real text for all three fallback causes, plus exits
+  1, 4, 12, 23, 25, 30, 127 and 255.
+- **S-20.** The install page covers local install, the Homebrew tap, release outputs and
+  `manifest.json`, a captured `--install` run against a host without xs, and a
+  helper-lookup flowchart. No releases are published (none exist on GitHub).
+- **S-21 (partial).** `CHANGELOG.md` exists at the repository root, written from the
+  backlog's completed stories, and the site renders it (`docs-inputs/changelog.md`, kept
+  current by `npm run check`). Versioned manuals wait for the first tag.
+- **S-22.** The contributing page has build and test commands, a test matrix grouped by
+  area with what each test needs, all 26 source files, and the maintenance workflow for
+  this site.
+
+Verification: `npm run check` passes, including links at `/` and `/xsyncv4/`. A
+Chromium pass found no console errors and no horizontal overflow at 375 px on the
+architecture, performance and options pages. The option filter counts were 88 total,
+26 needing a helper feature, 2 macOS-only and 5 matching "delete".
+
+**S-08 follow-up.** The repository-root `.gitignore` ignores every `dist/` directory, so
+new files under `sites/xsync/dist` were silently left out of commits, and `git status` did
+not show them. `sites/xsync/.gitignore` now re-includes `dist/`, and `npm run check` fails if
+any output under `dist/`, `docs/*.md`, `docs/public/` or `docs-inputs/` is ignored. This
+was negative-tested.
+
+Two CLI issues turned up while capturing, and both are left as suggested tasks rather
+than changed here: diagnostics still say "remote xsync", and an older helper prints its
+own "connection unexpectedly closed (code 12)" lines before the client's real
+message.

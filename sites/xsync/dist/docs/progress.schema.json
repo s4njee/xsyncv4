@@ -1,0 +1,243 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "progress.schema.json",
+  "title": "xs --progress=json event",
+  "description": "One line of xs --progress=json output on stderr. Lines that do not start with \"{\" are diagnostics, not events.",
+  "oneOf": [
+    {
+      "type": "object",
+      "title": "progress",
+      "description": "Periodic totals, emitted on every display tick.",
+      "required": [
+        "type",
+        "phase",
+        "elapsed_ms",
+        "files",
+        "files_total",
+        "bytes",
+        "bytes_total",
+        "files_seen",
+        "wire_bytes",
+        "deleted",
+        "verified",
+        "scanning",
+        "dry_run"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "progress"
+        },
+        "elapsed_ms": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Milliseconds since the transfer started."
+        },
+        "files": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Regular files completed so far."
+        },
+        "files_total": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Regular files planned so far. Grows while scanning."
+        },
+        "bytes": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Logical file bytes completed. On a push this follows receiver acknowledgments."
+        },
+        "bytes_total": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Logical file bytes planned so far."
+        },
+        "files_seen": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Source entries discovered by the scan."
+        },
+        "wire_bytes": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Bytes sent (push) or received (pull) on the connection, including compression and framing. Zero for local copies."
+        },
+        "phase": {
+          "enum": [
+            "scanning",
+            "transferring",
+            "deleting",
+            "verifying",
+            "waiting for receiver",
+            "waiting for sender"
+          ],
+          "description": "What the transfer is doing now."
+        },
+        "deleted": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Destination entries deleted."
+        },
+        "verified": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Successful checksum checks; source and destination hashes each count once."
+        },
+        "scanning": {
+          "type": "boolean",
+          "description": "True while the source scan is still running."
+        },
+        "dry_run": {
+          "type": "boolean",
+          "description": "True for -n; counts describe the plan, and nothing is written."
+        }
+      }
+    },
+    {
+      "type": "object",
+      "title": "file",
+      "description": "One transferred regular file (including clones and hard-link members), emitted after the destination operation succeeds, or once per planned file in a dry run.",
+      "required": [
+        "type",
+        "path",
+        "path_bytes_hex",
+        "code",
+        "size",
+        "bytes",
+        "dry_run"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "file"
+        },
+        "path": {
+          "type": "string",
+          "description": "Transfer-relative path. Valid UTF-8 is kept; control bytes are JSON-escaped, and invalid bytes appear as the Unicode code points of their byte values."
+        },
+        "path_bytes_hex": {
+          "type": "string",
+          "pattern": "^([0-9a-f]{2})*$",
+          "description": "The exact path bytes, hex encoded. Use this when names are not UTF-8."
+        },
+        "code": {
+          "type": "string",
+          "pattern": "^[<>h]f[^ ]{9,10}$",
+          "description": "The itemize change code, as printed by -i."
+        },
+        "size": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "File size in bytes."
+        },
+        "bytes": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "File-content bytes transferred (literal data). Zero for clones and dry runs; only the tail for a resumed file."
+        },
+        "dry_run": {
+          "type": "boolean",
+          "description": "True for -n; counts describe the plan, and nothing is written."
+        }
+      }
+    },
+    {
+      "type": "object",
+      "title": "complete",
+      "description": "Final totals, emitted once at the end. Always the last record.",
+      "required": [
+        "type",
+        "phase",
+        "success",
+        "exit_code",
+        "elapsed_ms",
+        "files",
+        "files_total",
+        "bytes",
+        "bytes_total",
+        "files_seen",
+        "wire_bytes",
+        "deleted",
+        "verified",
+        "scanning",
+        "dry_run"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "complete"
+        },
+        "elapsed_ms": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Milliseconds since the transfer started."
+        },
+        "files": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Regular files completed so far."
+        },
+        "files_total": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Regular files planned so far. Grows while scanning."
+        },
+        "bytes": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Logical file bytes completed. On a push this follows receiver acknowledgments."
+        },
+        "bytes_total": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Logical file bytes planned so far."
+        },
+        "files_seen": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Source entries discovered by the scan."
+        },
+        "wire_bytes": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Bytes sent (push) or received (pull) on the connection, including compression and framing. Zero for local copies."
+        },
+        "phase": {
+          "const": "complete",
+          "description": "Always \"complete\"."
+        },
+        "deleted": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Destination entries deleted."
+        },
+        "verified": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Successful checksum checks; source and destination hashes each count once."
+        },
+        "scanning": {
+          "type": "boolean",
+          "description": "True while the source scan is still running."
+        },
+        "dry_run": {
+          "type": "boolean",
+          "description": "True for -n; counts describe the plan, and nothing is written."
+        },
+        "success": {
+          "type": "boolean",
+          "description": "True only if the transfer finished with exit status 0."
+        },
+        "exit_code": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0,
+          "description": "The process exit status, or null if cleanup began before a fatal status was known."
+        }
+      }
+    }
+  ]
+}

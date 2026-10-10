@@ -62,6 +62,17 @@ xs -aP --link-dest=../previous/ src/ snapshots/current/
 
 
 
+<div class="example-caption">A dated snapshot that hard-links unchanged files</div>
+
+```sh
+xs -ai --link-dest=../2026-10-09 src/ snapshots/2026-10-10/
+stat -c "%h links  %n" snapshots/2026-10-10/notes.txt snapshots/2026-10-10/docs/guide.md
+```
+
+<div class="captured-doc-output example-output" v-pre><span class="micro">ACTUAL OUTPUT · EXIT 0</span><pre><code>created directory snapshots/2026-10-10&#10;&gt;f.st...... notes.txt&#10;1 links  snapshots/2026-10-10/notes.txt&#10;2 links  snapshots/2026-10-10/docs/guide.md</code></pre></div>
+
+
+
 ## SHARED FILES {#shared-files}
 
 <aside class="manual-note"><span>SNAPSHOTS</span><p>Hard-linked snapshots share the same inode. Later in-place writes or metadata changes to an already shared destination can affect other links. Create a new snapshot directory and keep old snapshots read-only by workflow.</p></aside>

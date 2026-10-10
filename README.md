@@ -837,12 +837,26 @@ including IDs present on only one machine and real sudo elevation on both ends.
 
 | file | |
 |---|---|
-| `src/main.cpp` | option parsing, summary output |
+| `src/common.h` | shared types, version and protocol constants, feature bits, options |
+| `src/engine.h`, `src/pool.h` | engine entry points and shared setup; the two-queue worker pool |
+| `src/main.cpp` | help text, option parsing, signals, summary output, engine dispatch |
+| `src/arguments.cpp` | personal defaults merged into the effective arguments |
+| `src/fallback.cpp` | re-executing a real rsync for unsupported requests |
+| `src/transport.cpp` | host specs, remote-shell selection and shell quoting |
+| `src/install.cpp` | `--install HOST` |
+| `src/local.cpp` | local engine: scan, clone, copy |
+| `src/remote.cpp` | wire protocol, sender, receiver, ssh client/server glue |
 | `src/fs.cpp` | directory listing, the generator (compare and decide), file writing |
 | `src/destination.cpp` | anchored receiver paths and symlink safety |
 | `src/names.cpp` | destination case and Unicode name equivalence |
-| `src/local.cpp` | local engine: scan, clone, copy |
-| `src/remote.cpp` | wire protocol, sender, receiver, ssh client/server glue |
-| `src/pool.h` | two-queue worker pool |
-| `src/progress.cpp` | live progress display |
-| `src/filter.cpp` | rsync include/exclude rules |
+| `src/listing.cpp`, `src/selection.cpp` | source listings; `--files-from` selection |
+| `src/filter.cpp` | rsync include/exclude, merge and CVS rules |
+| `src/delta.cpp` | streaming block matching |
+| `src/hardlink.cpp`, `src/link_dest.cpp`, `src/sparse.cpp` | `-H`, `--link-dest`, `-S` |
+| `src/permissions.cpp`, `src/ownership.cpp` | `--chmod`, `--chown` |
+| `src/acls.cpp`, `src/xattrs.cpp`, `src/xattr_value.cpp` | ACLs, extended attributes and their bounded storage |
+| `src/output.cpp`, `src/progress.cpp` | itemize/out-format output and logs; live and JSON progress |
+| `src/rate_limit.cpp`, `src/util.cpp` | `--bwlimit`; global state, errors and formatting |
+
+[CHANGELOG.md](CHANGELOG.md) records what changed; the manual's
+[contributing page](sites/xsync/content/contributing.md) maps the tests.

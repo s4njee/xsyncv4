@@ -104,3 +104,23 @@ xs -a --info=progress2 src/ dst/ 2>progress.log
 
 
 
+<div class="example-caption">Transfer statistics</div>
+
+```sh
+xs -a --stats src/ dst/
+```
+
+<div class="captured-doc-output example-output" v-pre><span class="micro">ACTUAL OUTPUT · EXIT 0</span><pre><code>Number of files: 10 (reg: 5, dir: 4, link: 1)&#10;Number of created files: 10 (reg: 5, dir: 4, link: 1)&#10;Number of deleted files: 0&#10;Number of regular files transferred: 5&#10;Total file size: 1,289,005 bytes&#10;Total transferred file size: 1,289,005 bytes&#10;Delta literal data: 0 bytes&#10;Delta matched data: 0 bytes&#10;Total bytes sent: 1,289,005&#10;Total bytes received: 0&#10;&#10;sent 1,289,005 bytes  received 0 bytes  420,767,144.64 bytes/sec&#10;total size is 1,289,005  speedup is 1.00</code></pre></div>
+
+
+
+<div class="example-caption">rsync-shaped progress lines on a pipe</div>
+
+```sh
+xs -a --info=progress2 src/ dst/ 2>&1 | tail -1
+```
+
+<div class="captured-doc-output example-output" v-pre><span class="micro">ACTUAL OUTPUT · EXIT 0</span><pre><code>      1,289,005 100%  293.02MB/s    0:00:00 (xfr#5, to-chk=0/5)</code></pre></div>
+
+
+

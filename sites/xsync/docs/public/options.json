@@ -1,0 +1,2114 @@
+{
+  "help_version": "xs  version 0.1.0  protocol version 4  git 1fff2a09ae2c",
+  "options": [
+    {
+      "id": "verbose",
+      "aliases": [
+        "v"
+      ],
+      "spec": "-v, --verbose",
+      "long": [
+        "--verbose"
+      ],
+      "short": [
+        "-v"
+      ],
+      "argument": null,
+      "help": "increase verbosity",
+      "class": "native",
+      "section": "Options (same meaning as rsync)",
+      "implies": [],
+      "features": [],
+      "platform": null,
+      "see": [
+        "progress#itemization"
+      ],
+      "detail": "Repeat for more detail: <code>-vv</code> adds the limiting-stage estimate (reading, network or writing) to progress and to the final summary."
+    },
+    {
+      "id": "quiet",
+      "aliases": [
+        "q"
+      ],
+      "spec": "-q, --quiet",
+      "long": [
+        "--quiet"
+      ],
+      "short": [
+        "-q"
+      ],
+      "argument": null,
+      "help": "suppress non-error messages",
+      "class": "native",
+      "section": "Options (same meaning as rsync)",
+      "implies": [],
+      "features": [],
+      "platform": null,
+      "see": [
+        "progress#streams"
+      ],
+      "detail": "Suppresses progress, file lines and the dry-run plan. Errors and the end-of-run error summary still print."
+    },
+    {
+      "id": "checksum",
+      "aliases": [
+        "c"
+      ],
+      "spec": "-c, --checksum",
+      "long": [
+        "--checksum"
+      ],
+      "short": [
+        "-c"
+      ],
+      "argument": null,
+      "help": "skip based on checksum, not mod-time & size",
+      "class": "native",
+      "section": "Options (same meaning as rsync)",
+      "implies": [],
+      "features": [],
+      "platform": null,
+      "see": [
+        "itemize#changes",
+        "progress#phases"
+      ],
+      "detail": "Both sides hash candidate files; progress shows <code>verifying N checks</code>. A content difference with matching size and time is reported as <code>c</code> in the change code."
+    },
+    {
+      "id": "archive",
+      "aliases": [
+        "a"
+      ],
+      "spec": "-a, --archive",
+      "long": [
+        "--archive"
+      ],
+      "short": [
+        "-a"
+      ],
+      "argument": null,
+      "help": "archive mode; equals -rlptgoD",
+      "class": "native",
+      "section": "Options (same meaning as rsync)",
+      "implies": [
+        "-r",
+        "-l",
+        "-p",
+        "-t",
+        "-g",
+        "-o",
+        "-D"
+      ],
+      "features": [],
+      "platform": null,
+      "see": [
+        "metadata#archive"
+      ],
+      "detail": "Does not imply <code>-H</code>, <code>-A</code>, <code>-X</code>, <code>-U</code>, <code>-N</code>, <code>-E</code> or <code>--fileflags</code>. With <code>--files-from</code>, <code>-a</code> does not enable recursion; add <code>-r</code>."
+    },
+    {
+      "id": "recursive",
+      "aliases": [
+        "r"
+      ],
+      "spec": "-r, --recursive",
+      "long": [
+        "--recursive"
+      ],
+      "short": [
+        "-r"
+      ],
+      "argument": null,
+      "help": "recurse into directories",
+      "class": "native",
+      "section": "Options (same meaning as rsync)",
+      "implies": [],
+      "features": [],
+      "platform": null,
+      "see": [
+        "transfers#local"
+      ],
+      "detail": null
+    },
+    {
+      "id": "dirs",
+      "aliases": [
+        "d"
+      ],
+      "spec": "-d, --dirs",
+      "long": [
+        "--dirs"
+      ],
+      "short": [
+        "-d"
+      ],
+      "argument": null,
+      "help": "transfer directories without recursing",
+      "class": "native",
+      "section": "Options (same meaning as rsync)",
+      "implies": [],
+      "features": [],
+      "platform": null,
+      "see": [
+        "transfers#local"
+      ],
+      "detail": "Copies named directories without their contents. Implied by <code>--files-from</code>."
+    },
+    {
+      "id": "relative",
+      "aliases": [
+        "R"
+      ],
+      "spec": "-R, --relative",
+      "long": [
+        "--relative"
+      ],
+      "short": [
+        "-R"
+      ],
+      "argument": null,
+      "help": "preserve source path components and implied directories",
+      "class": "native",
+      "section": "Options (same meaning as rsync)",
+      "implies": [],
+      "features": [
+        "PF_RELATIVE"
+      ],
+      "platform": null,
+      "see": [
+        "transfers#relative"
+      ],
+      "detail": "A <code>/./</code> component cuts off the prefix: <code>xs -aR /data/./project/file dest/</code> creates <code>dest/project/file</code>. Implied directories get their source attributes. <code>--no-implied-dirs</code> still delegates to rsync."
+    },
+    {
+      "id": "files-from",
+      "aliases": [],
+      "spec": "--files-from=FILE",
+      "long": [
+        "--files-from"
+      ],
+      "short": [],
+      "argument": "FILE",
+      "help": "select source names from FILE (\"-\" reads stdin)",
+      "class": "native",
+      "section": "Options (same meaning as rsync)",
+      "implies": [
+        "-R",
+        "-d"
+      ],
+      "features": [
+        "PF_FILES_FROM"
+      ],
+      "platform": null,
+      "see": [
+        "transfers#relative",
+        "filters#file-lists"
+      ],
+      "detail": "Names are relative to the single source directory. <code>-</code> reads stdin, <code>:FILE</code> reads the list on the remote machine of the transfer. Leading slashes refer to the source root and <code>..</code> cannot escape it. Use <code>-0</code> for NUL-delimited lists."
+    },
+    {
+      "id": "list-only",
+      "aliases": [],
+      "spec": "--list-only",
+      "long": [
+        "--list-only"
+      ],
+      "short": [],
+      "argument": null,
+      "help": "list source entries; do not transfer or change DEST",
+      "class": "native",
+      "section": "Options (same meaning as rsync)",
+      "implies": [],
+      "features": [
+        "PF_LIST"
+      ],
+      "platform": null,
+      "see": [
+        "transfers#listing"
+      ],
+      "detail": "Lists sources and leaves DEST untouched. A single source argument with no DEST lists it too."
+    },
+    {
+      "id": "xattrs",
+      "aliases": [
+        "X"
+      ],
+      "spec": "-X, --xattrs",
+      "long": [
+        "--xattrs"
+      ],
+      "short": [
+        "-X"
+      ],
+      "argument": null,
+      "help": "preserve extended attributes (twice includes rsync internals)",
+      "class": "native",
+      "section": "Options (same meaning as rsync)",
+      "implies": [],
+      "features": [
+        "PF_XATTRS",
+        "PF_XATTR_STREAM"
+      ],
+      "platform": null,
+      "see": [
+        "metadata#extended"
+      ],
+      "detail": "<code>-XX</code> also copies rsync-internal attributes. Whole-directory clones are disabled so each entry is handled individually. Large values spill to a temporary file beyond an 8 MiB in-memory budget."
+    },
+    {
+      "id": "hard-links",
+      "aliases": [
+        "H"
+      ],
+      "spec": "-H, --hard-links",
+      "long": [
+        "--hard-links"
+      ],
+      "short": [
+        "-H"
+      ],
+      "argument": null,
+      "help": "preserve hard links within the transferred tree",
+      "class": "native",
+      "section": "Options (same meaning as rsync)",
+      "implies": [],
+      "features": [
+        "PF_HLINK"
+      ],
+      "platform": null,
+      "see": [
+        "itemize#hard-links"
+      ],
+      "detail": "Preserves link groups among selected files, including across directories. Links to files outside the selection are not recreated."
+    },
+    {
+      "id": "sparse",
+      "aliases": [
+        "S"
+      ],
+      "spec": "-S, --sparse",
+      "long": [
+        "--sparse"
+      ],
+      "short": [
+        "-S"
+      ],
+      "argument": null,
+      "help": "create holes for zero-filled file regions",
+      "class": "native",
+      "section": "Options (same meaning as rsync)",
+      "implies": [],
+      "features": [
+        "PF_SPARSE"
+      ],
+      "platform": null,
+      "see": [
+        "metadata#sparse"
+      ],
+      "detail": "Disables cloning. Works with delta, resumed and in-place writes."
+    },
+    {
+      "id": "link-dest",
+      "aliases": [],
+      "spec": "--link-dest=DIR",
+      "long": [
+        "--link-dest"
+      ],
+      "short": [],
+      "argument": "DIR",
+      "help": "reuse unchanged files from a previous snapshot",
+      "class": "native",
+      "section": "Options (same meaning as rsync)",
+      "implies": [],
+      "features": [
+        "PF_LINK_DEST"
+      ],
+      "platform": null,
+      "see": [
+        "snapshots#link-dest"
+      ],
+      "detail": "Up to 20 directories. Relative paths start at the destination directory. Unchanged files with matching requested metadata become hard links; others are copied, and a snapshot can still serve as their delta basis."
+    },
+    {
+      "id": "links",
+      "aliases": [
+        "l"
+      ],
+      "spec": "-l, --links",
+      "long": [
+        "--links"
+      ],
+      "short": [
+        "-l"
+      ],
+      "argument": null,
+      "help": "copy symlinks as symlinks",
+      "class": "native",
+      "section": "Options (same meaning as rsync)",
+      "implies": [],
+      "features": [],
+      "platform": null,
+      "see": [
+        "transfers#local"
+      ],
+      "detail": null
+    },
+    {
+      "id": "safe-links",
+      "aliases": [],
+      "spec": "--safe-links",
+      "long": [
+        "--safe-links"
+      ],
+      "short": [],
+      "argument": null,
+      "help": "skip symlinks that point outside the transfer tree",
+      "class": "native",
+      "section": "Options (same meaning as rsync)",
+      "implies": [],
+      "features": [
+        "PF_SAFE_LINKS"
+      ],
+      "platform": null,
+      "see": [
+        "compatibility#differences"
+      ],
+      "detail": "Skips links that point outside the transfer tree and protects their existing destination entries from deletion."
+    },
+    {
+      "id": "copy-links",
+      "aliases": [
+        "L"
+      ],
+      "spec": "-L, --copy-links",
+      "long": [
+        "--copy-links"
+      ],
+      "short": [
+        "-L"
+      ],
+      "argument": null,
+      "help": "transform symlink into referent file/dir",
+      "class": "native",
+      "section": "Options (same meaning as rsync)",
+      "implies": [],
+      "features": [],
+      "platform": null,
+      "see": [
+        "transfers#local"
+      ],
+      "detail": "Overrides <code>-l</code>. Metadata options such as <code>-A</code> and <code>--fileflags</code> then apply to the referent."
+    },
+    {
+      "id": "perms",
+      "aliases": [
+        "p"
+      ],
+      "spec": "-p, --perms",
+      "long": [
+        "--perms"
+      ],
+      "short": [
+        "-p"
+      ],
+      "argument": null,
+      "help": "preserve permissions",
+      "class": "native",
+      "section": "Options (same meaning as rsync)",
+      "implies": [],
+      "features": [],
+      "platform": null,
+      "see": [
+        "metadata#archive"
+      ],
+      "detail": null
+    },
+    {
+      "id": "chmod",
+      "aliases": [],
+      "spec": "--chmod=CHMOD",
+      "long": [
+        "--chmod"
+      ],
+      "short": [],
+      "argument": "CHMOD",
+      "help": "change incoming file/directory permissions",
+      "class": "native",
+      "section": "Options (same meaning as rsync)",
+      "implies": [],
+      "features": [],
+      "platform": null,
+      "see": [
+        "metadata#permissions"
+      ],
+      "detail": "Numeric modes or comma-separated symbolic rules; <code>D</code>/<code>F</code> restrict a rule to directories or files, and repeated options append rules. Disables whole-directory clones. Works with protocol-3 helpers, because it changes existing mode fields."
+    },
+    {
+      "id": "executability",
+      "aliases": [
+        "E"
+      ],
+      "spec": "-E, --executability",
+      "long": [
+        "--executability"
+      ],
+      "short": [
+        "-E"
+      ],
+      "argument": null,
+      "help": "preserve executability of regular files",
+      "class": "native",
+      "section": "Options (same meaning as rsync)",
+      "implies": [],
+      "features": [
+        "PF_EXECUTABILITY"
+      ],
+      "platform": null,
+      "see": [
+        "metadata#permissions"
+      ],
+      "detail": "Only matters when <code>--perms</code> is off. Apple’s system rsync uses <code>-E</code> for extended attributes; use the long name when fallback must be unambiguous."
+    },
+    {
+      "id": "fileflags",
+      "aliases": [],
+      "spec": "--fileflags",
+      "long": [
+        "--fileflags"
+      ],
+      "short": [],
+      "argument": null,
+      "help": "preserve BSD file flags (macOS)",
+      "class": "native",
+      "section": "Options (same meaning as rsync)",
+      "implies": [],
+      "features": [
+        "PF_FILEFLAGS"
+      ],
+      "platform": "macOS",
+      "see": [
+        "metadata#times",
+        "itemize#code"
+      ],
+      "detail": "Adds a twelfth change-code character. On Linux the option is refused natively; fallback then needs an rsync built with <code>--fileflags</code>, which standard upstream builds are not."
+    },
+    {
+      "id": "owner",
+      "aliases": [
+        "o"
+      ],
+      "spec": "-o, --owner",
+      "long": [
+        "--owner"
+      ],
+      "short": [
+        "-o"
+      ],
+      "argument": null,
+      "help": "preserve owner (super-user only)",
+      "class": "native",
+      "section": "Options (same meaning as rsync)",
+      "implies": [],
+      "features": [
+        "PF_IDMAP"
+      ],
+      "platform": null,
+      "see": [
+        "metadata#archive"
+      ],
+      "detail": "Names map between hosts unless <code>--numeric-ids</code> is set; the name mapping needs the helper feature."
+    },
+    {
+      "id": "group",
+      "aliases": [
+        "g"
+      ],
+      "spec": "-g, --group",
+      "long": [
+        "--group"
+      ],
+      "short": [
+        "-g"
+      ],
+      "argument": null,
+      "help": "preserve group",
+      "class": "native",
+      "section": "Options (same meaning as rsync)",
+      "implies": [],
+      "features": [
+        "PF_IDMAP"
+      ],
+      "platform": null,
+      "see": [
+        "metadata#archive"
+      ],
+      "detail": null
+    },
+    {
+      "id": "chown",
+      "aliases": [],
+      "spec": "--chown=USER:GROUP",
+      "long": [
+        "--chown"
+      ],
+      "short": [],
+      "argument": "USER:GROUP",
+      "help": "change destination owner/group (names or IDs)",
+      "class": "native",
+      "section": "Options (same meaning as rsync)",
+      "implies": [
+        "-o",
+        "-g"
+      ],
+      "features": [
+        "PF_CHOWN"
+      ],
+      "platform": null,
+      "see": [
+        "metadata#permissions"
+      ],
+      "detail": "Names resolve on the destination host. Either field may be omitted. On a push, overrides still apply after a later <code>--no-owner</code>/<code>--no-group</code>."
+    },
+    {
+      "id": "D",
+      "aliases": [],
+      "spec": "-D",
+      "long": [],
+      "short": [
+        "-D"
+      ],
+      "argument": null,
+      "help": "same as --devices --specials",
+      "class": "native",
+      "section": "Options (same meaning as rsync)",
+      "implies": [
+        "--devices",
+        "--specials"
+      ],
+      "features": [],
+      "platform": null,
+      "see": [
+        "itemize#changes"
+      ],
+      "detail": "Device nodes need privilege on the receiver. <code>--no-D</code> turns both off."
+    },
+    {
+      "id": "acls",
+      "aliases": [
+        "A"
+      ],
+      "spec": "-A, --acls",
+      "long": [
+        "--acls"
+      ],
+      "short": [
+        "-A"
+      ],
+      "argument": null,
+      "help": "preserve ACLs (implies --perms)",
+      "class": "native",
+      "section": "Options (same meaning as rsync)",
+      "implies": [
+        "-p"
+      ],
+      "features": [
+        "PF_ACL_POSIX",
+        "PF_ACL_DARWIN",
+        "PF_ACL_UUID"
+      ],
+      "platform": null,
+      "see": [
+        "metadata#extended"
+      ],
+      "detail": "Remote ACLs need matching styles: macOS to macOS, or Linux to Linux. A macOS ↔ Linux request delegates before any write, and rsync itself rejects the tested cross-platform ACLs. Principals map by name unless <code>--numeric-ids</code>."
+    },
+    {
+      "id": "times",
+      "aliases": [
+        "t"
+      ],
+      "spec": "-t, --times",
+      "long": [
+        "--times"
+      ],
+      "short": [
+        "-t"
+      ],
+      "argument": null,
+      "help": "preserve modification times",
+      "class": "native",
+      "section": "Options (same meaning as rsync)",
+      "implies": [],
+      "features": [],
+      "platform": null,
+      "see": [
+        "itemize#code"
+      ],
+      "detail": null
+    },
+    {
+      "id": "atimes",
+      "aliases": [
+        "U"
+      ],
+      "spec": "-U, --atimes",
+      "long": [
+        "--atimes"
+      ],
+      "short": [
+        "-U"
+      ],
+      "argument": null,
+      "help": "preserve file access times (twice enables --open-noatime)",
+      "class": "native",
+      "section": "Options (same meaning as rsync)",
+      "implies": [],
+      "features": [
+        "PF_ATIMES"
+      ],
+      "platform": null,
+      "see": [
+        "metadata#times"
+      ],
+      "detail": "Files and special inodes only; directories and symlinks keep rsync’s omission. <code>-UU</code> also requests <code>O_NOATIME</code> reads."
+    },
+    {
+      "id": "crtimes",
+      "aliases": [
+        "N"
+      ],
+      "spec": "-N, --crtimes",
+      "long": [
+        "--crtimes"
+      ],
+      "short": [
+        "-N"
+      ],
+      "argument": null,
+      "help": "preserve creation times (macOS)",
+      "class": "native",
+      "section": "Options (same meaning as rsync)",
+      "implies": [],
+      "features": [
+        "PF_CRTIMES"
+      ],
+      "platform": "macOS",
+      "see": [
+        "metadata#times"
+      ],
+      "detail": "Including directories and symlinks. On Linux the option is refused and handed to rsync."
+    },
+    {
+      "id": "open-noatime",
+      "aliases": [],
+      "spec": "--open-noatime",
+      "long": [
+        "--open-noatime"
+      ],
+      "short": [],
+      "argument": null,
+      "help": "avoid read access-time updates where supported",
+      "class": "native",
+      "section": "Options (same meaning as rsync)",
+      "implies": [],
+      "features": [
+        "PF_OPEN_NOATIME"
+      ],
+      "platform": null,
+      "see": [
+        "metadata#times"
+      ],
+      "detail": "May need file ownership or privilege. macOS ignores the flag."
+    },
+    {
+      "id": "omit-dir-times",
+      "aliases": [
+        "O"
+      ],
+      "spec": "-O, --omit-dir-times",
+      "long": [
+        "--omit-dir-times"
+      ],
+      "short": [
+        "-O"
+      ],
+      "argument": null,
+      "help": "omit directory modification/access/creation times",
+      "class": "native",
+      "section": "Options (same meaning as rsync)",
+      "implies": [],
+      "features": [],
+      "platform": null,
+      "see": [
+        "metadata#times"
+      ],
+      "detail": null
+    },
+    {
+      "id": "omit-link-times",
+      "aliases": [
+        "J"
+      ],
+      "spec": "-J, --omit-link-times",
+      "long": [
+        "--omit-link-times"
+      ],
+      "short": [
+        "-J"
+      ],
+      "argument": null,
+      "help": "omit symlink modification/access/creation times",
+      "class": "native",
+      "section": "Options (same meaning as rsync)",
+      "implies": [],
+      "features": [],
+      "platform": null,
+      "see": [
+        "metadata#times"
+      ],
+      "detail": null
+    },
+    {
+      "id": "dry-run",
+      "aliases": [
+        "n"
+      ],
+      "spec": "-n, --dry-run",
+      "long": [
+        "--dry-run"
+      ],
+      "short": [
+        "-n"
+      ],
+      "argument": null,
+      "help": "perform a trial run with no changes made",
+      "class": "native",
+      "section": "Options (same meaning as rsync)",
+      "implies": [],
+      "features": [],
+      "platform": null,
+      "see": [
+        "filters#mirror"
+      ],
+      "detail": "Always ends with <code>would transfer N files (X), delete M</code> on stdout, even without <code>-v</code>."
+    },
+    {
+      "id": "whole-file",
+      "aliases": [
+        "W"
+      ],
+      "spec": "-W, --whole-file",
+      "long": [
+        "--whole-file"
+      ],
+      "short": [
+        "-W"
+      ],
+      "argument": null,
+      "help": "send the whole file; disable resume and block matching",
+      "class": "native",
+      "section": "Options (same meaning as rsync)",
+      "implies": [],
+      "features": [],
+      "platform": null,
+      "see": [
+        "snapshots#delta"
+      ],
+      "detail": "Disables both verified-prefix resume and block matching, locally and remotely."
+    },
+    {
+      "id": "no-whole-file",
+      "aliases": [],
+      "spec": "--no-whole-file",
+      "long": [
+        "--no-whole-file"
+      ],
+      "short": [],
+      "argument": null,
+      "help": "enable verified-prefix resume again",
+      "class": "native",
+      "section": "Options (same meaning as rsync)",
+      "implies": [],
+      "features": [],
+      "platform": null,
+      "see": [
+        "snapshots#resume"
+      ],
+      "detail": null
+    },
+    {
+      "id": "one-file-system",
+      "aliases": [
+        "x"
+      ],
+      "spec": "-x, --one-file-system",
+      "long": [
+        "--one-file-system"
+      ],
+      "short": [
+        "-x"
+      ],
+      "argument": null,
+      "help": "don't cross filesystem boundaries",
+      "class": "native",
+      "section": "Options (same meaning as rsync)",
+      "implies": [],
+      "features": [],
+      "platform": null,
+      "see": [
+        "transfers#local"
+      ],
+      "detail": null
+    },
+    {
+      "id": "rsh",
+      "aliases": [
+        "e"
+      ],
+      "spec": "-e, --rsh=COMMAND",
+      "long": [
+        "--rsh"
+      ],
+      "short": [
+        "-e"
+      ],
+      "argument": "COMMAND",
+      "help": "specify the remote shell to use",
+      "class": "native",
+      "section": "Options (same meaning as rsync)",
+      "implies": [],
+      "features": [],
+      "platform": null,
+      "see": [
+        "ssh#examples",
+        "environment#remote-shell"
+      ],
+      "detail": "Precedence: <code>-e</code>, then <code>XSYNC_RSH</code>, then <code>RSYNC_RSH</code>, then a shell in <code>XSYNC_OPTS</code>, then config, then <code>ssh</code>."
+    },
+    {
+      "id": "rsync-path",
+      "aliases": [],
+      "spec": "--rsync-path=PROGRAM",
+      "long": [
+        "--rsync-path"
+      ],
+      "short": [],
+      "argument": "PROGRAM",
+      "help": "specify the xs to run on the remote machine",
+      "class": "native",
+      "section": "Options (same meaning as rsync)",
+      "implies": [],
+      "features": [],
+      "platform": null,
+      "see": [
+        "ssh#helper"
+      ],
+      "detail": "Bypasses the automatic helper lookup. The same command is kept if the transfer falls back, so it must then accept rsync’s server arguments too."
+    },
+    {
+      "id": "no-fallback",
+      "aliases": [],
+      "spec": "--no-fallback",
+      "long": [
+        "--no-fallback"
+      ],
+      "short": [],
+      "argument": null,
+      "help": "fail instead of re-executing rsync for missing support",
+      "class": "native",
+      "section": "Options (same meaning as rsync)",
+      "implies": [],
+      "features": [],
+      "platform": null,
+      "see": [
+        "compatibility#fallback",
+        "troubleshooting#fallback"
+      ],
+      "detail": "An option xs does not implement then exits 1; a helper missing a needed feature exits 4; a missing helper exits 127."
+    },
+    {
+      "id": "fallback",
+      "aliases": [],
+      "spec": "--fallback",
+      "long": [
+        "--fallback"
+      ],
+      "short": [],
+      "argument": null,
+      "help": "enable fallback (overrides XSYNC_FALLBACK=0)",
+      "class": "native",
+      "section": "Options (same meaning as rsync)",
+      "implies": [],
+      "features": [],
+      "platform": null,
+      "see": [
+        "compatibility#fallback"
+      ],
+      "detail": null
+    },
+    {
+      "id": "existing",
+      "aliases": [],
+      "spec": "--existing",
+      "long": [
+        "--existing"
+      ],
+      "short": [],
+      "argument": null,
+      "help": "skip creating new files on receiver",
+      "class": "native",
+      "section": "Options (same meaning as rsync)",
+      "implies": [],
+      "features": [],
+      "platform": null,
+      "see": [
+        "transfers#existing"
+      ],
+      "detail": null
+    },
+    {
+      "id": "ignore-existing",
+      "aliases": [],
+      "spec": "--ignore-existing",
+      "long": [
+        "--ignore-existing"
+      ],
+      "short": [],
+      "argument": null,
+      "help": "skip updating files that exist on receiver",
+      "class": "native",
+      "section": "Options (same meaning as rsync)",
+      "implies": [],
+      "features": [],
+      "platform": null,
+      "see": [
+        "transfers#existing"
+      ],
+      "detail": null
+    },
+    {
+      "id": "delete",
+      "aliases": [],
+      "spec": "--delete",
+      "long": [
+        "--delete"
+      ],
+      "short": [],
+      "argument": null,
+      "help": "delete extraneous files from dest dirs",
+      "class": "native",
+      "section": "Options (same meaning as rsync)",
+      "implies": [],
+      "features": [],
+      "platform": null,
+      "see": [
+        "filters#mirror"
+      ],
+      "detail": "Also accepted: <code>--del</code>/<code>--delete-during</code>, <code>--delete-before</code>, <code>--delete-delay</code> and <code>--delete-after</code>. Source I/O errors suppress deletion unless <code>--ignore-errors</code>."
+    },
+    {
+      "id": "delete-after",
+      "aliases": [],
+      "spec": "--delete-after",
+      "long": [
+        "--delete-after"
+      ],
+      "short": [],
+      "argument": null,
+      "help": "scan deletions and merge files after transfer",
+      "class": "native",
+      "section": "Options (same meaning as rsync)",
+      "implies": [],
+      "features": [
+        "PF_DELETE_AFTER"
+      ],
+      "platform": null,
+      "see": [
+        "filters#merge"
+      ],
+      "detail": "Scans the destination after transfers finish and reloads receiver merge files from the updated tree."
+    },
+    {
+      "id": "prune-empty-dirs",
+      "aliases": [
+        "m"
+      ],
+      "spec": "-m, --prune-empty-dirs",
+      "long": [
+        "--prune-empty-dirs"
+      ],
+      "short": [
+        "-m"
+      ],
+      "argument": null,
+      "help": "omit empty directory chains from the file list",
+      "class": "native",
+      "section": "Options (same meaning as rsync)",
+      "implies": [],
+      "features": [
+        "PF_PRUNE_EMPTY"
+      ],
+      "platform": null,
+      "see": [
+        "filters#excludes"
+      ],
+      "detail": "Protected empty directories and their ancestors are kept."
+    },
+    {
+      "id": "delete-excluded",
+      "aliases": [],
+      "spec": "--delete-excluded",
+      "long": [
+        "--delete-excluded"
+      ],
+      "short": [],
+      "argument": null,
+      "help": "also delete excluded files from dest dirs",
+      "class": "native",
+      "section": "Options (same meaning as rsync)",
+      "implies": [],
+      "features": [],
+      "platform": null,
+      "see": [
+        "filters#sides"
+      ],
+      "detail": "Makes unqualified include/exclude rules sender-only. Explicit receiver rules still protect entries."
+    },
+    {
+      "id": "ignore-errors",
+      "aliases": [],
+      "spec": "--ignore-errors",
+      "long": [
+        "--ignore-errors"
+      ],
+      "short": [],
+      "argument": null,
+      "help": "delete even when the sender encountered I/O errors",
+      "class": "native",
+      "section": "Options (same meaning as rsync)",
+      "implies": [],
+      "features": [],
+      "platform": null,
+      "see": [
+        "filters#mirror"
+      ],
+      "detail": null
+    },
+    {
+      "id": "max-delete",
+      "aliases": [],
+      "spec": "--max-delete=NUM",
+      "long": [
+        "--max-delete"
+      ],
+      "short": [],
+      "argument": "NUM",
+      "help": "delete at most NUM entries (exit 25 if exceeded)",
+      "class": "native",
+      "section": "Options (same meaning as rsync)",
+      "implies": [],
+      "features": [],
+      "platform": null,
+      "see": [
+        "filters#mirror",
+        "exit-status#exit-status"
+      ],
+      "detail": null
+    },
+    {
+      "id": "force",
+      "aliases": [],
+      "spec": "--force",
+      "long": [
+        "--force"
+      ],
+      "short": [],
+      "argument": null,
+      "help": "force deletion of dirs even if not empty",
+      "class": "native",
+      "section": "Options (same meaning as rsync)",
+      "implies": [],
+      "features": [],
+      "platform": null,
+      "see": [
+        "filters#mirror"
+      ],
+      "detail": null
+    },
+    {
+      "id": "max-size",
+      "aliases": [],
+      "spec": "--max-size=SIZE",
+      "long": [
+        "--max-size"
+      ],
+      "short": [],
+      "argument": "SIZE",
+      "help": "don't transfer any file larger than SIZE",
+      "class": "native",
+      "section": "Options (same meaning as rsync)",
+      "implies": [],
+      "features": [],
+      "platform": null,
+      "see": [],
+      "detail": "Sizes accept <code>K</code>/<code>M</code>/<code>G</code>/<code>T</code> (binary) and <code>KB</code>/<code>MB</code>/<code>GB</code>/<code>TB</code> (decimal) suffixes."
+    },
+    {
+      "id": "min-size",
+      "aliases": [],
+      "spec": "--min-size=SIZE",
+      "long": [
+        "--min-size"
+      ],
+      "short": [],
+      "argument": "SIZE",
+      "help": "don't transfer any file smaller than SIZE",
+      "class": "native",
+      "section": "Options (same meaning as rsync)",
+      "implies": [],
+      "features": [],
+      "platform": null,
+      "see": [],
+      "detail": "Same size syntax as <code>--max-size</code>."
+    },
+    {
+      "id": "bwlimit",
+      "aliases": [],
+      "spec": "--bwlimit=RATE",
+      "long": [
+        "--bwlimit"
+      ],
+      "short": [],
+      "argument": "RATE",
+      "help": "limit bytes sent/copied per second (bare RATE: KiB/s)",
+      "class": "native",
+      "section": "Options (same meaning as rsync)",
+      "implies": [],
+      "features": [
+        "PF_IO_CONTROL"
+      ],
+      "platform": null,
+      "see": [
+        "ssh#limits"
+      ],
+      "detail": "Bare numbers are KiB/s; suffixes <code>K</code>–<code>P</code>, <code>KiB</code>/<code>MiB</code> or decimal <code>KB</code>/<code>MB</code> are accepted and rounded to the nearest KiB/s. Zero disables the limit; nonzero rates below 512 bytes/s are rejected. Remote writers limit bytes after compression; local workers share one limit on bytes written, which disables APFS cloning."
+    },
+    {
+      "id": "timeout",
+      "aliases": [],
+      "spec": "--timeout=SECONDS",
+      "long": [
+        "--timeout"
+      ],
+      "short": [],
+      "argument": "SECONDS",
+      "help": "remote idle I/O timeout (0 disables; exits with code 30)",
+      "class": "native",
+      "section": "Options (same meaning as rsync)",
+      "implies": [],
+      "features": [
+        "PF_IO_CONTROL"
+      ],
+      "platform": null,
+      "see": [
+        "ssh#limits"
+      ],
+      "detail": "Integer seconds. Covers shell and handshake waits, partial frames, blocked writes and a helper that stays alive after the protocol ends. Keep-alives are sent at most every 10 seconds, or a third of the timeout."
+    },
+    {
+      "id": "partial",
+      "aliases": [],
+      "spec": "--partial",
+      "long": [
+        "--partial"
+      ],
+      "short": [],
+      "argument": null,
+      "help": "keep partially transferred files",
+      "class": "native",
+      "section": "Options (same meaning as rsync)",
+      "implies": [],
+      "features": [],
+      "platform": null,
+      "see": [
+        "snapshots#resume"
+      ],
+      "detail": "Current helpers verify an existing destination prefix with XXH3-128 on both sides and send only the rest. Files up to 512 KiB use the whole-file path."
+    },
+    {
+      "id": "inplace",
+      "aliases": [],
+      "spec": "--inplace",
+      "long": [
+        "--inplace"
+      ],
+      "short": [],
+      "argument": null,
+      "help": "update destination files in-place",
+      "class": "native",
+      "section": "Options (same meaning as rsync)",
+      "implies": [],
+      "features": [],
+      "platform": null,
+      "see": [
+        "snapshots#atomic"
+      ],
+      "detail": "Writes destination files directly. A delta basis is snapshotted so moved blocks are preserved while the original inode is updated."
+    },
+    {
+      "id": "mkpath",
+      "aliases": [],
+      "spec": "--mkpath",
+      "long": [
+        "--mkpath"
+      ],
+      "short": [],
+      "argument": null,
+      "help": "create the destination's path component",
+      "class": "native",
+      "section": "Options (same meaning as rsync)",
+      "implies": [],
+      "features": [],
+      "platform": null,
+      "see": [
+        "transfers#local"
+      ],
+      "detail": null
+    },
+    {
+      "id": "numeric-ids",
+      "aliases": [],
+      "spec": "--numeric-ids",
+      "long": [
+        "--numeric-ids"
+      ],
+      "short": [],
+      "argument": null,
+      "help": "don't map uid/gid values by user/group name",
+      "class": "native",
+      "section": "Options (same meaning as rsync)",
+      "implies": [],
+      "features": [],
+      "platform": null,
+      "see": [
+        "metadata#extended"
+      ],
+      "detail": null
+    },
+    {
+      "id": "update",
+      "aliases": [
+        "u"
+      ],
+      "spec": "-u, --update",
+      "long": [
+        "--update"
+      ],
+      "short": [
+        "-u"
+      ],
+      "argument": null,
+      "help": "skip files that are newer on the receiver",
+      "class": "native",
+      "section": "Options (same meaning as rsync)",
+      "implies": [],
+      "features": [],
+      "platform": null,
+      "see": [
+        "transfers#existing"
+      ],
+      "detail": null
+    },
+    {
+      "id": "ignore-times",
+      "aliases": [
+        "I"
+      ],
+      "spec": "-I, --ignore-times",
+      "long": [
+        "--ignore-times"
+      ],
+      "short": [
+        "-I"
+      ],
+      "argument": null,
+      "help": "don't skip files that match size and time",
+      "class": "native",
+      "section": "Options (same meaning as rsync)",
+      "implies": [],
+      "features": [],
+      "platform": null,
+      "see": [],
+      "detail": null
+    },
+    {
+      "id": "size-only",
+      "aliases": [],
+      "spec": "--size-only",
+      "long": [
+        "--size-only"
+      ],
+      "short": [],
+      "argument": null,
+      "help": "skip files that match in size",
+      "class": "native",
+      "section": "Options (same meaning as rsync)",
+      "implies": [],
+      "features": [],
+      "platform": null,
+      "see": [],
+      "detail": null
+    },
+    {
+      "id": "modify-window",
+      "aliases": [
+        "@"
+      ],
+      "spec": "-@, --modify-window=NUM",
+      "long": [
+        "--modify-window"
+      ],
+      "short": [
+        "-@"
+      ],
+      "argument": "NUM",
+      "help": "set the accuracy for mod-time comparisons",
+      "class": "native",
+      "section": "Options (same meaning as rsync)",
+      "implies": [],
+      "features": [],
+      "platform": null,
+      "see": [],
+      "detail": null
+    },
+    {
+      "id": "compress",
+      "aliases": [
+        "z"
+      ],
+      "spec": "-z, --compress",
+      "long": [
+        "--compress"
+      ],
+      "short": [
+        "-z"
+      ],
+      "argument": null,
+      "help": "compress file data during the transfer (zstd)",
+      "class": "native",
+      "section": "Options (same meaning as rsync)",
+      "implies": [],
+      "features": [],
+      "platform": null,
+      "see": [
+        "transfers#remote"
+      ],
+      "detail": "zstd, decompressed on several threads. Has no effect on local copies. A helper without compression support silently gets plain data. <code>--compress-choice</code> accepts only <code>zstd</code> or <code>none</code>."
+    },
+    {
+      "id": "compress-level",
+      "aliases": [],
+      "spec": "--compress-level=NUM",
+      "long": [
+        "--compress-level"
+      ],
+      "short": [],
+      "argument": "NUM",
+      "help": "explicitly set compression level",
+      "class": "native",
+      "section": "Options (same meaning as rsync)",
+      "implies": [],
+      "features": [],
+      "platform": null,
+      "see": [
+        "transfers#remote"
+      ],
+      "detail": null
+    },
+    {
+      "id": "filter",
+      "aliases": [
+        "f"
+      ],
+      "spec": "-f, --filter=RULE",
+      "long": [
+        "--filter"
+      ],
+      "short": [
+        "-f"
+      ],
+      "argument": "RULE",
+      "help": "add a file-filtering RULE",
+      "class": "native",
+      "section": "Options (same meaning as rsync)",
+      "implies": [],
+      "features": [
+        "PF_FILTERS",
+        "PF_MERGE_FILTERS",
+        "PF_CVS_FILTERS"
+      ],
+      "platform": null,
+      "see": [
+        "filters#sides",
+        "filters#merge"
+      ],
+      "detail": "Supports <code>+</code>/<code>-</code>, <code>H</code>/<code>S</code>, <code>P</code>/<code>R</code>, <code>!</code>, merge rules, and the modifiers <code>! / s r p x</code>. Plain include/exclude rules work with any helper; side, merge and CVS rules need the corresponding features."
+    },
+    {
+      "id": "F",
+      "aliases": [],
+      "spec": "-F",
+      "long": [],
+      "short": [
+        "-F"
+      ],
+      "argument": null,
+      "help": "merge .rsync-filter files (twice also excludes them)",
+      "class": "native",
+      "section": "Options (same meaning as rsync)",
+      "implies": [],
+      "features": [
+        "PF_MERGE_FILTERS"
+      ],
+      "platform": null,
+      "see": [
+        "filters#merge"
+      ],
+      "detail": "Same as <code>--filter=': /.rsync-filter'</code>, including ancestor files. <code>-FF</code> also excludes the filter files."
+    },
+    {
+      "id": "cvs-exclude",
+      "aliases": [
+        "C"
+      ],
+      "spec": "-C, --cvs-exclude",
+      "long": [
+        "--cvs-exclude"
+      ],
+      "short": [
+        "-C"
+      ],
+      "argument": null,
+      "help": "exclude CVS defaults and .cvsignore patterns",
+      "class": "native",
+      "section": "Options (same meaning as rsync)",
+      "implies": [],
+      "features": [
+        "PF_CVS_FILTERS"
+      ],
+      "platform": null,
+      "see": [
+        "filters#merge"
+      ],
+      "detail": "Adds per-directory <code>.cvsignore</code> files, built-in CVS exclusions, <code>$HOME/.cvsignore</code> and <code>CVSIGNORE</code> after explicit rules."
+    },
+    {
+      "id": "exclude",
+      "aliases": [],
+      "spec": "--exclude=PATTERN",
+      "long": [
+        "--exclude"
+      ],
+      "short": [],
+      "argument": "PATTERN",
+      "help": "exclude files matching PATTERN",
+      "class": "native",
+      "section": "Options (same meaning as rsync)",
+      "implies": [],
+      "features": [],
+      "platform": null,
+      "see": [
+        "filters#excludes"
+      ],
+      "detail": null
+    },
+    {
+      "id": "exclude-from",
+      "aliases": [],
+      "spec": "--exclude-from=FILE",
+      "long": [
+        "--exclude-from"
+      ],
+      "short": [],
+      "argument": "FILE",
+      "help": "read exclude patterns from FILE",
+      "class": "native",
+      "section": "Options (same meaning as rsync)",
+      "implies": [],
+      "features": [],
+      "platform": null,
+      "see": [
+        "filters#excludes"
+      ],
+      "detail": null
+    },
+    {
+      "id": "include",
+      "aliases": [],
+      "spec": "--include=PATTERN",
+      "long": [
+        "--include"
+      ],
+      "short": [],
+      "argument": "PATTERN",
+      "help": "don't exclude files matching PATTERN",
+      "class": "native",
+      "section": "Options (same meaning as rsync)",
+      "implies": [],
+      "features": [],
+      "platform": null,
+      "see": [
+        "filters#excludes"
+      ],
+      "detail": null
+    },
+    {
+      "id": "include-from",
+      "aliases": [],
+      "spec": "--include-from=FILE",
+      "long": [
+        "--include-from"
+      ],
+      "short": [],
+      "argument": "FILE",
+      "help": "read include patterns from FILE",
+      "class": "native",
+      "section": "Options (same meaning as rsync)",
+      "implies": [],
+      "features": [],
+      "platform": null,
+      "see": [
+        "filters#excludes"
+      ],
+      "detail": null
+    },
+    {
+      "id": "from0",
+      "aliases": [
+        "0"
+      ],
+      "spec": "-0, --from0",
+      "long": [
+        "--from0"
+      ],
+      "short": [
+        "-0"
+      ],
+      "argument": null,
+      "help": "use NUL delimiters in list and filter merge files",
+      "class": "native",
+      "section": "Options (same meaning as rsync)",
+      "implies": [],
+      "features": [],
+      "platform": null,
+      "see": [
+        "filters#file-lists"
+      ],
+      "detail": "Applies to file lists, include/exclude files and merge files opened after the option. <code>--no-from0</code> restores line mode."
+    },
+    {
+      "id": "stats",
+      "aliases": [],
+      "spec": "--stats",
+      "long": [
+        "--stats"
+      ],
+      "short": [],
+      "argument": null,
+      "help": "give some file-transfer stats",
+      "class": "native",
+      "section": "Options (same meaning as rsync)",
+      "implies": [],
+      "features": [],
+      "platform": null,
+      "see": [
+        "progress#units"
+      ],
+      "detail": null
+    },
+    {
+      "id": "human-readable",
+      "aliases": [
+        "h"
+      ],
+      "spec": "-h, --human-readable",
+      "long": [
+        "--human-readable"
+      ],
+      "short": [
+        "-h"
+      ],
+      "argument": null,
+      "help": "use 1000-based units (-hh uses 1024)",
+      "class": "native",
+      "section": "Options (same meaning as rsync)",
+      "implies": [],
+      "features": [],
+      "platform": null,
+      "see": [
+        "progress#units"
+      ],
+      "detail": "One rule everywhere: decimal units by default and with <code>-h</code>, binary with <code>-hh</code>. <code>--no-h</code> removes digit separators. JSON counters are never scaled."
+    },
+    {
+      "id": "progress",
+      "aliases": [],
+      "spec": "--progress[=json]",
+      "long": [
+        "--progress"
+      ],
+      "short": [],
+      "argument": "json",
+      "help": "show progress (default on terminals), or JSON events",
+      "class": "native",
+      "section": "Options (same meaning as rsync)",
+      "implies": [],
+      "features": [],
+      "platform": null,
+      "see": [
+        "progress#terminal",
+        "json-events#synopsis"
+      ],
+      "detail": "On by default when stderr is a terminal. On a pipe, plain <code>--progress</code> prints one line per second; <code>--info=progress2</code> prints rsync’s line shape; <code>--progress=json</code> prints events."
+    },
+    {
+      "id": "no-progress",
+      "aliases": [],
+      "spec": "--no-progress",
+      "long": [
+        "--no-progress"
+      ],
+      "short": [],
+      "argument": null,
+      "help": "suppress progress; XSYNC_PROGRESS=0 also disables it",
+      "class": "native",
+      "section": "Options (same meaning as rsync)",
+      "implies": [],
+      "features": [],
+      "platform": null,
+      "see": [
+        "environment#environment"
+      ],
+      "detail": null
+    },
+    {
+      "id": "P",
+      "aliases": [],
+      "spec": "-P",
+      "long": [],
+      "short": [
+        "-P"
+      ],
+      "argument": null,
+      "help": "same as --partial --progress",
+      "class": "native",
+      "section": "Options (same meaning as rsync)",
+      "implies": [
+        "--partial",
+        "--progress"
+      ],
+      "features": [],
+      "platform": null,
+      "see": [
+        "snapshots#resume"
+      ],
+      "detail": null
+    },
+    {
+      "id": "itemize-changes",
+      "aliases": [
+        "i"
+      ],
+      "spec": "-i, --itemize-changes",
+      "long": [
+        "--itemize-changes"
+      ],
+      "short": [
+        "-i"
+      ],
+      "argument": null,
+      "help": "output a change-summary for all updates",
+      "class": "native",
+      "section": "Options (same meaning as rsync)",
+      "implies": [],
+      "features": [],
+      "platform": null,
+      "see": [
+        "itemize#code"
+      ],
+      "detail": null
+    },
+    {
+      "id": "8-bit-output",
+      "aliases": [
+        "8"
+      ],
+      "spec": "-8, --8-bit-output",
+      "long": [
+        "--8-bit-output"
+      ],
+      "short": [
+        "-8"
+      ],
+      "argument": null,
+      "help": "retain high bytes in names; escape unsafe control bytes",
+      "class": "native",
+      "section": "Options (same meaning as rsync)",
+      "implies": [],
+      "features": [],
+      "platform": null,
+      "see": [
+        "itemize#order"
+      ],
+      "detail": null
+    },
+    {
+      "id": "out-format",
+      "aliases": [],
+      "spec": "--out-format=FORMAT",
+      "long": [
+        "--out-format"
+      ],
+      "short": [],
+      "argument": "FORMAT",
+      "help": "file lines: %i %n %L %l %o %f %b %t %% (optional width)",
+      "class": "native",
+      "section": "Options (same meaning as rsync)",
+      "implies": [],
+      "features": [
+        "PF_OUTPUT",
+        "PF_DIR_OUTPUT"
+      ],
+      "platform": null,
+      "see": [
+        "itemize#out-format"
+      ],
+      "detail": null
+    },
+    {
+      "id": "log-file",
+      "aliases": [],
+      "spec": "--log-file=FILE",
+      "long": [
+        "--log-file"
+      ],
+      "short": [],
+      "argument": "FILE",
+      "help": "append the same stdout stream to FILE",
+      "class": "native",
+      "section": "Options (same meaning as rsync)",
+      "implies": [],
+      "features": [
+        "PF_OUTPUT"
+      ],
+      "platform": null,
+      "see": [
+        "itemize#order"
+      ],
+      "detail": null
+    },
+    {
+      "id": "version",
+      "aliases": [],
+      "spec": "--version, --help",
+      "long": [
+        "--version",
+        "--help"
+      ],
+      "short": [],
+      "argument": null,
+      "help": "print the version, or this help, and exit",
+      "class": "native",
+      "section": "Options (same meaning as rsync)",
+      "implies": [],
+      "features": [],
+      "platform": null,
+      "see": [],
+      "detail": null
+    },
+    {
+      "id": "protect-args",
+      "aliases": [
+        "s"
+      ],
+      "spec": "-s, --protect-args, --secluded-args",
+      "long": [
+        "--protect-args",
+        "--secluded-args"
+      ],
+      "short": [
+        "-s"
+      ],
+      "argument": null,
+      "help": "paths always travel as protocol data, not shell text",
+      "class": "no-op",
+      "section": "Documented compatibility no-ops",
+      "implies": [],
+      "features": [],
+      "platform": null,
+      "see": [
+        "compatibility#noops"
+      ],
+      "detail": null
+    },
+    {
+      "id": "blocking-io",
+      "aliases": [],
+      "spec": "--blocking-io, --no-blocking-io",
+      "long": [
+        "--blocking-io",
+        "--no-blocking-io"
+      ],
+      "short": [],
+      "argument": null,
+      "help": "transport polling handles either pipe mode internally",
+      "class": "no-op",
+      "section": "Documented compatibility no-ops",
+      "implies": [],
+      "features": [],
+      "platform": null,
+      "see": [
+        "compatibility#noops"
+      ],
+      "detail": null
+    },
+    {
+      "id": "no-motd",
+      "aliases": [],
+      "spec": "--no-motd",
+      "long": [
+        "--no-motd"
+      ],
+      "short": [],
+      "argument": null,
+      "help": "no daemon transport or daemon greeting exists",
+      "class": "no-op",
+      "section": "Documented compatibility no-ops",
+      "implies": [],
+      "features": [],
+      "platform": null,
+      "see": [
+        "compatibility#noops"
+      ],
+      "detail": null
+    },
+    {
+      "id": "install",
+      "aliases": [],
+      "spec": "--install=HOST",
+      "long": [
+        "--install"
+      ],
+      "short": [],
+      "argument": "HOST",
+      "help": "explicitly install the matching release at ~/.local/bin refuses newer versions unless --force is supplied",
+      "class": "xs-only",
+      "section": "xs extensions",
+      "implies": [],
+      "features": [],
+      "platform": null,
+      "see": [
+        "ssh#install",
+        "install#remote"
+      ],
+      "detail": "Never part of a transfer. Release files are found beside the executable, in a sibling <code>dist/</code>, in <code>../share/xs/releases/</code>, or in <code>XSYNC_RELEASE_DIR</code>. An interrupted upload leaves the previous executable in place."
+    },
+    {
+      "id": "jobs",
+      "aliases": [
+        "j"
+      ],
+      "spec": "-j, --jobs=N",
+      "long": [
+        "--jobs"
+      ],
+      "short": [
+        "-j"
+      ],
+      "argument": "N",
+      "help": "number of worker threads (default: performance cores)",
+      "class": "xs-only",
+      "section": "xs extensions",
+      "implies": [],
+      "features": [],
+      "platform": null,
+      "see": [
+        "architecture#local"
+      ],
+      "detail": null
+    },
+    {
+      "id": "no-clone",
+      "aliases": [],
+      "spec": "--no-clone",
+      "long": [
+        "--no-clone"
+      ],
+      "short": [],
+      "argument": null,
+      "help": "always copy file data, even where a copy-on-write clone (APFS, same volume, with -pt) would be possible",
+      "class": "xs-only",
+      "section": "xs extensions",
+      "implies": [],
+      "features": [],
+      "platform": null,
+      "see": [
+        "metadata#clones"
+      ],
+      "detail": "Clones only happen on the same APFS volume with at least <code>-pt</code>. They can carry xattrs, ACLs and access/creation times that <code>-a</code> alone would not copy."
+    },
+    {
+      "id": "atomic",
+      "aliases": [],
+      "spec": "--atomic",
+      "long": [
+        "--atomic"
+      ],
+      "short": [],
+      "argument": null,
+      "help": "create new files via temp file + rename (default)",
+      "class": "xs-only",
+      "section": "xs extensions",
+      "implies": [],
+      "features": [],
+      "platform": null,
+      "see": [
+        "snapshots#atomic"
+      ],
+      "detail": null
+    },
+    {
+      "id": "no-atomic",
+      "aliases": [],
+      "spec": "--no-atomic",
+      "long": [
+        "--no-atomic"
+      ],
+      "short": [],
+      "argument": null,
+      "help": "create new byte-copied files directly (fewer renames; a crash can leave truncated files under final names)",
+      "class": "xs-only",
+      "section": "xs extensions",
+      "implies": [],
+      "features": [],
+      "platform": null,
+      "see": [
+        "snapshots#atomic"
+      ],
+      "detail": null
+    }
+  ],
+  "unlisted": [
+    {
+      "name": "--del",
+      "help": "same as --delete-during"
+    },
+    {
+      "name": "--delete-before",
+      "help": "delete extraneous entries before transferring"
+    },
+    {
+      "name": "--delete-during",
+      "help": "delete extraneous entries while transferring"
+    },
+    {
+      "name": "--delete-delay",
+      "help": "find deletions during the transfer, delete afterwards"
+    },
+    {
+      "name": "--devices",
+      "help": "preserve device files (part of -D)"
+    },
+    {
+      "name": "--specials",
+      "help": "preserve special files (part of -D)"
+    },
+    {
+      "name": "--ignore-non-existing",
+      "help": "same as --existing"
+    },
+    {
+      "name": "--info",
+      "help": "progress2, progress0, stats2 or stats0, comma separated"
+    },
+    {
+      "name": "--compress-choice",
+      "help": "zstd or none (alias --zc)"
+    },
+    {
+      "name": "--clone",
+      "help": "allow copy-on-write clones again after --no-clone"
+    },
+    {
+      "name": "--no-OPTION",
+      "help": "turn off a flag, for example --no-perms, --no-times, --no-D"
+    }
+  ],
+  "delegated": [
+    "--address",
+    "--append",
+    "--append-verify",
+    "-b, --backup",
+    "--backup-dir",
+    "-B, --block-size",
+    "--cc",
+    "--checksum-choice",
+    "--checksum-seed",
+    "--compare-dest",
+    "--contimeout",
+    "--copy-as",
+    "--copy-dest",
+    "--copy-devices",
+    "--copy-dirlinks",
+    "--copy-unsafe-links",
+    "--daemon",
+    "--debug",
+    "--delay-updates",
+    "--delete-missing-args",
+    "--early-input",
+    "--fake-super",
+    "--fsync",
+    "-y, --fuzzy",
+    "--groupmap",
+    "--i-r",
+    "--iconv",
+    "--ignore-missing-args",
+    "--implied-dirs",
+    "--inc-recursive",
+    "-4, --ipv4",
+    "-6, --ipv6",
+    "--keep-dirlinks",
+    "--log-file-format",
+    "--max-alloc",
+    "--msgs2stderr",
+    "--munge-links",
+    "--new-compress",
+    "--no-i-r",
+    "--no-implied-dirs",
+    "--no-inc-recursive",
+    "--no-msgs2stderr",
+    "--no-protect-args",
+    "--old-args",
+    "--old-compress",
+    "--only-write-batch",
+    "--outbuf",
+    "--partial-dir",
+    "--password-file",
+    "--port",
+    "--preallocate",
+    "--read-batch",
+    "-M, --remote-option",
+    "--remove-source-files",
+    "--skip-compress",
+    "--sockopts",
+    "--stop-after",
+    "--stop-at",
+    "--suffix",
+    "--super",
+    "-T, --temp-dir",
+    "--trust-sender",
+    "--usermap",
+    "--write-batch",
+    "--write-devices"
+  ]
+}

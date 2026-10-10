@@ -1,6 +1,9 @@
 """Curated manuals grounded in the current xsync README and backlog status."""
 from html import escape
 
+# Public source repository; generated pages link evidence files here.
+REPO_URL = 'https://github.com/s4njee/xsyncv4'
+
 
 def p(text):
     return '<p>' + text + '</p>\n\n'
@@ -24,6 +27,11 @@ def section(identifier, title, body):
 
 def doc(slug, title, name, summary, group, sections):
     return {'slug':slug, 'title':title, 'name':name, 'summary':summary, 'group':group, 'sections':sections}
+
+
+def GENERATED_EXAMPLE(name):
+    """Placeholder for a captured example, filled by generate-docs.py."""
+    return '<!--example:' + name + '-->'
 
 
 def GENERATED(name):
@@ -151,3 +159,17 @@ PAGES = [
         section('sources', 'MAINTENANCE', p('The option reference and downloadable manpage are generated from <code>xs --help</code>. Exit codes come from the <code>RERR_*</code> definitions in the source, and tier status from <code>backlog.md</code>. Workflow pages are curated from README behavior.') + p('Source fingerprints for the curated pages are in <a href="sources.json">sources.json</a>; <code>npm run check</code> fails when a fingerprinted source has changed since review.')),
     ]),
 ]
+
+
+# Captured examples (scripts/capture-examples.py) appended to the end of a section.
+SECTION_EXAMPLES = {
+    ('transfers', 'remote'): ['push', 'pull', 'push-stats'],
+    ('transfers', 'listing'): ['list', 'list-recursive'],
+    ('transfers', 'relative'): ['relative', 'files-from'],
+    ('filters', 'excludes'): ['filter-include'],
+    ('snapshots', 'link-dest'): ['link-dest'],
+    ('progress', 'units'): ['stats', 'progress2'],
+}
+for (slug, ident), names in SECTION_EXAMPLES.items():
+    target = next(item for page in PAGES if page['slug'] == slug for item in page['sections'] if item['id'] == ident)
+    target['html'] += ''.join(GENERATED_EXAMPLE(name) for name in names)

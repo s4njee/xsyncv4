@@ -32,4 +32,8 @@ subprocess.run([sys.executable, str(args.repo / 'tools/help_to_man.py'), str(bin
                check=True, env=dict(os.environ, SOURCE_DATE_EPOCH=epoch))
 (inputs / 'exit-codes.json').write_text(json.dumps(derive.exit_codes(args.repo), indent=2) + '\n')
 (inputs / 'backlog-status.json').write_text(json.dumps(derive.backlog_status(args.repo), indent=2, ensure_ascii=False) + '\n')
+(inputs / 'benchmarks.json').write_text(json.dumps(derive.benchmarks(args.repo), indent=2, ensure_ascii=False) + '\n')
+(inputs / 'option-source.json').write_text(json.dumps(derive.option_source(args.repo), indent=2) + '\n')
+(inputs / 'protocol.json').write_text(json.dumps(derive.protocol(args.repo), indent=2) + '\n')
+(inputs / 'changelog.md').write_text((args.repo / 'CHANGELOG.md').read_text())
 print(f'Refreshed docs inputs from {binary} and {args.repo}.')
