@@ -1,0 +1,459 @@
+{
+  "schema": 1,
+  "utc": "2026-10-10T14:53:59.601369+00:00",
+  "client": "neo",
+  "target": "sanjee@freya.local:/home/sanjee/benchmarks/xsyncv4/20261010T144748Z-715fa0",
+  "direction": "pull",
+  "label": "smoke",
+  "cache": "warm",
+  "versions": {
+    "xs": "xs  version 0.1.0  protocol version 4  git 415900091024",
+    "rsync": "rsync  version 3.4.1  protocol version 32"
+  },
+  "argv": [
+    "/home/sanjee/benchmarks/xsyncv4/20261010T144748Z-715fa0/bin/run.py",
+    "--corpus",
+    "/home/sanjee/benchmarks/xsyncv4/20261010T144748Z-715fa0/data/smoke",
+    "--work",
+    "/home/sanjee/benchmarks/xsyncv4/20261010T144748Z-715fa0/work",
+    "--target",
+    "sanjee@freya.local:/home/sanjee/benchmarks/xsyncv4/20261010T144748Z-715fa0",
+    "--direction",
+    "pull",
+    "--xsync",
+    "/home/sanjee/benchmarks/xsyncv4/20261010T144748Z-715fa0/bin/xs",
+    "--remote-xs",
+    "/home/sanjee/benchmarks/xsyncv4/20261010T144748Z-715fa0/bin/xs",
+    "--remote-measure",
+    "/home/sanjee/benchmarks/xsyncv4/20261010T144748Z-715fa0/bin/measure.py",
+    "--runs",
+    "2",
+    "--scenarios",
+    "fresh,fresh-z,noop,checksum",
+    "--label",
+    "smoke",
+    "--output",
+    "/home/sanjee/benchmarks/xsyncv4/20261010T144748Z-715fa0/logs/smoke-pull.json"
+  ],
+  "records": [
+    {
+      "returncode": 0,
+      "wall_seconds": 0.17490177182480693,
+      "user_seconds": 0.032441,
+      "system_seconds": 0.010501,
+      "max_rss_bytes": 14434304,
+      "voluntary_switches": 42,
+      "involuntary_switches": 7,
+      "scenario": "fresh",
+      "tool": "rsync",
+      "run": 1,
+      "verified": true,
+      "remote": {
+        "returncode": 0,
+        "wall_seconds": 0.011763702612370253,
+        "user_seconds": 0.0,
+        "system_seconds": 0.002936,
+        "max_rss_bytes": 13524992,
+        "voluntary_switches": 12,
+        "involuntary_switches": 1
+      },
+      "stdout": "\nNumber of files: 9 (reg: 8, dir: 1)\nNumber of created files: 9 (reg: 8, dir: 1)\nNumber of deleted files: 0\nNumber of regular files transferred: 8\nTotal file size: 8,192 bytes\nTotal transferred file size: 8,192 bytes\nLiteral data: 8,192 bytes\nMatched data: 0 bytes\nFile list size: 146\nFile list generation time: 0.001 seconds\nFile list transfer time: 0.000 seconds\nTotal bytes sent: 179\nTotal bytes received: 8,700\n\nsent 179 bytes  received 8,700 bytes  17,758.00 bytes/sec\ntotal size is 8,192  speedup is 0.92\n",
+      "stderr": ""
+    },
+    {
+      "returncode": 0,
+      "wall_seconds": 0.20856952341273427,
+      "user_seconds": 0.014889,
+      "system_seconds": 0.025866999999999998,
+      "max_rss_bytes": 14434304,
+      "voluntary_switches": 59,
+      "involuntary_switches": 16,
+      "scenario": "fresh",
+      "tool": "xs",
+      "run": 1,
+      "verified": true,
+      "remote": {
+        "returncode": 0,
+        "wall_seconds": 0.010553496424108744,
+        "user_seconds": 0.0,
+        "system_seconds": 0.012270999999999999,
+        "max_rss_bytes": 17637376,
+        "voluntary_switches": 126,
+        "involuntary_switches": 1
+      },
+      "stdout": "\nNumber of files: 8 (reg: 8, dir: 0)\nNumber of created files: 8 (reg: 8, dir: 0)\nNumber of deleted files: 0\nNumber of regular files transferred: 8\nTotal file size: 8,192 bytes\nTotal transferred file size: 8,192 bytes\nDelta literal data: 0 bytes\nDelta matched data: 0 bytes\nTotal bytes sent: 260\nTotal bytes received: 8,619\n\nsent 260 bytes  received 8,619 bytes  47,731.37 bytes/sec\ntotal size is 8,192  speedup is 0.92\n",
+      "stderr": ""
+    },
+    {
+      "returncode": 0,
+      "wall_seconds": 0.18667657487094402,
+      "user_seconds": 0.023611999999999998,
+      "system_seconds": 0.017974999999999998,
+      "max_rss_bytes": 14434304,
+      "voluntary_switches": 59,
+      "involuntary_switches": 15,
+      "scenario": "fresh",
+      "tool": "xs",
+      "run": 2,
+      "verified": true,
+      "remote": {
+        "returncode": 0,
+        "wall_seconds": 0.012822838965803385,
+        "user_seconds": 0.000801,
+        "system_seconds": 0.010384,
+        "max_rss_bytes": 17895424,
+        "voluntary_switches": 106,
+        "involuntary_switches": 1
+      },
+      "stdout": "\nNumber of files: 8 (reg: 8, dir: 0)\nNumber of created files: 8 (reg: 8, dir: 0)\nNumber of deleted files: 0\nNumber of regular files transferred: 8\nTotal file size: 8,192 bytes\nTotal transferred file size: 8,192 bytes\nDelta literal data: 0 bytes\nDelta matched data: 0 bytes\nTotal bytes sent: 260\nTotal bytes received: 8,619\n\nsent 260 bytes  received 8,619 bytes  48,628.12 bytes/sec\ntotal size is 8,192  speedup is 0.92\n",
+      "stderr": ""
+    },
+    {
+      "returncode": 0,
+      "wall_seconds": 0.16875034989789128,
+      "user_seconds": 0.024371999999999998,
+      "system_seconds": 0.010381999999999999,
+      "max_rss_bytes": 14434304,
+      "voluntary_switches": 43,
+      "involuntary_switches": 13,
+      "scenario": "fresh",
+      "tool": "rsync",
+      "run": 2,
+      "verified": true,
+      "remote": {
+        "returncode": 0,
+        "wall_seconds": 0.011242727749049664,
+        "user_seconds": 0.0012469999999999998,
+        "system_seconds": 0.001254,
+        "max_rss_bytes": 14397440,
+        "voluntary_switches": 11,
+        "involuntary_switches": 1
+      },
+      "stdout": "\nNumber of files: 9 (reg: 8, dir: 1)\nNumber of created files: 9 (reg: 8, dir: 1)\nNumber of deleted files: 0\nNumber of regular files transferred: 8\nTotal file size: 8,192 bytes\nTotal transferred file size: 8,192 bytes\nLiteral data: 8,192 bytes\nMatched data: 0 bytes\nFile list size: 146\nFile list generation time: 0.001 seconds\nFile list transfer time: 0.000 seconds\nTotal bytes sent: 179\nTotal bytes received: 8,700\n\nsent 179 bytes  received 8,700 bytes  17,758.00 bytes/sec\ntotal size is 8,192  speedup is 0.92\n",
+      "stderr": ""
+    },
+    {
+      "returncode": 0,
+      "wall_seconds": 0.166722581256181,
+      "user_seconds": 0.024756,
+      "system_seconds": 0.015503,
+      "max_rss_bytes": 14434304,
+      "voluntary_switches": 44,
+      "involuntary_switches": 5,
+      "scenario": "fresh-z",
+      "tool": "rsync",
+      "run": 1,
+      "verified": true,
+      "remote": {
+        "returncode": 0,
+        "wall_seconds": 0.012521743308752775,
+        "user_seconds": 0.0009989999999999999,
+        "system_seconds": 0.0020009999999999997,
+        "max_rss_bytes": 13832192,
+        "voluntary_switches": 11,
+        "involuntary_switches": 2
+      },
+      "stdout": "\nNumber of files: 9 (reg: 8, dir: 1)\nNumber of created files: 9 (reg: 8, dir: 1)\nNumber of deleted files: 0\nNumber of regular files transferred: 8\nTotal file size: 8,192 bytes\nTotal transferred file size: 8,192 bytes\nLiteral data: 8,192 bytes\nMatched data: 0 bytes\nFile list size: 146\nFile list generation time: 0.001 seconds\nFile list transfer time: 0.000 seconds\nTotal bytes sent: 179\nTotal bytes received: 514\n\nsent 179 bytes  received 514 bytes  1,386.00 bytes/sec\ntotal size is 8,192  speedup is 11.82\n",
+      "stderr": ""
+    },
+    {
+      "returncode": 0,
+      "wall_seconds": 0.1819431046023965,
+      "user_seconds": 0.019708,
+      "system_seconds": 0.018902,
+      "max_rss_bytes": 14434304,
+      "voluntary_switches": 64,
+      "involuntary_switches": 11,
+      "scenario": "fresh-z",
+      "tool": "xs",
+      "run": 1,
+      "verified": true,
+      "remote": {
+        "returncode": 0,
+        "wall_seconds": 0.008057035971432924,
+        "user_seconds": 0.002241,
+        "system_seconds": 0.008978,
+        "max_rss_bytes": 17567744,
+        "voluntary_switches": 113,
+        "involuntary_switches": 3
+      },
+      "stdout": "\nNumber of files: 8 (reg: 8, dir: 0)\nNumber of created files: 8 (reg: 8, dir: 0)\nNumber of deleted files: 0\nNumber of regular files transferred: 8\nTotal file size: 8,192 bytes\nTotal transferred file size: 8,192 bytes\nDelta literal data: 0 bytes\nDelta matched data: 0 bytes\nTotal bytes sent: 262\nTotal bytes received: 318\n\nsent 262 bytes  received 318 bytes  3,239.23 bytes/sec\ntotal size is 8,192  speedup is 14.12\n",
+      "stderr": ""
+    },
+    {
+      "returncode": 0,
+      "wall_seconds": 0.1786097171716392,
+      "user_seconds": 0.018726,
+      "system_seconds": 0.018416,
+      "max_rss_bytes": 14434304,
+      "voluntary_switches": 66,
+      "involuntary_switches": 11,
+      "scenario": "fresh-z",
+      "tool": "xs",
+      "run": 2,
+      "verified": true,
+      "remote": {
+        "returncode": 0,
+        "wall_seconds": 0.007953776977956295,
+        "user_seconds": 0.001816,
+        "system_seconds": 0.009167999999999999,
+        "max_rss_bytes": 17596416,
+        "voluntary_switches": 116,
+        "involuntary_switches": 19
+      },
+      "stdout": "\nNumber of files: 8 (reg: 8, dir: 0)\nNumber of created files: 8 (reg: 8, dir: 0)\nNumber of deleted files: 0\nNumber of regular files transferred: 8\nTotal file size: 8,192 bytes\nTotal transferred file size: 8,192 bytes\nDelta literal data: 0 bytes\nDelta matched data: 0 bytes\nTotal bytes sent: 262\nTotal bytes received: 318\n\nsent 262 bytes  received 318 bytes  3,329.33 bytes/sec\ntotal size is 8,192  speedup is 14.12\n",
+      "stderr": ""
+    },
+    {
+      "returncode": 0,
+      "wall_seconds": 0.17329222615808249,
+      "user_seconds": 0.024007,
+      "system_seconds": 0.013841,
+      "max_rss_bytes": 14434304,
+      "voluntary_switches": 41,
+      "involuntary_switches": 3,
+      "scenario": "fresh-z",
+      "tool": "rsync",
+      "run": 2,
+      "verified": true,
+      "remote": {
+        "returncode": 0,
+        "wall_seconds": 0.012613361701369286,
+        "user_seconds": 0.0,
+        "system_seconds": 0.00292,
+        "max_rss_bytes": 14028800,
+        "voluntary_switches": 11,
+        "involuntary_switches": 1
+      },
+      "stdout": "\nNumber of files: 9 (reg: 8, dir: 1)\nNumber of created files: 9 (reg: 8, dir: 1)\nNumber of deleted files: 0\nNumber of regular files transferred: 8\nTotal file size: 8,192 bytes\nTotal transferred file size: 8,192 bytes\nLiteral data: 8,192 bytes\nMatched data: 0 bytes\nFile list size: 146\nFile list generation time: 0.001 seconds\nFile list transfer time: 0.000 seconds\nTotal bytes sent: 179\nTotal bytes received: 514\n\nsent 179 bytes  received 514 bytes  1,386.00 bytes/sec\ntotal size is 8,192  speedup is 11.82\n",
+      "stderr": ""
+    },
+    {
+      "returncode": 0,
+      "wall_seconds": 0.16948702139779925,
+      "user_seconds": 0.009011,
+      "system_seconds": 0.020569,
+      "max_rss_bytes": 14434304,
+      "voluntary_switches": 39,
+      "involuntary_switches": 2,
+      "scenario": "noop",
+      "tool": "rsync",
+      "run": 1,
+      "verified": true,
+      "remote": {
+        "returncode": 0,
+        "wall_seconds": 0.007844727952033281,
+        "user_seconds": 0.001237,
+        "system_seconds": 0.001232,
+        "max_rss_bytes": 14344192,
+        "voluntary_switches": 10,
+        "involuntary_switches": 3
+      },
+      "stdout": "\nNumber of files: 9 (reg: 8, dir: 1)\nNumber of created files: 0\nNumber of deleted files: 0\nNumber of regular files transferred: 0\nTotal file size: 8,192 bytes\nTotal transferred file size: 0 bytes\nLiteral data: 0 bytes\nMatched data: 0 bytes\nFile list size: 146\nFile list generation time: 0.001 seconds\nFile list transfer time: 0.000 seconds\nTotal bytes sent: 20\nTotal bytes received: 157\n\nsent 20 bytes  received 157 bytes  354.00 bytes/sec\ntotal size is 8,192  speedup is 46.28\n",
+      "stderr": ""
+    },
+    {
+      "returncode": 0,
+      "wall_seconds": 0.17884614411741495,
+      "user_seconds": 0.024718,
+      "system_seconds": 0.009758,
+      "max_rss_bytes": 14434304,
+      "voluntary_switches": 60,
+      "involuntary_switches": 15,
+      "scenario": "noop",
+      "tool": "xs",
+      "run": 1,
+      "verified": true,
+      "remote": {
+        "returncode": 0,
+        "wall_seconds": 0.0075936210341751575,
+        "user_seconds": 0.000959,
+        "system_seconds": 0.010463,
+        "max_rss_bytes": 17858560,
+        "voluntary_switches": 105,
+        "involuntary_switches": 1
+      },
+      "stdout": "\nNumber of files: 8 (reg: 8, dir: 0)\nNumber of created files: 0 (reg: 0, dir: 0)\nNumber of deleted files: 0\nNumber of regular files transferred: 0\nTotal file size: 8,192 bytes\nTotal transferred file size: 0 bytes\nDelta literal data: 0 bytes\nDelta matched data: 0 bytes\nTotal bytes sent: 247\nTotal bytes received: 245\n\nsent 247 bytes  received 245 bytes  2,793.73 bytes/sec\ntotal size is 8,192  speedup is 16.65\n",
+      "stderr": ""
+    },
+    {
+      "returncode": 0,
+      "wall_seconds": 0.18838978605344892,
+      "user_seconds": 0.017676,
+      "system_seconds": 0.020101,
+      "max_rss_bytes": 14434304,
+      "voluntary_switches": 61,
+      "involuntary_switches": 11,
+      "scenario": "noop",
+      "tool": "xs",
+      "run": 2,
+      "verified": true,
+      "remote": {
+        "returncode": 0,
+        "wall_seconds": 0.00765244010835886,
+        "user_seconds": 0.001646,
+        "system_seconds": 0.008412,
+        "max_rss_bytes": 17334272,
+        "voluntary_switches": 93,
+        "involuntary_switches": 1
+      },
+      "stdout": "\nNumber of files: 8 (reg: 8, dir: 0)\nNumber of created files: 0 (reg: 0, dir: 0)\nNumber of deleted files: 0\nNumber of regular files transferred: 0\nTotal file size: 8,192 bytes\nTotal transferred file size: 0 bytes\nDelta literal data: 0 bytes\nDelta matched data: 0 bytes\nTotal bytes sent: 247\nTotal bytes received: 245\n\nsent 247 bytes  received 245 bytes  2,643.05 bytes/sec\ntotal size is 8,192  speedup is 16.65\n",
+      "stderr": ""
+    },
+    {
+      "returncode": 0,
+      "wall_seconds": 0.19425581814721227,
+      "user_seconds": 0.02821,
+      "system_seconds": 0.022151,
+      "max_rss_bytes": 14434304,
+      "voluntary_switches": 40,
+      "involuntary_switches": 11,
+      "scenario": "noop",
+      "tool": "rsync",
+      "run": 2,
+      "verified": true,
+      "remote": {
+        "returncode": 0,
+        "wall_seconds": 0.008237703703343868,
+        "user_seconds": 0.001166,
+        "system_seconds": 0.00117,
+        "max_rss_bytes": 14086144,
+        "voluntary_switches": 10,
+        "involuntary_switches": 0
+      },
+      "stdout": "\nNumber of files: 9 (reg: 8, dir: 1)\nNumber of created files: 0\nNumber of deleted files: 0\nNumber of regular files transferred: 0\nTotal file size: 8,192 bytes\nTotal transferred file size: 0 bytes\nLiteral data: 0 bytes\nMatched data: 0 bytes\nFile list size: 146\nFile list generation time: 0.001 seconds\nFile list transfer time: 0.000 seconds\nTotal bytes sent: 20\nTotal bytes received: 157\n\nsent 20 bytes  received 157 bytes  354.00 bytes/sec\ntotal size is 8,192  speedup is 46.28\n",
+      "stderr": ""
+    },
+    {
+      "returncode": 0,
+      "wall_seconds": 0.17867312394082546,
+      "user_seconds": 0.030466999999999998,
+      "system_seconds": 0.009659,
+      "max_rss_bytes": 14434304,
+      "voluntary_switches": 38,
+      "involuntary_switches": 1,
+      "scenario": "checksum",
+      "tool": "rsync",
+      "run": 1,
+      "verified": true,
+      "remote": {
+        "returncode": 0,
+        "wall_seconds": 0.009304121136665344,
+        "user_seconds": 0.000914,
+        "system_seconds": 0.001828,
+        "max_rss_bytes": 13520896,
+        "voluntary_switches": 10,
+        "involuntary_switches": 0
+      },
+      "stdout": "\nNumber of files: 9 (reg: 8, dir: 1)\nNumber of created files: 0\nNumber of deleted files: 0\nNumber of regular files transferred: 0\nTotal file size: 8,192 bytes\nTotal transferred file size: 0 bytes\nLiteral data: 0 bytes\nMatched data: 0 bytes\nFile list size: 274\nFile list generation time: 0.001 seconds\nFile list transfer time: 0.000 seconds\nTotal bytes sent: 20\nTotal bytes received: 285\n\nsent 20 bytes  received 285 bytes  610.00 bytes/sec\ntotal size is 8,192  speedup is 26.86\n",
+      "stderr": ""
+    },
+    {
+      "returncode": 0,
+      "wall_seconds": 0.19220656575635076,
+      "user_seconds": 0.01838,
+      "system_seconds": 0.013668,
+      "max_rss_bytes": 14434304,
+      "voluntary_switches": 63,
+      "involuntary_switches": 18,
+      "scenario": "checksum",
+      "tool": "xs",
+      "run": 1,
+      "verified": true,
+      "remote": {
+        "returncode": 0,
+        "wall_seconds": 0.015241961926221848,
+        "user_seconds": 0.000977,
+        "system_seconds": 0.010745,
+        "max_rss_bytes": 17858560,
+        "voluntary_switches": 93,
+        "involuntary_switches": 2
+      },
+      "stdout": "\nNumber of files: 8 (reg: 8, dir: 0)\nNumber of created files: 0 (reg: 0, dir: 0)\nNumber of deleted files: 0\nNumber of regular files transferred: 0\nTotal file size: 8,192 bytes\nTotal transferred file size: 0 bytes\nDelta literal data: 0 bytes\nDelta matched data: 0 bytes\nTotal bytes sent: 251\nTotal bytes received: 373\n\nsent 251 bytes  received 373 bytes  3,271.90 bytes/sec\ntotal size is 8,192  speedup is 13.13\n",
+      "stderr": ""
+    },
+    {
+      "returncode": 0,
+      "wall_seconds": 0.1744720097631216,
+      "user_seconds": 0.014487,
+      "system_seconds": 0.019799,
+      "max_rss_bytes": 14434304,
+      "voluntary_switches": 61,
+      "involuntary_switches": 16,
+      "scenario": "checksum",
+      "tool": "xs",
+      "run": 2,
+      "verified": true,
+      "remote": {
+        "returncode": 0,
+        "wall_seconds": 0.009159603156149387,
+        "user_seconds": 0.0008619999999999999,
+        "system_seconds": 0.010302,
+        "max_rss_bytes": 17334272,
+        "voluntary_switches": 97,
+        "involuntary_switches": 1
+      },
+      "stdout": "\nNumber of files: 8 (reg: 8, dir: 0)\nNumber of created files: 0 (reg: 0, dir: 0)\nNumber of deleted files: 0\nNumber of regular files transferred: 0\nTotal file size: 8,192 bytes\nTotal transferred file size: 0 bytes\nDelta literal data: 0 bytes\nDelta matched data: 0 bytes\nTotal bytes sent: 251\nTotal bytes received: 373\n\nsent 251 bytes  received 373 bytes  3,614.57 bytes/sec\ntotal size is 8,192  speedup is 13.13\n",
+      "stderr": ""
+    },
+    {
+      "returncode": 0,
+      "wall_seconds": 0.18564219772815704,
+      "user_seconds": 0.024582999999999997,
+      "system_seconds": 0.023247999999999998,
+      "max_rss_bytes": 14434304,
+      "voluntary_switches": 47,
+      "involuntary_switches": 14,
+      "scenario": "checksum",
+      "tool": "rsync",
+      "run": 2,
+      "verified": true,
+      "remote": {
+        "returncode": 0,
+        "wall_seconds": 0.012961088214069605,
+        "user_seconds": 0.0024319999999999997,
+        "system_seconds": 0.0,
+        "max_rss_bytes": 14028800,
+        "voluntary_switches": 10,
+        "involuntary_switches": 1
+      },
+      "stdout": "\nNumber of files: 9 (reg: 8, dir: 1)\nNumber of created files: 0\nNumber of deleted files: 0\nNumber of regular files transferred: 0\nTotal file size: 8,192 bytes\nTotal transferred file size: 0 bytes\nLiteral data: 0 bytes\nMatched data: 0 bytes\nFile list size: 274\nFile list generation time: 0.001 seconds\nFile list transfer time: 0.000 seconds\nTotal bytes sent: 20\nTotal bytes received: 285\n\nsent 20 bytes  received 285 bytes  610.00 bytes/sec\ntotal size is 8,192  speedup is 26.86\n",
+      "stderr": ""
+    }
+  ],
+  "summary": [
+    {
+      "scenario": "fresh",
+      "median_seconds": {
+        "rsync": 0.1718260608613491,
+        "xs": 0.19762304914183915
+      },
+      "xs_speedup": 0.8694636663460502
+    },
+    {
+      "scenario": "fresh-z",
+      "median_seconds": {
+        "rsync": 0.17000740370713174,
+        "xs": 0.18027641088701785
+      },
+      "xs_speedup": 0.9430374327436447
+    },
+    {
+      "scenario": "noop",
+      "median_seconds": {
+        "rsync": 0.18187141977250576,
+        "xs": 0.18361796508543193
+      },
+      "xs_speedup": 0.9904881566892785
+    },
+    {
+      "scenario": "checksum",
+      "median_seconds": {
+        "rsync": 0.18215766083449125,
+        "xs": 0.18333928775973618
+      },
+      "xs_speedup": 0.9935549715520143
+    }
+  ],
+  "complete": true
+}

@@ -127,7 +127,7 @@ The benchmark so far is one corpus slice, one machine, one filesystem, no networ
 
 | ID | Item | Status | Done when | Size |
 |---|---|---|---|---|
-| F-01 | **Benchmark the real targets.** Over ssh to a Linux LAN host (ext4/XFS) and to the Pi; the full 14 GB corpus (needs disk space freed first); an update run with ~1 % of files changed; a mixed tree with large files; cold cache. | new | `bench/bench.py --target host:path` and a results table per target in the README; this decides the order of everything below. | M |
+| F-01 | **Benchmark the real targets.** Over ssh to a Linux LAN host (ext4/XFS) and to the Pi; the full 14 GB corpus (needs disk space freed first); an update run with ~1 % of files changed; a mixed tree with large files; cold cache. | partial | `bench/bench.py --target host:path` and a results table per target in the README; this decides the order of everything below. | M |
 | F-02 | **Regression gate.** Nothing stops a change from losing the lead. | new | CI job fails if any scenario drops below a recorded ratio to rsync on the same runner. | M |
 | F-03 | **ssh is one stream on one core.** On a fast LAN the cipher becomes the ceiling long before the disks do. | unverified | Measured first. Then, if it is the limit: `--streams N` (several ssh connections sharing one transfer) and no compression by default on links faster than the compressor. | L |
 | F-04 | **Adaptive compression.** `-z` compresses every block at level 3 regardless of content or link. | code | Incompressible blocks are detected from a sample and sent raw; `--skip-compress` suffixes honoured; level chosen from measured link speed unless set. | M |
@@ -3044,3 +3044,31 @@ after U-01's evidence entry completes P2, as requested by the user.
 - P2 is closed with U-02 through U-11 complete and U-01 skipped as instructed.
   All final executable/release outputs are named `xs`; final release hashes,
   acceptance checks and the package/install verification are recorded above.
+
+
+## P3 / F-01 started — 2026-10-10: direct neo/freya measurements
+
+- User requested `benchmarks/` and transfers neo→freya and freya→neo. Both
+  hosts are reachable: neo is a 4-core/4 GiB Raspberry Pi 5 with ext4/NVMe;
+  freya is 32-core/64 GiB x86_64 with a ZFS home dataset. Both NICs report
+  1 Gb/s. Source revision `415900091024` static releases are staged in owned
+  run directories, with SHA-256 ownership records and explicit helper paths.
+- Neo authenticates directly to freya; reverse data flow uses a pull from neo
+  because freya cannot authenticate to neo with its current credentials. No
+  SSH authorization or installed helpers were changed.
+- Added `benchmarks/run.py` and transparent resource helper `measure.py`. The
+  runner alternates rsync/xs order, measures client and peer wall/CPU/peak RSS,
+  records incremental JSON evidence and independently verifies every sample
+  with `rsync -anci --delete`. Setup and verification are untimed.
+  `bench/bench.py --target host:absolute-root` dispatches to the new runner.
+- Two repetitions of fresh/plain, fresh/compressed, no-op and checksum smoke
+  cases pass in both directions on the real hosts (32 verified samples).
+  These are harness checks, not representative performance results; full
+  dataset preparation was active during them. Evidence lives in
+  `benchmarks/results/20261010T144748Z-715fa0-smoke-{push,pull}.json`.
+- Freya's available Congress tree currently contains 918,236 files, 418,726
+  directories and 11,089,797,682 logical bytes (excluding `.git`). The actual
+  data-only corpus is being seeded into a benchmark-owned directory on neo.
+  Its current size will be recorded rather than assuming the historical
+  “14 GB” corpus size. Cold-cache coverage remains pending: freya lacks
+  passwordless sudo and ZFS ARC residency must be checked independently.

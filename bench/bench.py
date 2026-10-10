@@ -23,6 +23,10 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 def main():
+    if "--target" in sys.argv or any(a.startswith("--target=") for a in sys.argv):
+        sys.path.insert(0, os.path.join(ROOT, "benchmarks"))
+        from run import main as remote_main
+        return remote_main()
     ap = argparse.ArgumentParser()
     ap.add_argument("--corpus", default=os.path.join(ROOT, ".bench", "corpus"))
     ap.add_argument("--work", default=os.path.join(ROOT, ".bench"))

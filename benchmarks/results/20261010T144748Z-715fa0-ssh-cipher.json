@@ -1,0 +1,7 @@
+{
+  "cipher_lines": [
+    "debug1: kex: server->client cipher: chacha20-poly1305@openssh.com MAC: <implicit> compression: none",
+    "debug1: kex: client->server cipher: chacha20-poly1305@openssh.com MAC: <implicit> compression: none"
+  ],
+  "probe": "ssh -v -oBatchMode=yes -oCompression=no sanjee@freya.local true"
+}
