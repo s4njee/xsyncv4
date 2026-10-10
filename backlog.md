@@ -3744,3 +3744,30 @@ after U-01's evidence entry completes P2, as requested by the user.
   on each platform with no frozen-peer skip.
 - Transfer memory measurements remain required; preparing the full-size
   source is not evidence that an xs transfer meets the 512 MiB process budget.
+
+### F-02/F-05 full expanded hosted gate passed — 2026-10-10
+
+- Run 38080678548 completes successfully on both Linux and macOS. Each platform
+  passes all 18 scenarios, with exactly 1,296 verified timed records and 54
+  verified warmups; every scenario/tool pair has 24 samples. The original
+  reference and 85% relative floor remain unchanged. The worst macOS relative
+  median is 89.49%, and the complete raw artifact is retained.
+- This run qualifies source 0ece0c58b773 (the F-05 product), not the newer F-07
+  directory pinning or F-09 lifetime changes. Those changes have targeted
+  correctness coverage and receive their own hosted run after this one finishes.
+
+### F-07 free-container comparison started — 2026-10-10
+
+- A disposable 16 GiB APFS container holds a copy of the Congress slice and
+  fresh benchmark destinations. The new `path_walks.py` compares the clean
+  pre-pinning reference 7c3072c821cc at four workers with pinned product
+  24b82c5d5134 at one, two, four and eight workers, plus rsync. The source diff
+  between these products contains only the directory pinning implementation.
+- Fresh byte copies explicitly disable cloning; no-op destinations are seeded
+  separately. Six rotated samples per tool/case and one verified warmup yield
+  72 timed records and 12 warmups. All copies require independent rsync checksum
+  and metadata verification. A small harness run passes this entire matrix.
+- The container has substantial free space, while its backing volume remains
+  nearly full. Host load and both filesystem metadata are recorded; this
+  comparison does not alone isolate physical backing-store fullness. Results
+  and filesystem worker selection remain pending. F-07 stays partial.

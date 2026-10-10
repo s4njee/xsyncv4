@@ -101,6 +101,16 @@ verification. The stated F-09 budget is 512 MiB per measured xs process peak;
 this is not the summed simultaneous RSS across SSH and both endpoints. The
 five-million-file measurements remain pending.
 
+`path_walks.py` compares the old anchored destination walk with descriptor reuse
+at one, two, four and eight workers, plus rsync. It measures fresh byte copies
+with cloning disabled and no-op re-syncs, records wall time/CPU/peak process RSS,
+and independently verifies every warmup and timed copy. Its default six rotated
+samples produce 72 timed records and 12 warmups. Use a fresh owned work path and
+clean identified binaries. A separate APFS container can distinguish that
+container's free-space behavior, but its backing volume and host load must also
+be recorded; it does not establish performance on an otherwise empty physical
+disk.
+
 The [APFS no-op diagnostic](results/20261010T152712Z-apfs-baseline-summary.md)
 records the current binary's cost at 1, 2, 4 and 8 threads. Its host had high
 background load and the volume was 98% full; quieter/free-volume measurements
