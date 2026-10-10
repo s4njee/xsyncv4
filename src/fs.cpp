@@ -805,6 +805,7 @@ void skip_unsafe_links(DirWork& w, Worker& t) {
 }
 
 void generate(DirWork& w, Worker& t) {
+  DestinationDirectory directory(w.dst_path);
   const Options& o = g_opt;
   bool load_filters = w.has_attrs || !w.rel.empty();
   if (o.delete_after)

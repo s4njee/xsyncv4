@@ -17,6 +17,7 @@
 namespace {
 int root_fd = -1;
 std::string root_path;
+thread_local DestinationDirectory* directory_pin = nullptr;
 std::string absolute(const std::string& path) {
   std::error_code error;
   auto p = std::filesystem::absolute(path.empty() ? "." : path, error);
@@ -79,9 +80,16 @@ DestPath destination_path(const std::string& path) {
     return {};
   }
   std::filesystem::path rel = std::filesystem::path(p).lexically_relative(root_path);
+  int base = root_fd;
+  if (directory_pin && (p == directory_pin->path_ ||
+      (p.starts_with(directory_pin->path_) &&
+       (directory_pin->path_ == "/" || p[directory_pin->path_.size()] == '/')))) {
+    base = directory_pin->fd_;
+    rel = std::filesystem::path(p).lexically_relative(directory_pin->path_);
+  }
   auto name = rel.filename().string();
   if (name.empty()) name = ".";
-  int fd = dup(root_fd);
+  int fd = dup(base);
   if (fd < 0) return {};
   fd = walk(fd, rel.parent_path());
   if (fd < 0) return {};
@@ -91,6 +99,20 @@ DestPath destination_path(const std::string& path) {
 int destination_open_dir(const char* path) {
   auto p = destination_path(path);
   return p.fd < 0 ? -1 : openat(p.fd, p.name.c_str(), O_RDONLY | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC);
+}
+DestinationDirectory::DestinationDirectory(const std::string& path) {
+  path_ = absolute(path);
+  if (path_.empty()) return;
+  fd_ = destination_open_dir(path_.c_str());
+  if (fd_ < 0) return;
+  previous_ = directory_pin;
+  directory_pin = this;
+}
+DestinationDirectory::~DestinationDirectory() {
+  if (fd_ >= 0) {
+    directory_pin = previous_;
+    close(fd_);
+  }
 }
 int destination_stat(const char* path, struct stat* st) {
   auto p = destination_path(path);

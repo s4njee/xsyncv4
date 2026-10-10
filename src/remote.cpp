@@ -2066,6 +2066,8 @@ struct Receiver {
     if (XXH3_64bits(raw.data(), raw.size()) != want) die(RERR_STREAMIO, "data corruption detected in transfer stream");
     RBuf r(raw);
     RDir* d = nullptr;
+    std::optional<DestinationDirectory> directory;
+    u32 pinned_id = UINT32_MAX;
     while (!r.empty()) {
       u64 raw_id = r.var(), raw_idx = r.var();
       if (raw_id > UINT32_MAX || raw_idx > UINT32_MAX) die(RERR_PROTOCOL, "protocol error: bad DATA index");
@@ -2077,6 +2079,11 @@ struct Receiver {
       const Entry& s = w.src.e[idx];
       if (!d->gen_done || s.type != T_REG || !std::binary_search(w.need.begin(), w.need.end(), idx))
         die(RERR_PROTOCOL, "protocol error: unrequested file data");
+      if (pinned_id != id) {
+        directory.reset();
+        directory.emplace(w.dst_path);
+        pinned_id = id;
+      }
       bool delta = kind == R_LITERAL || kind == R_COPY || kind == R_DELTA_END;
       std::shared_ptr<DeltaBasis> basis;
       {

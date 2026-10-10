@@ -1,0 +1,115 @@
+#include "destination.h"
+#include <algorithm>
+#include <barrier>
+#include <cerrno>
+#include <exception>
+#include <fcntl.h>
+#include <filesystem>
+#include <fstream>
+#include <iostream>
+#include <stdexcept>
+#include <sys/resource.h>
+#include <thread>
+
+namespace fs = std::filesystem;
+void require(bool ok, const char* message) {
+  if (!ok) throw std::runtime_error(message);
+}
+void write_file(const fs::path& path) {
+  auto parent = destination_path(path.string());
+  require(parent.fd >= 0, "anchored parent lookup failed");
+  int fd = openat(parent.fd, parent.name.c_str(), O_WRONLY | O_CREAT | O_EXCL | O_NOFOLLOW | O_CLOEXEC, 0600);
+  require(fd >= 0, "relative creation failed");
+  bool ok = write(fd, "safe", 4) == 4;
+  close(fd);
+  require(ok, "file write failed");
+}
+size_t descriptors() {
+  rlimit limit{};
+  require(getrlimit(RLIMIT_NOFILE, &limit) == 0, "descriptor limit lookup failed");
+  size_t count = 0;
+  for (int fd = 0; fd < (int)std::min<rlim_t>(4096, limit.rlim_cur); ++fd)
+    if (fcntl(fd, F_GETFD) >= 0) ++count;
+  return count;
+}
+int main(int argc, char** argv) {
+  try {
+    require(argc == 3, "provide owned temporary root and case");
+    fs::path root(argv[1]), dest = root / "destination", a = dest / "a", b = dest / "b";
+    fs::path outside = root / "outside";
+    fs::create_directories(a / "nested");
+    fs::create_directories(b);
+    fs::create_directories(outside);
+    require(anchor_destination(dest.string()), "destination anchoring failed");
+    std::string test(argv[2]);
+    if (test == "nested") {
+      DestinationDirectory first(a.string());
+      write_file(a / "one");
+      {
+        DestinationDirectory second(b.string());
+        write_file(b / "two");
+      }
+      write_file(a / "three");
+      write_file(a / "nested" / "four");
+      require(fs::exists(a / "one") && fs::exists(b / "two") && fs::exists(a / "three") &&
+              fs::exists(a / "nested" / "four"), "nested pins did not restore their parents");
+    } else if (test == "escape") {
+      fs::create_directory_symlink(outside, a / "escape");
+      DestinationDirectory first(a.string());
+      require(destination_mkdir((a / "escape" / "bad").c_str(), 0700) < 0,
+              "a descendant symlink escaped the pin");
+      {
+        DestinationDirectory rejected((a / "escape").string());
+        write_file(a / "after-failed-pin");
+      }
+      auto rejected = destination_path((a / ".." / ".." / ".." / "outside").string());
+      require(rejected.fd < 0 && errno == EPERM, "a pin bypassed the transfer root");
+      require(fs::is_empty(outside), "outside directory changed");
+    } else if (test == "swap") {
+      {
+        DestinationDirectory first(a.string());
+        fs::rename(a, dest / "old-a");
+        fs::create_directory_symlink(outside, a);
+        write_file(a / "pinned");
+      }
+      require(fs::exists(dest / "old-a" / "pinned") && fs::is_empty(outside),
+              "a pinned write followed the replacement symlink");
+      auto rejected = destination_path((a / "after-scope").string());
+      require(rejected.fd < 0, "the expired pin was retained");
+    } else if (test == "threads") {
+      std::barrier ready(3);
+      std::exception_ptr errors[2];
+      auto worker = [&](const fs::path& path, int slot) {
+        try {
+          DestinationDirectory pin(path.string());
+          ready.arrive_and_wait();
+          ready.arrive_and_wait();
+          write_file(path / "thread-file");
+        } catch (...) { errors[slot] = std::current_exception(); }
+      };
+      std::thread first(worker, a, 0), second(worker, b, 1);
+      ready.arrive_and_wait();
+      fs::rename(a, dest / "old-a");
+      fs::rename(b, dest / "old-b");
+      fs::create_directory_symlink(outside, a);
+      fs::create_directory_symlink(outside, b);
+      ready.arrive_and_wait();
+      first.join(); second.join();
+      for (auto& error : errors) if (error) std::rethrow_exception(error);
+      require(fs::exists(dest / "old-a" / "thread-file") && fs::exists(dest / "old-b" / "thread-file") &&
+              fs::is_empty(outside), "directory pins leaked between threads");
+    } else if (test == "descriptors") {
+      auto before = descriptors();
+      for (int i = 0; i < 200; ++i) {
+        DestinationDirectory first(a.string());
+        DestinationDirectory second(b.string());
+        auto parent = destination_path((b / "probe").string());
+        require(parent.fd >= 0, "descriptor probe failed");
+      }
+      require(descriptors() == before, "directory pins leaked descriptors");
+    } else throw std::runtime_error("unknown case");
+  } catch (const std::exception& error) {
+    std::cerr << error.what() << '\n';
+    return 1;
+  }
+}

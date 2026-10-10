@@ -19,6 +19,20 @@ struct DestPath {
 bool anchor_destination(const std::string& path);
 DestPath destination_path(const std::string& path);
 int destination_open_dir(const char* path);
+// A bounded, thread-local pin for one generator/copy batch. Descendants still
+// walk with NOFOLLOW; paths outside the pin retain the transfer-root anchor.
+class DestinationDirectory {
+ public:
+  explicit DestinationDirectory(const std::string& path);
+  ~DestinationDirectory();
+  DestinationDirectory(const DestinationDirectory&) = delete;
+  DestinationDirectory& operator=(const DestinationDirectory&) = delete;
+ private:
+  friend DestPath destination_path(const std::string& path);
+  DestinationDirectory* previous_ = nullptr;
+  int fd_ = -1;
+  std::string path_;
+};
 int destination_stat(const char* path, struct stat* st);
 int destination_chmod(const char* path, mode_t mode);
 int destination_chown(const char* path, uid_t uid, gid_t gid);

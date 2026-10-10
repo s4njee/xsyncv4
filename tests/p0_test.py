@@ -133,10 +133,15 @@ class TrustTests(unittest.TestCase):
                         src, dst = root / "src", root / "dst"
                         src.mkdir()
                         dst.mkdir()
-                        (src / "large").write_bytes(b"a" * (32 * 1024 * 1024))
+                        # Larger than both transport queues and active ranges:
+                        # the first write must precede buffering the whole file.
+                        with (src / "large").open("wb") as stream:
+                            block = b"a" * (1024 * 1024)
+                            for _ in range(256): stream.write(block)
                         env = self.fault_env(root)
                         env["XSYNC_FAULT_WRITE_DELAY_US"] = "100000"
                         env["XSYNC_FAULT_EACH_READ_DELAY_US"] = "100000"
+                        env["XSYNC_FAULT_PREAD_DELAY_US"] = "100000"
                         env["XSYNC_FAULT_SERVER_PID"] = str(root / "server.pid")
                         a, b = str(src) + "/", str(dst) + "/"
                         if transport == "push":
@@ -149,12 +154,22 @@ class TrustTests(unittest.TestCase):
                                                 stdout=subprocess.PIPE, stderr=subprocess.PIPE, start_new_session=True)
                         try:
                             deadline = time.monotonic() + 10
+                            temps, ready = [], False
                             while time.monotonic() < deadline and proc.poll() is None:
                                 temps = list(dst.glob(".large.*"))
-                                if temps and any(p.stat().st_size > 0 for p in temps):
+                                ready = False
+                                for path in temps:
+                                    try:
+                                        with path.open("rb") as stream:
+                                            ready = stream.read(1) == b"a"
+                                    except FileNotFoundError:
+                                        continue
+                                    if ready: break
+                                if ready:
                                     break
                                 time.sleep(0.005)
                             self.assertTrue(temps, "no receiver temporary file")
+                            self.assertTrue(ready, "receiver never wrote a source prefix before interruption")
                             server = int((root / "server.pid").read_text())
                             if event == "signal":
                                 os.kill(proc.pid, signal.SIGINT)
@@ -167,6 +182,9 @@ class TrustTests(unittest.TestCase):
                             self.assertEqual((dst / "large").exists(), partial)
                             if partial:
                                 self.assertLess((dst / "large").stat().st_size, (src / "large").stat().st_size)
+                                with (dst / "large").open("rb") as stream:
+                                    while chunk := stream.read(1024 * 1024):
+                                        self.assertEqual(chunk, b"a" * len(chunk), "retained data is not a verified source prefix")
                         finally:
                             try:
                                 os.killpg(proc.pid, signal.SIGKILL)

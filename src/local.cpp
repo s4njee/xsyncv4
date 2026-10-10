@@ -894,7 +894,10 @@ struct Local {
       if (scans.fetch_sub(1) == 1) g_stats.scan_done.store(true);
       return;
     }
-    for (u32 i = t.a; i < t.b; i++) copy_one(*d, d->need[i], w);
+    {
+      DestinationDirectory directory(d->dst_path);
+      for (u32 i = t.a; i < t.b; i++) copy_one(*d, d->need[i], w);
+    }
     release(d);
   }
 };

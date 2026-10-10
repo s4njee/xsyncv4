@@ -133,7 +133,7 @@ The benchmark so far is one corpus slice, one machine, one filesystem, no networ
 | F-04 | **Adaptive compression.** `-z` compresses every block at level 3 regardless of content or link. | **done** | Incompressible blocks are detected from a sample and sent raw; `--skip-compress` suffixes honoured; level chosen from measured link speed unless set. | M |
 | F-05 | **Large files.** One thread reads and one stream carries each large file; local copies on Linux use a plain read/write loop. | **done** | Parallel ranges within a file on both ends; `copy_file_range`/`FICLONE` on Linux (reflinks on btrfs/XFS mirror the APFS clone path); `F_NOCACHE` above a size so a 50 GB copy does not evict the page cache. | L |
 | F-06 | **Linux scan path.** macOS uses `getattrlistbulk`; Linux uses `readdir` plus one `fstatat` per entry. | partial | `getdents64` + `statx`, optionally batched with io_uring; measured against rsync on a no-op re-sync of the corpus on ext4. | M |
-| F-07 | **APFS byte-copy ceiling.** Creation is ~100 µs per file and does not scale with threads here; system time triples from 2 to 8 threads for no gain. Unknown: how much is path-lookup contention versus the filesystem itself, and how much is the nearly full volume. | confirmed | Re-measure on a volume with free space; try `openat`-relative creation; pick the thread count per filesystem instead of always using all performance cores. | M |
+| F-07 | **APFS byte-copy ceiling.** Creation is ~100 µs per file and does not scale with threads here; system time triples from 2 to 8 threads for no gain. Unknown: how much is path-lookup contention versus the filesystem itself, and how much is the nearly full volume. | partial | Re-measure on a volume with free space; try `openat`-relative creation; pick the thread count per filesystem instead of always using all performance cores. | M |
 | F-08 | **No-op re-sync burns CPU.** 0.40 s wall but 2.7 s of system time at 8 threads. | confirmed | Wall time unchanged or better with under 1 s of CPU; or an opt-in manifest that skips listing the destination entirely. | M |
 | F-09 | **Memory on very large trees.** The receiver keeps every directory record until exit; the local engine holds up to 200,000 pending files. Never run beyond 77k files. | code | A 5-million-file synthetic tree syncs within a stated memory bound; receiver frees a directory once it and its children are finished. | M |
 | F-10 | **Whole-subtree clones.** Only leaf directories are cloned in one call. A missing subtree could be one call, at the price of a long volume-wide lock. | new | Bounded version (subtrees under N entries, known from the scan) measured against the leaf-only path. | M |
@@ -3624,3 +3624,35 @@ after U-01's evidence entry completes P2, as requested by the user.
   correction and macOS F_NOCACHE above 1 GiB are implemented. No new protocol
   field is required. F-05 is marked done. Expanded hosted run 38080678548 is
   still active; its outcome is not assumed successful.
+
+
+### F-07 anchored relative operations implemented — 2026-10-10
+
+- Each generator/local copy batch/remote DATA block now pins its destination
+  directory for the duration of the task. Descendant operations reuse that
+  descriptor and walk remaining components with O_NOFOLLOW. The transfer-root
+  boundary is checked first, and sibling/out-of-scope paths keep the original
+  anchored walk. Pins are thread-local and close on scope exit, rather than
+  retaining descriptors for the entire tree.
+- Five focused tests per platform verify nesting, failed-pin fallback, root
+  boundaries, descendant symlinks, replaced-directory aliases, independent
+  worker pins and descriptor cleanup. All 231 macOS itemized and 227 Linux
+  data/metadata differential cases pass. The 13-case P0 suite passes on macOS
+  and Linux (two existing root/platform skips on Linux), including all receiver
+  symlink-swap scenarios.
+- The old 32 MiB disconnect fixture also fails with the frozen pre-change
+  product on both platforms: it fits in the range/transport queues and can
+  complete before interruption. The fixture now writes 256 MiB, delays both
+  read and pread, waits for a real source byte, and checks every retained prefix
+  byte. Partial/non-partial cleanup and exit-code expectations remain strict.
+- Comparative timing, free-volume measurements and filesystem-specific worker
+  selection remain required; F-07 remains partial.
+
+### F-02/F-05 expanded Linux gate passed — 2026-10-10
+
+- Hosted run 38080678548 passes all 18 scenarios on Linux, including the three
+  single-file cases and the formerly regressed large-local path. All 1,296
+  timed samples and 54 warmups are independently verified, with the unchanged
+  85% floor and matched automatic worker budgets. The raw result is retained.
+- macOS remains active in the same run. No new code push will cancel it before
+  it finishes; source changes and their targeted validation continue locally.

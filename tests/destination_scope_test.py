@@ -1,0 +1,38 @@
+#!/usr/bin/env python3
+"""Exercise pinned relative operations, root boundaries, swaps and thread lifetime."""
+import pathlib
+import subprocess
+import tempfile
+import unittest
+
+ROOT = pathlib.Path(__file__).resolve().parent.parent
+
+
+class DestinationScopeTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.build = tempfile.TemporaryDirectory(prefix='xs-destination-scope-')
+        cls.binary = pathlib.Path(cls.build.name) / 'scope-test'
+        subprocess.run(['c++', '-std=c++20', '-pthread', '-I' + str(ROOT / 'src'),
+                        str(ROOT / 'tests/destination_scope_test.cpp'),
+                        str(ROOT / 'src/destination.cpp'), '-o', str(cls.binary)],
+                       check=True, capture_output=True, timeout=60)
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.build.cleanup()
+
+    def exercise(self, name):
+        with tempfile.TemporaryDirectory(prefix='xs-destination-scope-case-') as root:
+            result = subprocess.run([str(self.binary), root, name], capture_output=True, timeout=15)
+            self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_nested_pins_restore_the_previous_directory(self): self.exercise('nested')
+    def test_symlinks_and_parent_paths_cannot_escape(self): self.exercise('escape')
+    def test_renamed_directory_does_not_follow_replacement(self): self.exercise('swap')
+    def test_workers_keep_independent_pins(self): self.exercise('threads')
+    def test_descriptors_are_bounded_by_active_scopes(self): self.exercise('descriptors')
+
+
+if __name__ == '__main__':
+    unittest.main()
