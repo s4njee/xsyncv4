@@ -444,14 +444,14 @@ struct Conn {
       char h[HDR]{};
       if (!read_exact(h, HDR)) {
         if (hello && std::any_of(h, h + HDR, [](char ch) { return ch != 0; }))
-          die(RERR_PROTOCOL, "the remote shell is printing text on stdout (or --rsync-path is not xsync); remove shell startup output");
+          die(RERR_PROTOCOL, "the remote shell is printing text on stdout (or --rsync-path is not xs); remove shell startup output");
         return false;
       }
       u32 len;
       memcpy(&len, h, 4);
       type = (u8)h[4];
       if (hello && type != F_HELLO && type != F_MSG)
-        die(RERR_PROTOCOL, "the remote shell is printing text on stdout (or --rsync-path is not xsync); remove shell startup output");
+        die(RERR_PROTOCOL, "the remote shell is printing text on stdout (or --rsync-path is not xs); remove shell startup output");
       if (len > (1u << 30)) die(RERR_PROTOCOL, "protocol error: oversized frame");
       if (type == F_PROGRESS && (len > (g_opt.peer_features & PF_STAGE_METRICS ? 30u : 20u) || !(g_opt.peer_features & PF_PROGRESS_ACK)))
         die(RERR_PROTOCOL, "protocol error: oversized or unnegotiated progress acknowledgment");
@@ -2624,7 +2624,7 @@ int run_client(const std::vector<std::string>& srcs, const std::string& dest, u3
       if (g_stop.load()) exit_signal();
       int st = c.wait_peer();
       int code = WIFEXITED(st) ? WEXITSTATUS(st) : 255;
-      if (code == 127) fallback("remote xsync is not installed on " + rem.host, RERR_CMD_NOTFOUND);
+      if (code == 127) fallback("remote xs is not installed on " + rem.host, RERR_CMD_NOTFOUND);
       die(code == 255 ? 255 : RERR_STREAMIO, "connection unexpectedly closed (remote shell exited with code %d)", code);
     }
     if (type == F_MSG) {
@@ -2643,7 +2643,7 @@ int run_client(const std::vector<std::string>& srcs, const std::string& dest, u3
       continue;
     }
     if (type != F_HELLO || payload.size() < sizeof MAGIC - 1 || memcmp(payload.data(), MAGIC, sizeof MAGIC - 1) != 0)
-      die(RERR_PROTOCOL, "protocol error: the remote side did not answer as xsync (is --rsync-path pointing at xsync?)");
+      die(RERR_PROTOCOL, "protocol error: the remote side did not answer as xs (is --rsync-path pointing at xs?)");
     RBuf answer(payload);
     answer.raw(sizeof MAGIC - 1);
     u64 version = answer.var();

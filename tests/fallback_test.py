@@ -57,6 +57,7 @@ if case=='missing': sys.exit(127)
 elif case=='mismatch': frame(1,b'XSYNC\\x01\\x00')
 elif case=='fatal_mismatch': frame(8,b'\\x02\\x02protocol version mismatch: test peer')
 elif case=='banner': print('welcome to a broken shell',flush=True)
+elif case=='wrong_magic': frame(1,b'NOTXS\\x01\\x04')
 elif case in ('disconnect','capability','xattr_legacy','darwin_acl_legacy'):
  import re,pathlib
  version=int(re.search(r'PROTO_VERSION = (\\d+)',pathlib.Path(sys.argv[2]).read_text())[1])
@@ -303,8 +304,12 @@ else: sys.exit(255)
                     self.assertEqual(result.returncode, 0, result.stderr)
                     self.assertEqual((dest / 'file with spaces').read_bytes(), (self.src / 'file with spaces').read_bytes())
                     self.assertEqual(result.stderr.count(b'falling back'), 1)
+        # Diagnostics name the executable xs, never its old name.
+        messages = {'missing': b'xs: remote xs is not installed on fake (fallback disabled)',
+                    'banner': b'(or --rsync-path is not xs); remove shell startup output',
+                    'wrong_magic': b'did not answer as xs (is --rsync-path pointing at xs?)'}
         for case, code in (('missing', 127), ('mismatch', 2), ('fatal_mismatch', 2),
-                           ('banner', 2), ('disconnect', 12), ('auth', 255)):
+                           ('banner', 2), ('wrong_magic', 2), ('disconnect', 12), ('auth', 255)):
             with self.subTest(strict=case):
                 flags = [] if case in ('banner', 'disconnect', 'auth') else ['--no-fallback']
                 dest = self.root / ('strict-' + case)
@@ -312,6 +317,9 @@ else: sys.exit(255)
                                        env=dict(self.env, XSYNC_TEST_PEER=case))
                 self.assertEqual(result.returncode, code, result.stderr)
                 self.assertNotIn(b'falling back', result.stderr)
+                if case in messages:
+                    self.assertIn(messages[case], result.stderr)
+                self.assertNotIn(b'xsync', result.stderr.replace(str(self.root).encode(), b''))
                 self.assertFalse(dest.exists())
 
 
