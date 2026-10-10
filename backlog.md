@@ -112,7 +112,7 @@ coverage is tracked in `tests/progress-terminal.md` and remains incomplete.
 | U-02 | **Rows are noise for small files.** At 12,000 files/s each row shows a random file at 0 % or 100 %. | **done** | Rows are reserved for files that have been in flight for more than ~200 ms; small files collapse into one "small files" row with a rate. Large files show their own speed and ETA. | M |
 | U-03 | **Clone mode shows nothing per file.** Whole directories complete in one call, so the rows stay empty and the bar moves in jumps. | **done** | Rows show the directory being cloned; the bar advances per directory. | S |
 | U-04 | **Push progress counts bytes read, not bytes landed.** The bar can sit at 100 % while the receiver is still writing. | **done** | Receiver acknowledges completed bytes; the client bar reflects acknowledged work, with "sent" shown separately. | M |
-| U-05 | **Remote detail.** Wire bytes, compression ratio, and which side is the bottleneck (reading, network, writing) are known internally and not shown. | new | Total line shows wire rate and ratio with `-z`; `-vv` names the limiting stage. | M |
+| U-05 | **Remote detail.** Wire bytes, compression ratio, and which side is the bottleneck (reading, network, writing) are known internally and not shown. | **done** | Total line shows wire rate and ratio with `-z`; `-vv` names the limiting stage. | M |
 | U-06 | **Progress by default on a terminal?** rsync is silent without `-P`. A daily driver might show the bar whenever stderr is a tty and stay silent in scripts. See "Decisions". | new | Decision recorded; `--no-progress` and env override exist either way. | S |
 | U-07 | **Machine-readable progress.** Off a terminal, `--progress` prints a line a second. Scripts and wrappers want rsync's `--info=progress2` single line or JSON events. | code | `--info=progress2` output is line-compatible with rsync off a tty; `--progress=json` emits one object per tick and per file. | M |
 | U-08 | **Phases that look like hangs.** Deleting a large tree, waiting for the remote to finish, hashing with `-c`: the display says "scanning" or sits at 100 %. | code | Each phase has its own label and counter (`deleting 12,410`, `verifying`, `waiting for receiver`). | S |
@@ -2770,5 +2770,19 @@ Verified artifact manifest (source `864bd37edf14`):
   read/network/write cases across push/pull, compressible/incompressible ratios,
   four invalid stage-frame cases and a missing receiver-time field. Existing
   ACK acceptance passes **3 methods** and progress/clone checks pass **11**.
-  Initial real-SSH detail/ACK validation also passes; expanded final SSH,
-  protocol compatibility and release checks follow. U-05 remains uncompleted.
+  Expanded real-SSH acceptance passes all five detail and three ACK methods;
+  all 15 protocol compatibility methods pass.
+- **Done; P2 is 4/11 complete.** U-02 through U-05 are complete. U-01 remains
+  partial for the GUI terminal pass. U-06 is next, using the user's accepted
+  default of progress enabled when stderr is a terminal.
+- All three release artifacts are rebuilt and verified from source
+  `9467f2ff9b3b`. Native macOS ARM completes all 19 progress methods without
+  skips. Intel completes 19 methods with seven skip entries (three fixture
+  methods and four fault-injection subcases). Each static Linux artifact
+  completes 19 methods with nine skip entries (five platform/interposition
+  fixture methods and four fault-injection subcases). Delayed read/write
+  acceptance is covered by native macOS and the dynamic real-SSH rig.
+- Logs: `/tmp/xsync-u05-detail3.log`, `/tmp/xsync-u05-ack.log`,
+  `/tmp/xsync-u05-progress.log`, `/tmp/xsync-u05-real-ssh-final.log`,
+  `/tmp/xsync-u05-protocol.log`, `/tmp/xsync-u05-releases.log` and
+  `/tmp/xsync-u05-release-{mac-arm,mac-intel,linux-arm64,linux-amd64}.log`.
