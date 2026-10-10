@@ -6,6 +6,7 @@ from pathlib import Path
 from html import escape
 from docs_content import PAGES, doc, section, p, table
 from roadmap_content import ROADMAP_PAGE
+from lessons_content import LESSONS_PAGE, FIGURES as LESSON_FIGURES
 
 ROOT = Path(__file__).resolve().parents[1]
 HELP = (ROOT / 'docs-inputs/xsync-help.txt').read_text()
@@ -28,7 +29,10 @@ for heading, body in re.findall(r'^([^\n]+):\n(.*?)(?=^\S[^\n]+:\n|\Z)', HELP, r
 options = doc('options', 'xsync-options(1)', 'Option reference', 'The complete option list, generated from the executable’s own help.', 'REFERENCE', [section('source', 'SOURCE', p('Captured from <code>' + escape(HELP.splitlines()[0]) + '</code>. This is the current native help; delegated options and platform limits are covered in <a href="compatibility.html">compatibility</a>.') + p('<a href="xsync-help.txt" download>Download original help ↗</a> &nbsp; / &nbsp; <a href="xs.1" download>Download generated manpage ↗</a>')), *sections])
 pages = [*PAGES]
 pages.insert(8, options)
+pages.append(LESSONS_PAGE)
 pages.append(ROADMAP_PAGE)
+(ROOT / 'docs/public/charts').mkdir(parents=True, exist_ok=True)
+(ROOT / 'docs/public/charts/lessons.json').write_text(json.dumps(LESSON_FIGURES, ensure_ascii=False, separators=(',', ':')) + '\n')
 for page in pages:
     front = {'title': page['title'], 'description': page['summary'], 'manual': page['title'], 'manualName': page['name'], 'sectionNumber': re.search(r'\((\d)\)', page['title'])[1], **page.get('front', {})}
     text = '---\n' + '\n'.join(f'{k}: {json.dumps(v)}' for k,v in front.items()) + '\n---\n\n'

@@ -1,0 +1,23 @@
+# Holochart (vendored)
+
+Built from https://github.com/holochart/holochart at commit
+`0248f416ee6c3e0fd0d5109160b7eb6394cfda4f` with:
+
+```sh
+pnpm install --frozen-lockfile
+pnpm --filter @mk7s/holochart... build
+```
+
+Copied from `packages/holochart/dist/`: `holochart.iife.min.js` (bundles three.js)
+and `fonts/` (TeX Gyre Heros, GUST Font License), which the script loads from
+alongside itself. Source maps are omitted. Holochart is MIT-licensed (`LICENSE`);
+bundled third-party licenses are listed in `THIRD_PARTY_NOTICES.txt`.
+
+| File | SHA-256 |
+|---|---|
+| `holochart.iife.min.js` | `066b21d5269bc44604e40922ca2e6dee233d27e4bba0bef5a4d4973550bd64e6` |
+| `fonts/GUST-FONT-LICENSE.txt` | `2bd69affc3da00715116f713f57eab9707e96daf3562ad0215987b15b9c16f73` |
+| `fonts/texgyreheros-bold.otf` | `b170162835f4efc288886dd4231406dc47e19b614cf4416836635599d44a7d60` |
+| `fonts/texgyreheros-bolditalic.otf` | `166fc6d068d9c9974281555cb3d730365537a9b676ab269bb5163f5a75496505` |
+| `fonts/texgyreheros-italic.otf` | `6473df7fa107b3fb4be38973710afe22b0640c2ac076d5337cf126bed9aa108c` |
+| `fonts/texgyreheros-regular.otf` | `6ae1a09d5a940367b7aaaa91ee8bd8a2c333bfe193e7096e23f931357d62081f` |
