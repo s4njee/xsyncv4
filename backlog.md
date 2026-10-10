@@ -111,7 +111,7 @@ coverage is tracked in `tests/progress-terminal.md` and remains incomplete.
 | U-01 | **Real-terminal pass.** Terminal.app, iTerm, tmux, over ssh, narrow widths, resize mid-run, light themes, `TERM=dumb`, non-UTF-8 locales (needs an ASCII bar fallback). | partial | Checklist with screenshots; SIGWINCH handled; ASCII fallback when `LC_CTYPE` is not UTF-8. | M |
 | U-02 | **Rows are noise for small files.** At 12,000 files/s each row shows a random file at 0 % or 100 %. | **done** | Rows are reserved for files that have been in flight for more than ~200 ms; small files collapse into one "small files" row with a rate. Large files show their own speed and ETA. | M |
 | U-03 | **Clone mode shows nothing per file.** Whole directories complete in one call, so the rows stay empty and the bar moves in jumps. | **done** | Rows show the directory being cloned; the bar advances per directory. | S |
-| U-04 | **Push progress counts bytes read, not bytes landed.** The bar can sit at 100 % while the receiver is still writing. | code | Receiver acknowledges completed bytes; the client bar reflects acknowledged work, with "sent" shown separately. | M |
+| U-04 | **Push progress counts bytes read, not bytes landed.** The bar can sit at 100 % while the receiver is still writing. | **done** | Receiver acknowledges completed bytes; the client bar reflects acknowledged work, with "sent" shown separately. | M |
 | U-05 | **Remote detail.** Wire bytes, compression ratio, and which side is the bottleneck (reading, network, writing) are known internally and not shown. | new | Total line shows wire rate and ratio with `-z`; `-vv` names the limiting stage. | M |
 | U-06 | **Progress by default on a terminal?** rsync is silent without `-P`. A daily driver might show the bar whenever stderr is a tty and stay silent in scripts. See "Decisions". | new | Decision recorded; `--no-progress` and env override exist either way. | S |
 | U-07 | **Machine-readable progress.** Off a terminal, `--progress` prints a line a second. Scripts and wrappers want rsync's `--info=progress2` single line or JSON events. | code | `--info=progress2` output is line-compatible with rsync off a tty; `--progress=json` emits one object per tick and per file. | M |
@@ -2727,3 +2727,31 @@ Verified artifact manifest (source `864bd37edf14`):
   core-only compatibility checks are being finalized. The real-SSH suites
   pass 7 progress, 7 resume and 4 delta methods (platform/opt-in skips recorded
   in logs). U-04 remains uncompleted until final release verification.
+
+## U-04 complete — 2026-10-10: acknowledged push progress verified
+
+- **Done; P2 is 3/11 complete.** U-02/U-03/U-04 are complete; U-01 remains
+  partial for the GUI terminal pass. U-05 is next.
+- The delayed receiver acceptance passes on macOS development, universal ARM
+  and actual Linux SSH, including intermediate 0/25/50/75% acknowledgments and
+  separate sent wire bytes. Compressed, delta, inplace and sparse completion
+  counters match the transferred 4 MiB file, with matching contents/hashes.
+  Four malformed/unnegotiated/oversized frame cases fail safely with exit 2.
+- macOS development passes **3 ACK methods** and **11 progress/clone methods**.
+  Source-change/retry verification passes with progress enabled. Protocol
+  coverage passes **15 methods**, plus **2** progress-enabled frozen-v3/core-only
+  methods. Linux real SSH passes **3 ACK methods**, **7 progress methods**,
+  **7 resume methods**, and **4 delta methods**, with platform/opt-in skips.
+- All three artifacts identify **99c2859c30f9**, with verified manifest hashes.
+  Universal macOS passes **14 methods** on ARM, and **11** on Intel (three
+  interposition skips). Static Linux arm64 and emulated amd64 each pass **9**
+  methods (five APFS/tmux/interposition skips). The skipped write-delay fixture
+  independently passes on dynamic macOS/Linux and over real SSH. Build-time
+  units and scratch/transfer smoke checks pass.
+- Logs: `/tmp/xsync-u04-ack-final.log`, `/tmp/xsync-u04-progress2.log`,
+  `/tmp/xsync-u04-source-retries.log`, `/tmp/xsync-u04-protocol.log`,
+  `/tmp/xsync-u04-protocol-progress.log`, `/tmp/xsync-u04-real-ssh.log`,
+  `/tmp/xsync-u04-ack-real-ssh-final.log`, `/tmp/xsync-u04-releases.log`, and
+  `/tmp/xsync-u04-release-{mac-arm,mac-intel,linux-arm64,linux-amd64}.log`.
+  The source package/formula is refreshed after this entry; installed local
+  executables and physical remote helpers are unchanged.
