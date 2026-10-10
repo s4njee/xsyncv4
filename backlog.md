@@ -3537,3 +3537,15 @@ after U-01's evidence entry completes P2, as requested by the user.
   is 8.6% slower. Overlay byte copies remain 23.7% slower and plain pipe is
   13.0% slower. Raising the range threshold alone does not resolve all observed
   regressions; these raw results are also retained.
+
+
+### F-02 timeout evidence preservation — 2026-10-10
+
+- The fixed 24-sample macOS matrix is still active after roughly 50 minutes.
+  A job-wide 60-minute limit could terminate artifact upload along with the
+  measurement. The measurement step now has a 90-minute limit inside a
+  120-minute job; the proof step has a separate ten-minute limit. The always-run
+  upload can retain incremental JSON after a step timeout.
+- All 24 samples, 15 scenarios and the unchanged 85% ratio floor remain. No
+  selective retry or automatic acceptance was added. The current run is allowed
+  to finish before pushing these changes, preserving its original measurement.

@@ -36,7 +36,7 @@ jobs:
       matrix:
         os: [ubuntu-24.04, macos-15]
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 60
+    timeout-minutes: 120
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -78,8 +78,10 @@ jobs:
           subprocess.run(['cmake', '--build', 'build-reference', '--target', 'xsync', '-j2'], check=True)
           PY
       - name: Prove the gate rejects slowdown and corruption
+        timeout-minutes: 10
         run: python3 benchmarks/ci_gate_test.py --xsync build-ci/xs --rsync "$XS_GATE_RSYNC"
       - name: Measure and gate all scenarios
+        timeout-minutes: 90
         run: |
           python3 benchmarks/ci.py --candidate build-ci/xs --reference build-reference/xs \
             --rsync "$XS_GATE_RSYNC" --work "$RUNNER_TEMP/xs-performance" --output benchmarks/ci-results/ratios.json

@@ -140,6 +140,8 @@ The fixed production matrix collects 1,080 timed samples and 45 warmups per
 platform. All samples contribute to the medians; failures do not trigger
 selective retries. The larger sample count addresses the substantial timing
 variation observed on shared macOS runners.
+The measurement step has a 90-minute limit inside a 120-minute job, leaving
+time to upload partial evidence when the measurement step times out.
 
 For each scenario, the job records a minimum speedup relative to rsync equal
 to 85% of the pinned reference's measured speedup on that same runner. It exits
