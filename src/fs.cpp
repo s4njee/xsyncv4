@@ -164,18 +164,20 @@ u32 execution_mode(u32 source, u32 destination) {
 Entry source_snapshot(const Entry& scanned, const struct stat& st, bool receiver) {
   Entry e;
   entry_from_stat(st, e);
+  e.mode = incoming_mode(e.mode, e.type);
   e.name_off = scanned.name_off, e.name_len = scanned.name_len;
   e.link_off = scanned.link_off, e.flags = scanned.flags;
   e.item_flags = scanned.item_flags;
   e.time_flags = scanned.time_flags;
   e.fileflags_differ = scanned.fileflags_differ;
+  e.access_acl_differ = scanned.access_acl_differ;
   if (g_opt.atimes) e.atime = scanned.atime;  // checksum/read activity must not replace the listed atime.
   e.basis_mode = scanned.basis_mode;
   // Send fresh source bits; receivers retain their original destination classes.
   if (!g_opt.perms && (receiver || !g_opt.executability)) {
     if (g_opt.executability && (scanned.flags & EF_INPLACE_SAFE))
       e.mode = execution_mode(e.mode, scanned.basis_mode);
-    else e.mode = scanned.mode;
+    else e.mode = receiver ? scanned.mode : incoming_mode(scanned.mode, scanned.type);
   }
   return e;
 }
@@ -261,7 +263,7 @@ static int list_dir_fd(int fd, DirList& out, unsigned flags) {
   if (g_opt.atimes) al.commonattr |= ATTR_CMN_ACCTIME;
   if (g_opt.crtimes) al.commonattr |= ATTR_CMN_CRTIME;
   if (g_opt.fileflags) al.commonattr |= ATTR_CMN_FLAGS;
-  al.fileattr = ATTR_FILE_DEVTYPE | ATTR_FILE_DATALENGTH;
+  al.fileattr = ATTR_FILE_LINKCOUNT | ATTR_FILE_DEVTYPE | ATTR_FILE_DATALENGTH;
   static thread_local std::vector<char> abuf(128 * 1024);
   bool fallback = false;
   for (;;) {
@@ -318,6 +320,7 @@ static int list_dir_fd(int fd, DirList& out, unsigned flags) {
       if (ret.commonattr & ATTR_CMN_GRPID) memcpy(&e.gid, f, 4), f += 4;
       if (ret.commonattr & ATTR_CMN_ACCESSMASK) memcpy(&v32, f, 4), e.mode = v32 & 07777, f += 4;
       if (ret.commonattr & ATTR_CMN_FLAGS) memcpy(&e.fileflags, f, 4), f += 4;
+      if (ret.fileattr & ATTR_FILE_LINKCOUNT) memcpy(&v32, f, 4), e.nlink = v32, f += 4;
       if (ret.fileattr & ATTR_FILE_DEVTYPE) memcpy(&e.rdev, f, 4), f += 4;
       if (ret.fileattr & ATTR_FILE_DATALENGTH) memcpy(&e.size, f, 8), f += 8;
       p += len;
@@ -338,7 +341,8 @@ static int list_dir_fd(int fd, DirList& out, unsigned flags) {
       const u32 want = ATTR_CMN_OBJTYPE | ATTR_CMN_MODTIME | ATTR_CMN_ACCESSMASK |
                        (g_opt.atimes ? ATTR_CMN_ACCTIME : 0) | (g_opt.crtimes ? ATTR_CMN_CRTIME : 0) |
                        (g_opt.fileflags ? ATTR_CMN_FLAGS : 0);
-      if (g_opt.hard_links || err || (ret.commonattr & want) != want || (e.type == T_REG && !(ret.fileattr & ATTR_FILE_DATALENGTH))) {
+      if (g_opt.hard_links || err || (ret.commonattr & want) != want ||
+          (e.type != T_DIR && !(ret.fileattr & ATTR_FILE_LINKCOUNT)) || (e.type == T_REG && !(ret.fileattr & ATTR_FILE_DATALENGTH))) {
         // Attributes missing for this entry: fall back to a plain lstat.
         struct stat st;
         std::string tmp(nm, nlen);
@@ -472,6 +476,16 @@ std::string item_code(const char* code, const Entry& entry) {
 void set_fileflags(const char* path, const Entry& entry) {
   if (g_opt.fileflags && !g_opt.dry_run && entry.type != T_LNK)
     check_attr(destination_fileflags(path, entry.fileflags, g_opt.hard_links && entry.nlink > 1 && entry.type != T_DIR), path, "file flags");
+}
+
+static bool permission_item_diff(const Entry& source, const Entry& before) {
+  u32 mask = 07777;
+#ifndef __APPLE__
+  // A replaced POSIX access ACL carries the basic mode bits. rsync reports
+  // that metadata-only change as 'a'; a separate chmod reports special bits.
+  if (g_opt.acls && !g_opt.dry_run && source.access_acl_differ) mask = 07000;
+#endif
+  return (source.mode ^ before.mode) & mask;
 }
 
 // ---------------------------------------------------------------- generator
@@ -668,7 +682,7 @@ void tweak_attrs(const char* path, const Entry& s, const Entry& d, std::string_v
   }
   if ((o.perms || (o.executability && s.type == T_REG)) && (d.mode != s.mode || (changed && (s.mode & 06000)))) {
     if (!o.dry_run) set_mode(path, s.mode, link);
-    if (d.mode != s.mode) code[5] = 'p';
+    if (permission_item_diff(s, d)) code[5] = 'p';
     changed = true;
   }
   if (o.acls) {
@@ -790,6 +804,32 @@ void generate(DirWork& w, Worker& t) {
 
   size_t j = 0;
   const size_t m = dl.e.size();
+  // Compare shared-inode xattrs before metadata-only updates through an alias
+  // can change a later name in this directory's plan. Keep each comparison
+  // source-specific: aliases need not request the same values or filters.
+  std::vector<bool> shared_xattrs_checked(o.xattrs ? n : 0, false);
+  if (o.xattrs) {
+    size_t destination = 0;
+    for (size_t i = 0; i < n; ++i) {
+      Entry& source = src.e[i];
+      auto name = w.dst_name((u32)i);
+      while (destination < m && name_cmp(dl.name_sv(dl.e[destination]), name) < 0) ++destination;
+      if (destination == m || name_cmp(dl.name_sv(dl.e[destination]), name) != 0) continue;
+      const Entry& before = dl.e[destination];
+      if (before.nlink <= 1 || before.type == T_DIR || before.type != source.type ||
+          (source.item_flags & IF_PRUNED) || !w.src_xattrs[i].complete) continue;
+      if (o.ignore_existing) continue;
+      if (source.type == T_REG && ((o.max_size > 0 && source.size > o.max_size) ||
+          (o.min_size > 0 && source.size < o.min_size) ||
+          (o.update && (before.mtime > source.mtime ||
+                       (before.mtime == source.mtime && before.mtime_ns > source.mtime_ns))))) continue;
+      set_names(name);
+      bool ownership_changed = (o.owner && o.am_root && before.uid != source.uid) ||
+                               (o.group && before.gid != source.gid && can_set_gid(source.gid));
+      if (xattrs_differ(w.src_xattrs[i], path, source.type, filters, ownership_changed)) source.item_flags |= IF_XATTR;
+      shared_xattrs_checked[i] = true;
+    }
+  }
   for (size_t i = 0; i < n; i++) {
     Entry& s = src.e[i];
     std::string_view name = w.dst_name((u32)i);
@@ -804,11 +844,13 @@ void generate(DirWork& w, Worker& t) {
       break;
     }
     if (s.item_flags & IF_PRUNED) { if (d) extra(*d); continue; }
+    s.mode = incoming_mode(s.mode, s.type);
     set_names(name);
     if (metadata_enabled() && !w.src_xattrs[i].complete) continue;
 
     Entry metadata_before;
-    if ((o.fileflags || o.atimes || o.crtimes) && d && d->type == s.type) {
+    if (d && d->type == s.type && d->type != T_DIR && d->nlink > 1 &&
+        (o.perms || o.executability || o.owner || o.group || o.fileflags || o.atimes || o.crtimes)) {
       // A prior metadata-only update may already have changed this inode via
       // another destination name, even when -H was not requested.
       struct stat current;
@@ -820,17 +862,21 @@ void generate(DirWork& w, Worker& t) {
           metadata_before.fileflags = fresh.fileflags;
           metadata_before.atime = fresh.atime;
           metadata_before.crtime = fresh.crtime;
+          metadata_before.mode = fresh.mode;
+          metadata_before.uid = fresh.uid;
+          metadata_before.gid = fresh.gid;
         }
       }
       d = &metadata_before;
-      if (o.fileflags && s.type != T_LNK) s.fileflags_differ = s.fileflags != d->fileflags;
     }
+    if (o.fileflags && s.type != T_LNK && d && d->type == s.type)
+      s.fileflags_differ = s.fileflags != d->fileflags;
     auto compare_xattrs = [&] {
       if (!metadata_enabled() || !d || d->type != s.type) return;
       bool ownership_changed = (o.owner && o.am_root && d->uid != s.uid) ||
                                (o.group && d->gid != s.gid && can_set_gid(s.gid));
-      if (o.xattrs && xattrs_differ(w.src_xattrs[i], path, s.type, filters, ownership_changed)) s.item_flags |= IF_XATTR;
-      if (o.acls && acls_differ(w.src_xattrs[i].acl(), path, s.type)) s.item_flags |= IF_ACL;
+      if (o.xattrs && !shared_xattrs_checked[i] && xattrs_differ(w.src_xattrs[i], path, s.type, filters, ownership_changed)) s.item_flags |= IF_XATTR;
+      if (o.acls && acls_differ(w.src_xattrs[i].acl(), path, s.type, &s.access_acl_differ)) s.item_flags |= IF_ACL;
     };
     switch (s.type) {
       case T_DIR: {
@@ -1490,7 +1536,7 @@ bool clone_copy(DirWork& w, u32 idx, const char* source, unsigned flags, Worker&
   Entry fresh;
   int source_fd = -1;
   struct stat before;
-  if (g_opt.hard_links || metadata_enabled() || g_opt.atimes || g_opt.crtimes || g_opt.fileflags) {
+  if (g_opt.hard_links || metadata_enabled() || g_opt.atimes || g_opt.crtimes || g_opt.fileflags || !g_opt.chmod_rules.empty()) {
     source_fd = open(source, O_RDONLY | O_CLOEXEC | read_time_flags() | (g_opt.copy_links || !w.src_paths.empty() ? 0 : O_NOFOLLOW));
     if (source_fd < 0 || fstat(source_fd, &before) != 0 || !S_ISREG(before.st_mode)) {
       if (source_fd >= 0) close(source_fd);
@@ -1550,7 +1596,7 @@ bool clone_copy(DirWork& w, u32 idx, const char* source, unsigned flags, Worker&
   f.fd = fd;
   f.created_mode = st.st_mode & 07777;
   register_output(f);
-  return out_finish(f, w, idx, t, true, g_opt.hard_links || metadata_enabled() || g_opt.atimes || g_opt.crtimes || g_opt.fileflags ? &fresh : nullptr);
+  return out_finish(f, w, idx, t, true, g_opt.hard_links || metadata_enabled() || g_opt.atimes || g_opt.crtimes || g_opt.fileflags || !g_opt.chmod_rules.empty() ? &fresh : nullptr);
 #else
   errno = ENOTSUP;
   return false;
@@ -1589,6 +1635,7 @@ void note_directory(DirWork& w, const Entry* before, bool created, Worker& t) {
   if (created) memcpy(code, "cd+++++++++", 11);
   else if (before) {
     if (o.times && !o.omit_dir_times && !same_secs(source, *before)) code[4] = 't', changed = true;
+    // Directory events precede attribute writes, unlike metadata-only files.
     if (o.perms && source.mode != before->mode) code[5] = 'p', changed = true;
     if (o.owner && o.am_root && source.uid != before->uid) code[6] = 'o', changed = true;
     if (o.group && source.gid != before->gid && can_set_gid(source.gid)) code[7] = 'g', changed = true;

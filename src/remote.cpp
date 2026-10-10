@@ -944,7 +944,7 @@ struct Sender {
     u32 id = d->id = next_id.fetch_add(1);
     std::string body;
     put_str(body, d->rel);
-    put_var(body, d->attrs.mode);
+    put_var(body, incoming_mode(d->attrs.mode, d->attrs.type));
     put_svar(body, d->attrs.mtime);
     put_var(body, d->attrs.mtime_ns);
     put_var(body, d->attrs.uid);
@@ -964,7 +964,7 @@ struct Sender {
       const Entry& e = l.e[i];
       put_str(body, l.name_sv(e));
       body.push_back((char)e.type);
-      put_var(body, e.mode);
+      put_var(body, incoming_mode(e.mode, e.type));
       put_svar(body, e.mtime);
       put_var(body, e.mtime_ns);
       if (o.owner) put_var(body, e.uid);
@@ -1576,7 +1576,10 @@ struct Receiver {
     if (o.peer_features & PF_XATTRS) {
       w.attrs_xattrs = get_xattrs(r);
     }
-    if (o.peer_features & PF_NATIVE_ACL) get_acls(r, w.attrs_xattrs, T_DIR);
+    if (o.peer_features & PF_NATIVE_ACL) {
+      get_acls(r, w.attrs_xattrs, T_DIR);
+      incoming_acl_mode(w.attrs_xattrs.acls, w.attrs.mode, T_DIR);
+    }
     if (metadata_enabled()) {
       w.xattrs_loaded = w.attrs_xattrs_loaded = true;
       if (!w.attrs_xattrs.complete) { g_source_io_error.store(true); err_line(RERR_PARTIAL, "incomplete source directory metadata"); }
@@ -1647,7 +1650,10 @@ struct Receiver {
       if (o.peer_features & PF_XATTRS) {
         w.src_xattrs[i] = get_xattrs(r);
       }
-      if (o.peer_features & PF_NATIVE_ACL) get_acls(r, w.src_xattrs[i], e.type);
+      if (o.peer_features & PF_NATIVE_ACL) {
+        get_acls(r, w.src_xattrs[i], e.type);
+        incoming_acl_mode(w.src_xattrs[i].acls, e.mode, e.type);
+      }
       if (metadata_enabled() && !w.src_xattrs[i].complete) { g_source_io_error.store(true); err_line(RERR_PARTIAL, "incomplete source metadata: %s", l.name(e)); }
     }
     if (r.bad || !r.empty()) die(RERR_PROTOCOL, "protocol error: truncated or trailing DIR frame");
@@ -1781,7 +1787,8 @@ struct Receiver {
   }
 
   void get_file_attrs(RBuf& r, Entry& attrs, XattrSet& xattrs) {
-    u32 mode = (u32)r.var() & 07777;
+    u32 source_mode = (u32)r.var() & 07777;
+    u32 mode = incoming_mode(source_mode, T_REG);
     attrs.uid = (u32)r.var(), attrs.gid = (u32)r.var();
     attrs.mtime = r.svar(), attrs.mtime_ns = (u32)r.var();
     if (g_opt.peer_features & PF_ATIMES) attrs.atime = r.svar();
@@ -1792,7 +1799,10 @@ struct Receiver {
       attrs.ctime = r.svar(), attrs.ctime_ns = (u32)r.var();
     }
     if (g_opt.peer_features & PF_XATTRS) xattrs = get_xattrs(r);
-    if (g_opt.peer_features & PF_NATIVE_ACL) get_acls(r, xattrs, T_REG);
+    if (g_opt.peer_features & PF_NATIVE_ACL) {
+      get_acls(r, xattrs, T_REG);
+      incoming_acl_mode(xattrs.acls, source_mode, T_REG);
+    }
     if (g_opt.perms) attrs.mode = mode;
     else if (g_opt.executability && (attrs.flags & EF_INPLACE_SAFE)) attrs.mode = execution_mode(mode, attrs.basis_mode);
     if ((g_opt.owner || g_opt.group) && !g_opt.numeric_ids) {
@@ -2200,6 +2210,7 @@ int receive_listing(Conn& c) {
         entry.source.find('\0') != entry.source.npos ||
         (entry.attrs.type != T_LNK && !entry.target.empty()))
       die(RERR_PROTOCOL, "protocol error: malformed listing entry");
+    entry.attrs.mode = incoming_mode(entry.attrs.mode, entry.attrs.type);
     if (verify || g_opt.prune_empty || g_opt.file_requests) pending.push_back(std::move(entry));
     else listing_output(entry);
     ++count;
@@ -2549,10 +2560,12 @@ int run_server() {
   // Like rsync, an explicitly configured helper may set its own input
   // delimiter. Ordinary SSH invocations do not forward the client's -0.
   const bool server_from0 = o.from0;
+  const auto server_chmod = std::move(o.chmod_rules);
   const bool server_fileflags = o.fileflags;
   const bool server_executability = o.executability && !o.perms;
   const bool server_atimes = o.atimes, server_crtimes = o.crtimes, server_noatime = o.open_noatime;
   o = Options();
+  o.chmod_rules = server_chmod;
   o.from0 = server_from0;
   o.filters.set_from0(server_from0);
   o.am_server = true;

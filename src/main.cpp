@@ -61,6 +61,7 @@ Options (same meaning as rsync):
      --safe-links         skip symlinks that point outside the transfer tree
  -L, --copy-links         transform symlink into referent file/dir
  -p, --perms              preserve permissions
+     --chmod=CHMOD        change incoming file/directory permissions
  -E, --executability      preserve executability of regular files
      --fileflags          preserve BSD file flags (macOS)
  -o, --owner              preserve owner (super-user only)
@@ -239,6 +240,10 @@ Parsed parse(int argc, char** argv) {
     else if (name == "xattrs") o.xattrs = std::min(o.xattrs + 1, 2);
     else if (name == "no-xattrs" || name == "no-X") o.xattrs = 0;
     else if (name == "executability") o.executability = true;
+    else if (name == "chmod") {
+      std::string mode = need();
+      if (!parse_permissions(mode, o.chmod_rules)) usage_error("Invalid argument passed to --chmod (" + mode + ")");
+    }
     else if (flag(o.fileflags, "fileflags")) {}
     else if (name == "atimes") { if (++o.atimes > 1) o.open_noatime = true; }
     else if (name == "no-atimes" || name == "no-U") o.atimes = 0;
@@ -336,7 +341,7 @@ Parsed parse(int argc, char** argv) {
     } else {
       static const char* unsupported[] = {
           "backup", "backup-dir", "suffix", "link-dest", "compare-dest", "copy-dest",
-          "chmod", "chown", "usermap", "groupmap", "append", "append-verify", "partial-dir",
+          "chown", "usermap", "groupmap", "append", "append-verify", "partial-dir",
           "delay-updates", "fuzzy", "remove-source-files", "keep-dirlinks", "copy-dirlinks", "copy-unsafe-links",
           "munge-links", "daemon", "port", "password-file",
           "write-batch", "read-batch", "only-write-batch", "super", "fake-super", "temp-dir",

@@ -1,5 +1,6 @@
 // xsync — shared types, options, global state and small helpers.
 #pragma once
+#include "permissions.h"
 #include <atomic>
 #include <cstdint>
 #include <cstdio>
@@ -87,6 +88,7 @@ struct Options {
   int atimes = 0;
   bool executability = false;
   bool fileflags = false;  // Darwin st_flags, negotiated outside v3 options.
+  std::vector<PermissionRule> chmod_rules;  // Client-side incoming modes; no wire-layout change.
   bool crtimes = false, open_noatime = false;  // Negotiated outside v3 options.
   int xattrs = 0;  // 1: ordinary attributes; 2: include rsync internal attributes.
   bool hard_links = false;  // Negotiated separately from the frozen v3 options.
@@ -150,6 +152,7 @@ struct Entry {
   i64 atime = 0, crtime = 0;  // rsync transports these in whole seconds.
   u8 time_flags = 0;  // Compared access/create times; itemization slot 8.
   bool fileflags_differ = false;
+  bool access_acl_differ = false;  // POSIX metadata-only itemization of mode-linked ACL writes.
 };
 enum : u8 { IF_PERMS = 1, IF_OWNER = 2, IF_GROUP = 4, IF_NEW_TYPE = 8, IF_PRUNED = 16, IF_SELECTED_CHILD = 32, IF_XATTR = 64, IF_ACL = 128 };
 

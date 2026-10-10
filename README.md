@@ -447,6 +447,18 @@ Differences to be aware of:
   attributes, for which xsync uses `-X`. Fallback retains the original arguments,
   so system rsync's interpretation also applies after delegation; use
   `--executability` for unambiguous fallback.
+- **Permission overrides.** `--chmod=CHMOD` changes incoming permissions using
+  numeric modes or comma-separated symbolic rules. `D`/`F` restrict rules to
+  directories or non-directory files; repeated options append rules. Conditional
+  `X` uses the original incoming execution state (and applies to directories).
+  Omitted user/group/other classes obey the invoking process's umask. Physical
+  symlinks are unchanged. Existing entries still obey `--perms` and regular-file
+  `--executability`; without either, their existing modes are retained. Whole
+  directory clones are disabled so overrides can be applied per entry. Native
+  restrictive directory modes are finalized after children; rsync can instead
+  lose pathname access and report a partial transfer when a root loses search
+  permission. Remote overrides use existing mode fields and work with protocol 3
+  and feature-subset peers; no new wire capability is required.
 - **Additional times.** `-U`/`--atimes` preserves file and special-inode access
   times; directories and physical symlinks retain rsync's omission. `-UU` also
   enables `--open-noatime`, which requests `O_NOATIME` on systems that provide it
@@ -471,7 +483,7 @@ Differences to be aware of:
   a flags-capable rsync; standard upstream builds do not include `--fileflags`.
 - **Delegated to rsync** (strict mode rejects them): incompatible remote `-A`,
   `-b`, `--link-dest`/`--compare-dest`/`--copy-dest`,
-  `--chmod`, `--append`, `--partial-dir`, and `--remove-source-files`.
+  `--append`, `--partial-dir`, and `--remove-source-files`.
 - **Unsupported options fall back before transfer; strict mode fails.** This includes
   `--contimeout`, `-S`/`--sparse`, `--fsync`, `--preallocate`,
   `--skip-compress`, `--block-size`, `--checksum-choice`,

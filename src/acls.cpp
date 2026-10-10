@@ -158,7 +158,7 @@ bool apply(const AclSet& source, int fd, const std::string& path, u8 type, u32 m
     // Directory modes may be opened temporarily while children are populated.
     // Final chmod restores the source mode and its linked access-ACL bits.
     struct stat st;
-    if (fstat(fd, &st) == 0) mode = st.st_mode & 07777;
+    if (fstat(fd, &st) == 0) mode = (mode & ~0700U) | (st.st_mode & 0700);
   }
   auto desired = with_mode(bytes(source.access), mode);
   if (desired != bytes(current.access)) write_value(fd, ACCESS, desired, path);
@@ -170,17 +170,51 @@ bool apply(const AclSet& source, int fd, const std::string& path, u8 type, u32 m
 AclSet source_fd_acls(int fd, const std::string& path, u8 type) {
   return supported(type) ? read(fd, path, type, true) : AclSet{};
 }
+void incoming_acl_mode(std::shared_ptr<const AclSet>& attrs, u32 source_mode, u8 type) {
+#ifndef __APPLE__
+  if (!attrs || !attrs->complete || g_opt.chmod_rules.empty()) return;
+  u32 mode = incoming_mode(source_mode, type);
+  if ((mode & 0070) == (source_mode & 0070)) return;
+  auto data = bytes(attrs->access);
+  bool changed = false;
+  // The remote sender encoded an owning-group entry equal to its mode as an
+  // implicit permission. A receiving client's override reconstructs that
+  // entry from the new group mode; distinct owning-group access stays intact.
+  for (size_t i = 4; i + 8 <= data.size(); i += 8) {
+    if (tag(data, i) == 4 && tag(data, i + 2) == ((source_mode >> 3) & 7)) {
+      data[i + 2] = (char)((mode >> 3) & 7);
+      data[i + 3] = 0;
+      changed = true;
+    }
+  }
+  if (changed) {
+    auto adjusted = std::make_shared<AclSet>(*attrs);
+    adjusted->access = XattrValue(std::move(data));
+    attrs = std::move(adjusted);
+  }
+#else
+  (void)attrs; (void)source_mode; (void)type;
+#endif
+}
 AclSet source_acls(const std::string& path, u8 type) {
   if (!supported(type)) return {};
   Pin pin; pin.open(path, type, true);
   if (pin.fd >= 0) return read(pin.fd, path, type, true);
   AclSet result; failure(result, path, "open ACL", true); return result;
 }
-bool acls_differ(const AclSet& source, const std::string& path, u8 type) {
+bool acls_differ(const AclSet& source, const std::string& path, u8 type, bool* access_changed) {
+  if (access_changed) *access_changed = false;
   if (!source.complete || !supported(type)) return false;
   Pin pin; pin.open(path, type, false);
   if (pin.fd < 0) { file_io_error(errno, path.c_str(), "open ACL"); return false; }
-  try { auto current = read(pin.fd, path, type, false); return current.complete && !same(source, current); }
+  try {
+    auto current = read(pin.fd, path, type, false);
+    if (!current.complete) return false;
+#ifndef __APPLE__
+    if (access_changed) *access_changed = independent(bytes(source.access)) != independent(bytes(current.access));
+#endif
+    return !same(source, current);
+  }
   catch (const std::system_error& error) { g_source_io_error.store(true); file_io_error(error.code().value(), path.c_str(), "read stored ACL"); return false; }
 }
 bool apply_fd_acls(const AclSet& source, int fd, const std::string& path, u8 type, u32 mode) {

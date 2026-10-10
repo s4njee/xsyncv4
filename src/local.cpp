@@ -332,6 +332,7 @@ bool setup_dest(const std::string& dest_arg, DirWork& root, bool single) {
   }
   root.dst_path = dest;
   if (root.has_attrs) {
+    root.attrs.mode = incoming_mode(root.attrs.mode, root.attrs.type);
     Entry d;
     if (exists) entry_from_stat(st, d);
     else if (root.created && o.mkpath) {
@@ -343,7 +344,7 @@ bool setup_dest(const std::string& dest_arg, DirWork& root, bool single) {
     auto xattr_filters = o.xattrs ? directory_filters(root.receiver_filter, dest, true) : root.receiver_filter;
     const FilterList& metadata_filters = xattr_filters ? *xattr_filters : o.filters;
     if (o.xattrs && exists && !root.created && xattrs_differ(root.attrs_xattrs, dest, T_DIR, metadata_filters)) root.attrs.item_flags |= IF_XATTR;
-    if (o.acls && exists && !root.created && acls_differ(root.attrs_xattrs.acl(), dest, T_DIR)) root.attrs.item_flags |= IF_ACL;
+    if (o.acls && exists && !root.created && acls_differ(root.attrs_xattrs.acl(), dest, T_DIR, &root.attrs.access_acl_differ)) root.attrs.item_flags |= IF_ACL;
     Worker worker;
     note_directory(root, (exists && !root.created) || (root.created && o.mkpath) ? &d : nullptr,
                    root.created && !o.mkpath, worker);
@@ -814,7 +815,7 @@ int run_local(const std::vector<std::string>& srcs, const std::string& dest) {
   const Options& o = g_opt;
   // Whole-directory clones are only equivalent to a per-file sync when nothing could make us
   // treat any entry specially.
-  L.lazy_ok = o.clone && !o.atimes && !o.crtimes && !o.fileflags && o.recursive && o.links && !o.copy_links && o.perms && o.times && !o.omit_dir_times && !o.omit_link_times &&
+  L.lazy_ok = o.clone && o.chmod_rules.empty() && !o.atimes && !o.crtimes && !o.fileflags && o.recursive && o.links && !o.copy_links && o.perms && o.times && !o.omit_dir_times && !o.omit_link_times &&
               !metadata_enabled() && !o.dry_run && !o.inplace && !o.one_fs && !o.existing && !o.prune_empty && !root->selection && o.max_size <= 0 && o.min_size <= 0 && o.filters.empty();
 #endif
   int n = default_jobs();

@@ -215,6 +215,28 @@ p=pathlib.Path(sys.argv[1]); print(json.dumps({'hash':hashlib.sha256((p/'file').
                 else: mode = (target / 'file').stat().st_mode & 0o7777
                 self.assertEqual(mode, 0o751)
 
+    def test_chmod_uses_existing_mode_fields_with_frozen_and_subset_peers(self):
+        source = self.root / 'permission overrides'; source.mkdir()
+        (source / 'file').write_bytes(b'data'); (source / 'file').chmod(0o751)
+        for peer in (self.remote_subset, self.remote_legacy):
+            for direction in ('push', 'pull'):
+                target = self.root / ('chmod ' + pathlib.Path(peer).parent.name + direction)
+                if HOST and direction == 'pull':
+                    subprocess.run(['rsync', '-a', '-e', RSH, str(source) + '/', HOST + ':' + str(source) + '/'],
+                                   check=True, capture_output=True, timeout=20)
+                a, b = str(source) + '/', str(target) + '/'
+                if direction == 'push': b = (HOST or 'fake') + ':' + b
+                else: a = (HOST or 'fake') + ':' + a
+                result = subprocess.run([str(BINARY), '--no-fallback', '-rp', '--chmod=F640', '-e', RSH,
+                                         '--rsync-path=' + shlex.quote(peer), a, b], capture_output=True, timeout=20)
+                self.assertEqual(result.returncode, 0, result.stderr)
+                self.assertNotIn(b'falling back', result.stderr)
+                if HOST and direction == 'push':
+                    from ssh_test import remote_json
+                    mode = remote_json('import os,sys,json; print(json.dumps(os.stat(sys.argv[1]).st_mode & 4095))', target / 'file')
+                else: mode = (target / 'file').stat().st_mode & 0o7777
+                self.assertEqual(mode, 0o640)
+
     def test_formatted_output_requires_negotiated_support(self):
         source = self.root / 'format source'
         source.write_bytes(b'unchanged')

@@ -2,7 +2,7 @@
 
 Initial audit written 2026-10-08 against xsync 0.1.0 (protocol 1).
 All fifteen P0 stories completed against protocol 3; per-story evidence is below.
-P1 R-02 through R-09 and E-01 through E-09 are complete (17 of 22 stories). Current protocol 4 supports protocol 3; E-10 is in progress (local/remote xattrs, matching-style ACLs, executability, access/creation times and BSD flags implemented, cross-style compatibility guarded; identity overrides and packaging pending).
+P1 R-02 through R-09 and E-01 through E-09 are complete (17 of 22 stories). Current protocol 4 supports protocol 3; E-10 is in progress (local/remote xattrs, matching-style ACLs, executability, access/creation times, BSD flags and permission overrides implemented, cross-style compatibility guarded; ownership overrides and packaging pending).
 Problem statements retain the original audit findings.
 
 ## What "daily driver" means here
@@ -2082,3 +2082,63 @@ Verified artifact manifest (source `864bd37edf14`):
   target still fails DNS resolution; R-01 physical-host coverage remains open.
 - **Remaining before E-10 completion:** `--chmod`, `--chown`, final metadata
   composition checks and packaging. No complete-story count has been advanced.
+
+## E-10 progress — 2026-10-09: native incoming permission overrides
+
+- E-10 remains **code**, with P1 at **17/22**. Native local/push/pull transfers
+  and listings now implement `--chmod`. Numeric modes, comma-separated symbolic
+  rules, `D`/`F` selectors, repeated options, set-ID/sticky bits, conditional `X`
+  and omitted-class umask semantics match rsync. Existing entries retain normal
+  `--perms`/`--executability` precedence; physical symlinks remain unchanged.
+- **Data paths:** overrides apply once to incoming modes, including fresh modes
+  after a source retry and explicitly configured helper rules. Per-file APFS
+  clones validate and apply fresh permissions; whole-directory clones are
+  disabled when overrides require per-entry processing. Roots, nested entries,
+  relative cut points, file lists and renamed single-file destinations are
+  covered. No new wire fields or capability are required: frozen protocol-3 and
+  feature-subset peers continue to use their existing mode fields.
+- **Composition fixes:** shared destination inodes refresh basic metadata after
+  an earlier alias update. Their xattr comparisons are captured per source before
+  writes in the directory plan, including differing source values. Existing
+  `-H` aliases report a metadata-only anchor's shared xattr update. POSIX access
+  ACL writes consume basic permission itemization while separate special-bit
+  and default-ACL changes retain the appropriate `p`. Temporary directory access
+  no longer substitutes temporary group/other permissions into ACL setup.
+  Pull-side overrides reconstruct implicit owning-group ACL access from the
+  received mode, matching rsync's direction-dependent behavior.
+- **Verification:** `tests/chmod_test.py` covers **110** Darwin and **120** Linux
+  rsync differential transfers, with eight source and five destination modes,
+  existing/new data, metadata-only updates, FIFO/symlink handling, clone,
+  checksum, in-place, dry-run, hard links, ACL/xattr combinations, listing and
+  source integrity. Another **six** native cases finalize restrictive directory
+  modes after children, and **16** invalid grammars fail before writes.
+  `tests/chmod_race_test.py` checks **36** source-mode mutations across all three
+  directions, whole/delta and atomic/in-place writes. Linux ACL cases exercise
+  both data and metadata updates with `-p`, without `-p` and with `-E`.
+- **Real SSH and compatibility:** `tests/chmod_cross_test.py` owns and removes
+  disposable Linux containers and keys; **eight** Darwin/Linux differentials
+  check modes, bytes and output in both directions. The **12** protocol methods
+  pass, including **four** chmod cases against frozen/subset peers. The supplied
+  `sanjee@neo.local` target still fails DNS resolution; R-01's physical-host
+  checks remain open.
+- **Passing logs:** ARM and Intel chmod suites each pass **13** methods with
+  two POSIX-only skips, with the **36** mutation cases passing separately on
+  both architectures. Darwin metadata regressions pass **63** methods (one
+  Linux-only skip); Linux chmod/race/ACL/xattr/hard-link/executability/output
+  regressions pass **57** methods (six platform skips). Logs:
+  `/tmp/xsync-e10-chmod-mac-complete.log`,
+  `/tmp/xsync-e10-chmod-intel-complete.log`,
+  `/tmp/xsync-e10-chmod-mac-verified.log`,
+  `/tmp/xsync-e10-chmod-intel-verified.log`,
+  `/tmp/xsync-e10-chmod-metadata-final.log`,
+  `/tmp/xsync-e10-chmod-linux-final3.log`,
+  `/tmp/xsync-e10-chmod-protocol-final.log`, and
+  `/tmp/xsync-e10-chmod-cross-final.log`. Initial restrictive-root/relative-path
+  fixtures, ACL interactions and a missing ACL-negotiation guard were corrected
+  and rerun; failing runs are not counted as passing evidence.
+- **Documented boundary:** native pinned directories can complete transfers
+  whose final root loses search permission; rsync can instead report a partial
+  transfer after losing pathname access. README/help describe native overrides
+  and this behavior. Installed helpers and release artifacts are unchanged.
+- **Remaining before E-10 completion:** `--chown`, final metadata composition
+  checks and packaging. No complete-story count has been advanced.

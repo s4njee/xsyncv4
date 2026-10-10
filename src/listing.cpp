@@ -71,7 +71,8 @@ void prune_listing(std::vector<ListingEntry>& entries) {
 
 int run_listing(const std::vector<std::string>& sources, const ListingSink& emit) {
   std::vector<ListingEntry> pending;
-  auto emit_entry = [&](const ListingEntry& entry) {
+  auto emit_entry = [&](ListingEntry entry) {
+    entry.attrs.mode = incoming_mode(entry.attrs.mode, entry.attrs.type);
     if (g_opt.prune_empty && !g_opt.am_server) pending.push_back(entry);
     else emit(entry);
   };
