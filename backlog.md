@@ -117,7 +117,7 @@ coverage is tracked in `tests/progress-terminal.md` and remains incomplete.
 | U-07 | **Machine-readable progress.** Off a terminal, `--progress` prints a line a second. Scripts and wrappers want rsync's `--info=progress2` single line or JSON events. | **done** | `--info=progress2` output is line-compatible with rsync off a tty; `--progress=json` emits one object per tick and per file. | M |
 | U-08 | **Phases that look like hangs.** Deleting a large tree, waiting for the remote to finish, hashing with `-c`: the display says "scanning" or sits at 100 %. | **done** | Each phase has its own label and counter (`deleting 12,410`, `verifying`, `waiting for receiver`). | S |
 | U-09 | **Dry-run summary.** `-n` prints names only with `-v`. | **done** | `-n` always ends with "would transfer N files (X), delete M". | S |
-| U-10 | **`-h` consistency.** The summary follows rsync's `-h` (1000-based, 1024 with `-hh`); the progress display is always 1024-based. | code | One rule, applied everywhere, documented. | S |
+| U-10 | **`-h` consistency.** The summary follows rsync's `-h` (1000-based, 1024 with `-hh`); the progress display is always 1024-based. | **done** | One rule, applied everywhere, documented. | S |
 | U-11 | **Suspend/resume and cursor hygiene.** Ctrl-Z / `fg`, and every exit path (including `die()` from a worker thread) restoring the cursor. | unverified | SIGTSTP/SIGCONT redraw; cursor restored in a single exit hook. | S |
 
 ## P3 — Performance: holding the lead where you actually sync
@@ -2917,4 +2917,14 @@ Verified artifact manifest (source `864bd37edf14`):
 - All **4 unit acceptance methods** pass: 45 progress/stats combinations
   across local/push/pull and five byte boundaries, nine dry-run combinations,
   three JSON modes and three progress2 human byte columns. Existing four
-  dry-summary and three ACK methods pass. Real SSH and release checks follow.
+  dry-summary and three ACK methods pass. Real SSH passes all four unit and
+  four dry-summary methods; 11 live progress and eight machine-progress
+  regression methods pass.
+- **Done; P2 is 9/11 complete.** Release artifacts are rebuilt/verified from
+  `5eada8b4f11f`; all four unit methods pass on macOS ARM, Intel and static
+  Linux amd64/arm64 without skips. Logs: `/tmp/xsync-u10-units.log`,
+  `/tmp/xsync-u10-{summary,ack,progress,machine}.log`,
+  `/tmp/xsync-u10-real-ssh.log`, `/tmp/xsync-u10-releases.log` and
+  `/tmp/xsync-u10-release-{mac-arm,mac-intel,linux-amd64,linux-arm64}.log`.
+  Packaging is refreshed after this entry. U-11 is next; U-01 still requires
+  GUI terminal evidence, for which the user has been asked.
