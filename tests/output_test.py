@@ -181,7 +181,9 @@ class OutputTests(unittest.TestCase):
             self.assertIn(b'big|2097152|1048576', result.stdout.splitlines())
             result = self.run_copy(direction, ['-n', '--out-format=%n|%b'], name='dry-' + direction)
             self.assertEqual(result.returncode, 0, result.stderr)
-            self.assertTrue(all(line.endswith(b'|0') for line in result.stdout.splitlines()))
+            rows = result.stdout.splitlines()
+            self.assertTrue(all(line.endswith(b'|0') for line in rows[:-1]))
+            self.assertRegex(rows[-1], rb'^would transfer \d+ files \(.+\), delete 0$')
 
     def test_control_and_invalid_bytes_in_names(self):
         invalid_allowed = True

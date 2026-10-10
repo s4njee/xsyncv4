@@ -419,6 +419,15 @@ send optional, bounded phase snapshots; older helpers remain compatible with
 the client's local phases and wait label. JSON records include `phase`,
 `verified` and `deleted` counters.
 
+Native dry-run transfers (`-n`) always end on stdout with
+`would transfer N files (X), delete M`, even without `-v`. This counts regular
+files needing data and their logical size; deletion counts include directories
+and their entries. `--quiet` suppresses the plan summary. Push totals come from
+the receiver's virtual plan, including replacements of existing files. A helper
+without dry-run total acknowledgments delegates before transfer or fails in
+strict mode; `-n --quiet` can still use such a helper without a summary. Rsync
+fallback uses rsync's own dry-run output.
+
 Progress uses stderr. The live display is used on terminals; explicit
 `--progress` prints one plain line per second on pipes. `--info=progress2`
 uses rsync's byte/percent/rate/time and `(xfr#N, to-chk=R/T)` line shape on

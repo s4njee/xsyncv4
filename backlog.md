@@ -2877,3 +2877,21 @@ Verified artifact manifest (source `864bd37edf14`):
   `/tmp/xsync-u08-release-mac-{arm,intel}-final.log` and
   `/tmp/xsync-u08-release-linux-{amd64,arm64}.log`. Packaging is refreshed
   after this entry. U-09 is next; U-01 remains partial for GUI verification.
+
+## U-09 progress — 2026-10-10: visible dry-run plans
+
+- Native `-n` transfers always end with `would transfer N files (X), delete M`
+  on stdout, including without verbose output. Regular data transfers and
+  logical bytes are counted; deletions include directory entries. Explicit
+  quiet mode suppresses this non-error output; listings are unaffected.
+- Push dry runs negotiate receiver acknowledgments even without progress,
+  and use the receiver's virtual plan for the summary and stats. This fixes
+  existing-file replacements that source request counts cannot observe.
+  Older helpers lacking these totals delegate/refuse before transfer; quiet
+  dry runs retain compatibility without a summary. Delegation preserves
+  rsync's own output. README documents this capability boundary.
+- All **4 dry-summary methods** pass locally, exercising all three directions,
+  new/no-op/changed/filtered plans, recursive/protected deletion counts,
+  unchanged destination data/metadata/inodes and old-peer quiet compatibility.
+  All 10 output, eight machine-progress and 10 defaults methods pass.
+  Real-SSH and release checks follow.

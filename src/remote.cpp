@@ -743,6 +743,8 @@ u32 get_identity(RBuf& r) {
 }
 
 std::string missing_feature(u64 features) {
+  if (!g_opt.am_server && g_opt.pushing && g_opt.dry_run && !g_opt.quiet && !(features & PF_PROGRESS_ACK))
+    return "peer does not support dry-run transfer totals (use --quiet to omit the summary)";
   if (!g_opt.am_server && g_opt.progress && g_opt.progress_mode == Options::Json && !(features & PF_OUTPUT))
     return "peer does not support JSON file events";
   if (!g_opt.link_dest.empty() && !g_opt.list_only && !(features & PF_LINK_DEST)) return "peer does not support --link-dest";
@@ -1463,6 +1465,10 @@ struct Sender {
               g_stats.acknowledged_files = g_stats.xfer_files.load();
             }
             g_stats.receiver_done = true;
+            if (g_opt.dry_run && (g_opt.peer_features & PF_PROGRESS_ACK)) {
+              g_stats.xfer_bytes = g_stats.acknowledged_bytes.load();
+              g_stats.xfer_files = g_stats.acknowledged_files.load();
+            }
           }
           std::lock_guard<std::mutex> lk(done_mu);
           got_done = true;
@@ -2560,7 +2566,7 @@ int run_client(const std::vector<std::string>& srcs, const std::string& dest, u3
   put_var(f, wire_version);
   f.push_back(push ? 'R' : 'S');
   u64 advertised = PROTO_FEATURES & (o.whole_file ? ~(PF_RESUME | PF_DELTA) : ~u64(0));
-  if (!push || !o.progress) advertised &= ~PF_PROGRESS_ACK;
+  if (!push || (!o.progress && !(o.dry_run && !o.quiet))) advertised &= ~PF_PROGRESS_ACK;
   if (o.verbose < 2) advertised &= ~PF_STAGE_METRICS;
   if (!o.progress) advertised &= ~PF_PROGRESS_PHASE;
   if (o.list_only) advertised &= PF_CORE | PF_ZSTD | PF_LIST | PF_IO_CONTROL | PF_FILTERS | PF_MERGE_FILTERS | PF_CVS_FILTERS | PF_PRUNE_EMPTY | PF_RELATIVE | PF_FILES_FROM;

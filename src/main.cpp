@@ -563,6 +563,9 @@ void print_summary(u64 t0) {
     out += "total size is " + fmt_num(total) + "  speedup is " + speedup + (o.dry_run ? " (DRY RUN)" : "") + "\n";
   }
   if (o.verbose > 1) if (const char* stage = limiting_stage()) out += std::string("limiting stage: ") + stage + " (service time estimate)\n";
+  if (o.dry_run && !o.quiet && !o.list_only)
+    out += "would transfer " + fmt_num(s.xfer_files) + " files (" + fmt_size((double)s.xfer_bytes.load()) +
+           "), delete " + fmt_num(s.deleted) + "\n";
   if (!out.empty()) output_text(out);
 }
 

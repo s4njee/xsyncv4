@@ -28,9 +28,11 @@ class MachineProgressTests(unittest.TestCase):
 
     def records(self, result):
         self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertEqual(result.stdout, b'')
         self.assertNotIn(b'\x1b', result.stderr)
         rows = [json.loads(line) for line in result.stderr.splitlines()]
+        if rows[-1]['dry_run']:
+            self.assertRegex(result.stdout, rb'^would transfer \d+ files \(.+\), delete \d+\n$')
+        else: self.assertEqual(result.stdout, b'')
         self.assertEqual(rows[0]['type'], 'progress')
         self.assertEqual(rows[-1]['type'], 'complete')
         self.assertTrue(rows[-1]['success'])
