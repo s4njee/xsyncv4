@@ -109,7 +109,7 @@ coverage is tracked in `tests/progress-terminal.md` and remains incomplete.
 | ID | Item | Status | Done when | Size |
 |---|---|---|---|---|
 | U-01 | **Real-terminal pass.** Terminal.app, iTerm, tmux, over ssh, narrow widths, resize mid-run, light themes, `TERM=dumb`, non-UTF-8 locales (needs an ASCII bar fallback). | partial | Checklist with screenshots; SIGWINCH handled; ASCII fallback when `LC_CTYPE` is not UTF-8. | M |
-| U-02 | **Rows are noise for small files.** At 12,000 files/s each row shows a random file at 0 % or 100 %. | confirmed | Rows are reserved for files that have been in flight for more than ~200 ms; small files collapse into one "small files" row with a rate. Large files show their own speed and ETA. | M |
+| U-02 | **Rows are noise for small files.** At 12,000 files/s each row shows a random file at 0 % or 100 %. | **done** | Rows are reserved for files that have been in flight for more than ~200 ms; small files collapse into one "small files" row with a rate. Large files show their own speed and ETA. | M |
 | U-03 | **Clone mode shows nothing per file.** Whole directories complete in one call, so the rows stay empty and the bar moves in jumps. | code | Rows show the directory being cloned; the bar advances per directory. | S |
 | U-04 | **Push progress counts bytes read, not bytes landed.** The bar can sit at 100 % while the receiver is still writing. | code | Receiver acknowledges completed bytes; the client bar reflects acknowledged work, with "sent" shown separately. | M |
 | U-05 | **Remote detail.** Wire bytes, compression ratio, and which side is the bottleneck (reading, network, writing) are known internally and not shown. | new | Total line shows wire rate and ratio with `-z`; `-vv` names the limiting stage. | M |
@@ -2646,3 +2646,25 @@ Verified artifact manifest (source `864bd37edf14`):
   transfer. Receiver acknowledgments for queued push work remain U-04.
 - Development macOS and isolated Linux real-SSH validation are being finalized;
   release artifacts will be rebuilt before the story is marked done.
+
+## U-02 complete — 2026-10-10: release validation
+
+- **Done; P2 is 1/11 complete.** U-01 remains partial for GUI screenshots and
+  the visual terminal pass. U-03 is next. Rows wait 200 ms; fast files collapse
+  into one counted/rated row; longer transfers show individual speed and ETA.
+- macOS development passes **8 progress methods** and **10 output methods**.
+  Isolated Linux arm64 real SSH passes **7 progress methods** (tmux unavailable),
+  **10 output methods**, and **4 remote delta methods** (the opted-in 2 GiB
+  fixture skipped). Both local and remote progress/rate fixtures pass.
+- Clean artifacts identify source **1e2bd94cc35d**. Universal macOS passes
+  **8 progress methods** on ARM and **8** on Intel. Static Linux arm64 and amd64
+  each pass **7 methods** with the same tmux skip. The amd64 executable runs
+  under host-provided emulation, driven by the arm64 Python rig. Manifest
+  revisions and SHA-256 hashes match; build-time scratch/transfer smoke checks
+  also pass.
+- Logs: `/tmp/xsync-u02-pty3.log`, `/tmp/xsync-u02-output.log`,
+  `/tmp/xsync-u02-real-ssh3.log`, `/tmp/xsync-u02-releases.log`,
+  `/tmp/xsync-u02-release-mac-arm.log`, `/tmp/xsync-u02-release-mac-intel.log`,
+  `/tmp/xsync-u02-release-linux-arm64.log`, and
+  `/tmp/xsync-u02-release-linux-amd64.log`. Installed local executables and
+  physical remote helpers were not changed.
