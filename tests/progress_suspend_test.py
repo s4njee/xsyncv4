@@ -9,7 +9,6 @@ import subprocess
 import sys
 import tempfile
 import time
-import threading
 import unittest
 
 from progress_test import capture, ENV
@@ -87,9 +86,17 @@ class SuspendProgressTests(unittest.TestCase):
     def test_closed_stdout_restores(self):
         (self.root/'dest').mkdir()
         reader,writer = os.pipe()
-        closer = threading.Timer(.3,os.close,args=(reader,)); closer.start()
-        try: code,data = capture(self.command('-v'),stdout=writer)
-        finally: closer.join(); os.close(writer)
+        closed = False
+        seen = bytearray()
+        def close_after_live(chunk):
+            nonlocal closed
+            seen.extend(chunk)
+            if not closed and b'\x1b[?25l' in seen:
+                os.close(reader); closed = True
+        try: code,data = capture(self.command('-v'),stdout=writer,on_output=close_after_live)
+        finally:
+            os.close(writer)
+            if not closed: os.close(reader)
         self.assertEqual(code,13,data)
         self.assert_restored(data)
 

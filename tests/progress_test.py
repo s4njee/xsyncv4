@@ -30,7 +30,7 @@ def columns(text):
     return sum(0 if unicodedata.combining(c) else 2 if unicodedata.east_asian_width(c) in ('W', 'F') else 1 for c in text)
 
 
-def capture(command, width=80, env=None, resize=(), interrupt=False, stdout=None, signals=()):
+def capture(command, width=80, env=None, resize=(), interrupt=False, stdout=None, signals=(), on_output=None):
     master, slave = pty.openpty()
     fcntl.ioctl(slave, termios.TIOCSWINSZ, struct.pack('HHHH', 24, width, 0, 0))
     proc = subprocess.Popen(command, stdin=subprocess.DEVNULL, stdout=stdout if stdout is not None else subprocess.DEVNULL,
@@ -64,6 +64,7 @@ def capture(command, width=80, env=None, resize=(), interrupt=False, stdout=None
                     raise
                 if not chunk: break
                 data.extend(chunk)
+                if on_output: on_output(chunk)
         return proc.wait(timeout=2), bytes(data)
     finally:
         if proc.poll() is None:
@@ -165,7 +166,7 @@ class ProgressTests(unittest.TestCase):
                 # First tick precedes 200ms: only the collapsed row is visible.
                 first = CSI.sub(b'', frames[0])
                 self.assertNotIn(b'wide-', first)
-                if direction != 'pull': self.assertIn(b'small files', first)
+                if direction != 'pull' and b'scanning' not in first: self.assertIn(b'small files', first)
                 rows = [line for frame in frames for line in CSI.sub(b'', frame).splitlines() if b'wide-' in line]
                 self.assertGreater(len(rows), 2, data[:1200])
                 self.assertTrue(any(b'/s' in row and b'ETA ' in row for row in rows), rows[:5])

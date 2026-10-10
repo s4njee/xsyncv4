@@ -12,6 +12,8 @@ import unittest
 
 REPO = pathlib.Path(__file__).resolve().parent.parent
 BINARY = pathlib.Path(os.environ.get('XSYNC_TEST_BINARY', REPO / 'build/xs')).resolve()
+# Architecture launchers execute the client; upload the actual release bytes.
+ARTIFACT = pathlib.Path(os.environ.get('XSYNC_TEST_ARTIFACT', BINARY)).resolve()
 
 
 class InstallerTests(unittest.TestCase):
@@ -25,7 +27,7 @@ class InstallerTests(unittest.TestCase):
         self.releases = self.root / 'release files'
         self.releases.mkdir()
         for name in ('linux-amd64', 'linux-arm64', 'darwin-universal'):
-            shutil.copy2(BINARY, self.releases / ('xs-' + name))
+            shutil.copy2(ARTIFACT, self.releases / ('xs-' + name))
         commands = self.root / 'commands'
         commands.mkdir()
         uname = commands / 'uname'
@@ -64,7 +66,7 @@ os.execv('/bin/sh',['sh','-c',sys.argv[-1]])
                 result = self.install(env=dict(self.env, XSYNC_TEST_SYSTEM=system, XSYNC_TEST_ARCH=arch))
                 self.assertEqual(result.returncode, 0, result.stderr)
                 self.assertIn(('Installed xs-' + artifact).encode(), result.stdout)
-                self.assertEqual(self.target.read_bytes(), BINARY.read_bytes())
+                self.assertEqual(self.target.read_bytes(), ARTIFACT.read_bytes())
                 self.assertEqual(self.target.stat().st_mode & 0o777, 0o755)
                 self.assertEqual(list(self.target.parent.glob('.xs-install.*')), [])
                 version = subprocess.run([str(self.target), '--version'], capture_output=True)
@@ -80,7 +82,7 @@ os.execv('/bin/sh',['sh','-c',sys.argv[-1]])
                 self.assertEqual(self.target.read_bytes(), previous)
                 result = self.install('--force')
                 self.assertEqual(result.returncode, 0, result.stderr)
-                self.assertEqual(self.target.read_bytes(), BINARY.read_bytes())
+                self.assertEqual(self.target.read_bytes(), ARTIFACT.read_bytes())
 
     def test_failed_upload_preserves_existing_binary(self):
         previous = self.fixture_version('0.0.1')

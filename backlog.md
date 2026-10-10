@@ -118,7 +118,7 @@ coverage is tracked in `tests/progress-terminal.md` and remains incomplete.
 | U-08 | **Phases that look like hangs.** Deleting a large tree, waiting for the remote to finish, hashing with `-c`: the display says "scanning" or sits at 100 %. | **done** | Each phase has its own label and counter (`deleting 12,410`, `verifying`, `waiting for receiver`). | S |
 | U-09 | **Dry-run summary.** `-n` prints names only with `-v`. | **done** | `-n` always ends with "would transfer N files (X), delete M". | S |
 | U-10 | **`-h` consistency.** The summary follows rsync's `-h` (1000-based, 1024 with `-hh`); the progress display is always 1024-based. | **done** | One rule, applied everywhere, documented. | S |
-| U-11 | **Suspend/resume and cursor hygiene.** Ctrl-Z / `fg`, and every exit path (including `die()` from a worker thread) restoring the cursor. | unverified | SIGTSTP/SIGCONT redraw; cursor restored in a single exit hook. | S |
+| U-11 | **Suspend/resume and cursor hygiene.** Ctrl-Z / `fg`, and every exit path (including `die()` from a worker thread) restoring the cursor. | **done** | SIGTSTP/SIGCONT redraw; cursor restored in a single exit hook. | S |
 
 ## P3 — Performance: holding the lead where you actually sync
 
@@ -2970,3 +2970,46 @@ Verified artifact manifest (source `864bd37edf14`):
 - The user requested a new GitHub repository named `xsyncv4` and a push after
   P2 is complete. The authenticated owner is `s4njee`; that repository does
   not currently exist. GUI evidence for U-01 remains pending.
+
+
+## U-11 completed and xs release acceptance — 2026-10-10
+
+- **Done; P2 is 10/11 complete.** U-02 through U-11 are complete. U-01's
+  manual GUI pass is user-confirmed; saved screenshots/terminal versions
+  are awaiting their evidence path for the checklist.
+- All 40 native progress methods and all 11 error-summary methods pass
+  after the executable rename. Evidence: `/tmp/xsync-xs-progress-all-final.log`
+  and `/tmp/xsync-xs-errors.log`. Tests now close stdout only after observing
+  cursor hiding and allow scanning in the initial frame. These changes remove
+  startup/scheduler timing assumptions without relaxing cursor/error checks.
+- Release progress-suspension, machine-output, units and installer acceptance
+  pass on macOS arm64/x86_64 and static Linux amd64/arm64 (21 methods per
+  platform; Linux skips tmux and APFS only). The Intel installer uses the
+  actual universal binary as its upload artifact rather than its architecture
+  launcher script. Native macOS also passes disposable-prefix installation,
+  manual linting and live zsh completion. Evidence:
+  `/tmp/xsync-xs-release-mac-arm.log`,
+  `/tmp/xsync-xs-release-mac-arm-suspend-final.log`,
+  `/tmp/xsync-xs-release-mac-intel.log` (first 16 methods),
+  `/tmp/xsync-xs-release-mac-intel-install-final.log` (5 methods),
+  `/tmp/xsync-xs-release-linux-amd64.log`,
+  `/tmp/xsync-xs-release-linux-arm64.log`,
+  `/tmp/xsync-xs-release-packaging-final.log`.
+- Isolated real-SSH lookup, explicit installer/version guard, suspend/fatal
+  cursor checks, JSON/progress2, dry-run plans and broken-stdout cancellation
+  all pass: `/tmp/xsync-xs-real-ssh.log` (26 methods; tmux/APFS skips only).
+  All 15 frozen-legacy/capability protocol checks pass, and differential
+  acceptance is 231/231: `/tmp/xsync-xs-protocol.log`, `/tmp/xsync-xs-diff.log`.
+- Final releases are built from source `415900091024`; the release builder
+  verifies static Linux/scratch execution, universal macOS architecture and
+  dependencies, unit/smoke checks, and SHA-256 manifests. Evidence:
+  `/tmp/xsync-xs-releases.log`.
+
+| Artifact | Bytes | SHA-256 |
+|---|---:|---|
+| `xs-darwin-universal` | 3,886,496 | `477f6090d5453d6850bdc5efe59bd57b30ddb9ac24e585f39ff00902060763bd` |
+| `xs-linux-amd64` | 5,327,952 | `02a4d5b670c7a720a6ae95a13e123406b46c909ded74728f8f38c9e1db4916db` |
+| `xs-linux-arm64` | 5,199,328 | `72fa79df5918989cca1cac8eb4418ab6ec684493f257a0e509a2f5188e725f09` |
+
+Packaging is refreshed after this entry. GitHub creation/push remains queued
+after U-01's evidence entry completes P2, as requested by the user.
