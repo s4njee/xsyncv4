@@ -128,7 +128,7 @@ The benchmark so far is one corpus slice, one machine, one filesystem, no networ
 | ID | Item | Status | Done when | Size |
 |---|---|---|---|---|
 | F-01 | **Benchmark the real targets.** Over ssh to a Linux LAN host (ext4/XFS) and to the Pi; the full 14 GB corpus (needs disk space freed first); an update run with ~1 % of files changed; a mixed tree with large files; cold cache. | partial | `bench/bench.py --target host:path` and a results table per target in the README; this decides the order of everything below. | M |
-| F-02 | **Regression gate.** Nothing stops a change from losing the lead. | new | CI job fails if any scenario drops below a recorded ratio to rsync on the same runner. | M |
+| F-02 | **Regression gate.** Nothing stops a change from losing the lead. | partial | CI job fails if any scenario drops below a recorded ratio to rsync on the same runner. | M |
 | F-03 | **ssh is one stream on one core.** On a fast LAN the cipher becomes the ceiling long before the disks do. | unverified | Measured first. Then, if it is the limit: `--streams N` (several ssh connections sharing one transfer) and no compression by default on links faster than the compressor. | L |
 | F-04 | **Adaptive compression.** `-z` compresses every block at level 3 regardless of content or link. | code | Incompressible blocks are detected from a sample and sent raw; `--skip-compress` suffixes honoured; level chosen from measured link speed unless set. | M |
 | F-05 | **Large files.** One thread reads and one stream carries each large file; local copies on Linux use a plain read/write loop. | code | Parallel ranges within a file on both ends; `copy_file_range`/`FICLONE` on Linux (reflinks on btrfs/XFS mirror the APFS clone path); `F_NOCACHE` above a size so a 50 GB copy does not evict the page cache. | L |
@@ -3112,3 +3112,19 @@ after U-01's evidence entry completes P2, as requested by the user.
   component walks in collision checks and destination listing dominating the
   worker. This identifies descriptor reuse / relative path handling for
   F-07/F-08 investigation, while preserving T-05's symlink-race protection.
+
+## P3 / F-02 regression gate started — 2026-10-10
+
+- While the frozen neo/freya baseline continues, added an independent CI gate
+  for Linux and macOS. Each runner builds the candidate and pinned reference
+  `415900091024da0d7bb87344b20982d3802bceb8` with the same Release configuration.
+- Thirteen local/pipe, fresh/no-op/checksum/update, compressed, large and tiny
+  scenarios receive five rotated samples per tool. Every sample is verified
+  with rsync checksums and metadata. The gate records a per-scenario minimum
+  speedup to rsync at 85% of that runner's reference speedup and fails below it.
+- Three behavior tests pass locally: healthy real transfers succeed; an
+  intentionally delayed binary fails the ratio gate after successful
+  verification; a corrupt binary exiting zero fails verification. Seven
+  existing harness safeguard tests also pass. Hosted CI validation is pending.
+- F-01 remains partial, including the pending cold-cache access on freya.
+  Its staged production binary and measurement scripts remain unchanged.

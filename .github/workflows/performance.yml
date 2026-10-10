@@ -1,0 +1,93 @@
+name: Performance regression gate
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - 'cmake/**'
+      - 'CMakeLists.txt'
+      - 'benchmarks/ci*'
+      - 'benchmarks/measure.py'
+      - 'tests/fakessh.sh'
+      - '.github/workflows/performance.yml'
+  pull_request:
+    paths:
+      - 'src/**'
+      - 'cmake/**'
+      - 'CMakeLists.txt'
+      - 'benchmarks/ci*'
+      - 'benchmarks/measure.py'
+      - 'tests/fakessh.sh'
+      - '.github/workflows/performance.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: performance-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ratios:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, macos-15]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.13'
+      - name: Linux build dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends ninja-build libzstd-dev libxxhash-dev libicu-dev rsync
+          printf 'XS_GATE_RSYNC=%s\n' "$(command -v rsync)" >> "$GITHUB_ENV"
+          printf 'XS_GATE_ICU_ROOT=/usr\n' >> "$GITHUB_ENV"
+      - name: macOS build dependencies
+        if: runner.os == 'macOS'
+        run: |
+          brew install ninja zstd xxhash icu4c rsync
+          printf 'XS_GATE_RSYNC=%s/bin/rsync\n' "$(brew --prefix)" >> "$GITHUB_ENV"
+          printf 'XS_GATE_ICU_ROOT=%s\n' "$(brew --prefix icu4c)" >> "$GITHUB_ENV"
+      - name: Build candidate
+        run: |
+          cmake -S . -B build-ci -G Ninja -DCMAKE_BUILD_TYPE=Release "-DICU_ROOT=$XS_GATE_ICU_ROOT"
+          cmake --build build-ci --target xsync -j2
+      - name: Build pinned reference with the same settings
+        run: |
+          python3 - <<'PY'
+          import io, json, os, pathlib, subprocess, tarfile
+          policy = json.load(open('benchmarks/ci-policy.json'))
+          source = pathlib.Path(os.environ['RUNNER_TEMP']) / 'xs-reference-source'
+          source.mkdir()
+          archive = subprocess.check_output(['git', 'archive', policy['reference']])
+          with tarfile.open(fileobj=io.BytesIO(archive)) as tree:
+              tree.extractall(source, filter='data')
+          subprocess.run(['cmake', '-S', str(source), '-B', 'build-reference', '-G', 'Ninja',
+                          '-DCMAKE_BUILD_TYPE=Release', '-DXSYNC_GIT_HASH='+policy['reference'],
+                          '-DICU_ROOT='+os.environ['XS_GATE_ICU_ROOT']], check=True)
+          subprocess.run(['cmake', '--build', 'build-reference', '--target', 'xsync', '-j2'], check=True)
+          PY
+      - name: Prove the gate rejects slowdown and corruption
+        run: python3 benchmarks/ci_gate_test.py --xsync build-ci/xs --rsync "$XS_GATE_RSYNC"
+      - name: Measure and gate all scenarios
+        run: |
+          python3 benchmarks/ci.py --candidate build-ci/xs --reference build-reference/xs \
+            --rsync "$XS_GATE_RSYNC" --work "$RUNNER_TEMP/xs-performance" --output benchmarks/ci-results/ratios.json
+      - name: Upload verified ratios and resources
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: performance-${{ matrix.os }}-${{ github.run_id }}
+          path: benchmarks/ci-results/
+          if-no-files-found: ignore
+          retention-days: 30
