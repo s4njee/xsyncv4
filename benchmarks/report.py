@@ -46,7 +46,7 @@ def main():
             '|---|---|---|---|---:|---:|---:|---:|---:|---:|---|']
     for label,flow,cache,scenario,n,med,ratio,cpu,rss,evidence in rows:
         lines.append(f"| {label} | {flow} | {cache} | {scenario} | {n} | {med['rsync']:.3f} | {med['xs']:.3f} | {ratio:.2f}× | {cpu['rsync']:.3f} / {cpu['xs']:.3f} | {rss['rsync']:.1f} / {rss['xs']:.1f} | [{evidence}]({evidence}) |")
-    lines+=['','CPU is summed across the measured client and peer process trees. Peak RSS is the larger endpoint peak, not their sum. Filesystem/NIC/tool/source metadata accompanies the JSON files. Incomplete runs and smoke checks are excluded.','']
+    lines+=['','CPU is summed across the measured client and peer process trees. Peak RSS reports the largest process high-water mark on either endpoint; simultaneous memory across processes is not summed. Directory inventories exclude the dataset root; logical bytes count regular files. Filesystem/NIC/tool/source metadata accompanies the JSON files. Incomplete runs and smoke checks are excluded.','']
     args.output.parent.mkdir(parents=True,exist_ok=True);args.output.write_text('\n'.join(lines))
     print(f'{len(rows)} completed scenario rows: {args.output}')
 

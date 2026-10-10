@@ -3094,3 +3094,21 @@ after U-01's evidence entry completes P2, as requested by the user.
   the reverse direction. Further repetitions will confirm F-13's 10 ms target.
   The large-file checksum pull is slower (3.986 s versus 2.585 s); the full
   corpus checksum measurements will help distinguish cache/I/O from scan work.
+
+### F-01 corpus and APFS diagnostic checkpoint — 2026-10-10
+
+- The first verified full-corpus fresh samples are rsync 142.486 s and xs
+  125.154 s. The corresponding summed CPU is 179.641 s / 704.538 s; largest
+  peer process RSS is 88.7 MiB / 990.7 MiB. These are individual samples;
+  interleaved repetitions are still running and will determine the medians.
+- Added a validated checkpoint fetcher for long cases. It preserves the
+  incomplete marker so preliminary evidence cannot enter the summary table.
+- A separate APFS no-op diagnostic on the 76,838-file slice completed 24
+  verified samples at 1, 2, 4 and 8 xs threads. The current binary consumes
+  4.920 / 6.960 / 10.456 / 18.085 s median CPU respectively. The host's high
+  background load and 98%-full volume are recorded; this does not satisfy
+  F-07's free-volume measurement or settle the final thread default.
+- A separately verified stack sample shows repeated anchored destination
+  component walks in collision checks and destination listing dominating the
+  worker. This identifies descriptor reuse / relative path handling for
+  F-07/F-08 investigation, while preserving T-05's symlink-race protection.

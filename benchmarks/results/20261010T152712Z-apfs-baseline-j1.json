@@ -1,0 +1,143 @@
+{
+  "schema": 1,
+  "utc": "2026-10-10T15:27:15.687129+00:00",
+  "client": "MacBookPro",
+  "target": null,
+  "direction": "push",
+  "label": "apfs-noop-j1",
+  "cache": "warm",
+  "versions": {
+    "xs": "xs  version 0.1.0  protocol version 4  git 415900091024",
+    "rsync": "rsync  version 3.4.4  protocol version 32"
+  },
+  "argv": [
+    "benchmarks/run.py",
+    "--corpus",
+    "/Users/sanjee/projects/xsyncv4/.bench/corpus",
+    "--work",
+    ".bench/p3-local",
+    "--xsync",
+    "build-release/xs",
+    "--rsync",
+    "/opt/homebrew/bin/rsync",
+    "--scenarios",
+    "noop",
+    "--runs",
+    "3",
+    "--threads",
+    "1",
+    "--label",
+    "apfs-noop-j1",
+    "--output",
+    "benchmarks/results/20261010T152712Z-apfs-baseline-j1.json"
+  ],
+  "records": [
+    {
+      "returncode": 0,
+      "wall_seconds": 1.407955375034362,
+      "user_seconds": 0.20618799999999998,
+      "system_seconds": 1.40103,
+      "max_rss_bytes": 22626304,
+      "voluntary_switches": 1036,
+      "involuntary_switches": 6100,
+      "scenario": "noop",
+      "tool": "rsync",
+      "run": 1,
+      "verified": true,
+      "remote": null,
+      "stdout": "\nNumber of files: 95,911 (reg: 76,838, dir: 19,073)\nNumber of created files: 0\nNumber of deleted files: 0\nNumber of regular files transferred: 0\nTotal file size: 517,808,080 bytes\nTotal transferred file size: 0 bytes\nLiteral data: 0 bytes\nMatched data: 0 bytes\nFile list size: 139,808\nFile list generation time: 0.003 seconds\nFile list transfer time: 0.000 seconds\nTotal bytes sent: 2,899,357\nTotal bytes received: 20,792\n\nsent 2,899,357 bytes  received 20,792 bytes  1,946,766.00 bytes/sec\ntotal size is 517,808,080  speedup is 177.32\n",
+      "stderr": ""
+    },
+    {
+      "returncode": 0,
+      "wall_seconds": 5.377271207980812,
+      "user_seconds": 0.41103,
+      "system_seconds": 4.551264,
+      "max_rss_bytes": 28295168,
+      "voluntary_switches": 3,
+      "involuntary_switches": 13837,
+      "scenario": "noop",
+      "tool": "xs",
+      "run": 1,
+      "verified": true,
+      "remote": null,
+      "stdout": "\nNumber of files: 95,910 (reg: 76,838, dir: 19,072)\nNumber of created files: 0 (reg: 0, dir: 0)\nNumber of deleted files: 0\nNumber of regular files transferred: 0\nTotal file size: 517,808,080 bytes\nTotal transferred file size: 0 bytes\nDelta literal data: 0 bytes\nDelta matched data: 0 bytes\nTotal bytes sent: 0\nTotal bytes received: 0\n\nsent 0 bytes  received 0 bytes  0.00 bytes/sec\ntotal size is 517,808,080  speedup is 0.00\n",
+      "stderr": ""
+    },
+    {
+      "returncode": 0,
+      "wall_seconds": 5.082585375057533,
+      "user_seconds": 0.400984,
+      "system_seconds": 4.441856,
+      "max_rss_bytes": 28491776,
+      "voluntary_switches": 0,
+      "involuntary_switches": 11212,
+      "scenario": "noop",
+      "tool": "xs",
+      "run": 2,
+      "verified": true,
+      "remote": null,
+      "stdout": "\nNumber of files: 95,910 (reg: 76,838, dir: 19,072)\nNumber of created files: 0 (reg: 0, dir: 0)\nNumber of deleted files: 0\nNumber of regular files transferred: 0\nTotal file size: 517,808,080 bytes\nTotal transferred file size: 0 bytes\nDelta literal data: 0 bytes\nDelta matched data: 0 bytes\nTotal bytes sent: 0\nTotal bytes received: 0\n\nsent 0 bytes  received 0 bytes  0.00 bytes/sec\ntotal size is 517,808,080  speedup is 0.00\n",
+      "stderr": ""
+    },
+    {
+      "returncode": 0,
+      "wall_seconds": 1.785855625057593,
+      "user_seconds": 0.217661,
+      "system_seconds": 2.13779,
+      "max_rss_bytes": 26263552,
+      "voluntary_switches": 2769,
+      "involuntary_switches": 10005,
+      "scenario": "noop",
+      "tool": "rsync",
+      "run": 2,
+      "verified": true,
+      "remote": null,
+      "stdout": "\nNumber of files: 95,911 (reg: 76,838, dir: 19,073)\nNumber of created files: 0\nNumber of deleted files: 0\nNumber of regular files transferred: 0\nTotal file size: 517,808,080 bytes\nTotal transferred file size: 0 bytes\nLiteral data: 0 bytes\nMatched data: 0 bytes\nFile list size: 98,301\nFile list generation time: 0.002 seconds\nFile list transfer time: 0.000 seconds\nTotal bytes sent: 2,899,621\nTotal bytes received: 20,688\n\nsent 2,899,621 bytes  received 20,688 bytes  1,168,123.60 bytes/sec\ntotal size is 517,808,080  speedup is 177.31\n",
+      "stderr": ""
+    },
+    {
+      "returncode": 0,
+      "wall_seconds": 1.6257073329761624,
+      "user_seconds": 0.22089999999999999,
+      "system_seconds": 2.026865,
+      "max_rss_bytes": 26034176,
+      "voluntary_switches": 926,
+      "involuntary_switches": 10213,
+      "scenario": "noop",
+      "tool": "rsync",
+      "run": 3,
+      "verified": true,
+      "remote": null,
+      "stdout": "\nNumber of files: 95,911 (reg: 76,838, dir: 19,073)\nNumber of created files: 0\nNumber of deleted files: 0\nNumber of regular files transferred: 0\nTotal file size: 517,808,080 bytes\nTotal transferred file size: 0 bytes\nLiteral data: 0 bytes\nMatched data: 0 bytes\nFile list size: 131,764\nFile list generation time: 0.003 seconds\nFile list transfer time: 0.000 seconds\nTotal bytes sent: 2,899,605\nTotal bytes received: 20,704\n\nsent 2,899,605 bytes  received 20,704 bytes  1,946,872.67 bytes/sec\ntotal size is 517,808,080  speedup is 177.31\n",
+      "stderr": ""
+    },
+    {
+      "returncode": 0,
+      "wall_seconds": 5.146101959049702,
+      "user_seconds": 0.39370099999999997,
+      "system_seconds": 4.526242,
+      "max_rss_bytes": 28344320,
+      "voluntary_switches": 2,
+      "involuntary_switches": 10102,
+      "scenario": "noop",
+      "tool": "xs",
+      "run": 3,
+      "verified": true,
+      "remote": null,
+      "stdout": "\nNumber of files: 95,910 (reg: 76,838, dir: 19,072)\nNumber of created files: 0 (reg: 0, dir: 0)\nNumber of deleted files: 0\nNumber of regular files transferred: 0\nTotal file size: 517,808,080 bytes\nTotal transferred file size: 0 bytes\nDelta literal data: 0 bytes\nDelta matched data: 0 bytes\nTotal bytes sent: 0\nTotal bytes received: 0\n\nsent 0 bytes  received 0 bytes  0.00 bytes/sec\ntotal size is 517,808,080  speedup is 0.00\n",
+      "stderr": ""
+    }
+  ],
+  "summary": [
+    {
+      "scenario": "noop",
+      "median_seconds": {
+        "rsync": 1.6257073329761624,
+        "xs": 5.146101959049702
+      },
+      "xs_speedup": 0.3159104397683507
+    }
+  ],
+  "complete": true
+}
