@@ -93,7 +93,10 @@ class RangeTests(unittest.TestCase):
         with tempfile.TemporaryDirectory(prefix='xs-range-producers-') as tmp:
             source, target = pathlib.Path(tmp) / 'source', pathlib.Path(tmp) / 'target'
             source.mkdir()
-            for index in range(8): os.link(self.source, source / str(index))
+            for index in range(8):
+                directory = source / str(index)
+                directory.mkdir()
+                os.link(self.source, directory / "file")
             for direction in ('local', 'push', 'pull'):
                 with self.subTest(direction=direction):
                     if target.exists():
@@ -109,7 +112,7 @@ class RangeTests(unittest.TestCase):
                                             env=dict(os.environ, XSYNC_CONFIG='', XSYNC_OPTS=''))
                     self.assertEqual(result.returncode, 0, result.stderr)
                     self.assertEqual(sorted(p.name for p in target.iterdir()), [str(i) for i in range(8)])
-                    for file in target.iterdir(): self.assertEqual(digest(file), self.expected)
+                    for directory in target.iterdir(): self.assertEqual(digest(directory / "file"), self.expected)
 
     @unittest.skipUnless(os.environ.get('XSYNC_RANGE_LEGACY'), 'provide frozen native peer')
     def test_parallel_chunks_interoperate_with_frozen_peer(self):

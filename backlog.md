@@ -3462,3 +3462,15 @@ after U-01's evidence entry completes P2, as requested by the user.
   a simulated ext4 policy that fails if copy_file_range is used.
 - Fresh comparisons of the corrected policy remain required. F-02 and F-05
   remain partial; no physical baseline binary has been replaced.
+
+
+### F-05 contention policy refinement — 2026-10-10
+
+- The first scheduling correction still leaves two-file byte copies slower
+  than the predecessor. Independent large files now retain file-level
+  parallelism; single requested large files use intra-file ranges on both ends.
+  This selection is computed before dispatch, avoiding concurrent reads of
+  mutable local source snapshots. The multi-producer test uses eight separate
+  child directories so every producer still exercises range scheduling.
+- Seven kernel-policy/fault tests and four range tests per platform pass after
+  selecting single-file ranges. Fresh complete comparisons are pending.

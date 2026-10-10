@@ -1469,6 +1469,15 @@ int out_clone_data(OutFile& f, int source, i64 size) {
 #endif
 }
 
+bool parallel_file_ranges(const DirList& list, const std::vector<u32>& needed) {
+  int large = 0;
+  for (u32 index : needed)
+    if (list.e[index].type == T_REG && list.e[index].size >= (32 << 20) && ++large > 1) return false;
+  // Independent large files already provide file-level parallelism. Splitting
+  // them too can add inode contention without exposing more useful work.
+  return true;
+}
+
 bool native_copy_ranges(int source, int destination) {
 #ifdef __linux__
   struct statfs input{}, output{};

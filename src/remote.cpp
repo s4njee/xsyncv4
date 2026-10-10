@@ -898,7 +898,7 @@ struct SDir {
   Entry attrs;
   u8 flags = 0;
   u32 id = 0;
-  bool prelisted = false;
+  bool prelisted = false, file_ranges = true;
   std::shared_ptr<SelectedSource> selection;
   std::atomic<int> pending{2};  // walker and outstanding NEED; reads add references
 };
@@ -1214,6 +1214,7 @@ struct Sender {
         g_stats.xfer_files_total.fetch_add(n, std::memory_order_relaxed);
         g_stats.xfer_bytes_total.fetch_add(bytes, std::memory_order_relaxed);
       }
+      d->file_ranges = parallel_file_ranges(d->list, idx);
       std::vector<Task> tasks;
       size_t start = 0;
       i64 acc = 0;
@@ -1385,7 +1386,7 @@ struct Sender {
       } else {
         flush_block(w);
         w.buf.resize(BLOCK_TARGET);
-        if (fresh.size - off >= (32 << 20) && default_jobs() > 1) {
+        if (fresh.size - off >= (32 << 20) && default_jobs() > 1 && d.file_ranges) {
           i64 start = off;
           size_t ranges = (size_t)((fresh.size - start + BLOCK_TARGET - 1) / BLOCK_TARGET);
           std::atomic<bool> input_ok{true};
@@ -1640,6 +1641,7 @@ struct RDir {
   u32 id = 0, parent_plus1 = 0, pidx = 0;
   u8 flags = 0;
   bool gen_done = false;        // guarded by Receiver::dmu
+  bool file_ranges = true;
   std::vector<Task> waiters;    // children that arrived before our generator ran
   std::unordered_map<u32, ResumePrefix> prefixes;
   // Mutable transfer state is guarded by Receiver::bmu.
@@ -1974,6 +1976,7 @@ struct Receiver {
       w.has_attrs = false;
       for (Entry& e : l.e) e.flags &= (u8)~EF_DESCEND;
     }
+    d->file_ranges = parallel_file_ranges(l, w.need);
     put_var(f, w.need.size());
     u32 prev = 0;
     for (u32 i : w.need) {
@@ -2218,7 +2221,7 @@ struct Receiver {
             // Reserved ranges cannot overlap. Count completion only after the
             // write returns, so END cannot finalize while any write is active.
             // Sparse/delta paths retain serialization of their mutable state.
-            bool concurrent = !delta && !g_opt.sparse;
+            bool concurrent = !delta && !g_opt.sparse && d->file_ranges;
             if (concurrent) file_lock.unlock();
             bool wrote = count ? delta_copy_blocks(b->f, *basis, first, count, off, t.buf) :
               out_write(b->f, bytes.data(), bytes.size(), off);

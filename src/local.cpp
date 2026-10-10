@@ -593,6 +593,7 @@ struct Local {
     }
     size_t n = d->need.size();
     if (n == 0) return release(d);
+    d->file_ranges = parallel_file_ranges(d->src, d->need);
     // Split into batches so large directories and large files spread over the workers.
     std::vector<std::pair<u32, u32>> batches;
     u32 start = 0;
@@ -760,7 +761,7 @@ struct Local {
       struct stat output_stat;
       if (kernel_copy && (fstat(f.fd, &output_stat) != 0 || before.st_dev != output_stat.st_dev || !native_copy_ranges(in, f.fd))) kernel_copy = false;
 #endif
-      if (ok && total < s.size && s.size - total >= (32 << 20) && default_jobs() > 1 && !o.sparse) {
+      if (ok && total < s.size && s.size - total >= (32 << 20) && default_jobs() > 1 && !o.sparse && d.file_ranges) {
         i64 start = total;
         constexpr i64 span = 8 << 20;
         size_t ranges = (size_t)((s.size - start + span - 1) / span);

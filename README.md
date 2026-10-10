@@ -554,7 +554,9 @@ Differences to be aware of:
   retain the correct offset. `--no-clone`, sparse copies and bandwidth limits
   use the byte path. Source consistency checks and output metadata finalization
   still apply. Files with at least 32 MiB remaining also spread disjoint ranges
-  across the configured worker pool; native transfers parallelize reads and
+  across the configured worker pool when the directory requests one large file;
+  multiple large files retain file-level parallelism to avoid inode contention.
+  Native transfers parallelize reads and
   receiver writes while retaining source retries and partial-prefix verification.
   Sparse and delta receiver writes stay serialized. macOS disables data caching on source and output descriptors for
   copies of at least 1 GiB with `F_NOCACHE`.

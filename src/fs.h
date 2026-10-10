@@ -72,7 +72,7 @@ struct DirWork {
   DirList src;           // source entries, sorted by name
   std::vector<std::unique_ptr<DirWork>> prepared_children;  // Full source walk for -m.
   std::shared_ptr<SelectedSource> selection;
-  bool scan_failed = false;
+  bool scan_failed = false, file_ranges = true;
   XattrSet attrs_xattrs;
   std::vector<XattrSet> src_xattrs;  // Parallel to the filtered source entries.
   bool xattrs_loaded = false, attrs_xattrs_loaded = false;
@@ -136,6 +136,7 @@ int out_clone_data(OutFile& f, int source, i64 size); // 1 copied, 0 unsupported
 ssize_t out_copy_range(OutFile& f, int source, size_t size, i64 offset);
 bool native_copy_ranges(int source, int destination);
 void large_file_cache_policy(int fd, i64 size);
+bool parallel_file_ranges(const DirList& list, const std::vector<u32>& needed);
 bool clone_copy(DirWork& w, u32 idx, const char* source, unsigned flags, Worker& t);
 // Whole small file from memory.
 bool write_whole(DirWork& w, u32 idx, const char* data, size_t len, Worker& t);
