@@ -13,6 +13,7 @@ import unittest
 import corpus
 import preflight
 import probe
+import stage
 
 HERE = pathlib.Path(__file__).resolve().parent
 HELPER = HERE / 'xsbench-helper'
@@ -289,6 +290,76 @@ class Corpora(unittest.TestCase):
         inside = subprocess.run([sys.executable, str(HERE / 'corpus.py'), 'manifest', str(tree), '--name', 'real',
                                  '--output', str(tree / 'pin')], capture_output=True, text=True)
         self.assertIn('outside the tree', inside.stderr)
+
+
+class StagedBuilds(unittest.TestCase):
+    RECORD = {'rev12': 'abcdef012345', 'artifacts': {'xs-linux-arm64': {'sha256': 'arm'},
+                                                    'xs-linux-amd64': {'sha256': 'amd'}}}
+    SCRIPTS = {'probe.py': 'p', 'measure.py': 'm'}
+    VERSION = 'xs  version 0.1.0  protocol version 4  git abcdef012345'
+
+    def report(self, **changes):
+        report = {'machine': 'aarch64', 'files': {'xs-abcdef012345': 'arm', 'probe.py': 'p', 'measure.py': 'm'},
+                  'versions': {'xs-abcdef012345': self.VERSION},
+                  'rsync': {'path': '/usr/bin/rsync', 'sha256': 'r', 'version': 'rsync  version 3.4.1'}}
+        for key, value in changes.items():
+            if isinstance(value, dict):
+                report[key] = dict(report[key], **value)
+            else:
+                report[key] = value
+        return report
+
+    def problems(self, report):
+        return stage.check_host('neo', self.RECORD, self.SCRIPTS, report)
+
+    def test_recorded_build_passes(self):
+        self.assertEqual(self.problems(self.report()), [])
+        self.assertEqual(self.problems(self.report(machine='x86_64', files={'xs-abcdef012345': 'amd'})), [])
+
+    def test_stale_binary_is_refused(self):
+        problems = self.problems(self.report(files={'xs-abcdef012345': 'older build'}))
+        self.assertEqual(problems, ['neo: xs-abcdef012345 is not the recorded build of abcdef012345 '
+                                    '(stale or replaced)'])
+
+    def test_binary_for_the_other_architecture_is_refused(self):
+        self.assertTrue(any('stale or replaced' in p for p in self.problems(self.report(machine='x86_64'))))
+
+    def test_missing_binary_is_refused(self):
+        self.assertIn('neo: xs-abcdef012345 is not staged', self.problems(self.report(files={'xs-abcdef012345': None})))
+
+    def test_dirty_or_other_revision_is_refused(self):
+        dirty = self.report(versions={'xs-abcdef012345': self.VERSION + '-dirty'})
+        self.assertTrue(any('built from a dirty tree' in p for p in self.problems(dirty)))
+        other = self.report(versions={'xs-abcdef012345': self.VERSION.replace('abcdef012345', '111111111111')})
+        self.assertTrue(any('expected git abcdef012345' in p for p in self.problems(other)))
+        longer = self.report(versions={'xs-abcdef012345': self.VERSION + '9'})
+        self.assertTrue(any('expected git abcdef012345' in p for p in self.problems(longer)))
+        silent = self.report(versions={'xs-abcdef012345': None})
+        self.assertTrue(any('does not run' in p for p in self.problems(silent)))
+
+    def test_changed_or_missing_script_is_refused(self):
+        self.assertIn('neo: probe.py differs from the working copy', self.problems(self.report(files={'probe.py': 'x'})))
+        self.assertIn('neo: measure.py is not staged', self.problems(self.report(files={'measure.py': None})))
+
+    def test_unsupported_host_and_probe_failure(self):
+        self.assertEqual(self.problems(self.report(machine='riscv64')), ['neo: no build for a riscv64 host'])
+        self.assertEqual(self.problems({'error': 'ssh timed out'}), ['neo: ssh timed out'])
+
+    def test_only_commits_can_be_built(self):
+        with self.assertRaises(SystemExit):
+            stage.resolve('no-such-revision')
+        self.assertEqual(len(stage.resolve('HEAD')), 40)
+
+    def test_staged_probe_reports_hashes_and_refuses_paths(self):
+        with tempfile.TemporaryDirectory() as root:
+            (pathlib.Path(root) / 'bin').mkdir()
+            (pathlib.Path(root) / 'bin' / 'probe.py').write_bytes(b'x')
+            report = probe.staged(root, ['probe.py', 'absent'])
+            self.assertEqual(report['files'], {
+                'probe.py': '2d711642b726b04401627ca9fbac32f5c8530fb1903cc4db02258717921a4881', 'absent': None})
+        result = subprocess.run([sys.executable, str(HERE / 'probe.py'), 'staged', '--root', '/tmp', '../etc/passwd'],
+                                capture_output=True, text=True)
+        self.assertEqual(result.returncode, 2)
 
 
 class HelperArguments(unittest.TestCase):

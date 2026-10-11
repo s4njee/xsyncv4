@@ -2,13 +2,15 @@
 
 The measurement framework planned in [experiments.md](../../experiments.md).
 So far this holds the privileged helper, milestone M1 (host declarations,
-endpoint probes and the preflight check) and milestone M2 (corpora).
+endpoint probes and the preflight check), milestone M2 (corpora) and
+milestone M3 (building and staging binaries).
 
 | File | Runs on | Purpose |
 |---|---|---|
 | `hosts.toml` | controller | Hosts, benchmark roots, and the interface each host must use on each link |
 | `probe.py` | endpoint | Read-only JSON reports: `inventory`, `snapshot`, `route`, and `sample` for a once-a-second series |
 | `preflight.py` | controller | Runs the probes over SSH, checks them against `hosts.toml`, and writes a record under `benchmarks/results/lab/preflight/` |
+| `stage.py` | controller | Builds `xs` from a commit, stages it and the lab scripts on the hosts, and checks what they hold |
 | `corpus.py` | endpoint | Generates the seeded corpora, and pins any tree by a manifest digest |
 | `corpora.json` | — | The pinned digests of the generated and the frozen real corpora |
 | `xsbench-helper` | endpoint, as root | The only root operations a run performs |
@@ -29,6 +31,32 @@ of the declared medium and at the declared speed, with no `netem` qdisc and
 a round trip inside the declared limit. It exits nonzero and prints one
 `PROBLEM` line per failed check. A run may start only when it prints
 `preflight passed`.
+
+## Building and staging
+
+```sh
+python3 benchmarks/lab/stage.py build --rev REV
+python3 benchmarks/lab/stage.py push --rev REV
+python3 benchmarks/lab/stage.py check --rev REV
+```
+
+`build` exports the commit with `git archive` and builds its static musl
+release for linux/amd64 and linux/arm64 in Docker, using that commit's own
+`tools/release.Dockerfile`. The working tree is never built, so a binary
+cannot contain uncommitted changes, whatever state the tree is in. The
+binaries go to `.bench/lab/builds/<rev12>/` and their hashes to
+`benchmarks/results/lab/builds/<rev12>.json`, which is tracked. An existing
+build is kept unless `--rebuild` is given, since a rebuild need not be
+bit-identical.
+
+`push` copies the binary for each host's architecture to
+`ROOT/bin/xs-<rev12>`, checking its SHA-256 on the host before it takes that
+name, along with `probe.py`, `corpus.py`, `corpora.json` and `measure.py`.
+
+`check` fails for a host whose `xs-<rev12>` is missing, is not byte-for-byte
+the recorded build, reports another revision or a `-dirty` one, or whose
+scripts differ from the working copy. It also records each host's rsync
+path, version and hash. `preflight.py --rev REV` runs the same check.
 
 ## Corpora
 

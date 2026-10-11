@@ -203,6 +203,7 @@ def main(argv=None):
     parser.add_argument('--hosts', type=pathlib.Path, default=HERE / 'hosts.toml')
     parser.add_argument('--link', action='append', help='link to check (default: all)')
     parser.add_argument('--pings', type=int, default=10)
+    parser.add_argument('--rev', help='also require every host to have the recorded build of this commit')
     parser.add_argument('--output', type=pathlib.Path, default=RESULTS, help='directory for the record')
     args = parser.parse_args(argv)
     try:
@@ -213,6 +214,12 @@ def main(argv=None):
     if unknown := [name for name in link_names if name not in config['links']]:
         parser.error('unknown link: ' + ', '.join(unknown))
     record = survey(config, link_names, args.pings)
+    if args.rev:
+        import stage  # stage imports this module
+        build = record['build'] = stage.load_build(args.rev)
+        names = [name for name in record['inventory'] if config['hosts'][name].get('root')]
+        record['staged'], problems = stage.check(config, names, build)
+        record['problems'] += problems
     args.output.mkdir(parents=True, exist_ok=True)
     stamp = record['utc'].replace('-', '').replace(':', '').replace('+0000', 'Z')
     output = args.output / f'{stamp}-{"-".join(link_names)}.json'

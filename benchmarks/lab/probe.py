@@ -309,6 +309,32 @@ def route(peer, ssh_target, pings):
     return result
 
 
+def file_sha256(path):
+    try:
+        digest = hashlib.sha256()
+        with open(path, 'rb') as stream:
+            while chunk := stream.read(1 << 20):
+                digest.update(chunk)
+        return digest.hexdigest()
+    except OSError:
+        return None
+
+
+def staged(root, names):
+    """Hashes of the named files under ROOT/bin, what each xs there says it is, and this host's rsync."""
+    result = {'utc': utc(), 'hostname': socket.gethostname(), 'machine': platform.machine(),
+              'files': {name: file_sha256(os.path.join(root, 'bin', name)) for name in names}, 'versions': {}}
+    for name in names:
+        if name.startswith('xs-') and result['files'][name]:
+            status, out, _ = run([os.path.join(root, 'bin', name), '--version'], timeout=10)
+            result['versions'][name] = out.splitlines()[0] if status == 0 and out else None
+    rsync = which('rsync')
+    status, out, _ = run(['rsync', '--version'])
+    result['rsync'] = {'path': rsync, 'sha256': file_sha256(rsync) if rsync else None,
+                       'version': out.splitlines()[0] if status == 0 and out else None}
+    return result
+
+
 def sample(name, interval, output):
     """Append one snapshot per interval until SIGTERM or SIGINT."""
     stop = []
@@ -333,6 +359,9 @@ def main(argv=None):
     p.add_argument('--peer', required=True, help='host name to resolve')
     p.add_argument('--ssh', help='SSH target to connect to, as the transfers will')
     p.add_argument('--pings', type=int, default=10)
+    p = commands.add_parser('staged', help='hashes and versions of files staged under ROOT/bin')
+    p.add_argument('--root', required=True)
+    p.add_argument('names', nargs='+')
     p = commands.add_parser('sample', help='append snapshots at an interval until signalled')
     p.add_argument('--interface')
     p.add_argument('--interval', type=float, default=1.0)
@@ -346,6 +375,10 @@ def main(argv=None):
         if args.peer.startswith('-') or (args.ssh or '').startswith('-'):
             parser.error('invalid peer')
         result = route(args.peer, args.ssh, args.pings)
+    elif args.command == 'staged':
+        if not args.root.startswith('/') or any('/' in name or name.startswith('.') for name in args.names):
+            parser.error('staged needs an absolute root and plain file names')
+        result = staged(args.root, args.names)
     else:
         if args.interval <= 0:
             parser.error('--interval must be positive')

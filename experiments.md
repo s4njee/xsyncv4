@@ -168,7 +168,7 @@ results in `benchmarks/results/lab/<experiment>/<run-id>/`.
 | `hosts.toml` | controller | Host inventory, owned roots, declared interface and peer route per link |
 | `experiments/E*.toml` | controller | Pre-registered specs |
 | `corpus.py` | each endpoint | Seeded generator; writes a manifest and digest |
-| `stage.py` | controller | Builds via `tools/release.py`, stages `xs-<rev12>` by hash, verifies SHA-256 remotely |
+| `stage.py` | controller | Builds a commit's static release from `git archive`, stages `xs-<rev12>` and the lab scripts, verifies SHA-256 remotely |
 | `preflight.py` | controller + agent | Inventory, path proof, link probe, tool versions |
 | `plan.py` | controller | Spec + seed → block plan (JSON) |
 | `agent.py` | client endpoint | Executes a plan with no controller in the timed path; appends JSONL after every sample |
@@ -190,8 +190,11 @@ the controller cannot perturb or abort a block.
 
 Before a run:
 
-1. Refuse a dirty tree or a non-release build. Record the revision and the
-   binary hash on both ends, and the rsync and OpenSSH versions.
+1. Refuse any `xs` that is not the recorded build of the commit under test.
+   Builds are made from `git archive` of a commit, never from the working
+   tree, so a binary cannot hold uncommitted changes; each host's copy must
+   match the recorded SHA-256 and report that revision. Record the revision
+   and binary hash on both ends, and the rsync and OpenSSH versions.
 2. Check each corpus against its pinned manifest digest and file count.
 3. Path proof: resolve the peer name fresh, record `ip route get <peer>`
    (interface, source address), link speed and MTU, and the peer's
@@ -225,7 +228,9 @@ For each sample, in the block's random order:
 11. Time `syncfs` on the destination separately; `wall + syncfs` is the
     time-to-durable.
 12. Probe both hosts again.
-13. Verify with `rsync -anci --delete`, untimed. Screening specs may verify
+13. Verify, untimed, with `rsync -anci --delete` and, for a fresh copy of
+    a pinned corpus, by `corpus.py verify` of the destination against the
+    corpus manifest, which does not depend on either tool. Screening specs may verify
     by checksum on the first and last block and by size, time and mode
     otherwise; the record says which.
 14. Append the record.
@@ -627,8 +632,7 @@ stays out, load gate, free-space check, and `purge` for cold runs.
 | M8 | `export.py`, table schemas, one figure spec | F2 and F3 render in holochart from E0a and smoke E1 data with no hand-edited numbers |
 | M9 | E1 onward | — |
 
-Progress, 2026-10-11: M0 and M1 are done for the LAN pair, and M2 for the
-generated corpora.
+Progress, 2026-10-11: M0 to M3 are done for the LAN pair.
 
 - The helper is installed on neo and freya and was checked there: `netem`
   adds the stated delay and its timer clears it unprompted, the governor
@@ -640,10 +644,15 @@ generated corpora.
   the Mac, neo and freya, and every digest matches across the three.
 - The three real corpora are frozen on freya, mirrored to neo and verified
   there by a full re-read against the pinned digests.
+- The baseline revision is `bf596d28c5c9`. Its static release was built
+  from `git archive` for both architectures and staged on neo and freya;
+  the hashes are in `benchmarks/results/lab/builds/`. Replacing neo's copy
+  with an older build made both `stage.py check` and `preflight.py --rev`
+  fail. One push and one pull between the staged binaries produced trees
+  that match the corpus digests.
 - Not done: mars could not be inventoried. It has no mDNS name on the
   network and the address neo has for it (192.168.1.229) does not answer,
-  so it is off, asleep or booted into another system. The baseline revision
-  is not yet committed.
+  so it is off, asleep or booted into another system.
 
 M0 is done by the operator, not by the harness. M1–M6 need no engine
 change, so flag-only experiments (E1–E3) can start before M7.
