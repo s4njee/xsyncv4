@@ -171,7 +171,7 @@ results in `benchmarks/results/lab/<experiment>/<run-id>/`.
 | `stage.py` | controller | Builds a commit's static release from `git archive`, stages `xs-<rev12>` and the lab scripts, verifies SHA-256 remotely |
 | `preflight.py` | controller + agent | Inventory, path proof, link probe, tool versions |
 | `plan.py` | controller | Spec + seed → block plan (JSON) |
-| `agent.py` | client endpoint | Executes a plan with no controller in the timed path; appends JSONL after every sample |
+| `agent.py` | driver endpoint | Executes a plan with no controller in the timed path; appends JSONL after every sample |
 | `probe.py` | both endpoints | Host-state snapshot before and after each sample |
 | `analyze.py` | controller | Estimates, intervals, tests, verdicts |
 | `report.py` | controller | Markdown report per experiment |
@@ -182,9 +182,12 @@ The agent and probes use only the Python standard library, as the existing
 harness does, so they run unchanged on neo. The analysis is also standard
 library only; the estimators in section 5 need nothing more.
 
-The controller ships a plan to the client endpoint and collects results
-afterwards. The agent runs detached, so a sleeping laptop or a Wi-Fi drop on
-the controller cannot perturb or abort a block.
+The controller ships a plan to one endpoint, the driver (neo), and collects
+results afterwards. The agent runs there detached, so a sleeping laptop or a
+Wi-Fi drop on the controller cannot perturb or abort a block. The driver
+reaches the other endpoint over SSH and starts each timed transfer on
+whichever host the cell names as the SSH client, under `measure.py` on that
+host, so the agent itself is outside the timed path too.
 
 ### 4.3 Sample lifecycle
 
@@ -228,11 +231,11 @@ For each sample, in the block's random order:
 11. Time `syncfs` on the destination separately; `wall + syncfs` is the
     time-to-durable.
 12. Probe both hosts again.
-13. Verify, untimed, with `rsync -anci --delete` and, for a fresh copy of
-    a pinned corpus, by `corpus.py verify` of the destination against the
-    corpus manifest, which does not depend on either tool. Screening specs may verify
-    by checksum on the first and last block and by size, time and mode
-    otherwise; the record says which.
+13. Verify, untimed, by `corpus.py verify` of the destination against the
+    corpus manifest, which depends on neither tool. A fresh copy is re-read
+    in full; screening specs may do that on the first and last block only
+    and compare names, sizes, modes and times otherwise. The record says
+    which.
 14. Append the record.
 
 A sample is **invalid** only for reasons recorded independently of its
@@ -632,7 +635,7 @@ stays out, load gate, free-space check, and `purge` for cold runs.
 | M8 | `export.py`, table schemas, one figure spec | F2 and F3 render in holochart from E0a and smoke E1 data with no hand-edited numbers |
 | M9 | E1 onward | — |
 
-Progress, 2026-10-11: M0 to M3 are done for the LAN pair.
+Progress, 2026-10-11: M0 to M4 are done for the LAN pair.
 
 - The helper is installed on neo and freya and was checked there: `netem`
   adds the stated delay and its timer clears it unprompted, the governor
@@ -648,8 +651,19 @@ Progress, 2026-10-11: M0 to M3 are done for the LAN pair.
   from `git archive` for both architectures and staged on neo and freya;
   the hashes are in `benchmarks/results/lab/builds/`. Replacing neo's copy
   with an older build made both `stage.py check` and `preflight.py --rev`
-  fail. One push and one pull between the staged binaries produced trees
-  that match the corpus digests.
+  fail.
+- M4: `plan.py` expands a spec into randomized, interleaved blocks and
+  `agent.py` runs them detached on neo. The smoke experiment
+  (`benchmarks/experiments/E00-smoke.toml`: both tools, both directions,
+  either end as SSH client, fresh and noop) produced 64 valid samples in 32
+  valid blocks, each destination verified against its corpus manifest, with
+  the agent running under PID 1 after the launching session ended. An arm
+  with a bad option was recorded as void with the tool's own error, never
+  as a timing. Both hosts were left with their governors restored and work
+  directories removed.
+- Not yet in the agent: the `update-1pct` scenario, a throughput probe per
+  block (only ping statistics so far), the once-a-second host sampler, and
+  resuming a run whose agent died.
 - Not done: mars could not be inventoried. It has no mDNS name on the
   network and the address neo has for it (192.168.1.229) does not answer,
   so it is off, asleep or booted into another system.

@@ -10,7 +10,9 @@ import sys
 import tempfile
 import unittest
 
+import agent
 import corpus
+import plan
 import preflight
 import probe
 import stage
@@ -360,6 +362,142 @@ class StagedBuilds(unittest.TestCase):
         result = subprocess.run([sys.executable, str(HERE / 'probe.py'), 'staged', '--root', '/tmp', '../etc/passwd'],
                                 capture_output=True, text=True)
         self.assertEqual(result.returncode, 2)
+
+
+class Plans(unittest.TestCase):
+    SPEC = {'id': 'E99', 'sha256': 'spec', 'kind': 'screening', 'hypothesis': 'h', 'primary': 'wall_s',
+            'control': 'rsync', 'blocks': 4, 'verify': 'first-last',
+            'arms': {'rsync': {'tool': 'rsync'}, 'fast': {'tool': 'rsync', 'flags': ['-a', '-W']},
+                     'other': {'tool': 'rsync', 'flags': ['-rt']}},
+            'matrix': {'link': 'lan', 'corpus': ['tiny-one', 'small-flat'], 'scenario': ['fresh', 'noop'],
+                       'direction': ['neo>freya', 'freya>neo'], 'client': ['sender', 'receiver']}}
+
+    def setUp(self):
+        self.config = preflight.load(HERE / 'hosts.toml')
+        self.pins = json.loads((HERE / 'corpora.json').read_text())
+
+    def make(self, seed=1, **changes):
+        return plan.make_plan(dict(self.SPEC, **changes), self.config, self.pins, seed, 'run')
+
+    def test_every_block_holds_every_arm_once(self):
+        made = self.make()
+        self.assertEqual(len(made['cells']), 16)
+        self.assertEqual(len(made['blocks']), 16 * 4)
+        for block in made['blocks']:
+            for order in block['orders']:
+                self.assertEqual(sorted(order), ['fast', 'other', 'rsync'])
+
+    def test_cells_are_interleaved_round_by_round(self):
+        blocks = self.make()['blocks']
+        for start in range(0, len(blocks), 16):
+            round_ = blocks[start:start + 16]
+            self.assertEqual(len({block['cell'] for block in round_}), 16)
+            self.assertEqual({block['block'] for block in round_}, {start // 16})
+
+    def test_order_depends_only_on_the_seed(self):
+        self.assertEqual(self.make(seed=7)['blocks'], self.make(seed=7)['blocks'])
+        self.assertNotEqual(self.make(seed=7)['blocks'], self.make(seed=8)['blocks'])
+        orders = {tuple(block['orders'][0]) for block in self.make()['blocks']}
+        self.assertGreater(len(orders), 3, 'arm order is not randomized')
+
+    def test_first_and_last_blocks_are_verified_in_full(self):
+        made = self.make()
+        self.assertEqual({block['block'] for block in made['blocks'] if block['verify_full']}, {0, 3})
+        self.assertTrue(all(block['verify_full'] for block in self.make(verify='full')['blocks']))
+
+    def test_plan_names_pinned_corpora_and_declared_interfaces(self):
+        made = self.make()
+        self.assertEqual(made['corpora']['small-flat']['digest'], self.pins['small-flat:full']['digest'])
+        self.assertEqual(made['hosts']['neo']['interface'], 'eth0')
+        self.assertEqual(made['driver'], 'neo')
+        self.assertIn('agent.py', made['scripts'])
+
+    def test_bad_specs_are_rejected(self):
+        for changes in ({'matrix': dict(self.SPEC['matrix'], corpus=['unpinned'])},
+                        {'matrix': dict(self.SPEC['matrix'], direction=['neo>mars'])},
+                        {'matrix': dict(self.SPEC['matrix'], scenario=['update-1pct'])},
+                        {'matrix': dict(self.SPEC['matrix'], link='nowhere')}):
+            with self.assertRaises(plan.SpecError, msg=changes):
+                self.make(**changes)
+        for text in ('id="x"\n', 'id="E1"\nhypothesis="h"\nkind="guess"\nprimary="wall_s"\ncontrol="a"\nblocks=1\n'
+                     '[arms.a]\ntool="rsync"\n[arms.b]\ntool="rsync"\n[matrix]\n',
+                     'id="E1"\nhypothesis="h"\nkind="screening"\nprimary="wall_s"\ncontrol="a"\nblocks=1\n'
+                     '[arms.a]\ntool="rsync"\n[arms.b]\ntool="xs"\n[matrix]\n'):
+            with tempfile.NamedTemporaryFile('w', suffix='.toml') as stream:
+                stream.write(text)
+                stream.flush()
+                with self.assertRaises(plan.SpecError, msg=text):
+                    plan.load_spec(stream.name)
+
+    def test_checked_in_smoke_spec_loads(self):
+        spec = plan.load_spec(HERE.parent / 'experiments' / 'E00-smoke.toml')
+        self.assertEqual(spec['control'], 'rsync')
+
+
+class AgentPieces(unittest.TestCase):
+    def hosts(self):
+        spec = lambda root, ssh: {'ssh': ssh, 'root': root, 'interface': 'eth0', 'helper': True}
+        return {'neo': agent.Host('neo', spec('/n', 'u@neo.local'), True),
+                'freya': agent.Host('freya', spec('/f', 'u@freya.local'), False)}
+
+    CELL = {'id': 'tiny-one.fresh.neo-freya.sender.warm', 'corpus': 'tiny-one', 'scenario': 'fresh',
+            'sender': 'neo', 'receiver': 'freya', 'client': 'sender', 'link': 'lan', 'cache': 'warm'}
+    XS = {'name': 'xs', 'tool': 'xs', 'flags': ['-a'], 'binary': {'neo': '/n/bin/xs-r', 'freya': '/f/bin/xs-r'}}
+    RSYNC = {'name': 'rsync', 'tool': 'rsync', 'flags': ['-a'], 'binary': {'neo': 'rsync', 'freya': 'rsync'}}
+
+    def test_push_runs_on_the_sender_and_measures_both_ends(self):
+        client, peer, argv, script = agent.transfer_command(self.XS, self.CELL, self.hosts(), 'run1', 'tag')
+        self.assertEqual((client.name, peer.name), ('neo', 'freya'))
+        self.assertEqual(argv[:3], ['env', 'XSYNC_CONFIG=', 'XSYNC_OPTS='])
+        self.assertEqual(argv[3:8], ['python3', '/n/bin/measure.py', '--metrics', '/n/work/run1/logs/tag.client.json', '--'])
+        self.assertEqual(argv[8:13], ['/n/bin/xs-r', '-a', '--stats', '--no-fallback', '--no-progress'])
+        self.assertIn('--rsync-path=python3 /f/bin/measure.py --metrics /f/work/run1/logs/tag.peer.json -- /f/bin/xs-r', argv)
+        self.assertEqual(argv[-2:], ['/n/corpora/tiny-one/',
+                                     'u@freya.local:/f/work/run1/tiny-one.fresh.neo-freya.sender.warm/xs/'])
+        self.assertTrue(script.endswith('> /n/work/run1/logs/tag.out 2> /n/work/run1/logs/tag.err'))
+
+    def test_pull_runs_on_the_receiver(self):
+        cell = dict(self.CELL, client='receiver')
+        client, peer, argv, _ = agent.transfer_command(self.RSYNC, cell, self.hosts(), 'run1', 'tag')
+        self.assertEqual((client.name, peer.name), ('freya', 'neo'))
+        self.assertNotIn('--no-fallback', argv)
+        self.assertEqual(argv[-2:], ['u@neo.local:/n/corpora/tiny-one/',
+                                     '/f/work/run1/tiny-one.fresh.neo-freya.sender.warm/rsync/'])
+        self.assertIn('--rsync-path=python3 /n/bin/measure.py --metrics /n/work/run1/logs/tag.peer.json -- rsync', argv)
+
+    def test_work_paths_stay_inside_the_owned_directory(self):
+        host = self.hosts()['freya']
+        self.assertEqual(agent.work_path(host, 'run1', 'cell.a', 'xs'), '/f/work/run1/cell.a/xs')
+        for parts in (('..',), ('a/b',), ('',), ('-rf',), ('run1', '..')):
+            with self.assertRaises(ValueError, msg=parts):
+                agent.work_path(host, *parts)
+
+    def test_stats_are_parsed(self):
+        text = ('\nNumber of files: 10,103 (reg: 10,002, dir: 101)\nNumber of regular files transferred: 10,002\n'
+                'Total file size: 578,000 bytes\nTotal bytes sent: 1,234\nTotal bytes received: 56\n'
+                'File list generation time: 0.001 seconds\n\nsent 1,234 bytes  received 56 bytes  2.00 bytes/sec\n')
+        self.assertEqual(agent.parse_stats(text), {
+            'number_of_files': 10103, 'number_of_regular_files_transferred': 10002, 'total_file_size': 578000,
+            'total_bytes_sent': 1234, 'total_bytes_received': 56, 'file_list_generation_time': 0.001})
+
+    def test_gates(self):
+        host = self.hosts()['neo']
+        idle = {'cpu_jiffies': ['cpu  100 0 100 1000 0 0 0 0 0 0'], 'memory': {'Dirty': 0, 'Writeback': 0},
+                'temp_millic': {'cpu-thermal': 50000}, 'throttled': '0x0'}
+        later = lambda **changes: {**idle, 'cpu_jiffies': ['cpu  101 0 101 1098 0 0 0 0 0 0'], **changes}
+        self.assertAlmostEqual(agent.busy_fraction(idle['cpu_jiffies'][0], later()['cpu_jiffies'][0]), 0.02)
+        self.assertIsNone(agent.gate_problem(host, idle, later()))
+        self.assertIn('busy', agent.gate_problem(host, idle, later(cpu_jiffies=['cpu  150 0 150 1000 0 0 0 0 0 0'])))
+        self.assertIn('dirty', agent.gate_problem(host, idle, later(memory={'Dirty': 64 << 20, 'Writeback': 0})))
+        self.assertIn('at 81 C', agent.gate_problem(host, idle, later(temp_millic={'cpu-thermal': 81000})))
+        self.assertIn('throttled', agent.gate_problem(host, idle, later(throttled='0x4')))
+
+    def test_throttling_during_a_sample_voids_it(self):
+        host = self.hosts()['neo']
+        self.assertIsNone(agent.throttle_problem(host, {'throttled': '0x50000'}, {'throttled': '0x50000'}))
+        self.assertIsNone(agent.throttle_problem(host, {}, {}))
+        self.assertIn('throttled during', agent.throttle_problem(host, {'throttled': '0x0'}, {'throttled': '0x40000'}))
+        self.assertIn('throttled during', agent.throttle_problem(host, {'throttled': '0x0'}, {'throttled': '0x4'}))
 
 
 class HelperArguments(unittest.TestCase):

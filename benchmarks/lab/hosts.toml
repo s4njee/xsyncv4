@@ -2,6 +2,9 @@
 # every claim here against what the hosts themselves report, so a wrong entry
 # fails loudly instead of quietly measuring another path.
 
+# The host agent.py runs on. It reaches the other endpoint of a link over SSH.
+driver = "neo"
+
 [hosts.neo]
 ssh = "sanjee@neo.local"      # how the controller and the peers reach it
 name = "neo.local"            # the name peers resolve

@@ -22,7 +22,7 @@ REPO = HERE.parent.parent
 BUILDS = REPO / '.bench' / 'lab' / 'builds'             # binaries, not tracked
 RECORDS = HERE.parent / 'results' / 'lab' / 'builds'    # their hashes, tracked
 ARCHES = {'x86_64': 'amd64', 'aarch64': 'arm64', 'arm64': 'arm64'}
-SCRIPTS = (HERE / 'probe.py', HERE / 'corpus.py', HERE / 'corpora.json', HERE.parent / 'measure.py')
+SCRIPTS = (HERE / 'probe.py', HERE / 'corpus.py', HERE / 'corpora.json', HERE / 'agent.py', HERE.parent / 'measure.py')
 
 
 def run(*command, **options):

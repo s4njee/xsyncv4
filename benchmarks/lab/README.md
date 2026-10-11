@@ -3,7 +3,8 @@
 The measurement framework planned in [experiments.md](../../experiments.md).
 So far this holds the privileged helper, milestone M1 (host declarations,
 endpoint probes and the preflight check), milestone M2 (corpora) and
-milestone M3 (building and staging binaries).
+milestone M3 (building and staging binaries) and milestone M4 (plans, the
+run agent and the sample record).
 
 | File | Runs on | Purpose |
 |---|---|---|
@@ -11,6 +12,8 @@ milestone M3 (building and staging binaries).
 | `probe.py` | endpoint | Read-only JSON reports: `inventory`, `snapshot`, `route`, and `sample` for a once-a-second series |
 | `preflight.py` | controller | Runs the probes over SSH, checks them against `hosts.toml`, and writes a record under `benchmarks/results/lab/preflight/` |
 | `stage.py` | controller | Builds `xs` from a commit, stages it and the lab scripts on the hosts, and checks what they hold |
+| `plan.py` | controller | Expands an experiment spec into a randomized block plan; starts, follows and fetches a run |
+| `agent.py` | driver endpoint | Executes a plan detached and writes one record per sample |
 | `corpus.py` | endpoint | Generates the seeded corpora, and pins any tree by a manifest digest |
 | `corpora.json` | — | The pinned digests of the generated and the frozen real corpora |
 | `xsbench-helper` | endpoint, as root | The only root operations a run performs |
@@ -57,6 +60,45 @@ name, along with `probe.py`, `corpus.py`, `corpora.json` and `measure.py`.
 the recorded build, reports another revision or a `-dirty` one, or whose
 scripts differ from the working copy. It also records each host's rsync
 path, version and hash. `preflight.py --rev REV` runs the same check.
+
+## Running an experiment
+
+A spec in `benchmarks/experiments/` names the arms, the cell matrix, the
+control arm and a block budget. `E00-smoke.toml` is the harness's own check.
+
+```sh
+python3 benchmarks/lab/plan.py make benchmarks/experiments/E00-smoke.toml
+python3 benchmarks/lab/plan.py start benchmarks/experiments/E00-smoke.toml
+python3 benchmarks/lab/plan.py status RUN_ID
+python3 benchmarks/lab/plan.py fetch RUN_ID
+python3 benchmarks/lab/plan.py stop RUN_ID
+```
+
+`make` prints the plan: every arm once per block in an order drawn from the
+seed, cells interleaved round by round, and two spare orders per block for
+retries. `start` runs preflight (with `--rev` for each `xs` arm), copies the
+plan to the driver host and launches `agent.py` there with `setsid`, so it
+keeps running when the controller disconnects. `fetch` copies the records to
+`benchmarks/results/lab/EXPERIMENT/RUN_ID/`.
+
+The agent, for each sample: empties or seeds the destination, pre-reads the
+source (or drops caches for a cold cell), flushes the destination filesystem
+and waits until both hosts are idle, cool and have nothing dirty, then runs
+the transfer under `measure.py` on the client host with the peer wrapped by
+`measure.py` through `--rsync-path`. Afterwards it times a `sync -f` of the
+destination, snapshots both hosts again and verifies the destination against
+the corpus manifest. It sets the `performance` governor for the run and
+restores it at the end.
+
+A sample is void, with a reason and no timing, if the transfer or the peer
+failed, the destination does not verify, a host throttled, or the hosts did
+not settle. A void sample ends its block attempt; the block is tried again
+in a fresh order up to twice. `samples.jsonl` holds one record per sample,
+`blocks.jsonl` one per block attempt with its link probe, and `run.json` the
+plan as executed.
+
+Only one run at a time holds the driver's lock. Scenarios are `fresh` and
+`noop` so far.
 
 ## Corpora
 
