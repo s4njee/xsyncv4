@@ -18,6 +18,7 @@ std::atomic<int> g_exit_code{0};
 std::atomic<int> g_stop{0};
 std::atomic<bool> g_source_io_error{false};
 void (*g_msg_sink)(int kind, int code, std::string_view s) = nullptr;
+void (*g_fs_error_sink)(int error, std::string_view path, std::string_view operation) = nullptr;
 
 void DirList::sort() {
   if (e.size() < 2) return;
@@ -155,6 +156,7 @@ void die(int code, const char* fmt, ...) {
   std::string s = vformat(fmt, ap);
   va_end(ap);
   cleanup_open_outputs();
+  if (g_item_sink) { item_error(); item_finish(current_item(), "failure"); }
   if (g_msg_sink) g_msg_sink(2, code, s);
   else {
     progress_stop(false);

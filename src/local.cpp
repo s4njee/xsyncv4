@@ -15,6 +15,7 @@
 #include "delta.h"
 #include "rate_limit.h"
 #include "link_dest.h"
+#include "app_partials.h"
 
 #ifdef __APPLE__
 #include <sys/clonefile.h>
@@ -61,7 +62,10 @@ SourceGuard::SourceGuard(const std::string& dest) {
   if (dest.empty()) return;
   std::error_code ec;
   path = std::filesystem::weakly_canonical(std::filesystem::absolute(dest, ec), ec).string();
-  if (ec) die(RERR_FILESELECT, "cannot resolve destination \"%s\": %s", dest.c_str(), ec.message().c_str());
+  if (ec) {
+    if (g_fs_error_sink) g_fs_error_sink(ec.value(), dest, "resolve_destination");
+    die(RERR_FILESELECT, "cannot resolve destination \"%s\": %s", dest.c_str(), ec.message().c_str());
+  }
   while (path.size() > 1 && path.back() == '/') path.pop_back();
   struct stat st;
   if (stat(dest.c_str(), &st) == 0 && S_ISDIR(st.st_mode)) dev = st.st_dev, ino = st.st_ino;
@@ -190,6 +194,8 @@ void prune_source(DirList& l, std::string_view rel, u32 parent_dev, Worker& t, s
       default: break;
     }
     if (skip && !o.list_only) {
+      auto item = transfer_item(full(), paths ? (*paths)[i] : path_join(base, l.name_sv(e)), {}, e);
+      item_finish(item, "skipped", "unsupported_type");
       if (!o.quiet) t.logf("skipping non-regular file \"" + full() + "\"");
       if (!o.del) continue;
       // rsync retains skipped source names in its deletion comparison. Keep a
@@ -220,17 +226,45 @@ void build_root(const std::vector<std::string>& srcs, RootList& r, Worker& t, co
     struct stat st;
     const char* a = arg.empty() ? "." : arg.c_str();
     if ((slash || o.copy_links ? stat(a, &st) : lstat(a, &st)) != 0) {
+      int error = errno;
+      std::string selected = arg;
+      while (selected.size() > 1 && selected.back() == '/') selected.pop_back();
+      auto item = transfer_item(slash ? "" : app_selection_name(selected, selected.substr(selected.rfind('/') + 1)), a, {}, Entry{});
+      ItemScope scope(item);
+      source_error(error, a, "stat_source");
       g_source_io_error.store(true);
-      err_line(RERR_PARTIAL, "link_stat \"%s\" failed: %s", a, errstr(errno).c_str());
+      err_line(RERR_PARTIAL, "link_stat \"%s\" failed: %s", a, errstr(error).c_str());
+      item_finish(item, "failure", "source_error");
       continue;
     }
     Entry e;
     entry_from_stat(st, e);
+    if (g_app_preview_source_check) {
+      std::string selected=arg; while (selected.size()>1 && selected.back()=='/') selected.pop_back();
+      auto relative=slash ? std::string() : app_selection_name(selected,selected.substr(selected.rfind('/')+1));
+      auto observed=transfer_item(relative,a,{},e,false);
+      auto revision=DestinationRevision::from(st);
+      if (!item_preview_source_valid(observed,&revision)) {
+        r.app_scan_failed=true;
+        auto failed=transfer_item(relative,a,{},e);
+        failed->failed.store(true); failed->source_failed.store(true); failed->preview_stale.store(true);
+        item_finish(failed,"failure","stale_preview");
+        continue;
+      }
+    }
     if (e.type == T_DIR && guard.excludes(a)) {
+      std::string selected = arg;
+      while (selected.size() > 1 && selected.back() == '/') selected.pop_back();
+      auto item = transfer_item(slash ? "" : app_selection_name(selected, selected.substr(selected.rfind('/') + 1)), a, {}, e);
+      ItemScope scope(item);
+      if (g_fs_error_sink) g_fs_error_sink(0, a, "source_destination_overlap");
       err_line(RERR_FILESELECT, "source directory is inside the destination: \"%s\"", a);
+      item_finish(item, "failure", "source_destination_overlap");
       continue;
     }
     if (e.type == T_DIR && slash) {
+      ItemScope source_directory(transfer_item("", a, {}, e, false));
+      if (g_item_sink && !r.has_attrs) r.attrs = e, r.has_attrs = true, r.attr_source = path_join(a, ".");
       any_slash = true;
       if (!o.recursive && !o.dirs) {
         if (!o.quiet) t.logf("skipping directory .");
@@ -239,15 +273,20 @@ void build_root(const std::vector<std::string>& srcs, RootList& r, Worker& t, co
       DirList l;
       int err = list_dir(a, l, lflags);
       if (err) {
+        r.app_scan_failed = true;
+        source_error(err, a, "scan_source");
         g_source_io_error.store(true);
         err_line(RERR_PARTIAL, "opendir \"%s\" failed: %s", a, errstr(err).c_str());
         continue;
       }
       if (l.incomplete) {
+        r.app_scan_failed = true;
+        source_error(0, a, "scan_source");
         g_source_io_error.store(true);
         err_line(RERR_PARTIAL, "incomplete source listing: \"%s\"", a);
       }
       auto context = directory_filters({}, a, false);
+      if (!item_preview_source_valid(current_item())) { r.app_scan_failed=true; l.clear(); }
       prune_source(l, "", e.dev, t, nullptr, guard, a, context.get());
       for (Entry c : l.e) {
         std::string_view nm = l.name_sv(c);
@@ -268,14 +307,20 @@ void build_root(const std::vector<std::string>& srcs, RootList& r, Worker& t, co
         err_line(RERR_PARTIAL, "cannot use \"%s\" as a source without a trailing slash", a);
         continue;
       }
+      nm = app_selection_name(trimmed, nm);
       DirList one;
       e.name_off = one.add_str(nm);
       e.name_len = (u16)nm.size();
       if (e.type == T_LNK && (o.links || o.list_only)) {
         char buf[PATH_MAX];
         ssize_t n = readlink(a, buf, sizeof buf - 1);
-        if (n < 0 && o.list_only) {
-          err_line(RERR_PARTIAL, "readlink \"%s\" failed: %s", a, errstr(errno).c_str());
+        if (n < 0) {
+          int error = errno;
+          auto item = transfer_item(nm, a, {}, e);
+          ItemScope scope(item);
+          source_error(error, a, "readlink_source");
+          err_line(RERR_PARTIAL, "readlink \"%s\" failed: %s", a, errstr(error).c_str());
+          item_finish(item, "failure", "source_error");
           continue;
         }
         e.link_off = one.add_str({buf, n > 0 ? (size_t)n : 0});
@@ -283,7 +328,9 @@ void build_root(const std::vector<std::string>& srcs, RootList& r, Worker& t, co
       one.e.push_back(e);
       std::string parent = sl == std::string::npos ? "." : sl ? trimmed.substr(0, sl) : "/";
       std::shared_ptr<const FilterList> context;
-      prune_source(one, "", 0, t, nullptr, guard, parent, context.get());
+      std::vector<std::string> exact_paths;
+      if (g_item_sink) exact_paths.push_back(trimmed);
+      prune_source(one, "", 0, t, g_item_sink ? &exact_paths : nullptr, guard, parent, context.get());
       if (one.e.empty()) continue;
       Entry c = one.e[0];
       c.rdev = (c.type == T_CHR || c.type == T_BLK) ? c.rdev : 0;
@@ -330,9 +377,31 @@ bool setup_dest(const std::string& dest_arg, DirWork& root, bool single) {
   while (dest.size() > 1 && dest.back() == '/') dest.pop_back();
   if (!root.has_attrs && std::none_of(root.src.e.begin(), root.src.e.end(),
                                     [](const Entry& e) { return !(e.item_flags & IF_PRUNED); })) return false;
-  if (!anchor_destination(dest)) die(RERR_FILESELECT, "cannot open destination anchor: %s", errstr(errno).c_str());
+  auto reject_root = [&](std::string_view reason) {
+    root.dst_path = dest;
+    prepare_items(root);
+    if (root.app_directory) {
+      root.app_directory->applied.store(false);
+      item_finish(root.app_directory, "failure", reason);
+    }
+    for (auto& item : root.app_items) item_finish(item, "failure", reason);
+    return false;
+  };
+  // App roots are existing objects, never implicit mkdir targets.
+  if (g_app_destination_check && !g_app_destination_check()) return reject_root("destination_changed");
+  if (!anchor_destination(dest)) {
+    if (g_fs_error_sink) g_fs_error_sink(errno, dest, "anchor_destination");
+    die(RERR_FILESELECT, "cannot open destination anchor: %s", errstr(errno).c_str());
+  }
   struct stat st;
   bool exists = destination_stat(dest.c_str(), &st) == 0;
+  int stat_error = exists ? 0 : errno;
+  if (!exists && g_app_destination_check) {
+    if (!g_app_destination_check()) return reject_root("destination_changed");
+    if (g_fs_error_sink) g_fs_error_sink(stat_error, dest, "stat_destination_root");
+    err_line(RERR_PARTIAL, "cannot stat destination root during setup: %s", errstr(stat_error).c_str());
+    return reject_root("destination_unavailable");
+  }
   bool is_dir = exists && S_ISDIR(st.st_mode);
   if (single && !dest_slash && !is_dir) {
     size_t sl = dest.rfind('/');
@@ -343,9 +412,15 @@ bool setup_dest(const std::string& dest_arg, DirWork& root, bool single) {
     init_link_dest(root.dst_path);
     return true;
   }
-  if (exists && !is_dir) die(RERR_FILESELECT, "ERROR: destination must be a directory when copying more than 1 file");
+  if (exists && !is_dir) {
+    if (g_fs_error_sink) g_fs_error_sink(ENOTDIR, dest, "destination_preflight");
+    die(RERR_FILESELECT, "ERROR: destination must be a directory when copying more than 1 file");
+  }
   if (!exists) {
-    if (!o.dry_run && !mkdir_p(dest, 0777 & ~g_umask)) die(RERR_FILEIO, "mkdir \"%s\" failed: %s", dest.c_str(), errstr(errno).c_str());
+    if (!o.dry_run && !mkdir_p(dest, 0777 & ~g_umask)) {
+      if (g_fs_error_sink) g_fs_error_sink(errno, dest, "mkdir_destination");
+      die(RERR_FILEIO, "mkdir \"%s\" failed: %s", dest.c_str(), errstr(errno).c_str());
+    }
     if (o.verbose > 0 || (!o.link_dest.empty() && output_enabled())) out_line("created directory " + dest);
     root.created = true;
     exists = !o.dry_run && destination_stat(dest.c_str(), &st) == 0;
@@ -353,6 +428,14 @@ bool setup_dest(const std::string& dest_arg, DirWork& root, bool single) {
   root.dst_path = dest;
   init_link_dest(root.dst_path);
   if (root.has_attrs) {
+    if (g_app_preview_destination_check) {
+      prepare_items(root);
+      if (!item_preview_source_valid(root.app_directory) || !item_destination_valid(root.app_directory,true)) return reject_root("stale_preview");
+    }
+    if (app_partials::active()) {
+      prepare_items(root);
+      if (!app_partials::prepare_entry(root.app_directory)) return false;
+    }
     root.attrs.mode = incoming_mode(root.attrs.mode, root.attrs.type);
     incoming_ownership(root.attrs);
     Entry d;
@@ -391,6 +474,9 @@ bool setup_dest(const std::string& dest_arg, DirWork& root, bool single) {
     if (o.acls && exists) apply_acls(root.attrs_xattrs.acl(), dest, T_DIR, final_mode);
     if (o.xattrs && exists && (root.created || (root.attrs.item_flags & IF_XATTR))) apply_xattrs(root.attrs_xattrs, dest, T_DIR, metadata_filters);
     root.time_ok = exists && d.mtime == root.attrs.mtime && !(root.attrs.item_flags & IF_XATTR);
+    if (g_app_preview_destination_check) item_expect_destination(root.app_directory);
+    if (app_partials::active() && root.app_directory && item_expect_destination(root.app_directory))
+      if (!app_partials::own_entry(root.app_directory)) return false;
   }
   return true;
 }
@@ -565,12 +651,16 @@ struct Local {
 #endif
 
   void scan(DirWork* d, bool prelisted, Worker& w) {
+    prepare_items(*d);
+    ItemScope directory_item(d->app_directory);
+    item_stage(d->app_directory, "scanning");
     const Options& o = g_opt;
     int list_err = 0;
     size_t listed = 0;
     if (!prelisted) {
       list_err = list_dir(d->src_path.c_str(), d->src, o.copy_links ? LD_FOLLOW : o.links ? LD_LINKS : 0);
       if (list_err || d->src.incomplete) g_source_io_error.store(true);
+      if (list_err || d->src.incomplete) source_error(list_err, d->src_path, "scan_source");
       if (d->src.incomplete && !list_err) err_line(RERR_PARTIAL, "incomplete source listing: \"%s\"", d->src_path.c_str());
       if (list_err) err_line(RERR_PARTIAL, "opendir \"%s\" failed: %s", d->src_path.c_str(), errstr(list_err).c_str());
       if (d->src.incomplete) d->no_delete = true;
@@ -613,13 +703,14 @@ struct Local {
         if (s.type != T_DIR || !(s.flags & EF_DESCEND)) continue;
         DirWork* c = o.prune_empty ? d->prepared_children[i].release() : new DirWork;
         if (!c) continue;
+        c->app_directory = d->app_items.empty() ? ItemPtr{} : d->app_items[i];
         std::string_view nm = d->src.name_sv(s);
         if (d->src_paths.empty()) c->src_path = path_join(d->src_path, nm);
         else c->src_path = d->src_paths[i];
         if (!o.prune_empty) c->source_filter = d->source_contexts.empty() ? d->source_filter : d->source_contexts[i];
         c->receiver_filter = d->receiver_filter;
         c->receiver_filter_node = d->receiver_filter_node;
-        c->dst_path = path_join(d->dst_path, nm);
+        c->dst_path = path_join(d->dst_path, d->dst_name((u32)i));
         c->destination_parent = d->child_anchor;
         c->rel = rel_join(d->rel, nm);
         c->selection = d->selection;
@@ -678,6 +769,10 @@ struct Local {
   }
 
   void copy_one(DirWork& d, u32 idx, Worker& w) {
+    ItemPtr observed = d.app_items.empty() ? ItemPtr{} : d.app_items[idx];
+    ItemScope observation(observed);
+    ItemFinalizer outcome(observed);
+    item_stage(observed, "transferring");
     const Options& o = g_opt;
     Entry& s = d.src.e[idx];
     if (g_stop.load(std::memory_order_relaxed)) return;
@@ -689,6 +784,7 @@ struct Local {
     src_path_of(d, idx, w.p2);
     slot_begin(w.id, d.rel, d.src.name_sv(s), s.size);
     auto fail = [&](i64 done) {
+      outcome.status = "failure";
       g_stats.xfer_files_total.fetch_sub(1, std::memory_order_relaxed);
       g_stats.xfer_bytes_total.fetch_sub((u64)(s.size - done), std::memory_order_relaxed);
       slot_end(w.id);
@@ -713,14 +809,17 @@ struct Local {
     for (int attempt = 0; attempt < 2; attempt++) {
       int in = open(w.p2.c_str(), O_RDONLY | O_CLOEXEC | read_time_flags() | (o.copy_links || !d.src_paths.empty() ? 0 : O_NOFOLLOW));
       struct stat before;
-      if (in < 0 || fstat(in, &before) != 0 || !S_ISREG(before.st_mode)) {
-        int error = in < 0 ? errno : EIO;
+      int error = in < 0 || fstat(in, &before) != 0 ? errno : !S_ISREG(before.st_mode) ? ESTALE : 0;
+      if (error) {
         if (in >= 0) close(in);
+        source_error(error, w.p2, "open_source");
         g_source_io_error.store(true);
         if (error == ENOENT) err_line(RERR_VANISHED, "file has vanished: \"%s\"", w.p2.c_str());
         else err_line(RERR_PARTIAL, "send_files failed to open \"%s\": %s", w.p2.c_str(), errstr(error).c_str());
         return fail(0);
       }
+      auto preview_source=DestinationRevision::from(before);
+      if (!item_preview_source_valid(observed,&preview_source)) { close(in); return fail(0); }
       if (metadata_enabled()) {
         const auto& context = d.source_contexts.empty() ? d.source_filter : d.source_contexts[idx];
         d.src_xattrs[idx] = source_fd_xattrs(in, w.p2, T_REG, context ? *context : o.filters);
@@ -730,6 +829,7 @@ struct Local {
       if (fresh.size >= s.size) g_stats.xfer_bytes_total.fetch_add((u64)(fresh.size - s.size));
       else g_stats.xfer_bytes_total.fetch_sub((u64)(s.size - fresh.size));
       s = fresh;
+      if (observed) observed->size.store(s.size);
       large_file_cache_policy(in, s.size);
       slot_begin(w.id, d.rel, d.src.name_sv(s), s.size);
       ResumePrefix prefix;
@@ -741,6 +841,7 @@ struct Local {
       auto basis = !prefix.size && !o.whole_file && s.size > DELTA_THRESHOLD
                        ? (s.link_basis != 255 ? link_dest_delta_basis(d, idx) :
                           destination_delta_basis(path_join(d.dst_path, d.dst_name(idx)), o.inplace)) : nullptr;
+      item_stage(observed, "transferring");
       if (basis) {
         if (!out_open(f, d, idx, w, false, true)) { close(in); return fail(0); }
         bool output_ok = true;
@@ -758,15 +859,19 @@ struct Local {
           slot_add(w.id, size);
           return true;
         });
+        errno = result.ok ? ESTALE : EIO;
         bool stable = result.ok && source_unchanged(in, w.p2, before) && (!metadata_enabled() || source_xattrs_unchanged(d.src_xattrs[idx], w.p2));
+        int validation_error = errno;
         close(in);
         f.size = s.size;
         if (output_ok && !stable && attempt == 0) {
           out_abort(f);
           g_stats.xfer_bytes.fetch_sub((u64)result.processed);
+          item_retry(observed, 1, "source_changed");
           continue;
         }
         if (output_ok && !stable) {
+          source_error(validation_error, w.p2, "revalidate_source");
           g_source_io_error.store(true);
           err_line(RERR_PARTIAL, "source could not be read consistently during delta transfer: \"%s\"", w.p2.c_str());
           output_ok = false;
@@ -797,6 +902,10 @@ struct Local {
           return fail(0);
         }
         total = prefix.size;
+        if (prefix.basis) {
+          g_stats.delta_matched_bytes.fetch_add((u64)prefix.size);
+          item_progress(f.item,0,(u64)prefix.size);
+        }
         g_stats.xfer_bytes.fetch_add((u64)total);
         slot_add(w.id, total);
       }
@@ -851,6 +960,7 @@ struct Local {
               if (n < 0 && errno == EINTR) continue;
               if (n <= 0) {
                 if (n < 0 && !failed.exchange(true)) {
+                  source_error(errno, w.p2, "read_source");
                   g_source_io_error.store(true);
                   err_line(RERR_PARTIAL, "read errors mapping \"%s\": %s", w.p2.c_str(), errstr(errno).c_str());
                 }
@@ -872,7 +982,8 @@ struct Local {
         if (total != s.size && ok) {
           out_abort(f); close(in);
           g_stats.xfer_bytes.fetch_sub((u64)total);
-          if (attempt == 0) continue;
+          if (attempt == 0) { item_retry(observed, 1, "source_changed"); continue; }
+          source_error(ESTALE, w.p2, "revalidate_source");
           g_source_io_error.store(true);
           err_line(RERR_PARTIAL, "file changed during ranged transfer: \"%s\"", w.p2.c_str());
           return fail(0);
@@ -900,6 +1011,7 @@ struct Local {
         }
         if (!byte_positioned) {
           if (lseek(in, total, SEEK_SET) < 0) {
+            source_error(errno, w.p2, "seek_source");
             g_source_io_error.store(true);
             err_line(RERR_PARTIAL, "failed to seek source \"%s\": %s", w.p2.c_str(), errstr(errno).c_str());
             ok = false;
@@ -911,6 +1023,7 @@ struct Local {
         ssize_t n = read(in, w.buf.data(), want);
         if (n < 0 && errno == EINTR) continue;
         if (n < 0) {
+          source_error(errno, w.p2, "read_source");
           g_source_io_error.store(true);
           err_line(RERR_PARTIAL, "read errors mapping \"%s\": %s", w.p2.c_str(), errstr(errno).c_str());
           ok = false;
@@ -926,15 +1039,19 @@ struct Local {
         slot_add(w.id, n);
         if (g_stop.load()) { ok = false; break; }
       }
+      errno = ESTALE;
       bool stable = total == s.size && source_unchanged(in, w.p2, before) && (!metadata_enabled() || source_xattrs_unchanged(d.src_xattrs[idx], w.p2));
+      int validation_error = errno;
       close(in);
       f.size = total;
       if (ok && !stable && attempt == 0) {
         out_abort(f);
         g_stats.xfer_bytes.fetch_sub((u64)total);
+        item_retry(observed, 1, "source_changed");
         continue;
       }
       if (ok && !stable) {
+        source_error(validation_error, w.p2, "revalidate_source");
         g_source_io_error.store(true);
         err_line(RERR_PARTIAL, "file changed during transfer after retry: \"%s\"", w.p2.c_str());
         ok = false;
@@ -1032,6 +1149,13 @@ int run_local(const std::vector<std::string>& srcs, const std::string& dest) {
   if (!setup_dest(dest, *root, rl.single)) {
     delete root;
     return g_exit_code.load();
+  }
+  if (g_item_sink && rl.app_scan_failed) {
+    prepare_items(*root);
+    if (root->app_directory) {
+      root->app_directory->failed.store(true);
+      root->app_directory->source_failed.store(true);
+    }
   }
 #ifdef __APPLE__
   const Options& o = g_opt;

@@ -11,6 +11,7 @@
 #include <unistd.h>
 
 void entry_from_stat(const struct stat& st, Entry& entry);
+void listing_entry_error(int error, std::string_view name, std::string_view operation, const Entry* entry = nullptr);
 
 namespace {
 struct LinuxDirent {
@@ -88,7 +89,7 @@ int list_dir_linux(int fd, DirList& out) {
       offset += length;
       if (name[0] == '.' && (!name[1] || (name[1] == '.' && !name[2]))) continue;
       Entry entry;
-      if (!entry_at(fd, name, entry)) { out.incomplete = true; continue; }
+      if (!entry_at(fd, name, entry)) { listing_entry_error(errno, name, "stat"); out.incomplete = true; continue; }
       entry.name_len = end - name;
       entry.name_off = out.add_str({name, entry.name_len});
       out.e.push_back(entry);

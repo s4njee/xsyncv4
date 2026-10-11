@@ -50,6 +50,12 @@ constexpr u64 PF_STAGE_METRICS = 4294967296ULL;
 constexpr u64 PF_PROGRESS_PHASE = 8589934592ULL;
 constexpr u64 PF_COMPRESS_POLICY = 17179869184ULL;
 constexpr u64 PF_DIR_CHILDREN = 34359738368ULL;
+constexpr u64 PF_APP_EVENTS = 68719476736ULL;  // App bridge: literal paths and typed events.
+constexpr u64 PF_APP_CONTROLS = 137438953472ULL;
+constexpr u64 PF_APP_LEASE = 274877906944ULL;
+constexpr u64 PF_APP_PARTIALS = 549755813888ULL;
+constexpr u64 APP_TRANSFER_FEATURES = PF_CORE | PF_OUTPUT | PF_DIR_OUTPUT | PF_IO_CONTROL |
+                                     PF_PROGRESS_ACK | PF_DIR_CHILDREN | PF_APP_EVENTS;
 #ifdef __APPLE__
 constexpr u64 PF_NATIVE_ACL = PF_ACL_DARWIN;
 constexpr u64 PF_UNSUPPORTED_NATIVE = PF_ACL_POSIX;
@@ -58,7 +64,7 @@ constexpr u64 PF_NATIVE_ACL = PF_ACL_POSIX;
 constexpr u64 PF_UNSUPPORTED_NATIVE = PF_ACL_DARWIN | PF_ACL_UUID | PF_CRTIMES | PF_FILEFLAGS;
 #endif
 #ifndef XSYNC_PROTOCOL_FEATURES
-#define XSYNC_PROTOCOL_FEATURES 68719476735ULL
+#define XSYNC_PROTOCOL_FEATURES 1099511627775ULL
 #endif
 constexpr u64 PROTO_FEATURES = XSYNC_PROTOCOL_FEATURES & ~PF_UNSUPPORTED_NATIVE;
 constexpr u64 LEGACY_V3_FEATURES = 15;
@@ -208,11 +214,14 @@ struct Stats {
   std::atomic<u64> deleted{0};
   std::atomic<u64> wire_sent{0}, wire_recv{0};
   std::atomic<u64> acknowledged_bytes{0}, acknowledged_files{0};
+  std::atomic<u64> receiver_completed_bytes{0};  // Published files, separate from read/staged bytes.
   std::atomic<u64> compression_raw{0}, compression_wire{0};
   std::atomic<u64> read_ns{0}, network_ns{0}, write_ns{0};
   std::atomic<u64> peer_read_ns{0}, peer_network_ns{0}, peer_write_ns{0};
   std::atomic<bool> receiver_done{false};
   std::atomic<u32> deleting_active{0}, verifying_active{0}, peer_phase{0};
+  std::atomic<u32> metadata_active{0};
+  std::atomic<u32> conflict_active{0};
   std::atomic<u64> verified{0}, peer_verified{0}, peer_deleted{0};
   std::atomic<bool> waiting_peer{false};
   std::atomic<u64> delta_files{0}, delta_literal_bytes{0}, delta_matched_bytes{0};
@@ -235,6 +244,8 @@ void print_error_summary();
 [[noreturn]] void exit_signal();
 // When set (server mode) messages are routed here instead of the terminal. kind: 0=out 1=err.
 extern void (*g_msg_sink)(int kind, int code, std::string_view s);
+// Native filesystem errors, before human formatting; optional app event sink.
+extern void (*g_fs_error_sink)(int error, std::string_view path, std::string_view operation);
 
 // rsync exit codes
 enum { RERR_SYNTAX = 1, RERR_PROTOCOL = 2, RERR_FILESELECT = 3, RERR_UNSUPPORTED = 4,

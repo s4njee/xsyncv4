@@ -54,6 +54,49 @@ compiling the C++ application. See the site README for refreshing those inputs.
 
 ## Personal defaults
 
+GUI integrations can launch `xs --app` for the experimental schema-1 subprocess
+interface: local and SSH pane browsing, headless SSH authentication, explicit
+local and SSH selected copies with literal destination-name mappings, live
+progress and item outcomes, revision-bound conflict decisions, scoped policies,
+keep-both names, acknowledged cancellation, revision-checked filesystem actions,
+safe moves with verified copy/remove outcomes, and opt-in private local/SSH
+partials with explicit verified-prefix resume, guarded cleanup and confirmed
+safe pause checkpoints. Directory/symlink receipts, source type changes, saved
+conflict decisions and keep-both mappings are guarded across recovery attempts. It bypasses
+personal CLI defaults and never falls back to rsync. See the
+[machine contract](docs/app-protocol.md) and [reference client](tools/app_client.py).
+The [reference queue journal](tools/app_queue.py) persists copy selections,
+profile references, recovery IDs and authoritative outcomes; unfinished attempts
+use helper quiescence and read-only inventory/destination verification before
+an explicit restart resume. Missing results remain unconfirmed and cancel intent
+survives lost acknowledgements. Explicit failed-file/symlink retries preserve
+nested destination mappings and save their admission across restart; replacements
+ask for a fresh conflict decision. Opt-in bounded reconnects require engine proof
+that no copy request was submitted and survive queue restart with their remaining
+budget. An additional opt-in policy reconciles disconnected private SSH copies
+before resuming: helpers must be quiet and inventory/destination guards must pass.
+Capable engines accept a queue-reserved private ID saved before copy submission,
+so losing every initial receipt still leaves an inspection target.
+Missing results remain unconfirmed; cancellation prevents automatic recovery.
+Regular-file publication intents allow guarded reconciliation after rename when
+the final receipt is lost. Directory retry and remaining creation/publication
+gaps remain in progress. Read-only local/SSH destination preflight reports
+filesystem capacity, detectable name/metadata constraints and an optional exact
+advisory budget for regular files and atomic staging. Unknown physical storage
+and quota requirements remain explicit; preflight does not authorize a copy.
+Copy/resume refresh hints identify mapped destination items and conservatively
+invalidate the destination tree when completion receipts are lost. The reference
+pane view rejects late navigation events after invalidation and routes SSH hints
+using the job's saved profile.
+Read-only local/SSH transfer previews report selected-copy or mirror proposals,
+reasons, conflicts and stat-verified source budgets. Complete selected-copy
+previews can guard copy admission against changed inventories. Mirror deletion
+execution and SSH revision handoff remain open. Local guarded copies also check
+saved source/destination revisions through planning and publication, including
+conflict replies and directory metadata restoration;
+preview itself never writes or authorizes deletion.
+Engine/reference-client P0 and P1 acceptance is tracked in [the GUI backlog](backlog-gui.md).
+
 For scalar options and on/off flags, precedence is **command-line flags, then
 environment, then config**. Within one layer, the last value wins. Repeatable
 options such as filters accumulate from config, then environment, then flags;
@@ -872,6 +915,18 @@ python3 tests/broken_stdout_test.py                       # closed pipes, cancel
 python3 tests/io_limit_test.py                            # pacing, deadlines, keep-alives and negotiation
 ./tests/ssh-rig.sh io_limit_test.py                        # real SSH pacing and interruption
 python3 tests/list_test.py                                # listing parity and no destination writes
+python3 tests/app_test.py                                 # GUI contract, byte paths, cancellation and job isolation
+python3 tests/app_mapping_test.py                         # literal selection mappings and mapped retries
+python3 tests/app_retry_test.py                           # nested retries preserve destination parents
+python3 tests/app_conflict_test.py                        # decisions, scopes, keep-both and revision races
+python3 tests/app_actions_test.py                         # revision-checked mkdir, rename, permanent delete and metadata
+python3 tests/app_preflight_test.py                       # read-only destination capabilities and exact advisory budgets
+python3 tests/app_preview_test.py                         # read-only plans, verified budgets and stale-copy admission guards
+python3 tests/app_refresh_test.py                         # mapped destination refresh and stale pane generations
+python3 tests/app_move_test.py                            # native rename and verified copy/remove outcomes
+python3 tests/app_partials_test.py                        # private local interruption, resume and guarded cleanup
+./tests/ssh-rig.sh app_ssh_test.py                         # GUI SSH browsing and authentication without a TTY
+python3 tests/rig/app_host.py                             # native host engine against an isolated SSH helper
 python3 tests/list_wire_test.py                           # hostile listing metadata and fallback
 python3 tests/filter_diff_test.py                         # global rule-side differential fuzzer
 python3 tests/filter_merge_test.py                        # merge scopes, inheritance and modifiers

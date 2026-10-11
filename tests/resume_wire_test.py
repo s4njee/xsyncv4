@@ -51,7 +51,7 @@ class ResumeWireTests(unittest.TestCase):
         return proc
 
     def finish(self, proc):
-        proc.stdin.write(frame(6, var(0)))
+        proc.stdin.write(frame(5, b'') + frame(6, var(0)))
         proc.stdin.flush()
         while read_frame(proc)[0] != 7: pass
         proc.stdin.close()

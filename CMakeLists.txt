@@ -50,7 +50,7 @@ set(XSYNC_ICU_LIBRARIES ICU::uc)
 endif()
 
 add_executable(xsync
-  src/main.cpp src/util.cpp src/progress.cpp src/fs.cpp src/filter.cpp
+  src/main.cpp src/app.cpp src/app_json.cpp src/app_ssh.cpp src/app_conflict.cpp src/app_actions.cpp src/app_move.cpp src/app_partials.cpp src/app_actor.cpp src/app_preflight.cpp src/app_preview.cpp src/app_preview_guard.cpp src/app_preview_manifest.cpp src/app_mirror.cpp src/item.cpp src/util.cpp src/progress.cpp src/fs.cpp src/filter.cpp
   src/local.cpp src/remote.cpp src/names.cpp src/destination.cpp src/linux_scan.cpp src/compression.cpp src/fallback.cpp src/transport.cpp src/install.cpp src/arguments.cpp src/output.cpp src/hardlink.cpp src/delta.cpp src/listing.cpp src/rate_limit.cpp src/selection.cpp src/xattrs.cpp src/xattr_value.cpp src/acls.cpp src/permissions.cpp src/ownership.cpp src/sparse.cpp src/link_dest.cpp)
 set_target_properties(xsync PROPERTIES OUTPUT_NAME xs)
 target_include_directories(xsync PRIVATE src ${ZSTD_INCLUDE_DIR} ${XXHASH_INCLUDE_DIR} ${XSYNC_ICU_INCLUDE_DIR})

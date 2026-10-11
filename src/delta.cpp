@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <cerrno>
 #include <cmath>
+#include <optional>
 #include <unordered_map>
 #include <unordered_set>
 #define XXH_INLINE_ALL
@@ -14,6 +15,15 @@
 namespace {
 constexpr size_t READ_BUFFER = 1 << 20, LITERAL_BUFFER = 1 << 16;
 constexpr i64 COPY_RUN = 8 << 20;
+
+struct AppHashing {
+  std::optional<ProgressPhase> phase;
+  AppHashing() {
+    if (!g_item_sink) return;
+    item_stage(current_item(), "hashing");
+    phase.emplace(g_stats.verifying_active);
+  }
+};
 
 u32 weak_sum(const char* bytes, size_t size) {
   u32 a = 0, b = 0;
@@ -76,6 +86,7 @@ std::shared_ptr<DeltaBasis> destination_delta_basis(const std::string& path, boo
   basis->fd = fd;
   struct stat before;
   if (fstat(fd, &before) != 0 || !S_ISREG(before.st_mode) || before.st_size < 1024) return {};
+  AppHashing activity;
   auto& signature = basis->signature;
   signature.size = before.st_size;
   // Larger blocks trade a little literal data around edits for fewer reverse signatures.
@@ -117,6 +128,7 @@ std::shared_ptr<DeltaBasis> readonly_delta_basis(int fd) {
   basis->fd = fd;
   struct stat before;
   if (fstat(fd, &before) != 0 || !S_ISREG(before.st_mode) || before.st_size < 1024) return {};
+  AppHashing activity;
   auto& signature = basis->signature;
   signature.size = before.st_size;
   signature.block_size = (u32)std::clamp<double>(2 * std::sqrt((double)signature.size), 1024, DELTA_MAX_BLOCK) & ~u32(7);
@@ -261,12 +273,14 @@ bool delta_copy_blocks(OutFile& output, const DeltaBasis& basis, u32 first, u32 
     if (!read_exact(basis.fd, scratch.data(), size, (i64)i * basis.signature.block_size)) return false;
     if (XXH3_64bits(scratch.data(), size) != basis.signature.blocks[i].strong) { errno = ESTALE; return false; }
     if (!out_write(output, scratch.data(), size, offset)) return false;
+    item_progress(output.item, 0, size);
     offset += (i64)size;
   }
   return true;
 }
 
 bool delta_verify_fd(int fd, i64 size, const u64 sum[2]) {
+  AppHashing activity;
   u64 actual[2];
   if (!hash_prefix_fd(fd, size, actual)) return false;
   if (actual[0] == sum[0] && actual[1] == sum[1]) return true;

@@ -5,6 +5,10 @@
 #include <algorithm>
 #include <atomic>
 #include <sys/resource.h>
+#include <cstdio>
+#ifdef __linux__
+#include <sys/syscall.h>
+#endif
 #ifdef __APPLE__
 #include <sys/clonefile.h>
 #include <sys/attr.h>
@@ -187,6 +191,28 @@ DestinationDirectory::~DestinationDirectory() {
 int destination_stat(const char* path, struct stat* st) {
   auto p = destination_path_impl(path, false);
   return p.fd < 0 ? -1 : fstatat(p.fd, p.name.c_str(), st, AT_SYMLINK_NOFOLLOW);
+}
+int destination_named_stat(const char* path, struct stat* st) {
+  struct Restore {
+    DestinationDirectory* saved = directory_pin;
+    ~Restore() { directory_pin = saved; }
+  } restore;
+  directory_pin = nullptr;
+  auto p = destination_path_impl(path, false);
+  return p.fd < 0 ? -1 : fstatat(p.fd, p.name.c_str(), st, AT_SYMLINK_NOFOLLOW);
+}
+int destination_publish_noreplace(int parent, const char* staged, const char* final) {
+  return destination_rename_noreplace(parent, staged, parent, final);
+}
+int destination_rename_noreplace(int source_parent, const char* source, int destination_parent, const char* destination) {
+#ifdef __APPLE__
+  return renameatx_np(source_parent, source, destination_parent, destination, RENAME_EXCL);
+#elif defined(__linux__) && defined(SYS_renameat2)
+  return (int)syscall(SYS_renameat2, source_parent, source, destination_parent, destination, 1u /* RENAME_NOREPLACE */);
+#else
+  errno = ENOTSUP;
+  return -1;
+#endif
 }
 int destination_chmod(const char* path, mode_t mode) {
   auto p = destination_path_impl(path, false);

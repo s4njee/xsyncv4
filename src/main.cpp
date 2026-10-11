@@ -18,6 +18,8 @@
 #include "arguments.h"
 #include "output.h"
 #include "listing.h"
+#include "app.h"
+#include "app_ssh.h"
 
 namespace {
 
@@ -137,6 +139,7 @@ Documented compatibility no-ops:
      --no-motd            no daemon transport or daemon greeting exists
 
 xs extensions:
+     --app                schema-1 subprocess API (see docs/app-protocol.md)
      --install=HOST       explicitly install the matching release at ~/.local/bin
                           refuses newer versions unless --force is supplied
  -j, --jobs=N             worker threads (default: CPU budget; APFS copies max 4)
@@ -592,6 +595,9 @@ void print_summary(u64 t0) {
 }
 
 int main(int argc, char** argv) {
+  if (argc >= 2 && std::string_view(argv[1]) == "--app-askpass") return app_ssh::askpass(argc, argv);
+  // App requests never enter the CLI defaults, parser, renderer, or fallback path.
+  if (argc == 2 && std::string_view(argv[1]) == "--app") return run_app();
   std::atexit(progress_restore_cursor);
   signal(SIGPIPE, SIG_IGN);
   setvbuf(stdout, nullptr, _IONBF, 0);

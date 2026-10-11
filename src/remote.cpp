@@ -1,3 +1,4 @@
+#include "app_conflict.h"
 // Remote sync over a pipe pair (ssh or any -e command): xsync's own pipelined protocol.
 //
 // The sender walks the source tree and streams one DIR frame per directory. The receiver
@@ -49,8 +50,8 @@ namespace {
 
 enum : u8 { F_HELLO = 1, F_DIR, F_NEED, F_DATA, F_LIST_END, F_DATA_END, F_DONE, F_MSG, F_IDMAP, F_DEST, F_OUTPUT, F_OUTPUT_CONFIG,
             F_DELTA_REQUEST, F_DELTA_SIGNATURE, F_DELTA_RETRY_ACK, F_LIST_ENTRY, F_IO_CONFIG, F_KEEPALIVE, F_FILTER_CONFIG, F_DELETE_CONFIG,
-            F_PRUNE_CONFIG, F_RELATIVE_CONFIG, F_FILES_CONFIG, F_FILES_DATA, F_FILES_END, F_XATTR_CONFIG, F_XATTR_START, F_XATTR_CHUNK, F_XATTR_END, F_ACL_CONFIG, F_CHOWN_CONFIG, F_SPARSE_CONFIG, F_LINKDEST_CONFIG, F_PROGRESS, F_STAGE, F_PHASE, F_COMPRESS_CONFIG };
-enum : u8 { DF_ATTRS = 1, DF_SINGLE = 2, DF_NODELETE = 4, DF_ZSTD = 8 };
+            F_PRUNE_CONFIG, F_RELATIVE_CONFIG, F_FILES_CONFIG, F_FILES_DATA, F_FILES_END, F_XATTR_CONFIG, F_XATTR_START, F_XATTR_CHUNK, F_XATTR_END, F_ACL_CONFIG, F_CHOWN_CONFIG, F_SPARSE_CONFIG, F_LINKDEST_CONFIG, F_PROGRESS, F_STAGE, F_PHASE, F_COMPRESS_CONFIG, F_APP_EVENT, F_APP_CONTROL, F_APP_END };
+enum : u8 { DF_ATTRS = 1, DF_SINGLE = 2, DF_NODELETE = 4, DF_ZSTD = 8, DF_APP_SCAN_FAILED = 16 };
 enum : u8 { R_WHOLE = 1, R_CHUNK = 2, R_FAIL = 4, R_END = 8, R_LITERAL = 16, R_DELTA_END = 32, R_COPY = 64 };
 constexpr size_t HDR = 5;                  // u32 payload length + u8 type
 constexpr size_t BLOCK_TARGET = 1 << 20;   // raw bytes per DATA frame
@@ -224,6 +225,9 @@ std::string new_frame(u8 type) {
 
 // ---------------------------------------------------------------- connection
 
+std::function<void(std::string)> app_event_sink;
+bool app_server_mode = false;
+std::function<void(int)> app_finish_sink;
 std::mutex peer_guard;
 pid_t current_remote_peer = -1;
 bool peer_cancelled = false;
@@ -262,6 +266,9 @@ struct Conn {
     }
     output_check();
     if (output_error()) return;  // Preserve the diagnostic failure as the exit reason.
+    if (!write_progress && (g_opt.peer_features & PF_APP_CONTROLS) && (g_stats.conflict_active.load() || (g_stats.peer_phase.load() & 8))) {
+      last_activity.store(now_ns()); return;
+    }
     u64 deadline = idle_ns.load();
     u64 now = now_ns(), last = write_progress ? write_progress : last_activity.load();
     if (!deadline || now < last || now - last < deadline) return;
@@ -272,7 +279,7 @@ struct Conn {
     // A stalled writer cannot safely drain a fatal frame, especially mid-frame.
     // Both peers have the deadline; the client also recognizes shell exit 30.
     if (peer_pid > 0) kill(peer_pid, SIGTERM);
-    g_msg_sink = nullptr;
+    if (!app_event_sink) g_msg_sink = nullptr;
     g_output_sink = nullptr;
     u64 seconds = deadline / 1000000000ull;
     die(RERR_TIMEOUT, "I/O timeout after %llu second%s", (unsigned long long)seconds, seconds == 1 ? "" : "s");
@@ -288,6 +295,7 @@ struct Conn {
     }
   }
   int wait_peer() {
+    if (peer_pid <= 0) return 0;  // The app adapter owns its SSH process.
     int status = 0;
     for (;;) {
       {
@@ -309,8 +317,10 @@ struct Conn {
   void start() {
     for (int fd : {rfd, wfd}) {
       int flags = fcntl(fd, F_GETFL);
-      if (flags < 0 || fcntl(fd, F_SETFL, flags | O_NONBLOCK) < 0)
+      if (flags < 0 || fcntl(fd, F_SETFL, flags | O_NONBLOCK) < 0) {
+        if (g_fs_error_sink) g_fs_error_sink(errno, {}, "configure_transport");
         die(RERR_IPC, "cannot configure transport pipe: %s", errstr(errno).c_str());
+      }
     }
     wt = std::thread([this] { writer(); });
   }
@@ -428,17 +438,23 @@ struct Conn {
         rpos += k, dst += k, n -= k;
         continue;
       }
-      ssize_t k = n >= rb.size() ? read(rfd, dst, n) : read(rfd, rb.data(), rb.size());
+      // A leased app channel returns to JSON after F_APP_END. Never read
+      // ahead across that boundary into the next protocol.
+      bool exact = (g_opt.peer_features & PF_APP_LEASE) || n >= rb.size();
+      ssize_t k = exact ? read(rfd, dst, n) : read(rfd, rb.data(), rb.size());
       if (g_stop.load()) return false;
       if (k < 0 && errno == EINTR) continue;
       if (k < 0 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
         if (!wait_fd(rfd, POLLIN)) return false;
         continue;
       }
-      if (k <= 0) return false;
+      if (k <= 0) {
+        if (k < 0 && g_fs_error_sink) g_fs_error_sink(errno, {}, "read_transport");
+        return false;
+      }
       last_activity = now_ns();
       g_stats.wire_recv.fetch_add((u64)k, std::memory_order_relaxed);
-      if (n >= rb.size()) dst += k, n -= (size_t)k;
+      if (exact) dst += k, n -= (size_t)k;
       else rpos = 0, rlen = (size_t)k;
     }
     return true;
@@ -455,10 +471,16 @@ struct Conn {
       u32 len;
       memcpy(&len, h, 4);
       type = (u8)h[4];
-      if (hello && type != F_HELLO && type != F_MSG)
+      if (app_server_mode && type == F_HELLO && len > 1024*1024)
+        die(RERR_PROTOCOL, "protocol error: oversized app transfer hello");
+      if (hello && type != F_HELLO && type != F_MSG && type != F_APP_EVENT)
         die(RERR_PROTOCOL, "the remote shell is printing text on stdout (or --rsync-path is not xsync); remove shell startup output");
+      if (type == F_APP_END && (!(g_opt.peer_features & PF_APP_LEASE) || len != 0)) die(RERR_PROTOCOL, "invalid app transfer boundary frame");
+      if (type == F_APP_CONTROL && (!(g_opt.peer_features & PF_APP_CONTROLS) || len > 1024*1024)) die(RERR_PROTOCOL, "invalid app control frame");
+      if (type == F_APP_EVENT && (!(g_opt.peer_features & PF_APP_EVENTS) || len > 1024*1024))
+        die(RERR_PROTOCOL, "protocol error: unnegotiated or oversized app event");
       if (len > (1u << 30)) die(RERR_PROTOCOL, "protocol error: oversized frame");
-      if (type == F_PROGRESS && (len > (g_opt.peer_features & PF_STAGE_METRICS ? 30u : 20u) || !(g_opt.peer_features & PF_PROGRESS_ACK)))
+      if (type == F_PROGRESS && (len > (g_opt.peer_features & PF_APP_EVENTS ? 40u : g_opt.peer_features & PF_STAGE_METRICS ? 30u : 20u) || !(g_opt.peer_features & PF_PROGRESS_ACK)))
         die(RERR_PROTOCOL, "protocol error: oversized or unnegotiated progress acknowledgment");
       if (type == F_STAGE && (len > 20 || !(g_opt.peer_features & PF_STAGE_METRICS)))
         die(RERR_PROTOCOL, "protocol error: oversized or unnegotiated stage metrics");
@@ -507,6 +529,81 @@ struct Conn {
 };
 
 Conn* g_conn = nullptr;
+std::mutex app_control_mu;
+struct PreviewProbe {
+  bool ready=false, valid=false;
+  std::condition_variable condition;
+};
+std::mutex preview_probe_mutex;
+std::map<std::string,std::shared_ptr<PreviewProbe>> preview_probes;
+u64 preview_probe_sequence=0;
+void handle_app_event(std::string_view payload) {
+  try {
+    auto event=app_json::parse(payload);
+    if (event.at("type").string()=="_preview_source_result") {
+      if (event.object.size()!=3 || event.at("valid").kind!=app_json::Value::Bool) throw std::runtime_error("invalid source proof");
+      std::lock_guard lock(preview_probe_mutex);
+      auto found=preview_probes.find(event.at("request").string());
+      if (found==preview_probes.end() || found->second->ready) throw std::runtime_error("unsolicited source proof");
+      found->second->valid=event.at("valid").boolean(); found->second->ready=true; found->second->condition.notify_all(); return;
+    }
+  } catch (const std::exception&) { die(RERR_PROTOCOL,"malformed native source proof"); }
+  if (!app_event_sink) die(RERR_PROTOCOL, "unexpected app event");
+  try { app_event_sink(std::string(payload)); }
+  catch (const std::exception&) { die(RERR_PROTOCOL, "malformed native app event"); }
+}
+void handle_app_control(std::string_view payload) {
+  try {
+    auto command=app_json::parse(payload);
+    if (command.object.count("op") && command.at("op").string()=="_preview_source_check") {
+      if (command.object.size()!=5 || !g_app_preview_source_check || g_app_preview_remote_source) throw std::runtime_error("source proof unavailable");
+      auto id=command.at("request").string();
+      auto path=app_json::unhex(command.at("source").at("bytes_hex").string());
+      auto relative=app_json::unhex(command.at("relative").at("bytes_hex").string());
+      auto type=command.at("entry_type").string();
+      if (id.empty() || id.size()>128 || path.empty() || path.front()!='/' || path.size()>4096 || path.find('\0')!=path.npos || relative.size()>8192 || relative.find('\0')!=relative.npos || type.size()!=1 || type[0]<'0' || type[0]>'8') throw std::runtime_error("invalid source proof request");
+      Entry entry; entry.type=(u8)(type[0]-'0');
+      auto item=transfer_item(relative,path,{},entry,false);
+      bool valid=item_preview_source_valid(item);
+      send_app_event("\"type\":\"_preview_source_result\",\"request\":"+app_json::quote(id)+",\"valid\":"+(valid ? "true" : "false"));
+      return;
+    }
+  } catch (const std::exception&) { die(RERR_PROTOCOL,"malformed native source proof request"); }
+  app_conflict::response(payload);
+}
+class RemotePreviewSource {
+  decltype(g_app_preview_source_check) previous;
+  bool enabled=false, previous_remote=false;
+ public:
+  RemotePreviewSource() {
+    enabled=bool(g_app_preview_destination_check);
+    if (!enabled) return;
+    if (!(g_opt.peer_features&PF_APP_CONTROLS)) die(RERR_UNSUPPORTED,"remote preview checks require the native control bridge");
+    previous=std::move(g_app_preview_source_check); previous_remote=std::exchange(g_app_preview_remote_source,true);
+    g_app_preview_source_check=[](const ItemPtr& item,const DestinationRevision&) {
+      auto probe=std::make_shared<PreviewProbe>(); std::string id;
+      {
+        std::lock_guard lock(preview_probe_mutex);
+        if (preview_probes.size()>=256) die(RERR_PROTOCOL,"too many pending source proofs");
+        id="preview-check-"+std::to_string(++preview_probe_sequence); preview_probes.emplace(id,probe);
+      }
+      send_app_control("{\"op\":\"_preview_source_check\",\"request\":"+app_json::quote(id)+",\"source\":"+app_json::path(item->source)+
+        ",\"relative\":"+app_json::path(item->relative)+",\"entry_type\":"+app_json::quote(std::to_string(item->type))+"}");
+      u64 deadline=now_ns()+(u64)(g_opt.timeout ? g_opt.timeout : 30)*1000000000ULL;
+      std::unique_lock lock(preview_probe_mutex);
+      while (!probe->ready && !g_stop.load() && now_ns()<deadline) probe->condition.wait_for(lock,std::chrono::milliseconds(50));
+      bool valid=probe->ready && probe->valid; preview_probes.erase(id); lock.unlock();
+      if (!valid) {
+        item->failed.store(true); item->source_failed.store(true); item->preview_stale.store(true);
+        if (!g_stop.load()) err_line(RERR_PARTIAL,"remote source could not be revalidated against the preview: \"%s\"",item->source.c_str());
+      }
+      return valid;
+    };
+  }
+  ~RemotePreviewSource() {
+    if (enabled) { g_app_preview_source_check=std::move(previous); g_app_preview_remote_source=previous_remote; }
+  }
+};
 
 void phase_snapshot(bool force = false) {
   if (!g_opt.am_server || !(g_opt.peer_features & PF_PROGRESS_PHASE)) return;
@@ -517,17 +614,33 @@ void phase_snapshot(bool force = false) {
   if (!force && now - last < 100000000) return;
   last = now;
   std::string frame = new_frame(F_PHASE);
-  frame.push_back((char)((g_stats.deleting_active.load() ? 1 : 0) | (g_stats.verifying_active.load() ? 2 : 0)));
+  frame.push_back((char)((g_stats.deleting_active.load() ? 1 : 0) | (g_stats.verifying_active.load() ? 2 : 0) |
+    ((g_opt.peer_features & PF_APP_EVENTS) && g_stats.metadata_active.load() ? 4 : 0) |
+    ((g_opt.peer_features & PF_APP_CONTROLS) && g_stats.conflict_active.load() ? 8 : 0)));
   put_var(frame, g_stats.verified.load()), put_var(frame, g_stats.deleted.load());
   g_conn->send(std::move(frame));
 }
 void phase_tick() { phase_snapshot(); }
+struct AppPhaseSampler {
+  std::atomic<bool> done{false};
+  std::thread thread;
+  explicit AppPhaseSampler(bool enabled) {
+    if (enabled) thread = std::thread([this] {
+      while (!done.load()) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        if (!done.load()) phase_snapshot();
+      }
+    });
+  }
+  void stop() { done.store(true); if (thread.joinable()) thread.join(); }
+  ~AppPhaseSampler() { stop(); }
+};
 void handle_phase(std::string_view payload) {
   if (g_opt.am_server) die(RERR_PROTOCOL, "protocol error: client progress phase");
   RBuf r(payload);
   u8 active = r.byte();
   u64 verified = r.var(), deleted = r.var();
-  if (active > 3 || r.bad || !r.empty()) die(RERR_PROTOCOL, "protocol error: malformed progress phase");
+  if (active > ((g_opt.peer_features & PF_APP_CONTROLS) ? 15 : (g_opt.peer_features & PF_APP_EVENTS) ? 7 : 3) || r.bad || !r.empty()) die(RERR_PROTOCOL, "protocol error: malformed progress phase");
   g_stats.peer_phase = active, g_stats.peer_verified = verified, g_stats.peer_deleted = deleted;
 }
 
@@ -641,7 +754,7 @@ void send_msg(int kind, int code, std::string_view s) {
   // path instead of racing it with a second die() that could exit too early.
   if (g_conn) g_conn->check_timeout();
   // A broken connection cannot carry the fatal message back to the peer.
-  g_msg_sink = nullptr;
+  if (!app_event_sink) g_msg_sink = nullptr;
   g_output_sink = nullptr;
   if (g_stop.load()) exit_signal();
   if (g_conn && g_conn->peer_pid > 0 && g_conn->idle_ns.load()) {
@@ -1022,16 +1135,21 @@ struct Sender {
   }
 
   bool walk(SDir* d, u32 parent_plus1, u32 pidx, Worker& w) {
+    ItemScope source_directory(transfer_item(d->rel, d->attr_source.empty() ? d->src_path : d->attr_source, {}, d->attrs, false));
     const Options& o = g_opt;
     if (!d->prelisted) {
       int e = list_dir(d->src_path.c_str(), d->list, o.copy_links ? LD_FOLLOW : o.links ? LD_LINKS : 0);
       if (e) {
+        if (g_opt.peer_features & PF_APP_EVENTS) d->flags |= DF_APP_SCAN_FAILED;
+        source_error(e, d->src_path, "scan_source");
         err_line(RERR_PARTIAL, "opendir \"%s\" failed: %s", d->src_path.c_str(), errstr(e).c_str());
         // Still send the directory's attributes, while protecting its contents.
         d->list.clear();
         d->flags |= DF_NODELETE;
       }
       if (d->list.incomplete) {
+        if (g_opt.peer_features & PF_APP_EVENTS) d->flags |= DF_APP_SCAN_FAILED;
+        source_error(0, d->src_path, "scan_source");
         d->flags |= DF_NODELETE;
         err_line(RERR_PARTIAL, "incomplete source listing: \"%s\"", d->src_path.c_str());
       }
@@ -1039,6 +1157,15 @@ struct Sender {
       prune_source(d->list, d->rel, d->attrs.dev, w, nullptr, guard, d->src_path, d->source_filter.get());
     }
     DirList& l = d->list;
+    if (g_app_preview_source_check) {
+      bool valid=!(d->flags&DF_ATTRS) || item_preview_source_valid(current_item());
+      if (valid) for (const auto& entry:l.e) {
+        auto source=d->src_paths.empty() ? path_join(d->src_path,l.name_sv(entry)) : d->src_paths[&entry-l.e.data()];
+        auto item=transfer_item(rel_join(d->rel,l.name_sv(entry)),std::move(source),{},entry,false);
+        if (!item_preview_source_valid(item)) { valid=false; break; }
+      }
+      if (!valid) { l.clear(); d->flags|=DF_APP_SCAN_FAILED|DF_NODELETE; }
+    }
     d->accounted_entries = std::max<size_t>(1, l.e.size());
     retained_entries.fetch_add(d->accounted_entries, std::memory_order_relaxed);
     if (metadata_enabled()) {
@@ -1300,15 +1427,19 @@ struct Sender {
       w.block.push_back((char)kind);
     };
     w.p2 = d.src_paths.empty() ? path_join(d.src_path, d.list.name_sv(scanned)) : d.src_paths[idx];
+    auto observed = transfer_item(rel_join(d.rel, d.list.name_sv(scanned)), w.p2, {}, scanned, false);
+    ItemScope observation(observed);
+    item_stage(observed, "reading_source");
     i64 planned = scanned.size;
     bool requested_delta = false;
     std::shared_ptr<DeltaSignature> signature;
     for (u32 attempt = 0; attempt < 2; attempt++) {
       int in = open(w.p2.c_str(), O_RDONLY | O_CLOEXEC | read_time_flags() | (o.copy_links || !d.src_paths.empty() ? 0 : O_NOFOLLOW));
       struct stat before;
-      if (in < 0 || fstat(in, &before) != 0 || !S_ISREG(before.st_mode)) {
-        int error = in < 0 ? errno : EIO;
+      int error = in < 0 || fstat(in, &before) != 0 ? errno : !S_ISREG(before.st_mode) ? ESTALE : 0;
+      if (error) {
         if (in >= 0) close(in);
+        source_error(error, w.p2, "open_source");
         err_line(error == ENOENT ? RERR_VANISHED : RERR_PARTIAL, "send_files failed to open \"%s\": %s", w.p2.c_str(), errstr(error).c_str());
         head(R_FAIL);
         if (client) {
@@ -1316,6 +1447,12 @@ struct Sender {
           g_stats.xfer_bytes_total.fetch_sub((u64)planned);
           slot_end(w.id);
         }
+        return;
+      }
+      auto preview_source=DestinationRevision::from(before);
+      if (!item_preview_source_valid(observed,&preview_source)) {
+        close(in); head(R_FAIL);
+        if (client) { g_stats.xfer_files_total.fetch_sub(1); g_stats.xfer_bytes_total.fetch_sub((u64)planned); slot_end(w.id); }
         return;
       }
       Entry fresh = source_snapshot(scanned, before, false);
@@ -1346,11 +1483,13 @@ struct Sender {
           ssize_t k = read(in, dst + n, want - n);
           if (k < 0 && errno == EINTR) continue;
           if (k < 0) {
+            source_error(errno, w.p2, "read_source");
             err_line(RERR_PARTIAL, "read errors mapping \"%s\": %s", w.p2.c_str(), errstr(errno).c_str());
             ok = false;
           }
           if (k <= 0) break;
           n += (size_t)k;
+          item_progress(observed, (u64)k);
         }
         return n;
       };
@@ -1367,6 +1506,7 @@ struct Sender {
       i64 off = prefix;
       if (prefix && lseek(in, prefix, SEEK_SET) < 0) ok = false, off = prefix = 0;
       if (client && prefix) slot_add(w.id, prefix);
+      if (prefix && (o.peer_features & PF_APP_PARTIALS)) g_stats.delta_matched_bytes.fetch_add((u64)prefix);
       if (!prefix && fresh.size > DELTA_THRESHOLD && d.delta_candidates.count(idx) && !requested_delta) {
         requested_delta = true;
         flush_block(w);
@@ -1374,9 +1514,11 @@ struct Sender {
         std::string request = new_frame(F_DELTA_REQUEST);
         put_var(request, d.id), put_var(request, idx);
         c.send(std::move(request));
+        item_stage(observed, "waiting_receiver");
         wait_reply(reply);
         signature = reply->signature;
       }
+      item_stage(observed, "transferring");
       bool delta = !prefix && fresh.size > DELTA_THRESHOLD && signature;
       DeltaResult delta_result;
       size_t checkpoint = w.block.size();
@@ -1416,8 +1558,10 @@ struct Sender {
                 ssize_t count = pread(in, worker.buf.data() + n, want - n, offset + (i64)n);
                 if (count < 0 && errno == EINTR) continue;
                 if (count <= 0) {
-                  if (count < 0 && input_ok.exchange(false))
+                  if (count < 0 && input_ok.exchange(false)) {
+                    source_error(errno, w.p2, "read_source");
                     err_line(RERR_PARTIAL, "read errors mapping \"%s\": %s", w.p2.c_str(), errstr(errno).c_str());
+                  }
                   break;
                 }
                 n += (size_t)count;
@@ -1458,11 +1602,17 @@ struct Sender {
           flush_block(w);
         }
       }
-      bool stable = off == fresh.size && source_unchanged(in, w.p2, before) && (!metadata_enabled() || source_xattrs_unchanged(xattrs, w.p2));
+      errno = ESTALE;
+      bool preview_stable=item_preview_source_valid(observed);
+      bool stable = preview_stable && off == fresh.size && source_unchanged(in, w.p2, before) && (!metadata_enabled() || source_xattrs_unchanged(xattrs, w.p2));
+      int validation_error = errno;
       close(in);
-      bool retry = !stable && attempt == 0 && !g_stop.load();
-      if (!stable && !retry && !g_stop.load())
+      bool retry = preview_stable && !stable && attempt == 0 && !g_stop.load();
+      if (retry) item_retry(observed, 1, "source_changed");
+      if (!stable && !retry && !g_stop.load()) {
+        source_error(validation_error, w.p2, "revalidate_source");
         err_line(RERR_PARTIAL, "file changed during transfer after retry: \"%s\"", w.p2.c_str());
+      }
       if (small) {
         w.block.resize(checkpoint);
         if (stable && ok) {
@@ -1525,6 +1675,8 @@ struct Sender {
         case F_NEED: on_need(payload); break;
         case F_DELTA_SIGNATURE: on_delta_reply(payload, false); break;
         case F_DELTA_RETRY_ACK: on_delta_reply(payload, true); break;
+        case F_APP_EVENT: handle_app_event(payload); break;
+        case F_APP_CONTROL: handle_app_control(payload); break;
         case F_MSG: handle_msg(payload); break;
         case F_OUTPUT: handle_output(payload); break;
         case F_PHASE: handle_phase(payload); break;
@@ -1532,10 +1684,12 @@ struct Sender {
           RBuf r(payload);
           u64 bytes = r.var(), files = r.var();
           u64 writing = g_opt.peer_features & PF_STAGE_METRICS ? r.var() : 0;
+          u64 completed = g_opt.peer_features & PF_APP_EVENTS ? r.var() : 0;
           if (r.bad || !r.empty()) die(RERR_PROTOCOL, "protocol error: malformed progress acknowledgment");
           if (client) {
             g_stats.acknowledged_bytes.store(bytes);
             g_stats.acknowledged_files.store(files);
+            g_stats.receiver_completed_bytes.store(completed);
             g_stats.peer_write_ns.store(writing);
           }
           break;
@@ -1598,6 +1752,7 @@ struct Sender {
     root->attrs = rl.attrs;
     root->attr_source = std::move(rl.attr_source);
     root->flags = (rl.has_attrs ? DF_ATTRS : 0) | (rl.no_delete ? DF_NODELETE : 0) | (rl.single ? DF_SINGLE : 0);
+    if (rl.app_scan_failed && (g_opt.peer_features & PF_APP_EVENTS)) root->flags |= DF_APP_SCAN_FAILED;
     root->selection = std::move(rl.selection);
     root->prelisted = true;
     int n = default_jobs();
@@ -1649,6 +1804,7 @@ struct Sender {
     if (client) g_stats.waiting_peer = false;
     phase_snapshot(true);
     stage_snapshot(true);
+    if (g_opt.peer_features & PF_APP_LEASE) c.send(new_frame(F_APP_END));
     c.finish();
     return g_exit_code.load();
   }
@@ -1732,6 +1888,7 @@ struct Receiver {
     std::string frame = new_frame(F_PROGRESS);
     put_var(frame, bytes), put_var(frame, files);
     if (g_opt.peer_features & PF_STAGE_METRICS) put_var(frame, g_stats.write_ns);
+    if (g_opt.peer_features & PF_APP_EVENTS) put_var(frame, g_stats.receiver_completed_bytes);
     c.send(std::move(frame));
     progress_last_bytes = bytes, progress_last_files = files, progress_last_time = now;
   }
@@ -1806,6 +1963,8 @@ struct Receiver {
   }
 
   void signature(RDir& d, u32 idx, Worker& worker) {
+    auto observed = d.w.app_items.empty() ? ItemPtr{} : d.w.app_items[idx];
+    ItemScope observation(observed);
     bool active;
     {
       std::lock_guard<std::mutex> lock(bmu);
@@ -1817,6 +1976,7 @@ struct Receiver {
     auto basis = active ? std::shared_ptr<DeltaBasis>() :
       (d.w.src.e[idx].link_basis != 255 ? link_dest_delta_basis(d.w, idx) :
        destination_delta_basis(path_join(d.w.dst_path, d.w.dst_name(idx)), g_opt.inplace));
+    item_stage(observed, "waiting_source");
     std::string f = new_frame(F_DELTA_SIGNATURE);
     put_var(f, d.id), put_var(f, idx);
     size_t flag_at = f.size();
@@ -2007,7 +2167,7 @@ struct Receiver {
       if ((pe.type != T_DIR && pe.type != T_NONE) || w.rel != rel_join(p->w.rel, p->w.src.name_sv(pe)))
         die(RERR_PROTOCOL, "protocol error: inconsistent directory path");
       go = pe.flags & EF_DESCEND;
-      w.dst_path = path_join(p->w.dst_path, p->w.src.name_sv(pe));
+      w.dst_path = path_join(p->w.dst_path, p->w.dst_name(d->pidx));
       w.destination_parent = p->w.child_anchor;
       w.receiver_filter = p->w.receiver_filter;
       w.receiver_filter_node = p->w.receiver_filter_node;
@@ -2016,6 +2176,7 @@ struct Receiver {
       w.created = pe.flags & EF_CREATED;
       w.mode_ok = pe.flags & EF_MODE_OK;
       w.time_ok = pe.flags & EF_TIME_OK;
+      w.app_directory = p->w.app_items.empty() ? ItemPtr{} : p->w.app_items[d->pidx];
     }
     w.pending.store(1);
     std::string f = new_frame(F_NEED);
@@ -2023,6 +2184,14 @@ struct Receiver {
     if (o.peer_features & PF_PRUNE_EMPTY)
       put_var(f, std::count_if(l.e.begin(), l.e.end(), [](const Entry& e) { return e.item_flags & IF_PRUNED; }));
     if (go) {
+      if (d->flags & DF_APP_SCAN_FAILED) {
+        if (!(o.peer_features & PF_APP_EVENTS)) die(RERR_PROTOCOL, "protocol error: app scan status without negotiation");
+        prepare_items(w);
+        if (w.app_directory) {
+          w.app_directory->failed.store(true);
+          w.app_directory->source_failed.store(true);
+        }
+      }
       generate(w, t);
       if (o.dry_run) {
         for (u32 i : w.need) {
@@ -2035,6 +2204,10 @@ struct Receiver {
     } else {
       w.has_attrs = false;
       for (Entry& e : l.e) e.flags &= (u8)~EF_DESCEND;
+      prepare_items(w);
+      bool skipped = w.app_directory && w.app_directory->skipped.load();
+      for (auto& item : w.app_items)
+        item_finish(item, skipped ? "skipped" : "failure", skipped ? "ancestor_skipped" : "ancestor_failed");
     }
     d->file_ranges = parallel_file_ranges(l, w.need);
     put_var(f, w.need.size());
@@ -2122,7 +2295,10 @@ struct Receiver {
     std::string_view raw = unpack(std::string_view(payload).substr(9), payload[0] & 1, scratch, t);
     g_stats.compression_raw.fetch_add(raw.size());
     g_stats.compression_wire.fetch_add(payload.size() - 9);
-    if (XXH3_64bits(raw.data(), raw.size()) != want) die(RERR_STREAMIO, "data corruption detected in transfer stream");
+    if (XXH3_64bits(raw.data(), raw.size()) != want) {
+      if (g_fs_error_sink) g_fs_error_sink(EBADMSG, {}, "verify_transfer_stream");
+      die(RERR_STREAMIO, "data corruption detected in transfer stream");
+    }
     RBuf r(raw);
     std::shared_ptr<RDir> d;
     std::optional<DestinationDirectory> directory;
@@ -2136,6 +2312,8 @@ struct Receiver {
       if (r.bad || !d || idx >= d->w.src.e.size()) die(RERR_PROTOCOL, "protocol error: bad DATA record");
       DirWork& w = d->w;
       const Entry& s = w.src.e[idx];
+      ItemPtr observed = w.app_items.empty() ? ItemPtr{} : w.app_items[idx];
+      ItemScope observation(observed);
       if (!d->gen_done || s.type != T_REG || !std::binary_search(w.need.begin(), w.need.end(), idx))
         die(RERR_PROTOCOL, "protocol error: unrequested file data");
       if (pinned_id != id) {
@@ -2155,10 +2333,12 @@ struct Receiver {
         }
       }
       if (kind == R_FAIL) {
+        item_finish(observed, "failure", "source_failure");
         g_stats.xfer_files_total.fetch_sub(1, std::memory_order_relaxed);
         g_stats.xfer_bytes_total.fetch_sub((u64)s.size, std::memory_order_relaxed);
         complete_file(*d, idx);
       } else if (kind == R_WHOLE) {
+        item_stage(observed, "transferring");
         Entry attrs = s;
         XattrSet xattrs;
         get_file_attrs(r, attrs, xattrs);
@@ -2186,6 +2366,7 @@ struct Receiver {
         }
         slot_set(progress_slot, ok ? (i64)bytes.size() : 0);
         slot_end(progress_slot, ok);
+        item_finish(observed, ok ? "success" : "failure");
         complete_file(*d, idx);
       } else if (kind == R_CHUNK || kind == R_END || delta) {
         u64 raw_attempt = r.var();
@@ -2241,6 +2422,8 @@ struct Receiver {
         std::unique_lock<std::mutex> file_lock(b->mu);
         if (b->finished) die(RERR_PROTOCOL, "protocol error: data after file completion");
         if (!b->opened) {
+          if (attempt) item_retry(observed, attempt, "source_changed");
+          item_stage(observed, "transferring");
           b->opened = true;
           b->progress_slot = slot_claim(w.rel, w.src.name_sv(s), total);
           b->attrs = s;
@@ -2253,7 +2436,13 @@ struct Receiver {
             file_io_error(errno, b->f.path.c_str(), "reuse partial prefix");
             b->prefix_ok = b->ok = false;
           }
-          if (b->ok && prefix) acknowledge(prefix), b->acknowledged += prefix;
+          if (b->ok && prefix) {
+            acknowledge(prefix); b->acknowledged += prefix;
+            if (g_opt.peer_features & PF_APP_PARTIALS) {
+              g_stats.delta_matched_bytes.fetch_add((u64)prefix);
+              item_progress(observed,0,(u64)prefix);
+            }
+          }
         }
         if (b->prefix != prefix || b->delta != delta) die(RERR_PROTOCOL, "protocol error: inconsistent transfer method");
         if (ending) {
@@ -2339,6 +2528,7 @@ struct Receiver {
               g_stats.xfer_bytes_total.fetch_sub((u64)s.size);
             }
             complete_file(*d, idx);
+            item_finish(observed, ok ? "success" : "failure", !ok && b->status == 2 ? "source_failure" : "");
           } else if (delta) {
             std::string ack = new_frame(F_DELTA_RETRY_ACK);
             put_var(ack, id), put_var(ack, idx);
@@ -2404,7 +2594,7 @@ struct Receiver {
         if (allow_disconnect.load()) return;
         conn_lost();
       }
-      if (ended && type != F_STAGE && type != F_PHASE) die(RERR_PROTOCOL, "protocol error: frame after DATA_END");
+      if (ended && type != F_STAGE && type != F_PHASE && type != F_APP_CONTROL && type != F_APP_END && !(g_app_preview_remote_source && (type==F_APP_EVENT || type==F_MSG))) die(RERR_PROTOCOL, "protocol error: frame after DATA_END");
       switch (type) {
         case F_PHASE: handle_phase(payload); break;
         case F_STAGE: {
@@ -2439,6 +2629,8 @@ struct Receiver {
           if (!(g_opt.peer_features & PF_IDMAP)) die(RERR_PROTOCOL, "ID map without negotiated name-mapping support");
           ids.learn(payload);
           break;
+        case F_APP_EVENT: handle_app_event(payload); break;
+        case F_APP_CONTROL: handle_app_control(payload); break;
         case F_MSG: handle_msg(payload); break;
         case F_LIST_END:
           if (list_end.exchange(true)) die(RERR_PROTOCOL, "protocol error: duplicate LIST_END");
@@ -2458,6 +2650,10 @@ struct Receiver {
           }
           if (gens.load() == 0) g_stats.scan_done.store(true);
           break;
+        case F_APP_END:
+          if (!(g_opt.peer_features & PF_APP_LEASE) || !ended || !allow_disconnect.load() || !payload.empty())
+            die(RERR_PROTOCOL, "invalid leased app transfer boundary");
+          return;
         case F_DATA_END: {
           if (!list_end.load())
             die(RERR_PROTOCOL, "protocol error: DATA_END before LIST_END");
@@ -2476,6 +2672,8 @@ struct Receiver {
   }
 
   int run(const std::string& dest_path) {
+    RemotePreviewSource preview_source;
+    AppPhaseSampler sampler(!client && (g_opt.peer_features & PF_APP_EVENTS));
     dest = dest_path;
     SourceGuard guard(dest.empty() ? "." : dest);
     std::string identity = new_frame(F_DEST);
@@ -2511,7 +2709,11 @@ struct Receiver {
     if (sender_code) g_source_io_error.store(true);
     if (client) report_peer_error(sender_code, "errors were reported by the sender");
     finalize_tree();
+    if ((g_opt.peer_features & PF_APP_EVENTS) && pending_items())
+      die(RERR_PROTOCOL, "incomplete app item outcomes after receiver completion");
     if (g_stop.load()) exit_signal();
+    sampler.stop(); // No periodic frames may follow the terminal acknowledgement.
+    if (app_finish_sink) app_finish_sink(g_exit_code.load());
     allow_disconnect.store(true);
     acknowledge(0, true);
     phase_snapshot(true);
@@ -2669,13 +2871,16 @@ void receive_file_frames(Conn& connection, bool from0, std::vector<std::string>*
 }
 }
 
-int run_client(const std::vector<std::string>& srcs, const std::string& dest, u32 wire_version) {
+int run_client(const std::vector<std::string>& srcs, const std::string& dest, u32 wire_version, const AppStream* app) {
   Options& o = g_opt;
   o.wire_version = wire_version;
-  bool push = parse_remote_spec(dest).remote;
+  bool push = app ? app->push : parse_remote_spec(dest).remote;
+  app_event_sink = app ? app->event : std::function<void(std::string)>();
   RemoteSpec rem;
   std::vector<std::string> paths;  // paths on the remote side
-  if (push) {
+  if (app) {
+    paths = push ? std::vector<std::string>{dest} : srcs;
+  } else if (push) {
     rem = parse_remote_spec(dest);
     paths.push_back(rem.path);
   } else {
@@ -2695,6 +2900,10 @@ int run_client(const std::vector<std::string>& srcs, const std::string& dest, u3
       die(RERR_SYNTAX, "files-from hostname must match the transfer host");
     if (list.remote && o.files_from.ends_with(':')) list.path.clear();
   }
+  int read_fd, write_fd;
+  pid_t pid = -1;
+  if (app) { read_fd = app->read_fd; write_fd = app->write_fd; }
+  else {
   std::vector<std::string> cmd = split_shell_words(remote_shell_command());
   if (cmd.empty()) die(RERR_SYNTAX, "empty remote shell command");
   if (rem.has_user) cmd.push_back("-l"), cmd.push_back(rem.user);
@@ -2715,7 +2924,7 @@ int run_client(const std::vector<std::string>& srcs, const std::string& dest, u3
 
   int to_child[2], from_child[2];
   if (pipe(to_child) != 0 || pipe(from_child) != 0) die(RERR_IPC, "pipe failed: %s", errstr(errno).c_str());
-  pid_t pid = fork();
+  pid = fork();
   if (pid < 0) die(RERR_IPC, "fork failed: %s", errstr(errno).c_str());
   if (pid == 0) {
     umask((mode_t)g_umask);
@@ -2733,8 +2942,10 @@ int run_client(const std::vector<std::string>& srcs, const std::string& dest, u3
   fcntl(to_child[1], F_SETFD, FD_CLOEXEC);
   fcntl(from_child[0], F_SETFD, FD_CLOEXEC);
 
+  read_fd = from_child[0]; write_fd = to_child[1];
+  }
   Conn c;
-  c.rfd = from_child[0], c.wfd = to_child[1];
+  c.rfd = read_fd, c.wfd = write_fd;
   c.peer_pid = pid;
   {
     std::lock_guard<std::mutex> lock(peer_guard);
@@ -2742,7 +2953,7 @@ int run_client(const std::vector<std::string>& srcs, const std::string& dest, u3
     peer_cancelled = false;
   }
   c.configure(0, o.timeout, false);  // Also covers authentication and hello waits.
-  g_conn = &c;
+  { std::lock_guard lock(app_control_mu); g_conn = &c; }
   o.pushing = push;
   o.receiving = !push;
   // Hello: magic, version, the role the server plays, options, paths.
@@ -2776,6 +2987,13 @@ int run_client(const std::vector<std::string>& srcs, const std::string& dest, u3
   if (o.link_dest.empty()) advertised &= ~PF_LINK_DEST;
   if (!o.open_noatime) advertised &= ~PF_OPEN_NOATIME;
   if (!output_enabled()) advertised &= ~(PF_OUTPUT | PF_DIR_OUTPUT);
+  if (app) {
+    advertised &= PF_CORE | PF_OUTPUT | PF_DIR_OUTPUT | PF_IO_CONTROL | PF_DELTA | PF_DIR_CHILDREN | PF_APP_EVENTS;
+    advertised |= PROTO_FEATURES & (PF_APP_EVENTS | PF_PROGRESS_ACK | PF_PROGRESS_PHASE);
+    if (g_app_conflict_plan || g_app_preview_source_check || g_app_preview_destination_check) advertised |= PROTO_FEATURES & PF_APP_CONTROLS;
+    if (app->leased) advertised |= PROTO_FEATURES & PF_APP_LEASE;
+    if (app->recoverable) advertised |= PROTO_FEATURES & (PF_RESUME | PF_APP_PARTIALS);
+  } else advertised &= ~(PF_APP_EVENTS | PF_APP_CONTROLS | PF_APP_LEASE | PF_APP_PARTIALS);
   if (wire_version >= 4) put_var(f, advertised);
   put_options(f);
   put_var(f, paths.size());
@@ -2790,15 +3008,16 @@ int run_client(const std::vector<std::string>& srcs, const std::string& dest, u3
     close(c.wfd);
     close(c.rfd);
     c.wait_peer();
-    g_conn = nullptr;
+    { std::lock_guard lock(app_control_mu); g_conn = nullptr; }
   };
   auto fallback = [&](const std::string& reason, int strict_code) {
+    if (app) die(strict_code, "%s", reason.c_str());
     disconnect();
     fallback_to_rsync(reason, strict_code);
   };
   auto mismatch = [&](u64 peer_version, const std::string& reason) -> int {
     // Retry once using the frozen N-1 layout, before either end opens a destination.
-    if (wire_version == PROTO_VERSION && peer_version == PROTO_MIN_VERSION) {
+    if (!app && wire_version == PROTO_VERSION && peer_version == PROTO_MIN_VERSION) {
       disconnect();
       return run_client(srcs, dest, PROTO_MIN_VERSION);
     }
@@ -2813,6 +3032,7 @@ int run_client(const std::vector<std::string>& srcs, const std::string& dest, u3
       if (code == 127) fallback("remote xsync is not installed on " + rem.host, RERR_CMD_NOTFOUND);
       die(code == 255 ? 255 : RERR_STREAMIO, "connection unexpectedly closed (remote shell exited with code %d)", code);
     }
+    if (type == F_APP_EVENT) { handle_app_event(payload); continue; }
     if (type == F_MSG) {
       RBuf message(payload);
       int kind = message.byte();
@@ -2839,6 +3059,10 @@ int run_client(const std::vector<std::string>& srcs, const std::string& dest, u3
     u64 features = version >= 4 ? answer.var() : LEGACY_V3_FEATURES;
     if (answer.bad || !answer.empty()) die(RERR_PROTOCOL, "protocol error: malformed server hello");
     o.peer_features = features & advertised;
+    if (app && g_app_conflict_plan && (!(o.peer_features & PF_APP_CONTROLS) || !(o.peer_features & PF_PROGRESS_PHASE))) fallback("peer does not support interactive conflicts", RERR_UNSUPPORTED);
+    if (app && app->leased && !(o.peer_features & PF_APP_LEASE)) fallback("peer does not support move leases", RERR_UNSUPPORTED);
+    if (app && app->recoverable && (o.peer_features & (PF_RESUME | PF_APP_PARTIALS)) != (PF_RESUME | PF_APP_PARTIALS)) fallback("peer does not support private partials", RERR_UNSUPPORTED);
+    if (app && (o.peer_features & APP_TRANSFER_FEATURES) != APP_TRANSFER_FEATURES) fallback("peer does not support app transfers", RERR_UNSUPPORTED);
     std::string missing = missing_feature(o.peer_features);
     if (!missing.empty()) fallback(missing, RERR_UNSUPPORTED);
     if (!o.list_only && (o.out_format_set || !o.log_file.empty()) && !structured_output())
@@ -2929,15 +3153,20 @@ int run_client(const std::vector<std::string>& srcs, const std::string& dest, u3
     Sender s(c, true);
     rc = s.run(srcs);
   } else {
+    if (app && app->receiver_preflight) {
+      int code = app->receiver_preflight();
+      if (code) die(code,"app recovery preflight failed");
+    }
     Receiver r(c, true);
     rc = r.run(dest);
   }
+  { std::lock_guard lock(app_control_mu); g_conn = nullptr; }
   if (c.wfd >= 0) close(c.wfd);
   g_stats.waiting_peer = true;
   int st = c.wait_peer();
   g_stats.waiting_peer = false;
   close(c.rfd);
-  g_conn = nullptr;
+  { std::lock_guard lock(app_control_mu); g_conn = nullptr; }
   if (o.list_only && !rc && (!WIFEXITED(st) || WEXITSTATUS(st))) {
     rc = WIFEXITED(st) ? WEXITSTATUS(st) : RERR_STREAMIO;
     err_line(rc, "remote shell exited after listing with code %d", rc);
@@ -2945,14 +3174,34 @@ int run_client(const std::vector<std::string>& srcs, const std::string& dest, u3
   return rc;
 }
 
-int run_server() {
+void send_app_control(std::string payload) {
+  std::lock_guard lock(app_control_mu);
+  if (!g_conn || !(g_opt.peer_features & PF_APP_CONTROLS)) return;
+  g_conn->send(new_frame(F_APP_CONTROL) + payload, true);
+}
+void send_app_event(std::string fields) {
+  if (!g_conn || !(g_opt.peer_features & PF_APP_EVENTS)) return;
+  bool cancelled = fields.find("\"type\":\"conflict_resolved\"") != fields.npos && fields.find("\"decision\":\"cancel\"") != fields.npos;
+  g_conn->send(new_frame(F_APP_EVENT) + "{" + fields + "}", true);
+  // Cancellation closes this transfer; flush its accepted decision before
+  // stopping readers/writers so the peer can report cancellation instead of EOF.
+  if (cancelled) g_conn->finish();
+}
+
+int run_server(const AppServer* app) {
+  app_server_mode = app != nullptr;
+  app_finish_sink = app ? app->finish : std::function<void(int)>();
   Options& o = g_opt;
+  std::string expected_options;
+  if (app) put_options(expected_options);
+  const u64 expected_bandwidth = o.bwlimit;
+  const u32 expected_timeout = o.timeout;
   static Conn c;
   c.rfd = 0, c.wfd = dup(1);
   // Anything that strays onto stdout would corrupt the protocol stream.
   int devnull = open("/dev/null", O_WRONLY);
   if (devnull >= 0) dup2(devnull, 1), close(devnull);
-  g_conn = &c;
+  { std::lock_guard lock(app_control_mu); g_conn = &c; }
   u8 type;
   std::string payload;
   if (!c.read_frame(type, payload) || type != F_HELLO) return RERR_PROTOCOL;
@@ -2988,6 +3237,9 @@ int run_server() {
   o.am_server = true;
   o.wire_version = ver;
   o.peer_features = advertised & PROTO_FEATURES;
+  if (!app) o.peer_features &= ~(PF_APP_EVENTS | PF_APP_CONTROLS | PF_APP_LEASE | PF_APP_PARTIALS);
+  if (app && (ver != PROTO_VERSION || (o.peer_features & APP_TRANSFER_FEATURES) != APP_TRANSFER_FEATURES))
+    die(RERR_UNSUPPORTED, "peer does not support app transfers");
   if ((advertised & PF_LINK_DEST) && !(PROTO_FEATURES & PF_LINK_DEST)) die(RERR_UNSUPPORTED, "peer does not support --link-dest");
   if (!o.link_dest.empty() && !(o.peer_features & PF_LINK_DEST) && !(o.peer_features & PF_LIST))
     die(RERR_UNSUPPORTED, "explicit helper --link-dest requires negotiated snapshot bases");
@@ -3022,6 +3274,16 @@ int run_server() {
   o.fileflags = o.peer_features & PF_FILEFLAGS;
   o.open_noatime = o.peer_features & PF_OPEN_NOATIME;
   get_options(r);
+  if (app) {
+    std::string actual; put_options(actual);
+    const u64 permitted = PF_CORE | PF_OUTPUT | PF_DIR_OUTPUT | PF_IO_CONTROL | PF_DELTA | PF_DIR_CHILDREN | PF_APP_EVENTS | PF_APP_CONTROLS | PF_APP_LEASE | PF_APP_PARTIALS | PF_RESUME | PF_PROGRESS_ACK | PF_PROGRESS_PHASE;
+    if (g_app_conflict_plan && (!(o.peer_features & PF_APP_CONTROLS) || !(o.peer_features & PF_PROGRESS_PHASE))) die(RERR_UNSUPPORTED, "peer does not support interactive conflicts");
+    if (app->leased != bool(o.peer_features & PF_APP_LEASE)) die(RERR_PROTOCOL, "app move lease differs from validated request");
+    if (app->recoverable != bool(o.peer_features & PF_APP_PARTIALS) || (app->recoverable && !(o.peer_features & PF_RESUME)))
+      die(RERR_PROTOCOL,"app private partials differ from validated request");
+    if (actual != expected_options || (advertised & ~permitted))
+      die(RERR_PROTOCOL, "app transfer options differ from the validated request");
+  }
   // Old clients cannot distinguish an explicit level from their default.
   // Retain their requested level rather than silently adapting it.
   if (!(o.peer_features & PF_COMPRESS_POLICY)) o.compress_level_explicit = true;
@@ -3043,8 +3305,15 @@ int run_server() {
   init_ids();
   std::vector<std::string> paths;
   size_t n = (size_t)r.var();
-  for (size_t i = 0; i < n && !r.bad; i++) paths.push_back(expand_remote_home(std::string(r.str())));
+  if (app && n > 1024) die(RERR_PROTOCOL, "protocol error: too many app transfer paths");
+  for (size_t i = 0; i < n && !r.bad; i++) paths.push_back(app ? std::string(r.str()) : expand_remote_home(std::string(r.str())));
   if (r.bad || paths.empty() || !r.empty()) die(RERR_PROTOCOL, "protocol error: truncated or trailing hello");
+  if (app) {
+    if ((role == 'R') != app->receiving || paths != app->paths)
+      die(RERR_PROTOCOL, "app transfer paths differ from the validated request");
+    int code = app->preflight();
+    if (code) { send_msg(2, code, "app transfer preflight failed"); return code; }
+  }
   o.pushing = role == 'R';
   std::string f = new_frame(F_HELLO);
   f.append(MAGIC, sizeof MAGIC - 1);
@@ -3057,7 +3326,8 @@ int run_server() {
     if (!c.read_frame(type, payload)) conn_lost();
     RBuf config(payload);
     u64 rate = config.var(), seconds = config.var();
-    if (type != F_IO_CONFIG || config.bad || !config.empty() || rate > INT64_MAX || rate % 1024 || seconds > INT_MAX)
+    if (type != F_IO_CONFIG || config.bad || !config.empty() || rate > INT64_MAX || (!app && rate % 1024) || seconds > INT_MAX ||
+        (app && (rate != expected_bandwidth || seconds != expected_timeout)))
       die(RERR_PROTOCOL, "protocol error: malformed I/O configuration");
     o.bwlimit = rate;
     o.timeout = (u32)seconds;
@@ -3194,6 +3464,7 @@ int run_server() {
     o.output_unchanged = payload[1];
     o.mkpath = payload[2];
     o.delete_before = payload[3];
+    if (app && (o.mkpath || o.delete_before)) die(RERR_PROTOCOL, "unsupported app transfer output configuration");
   }
   if (role == 'R' && !o.list_only) {
     if (o.ownership.user_set) o.owner = true;
@@ -3222,7 +3493,7 @@ int run_server() {
     rc = rv.run(paths[0]);
   } else {
     Sender s(c, false);
-    rc = s.run(expand_remote_sources(paths));
+    rc = s.run(app ? paths : expand_remote_sources(paths));
   }
   return rc;
 }

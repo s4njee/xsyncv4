@@ -132,6 +132,7 @@ std::string name_key(std::string_view name, NameRules rules) {
 }
 
 void reject_name_collisions(DirWork& w) {
+  if (g_app_conflict_plan) return;
   if (w.src.e.size() < 2 || !w.rename_to.empty()) return;
   NameRules rules = destination_rules(w.dst_path);
   if (!rules.fold && !rules.normalize) return;
@@ -154,4 +155,17 @@ void reject_name_collisions(DirWork& w) {
     if (collision) entry.type = T_NONE, w.no_delete = true;
     group.push_back(i);
   }
+}
+
+bool destination_names_equivalent(const std::string& path, std::string_view a, std::string_view b) {
+  if (a == b) return true;
+  auto rules = destination_rules(path);
+  return name_key(a, rules) == name_key(b, rules);
+}
+std::function<std::string(std::string_view)> destination_name_keyer(const std::string& path) {
+  auto rules = destination_rules(path);
+  return [rules](std::string_view name) { return name_key(name, rules); };
+}
+std::function<std::string(std::string_view)> observed_name_keyer(bool fold, bool normalize, bool full_fold) {
+  return [rules = NameRules{fold,normalize,full_fold}](std::string_view name) { return name_key(name,rules); };
 }

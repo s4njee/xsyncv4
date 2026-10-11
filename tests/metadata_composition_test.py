@@ -92,7 +92,12 @@ class MetadataCompositionTests(unittest.TestCase):
                     # fields. Compare all other requested metadata with modern
                     # rsync and check flags independently against source stat.
                     rows = []
-                    for row in result.stdout.splitlines():
+                    output = result.stdout.splitlines()
+                    if native and '-n' in extra:
+                        # Native dry-run ends with its documented aggregate
+                        # summary, outside the per-file out-format records.
+                        self.assertRegex(output.pop(), rb'^would transfer \d+ files \(.+\), delete 0$')
+                    for row in output:
                         code, name, transferred = row.split(b'|')
                         if clone and native and name == b'changed': self.assertEqual(int(transferred), 0)
                         self.assertEqual(len(code), 12 if DARWIN and native else 11)

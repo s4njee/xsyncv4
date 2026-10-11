@@ -2,8 +2,11 @@
 #pragma once
 #include <mutex>
 #include <memory>
+#include <functional>
+#include <unordered_map>
 
 #include "common.h"
+#include "item.h"
 #include "destination.h"
 #include "xattrs.h"
 
@@ -36,11 +39,15 @@ enum { LD_LINKS = 1, LD_FOLLOW = 2, LD_SUMS = 4 };
 // List a directory with attributes (sorted by name). Returns 0 or errno.
 int list_dir(const char* path, DirList& out, unsigned flags);
 int destination_list_dir(const char* path, DirList& out, unsigned flags);
+// Optional app observer; scanner failures retain the exact child path/errno.
+void listing_entry_error(int error, std::string_view name, std::string_view operation, const Entry* entry = nullptr);
 void entry_from_stat(const struct stat& st, Entry& e);
 bool same_entry_time(const Entry& source, const Entry& destination, bool exact = false);
 u32 execution_mode(u32 source, u32 destination);
 Entry source_snapshot(const Entry& scanned, const struct stat& st, bool receiver = true);
 bool source_unchanged(int fd, const std::string& path, const struct stat& before);
+// Optional app attribution; CLI diagnostics and exit-code policy stay at callers.
+void source_error(int error, std::string_view path, std::string_view operation);
 std::string item_code(const char* code, const Entry& entry);
 void set_fileflags(const char* path, const Entry& entry);
 bool hash_file(const char* path, u64 out[2]);
@@ -48,6 +55,16 @@ bool destination_hash_file(const char* path, u64 out[2]);
 struct ResumePrefix {
   i64 size = 0;
   u64 sum[2] = {};
+  struct Basis {
+    int fd = -1;
+    DestinationRevision identity;
+    // Native NEED preflight can collect an entire directory. Private snapshots
+    // retain identities rather than keeping one descriptor per candidate.
+    std::string path;
+    bool published = false;
+    ~Basis();
+  };
+  std::shared_ptr<Basis> basis; // Private app data; CLI prefixes use the final name.
 };
 bool hash_prefix_fd(int fd, i64 size, u64 out[2]);
 ResumePrefix destination_resume_prefix(const char* path, i64 limit);
@@ -60,6 +77,8 @@ struct ReceiverFilterNode {
 
 // One directory being synchronised, as seen from the destination side.
 struct DirWork {
+  ItemPtr app_directory;
+  std::vector<ItemPtr> app_items;
   std::string dst_path;  // destination directory
   std::string rel;       // path relative to the transfer root ("" for the root)
   std::string src_path;  // local mode: source directory
@@ -88,18 +107,31 @@ struct DirWork {
   DirWork* waiter = nullptr;   // parent that must not be finished before we exist
   std::atomic<bool> modified{false};
   std::string rename_to;  // single-file transfer to an explicit destination name
+  std::vector<std::string> destination_names;
+  std::mutex conflict_mutex;
+  std::function<std::string(std::string_view)> conflict_name_key;
+  std::unordered_map<std::string, std::vector<u32>> conflict_names;
+  std::unordered_map<std::string, std::string> conflict_existing_names;
   std::vector<u32> need;  // indices of regular files that must be transferred
   std::atomic<int> pending{0};
   u32 dgid = 0;  // group new children of the destination directory get
 
-  const char* dst_name(u32 i) const { return rename_to.empty() ? src.name(src.e[i]) : rename_to.c_str(); }
+  const char* dst_name(u32 i) const {
+    if (!destination_names.empty() && !destination_names[i].empty()) return destination_names[i].c_str();
+    return rename_to.empty() ? src.name(src.e[i]) : rename_to.c_str();
+  }
 };
 
 // Compare `w.src` against the destination directory: create directories, symlinks and
 // specials, fix attributes of up-to-date files, delete extraneous entries, and collect the
 // regular files that need their data transferred into `w.need`.
 void generate(DirWork& w, Worker& t);
+void prepare_items(DirWork& w);
 void reject_name_collisions(DirWork& w);
+bool destination_names_equivalent(const std::string& path, std::string_view a, std::string_view b);
+std::function<std::string(std::string_view)> destination_name_keyer(const std::string& path);
+// Use already observed rules without probing or modifying a filesystem.
+std::function<std::string(std::string_view)> observed_name_keyer(bool fold, bool normalize, bool full_fold = true);
 void skip_unsafe_links(DirWork& w, Worker& t);
 // Apply final directory attributes once everything inside is in place.
 void finish_dir(DirWork& w);
@@ -109,8 +141,12 @@ void finalize_tree();
 // Destination file being written.
 struct OutputProgress;
 struct OutFile {
+  ItemPtr item;
+  DestinationRevision output_identity;
+  int ownership_fd = -1; // Keep an app staging inode alive through close/publication.
   int fd = -1;
   int dir_fd = -1;
+  int stage_fd = -1; // Private app job directory; -1 stages beside the final name.
   bool temp = false;
   bool existed = false;
   u32 created_mode = 0;

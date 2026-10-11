@@ -23,6 +23,7 @@ struct RootList {
   Entry attrs;                         // attributes for the destination directory itself
   std::string attr_source;
   bool has_attrs = false;
+  bool app_scan_failed = false;         // observed source listing failure, including partial listings
   bool single = false;                 // exactly one non-directory source argument
   bool no_delete = true;               // implied/partial parents do not own unlisted siblings
   std::shared_ptr<SelectedSource> selection;
@@ -55,7 +56,26 @@ int default_jobs(const std::string& destination = {});
 void wait_pool(Pool& pool);
 
 int run_local(const std::vector<std::string>& srcs, const std::string& dest);
-int run_client(const std::vector<std::string>& srcs, const std::string& dest, u32 wire_version = PROTO_VERSION);
-int run_server();
+struct AppStream {
+  bool push;
+  int read_fd, write_fd;  // Ownership passes to the engine; SSH lifetime stays with the adapter.
+  std::function<void(std::string)> event;
+  bool leased = false;
+  bool recoverable = false;
+  std::function<int()> receiver_preflight = {};
+};
+struct AppServer {
+  bool receiving;
+  std::vector<std::string> paths;
+  std::function<int()> preflight;
+  bool leased = false;
+  bool recoverable = false;
+  std::function<void(int)> finish = {};
+};
+int run_client(const std::vector<std::string>& srcs, const std::string& dest, u32 wire_version = PROTO_VERSION,
+               const AppStream* app = nullptr);
+int run_server(const AppServer* app = nullptr);
+void send_app_event(std::string fields);
+void send_app_control(std::string payload);
 void cancel_remote_peer();
 void print_summary(u64 t0);

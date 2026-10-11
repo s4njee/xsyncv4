@@ -1,4 +1,5 @@
 #include "fs.h"
+#include "app_partials.h"
 
 #include <dirent.h>
 #include <fcntl.h>
@@ -45,7 +46,46 @@
 std::string errstr(int e) { return std::string(strerror(e)) + " (" + std::to_string(e) + ")"; }
 
 static std::atomic<bool> disk_full{false};
+namespace {
+thread_local std::string_view listing_path;
+thread_local bool listing_destination = false;
+struct ListingObservation {
+  std::string_view previous_path = listing_path;
+  bool previous_destination = listing_destination;
+  ListingObservation(std::string_view path, bool destination) { listing_path = path; listing_destination = destination; }
+  ~ListingObservation() { listing_path = previous_path; listing_destination = previous_destination; }
+};
+}
+void listing_entry_error(int error, std::string_view name, std::string_view operation, const Entry* entry) {
+  if (!g_fs_error_sink) return;
+  int saved_errno = errno;
+  std::string path = name.empty() ? std::string(listing_path) : path_join(listing_path, name);
+  std::string op = std::string(operation) + (listing_destination ? "_destination" : "_source");
+  ItemPtr failed;
+  if (g_item_sink && !listing_destination && !name.empty()) {
+    auto parent = current_item();
+    failed = transfer_item(rel_join(parent ? parent->relative : "", name), path, {}, entry ? *entry : Entry{});
+  }
+  ItemScope scope(failed ? failed : current_item());
+  g_fs_error_sink(error, path, op);
+  err_line(RERR_PARTIAL, "%s failed on \"%s\": %s", op.c_str(), path.c_str(), errstr(error).c_str());
+  item_finish(failed, "failure", "source_error");
+  errno = saved_errno;
+}
+void source_error(int error, std::string_view path, std::string_view operation) {
+  int saved_errno = errno;
+  if (g_fs_error_sink) g_fs_error_sink(error, path, operation);
+  errno = saved_errno;
+}
+// App progress observes actual metadata work, including deferred directories.
+// Keep this off the ordinary CLI's hot path.
+struct MetadataActivity {
+  bool active = g_fs_error_sink != nullptr;
+  MetadataActivity() { if (active) { item_stage(current_item(), "applying_metadata"); g_stats.metadata_active.fetch_add(1); progress_tick(); } }
+  ~MetadataActivity() { if (active) { g_stats.metadata_active.fetch_sub(1); progress_tick(); } }
+};
 void file_io_error(int error, const char* path, const char* operation) {
+  if (g_fs_error_sink) g_fs_error_sink(error, path, operation);
   if (disk_full.load()) return;
   if (error == ENOSPC || error == EDQUOT) {
     if (!disk_full.exchange(true)) die(RERR_FILEIO, "%s failed on \"%s\": %s", operation, path, errstr(error).c_str());
@@ -57,6 +97,8 @@ void file_io_error(int error, const char* path, const char* operation) {
 bool check_attr(int result, const char* path, const char* attribute) {
   if (result == 0) return true;
   int e = errno;
+  if (g_fs_error_sink && e != ENOSPC && e != EDQUOT && !disk_full.load())
+    g_fs_error_sink(e, path, attribute);
   if (e == ENOSPC || e == EDQUOT || disk_full.load()) { file_io_error(e, path, attribute); return false; }
   err_line(RERR_PARTIAL, "failed to set %s on \"%s\": %s", attribute, path, errstr(e).c_str());
   return false;
@@ -214,7 +256,9 @@ bool source_unchanged(int fd, const std::string& path, const struct stat& before
 #endif
     return times && st.st_size == before.st_size && st.st_dev == before.st_dev && st.st_ino == before.st_ino && S_ISREG(st.st_mode);
   };
-  return same(after) && same(named);
+  if (same(after) && same(named)) return true;
+  errno = ESTALE;
+  return false;
 }
 
 static void resolve_links(int fd, DirList& out, size_t first, unsigned flags) {
@@ -233,7 +277,13 @@ static void resolve_links(int fd, DirList& out, size_t first, unsigned flags) {
       }
     } else if (flags & LD_LINKS) {
       ssize_t n = readlinkat(fd, out.names.c_str() + out.e[i].name_off, buf, sizeof buf - 1);
-      if (n < 0) n = 0, out.incomplete = true;
+      if (n < 0) {
+        listing_entry_error(errno, out.name_sv(out.e[i]), "readlink", &out.e[i]);
+        // An unreadable link target is not an empty target to install. The
+        // source owns its failed outcome; pruning prevents receiver discovery.
+        if (g_item_sink && !listing_destination) out.e[i].type = T_NONE;
+        n = 0; out.incomplete = true;
+      }
       out.e[i].link_off = out.add_str({buf, (size_t)n});
     }
   }
@@ -251,13 +301,14 @@ static int list_dir_generic(int fd, DirList& out) {
     errno = 0;
     dirent* de = readdir(dir);
     if (!de) {
-      if (errno) out.incomplete = true;
+      if (errno) { listing_entry_error(errno, {}, "scan"); out.incomplete = true; }
       break;
     }
     const char* nm = de->d_name;
     if (nm[0] == '.' && (!nm[1] || (nm[1] == '.' && !nm[2]))) continue;
     struct stat st;
     if (fstatat(dirfd(dir), nm, &st, AT_SYMLINK_NOFOLLOW) != 0) {
+      listing_entry_error(errno, nm, "stat");
       out.incomplete = true;
       continue;
     }
@@ -362,12 +413,13 @@ static int list_dir_fd(int fd, DirList& out, unsigned flags) {
       const u32 want = ATTR_CMN_OBJTYPE | ATTR_CMN_MODTIME | ATTR_CMN_ACCESSMASK |
                        (g_opt.atimes ? ATTR_CMN_ACCTIME : 0) | (g_opt.crtimes ? ATTR_CMN_CRTIME : 0) |
                        ATTR_CMN_FLAGS;
-      if (g_opt.hard_links || err || (ret.commonattr & want) != want ||
+      if (g_item_sink || g_opt.hard_links || err || (ret.commonattr & want) != want ||
           (e.type != T_DIR && !(ret.fileattr & ATTR_FILE_LINKCOUNT)) || (e.type == T_REG && !(ret.fileattr & ATTR_FILE_DATALENGTH))) {
         // Attributes missing for this entry: fall back to a plain lstat.
         struct stat st;
         std::string tmp(nm, nlen);
         if (fstatat(fd, tmp.c_str(), &st, AT_SYMLINK_NOFOLLOW) != 0) {
+          listing_entry_error(errno, tmp, "stat");
           out.incomplete = true;
           continue;
         }
@@ -379,7 +431,7 @@ static int list_dir_fd(int fd, DirList& out, unsigned flags) {
           struct stat st;
           std::string name(nm, nlen);
           if (fstatat(fd, name.c_str(), &st, AT_SYMLINK_NOFOLLOW) == 0) e.size = st.st_size;
-          else out.incomplete = true;
+          else { listing_entry_error(errno, name, "stat"); out.incomplete = true; }
         }
       }
       if (e.type != T_CHR && e.type != T_BLK) e.rdev = 0;
@@ -411,6 +463,11 @@ static int list_dir_fd(int fd, DirList& out, unsigned flags) {
     }
   }
 #endif
+  if (g_item_sink) {
+    out.e.erase(std::remove_if(out.e.begin() + first,out.e.end(),[&](const Entry& entry) {
+      return app_partials::hidden(fd,out.name_sv(entry));
+    }),out.e.end());
+  }
   if (flags & (LD_LINKS | LD_FOLLOW)) resolve_links(fd, out, first, flags);
   close(fd);
   out.sort();
@@ -418,9 +475,11 @@ static int list_dir_fd(int fd, DirList& out, unsigned flags) {
 }
 
 int list_dir(const char* path, DirList& out, unsigned flags) {
+  ListingObservation observation(path, false);
   return list_dir_fd(open(path, O_RDONLY | O_DIRECTORY | O_CLOEXEC), out, flags);
 }
 int destination_list_dir(const char* path, DirList& out, unsigned flags) {
+  ListingObservation observation(path, true);
   return list_dir_fd(destination_open_dir(path), out, flags);
 }
 
@@ -482,6 +541,7 @@ bool hash_prefix_fd(int fd, i64 size, u64 out[2]) {
 }
 
 ResumePrefix destination_resume_prefix(const char* path, i64 limit) {
+  if (app_partials::active()) return app_partials::prefix(path, limit);
   ResumePrefix prefix;
   auto target = destination_path(path);
   if (target.fd < 0 || limit <= 0) return prefix;
@@ -494,6 +554,7 @@ ResumePrefix destination_resume_prefix(const char* path, i64 limit) {
   if (fd >= 0) close(fd);
   return prefix;
 }
+ResumePrefix::Basis::~Basis() { if (fd >= 0) close(fd); }
 
 std::string item_code(const char* code, const Entry& entry) {
   std::string result(code);
@@ -539,6 +600,7 @@ struct FinalDirectory {
   std::string path, rel, source;
   Entry attrs;
   bool mode_ok, time_ok, modified, reported;
+  ItemPtr item;
 };
 std::mutex final_mu;
 std::vector<DeleteCandidate> delete_candidates;
@@ -646,6 +708,7 @@ bool remove_tree(const std::string& path, u8 type, const std::string& rel, Worke
     int e = destination_list_dir(path.c_str(), l, 0);
     if (e == EACCES && check_attr(destination_chmod(path.c_str(), 0700), path.c_str(), "permissions")) e = destination_list_dir(path.c_str(), l, 0);
     if (e) {
+      if (g_fs_error_sink) g_fs_error_sink(e, path, "scan_destination");
       err_line(RERR_PARTIAL, "delete_file: opendir \"%s\" failed: %s", path.c_str(), errstr(e).c_str());
       return false;
     }
@@ -688,10 +751,12 @@ bool remove_tree(const std::string& path, u8 type, const std::string& rel, Worke
     if (!ok.load()) return false;
     if (!permit()) return false;
     if (!g_opt.dry_run && destination_rmdir(path.c_str()) != 0) {
+      if (g_fs_error_sink) g_fs_error_sink(errno, path, "rmdir_destination");
       err_line(RERR_PARTIAL, "delete_file: rmdir \"%s\" failed: %s", path.c_str(), errstr(errno).c_str());
       return false;
     }
   } else if (!g_opt.dry_run && destination_unlink(path.c_str()) != 0 && errno != ENOENT) {
+    if (g_fs_error_sink) g_fs_error_sink(errno, path, "unlink_destination");
     err_line(RERR_PARTIAL, "delete_file: unlink \"%s\" failed: %s", path.c_str(), errstr(errno).c_str());
     return false;
   }
@@ -741,6 +806,7 @@ bool make_way(const std::string& path, const Entry& d, const std::string& rel, c
   if (d.type == T_DIR && !g_opt.force && !g_opt.del) {
     // Without --force/--delete only an empty directory may be replaced.
     if (g_opt.dry_run || destination_rmdir(path.c_str()) == 0) return true;
+    if (g_fs_error_sink) g_fs_error_sink(errno, path, "replace_destination_type");
     err_line(RERR_PARTIAL, "could not make way for new %s: %s", what, rel.c_str());
     return false;
   }
@@ -804,7 +870,46 @@ void skip_unsafe_links(DirWork& w, Worker& t) {
   }
 }
 
+void prepare_items(DirWork& w) {
+  if (!g_item_sink) return;
+  if (w.has_attrs && !w.app_directory) {
+    w.app_directory = transfer_item(w.rel, w.attr_source.empty() ? w.src_path : w.attr_source, w.dst_path, w.attrs);
+    w.app_directory->applied.store(true); // setup_dest or the parent generator pinned it.
+    item_preview_source_valid(w.app_directory);
+    item_expect_destination(w.app_directory);
+  }
+  if (!w.app_items.empty()) return;
+  w.app_items.resize(w.src.e.size());
+  w.destination_names.resize(w.src.e.size());
+  for (u32 i = 0; i < w.src.e.size(); ++i) {
+    std::string source;
+    if (!w.output_sources.empty()) source = w.output_sources[i];
+    else src_path_of(w, i, source);
+    w.app_items[i] = transfer_item(rel_join(w.rel, w.src.name_sv(w.src.e[i])), std::move(source),
+                                  path_join(w.dst_path, w.dst_name(i)), w.src.e[i]);
+    w.app_items[i]->parent = w.app_directory;
+    w.app_items[i]->plan_owner = &w;
+    w.app_items[i]->plan_index = i;
+    item_preview_source_valid(w.app_items[i]);
+  }
+}
+
 void generate(DirWork& w, Worker& t) {
+  prepare_items(w);
+  ItemScope directory_item(w.app_directory);
+  item_preview_source_valid(w.app_directory);
+  if (w.app_directory && w.app_directory->preview_stale.load()) {
+    for (size_t i=0;i<w.app_items.size();++i) {
+      w.src.e[i].flags &= (u8)~EF_DESCEND;
+      item_finish(w.app_items[i],"failure","stale_preview");
+    }
+    return;
+  }
+  if ((w.app_directory && !item_destination_valid(w.app_directory, true)) ||
+      (!w.app_directory && g_app_destination_check && !g_app_destination_check())) {
+    for (auto& item : w.app_items) item_finish(item, "failure", "destination_changed");
+    return;
+  }
   DestinationDirectory directory(w.dst_path, w.destination_parent);
   const Options& o = g_opt;
   bool load_filters = w.has_attrs || !w.rel.empty();
@@ -821,7 +926,7 @@ void generate(DirWork& w, Worker& t) {
   reject_name_collisions(w);
 
   if (!w.created) {
-    if (!w.rename_to.empty() || (!o.del && n <= 2)) {
+    if (!g_app_conflict_plan && (!w.rename_to.empty() || (!o.del && n <= 2))) {
       for (size_t i = 0; i < n; i++) {
         std::string_view nm = w.dst_name((u32)i);
         t.p1.assign(w.dst_path).push_back('/');
@@ -837,11 +942,21 @@ void generate(DirWork& w, Worker& t) {
     } else {
       int e = destination_list_dir(w.dst_path.c_str(), dl, 0);
       if (e && !(e == ENOENT && o.dry_run)) {
+        if (g_fs_error_sink) g_fs_error_sink(e, w.dst_path, "scan_destination");
         err_line(RERR_PARTIAL, "opendir \"%s\" failed: %s", w.dst_path.c_str(), errstr(e).c_str());
         for (Entry& s : src.e) s.flags &= (u8)~EF_DESCEND;
+        for (auto& item : w.app_items) item_finish(item, "failure", "destination_unreadable");
         return;
       }
       if (dl.incomplete) w.no_delete = true;
+    }
+  }
+  if (g_app_conflict_plan) {
+    w.conflict_name_key = destination_name_keyer(w.dst_path);
+    for (u32 i = 0; i < src.e.size(); ++i) w.conflict_names[w.conflict_name_key(w.dst_name(i))].push_back(i);
+    for (const auto& entry : dl.e) {
+      auto name = dl.name_sv(entry);
+      w.conflict_existing_names.emplace(w.conflict_name_key(name), name);
     }
   }
   if (o.del && o.delete_after && !w.no_delete && w.rename_to.empty()) {
@@ -934,6 +1049,33 @@ void generate(DirWork& w, Worker& t) {
     s.mode = incoming_mode(s.mode, s.type);
     incoming_ownership(s);
     set_names(name);
+    ItemPtr observed = w.app_items.empty() ? ItemPtr{} : w.app_items[i];
+    ItemScope observation(observed);
+    ItemFinalizer outcome(observed);
+    if (observed) item_stage(observed, "planning");
+    if (observed && observed->preview_stale.load()) { s.flags &= (u8)~EF_DESCEND; continue; }
+    if (s.type == T_NONE && observed && observed->type != T_NONE) {
+      outcome.status = "failure"; outcome.reason = "name_collision";
+      if (g_fs_error_sink) g_fs_error_sink(0, path, "name_collision");
+      continue;
+    }
+    Entry planned_destination;
+    std::string_view conflict_reason;
+retry_destination:
+    if (observed && g_app_conflict_plan && s.type != T_NONE) {
+      bool exists = d != nullptr;
+      if (!g_app_conflict_plan(w, (u32)i, planned_destination, exists, conflict_reason)) continue;
+      d = exists ? &planned_destination : nullptr;
+      name = w.dst_name((u32)i);
+      set_names(name);
+    } else if (observed) {
+      auto revision=d ? DestinationRevision::from(*d) : DestinationRevision::absent();
+      if (g_app_preview_destination_check && !g_app_preview_destination_check(observed,revision)) { s.flags &= (u8)~EF_DESCEND; continue; }
+      observed->expected_destination = d ? DestinationRevision::from(*d) : DestinationRevision::absent();
+      if ((!d || !o.ignore_existing || (s.type == T_DIR && d->type == T_DIR)) &&
+          !item_destination_valid(observed)) continue;
+    }
+    if (!item_preview_source_valid(observed)) { s.flags &= (u8)~EF_DESCEND; continue; }
     if (metadata_enabled() && !w.src_xattrs[i].complete) continue;
 
     Entry metadata_before;
@@ -966,8 +1108,24 @@ void generate(DirWork& w, Worker& t) {
       if (o.xattrs && !shared_xattrs_checked[i] && xattrs_differ(w.src_xattrs[i], path, s.type, filters, ownership_changed)) s.item_flags |= IF_XATTR;
       if (o.acls && acls_differ(w.src_xattrs[i].acl(), path, s.type, &s.access_acl_differ)) s.item_flags |= IF_ACL;
     };
+    auto destination_changed = [&] {
+      if (!g_app_conflict_plan || !observed) return 0;
+      if ((g_app_destination_check && !g_app_destination_check()) ||
+          !item_destination_valid(observed->parent, true)) return -1;
+      DestinationRevision current;
+      if (!item_observe_destination(observed, current)) return -1;
+      return current == observed->expected_destination ? 0 : 1;
+    };
     switch (s.type) {
       case T_DIR: {
+        int changed = destination_changed();
+        if (changed < 0) break;
+        if (changed) { conflict_reason = "destination_changed"; goto retry_destination; }
+        // App skip decisions protect an existing node of a different type too.
+        if (observed && d && d->type != T_DIR && o.ignore_existing) {
+          outcome.status = "skipped"; outcome.reason = "existing"; break;
+        }
+        if (!app_partials::prepare_entry(observed)) break;
         seen_dirs++;
         bool keep = d && d->type == T_DIR;
         auto note_created = [&] {
@@ -1005,13 +1163,18 @@ void generate(DirWork& w, Worker& t) {
           if (!d && o.existing) break;
           if (d && !make_way(path, *d, rel, "directory", t, w.receiver_filter)) break;
           need_dgid();
-          if (!d && w.lazy_children && o.recursive && s.rdev != 1) {
+          if (!d && w.lazy_children && o.recursive && s.rdev != 1 && !app_partials::active()) {
             s.flags |= EF_CREATED | EF_DESCEND | EF_LAZY;
             if ((final_mode | 0700) == final_mode && !(final_mode & 07000)) s.flags |= EF_MODE_OK;
             w.modified = true;
             g_stats.created_dirs.fetch_add(1, std::memory_order_relaxed);
             note_created();
           } else if (!o.dry_run && destination_mkdir(path.c_str(), final_mode | 0700) != 0) {
+            if (errno == EEXIST && g_app_conflict_plan) {
+              --seen_dirs;
+              conflict_reason = "destination_changed";
+              goto retry_destination;
+            }
             if (errno != EEXIST) {
               file_io_error(errno, path.c_str(), "recv_generator: mkdir");
               break;
@@ -1044,6 +1207,11 @@ void generate(DirWork& w, Worker& t) {
           }
           s.flags &= (u8)~EF_DESCEND;
         }
+        if (observed && (s.flags & (EF_EXISTS | EF_CREATED))) observed->applied.store(true);
+        if (observed && (s.flags & (EF_EXISTS | EF_CREATED))) item_expect_destination(observed);
+        if (observed && (s.flags & (EF_EXISTS | EF_CREATED))) app_partials::own_entry(observed);
+        outcome.deferred = s.flags & EF_DESCEND;
+        outcome.reason = keep ? "merged" : "created";
         break;
       }
 
@@ -1060,13 +1228,17 @@ void generate(DirWork& w, Worker& t) {
           if (o.existing) break;
           transfer = true;
         } else if (o.ignore_existing) {
+          outcome.status = "skipped"; outcome.reason = "existing";
           break;
         } else if (d->type != T_REG) {
           s.item_flags |= IF_NEW_TYPE;
           if (d->type == T_DIR) {
+            if (!app_partials::prepare_entry(observed)) break;
             if (!make_way(path, *d, rel, "regular file", t, w.receiver_filter)) break;
             w.modified = true;
             d = nullptr;
+            if (observed) observed->expected_destination = DestinationRevision::absent();
+            if (!app_partials::removed_entry(observed)) break;
           } else {
             s.flags |= EF_EXISTS;
           }
@@ -1100,9 +1272,11 @@ void generate(DirWork& w, Worker& t) {
           s.basis_mode = d->mode;
           if (!o.perms) s.mode = o.executability ? execution_mode(s.mode, d->mode) : d->mode;
           if (same) {
+            if (!app_partials::prepare_entry(observed)) break;
             hardlink_prepare(w, (u32)i, d);
             hardlink_complete(w, (u32)i, s);
             tweak_attrs(path.c_str(), s, *d, rel, 'f', t, w, (u32)i);
+            if (observed && item_expect_destination(observed)) app_partials::own_entry(observed);
             break;
           }
           s.flags |= EF_EXISTS | EF_INPLACE_SAFE;
@@ -1120,6 +1294,7 @@ void generate(DirWork& w, Worker& t) {
           if (o.dry_run) hardlink_complete(w, (u32)i, s);
           if (!o.perms && !(d && d->type == T_REG)) s.mode = s.mode & 0777 & ~g_umask;
           w.need.push_back((u32)i);
+          outcome.deferred = true;
           plan_bytes += (u64)s.size;
         }
         break;
@@ -1127,21 +1302,24 @@ void generate(DirWork& w, Worker& t) {
 
       case T_LNK: {
         seen_links++;
-        if (d && o.ignore_existing) break;
+        if (d && o.ignore_existing) { outcome.status = "skipped"; outcome.reason = "existing"; break; }
         const char* target = src.link(s);
         compare_xattrs();
         if (d && d->type == T_LNK) {
           char buf[PATH_MAX];
           ssize_t k = destination_readlink(path.c_str(), buf, sizeof buf - 1);
           if (k >= 0 && (size_t)k == strlen(target) && memcmp(buf, target, (size_t)k) == 0) {
+            if (!app_partials::prepare_entry(observed)) break;
             if (!o.perms) s.mode = d->mode;
             hardlink_prepare(w, (u32)i, d);
             hardlink_complete(w, (u32)i, s);
             tweak_attrs(path.c_str(), s, *d, rel, 'L', t, w, (u32)i);
+            if (observed && item_expect_destination(observed)) app_partials::own_entry(observed);
             break;
           }
         }
         if (d ? o.ignore_existing : o.existing) break;
+        if (!app_partials::prepare_entry(observed)) break;
         std::optional<Entry> alternate;
         if (!d && link_dest_nonregular(w, (u32)i, t, alternate)) break;
         hardlink_prepare(w, (u32)i, d);
@@ -1158,15 +1336,26 @@ void generate(DirWork& w, Worker& t) {
           link_code[8] = extra_time_code(s, *comparison);
         }
         if (d) {
+          int changed = destination_changed();
+          if (changed < 0) break;
+          if (changed) { --seen_links; conflict_reason = "destination_changed"; goto retry_destination; }
           if (d->type == T_DIR) {
             if (!make_way(path, *d, rel, "symlink", t, w.receiver_filter)) break;
           } else if (!o.dry_run) {
-            destination_unlink(path.c_str());
+            if (destination_unlink(path.c_str()) != 0 && errno != ENOENT) {
+              file_io_error(errno, path.c_str(), "unlink_destination");
+              break;
+            }
           }
         }
         need_dgid();
         if (!o.dry_run) {
           if (destination_symlink(target, path.c_str()) != 0) {
+            if (errno == EEXIST && g_app_conflict_plan) {
+              --seen_links;
+              conflict_reason = "destination_changed";
+              goto retry_destination;
+            }
             file_io_error(errno, path.c_str(), "symlink");
             break;
           }
@@ -1181,6 +1370,8 @@ void generate(DirWork& w, Worker& t) {
         g_stats.created_links.fetch_add(1, std::memory_order_relaxed);
         hardlink_complete(w, (u32)i, s);
         note_item(w, (u32)i, link_code, 0, t);
+        if (observed) observed->published.store(true);
+        if (observed && item_expect_destination(observed)) app_partials::own_entry(observed);
         break;
       }
 
@@ -1249,6 +1440,7 @@ void generate(DirWork& w, Worker& t) {
       }
       default: break;
     }
+    if (observed && !outcome.deferred && outcome.status == "success" && !observed->failed.load()) observed->applied.store(true);
   }
   for (; j < m; j++) extra(dl.e[j]);
 
@@ -1272,7 +1464,7 @@ void finish_dir(DirWork& w) {
   if (!w.has_attrs || o.dry_run) return;
   std::lock_guard<std::mutex> lock(final_mu);
   final_directories.push_back({w.dst_path, w.rel, w.attr_source.empty() ? w.src_path : w.attr_source,
-                               w.attrs, w.mode_ok, w.time_ok, w.modified.load(), w.directory_reported});
+                               w.attrs, w.mode_ok, w.time_ok, w.modified.load(), w.directory_reported, w.app_directory});
 }
 
 void finalize_tree() {
@@ -1354,13 +1546,23 @@ void finalize_tree() {
     return std::count(a.path.begin(), a.path.end(), '/') > std::count(b.path.begin(), b.path.end(), '/');
   });
   for (const auto& dir : final_directories) {
+    ItemScope observation(dir.item);
+    ItemFinalizer outcome(dir.item);
+    if (!item_preview_source_valid(dir.item)) continue;
+    if (dir.item) dir.item->applied.store(false);
+    if (!item_destination_valid(dir.item, true)) continue;
+    if (!app_partials::validate_entry(dir.item)) continue;
     if (dir.rel.empty() && !dir.reported && g_opt.delete_before && g_opt.output_attrs && g_opt.times &&
         !g_opt.omit_dir_times && std::find(dirty.begin(), dirty.end(), dir.path) != dirty.end())
       item(worker, ".d..t......", dir.rel, dir.attrs, dir.source);
     const bool time_needed = g_opt.times && !g_opt.omit_dir_times &&
       (!dir.time_ok || dir.modified || std::find(dirty.begin(), dirty.end(), dir.path) != dirty.end());
     if (dir.mode_ok && !time_needed && !preserve_atime(dir.attrs) &&
-        !preserve_crtime(dir.attrs) && !g_opt.fileflags) continue;
+        !preserve_crtime(dir.attrs) && !g_opt.fileflags) {
+      if (dir.item) dir.item->applied.store(true);
+      continue;
+    }
+    MetadataActivity metadata;
     int fd = destination_open_dir(dir.path.c_str());
     if (fd < 0) {
       check_attr(-1, dir.path.c_str(), "open directory for final attributes");
@@ -1374,6 +1576,8 @@ void finalize_tree() {
     }
     set_fileflags(dir.path.c_str(), dir.attrs);
     close(fd);
+    if (dir.item) dir.item->applied.store(true);
+    app_partials::own_entry(dir.item);
   }
   worker.flush_log();
   delete_candidates.clear();
@@ -1392,19 +1596,61 @@ struct OutputProgress {
 namespace {
 struct OpenOutput {
   int dir_fd;
-  std::string name, tmp_name;
+  int stage_fd;
+  std::string name, tmp_name, path;
   bool temp, existed, partial, fd_open;
   std::shared_ptr<OutputProgress> progress;
+  bool app_owned;
+  DestinationRevision identity;
+  int ownership_fd;
 };
 std::recursive_mutex output_mu;
 std::shared_mutex output_io_mu;
 std::unordered_map<int, OpenOutput> open_outputs;
 std::atomic<bool> output_shutdown{false};
 
-void register_output(OutFile& f) {
+bool register_output(OutFile& f) {
   large_file_cache_policy(f.fd, f.sparse_size_hint);
   f.progress = g_opt.partial ? std::make_shared<OutputProgress>() : nullptr;
-  open_outputs[f.fd] = {f.dir_fd, f.name, f.tmp_name, f.temp, f.existed, g_opt.partial, true, f.progress};
+  int error = 0;
+  if (f.item && f.temp) {
+    f.output_identity = {}; // A retry must never inherit a previous inode observation.
+    struct stat st;
+    if (fstat(f.fd, &st) != 0) error = errno;
+    else {
+      f.output_identity = DestinationRevision::from(st);
+      f.ownership_fd = fcntl(f.fd, F_DUPFD_CLOEXEC, 0);
+      if (f.ownership_fd < 0) error = errno;
+    }
+  }
+  open_outputs[f.fd] = {f.dir_fd, f.stage_fd, f.name, f.tmp_name, f.path, f.temp, f.existed, g_opt.partial, true, f.progress,
+                       bool(f.item && f.temp), f.output_identity, f.ownership_fd};
+  if (!error) return true;
+  file_io_error(error, f.path.c_str(), "retain output identity");
+  out_abort(f);
+  return false;
+}
+
+bool output_owned(int parent, const std::string& name, const DestinationRevision& expected,
+                  DestinationRevision* observed = nullptr) {
+  struct stat st;
+  DestinationRevision actual;
+  if (fstatat(parent, name.c_str(), &st, AT_SYMLINK_NOFOLLOW) == 0) actual = DestinationRevision::from(st);
+  else if (errno == ENOENT) actual = DestinationRevision::absent();
+  if (observed) *observed = actual;
+  return expected.known && expected.exists && expected.same_object(actual);
+}
+
+bool validate_output_ownership(const OutFile& f) {
+  if (!f.item || !f.temp) return true;
+  DestinationRevision observed;
+  if (output_owned(f.stage_fd >= 0 ? f.stage_fd : f.dir_fd, f.tmp_name, f.output_identity, &observed)) return true;
+  ItemScope scope(f.item);
+  f.item->failed.store(true); f.item->temporary_changed.store(true);
+  f.item->expected_conflict = f.output_identity; f.item->observed_conflict = observed;
+  if (g_fs_error_sink) g_fs_error_sink(0, f.tmp, "temporary_output_changed");
+  err_line(RERR_PARTIAL, "temporary output was replaced or removed: \"%s\"", f.tmp.c_str());
+  return false;
 }
 
 bool trim_partial(int fd, const OpenOutput& file) {
@@ -1420,20 +1666,40 @@ void cleanup_open_outputs() {
   // Wait for writes to finish before trimming, closing and publishing a prefix.
   // Writes hold only the shared I/O lock and their own progress mutex.
   std::unique_lock<std::shared_mutex> io_lock(output_io_mu);
+  auto private_error = [](int error,const OpenOutput& file,const char* operation) {
+    if (g_fs_error_sink) g_fs_error_sink(error,file.path,operation);
+    // Cleanup already owns the exclusive I/O lock. Record the failure without
+    // entering die(), which would recursively attempt cleanup under this lock.
+    err_line(RERR_PARTIAL,"%s failed on \"%s\": %s",operation,file.path.c_str(),errstr(error).c_str());
+  };
   for (const auto& [fd, f] : open_outputs) {
     bool keep = f.partial && trim_partial(fd, f);
-    if (f.fd_open) close(fd);
-    if (f.temp) {
-      if (!keep || renameat(f.dir_fd, f.tmp_name.c_str(), f.dir_fd, f.name.c_str()) != 0)
+    if (!keep && f.partial && f.stage_fd >= 0) private_error(errno,f,"trim private partial");
+    if (f.fd_open && close(fd)) {
+      if (f.stage_fd >= 0) {
+        private_error(errno,f,"close private partial");
+        keep = false;
+      }
+    }
+    if (f.stage_fd >= 0) {
+      if (keep) app_partials::retained(f.stage_fd,f.tmp_name,f.identity);
+      else app_partials::discarded(f.stage_fd,f.tmp_name,f.identity);
+      close(f.stage_fd);
+    } else if (f.temp) {
+      if ((!f.app_owned || output_owned(f.dir_fd, f.tmp_name, f.identity)) &&
+          (!keep || renameat(f.dir_fd, f.tmp_name.c_str(), f.dir_fd, f.name.c_str()) != 0))
         unlinkat(f.dir_fd, f.tmp_name.c_str(), 0);
     } else if (!f.existed && !keep) unlinkat(f.dir_fd, f.name.c_str(), 0);
+    if (f.ownership_fd >= 0) close(f.ownership_fd);
     close(f.dir_fd);
   }
   open_outputs.clear();
+  app_partials::stopped();
 }
 
 // Called while the shared output I/O lock protects the descriptor from cleanup.
 static void record_output_range(OutFile& f, size_t size, i64 offset) {
+  item_progress(f.item, size);
   if (g_opt.partial && size) {
     auto& progress = *f.progress;
     std::lock_guard<std::mutex> lock(progress.mu);
@@ -1559,7 +1825,9 @@ bool out_write(OutFile& f, const char* bytes, size_t size, i64 offset) {
 }
 
 bool out_restore_prefix(OutFile& f, const ResumePrefix& prefix) {
-  int fd = openat(f.dir_fd, f.name.c_str(), O_RDONLY | O_CLOEXEC | O_NOFOLLOW | O_NONBLOCK | read_time_flags());
+  int fd = prefix.basis ? (prefix.basis->fd >= 0 ? fcntl(prefix.basis->fd,F_DUPFD_CLOEXEC,0) :
+    app_partials::open_prefix(prefix.basis->path,prefix.basis->published,prefix.basis->identity)) :
+    openat(f.dir_fd, f.name.c_str(), O_RDONLY | O_CLOEXEC | O_NOFOLLOW | O_NONBLOCK | read_time_flags());
   struct stat before;
   if (fd < 0) return false;
   if (fstat(fd, &before) != 0 || !S_ISREG(before.st_mode) || before.st_size < prefix.size) {
@@ -1583,12 +1851,16 @@ bool out_restore_prefix(OutFile& f, const ResumePrefix& prefix) {
     offset += n;
   }
   auto digest = XXH3_128bits_digest(&hash);
-  if (ok && (digest.low64 != prefix.sum[0] || digest.high64 != prefix.sum[1] || !source_unchanged(fd, f.path, before))) {
+  struct stat after;
+  bool stable = prefix.basis ? fstat(fd,&after) == 0 && DestinationRevision::from(before) == DestinationRevision::from(after) &&
+    prefix.basis->identity == DestinationRevision::from(before) : source_unchanged(fd, f.path, before);
+  if (ok && (digest.low64 != prefix.sum[0] || digest.high64 != prefix.sum[1] || !stable)) {
     errno = ESTALE;
     ok = false;
   }
   int error = errno;
   close(fd);
+  if (ok && inplace && prefix.basis) record_output_range(f,size_t(prefix.size),0);
   errno = error;
   return ok;
 }
@@ -1604,9 +1876,11 @@ bool out_open(OutFile& f, DirWork& w, u32 idx, Worker& t, bool force_temp, bool 
   if (output_shutdown || g_stop.load()) return false;
   const Options& o = g_opt;
   const Entry& s = w.src.e[idx];
+  f.item = w.app_items.empty() ? ItemPtr{} : w.app_items[idx];
+  if (!item_destination_valid(f.item)) return false;
   std::string_view name = w.dst_name(idx);
   f.path = path_join(w.dst_path, name);
-  f.fd = f.dir_fd = -1;
+  f.fd = f.dir_fd = f.stage_fd = -1;
   f.temp = false;
   f.cloned_flags = false, f.clone_fileflags = 0;
   f.size = -1;
@@ -1646,6 +1920,11 @@ bool out_open(OutFile& f, DirWork& w, u32 idx, Worker& t, bool force_temp, bool 
     file_io_error(error, f.path.c_str(), operation);
     return false;
   };
+  if (app_partials::active()) {
+    if (!f.item) { errno = EINVAL; return failed("private app output without an item"); }
+    if (!app_partials::open_stage(f)) { close(f.dir_fd); f.dir_fd = -1; return false; }
+    return register_output(f);
+  }
   mode_t mode = s.mode & 0777;
   f.created_mode = mode;
   if (f.existed && o.inplace && (s.flags & EF_INPLACE_SAFE)) {
@@ -1660,12 +1939,11 @@ bool out_open(OutFile& f, DirWork& w, u32 idx, Worker& t, bool force_temp, bool 
       errno = EINVAL;
       return failed("open --inplace regular file");
     }
-    register_output(f);
-    return true;
+    return register_output(f);
   }
   if (!f.existed && (o.direct_new || o.inplace) && !force_temp) {
     f.fd = openat(f.dir_fd, f.name.c_str(), (readable ? O_RDWR : O_WRONLY) | O_CREAT | O_EXCL | O_CLOEXEC | O_NOFOLLOW, mode);
-    if (f.fd >= 0) { register_output(f); return true; }
+    if (f.fd >= 0) return register_output(f);
     if (errno != EEXIST) return failed("open");
   }
   static const char al[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -1678,8 +1956,7 @@ bool out_open(OutFile& f, DirWork& w, u32 idx, Worker& t, bool force_temp, bool 
     if (f.fd >= 0) {
       f.temp = true;
       f.created_mode = mode | 0600;
-      register_output(f);
-      return true;
+      return register_output(f);
     }
     if (errno != EEXIST) break;
   }
@@ -1688,7 +1965,7 @@ bool out_open(OutFile& f, DirWork& w, u32 idx, Worker& t, bool force_temp, bool 
 
 void out_abort(OutFile& f, bool keep_partial) {
   std::lock_guard<std::recursive_mutex> lock(output_mu);
-  if (output_shutdown) { f.fd = f.dir_fd = -1; return; }
+  if (output_shutdown) { f.fd = f.dir_fd = f.stage_fd = -1; return; }
   if (keep_partial && f.fd >= 0) {
     auto found = open_outputs.find(f.fd);
     if (found != open_outputs.end() && !trim_partial(f.fd, found->second)) keep_partial = false;
@@ -1697,23 +1974,43 @@ void out_abort(OutFile& f, bool keep_partial) {
   if (f.fd >= 0) close(f.fd);
   f.fd = -1;
   if (f.dir_fd < 0) return;
-  if (f.temp) {
+  if (f.stage_fd >= 0) {
+    if (keep_partial) app_partials::retained(f.stage_fd,f.tmp_name,f.output_identity);
+    else app_partials::discarded(f.stage_fd,f.tmp_name,f.output_identity);
+    close(f.stage_fd); f.stage_fd = -1;
+  } else if (f.temp) {
     if (keep_partial && renameat(f.dir_fd, f.tmp_name.c_str(), f.dir_fd, f.name.c_str()) != 0) {
       err_line(RERR_PARTIAL, "failed to keep partial \"%s\": %s", f.path.c_str(), errstr(errno).c_str());
       keep_partial = false;
     }
-    if (!keep_partial) unlinkat(f.dir_fd, f.tmp_name.c_str(), 0);
+    if (!keep_partial && (!f.item || output_owned(f.dir_fd, f.tmp_name, f.output_identity)))
+      unlinkat(f.dir_fd, f.tmp_name.c_str(), 0);
   } else if (!f.existed && !keep_partial) unlinkat(f.dir_fd, f.name.c_str(), 0);
+  if (f.ownership_fd >= 0) close(f.ownership_fd);
+  f.ownership_fd = -1;
   close(f.dir_fd);
   f.dir_fd = -1;
 }
 
 bool out_finish(OutFile& f, DirWork& w, u32 idx, Worker&, bool ok, const Entry* attrs, const XattrSet* xattrs) {
   std::lock_guard<std::recursive_mutex> lock(output_mu);
-  if (output_shutdown) { f.fd = f.dir_fd = -1; return false; }
+  if (output_shutdown) { f.fd = f.dir_fd = f.stage_fd = -1; return false; }
+  if (ok && !item_preview_source_valid(f.item)) { out_abort(f); return false; }
   const Options& o = g_opt;
-  const Entry& s = attrs ? *attrs : w.src.e[idx];
+  Entry s = attrs ? *attrs : w.src.e[idx];
+  auto refresh_target = [&] {
+    if (!f.item || !g_app_conflict_recheck) return;
+    f.path = f.item->destination; f.name = w.dst_name(idx);
+    f.existed = f.item->expected_destination.exists;
+    if (!o.perms) {
+      s.mode = f.item->expected_destination.exists && (f.item->expected_destination.mode & S_IFMT) == S_IFREG
+        ? f.item->expected_destination.mode & 07777 : incoming_mode(f.item->source_mode, s.type);
+    }
+  };
+  if (f.item) f.item->size.store(s.size);
   if (!ok) { out_abort(f, o.partial); return false; }
+  if (!item_destination_valid(f.item)) { out_abort(f); return false; }
+  refresh_target();
   bool reused = !f.temp && f.existed;
   u32 final_mode = s.mode;
   if (o.acls && !o.perms && !f.existed) {
@@ -1721,7 +2018,7 @@ bool out_finish(OutFile& f, DirWork& w, u32 idx, Worker&, bool ok, const Entry* 
     if (fstat(f.fd, &created) != 0) { file_io_error(errno, f.path.c_str(), "stat inherited permissions"); out_abort(f); return false; }
     final_mode &= created.st_mode & 07777;
   }
-  if ((reused || o.sparse) && f.size >= 0 && ftruncate(f.fd, f.size) != 0) {
+  if ((reused || o.sparse || f.stage_fd >= 0) && f.size >= 0 && ftruncate(f.fd, f.size) != 0) {
     file_io_error(errno, f.path.c_str(), "truncate");
     out_abort(f);
     return false;
@@ -1731,6 +2028,7 @@ bool out_finish(OutFile& f, DirWork& w, u32 idx, Worker&, bool ok, const Entry* 
     out_abort(f);
     return false;
   }
+  MetadataActivity metadata;
   if (o.group && (reused || s.gid != w.dgid) && can_set_gid(s.gid)) check_attr(fchown(f.fd, (uid_t)-1, s.gid), f.path.c_str(), "ownership");
   if (o.owner && o.am_root && (reused || s.uid != my_uid)) check_attr(fchown(f.fd, s.uid, (gid_t)-1), f.path.c_str(), "ownership");
   if (o.acls || reused || f.created_mode != final_mode) check_attr(fchmod(f.fd, final_mode), f.path.c_str(), "permissions");
@@ -1757,6 +2055,16 @@ bool out_finish(OutFile& f, DirWork& w, u32 idx, Worker&, bool ok, const Entry* 
     u32 preliminary = f.temp ? desired_flags & ~blocking_fileflags(desired_flags) : desired_flags;
     check_attr(fd_fileflags(f.fd, preliminary, defer_links && !f.temp), f.path.c_str(), "file flags");
   }
+  // Metadata work can block; recheck after it, immediately before publication.
+  if (!item_destination_valid(f.item)) {
+    if (immutable_fd >= 0) close(immutable_fd);
+    out_abort(f);
+    return false;
+  }
+  refresh_target();
+  if (f.item && !o.perms && s.mode != final_mode) {
+    check_attr(fchmod(f.fd, s.mode), f.path.c_str(), "permissions"); final_mode = s.mode;
+  }
   int fd = f.fd;
   f.fd = -1;
   int closed = close(fd);
@@ -1769,19 +2077,69 @@ bool out_finish(OutFile& f, DirWork& w, u32 idx, Worker&, bool ok, const Entry* 
     out_abort(f);
     return false;
   }
-  if (f.temp && renameat(f.dir_fd, f.tmp_name.c_str(), f.dir_fd, f.name.c_str()) != 0) {
+  for (;;) {
+    bool exclusive = f.item && f.item->expected_destination.known && !f.item->expected_destination.exists;
+    if (!item_preview_source_valid(f.item)) {
+      if (immutable_fd >= 0) close(immutable_fd);
+      open_outputs.erase(fd); out_abort(f); return false;
+    }
+    if (f.item && (!item_destination_valid(f.item, false, exclusive) || !validate_output_ownership(f))) {
+      if (immutable_fd >= 0) close(immutable_fd);
+      open_outputs.erase(fd); out_abort(f); return false;
+    }
+    refresh_target();
+    if (f.item && !o.perms && s.mode != final_mode) {
+      check_attr(fchmod(f.ownership_fd, s.mode), f.path.c_str(), "permissions"); final_mode = s.mode;
+    }
+    if (f.item && g_app_conflict_recheck && f.item->expected_destination.exists &&
+        (f.item->expected_destination.mode & S_IFMT) == S_IFDIR) {
+      if (unlinkat(f.dir_fd, f.name.c_str(), AT_REMOVEDIR) == 0) {
+        f.item->expected_destination = DestinationRevision::absent(); continue;
+      }
+      int error = errno;
+      if (error == ENOTEMPTY || error == EEXIST || error == ENOTDIR || error == ENOENT) {
+        if (g_app_conflict_recheck(f.item, {})) continue;
+      } else file_io_error(error, f.path.c_str(), "replace destination directory");
+      if (immutable_fd >= 0) close(immutable_fd);
+      open_outputs.erase(fd); out_abort(f); return false;
+    }
+    exclusive = f.item && !f.item->expected_destination.exists;
+    if (f.stage_fd >= 0) {
+      auto expected = f.item->expected_destination;
+      auto path = f.path;
+      if (!app_partials::preparing_publication(f) || !item_preview_source_valid(f.item) || !item_destination_valid(f.item, false, exclusive) || !validate_output_ownership(f)) {
+        if (immutable_fd >= 0) close(immutable_fd);
+        open_outputs.erase(fd); out_abort(f, o.partial); return false;
+      }
+      refresh_target();
+      // Digest/metadata work can block. A new conflict choice requires another
+      // intent tied to its actual output and freshly observed target.
+      if (path != f.path || !(expected == f.item->expected_destination)) continue;
+    }
+    int stage = f.stage_fd >= 0 ? f.stage_fd : f.dir_fd;
+    int published_status = !f.temp ? 0 : exclusive
+      ? destination_rename_noreplace(stage, f.tmp_name.c_str(), f.dir_fd, f.name.c_str())
+      : renameat(stage, f.tmp_name.c_str(), f.dir_fd, f.name.c_str());
+    if (published_status == 0) break;
     int error = errno;
+    if (exclusive && error == EEXIST && g_app_conflict_recheck) {
+      if (g_app_conflict_recheck(f.item, {})) continue;
+      if (immutable_fd >= 0) close(immutable_fd);
+      open_outputs.erase(fd); out_abort(f); return false;
+    }
     if (immutable_fd >= 0) close(immutable_fd);
-    file_io_error(error, f.path.c_str(), "rename");
-    open_outputs.erase(fd);
-    out_abort(f);
-    return false;
+    if (exclusive && error == EEXIST) item_destination_changed(f.item, error);
+    else file_io_error(error, f.path.c_str(), exclusive ? "publish without replace" : "rename");
+    open_outputs.erase(fd); out_abort(f); return false;
   }
   if (immutable_fd >= 0) {
     check_attr(fd_fileflags(immutable_fd, desired_flags), f.path.c_str(), "file flags");
     close(immutable_fd);
   }
   open_outputs.erase(fd);
+  if (f.stage_fd >= 0) { app_partials::published(f); close(f.stage_fd); f.stage_fd = -1; }
+  if (f.ownership_fd >= 0) close(f.ownership_fd);
+  f.ownership_fd = -1;
   close(f.dir_fd);
   f.dir_fd = -1;
   w.modified.store(true, std::memory_order_relaxed);
@@ -1794,10 +2152,12 @@ bool out_finish(OutFile& f, DirWork& w, u32 idx, Worker&, bool ok, const Entry* 
     if (o.group && f.basis_gid != s.gid && can_set_gid(s.gid)) listed.item_flags |= IF_GROUP;
   }
   if (have_published) hardlink_complete(w, idx, s, &published, f.cloned_flags && defer_links);
+  if (f.item) { f.item->applied.store(true); f.item->published.store(true); }
   return true;
 }
 
 bool clone_copy(DirWork& w, u32 idx, const char* source, unsigned flags, Worker& t) {
+  if (app_partials::active()) return false;
 #ifdef __APPLE__
   struct stat resident;
   if (lstat(source, &resident) != 0 || (resident.st_flags & SF_DATALESS)) return false;
@@ -1871,7 +2231,7 @@ bool clone_copy(DirWork& w, u32 idx, const char* source, unsigned flags, Worker&
   close(f.fd);
   f.fd = fd;
   f.created_mode = st.st_mode & 07777;
-  register_output(f);
+  if (!register_output(f)) return false;
   return out_finish(f, w, idx, t, true, snapshot ? &fresh : nullptr);
 #else
   errno = ENOTSUP;
@@ -1931,6 +2291,7 @@ void note_transferred(DirWork& w, u32 idx, i64 bytes, Worker& t, i64 final_size)
   const Options& o = g_opt;
   const Entry& s = w.src.e[idx];
   g_stats.xfer_files.fetch_add(1, std::memory_order_relaxed);
+  g_stats.receiver_completed_bytes.fetch_add((u64)(final_size < 0 ? s.size : final_size), std::memory_order_relaxed);
   if (!(s.flags & EF_EXISTS)) g_stats.created_files.fetch_add(1, std::memory_order_relaxed);
   if (!output_enabled()) return;
   char code[12] = ">f+++++++++";

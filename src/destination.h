@@ -61,6 +61,12 @@ class DestinationDirectory {
   std::string path_;
 };
 int destination_stat(const char* path, struct stat* st);
+// Rewalk the logical name from the transfer root, bypassing worker parent pins.
+int destination_named_stat(const char* path, struct stat* st);
+// Publishes a staged regular file only if the final name is still absent.
+// Never falls back to ordinary replacing rename.
+int destination_publish_noreplace(int parent, const char* staged, const char* final);
+int destination_rename_noreplace(int source_parent, const char* source, int destination_parent, const char* destination);
 int destination_chmod(const char* path, mode_t mode);
 int destination_chown(const char* path, uid_t uid, gid_t gid);
 int destination_times(const char* path, const timespec times[2]);
