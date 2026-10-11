@@ -1,0 +1,374 @@
+#!/bin/sh
+# xsbench-helper: the only root operations the benchmark lab performs.
+#
+# Installed by the operator as /usr/local/sbin/xsbench-helper (root:root 0755)
+# and allowed by one sudoers entry; see benchmarks/lab/README.md. The harness
+# calls it as `sudo -n xsbench-helper VERB ...` and never does anything else
+# as root.
+#
+# The interface, mount point and device come from /etc/xsbench-helper.conf,
+# which must be root-owned. A caller cannot name another interface, path or
+# device. Its keys:
+#
+#   interface=eth0            the interface netem may act on
+#   scratch=/mnt/nvme         the scratch mount point (optional)
+#   scratch_fstype=ext4       the type it must have (default ext4)
+#   scratch_source=UUID=...   what to mount there when fstab has no entry
+#
+#   status                         print state as key=value lines (no root needed)
+#   drop-caches                    sync, then drop the page, dentry and inode caches
+#   governor performance|restore   set, or put back, the cpufreq governor
+#   netem set DELAY_MS LOSS_PCT LIFETIME_S
+#                                  delay and drop outgoing packets on the
+#                                  configured interface; cleared automatically
+#                                  after LIFETIME_S seconds
+#   netem clear                    remove that qdisc
+#   mount-scratch                  mount the scratch mount point if it is not
+#                                  mounted, from fstab or from scratch_source
+#
+# Exit status: 0 done, 1 failed, 2 usage, 3 not configured or not supported
+# on this host, 4 refused.
+set -eu
+umask 077
+PATH=/usr/sbin:/usr/bin:/sbin:/bin
+export PATH
+
+VERSION=1
+SELF=/usr/local/sbin/xsbench-helper
+CONF=/etc/xsbench-helper.conf
+STATE=/run/xsbench-helper
+UNIT=xsbench-netem-clear
+CPUFREQ=/sys/devices/system/cpu/cpufreq
+# netem's default queue of 1000 packets overflows at 1 Gb/s with 20 ms of delay.
+NETEM_LIMIT=100000
+MAX_DELAY_MS=1000
+MAX_LIFETIME_S=3600
+
+IFACE=
+SCRATCH=
+SCRATCH_FS=ext4
+SCRATCH_SOURCE=
+
+die() {
+  status=$1
+  shift
+  echo "xsbench-helper: $*" >&2
+  exit "$status"
+}
+
+usage() {
+  die 2 "usage: xsbench-helper status | drop-caches | governor performance|restore | netem set DELAY_MS LOSS_PCT LIFETIME_S | netem clear | mount-scratch"
+}
+
+need_root() {
+  [ "$(id -u)" -eq 0 ] || die 4 "must run as root: sudo -n $SELF"
+}
+
+audit() {
+  logger -t xsbench-helper -- "${SUDO_USER:-root}: $*" 2>/dev/null || true
+}
+
+conf_value() {
+  sed -n "s/^$1=//p" "$CONF" | tail -n 1
+}
+
+load_conf() {
+  [ -f "$CONF" ] || die 3 "$CONF is missing"
+  owner_mode=$(stat -c '%u %a' "$CONF")
+  [ "${owner_mode%% *}" = 0 ] || die 4 "$CONF must be owned by root"
+  case "${owner_mode##* }" in
+    *[2367]? | *[2367]) die 4 "$CONF must not be writable by group or others" ;;
+  esac
+  IFACE=$(conf_value interface)
+  SCRATCH=$(conf_value scratch)
+  fs=$(conf_value scratch_fstype)
+  [ -z "$fs" ] || SCRATCH_FS=$fs
+  SCRATCH_SOURCE=$(conf_value scratch_source)
+  case "$IFACE" in
+    *[!A-Za-z0-9_.-]*) die 3 "interface in $CONF is not a valid name" ;;
+  esac
+  [ "${#IFACE}" -le 15 ] || die 3 "interface in $CONF is not a valid name"
+  case "$SCRATCH" in
+    '') ;;
+    *[!A-Za-z0-9_./-]* | *..* | [!/]*) die 3 "scratch in $CONF must be an absolute path" ;;
+  esac
+  case "$SCRATCH_FS" in
+    *[!a-z0-9]* | '') die 3 "scratch_fstype in $CONF is not a filesystem name" ;;
+  esac
+  case "$SCRATCH_SOURCE" in
+    '') ;;
+    UUID=*[!0-9A-Fa-f-]* | UUID=) die 3 "scratch_source in $CONF must be UUID=<filesystem uuid>" ;;
+    UUID=*) ;;
+    *) die 3 "scratch_source in $CONF must be UUID=<filesystem uuid>" ;;
+  esac
+}
+
+need_iface() {
+  [ -n "$IFACE" ] || die 3 "no interface is set in $CONF"
+  [ -d "/sys/class/net/$IFACE" ] || die 3 "interface $IFACE does not exist"
+}
+
+# Prints "KIND HANDLE" for the interface's root qdisc, or nothing.
+root_qdisc() {
+  tc qdisc show dev "$IFACE" root 2>/dev/null | sed -n '1s/^qdisc \([^ ]*\) \([^ ]*\) .*/\1 \2/p'
+}
+
+have_systemd() {
+  [ -d /run/systemd/system ] && command -v systemd-run >/dev/null 2>&1
+}
+
+cancel_timer() {
+  if have_systemd; then
+    systemctl stop "$UNIT.timer" >/dev/null 2>&1 || true
+    systemctl reset-failed "$UNIT.timer" "$UNIT.service" >/dev/null 2>&1 || true
+  fi
+  if [ -s "$STATE/netem.timer" ]; then
+    pid=$(cat "$STATE/netem.timer")
+    case "$pid" in
+      '' | *[!0-9]*) ;;
+      *) [ "$pid" = "$$" ] || kill "$pid" 2>/dev/null || true ;;
+    esac
+  fi
+  rm -f "$STATE/netem.timer"
+}
+
+arm_timer() {
+  cancel_timer
+  if have_systemd; then
+    systemd-run --quiet --collect --unit="$UNIT" --on-active="${1}s" "$SELF" netem clear >/dev/null ||
+      return 1
+  else
+    setsid sh -c "sleep $1; exec $SELF netem clear" >/dev/null 2>&1 </dev/null &
+    echo $! >"$STATE/netem.timer"
+  fi
+}
+
+timer_armed() {
+  if have_systemd && systemctl is-active --quiet "$UNIT.timer" 2>/dev/null; then
+    return 0
+  fi
+  [ -s "$STATE/netem.timer" ] && kill -0 "$(cat "$STATE/netem.timer")" 2>/dev/null
+}
+
+governors() {
+  found=
+  for policy in "$CPUFREQ"/policy*; do
+    [ -r "$policy/scaling_governor" ] || continue
+    found="$found$(cat "$policy/scaling_governor")
+"
+  done
+  printf '%s' "$found" | sort -u | paste -sd, -
+}
+
+do_status() {
+  echo "version=$VERSION"
+  if [ "$(id -u)" -eq 0 ]; then echo root=yes; else echo root=no; fi
+  if message=$( (load_conf) 2>&1); then
+    load_conf
+    echo config=ok
+  else
+    echo "config=${message#xsbench-helper: }"
+  fi
+  echo "interface=$IFACE"
+  if [ -n "$IFACE" ] && [ -d "/sys/class/net/$IFACE" ]; then
+    qdisc=$(root_qdisc)
+    echo "qdisc=$qdisc"
+    case "$qdisc" in netem\ *) echo netem=on ;; *) echo netem=off ;; esac
+  else
+    echo qdisc=
+    echo netem=off
+  fi
+  if timer_armed; then echo netem_timer=on; else echo netem_timer=off; fi
+  echo "governor=$(governors)"
+  if ls "$STATE"/governor/policy* >/dev/null 2>&1; then
+    echo governor_saved=yes
+  else
+    echo governor_saved=no
+  fi
+  echo "scratch=$SCRATCH"
+  echo "scratch_fstype_wanted=$SCRATCH_FS"
+  echo "scratch_source_configured=$SCRATCH_SOURCE"
+  if [ -n "$SCRATCH" ]; then
+    mounted=$(findmnt -n -o SOURCE,FSTYPE --mountpoint "$SCRATCH" 2>/dev/null | tail -n 1) || true
+    if [ -n "$mounted" ]; then
+      echo scratch_mounted=yes
+      echo "scratch_source=${mounted%% *}"
+      echo "scratch_fstype=${mounted##* }"
+    else
+      echo scratch_mounted=no
+    fi
+    if [ -n "$(findmnt -s -n -o FSTYPE --mountpoint "$SCRATCH" 2>/dev/null)" ]; then
+      echo scratch_fstab=yes
+    else
+      echo scratch_fstab=no
+    fi
+  fi
+}
+
+do_drop_caches() {
+  need_root
+  sync
+  echo 3 >/proc/sys/vm/drop_caches
+  audit drop-caches
+  echo dropped=yes
+}
+
+do_governor_performance() {
+  need_root
+  mkdir -p "$STATE/governor"
+  found=no
+  for policy in "$CPUFREQ"/policy*; do
+    [ -e "$policy/scaling_governor" ] || continue
+    found=yes
+    name=${policy##*/}
+    # Keep the first saved value: a second call must not record "performance".
+    if [ ! -e "$STATE/governor/$name" ]; then
+      cat "$policy/scaling_governor" >"$STATE/governor/$name"
+      # amd-pstate-epp and intel_pstate force this to "performance" as well.
+      if [ -r "$policy/energy_performance_preference" ]; then
+        cat "$policy/energy_performance_preference" >"$STATE/governor/epp-$name"
+      fi
+    fi
+    echo performance >"$policy/scaling_governor" || die 1 "cannot set the governor of $name"
+  done
+  [ "$found" = yes ] || die 3 "this host has no cpufreq governor"
+  audit governor performance
+  echo "governor=$(governors)"
+}
+
+do_governor_restore() {
+  need_root
+  for saved in "$STATE"/governor/policy*; do
+    [ -e "$saved" ] || continue
+    name=${saved##*/}
+    value=$(cat "$saved")
+    case "$value" in
+      '' | *[!a-z_]*) ;;
+      *)
+        if [ -e "$CPUFREQ/$name/scaling_governor" ]; then
+          echo "$value" >"$CPUFREQ/$name/scaling_governor" || die 1 "cannot restore the governor of $name"
+        fi
+        ;;
+    esac
+    if [ -e "$STATE/governor/epp-$name" ]; then
+      value=$(cat "$STATE/governor/epp-$name")
+      case "$value" in
+        '' | *[!a-z0-9_]*) ;;
+        *) echo "$value" >"$CPUFREQ/$name/energy_performance_preference" 2>/dev/null || true ;;
+      esac
+      rm -f "$STATE/governor/epp-$name"
+    fi
+    rm -f "$saved"
+  done
+  audit governor restore
+  echo "governor=$(governors)"
+}
+
+do_netem_set() {
+  delay=$1
+  loss=$2
+  lifetime=$3
+  case "$delay" in '' | *[!0-9]* | ?????*) usage ;; esac
+  case "$lifetime" in '' | *[!0-9]* | ?????*) usage ;; esac
+  case "$loss" in
+    [0-9] | [0-9][0-9] | 100) ;;
+    [0-9].[0-9] | [0-9].[0-9][0-9] | [0-9][0-9].[0-9] | [0-9][0-9].[0-9][0-9]) ;;
+    *) usage ;;
+  esac
+  [ "$delay" -le "$MAX_DELAY_MS" ] || die 2 "delay is limited to $MAX_DELAY_MS ms"
+  [ "$lifetime" -ge 1 ] && [ "$lifetime" -le "$MAX_LIFETIME_S" ] ||
+    die 2 "lifetime must be 1 to $MAX_LIFETIME_S seconds"
+  need_root
+  load_conf
+  need_iface
+  current=$(root_qdisc)
+  case "$current" in
+    '' | netem\ * | *\ 0:) ;;
+    # A nonzero handle means someone installed this qdisc; deleting netem
+    # later would not bring it back.
+    *) die 4 "$IFACE has a configured root qdisc (${current}); refusing to replace it" ;;
+  esac
+  mkdir -p "$STATE"
+  # Arm the clearing timer first, so a failure after this point still clears.
+  arm_timer "$lifetime" || die 1 "cannot arm the timer that clears netem"
+  if ! tc qdisc replace dev "$IFACE" root netem delay "${delay}ms" loss "${loss}%" limit "$NETEM_LIMIT"; then
+    cancel_timer
+    die 1 "tc could not install netem on $IFACE"
+  fi
+  audit "netem set $delay $loss $lifetime on $IFACE"
+  echo "netem=on interface=$IFACE delay_ms=$delay loss_pct=$loss lifetime_s=$lifetime"
+}
+
+do_netem_clear() {
+  need_root
+  load_conf
+  need_iface
+  case "$(root_qdisc)" in
+    netem\ *) tc qdisc del dev "$IFACE" root || die 1 "tc could not remove netem from $IFACE" ;;
+  esac
+  audit "netem clear on $IFACE"
+  echo "netem=off interface=$IFACE"
+  cancel_timer
+}
+
+do_mount_scratch() {
+  need_root
+  load_conf
+  [ -n "$SCRATCH" ] || die 3 "no scratch mount point is set in $CONF"
+  mounted=$(findmnt -n -o FSTYPE --mountpoint "$SCRATCH" 2>/dev/null | tail -n 1) || true
+  if [ -z "$mounted" ]; then
+    planned=$(findmnt -s -n -o FSTYPE --mountpoint "$SCRATCH" 2>/dev/null | tail -n 1) || true
+    if [ -n "$planned" ]; then
+      [ "$planned" = "$SCRATCH_FS" ] ||
+        die 4 "fstab mounts $SCRATCH as $planned, expected $SCRATCH_FS"
+      mount "$SCRATCH" || die 1 "mount $SCRATCH failed"
+    elif [ -n "$SCRATCH_SOURCE" ]; then
+      [ -d "$SCRATCH" ] || die 3 "$SCRATCH is not a directory"
+      mount -t "$SCRATCH_FS" "$SCRATCH_SOURCE" "$SCRATCH" ||
+        die 1 "mount $SCRATCH_SOURCE on $SCRATCH failed"
+    else
+      die 3 "nothing is mounted at $SCRATCH, and neither fstab nor scratch_source in $CONF says what to mount; this helper does not choose devices"
+    fi
+    audit "mount-scratch $SCRATCH"
+    mounted=$(findmnt -n -o FSTYPE --mountpoint "$SCRATCH" 2>/dev/null | tail -n 1) || true
+  fi
+  [ "$mounted" = "$SCRATCH_FS" ] || die 4 "$SCRATCH is mounted as ${mounted:-nothing}, expected $SCRATCH_FS"
+  echo "scratch_mounted=yes scratch=$SCRATCH scratch_fstype=$mounted"
+}
+
+case "${1:-}" in
+  status)
+    [ $# -eq 1 ] || usage
+    do_status
+    ;;
+  drop-caches)
+    [ $# -eq 1 ] || usage
+    do_drop_caches
+    ;;
+  governor)
+    [ $# -eq 2 ] || usage
+    case "$2" in
+      performance) do_governor_performance ;;
+      restore) do_governor_restore ;;
+      *) usage ;;
+    esac
+    ;;
+  netem)
+    case "${2:-}" in
+      set)
+        [ $# -eq 5 ] || usage
+        do_netem_set "$3" "$4" "$5"
+        ;;
+      clear)
+        [ $# -eq 2 ] || usage
+        do_netem_clear
+        ;;
+      *) usage ;;
+    esac
+    ;;
+  mount-scratch)
+    [ $# -eq 1 ] || usage
+    do_mount_scratch
+    ;;
+  *) usage ;;
+esac

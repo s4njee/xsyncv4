@@ -1,0 +1,45 @@
+# Hosts and links of the benchmark lab, declared by hand. preflight.py checks
+# every claim here against what the hosts themselves report, so a wrong entry
+# fails loudly instead of quietly measuring another path.
+
+[hosts.neo]
+ssh = "sanjee@neo.local"      # how the controller and the peers reach it
+name = "neo.local"            # the name peers resolve
+hostname = "neo"              # what `hostname` must print there
+root = "/home/sanjee/benchmarks/xsyncv4/lab"
+root_fstype = "ext4"
+helper = true
+
+[hosts.freya]
+ssh = "sanjee@freya.local"
+name = "freya.local"
+hostname = "freya"
+root = "/mnt/nvme/xsbench"    # ext4 on NVMe; the home directory is ZFS
+root_fstype = "ext4"
+helper = true
+
+# Not yet inventoried: mars was off the network when this file was written.
+# Its root and its interface on the mesh link are filled in from its first
+# inventory; until then preflight reports them as undeclared.
+[hosts.mars]
+ssh = "sanjee@mars.local"
+name = "mars.local"
+hostname = "mars"
+root = ""
+root_fstype = "ext4"
+helper = true
+
+# medium: "wired" and "wireless" must match the interface each host uses.
+# "mesh" means a wireless hop somewhere on the path, whatever the hosts' own
+# interfaces are, so it is not checked against them.
+[links.lan]
+hosts = ["neo", "freya"]
+medium = "wired"
+min_speed_mbps = 1000
+max_rtt_ms = 2.0
+interface = { neo = "eth0", freya = "enp10s0" }
+
+[links.mesh]
+hosts = ["neo", "mars"]
+medium = "mesh"
+interface = { neo = "eth0" }

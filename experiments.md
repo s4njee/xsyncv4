@@ -85,11 +85,11 @@ or a caveat in v4. Section 4.3 turns every one into a check.
 
 ## 2. Testbed
 
-| Host | Hardware (to be re-inventoried) | Role |
+| Host | Hardware | Role |
 |---|---|---|
-| `neo.local` | Raspberry Pi 5, 4 cores, 4 GiB, ext4 on NVMe | One end of every pair |
-| `freya.local` | Ryzen 9 7950X, 32 threads, 64 GiB; benchmark root on ext4 at `/mnt`; ZFS home; runs other services | Phase A peer |
-| `mars.local` | amd64 Linux; old docs say Ryzen 9 7900X, ext4 on NVMe, dual-boots Windows | Phase B peer |
+| `neo.local` | Raspberry Pi 5 Model B, 4 cores, 4 GiB; Debian 13, kernel 6.18; ext4 on NVMe; `eth0` at 1 Gb/s | One end of every pair |
+| `freya.local` | Ryzen 9 7950X, 32 threads, 62 GiB; CachyOS, kernel 7.1; benchmark root on ext4 on NVMe at `/mnt/nvme`; ZFS home; `enp10s0` at 1 Gb/s; runs other services | Phase A peer |
+| `mars.local` | Not yet inventoried. amd64 Linux; old docs say Ryzen 9 7900X, ext4 on NVMe, dual-boots Windows | Phase B peer |
 | this Mac | M1 Max, 10 cores, 64 GiB, APFS (98–99% full in past runs), USB gigabit adapter | Phase C peer; controller for A and B |
 
 | Phase | Pair | Link | Purpose |
@@ -100,19 +100,24 @@ or a caveat in v4. Section 4.3 turns every one into a check.
 
 Known constraints:
 
-- These hostnames did not resolve from the session that wrote this plan, so
-  the table above comes from `backlog.md` and the old docs. Milestone M1
-  replaces it with a recorded inventory.
+- neo and freya were inventoried on 2026-10-11 (`benchmarks/results/lab/
+  preflight/`): both ends of the LAN link are wired at 1 Gb/s with a 0.36 ms
+  round trip. mars was off the network and its row is still from the old
+  docs.
+- rsync differs by host: 3.4.1 on neo and 3.5.0 on freya. Every record names
+  both versions; E1 should say whether the baseline is each host's own
+  rsync or one pinned build.
 - The old topology notes put freya behind the mesh hop and mars on the
   switch, the reverse of the layout above. The path proof must confirm the
   current wiring rather than trust either description.
-- Today neo can authenticate to freya but not the reverse, so every recorded
-  v4 run has neo as the SSH client and direction is confounded with client
-  role. SSH keys are set up in both directions for each pair before the
-  campaign (M0), and E1b measures whether client role matters.
-- freya's benchmark root is an ext4 filesystem mounted at `/mnt`. Preflight
-  checks the mount and its type, and mounts it through the helper if it is
-  absent. The device behind it is recorded in the inventory. The ZFS home
+- Every v4 run recorded so far has neo as the SSH client, because freya
+  could not authenticate to neo, so direction is confounded with client
+  role in that data. neo and freya now authenticate both ways; mars gets
+  the same before phase B. E1b measures whether client role matters.
+- freya's benchmark root is `/mnt/nvme/xsbench`, on an ext4 filesystem on a
+  1.9 TB NVMe drive mounted at `/mnt/nvme` (about 310 GB free). That mount
+  has no `fstab` entry, so after a reboot the helper mounts it by UUID from
+  its root-owned configuration. Preflight checks the mount and its type. The ZFS home
   stays in use as a second receiver filesystem for H19, warm-cache only,
   because `drop_caches` does not prove a cold ZFS ARC.
 - Root operations go through one fixed helper per Linux host (section 4.8).
@@ -194,7 +199,7 @@ Before a run:
    declares for the link.
 
 The run also sets the `performance` governor through the helper, checks
-that freya's root is ext4 at `/mnt`, and refuses to start if the helper
+that freya's root is ext4 at `/mnt/nvme`, and refuses to start if the helper
 reports a leftover `netem` qdisc. At exit, including on failure, it clears
 `netem` and restores the governor.
 
@@ -270,13 +275,23 @@ style, and writes a manifest whose digest pins the corpus.
 | `small-opaque` | `small-flat` shape, random bytes, half with skip-list suffixes (`.jpg`, `.gz`) | Compression skip paths (H14) |
 | `mixed-bimodal` | ~20,000 files, ~1.5 GB: 83% of files under 8 KiB, about two thirds of bytes in files over 8 MiB | The old `cb7` shape, scaled to fit a block |
 | `mixed-threshold` | Sizes log-uniform from 1 KiB to 8 MiB | Behaviour around `SMALL_MAX` and `BLOCK_TARGET` (H22) |
-| `mixed-modules` | Regenerated from the size and depth histogram of a real `node_modules` tree | A shape neither project measured |
+| `real-holochart` | Frozen copy of `~/projects/holochart`, a JavaScript monorepo: 249,472 files, 43,625 directories, 7.8 GB; median file 2.2 KiB, 74% of files under 8 KiB, 24% of bytes in files over 8 MiB; over half the files are `node_modules` | A real small-file-dominated working tree |
+| `real-laikav2` | Frozen copy of `~/projects/laikav2`, a Rust project: 54,688 files, 3,140 directories, 45.3 GB; median file 88 KiB, 10% of files over 1.3 MiB, 48% of bytes in files over 8 MiB; almost all of it is the `target` build directory | A real mixed tree whose sizes straddle `SMALL_MAX` and `BLOCK_TARGET` |
 
 Sizes target 3–20 s per sample on the LAN: long enough that the ~170 ms
 fixed cost and the 25 ms teardown quantum are not the result, short enough
 for a dozen blocks per cell. Each corpus also has a 10× smaller smoke tier
-for harness tests. `mixed-modules` is regenerated from a histogram rather
-than copied so that every host can build the identical tree.
+for harness tests.
+
+The two `real-` corpora are live working trees (figures above measured on
+2026-10-11), so each is frozen once: copied whole, including `.git`,
+`node_modules` and build output, to a benchmark-owned directory on every
+host, and pinned by manifest digest like the others. The manifest records
+symlinks and hard links, which a pnpm `node_modules` uses heavily. They are
+far larger than the 3–20 s target — `real-laikav2` is about seven minutes
+per sample at wire rate on the LAN — so they run in E1 and E6 with a small
+block count, and tuning experiments use a pinned subtree of each. Their
+per-file tables carry sizes and depths but no file names.
 
 Scenarios: `fresh` (empty destination), `noop` (identical destination) and
 `update-1pct` (1% of files replaced). `fresh` and `noop` are primary.
@@ -285,7 +300,7 @@ Scenarios: `fresh` (empty destination), `noop` (identical destination) and
 
 - `warm`: the source is pre-read before each sample. The default.
 - `cold`: the helper's `drop-caches` runs on both ends before each sample.
-  Available on ext4 (neo, freya's `/mnt`, and mars once inventoried). ZFS
+  Available on ext4 (neo, freya's `/mnt/nvme`, and mars once inventoried). ZFS
   cells stay warm-only. `purge` on the Mac is deferred with the rest of
   phase C access (section 10).
 - `/dev/shm` is tmpfs and needs no privilege, so a tmpfs destination control
@@ -343,15 +358,18 @@ root. It accepts only these verbs:
 | `drop-caches` | `sync`, then writes 3 to `/proc/sys/vm/drop_caches` | The `cold` cache state |
 | `governor performance`, `governor restore` | Sets and restores the cpufreq governor | Run start and exit |
 | `netem set <delay-ms> <loss-%> <lifetime-s>`, `netem clear` | Adds or removes a `netem` qdisc | E7b |
-| `mount-scratch` | Mounts the `fstab` entry for `/mnt` if it is not mounted | freya's benchmark root |
+| `mount-scratch` | Mounts the configured scratch mount point if it is not mounted | freya's benchmark root |
 | `status` | Prints governor, qdisc and mount state | Preflight and exit checks |
 
-The network interface and the mount point are fixed in a root-owned
-configuration file beside the script; a caller cannot name another.
-`mount-scratch` mounts only what `fstab` already defines for `/mnt` and
-never chooses or formats a device. `netem set` arms a timer that clears the
-qdisc after the stated lifetime, so a crashed run cannot leave a host's
-network degraded.
+The network interface, the mount point and the filesystem UUID are fixed in
+a root-owned file, `/etc/xsbench-helper.conf`; a caller cannot name another.
+`mount-scratch` mounts what `fstab` defines for the mount point, or failing
+that the configured UUID, and never chooses or formats a device. `netem set`
+refuses to replace a qdisc that someone configured, and arms a timer that
+clears its own after the stated lifetime, so a crashed run cannot leave a
+host's network degraded. `governor` also saves and restores the
+energy-performance preference that `amd-pstate-epp` ties to the governor.
+Installation steps are in `benchmarks/lab/README.md`.
 
 ## 5. Statistical method
 
@@ -491,7 +509,7 @@ capacity) per cell — decides whether H10 and multi-stream are worth
 revisiting. (b) Syscalls and futex calls per file on both ends under
 `strace -c -f`, against rsync. (c) tmpfs destination vs the real filesystem
 on each receiver; this one is timed and inferential, and gives the storage
-share of receive time. On freya it compares tmpfs, ext4 at `/mnt` and ZFS
+share of receive time. On freya it compares tmpfs, ext4 at `/mnt/nvme` and ZFS
 on one host, which is the cleanest test of H19. (d) Frame counts by type via
 `tests/compression_proxy.py`.
 
@@ -563,7 +581,7 @@ carries an interval.
 ## 7. Campaign
 
 **Phase A — neo ↔ freya, wired.** Everything: E0, E1, E1b, E2, E3, E4, E5,
-E6, then E7b and E8. freya's cells use the ext4 root at `/mnt` unless the
+E6, then E7b and E8. freya's cells use the ext4 root at `/mnt/nvme` unless the
 experiment names ZFS.
 Rough cost at ~30 s per sample cycle (transfer, settle, verify): a 4-arm,
 12-block cell is about 25 minutes, so E1 is roughly a day of unattended
@@ -589,7 +607,7 @@ stays out, load gate, free-space check, and `purge` for cold runs.
 
 | Milestone | Deliverable | Done when |
 |---|---|---|
-| M0 | Operator setup: baseline revision committed on `main`; helper reviewed and installed with its `sudoers` entry on neo, freya and mars; SSH keys in both directions for each pair; ext4 at `/mnt` on freya | From each host, `xsbench-helper status` answers under `sudo -n` and a non-interactive SSH to its peer succeeds; `/mnt` on freya reports ext4 |
+| M0 | Operator setup: baseline revision committed on `main`; helper reviewed and installed with its `sudoers` entry on neo, freya and mars; SSH keys in both directions for each pair; a benchmark root owned by the benchmark user on each host | `preflight.py` reports no problem for the link |
 | M1 | `hosts.toml`, `preflight.py`, `probe.py` | Inventory and path proof recorded for all three Linux hosts; a deliberately wrong interface fails the proof |
 | M2 | `corpus.py` and manifests | Same seed gives the same digest on neo, freya and the Mac |
 | M3 | `stage.py` | A stale or dirty binary on either end is refused |
@@ -599,6 +617,14 @@ stays out, load gate, free-space check, and `purge` for cold runs.
 | M7 | `XSYNC_TUNE`, `XSYNC_METRICS`, `measure.py --env` | Existing tests pass; E0c is *equivalent* |
 | M8 | `export.py`, table schemas, one figure spec | F2 and F3 render in holochart from E0a and smoke E1 data with no hand-edited numbers |
 | M9 | E1 onward | — |
+
+Progress, 2026-10-11: M0 and M1 are done for the LAN pair. The helper is
+installed on neo and freya and was checked there: `netem` adds the stated
+delay and its timer clears it unprompted, the governor and freya's
+energy-performance preference are set and restored exactly, and
+`drop-caches` and `mount-scratch` work. `preflight.py --link lan` passes
+with SSH in both directions and rejects a wrong interface. mars is not yet
+inventoried, and the baseline revision is not yet committed.
 
 M0 is done by the operator, not by the harness. M1–M6 need no engine
 change, so flag-only experiments (E1–E3) can start before M7.
@@ -789,7 +815,7 @@ Settled on 2026-10-11:
 |---|---|
 | Privileged helper | Yes, as specified in section 4.8. Cold-cache runs, a fixed governor and `netem` are all available. |
 | Reverse SSH keys | Set up in both directions for each pair before the campaign (M0). Client role becomes a measured factor (E1b). |
-| freya's destination filesystem | ext4 mounted at `/mnt`, mounted through the helper if it is not already. ZFS is kept as a warm-only comparison. |
+| freya's destination filesystem | ext4 mounted at `/mnt/nvme`, mounted through the helper if it is not already. ZFS is kept as a warm-only comparison. |
 | Baseline revision | A commit on `main`, not a separate clean worktree. Every run is pinned to a commit and the harness refuses a dirty tree. |
 | Paper scope | A scientific report first, with a slight showcase of holochart (section 9.6). |
 | Public naming | Hostnames may be published. |
