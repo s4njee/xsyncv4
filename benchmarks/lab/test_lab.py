@@ -2,17 +2,21 @@
 """Check the lab's probes, preflight verdicts and the helper's argument guard."""
 import copy
 import datetime
+import json
 import os
 import pathlib
 import subprocess
+import sys
 import tempfile
 import unittest
 
+import corpus
 import preflight
 import probe
 
 HERE = pathlib.Path(__file__).resolve().parent
 HELPER = HERE / 'xsbench-helper'
+GOLDEN_DRAWS = (21844, 260, 5364032292144503359)
 
 HOSTS = {'neo': {'ssh': 'u@neo.local', 'name': 'neo.local', 'hostname': 'neo', 'root': '/bench',
                  'root_fstype': 'ext4', 'helper': True},
@@ -200,6 +204,91 @@ class Parsers(unittest.TestCase):
     def test_snapshot_and_inventory_run_here(self):
         self.assertIn('loadavg', probe.snapshot())
         self.assertIn('tools', probe.inventory([str(HERE)]))
+
+
+class Corpora(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.root = pathlib.Path(self.tmp.name) / 'corpora'
+
+    def generate(self, name, workers=1, replace=False):
+        return corpus.generate(name, 'test', self.root, workers, replace)
+
+    def test_draws_are_pinned(self):
+        stream = corpus.Stream('golden')
+        self.assertEqual((stream.bits(16), stream.below(1000), stream.bits(64)), GOLDEN_DRAWS)
+        self.assertEqual((corpus.exp2(10 << 16), corpus.exp2((10 << 16) + 32768), corpus.exp2(-1)), (1024, 1536, 0))
+
+    def test_every_named_corpus_matches_its_pinned_digest(self):
+        pinned = json.loads((HERE / 'corpora.json').read_text())
+        for name in corpus.SPECS:
+            header = self.generate(name)
+            self.assertEqual(header['digest'], pinned[f'{name}:test']['digest'], name)
+            self.assertEqual(header['bytes'], pinned[f'{name}:test']['bytes'], name)
+
+    def test_worker_count_does_not_change_the_corpus(self):
+        first = self.generate('small-flat')['digest']
+        self.assertEqual(self.generate('small-flat', workers=4, replace=True)['digest'], first)
+
+    def test_deep_and_flat_hold_the_same_files(self):
+        self.generate('small-flat')
+        self.generate('small-deep')
+
+        def files(label):
+            lines = (self.root / f'{label}.files.jsonl').read_text().splitlines()
+            return sorted((entry['size'], entry['data']) for entry in map(json.loads, lines) if entry['type'] == 'f')
+        self.assertEqual(files('small-flat-test'), files('small-deep-test'))
+
+    def test_verify_detects_content_time_and_extra_files(self):
+        self.generate('small-flat')
+        tree, manifest = self.root / 'small-flat-test', self.root / 'small-flat-test.manifest.json'
+        self.assertTrue(corpus.verify(tree, manifest, False, 1)[0])
+        victim = tree / 'd0000' / 'f0000000.txt'
+        times, data = victim.stat(), bytearray(victim.read_bytes())
+        data[0] ^= 1
+        victim.write_bytes(data)
+        os.utime(victim, ns=(times.st_atime_ns, times.st_mtime_ns))
+        os.utime(victim.parent, (corpus.MTIME, corpus.MTIME))
+        ok, _, different = corpus.verify(tree, manifest, False, 1)
+        self.assertEqual((ok, different), (False, ['d0000/f0000000.txt']))
+        self.assertTrue(corpus.verify(tree, manifest, True, 1)[0], 'a quick check does not read content')
+        os.utime(victim, (corpus.MTIME + 99, corpus.MTIME + 99))
+        self.assertFalse(corpus.verify(tree, manifest, True, 1)[0])
+        (tree / 'd0000' / 'extra').write_text('x')
+        self.assertIn('d0000/extra', corpus.verify(tree, manifest, True, 1)[2])
+
+    def test_refuses_unowned_and_existing_destinations(self):
+        self.root.mkdir(parents=True)
+        (self.root / 'valuable').write_text('keep')
+        with self.assertRaises(SystemExit):
+            self.generate('tiny-one')
+        self.assertEqual((self.root / 'valuable').read_text(), 'keep')
+        (self.root / 'valuable').unlink()
+        self.generate('tiny-one')
+        with self.assertRaises(SystemExit):
+            self.generate('tiny-one')
+        with self.assertRaises(ValueError):
+            self.generate('no-such-corpus')
+
+    def test_real_tree_manifest_records_links(self):
+        tree = pathlib.Path(self.tmp.name) / 'real'
+        (tree / 'sub').mkdir(parents=True)
+        (tree / 'sub' / 'a').write_bytes(b'payload')
+        os.link(tree / 'sub' / 'a', tree / 'b')
+        os.symlink('sub/a', tree / 'link')
+        entries = {entry['path']: entry for entry in corpus.scan(tree, True, 1)}
+        self.assertEqual(entries['link']['data'], 'sub/a')
+        self.assertEqual(entries['sub/a']['link'], 'b')  # the later name points at the first
+        self.assertIsNone(entries['b']['link'])
+        self.assertEqual(entries['b']['data'], entries['sub/a']['data'])
+        header = corpus.describe('real', 'real', tree, list(entries.values()))
+        self.assertEqual((header['files'], header['directories'], header['symlinks'], header['hardlinks']),
+                         (2, 1, 1, 1))
+        self.assertEqual(corpus.digest_of(corpus.scan(tree, True, 1)), corpus.digest_of(corpus.scan(tree, True, 2)))
+        inside = subprocess.run([sys.executable, str(HERE / 'corpus.py'), 'manifest', str(tree), '--name', 'real',
+                                 '--output', str(tree / 'pin')], capture_output=True, text=True)
+        self.assertIn('outside the tree', inside.stderr)
 
 
 class HelperArguments(unittest.TestCase):

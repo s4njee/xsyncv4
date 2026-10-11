@@ -269,19 +269,26 @@ style, and writes a manifest whose digest pins the corpus.
 | Corpus | Shape | Tests |
 |---|---|---|
 | `tiny-one` | One 19-byte file | Fixed startup and teardown cost |
-| `small-flat` | 100,000 files, log-normal sizes (median 1 KiB), 100 directories, text-like | Pure per-file cost |
-| `small-deep` | Same files and bytes, one file per directory, depth 6 | Per-directory cost (H2, H17) |
+| `small-flat` | 100,000 files, 304 MiB, log-normal sizes (median 1 KiB, 90% under 7.3 KiB), 100 directories, text-like (zstd-3 ratio 4.2) | Pure per-file cost |
+| `small-deep` | The same files, one per directory, depth 6: 116,667 directories | Per-directory cost (H2, H17) |
 | `small-real` | congress-100k: 109,615 files, 25,851 directories, real JSON/XML | Realistic compressible small files |
 | `small-opaque` | `small-flat` shape, random bytes, half with skip-list suffixes (`.jpg`, `.gz`) | Compression skip paths (H14) |
-| `mixed-bimodal` | ~20,000 files, ~1.5 GB: 83% of files under 8 KiB, about two thirds of bytes in files over 8 MiB | The old `cb7` shape, scaled to fit a block |
-| `mixed-threshold` | Sizes log-uniform from 1 KiB to 8 MiB | Behaviour around `SMALL_MAX` and `BLOCK_TARGET` (H22) |
+| `mixed-bimodal` | 20,000 files, 1.33 GiB: 83% of files under 8 KiB, 68% of bytes in 74 files over 8 MiB; two thirds text-like, the rest random | The old `cb7` shape, scaled to fit a block |
+| `mixed-threshold` | 1,500 files, 1.43 GiB, sizes log-uniform from 1 KiB to 8 MiB (469 files over 512 KiB); half text-like | Behaviour around `SMALL_MAX` and `BLOCK_TARGET` (H22) |
 | `real-holochart` | Frozen copy of `~/projects/holochart`, a JavaScript monorepo: 249,472 files, 43,625 directories, 7.8 GB; median file 2.2 KiB, 74% of files under 8 KiB, 24% of bytes in files over 8 MiB; over half the files are `node_modules` | A real small-file-dominated working tree |
 | `real-laikav2` | Frozen copy of `~/projects/laikav2`, a Rust project: 54,688 files, 3,140 directories, 45.3 GB; median file 88 KiB, 10% of files over 1.3 MiB, 48% of bytes in files over 8 MiB; almost all of it is the `target` build directory | A real mixed tree whose sizes straddle `SMALL_MAX` and `BLOCK_TARGET` |
+
+The generated corpora are built by `benchmarks/lab/corpus.py`, which draws
+everything from SHAKE-256 with integer arithmetic so that a name and tier
+give the same bytes, names, modes and times on any host. Their digests are
+pinned in `benchmarks/lab/corpora.json`. E8's series are generated the same
+way as `scale-size-BYTES` and `scale-count-FILES`; the count series is a
+prefix of `small-flat`, so its points nest.
 
 Sizes target 3–20 s per sample on the LAN: long enough that the ~170 ms
 fixed cost and the 25 ms teardown quantum are not the result, short enough
 for a dozen blocks per cell. Each corpus also has a 10× smaller smoke tier
-for harness tests.
+for harness tests and a 500× smaller one for unit tests.
 
 The two `real-` corpora are live working trees (figures above measured on
 2026-10-11), so each is frozen once: copied whole, including `.git`,
@@ -618,13 +625,20 @@ stays out, load gate, free-space check, and `purge` for cold runs.
 | M8 | `export.py`, table schemas, one figure spec | F2 and F3 render in holochart from E0a and smoke E1 data with no hand-edited numbers |
 | M9 | E1 onward | — |
 
-Progress, 2026-10-11: M0 and M1 are done for the LAN pair. The helper is
-installed on neo and freya and was checked there: `netem` adds the stated
-delay and its timer clears it unprompted, the governor and freya's
-energy-performance preference are set and restored exactly, and
-`drop-caches` and `mount-scratch` work. `preflight.py --link lan` passes
-with SSH in both directions and rejects a wrong interface. mars is not yet
-inventoried, and the baseline revision is not yet committed.
+Progress, 2026-10-11: M0 and M1 are done for the LAN pair, and M2 for the
+generated corpora.
+
+- The helper is installed on neo and freya and was checked there: `netem`
+  adds the stated delay and its timer clears it unprompted, the governor
+  and freya's energy-performance preference are set and restored exactly,
+  and `drop-caches` and `mount-scratch` work.
+- `preflight.py --link lan` passes with SSH in both directions and rejects
+  a wrong interface.
+- All six generated corpora and two scale points were built at full size on
+  the Mac, neo and freya, and every digest matches across the three.
+- Not done: mars is not inventoried; the three real corpora (`small-real`,
+  `real-holochart`, `real-laikav2`) are not yet frozen and pinned; the
+  baseline revision is not yet committed.
 
 M0 is done by the operator, not by the harness. M1–M6 need no engine
 change, so flag-only experiments (E1–E3) can start before M7.
