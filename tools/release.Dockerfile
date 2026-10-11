@@ -10,7 +10,7 @@ WORKDIR /work
 COPY CMakeLists.txt CMakePresets.json ./
 COPY src ./src
 COPY cmake ./cmake
-COPY tests/filter_test.cpp tests/xattr_value_test.cpp tests/sparse_test.cpp ./tests/
+COPY tests/filter_test.cpp tests/xattr_value_test.cpp tests/sparse_test.cpp tests/scan_admission_test.cpp ./tests/
 COPY tools ./tools
 COPY completions ./completions
 ARG XSYNC_GIT_HASH
