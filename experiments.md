@@ -89,7 +89,7 @@ or a caveat in v4. Section 4.3 turns every one into a check.
 |---|---|---|
 | `neo.local` | Raspberry Pi 5 Model B, 4 cores, 4 GiB; Debian 13, kernel 6.18; ext4 on NVMe; `eth0` at 1 Gb/s | One end of every pair |
 | `freya.local` | Ryzen 9 7950X, 32 threads, 62 GiB; CachyOS, kernel 7.1; benchmark root on ext4 on NVMe at `/mnt/nvme`; ZFS home; `enp10s0` at 1 Gb/s; runs other services | Phase A peer |
-| `mars.local` | Not yet inventoried. amd64 Linux; old docs say Ryzen 9 7900X, ext4 on NVMe, dual-boots Windows | Phase B peer |
+| `mars.local` | Not yet inventoried (unreachable on 2026-10-11). amd64 Linux; old docs say Ryzen 9 7900X, ext4 on NVMe, dual-boots Windows | Phase B peer |
 | this Mac | M1 Max, 10 cores, 64 GiB, APFS (98–99% full in past runs), USB gigabit adapter | Phase C peer; controller for A and B |
 
 | Phase | Pair | Link | Purpose |
@@ -271,12 +271,12 @@ style, and writes a manifest whose digest pins the corpus.
 | `tiny-one` | One 19-byte file | Fixed startup and teardown cost |
 | `small-flat` | 100,000 files, 304 MiB, log-normal sizes (median 1 KiB, 90% under 7.3 KiB), 100 directories, text-like (zstd-3 ratio 4.2) | Pure per-file cost |
 | `small-deep` | The same files, one per directory, depth 6: 116,667 directories | Per-directory cost (H2, H17) |
-| `small-real` | congress-100k: 109,615 files, 25,851 directories, real JSON/XML | Realistic compressible small files |
+| `small-real` | Congresses 116–118 of the congress corpus: 118,594 files, 59,336 directories, 1.03 GiB; median file 6.1 KiB, 90% under 24 KiB; real JSON and XML | Realistic compressible small files, with a directory for every two files |
 | `small-opaque` | `small-flat` shape, random bytes, half with skip-list suffixes (`.jpg`, `.gz`) | Compression skip paths (H14) |
 | `mixed-bimodal` | 20,000 files, 1.33 GiB: 83% of files under 8 KiB, 68% of bytes in 74 files over 8 MiB; two thirds text-like, the rest random | The old `cb7` shape, scaled to fit a block |
 | `mixed-threshold` | 1,500 files, 1.43 GiB, sizes log-uniform from 1 KiB to 8 MiB (469 files over 512 KiB); half text-like | Behaviour around `SMALL_MAX` and `BLOCK_TARGET` (H22) |
-| `real-holochart` | Frozen copy of `~/projects/holochart`, a JavaScript monorepo: 249,472 files, 43,625 directories, 7.8 GB; median file 2.2 KiB, 74% of files under 8 KiB, 24% of bytes in files over 8 MiB; over half the files are `node_modules` | A real small-file-dominated working tree |
-| `real-laikav2` | Frozen copy of `~/projects/laikav2`, a Rust project: 54,688 files, 3,140 directories, 45.3 GB; median file 88 KiB, 10% of files over 1.3 MiB, 48% of bytes in files over 8 MiB; almost all of it is the `target` build directory | A real mixed tree whose sizes straddle `SMALL_MAX` and `BLOCK_TARGET` |
+| `real-holochart` | Frozen copy of `~/projects/holochart`, a JavaScript monorepo: 249,602 files, 33,012 directories, 10,607 symlinks, 7.3 GiB; median file 2.2 KiB, 90% under 33 KiB, largest 76 MB; over half the files are `node_modules` | A real small-file-dominated working tree, with pnpm's symlinks |
+| `real-laikav2` | Frozen copy of `~/projects/laikav2`, a Rust project: 54,691 files, 3,106 directories, 42.2 GiB (33 GiB on disk: 19,345 names are hard links); median file 88 KiB, 10% over 1.3 MiB, largest 214 MB; almost all of it is the `target` build directory | A real mixed tree whose sizes straddle `SMALL_MAX` and `BLOCK_TARGET`, with many hard links |
 
 The generated corpora are built by `benchmarks/lab/corpus.py`, which draws
 everything from SHAKE-256 with integer arithmetic so that a name and tier
@@ -290,18 +290,20 @@ fixed cost and the 25 ms teardown quantum are not the result, short enough
 for a dozen blocks per cell. Each corpus also has a 10× smaller smoke tier
 for harness tests and a 500× smaller one for unit tests.
 
-The two `real-` corpora are live working trees (figures above measured on
-2026-10-11), so each is frozen once: copied whole, including `.git`,
-`node_modules` and build output, to a benchmark-owned directory on every
-host, and pinned by manifest digest like the others. The manifest records
-symlinks and hard links, which a pnpm `node_modules` uses heavily. They are
-far larger than the 3–20 s target — `real-laikav2` is about seven minutes
-per sample at wire rate on the LAN — so they run in E1 and E6 with a small
-block count, and tuning experiments use a pinned subtree of each. Their
-per-file tables carry sizes and depths but no file names.
+The three real corpora are frozen copies. `small-real` was taken from the
+congress snapshot already on freya. `real-holochart` and `real-laikav2` are
+live working trees, so each was copied once, whole, including `.git`,
+`node_modules` and build output, from the Mac to freya on 2026-10-11. The
+copy on freya is the definition from then on: neo's copy was made from it
+and every later host's will be, and all are pinned by manifest digest in
+`corpora.json` like the generated ones. Transfers of `real-laikav2` need
+`-H` to be comparable, because a fifth of its bytes are hard links.
 
-Scenarios: `fresh` (empty destination), `noop` (identical destination) and
-`update-1pct` (1% of files replaced). `fresh` and `noop` are primary.
+The two `real-` trees are far larger than the 3–20 s target —
+`real-laikav2` is about five minutes per sample at wire rate on the LAN —
+so they run in E1 and E6 with a small block count, and tuning experiments
+use a pinned subtree of each. Their per-file listings stay on the hosts;
+published tables carry sizes and depths but no file names.
 
 ### 4.6 Cache states
 
@@ -636,9 +638,12 @@ generated corpora.
   a wrong interface.
 - All six generated corpora and two scale points were built at full size on
   the Mac, neo and freya, and every digest matches across the three.
-- Not done: mars is not inventoried; the three real corpora (`small-real`,
-  `real-holochart`, `real-laikav2`) are not yet frozen and pinned; the
-  baseline revision is not yet committed.
+- The three real corpora are frozen on freya, mirrored to neo and verified
+  there by a full re-read against the pinned digests.
+- Not done: mars could not be inventoried. It has no mDNS name on the
+  network and the address neo has for it (192.168.1.229) does not answer,
+  so it is off, asleep or booted into another system. The baseline revision
+  is not yet committed.
 
 M0 is done by the operator, not by the harness. M1–M6 need no engine
 change, so flag-only experiments (E1–E3) can start before M7.

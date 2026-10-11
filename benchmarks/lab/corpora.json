@@ -31,6 +31,40 @@
   "digest": "78705c3adf3f5005dd4996352cfef5f3ec099ef01f045be130c99bf9b1443a2b",
   "quick_digest": "915b2165e9d76a6bfc730f6abd5c531963b641b6a00f09c99ad3ad8c7884eb61"
  },
+ "real-holochart:real": {
+  "files": 249602,
+  "directories": 33012,
+  "symlinks": 10607,
+  "hardlinks": 1,
+  "bytes": 7825180850,
+  "size_quantiles": {
+   "p10": 159,
+   "p50": 2186,
+   "p90": 33066,
+   "p99": 346139,
+   "max": 75971547
+  },
+  "digest": "32264d1dc67934398ecd8095344cc80d328bc57395c65910dadcc8f03c44ecf4",
+  "quick_digest": "c71e98cb0e6e4201c36d7bc9f90afc9fe925b773391ea3c9c89de0eaa5b4edd3",
+  "utc": "2026-10-11T23:06:45+00:00"
+ },
+ "real-laikav2:real": {
+  "files": 54691,
+  "directories": 3106,
+  "symlinks": 34,
+  "hardlinks": 19345,
+  "bytes": 45316076042,
+  "size_quantiles": {
+   "p10": 48,
+   "p50": 87856,
+   "p90": 1277112,
+   "p99": 11358520,
+   "max": 214196200
+  },
+  "digest": "e25b0f37618e36c7ec17588806ceeb5a74135bba74f68f21f75c376b6d10148a",
+  "quick_digest": "c545fd94c1e715bfb5abc350082ce30d9bde5857c66275bbaace2dfa0975fcbc",
+  "utc": "2026-10-11T23:06:58+00:00"
+ },
  "scale-count-10000:full": {
   "generator": 1,
   "files": 10000,
@@ -94,6 +128,23 @@
   "bytes": 570094,
   "digest": "d812b43b950d72f3985aea556cb4bf93e8c8e6c9aac9c54a420dcf4fe46aaa0d",
   "quick_digest": "a0d45036af29fc2a2df39dbb8b001b79b77efc5b4a10ad47237741a14d5223a7"
+ },
+ "small-real:real": {
+  "files": 118594,
+  "directories": 59336,
+  "symlinks": 0,
+  "hardlinks": 0,
+  "bytes": 1107333872,
+  "size_quantiles": {
+   "p10": 24,
+   "p50": 6103,
+   "p90": 23967,
+   "p99": 54350,
+   "max": 3114410
+  },
+  "digest": "e9c84fab7d1a6dcdaf7c1c8688abe9bcb3cd114f551c27fad5b8624391005cdb",
+  "quick_digest": "65994469699350cde8ad45842d686fe1a01d87e64ed26de283fb0c860fae01e3",
+  "utc": "2026-10-11T22:55:09+00:00"
  },
  "tiny-one:full": {
   "generator": 1,

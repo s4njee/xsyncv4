@@ -10,7 +10,7 @@ endpoint probes and the preflight check) and milestone M2 (corpora).
 | `probe.py` | endpoint | Read-only JSON reports: `inventory`, `snapshot`, `route`, and `sample` for a once-a-second series |
 | `preflight.py` | controller | Runs the probes over SSH, checks them against `hosts.toml`, and writes a record under `benchmarks/results/lab/preflight/` |
 | `corpus.py` | endpoint | Generates the seeded corpora, and pins any tree by a manifest digest |
-| `corpora.json` | — | The pinned digests of the generated corpora |
+| `corpora.json` | — | The pinned digests of the generated and the frozen real corpora |
 | `xsbench-helper` | endpoint, as root | The only root operations a run performs |
 | `test_lab.py` | anywhere | Unit tests for the parsers, the preflight verdicts and the helper's argument checks |
 | `test_helper_container.sh` | a disposable container | Exercises the helper for real |
@@ -63,8 +63,15 @@ A real tree is pinned with `manifest`, which treats it the same way:
 python3 corpus.py manifest /path/to/tree --name real-holochart --output ROOT/corpora/real-holochart
 ```
 
+The three real corpora (`small-real`, `real-holochart`, `real-laikav2`) were
+frozen on freya, and freya's copy defines them. A new host gets them from
+there with `rsync -aH`, hard links included, and checks them with `verify`.
+`corpora.json` records their digests and counts; their file listings stay
+on the hosts.
+
 After a change that alters generated output, bump `GENERATOR`, regenerate
-and run `python3 corpus.py pin ROOT/corpora`.
+and run `python3 corpus.py pin ROOT/corpora`, which records every manifest
+it finds there.
 
 ## Operator setup (milestone M0)
 

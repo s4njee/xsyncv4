@@ -330,14 +330,19 @@ def pinned(name, tier):
 
 
 def pin(root):
-    """Record the digests of the generated corpora under root in corpora.json."""
+    """Record the digests of the corpora whose manifests are under root in corpora.json."""
     path = HERE / 'corpora.json'
     table = json.loads(path.read_text()) if path.exists() else {}
     for manifest in sorted(pathlib.Path(root).glob('*.manifest.json')):
         header = json.loads(manifest.read_text())
         if header.get('generator') == GENERATOR:
-            table[f'{header["name"]}:{header["tier"]}'] = {
-                key: header[key] for key in ('generator', 'files', 'directories', 'bytes', 'digest', 'quick_digest')}
+            keys = ('generator', 'files', 'directories', 'bytes', 'digest', 'quick_digest')
+        elif header['tier'] == 'real':  # a frozen copy of a real tree: pinned as found
+            keys = ('files', 'directories', 'symlinks', 'hardlinks', 'bytes', 'size_quantiles', 'digest',
+                    'quick_digest', 'utc')
+        else:
+            continue
+        table[f'{header["name"]}:{header["tier"]}'] = {key: header[key] for key in keys}
     path.write_text(json.dumps(dict(sorted(table.items())), indent=1) + '\n')
     return table
 
@@ -375,7 +380,7 @@ def generate(name, tier, root, workers, replace):
     header = describe(name, tier, tree, entries, {'generator': GENERATOR, 'seed': SEED, 'spec': spec})
     save(root / label, header, entries)
     expected = pinned(name, tier)
-    if expected and expected['generator'] == GENERATOR and expected['digest'] != header['digest']:
+    if expected and expected.get('generator') == GENERATOR and expected['digest'] != header['digest']:
         raise SystemExit(f'{label}: digest {header["digest"]} differs from the pinned {expected["digest"]}')
     return header
 
@@ -416,7 +421,7 @@ def main(argv=None):
     p.add_argument('--quick', action='store_true', help='compare names, types, sizes, modes and times only')
     for p in commands.choices.values():
         p.add_argument('--jobs', type=int, default=os.cpu_count() or 1)
-    p = commands.add_parser('pin', help='record the digests of the generated corpora under ROOT in corpora.json')
+    p = commands.add_parser('pin', help='record the digests of the manifests under ROOT in corpora.json')
     p.add_argument('root', type=pathlib.Path)
     args = parser.parse_args(argv)
     if args.command == 'list':
