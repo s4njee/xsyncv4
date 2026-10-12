@@ -147,9 +147,11 @@ def transfer_command(arm, cell, hosts, run_id, tag):
     if delay := arm.get('delay_s', {}).get(cell['id']):
         # An injected, known slowdown, inside the measured region.
         tool = ['sh', '-c', 'sleep "$0"; exec "$@"', f'{delay:.4f}', *tool]
+    # An arm may add options to the SSH client the transfer uses, such as a cipher.
+    rsh = ' '.join([RSH, *map(shlex.quote, arm.get('ssh_options', []))])
     argv = [*CLEAN_ENV, 'python3', client.bin('measure.py'), '--metrics',
             work_path(client, run_id, 'logs', f'{tag}.client.json'), '--', *tool,
-            *arm['flags'], *fixed, '-e', RSH, f'--rsync-path={peer_program}', *paths]
+            *arm['flags'], *fixed, '-e', rsh, f'--rsync-path={peer_program}', *paths]
     log = work_path(client, run_id, 'logs', tag)
     return client, peer, argv, f'{shlex.join(argv)} > {shlex.quote(log + ".out")} 2> {shlex.quote(log + ".err")}'
 
@@ -203,9 +205,13 @@ class Run:
                 if state.get('netem') != 'off' or state.get('netem_timer') != 'off':
                     raise RuntimeError(f'{host.name}: a netem qdisc is active')
                 # Exit 3 means this host has no scratch mount configured, which is fine.
-                mounted = host.run('sudo', '-n', HELPER, 'mount-scratch', check=False)
-                if mounted.returncode not in (0, 3):
-                    raise RuntimeError(f'{host.name}: {mounted.stderr.strip()}')
+                trimmed = None
+                for verb in ('mount-scratch', 'trim-scratch'):
+                    done = host.run('sudo', '-n', HELPER, verb, check=False, timeout=3600)
+                    if done.returncode not in (0, 3):
+                        raise RuntimeError(f'{host.name}: {verb}: {done.stderr.strip()}')
+                    trimmed = done.stdout.strip() if verb == 'trim-scratch' and done.returncode == 0 else trimmed
+                self.plan['observed'][host.name]['trim'] = trimmed
             host.run('mkdir', '-p', work_path(host, self.run_id, 'logs'))
         for name, corpus in self.plan['corpora'].items():
             for sender in sorted({cell['sender'] for cell in self.cells.values() if cell['corpus'] == name}):
@@ -215,6 +221,8 @@ class Run:
                                             '--manifest', manifest, '--quick', timeout=1800).stdout)
                 if found['digest'] != corpus['digest']:
                     raise RuntimeError(f'{sender}: corpus {name} is not the pinned one')
+        if any(observed.get('trim') for observed in self.plan['observed'].values()):
+            time.sleep(15)  # a drive works through a large trim for a few seconds afterwards
         for host in self.hosts.values():
             host.helper('governor', 'performance')
         (self.directory / 'run.json').write_text(json.dumps(
@@ -286,7 +294,7 @@ class Run:
                   'previous_arm': previous_arm, 'control': arm['name'] == self.plan['control'],
                   'tool': arm['tool'], 'rev': arm.get('rev'), 'flags': arm['flags'],
                   'injected_delay_s': arm.get('delay_s', {}).get(cell['id']),
-                  'client_role': client_role(arm, cell),
+                  'client_role': client_role(arm, cell), 'ssh_options': arm.get('ssh_options', []),
                   'corpus_files': self.plan['corpora'][cell['corpus']]['files'],
                   'corpus_bytes': self.plan['corpora'][cell['corpus']]['bytes'],
                   'valid': False, 'void_reason': None}

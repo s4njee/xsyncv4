@@ -126,7 +126,24 @@ def is_wireless(name):
     return (NET / name / 'wireless').exists() or (NET / name / 'phy80211').exists()
 
 
+def darwin_interface(name):
+    """Interface facts from ifconfig, for macOS endpoints."""
+    status, out, _ = run(['ifconfig', name], timeout=5)
+    if status != 0:
+        return None
+    speed = re.search(r'media:.*?\((\d+)base', out)
+    mtu = re.search(r'mtu (\d+)', out)
+    _, ports, _ = run(['networksetup', '-listallhardwareports'], timeout=5)
+    wireless = bool(re.search(r'Hardware Port: Wi-Fi\s+Device: ' + re.escape(name) + r'\b', ports or ''))
+    return {'name': name, 'operstate': 'up' if 'status: active' in out else 'down',
+            'speed_mbps': int(speed.group(1)) if speed else None, 'mtu': int(mtu.group(1)) if mtu else None,
+            'duplex': 'full' if 'full-duplex' in out else None, 'medium': 'wireless' if wireless else 'wired',
+            'addresses': re.findall(r'inet6? ([0-9a-fA-F:.]+)', out)}
+
+
 def interface(name):
+    if platform.system() == 'Darwin':
+        return darwin_interface(name)
     base = NET / name
     if not base.exists():
         return None
@@ -296,8 +313,22 @@ def route(peer, ssh_target, pings):
         else:
             result['ssh']['error'] = (err.strip() or 'no SSH_CONNECTION').splitlines()[-1]
     result['address'] = target
-    status, out, err = run(['ip', '-j', 'route', 'get', target.split('%')[0]])
-    if status == 0 and (hops := json.loads(out)):
+    if platform.system() == 'Darwin':
+        family = ['-inet6'] if ':' in target else []
+        status, out, err = run(['route', '-n', 'get', *family, target])
+        device = re.search(r'interface: (\S+)', out or '')
+        if status == 0 and device:
+            facts = interface(device.group(1)) or {}
+            result.update(dev=device.group(1), source=None, gateway=None, interface=facts,
+                          interface_addresses=facts.get('addresses', []), qdisc=None)
+        else:
+            result['error'] = (err or '').strip() or 'route get failed'
+        status, out, err = None, '', ''
+    else:
+        status, out, err = run(['ip', '-j', 'route', 'get', target.split('%')[0]])
+    if platform.system() == 'Darwin':
+        pass
+    elif status == 0 and (hops := json.loads(out)):
         hop = hops[0]
         result.update(dev=hop.get('dev'), source=hop.get('prefsrc'), gateway=hop.get('gateway'))
         result['interface'] = interface(hop.get('dev', ''))
@@ -326,6 +357,7 @@ def file_sha256(path):
 def staged(root, names):
     """Hashes of the named files under ROOT/bin, what each xs there says it is, and this host's rsync."""
     result = {'utc': utc(), 'hostname': socket.gethostname(), 'machine': platform.machine(),
+              'system': platform.system(),
               'files': {name: file_sha256(os.path.join(root, 'bin', name)) for name in names}, 'versions': {}}
     for name in names:
         if name.startswith('xs-') and result['files'][name]:

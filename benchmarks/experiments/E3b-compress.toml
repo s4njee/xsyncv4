@@ -1,0 +1,44 @@
+# E3b, first screen: compression when the link is the limit. Both tools are
+# within a few percent of what the gigabit link carries on these corpora, so
+# sending fewer bytes is the only way to go faster. mixed-bimodal is two
+# thirds compressible, small-real is highly compressible text, small-opaque
+# is random data with half its names on xs's skip list (H13-H15).
+id = "E3b-compress"
+kind = "screening"
+hypothesis = "With neo sending over gigabit, -z makes xs faster on compressible corpora and no slower on incompressible ones."
+primary = "wall_s"
+delta = 0.03
+blocks = 10
+control = "xs"
+verify = "first-last"
+
+[arms.xs]
+tool = "xs"
+rev = "bf596d28c5c9"
+flags = ["-a"]
+
+[arms.xs-z]
+tool = "xs"
+rev = "bf596d28c5c9"
+flags = ["-a", "-z"]
+
+[arms.xs-z1]
+tool = "xs"
+rev = "bf596d28c5c9"
+flags = ["-a", "-z", "--compress-level=1"]
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[arms.rsync-z]
+tool = "rsync"
+flags = ["-a", "-z"]
+
+[matrix]
+link = "lan"
+corpus = ["mixed-bimodal", "small-real", "small-opaque"]
+scenario = ["fresh"]
+direction = ["neo>freya", "freya>neo"]
+client = ["sender"]
+cache = ["warm"]

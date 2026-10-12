@@ -1,0 +1,52 @@
+# T1a: first screen for tuning target T1, the Pi sending a mixed tree. rsync
+# moves it at 114 MB/s, within 1% of what a raw SSH stream manages on this
+# link (115 MB/s); xs manages 110. Two cheap suspects, neither needing an
+# engine change: xs's worker threads competing with ssh on a four-core Pi,
+# and the SSH cipher, where AES-GCM costs the Pi half the CPU of the default
+# ChaCha20-Poly1305 for the same throughput.
+id = "T1a-pi-sender"
+kind = "screening"
+hypothesis = "Fewer xs worker threads, or a cheaper SSH cipher, close the gap to rsync when neo sends a mixed tree."
+primary = "wall_s"
+delta = 0.02
+blocks = 12
+control = "xs"
+verify = "first-last"
+
+[arms.xs]
+tool = "xs"
+rev = "bf596d28c5c9"
+flags = ["-a"]
+
+[arms.xs-j1]
+tool = "xs"
+rev = "bf596d28c5c9"
+flags = ["-a", "-j1"]
+
+[arms.xs-j2]
+tool = "xs"
+rev = "bf596d28c5c9"
+flags = ["-a", "-j2"]
+
+[arms.xs-aes]
+tool = "xs"
+rev = "bf596d28c5c9"
+flags = ["-a"]
+ssh_options = ["-c", "aes128-gcm@openssh.com"]
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[arms.rsync-aes]
+tool = "rsync"
+flags = ["-a"]
+ssh_options = ["-c", "aes128-gcm@openssh.com"]
+
+[matrix]
+link = "lan"
+corpus = ["mixed-bimodal", "mixed-threshold"]
+scenario = ["fresh"]
+direction = ["neo>freya"]
+client = ["sender"]
+cache = ["warm"]

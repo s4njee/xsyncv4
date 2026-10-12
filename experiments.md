@@ -89,7 +89,7 @@ or a caveat in v4. Section 4.3 turns every one into a check.
 |---|---|---|
 | `neo.local` | Raspberry Pi 5 Model B, 4 cores, 4 GiB; Debian 13, kernel 6.18; ext4 on NVMe; `eth0` at 1 Gb/s | One end of every pair |
 | `freya.local` | Ryzen 9 7950X, 32 threads, 62 GiB; CachyOS, kernel 7.1; benchmark root on ext4 on a QLC NVMe drive at `/mnt/nvme`, reformatted 2026-10-12; ZFS home; `enp10s0` at 1 Gb/s; runs other services | Phase A peer |
-| `mars.local` | Not yet inventoried (unreachable on 2026-10-11). amd64 Linux; old docs say Ryzen 9 7900X, ext4 on NVMe, dual-boots Windows | Phase B peer |
+| `mars.local` | Ryzen 9 7900X, 24 threads, 30 GiB; CachyOS, kernel 7.2; ext4 on NVMe with 700 GB free; `enp9s0` wired at 1 Gb/s into the mesh, about 2.3 ms from neo and freya and 1 ms from the Mac; steady drive (1.6-fold in the write test). Inventoried 2026-10-12. No helper yet, and SSH host keys between mars and neo or freya are not yet accepted | Phase B peer |
 | this Mac | M1 Max, 10 cores, 64 GiB, APFS (98–99% full in past runs), USB gigabit adapter | Phase C peer; controller for A and B |
 
 | Phase | Pair | Link | Purpose |
@@ -377,6 +377,7 @@ root. It accepts only these verbs:
 | `governor performance`, `governor restore` | Sets and restores the cpufreq governor | Run start and exit |
 | `netem set <delay-ms> <loss-%> <lifetime-s>`, `netem clear` | Adds or removes a `netem` qdisc | E7b |
 | `mount-scratch` | Mounts the configured scratch mount point if it is not mounted | freya's benchmark root |
+| `trim-scratch` | Runs `fstrim` on the scratch filesystem | The start of every run |
 | `status` | Prints governor, qdisc and mount state | Preflight and exit checks |
 
 The network interface, the mount point and the filesystem UUID are fixed in
@@ -772,11 +773,154 @@ Progress, 2026-10-12: M0 to M6 are done for the LAN pair, and E1 and E1b have th
     8 s rounds: the kernel was zeroing the new filesystem's inode tables
     in the background (`ext4lazyinit`). Preflight now refuses a host where
     that is running.
-  - The cells that were inconclusive for this reason need re-running; the
-    first night's fresh-copy-to-freya figures were measured on the stalling
-    drive. The drive should be re-tested if it fills up again.
+  - The drive should be re-tested if it fills up again.
+- E1f (the seven fresh-copy-to-freya cells of E1, re-measured on the
+  reformatted drive, 12 blocks, all valid, in
+  `benchmarks/results/lab/E1f-fresh-to-freya/`). These replace E1's
+  figures for those cells.
+  - Noise fell sharply: σ_d went from 0.29 to 0.04 for `small-flat`, 0.53
+    to 0.07 for `small-deep`, 0.24 to 0.02 for `mixed-threshold` and 0.03
+    to 0.015 for `mixed-bimodal`.
+  - *Faster*: `small-flat` 0.458 [0.447, 0.468], `small-opaque` 0.486
+    [0.465, 0.508], `small-deep` 0.834 [0.797, 0.873].
+  - Mixed trees with neo sending: xs is slightly slower, `mixed-bimodal`
+    1.036 [1.026, 1.046] and `mixed-threshold` 1.028 [1.015, 1.042]. Both
+    intervals exclude 1 (Holm-adjusted p 0.003) but neither clears δ = 3%,
+    so the verdict is *inconclusive*: a real deficit of about 3%.
+  - `small-real` is still *inconclusive*, 0.948 [0.820, 1.096]. Nine of
+    its twelve blocks have both tools at 11.0 to 11.4 s; three early ones
+    have a sample at 15 to 21 s with heavy I/O wait on freya, as does the
+    first `small-deep` block. Those fall in the first quarter-hour of the
+    run, which began minutes after 50 GB of corpora had been copied onto
+    the drive, so the drive was probably still moving that data out of its
+    write cache. The cell needs blocks from a run that starts on an idle
+    drive.
+  - `tiny-one` is now *inconclusive*, 0.922 [0.864, 0.985]: 0.17 s against
+    0.18 s with σ_d of 0.10.
   - `probe.py storage --path DIR` is that write test, and every snapshot
     now records per-device write counts, write time and discards.
+
+Tuning target T1, set on 2026-10-12: the Pi sending bytes. With neo sending
+a mixed tree to freya, rsync runs at 113.9 MB/s and xs at 110.2 MB/s, a
+ratio of 1.036 [1.026, 1.046]. First diagnostics, run by hand:
+
+- A raw SSH stream on this link carries 115.0 to 115.9 MB/s whatever the
+  cipher, so rsync is within 1% of the link and the best xs can do on an
+  incompressible byte-bound transfer is parity.
+- xs reports its limiting stage as the network, and sends the same bytes
+  as rsync (1,396 MB), so the gap is not protocol overhead.
+- On neo, xs uses 14.3 s of CPU where rsync uses 6.4 s, and 8.3 s of that
+  is kernel time against rsync's 2.5 s.
+- Under `strace`, the xs sender makes 135,000 writes for 1.33 GiB, 31% of
+  them failing with EAGAIN, plus 98,000 `ppoll` calls: it feeds SSH
+  through a non-blocking 64 KiB pipe in pieces of about 15 KiB. rsync
+  makes 72,000 writes and none fail. This is H25, the transport write
+  path, and needs the tunables of section 4.7 to test (`pipe_size`,
+  `write_chunk`).
+- AES-GCM costs the Pi half the CPU of the default ChaCha20-Poly1305 for
+  the same throughput (4.0 s against 8.3 s for 2 GiB).
+- T1a (screening, 12 blocks, both mixed corpora, all blocks valid, σ_d of
+  0.003 to 0.008) tested the two suspects that need no engine change:
+  - Fewer worker threads close the gap. Against rsync, xs with `-j1` is
+    0.999 [0.997, 1.002] and 0.997 [0.996, 0.998], and with `-j2` 1.002
+    and 0.998: *equivalent*, at link rate. Default xs in the same blocks
+    is 1.023 [1.020, 1.027] and 1.014 [1.009, 1.019].
+  - The Pi's kernel time falls with the thread count: 7.8 s by default,
+    6.7 s at `-j2`, 4.7 s at `-j1`, against rsync's 2.3 s. So about half
+    of the excess is thread contention and the rest is the write path.
+  - AES-GCM makes xs about 1% faster (0.992 and 0.989 against default xs)
+    and cuts its user CPU on the Pi from 6.0 s to 3.6 s. It does nothing
+    for rsync's time, which is already at the link's limit.
+  - `-j` applies to both ends and to every workload, so this is not yet a
+    setting to adopt: small-file and no-op cells may want more workers,
+    not fewer. That is what the wider `-j` sweep (E3a) must show.
+- The larger lever for this workload is compression, since the link is
+  the limit and two thirds of `mixed-bimodal` is compressible.
+- E3b (screening, 10 blocks, three corpora, both directions, all blocks
+  valid), fresh copies with `-z`:
+  - xs with `-z --compress-level=1` against plain xs: `mixed-bimodal`
+    0.783 [0.779, 0.788] from neo and 0.794 from freya; `small-real` 0.489
+    [0.445, 0.537] from neo and 0.807 from freya. All *faster*.
+  - On random data (`small-opaque`) `-z` costs xs about 5% with neo
+    sending, 1.054 [1.034, 1.074], and 2 to 3% the other way.
+  - `rsync -z` is *slower* than plain rsync whenever neo sends anything
+    not highly compressible: 1.368 [1.324, 1.413] on `mixed-bimodal` and
+    2.025 [1.751, 2.342] on `small-opaque`. H14 reproduces for rsync; xs
+    avoids it.
+  - Against plain rsync, xs with `-z` is 0.501 [0.461, 0.545] on
+    `small-real` from neo and 0.607 from freya.
+  - **The adaptive level misfires on the Pi.** In two of ten blocks of
+    `mixed-bimodal` from neo, xs with plain `-z` took 18.0 and 16.6 s
+    against 9.9 s, burning 61 to 68 s of CPU on neo against 19 s, for 6%
+    fewer bytes. Level 1 fixed never did this (σ_d 0.008 against 0.235).
+    Reproduced by hand with `-vv`: the slow runs report level 3 for the
+    whole transfer. The policy starts at 3 and leaves it only when
+    transport writes measure at 64 MiB/s or more. On the Pi, four
+    compressor threads at level 3 take CPU from ssh, the gigabit link then
+    measures at about 46 MiB/s, and the transfer stays at level 3, which
+    the Pi can only produce at 68 MB/s of input. How often varies by
+    session: 2 of 14 runs in one, 11 of 16 in another.
+  - Fix, on the `adaptive-compression` branch (not merged), final build
+    `e1f05b518049`: the original rate rule is kept unchanged, and a cap is
+    added. When the writer has kept up with everything produced for 16 MiB
+    in a row, the level in force is more than this machine can sustain
+    against this link, so the level is capped a step lower and the rate
+    the machine was producing at is kept. The cap lifts when the link is
+    seen, while it is the bottleneck, to carry distinctly less than that.
+    `-vv` now reports the level that compressed the most input, with the
+    split.
+  - Three earlier attempts were discarded, each for a measured reason:
+    starting at level 1 was 14% slower under a 4 or 20 MiB/s limit, where
+    level 3 sends 30% fewer bytes of text and most of a transfer is
+    compressed before the first decision; judging starvation by the
+    writer's waiting time dropped the level during the scan phase; and
+    replacing the rate rule outright (build `5aa5555ec8dd`, tested in
+    T2a) removed the slow runs but cost the Pi about half a second on
+    every transfer, since the original rule usually leaves level 3 after
+    256 KiB. T2a: with neo sending, `mixed-bimodal` median 10.4 s against
+    10.0 s but worst case 11.4 s against 19.5 s; `small-flat` 1.137
+    [1.035, 1.249]; with freya sending, *equivalent* in two cells of three.
+  - Hand checks of the final build on neo, single runs: ten alternating
+    `mixed-bimodal` runs 9.7 to 10.4 s against 9.6 to 10.4 s for the old
+    build, which did not trap in that session; `--bwlimit` 4 MiB/s 21.4 s
+    against 21.8 s, 20 MiB/s 6.7 s both, 40 MiB/s 4.7 s against 6.6 s.
+  - T2b (confirmatory, 12 blocks, all valid): the final build against the
+    old one with `-z`.
+    - freya sending: *equivalent* on `mixed-bimodal` (1.000 [0.996,
+      1.003]) and `small-flat` (0.996 [0.986, 1.007]); `small-real`
+      *inconclusive* (1.027 [0.967, 1.091]).
+    - neo sending `mixed-bimodal`: 0.902 [0.806, 1.010], *inconclusive*.
+      The old build had three slow runs in twelve (13.8, 14.5, 18.6 s);
+      the new build's twelve lie between 9.7 and 11.0 s. Mean 10.29 s
+      against 11.66 s.
+    - neo sending `small-flat`: 0.957 [0.912, 1.004], *inconclusive*.
+    - neo sending `small-real`: 1.007 [0.907, 1.118], *inconclusive*, and
+      not a test of the fix: all three arms, fixed level 1 included, slowed
+      from 6 to 10 s early in the run to 14 to 20 s by its end, with I/O
+      wait on freya (see below).
+    - So the fix costs nothing where it has nothing to do and removes the
+      slow runs where it does, but twelve blocks cannot turn an
+      intermittent fault into a verdict: the interval is as wide as the
+      fault is rare.
+- **freya's scratch drive degraded again within a day.** After the
+  reformat it wrote 512 MiB in 0.18 to 0.27 s; by the end of 2026-10-12,
+  after several hundred GB of corpora written and deleted, every round
+  took 2.6 to 5.6 s (155 MB/s). The filesystem is 3% full, but nothing has
+  been trimmed since `mkfs` (`/proc/diskstats` still shows the same 955
+  discards): the weekly `fstrim` is far too rare for this write volume.
+  Small-file copies to freya late in the day are affected; byte-bound ones
+  are not yet, since 155 MB/s is still above the link. One `fstrim`
+  (1.96 TB discarded) restored 3,000 MB/s. The helper now has a
+  `trim-scratch` verb and the agent calls it at the start of every run.
+- The adaptive-compression fix was merged into `main` on 2026-10-12 as a
+  fast-forward to `e1f05b518049`, the build already staged on neo and
+  freya, which is the baseline revision from here on.
+  - **xs compresses small files much less well from a fast sender.** For
+    `small-real` it sends 84 MB from neo but 123 to 197 MB from freya,
+    against rsync's 64 MB either way, and the figure varies run to run
+    even at a fixed level. xs compresses each block alone, and with many
+    workers the blocks are flushed smaller. This is a lead for the block
+    size and idle-flush tunables (E4a).
 
 M0 is done by the operator, not by the harness. M1–M6 need no engine
 change, so flag-only experiments (E1–E3) can start before M7.

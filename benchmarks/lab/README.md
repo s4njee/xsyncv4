@@ -299,6 +299,7 @@ installed copy's SHA-256 with the one in this directory.
 | `netem set DELAY_MS LOSS_PCT LIFETIME_S` | Installs a `netem` root qdisc on the configured interface, and a timer that removes it after `LIFETIME_S` (at most 3600). Delay applies to outgoing packets only, so it adds `DELAY_MS` to the round trip. Refuses if the interface already has a qdisc someone configured. |
 | `netem clear` | Removes that qdisc and its timer. |
 | `mount-scratch` | Mounts the configured scratch mount point if it is not mounted, from `fstab` or else from `scratch_source`, and checks its type. |
+| `trim-scratch` | Runs `fstrim` on the scratch filesystem. The agent calls it at the start of every run: freya's QLC scratch drive fell from 3,000 MB/s to 155 MB/s within a day of write-and-delete cycles without it. |
 
 Exit status: 0 done, 1 failed, 2 usage, 3 not configured or not supported
 on this host, 4 refused. Each change is logged to syslog with the calling

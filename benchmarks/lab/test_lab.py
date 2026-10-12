@@ -501,6 +501,13 @@ class AgentPieces(unittest.TestCase):
         _, _, plain, _ = agent.transfer_command(self.XS, self.CELL, self.hosts(), 'run1', 'tag')
         self.assertNotIn('sh', plain)
 
+    def test_an_arm_can_add_ssh_options(self):
+        arm = dict(self.XS, ssh_options=['-c', 'aes128-gcm@openssh.com'])
+        _, _, argv, _ = agent.transfer_command(arm, self.CELL, self.hosts(), 'run1', 'tag')
+        self.assertEqual(argv[argv.index('-e') + 1], agent.RSH + ' -c aes128-gcm@openssh.com')
+        _, _, plain, _ = agent.transfer_command(self.XS, self.CELL, self.hosts(), 'run1', 'tag')
+        self.assertEqual(plain[plain.index('-e') + 1], agent.RSH)
+
     def test_an_arm_can_choose_which_end_starts(self):
         cell = dict(self.CELL, client='arm')
         push, _, _, _ = agent.transfer_command(dict(self.XS, client='sender'), cell, self.hosts(), 'run1', 'tag')
@@ -787,7 +794,8 @@ class HelperArguments(unittest.TestCase):
                           ('netem', 'set', '5; reboot', '0', '10'), ('netem', 'set', '5', '101', '10'),
                           ('netem', 'set', '5', '1.234', '10'), ('netem', 'set', '5', '0', '0'),
                           ('netem', 'set', '5', '0', '3601'), ('netem', 'set', '1001', '0', '10'),
-                          ('netem', 'clear', 'eth1'), ('mount-scratch', '/dev/sda1'), ('drop-caches', '1')):
+                          ('netem', 'clear', 'eth1'), ('mount-scratch', '/dev/sda1'), ('trim-scratch', '/'),
+                          ('drop-caches', '1')):
             result = self.run_helper(*arguments)
             self.assertEqual(result.returncode, 2, arguments)
             self.assertEqual(result.stdout, '', arguments)
@@ -795,7 +803,8 @@ class HelperArguments(unittest.TestCase):
     @unittest.skipIf(os.geteuid() == 0, 'as root these would act on this machine')
     def test_valid_requests_need_root(self):
         for arguments in (('drop-caches',), ('governor', 'performance'), ('governor', 'restore'),
-                          ('netem', 'set', '20', '0.5', '60'), ('netem', 'clear'), ('mount-scratch',)):
+                          ('netem', 'set', '20', '0.5', '60'), ('netem', 'clear'), ('mount-scratch',),
+                          ('trim-scratch',)):
             result = self.run_helper(*arguments)
             self.assertEqual(result.returncode, 4, arguments)
             self.assertIn('must run as root', result.stderr)
@@ -803,7 +812,7 @@ class HelperArguments(unittest.TestCase):
     def test_status_never_needs_root(self):
         result = self.run_helper('status')
         self.assertEqual(result.returncode, 0)
-        self.assertIn('version=1', result.stdout)
+        self.assertIn('version=2', result.stdout)
 
 
 if __name__ == '__main__':

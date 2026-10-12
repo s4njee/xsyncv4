@@ -102,11 +102,17 @@ expect 0 'scratch_fstab=yes' "$HELPER" status
 expect 0 'scratch_fstype=ext4' "$HELPER" mount-scratch
 expect 0 'scratch_mounted=yes' "$HELPER" status
 expect 0 'scratch_fstype=ext4' "$HELPER" mount-scratch
+# Trimming acts on the mounted scratch filesystem and nothing else.
+expect 0 'trimmed=yes /mnt' "$HELPER" trim-scratch
+expect 2 'usage' "$HELPER" trim-scratch /
 write_conf interface=eth0 scratch=/mnt scratch_fstype=xfs
 expect 4 'expected xfs' "$HELPER" mount-scratch
 write_conf interface=eth0
 expect 3 'no scratch mount point' "$HELPER" mount-scratch
+expect 3 'no scratch mount point' "$HELPER" trim-scratch
 umount /mnt
+write_conf interface=eth0 scratch=/mnt
+expect 3 'is not mounted' "$HELPER" trim-scratch
 
 # Without an fstab entry, only a UUID from the root-owned configuration mounts.
 sed -i '/scratch.img/d' /etc/fstab

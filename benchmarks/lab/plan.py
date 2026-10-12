@@ -105,6 +105,10 @@ def make_plan(spec, config, pins, seed, run_id, baseline=None):
     arms = []
     for name, arm in spec['arms'].items():
         entry = {'name': name, 'tool': arm['tool'], 'flags': list(arm.get('flags', ['-a']))}
+        if options := arm.get('ssh_options'):
+            if not isinstance(options, list) or not all(isinstance(option, str) for option in options):
+                raise SpecError(f'arm {name}: `ssh_options` must be a list of strings')
+            entry['ssh_options'] = options
         if arm.get('client') in ('sender', 'receiver'):
             entry['client'] = arm['client']  # this arm chooses which end starts the transfer
         elif 'client' in arm or any(cell['client'] == 'arm' for cell in cells):

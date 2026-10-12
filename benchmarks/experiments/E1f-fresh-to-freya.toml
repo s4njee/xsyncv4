@@ -1,0 +1,30 @@
+# E1f: the fresh-copy-to-freya cells of E1, measured again. On the first
+# night freya's scratch drive stalled at random (a nearly full, untrimmed
+# QLC drive), which left most of these cells inconclusive. The drive was
+# reformatted on 2026-10-12. These blocks replace E1's for these seven cells;
+# they are a separate experiment so the two sets are never pooled.
+id = "E1f-fresh-to-freya"
+kind = "confirmatory"
+hypothesis = "xs -a differs from rsync -a by more than 3% in time-to-durable for a fresh copy from neo to freya, per corpus."
+primary = "durable_s"
+delta = 0.03
+blocks = 12
+control = "rsync"
+verify = "first-last"
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[arms.xs]
+tool = "xs"
+rev = "bf596d28c5c9"
+flags = ["-a"]
+
+[matrix]
+link = "lan"
+corpus = ["tiny-one", "small-flat", "small-deep", "small-opaque", "small-real", "mixed-bimodal", "mixed-threshold"]
+scenario = ["fresh"]
+direction = ["neo>freya"]
+client = ["sender"]
+cache = ["warm"]

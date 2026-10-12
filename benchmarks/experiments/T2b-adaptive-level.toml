@@ -1,0 +1,38 @@
+# T2b: the adaptive compression level, before and after the final fix on the
+# adaptive-compression branch (e1f05b518049). T2a tested an earlier attempt
+# (5aa5555ec8dd), which removed the slow runs but cost the Pi about half a
+# second on every transfer. This version keeps the original rate rule and adds
+# a cap: when the writer has kept up with everything produced for 16 MiB in a
+# row, the level in force is one this machine cannot sustain against this
+# link, and it drops a step. xs-z1-old is a fixed level 1 on the old build.
+id = "T2b-adaptive-level"
+kind = "confirmatory"
+hypothesis = "With -z, the new adaptive policy is faster than the old one when neo sends over gigabit, and no slower when freya sends."
+primary = "wall_s"
+delta = 0.03
+blocks = 12
+control = "xs-z-old"
+verify = "first-last"
+
+[arms.xs-z-old]
+tool = "xs"
+rev = "bf596d28c5c9"
+flags = ["-a", "-z"]
+
+[arms.xs-z-new]
+tool = "xs"
+rev = "e1f05b518049"
+flags = ["-a", "-z"]
+
+[arms.xs-z1-old]
+tool = "xs"
+rev = "bf596d28c5c9"
+flags = ["-a", "-z", "--compress-level=1"]
+
+[matrix]
+link = "lan"
+corpus = ["mixed-bimodal", "small-real", "small-flat"]
+scenario = ["fresh"]
+direction = ["neo>freya", "freya>neo"]
+client = ["sender"]
+cache = ["warm"]

@@ -25,6 +25,8 @@
 #   netem clear                    remove that qdisc
 #   mount-scratch                  mount the scratch mount point if it is not
 #                                  mounted, from fstab or from scratch_source
+#   trim-scratch                   tell the drive which blocks of the scratch
+#                                  filesystem are unused (fstrim)
 #
 # Exit status: 0 done, 1 failed, 2 usage, 3 not configured or not supported
 # on this host, 4 refused.
@@ -33,7 +35,7 @@ umask 077
 PATH=/usr/sbin:/usr/bin:/sbin:/bin
 export PATH
 
-VERSION=1
+VERSION=2
 SELF=/usr/local/sbin/xsbench-helper
 CONF=/etc/xsbench-helper.conf
 STATE=/run/xsbench-helper
@@ -57,7 +59,7 @@ die() {
 }
 
 usage() {
-  die 2 "usage: xsbench-helper status | drop-caches | governor performance|restore | netem set DELAY_MS LOSS_PCT LIFETIME_S | netem clear | mount-scratch"
+  die 2 "usage: xsbench-helper status | drop-caches | governor performance|restore | netem set DELAY_MS LOSS_PCT LIFETIME_S | netem clear | mount-scratch | trim-scratch"
 }
 
 need_root() {
@@ -336,6 +338,19 @@ do_mount_scratch() {
   echo "scratch_mounted=yes scratch=$SCRATCH scratch_fstype=$mounted"
 }
 
+# A drive that is written and emptied all day but never trimmed comes to
+# believe it is full, and a QLC drive then writes at a fraction of its speed.
+do_trim_scratch() {
+  need_root
+  load_conf
+  [ -n "$SCRATCH" ] || die 3 "no scratch mount point is set in $CONF"
+  mounted=$(findmnt -n -o FSTYPE --mountpoint "$SCRATCH" 2>/dev/null | tail -n 1) || true
+  [ -n "$mounted" ] || die 3 "$SCRATCH is not mounted"
+  trimmed=$(fstrim -v "$SCRATCH" 2>&1) || die 1 "fstrim $SCRATCH failed: $trimmed"
+  audit "trim-scratch $SCRATCH"
+  echo "trimmed=yes $trimmed"
+}
+
 case "${1:-}" in
   status)
     [ $# -eq 1 ] || usage
@@ -369,6 +384,10 @@ case "${1:-}" in
   mount-scratch)
     [ $# -eq 1 ] || usage
     do_mount_scratch
+    ;;
+  trim-scratch)
+    [ $# -eq 1 ] || usage
+    do_trim_scratch
     ;;
   *) usage ;;
 esac
