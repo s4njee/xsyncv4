@@ -67,19 +67,24 @@ bool CompressionSuffixes::matches(std::string_view name) const {
   return false;
 }
 
-void CompressionLink::observe(uint64_t count, uint64_t elapsed, Transport state, uint64_t now) {
+void CompressionLink::observe(uint64_t count, uint64_t elapsed, Transport state) {
   if (!count) return;
-  if (!bytes_) window_start_ = now - elapsed;
+  int level = current.load(std::memory_order_relaxed);
+  // Whether this machine keeps the transport busy is a matter of how much it
+  // wrote without a queue forming, so it is counted in bytes, outside windows.
+  keeping_up_bytes_ = state == Transport::keeping_up ? keeping_up_bytes_ + count : 0;
+  if (keeping_up_bytes_ >= DROP_BYTES && level > 1) {
+    level = level == 6 ? 3 : 1;
+    keeping_up_bytes_ = slow_ns_ = 0;
+    awaiting_ceiling_ = true;
+    current.store(level, std::memory_order_relaxed);
+  }
   bytes_ += count;
   nanoseconds_ += elapsed;
   if (state == Transport::saturated) saturated_bytes_ += count;
-  if (state == Transport::starved) starved_ = true;
-  // Do not infer anything from tiny acknowledgments, or from less than a window.
+  // Do not infer a rate from tiny acknowledgments, or from less than a window.
   if (bytes_ < MIN_BYTES || (bytes_ < WINDOW_BYTES && nanoseconds_ < WINDOW_NS)) return;
-  uint64_t wall = now - window_start_;
-  int level = current.load(std::memory_order_relaxed);
   if (saturated_bytes_ * 2 >= bytes_) {
-    starved_ns_ = 0;
     double rate = nanoseconds_ ? (double)bytes_ * 1e9 / (double)nanoseconds_ : (double)FAST;
     if (awaiting_ceiling_) ceiling_ = rate, awaiting_ceiling_ = false;
     int target = rate >= (double)FAST ? 1 : rate < (double)SLOW ? 6 : 3;
@@ -96,21 +101,9 @@ void CompressionLink::observe(uint64_t count, uint64_t elapsed, Transport state,
     } else {
       slow_ns_ = 0;
     }
-  } else if (starved_ && !saturated_bytes_) {
-    slow_ns_ = 0;
-    starved_ns_ += wall;
-    if (starved_ns_ >= DROP_NS && level > 1) {
-      // This machine cannot compress this hard as fast as the transport drains.
-      level = level == 6 ? 3 : 1;
-      starved_ns_ = 0;
-      awaiting_ceiling_ = true;
-    }
-  } else {
-    starved_ns_ -= std::min(starved_ns_, wall);  // occasional starvation is not a verdict
+    current.store(level, std::memory_order_relaxed);
   }
-  current.store(level, std::memory_order_relaxed);
   bytes_ = nanoseconds_ = saturated_bytes_ = 0;
-  starved_ = false;
 }
 
 std::string CompressionLink::summary() const {

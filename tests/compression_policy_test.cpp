@@ -23,12 +23,12 @@ int main() {
 
   // One window of transport writes at a given rate, in a given state of the send queue.
   constexpr uint64_t MiB = 1024 * 1024, second = 1000000000;
-  constexpr Transport saturated = Transport::saturated, starved = Transport::starved, neutral = Transport::neutral;
+  constexpr Transport saturated = Transport::saturated, keeping_up = Transport::keeping_up, queued = Transport::queued;
   uint64_t clock = 0;
   auto window = [&clock](CompressionLink& link, uint64_t bytes_per_second, Transport state) {
     uint64_t count = CompressionLink::WINDOW_BYTES, elapsed = count * second / bytes_per_second;
     clock += elapsed;
-    link.observe(count, elapsed, state, clock);
+    link.observe(count, elapsed, state);
     return link.level(false, 3);
   };
   // Writes until the level changes or `seconds` of write time have passed; returns the level.
@@ -41,7 +41,7 @@ int main() {
 
   CompressionLink unknown;
   assert(unknown.level(false, 3) == 3);
-  unknown.observe(128 * 1024, second, saturated, second);
+  unknown.observe(128 * 1024, second, saturated);
   assert(unknown.level(false, 3) == 3); // Do not infer a rate from tiny acknowledgments.
 
   // While the transport is the bottleneck its rate decides, as it always did.
@@ -63,39 +63,45 @@ int main() {
 
   // A machine that cannot keep the link busy is limited by compression, whatever
   // rate its writes measure at: its compressors take CPU from the transport
-  // process, so a fast link measures as a slow one while the writer runs dry.
+  // process, so a fast link measures as a slow one while nothing queues.
   CompressionLink weak;
-  assert(sustain(weak, 46 * MiB, starved, 0.4) == 3);   // Not on the first dry spell,
-  assert(sustain(weak, 46 * MiB, starved, 0.3) == 1);   // but after half a second of it.
+  for (int i = 0; i < 3; ++i) assert(window(weak, 46 * MiB, keeping_up) == 3); // Not within 12 MiB,
+  assert(window(weak, 46 * MiB, keeping_up) == 1);                              // but after 16.
   assert(sustain(weak, 100 * MiB, saturated, 30) == 1); // At level 1 it fills the link and stays there.
 
+  // Keeping up is a matter of data written, not time: a scan phase that writes
+  // little for a long while proves nothing about compression.
+  CompressionLink scanning;
+  for (int i = 0; i < 60; ++i) scanning.observe(64 * 1024, second, keeping_up);
+  assert(scanning.level(false, 3) == 3);
+
   // The same machine on a link slow enough to ask for level 3: the level that
-  // starved it is not tried again at that link rate, only if the link gets distinctly slower.
+  // it could not sustain is not tried again at that link rate, only if the link gets distinctly slower.
   CompressionLink remembered;
   assert(sustain(remembered, 30 * MiB, saturated, 2) == 3);
-  assert(sustain(remembered, 30 * MiB, starved, 1) == 1);
+  assert(sustain(remembered, 30 * MiB, keeping_up, 1) == 1);
   assert(sustain(remembered, 30 * MiB, saturated, 30) == 1);
   assert(sustain(remembered, 25 * MiB, saturated, 30) == 1);
   assert(window(remembered, 15 * MiB, saturated) == 3); // It has been slow and saturated for long enough already.
 
-  // Frames waiting without producers held up says nothing either way, and
-  // starvation that comes and goes is not a verdict.
-  CompressionLink idle, flickering;
-  assert(sustain(idle, 46 * MiB, neutral, 30) == 3);
+  // A deep queue without producers held up says nothing either way, and it
+  // interrupts a run of keeping up.
+  CompressionLink deep, flickering;
+  assert(sustain(deep, 46 * MiB, queued, 30) == 3);
   for (int i = 0; i < 40; ++i) {
-    assert(window(flickering, 46 * MiB, starved) == 3);
-    assert(sustain(flickering, 46 * MiB, neutral, 0.3) == 3);
+    for (int j = 0; j < 3; ++j) assert(window(flickering, 46 * MiB, keeping_up) == 3);
+    assert(window(flickering, 46 * MiB, queued) == 3);
   }
 
-  // A window is saturated only if most of its bytes were, and one saturated byte rules out starvation.
-  CompressionLink mostly_neutral, crawling;
-  mostly_neutral.observe(3 * MiB, 3 * second / 100, neutral, clock);
-  mostly_neutral.observe(1 * MiB, 1 * second / 100, saturated, clock);
-  assert(mostly_neutral.level(false, 3) == 3);
+  // A window is saturated only if most of its bytes were.
+  CompressionLink mostly_queued, crawling;
+  mostly_queued.observe(3 * MiB, 3 * second / 100, queued);
+  mostly_queued.observe(1 * MiB, 1 * second / 100, saturated);
+  assert(mostly_queued.level(false, 3) == 3);
   // A slow window of time also decides, without waiting for a full window of bytes.
-  crawling.observe(512 * 1024, second, saturated, clock += second);
+  crawling.observe(512 * 1024, second, saturated);
   assert(crawling.level(false, 3) == 6);
-  crawling.observe(128 * 1024, second, saturated, clock += second);
+  crawling.observe(128 * 1024, second, saturated);
   assert(crawling.level(false, 3) == 6); // Still too few bytes to judge.
 
   CompressionLink report;

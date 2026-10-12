@@ -27,9 +27,9 @@ class CompressionSuffixes {
 
 // What the send queue said about the transport while some bytes were written.
 enum class Transport {
-  neutral,    // frames were waiting, but producers were not held up
-  saturated,  // producers had to wait for room in the queue: the transport is the bottleneck
-  starved,    // the writer had to wait for a frame: something upstream is the bottleneck
+  saturated,   // producers had to wait for room in the queue: the transport is the bottleneck
+  queued,      // a deep queue was waiting, though producers were not held up
+  keeping_up,  // little was waiting: the writer is keeping up with what is produced
 };
 
 // Chooses the zstd level between 1, 3 and 6, starting at 3.
@@ -39,14 +39,15 @@ enum class Transport {
 // 8 MiB/s, 3 in between. A lower target takes effect at once; a higher one
 // needs a second of such writing, so a short stall does not raise it.
 //
-// While the writer keeps running out of frames, compression or reading is the
-// bottleneck and the level drops, whatever the writes measure at. This is what
-// the rate alone gets wrong: on a small machine the compressor threads take
-// CPU from the transport process, a gigabit link then measures as a slow one,
-// and a policy that trusts the measurement stays at a level that halves the
-// transfer's speed. The link rate at which the higher level proved too costly
-// is remembered, and that level is not tried again unless the link gets
-// distinctly slower.
+// While the writer keeps up with what is produced, compression or reading is
+// the bottleneck and the level drops, whatever the writes measure at. This is
+// what the rate alone gets wrong: on a small machine the compressor threads
+// take CPU from the transport process, a gigabit link then measures as a slow
+// one, and a policy that trusts the measurement stays at a level that halves
+// the transfer's speed. Keeping up is judged over data written, not time, so
+// an idle scan phase proves nothing. The link rate at which the higher level
+// proved too costly is remembered, and that level is not tried again unless
+// the link gets distinctly slower.
 //
 // Only active transport writes are measured, so idle source or scan time cannot
 // make a fast link look slow. Bandwidth limiting is part of the write.
@@ -54,13 +55,13 @@ struct CompressionLink {
   static constexpr uint64_t WINDOW_BYTES = 4ull << 20, WINDOW_NS = 250'000'000ull, MIN_BYTES = 256ull << 10;
   static constexpr uint64_t FAST = 64ull << 20, SLOW = 8ull << 20;  // bytes per second
   static constexpr uint64_t RAISE_NS = 1'000'000'000ull;            // slow, saturated writing before a raise
-  static constexpr uint64_t DROP_NS = 500'000'000ull;               // starved time before a drop
+  static constexpr uint64_t DROP_BYTES = 16ull << 20;               // written while keeping up, before a drop
 
   std::atomic<int> current{3}, last_level{3};
   std::atomic<bool> used{false};
   std::atomic<uint64_t> compressed_input[3] = {};  // raw bytes compressed at levels 1, 3 and 6
-  // Writer thread only: `count` bytes took `elapsed` ns to write, finishing at `now`.
-  void observe(uint64_t count, uint64_t elapsed, Transport state, uint64_t now);
+  // Writer thread only: `count` bytes took `elapsed` ns to write.
+  void observe(uint64_t count, uint64_t elapsed, Transport state);
   int level(bool explicit_level, int requested) const;
   // Record that a worker compressed `raw` bytes at an automatic level.
   void count(int level, uint64_t raw) {
@@ -71,10 +72,10 @@ struct CompressionLink {
   std::string summary() const;
 
  private:
-  uint64_t bytes_ = 0, nanoseconds_ = 0, saturated_bytes_ = 0, window_start_ = 0;
-  uint64_t slow_ns_ = 0, starved_ns_ = 0;
+  uint64_t bytes_ = 0, nanoseconds_ = 0, saturated_bytes_ = 0;
+  uint64_t slow_ns_ = 0, keeping_up_bytes_ = 0;
   double ceiling_ = 0;  // link rate at which the level above this one proved too costly
-  bool starved_ = false, awaiting_ceiling_ = false;
+  bool awaiting_ceiling_ = false;
 };
 
 // Sample four spaced regions before spending CPU on an entire large block.

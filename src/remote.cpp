@@ -253,6 +253,8 @@ struct Conn {
   size_t rpos = 0, rlen = 0;
   static constexpr size_t MAX_Q = 48 << 20;
   u64 blocked_sends = 0;  // bounded producers that had to wait for room; guarded by mu
+  // Less than this waiting when the writer comes back means it is keeping up with production.
+  static constexpr size_t SHALLOW_Q = 8 << 20;
 
   void configure(u64 rate, u32 seconds, bool heartbeat) {
     limiter.configure(rate);
@@ -354,7 +356,7 @@ struct Conn {
     std::string small;
     std::deque<std::string> batch;
     // What the queue showed when this batch was taken, for the compression policy.
-    Transport transport = Transport::neutral;
+    Transport transport = Transport::keeping_up;
     u64 blocked_seen = 0;
     auto out = [&](const char* p, size_t n, bool activity = true) {
       StageTimer timing(g_stats.network_ns);
@@ -384,10 +386,7 @@ struct Conn {
         }
         if (!ok) break;
       }
-      if (ok && transport_started) {
-        u64 finished = now_ns();
-        compression_link.observe(transport_bytes, finished - transport_started, transport, finished);
-      }
+      if (ok && transport_started) compression_link.observe(transport_bytes, now_ns() - transport_started, transport);
       if (!ok) {
         // The peer may have sent a fatal filesystem error before closing. Let
         // the reader consume it instead of racing it with an EPIPE exit here.
@@ -403,7 +402,6 @@ struct Conn {
     for (;;) {
       {
         std::unique_lock<std::mutex> lk(mu);
-        bool waited = q.empty() && !closing;
         cv.wait_for(lk, std::chrono::milliseconds(100), [&] { return !q.empty() || closing; });
         if (q.empty()) {
           if (closing) break;
@@ -416,7 +414,7 @@ struct Conn {
           continue;
         }
         transport = blocked_sends != blocked_seen ? Transport::saturated
-                    : waited ? Transport::starved : Transport::neutral;
+                    : qbytes < SHALLOW_Q ? Transport::keeping_up : Transport::queued;
         blocked_seen = blocked_sends;
         batch.swap(q);
         qbytes = 0;

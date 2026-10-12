@@ -627,9 +627,9 @@ Differences to be aware of:
   While the link is the bottleneck, that is, while producers wait for room
   in the send queue, the measured write rate decides: level 1 at 64 MiB/s or
   faster, 6 below 8 MiB/s (after a second of it), and 3 in between. While the
-  writer instead keeps running out of frames, this machine cannot compress
-  that hard as fast as the link drains, and the level drops a step; it is not
-  raised again unless the link gets distinctly slower. `-vv` reports the level
+  writer instead keeps up with everything produced, for 16 MiB in a row, this
+  machine cannot compress that hard as fast as the link drains, and the level
+  drops a step; it is not raised again unless the link gets distinctly slower. `-vv` reports the level
   that compressed the most data, with the split when there was more than one.
   `--compress-level=NUM` fixes the level. `--skip-compress=gz/jpg/mp[34]` replaces the default compressed-media
   suffix list; an empty list disables suffix skipping. Matching is case-insensitive,
