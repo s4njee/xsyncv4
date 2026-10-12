@@ -87,7 +87,7 @@ def shuffled(items, stream):
     return items
 
 
-def make_plan(spec, config, pins, seed, run_id):
+def make_plan(spec, config, pins, seed, run_id, baseline=None):
     """The complete, self-contained instructions for one run."""
     cells = cells_of(spec, config)
     link = config['links'][spec['matrix']['link']]
@@ -105,6 +105,13 @@ def make_plan(spec, config, pins, seed, run_id):
     arms = []
     for name, arm in spec['arms'].items():
         entry = {'name': name, 'tool': arm['tool'], 'flags': list(arm.get('flags', ['-a']))}
+        if fraction := arm.get('inject_fraction'):
+            # A known slowdown: sleep this share of the control's usual time before the tool starts.
+            missing = [cell['id'] for cell in cells if cell['id'] not in (baseline or {})]
+            if missing:
+                raise SpecError(f'arm {name}: no baseline time for {", ".join(missing)}')
+            entry['inject_fraction'] = fraction
+            entry['delay_s'] = {cell['id']: fraction * baseline[cell['id']] for cell in cells}
         if arm['tool'] == 'xs':
             build = stage.load_build(arm['rev'])
             entry['rev'] = build['rev12']
@@ -138,6 +145,18 @@ def make_plan(spec, config, pins, seed, run_id):
             'scripts': {path.name: stage.sha256(path) for path in stage.SCRIPTS}}
 
 
+def load_baseline(spec):
+    """Per-cell geometric mean time of an arm in an analysed experiment, for injected slowdowns."""
+    source = spec.get('baseline')
+    if not source:
+        return None
+    path = RESULTS / source['experiment'] / 'analysis' / 'absolutes.json'
+    if not path.exists():
+        raise SpecError(f'baseline {source["experiment"]} has not been analysed')
+    return {row['cell_id']: row['geomean'] for row in json.loads(path.read_text())
+            if row['arm'] == source['arm'] and row['metric'] == spec['primary']}
+
+
 def new_run_id(spec):
     return datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%dT%H%M%SZ') + '-' + spec['id']
 
@@ -153,7 +172,7 @@ def remote(host, script, **options):
 def start(spec_path, config, seed, skip_preflight):
     spec = load_spec(spec_path)
     pins = json.loads((HERE / 'corpora.json').read_text())
-    plan = make_plan(spec, config, pins, seed, new_run_id(spec))
+    plan = make_plan(spec, config, pins, seed, new_run_id(spec), load_baseline(spec))
     revisions = sorted({arm['rev'] for arm in plan['arms'] if arm['tool'] == 'xs'})
     link = spec['matrix']['link']
     if not skip_preflight:
@@ -209,7 +228,8 @@ def main(argv=None):
         config = preflight.load(args.hosts)
         if args.command == 'make':
             spec = load_spec(args.spec)
-            plan = make_plan(spec, config, json.loads((HERE / 'corpora.json').read_text()), args.seed, new_run_id(spec))
+            plan = make_plan(spec, config, json.loads((HERE / 'corpora.json').read_text()), args.seed, new_run_id(spec),
+                             load_baseline(spec))
             json.dump(plan, sys.stdout, indent=1)
             print(f'\n{len(plan["cells"])} cells, {len(plan["blocks"])} blocks, '
                   f'{len(plan["blocks"]) * len(plan["arms"])} samples', file=sys.stderr)

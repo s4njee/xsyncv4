@@ -219,7 +219,7 @@ def load(directories):
     return cells, plans, voids
 
 
-def analyse(directories, delta=None, looks=1):
+def analyse(directories, delta=None, looks=1, control=None):
     """The effects, absolutes, pairs and noise tables of an experiment's runs."""
     cells, plans, voids = load(directories)
     plan = plans[0]
@@ -227,7 +227,9 @@ def analyse(directories, delta=None, looks=1):
         raise SystemExit('the runs belong to different experiments')
     delta = delta if delta is not None else (plan.get('delta') or 0.03)
     level = 1.0 - ALPHA / looks
-    control, primary = plan['control'], plan['primary']
+    control, primary = control or plan['control'], plan['primary']
+    if control not in {arm['name'] for arm in plan['arms']}:
+        raise SystemExit(f'{control} is not an arm of this experiment')
     cell_info = {cell['id']: cell for p in plans for cell in p['cells']}
     arms = [arm['name'] for arm in plan['arms'] if arm['name'] != control]
     metrics = [primary] + [metric for metric in SECONDARY if metric != primary]
@@ -298,6 +300,11 @@ def write(result, directory):
                 writer.writerows({key: '' if value is None else value for key, value in row.items()} for row in rows)
 
 
+def output_name(stem, control):
+    """Where an analysis against a non-default control goes, so it cannot replace the declared one."""
+    return f'{stem}-vs-{control}' if control else stem
+
+
 def run_directories(experiment):
     experiment = pathlib.Path(experiment)
     return sorted(path.parent for path in experiment.glob('*/samples.jsonl'))
@@ -308,17 +315,18 @@ def main(argv=None):
     parser.add_argument('experiment', type=pathlib.Path, help='benchmarks/results/lab/EXPERIMENT')
     parser.add_argument('--delta', type=float, help='smallest effect of interest (default: the spec\'s)')
     parser.add_argument('--looks', type=int, default=1, help='declared analysis looks; each uses 1 - 0.05/looks')
+    parser.add_argument('--control', help='compare against this arm instead of the spec\'s control')
     args = parser.parse_args(argv)
     directories = run_directories(args.experiment)
     if not directories:
         parser.error('no fetched runs under ' + str(args.experiment))
-    result = analyse(directories, args.delta, args.looks)
-    write(result, args.experiment / 'analysis')
+    result = analyse(directories, args.delta, args.looks, args.control)
+    write(result, args.experiment / output_name('analysis', args.control))
     for row in result['effects']:
         if row['primary']:
             interval = '' if row['lo'] is None else f' [{row["lo"]:.3f}, {row["hi"]:.3f}]'
             print(f'{row["cell_id"]:48} {row["arm"]:10} n={row["n_blocks"]:<3} {row["ratio"]:.3f}{interval}  {row["verdict"]}')
-    print(args.experiment / 'analysis')
+    print(args.experiment / output_name('analysis', args.control))
 
 
 if __name__ == '__main__':

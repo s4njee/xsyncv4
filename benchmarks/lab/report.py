@@ -91,14 +91,16 @@ def main(argv=None):
     parser.add_argument('experiment', type=pathlib.Path, help='benchmarks/results/lab/EXPERIMENT')
     parser.add_argument('--delta', type=float)
     parser.add_argument('--looks', type=int, default=1)
+    parser.add_argument('--control', help='compare against this arm instead of the spec\'s control')
     args = parser.parse_args(argv)
     directories = analyze.run_directories(args.experiment)
     if not directories:
         parser.error('no fetched runs under ' + str(args.experiment))
-    result = analyze.analyse(directories, args.delta, args.looks)
-    analyze.write(result, args.experiment / 'analysis')
-    (args.experiment / 'report.md').write_text(render(result))
-    print(args.experiment / 'report.md')
+    result = analyze.analyse(directories, args.delta, args.looks, args.control)
+    analyze.write(result, args.experiment / analyze.output_name('analysis', args.control))
+    output = args.experiment / (analyze.output_name('report', args.control) + '.md')
+    output.write_text(render(result))
+    print(output)
 
 
 if __name__ == '__main__':

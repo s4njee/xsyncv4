@@ -415,6 +415,16 @@ class Plans(unittest.TestCase):
         self.assertEqual(made['driver'], 'neo')
         self.assertIn('agent.py', made['scripts'])
 
+    def test_injected_slowdown_is_a_share_of_the_baseline(self):
+        arms = dict(self.SPEC['arms'], slow={'tool': 'rsync', 'inject_fraction': 0.06})
+        with self.assertRaises(plan.SpecError):
+            self.make(arms=arms)
+        baseline = {cell['id']: 10.0 for cell in self.make()['cells']}
+        made = plan.make_plan(dict(self.SPEC, arms=arms), self.config, self.pins, 1, 'run', baseline)
+        slow = next(arm for arm in made['arms'] if arm['name'] == 'slow')
+        self.assertEqual(set(slow['delay_s'].values()), {0.6})
+        self.assertNotIn('delay_s', made['arms'][0])
+
     def test_bad_specs_are_rejected(self):
         for changes in ({'matrix': dict(self.SPEC['matrix'], corpus=['unpinned'])},
                         {'matrix': dict(self.SPEC['matrix'], direction=['neo>mars'])},
@@ -458,6 +468,14 @@ class AgentPieces(unittest.TestCase):
         self.assertEqual(argv[-2:], ['/n/corpora/tiny-one/',
                                      'u@freya.local:/f/work/run1/tiny-one.fresh.neo-freya.sender.warm/xs/'])
         self.assertTrue(script.endswith('> /n/work/run1/logs/tag.out 2> /n/work/run1/logs/tag.err'))
+
+    def test_injected_delay_sleeps_inside_the_measured_command(self):
+        arm = dict(self.XS, delay_s={self.CELL['id']: 0.25})
+        _, _, argv, _ = agent.transfer_command(arm, self.CELL, self.hosts(), 'run1', 'tag')
+        start = argv.index('--') + 1
+        self.assertEqual(argv[start:start + 6], ['sh', '-c', 'sleep "$0"; exec "$@"', '0.2500', '/n/bin/xs-r', '-a'])
+        _, _, plain, _ = agent.transfer_command(self.XS, self.CELL, self.hosts(), 'run1', 'tag')
+        self.assertNotIn('sh', plain)
 
     def test_pull_runs_on_the_receiver(self):
         cell = dict(self.CELL, client='receiver')
@@ -610,6 +628,16 @@ class Analysis(unittest.TestCase):
         self.assertEqual({row['verdict'] for row in result['effects'] if not row['primary']}, {'descriptive'})
         absolute = {row['arm']: row for row in result['absolutes'] if row['metric'] == 'wall_s'}
         self.assertGreater(absolute['rsync']['geomean'], absolute['xs']['geomean'])
+
+    def test_another_arm_can_be_the_control(self):
+        self.run_directory('r1', self.RATIOS)
+        result = analyze.analyse(analyze.run_directories(self.experiment), control='xs')
+        row = next(row for row in result['effects'] if row['primary'])
+        self.assertEqual((row['arm'], row['control']), ('rsync', 'xs'))
+        self.assertAlmostEqual(row['ratio'], 1 / 0.9005, places=2)
+        self.assertEqual(analyze.output_name('analysis', 'xs'), 'analysis-vs-xs')
+        with self.assertRaises(SystemExit):
+            analyze.analyse(analyze.run_directories(self.experiment), control='absent')
 
     def test_void_blocks_are_excluded_and_reported(self):
         self.run_directory('r1', self.RATIOS + (5.0,), void_last=True)

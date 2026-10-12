@@ -103,6 +103,12 @@ plan as executed.
 Only one run at a time holds the driver's lock. Scenarios are `fresh` and
 `noop` so far.
 
+An arm with `inject_fraction = 0.06` sleeps, inside the measured command,
+for that share of the time a baseline arm usually takes in the same cell.
+The spec's `[baseline]` table names the analysed experiment and arm the
+times come from. It exists to give the analysis a known effect to find
+(`E0b-known.toml`).
+
 ## Analysis
 
 ```sh
@@ -133,6 +139,10 @@ peak memory are reported with the same intervals as descriptive. A
 confirmatory experiment's p-values are Holm-adjusted across its cells and
 arms; a screening experiment's are not and make no claim. `--looks N` widens
 every interval to 1 − 0.05/N for an experiment analysed N times.
+
+`--control ARM` compares against another arm than the spec's control and
+writes to `analysis-vs-ARM/` and `report-vs-ARM.md`, leaving the declared
+analysis untouched.
 
 `selftest.py` takes about a minute and a half. It must pass before a change
 to `analyze.py` is trusted.

@@ -138,8 +138,12 @@ def transfer_command(arm, cell, hosts, run_id, tag):
     fixed = ['--stats'] + (['--no-fallback', '--no-progress'] if arm['tool'] == 'xs' else [])
     remote = lambda path: f'{peer.ssh}:{path}'
     paths = [source, remote(destination)] if client is sender else [remote(source), destination]
+    tool = [arm['binary'][client.name]]
+    if delay := arm.get('delay_s', {}).get(cell['id']):
+        # An injected, known slowdown, inside the measured region.
+        tool = ['sh', '-c', 'sleep "$0"; exec "$@"', f'{delay:.4f}', *tool]
     argv = [*CLEAN_ENV, 'python3', client.bin('measure.py'), '--metrics',
-            work_path(client, run_id, 'logs', f'{tag}.client.json'), '--', arm['binary'][client.name],
+            work_path(client, run_id, 'logs', f'{tag}.client.json'), '--', *tool,
             *arm['flags'], *fixed, '-e', RSH, f'--rsync-path={peer_program}', *paths]
     log = work_path(client, run_id, 'logs', tag)
     return client, peer, argv, f'{shlex.join(argv)} > {shlex.quote(log + ".out")} 2> {shlex.quote(log + ".err")}'
@@ -272,6 +276,7 @@ class Run:
                   'block': block, 'attempt': attempt, 'position': position, 'arm': arm['name'],
                   'previous_arm': previous_arm, 'control': arm['name'] == self.plan['control'],
                   'tool': arm['tool'], 'rev': arm.get('rev'), 'flags': arm['flags'],
+                  'injected_delay_s': arm.get('delay_s', {}).get(cell['id']),
                   'corpus_files': self.plan['corpora'][cell['corpus']]['files'],
                   'corpus_bytes': self.plan['corpora'][cell['corpus']]['bytes'],
                   'valid': False, 'void_reason': None}
