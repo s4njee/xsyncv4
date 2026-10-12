@@ -25,29 +25,43 @@ class CompressionSuffixes {
   bool initialized_ = false;
 };
 
-// Chooses the zstd level from how fast the transport drains, judged only over
-// windows in which the transport was the bottleneck: the send queue was backed
-// up. When it is not, something upstream limits the transfer, and a costlier
-// level can only slow it, however slow the writes measure. That matters on a
-// small machine, where compressor threads take CPU from the transport process
-// and make a fast link measure as a slow one; a policy that trusts that
-// measurement stays at the costly level for the whole transfer.
+// What the send queue said about the transport while some bytes were written.
+enum class Transport {
+  neutral,    // frames were waiting, but producers were not held up
+  saturated,  // producers had to wait for room in the queue: the transport is the bottleneck
+  starved,    // the writer had to wait for a frame: something upstream is the bottleneck
+};
+
+// Chooses the zstd level between 1, 3 and 6, starting at 3.
 //
-// The level starts at 1 and moves one step at a time between 1, 3 and 6. It
-// rises only after the transport has been the slow bottleneck for a full
-// second of writing, so a stall of a few hundred milliseconds on a fast link
-// does not buy seconds of costlier compression; it falls after one window.
-// Only active transport writes are measured, so idle source or scan time
-// cannot make a fast link look slow. Bandwidth limiting is part of the write.
+// While the transport is the bottleneck, the measured write rate is the link's
+// rate and decides the level as before: 1 at 64 MiB/s or faster, 6 below
+// 8 MiB/s, 3 in between. A lower target takes effect at once; a higher one
+// needs a second of such writing, so a short stall does not raise it.
+//
+// While the writer keeps running out of frames, compression or reading is the
+// bottleneck and the level drops, whatever the writes measure at. This is what
+// the rate alone gets wrong: on a small machine the compressor threads take
+// CPU from the transport process, a gigabit link then measures as a slow one,
+// and a policy that trusts the measurement stays at a level that halves the
+// transfer's speed. The link rate at which the higher level proved too costly
+// is remembered, and that level is not tried again unless the link gets
+// distinctly slower.
+//
+// Only active transport writes are measured, so idle source or scan time cannot
+// make a fast link look slow. Bandwidth limiting is part of the write.
 struct CompressionLink {
   static constexpr uint64_t WINDOW_BYTES = 4ull << 20, WINDOW_NS = 250'000'000ull, MIN_BYTES = 256ull << 10;
   static constexpr uint64_t FAST = 64ull << 20, SLOW = 8ull << 20;  // bytes per second
-  static constexpr uint64_t RAISE_NS = 1'000'000'000ull;            // slow, backed-up writing before a raise
-  static constexpr uint64_t HOLD_NS = 10'000'000'000ull;            // after a raise proved too costly
+  static constexpr uint64_t RAISE_NS = 1'000'000'000ull;            // slow, saturated writing before a raise
+  static constexpr uint64_t DROP_NS = 500'000'000ull;               // starved time before a drop
 
-  std::atomic<int> current{1}, last_level{1};
+  std::atomic<int> current{3}, last_level{3};
   std::atomic<bool> used{false};
   std::atomic<uint64_t> compressed_input[3] = {};  // raw bytes compressed at levels 1, 3 and 6
+  // Writer thread only: `count` bytes took `elapsed` ns to write, finishing at `now`.
+  void observe(uint64_t count, uint64_t elapsed, Transport state, uint64_t now);
+  int level(bool explicit_level, int requested) const;
   // Record that a worker compressed `raw` bytes at an automatic level.
   void count(int level, uint64_t raw) {
     compressed_input[level >= 6 ? 2 : level >= 3 ? 1 : 0].fetch_add(raw, std::memory_order_relaxed);
@@ -55,12 +69,12 @@ struct CompressionLink {
   // "3 (automatic)", or "1 (automatic; level 1: 62%, level 3: 38% of compressed input)"
   // when more than one level was used: the level that compressed the most comes first.
   std::string summary() const;
-  // Writer thread only. `backlogged`: these bytes were written while frames were waiting behind them.
-  void observe(uint64_t count, uint64_t elapsed, bool backlogged, uint64_t now);
-  int level(bool explicit_level, int requested) const;
 
  private:
-  uint64_t bytes_ = 0, nanoseconds_ = 0, backlogged_bytes_ = 0, slow_ns_ = 0, hold_until_ = 0;
+  uint64_t bytes_ = 0, nanoseconds_ = 0, saturated_bytes_ = 0, window_start_ = 0;
+  uint64_t slow_ns_ = 0, starved_ns_ = 0;
+  double ceiling_ = 0;  // link rate at which the level above this one proved too costly
+  bool starved_ = false, awaiting_ceiling_ = false;
 };
 
 // Sample four spaced regions before spending CPU on an entire large block.

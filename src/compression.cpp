@@ -67,34 +67,50 @@ bool CompressionSuffixes::matches(std::string_view name) const {
   return false;
 }
 
-void CompressionLink::observe(uint64_t count, uint64_t elapsed, bool backlogged, uint64_t now) {
+void CompressionLink::observe(uint64_t count, uint64_t elapsed, Transport state, uint64_t now) {
   if (!count) return;
+  if (!bytes_) window_start_ = now - elapsed;
   bytes_ += count;
   nanoseconds_ += elapsed;
-  if (backlogged) backlogged_bytes_ += count;
-  // Do not infer a rate from tiny acknowledgments, or from less than a window.
+  if (state == Transport::saturated) saturated_bytes_ += count;
+  if (state == Transport::starved) starved_ = true;
+  // Do not infer anything from tiny acknowledgments, or from less than a window.
   if (bytes_ < MIN_BYTES || (bytes_ < WINDOW_BYTES && nanoseconds_ < WINDOW_NS)) return;
-  bool saturated = backlogged_bytes_ * 2 >= bytes_;
-  double rate = nanoseconds_ ? (double)bytes_ * 1e9 / (double)nanoseconds_ : (double)FAST;
-  int target = !saturated || rate >= (double)FAST ? 1 : rate < (double)SLOW ? 6 : 3;
+  uint64_t wall = now - window_start_;
   int level = current.load(std::memory_order_relaxed);
-  if (target > level) {
-    slow_ns_ += nanoseconds_;
-    if (now >= hold_until_ && slow_ns_ >= RAISE_NS) {
-      level = level == 1 ? 3 : 6;
-      slow_ns_ = 0;
-    }
-  } else {
-    slow_ns_ = 0;
+  if (saturated_bytes_ * 2 >= bytes_) {
+    starved_ns_ = 0;
+    double rate = nanoseconds_ ? (double)bytes_ * 1e9 / (double)nanoseconds_ : (double)FAST;
+    if (awaiting_ceiling_) ceiling_ = rate, awaiting_ceiling_ = false;
+    int target = rate >= (double)FAST ? 1 : rate < (double)SLOW ? 6 : 3;
     if (target < level) {
       level = level == 6 ? 3 : 1;
-      // The transport stopped being the limit at this level: this machine cannot
-      // compress that hard as fast as the link drains. Do not try again at once.
-      if (!saturated) hold_until_ = now + HOLD_NS;
+      slow_ns_ = 0;
+    } else if (target > level) {
+      slow_ns_ += nanoseconds_;
+      if (slow_ns_ >= RAISE_NS && (ceiling_ == 0 || rate < 0.75 * ceiling_)) {
+        level = level == 1 ? 3 : 6;
+        slow_ns_ = 0;
+        ceiling_ = 0;
+      }
+    } else {
+      slow_ns_ = 0;
     }
+  } else if (starved_ && !saturated_bytes_) {
+    slow_ns_ = 0;
+    starved_ns_ += wall;
+    if (starved_ns_ >= DROP_NS && level > 1) {
+      // This machine cannot compress this hard as fast as the transport drains.
+      level = level == 6 ? 3 : 1;
+      starved_ns_ = 0;
+      awaiting_ceiling_ = true;
+    }
+  } else {
+    starved_ns_ -= std::min(starved_ns_, wall);  // occasional starvation is not a verdict
   }
   current.store(level, std::memory_order_relaxed);
-  bytes_ = nanoseconds_ = backlogged_bytes_ = 0;
+  bytes_ = nanoseconds_ = saturated_bytes_ = 0;
+  starved_ = false;
 }
 
 std::string CompressionLink::summary() const {

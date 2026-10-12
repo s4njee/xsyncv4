@@ -252,8 +252,7 @@ struct Conn {
   std::vector<char> rb = std::vector<char>(256 * 1024);
   size_t rpos = 0, rlen = 0;
   static constexpr size_t MAX_Q = 48 << 20;
-  // A queue this deep when the writer comes back for more means the transport is the bottleneck.
-  static constexpr size_t BACKLOG = 8 << 20;
+  u64 blocked_sends = 0;  // bounded producers that had to wait for room; guarded by mu
 
   void configure(u64 rate, u32 seconds, bool heartbeat) {
     limiter.configure(rate);
@@ -332,7 +331,10 @@ struct Conn {
     u32 len = (u32)(f.size() - HDR);
     memcpy(f.data(), &len, 4);
     std::unique_lock<std::mutex> lk(mu);
-    if (bounded) cv_space.wait(lk, [&] { return qbytes < queue_limit || closing; });
+    if (bounded && qbytes >= queue_limit && !closing) {
+      ++blocked_sends;
+      cv_space.wait(lk, [&] { return qbytes < queue_limit || closing; });
+    }
     if (closing) return;
     qbytes += f.size();
     q.push_back(std::move(f));
@@ -351,8 +353,10 @@ struct Conn {
     wt_id = std::this_thread::get_id();
     std::string small;
     std::deque<std::string> batch;
-    bool queue_backlogged = false;
-    auto out = [&](const char* p, size_t n, bool activity = true, bool backlogged = false) {
+    // What the queue showed when this batch was taken, for the compression policy.
+    Transport transport = Transport::neutral;
+    u64 blocked_seen = 0;
+    auto out = [&](const char* p, size_t n, bool activity = true) {
       StageTimer timing(g_stats.network_ns);
       u64 transport_started = activity && compression_observe.load(std::memory_order_relaxed) ? now_ns() : 0;
       size_t transport_bytes = n;
@@ -382,7 +386,7 @@ struct Conn {
       }
       if (ok && transport_started) {
         u64 finished = now_ns();
-        compression_link.observe(transport_bytes, finished - transport_started, backlogged, finished);
+        compression_link.observe(transport_bytes, finished - transport_started, transport, finished);
       }
       if (!ok) {
         // The peer may have sent a fatal filesystem error before closing. Let
@@ -399,6 +403,7 @@ struct Conn {
     for (;;) {
       {
         std::unique_lock<std::mutex> lk(mu);
+        bool waited = q.empty() && !closing;
         cv.wait_for(lk, std::chrono::milliseconds(100), [&] { return !q.empty() || closing; });
         if (q.empty()) {
           if (closing) break;
@@ -410,7 +415,9 @@ struct Conn {
           }
           continue;
         }
-        queue_backlogged = qbytes >= BACKLOG;
+        transport = blocked_sends != blocked_seen ? Transport::saturated
+                    : waited ? Transport::starved : Transport::neutral;
+        blocked_seen = blocked_sends;
         batch.swap(q);
         qbytes = 0;
         cv_space.notify_all();
@@ -421,18 +428,18 @@ struct Conn {
         if (f.size() < 32768) {
           small.append(f);
           if (small.size() >= (256 << 10)) {
-            if (!out(small.data(), small.size(), true, queue_backlogged)) return;
+            if (!out(small.data(), small.size())) return;
             small.clear();
           }
         } else {
           if (!small.empty()) {
-            if (!out(small.data(), small.size(), true, queue_backlogged)) return;
+            if (!out(small.data(), small.size())) return;
             small.clear();
           }
-          if (!out(f.data(), f.size(), true, queue_backlogged)) return;
+          if (!out(f.data(), f.size())) return;
         }
       }
-      if (!small.empty() && !out(small.data(), small.size(), true, queue_backlogged)) return;
+      if (!small.empty() && !out(small.data(), small.size())) return;
       batch.clear();
     }
   }
