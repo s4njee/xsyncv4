@@ -33,12 +33,16 @@ class CompressionSuffixes {
 // and make a fast link measure as a slow one; a policy that trusts that
 // measurement stays at the costly level for the whole transfer.
 //
-// The level starts at 1 and moves one step per window between 1, 3 and 6.
+// The level starts at 1 and moves one step at a time between 1, 3 and 6. It
+// rises only after the transport has been the slow bottleneck for a full
+// second of writing, so a stall of a few hundred milliseconds on a fast link
+// does not buy seconds of costlier compression; it falls after one window.
 // Only active transport writes are measured, so idle source or scan time
 // cannot make a fast link look slow. Bandwidth limiting is part of the write.
 struct CompressionLink {
   static constexpr uint64_t WINDOW_BYTES = 4ull << 20, WINDOW_NS = 250'000'000ull, MIN_BYTES = 256ull << 10;
   static constexpr uint64_t FAST = 64ull << 20, SLOW = 8ull << 20;  // bytes per second
+  static constexpr uint64_t RAISE_NS = 1'000'000'000ull;            // slow, backed-up writing before a raise
   static constexpr uint64_t HOLD_NS = 10'000'000'000ull;            // after a raise proved too costly
 
   std::atomic<int> current{1}, last_level{1};
@@ -48,7 +52,7 @@ struct CompressionLink {
   int level(bool explicit_level, int requested) const;
 
  private:
-  uint64_t bytes_ = 0, nanoseconds_ = 0, backlogged_bytes_ = 0, hold_until_ = 0;
+  uint64_t bytes_ = 0, nanoseconds_ = 0, backlogged_bytes_ = 0, slow_ns_ = 0, hold_until_ = 0;
 };
 
 // Sample four spaced regions before spending CPU on an entire large block.

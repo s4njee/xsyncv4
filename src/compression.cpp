@@ -79,12 +79,19 @@ void CompressionLink::observe(uint64_t count, uint64_t elapsed, bool backlogged,
   int target = !saturated || rate >= (double)FAST ? 1 : rate < (double)SLOW ? 6 : 3;
   int level = current.load(std::memory_order_relaxed);
   if (target > level) {
-    if (now >= hold_until_) level = level == 1 ? 3 : 6;
-  } else if (target < level) {
-    level = level == 6 ? 3 : 1;
-    // The transport stopped being the limit at this level: this machine cannot
-    // compress that hard as fast as the link drains. Do not try again at once.
-    if (!saturated) hold_until_ = now + HOLD_NS;
+    slow_ns_ += nanoseconds_;
+    if (now >= hold_until_ && slow_ns_ >= RAISE_NS) {
+      level = level == 1 ? 3 : 6;
+      slow_ns_ = 0;
+    }
+  } else {
+    slow_ns_ = 0;
+    if (target < level) {
+      level = level == 6 ? 3 : 1;
+      // The transport stopped being the limit at this level: this machine cannot
+      // compress that hard as fast as the link drains. Do not try again at once.
+      if (!saturated) hold_until_ = now + HOLD_NS;
+    }
   }
   current.store(level, std::memory_order_relaxed);
   bytes_ = nanoseconds_ = backlogged_bytes_ = 0;
