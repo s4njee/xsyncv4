@@ -442,8 +442,7 @@ effect that is real is still not a reason to change a default.
 
 From the noise floor σ_d (the standard deviation of `d_b` in an A/A run):
 
-`n ≈ ((1.96 + 0.84) · σ_d / ln(1+δ))² + 2` for 80% power at 95% confidence,
-with a floor of 8.
+`n ≈ ((1.96 + 0.84) · σ_d / ln(1+δ))² + 2`, with a floor of 8.
 
 | σ_d | δ = 2% | 3% | 5% | 10% | 20% |
 |---|---:|---:|---:|---:|---:|
@@ -455,8 +454,22 @@ with a floor of 8.
 v4's existing n=3 runs show a typical spread of 1–10% with outliers of
 30–148%, so σ_d on the LAN is probably 0.03–0.08 and unknown on Wi-Fi. The
 table is why the Wi-Fi phase uses a larger δ and tests fewer factors.
-Showing *equivalence* needs more blocks than showing a difference of the
-same size.
+
+What that many blocks buys, confirmed by simulation in `selftest.py` at
+σ_d = 0.05 and δ = 3% (25 blocks):
+
+- If the true ratio is 1 + δ, the interval excludes 1 about 80% of the
+  time. That is the power the formula is built for.
+- The verdict *faster* or *slower* needs the interval to clear δ, which is
+  stricter. A true ratio of exactly 1 + δ earns it about 2% of the time;
+  a true ratio of (1 + δ)², about 6%, earns it about 77% of the time. So δ
+  is the smallest effect that can be *noticed*, and twice δ the smallest
+  that is reliably *called*.
+- With no true effect, the verdict *equivalent* needs about a third more
+  blocks for 80% power: `((1.96 + 1.28) · σ_d / ln(1+δ))² + 2`, 33 here.
+- An exact two-sided p-value cannot be smaller than 2^(1−n). Under Holm's
+  correction across m comparisons, nothing can be significant unless
+  2^(1−n) · m is below 0.05: eight blocks cannot survive ten comparisons.
 
 ### 5.6 Adding blocks without fooling ourselves
 
@@ -496,15 +509,20 @@ Before any result is believed (experiment E0):
 
 - **A/A**: one binary under two arm labels must come out *equivalent*, in
   every cell. This also measures σ_d.
-- **Known effect**: an arm that sleeps for 3% of the control's median before
-  exec must come out *slower* at the planned block count.
-- **Synthetic**: `selftest.py` checks interval coverage and verdict rates on
-  generated data with known ratios, including heavy-tailed noise.
+- **Known effect**: an arm that sleeps for 2δ of the control's median before
+  exec must come out *slower* at the planned block count, and one that
+  sleeps for δ must give an interval that excludes 1 without earning a
+  verdict (section 5.5).
+- **Synthetic**: `selftest.py` simulates experiments with known ratios and
+  a large shared drift per block. It checks interval coverage (95.2%,
+  94.8% and 95.4% at 8, 12 and 24 blocks), coverage under heavy-tailed and
+  outlier noise, the rate of wrong verdicts, the power figures above, and
+  Holm's family-wise error.
 
 ## 6. Experiment catalogue
 
 **E0 — calibration.** (a) A/A noise floor per cell, 20 blocks. (b) Injected
-3% slowdown. (c) Tunables build vs release build at defaults, expecting
+slowdowns of δ and 2δ (section 5.10). (c) Tunables build vs release build at defaults, expecting
 *equivalent*. (d) Position and carry-over effects from the E0a data. (e) The
 one-second host sampler on vs off, expecting *equivalent*.
 
@@ -630,12 +648,12 @@ stays out, load gate, free-space check, and `purge` for cold runs.
 | M3 | `stage.py` | A stale or dirty binary on either end is refused |
 | M4 | `plan.py`, `agent.py`, record schema | A smoke experiment runs detached on neo and survives the controller disconnecting |
 | M5 | `analyze.py`, `report.py`, `selftest.py` | Synthetic selftests pass; coverage of the 95% interval is 93–97% |
-| M6 | E0a, E0b on phase A | A/A is *equivalent*; the injected 3% is detected; σ_d table published |
+| M6 | E0a, E0b on phase A | A/A is *equivalent*; an injected 2δ is called *slower* and an injected δ excludes 1; σ_d table published |
 | M7 | `XSYNC_TUNE`, `XSYNC_METRICS`, `measure.py --env` | Existing tests pass; E0c is *equivalent* |
 | M8 | `export.py`, table schemas, one figure spec | F2 and F3 render in holochart from E0a and smoke E1 data with no hand-edited numbers |
 | M9 | E1 onward | — |
 
-Progress, 2026-10-11: M0 to M4 are done for the LAN pair.
+Progress, 2026-10-11: M0 to M5 are done for the LAN pair.
 
 - The helper is installed on neo and freya and was checked there: `netem`
   adds the stated delay and its timer clears it unprompted, the governor
@@ -661,6 +679,12 @@ Progress, 2026-10-11: M0 to M4 are done for the LAN pair.
   with a bad option was recorded as void with the tool's own error, never
   as a timing. Both hosts were left with their governors restored and work
   directories removed.
+- M5: `analyze.py` computes the paired ratios, intervals, robust checks and
+  verdicts and writes the effects, absolutes, pairs and noise tables;
+  `report.py` renders them; `selftest.py` passes all 20 of its simulated
+  checks. The simulations showed that the block counts of section 5.5 give
+  power to notice δ, not to earn a verdict at δ, so that section and E0b
+  were corrected.
 - Not yet in the agent: the `update-1pct` scenario, a throughput probe per
   block (only ping statistics so far), the once-a-second host sampler, and
   resuming a run whose agent died.

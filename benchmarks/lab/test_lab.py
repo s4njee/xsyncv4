@@ -3,6 +3,7 @@
 import copy
 import datetime
 import json
+import math
 import os
 import pathlib
 import subprocess
@@ -11,10 +12,12 @@ import tempfile
 import unittest
 
 import agent
+import analyze
 import corpus
 import plan
 import preflight
 import probe
+import report
 import stage
 
 HERE = pathlib.Path(__file__).resolve().parent
@@ -498,6 +501,140 @@ class AgentPieces(unittest.TestCase):
         self.assertIsNone(agent.throttle_problem(host, {}, {}))
         self.assertIn('throttled during', agent.throttle_problem(host, {'throttled': '0x0'}, {'throttled': '0x40000'}))
         self.assertIn('throttled during', agent.throttle_problem(host, {'throttled': '0x0'}, {'throttled': '0x4'}))
+
+
+class Statistics(unittest.TestCase):
+    def test_t_quantiles_match_tables(self):
+        for probability, df, expected in ((0.975, 1, 12.706205), (0.975, 7, 2.364624), (0.975, 11, 2.200985),
+                                          (0.975, 30, 2.042272), (0.995, 7, 3.499483), (0.975, 1000, 1.962339)):
+            self.assertAlmostEqual(analyze.t_quantile(probability, df), expected, places=5)
+        self.assertAlmostEqual(analyze.t_cdf(0.0, 5), 0.5)
+        self.assertAlmostEqual(analyze.t_cdf(-2.570582, 5), 0.025, places=6)
+
+    def test_signed_rank_distribution_is_exact(self):
+        self.assertEqual(analyze.signed_rank_cdf(6)[:3], [1 / 64, 2 / 64, 3 / 64])
+        self.assertEqual(analyze.signed_rank_cdf(8)[3], 5 / 256)
+        self.assertEqual(analyze.signed_rank_cdf(10)[-1], 1.0)
+
+    def test_hodges_lehmann(self):
+        estimate, low, high = analyze.hodges_lehmann([0.05, 0.02, 0.08, 0.01, 0.06, 0.03, 0.04, 0.07], 0.05)
+        self.assertAlmostEqual(estimate, 0.045)
+        self.assertAlmostEqual(low, 0.02)
+        self.assertAlmostEqual(high, 0.07)
+        self.assertEqual(analyze.hodges_lehmann([0.1, 0.2, 0.3, 0.4, 0.5], 0.05)[1:], (None, None),
+                         'five blocks cannot give a 95% interval')
+        self.assertIsNotNone(analyze.hodges_lehmann([0.1, 0.2, 0.3, 0.4, 0.5, 0.6], 0.05)[1])
+
+    def test_sign_flip_p_is_exact(self):
+        self.assertEqual(analyze.sign_flip_p([0.05, 0.02, 0.08, 0.01, 0.06, 0.03, 0.04, 0.07]), 2 / 256)
+        self.assertEqual(analyze.sign_flip_p([1.0, -1.0]), 1.0)
+        self.assertEqual(analyze.sign_flip_p([0.3, 0.1, -0.2]), 0.75)
+        many = analyze.sign_flip_p([0.01 * (1 + index % 3) for index in range(24)])
+        self.assertLess(many, 1e-4, 'sampled above twenty blocks')
+
+    def test_classification_against_delta(self):
+        self.assertEqual(analyze.classify(0.90, 0.96, 0.03), 'faster')
+        self.assertEqual(analyze.classify(1.04, 1.10, 0.03), 'slower')
+        self.assertEqual(analyze.classify(0.98, 1.02, 0.03), 'equivalent')
+        self.assertEqual(analyze.classify(0.96, 1.01, 0.03), 'inconclusive')
+        self.assertEqual(analyze.classify(0.90, 0.975, 0.03), 'inconclusive', 'real but inside delta')
+
+    def test_comparison_and_minimum_blocks(self):
+        steady = [math.log(0.9) + shift for shift in (-.010, .012, -.004, .006, .0, .003, -.008, .009)]
+        result = analyze.compare(steady, 0.03)
+        self.assertEqual(result['verdict'], 'faster')
+        self.assertAlmostEqual(result['ratio'], 0.9009, places=4)
+        self.assertLess(result['lo'], result['ratio'])
+        self.assertLess(result['hi'], 1 / 1.03)
+        self.assertEqual(analyze.compare(steady[:7], 0.03)['verdict'], 'too few blocks')
+        self.assertEqual(analyze.compare(steady[:1], 0.03)['verdict'], 'too few blocks')
+        wild = steady[:7] + [math.log(3.0)]  # one block three times slower
+        self.assertEqual(analyze.compare(wild, 0.03)['verdict'], 'inconclusive')
+
+    def test_holm(self):
+        for found, expected in zip(analyze.holm([0.01, 0.04, 0.03, 0.005]), [0.03, 0.06, 0.06, 0.02]):
+            self.assertAlmostEqual(found, expected)
+        self.assertEqual(analyze.holm([0.5, 0.9]), [1.0, 1.0])
+
+    def test_block_counts_match_the_plan(self):
+        self.assertEqual([analyze.blocks_needed(sigma, delta) for sigma, delta in
+                          ((0.02, 0.02), (0.05, 0.03), (0.10, 0.05), (0.20, 0.10), (0.02, 0.10))],
+                         [10, 25, 35, 37, 8])
+        self.assertGreater(analyze.blocks_for_equivalence(0.05, 0.03), analyze.blocks_needed(0.05, 0.03))
+
+
+class Analysis(unittest.TestCase):
+    """A whole synthetic experiment through load, analyse, write and render."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.experiment = pathlib.Path(self.tmp.name) / 'E98'
+
+    def run_directory(self, run_id, ratios, kind='confirmatory', void_last=False):
+        directory = self.experiment / run_id
+        directory.mkdir(parents=True)
+        cell = {'id': 'c1', 'corpus': 'small-flat', 'scenario': 'fresh', 'sender': 'neo', 'receiver': 'freya',
+                'client': 'sender', 'link': 'lan', 'cache': 'warm'}
+        (directory / 'plan.json').write_text(json.dumps({
+            'experiment': 'E98', 'run_id': run_id, 'spec_sha256': 's', 'kind': kind, 'hypothesis': 'h',
+            'primary': 'wall_s', 'control': 'rsync', 'delta': 0.03, 'cells': [cell],
+            'arms': [{'name': 'rsync'}, {'name': 'xs'}]}))
+        samples, blocks = [], []
+        for number, ratio in enumerate(ratios):
+            valid = not (void_last and number == len(ratios) - 1)
+            base = 10.0 * (1 + 0.2 * (number % 3))  # drift between blocks, shared by both arms
+            for arm, wall in (('rsync', base), ('xs', base * ratio)):
+                ends = {'user_seconds': 1.0, 'system_seconds': 1.0, 'max_rss_bytes': 1 << 20}
+                samples.append({'run_id': run_id, 'cell_id': 'c1', 'block': number, 'attempt': 0, 'arm': arm,
+                                'valid': valid, 'wall_s': wall, 'durable_s': wall + 1.0, 'client': ends, 'peer': ends,
+                                'stats': {'total_bytes_sent': 10, 'total_bytes_received': 1}})
+            blocks.append({'cell_id': 'c1', 'block': number, 'attempt': 0, 'valid': valid,
+                           'void_reason': None if valid else 'neo throttled during the sample'})
+        (directory / 'samples.jsonl').write_text(''.join(json.dumps(sample) + '\n' for sample in samples))
+        (directory / 'blocks.jsonl').write_text(''.join(json.dumps(block) + '\n' for block in blocks))
+
+    RATIOS = (0.90, 0.91, 0.89, 0.905, 0.895, 0.90, 0.91, 0.89, 0.90, 0.905)
+
+    def test_drift_cancels_and_blocks_pool_across_runs(self):
+        self.run_directory('r1', self.RATIOS[:5])
+        self.run_directory('r2', self.RATIOS[5:])
+        result = analyze.analyse(analyze.run_directories(self.experiment))
+        row = next(row for row in result['effects'] if row['primary'])
+        self.assertEqual((row['n_blocks'], row['verdict'], row['corpus'], row['link']), (10, 'faster', 'small-flat', 'lan'))
+        self.assertAlmostEqual(row['ratio'], 0.9005, places=3)
+        self.assertLess(row['hi'] - row['lo'], 0.02, 'a 20% drift between blocks must not widen the interval')
+        self.assertAlmostEqual(row['err_plus'], row['hi'] - row['ratio'])
+        self.assertEqual(row['p_holm'], row['p'])
+        self.assertEqual(len(result['pairs']), 10)
+        self.assertEqual({row['verdict'] for row in result['effects'] if not row['primary']}, {'descriptive'})
+        absolute = {row['arm']: row for row in result['absolutes'] if row['metric'] == 'wall_s'}
+        self.assertGreater(absolute['rsync']['geomean'], absolute['xs']['geomean'])
+
+    def test_void_blocks_are_excluded_and_reported(self):
+        self.run_directory('r1', self.RATIOS + (5.0,), void_last=True)
+        result = analyze.analyse(analyze.run_directories(self.experiment))
+        row = next(row for row in result['effects'] if row['primary'])
+        self.assertEqual(row['n_blocks'], 10)
+        self.assertEqual(result['summary']['void_attempts'], 1)
+        self.assertIn('neo throttled during the sample', result['summary']['void_reasons'])
+
+    def test_tables_and_report_are_written(self):
+        self.run_directory('r1', self.RATIOS)
+        result = analyze.analyse(analyze.run_directories(self.experiment))
+        analyze.write(result, self.experiment / 'analysis')
+        header = (self.experiment / 'analysis' / 'effects.csv').read_text().splitlines()[0].split(',')
+        for column in ('corpus', 'scenario', 'sender', 'receiver', 'client', 'link', 'cache', 'arm', 'ratio', 'lo',
+                       'hi', 'err_minus', 'err_plus', 'n_blocks', 'p', 'p_holm', 'verdict'):
+            self.assertIn(column, header)
+        text = report.render(result)
+        self.assertIn('| `c1` | xs | 10 | 0.900 [', text)
+        self.assertIn('faster', text)
+        self.assertIn('p (Holm)', text)
+        self.run_directory('r2', self.RATIOS[:3], kind='screening')
+        few = report.render(analyze.analyse([self.experiment / 'r2']))
+        self.assertIn('estimates only, no verdict', few)
+        self.assertIn('nothing here is a claim', few)
 
 
 class HelperArguments(unittest.TestCase):

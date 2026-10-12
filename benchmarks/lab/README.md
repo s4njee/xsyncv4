@@ -3,8 +3,8 @@
 The measurement framework planned in [experiments.md](../../experiments.md).
 So far this holds the privileged helper, milestone M1 (host declarations,
 endpoint probes and the preflight check), milestone M2 (corpora) and
-milestone M3 (building and staging binaries) and milestone M4 (plans, the
-run agent and the sample record).
+milestone M3 (building and staging binaries), milestone M4 (plans, the run
+agent and the sample record) and milestone M5 (analysis and reports).
 
 | File | Runs on | Purpose |
 |---|---|---|
@@ -14,6 +14,9 @@ run agent and the sample record).
 | `stage.py` | controller | Builds `xs` from a commit, stages it and the lab scripts on the hosts, and checks what they hold |
 | `plan.py` | controller | Expands an experiment spec into a randomized block plan; starts, follows and fetches a run |
 | `agent.py` | driver endpoint | Executes a plan detached and writes one record per sample |
+| `analyze.py` | controller | Paired ratios, intervals, robust checks and verdicts from the valid blocks; writes the tables |
+| `report.py` | controller | Renders an experiment's analysis as Markdown |
+| `selftest.py` | anywhere | Checks the analysis on simulated experiments with known ratios |
 | `corpus.py` | endpoint | Generates the seeded corpora, and pins any tree by a manifest digest |
 | `corpora.json` | — | The pinned digests of the generated and the frozen real corpora |
 | `xsbench-helper` | endpoint, as root | The only root operations a run performs |
@@ -99,6 +102,40 @@ plan as executed.
 
 Only one run at a time holds the driver's lock. Scenarios are `fresh` and
 `noop` so far.
+
+## Analysis
+
+```sh
+python3 benchmarks/lab/report.py benchmarks/results/lab/EXPERIMENT
+python3 benchmarks/lab/selftest.py
+```
+
+`report.py` analyses every fetched run of the experiment together, writes
+`analysis/{effects,absolutes,pairs,noise}.{json,csv}` and renders
+`report.md`. `analyze.py` does the same without the report.
+
+Only valid blocks count, and a block is one observation: for each cell and
+arm it gives one log-ratio to the control. The estimate is the mean of
+those, exponentiated; the interval is the paired t interval. The robust
+check is the Hodges-Lehmann estimate with its distribution-free interval,
+and the p-value is an exact sign-flip test (sampled above 20 blocks). A
+verdict needs at least eight blocks and both intervals to agree:
+
+| Verdict | The interval of ratios is |
+|---|---|
+| faster | entirely below 1/(1+δ) |
+| slower | entirely above 1+δ |
+| equivalent | entirely inside [1/(1+δ), 1+δ] |
+| inconclusive | anything else, or the two intervals disagree |
+
+Only the spec's primary metric is judged; durable time, CPU seconds and
+peak memory are reported with the same intervals as descriptive. A
+confirmatory experiment's p-values are Holm-adjusted across its cells and
+arms; a screening experiment's are not and make no claim. `--looks N` widens
+every interval to 1 − 0.05/N for an experiment analysed N times.
+
+`selftest.py` takes about a minute and a half. It must pass before a change
+to `analyze.py` is trusted.
 
 ## Corpora
 
