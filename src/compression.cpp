@@ -67,43 +67,38 @@ bool CompressionSuffixes::matches(std::string_view name) const {
   return false;
 }
 
-void CompressionLink::observe(uint64_t count, uint64_t elapsed, Transport state) {
-  if (!count) return;
-  int level = current.load(std::memory_order_relaxed);
-  // Whether this machine keeps the transport busy is a matter of how much it
-  // wrote without a queue forming, so it is counted in bytes, outside windows.
-  keeping_up_bytes_ = state == Transport::keeping_up ? keeping_up_bytes_ + count : 0;
-  if (keeping_up_bytes_ >= DROP_BYTES && level > 1) {
-    level = level == 6 ? 3 : 1;
-    keeping_up_bytes_ = slow_ns_ = 0;
-    awaiting_ceiling_ = true;
-    current.store(level, std::memory_order_relaxed);
-  }
-  bytes_ += count;
-  nanoseconds_ += elapsed;
-  if (state == Transport::saturated) saturated_bytes_ += count;
-  // Do not infer a rate from tiny acknowledgments, or from less than a window.
-  if (bytes_ < MIN_BYTES || (bytes_ < WINDOW_BYTES && nanoseconds_ < WINDOW_NS)) return;
-  if (saturated_bytes_ * 2 >= bytes_) {
-    double rate = nanoseconds_ ? (double)bytes_ * 1e9 / (double)nanoseconds_ : (double)FAST;
-    if (awaiting_ceiling_) ceiling_ = rate, awaiting_ceiling_ = false;
-    int target = rate >= (double)FAST ? 1 : rate < (double)SLOW ? 6 : 3;
-    if (target < level) {
-      level = level == 6 ? 3 : 1;
-      slow_ns_ = 0;
-    } else if (target > level) {
-      slow_ns_ += nanoseconds_;
-      if (slow_ns_ >= RAISE_NS && (ceiling_ == 0 || rate < 0.75 * ceiling_)) {
-        level = level == 1 ? 3 : 6;
-        slow_ns_ = 0;
-        ceiling_ = 0;
+void CompressionLink::observe(uint64_t count, uint64_t elapsed, Transport state, uint64_t now, uint64_t rate_limit) {
+  if (!count || !elapsed) return;
+  nanoseconds.fetch_add(elapsed, std::memory_order_relaxed);
+  bytes.fetch_add(count, std::memory_order_relaxed);
+
+  // Kept up for long enough: the level in force is more than this machine can
+  // sustain here. Counted in bytes, so a phase that writes little proves nothing.
+  if (state != Transport::keeping_up) {
+    keeping_up_bytes_ = 0;
+  } else {
+    if (!keeping_up_bytes_) keeping_up_since_ = now - elapsed;
+    keeping_up_bytes_ += count;
+    if (keeping_up_bytes_ >= DROP_BYTES) {
+      int in_force = level(false, 0, rate_limit);
+      if (in_force > 1 && now > keeping_up_since_) {
+        sustained_ = (double)keeping_up_bytes_ * 1e9 / (double)(now - keeping_up_since_);
+        cap.store(in_force == 6 ? 3 : 1, std::memory_order_relaxed);
       }
-    } else {
-      slow_ns_ = 0;
+      keeping_up_bytes_ = 0;
     }
-    current.store(level, std::memory_order_relaxed);
   }
-  bytes_ = nanoseconds_ = saturated_bytes_ = 0;
+
+  // A capped level is worth trying again only once the link is seen to carry
+  // less than this machine produced at it.
+  window_bytes_ += count;
+  window_ns_ += elapsed;
+  if (state == Transport::saturated) window_saturated_ += count;
+  if (window_bytes_ < WINDOW_BYTES) return;
+  if (cap.load(std::memory_order_relaxed) < 6 && window_saturated_ * 2 >= window_bytes_ &&
+      (double)window_bytes_ * 1e9 / (double)window_ns_ < 0.9 * sustained_)
+    cap.store(6, std::memory_order_relaxed);
+  window_bytes_ = window_ns_ = window_saturated_ = 0;
 }
 
 std::string CompressionLink::summary() const {
@@ -116,7 +111,7 @@ std::string CompressionLink::summary() const {
     used_levels += bytes[i] != 0;
     if (bytes[i] > bytes[most]) most = i;
   }
-  if (!total) return std::to_string(current.load(std::memory_order_relaxed)) + " (automatic)";
+  if (!total) return std::to_string(last_level.load(std::memory_order_relaxed)) + " (automatic)";
   std::string text = std::to_string(levels[most]) + " (automatic";
   if (used_levels < 2) return text + ")";
   const char* separator = "; ";
@@ -128,8 +123,14 @@ std::string CompressionLink::summary() const {
   return text + " of compressed input)";
 }
 
-int CompressionLink::level(bool explicit_level, int requested) const {
-  return explicit_level ? requested : current.load(std::memory_order_relaxed);
+int CompressionLink::level(bool explicit_level, int requested, uint64_t rate_limit) const {
+  if (explicit_level) return requested;
+  uint64_t count = bytes.load(std::memory_order_relaxed), elapsed = nanoseconds.load(std::memory_order_relaxed);
+  if (count < 256 * 1024 || elapsed < 1000000) return std::min(3, cap.load(std::memory_order_relaxed));
+  double rate = (double)count * 1e9 / elapsed;
+  if (rate_limit) rate = std::min(rate, (double)rate_limit);
+  int chosen = rate >= 64 * 1024 * 1024 ? 1 : rate < 8 * 1024 * 1024 ? 6 : 3;
+  return std::min(chosen, cap.load(std::memory_order_relaxed));
 }
 
 bool compression_worthwhile(std::string_view raw, void* context) {

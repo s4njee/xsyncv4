@@ -386,7 +386,10 @@ struct Conn {
         }
         if (!ok) break;
       }
-      if (ok && transport_started) compression_link.observe(transport_bytes, now_ns() - transport_started, transport);
+      if (ok && transport_started) {
+        u64 finished = now_ns();
+        compression_link.observe(transport_bytes, finished - transport_started, transport, finished, g_opt.bwlimit);
+      }
       if (!ok) {
         // The peer may have sent a fatal filesystem error before closing. Let
         // the reader consume it instead of racing it with an EPIPE exit here.
@@ -836,7 +839,7 @@ bool pack(std::string& f, std::string_view raw, Worker& w) {
   put_var(f, raw.size());
   size_t at = f.size();
   f.resize(at + bound);
-  int level = g_conn ? g_conn->compression_link.level(g_opt.compress_level_explicit, (int)g_opt.compress_level)
+  int level = g_conn ? g_conn->compression_link.level(g_opt.compress_level_explicit, (int)g_opt.compress_level, g_opt.bwlimit)
                      : (int)g_opt.compress_level;
   level = std::clamp(level, ZSTD_minCLevel(), ZSTD_maxCLevel());
   if (g_conn) {

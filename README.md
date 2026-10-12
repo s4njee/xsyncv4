@@ -623,15 +623,14 @@ Differences to be aware of:
   Sparse and delta receiver writes stay serialized. macOS disables data caching on source and output descriptors for
   copies of at least 1 GiB with `F_NOCACHE`.
 - **Compression is opt-in with `-z`.** Large blocks are sampled before compression;
-  incompressible blocks travel raw. The automatic zstd level starts at 3.
-  While the link is the bottleneck, that is, while producers wait for room
-  in the send queue, the measured write rate decides: level 1 at 64 MiB/s or
-  faster, 6 below 8 MiB/s (after a second of it), and 3 in between. While the
-  writer instead keeps up with everything produced, for 16 MiB in a row, this
-  machine cannot compress that hard as fast as the link drains, and the level
-  drops a step; it is not raised again unless the link gets distinctly slower. `-vv` reports the level
-  that compressed the most data, with the split when there was more than one.
-  `--compress-level=NUM` fixes the level. `--skip-compress=gz/jpg/mp[34]` replaces the default compressed-media
+  incompressible blocks travel raw. The automatic zstd level starts at 3 and
+  uses active transport-write measurements after 256 KiB: level 1 at 64 MiB/s
+  or faster, 6 below 8 MiB/s, and 3 in between. A machine too slow for a level
+  can make a fast link measure as a slow one, so when the writer has kept up
+  with everything produced for 16 MiB in a row the level is capped a step
+  lower, until the link itself is seen to carry less than the machine was
+  producing. `-vv` reports the level that compressed the most data, with the
+  split when there was more than one. `--compress-level=NUM` fixes the level. `--skip-compress=gz/jpg/mp[34]` replaces the default compressed-media
   suffix list; an empty list disables suffix skipping. Matching is case-insensitive,
   and skipped files stay raw even beside compressible files in a shared batch.
   This implements the suffix syntax in the

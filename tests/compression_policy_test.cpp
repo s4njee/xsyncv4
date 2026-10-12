@@ -21,88 +21,69 @@ int main() {
   assert(!suffixes.assign(std::string("gz\0jpg", 6)));
   assert(suffixes.assign("") && !suffixes.matches("file.mp4"));
 
-  // One window of transport writes at a given rate, in a given state of the send queue.
+  // The rate rule, unchanged: judged over everything written so far.
   constexpr uint64_t MiB = 1024 * 1024, second = 1000000000;
   constexpr Transport saturated = Transport::saturated, keeping_up = Transport::keeping_up, queued = Transport::queued;
-  uint64_t clock = 0;
-  auto window = [&clock](CompressionLink& link, uint64_t bytes_per_second, Transport state) {
-    uint64_t count = CompressionLink::WINDOW_BYTES, elapsed = count * second / bytes_per_second;
-    clock += elapsed;
-    link.observe(count, elapsed, state);
-    return link.level(false, 3);
-  };
-  // Writes until the level changes or `seconds` of write time have passed; returns the level.
-  auto sustain = [&](CompressionLink& link, uint64_t bytes_per_second, Transport state, double seconds) {
-    int before = link.level(false, 3);
-    for (uint64_t start = clock; clock - start < (uint64_t)(seconds * second);)
-      if (window(link, bytes_per_second, state) != before) break;
-    return link.level(false, 3);
-  };
-
   CompressionLink unknown;
-  assert(unknown.level(false, 3) == 3);
-  unknown.observe(128 * 1024, second, saturated);
-  assert(unknown.level(false, 3) == 3); // Do not infer a rate from tiny acknowledgments.
-
-  // While the transport is the bottleneck its rate decides, as it always did.
+  assert(unknown.level(false, 3, 0) == 3);
+  unknown.observe(128 * 1024, second, saturated, second);
+  assert(unknown.level(false, 3, 0) == 3); // Do not infer a rate from tiny acknowledgments.
   CompressionLink fast, medium, slow;
-  assert(window(fast, 100 * MiB, saturated) == 1 && sustain(fast, 100 * MiB, saturated, 5) == 1);
-  assert(sustain(medium, 20 * MiB, saturated, 5) == 3);
-  assert(window(slow, 4 * MiB, saturated) == 6);        // One window here is a full second of slow writing.
-  assert(sustain(slow, 4 * MiB, saturated, 5) == 6);
-  assert(window(slow, 20 * MiB, saturated) == 3 && window(slow, 100 * MiB, saturated) == 1); // Falling is immediate.
+  fast.observe(16 * MiB, second / 10, saturated, second);
+  medium.observe(4 * MiB, second / 10, saturated, second);
+  slow.observe(1 * MiB, second, saturated, second);
+  assert(fast.level(false, 3, 0) == 1);
+  assert(medium.level(false, 3, 0) == 3);
+  assert(slow.level(false, 3, 0) == 6);
+  assert(fast.level(false, 3, 1024 * 1024) == 6);
 
-  // A higher level needs a full second of slow writing, so a stall on a fast link does not buy one.
-  CompressionLink stalling;
-  assert(window(stalling, 100 * MiB, saturated) == 1);
-  for (int i = 0; i < 6; ++i) {
-    assert(sustain(stalling, 20 * MiB, saturated, 0.6) == 1);
-    assert(window(stalling, 100 * MiB, saturated) == 1);
-  }
-  assert(sustain(stalling, 20 * MiB, saturated, 0.7) == 1 && sustain(stalling, 20 * MiB, saturated, 0.5) == 3);
+  // Writes `megabytes` at a rate, in 1 MiB frames, with the queue in a given state.
+  uint64_t clock = 0;
+  auto write = [&clock](CompressionLink& link, uint64_t megabytes, uint64_t bytes_per_second, Transport state) {
+    for (uint64_t i = 0; i < megabytes; ++i) {
+      uint64_t elapsed = MiB * second / bytes_per_second;
+      link.observe(MiB, elapsed, state, clock += elapsed);
+    }
+    return link.level(false, 3, 0);
+  };
 
-  // A machine that cannot keep the link busy is limited by compression, whatever
-  // rate its writes measure at: its compressors take CPU from the transport
-  // process, so a fast link measures as a slow one while nothing queues.
+  // A machine too slow for level 3 on a fast link: its compressors take CPU from
+  // the transport process, the link measures at 46 MiB/s, and the rate rule keeps
+  // level 3. But the writer keeps up with everything produced, so after 16 MiB
+  // of that the level is capped at 1.
   CompressionLink weak;
-  for (int i = 0; i < 3; ++i) assert(window(weak, 46 * MiB, keeping_up) == 3); // Not within 12 MiB,
-  assert(window(weak, 46 * MiB, keeping_up) == 1);                              // but after 16.
-  assert(sustain(weak, 100 * MiB, saturated, 30) == 1); // At level 1 it fills the link and stays there.
+  assert(write(weak, 15, 46 * MiB, keeping_up) == 3);
+  assert(write(weak, 1, 46 * MiB, keeping_up) == 1);
+  // At level 1 it fills the link. However the rate rule reads the history, the cap holds.
+  assert(write(weak, 64, 100 * MiB, saturated) == 1);
+  assert(write(weak, 64, 50 * MiB, saturated) == 1); // Slower, but still more than level 3 could feed.
+  // Once the link carries distinctly less than the machine produced at level 3, level 3 would fill it.
+  CompressionLink slowing;
+  write(slowing, 16, 30 * MiB, keeping_up);
+  assert(slowing.level(false, 3, 0) == 1);
+  assert(write(slowing, 8, 28 * MiB, saturated) == 1);  // 28 is not distinctly less than 30.
+  assert(write(slowing, 8, 20 * MiB, saturated) == 3);  // 20 is: the cap lifts and the rate rule decides.
+
+  // Level 6 is capped to 3 in the same way, and no further without new evidence.
+  CompressionLink crawling;
+  assert(write(crawling, 15, 4 * MiB, keeping_up) == 6 && write(crawling, 1, 4 * MiB, keeping_up) == 3);
+  assert(write(crawling, 15, 4 * MiB, keeping_up) == 3 && write(crawling, 1, 4 * MiB, keeping_up) == 1);
 
   // Keeping up is a matter of data written, not time: a scan phase that writes
   // little for a long while proves nothing about compression.
   CompressionLink scanning;
-  for (int i = 0; i < 60; ++i) scanning.observe(64 * 1024, second, keeping_up);
-  assert(scanning.level(false, 3) == 3);
+  for (int i = 0; i < 60; ++i) scanning.observe(64 * 1024, second, keeping_up, clock += second);
+  assert(scanning.cap.load() == 6);
 
-  // The same machine on a link slow enough to ask for level 3: the level that
-  // it could not sustain is not tried again at that link rate, only if the link gets distinctly slower.
-  CompressionLink remembered;
-  assert(sustain(remembered, 30 * MiB, saturated, 2) == 3);
-  assert(sustain(remembered, 30 * MiB, keeping_up, 1) == 1);
-  assert(sustain(remembered, 30 * MiB, saturated, 30) == 1);
-  assert(sustain(remembered, 25 * MiB, saturated, 30) == 1);
-  assert(window(remembered, 15 * MiB, saturated) == 3); // It has been slow and saturated for long enough already.
-
-  // A deep queue without producers held up says nothing either way, and it
-  // interrupts a run of keeping up.
-  CompressionLink deep, flickering;
-  assert(sustain(deep, 46 * MiB, queued, 30) == 3);
+  // A queue forming interrupts a run of keeping up, and a link that is the
+  // bottleneck never caps anything.
+  CompressionLink flickering, busy;
   for (int i = 0; i < 40; ++i) {
-    for (int j = 0; j < 3; ++j) assert(window(flickering, 46 * MiB, keeping_up) == 3);
-    assert(window(flickering, 46 * MiB, queued) == 3);
+    write(flickering, 12, 46 * MiB, keeping_up);
+    write(flickering, 1, 46 * MiB, queued);
   }
-
-  // A window is saturated only if most of its bytes were.
-  CompressionLink mostly_queued, crawling;
-  mostly_queued.observe(3 * MiB, 3 * second / 100, queued);
-  mostly_queued.observe(1 * MiB, 1 * second / 100, saturated);
-  assert(mostly_queued.level(false, 3) == 3);
-  // A slow window of time also decides, without waiting for a full window of bytes.
-  crawling.observe(512 * 1024, second, saturated);
-  assert(crawling.level(false, 3) == 6);
-  crawling.observe(128 * 1024, second, saturated);
-  assert(crawling.level(false, 3) == 6); // Still too few bytes to judge.
+  assert(flickering.cap.load() == 6 && flickering.level(false, 3, 0) == 3);
+  assert(write(busy, 256, 20 * MiB, saturated) == 3 && busy.cap.load() == 6);
 
   CompressionLink report;
   assert(report.summary() == "3 (automatic)");
@@ -112,7 +93,7 @@ int main() {
   assert(report.summary() == "6 (automatic; level 1: 20%, level 3: 10%, level 6: 70% of compressed input)");
 
   for (int explicit_level : {-1000, -5, 0, 1, 9, 22})
-    assert(fast.level(true, explicit_level) == explicit_level && slow.level(true, explicit_level) == explicit_level);
+    assert(fast.level(true, explicit_level, 0) == explicit_level && slow.level(true, explicit_level, 0) == explicit_level);
 
   auto* context = ZSTD_createCCtx();
   assert(context);

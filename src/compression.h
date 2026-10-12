@@ -25,44 +25,38 @@ class CompressionSuffixes {
   bool initialized_ = false;
 };
 
-// What the send queue said about the transport while some bytes were written.
+// What the send queue showed when the writer took the bytes it then wrote.
 enum class Transport {
   saturated,   // producers had to wait for room in the queue: the transport is the bottleneck
   queued,      // a deep queue was waiting, though producers were not held up
   keeping_up,  // little was waiting: the writer is keeping up with what is produced
 };
 
-// Chooses the zstd level between 1, 3 and 6, starting at 3.
+// Chooses the zstd level from the rate of active transport writes: 3 until
+// 256 KiB have been written, then 1 at 64 MiB/s or faster, 6 below 8 MiB/s
+// and 3 in between. Idle source or scan time is not measured, so it cannot
+// make a fast link look slow, and bandwidth limiting is part of the write.
 //
-// While the transport is the bottleneck, the measured write rate is the link's
-// rate and decides the level as before: 1 at 64 MiB/s or faster, 6 below
-// 8 MiB/s, 3 in between. A lower target takes effect at once; a higher one
-// needs a second of such writing, so a short stall does not raise it.
-//
-// While the writer keeps up with what is produced, compression or reading is
-// the bottleneck and the level drops, whatever the writes measure at. This is
-// what the rate alone gets wrong: on a small machine the compressor threads
-// take CPU from the transport process, a gigabit link then measures as a slow
-// one, and a policy that trusts the measurement stays at a level that halves
-// the transfer's speed. Keeping up is judged over data written, not time, so
-// an idle scan phase proves nothing. The link rate at which the higher level
-// proved too costly is remembered, and that level is not tried again unless
-// the link gets distinctly slower.
-//
-// Only active transport writes are measured, so idle source or scan time cannot
-// make a fast link look slow. Bandwidth limiting is part of the write.
+// The rate alone cannot tell a slow link from a machine too slow for the
+// level: compressor threads take CPU from the transport process, a gigabit
+// link then measures as a 46 MiB/s one, and the level never leaves 3 although
+// level 1 would fill the link. So when the writer has kept up with everything
+// produced for DROP_BYTES in a row, the level in force is one this machine
+// cannot sustain against this link, and the level is capped a step lower. The
+// rate at which it was producing is kept: the cap lifts only when the link
+// itself is seen to carry less than that, which is when the higher level
+// would fill it.
 struct CompressionLink {
-  static constexpr uint64_t WINDOW_BYTES = 4ull << 20, WINDOW_NS = 250'000'000ull, MIN_BYTES = 256ull << 10;
-  static constexpr uint64_t FAST = 64ull << 20, SLOW = 8ull << 20;  // bytes per second
-  static constexpr uint64_t RAISE_NS = 1'000'000'000ull;            // slow, saturated writing before a raise
-  static constexpr uint64_t DROP_BYTES = 16ull << 20;               // written while keeping up, before a drop
+  static constexpr uint64_t DROP_BYTES = 16ull << 20;   // written while keeping up, before the cap drops
+  static constexpr uint64_t WINDOW_BYTES = 4ull << 20;  // saturated writing judged for lifting the cap
 
-  std::atomic<int> current{3}, last_level{3};
+  std::atomic<uint64_t> bytes{0}, nanoseconds{0};
+  std::atomic<int> cap{6}, last_level{3};
   std::atomic<bool> used{false};
   std::atomic<uint64_t> compressed_input[3] = {};  // raw bytes compressed at levels 1, 3 and 6
-  // Writer thread only: `count` bytes took `elapsed` ns to write.
-  void observe(uint64_t count, uint64_t elapsed, Transport state);
-  int level(bool explicit_level, int requested) const;
+  // Writer thread only: `count` bytes took `elapsed` ns to write, finishing at `now`.
+  void observe(uint64_t count, uint64_t elapsed, Transport state, uint64_t now, uint64_t rate_limit = 0);
+  int level(bool explicit_level, int requested, uint64_t rate_limit) const;
   // Record that a worker compressed `raw` bytes at an automatic level.
   void count(int level, uint64_t raw) {
     compressed_input[level >= 6 ? 2 : level >= 3 ? 1 : 0].fetch_add(raw, std::memory_order_relaxed);
@@ -72,10 +66,9 @@ struct CompressionLink {
   std::string summary() const;
 
  private:
-  uint64_t bytes_ = 0, nanoseconds_ = 0, saturated_bytes_ = 0;
-  uint64_t slow_ns_ = 0, keeping_up_bytes_ = 0;
-  double ceiling_ = 0;  // link rate at which the level above this one proved too costly
-  bool awaiting_ceiling_ = false;
+  uint64_t keeping_up_bytes_ = 0, keeping_up_since_ = 0;
+  uint64_t window_bytes_ = 0, window_ns_ = 0, window_saturated_ = 0;
+  double sustained_ = 0;  // bytes per second this machine produced at the level it could not sustain
 };
 
 // Sample four spaced regions before spending CPU on an entire large block.
