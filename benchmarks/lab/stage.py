@@ -22,7 +22,8 @@ REPO = HERE.parent.parent
 BUILDS = REPO / '.bench' / 'lab' / 'builds'             # binaries, not tracked
 RECORDS = HERE.parent / 'results' / 'lab' / 'builds'    # their hashes, tracked
 ARCHES = {'x86_64': 'amd64', 'aarch64': 'arm64', 'arm64': 'arm64'}
-SCRIPTS = (HERE / 'probe.py', HERE / 'corpus.py', HERE / 'corpora.json', HERE / 'agent.py', HERE.parent / 'measure.py')
+SCRIPTS = (HERE / 'probe.py', HERE / 'corpus.py', HERE / 'corpora.json', HERE / 'agent.py', HERE / 'overnight.py',
+           HERE.parent / 'measure.py')
 
 
 def run(*command, **options):
@@ -165,7 +166,11 @@ def push(config, names, record):
         artifact, directory = f'xs-linux-{arch}', host['root'] + '/bin'
         run(*preflight.SSH, host['ssh'], 'mkdir', '-p', directory)
         run('scp', '-q', '-oBatchMode=yes', BUILDS / short / artifact, f'{host["ssh"]}:{directory}/xs-{short}.incoming')
-        run('scp', '-q', '-oBatchMode=yes', *SCRIPTS, f'{host["ssh"]}:{directory}/')
+        # Scripts arrive beside their names and are renamed into place, so a run in progress never
+        # executes a half-written file.
+        run(*preflight.SSH, host['ssh'], 'mkdir', '-p', f'{directory}/.incoming')
+        run('scp', '-q', '-oBatchMode=yes', *SCRIPTS, f'{host["ssh"]}:{directory}/.incoming/')
+        run(*preflight.SSH, host['ssh'], f'cd {directory} && for f in .incoming/*; do mv -f "$f" .; done && rmdir .incoming')
         report = preflight.probe(host, 'staged', '--root', host['root'], f'xs-{short}.incoming')
         if report.get('files', {}).get(f'xs-{short}.incoming') != record['artifacts'][artifact]['sha256']:
             raise SystemExit(f'{name}: the copy of {artifact} arrived damaged; nothing was replaced')

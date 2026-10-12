@@ -14,6 +14,7 @@ agent and the sample record) and milestone M5 (analysis and reports).
 | `stage.py` | controller | Builds `xs` from a commit, stages it and the lab scripts on the hosts, and checks what they hold |
 | `plan.py` | controller | Expands an experiment spec into a randomized block plan; starts, follows and fetches a run |
 | `agent.py` | driver endpoint | Executes a plan detached and writes one record per sample |
+| `overnight.py` | driver endpoint | Runs queued plans one after another inside a time window |
 | `analyze.py` | controller | Paired ratios, intervals, robust checks and verdicts from the valid blocks; writes the tables |
 | `report.py` | controller | Renders an experiment's analysis as Markdown |
 | `selftest.py` | anywhere | Checks the analysis on simulated experiments with known ratios |
@@ -108,6 +109,32 @@ for that share of the time a baseline arm usually takes in the same cell.
 The spec's `[baseline]` table names the analysed experiment and arm the
 times come from. It exists to give the analysis a known effect to find
 (`E0b-known.toml`).
+
+## Running unattended overnight
+
+```sh
+python3 benchmarks/lab/plan.py enqueue benchmarks/experiments/E1-baseline.toml
+python3 benchmarks/lab/plan.py night --from 2026-10-11T22:00-05:00 --until 2026-10-12T04:00-05:00
+python3 benchmarks/lab/plan.py queue
+python3 benchmarks/lab/plan.py collect
+python3 benchmarks/lab/plan.py stop-queue
+```
+
+`enqueue` makes a plan and puts it on the driver's queue without starting
+it. `night` checks the hosts once, then starts `overnight.py` on the driver,
+detached. Nothing after that needs the controller: it may sleep or be off.
+
+`overnight.py` waits for the window to open, then gives each queued run to
+the agent in order. It waits for any experiment still running, never repeats
+a run that already has a status, and carries on past a run that fails. The
+agent gets the window's end as a deadline and starts no block that might run
+past it, so a run cut short still holds whole blocks, spread evenly over its
+cells, and a later night's run of the same spec pools with it in the
+analysis. It will not start a run with less than five minutes left.
+
+`queue` shows what the queue is doing. `collect` fetches every queued run
+and writes each experiment's report. `stop-queue` ends it after the current
+sample, with the hosts restored.
 
 ## Analysis
 

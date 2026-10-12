@@ -1,0 +1,42 @@
+# E0b: known effects. Two xs arms sleep before starting, for 3% and 6% of the
+# time the plain arm usually takes in that cell (from E0a), so their true
+# ratios to the control are close to 1.03 and 1.06. The analysis must call
+# the 6% arm slower, and must see the 3% arm as different from 1 without
+# giving it a verdict (experiments.md, section 5.5).
+id = "E0b-known"
+kind = "confirmatory"
+hypothesis = "An injected slowdown of twice delta is called slower; one of delta excludes 1 but earns no verdict."
+primary = "wall_s"
+delta = 0.03
+blocks = 12
+control = "xs"
+verify = "first-last"
+
+[baseline]
+experiment = "E0a-noise"
+arm = "xs"
+
+[arms.xs]
+tool = "xs"
+rev = "bf596d28c5c9"
+flags = ["-a"]
+
+[arms.xs-plus-3pct]
+tool = "xs"
+rev = "bf596d28c5c9"
+flags = ["-a"]
+inject_fraction = 0.03
+
+[arms.xs-plus-6pct]
+tool = "xs"
+rev = "bf596d28c5c9"
+flags = ["-a"]
+inject_fraction = 0.06
+
+[matrix]
+link = "lan"
+corpus = ["small-flat", "mixed-bimodal"]
+scenario = ["fresh"]
+direction = ["neo>freya", "freya>neo"]
+client = ["sender"]
+cache = ["warm"]

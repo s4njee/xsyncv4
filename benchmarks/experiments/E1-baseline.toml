@@ -1,0 +1,31 @@
+# E1: the baseline matrix. xs at release defaults against rsync -a on every
+# corpus small enough for a block, fresh and no-op, in both directions, with
+# the sender as SSH client. Timed to durability, because rsync returns with
+# more of the transfer still unwritten than xs does (H9).
+# Covers H1, H2, H6-H9 and H21 of experiments.md. The two large real trees
+# (real-holochart, real-laikav2) are left for a separate run.
+id = "E1-baseline"
+kind = "confirmatory"
+hypothesis = "xs -a differs from rsync -a by more than 3% in time-to-durable, per corpus, scenario and direction."
+primary = "durable_s"
+delta = 0.03
+blocks = 12
+control = "rsync"
+verify = "first-last"
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[arms.xs]
+tool = "xs"
+rev = "bf596d28c5c9"
+flags = ["-a"]
+
+[matrix]
+link = "lan"
+corpus = ["tiny-one", "small-flat", "small-deep", "small-opaque", "small-real", "mixed-bimodal", "mixed-threshold"]
+scenario = ["fresh", "noop"]
+direction = ["neo>freya", "freya>neo"]
+client = ["sender"]
+cache = ["warm"]

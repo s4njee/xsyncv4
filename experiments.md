@@ -653,7 +653,7 @@ stays out, load gate, free-space check, and `purge` for cold runs.
 | M8 | `export.py`, table schemas, one figure spec | F2 and F3 render in holochart from E0a and smoke E1 data with no hand-edited numbers |
 | M9 | E1 onward | — |
 
-Progress, 2026-10-11: M0 to M5 are done for the LAN pair.
+Progress, 2026-10-12: M0 to M6 are done for the LAN pair, and E1 and E1b have their first night of data.
 
 - The helper is installed on neo and freya and was checked there: `netem`
   adds the stated delay and its timer clears it unprompted, the governor
@@ -685,9 +685,67 @@ Progress, 2026-10-11: M0 to M5 are done for the LAN pair.
   checks. The simulations showed that the block counts of section 5.5 give
   power to notice δ, not to earn a verdict at δ, so that section and E0b
   were corrected.
+- M6, E0a (noise floor): 144 of 144 blocks valid, 12 per cell, in
+  `benchmarks/results/lab/E0a-noise/`. No A/A pair was called faster or
+  slower. At δ = 3% the pair was *equivalent* in 3 of 12 cells for xs and 5
+  of 12 for rsync, and *inconclusive* in the rest, because the noise differs
+  enormously by cell:
+  - σ_d is 0.009 to 0.014 when neo receives a fresh copy, so 8 blocks
+    suffice there.
+  - σ_d is 0.12 to 0.26 when freya receives a fresh copy. The cause is
+    occasional slow samples, not steady spread: one block had 23.0 s and
+    15.7 s transfers among dozens at 12 to 13 s, and rsync's 100,000-file
+    receive on freya ranges from 3.6 to 7.9 s. The robust interval stays
+    narrow in those cells while the t interval does not, which is why the
+    verdict is inconclusive.
+  - No-op and one-file cells sit at 0.03 to 0.06, needing 16 to 46 blocks
+    for a 3% question.
+  - The first sample of a block is 1.35% slower on average (±0.42), up to
+    6.7% in the noisiest cell. Random order keeps that from biasing a
+    comparison but it adds noise; an untimed warm-up per block would
+    remove it at the cost of one more sample.
+  - Three block attempts were voided and retried because freya briefly
+    resolved neo to an address routed through a Docker bridge.
+- M6, E0b (known effects), 12 blocks: in three of four cells the injected
+  6% was called *slower* (estimates 1.054 to 1.080) and the injected 3%
+  gave an interval that excludes 1 (1.030 to 1.046) with no verdict, as
+  section 5.5 predicts. In the fourth, a fresh 100,000-file copy to freya
+  with σ_d near 0.15, neither was detected.
+- Unattended running: `plan.py enqueue` and `plan.py night` put specs on
+  the driver's queue and `overnight.py` runs them inside a time window.
+  The first night ran E0b, E1 and E1b to completion, 464 of 464 blocks
+  valid, eleven minutes inside its 22:00 to 04:00 window.
+- E1 (baseline, time-to-durable, 12 blocks, 28 cells, Holm-adjusted): xs
+  is *faster* than `rsync -a` in 21 cells, *inconclusive* in 7 and
+  *slower* in none.
+  - No-op: faster everywhere, by 2.3 to 2.5 times on 100,000 small files
+    and by 6.5 times on the deep and the congress trees pulled to neo
+    (20.0 s against 3.1 s, and 10.1 s against 1.55 s).
+  - Fresh small files: about twice as fast to freya, 10 to 25% faster to
+    neo.
+  - Fresh mixed trees: no difference shown. With neo sending
+    `mixed-bimodal` the ratio is 1.048 [1.026, 1.071]: about 5% slower,
+    short of a verdict at δ = 3%.
+  - The seven inconclusive cells are fresh copies, five of them to freya,
+    where σ_d reached 0.24 to 0.53.
+  - Cost: xs uses 1.3 to 2.4 times rsync's CPU on most cells and 5 to 8
+    times on a no-op of a deep tree from neo, and 4 to 10 times its memory
+    on fresh copies (110 to 200 MiB against 14 to 20).
+  - Time-to-durable and wall time give nearly the same ratios here; the
+    sync adds 0.1 to 1.2 s to either tool.
+- E1b (client role, 10 blocks): for fresh copies, which end starts the
+  transfer makes no detectable difference. For no-ops it does: both tools
+  are 15 to 38% slower when freya is the SSH client and neo the server.
+  One-file transfers show the same 40 to 50 ms, so it is a fixed
+  session-setup cost on neo's side, large only against sub-second runs.
 - Not yet in the agent: the `update-1pct` scenario, a throughput probe per
-  block (only ping statistics so far), the once-a-second host sampler, and
-  resuming a run whose agent died.
+  block (only ping statistics so far), the once-a-second host sampler,
+  resuming a run whose agent died, and a per-block warm-up.
+- Open question from E0a: what makes freya slow now and then as a
+  receiver. Its `/mnt/nvme` is an old root filesystem at 86% full and the
+  host runs other services. Until that is understood, a 3% question cannot
+  be answered for fresh copies to freya without hundreds of blocks; the
+  host-state snapshots around every sample are there to investigate it.
 - Not done: mars could not be inventoried. It has no mDNS name on the
   network and the address neo has for it (192.168.1.229) does not answer,
   so it is off, asleep or booted into another system.

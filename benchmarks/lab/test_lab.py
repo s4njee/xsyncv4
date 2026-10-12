@@ -9,6 +9,7 @@ import pathlib
 import subprocess
 import sys
 import tempfile
+import time
 import unittest
 
 import agent
@@ -425,6 +426,17 @@ class Plans(unittest.TestCase):
         self.assertEqual(set(slow['delay_s'].values()), {0.6})
         self.assertNotIn('delay_s', made['arms'][0])
 
+    def test_client_role_can_be_left_to_the_arms(self):
+        matrix = dict(self.SPEC['matrix'], client=['arm'])
+        with self.assertRaises(plan.SpecError):
+            self.make(matrix=matrix)
+        arms = {'rsync': {'tool': 'rsync', 'client': 'sender'}, 'pull': {'tool': 'rsync', 'client': 'receiver'}}
+        made = self.make(matrix=matrix, arms=arms)
+        self.assertEqual([arm['client'] for arm in made['arms']], ['sender', 'receiver'])
+        self.assertTrue(all(cell['client'] == 'arm' for cell in made['cells']))
+        with self.assertRaises(plan.SpecError):
+            self.make(arms=dict(arms, odd={'tool': 'rsync', 'client': 'both'}))
+
     def test_bad_specs_are_rejected(self):
         for changes in ({'matrix': dict(self.SPEC['matrix'], corpus=['unpinned'])},
                         {'matrix': dict(self.SPEC['matrix'], direction=['neo>mars'])},
@@ -476,6 +488,14 @@ class AgentPieces(unittest.TestCase):
         self.assertEqual(argv[start:start + 6], ['sh', '-c', 'sleep "$0"; exec "$@"', '0.2500', '/n/bin/xs-r', '-a'])
         _, _, plain, _ = agent.transfer_command(self.XS, self.CELL, self.hosts(), 'run1', 'tag')
         self.assertNotIn('sh', plain)
+
+    def test_an_arm_can_choose_which_end_starts(self):
+        cell = dict(self.CELL, client='arm')
+        push, _, _, _ = agent.transfer_command(dict(self.XS, client='sender'), cell, self.hosts(), 'run1', 'tag')
+        pull, _, argv, _ = agent.transfer_command(dict(self.XS, client='receiver'), cell, self.hosts(), 'run1', 'tag')
+        self.assertEqual((push.name, pull.name), ('neo', 'freya'))
+        self.assertTrue(argv[-2].startswith('u@neo.local:'))
+        self.assertEqual(agent.client_role(self.XS, self.CELL), 'sender')
 
     def test_pull_runs_on_the_receiver(self):
         cell = dict(self.CELL, client='receiver')
@@ -663,6 +683,83 @@ class Analysis(unittest.TestCase):
         few = report.render(analyze.analyse([self.experiment / 'r2']))
         self.assertIn('estimates only, no verdict', few)
         self.assertIn('nothing here is a claim', few)
+
+
+class OvernightQueue(unittest.TestCase):
+    """overnight.py with a stand-in agent that records its arguments and takes a second."""
+
+    STUB = ("import json, pathlib, sys, time\n"
+            "plan = pathlib.Path(sys.argv[1])\n"
+            "time.sleep(1.0)\n"
+            "if plan.parent.name == 'broken': sys.exit(3)\n"
+            "(plan.parent / 'status.json').write_text(json.dumps({'state': 'complete', 'detail': sys.argv[3]}))\n")
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.root = pathlib.Path(self.tmp.name)
+        self.runs = self.root / 'runs'
+        self.runs.mkdir()
+        self.stub = self.root / 'stub_agent.py'
+        self.stub.write_text(self.STUB)
+
+    def queue(self, *names, with_plan=True):
+        for name in names:
+            (self.runs / name).mkdir()
+            if with_plan:
+                (self.runs / name / 'plan.json').write_text('{}')
+        with open(self.runs / 'queue.txt', 'a') as stream:
+            stream.write(''.join(name + '\n' for name in names))
+
+    def overnight(self, opens_in, closes_in):
+        moment = lambda seconds: (datetime.datetime.now(datetime.timezone.utc)
+                                  + datetime.timedelta(seconds=seconds)).isoformat()
+        done = subprocess.run([sys.executable, str(HERE / 'overnight.py'), '--root', str(self.root), '--agent',
+                               str(self.stub), '--not-before', moment(opens_in), '--deadline', moment(closes_in)],
+                              capture_output=True, text=True, timeout=60)
+        self.assertEqual(done.returncode, 0, done.stderr)
+        status = json.loads((self.runs / 'queue-status.json').read_text())
+        return status, {entry['run']: entry for entry in status['runs']}
+
+    def test_runs_in_order_and_survives_a_failure(self):
+        self.queue('first', 'broken', 'last')
+        self.queue('ghost', with_plan=False)
+        started = time.monotonic()
+        status, runs = self.overnight(1.5, 3600)
+        self.assertGreater(time.monotonic() - started, 1.5, 'it must wait for the window to open')
+        self.assertEqual(status['state'], 'finished')
+        self.assertEqual(list(runs), ['first', 'broken', 'last', 'ghost'])
+        self.assertEqual(runs['first']['state'], 'complete')
+        self.assertEqual((runs['broken']['state'], runs['broken']['exit']), ('failed', 3))
+        self.assertEqual(runs['last']['state'], 'complete', 'a failed run must not stop the queue')
+        self.assertEqual(runs['ghost']['detail'], 'no plan')
+        deadline = datetime.datetime.fromisoformat(runs['first']['detail'])
+        self.assertGreater(deadline, datetime.datetime.now(datetime.timezone.utc), 'the agent gets the window end')
+
+    def test_nothing_starts_once_the_window_is_nearly_over(self):
+        self.queue('late')
+        status, runs = self.overnight(0, 60)  # less than the reserve remains
+        self.assertEqual(runs['late']['detail'], 'the window closed first')
+        self.assertFalse((self.runs / 'late' / 'status.json').exists())
+
+    def test_a_finished_run_is_not_repeated(self):
+        self.queue('done')
+        (self.runs / 'done' / 'status.json').write_text('{"state": "complete"}')
+        _, runs = self.overnight(0, 3600)
+        self.assertEqual(runs['done']['detail'], 'already run')
+
+    def test_waits_for_a_running_experiment(self):
+        self.queue('after')
+        holder = subprocess.Popen([sys.executable, '-c', 'import fcntl,sys,time; f=open(sys.argv[1],"a+"); '
+                                   'fcntl.flock(f,fcntl.LOCK_EX); print("held",flush=True); time.sleep(3)',
+                                   str(self.runs / '.lock')], stdout=subprocess.PIPE, text=True)
+        self.addCleanup(holder.wait)
+        self.addCleanup(holder.stdout.close)
+        holder.stdout.readline()
+        started = time.monotonic()
+        _, runs = self.overnight(0, 3600)
+        self.assertGreater(time.monotonic() - started, 2.5)
+        self.assertEqual(runs['after']['state'], 'complete')
 
 
 class HelperArguments(unittest.TestCase):

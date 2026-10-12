@@ -1,0 +1,21 @@
+{
+  "experiment": "E0b-known",
+  "kind": "confirmatory",
+  "hypothesis": "An injected slowdown of twice delta is called slower; one of delta excludes 1 but earns no verdict.",
+  "primary": "wall_s",
+  "control": "xs",
+  "delta": 0.03,
+  "level": 0.95,
+  "looks": 1,
+  "runs": [
+    "20261012T003157Z-E0b-known"
+  ],
+  "spec_sha256": [
+    "bbf8f095f83b83fffad9253e12d60dd620e5b5c00d5bc13e99bfc50706e903be"
+  ],
+  "valid_blocks": 48,
+  "void_attempts": 1,
+  "void_reasons": [
+    "freya reaches neo by br-039e63f2ae7f, not enp10s0"
+  ]
+}

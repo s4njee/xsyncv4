@@ -70,7 +70,7 @@ def cells_of(spec, config):
         sender, _, receiver = direction.partition('>')
         if {sender, receiver} != set(link['hosts']):
             raise SpecError(f'direction {direction} is not between the hosts of link {matrix["link"]}')
-        if scenario not in SCENARIOS or client not in ('sender', 'receiver') or cache not in ('warm', 'cold'):
+        if scenario not in SCENARIOS or client not in ('sender', 'receiver', 'arm') or cache not in ('warm', 'cold'):
             raise SpecError(f'unsupported scenario, client or cache in {scenario}/{client}/{cache}')
         cells.append({'id': f'{name}.{scenario}.{sender}-{receiver}.{client}.{cache}', 'corpus': name,
                       'scenario': scenario, 'sender': sender, 'receiver': receiver, 'client': client,
@@ -105,6 +105,10 @@ def make_plan(spec, config, pins, seed, run_id, baseline=None):
     arms = []
     for name, arm in spec['arms'].items():
         entry = {'name': name, 'tool': arm['tool'], 'flags': list(arm.get('flags', ['-a']))}
+        if arm.get('client') in ('sender', 'receiver'):
+            entry['client'] = arm['client']  # this arm chooses which end starts the transfer
+        elif 'client' in arm or any(cell['client'] == 'arm' for cell in cells):
+            raise SpecError(f'arm {name}: `client` must be sender or receiver when the matrix leaves it to the arms')
         if fraction := arm.get('inject_fraction'):
             # A known slowdown: sleep this share of the control's usual time before the tool starts.
             missing = [cell['id'] for cell in cells if cell['id'] not in (baseline or {})]
@@ -169,18 +173,30 @@ def remote(host, script, **options):
     return subprocess.run([*preflight.SSH, host['ssh'], script], capture_output=True, text=True, **options)
 
 
-def start(spec_path, config, seed, skip_preflight):
+def preflight_or_exit(link, revisions, expected=()):
+    """Run preflight; exit on any problem other than those containing an `expected` phrase."""
+    for revision in revisions or [None]:
+        arguments = ['--link', link] + (['--rev', revision] if revision else [])
+        done = subprocess.run([sys.executable, str(HERE / 'preflight.py'), *arguments], capture_output=True, text=True)
+        problems = [line for line in done.stdout.splitlines() if line.startswith('PROBLEM')
+                    and not any(phrase in line for phrase in expected)]
+        if done.returncode and (problems or 'PROBLEM' not in done.stdout):
+            raise SystemExit('preflight failed:\n' + done.stdout + done.stderr)
+
+
+def run_in_progress(driver):
+    """Whether an agent holds the driver's lock right now."""
+    test = ('import fcntl,sys\ntry:\n fcntl.flock(open(sys.argv[1],"a+"),fcntl.LOCK_EX|fcntl.LOCK_NB)\n'
+            'except BlockingIOError:\n sys.exit(1)')
+    return remote(driver, f'python3 -c {shlex.quote(test)} {shlex.quote(driver["root"] + "/runs/.lock")}',
+                  timeout=60).returncode == 1
+
+
+def prepare_run(spec_path, config, seed):
+    """Make a plan, keep it locally and put it on the driver. Returns (plan, remote directory)."""
     spec = load_spec(spec_path)
     pins = json.loads((HERE / 'corpora.json').read_text())
     plan = make_plan(spec, config, pins, seed, new_run_id(spec), load_baseline(spec))
-    revisions = sorted({arm['rev'] for arm in plan['arms'] if arm['tool'] == 'xs'})
-    link = spec['matrix']['link']
-    if not skip_preflight:
-        for revision in revisions or [None]:
-            arguments = ['--link', link] + (['--rev', revision] if revision else [])
-            done = subprocess.run([sys.executable, str(HERE / 'preflight.py'), *arguments], capture_output=True, text=True)
-            if done.returncode:
-                raise SystemExit('preflight failed:\n' + done.stdout + done.stderr)
     for name, host in plan['hosts'].items():
         machine = remote(host, 'uname -m', timeout=30).stdout.strip()
         for arm in plan['arms']:
@@ -195,12 +211,57 @@ def start(spec_path, config, seed, skip_preflight):
     remote(driver, f'mkdir -p {shlex.quote(directory)}', check=True)
     subprocess.run(['scp', '-q', '-oBatchMode=yes', str(local / 'plan.json'), f'{driver["ssh"]}:{directory}/plan.json'],
                    check=True)
-    # setsid and closed descriptors: the agent outlives this SSH session and the controller.
+    return plan, directory
+
+
+def revisions_of(plan):
+    return sorted({arm['rev'] for arm in plan['arms'] if arm['tool'] == 'xs'})
+
+
+def start(spec_path, config, seed, skip_preflight):
+    spec = load_spec(spec_path)
+    if not skip_preflight:
+        preflight_or_exit(spec['matrix']['link'], sorted({stage.resolve(arm['rev'])[:12] for arm in spec['arms'].values()
+                                                           if arm['tool'] == 'xs'}))
+    plan, directory = prepare_run(spec_path, config, seed)
+    driver = driver_of(plan)
     # The backgrounded command must be the agent alone, with every descriptor redirected, or SSH waits for it.
     launch = (f'cd {shlex.quote(directory)} || exit 1; setsid nohup python3 '
               f'{shlex.quote(driver["root"] + "/bin/agent.py")} plan.json > agent.log 2>&1 < /dev/null & echo started')
     remote(driver, launch, check=True, timeout=60)
     return plan
+
+
+def queued_runs(driver):
+    """Run ids in the driver's queue, in order."""
+    done = remote(driver, f'cat {shlex.quote(driver["root"] + "/runs/queue.txt")} 2>/dev/null', timeout=60)
+    return [line.strip() for line in done.stdout.splitlines() if line.strip()]
+
+
+def enqueue(spec_path, config, seed):
+    plan, _ = prepare_run(spec_path, config, seed)
+    driver = driver_of(plan)
+    remote(driver, f'echo {shlex.quote(plan["run_id"])} >> {shlex.quote(driver["root"] + "/runs/queue.txt")}', check=True)
+    return plan
+
+
+def night(config, opens, closes):
+    """Check the hosts now, then start overnight.py on the driver for the given window."""
+    driver = config['hosts'][config.get('driver') or next(iter(config['hosts']))]
+    runs = queued_runs(driver)
+    if not runs:
+        raise SystemExit('the queue is empty: enqueue a spec first')
+    plans = [find_plan(run_id)[1] for run_id in runs]
+    # A run still in progress holds the performance governor; that is not a leftover.
+    expected = ('left the governor changed',) if run_in_progress(driver) else ()
+    for link in sorted({name for plan in plans for name in plan['links']}):
+        preflight_or_exit(link, sorted({revision for plan in plans for revision in revisions_of(plan)}), expected)
+    root = driver['root']
+    launch = (f'cd {shlex.quote(root + "/runs")} || exit 1; setsid nohup python3 {shlex.quote(root + "/bin/overnight.py")} '
+              f'--root {shlex.quote(root)} --not-before {shlex.quote(opens)} --deadline {shlex.quote(closes)} '
+              f'> overnight.log 2>&1 < /dev/null & echo started')
+    remote(driver, launch, check=True, timeout=60)
+    return runs
 
 
 def find_plan(run_id):
@@ -223,6 +284,15 @@ def main(argv=None):
     for command, text in (('status', 'what the agent is doing'), ('fetch', 'copy the records back'),
                           ('stop', 'ask the agent to stop after the current sample')):
         commands.add_parser(command, help=text).add_argument('run_id')
+    p = commands.add_parser('enqueue', help='put a spec in the driver\'s overnight queue')
+    p.add_argument('spec', type=pathlib.Path)
+    p.add_argument('--seed', type=int, default=1)
+    p = commands.add_parser('night', help='run the queue unattended inside a time window')
+    p.add_argument('--from', dest='opens', required=True, help='ISO-8601 with offset, e.g. 2026-10-11T22:00-05:00')
+    p.add_argument('--until', dest='closes', required=True, help='ISO-8601 with offset')
+    commands.add_parser('queue', help='what the overnight queue is doing')
+    commands.add_parser('collect', help='fetch every queued run and write its experiment\'s report')
+    commands.add_parser('stop-queue', help='stop the overnight queue after the current sample')
     args = parser.parse_args(argv)
     try:
         config = preflight.load(args.hosts)
@@ -239,8 +309,42 @@ def main(argv=None):
             print(f'{plan["run_id"]} started on {plan["driver"]}: {len(plan["blocks"])} blocks, '
                   f'{len(plan["blocks"]) * len(plan["arms"])} samples')
             return
+        if args.command == 'enqueue':
+            plan = enqueue(args.spec, config, args.seed)
+            print(f'{plan["run_id"]} queued on {plan["driver"]}: {len(plan["blocks"])} blocks, '
+                  f'{len(plan["blocks"]) * len(plan["arms"])} samples')
+            return
+        if args.command == 'night':
+            runs = night(config, args.opens, args.closes)
+            print(f'the queue will run from {args.opens} until {args.closes}:')
+            print('\n'.join('  ' + run for run in runs))
+            return
     except (SpecError, preflight.ConfigError, OSError) as error:
         parser.error(str(error))
+    if args.command in ('queue', 'collect', 'stop-queue'):
+        driver = config['hosts'][config.get('driver') or next(iter(config['hosts']))]
+        runs_directory = shlex.quote(driver['root'] + '/runs')
+        if args.command == 'stop-queue':
+            remote(driver, f'kill -TERM "$(python3 -c \'import json;print(json.load(open("{driver["root"]}/runs/'
+                           f'queue-status.json"))["pid"])\')"', check=True, timeout=60)
+            print('asked the queue to stop after the current sample')
+            return
+        print(remote(driver, f'cat {runs_directory}/queue-status.json 2>/dev/null || echo "no queue has been started"',
+                     timeout=60).stdout.strip())
+        for run_id in queued_runs(driver):
+            status = remote(driver, f'cat {runs_directory}/{shlex.quote(run_id)}/status.json 2>/dev/null', timeout=60)
+            print(run_id, status.stdout.strip() or 'not started')
+        if args.command == 'collect':
+            experiments = set()
+            for run_id in queued_runs(driver):
+                local, _ = find_plan(run_id)
+                done = subprocess.run(['rsync', '-a', '--exclude=plan.json', f'{driver["ssh"]}:{driver["root"]}/runs/{run_id}/',
+                                       f'{local}/'])
+                if done.returncode == 0 and (local / 'samples.jsonl').exists():
+                    experiments.add(local.parent)
+            for experiment in sorted(experiments):
+                subprocess.run([sys.executable, str(HERE / 'report.py'), str(experiment)])
+        return
     local, plan = find_plan(args.run_id)
     driver = driver_of(plan)
     directory = shlex.quote(f'{driver["root"]}/runs/{args.run_id}')

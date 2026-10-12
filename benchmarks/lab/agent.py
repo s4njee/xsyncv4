@@ -125,10 +125,15 @@ def work_path(host, run_id, *parts):
     return '/'.join((host.root, 'work', run_id, *parts))
 
 
+def client_role(arm, cell):
+    """Which end starts the transfer: the arm's choice if it makes one, else the cell's."""
+    return arm.get('client') or cell['client']
+
+
 def transfer_command(arm, cell, hosts, run_id, tag):
     """(client host, shell script) for one timed transfer, measured on both ends."""
     sender, receiver = hosts[cell['sender']], hosts[cell['receiver']]
-    client = sender if cell['client'] == 'sender' else receiver
+    client = sender if client_role(arm, cell) == 'sender' else receiver
     peer = receiver if client is sender else sender
     source = f'{sender.root}/corpora/{cell["corpus"]}/'
     destination = work_path(receiver, run_id, cell['id'], arm['name']) + '/'
@@ -197,6 +202,10 @@ class Run:
                              host.run('sudo', '-n', HELPER, 'status').stdout.splitlines() if '=' in line)
                 if state.get('netem') != 'off' or state.get('netem_timer') != 'off':
                     raise RuntimeError(f'{host.name}: a netem qdisc is active')
+                # Exit 3 means this host has no scratch mount configured, which is fine.
+                mounted = host.run('sudo', '-n', HELPER, 'mount-scratch', check=False)
+                if mounted.returncode not in (0, 3):
+                    raise RuntimeError(f'{host.name}: {mounted.stderr.strip()}')
             host.run('mkdir', '-p', work_path(host, self.run_id, 'logs'))
         for name, corpus in self.plan['corpora'].items():
             for sender in sorted({cell['sender'] for cell in self.cells.values() if cell['corpus'] == name}):
@@ -277,6 +286,7 @@ class Run:
                   'previous_arm': previous_arm, 'control': arm['name'] == self.plan['control'],
                   'tool': arm['tool'], 'rev': arm.get('rev'), 'flags': arm['flags'],
                   'injected_delay_s': arm.get('delay_s', {}).get(cell['id']),
+                  'client_role': client_role(arm, cell),
                   'corpus_files': self.plan['corpora'][cell['corpus']]['files'],
                   'corpus_bytes': self.plan['corpora'][cell['corpus']]['bytes'],
                   'valid': False, 'void_reason': None}
@@ -373,7 +383,8 @@ class Run:
                 return summary['valid']
         return False
 
-    def execute(self):
+    def execute(self, deadline=None):
+        """Run the plan. With a deadline (epoch seconds), start no block that might run past it."""
         lock = open(pathlib.Path(self.plan['hosts'][self.plan['driver']]['root']) / 'runs' / '.lock', 'a+')
         try:
             fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
@@ -381,24 +392,31 @@ class Run:
             self.status('refused', 'another run holds the lock')
             return 1
         signal.signal(signal.SIGTERM, lambda *_: setattr(self, 'stopping', True))
-        valid = 0
+        valid, attempted, longest, expired = 0, 0, 180.0, False
         try:
             self.prepare()
             for entry in self.plan['blocks']:
                 if self.stopping:
                     break
+                if deadline and time.time() + longest > deadline:
+                    expired = True
+                    break
+                started = time.monotonic()
                 valid += self.block(entry)
+                attempted += 1
+                longest = max(longest, time.monotonic() - started)
         except Exception as error:
             self.finish()
             self.status('failed', f'{type(error).__name__}: {error}')
             raise
         self.finish()
-        state = 'stopped' if self.stopping else 'complete'
-        self.status(state, f'{valid} of {len(self.plan["blocks"])} blocks valid')
+        state = 'stopped' if self.stopping else 'deadline' if expired else 'complete'
+        self.status(state, f'{valid} of {attempted} blocks valid, {len(self.plan["blocks"])} planned')
         return 0
 
 
 if __name__ == '__main__':
-    if len(sys.argv) != 2:
-        sys.exit('usage: agent.py RUN_DIRECTORY/plan.json')
-    sys.exit(Run(sys.argv[1]).execute())
+    if len(sys.argv) not in (2, 4) or (len(sys.argv) == 4 and sys.argv[2] != '--deadline'):
+        sys.exit('usage: agent.py RUN_DIRECTORY/plan.json [--deadline ISO-8601]')
+    limit = datetime.datetime.fromisoformat(sys.argv[3]).timestamp() if len(sys.argv) == 4 else None
+    sys.exit(Run(sys.argv[1]).execute(limit))

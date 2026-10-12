@@ -25,7 +25,7 @@ MIN_BLOCKS = 8
 ALPHA = 0.05
 EXACT_FLIPS = 20            # sign patterns are enumerated up to 2**20
 FLIP_SAMPLES = 100_000
-SECONDARY = ('durable_s', 'cpu_s', 'rss_bytes')
+SECONDARY = ('wall_s', 'durable_s', 'cpu_s', 'rss_bytes')
 CELL_FIELDS = ('corpus', 'scenario', 'sender', 'receiver', 'client', 'link', 'cache')
 METRICS = {
     'wall_s': lambda s: s['wall_s'],
@@ -202,17 +202,22 @@ def blocks_for_equivalence(sigma, delta, power=0.8):
 
 # -- experiment data -------------------------------------------------------
 
+def records(path):
+    """The complete lines of a JSONL file; a last line still being written is left out."""
+    lines = path.read_text().split('\n')
+    return [json.loads(line) for line in lines[:-1] if line]
+
+
 def load(directories):
     """Samples of valid blocks, grouped as {cell_id: {(run, block): {arm: sample}}}, with the plans."""
     cells, plans, voids = {}, [], []
     for directory in directories:
         directory = pathlib.Path(directory)
         plans.append(json.loads((directory / 'plan.json').read_text()))
-        attempts = [json.loads(line) for line in (directory / 'blocks.jsonl').read_text().splitlines()]
+        attempts = records(directory / 'blocks.jsonl')
         valid = {(a['cell_id'], a['block'], a['attempt']) for a in attempts if a['valid']}
         voids += [a for a in attempts if not a['valid']]
-        for line in (directory / 'samples.jsonl').read_text().splitlines():
-            sample = json.loads(line)
+        for sample in records(directory / 'samples.jsonl'):
             if (sample['cell_id'], sample['block'], sample['attempt']) in valid:
                 block = cells.setdefault(sample['cell_id'], {}).setdefault((sample['run_id'], sample['block']), {})
                 block[sample['arm']] = sample
