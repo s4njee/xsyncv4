@@ -2,6 +2,7 @@
 #include <cassert>
 #include <cstdint>
 #include <random>
+#include <string>
 #include <zstd.h>
 
 int main() {
@@ -88,6 +89,13 @@ int main() {
   assert(crawling.level(false, 3) == 3);
   crawling.observe(128 * 1024, second, true, clock);
   assert(crawling.level(false, 3) == 3); // Still too few bytes to judge.
+
+  CompressionLink report;
+  assert(report.summary() == "1 (automatic)");
+  report.count(1, 600);
+  assert(report.summary() == "1 (automatic)");
+  report.count(3, 300), report.count(6, 2100);
+  assert(report.summary() == "6 (automatic; level 1: 20%, level 3: 10%, level 6: 70% of compressed input)");
 
   for (int explicit_level : {-1000, -5, 0, 1, 9, 22})
     assert(fast.level(true, explicit_level) == explicit_level && slow.level(true, explicit_level) == explicit_level);

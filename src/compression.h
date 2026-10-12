@@ -47,6 +47,14 @@ struct CompressionLink {
 
   std::atomic<int> current{1}, last_level{1};
   std::atomic<bool> used{false};
+  std::atomic<uint64_t> compressed_input[3] = {};  // raw bytes compressed at levels 1, 3 and 6
+  // Record that a worker compressed `raw` bytes at an automatic level.
+  void count(int level, uint64_t raw) {
+    compressed_input[level >= 6 ? 2 : level >= 3 ? 1 : 0].fetch_add(raw, std::memory_order_relaxed);
+  }
+  // "3 (automatic)", or "1 (automatic; level 1: 62%, level 3: 38% of compressed input)"
+  // when more than one level was used: the level that compressed the most comes first.
+  std::string summary() const;
   // Writer thread only. `backlogged`: these bytes were written while frames were waiting behind them.
   void observe(uint64_t count, uint64_t elapsed, bool backlogged, uint64_t now);
   int level(bool explicit_level, int requested) const;

@@ -843,6 +843,7 @@ bool pack(std::string& f, std::string_view raw, Worker& w) {
     f.resize(base);
     return false;
   }
+  if (g_conn && !g_opt.compress_level_explicit) g_conn->compression_link.count(level, raw.size());
   f.resize(at + n);
   return true;
 }
@@ -1787,8 +1788,10 @@ struct Sender {
     if (g_stop.load()) exit_signal();
     pool.join();
     if (g_opt.compress && g_opt.verbose >= 2 && c.compression_link.used.load()) {
-      out_line("Compression level: " + std::to_string(c.compression_link.last_level.load()) +
-               (g_opt.compress_level_explicit ? " (explicit)" : " (automatic)"));
+      // An automatic level can change during a transfer; report the one that did most of the work.
+      out_line(g_opt.compress_level_explicit
+                 ? "Compression level: " + std::to_string(c.compression_link.last_level.load()) + " (explicit)"
+                 : "Compression level: " + c.compression_link.summary());
     }
     std::string f = new_frame(F_DATA_END);
     put_var(f, (u64)g_exit_code.load());

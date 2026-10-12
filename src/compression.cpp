@@ -97,6 +97,28 @@ void CompressionLink::observe(uint64_t count, uint64_t elapsed, bool backlogged,
   bytes_ = nanoseconds_ = backlogged_bytes_ = 0;
 }
 
+std::string CompressionLink::summary() const {
+  static constexpr int levels[3] = {1, 3, 6};
+  uint64_t bytes[3], total = 0;
+  size_t most = 0, used_levels = 0;
+  for (size_t i = 0; i < 3; ++i) {
+    bytes[i] = compressed_input[i].load(std::memory_order_relaxed);
+    total += bytes[i];
+    used_levels += bytes[i] != 0;
+    if (bytes[i] > bytes[most]) most = i;
+  }
+  if (!total) return std::to_string(current.load(std::memory_order_relaxed)) + " (automatic)";
+  std::string text = std::to_string(levels[most]) + " (automatic";
+  if (used_levels < 2) return text + ")";
+  const char* separator = "; ";
+  for (size_t i = 0; i < 3; ++i) {
+    if (!bytes[i]) continue;
+    text += separator + ("level " + std::to_string(levels[i]) + ": " + std::to_string((bytes[i] * 100 + total / 2) / total) + "%");
+    separator = ", ";
+  }
+  return text + " of compressed input)";
+}
+
 int CompressionLink::level(bool explicit_level, int requested) const {
   return explicit_level ? requested : current.load(std::memory_order_relaxed);
 }
