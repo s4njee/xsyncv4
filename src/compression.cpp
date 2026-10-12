@@ -67,21 +67,31 @@ bool CompressionSuffixes::matches(std::string_view name) const {
   return false;
 }
 
-void CompressionLink::observe(uint64_t count, uint64_t elapsed) {
-  if (!count || !elapsed) return;
-  nanoseconds.fetch_add(elapsed, std::memory_order_relaxed);
-  bytes.fetch_add(count, std::memory_order_relaxed);
+void CompressionLink::observe(uint64_t count, uint64_t elapsed, bool backlogged, uint64_t now) {
+  if (!count) return;
+  bytes_ += count;
+  nanoseconds_ += elapsed;
+  if (backlogged) backlogged_bytes_ += count;
+  // Do not infer a rate from tiny acknowledgments, or from less than a window.
+  if (bytes_ < MIN_BYTES || (bytes_ < WINDOW_BYTES && nanoseconds_ < WINDOW_NS)) return;
+  bool saturated = backlogged_bytes_ * 2 >= bytes_;
+  double rate = nanoseconds_ ? (double)bytes_ * 1e9 / (double)nanoseconds_ : (double)FAST;
+  int target = !saturated || rate >= (double)FAST ? 1 : rate < (double)SLOW ? 6 : 3;
+  int level = current.load(std::memory_order_relaxed);
+  if (target > level) {
+    if (now >= hold_until_) level = level == 1 ? 3 : 6;
+  } else if (target < level) {
+    level = level == 6 ? 3 : 1;
+    // The transport stopped being the limit at this level: this machine cannot
+    // compress that hard as fast as the link drains. Do not try again at once.
+    if (!saturated) hold_until_ = now + HOLD_NS;
+  }
+  current.store(level, std::memory_order_relaxed);
+  bytes_ = nanoseconds_ = backlogged_bytes_ = 0;
 }
 
-int CompressionLink::level(bool explicit_level, int requested, uint64_t rate_limit) const {
-  if (explicit_level) return requested;
-  uint64_t count = bytes.load(std::memory_order_relaxed), elapsed = nanoseconds.load(std::memory_order_relaxed);
-  if (count < 256 * 1024 || elapsed < 1000000) return 3;
-  double rate = (double)count * 1e9 / elapsed;
-  if (rate_limit) rate = std::min(rate, (double)rate_limit);
-  if (rate >= 64 * 1024 * 1024) return 1;
-  if (rate < 8 * 1024 * 1024) return 6;
-  return 3;
+int CompressionLink::level(bool explicit_level, int requested) const {
+  return explicit_level ? requested : current.load(std::memory_order_relaxed);
 }
 
 bool compression_worthwhile(std::string_view raw, void* context) {

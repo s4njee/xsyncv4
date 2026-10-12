@@ -252,6 +252,8 @@ struct Conn {
   std::vector<char> rb = std::vector<char>(256 * 1024);
   size_t rpos = 0, rlen = 0;
   static constexpr size_t MAX_Q = 48 << 20;
+  // A queue this deep when the writer comes back for more means the transport is the bottleneck.
+  static constexpr size_t BACKLOG = 8 << 20;
 
   void configure(u64 rate, u32 seconds, bool heartbeat) {
     limiter.configure(rate);
@@ -349,7 +351,8 @@ struct Conn {
     wt_id = std::this_thread::get_id();
     std::string small;
     std::deque<std::string> batch;
-    auto out = [&](const char* p, size_t n, bool activity = true) {
+    bool queue_backlogged = false;
+    auto out = [&](const char* p, size_t n, bool activity = true, bool backlogged = false) {
       StageTimer timing(g_stats.network_ns);
       u64 transport_started = activity && compression_observe.load(std::memory_order_relaxed) ? now_ns() : 0;
       size_t transport_bytes = n;
@@ -377,7 +380,10 @@ struct Conn {
         }
         if (!ok) break;
       }
-      if (ok && transport_started) compression_link.observe(transport_bytes, now_ns() - transport_started);
+      if (ok && transport_started) {
+        u64 finished = now_ns();
+        compression_link.observe(transport_bytes, finished - transport_started, backlogged, finished);
+      }
       if (!ok) {
         // The peer may have sent a fatal filesystem error before closing. Let
         // the reader consume it instead of racing it with an EPIPE exit here.
@@ -404,6 +410,7 @@ struct Conn {
           }
           continue;
         }
+        queue_backlogged = qbytes >= BACKLOG;
         batch.swap(q);
         qbytes = 0;
         cv_space.notify_all();
@@ -414,18 +421,18 @@ struct Conn {
         if (f.size() < 32768) {
           small.append(f);
           if (small.size() >= (256 << 10)) {
-            if (!out(small.data(), small.size())) return;
+            if (!out(small.data(), small.size(), true, queue_backlogged)) return;
             small.clear();
           }
         } else {
           if (!small.empty()) {
-            if (!out(small.data(), small.size())) return;
+            if (!out(small.data(), small.size(), true, queue_backlogged)) return;
             small.clear();
           }
-          if (!out(f.data(), f.size())) return;
+          if (!out(f.data(), f.size(), true, queue_backlogged)) return;
         }
       }
-      if (!small.empty() && !out(small.data(), small.size())) return;
+      if (!small.empty() && !out(small.data(), small.size(), true, queue_backlogged)) return;
       batch.clear();
     }
   }
@@ -824,7 +831,7 @@ bool pack(std::string& f, std::string_view raw, Worker& w) {
   put_var(f, raw.size());
   size_t at = f.size();
   f.resize(at + bound);
-  int level = g_conn ? g_conn->compression_link.level(g_opt.compress_level_explicit, (int)g_opt.compress_level, g_opt.bwlimit)
+  int level = g_conn ? g_conn->compression_link.level(g_opt.compress_level_explicit, (int)g_opt.compress_level)
                      : (int)g_opt.compress_level;
   level = std::clamp(level, ZSTD_minCLevel(), ZSTD_maxCLevel());
   if (g_conn) {
