@@ -83,6 +83,8 @@ def check_inventory(name, host, report, now=None):
     for tool in ('rsync', 'ip', 'tc', 'ping', 'findmnt'):
         if not report.get('tools', {}).get(tool):
             problems.append(f'{name}: {tool} is not installed')
+    if report.get('ext4_lazy_init'):
+        problems.append(f'{name}: a new ext4 filesystem is still being initialised in the background')
     if not host.get('root'):
         problems.append(f'{name}: no benchmark root is declared')
     else:

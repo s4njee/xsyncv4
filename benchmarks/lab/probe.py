@@ -230,6 +230,8 @@ def inventory(paths):
         'block_devices': block_devices(),
         'zfs': os.path.exists('/proc/spl/kstat/zfs/arcstats'),
         'systemd': os.path.isdir('/run/systemd/system'),
+        # The kernel zeroes a new ext4 filesystem's inode tables in the background, competing for the disk.
+        'ext4_lazy_init': any(read(f'/proc/{pid}/comm') == 'ext4lazyinit' for pid in os.listdir('/proc') if pid.isdigit()),
         'helper': helper_state(),
     })
     return result
@@ -252,6 +254,7 @@ def snapshot(name=None):
     if status == 0 and '=' in out:
         result['throttled'] = out.strip().split('=', 1)[1]
     result['tcp'] = parse_snmp_tcp(read('/proc/net/snmp') or '')
+    result['disks'] = disk_stats()
     arc = read('/proc/spl/kstat/zfs/arcstats')
     if arc:
         result['zfs_arc_bytes'] = next((int(fields[2]) for line in arc.splitlines()
@@ -335,6 +338,50 @@ def staged(root, names):
     return result
 
 
+def disk_stats():
+    """Per-device I/O counters from /proc/diskstats, for write latency and discards over an interval."""
+    result = {}
+    for line in (read('/proc/diskstats') or '').splitlines():
+        fields = line.split()
+        if len(fields) >= 14 and not fields[2].startswith(('loop', 'ram', 'zram', 'dm-')) \
+                and os.path.exists('/sys/block/' + fields[2]):  # whole devices, not partitions
+            result[fields[2]] = {'reads': int(fields[3]), 'read_ms': int(fields[6]), 'writes': int(fields[7]),
+                                 'write_sectors': int(fields[9]), 'write_ms': int(fields[10]),
+                                 'discards': int(fields[14]) if len(fields) > 14 else None}
+    return result
+
+
+def storage(path, rounds, megabytes, pause):
+    """Time repeated synced writes under a directory, to expose a drive whose write speed collapses.
+
+    Each round writes, syncs and deletes one file of incompressible data. A
+    drive with a small exhausted write cache shows up as a slowest round many
+    times longer than the fastest.
+    """
+    block = os.urandom(8 << 20)
+    target = os.path.join(path, f'.xsbench-storage-test.{os.getpid()}')
+    times = []
+    try:
+        for _ in range(rounds):
+            started = time.perf_counter()
+            with open(target, 'wb') as stream:
+                for _ in range(megabytes // 8):
+                    stream.write(block)
+                stream.flush()
+                os.fsync(stream.fileno())
+            times.append(time.perf_counter() - started)
+            os.unlink(target)
+            time.sleep(pause)
+    finally:
+        if os.path.exists(target):
+            os.unlink(target)
+    rates = sorted(megabytes / seconds for seconds in times)
+    return {'utc': utc(), 'hostname': socket.gethostname(), 'path': path, 'mount': mount_of(path),
+            'megabytes_per_round': megabytes, 'seconds': [round(seconds, 3) for seconds in times],
+            'mb_per_s_median': round(rates[len(rates) // 2], 1), 'mb_per_s_min': round(rates[0], 1),
+            'mb_per_s_max': round(rates[-1], 1), 'slowest_over_fastest': round(max(times) / min(times), 1)}
+
+
 def sample(name, interval, output):
     """Append one snapshot per interval until SIGTERM or SIGINT."""
     stop = []
@@ -362,6 +409,11 @@ def main(argv=None):
     p = commands.add_parser('staged', help='hashes and versions of files staged under ROOT/bin')
     p.add_argument('--root', required=True)
     p.add_argument('names', nargs='+')
+    p = commands.add_parser('storage', help='time repeated synced writes under a directory')
+    p.add_argument('--path', required=True, help='an existing directory on the filesystem to test')
+    p.add_argument('--rounds', type=int, default=14)
+    p.add_argument('--megabytes', type=int, default=512, help='size of each round')
+    p.add_argument('--pause', type=float, default=1.0, help='seconds between rounds')
     p = commands.add_parser('sample', help='append snapshots at an interval until signalled')
     p.add_argument('--interface')
     p.add_argument('--interval', type=float, default=1.0)
@@ -375,6 +427,10 @@ def main(argv=None):
         if args.peer.startswith('-') or (args.ssh or '').startswith('-'):
             parser.error('invalid peer')
         result = route(args.peer, args.ssh, args.pings)
+    elif args.command == 'storage':
+        if not os.path.isdir(args.path) or args.rounds < 2 or args.megabytes < 8:
+            parser.error('storage needs an existing directory, at least two rounds and 8 MB per round')
+        result = storage(args.path, args.rounds, args.megabytes, args.pause)
     elif args.command == 'staged':
         if not args.root.startswith('/') or any('/' in name or name.startswith('.') for name in args.names):
             parser.error('staged needs an absolute root and plain file names')

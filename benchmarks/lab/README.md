@@ -9,7 +9,7 @@ agent and the sample record) and milestone M5 (analysis and reports).
 | File | Runs on | Purpose |
 |---|---|---|
 | `hosts.toml` | controller | Hosts, benchmark roots, and the interface each host must use on each link |
-| `probe.py` | endpoint | Read-only JSON reports: `inventory`, `snapshot`, `route`, and `sample` for a once-a-second series |
+| `probe.py` | endpoint | JSON reports: `inventory`, `snapshot`, `route`, `staged`, `sample` for a once-a-second series, and `storage`, a write test |
 | `preflight.py` | controller | Runs the probes over SSH, checks them against `hosts.toml`, and writes a record under `benchmarks/results/lab/preflight/` |
 | `stage.py` | controller | Builds `xs` from a commit, stages it and the lab scripts on the hosts, and checks what they hold |
 | `plan.py` | controller | Expands an experiment spec into a randomized block plan; starts, follows and fetches a run |
@@ -217,6 +217,25 @@ After a change that alters generated output, bump `GENERATOR`, regenerate
 and run `python3 corpus.py pin ROOT/corpora`, which records every manifest
 it finds there.
 
+## Checking a destination drive
+
+```sh
+ssh HOST python3 - storage --path /dir/on/the/drive < benchmarks/lab/probe.py
+```
+
+This writes, syncs and deletes a 512 MiB file fourteen times and reports
+each round's time. A steady drive gives a slowest round within a few tens
+of percent of the fastest. A drive whose write cache runs out gives a
+slowest round many times longer, and makes a noisy destination. freya's
+scratch drive, a QLC drive that was 86% full and had never been trimmed,
+showed a 60-fold swing; reformatted, it shows 1.5-fold. Every other probe
+command only reads; this one writes about 7 GB.
+
+A newly formatted ext4 filesystem zeroes its inode tables in the background
+for some minutes after it is first mounted, and writes are several times
+slower until that finishes. Preflight refuses a host where that is still
+running.
+
 ## Operator setup (milestone M0)
 
 The harness never edits `sudoers`, `authorized_keys` or anything else owned
@@ -237,21 +256,23 @@ ssh -t neo.local '
   mkdir -p ~/benchmarks/xsyncv4/lab'
 ```
 
-On freya, whose benchmark root is the ext4 filesystem at `/mnt/nvme`. That
-mount has no `fstab` entry, so its UUID goes in the configuration:
+On freya, whose benchmark root is the ext4 filesystem at `/mnt/nvme`, mounted
+from `fstab` (so the weekly `fstrim` covers it):
 
 ```sh
 scp benchmarks/lab/xsbench-helper freya.local:/tmp/xsbench-helper
 ssh -t freya.local '
   sudo install -o root -g root -m 0755 /tmp/xsbench-helper /usr/local/sbin/xsbench-helper &&
-  printf "%s\n" interface=enp10s0 scratch=/mnt/nvme scratch_fstype=ext4 \
-    scratch_source=UUID=82f82f32-5131-4711-a23e-31a19c468950 |
+  printf "%s\n" interface=enp10s0 scratch=/mnt/nvme scratch_fstype=ext4 |
     sudo install -o root -g root -m 0644 /dev/stdin /etc/xsbench-helper.conf &&
   echo "sanjee ALL=(root) NOPASSWD: /usr/local/sbin/xsbench-helper" |
     sudo install -o root -g root -m 0440 /dev/stdin /etc/sudoers.d/xsbench-helper &&
   sudo visudo -cf /etc/sudoers.d/xsbench-helper &&
   sudo install -d -o sanjee -g sanjee /mnt/nvme/xsbench'
 ```
+
+A scratch mount with no `fstab` entry can instead be named in the helper's
+configuration as `scratch_source=UUID=...`, but then nothing trims it.
 
 SSH from freya to neo, using the key freya already has (done on 2026-10-11):
 

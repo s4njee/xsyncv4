@@ -88,7 +88,7 @@ or a caveat in v4. Section 4.3 turns every one into a check.
 | Host | Hardware | Role |
 |---|---|---|
 | `neo.local` | Raspberry Pi 5 Model B, 4 cores, 4 GiB; Debian 13, kernel 6.18; ext4 on NVMe; `eth0` at 1 Gb/s | One end of every pair |
-| `freya.local` | Ryzen 9 7950X, 32 threads, 62 GiB; CachyOS, kernel 7.1; benchmark root on ext4 on NVMe at `/mnt/nvme`; ZFS home; `enp10s0` at 1 Gb/s; runs other services | Phase A peer |
+| `freya.local` | Ryzen 9 7950X, 32 threads, 62 GiB; CachyOS, kernel 7.1; benchmark root on ext4 on a QLC NVMe drive at `/mnt/nvme`, reformatted 2026-10-12; ZFS home; `enp10s0` at 1 Gb/s; runs other services | Phase A peer |
 | `mars.local` | Not yet inventoried (unreachable on 2026-10-11). amd64 Linux; old docs say Ryzen 9 7900X, ext4 on NVMe, dual-boots Windows | Phase B peer |
 | this Mac | M1 Max, 10 cores, 64 GiB, APFS (98–99% full in past runs), USB gigabit adapter | Phase C peer; controller for A and B |
 
@@ -115,9 +115,10 @@ Known constraints:
   role in that data. neo and freya now authenticate both ways; mars gets
   the same before phase B. E1b measures whether client role matters.
 - freya's benchmark root is `/mnt/nvme/xsbench`, on an ext4 filesystem on a
-  1.9 TB NVMe drive mounted at `/mnt/nvme` (about 310 GB free). That mount
-  has no `fstab` entry, so after a reboot the helper mounts it by UUID from
-  its root-owned configuration. Preflight checks the mount and its type. The ZFS home
+  1.9 TB QLC NVMe drive mounted at `/mnt/nvme` from `fstab`. The helper
+  mounts it if it is not mounted, and preflight checks the mount and its
+  type. The drive's write speed collapses when it is nearly full and
+  untrimmed (see the progress notes), so it is kept mostly empty. The ZFS home
   stays in use as a second receiver filesystem for H19, warm-cache only,
   because `drop_caches` does not prove a cold ZFS ARC.
 - Root operations go through one fixed helper per Linux host (section 4.8).
@@ -741,14 +742,41 @@ Progress, 2026-10-12: M0 to M6 are done for the LAN pair, and E1 and E1b have th
 - Not yet in the agent: the `update-1pct` scenario, a throughput probe per
   block (only ping statistics so far), the once-a-second host sampler,
   resuming a run whose agent died, and a per-block warm-up.
-- Open question from E0a: what makes freya slow now and then as a
-  receiver. Its `/mnt/nvme` is an old root filesystem at 86% full and the
-  host runs other services. Until that is understood, a 3% question cannot
-  be answered for fresh copies to freya without hundreds of blocks; the
-  host-state snapshots around every sample are there to investigate it.
-- Not done: mars could not be inventoried. It has no mDNS name on the
-  network and the address neo has for it (192.168.1.229) does not answer,
-  so it is off, asleep or booted into another system.
+- Why freya is noisy as a receiver (investigated 2026-10-12 from the 1,616
+  valid samples of E0a, E0b, E1 and E1b): its scratch drive stalls.
+  - 11 to 13% of fresh copies to freya run more than 15% over their cell's
+    median, against 2 to 5% of fresh copies to neo.
+  - Those slow samples go with I/O wait on freya (2.5 CPUs waiting on
+    average, against 0.75) and with a slow sync afterwards (2.3 s against
+    0.36 s). They do not go with network retransmits, with other processes'
+    CPU on either host, with neo's temperature, with position in the
+    block, or with how much was written in the minutes before.
+  - A direct test with nothing else running shows it: fourteen 512 MiB
+    synced writes to `/mnt/nvme` took 0.17 s at best and 10.0 s at worst,
+    a 60-fold swing between about 3,000 and 51 MB/s. The same test on
+    freya's other drive (ZFS) varied 1.2-fold around 1,500 MB/s, and on
+    neo's drive 1.0-fold at 359 MB/s.
+  - The drive is a Solidigm P41 Plus, a QLC drive whose fast write cache
+    is small when the drive believes it is full. The filesystem is 86%
+    full, is mounted without `discard`, and has had no TRIM in 37 days of
+    uptime (zero discards in `/proc/diskstats`), because the weekly
+    `fstrim` only covers `fstab` entries and this mount has none. In its
+    slow state the drive writes below the speed of the gigabit link, so
+    the transfer itself waits on it.
+  - Fixed on 2026-10-12: the drive was reformatted and given an `fstab`
+    entry, so the weekly `fstrim` now covers it. Twenty 512 MiB synced
+    writes then took 0.18 to 0.27 s each, a 1.5-fold spread at about
+    2,700 MB/s. The corpora were regenerated or copied back from neo and
+    verified against their pinned digests.
+  - For a few minutes after the reformat the same test still showed 7 to
+    8 s rounds: the kernel was zeroing the new filesystem's inode tables
+    in the background (`ext4lazyinit`). Preflight now refuses a host where
+    that is running.
+  - The cells that were inconclusive for this reason need re-running; the
+    first night's fresh-copy-to-freya figures were measured on the stalling
+    drive. The drive should be re-tested if it fills up again.
+  - `probe.py storage --path DIR` is that write test, and every snapshot
+    now records per-device write counts, write time and discards.
 
 M0 is done by the operator, not by the harness. M1–M6 need no engine
 change, so flag-only experiments (E1–E3) can start before M7.

@@ -146,6 +146,10 @@ class InventoryVerdicts(unittest.TestCase):
             report = inventory(helper=dict(INVENTORY['helper'], **change))
             self.assertTrue(any(expected in p for p in self.problems(report)), expected)
 
+    def test_filesystem_still_initialising_fails(self):
+        problems = self.problems(inventory(ext4_lazy_init=True))
+        self.assertTrue(any('still being initialised' in p for p in problems))
+
     def test_missing_tool_fails(self):
         report = inventory(tools=dict(INVENTORY['tools'], tc=None))
         self.assertIn('neo: tc is not installed', self.problems(report))
@@ -207,6 +211,14 @@ class Parsers(unittest.TestCase):
         self.assertEqual(probe.parse_iw_link(text), {'connected': True, 'signal_dbm': -52.0, 'freq_mhz': 5180.0,
                                                      'rx_bitrate_mbps': 866.7, 'tx_bitrate_mbps': 650.0})
         self.assertEqual(probe.parse_iw_link('Not connected.\n'), {'connected': False})
+
+    def test_storage_test_writes_syncs_and_cleans_up(self):
+        with tempfile.TemporaryDirectory() as directory:
+            report = probe.storage(directory, rounds=3, megabytes=8, pause=0.0)
+            self.assertEqual(len(report['seconds']), 3)
+            self.assertGreaterEqual(report['slowest_over_fastest'], 1.0)
+            self.assertGreater(report['mb_per_s_median'], 0)
+            self.assertEqual(os.listdir(directory), [])
 
     def test_snapshot_and_inventory_run_here(self):
         self.assertIn('loadavg', probe.snapshot())
