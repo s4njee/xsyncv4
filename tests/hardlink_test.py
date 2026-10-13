@@ -57,6 +57,10 @@ class HardlinkTests(unittest.TestCase):
             subprocess.run([REFERENCE, '-aH', '-e', RSH, str(self.source) + '/', HOST + ':' + str(self.source) + '/'], check=True, capture_output=True)
 
     def copy(self, binary, direction, target, flags=()):
+        output = self.output(binary, direction, target, flags)
+        return sorted(line for line in output.splitlines() if len(line) > 11 and line[11:12] == b' ' and line[:1] in b'<>ch.')
+
+    def output(self, binary, direction, target, flags=()):
         source, dest = str(self.source) + '/', str(self.root / target) + '/'
         command = [str(binary), '-aH', '-j8' if binary == BINARY else '-i', *flags]
         if binary == BINARY: command += ['--no-fallback', '-i']
@@ -67,7 +71,12 @@ class HardlinkTests(unittest.TestCase):
             else: source = (HOST or 'fake') + ':' + source
         result = subprocess.run(command + [source, dest], capture_output=True, timeout=40)
         self.assertEqual(result.returncode, 0, result.stderr)
-        return sorted(line for line in result.stdout.splitlines() if len(line) > 11 and line[11:12] == b' ' and line[:1] in b'<>ch.')
+        return result.stdout
+
+    def add_name(self, name):
+        os.link(self.source / 'a', self.source / name)
+        if HOST:
+            subprocess.run([REFERENCE, '-aH', '-e', RSH, str(self.source) + '/', HOST + ':' + str(self.source) + '/'], check=True, capture_output=True)
 
     def snapshot(self, direction, target):
         path = self.root / target
@@ -94,6 +103,31 @@ class HardlinkTests(unittest.TestCase):
                     got = self.copy(BINARY, direction, suffix + '-native', ['-z', *flags])
                     self.assertEqual(got, expected)
                     self.assertEqual(self.snapshot(direction, suffix + '-native'), self.snapshot(direction, suffix + '-ref'))
+
+    def test_linked_data_is_sent_once(self):
+        size = format((self.source / 'a').stat().st_size, ',').encode()
+        for direction in ('local', 'push', 'pull'):
+            flags = ['--stats'] + (['--no-clone'] if direction == 'local' else [])
+            fresh = self.output(BINARY, direction, direction + '-once', flags)
+            self.assertIn(b'Number of regular files transferred: 1\n', fresh)
+            self.assertIn(b'Total transferred file size: ' + size + b' bytes\n', fresh)
+            names = sum(path.is_file() and not path.is_symlink() for path in self.source.rglob('*'))
+            self.assertIn(b' (reg: %d, dir: 1, link: 2)\nNumber of deleted' % names, fresh)
+            self.copy(REFERENCE, direction, direction + '-once-ref')
+            self.assertEqual(self.snapshot(direction, direction + '-once'), self.snapshot(direction, direction + '-once-ref'))
+            # A new name of a file that is already there is linked to it.
+            self.add_name('new-' + direction)
+            again = self.output(BINARY, direction, direction + '-once', flags)
+            self.assertIn(b'Number of regular files transferred: 0\n', again)
+            self.assertIn(b'Number of created files: 1 (reg: 1, ', again)
+            self.copy(REFERENCE, direction, direction + '-once-ref')
+            self.assertEqual(self.snapshot(direction, direction + '-once'), self.snapshot(direction, direction + '-once-ref'))
+
+    def test_new_name_itemizes_like_rsync(self):
+        for direction in ('local', 'push', 'pull'):
+            self.compare(direction, direction + '-name', repeat=1)
+            self.add_name('late-' + direction)
+            self.compare(direction, direction + '-name', repeat=1)
 
     def test_dry_run_has_no_side_effects(self):
         for direction in ('local', 'push', 'pull'):

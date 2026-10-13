@@ -332,12 +332,18 @@ fields; missing support falls back or fails with code 4 before destination write
 The frozen Hello options and four-byte output configuration remain unchanged.
 
 With `-H`, selected regular files, symlinks and special files retain their source
-hard-link groups, including groups spanning directories. Each selected member
-is independently validated/copied before the receiver joins successful members
-with verified temporary links. This first implementation can copy/send duplicate
-contents; `%b` still reports the actual bytes copied for each member. Link
-creation pins the selected object and both receiver-owned parent directories,
-checks inode and type, and publishes atomically. Directory times are restored
+hard-link groups, including groups spanning directories. The contents of a
+regular file are copied or sent once. The first selected name of a source inode
+that is transferred, or is already up to date, holds its data; a later name
+with nothing at the destination is not transferred, and is linked to the holder
+once every transfer has finished. If the holder was not transferred, the names
+waiting on it are reported (code 23) and left for the next run. A name that
+exists with other contents is still validated and copied on its own, as is
+every name under `--prune-empty-dirs` and in app sessions, before the receiver
+joins successful members with verified temporary links; `%b` reports the bytes
+actually copied for each member. Link creation pins the selected object and
+both receiver-owned parent directories, checks inode and type, and publishes
+atomically, never replacing a name that had nothing at it. Directory times are restored
 once linking and deletion finish. Links outside the selected source list are
 not recreated. `hf`, `hL` and `hS` records and `%L` distinguish hard-link targets
 (` => `) from symlink targets (` -> `), including repeated itemization.

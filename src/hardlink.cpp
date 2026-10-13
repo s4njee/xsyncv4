@@ -14,11 +14,20 @@ struct Member {
   Entry attrs, before;
   bool existed = false, ready = false, restore_flags = false;
   bool alternate = false;
+  // A follower is a new name of an inode whose data another member, its
+  // leader, already holds or is receiving. It is not transferred; it has no
+  // destination file until finalization links it.
+  std::string leader;
+  bool absent = false;
   u64 dest_dev = 0, dest_ino = 0;
   std::optional<OutputEvent> event;
 };
+using Identity = std::tuple<u64, u64, u8, i64, i64, u32, i64, u32>;
 std::mutex mutex;
 std::unordered_map<std::string, Member> members;
+std::map<Identity, std::string> holders;  // source inode -> destination path of the member with its data
+
+Identity identity(const Entry& a) { return {a.hdev, a.ino, a.type, a.size, a.mtime, a.mtime_ns, a.ctime, a.ctime_ns}; }
 
 std::string key(const DirWork& w, u32 i) { return path_join(w.dst_path, w.dst_name(i)); }
 char kind(u8 type) { return type == T_REG ? 'f' : type == T_LNK ? 'L' : type == T_CHR || type == T_BLK ? 'D' : 'S'; }
@@ -49,7 +58,7 @@ bool publish(const Member& anchor, const Member& member) {
   if (!source_ok || !matches(anchor, source)) {
     errno = ESTALE; return false;
   }
-  if (fstatat(to.fd, to.name.c_str(), &target, AT_SYMLINK_NOFOLLOW) != 0 || !matches(member, target)) {
+  if (!member.absent && (fstatat(to.fd, to.name.c_str(), &target, AT_SYMLINK_NOFOLLOW) != 0 || !matches(member, target))) {
     errno = ESTALE; return false;
   }
   std::string temp;
@@ -60,6 +69,15 @@ bool publish(const Member& anchor, const Member& member) {
   }
   struct stat linked;
   bool ok = fstatat(to.fd, temp.c_str(), &linked, AT_SYMLINK_NOFOLLOW) == 0 && matches(anchor, linked);
+  if (ok && member.absent) {
+    // Nothing of ours is at this name, so nothing may be replaced: a second
+    // link from the verified temporary one fails if the name is now taken.
+    ok = linkat(to.fd, temp.c_str(), to.fd, to.name.c_str(), 0) == 0;
+    int error = errno;
+    unlinkat(to.fd, temp.c_str(), 0);
+    errno = error;
+    return ok;
+  }
   if (ok) ok = fstatat(to.fd, to.name.c_str(), &target, AT_SYMLINK_NOFOLLOW) == 0 && matches(member, target);
   if (!ok) errno = ESTALE;
   if (ok) ok = renameat(to.fd, temp.c_str(), to.fd, to.name.c_str()) == 0;
@@ -146,6 +164,18 @@ void hardlink_complete(DirWork& w, u32 index, const Entry& source, const struct 
   member.ready = true;
 }
 
+bool hardlink_follow(DirWork& w, u32 index, bool may_follow) {
+  if (!g_opt.hard_links || g_opt.dry_run) return false;
+  std::lock_guard<std::mutex> lock(mutex);
+  auto it = members.find(key(w, index));
+  if (it == members.end() || it->second.attrs.type != T_REG) return false;
+  Member& member = it->second;
+  auto [holder, first] = holders.try_emplace(identity(w.src.e[index]), member.path);
+  if (first || holder->second == member.path || !may_follow) return false;
+  member.leader = holder->second;
+  return true;
+}
+
 bool hardlink_defer(DirWork& w, u32 index, OutputEvent event) {
   if (!g_opt.hard_links) return false;
   std::lock_guard<std::mutex> lock(mutex);
@@ -157,12 +187,23 @@ bool hardlink_defer(DirWork& w, u32 index, OutputEvent event) {
 
 std::vector<std::string> hardlink_finalize() {
   std::vector<std::string> dirty;
-  using Identity = std::tuple<u64, u64, u8, i64, i64, u32, i64, u32, std::string>;
-  std::map<Identity, std::vector<Member*>> groups;
+  // A follower takes its leader's final attributes, and so joins its group.
+  for (auto& [path, member] : members) {
+    if (member.leader.empty()) continue;
+    auto leader = members.find(member.leader);
+    if (leader == members.end() || !leader->second.ready) {
+      if (!g_stop.load())
+        err_line(RERR_PARTIAL, "cannot link \"%s\": \"%s\" was not transferred", member.rel.c_str(),
+                 leader == members.end() ? member.leader.c_str() : leader->second.rel.c_str());
+      continue;
+    }
+    member.attrs = leader->second.attrs;
+    member.absent = member.ready = true;
+  }
+  std::map<std::tuple<Identity, std::string>, std::vector<Member*>> groups;
   for (auto& [path, member] : members) {
     if (!member.ready) continue;
-    const Entry& a = member.attrs;
-    groups[{a.hdev, a.ino, a.type, a.size, a.mtime, a.mtime_ns, a.ctime, a.ctime_ns, member.target}].push_back(&member);
+    groups[{identity(member.attrs), member.target}].push_back(&member);
   }
   for (auto& [identity, group] : groups) {
     std::sort(group.begin(), group.end(), [](const auto* a, const auto* b) {
@@ -172,6 +213,26 @@ std::vector<std::string> hardlink_finalize() {
     Member* anchor = group.front();
     if (anchor->attrs.type == T_REG) anchor = group.back();
     for (Member* member : group) if (member->existed && member->before.type == member->attrs.type) { anchor = member; break; }
+    if (anchor->absent) {
+      // The name that is reported as transferred was not the one that received
+      // the data. Link it first; the member holding the data is then its alias.
+      auto holder = std::find_if(group.begin(), group.end(), [](const Member* member) { return !member->absent; });
+      if (holder == group.end()) continue;
+      if (publish(**holder, *anchor)) {
+        anchor->dest_dev = (*holder)->dest_dev, anchor->dest_ino = (*holder)->dest_ino;
+        anchor->absent = false;
+        anchor->restore_flags = (*holder)->restore_flags;
+        if ((*holder)->event) {
+          anchor->event = (*holder)->event;
+          anchor->event->path = anchor->rel, anchor->event->source = anchor->source;
+        }
+        g_stats.created_files.fetch_add(1, std::memory_order_relaxed);
+        dirty.push_back(anchor->parent);
+      } else {
+        file_io_error(errno, anchor->path.c_str(), "hard link");
+        anchor = *holder;
+      }
+    }
     if (anchor->event) output_event(*anchor->event);
     for (Member* member : group) {
       if (member == anchor) continue;
@@ -185,6 +246,7 @@ std::vector<std::string> hardlink_finalize() {
           if (member->event) output_event(*member->event);
           continue;
         }
+        if (member->absent) g_stats.created_files.fetch_add(1, std::memory_order_relaxed);
         dirty.push_back(member->parent);
       }
       // rsync also reports already-linked aliases when a metadata-only anchor
@@ -200,5 +262,6 @@ std::vector<std::string> hardlink_finalize() {
                                       anchor->dest_dev, anchor->dest_ino), anchor->path.c_str(), "file flags");
   }
   members.clear();
+  holders.clear();
   return dirty;
 }

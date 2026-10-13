@@ -1275,6 +1275,7 @@ retry_destination:
             if (!app_partials::prepare_entry(observed)) break;
             hardlink_prepare(w, (u32)i, d);
             hardlink_complete(w, (u32)i, s);
+            hardlink_follow(w, (u32)i, false);
             tweak_attrs(path.c_str(), s, *d, rel, 'f', t, w, (u32)i);
             if (observed && item_expect_destination(observed)) app_partials::own_entry(observed);
             break;
@@ -1292,6 +1293,13 @@ retry_destination:
         if (transfer) {
           hardlink_prepare(w, (u32)i, d);
           if (o.dry_run) hardlink_complete(w, (u32)i, s);
+          // A new name of an inode that is already here, or on its way, needs
+          // no data of its own.
+          if (hardlink_follow(w, (u32)i, !d && !observed && !o.prune_empty && !app_partials::active())) {
+            w.modified = true;
+            outcome.deferred = true;
+            break;
+          }
           if (!o.perms && !(d && d->type == T_REG)) s.mode = s.mode & 0777 & ~g_umask;
           w.need.push_back((u32)i);
           outcome.deferred = true;

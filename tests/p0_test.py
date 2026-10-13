@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 """Trust regressions that intentionally differ from rsync or need fault fixtures."""
+import itertools
 import os
 import pathlib
 import pwd
+import shutil
 import signal
 import subprocess
 import sys
@@ -536,19 +538,26 @@ class TrustTests(unittest.TestCase):
 
 
     def test_hardlink_anchor_replacement_is_rejected(self):
-        for direction in ("local", "push", "pull"):
-            with self.subTest(direction=direction), tempfile.TemporaryDirectory(prefix="xsync hardlink race ") as tmp:
+        # Separate copies already at the destination are joined by replacing
+        # one with a link to the other; a fresh copy sends the data once and
+        # links the second name where nothing exists. Both pause before the
+        # link from "a" is made.
+        for direction, existing in itertools.product(("local", "push", "pull"), (True, False)):
+            with self.subTest(direction=direction, existing=existing), tempfile.TemporaryDirectory(prefix="xsync hardlink race ") as tmp:
                 root = pathlib.Path(tmp)
                 source, dest = root / "source", root / "destination"
                 source.mkdir()
                 (source / "a").write_bytes(b"validated data")
                 os.link(source / "a", source / "z")
+                if existing:
+                    dest.mkdir()
+                    for name in ("a", "z"): shutil.copy2(source / name, dest / name)
                 outside = root / "outside"
                 outside.write_bytes(b"outside sentinel")
                 outside_before = outside.stat()
                 marker = root / "link selected"
                 env = self.fault_env(dest)
-                env.update(XSYNC_FAULT_AT_OP="link", XSYNC_FAULT_AT_NAME="z", XSYNC_FAULT_AT_NOTIFY=str(marker))
+                env.update(XSYNC_FAULT_AT_OP="link", XSYNC_FAULT_AT_NAME="a", XSYNC_FAULT_AT_NOTIFY=str(marker))
                 args = [str(BINARY), "--no-fallback", "-aHi", "--no-clone"]
                 a, b = str(source) + "/", str(dest) + "/"
                 if direction != "local":
@@ -561,15 +570,21 @@ class TrustTests(unittest.TestCase):
                     while not marker.exists() and proc.poll() is None and time.monotonic() < deadline:
                         time.sleep(0.005)
                     self.assertTrue(marker.exists(), "hard-link publication was not reached")
-                    (dest / "z").unlink()
-                    (dest / "z").symlink_to(outside)
+                    if existing:
+                        # The validated anchor becomes a link to somewhere else.
+                        (dest / "a").unlink()
+                        (dest / "a").symlink_to(outside)
+                    else:
+                        # The name that had nothing at it is taken.
+                        (dest / "z").symlink_to(outside)
                     stdout, stderr = proc.communicate(timeout=10)
                 finally:
                     if proc.poll() is None: proc.kill()
                     proc.communicate()
                 self.assertEqual(proc.returncode, 23, stderr)
                 self.assertIn(b"hard link", stderr)
-                self.assertEqual((dest / "a").read_bytes(), b"validated data")
+                self.assertEqual((dest / ("z" if existing else "a")).read_bytes(), b"validated data")
+                self.assertTrue((dest / ("a" if existing else "z")).is_symlink())
                 self.assertEqual(outside.read_bytes(), b"outside sentinel")
                 self.assertEqual((outside.stat().st_ino, outside.stat().st_nlink, outside.stat().st_mtime_ns),
                                  (outside_before.st_ino, outside_before.st_nlink, outside_before.st_mtime_ns))
