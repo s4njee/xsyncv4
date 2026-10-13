@@ -48,7 +48,10 @@ def load(path):
 
 def probe(host, *arguments, timeout=90):
     """Run probe.py on a host over SSH. Returns the report, or {'error': ...}."""
-    command = [*SSH, host['ssh'], 'python3', '-', *arguments]
+    if host.get('local'):
+        command = [sys.executable, str(HERE / 'probe.py'), *arguments]
+    else:
+        command = [*SSH, host['ssh'], 'python3', '-', *arguments]
     try:
         with open(HERE / 'probe.py', 'rb') as script:
             done = subprocess.run(command, stdin=script, capture_output=True, timeout=timeout)
@@ -74,13 +77,14 @@ def check_inventory(name, host, report, now=None):
     problems = []
     if report.get('hostname') != host['hostname']:
         problems.append(f'{name}: reached a host called {report.get("hostname")}, expected {host["hostname"]}')
-    if report.get('system') != 'Linux':
-        problems.append(f'{name}: {report.get("system")} endpoints are not supported yet')
+    linux = report.get('system') == 'Linux'
+    if not linux and not host.get('local'):
+        problems.append(f'{name}: a {report.get("system")} endpoint must be the local host')
     if now is not None and report.get('utc'):
         skew = abs((datetime.datetime.fromisoformat(report['utc']) - now).total_seconds())
         if skew > MAX_CLOCK_SKEW_S:
             problems.append(f'{name}: clock differs from the controller by {skew:.1f} s')
-    for tool in ('rsync', 'ip', 'tc', 'ping', 'findmnt'):
+    for tool in ('rsync', 'ip', 'tc', 'ping', 'findmnt') if linux else ('rsync', 'ping'):
         if not report.get('tools', {}).get(tool):
             problems.append(f'{name}: {tool} is not installed')
     if report.get('ext4_lazy_init'):
@@ -122,7 +126,10 @@ def check_route(link_name, link, source, target, hosts, report):
         return [f'{label}: {report["error"]}']
     problems = []
     ssh = report.get('ssh', {})
-    if not ssh.get('ok'):
+    one_way = link.get('initiator') not in (None, source)  # only the initiator ever connects
+    if one_way:
+        ssh = {}
+    elif not ssh.get('ok'):
         problems.append(f'{label}: {source} cannot SSH to {target}: {ssh.get("error", "not attempted")}')
     elif ssh.get('peer_hostname') != hosts[target]['hostname']:
         problems.append(f'{label}: reached a host called {ssh.get("peer_hostname")}, '
@@ -173,8 +180,8 @@ def survey(config, link_names, pings):
         for source, target in (link['hosts'], link['hosts'][::-1]):
             if 'error' in record['inventory'][source]:
                 continue  # already reported; its route would only repeat the failure
-            report = probe(hosts[source], 'route', '--peer', hosts[target]['name'],
-                           '--ssh', hosts[target]['ssh'], '--pings', str(pings))
+            proof = ['--ssh', hosts[target]['ssh']] if link.get('initiator') in (None, source) else []
+            report = probe(hosts[source], 'route', '--peer', hosts[target]['name'], *proof, '--pings', str(pings))
             record['routes'][f'{link_name}:{source}->{target}'] = report
             record['problems'] += check_route(link_name, link, source, target, hosts, report)
     return record

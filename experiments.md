@@ -912,6 +912,16 @@ ratio of 1.036 [1.026, 1.046]. First diagnostics, run by hand:
   are not yet, since 155 MB/s is still above the link. One `fstrim`
   (1.96 TB discarded) restored 3,000 MB/s. The helper now has a
   `trim-scratch` verb and the agent calls it at the start of every run.
+- Supplementary experiments between this Mac and mars (2026-10-12): the
+  harness now drives a local macOS endpoint without SSH, builds its own
+  binary from the same commit, and writes to
+  `benchmarks/results/supplementary/`. The Mac accepts no SSH, so it is the
+  driver and the SSH client in both directions; it has no helper, no cold
+  cache and no quiet-host gate, so these runs are noisier than the path
+  experiments and are kept apart from them. Only small-file corpora are
+  run. A background run waits whenever a path experiment marks one of its
+  hosts as in use. `S1-mac-mars-small.toml` is the first.
+- mars's login shell is fish, so every remote script now runs under `sh`.
 - The adaptive-compression fix was merged into `main` on 2026-10-12 as a
   fast-forward to `e1f05b518049`, the build already staged on neo and
   freya, which is the baseline revision from here on.
@@ -921,6 +931,111 @@ ratio of 1.036 [1.026, 1.046]. First diagnostics, run by hand:
     even at a fixed level. xs compresses each block alone, and with many
     workers the blocks are flushed smaller. This is a lead for the block
     size and idle-flush tunables (E4a).
+- Queue of 2026-10-12 (started 21:09 UTC because both hosts were free,
+  finished 05:59 UTC, baseline `e1f05b518049`): five runs, 1,120 samples,
+  332 of 332 blocks valid, none voided. The scratch drive was trimmed at
+  the start of each run.
+- E1f, second run of 12 blocks. The report pools both runs (24 blocks);
+  that is a second look at a confirmatory experiment, so the pooled
+  intervals should be read at `--looks 2`.
+  - Mixed trees with neo sending, last night alone: `mixed-bimodal` 1.038
+    [1.034, 1.043] with σ_d 0.007, `mixed-threshold` 1.031 [1.021, 1.041].
+    Pooled: 1.037 [1.032, 1.042], *slower*, and 1.030 [1.022, 1.037],
+    *inconclusive*. The deficit of T1 is real and is 3 to 4%.
+  - `small-flat` 0.520 [0.487, 0.556], `small-opaque` 0.514 [0.493, 0.537],
+    `small-deep` 0.812 [0.750, 0.879], `tiny-one` 0.902 [0.872, 0.933]:
+    all *faster* (pooled).
+  - `small-real` is still *inconclusive* by the t interval, 0.951 [0.884,
+    1.023], because of one rsync sample at 16.0 s in the first block; the
+    other eleven blocks have rsync at 11.0 to 11.7 s and xs at 11.1 to
+    11.3 s, and the robust estimate is 0.984 [0.971, 0.992]. The two tools
+    are within 2% of each other on this cell.
+  - **Trimming did not remove the first-blocks effect.** The first two
+    `small-deep` blocks had samples at 16 to 18 s against 6 to 8 s
+    afterwards, and rsync's small-file times to freya still vary (5.2 to
+    7.7 s on `small-flat`) while xs's do not (3.4 to 3.7 s). The noise in
+    these cells is now mostly rsync's own, and what is left of the drive's
+    is in the first minutes after a trim. A run should discard a warm-up
+    block per cell (the per-block warm-up of M5, not yet built).
+- E3a (screening, 10 blocks, `-j` 1, 2, 4, 8 against the default, three
+  corpora, fresh and no-op, both directions). `-j` applies to both ends;
+  the default is the core count capped at 16, so 4 on neo and 16 on freya.
+  - **No single worker count is right, and one is clearly wrong.** `-j1`
+    recovers the byte-bound deficit with neo sending (`mixed-bimodal` 0.966
+    [0.955, 0.977]; `-j2` 0.973, `-j4` 1.003 *equivalent*, `-j8` 1.027) but
+    is *slower* on every no-op (1.15 to 1.58), on `small-flat` from neo
+    (1.93 [1.60, 2.33]) and on `small-real` from freya (1.12). The time on
+    the Pi is monotone in the worker count for large files and the reverse
+    for small ones.
+  - With freya sending bytes, the count does not matter (0.989 to 0.993,
+    all intervals include 1).
+  - **Sixteen workers are too many for a no-op on freya.** `small-real`
+    no-op from neo to freya takes 1.63 s by default and 1.01 s at `-j4`
+    (0.624 [0.537, 0.724], *faster*), 1.09 s at `-j2`, 1.18 s at `-j8`. No
+    such effect on `small-flat` or with neo receiving.
+  - `-j2` is 5% *faster* than the default for `small-flat` from freya to
+    neo (0.948 [0.938, 0.958]), where neo is the receiver.
+  - What to build from this: the worker count should be chosen per side and
+    per kind of work, not once. Candidates for M7 and a confirmatory run:
+    one or two data workers per large file on a sender with four cores or
+    fewer, the present count for scanning and small files, and a default
+    cap below 16.
+- E3b-confirm (confirmatory, 12 blocks, Holm over 16 comparisons), `-z`
+  against plain xs on fresh copies, with the merged adaptive level:
+  - *Faster* on compressible data in both directions: `mixed-bimodal` 0.773
+    [0.768, 0.779] from freya and 0.794 [0.779, 0.809] from neo;
+    `small-real` 0.844 [0.785, 0.906] from freya and 0.505 [0.481, 0.530]
+    from neo; `small-flat` from freya 0.932 [0.917, 0.947].
+  - No trapped runs: `mixed-bimodal` from neo has σ_d 0.030 against 0.235
+    for the old build in E3b.
+  - The second half of the hypothesis fails. On random data `-z` costs more
+    than 3% with neo sending: `small-opaque` 1.054 [1.043, 1.065],
+    *slower*; from freya 1.035 [1.024, 1.046], *inconclusive*.
+    `small-flat` from neo is 1.050 [1.028, 1.073], *inconclusive*. So `-z`
+    is not yet safe to enable by default on a gigabit link; skipping
+    blocks that do not compress is the missing piece.
+  - Plain rsync against plain xs in the same blocks: 1.36 on `small-real`
+    from freya, 1.73 and 1.62 on `small-flat` and `small-opaque` from neo
+    (all *slower*), *equivalent* on `mixed-bimodal` both ways (1.009 and
+    0.981; the 0.981 is T1 again).
+- E1r, real trees with `-aH` (screening; 6 and 4 blocks, so estimates
+  only):
+  - `real-holochart` (249,602 files, 7.3 GiB): fresh copies are link-bound
+    at about 70 s, 0.953 [0.936, 0.971] from freya and 1.003 [0.993,
+    1.013] from neo. No-ops are 0.207 [0.191, 0.225] to neo (1.6 s against
+    7.6 s) and 0.373 [0.356, 0.392] to freya (1.3 s against 3.6 s). The
+    synthetic small corpora predicted both.
+  - **`real-laikav2`: xs is 19 to 24% slower, because it sends hard-linked
+    data once per name.** 1.190 [1.173, 1.207] from freya and 1.242 [1.240,
+    1.245] from neo, 392 s against 316 to 330 s. The tree has 19,345 hard
+    links. rsync `-H` transfers 35,346 files and 36.7 GB; xs `-H`
+    transfers all 54,691 names and 45.3 GB, then links them at the
+    destination (verification, which checks the links, passes for both).
+    Both tools run at link rate, 116 MB/s, so the whole difference is the
+    23% of extra bytes. This is a defect in the remote `-H` path, not a
+    tuning matter, and it hides how xs compares on the rest of that tree.
+    The run should be repeated after the fix, or meanwhile without `-H`.
+  - On the Pi, sending `real-laikav2` costs xs 357 s of CPU against
+    rsync's 150 s.
+- S1 (supplementary, the Mac and mars over mesh Wi-Fi, 12 blocks, 192 of
+  192 valid, in `benchmarks/results/supplementary/S1-mac-mars-small/`;
+  caveats in the `README.md` beside it). σ_d is 0.16 to 0.55 on the
+  100,000-file corpora, against 0.01 to 0.19 in the path experiments, so
+  only large effects show.
+  - Pushing from the Mac to ext4: xs is 2.7 to 3.4 times faster on fresh
+    copies (`small-flat` 4.4 s against 15.0 s) and 1.9 to 3.3 times faster
+    on no-ops.
+  - Pulling onto APFS, `small-flat` and `small-opaque`: 0.805 [0.726,
+    0.892] and 0.775 [0.669, 0.899] fresh, about 21 s against 28 s; no-ops
+    2.5 times faster.
+  - **Pulling a deep tree onto APFS, xs is slower:** `small-deep` fresh
+    1.75 [1.53, 1.99] (57 s against 33 s) and no-op 3.66 [2.87, 4.66]
+    (11.3 s against 3.1 s). The Mac spends 89 s of kernel time on the
+    fresh copy against rsync's 42 s, and 27 s on the no-op against 1.9 s.
+    The tree has 116,667 directories; the same files in a flat tree show
+    no such cost, and neither does a Linux receiver (E1). A lead for the
+    macOS receiver's per-directory work, to be looked at on the Mac leg.
+  - `tiny-one` is noise: σ_d 0.6 to 0.8 on a 0.3 s transfer over Wi-Fi.
 
 M0 is done by the operator, not by the harness. M1–M6 need no engine
 change, so flag-only experiments (E1–E3) can start before M7.

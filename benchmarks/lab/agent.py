@@ -46,10 +46,16 @@ class Host:
         self.name, self.local = name, local
         self.ssh, self.root, self.interface = spec['ssh'], spec['root'], spec['interface']
         self.has_helper = spec.get('helper', False)
+        self.system = spec.get('system', 'Linux')
         self.gates = dict(GATES, **spec.get('gates', {}))
 
+    def sync_argv(self, path):
+        """Flush one filesystem where the system can, everything where it cannot (macOS)."""
+        return ['sync', '-f', path] if self.system == 'Linux' else ['sync']
+
     def shell(self, script, check=True, timeout=None):
-        argv = ['sh', '-c', script] if self.local else [*SSH, self.ssh, script]
+        # The peer's login shell may not be a POSIX one (mars uses fish), so sh runs the script there too.
+        argv = ['sh', '-c', script] if self.local else [*SSH, self.ssh, 'sh -c ' + shlex.quote(script)]
         done = subprocess.run(argv, capture_output=True, text=True, timeout=timeout, stdin=subprocess.DEVNULL)
         if check and done.returncode:
             raise RuntimeError(f'{self.name}: `{script[:200]}` exited {done.returncode}: {done.stderr.strip()[-400:]}')
@@ -212,7 +218,10 @@ class Run:
                         raise RuntimeError(f'{host.name}: {verb}: {done.stderr.strip()}')
                     trimmed = done.stdout.strip() if verb == 'trim-scratch' and done.returncode == 0 else trimmed
                 self.plan['observed'][host.name]['trim'] = trimmed
-            host.run('mkdir', '-p', work_path(host, self.run_id, 'logs'))
+            host.run('mkdir', '-p', work_path(host, self.run_id, 'logs'), f'{host.root}/runs')
+            if not self.plan.get('background'):
+                # Tell background runs that share this host to wait.
+                host.run('touch', f'{host.root}/runs/.foreground-{self.run_id}')
         for name, corpus in self.plan['corpora'].items():
             for sender in sorted({cell['sender'] for cell in self.cells.values() if cell['corpus'] == name}):
                 host = self.hosts[sender]
@@ -229,9 +238,21 @@ class Run:
             {'schema': SCHEMA, 'run_id': self.run_id, 'started_utc': utc(), 'driver': socket.gethostname(),
              'plan': self.plan}, indent=1) + '\n')
 
+    def yield_to_foreground(self):
+        """A background run waits while a path experiment is using any of its hosts."""
+        while self.plan.get('background') and not self.stopping:
+            busy = [host.name for host in self.hosts.values()
+                    if host.shell(f'find {shlex.quote(host.root + "/runs")} -maxdepth 1 -name ".foreground-*" -mmin -720',
+                                  check=False, timeout=60).stdout.strip()]
+            if not busy:
+                return
+            self.status('yielding', 'a path experiment is using ' + ', '.join(busy))
+            time.sleep(60)
+
     def finish(self):
         for host in self.hosts.values():
             try:
+                host.run('rm', '-f', f'{host.root}/runs/.foreground-{self.run_id}', check=False, timeout=60)
                 host.helper('governor', 'restore')
                 host.run('rm', '-rf', '--', work_path(host, self.run_id), check=False, timeout=600)
             except Exception as error:  # every host gets its turn
@@ -248,8 +269,13 @@ class Run:
             # noop: an identical destination, made once and left unchanged by every sample
             receiver.run('rm', '-rf', '--', destination, timeout=1800)
             receiver.run('mkdir', '-p', destination)
-            sender.shell(f'rsync -aH -e {shlex.quote(RSH)} {shlex.quote(sender.root + "/corpora/" + cell["corpus"] + "/")} '
-                         f'{shlex.quote(receiver.ssh + ":" + destination + "/")}', timeout=7200)
+            # Seeded from whichever end starts this arm's transfers; the other may accept no connections.
+            source = sender.root + '/corpora/' + cell['corpus'] + '/'
+            if client_role(arm, cell) == 'sender':
+                client, paths = sender, (source, receiver.ssh + ':' + destination + '/')
+            else:
+                client, paths = receiver, (sender.ssh + ':' + source, destination + '/')
+            client.shell(f'rsync -aH -e {shlex.quote(RSH)} {shlex.quote(paths[0])} {shlex.quote(paths[1])}', timeout=7200)
             self.seeded.add((cell['id'], arm['name']))
 
     def apply_cache(self, cell, destination):
@@ -266,7 +292,7 @@ class Run:
     def settle(self, cell, destination):
         """Flush the destination filesystem, then wait until both hosts are quiet. Returns their states."""
         sender, receiver = self.hosts[cell['sender']], self.hosts[cell['receiver']]
-        receiver.run('sync', '-f', os.path.dirname(destination), timeout=1800)
+        receiver.run(*receiver.sync_argv(os.path.dirname(destination)), timeout=1800)
         started = time.monotonic()
         previous = {host.name: host.snapshot() for host in (sender, receiver)}
         while True:
@@ -307,8 +333,9 @@ class Run:
             exit_status = client.shell(script, check=False, timeout=self.plan['sample_timeout_s']).returncode
             record['utc_end'] = utc()
             sync = receiver.run('python3', '-c', 'import subprocess,sys,time; s=time.perf_counter(); '
-                                'subprocess.run(["sync","-f",sys.argv[1]],check=True); print(time.perf_counter()-s)',
-                                destination, check=False, timeout=1800)  # a failed transfer may leave nothing to sync
+                                'subprocess.run(sys.argv[1:],check=True); print(time.perf_counter()-s)',
+                                *receiver.sync_argv(destination), check=False,
+                                timeout=1800)  # a failed transfer may leave nothing to sync
             after = {host.name: host.snapshot() for host in (sender, receiver)}
             record['host_state'] = {name: {'before': before[name], 'after': after[name]} for name in before}
             log = work_path(client, self.run_id, 'logs', tag)
@@ -349,6 +376,8 @@ class Run:
             record['void_reason'] = str(void)
         except (RuntimeError, subprocess.TimeoutExpired, ValueError) as error:
             record['void_reason'] = f'harness error: {error}'
+        if self.plan.get('eager_cleanup') and cell['scenario'] == 'fresh':
+            receiver.run('rm', '-rf', '--', destination, check=False, timeout=1800)  # a host short of space
         self.append(self.samples, record)
         self.done += 1
         return record
@@ -409,6 +438,7 @@ class Run:
                 if deadline and time.time() + longest > deadline:
                     expired = True
                     break
+                self.yield_to_foreground()
                 started = time.monotonic()
                 valid += self.block(entry)
                 attempted += 1

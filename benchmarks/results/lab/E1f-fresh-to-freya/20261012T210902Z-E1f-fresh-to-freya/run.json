@@ -1,0 +1,1840 @@
+{
+ "schema": 1,
+ "run_id": "20261012T210902Z-E1f-fresh-to-freya",
+ "started_utc": "2026-10-12T21:10:09.369+00:00",
+ "driver": "neo",
+ "plan": {
+  "schema": 1,
+  "experiment": "E1f-fresh-to-freya",
+  "spec_sha256": "ac0a481baaf55afb30088c2ec133f923ffaa736de26b1349cb345fc9803e2b83",
+  "kind": "confirmatory",
+  "hypothesis": "xs -a differs from rsync -a by more than 3% in time-to-durable for a fresh copy from neo to freya, per corpus.",
+  "primary": "durable_s",
+  "delta": 0.03,
+  "control": "rsync",
+  "seed": 1,
+  "run_id": "20261012T210902Z-E1f-fresh-to-freya",
+  "driver": "neo",
+  "sample_timeout_s": 3600,
+  "results": "lab",
+  "background": false,
+  "eager_cleanup": false,
+  "hosts": {
+   "neo": {
+    "ssh": "sanjee@neo.local",
+    "name": "neo.local",
+    "hostname": "neo",
+    "root": "/home/sanjee/benchmarks/xsyncv4/lab",
+    "interface": "eth0",
+    "helper": true,
+    "gates": {},
+    "local": false,
+    "system": "Linux"
+   },
+   "freya": {
+    "ssh": "sanjee@freya.local",
+    "name": "freya.local",
+    "hostname": "freya",
+    "root": "/mnt/nvme/xsbench",
+    "interface": "enp10s0",
+    "helper": true,
+    "gates": {},
+    "local": false,
+    "system": "Linux"
+   }
+  },
+  "links": {
+   "lan": {
+    "hosts": [
+     "neo",
+     "freya"
+    ],
+    "medium": "wired",
+    "min_speed_mbps": 1000,
+    "max_rtt_ms": 2.0
+   }
+  },
+  "arms": [
+   {
+    "name": "rsync",
+    "tool": "rsync",
+    "flags": [
+     "-a"
+    ],
+    "binary": {
+     "neo": "rsync",
+     "freya": "rsync"
+    }
+   },
+   {
+    "name": "xs",
+    "tool": "xs",
+    "flags": [
+     "-a"
+    ],
+    "rev": "bf596d28c5c9",
+    "binary": {
+     "neo": "/home/sanjee/benchmarks/xsyncv4/lab/bin/xs-bf596d28c5c9",
+     "freya": "/mnt/nvme/xsbench/bin/xs-bf596d28c5c9"
+    },
+    "sha256": {
+     "neo": "7f61f0acdef53606350f80057bac8d9cb418d7e7af5104315d3de9f8b9b9ac18",
+     "freya": "ce24c1fa00c11ffe8f94ad96a1221970b627d85c4607d19652815b3d5f20996f"
+    },
+    "artifacts": {
+     "xs-linux-amd64": "ce24c1fa00c11ffe8f94ad96a1221970b627d85c4607d19652815b3d5f20996f",
+     "xs-linux-arm64": "7f61f0acdef53606350f80057bac8d9cb418d7e7af5104315d3de9f8b9b9ac18"
+    }
+   }
+  ],
+  "cells": [
+   {
+    "id": "tiny-one.fresh.neo-freya.sender.warm",
+    "corpus": "tiny-one",
+    "scenario": "fresh",
+    "sender": "neo",
+    "receiver": "freya",
+    "client": "sender",
+    "link": "lan",
+    "cache": "warm"
+   },
+   {
+    "id": "small-flat.fresh.neo-freya.sender.warm",
+    "corpus": "small-flat",
+    "scenario": "fresh",
+    "sender": "neo",
+    "receiver": "freya",
+    "client": "sender",
+    "link": "lan",
+    "cache": "warm"
+   },
+   {
+    "id": "small-deep.fresh.neo-freya.sender.warm",
+    "corpus": "small-deep",
+    "scenario": "fresh",
+    "sender": "neo",
+    "receiver": "freya",
+    "client": "sender",
+    "link": "lan",
+    "cache": "warm"
+   },
+   {
+    "id": "small-opaque.fresh.neo-freya.sender.warm",
+    "corpus": "small-opaque",
+    "scenario": "fresh",
+    "sender": "neo",
+    "receiver": "freya",
+    "client": "sender",
+    "link": "lan",
+    "cache": "warm"
+   },
+   {
+    "id": "small-real.fresh.neo-freya.sender.warm",
+    "corpus": "small-real",
+    "scenario": "fresh",
+    "sender": "neo",
+    "receiver": "freya",
+    "client": "sender",
+    "link": "lan",
+    "cache": "warm"
+   },
+   {
+    "id": "mixed-bimodal.fresh.neo-freya.sender.warm",
+    "corpus": "mixed-bimodal",
+    "scenario": "fresh",
+    "sender": "neo",
+    "receiver": "freya",
+    "client": "sender",
+    "link": "lan",
+    "cache": "warm"
+   },
+   {
+    "id": "mixed-threshold.fresh.neo-freya.sender.warm",
+    "corpus": "mixed-threshold",
+    "scenario": "fresh",
+    "sender": "neo",
+    "receiver": "freya",
+    "client": "sender",
+    "link": "lan",
+    "cache": "warm"
+   }
+  ],
+  "corpora": {
+   "tiny-one": {
+    "files": 1,
+    "directories": 0,
+    "bytes": 19,
+    "digest": "38e12e8a867b32d7d9c7bf9c9a1bf9b731ba1a2a425f0323983ccc535e871dbe",
+    "quick_digest": "fba99983b39b06c131a47d522ecc6fa31d90fa37a84b7cb37ae68904a1ac50e7"
+   },
+   "small-flat": {
+    "files": 100000,
+    "directories": 100,
+    "bytes": 319224077,
+    "digest": "41b628c4337730be4efdfcc6673d517749132ffd50b75b29321640e6f064bbec",
+    "quick_digest": "e8de96251eaca6be3e98b1cb8097405b37ad470fc0d5ffdb7a5a48ea5b9f3805"
+   },
+   "small-deep": {
+    "files": 100000,
+    "directories": 116667,
+    "bytes": 319224077,
+    "digest": "8faf23b36caef1b8cf4a8b5419b8d0a27a5bc32ad0799798be2fd0b3fe79be3a",
+    "quick_digest": "be0b7fbe218fd5ac477df18245e63d6bd851d2e50dabd8cb556f04c98e3cf902"
+   },
+   "small-opaque": {
+    "files": 100000,
+    "directories": 100,
+    "bytes": 319224077,
+    "digest": "7b291eb520e784dea5a94bfdef3e842c75f2e4e193ab736217566ba1ce28c63e",
+    "quick_digest": "0614d31bdac509e673b100a3adb8d0fa28f2f372c3c5f4eb476e634b54f711b5"
+   },
+   "small-real": {
+    "files": 118594,
+    "directories": 59336,
+    "bytes": 1107333872,
+    "digest": "e9c84fab7d1a6dcdaf7c1c8688abe9bcb3cd114f551c27fad5b8624391005cdb",
+    "quick_digest": "65994469699350cde8ad45842d686fe1a01d87e64ed26de283fb0c860fae01e3"
+   },
+   "mixed-bimodal": {
+    "files": 20000,
+    "directories": 420,
+    "bytes": 1395127076,
+    "digest": "e9071fb7ad3b0375ffe9fab58f740bfd22d545f7678e163a6c745504cc7aa16b",
+    "quick_digest": "31af6dbe5d38a32f5f0acf560703fa557304d3936e59f7b395d13cf8d0dec7fb"
+   },
+   "mixed-threshold": {
+    "files": 1500,
+    "directories": 72,
+    "bytes": 1502174819,
+    "digest": "d3070e0dc3befde555186110544966357a2c32a1db72c20e30d464e4cea9e048",
+    "quick_digest": "1f974c87ddf6c48409178d39b34889d699e7079283dcd212889a0ea3ac6c38f2"
+   }
+  },
+  "blocks": [
+   {
+    "cell": "tiny-one.fresh.neo-freya.sender.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "xs",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-threshold.fresh.neo-freya.sender.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "xs",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.fresh.neo-freya.sender.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "xs",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "small-deep.fresh.neo-freya.sender.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "small-opaque.fresh.neo-freya.sender.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "rsync",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "rsync",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.fresh.neo-freya.sender.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "xs",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "tiny-one.fresh.neo-freya.sender.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "xs",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "small-opaque.fresh.neo-freya.sender.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.fresh.neo-freya.sender.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "xs",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "small-deep.fresh.neo-freya.sender.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "rsync",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-threshold.fresh.neo-freya.sender.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.fresh.neo-freya.sender.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.fresh.neo-freya.sender.warm",
+    "block": 2,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+    "block": 2,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "tiny-one.fresh.neo-freya.sender.warm",
+    "block": 2,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "xs",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "small-opaque.fresh.neo-freya.sender.warm",
+    "block": 2,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "rsync",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-threshold.fresh.neo-freya.sender.warm",
+    "block": 2,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "xs",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.fresh.neo-freya.sender.warm",
+    "block": 2,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "xs",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "small-deep.fresh.neo-freya.sender.warm",
+    "block": 2,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "xs",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.fresh.neo-freya.sender.warm",
+    "block": 3,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "xs",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-threshold.fresh.neo-freya.sender.warm",
+    "block": 3,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "rsync",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "tiny-one.fresh.neo-freya.sender.warm",
+    "block": 3,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "small-deep.fresh.neo-freya.sender.warm",
+    "block": 3,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "rsync",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "small-opaque.fresh.neo-freya.sender.warm",
+    "block": 3,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "xs",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.fresh.neo-freya.sender.warm",
+    "block": 3,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "rsync",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+    "block": 3,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "xs",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "small-opaque.fresh.neo-freya.sender.warm",
+    "block": 4,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "rsync",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+    "block": 4,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "xs",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-threshold.fresh.neo-freya.sender.warm",
+    "block": 4,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.fresh.neo-freya.sender.warm",
+    "block": 4,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.fresh.neo-freya.sender.warm",
+    "block": 4,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "xs",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "tiny-one.fresh.neo-freya.sender.warm",
+    "block": 4,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "xs",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "small-deep.fresh.neo-freya.sender.warm",
+    "block": 4,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "xs",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.fresh.neo-freya.sender.warm",
+    "block": 5,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "xs",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "small-deep.fresh.neo-freya.sender.warm",
+    "block": 5,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "xs",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.fresh.neo-freya.sender.warm",
+    "block": 5,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "xs",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "small-opaque.fresh.neo-freya.sender.warm",
+    "block": 5,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "xs",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-threshold.fresh.neo-freya.sender.warm",
+    "block": 5,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "xs",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "tiny-one.fresh.neo-freya.sender.warm",
+    "block": 5,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+    "block": 5,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "xs",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.fresh.neo-freya.sender.warm",
+    "block": 6,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "rsync",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "tiny-one.fresh.neo-freya.sender.warm",
+    "block": 6,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "small-opaque.fresh.neo-freya.sender.warm",
+    "block": 6,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "xs",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "small-deep.fresh.neo-freya.sender.warm",
+    "block": 6,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "xs",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-threshold.fresh.neo-freya.sender.warm",
+    "block": 6,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "rsync",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.fresh.neo-freya.sender.warm",
+    "block": 6,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "xs",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+    "block": 6,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "small-deep.fresh.neo-freya.sender.warm",
+    "block": 7,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+    "block": 7,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "xs",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "small-opaque.fresh.neo-freya.sender.warm",
+    "block": 7,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "tiny-one.fresh.neo-freya.sender.warm",
+    "block": 7,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.fresh.neo-freya.sender.warm",
+    "block": 7,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "rsync",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-threshold.fresh.neo-freya.sender.warm",
+    "block": 7,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "rsync",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.fresh.neo-freya.sender.warm",
+    "block": 7,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "xs",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "small-opaque.fresh.neo-freya.sender.warm",
+    "block": 8,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "rsync",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.fresh.neo-freya.sender.warm",
+    "block": 8,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "xs",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "tiny-one.fresh.neo-freya.sender.warm",
+    "block": 8,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "xs",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-threshold.fresh.neo-freya.sender.warm",
+    "block": 8,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "xs",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "small-deep.fresh.neo-freya.sender.warm",
+    "block": 8,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "xs",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+    "block": 8,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.fresh.neo-freya.sender.warm",
+    "block": 8,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "xs",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "small-deep.fresh.neo-freya.sender.warm",
+    "block": 9,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "tiny-one.fresh.neo-freya.sender.warm",
+    "block": 9,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "rsync",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-threshold.fresh.neo-freya.sender.warm",
+    "block": 9,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "xs",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.fresh.neo-freya.sender.warm",
+    "block": 9,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "xs",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.fresh.neo-freya.sender.warm",
+    "block": 9,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "rsync",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+    "block": 9,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "rsync",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "small-opaque.fresh.neo-freya.sender.warm",
+    "block": 9,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "xs",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "small-opaque.fresh.neo-freya.sender.warm",
+    "block": 10,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "rsync",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.fresh.neo-freya.sender.warm",
+    "block": 10,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.fresh.neo-freya.sender.warm",
+    "block": 10,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-threshold.fresh.neo-freya.sender.warm",
+    "block": 10,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "xs",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "tiny-one.fresh.neo-freya.sender.warm",
+    "block": 10,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "xs",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "small-deep.fresh.neo-freya.sender.warm",
+    "block": 10,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "rsync",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+    "block": 10,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "small-opaque.fresh.neo-freya.sender.warm",
+    "block": 11,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "rsync",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.fresh.neo-freya.sender.warm",
+    "block": 11,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "rsync",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+    "block": 11,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "tiny-one.fresh.neo-freya.sender.warm",
+    "block": 11,
+    "verify_full": true,
+    "orders": [
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "xs",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-threshold.fresh.neo-freya.sender.warm",
+    "block": 11,
+    "verify_full": true,
+    "orders": [
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "rsync",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.fresh.neo-freya.sender.warm",
+    "block": 11,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "rsync",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "small-deep.fresh.neo-freya.sender.warm",
+    "block": 11,
+    "verify_full": true,
+    "orders": [
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "xs",
+      "rsync"
+     ]
+    ]
+   }
+  ],
+  "scripts": {
+   "probe.py": "79c5d5649359fab936d72a58ccbb0348b8388dd71969a5c56d7915ca6a0c7563",
+   "corpus.py": "d6018d3611cba607a670f3fe554d0d4be5941fb2ef8fd65d57f10bfb582625f6",
+   "corpora.json": "729929e1ba7baf3a0b8413efffab5bc26ae0cbe8514daf1c05bbb53a314bb084",
+   "agent.py": "93f08faf14cc3ef3692716e214e5930a3b1574b35a8463f9aa6be69731572219",
+   "overnight.py": "c9b81a0bbcda7d1d2431e88060e88e432425e6251e46d6af2b24e7fdd0186072",
+   "measure.py": "afd0cf9011adb290a92853b262a57adab76b9910f6d679dd6c647f4bfb6eaf94"
+  },
+  "observed": {
+   "neo": {
+    "rsync": {
+     "path": "/usr/bin/rsync",
+     "sha256": "3852336282ee66a98c52966a8bebbf3508980a3ec47e7150f40330ada999980e",
+     "version": "rsync  version 3.4.1  protocol version 32"
+    },
+    "hostname": "neo",
+    "trim": null
+   },
+   "freya": {
+    "rsync": {
+     "path": "/usr/bin/rsync",
+     "sha256": "cae31f86ebfa8ecf2293a809c8f09d8176c8ead7f192de8caebcc6a1f3f14800",
+     "version": "rsync  version 3.5.0-g471e17dc  protocol version 32"
+    },
+    "hostname": "freya",
+    "trim": "trimmed=yes /mnt/nvme: 3.3 GiB (3582930944 bytes) trimmed"
+   }
+  }
+ }
+}

@@ -1,0 +1,32 @@
+# S1, supplementary: small files between this Mac and mars. The Mac is a busy
+# workstation with no helper, no cold cache and no quiet-host gate, so these
+# results are noisier than the path experiments and are kept apart from them,
+# in benchmarks/results/supplementary/. Only small-file corpora: with the Mac
+# in the loop, wire speed is not worth measuring. The Mac accepts no SSH, so
+# it starts every transfer: a push to mars, a pull from mars.
+id = "S1-mac-mars-small"
+kind = "screening"
+hypothesis = "On small files between a Mac (APFS) and a Linux desktop (ext4), xs -a is faster than rsync -a, fresh and no-op, in both directions."
+primary = "wall_s"
+delta = 0.05
+blocks = 12
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[arms.xs]
+tool = "xs"
+rev = "e1f05b518049"
+flags = ["-a"]
+
+[matrix]
+link = "mac-mars"
+corpus = ["tiny-one", "small-flat", "small-deep", "small-opaque"]
+scenario = ["fresh", "noop"]
+direction = ["mac>mars", "mars>mac"]
+client = ["initiator"]
+cache = ["warm"]

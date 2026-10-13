@@ -136,6 +136,22 @@ analysis. It will not start a run with less than five minutes left.
 and writes each experiment's report. `stop-queue` ends it after the current
 sample, with the hosts restored.
 
+## A macOS endpoint
+
+A host marked `local = true` in `hosts.toml` is this machine: nothing is
+sent to it over SSH, `stage.py build` adds its native binary from the same
+exported commit, and it can be the driver. A link with `initiator = "mac"`
+is one-way: only that host starts connections, so the spec says
+`client = ["initiator"]` and a transfer to it is a pull. `results =
+"supplementary"` sends the link's runs to `benchmarks/results/supplementary/`
+and `background = true` makes them wait while any path experiment has marked
+one of their hosts as in use.
+
+macOS has no per-filesystem sync, no cache reset without root and no
+quiet-host gate here, so `durable_s` there includes a system-wide `sync` and
+the cells are warm only. `cleanup = "eager"` in a spec deletes each fresh
+destination as soon as it is verified, for a host short of disk.
+
 ## Analysis
 
 ```sh

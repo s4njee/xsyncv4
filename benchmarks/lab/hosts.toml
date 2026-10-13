@@ -21,16 +21,26 @@ root = "/mnt/nvme/xsbench"    # ext4 on NVMe; the home directory is ZFS
 root_fstype = "ext4"
 helper = true
 
-# Not yet inventoried: mars was off the network when this file was written.
-# Its root and its interface on the mesh link are filled in from its first
-# inventory; until then preflight reports them as undeclared.
+# Inventoried 2026-10-12. No helper is installed yet, so no cold cache, fixed
+# governor or netem there, and mars cannot yet SSH to neo or freya.
 [hosts.mars]
 ssh = "sanjee@mars.local"
 name = "mars.local"
 hostname = "mars"
-root = ""
+root = "/home/sanjee/benchmarks/xsyncv4/lab"
 root_fstype = "ext4"
-helper = true
+helper = false
+
+# The controller itself, as an endpoint for the supplementary Mac experiments.
+# `local` hosts are driven without SSH. It is a busy workstation with no
+# helper; the .noindex suffix keeps Spotlight out of the benchmark root.
+[hosts.mac]
+local = true
+ssh = "sanjee@mbp-3.local"
+name = "mbp-3.local"
+hostname = "mbp-3"
+root = "/Users/sanjee/benchmarks/xsbench.noindex"
+helper = false
 
 # medium: "wired" and "wireless" must match the interface each host uses.
 # "mesh" means a wireless hop somewhere on the path, whatever the hosts' own
@@ -45,4 +55,17 @@ interface = { neo = "eth0", freya = "enp10s0" }
 [links.mesh]
 hosts = ["neo", "mars"]
 medium = "mesh"
-interface = { neo = "eth0" }
+interface = { neo = "eth0", mars = "enp9s0" }
+
+# Supplementary: this Mac and mars. Only the Mac can start a connection (it
+# accepts no SSH), so it is the driver and the SSH client in both directions.
+# Results go to benchmarks/results/supplementary/, apart from the path
+# experiments, and its runs give way to theirs.
+[links.mac-mars]
+hosts = ["mac", "mars"]
+medium = "mesh"
+initiator = "mac"
+driver = "mac"
+results = "supplementary"
+background = true
+interface = { mac = "en8", mars = "enp9s0" }

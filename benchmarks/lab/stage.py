@@ -11,6 +11,9 @@ import datetime
 import hashlib
 import json
 import pathlib
+import platform
+import shlex
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -22,6 +25,27 @@ REPO = HERE.parent.parent
 BUILDS = REPO / '.bench' / 'lab' / 'builds'             # binaries, not tracked
 RECORDS = HERE.parent / 'results' / 'lab' / 'builds'    # their hashes, tracked
 ARCHES = {'x86_64': 'amd64', 'aarch64': 'arm64', 'arm64': 'arm64'}
+
+
+def artifact_for(system, machine):
+    """The build a host of this kind runs, or None."""
+    arch = ARCHES.get(machine)
+    return f'xs-{"darwin" if system == "Darwin" else "linux"}-{arch}' if arch else None
+
+
+def run_on(host, script, **options):
+    """Run a shell command on a host: directly if it is this machine, else over SSH."""
+    # The login shell there may not be a POSIX one, so sh runs the script on either kind of host.
+    command = ['sh', '-c', script] if host.get('local') else [*preflight.SSH, host['ssh'], 'sh -c ' + shlex.quote(script)]
+    return subprocess.run(command, capture_output=True, text=True, stdin=subprocess.DEVNULL, **options)
+
+
+def copy_to(host, paths, directory):
+    if host.get('local'):
+        for path in paths:
+            shutil.copy2(path, directory)
+    else:
+        run('scp', '-q', '-oBatchMode=yes', *paths, f'{host["ssh"]}:{directory}/')
 SCRIPTS = (HERE / 'probe.py', HERE / 'corpus.py', HERE / 'corpora.json', HERE / 'agent.py', HERE / 'overnight.py',
            HERE.parent / 'measure.py')
 
@@ -55,16 +79,38 @@ def build(revision, rebuild=False):
     full = resolve(revision)
     short = full[:12]
     output = BUILDS / short
-    if (output / 'build.json').exists() and not rebuild:
-        return json.loads((output / 'build.json').read_text())
-    output.mkdir(parents=True, exist_ok=True)
+    native = artifact_for(platform.system(), platform.machine()) if platform.system() == 'Darwin' else None
     artifacts = {}
+    if (output / 'build.json').exists() and not rebuild:
+        record = json.loads((output / 'build.json').read_text())
+        if not native or native in record['artifacts']:
+            return record
+        artifacts = record['artifacts']  # built before this machine was an endpoint: add its own binary
+    output.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory() as source:
         archive = subprocess.Popen(['git', '-C', str(REPO), 'archive', '--format=tar', full], stdout=subprocess.PIPE)
         run('tar', '-x', '-C', source, stdin=archive.stdout)
         if archive.wait():
             raise SystemExit('git archive failed')
+        if native and native not in artifacts:
+            # This machine's own binary, from the same exported commit, for when it is an endpoint.
+            print(f'building {native} from {short}', flush=True)
+            with open(output / 'build-native.log', 'w') as log:
+                done = subprocess.run(f'cmake -S {shlex.quote(source)} -B {shlex.quote(source)}/native -G Ninja '
+                                      f'-DCMAKE_BUILD_TYPE=Release -DXSYNC_GIT_HASH={short} && '
+                                      f'cmake --build {shlex.quote(source)}/native --target xsync -j 8',
+                                      shell=True, stdout=log, stderr=subprocess.STDOUT)
+            if done.returncode:
+                raise SystemExit(f'native build failed; see {output / "build-native.log"}')
+            shutil.copy2(pathlib.Path(source) / 'native' / 'xs', output / native)
+            version = run(output / native, '--version', capture_output=True, text=True).stdout.splitlines()[0]
+            if problem := version_problem(version, short):
+                raise SystemExit(f'{native}: {problem}')
+            artifacts[native] = {'sha256': sha256(output / native), 'bytes': (output / native).stat().st_size,
+                                 'version': version}
         for arch in ('amd64', 'arm64'):
+            if f'xs-linux-{arch}' in artifacts:
+                continue
             image, name = f'xsbench-xs-{short}-{arch}', f'xs-linux-{arch}'
             print(f'building {name} from {short}', flush=True)
             with open(output / f'build-{arch}.log', 'w') as log:
@@ -117,14 +163,14 @@ def check_host(name, record, scripts, report):
     if 'error' in report:
         return [f'{name}: {report["error"]}']
     short, binary = record['rev12'], f'xs-{record["rev12"]}'
-    arch = ARCHES.get(report.get('machine'))
-    if not arch:
-        return [f'{name}: no build for a {report.get("machine")} host']
+    artifact = artifact_for(report.get('system', 'Linux'), report.get('machine'))
+    if artifact not in record['artifacts']:
+        return [f'{name}: no build for a {report.get("system", "Linux")} {report.get("machine")} host']
     problems = []
     found = report.get('files', {}).get(binary)
     if found is None:
         problems.append(f'{name}: {binary} is not staged')
-    elif found != record['artifacts'][f'xs-linux-{arch}']['sha256']:
+    elif found != record['artifacts'][artifact]['sha256']:
         problems.append(f'{name}: {binary} is not the recorded build of {short} (stale or replaced)')
     elif problem := version_problem(report.get('versions', {}).get(binary), short):
         problems.append(f'{name}: {binary} {problem}')
@@ -158,24 +204,28 @@ def push(config, names, record):
     short = record['rev12']
     for name in names:
         host = config['hosts'][name]
-        machine = subprocess.run([*preflight.SSH, host['ssh'], 'uname', '-m'], capture_output=True, text=True,
-                                 timeout=30).stdout.strip()
-        arch = ARCHES.get(machine)
-        if not arch:
-            raise SystemExit(f'{name}: no build for a {machine or "unreachable"} host')
-        artifact, directory = f'xs-linux-{arch}', host['root'] + '/bin'
-        run(*preflight.SSH, host['ssh'], 'mkdir', '-p', directory)
-        run('scp', '-q', '-oBatchMode=yes', BUILDS / short / artifact, f'{host["ssh"]}:{directory}/xs-{short}.incoming')
-        # Scripts arrive beside their names and are renamed into place, so a run in progress never
-        # executes a half-written file.
-        run(*preflight.SSH, host['ssh'], 'mkdir', '-p', f'{directory}/.incoming')
-        run('scp', '-q', '-oBatchMode=yes', *SCRIPTS, f'{host["ssh"]}:{directory}/.incoming/')
-        run(*preflight.SSH, host['ssh'], f'cd {directory} && for f in .incoming/*; do mv -f "$f" .; done && rmdir .incoming')
+        system, machine = run_on(host, 'uname -s; uname -m', timeout=30).stdout.split() or (None, None)
+        artifact = artifact_for(system, machine)
+        if artifact not in record['artifacts']:
+            raise SystemExit(f'{name}: no build for a {system or "unreachable"} {machine or ""} host')
+        directory = host['root'] + '/bin'
+        if run_on(host, f'mkdir -p {shlex.quote(directory)}/.incoming').returncode:
+            raise SystemExit(f'{name}: cannot create {directory}')
+        # Everything arrives beside its name and is renamed into place, so a run in progress
+        # never executes a half-written file.
+        staging = BUILDS / short / f'xs-{short}.incoming'
+        shutil.copy2(BUILDS / short / artifact, staging)
+        copy_to(host, [staging], directory)
+        staging.unlink()
+        copy_to(host, SCRIPTS, directory + '/.incoming')
         report = preflight.probe(host, 'staged', '--root', host['root'], f'xs-{short}.incoming')
         if report.get('files', {}).get(f'xs-{short}.incoming') != record['artifacts'][artifact]['sha256']:
             raise SystemExit(f'{name}: the copy of {artifact} arrived damaged; nothing was replaced')
-        run(*preflight.SSH, host['ssh'], f'chmod 755 {directory}/xs-{short}.incoming && '
-            f'mv -f {directory}/xs-{short}.incoming {directory}/xs-{short}')
+        moved = run_on(host, f'cd {shlex.quote(directory)} && chmod 755 xs-{short}.incoming && '
+                             f'mv -f xs-{short}.incoming xs-{short} && '
+                             f'for f in .incoming/*; do mv -f "$f" .; done && rmdir .incoming')
+        if moved.returncode:
+            raise SystemExit(f'{name}: {moved.stderr.strip()}')
         print(f'{name}: staged xs-{short} ({artifact}) and {len(SCRIPTS)} scripts', flush=True)
 
 

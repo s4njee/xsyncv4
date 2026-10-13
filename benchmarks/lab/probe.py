@@ -178,6 +178,14 @@ def mount_of(path):
         present = present.parent
     status, out, _ = run(['findmnt', '-J', '-T', str(present), '-o', 'TARGET,SOURCE,FSTYPE,OPTIONS'])
     entry = json.loads(out)['filesystems'][0] if status == 0 else {}
+    if not entry and platform.system() == 'Darwin':
+        # `mount` lists "device on /point (apfs, local, ...)"; the longest matching point holds the path.
+        _, listing, _ = run(['mount'], timeout=5)
+        points = re.findall(r'^(\S+) on (.+?) \((\w+)', listing or '', re.M)
+        held = [point for point in points if str(present.resolve()).startswith(point[1].rstrip('/') + '/') or point[1] == '/']
+        if held:
+            source, target, fstype = max(held, key=lambda point: len(point[1]))
+            entry = {'target': target, 'source': source, 'fstype': fstype}
     try:
         usage = os.statvfs(present)
         entry.update(free_bytes=usage.f_bavail * usage.f_frsize, total_bytes=usage.f_blocks * usage.f_frsize)
@@ -226,7 +234,12 @@ def inventory(paths):
               'open_files_limit': resource.getrlimit(resource.RLIMIT_NOFILE)[0],
               'paths': [mount_of(path) for path in paths]}
     if system != 'Linux':
-        result['note'] = 'only Linux endpoints are inventoried in full'
+        sysctl = lambda key: (run(['sysctl', '-n', key], timeout=5)[1] or '').strip() or None
+        result.update(cpu_model=sysctl('machdep.cpu.brand_string') or result['cpu_model'],
+                      memory_bytes=int(sysctl('hw.memsize') or 0) or None,
+                      os=' '.join(filter(None, ((run(['sw_vers', '-productName'], timeout=5)[1] or '').strip(),
+                                                (run(['sw_vers', '-productVersion'], timeout=5)[1] or '').strip()))),
+                      helper={'installed': False}, note='only Linux endpoints are inventoried in full')
         return result
     os_release = parse_key_values(read('/etc/os-release') or '')
     policy = CPUFREQ / 'policy0'
@@ -294,12 +307,16 @@ def route(peer, ssh_target, pings):
     """How this host reaches a peer: the address SSH uses, the interface it leaves by, and the delay."""
     result = {'utc': utc(), 'hostname': socket.gethostname(), 'peer': peer}
     try:
-        resolved = sorted({info[4][0] for info in socket.getaddrinfo(peer, 22, proto=socket.IPPROTO_TCP)})
+        # A link-local address is usable only with its interface, which arrives as a numeric scope.
+        resolved = sorted({info[4][0] + ('%' + socket.if_indextoname(info[4][3])
+                                         if len(info[4]) > 3 and info[4][3] and '%' not in info[4][0] else '')
+                           for info in socket.getaddrinfo(peer, 22, proto=socket.IPPROTO_TCP)})
     except socket.gaierror as error:
         result['error'] = f'cannot resolve {peer}: {error}'
         return result
     result['resolved'] = resolved
     target = next((address for address in resolved if ':' not in address), resolved[0])
+    scoped = target
     if ssh_target:
         # The same client and target the transfers use, so this is the path they take.
         status, out, err = run(['ssh', '-oBatchMode=yes', '-oConnectTimeout=8', ssh_target,
@@ -308,8 +325,14 @@ def route(peer, ssh_target, pings):
         connection = parse_ssh_connection(lines[0]) if status == 0 and lines else None
         result['ssh'] = {'target': ssh_target, 'ok': bool(connection)}
         if connection:
+            # A link-local address arrives with the peer's own interface name as its scope.
+            connection.update(client_ip=connection['client_ip'].split('%')[0],
+                              server_ip=connection['server_ip'].split('%')[0])
             result['ssh'].update(connection, peer_hostname=lines[1] if len(lines) > 1 else None)
-            target = connection['server_ip']
+            # A link-local address cannot be routed without this host's own scope; the peer's
+            # other address leaves by the same interface.
+            if not connection['server_ip'].lower().startswith('fe80:'):
+                target = scoped = connection['server_ip']
         else:
             result['ssh']['error'] = (err.strip() or 'no SSH_CONNECTION').splitlines()[-1]
     result['address'] = target
@@ -325,7 +348,9 @@ def route(peer, ssh_target, pings):
             result['error'] = (err or '').strip() or 'route get failed'
         status, out, err = None, '', ''
     else:
-        status, out, err = run(['ip', '-j', 'route', 'get', target.split('%')[0]])
+        # A link-local address is reachable only through the interface named in its scope.
+        scope = ['oif', target.split('%')[1]] if '%' in target else []
+        status, out, err = run(['ip', '-j', 'route', 'get', target.split('%')[0], *scope])
     if platform.system() == 'Darwin':
         pass
     elif status == 0 and (hops := json.loads(out)):
@@ -338,7 +363,7 @@ def route(peer, ssh_target, pings):
     else:
         result['error'] = (err.strip() or 'ip route get failed')
     if pings:
-        status, out, _ = run(['ping', '-n', '-q', '-c', str(pings), '-i', '0.2', target], timeout=pings + 15)
+        status, out, _ = run(['ping', '-n', '-q', '-c', str(pings), '-i', '0.2', scoped], timeout=pings + 15)
         result['ping'] = parse_ping(out) if status is not None else {}
     return result
 

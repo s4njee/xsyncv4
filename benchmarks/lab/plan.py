@@ -24,7 +24,7 @@ import preflight
 import stage
 
 HERE = pathlib.Path(__file__).resolve().parent
-RESULTS = HERE.parent / 'results' / 'lab'
+RESULTS = HERE.parent / 'results' / 'lab'  # path experiments; a link may name another folder
 SCENARIOS = ('fresh', 'noop')
 SAFE = re.compile(r'[A-Za-z0-9][A-Za-z0-9_-]*')
 RETRIES = 2  # extra attempts at a block that was voided
@@ -70,8 +70,17 @@ def cells_of(spec, config):
         sender, _, receiver = direction.partition('>')
         if {sender, receiver} != set(link['hosts']):
             raise SpecError(f'direction {direction} is not between the hosts of link {matrix["link"]}')
-        if scenario not in SCENARIOS or client not in ('sender', 'receiver', 'arm') or cache not in ('warm', 'cold'):
+        if scenario not in SCENARIOS or client not in ('sender', 'receiver', 'arm', 'initiator') \
+                or cache not in ('warm', 'cold'):
             raise SpecError(f'unsupported scenario, client or cache in {scenario}/{client}/{cache}')
+        # On a link only one host can start connections from, that host is the client either way.
+        initiator = link.get('initiator')
+        if client == 'initiator':
+            if not initiator:
+                raise SpecError(f'link {matrix["link"]} declares no initiator')
+            client = 'sender' if sender == initiator else 'receiver'
+        elif initiator and (client == 'arm' or (sender if client == 'sender' else receiver) != initiator):
+            raise SpecError(f'on link {matrix["link"]} only {initiator} can be the SSH client: use client = ["initiator"]')
         cells.append({'id': f'{name}.{scenario}.{sender}-{receiver}.{client}.{cache}', 'corpus': name,
                       'scenario': scenario, 'sender': sender, 'receiver': receiver, 'client': client,
                       'link': matrix['link'], 'cache': cache})
@@ -98,8 +107,8 @@ def make_plan(spec, config, pins, seed, run_id, baseline=None):
             raise SpecError(f'{name} needs a root and an interface on the link in hosts.toml')
         hosts[name] = {key: host[key] for key in ('ssh', 'name', 'hostname', 'root') if key in host}
         hosts[name].update(interface=link['interface'][name], helper=host.get('helper', False),
-                           gates=host.get('gates', {}))
-    driver = spec.get('driver', config.get('driver', link['hosts'][0]))
+                           gates=host.get('gates', {}), local=host.get('local', False))
+    driver = spec.get('driver') or link.get('driver') or config.get('driver') or link['hosts'][0]
     if driver not in hosts:
         raise SpecError(f'the driver {driver} is not on the link')
     arms = []
@@ -148,6 +157,8 @@ def make_plan(spec, config, pins, seed, run_id, baseline=None):
             'hypothesis': spec['hypothesis'], 'primary': spec['primary'], 'delta': spec.get('delta'),
             'control': spec['control'], 'seed': seed, 'run_id': run_id, 'driver': driver,
             'sample_timeout_s': spec.get('sample_timeout_s', 3600),
+            'results': link.get('results', 'lab'), 'background': bool(link.get('background')),
+            'eager_cleanup': spec.get('cleanup') == 'eager',
             'hosts': hosts, 'links': {spec['matrix']['link']: {key: link[key] for key in link if key != 'interface'}},
             'arms': arms, 'cells': cells, 'corpora': corpora, 'blocks': blocks,
             'scripts': {path.name: stage.sha256(path) for path in stage.SCRIPTS}}
@@ -174,7 +185,9 @@ def driver_of(plan):
 
 
 def remote(host, script, **options):
-    return subprocess.run([*preflight.SSH, host['ssh'], script], capture_output=True, text=True, **options)
+    """Run a shell command on a plan's host: directly if it is this machine, else over SSH."""
+    command = ['sh', '-c', script] if host.get('local') else [*preflight.SSH, host['ssh'], 'sh -c ' + shlex.quote(script)]
+    return subprocess.run(command, capture_output=True, text=True, stdin=subprocess.DEVNULL, **options)
 
 
 def preflight_or_exit(link, revisions, expected=()):
@@ -202,19 +215,21 @@ def prepare_run(spec_path, config, seed):
     pins = json.loads((HERE / 'corpora.json').read_text())
     plan = make_plan(spec, config, pins, seed, new_run_id(spec), load_baseline(spec))
     for name, host in plan['hosts'].items():
-        machine = remote(host, 'uname -m', timeout=30).stdout.strip()
+        host['system'], machine = remote(host, 'uname -s; uname -m', timeout=30).stdout.split()
+        artifact = stage.artifact_for(host['system'], machine)
         for arm in plan['arms']:
             if arm['tool'] == 'xs':
-                arm['sha256'][name] = arm['artifacts'][f'xs-linux-{stage.ARCHES[machine]}']
+                if artifact not in arm['artifacts']:
+                    raise SystemExit(f'{name}: {arm["rev"]} has no {artifact}; run stage.py build --rev {arm["rev"]}')
+                arm['sha256'][name] = arm['artifacts'][artifact]
     driver = driver_of(plan)
     directory = f'{driver["root"]}/runs/{plan["run_id"]}'
-    local = RESULTS / spec['id'] / plan['run_id']
+    local = HERE.parent / 'results' / plan['results'] / spec['id'] / plan['run_id']
     local.mkdir(parents=True)
     (local / 'plan.json').write_text(json.dumps(plan, indent=1) + '\n')
     (local / 'spec.toml').write_bytes(pathlib.Path(spec_path).read_bytes())
     remote(driver, f'mkdir -p {shlex.quote(directory)}', check=True)
-    subprocess.run(['scp', '-q', '-oBatchMode=yes', str(local / 'plan.json'), f'{driver["ssh"]}:{directory}/plan.json'],
-                   check=True)
+    stage.copy_to(driver, [local / 'plan.json'], directory)
     return plan, directory
 
 
@@ -230,6 +245,13 @@ def start(spec_path, config, seed, skip_preflight):
     plan, directory = prepare_run(spec_path, config, seed)
     driver = driver_of(plan)
     # The backgrounded command must be the agent alone, with every descriptor redirected, or SSH waits for it.
+    if driver.get('local'):
+        # This machine is the driver: detach the agent into its own session, and keep the machine awake.
+        with open(pathlib.Path(directory) / 'agent.log', 'w') as log:
+            subprocess.Popen(['caffeinate', '-i', sys.executable, driver['root'] + '/bin/agent.py', 'plan.json'],
+                             cwd=directory, stdout=log, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL,
+                             start_new_session=True)
+        return plan
     launch = (f'cd {shlex.quote(directory)} || exit 1; setsid nohup python3 '
               f'{shlex.quote(driver["root"] + "/bin/agent.py")} plan.json > agent.log 2>&1 < /dev/null & echo started')
     remote(driver, launch, check=True, timeout=60)
@@ -269,7 +291,7 @@ def night(config, opens, closes):
 
 
 def find_plan(run_id):
-    matches = list(RESULTS.glob(f'*/{run_id}/plan.json'))
+    matches = list((HERE.parent / 'results').glob(f'*/*/{run_id}/plan.json'))
     if len(matches) != 1:
         raise SystemExit(f'no local plan for run {run_id}')
     return matches[0].parent, json.loads(matches[0].read_text())
@@ -361,7 +383,8 @@ def main(argv=None):
                check=True, timeout=60)
         print('asked the agent to stop after the current sample')
     else:
-        subprocess.run(['rsync', '-a', '--exclude=plan.json', f'{driver["ssh"]}:{directory}/', f'{local}/'], check=True)
+        source = f'{driver["root"]}/runs/{args.run_id}/' if driver.get('local') else f'{driver["ssh"]}:{directory}/'
+        subprocess.run(['rsync', '-a', '--exclude=plan.json', source, f'{local}/'], check=True)
         status = json.loads((local / 'status.json').read_text()) if (local / 'status.json').exists() else {}
         print(f'{local}: {status.get("state", "no status")} {status.get("detail", "")}')
 

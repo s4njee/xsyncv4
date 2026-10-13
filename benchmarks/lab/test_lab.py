@@ -360,7 +360,20 @@ class StagedBuilds(unittest.TestCase):
         self.assertIn('neo: measure.py is not staged', self.problems(self.report(files={'measure.py': None})))
 
     def test_unsupported_host_and_probe_failure(self):
-        self.assertEqual(self.problems(self.report(machine='riscv64')), ['neo: no build for a riscv64 host'])
+        self.assertEqual(self.problems(self.report(machine='riscv64')), ['neo: no build for a Linux riscv64 host'])
+        self.assertEqual(self.problems(self.report(system='Darwin', machine='arm64')),
+                         ['neo: no build for a Darwin arm64 host'])
+
+    def test_each_kind_of_host_gets_its_own_build(self):
+        self.assertEqual(stage.artifact_for('Linux', 'x86_64'), 'xs-linux-amd64')
+        self.assertEqual(stage.artifact_for('Linux', 'aarch64'), 'xs-linux-arm64')
+        self.assertEqual(stage.artifact_for('Darwin', 'arm64'), 'xs-darwin-arm64')
+        self.assertIsNone(stage.artifact_for('Linux', 'riscv64'))
+        record = dict(self.RECORD, artifacts=dict(self.RECORD['artifacts'], **{'xs-darwin-arm64': {'sha256': 'mac'}}))
+        report = self.report(system='Darwin', machine='arm64', files={'xs-abcdef012345': 'mac'})
+        self.assertEqual(stage.check_host('mac', record, self.SCRIPTS, report), [])
+        self.assertTrue(any('stale or replaced' in p for p in
+                            stage.check_host('mac', record, self.SCRIPTS, self.report(system='Darwin', machine='arm64'))))
         self.assertEqual(self.problems({'error': 'ssh timed out'}), ['neo: ssh timed out'])
 
     def test_only_commits_can_be_built(self):
@@ -449,6 +462,19 @@ class Plans(unittest.TestCase):
         with self.assertRaises(plan.SpecError):
             self.make(arms=dict(arms, odd={'tool': 'rsync', 'client': 'both'}))
 
+    def test_one_way_link_makes_its_initiator_the_client(self):
+        spec = dict(self.SPEC, matrix={'link': 'mac-mars', 'corpus': ['tiny-one'], 'scenario': ['fresh'],
+                                       'direction': ['mac>mars', 'mars>mac'], 'client': ['initiator']})
+        made = self.make(matrix=spec['matrix'])
+        self.assertEqual({cell['sender']: cell['client'] for cell in made['cells']}, {'mac': 'sender', 'mars': 'receiver'})
+        self.assertEqual((made['driver'], made['results'], made['background']), ('mac', 'supplementary', True))
+        self.assertTrue(made['hosts']['mac']['local'] and not made['hosts']['mars']['local'])
+        for client in (['sender'], ['receiver'], ['arm']):
+            with self.assertRaises(plan.SpecError, msg=client):
+                self.make(matrix=dict(spec['matrix'], client=client))
+        with self.assertRaises(plan.SpecError):
+            self.make(matrix=dict(self.SPEC['matrix'], client=['initiator']))
+
     def test_bad_specs_are_rejected(self):
         for changes in ({'matrix': dict(self.SPEC['matrix'], corpus=['unpinned'])},
                         {'matrix': dict(self.SPEC['matrix'], direction=['neo>mars'])},
@@ -531,6 +557,23 @@ class AgentPieces(unittest.TestCase):
         for parts in (('..',), ('a/b',), ('',), ('-rf',), ('run1', '..')):
             with self.assertRaises(ValueError, msg=parts):
                 agent.work_path(host, *parts)
+
+    def test_remote_scripts_run_under_sh_whatever_the_login_shell(self):
+        seen = []
+        original = agent.subprocess.run
+        agent.subprocess.run = lambda argv, **options: seen.append(argv) or subprocess.CompletedProcess(argv, 0, '', '')
+        try:
+            self.hosts()['freya'].shell('for f in a b; do echo "$f"; done')
+            self.hosts()['neo'].shell('true')
+        finally:
+            agent.subprocess.run = original
+        self.assertEqual(seen[0][-1], """sh -c 'for f in a b; do echo "$f"; done'""")
+        self.assertEqual(seen[1], ['sh', '-c', 'true'])
+
+    def test_macos_endpoint_syncs_everything(self):
+        spec = {'ssh': 'u@mac.local', 'root': '/m', 'interface': 'en8', 'system': 'Darwin'}
+        self.assertEqual(agent.Host('mac', spec, True).sync_argv('/m/work'), ['sync'])
+        self.assertEqual(self.hosts()['neo'].sync_argv('/n/work'), ['sync', '-f', '/n/work'])
 
     def test_stats_are_parsed(self):
         text = ('\nNumber of files: 10,103 (reg: 10,002, dir: 101)\nNumber of regular files transferred: 10,002\n'
