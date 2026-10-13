@@ -1017,6 +1017,34 @@ ratio of 1.036 [1.026, 1.046]. First diagnostics, run by hand:
     The run should be repeated after the fix, or meanwhile without `-H`.
   - On the Pi, sending `real-laikav2` costs xs 357 s of CPU against
     rsync's 150 s.
+- The `-H` defect is fixed in build `8cc75bbdb801`, merged into `main` on
+  2026-10-13 and the baseline revision from here on. The decision to transfer a file is made in
+  one place for local and remote copies, so the fix is there: the first
+  name of a source inode that is transferred, or is already up to date,
+  holds its data; a later name with nothing at the destination is left off
+  the transfer list and linked to the holder after the last transfer, with
+  the same pinned and verified temporary link as before, and without
+  replacing anything that has appeared at the name. Itemized output and
+  `--stats` now match rsync's (one transfer per inode, the same anchor).
+  If the holder is not transferred, the names waiting on it are reported
+  and the run exits with code 23; rsync would try the next name instead.
+  - Checked on the Mac: the differential hard-link tests against rsync, two
+    new ones (data sent once; a late name is linked, not sent), the
+    publication-race test extended to the new link path, 231 differential
+    scenarios, and 3,000 link groups over 60 directories with 16 workers,
+    nine runs, identical contents and link topology each time.
+  - Checked by hand between neo and freya over SSH, both directions: a
+    20 MB file with three names sends 20 MB where the old build sent 60 MB.
+  - E1r-laikav2-linked (screening, the same cells and four blocks with
+    the fixed build, 8 of 8 blocks valid, full verification passing): xs
+    now transfers the same 35,346 files and 36.8 GB as rsync. The ratio is
+    0.970 [0.953, 0.988] from freya (318 s against 327 s) and 1.006 [1.003,
+    1.009] from neo (317.5 s against 315.7 s), where it was 1.190 and
+    1.242. With the links out of the way the tree behaves like the
+    synthetic mixed corpora: level with rsync at link rate, a fraction
+    behind when the Pi sends.
+  - CPU on the Pi sending this tree is still 1.84 times rsync's (about
+    285 s against 153 s), which is tuning target T1.
 - S1 (supplementary, the Mac and mars over mesh Wi-Fi, 12 blocks, 192 of
   192 valid, in `benchmarks/results/supplementary/S1-mac-mars-small/`;
   caveats in the `README.md` beside it). σ_d is 0.16 to 0.55 on the
