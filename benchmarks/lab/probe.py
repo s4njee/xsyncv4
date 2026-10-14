@@ -131,7 +131,7 @@ def darwin_interface(name):
     status, out, _ = run(['ifconfig', name], timeout=5)
     if status != 0:
         return None
-    speed = re.search(r'media:.*?\((\d+)base', out)
+    speed = re.search(r'media:.*?\((\d+)base', out, re.IGNORECASE)  # 1000baseT, 2500Base-T
     mtu = re.search(r'mtu (\d+)', out)
     _, ports, _ = run(['networksetup', '-listallhardwareports'], timeout=5)
     wireless = bool(re.search(r'Hardware Port: Wi-Fi\s+Device: ' + re.escape(name) + r'\b', ports or ''))

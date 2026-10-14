@@ -50,7 +50,7 @@ helper = true
 local = true
 ssh = "sanjee@mbp-3.local"
 name = "mbp-3.local"
-hostname = "mbp-3"
+hostname = "MacBookPro"     # what `hostname` prints; mbp-3 is its Bonjour name
 root = "/Users/sanjee/benchmarks/xsbench.noindex"
 helper = false
 
@@ -92,3 +92,19 @@ driver = "mac"
 results = "supplementary"
 background = true
 interface = { mac = "en8", mars = "enp9s0" }
+
+# Direct cable between this Mac and mars, for large-file tuning (2026-10-14):
+# the Mac's USB adapter (10 Gb/s USB, en11, 10.25.0.1) to mars's Intel X540
+# (enp7s0f0, 10.25.0.2), linked at 10 Gb/s; USB holds it to about 3 Gb/s of
+# TCP each way, and the Mac's driver allows no jumbo frames. mars is reached
+# at its address on this cable, not by name (its name resolves to Wi-Fi).
+[links.mac-mars-direct]
+hosts = ["mac", "mars"]
+medium = "wired"
+min_speed_mbps = 2500  # the Mac reports 2500Base-T for this 10G link
+max_rtt_ms = 2.0
+initiator = "mac"
+driver = "mac"
+results = "direct"
+address = { mac = "10.25.0.1", mars = "10.25.0.2" }
+interface = { mac = "en11", mars = "enp7s0f0" }

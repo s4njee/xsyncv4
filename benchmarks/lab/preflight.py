@@ -180,8 +180,12 @@ def survey(config, link_names, pings):
         for source, target in (link['hosts'], link['hosts'][::-1]):
             if 'error' in record['inventory'][source]:
                 continue  # already reported; its route would only repeat the failure
-            proof = ['--ssh', hosts[target]['ssh']] if link.get('initiator') in (None, source) else []
-            report = probe(hosts[source], 'route', '--peer', hosts[target]['name'], *proof, '--pings', str(pings))
+            # A link may reach a host at its own address, such as a direct cable beside the LAN.
+            peer = link.get('address', {}).get(target) or hosts[target]['name']
+            target_ssh = hosts[target]['ssh'].rpartition('@')[0] + '@' + peer if link.get('address', {}).get(target) \
+                else hosts[target]['ssh']
+            proof = ['--ssh', target_ssh] if link.get('initiator') in (None, source) else []
+            report = probe(hosts[source], 'route', '--peer', peer, *proof, '--pings', str(pings))
             record['routes'][f'{link_name}:{source}->{target}'] = report
             record['problems'] += check_route(link_name, link, source, target, hosts, report)
     return record

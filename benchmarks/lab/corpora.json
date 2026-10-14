@@ -1,4 +1,37 @@
 {
+ "large-four:full": {
+  "generator": 1,
+  "files": 4,
+  "directories": 0,
+  "bytes": 8589934592,
+  "digest": "8032fa3fb849945742f3640ddc980b1aa7e938a38f78a868c90d75e2cf249590",
+  "quick_digest": "58e8f59c06b8b9b56339d2d7f174238572fb65bd840f7ac77647083b328b02e6"
+ },
+ "large-mixed:full": {
+  "generator": 1,
+  "files": 32,
+  "directories": 0,
+  "bytes": 8963523840,
+  "digest": "e3de948681b0113eb6bba1fb8b303aaa91bd77b43a67bda734aab334bf7d2d7d",
+  "quick_digest": "4c63eeb002084b78832f220f4dd8d6cc26b2f84c69ec041346ee93a70142b4bb"
+ },
+ "large-one:real": {
+  "files": 1,
+  "directories": 0,
+  "symlinks": 0,
+  "hardlinks": 0,
+  "bytes": 7994415104,
+  "size_quantiles": {
+   "p10": 7994415104,
+   "p50": 7994415104,
+   "p90": 7994415104,
+   "p99": 7994415104,
+   "max": 7994415104
+  },
+  "digest": "e86245ba1191231af17bf2587f6cd07540b1b4f469c914c3e4572df606d2b9c9",
+  "quick_digest": "b5c225f81cc5828f266b5662d64827470bcbea52379acdd76c656970bcfb5f9a",
+  "utc": "2026-10-14T22:42:51+00:00"
+ },
  "mixed-bimodal:full": {
   "generator": 1,
   "files": 20000,

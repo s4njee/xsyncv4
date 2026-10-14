@@ -272,9 +272,10 @@ class Run:
                 client = sender if client_role(arm, cell) == 'sender' else receiver
                 peer = receiver if client is sender else sender
                 key = f'{client.name}>{peer.name}'
+                fixed = self.link_address(peer.name)
                 if key not in self.addresses and not peer.local:
                     name = peer.ssh.rpartition('@')[2]
-                    self.addresses[key] = client.run('python3', '-c', RESOLVE, name, timeout=60).stdout.strip()
+                    self.addresses[key] = fixed or client.run('python3', '-c', RESOLVE, name, timeout=60).stdout.strip()
         self.plan['observed']['addresses'] = self.addresses
         if any(observed.get('trim') for observed in self.plan['observed'].values() if isinstance(observed, dict)):
             time.sleep(15)  # a drive works through a large trim for a few seconds afterwards
@@ -283,6 +284,13 @@ class Run:
         (self.directory / 'run.json').write_text(json.dumps(
             {'schema': SCHEMA, 'run_id': self.run_id, 'started_utc': utc(), 'driver': socket.gethostname(),
              'plan': self.plan}, indent=1) + '\n')
+
+    def link_address(self, host):
+        """The address the plan's link names for a host, if it reaches it by its own address."""
+        for link in self.plan.get('links', {}).values():
+            if address := link.get('address', {}).get(host):
+                return address
+        return None
 
     def yield_to_foreground(self):
         """A background run waits while a path experiment is using any of its hosts."""
@@ -442,7 +450,8 @@ class Run:
     def link_probe(self, cell):
         """Round-trip statistics and the interface used, from the sender's side."""
         sender, receiver = self.hosts[cell['sender']], self.hosts[cell['receiver']]
-        report = sender.probe('route', '--peer', self.plan['hosts'][receiver.name]['name'], '--pings', '10')
+        report = sender.probe('route', '--peer', self.link_address(receiver.name) or self.plan['hosts'][receiver.name]['name'],
+                              '--pings', '10')
         limit = self.plan['links'][cell['link']].get('max_rtt_ms')
         if report.get('dev') != sender.interface:
             raise Void(f'{sender.name} reaches {receiver.name} by {report.get("dev")}, not {sender.interface}')

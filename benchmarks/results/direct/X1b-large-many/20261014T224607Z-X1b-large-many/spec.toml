@@ -1,0 +1,39 @@
+# X1b: the same arms on four 2 GiB files and on 32 files of 16 MiB to 1 GiB,
+# from mars to the Mac only: the Mac has no room to hold these as sources.
+id = "X1b-large-many"
+kind = "screening"
+hypothesis = "On a ~3 Gb/s direct link, xs -a copies large files at least as fast as rsync -a, and AES-GCM speeds both up over the default ChaCha20."
+primary = "durable_s"
+delta = 0.03
+blocks = 8
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[arms.rsync-aes]
+tool = "rsync"
+flags = ["-a"]
+ssh_options = ["-c", "aes128-gcm@openssh.com"]
+
+[arms.xs]
+tool = "xs"
+rev = "8cc75bbdb801"
+flags = ["-a"]
+
+[arms.xs-aes]
+tool = "xs"
+rev = "8cc75bbdb801"
+flags = ["-a"]
+ssh_options = ["-c", "aes128-gcm@openssh.com"]
+
+[matrix]
+link = "mac-mars-direct"
+corpus = ["large-four", "large-mixed"]
+scenario = ["fresh"]
+direction = ["mars>mac"]
+client = ["initiator"]
+cache = ["warm"]

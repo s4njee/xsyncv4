@@ -54,6 +54,11 @@ SPECS = {
         {'weight': 4, 'size': ('loguniform', 23, 24), 'text': 250}]},
     'mixed-threshold': {'files': 1_500, 'family': 'threshold', 'layout': ('tree', 8),
                         'parts': [{'weight': 1000, 'size': ('loguniform', 10, 23), 'text': 500}]},
+    # Large files, for link-rate copies; incompressible. large-one is a real 8 GB ISO, pinned with `manifest`.
+    'large-four': {'files': 4, 'family': 'large', 'layout': ('flat', 0),
+                   'parts': [{'weight': 1000, 'size': ('fixed', 2048 * MIB), 'text': 0}]},
+    'large-mixed': {'files': 32, 'family': 'large', 'layout': ('flat', 0),
+                    'parts': [{'weight': 1000, 'size': ('loguniform', 24, 30), 'text': 0}]},
 }
 
 
