@@ -1,0 +1,60 @@
+# E4b and E4d, small files: one factor at a time around the default. How
+# many files one read task takes, how many workers prefer scanning, and how
+# many source entries the sender keeps before it scans further.
+id = "E4bd-small-pipeline"
+kind = "screening"
+hypothesis = "On small-file trees, read-task size, the share of scanning workers and the listing window each change fresh-copy or no-op time by more than 3%."
+primary = "wall_s"
+delta = 0.03
+blocks = 10
+control = "xs"
+verify = "first-last"
+
+[arms.xs]
+tool = "xs"
+rev = "ddefa041364e-tune"
+flags = ["-a"]
+metrics = true
+
+[arms.batch16]
+tool = "xs"
+rev = "ddefa041364e-tune"
+flags = ["-a"]
+tune = "read_batch_files=16"
+metrics = true
+
+[arms.batch256]
+tool = "xs"
+rev = "ddefa041364e-tune"
+flags = ["-a"]
+tune = "read_batch_files=256,read_batch_bytes=33554432"
+metrics = true
+
+[arms.scan1]
+tool = "xs"
+rev = "ddefa041364e-tune"
+flags = ["-a"]
+tune = "scan_workers=1"
+metrics = true
+
+[arms.scanall]
+tool = "xs"
+rev = "ddefa041364e-tune"
+flags = ["-a"]
+tune = "scan_workers=16"
+metrics = true
+
+[arms.window4k]
+tool = "xs"
+rev = "ddefa041364e-tune"
+flags = ["-a"]
+tune = "listing_window=4096"
+metrics = true
+
+[matrix]
+link = "lan"
+corpus = ["small-flat", "small-deep"]
+scenario = ["fresh", "noop"]
+direction = ["neo>freya", "freya>neo"]
+client = ["sender"]
+cache = ["warm"]

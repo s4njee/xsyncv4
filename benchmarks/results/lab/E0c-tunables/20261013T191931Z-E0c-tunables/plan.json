@@ -1,0 +1,1594 @@
+{
+ "schema": 1,
+ "experiment": "E0c-tunables",
+ "spec_sha256": "4dc2c75f94bcd8acee9ca5bb55326caa66954148a74265f8d4463046f52c08c4",
+ "kind": "confirmatory",
+ "hypothesis": "At default values the tunables build of ddefa041364e is within 3% of the release build, with and without XSYNC_METRICS.",
+ "primary": "wall_s",
+ "delta": 0.03,
+ "control": "release",
+ "seed": 1,
+ "run_id": "20261013T191931Z-E0c-tunables",
+ "driver": "neo",
+ "sample_timeout_s": 3600,
+ "results": "lab",
+ "background": false,
+ "eager_cleanup": false,
+ "hosts": {
+  "neo": {
+   "ssh": "sanjee@neo.local",
+   "name": "neo.local",
+   "hostname": "neo",
+   "root": "/home/sanjee/benchmarks/xsyncv4/lab",
+   "interface": "eth0",
+   "helper": true,
+   "gates": {},
+   "local": false,
+   "system": "Linux"
+  },
+  "freya": {
+   "ssh": "sanjee@freya.local",
+   "name": "freya.local",
+   "hostname": "freya",
+   "root": "/mnt/nvme/xsbench",
+   "interface": "enp10s0",
+   "helper": true,
+   "gates": {},
+   "local": false,
+   "system": "Linux"
+  }
+ },
+ "links": {
+  "lan": {
+   "hosts": [
+    "neo",
+    "freya"
+   ],
+   "medium": "wired",
+   "min_speed_mbps": 1000,
+   "max_rtt_ms": 2.0
+  }
+ },
+ "arms": [
+  {
+   "name": "release",
+   "tool": "xs",
+   "flags": [
+    "-a"
+   ],
+   "rev": "ddefa041364e",
+   "binary": {
+    "neo": "/home/sanjee/benchmarks/xsyncv4/lab/bin/xs-ddefa041364e",
+    "freya": "/mnt/nvme/xsbench/bin/xs-ddefa041364e"
+   },
+   "sha256": {
+    "neo": "a448cdec7ceb96caba5da07ec1cd5ec874ab036f6a8b42ff637bc0768dd3b8d8",
+    "freya": "f6183b49edfefcccdc04adb1951ecfd360bad2e0dcb58025dca8b7563ede1559"
+   },
+   "artifacts": {
+    "xs-darwin-arm64": "a8dc703235f5ad045241bc477110829b458872f0ec4d8199927949a51c4a6e8e",
+    "xs-linux-amd64": "f6183b49edfefcccdc04adb1951ecfd360bad2e0dcb58025dca8b7563ede1559",
+    "xs-linux-arm64": "a448cdec7ceb96caba5da07ec1cd5ec874ab036f6a8b42ff637bc0768dd3b8d8"
+   }
+  },
+  {
+   "name": "tunables",
+   "tool": "xs",
+   "flags": [
+    "-a"
+   ],
+   "rev": "ddefa041364e-tune",
+   "binary": {
+    "neo": "/home/sanjee/benchmarks/xsyncv4/lab/bin/xs-ddefa041364e-tune",
+    "freya": "/mnt/nvme/xsbench/bin/xs-ddefa041364e-tune"
+   },
+   "sha256": {
+    "neo": "1f5c40a3f4d3ec403abcf30d64d8ade2a74f9fccfa6ba2c98709fb6f83ebebe2",
+    "freya": "fbe88e865b1d5162f6e370804f6b4683a196c272ce004d122311cac3431d05e0"
+   },
+   "artifacts": {
+    "xs-darwin-arm64": "304c6fe87a5235dc30bfc665dfe71ba8a777d8b633b9246b84bba42349c0679e",
+    "xs-linux-amd64": "fbe88e865b1d5162f6e370804f6b4683a196c272ce004d122311cac3431d05e0",
+    "xs-linux-arm64": "1f5c40a3f4d3ec403abcf30d64d8ade2a74f9fccfa6ba2c98709fb6f83ebebe2"
+   }
+  },
+  {
+   "name": "metrics",
+   "tool": "xs",
+   "flags": [
+    "-a"
+   ],
+   "rev": "ddefa041364e-tune",
+   "metrics": true,
+   "binary": {
+    "neo": "/home/sanjee/benchmarks/xsyncv4/lab/bin/xs-ddefa041364e-tune",
+    "freya": "/mnt/nvme/xsbench/bin/xs-ddefa041364e-tune"
+   },
+   "sha256": {
+    "neo": "1f5c40a3f4d3ec403abcf30d64d8ade2a74f9fccfa6ba2c98709fb6f83ebebe2",
+    "freya": "fbe88e865b1d5162f6e370804f6b4683a196c272ce004d122311cac3431d05e0"
+   },
+   "artifacts": {
+    "xs-darwin-arm64": "304c6fe87a5235dc30bfc665dfe71ba8a777d8b633b9246b84bba42349c0679e",
+    "xs-linux-amd64": "fbe88e865b1d5162f6e370804f6b4683a196c272ce004d122311cac3431d05e0",
+    "xs-linux-arm64": "1f5c40a3f4d3ec403abcf30d64d8ade2a74f9fccfa6ba2c98709fb6f83ebebe2"
+   }
+  }
+ ],
+ "cells": [
+  {
+   "id": "mixed-bimodal.fresh.neo-freya.sender.warm",
+   "corpus": "mixed-bimodal",
+   "scenario": "fresh",
+   "sender": "neo",
+   "receiver": "freya",
+   "client": "sender",
+   "link": "lan",
+   "cache": "warm"
+  },
+  {
+   "id": "mixed-bimodal.fresh.freya-neo.sender.warm",
+   "corpus": "mixed-bimodal",
+   "scenario": "fresh",
+   "sender": "freya",
+   "receiver": "neo",
+   "client": "sender",
+   "link": "lan",
+   "cache": "warm"
+  },
+  {
+   "id": "small-flat.fresh.neo-freya.sender.warm",
+   "corpus": "small-flat",
+   "scenario": "fresh",
+   "sender": "neo",
+   "receiver": "freya",
+   "client": "sender",
+   "link": "lan",
+   "cache": "warm"
+  },
+  {
+   "id": "small-flat.fresh.freya-neo.sender.warm",
+   "corpus": "small-flat",
+   "scenario": "fresh",
+   "sender": "freya",
+   "receiver": "neo",
+   "client": "sender",
+   "link": "lan",
+   "cache": "warm"
+  }
+ ],
+ "corpora": {
+  "mixed-bimodal": {
+   "files": 20000,
+   "directories": 420,
+   "bytes": 1395127076,
+   "digest": "e9071fb7ad3b0375ffe9fab58f740bfd22d545f7678e163a6c745504cc7aa16b",
+   "quick_digest": "31af6dbe5d38a32f5f0acf560703fa557304d3936e59f7b395d13cf8d0dec7fb"
+  },
+  "small-flat": {
+   "files": 100000,
+   "directories": 100,
+   "bytes": 319224077,
+   "digest": "41b628c4337730be4efdfcc6673d517749132ffd50b75b29321640e6f064bbec",
+   "quick_digest": "e8de96251eaca6be3e98b1cb8097405b37ad470fc0d5ffdb7a5a48ea5b9f3805"
+  }
+ },
+ "blocks": [
+  {
+   "cell": "mixed-bimodal.fresh.freya-neo.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "release",
+     "tunables",
+     "metrics"
+    ],
+    [
+     "metrics",
+     "tunables",
+     "release"
+    ],
+    [
+     "tunables",
+     "release",
+     "metrics"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.freya-neo.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "metrics",
+     "tunables",
+     "release"
+    ],
+    [
+     "release",
+     "metrics",
+     "tunables"
+    ],
+    [
+     "release",
+     "metrics",
+     "tunables"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "release",
+     "metrics",
+     "tunables"
+    ],
+    [
+     "tunables",
+     "release",
+     "metrics"
+    ],
+    [
+     "release",
+     "tunables",
+     "metrics"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.neo-freya.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "metrics",
+     "release",
+     "tunables"
+    ],
+    [
+     "release",
+     "metrics",
+     "tunables"
+    ],
+    [
+     "release",
+     "tunables",
+     "metrics"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "release",
+     "metrics",
+     "tunables"
+    ],
+    [
+     "release",
+     "tunables",
+     "metrics"
+    ],
+    [
+     "release",
+     "metrics",
+     "tunables"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.freya-neo.sender.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "metrics",
+     "tunables",
+     "release"
+    ],
+    [
+     "metrics",
+     "release",
+     "tunables"
+    ],
+    [
+     "release",
+     "metrics",
+     "tunables"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.freya-neo.sender.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "tunables",
+     "metrics",
+     "release"
+    ],
+    [
+     "tunables",
+     "release",
+     "metrics"
+    ],
+    [
+     "metrics",
+     "release",
+     "tunables"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.neo-freya.sender.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "metrics",
+     "release",
+     "tunables"
+    ],
+    [
+     "release",
+     "metrics",
+     "tunables"
+    ],
+    [
+     "release",
+     "metrics",
+     "tunables"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.neo-freya.sender.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "tunables",
+     "release",
+     "metrics"
+    ],
+    [
+     "tunables",
+     "release",
+     "metrics"
+    ],
+    [
+     "release",
+     "tunables",
+     "metrics"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.freya-neo.sender.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "tunables",
+     "release",
+     "metrics"
+    ],
+    [
+     "release",
+     "metrics",
+     "tunables"
+    ],
+    [
+     "release",
+     "tunables",
+     "metrics"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.freya-neo.sender.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "tunables",
+     "release",
+     "metrics"
+    ],
+    [
+     "release",
+     "tunables",
+     "metrics"
+    ],
+    [
+     "metrics",
+     "release",
+     "tunables"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "tunables",
+     "release",
+     "metrics"
+    ],
+    [
+     "release",
+     "tunables",
+     "metrics"
+    ],
+    [
+     "metrics",
+     "release",
+     "tunables"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.freya-neo.sender.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "tunables",
+     "metrics",
+     "release"
+    ],
+    [
+     "release",
+     "tunables",
+     "metrics"
+    ],
+    [
+     "metrics",
+     "release",
+     "tunables"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.neo-freya.sender.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "tunables",
+     "release",
+     "metrics"
+    ],
+    [
+     "tunables",
+     "metrics",
+     "release"
+    ],
+    [
+     "metrics",
+     "release",
+     "tunables"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.freya-neo.sender.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "metrics",
+     "tunables",
+     "release"
+    ],
+    [
+     "metrics",
+     "release",
+     "tunables"
+    ],
+    [
+     "metrics",
+     "release",
+     "tunables"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "tunables",
+     "metrics",
+     "release"
+    ],
+    [
+     "tunables",
+     "metrics",
+     "release"
+    ],
+    [
+     "metrics",
+     "release",
+     "tunables"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.freya-neo.sender.warm",
+   "block": 4,
+   "verify_full": false,
+   "orders": [
+    [
+     "metrics",
+     "release",
+     "tunables"
+    ],
+    [
+     "tunables",
+     "release",
+     "metrics"
+    ],
+    [
+     "metrics",
+     "tunables",
+     "release"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+   "block": 4,
+   "verify_full": false,
+   "orders": [
+    [
+     "release",
+     "tunables",
+     "metrics"
+    ],
+    [
+     "release",
+     "metrics",
+     "tunables"
+    ],
+    [
+     "tunables",
+     "metrics",
+     "release"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.freya-neo.sender.warm",
+   "block": 4,
+   "verify_full": false,
+   "orders": [
+    [
+     "release",
+     "metrics",
+     "tunables"
+    ],
+    [
+     "tunables",
+     "release",
+     "metrics"
+    ],
+    [
+     "metrics",
+     "release",
+     "tunables"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.neo-freya.sender.warm",
+   "block": 4,
+   "verify_full": false,
+   "orders": [
+    [
+     "release",
+     "metrics",
+     "tunables"
+    ],
+    [
+     "tunables",
+     "release",
+     "metrics"
+    ],
+    [
+     "tunables",
+     "metrics",
+     "release"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+   "block": 5,
+   "verify_full": false,
+   "orders": [
+    [
+     "metrics",
+     "release",
+     "tunables"
+    ],
+    [
+     "metrics",
+     "tunables",
+     "release"
+    ],
+    [
+     "tunables",
+     "metrics",
+     "release"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.freya-neo.sender.warm",
+   "block": 5,
+   "verify_full": false,
+   "orders": [
+    [
+     "release",
+     "tunables",
+     "metrics"
+    ],
+    [
+     "tunables",
+     "release",
+     "metrics"
+    ],
+    [
+     "release",
+     "metrics",
+     "tunables"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.freya-neo.sender.warm",
+   "block": 5,
+   "verify_full": false,
+   "orders": [
+    [
+     "metrics",
+     "tunables",
+     "release"
+    ],
+    [
+     "tunables",
+     "metrics",
+     "release"
+    ],
+    [
+     "metrics",
+     "release",
+     "tunables"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.neo-freya.sender.warm",
+   "block": 5,
+   "verify_full": false,
+   "orders": [
+    [
+     "metrics",
+     "release",
+     "tunables"
+    ],
+    [
+     "tunables",
+     "release",
+     "metrics"
+    ],
+    [
+     "tunables",
+     "release",
+     "metrics"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.neo-freya.sender.warm",
+   "block": 6,
+   "verify_full": false,
+   "orders": [
+    [
+     "metrics",
+     "release",
+     "tunables"
+    ],
+    [
+     "release",
+     "metrics",
+     "tunables"
+    ],
+    [
+     "release",
+     "metrics",
+     "tunables"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.freya-neo.sender.warm",
+   "block": 6,
+   "verify_full": false,
+   "orders": [
+    [
+     "release",
+     "metrics",
+     "tunables"
+    ],
+    [
+     "metrics",
+     "tunables",
+     "release"
+    ],
+    [
+     "tunables",
+     "metrics",
+     "release"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+   "block": 6,
+   "verify_full": false,
+   "orders": [
+    [
+     "metrics",
+     "tunables",
+     "release"
+    ],
+    [
+     "metrics",
+     "release",
+     "tunables"
+    ],
+    [
+     "metrics",
+     "tunables",
+     "release"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.freya-neo.sender.warm",
+   "block": 6,
+   "verify_full": false,
+   "orders": [
+    [
+     "metrics",
+     "tunables",
+     "release"
+    ],
+    [
+     "release",
+     "tunables",
+     "metrics"
+    ],
+    [
+     "metrics",
+     "release",
+     "tunables"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+   "block": 7,
+   "verify_full": false,
+   "orders": [
+    [
+     "tunables",
+     "release",
+     "metrics"
+    ],
+    [
+     "metrics",
+     "release",
+     "tunables"
+    ],
+    [
+     "tunables",
+     "metrics",
+     "release"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.freya-neo.sender.warm",
+   "block": 7,
+   "verify_full": false,
+   "orders": [
+    [
+     "release",
+     "tunables",
+     "metrics"
+    ],
+    [
+     "release",
+     "tunables",
+     "metrics"
+    ],
+    [
+     "metrics",
+     "tunables",
+     "release"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.neo-freya.sender.warm",
+   "block": 7,
+   "verify_full": false,
+   "orders": [
+    [
+     "metrics",
+     "release",
+     "tunables"
+    ],
+    [
+     "tunables",
+     "metrics",
+     "release"
+    ],
+    [
+     "release",
+     "metrics",
+     "tunables"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.freya-neo.sender.warm",
+   "block": 7,
+   "verify_full": false,
+   "orders": [
+    [
+     "release",
+     "metrics",
+     "tunables"
+    ],
+    [
+     "metrics",
+     "release",
+     "tunables"
+    ],
+    [
+     "tunables",
+     "metrics",
+     "release"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.freya-neo.sender.warm",
+   "block": 8,
+   "verify_full": false,
+   "orders": [
+    [
+     "tunables",
+     "metrics",
+     "release"
+    ],
+    [
+     "release",
+     "tunables",
+     "metrics"
+    ],
+    [
+     "release",
+     "tunables",
+     "metrics"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.neo-freya.sender.warm",
+   "block": 8,
+   "verify_full": false,
+   "orders": [
+    [
+     "tunables",
+     "release",
+     "metrics"
+    ],
+    [
+     "tunables",
+     "metrics",
+     "release"
+    ],
+    [
+     "metrics",
+     "release",
+     "tunables"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.freya-neo.sender.warm",
+   "block": 8,
+   "verify_full": false,
+   "orders": [
+    [
+     "metrics",
+     "tunables",
+     "release"
+    ],
+    [
+     "metrics",
+     "tunables",
+     "release"
+    ],
+    [
+     "metrics",
+     "release",
+     "tunables"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+   "block": 8,
+   "verify_full": false,
+   "orders": [
+    [
+     "release",
+     "metrics",
+     "tunables"
+    ],
+    [
+     "release",
+     "metrics",
+     "tunables"
+    ],
+    [
+     "metrics",
+     "release",
+     "tunables"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+   "block": 9,
+   "verify_full": false,
+   "orders": [
+    [
+     "tunables",
+     "release",
+     "metrics"
+    ],
+    [
+     "tunables",
+     "release",
+     "metrics"
+    ],
+    [
+     "release",
+     "tunables",
+     "metrics"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.freya-neo.sender.warm",
+   "block": 9,
+   "verify_full": false,
+   "orders": [
+    [
+     "metrics",
+     "release",
+     "tunables"
+    ],
+    [
+     "tunables",
+     "release",
+     "metrics"
+    ],
+    [
+     "tunables",
+     "release",
+     "metrics"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.neo-freya.sender.warm",
+   "block": 9,
+   "verify_full": false,
+   "orders": [
+    [
+     "metrics",
+     "tunables",
+     "release"
+    ],
+    [
+     "tunables",
+     "metrics",
+     "release"
+    ],
+    [
+     "release",
+     "tunables",
+     "metrics"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.freya-neo.sender.warm",
+   "block": 9,
+   "verify_full": false,
+   "orders": [
+    [
+     "metrics",
+     "tunables",
+     "release"
+    ],
+    [
+     "tunables",
+     "metrics",
+     "release"
+    ],
+    [
+     "metrics",
+     "tunables",
+     "release"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+   "block": 10,
+   "verify_full": false,
+   "orders": [
+    [
+     "release",
+     "tunables",
+     "metrics"
+    ],
+    [
+     "metrics",
+     "release",
+     "tunables"
+    ],
+    [
+     "metrics",
+     "release",
+     "tunables"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.freya-neo.sender.warm",
+   "block": 10,
+   "verify_full": false,
+   "orders": [
+    [
+     "tunables",
+     "metrics",
+     "release"
+    ],
+    [
+     "metrics",
+     "release",
+     "tunables"
+    ],
+    [
+     "metrics",
+     "release",
+     "tunables"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.neo-freya.sender.warm",
+   "block": 10,
+   "verify_full": false,
+   "orders": [
+    [
+     "metrics",
+     "release",
+     "tunables"
+    ],
+    [
+     "metrics",
+     "tunables",
+     "release"
+    ],
+    [
+     "metrics",
+     "release",
+     "tunables"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.freya-neo.sender.warm",
+   "block": 10,
+   "verify_full": false,
+   "orders": [
+    [
+     "release",
+     "tunables",
+     "metrics"
+    ],
+    [
+     "metrics",
+     "tunables",
+     "release"
+    ],
+    [
+     "metrics",
+     "release",
+     "tunables"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.freya-neo.sender.warm",
+   "block": 11,
+   "verify_full": false,
+   "orders": [
+    [
+     "tunables",
+     "release",
+     "metrics"
+    ],
+    [
+     "tunables",
+     "metrics",
+     "release"
+    ],
+    [
+     "metrics",
+     "release",
+     "tunables"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+   "block": 11,
+   "verify_full": false,
+   "orders": [
+    [
+     "tunables",
+     "release",
+     "metrics"
+    ],
+    [
+     "metrics",
+     "release",
+     "tunables"
+    ],
+    [
+     "metrics",
+     "tunables",
+     "release"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.neo-freya.sender.warm",
+   "block": 11,
+   "verify_full": false,
+   "orders": [
+    [
+     "metrics",
+     "release",
+     "tunables"
+    ],
+    [
+     "metrics",
+     "tunables",
+     "release"
+    ],
+    [
+     "tunables",
+     "release",
+     "metrics"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.freya-neo.sender.warm",
+   "block": 11,
+   "verify_full": false,
+   "orders": [
+    [
+     "metrics",
+     "release",
+     "tunables"
+    ],
+    [
+     "release",
+     "tunables",
+     "metrics"
+    ],
+    [
+     "metrics",
+     "tunables",
+     "release"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.freya-neo.sender.warm",
+   "block": 12,
+   "verify_full": false,
+   "orders": [
+    [
+     "tunables",
+     "release",
+     "metrics"
+    ],
+    [
+     "tunables",
+     "release",
+     "metrics"
+    ],
+    [
+     "metrics",
+     "tunables",
+     "release"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.freya-neo.sender.warm",
+   "block": 12,
+   "verify_full": false,
+   "orders": [
+    [
+     "metrics",
+     "tunables",
+     "release"
+    ],
+    [
+     "release",
+     "metrics",
+     "tunables"
+    ],
+    [
+     "metrics",
+     "tunables",
+     "release"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.neo-freya.sender.warm",
+   "block": 12,
+   "verify_full": false,
+   "orders": [
+    [
+     "tunables",
+     "release",
+     "metrics"
+    ],
+    [
+     "tunables",
+     "release",
+     "metrics"
+    ],
+    [
+     "release",
+     "metrics",
+     "tunables"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+   "block": 12,
+   "verify_full": false,
+   "orders": [
+    [
+     "release",
+     "metrics",
+     "tunables"
+    ],
+    [
+     "tunables",
+     "release",
+     "metrics"
+    ],
+    [
+     "metrics",
+     "release",
+     "tunables"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+   "block": 13,
+   "verify_full": false,
+   "orders": [
+    [
+     "release",
+     "metrics",
+     "tunables"
+    ],
+    [
+     "release",
+     "metrics",
+     "tunables"
+    ],
+    [
+     "metrics",
+     "release",
+     "tunables"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.freya-neo.sender.warm",
+   "block": 13,
+   "verify_full": false,
+   "orders": [
+    [
+     "metrics",
+     "release",
+     "tunables"
+    ],
+    [
+     "tunables",
+     "metrics",
+     "release"
+    ],
+    [
+     "metrics",
+     "release",
+     "tunables"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.neo-freya.sender.warm",
+   "block": 13,
+   "verify_full": false,
+   "orders": [
+    [
+     "metrics",
+     "tunables",
+     "release"
+    ],
+    [
+     "tunables",
+     "release",
+     "metrics"
+    ],
+    [
+     "tunables",
+     "release",
+     "metrics"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.freya-neo.sender.warm",
+   "block": 13,
+   "verify_full": false,
+   "orders": [
+    [
+     "tunables",
+     "metrics",
+     "release"
+    ],
+    [
+     "release",
+     "metrics",
+     "tunables"
+    ],
+    [
+     "release",
+     "metrics",
+     "tunables"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.freya-neo.sender.warm",
+   "block": 14,
+   "verify_full": false,
+   "orders": [
+    [
+     "tunables",
+     "release",
+     "metrics"
+    ],
+    [
+     "release",
+     "metrics",
+     "tunables"
+    ],
+    [
+     "metrics",
+     "release",
+     "tunables"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+   "block": 14,
+   "verify_full": false,
+   "orders": [
+    [
+     "tunables",
+     "metrics",
+     "release"
+    ],
+    [
+     "metrics",
+     "tunables",
+     "release"
+    ],
+    [
+     "release",
+     "metrics",
+     "tunables"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.neo-freya.sender.warm",
+   "block": 14,
+   "verify_full": false,
+   "orders": [
+    [
+     "metrics",
+     "release",
+     "tunables"
+    ],
+    [
+     "release",
+     "metrics",
+     "tunables"
+    ],
+    [
+     "metrics",
+     "tunables",
+     "release"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.freya-neo.sender.warm",
+   "block": 14,
+   "verify_full": false,
+   "orders": [
+    [
+     "release",
+     "tunables",
+     "metrics"
+    ],
+    [
+     "metrics",
+     "release",
+     "tunables"
+    ],
+    [
+     "release",
+     "metrics",
+     "tunables"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.neo-freya.sender.warm",
+   "block": 15,
+   "verify_full": true,
+   "orders": [
+    [
+     "tunables",
+     "metrics",
+     "release"
+    ],
+    [
+     "release",
+     "tunables",
+     "metrics"
+    ],
+    [
+     "tunables",
+     "release",
+     "metrics"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.freya-neo.sender.warm",
+   "block": 15,
+   "verify_full": true,
+   "orders": [
+    [
+     "metrics",
+     "tunables",
+     "release"
+    ],
+    [
+     "release",
+     "tunables",
+     "metrics"
+    ],
+    [
+     "release",
+     "tunables",
+     "metrics"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+   "block": 15,
+   "verify_full": true,
+   "orders": [
+    [
+     "release",
+     "tunables",
+     "metrics"
+    ],
+    [
+     "release",
+     "metrics",
+     "tunables"
+    ],
+    [
+     "tunables",
+     "release",
+     "metrics"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.freya-neo.sender.warm",
+   "block": 15,
+   "verify_full": true,
+   "orders": [
+    [
+     "release",
+     "metrics",
+     "tunables"
+    ],
+    [
+     "release",
+     "tunables",
+     "metrics"
+    ],
+    [
+     "metrics",
+     "tunables",
+     "release"
+    ]
+   ]
+  }
+ ],
+ "scripts": {
+  "probe.py": "79c5d5649359fab936d72a58ccbb0348b8388dd71969a5c56d7915ca6a0c7563",
+  "corpus.py": "d6018d3611cba607a670f3fe554d0d4be5941fb2ef8fd65d57f10bfb582625f6",
+  "corpora.json": "729929e1ba7baf3a0b8413efffab5bc26ae0cbe8514daf1c05bbb53a314bb084",
+  "agent.py": "04d9c596cea456441e99d514a3a819c2f6b3f7dc1e412e00c06ea7a693a423c4",
+  "overnight.py": "c9b81a0bbcda7d1d2431e88060e88e432425e6251e46d6af2b24e7fdd0186072",
+  "measure.py": "5065310f480ff1cabfa7c645f0db342624a02f9a081b96069d50d52b3d224777"
+ }
+}

@@ -1,0 +1,11 @@
+experiment,kind,cell_id,corpus,scenario,sender,receiver,client,link,cache,arm,n_blocks,sigma_d,blocks_for_2pct,blocks_for_3pct,blocks_for_5pct,blocks_for_10pct,blocks_equivalent_2pct,blocks_equivalent_3pct,blocks_equivalent_5pct,blocks_equivalent_10pct
+S2-mac-deep-workers,screening,small-deep.fresh.mars-mac.receiver.warm,small-deep,fresh,mars,mac,receiver,mac-mars,warm,rsync,8,0.2357646401007069,1114,501,186,50,1492,671,248,67
+S2-mac-deep-workers,screening,small-deep.fresh.mars-mac.receiver.warm,small-deep,fresh,mars,mac,receiver,mac-mars,warm,recv1,8,0.1953563296485442,766,345,128,35,1025,461,171,47
+S2-mac-deep-workers,screening,small-deep.fresh.mars-mac.receiver.warm,small-deep,fresh,mars,mac,receiver,mac-mars,warm,recv2,8,0.2055319280502952,847,382,142,39,1134,511,189,51
+S2-mac-deep-workers,screening,small-deep.fresh.mars-mac.receiver.warm,small-deep,fresh,mars,mac,receiver,mac-mars,warm,recv8,8,0.13496556241713523,367,166,62,18,491,222,83,24
+S2-mac-deep-workers,screening,small-deep.fresh.mars-mac.receiver.warm,small-deep,fresh,mars,mac,receiver,mac-mars,warm,scan1,8,0.24617055739536692,1214,546,202,55,1626,731,270,73
+S2-mac-deep-workers,screening,small-deep.noop.mars-mac.receiver.warm,small-deep,noop,mars,mac,receiver,mac-mars,warm,rsync,8,0.3651881672710909,2669,1199,442,118,3576,1606,591,157
+S2-mac-deep-workers,screening,small-deep.noop.mars-mac.receiver.warm,small-deep,noop,mars,mac,receiver,mac-mars,warm,recv1,8,0.22303584761468348,997,449,166,45,1335,601,222,60
+S2-mac-deep-workers,screening,small-deep.noop.mars-mac.receiver.warm,small-deep,noop,mars,mac,receiver,mac-mars,warm,recv2,8,0.16643312347614322,556,251,94,26,745,336,125,35
+S2-mac-deep-workers,screening,small-deep.noop.mars-mac.receiver.warm,small-deep,noop,mars,mac,receiver,mac-mars,warm,recv8,8,0.36494627922327044,2665,1198,441,117,3571,1604,590,157
+S2-mac-deep-workers,screening,small-deep.noop.mars-mac.receiver.warm,small-deep,noop,mars,mac,receiver,mac-mars,warm,scan1,8,0.18257436714662634,669,302,112,31,896,403,150,41

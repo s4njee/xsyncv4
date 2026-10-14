@@ -14,7 +14,7 @@ agent and the sample record) and milestone M5 (analysis and reports).
 | `stage.py` | controller | Builds `xs` from a commit, stages it and the lab scripts on the hosts, and checks what they hold |
 | `plan.py` | controller | Expands an experiment spec into a randomized block plan; starts, follows and fetches a run |
 | `agent.py` | driver endpoint | Executes a plan detached and writes one record per sample |
-| `overnight.py` | driver endpoint | Runs queued plans one after another inside a time window |
+| `runner.py` | driver endpoint | Works the driver's backlog and sentinel list around the clock, one plan at a time |
 | `analyze.py` | controller | Paired ratios, intervals, robust checks and verdicts from the valid blocks; writes the tables |
 | `report.py` | controller | Renders an experiment's analysis as Markdown |
 | `selftest.py` | anywhere | Checks the analysis on simulated experiments with known ratios |
@@ -65,6 +65,42 @@ the recorded build, reports another revision or a `-dirty` one, or whose
 scripts differ from the working copy. It also records each host's rsync
 path, version and hash. `preflight.py --rev REV` runs the same check.
 
+## Tuning the engine
+
+The engine's tuning constants are compiled into a release build. A commit
+can also be built with `XSYNC_TUNABLES=ON`, which reads them from
+`XSYNC_TUNE` when it starts; that build is written `REV-tune` everywhere a
+revision is accepted, and is staged beside the release build as
+`xs-<rev12>-tune`:
+
+```sh
+python3 benchmarks/lab/stage.py build --rev REV-tune
+python3 benchmarks/lab/stage.py push --rev REV-tune
+```
+
+An arm that names a tunables build may set constants and ask for the
+engine's own counters:
+
+```toml
+[arms.send1]
+tool = "xs"
+rev = "ddefa041364e-tune"
+tune = { sender = "jobs=1", receiver = "pipe_size=1048576" }   # or one string for both ends
+metrics = true
+```
+
+The environment does not cross SSH, so the agent hands each end its
+variables through `measure.py --env`. `sender` and `receiver` follow the
+data, whichever end starts the transfer. The keys and their defaults are in
+`src/tune.h`; an unknown key or a value out of range stops the transfer
+before anything is written. With `metrics`, each sample records an `engine`
+object with one entry per end: stage timers, phase marks, CPU, context
+switches, wire bytes, pipe sizes and the constants in force.
+
+A tunables build is used for conclusions only at a commit where E0c
+(`benchmarks/experiments/E0c-tunables.toml`) found it *equivalent* to the
+release build at default values.
+
 ## Running an experiment
 
 A spec in `benchmarks/experiments/` names the arms, the cell matrix, the
@@ -110,31 +146,64 @@ The spec's `[baseline]` table names the analysed experiment and arm the
 times come from. It exists to give the analysis a known effect to find
 (`E0b-known.toml`).
 
-## Running unattended overnight
+## Running around the clock
+
+The LAN pair works continuously. A runner (`runner.py`) lives on the driver,
+detached, and gives one plan at a time to that plan's agent. It never
+finishes on its own and needs nothing from the controller, which may sleep
+or be off.
 
 ```sh
-python3 benchmarks/lab/plan.py enqueue benchmarks/experiments/E1-baseline.toml
-python3 benchmarks/lab/plan.py night --from 2026-10-11T22:00-05:00 --until 2026-10-12T04:00-05:00
-python3 benchmarks/lab/plan.py queue
-python3 benchmarks/lab/plan.py collect
-python3 benchmarks/lab/plan.py stop-queue
+python3 benchmarks/lab/plan.py enqueue benchmarks/experiments/E1v2-baseline.toml   # add to the backlog
+python3 benchmarks/lab/plan.py enqueue SPEC --front                                 # run it next
+python3 benchmarks/lab/plan.py standing benchmarks/experiments/S0-sentinel.toml --count 40
+python3 benchmarks/lab/plan.py queue                                                # what it is doing, what waits
+python3 benchmarks/lab/plan.py collect                                              # fetch finished runs, write reports
+python3 benchmarks/lab/plan.py runner start | pause | resume | restart | stop | status
+python3 benchmarks/lab/plan.py runner set --standing-every 6 --write-budget freya=750 --halt-after 3
 ```
 
-`enqueue` makes a plan and puts it on the driver's queue without starting
-it. `night` checks the hosts once, then starts `overnight.py` on the driver,
-detached. Nothing after that needs the controller: it may sleep or be off.
+What the runner does, in order, each time the hosts are free:
 
-`overnight.py` waits for the window to open, then gives each queued run to
-the agent in order. It waits for any experiment still running, never repeats
-a run that already has a status, and carries on past a run that fails. The
-agent gets the window's end as a deadline and starts no block that might run
-past it, so a run cut short still holds whole blocks, spread evenly over its
-cells, and a later night's run of the same spec pools with it in the
-analysis. It will not start a run with less than five minutes left.
+1. **Halted or paused?** Three failed runs in a row halt it until `runner
+   resume`. `runner pause` lets the current run finish and starts no other,
+   which is how to take the hosts for a test by hand; `stop RUN` ends the
+   current run after its sample.
+2. **Sentinel due?** `standing` prepares runs of a short spec. One is run
+   every `--standing-every` hours whatever is in the backlog, so the same
+   measurement is repeated through the day and night. Its two identical xs
+   arms give the noise floor at that hour, and its xs to rsync ratio should
+   not move: a drive slowing down or a noisy hour shows there first.
+3. **Next in the backlog** that fits the write budget. A plan records how
+   many bytes it will write to each host's drive. The runner charges that
+   when the run starts and keeps a 24-hour total per host; a run that would
+   take a host over `--write-budget` (GiB in any 24 hours) is passed over
+   until it fits. A run larger than the whole allowance runs only when
+   nothing has been charged to that host for a day.
+4. **Nothing to do:** it waits. An empty backlog costs nothing but the
+   sentinel.
 
-`queue` shows what the queue is doing. `collect` fetches every queued run
-and writes each experiment's report. `stop-queue` ends it after the current
-sample, with the hosts restored.
+A run that has a status is never repeated, and a run that fails does not
+stop the queue. There is no deadline and no window: a run is whole.
+
+Scripts are staged as bundles, `ROOT/lib/<id>`, named by a hash of their
+contents and never changed. A plan names its bundle and runs under that
+bundle's agent, so `stage.py push` and new plans never disturb what is
+queued or running. `runner restart` replaces the runner with the current
+bundle's without touching the run in progress: the old one lets go, the new
+one waits for that run and carries on.
+
+The runner does not survive a reboot of the driver. To have it come back,
+the operator can add one line to their own crontab on the driver (`crontab
+-e`), using the path `runner status` reports:
+
+```
+@reboot python3 /home/USER/benchmarks/xsyncv4/lab/lib/ID/runner.py --root /home/USER/benchmarks/xsyncv4/lab >> /home/USER/benchmarks/xsyncv4/lab/runs/runner.log 2>&1
+```
+
+Mac to mars runs are not queued. They are started on demand with `plan.py
+start`, run under an agent on the Mac, and wait while a path experiment
+marks one of their hosts as in use.
 
 ## A macOS endpoint
 

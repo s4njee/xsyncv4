@@ -1,0 +1,40 @@
+# T1e: cap the receiver's workers on a many-core host. E3a and T1c both found
+# that sixteen receiving workers on freya make a no-op of small-real 26 to 38%
+# slower than four or eight, and in T1c fewer receiving workers looked
+# slightly faster on small fresh copies too. Before the default changes it
+# must not cost anything elsewhere: every E1 corpus, fresh and no-op, into
+# freya (the only host here with more than eight cores), Holm over the
+# 28 comparisons.
+id = "T1e-recv-cap"
+kind = "confirmatory"
+hypothesis = "Four or eight receiving workers on a 32-thread host make no-ops of real trees faster than sixteen, and nothing slower."
+primary = "wall_s"
+delta = 0.03
+blocks = 12
+control = "xs"
+verify = "first-last"
+
+[arms.xs]
+tool = "xs"
+rev = "ddefa041364e-tune"
+flags = ["-a"]
+
+[arms.recv4]
+tool = "xs"
+rev = "ddefa041364e-tune"
+flags = ["-a"]
+tune = { receiver = "jobs=4" }
+
+[arms.recv8]
+tool = "xs"
+rev = "ddefa041364e-tune"
+flags = ["-a"]
+tune = { receiver = "jobs=8" }
+
+[matrix]
+link = "lan"
+corpus = ["tiny-one", "small-flat", "small-deep", "small-opaque", "small-real", "mixed-bimodal", "mixed-threshold"]
+scenario = ["fresh", "noop"]
+direction = ["neo>freya"]
+client = ["sender"]
+cache = ["warm"]

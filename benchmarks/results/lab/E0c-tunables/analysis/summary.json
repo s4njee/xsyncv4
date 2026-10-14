@@ -1,0 +1,19 @@
+{
+  "experiment": "E0c-tunables",
+  "kind": "confirmatory",
+  "hypothesis": "At default values the tunables build of ddefa041364e is within 3% of the release build, with and without XSYNC_METRICS.",
+  "primary": "wall_s",
+  "control": "release",
+  "delta": 0.03,
+  "level": 0.95,
+  "looks": 1,
+  "runs": [
+    "20261013T191931Z-E0c-tunables"
+  ],
+  "spec_sha256": [
+    "4dc2c75f94bcd8acee9ca5bb55326caa66954148a74265f8d4463046f52c08c4"
+  ],
+  "valid_blocks": 64,
+  "void_attempts": 0,
+  "void_reasons": []
+}

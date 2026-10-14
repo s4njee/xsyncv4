@@ -1,0 +1,36 @@
+# W0, the Wi-Fi pair's sentinel (see S0-sentinel): a short run the driver repeats at a fixed interval, day
+# and night, whatever else is in its backlog. It is not an experiment with a
+# verdict. Its two xs arms are the same build, so their ratio is the noise
+# floor at that hour, and xs against rsync is a ratio that should not move.
+# Read as a series over time it shows a drive slowing down, a noisy period of
+# the day, or a host that changed, before those reach a real experiment.
+id = "W0-sentinel"
+kind = "screening"
+hypothesis = "Hour by hour, the A/A ratio stays within 3% of 1 and the xs to rsync ratio stays where the baseline put it."
+primary = "wall_s"
+delta = 0.03
+blocks = 3
+control = "xs"
+verify = "first-last"
+
+[arms.xs]
+tool = "xs"
+rev = "8cc75bbdb801"
+flags = ["-a"]
+
+[arms.again]
+tool = "xs"
+rev = "8cc75bbdb801"
+flags = ["-a"]
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[matrix]
+link = "wifi"
+corpus = ["small-flat", "mixed-bimodal"]
+scenario = ["fresh", "noop"]
+direction = ["orion>mars", "mars>orion"]
+client = ["sender"]
+cache = ["warm"]

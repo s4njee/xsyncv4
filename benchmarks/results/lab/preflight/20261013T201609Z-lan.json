@@ -1,0 +1,1773 @@
+{
+  "utc": "2026-10-13T20:16:09+00:00",
+  "helper_sha256": "e3ba2eedf97c31557e883128d0e61adc4d568fc2573d9f31dc5ecbdae3be0755",
+  "config": {
+    "driver": "neo",
+    "hosts": {
+      "neo": {
+        "ssh": "sanjee@neo.local",
+        "name": "neo.local",
+        "hostname": "neo",
+        "root": "/home/sanjee/benchmarks/xsyncv4/lab",
+        "root_fstype": "ext4",
+        "helper": true
+      },
+      "freya": {
+        "ssh": "sanjee@freya.local",
+        "name": "freya.local",
+        "hostname": "freya",
+        "root": "/mnt/nvme/xsbench",
+        "root_fstype": "ext4",
+        "helper": true
+      },
+      "mars": {
+        "ssh": "sanjee@mars.local",
+        "name": "mars.local",
+        "hostname": "mars",
+        "root": "/home/sanjee/benchmarks/xsyncv4/lab",
+        "root_fstype": "ext4",
+        "helper": false
+      },
+      "mac": {
+        "local": true,
+        "ssh": "sanjee@mbp-3.local",
+        "name": "mbp-3.local",
+        "hostname": "mbp-3",
+        "root": "/Users/sanjee/benchmarks/xsbench.noindex",
+        "helper": false
+      }
+    },
+    "links": {
+      "lan": {
+        "hosts": [
+          "neo",
+          "freya"
+        ],
+        "medium": "wired",
+        "min_speed_mbps": 1000,
+        "max_rtt_ms": 2.0,
+        "interface": {
+          "neo": "eth0",
+          "freya": "enp10s0"
+        }
+      },
+      "mesh": {
+        "hosts": [
+          "neo",
+          "mars"
+        ],
+        "medium": "mesh",
+        "interface": {
+          "neo": "eth0",
+          "mars": "enp9s0"
+        }
+      },
+      "mac-mars": {
+        "hosts": [
+          "mac",
+          "mars"
+        ],
+        "medium": "mesh",
+        "initiator": "mac",
+        "driver": "mac",
+        "results": "supplementary",
+        "background": true,
+        "interface": {
+          "mac": "en8",
+          "mars": "enp9s0"
+        }
+      }
+    }
+  },
+  "inventory": {
+    "freya": {
+      "utc": "2026-10-13T20:16:09.505+00:00",
+      "hostname": "freya",
+      "user": "sanjee",
+      "system": "Linux",
+      "kernel": "7.1.8-1-cachyos",
+      "machine": "x86_64",
+      "python": "3.14.7",
+      "cpus": 32,
+      "cpu_model": "AMD Ryzen 9 7950X 16-Core Processor",
+      "tools": {
+        "rsync": "/usr/bin/rsync",
+        "ssh": "/usr/bin/ssh",
+        "ip": "/usr/bin/ip",
+        "tc": "/usr/bin/tc",
+        "iw": "/usr/bin/iw",
+        "ping": "/usr/bin/ping",
+        "strace": "/usr/bin/strace",
+        "perf": null,
+        "vcgencmd": null,
+        "zstd": "/usr/bin/zstd",
+        "findmnt": "/usr/bin/findmnt",
+        "lsblk": "/usr/bin/lsblk",
+        "systemd-run": "/usr/bin/systemd-run",
+        "sudo": "/usr/bin/sudo",
+        "iperf3": null,
+        "rsync_version": "rsync  version 3.5.0-g471e17dc  protocol version 32",
+        "ssh_version": "OpenSSH_10.5p1, OpenSSL 3.6.3 9 Jun 2026"
+      },
+      "open_files_limit": 2048,
+      "paths": [
+        {
+          "target": "/mnt/nvme",
+          "source": "/dev/nvme1n1p2",
+          "fstype": "ext4",
+          "options": "rw,noatime",
+          "free_bytes": 1858623381504,
+          "total_bytes": 2014045028352,
+          "path": "/mnt/nvme/xsbench",
+          "exists": true,
+          "writable": true
+        }
+      ],
+      "os": "CachyOS",
+      "board": null,
+      "memory_bytes": 66425176064,
+      "cpufreq": {
+        "driver": "amd-pstate-epp",
+        "governors": [
+          "powersave"
+        ],
+        "available": [
+          "performance",
+          "powersave"
+        ],
+        "max_khz": 5883197,
+        "epp": "balance_performance"
+      },
+      "thermal_zones": [],
+      "interfaces": [
+        {
+          "name": "br-039e63f2ae7f",
+          "operstate": "up",
+          "speed_mbps": 10000,
+          "mtu": 1500,
+          "duplex": "unknown",
+          "medium": "wired"
+        },
+        {
+          "name": "br-6fe3f3664eac",
+          "operstate": "down",
+          "speed_mbps": -1,
+          "mtu": 1500,
+          "duplex": "unknown",
+          "medium": "wired"
+        },
+        {
+          "name": "br-92f611be63fd",
+          "operstate": "up",
+          "speed_mbps": 10000,
+          "mtu": 1500,
+          "duplex": "unknown",
+          "medium": "wired"
+        },
+        {
+          "name": "br-e132e87d027f",
+          "operstate": "up",
+          "speed_mbps": 10000,
+          "mtu": 1500,
+          "duplex": "unknown",
+          "medium": "wired"
+        },
+        {
+          "name": "cni0",
+          "operstate": "up",
+          "speed_mbps": 10000,
+          "mtu": 1450,
+          "duplex": "unknown",
+          "medium": "wired"
+        },
+        {
+          "name": "docker0",
+          "operstate": "down",
+          "speed_mbps": -1,
+          "mtu": 1500,
+          "duplex": "unknown",
+          "medium": "wired"
+        },
+        {
+          "name": "enp10s0",
+          "operstate": "up",
+          "speed_mbps": 1000,
+          "mtu": 1500,
+          "duplex": "full",
+          "medium": "wired"
+        },
+        {
+          "name": "flannel.1",
+          "operstate": "unknown",
+          "speed_mbps": 1000,
+          "mtu": 1450,
+          "duplex": "full",
+          "medium": "wired"
+        },
+        {
+          "name": "veth02320a77",
+          "operstate": "up",
+          "speed_mbps": 10000,
+          "mtu": 1450,
+          "duplex": "full",
+          "medium": "wired"
+        },
+        {
+          "name": "veth07930f24",
+          "operstate": "up",
+          "speed_mbps": 10000,
+          "mtu": 1450,
+          "duplex": "full",
+          "medium": "wired"
+        },
+        {
+          "name": "veth09fc7881",
+          "operstate": "up",
+          "speed_mbps": 10000,
+          "mtu": 1450,
+          "duplex": "full",
+          "medium": "wired"
+        },
+        {
+          "name": "veth0aea8660",
+          "operstate": "up",
+          "speed_mbps": 10000,
+          "mtu": 1450,
+          "duplex": "full",
+          "medium": "wired"
+        },
+        {
+          "name": "veth14c418bd",
+          "operstate": "up",
+          "speed_mbps": 10000,
+          "mtu": 1450,
+          "duplex": "full",
+          "medium": "wired"
+        },
+        {
+          "name": "veth195df00a",
+          "operstate": "up",
+          "speed_mbps": 10000,
+          "mtu": 1450,
+          "duplex": "full",
+          "medium": "wired"
+        },
+        {
+          "name": "veth199a610f",
+          "operstate": "up",
+          "speed_mbps": 10000,
+          "mtu": 1450,
+          "duplex": "full",
+          "medium": "wired"
+        },
+        {
+          "name": "veth1f8b30f4",
+          "operstate": "up",
+          "speed_mbps": 10000,
+          "mtu": 1450,
+          "duplex": "full",
+          "medium": "wired"
+        },
+        {
+          "name": "veth22368dd8",
+          "operstate": "up",
+          "speed_mbps": 10000,
+          "mtu": 1450,
+          "duplex": "full",
+          "medium": "wired"
+        },
+        {
+          "name": "veth22d52e10",
+          "operstate": "up",
+          "speed_mbps": 10000,
+          "mtu": 1450,
+          "duplex": "full",
+          "medium": "wired"
+        },
+        {
+          "name": "veth237010f9",
+          "operstate": "up",
+          "speed_mbps": 10000,
+          "mtu": 1450,
+          "duplex": "full",
+          "medium": "wired"
+        },
+        {
+          "name": "veth27b8485b",
+          "operstate": "up",
+          "speed_mbps": 10000,
+          "mtu": 1450,
+          "duplex": "full",
+          "medium": "wired"
+        },
+        {
+          "name": "veth288f5550",
+          "operstate": "up",
+          "speed_mbps": 10000,
+          "mtu": 1450,
+          "duplex": "full",
+          "medium": "wired"
+        },
+        {
+          "name": "veth2b611bd4",
+          "operstate": "up",
+          "speed_mbps": 10000,
+          "mtu": 1450,
+          "duplex": "full",
+          "medium": "wired"
+        },
+        {
+          "name": "veth2ce7eba4",
+          "operstate": "up",
+          "speed_mbps": 10000,
+          "mtu": 1450,
+          "duplex": "full",
+          "medium": "wired"
+        },
+        {
+          "name": "veth2e77b1fb",
+          "operstate": "up",
+          "speed_mbps": 10000,
+          "mtu": 1450,
+          "duplex": "full",
+          "medium": "wired"
+        },
+        {
+          "name": "veth2f9b63ef",
+          "operstate": "up",
+          "speed_mbps": 10000,
+          "mtu": 1450,
+          "duplex": "full",
+          "medium": "wired"
+        },
+        {
+          "name": "veth3994c6f2",
+          "operstate": "up",
+          "speed_mbps": 10000,
+          "mtu": 1450,
+          "duplex": "full",
+          "medium": "wired"
+        },
+        {
+          "name": "veth3b4f08a",
+          "operstate": "up",
+          "speed_mbps": 10000,
+          "mtu": 1500,
+          "duplex": "full",
+          "medium": "wired"
+        },
+        {
+          "name": "veth3c0ad46a",
+          "operstate": "up",
+          "speed_mbps": 10000,
+          "mtu": 1450,
+          "duplex": "full",
+          "medium": "wired"
+        },
+        {
+          "name": "veth3fa261d5",
+          "operstate": "up",
+          "speed_mbps": 10000,
+          "mtu": 1450,
+          "duplex": "full",
+          "medium": "wired"
+        },
+        {
+          "name": "veth4505baf4",
+          "operstate": "up",
+          "speed_mbps": 10000,
+          "mtu": 1450,
+          "duplex": "full",
+          "medium": "wired"
+        },
+        {
+          "name": "veth505c8eec",
+          "operstate": "up",
+          "speed_mbps": 10000,
+          "mtu": 1450,
+          "duplex": "full",
+          "medium": "wired"
+        },
+        {
+          "name": "veth54694c8",
+          "operstate": "up",
+          "speed_mbps": 10000,
+          "mtu": 1500,
+          "duplex": "full",
+          "medium": "wired"
+        },
+        {
+          "name": "veth5c96fd6c",
+          "operstate": "up",
+          "speed_mbps": 10000,
+          "mtu": 1450,
+          "duplex": "full",
+          "medium": "wired"
+        },
+        {
+          "name": "veth754e3cf5",
+          "operstate": "up",
+          "speed_mbps": 10000,
+          "mtu": 1450,
+          "duplex": "full",
+          "medium": "wired"
+        },
+        {
+          "name": "veth76ddef75",
+          "operstate": "up",
+          "speed_mbps": 10000,
+          "mtu": 1450,
+          "duplex": "full",
+          "medium": "wired"
+        },
+        {
+          "name": "veth80eeb30b",
+          "operstate": "up",
+          "speed_mbps": 10000,
+          "mtu": 1450,
+          "duplex": "full",
+          "medium": "wired"
+        },
+        {
+          "name": "veth829f081f",
+          "operstate": "up",
+          "speed_mbps": 10000,
+          "mtu": 1450,
+          "duplex": "full",
+          "medium": "wired"
+        },
+        {
+          "name": "veth8540e79f",
+          "operstate": "up",
+          "speed_mbps": 10000,
+          "mtu": 1450,
+          "duplex": "full",
+          "medium": "wired"
+        },
+        {
+          "name": "veth86ecaea3",
+          "operstate": "up",
+          "speed_mbps": 10000,
+          "mtu": 1450,
+          "duplex": "full",
+          "medium": "wired"
+        },
+        {
+          "name": "veth8a8641a4",
+          "operstate": "up",
+          "speed_mbps": 10000,
+          "mtu": 1450,
+          "duplex": "full",
+          "medium": "wired"
+        },
+        {
+          "name": "veth8accb6e",
+          "operstate": "up",
+          "speed_mbps": 10000,
+          "mtu": 1500,
+          "duplex": "full",
+          "medium": "wired"
+        },
+        {
+          "name": "veth8e854eb8",
+          "operstate": "up",
+          "speed_mbps": 10000,
+          "mtu": 1450,
+          "duplex": "full",
+          "medium": "wired"
+        },
+        {
+          "name": "vetha8427944",
+          "operstate": "up",
+          "speed_mbps": 10000,
+          "mtu": 1450,
+          "duplex": "full",
+          "medium": "wired"
+        },
+        {
+          "name": "vetha8643974",
+          "operstate": "up",
+          "speed_mbps": 10000,
+          "mtu": 1450,
+          "duplex": "full",
+          "medium": "wired"
+        },
+        {
+          "name": "vetha8a04dc7",
+          "operstate": "up",
+          "speed_mbps": 10000,
+          "mtu": 1450,
+          "duplex": "full",
+          "medium": "wired"
+        },
+        {
+          "name": "vethb0f1f40f",
+          "operstate": "up",
+          "speed_mbps": 10000,
+          "mtu": 1450,
+          "duplex": "full",
+          "medium": "wired"
+        },
+        {
+          "name": "vethb25ad3c8",
+          "operstate": "up",
+          "speed_mbps": 10000,
+          "mtu": 1450,
+          "duplex": "full",
+          "medium": "wired"
+        },
+        {
+          "name": "vethb468e385",
+          "operstate": "up",
+          "speed_mbps": 10000,
+          "mtu": 1450,
+          "duplex": "full",
+          "medium": "wired"
+        },
+        {
+          "name": "vethb4b741d4",
+          "operstate": "up",
+          "speed_mbps": 10000,
+          "mtu": 1450,
+          "duplex": "full",
+          "medium": "wired"
+        },
+        {
+          "name": "vethbddb309c",
+          "operstate": "up",
+          "speed_mbps": 10000,
+          "mtu": 1450,
+          "duplex": "full",
+          "medium": "wired"
+        },
+        {
+          "name": "vethc1a31828",
+          "operstate": "up",
+          "speed_mbps": 10000,
+          "mtu": 1450,
+          "duplex": "full",
+          "medium": "wired"
+        },
+        {
+          "name": "vethc834924b",
+          "operstate": "up",
+          "speed_mbps": 10000,
+          "mtu": 1450,
+          "duplex": "full",
+          "medium": "wired"
+        },
+        {
+          "name": "vethcfc510d5",
+          "operstate": "up",
+          "speed_mbps": 10000,
+          "mtu": 1450,
+          "duplex": "full",
+          "medium": "wired"
+        },
+        {
+          "name": "vethd2804305",
+          "operstate": "up",
+          "speed_mbps": 10000,
+          "mtu": 1450,
+          "duplex": "full",
+          "medium": "wired"
+        },
+        {
+          "name": "vethd2c35e2d",
+          "operstate": "up",
+          "speed_mbps": 10000,
+          "mtu": 1450,
+          "duplex": "full",
+          "medium": "wired"
+        },
+        {
+          "name": "vethd5922ca7",
+          "operstate": "up",
+          "speed_mbps": 10000,
+          "mtu": 1450,
+          "duplex": "full",
+          "medium": "wired"
+        },
+        {
+          "name": "vethe90c87bd",
+          "operstate": "up",
+          "speed_mbps": 10000,
+          "mtu": 1450,
+          "duplex": "full",
+          "medium": "wired"
+        },
+        {
+          "name": "vethed37921",
+          "operstate": "up",
+          "speed_mbps": 10000,
+          "mtu": 1500,
+          "duplex": "full",
+          "medium": "wired"
+        },
+        {
+          "name": "vetheeb4d36f",
+          "operstate": "up",
+          "speed_mbps": 10000,
+          "mtu": 1450,
+          "duplex": "full",
+          "medium": "wired"
+        },
+        {
+          "name": "vethf3e8df9e",
+          "operstate": "up",
+          "speed_mbps": 10000,
+          "mtu": 1450,
+          "duplex": "full",
+          "medium": "wired"
+        },
+        {
+          "name": "vethf5109558",
+          "operstate": "up",
+          "speed_mbps": 10000,
+          "mtu": 1450,
+          "duplex": "full",
+          "medium": "wired"
+        },
+        {
+          "name": "vethfa93cb2e",
+          "operstate": "up",
+          "speed_mbps": 10000,
+          "mtu": 1450,
+          "duplex": "full",
+          "medium": "wired"
+        },
+        {
+          "name": "wlan0",
+          "operstate": "down",
+          "speed_mbps": null,
+          "mtu": 1500,
+          "duplex": null,
+          "medium": "wireless"
+        }
+      ],
+      "addresses": {
+        "lo": [
+          "127.0.0.1",
+          "::1"
+        ],
+        "enp10s0": [
+          "192.168.1.156",
+          "fe80::7745:7283:821c:938f"
+        ],
+        "wlan0": [],
+        "br-039e63f2ae7f": [
+          "172.19.0.1",
+          "fe80::745c:83ff:fe8c:ef07"
+        ],
+        "docker0": [
+          "172.17.0.1",
+          "fe80::448:e3ff:fe86:ea99"
+        ],
+        "br-6fe3f3664eac": [
+          "172.18.0.1"
+        ],
+        "br-92f611be63fd": [
+          "172.21.0.1",
+          "fe80::78b6:51ff:fec8:2240"
+        ],
+        "br-e132e87d027f": [
+          "172.20.0.1",
+          "fe80::7025:1fff:fecb:3763"
+        ],
+        "flannel.1": [
+          "10.42.0.0",
+          "fe80::3cbd:37ff:fed2:4d8a"
+        ],
+        "cni0": [
+          "10.42.0.1",
+          "fe80::b8d1:84ff:fe01:393b"
+        ],
+        "vetheeb4d36f": [
+          "fe80::c050:d5ff:fe2e:f4bb"
+        ],
+        "vethd2c35e2d": [
+          "fe80::5cd1:c5ff:fe80:ca78"
+        ],
+        "vethfa93cb2e": [
+          "fe80::e0f6:43ff:fea2:a979"
+        ],
+        "veth2b611bd4": [
+          "fe80::3412:3eff:fee4:3097"
+        ],
+        "vetha8643974": [
+          "fe80::58b7:c3ff:fe89:4e91"
+        ],
+        "veth8a8641a4": [
+          "fe80::6c64:82ff:fece:961b"
+        ],
+        "veth09fc7881": [
+          "fe80::74ad:94ff:fee6:cc73"
+        ],
+        "vethe90c87bd": [
+          "fe80::f0e8:5dff:febd:a223"
+        ],
+        "veth3fa261d5": [
+          "fe80::e80d:82ff:fee2:34e2"
+        ],
+        "veth237010f9": [
+          "fe80::a0e7:77ff:feca:e6b6"
+        ],
+        "vethb4b741d4": [
+          "fe80::340e:5dff:feec:a99"
+        ],
+        "veth76ddef75": [
+          "fe80::d424:feff:fe88:3d6a"
+        ],
+        "veth3c0ad46a": [
+          "fe80::68fe:6bff:fe0c:f05e"
+        ],
+        "veth22d52e10": [
+          "fe80::f06d:b8ff:fe17:1a95"
+        ],
+        "veth8e854eb8": [
+          "fe80::1453:e8ff:fe17:4037"
+        ],
+        "veth27b8485b": [
+          "fe80::e07b:76ff:feb1:f615"
+        ],
+        "vethc1a31828": [
+          "fe80::302a:feff:fe0d:6808"
+        ],
+        "veth1f8b30f4": [
+          "fe80::2cdc:6bff:fe4b:e7c7"
+        ],
+        "vethbddb309c": [
+          "fe80::9863:41ff:fe90:1468"
+        ],
+        "vethcfc510d5": [
+          "fe80::d03b:caff:fed4:d024"
+        ],
+        "vethf5109558": [
+          "fe80::f88b:10ff:fe8e:5486"
+        ],
+        "vethf3e8df9e": [
+          "fe80::883d:77ff:fedd:6fea"
+        ],
+        "veth2f9b63ef": [
+          "fe80::f834:a2ff:fe06:913"
+        ],
+        "veth07930f24": [
+          "fe80::f403:30ff:fe88:799e"
+        ],
+        "vethd5922ca7": [
+          "fe80::e8c0:20ff:fe50:42d0"
+        ],
+        "vethb25ad3c8": [
+          "fe80::b06d:d3ff:fe8a:2cdf"
+        ],
+        "veth8540e79f": [
+          "fe80::3065:f3ff:fe3b:f84d"
+        ],
+        "veth86ecaea3": [
+          "fe80::b0f8:cff:fe18:37e9"
+        ],
+        "veth02320a77": [
+          "fe80::6c17:fcff:fe9a:9575"
+        ],
+        "vethb0f1f40f": [
+          "fe80::843c:21ff:fe17:9fdf"
+        ],
+        "veth2e77b1fb": [
+          "fe80::2036:9eff:fe82:c5c"
+        ],
+        "vethc834924b": [
+          "fe80::9c07:f6ff:fe37:f0ad"
+        ],
+        "veth505c8eec": [
+          "fe80::bc05:40ff:fe0b:bb39"
+        ],
+        "veth288f5550": [
+          "fe80::18b8:8ff:fe6a:dc79"
+        ],
+        "veth2ce7eba4": [
+          "fe80::6437:aaff:fe2a:2b21"
+        ],
+        "veth5c96fd6c": [
+          "fe80::e83e:74ff:fec1:dbe2"
+        ],
+        "veth195df00a": [
+          "fe80::5c8a:7dff:fed1:aa80"
+        ],
+        "vethd2804305": [
+          "fe80::4844:ebff:fe3a:8276"
+        ],
+        "veth829f081f": [
+          "fe80::f095:3fff:fe3d:da38"
+        ],
+        "vetha8a04dc7": [
+          "fe80::bc62:9bff:fee2:d542"
+        ],
+        "veth4505baf4": [
+          "fe80::149c:4dff:feda:6dfe"
+        ],
+        "vethb468e385": [
+          "fe80::c421:7cff:fe29:b3ec"
+        ],
+        "veth0aea8660": [
+          "fe80::ec81:feff:fe91:a37f"
+        ],
+        "vetha8427944": [
+          "fe80::d868:22ff:fe60:6907"
+        ],
+        "veth199a610f": [
+          "fe80::1c2e:5fff:fe48:6d5f"
+        ],
+        "veth22368dd8": [
+          "fe80::d835:f1ff:fefd:86d5"
+        ],
+        "veth3994c6f2": [
+          "fe80::34f4:4eff:fe08:1117"
+        ],
+        "vethed37921": [
+          "fe80::3c61:f9ff:fe15:ed88"
+        ],
+        "veth8accb6e": [
+          "fe80::4c07:a8ff:febd:ea67"
+        ],
+        "veth3b4f08a": [
+          "fe80::e024:caff:fe93:7a5a"
+        ],
+        "veth54694c8": [
+          "fe80::90c2:bfff:fe79:8206"
+        ],
+        "veth14c418bd": [
+          "fe80::89c:ccff:fe0d:8ccd"
+        ],
+        "veth80eeb30b": [
+          "fe80::d4b7:84ff:feab:d839"
+        ],
+        "veth754e3cf5": [
+          "fe80::b07f:a4ff:fede:66c5"
+        ]
+      },
+      "default_qdisc": "fq_codel",
+      "tcp_congestion_control": "cubic",
+      "block_devices": [
+        {
+          "name": "sda",
+          "type": "disk",
+          "size": 6001175126016,
+          "fstype": null,
+          "mountpoints": [],
+          "model": "HGST HUS726060ALE610",
+          "tran": "sas",
+          "rota": true,
+          "children": [
+            {
+              "name": "sda1",
+              "type": "part",
+              "size": 6001165074432,
+              "fstype": "zfs_member",
+              "mountpoints": [],
+              "model": null,
+              "tran": null,
+              "rota": true
+            },
+            {
+              "name": "sda9",
+              "type": "part",
+              "size": 8388608,
+              "fstype": null,
+              "mountpoints": [],
+              "model": null,
+              "tran": null,
+              "rota": true
+            }
+          ]
+        },
+        {
+          "name": "sdb",
+          "type": "disk",
+          "size": 6001175126016,
+          "fstype": "zfs_member",
+          "mountpoints": [],
+          "model": "HGST HUS726060ALE610",
+          "tran": "sas",
+          "rota": true,
+          "children": [
+            {
+              "name": "sdb1",
+              "type": "part",
+              "size": 6001165074432,
+              "fstype": "zfs_member",
+              "mountpoints": [],
+              "model": null,
+              "tran": null,
+              "rota": true
+            },
+            {
+              "name": "sdb9",
+              "type": "part",
+              "size": 8388608,
+              "fstype": null,
+              "mountpoints": [],
+              "model": null,
+              "tran": null,
+              "rota": true
+            }
+          ]
+        },
+        {
+          "name": "sdc",
+          "type": "disk",
+          "size": 6001175126016,
+          "fstype": null,
+          "mountpoints": [],
+          "model": "HGST HDN726060ALE610",
+          "tran": "sas",
+          "rota": true,
+          "children": [
+            {
+              "name": "sdc1",
+              "type": "part",
+              "size": 6001165074432,
+              "fstype": "zfs_member",
+              "mountpoints": [],
+              "model": null,
+              "tran": null,
+              "rota": true
+            },
+            {
+              "name": "sdc9",
+              "type": "part",
+              "size": 8388608,
+              "fstype": null,
+              "mountpoints": [],
+              "model": null,
+              "tran": null,
+              "rota": true
+            }
+          ]
+        },
+        {
+          "name": "sdd",
+          "type": "disk",
+          "size": 6001175126016,
+          "fstype": null,
+          "mountpoints": [],
+          "model": "HGST HUS726060ALE610",
+          "tran": "sas",
+          "rota": true,
+          "children": [
+            {
+              "name": "sdd1",
+              "type": "part",
+              "size": 6001165074432,
+              "fstype": "zfs_member",
+              "mountpoints": [],
+              "model": null,
+              "tran": null,
+              "rota": true
+            },
+            {
+              "name": "sdd9",
+              "type": "part",
+              "size": 8388608,
+              "fstype": null,
+              "mountpoints": [],
+              "model": null,
+              "tran": null,
+              "rota": true
+            }
+          ]
+        },
+        {
+          "name": "sde",
+          "type": "disk",
+          "size": 6001175126016,
+          "fstype": null,
+          "mountpoints": [],
+          "model": "HGST HUS726060ALE610",
+          "tran": "sas",
+          "rota": true,
+          "children": [
+            {
+              "name": "sde1",
+              "type": "part",
+              "size": 6001165074432,
+              "fstype": "zfs_member",
+              "mountpoints": [],
+              "model": null,
+              "tran": null,
+              "rota": true
+            },
+            {
+              "name": "sde9",
+              "type": "part",
+              "size": 8388608,
+              "fstype": null,
+              "mountpoints": [],
+              "model": null,
+              "tran": null,
+              "rota": true
+            }
+          ]
+        },
+        {
+          "name": "sdf",
+          "type": "disk",
+          "size": 6001175126016,
+          "fstype": null,
+          "mountpoints": [],
+          "model": "HGST HUS726060ALE610",
+          "tran": "sas",
+          "rota": true,
+          "children": [
+            {
+              "name": "sdf1",
+              "type": "part",
+              "size": 6001165074432,
+              "fstype": "zfs_member",
+              "mountpoints": [],
+              "model": null,
+              "tran": null,
+              "rota": true
+            },
+            {
+              "name": "sdf9",
+              "type": "part",
+              "size": 8388608,
+              "fstype": null,
+              "mountpoints": [],
+              "model": null,
+              "tran": null,
+              "rota": true
+            }
+          ]
+        },
+        {
+          "name": "sdg",
+          "type": "disk",
+          "size": 6001175126016,
+          "fstype": null,
+          "mountpoints": [],
+          "model": "HGST HUS726060ALE610",
+          "tran": "sas",
+          "rota": true,
+          "children": [
+            {
+              "name": "sdg1",
+              "type": "part",
+              "size": 6001165074432,
+              "fstype": "zfs_member",
+              "mountpoints": [],
+              "model": null,
+              "tran": null,
+              "rota": true
+            },
+            {
+              "name": "sdg9",
+              "type": "part",
+              "size": 8388608,
+              "fstype": null,
+              "mountpoints": [],
+              "model": null,
+              "tran": null,
+              "rota": true
+            }
+          ]
+        },
+        {
+          "name": "sdh",
+          "type": "disk",
+          "size": 6001175126016,
+          "fstype": null,
+          "mountpoints": [],
+          "model": "HGST HUS726060ALE610",
+          "tran": "sas",
+          "rota": true,
+          "children": [
+            {
+              "name": "sdh1",
+              "type": "part",
+              "size": 6001165074432,
+              "fstype": "zfs_member",
+              "mountpoints": [],
+              "model": null,
+              "tran": null,
+              "rota": true
+            },
+            {
+              "name": "sdh9",
+              "type": "part",
+              "size": 8388608,
+              "fstype": null,
+              "mountpoints": [],
+              "model": null,
+              "tran": null,
+              "rota": true
+            }
+          ]
+        },
+        {
+          "name": "sdi",
+          "type": "disk",
+          "size": 6001175126016,
+          "fstype": null,
+          "mountpoints": [],
+          "model": "HGST HUS726060ALE610",
+          "tran": "sas",
+          "rota": true,
+          "children": [
+            {
+              "name": "sdi1",
+              "type": "part",
+              "size": 6001165074432,
+              "fstype": "zfs_member",
+              "mountpoints": [],
+              "model": null,
+              "tran": null,
+              "rota": true
+            },
+            {
+              "name": "sdi9",
+              "type": "part",
+              "size": 8388608,
+              "fstype": null,
+              "mountpoints": [],
+              "model": null,
+              "tran": null,
+              "rota": true
+            }
+          ]
+        },
+        {
+          "name": "sdj",
+          "type": "disk",
+          "size": 6001175126016,
+          "fstype": null,
+          "mountpoints": [],
+          "model": "HGST HUS726060ALE610",
+          "tran": "sas",
+          "rota": true,
+          "children": [
+            {
+              "name": "sdj1",
+              "type": "part",
+              "size": 6001165074432,
+              "fstype": "zfs_member",
+              "mountpoints": [],
+              "model": null,
+              "tran": null,
+              "rota": true
+            },
+            {
+              "name": "sdj9",
+              "type": "part",
+              "size": 8388608,
+              "fstype": null,
+              "mountpoints": [],
+              "model": null,
+              "tran": null,
+              "rota": true
+            }
+          ]
+        },
+        {
+          "name": "sdk",
+          "type": "disk",
+          "size": 6001175126016,
+          "fstype": null,
+          "mountpoints": [],
+          "model": "HGST HUS726060ALE610",
+          "tran": "sas",
+          "rota": true,
+          "children": [
+            {
+              "name": "sdk1",
+              "type": "part",
+              "size": 6001165074432,
+              "fstype": "zfs_member",
+              "mountpoints": [],
+              "model": null,
+              "tran": null,
+              "rota": true
+            },
+            {
+              "name": "sdk9",
+              "type": "part",
+              "size": 8388608,
+              "fstype": null,
+              "mountpoints": [],
+              "model": null,
+              "tran": null,
+              "rota": true
+            }
+          ]
+        },
+        {
+          "name": "sdl",
+          "type": "disk",
+          "size": 6001175126016,
+          "fstype": null,
+          "mountpoints": [],
+          "model": "HGST HUS726060ALE614",
+          "tran": "sas",
+          "rota": true,
+          "children": [
+            {
+              "name": "sdl1",
+              "type": "part",
+              "size": 6001165074432,
+              "fstype": "zfs_member",
+              "mountpoints": [],
+              "model": null,
+              "tran": null,
+              "rota": true
+            },
+            {
+              "name": "sdl9",
+              "type": "part",
+              "size": 8388608,
+              "fstype": null,
+              "mountpoints": [],
+              "model": null,
+              "tran": null,
+              "rota": true
+            }
+          ]
+        },
+        {
+          "name": "sdm",
+          "type": "disk",
+          "size": 6001175126016,
+          "fstype": null,
+          "mountpoints": [],
+          "model": "HGST HUS726060ALE610",
+          "tran": "sas",
+          "rota": true,
+          "children": [
+            {
+              "name": "sdm1",
+              "type": "part",
+              "size": 6001165074432,
+              "fstype": "zfs_member",
+              "mountpoints": [],
+              "model": null,
+              "tran": null,
+              "rota": true
+            },
+            {
+              "name": "sdm9",
+              "type": "part",
+              "size": 8388608,
+              "fstype": null,
+              "mountpoints": [],
+              "model": null,
+              "tran": null,
+              "rota": true
+            }
+          ]
+        },
+        {
+          "name": "sdn",
+          "type": "disk",
+          "size": 6001175126016,
+          "fstype": null,
+          "mountpoints": [],
+          "model": "HGST HUS726060ALE614",
+          "tran": "sas",
+          "rota": true,
+          "children": [
+            {
+              "name": "sdn1",
+              "type": "part",
+              "size": 6001165074432,
+              "fstype": "zfs_member",
+              "mountpoints": [],
+              "model": null,
+              "tran": null,
+              "rota": true
+            },
+            {
+              "name": "sdn9",
+              "type": "part",
+              "size": 8388608,
+              "fstype": null,
+              "mountpoints": [],
+              "model": null,
+              "tran": null,
+              "rota": true
+            }
+          ]
+        },
+        {
+          "name": "sdo",
+          "type": "disk",
+          "size": 6001175126016,
+          "fstype": null,
+          "mountpoints": [],
+          "model": "HUS726060ALE610",
+          "tran": "sas",
+          "rota": true,
+          "children": [
+            {
+              "name": "sdo1",
+              "type": "part",
+              "size": 6001165074432,
+              "fstype": "zfs_member",
+              "mountpoints": [],
+              "model": null,
+              "tran": null,
+              "rota": true
+            },
+            {
+              "name": "sdo9",
+              "type": "part",
+              "size": 8388608,
+              "fstype": null,
+              "mountpoints": [],
+              "model": null,
+              "tran": null,
+              "rota": true
+            }
+          ]
+        },
+        {
+          "name": "sdp",
+          "type": "disk",
+          "size": 6001175126016,
+          "fstype": null,
+          "mountpoints": [],
+          "model": "HGST HUS726060ALE610",
+          "tran": "sas",
+          "rota": true,
+          "children": [
+            {
+              "name": "sdp1",
+              "type": "part",
+              "size": 6001165074432,
+              "fstype": "zfs_member",
+              "mountpoints": [],
+              "model": null,
+              "tran": null,
+              "rota": true
+            },
+            {
+              "name": "sdp9",
+              "type": "part",
+              "size": 8388608,
+              "fstype": null,
+              "mountpoints": [],
+              "model": null,
+              "tran": null,
+              "rota": true
+            }
+          ]
+        },
+        {
+          "name": "nvme1n1",
+          "type": "disk",
+          "size": 2048408248320,
+          "fstype": null,
+          "mountpoints": [],
+          "model": "SOLIDIGM SSDPFKNU020TZ",
+          "tran": "nvme",
+          "rota": false,
+          "children": [
+            {
+              "name": "nvme1n1p1",
+              "type": "part",
+              "size": 1073741824,
+              "fstype": "vfat",
+              "mountpoints": [],
+              "model": null,
+              "tran": "nvme",
+              "rota": false
+            },
+            {
+              "name": "nvme1n1p2",
+              "type": "part",
+              "size": 2047332057088,
+              "fstype": "ext4",
+              "mountpoints": [
+                "/mnt/nvme"
+              ],
+              "model": null,
+              "tran": "nvme",
+              "rota": false
+            }
+          ]
+        },
+        {
+          "name": "nvme0n1",
+          "type": "disk",
+          "size": 2000398934016,
+          "fstype": null,
+          "mountpoints": [],
+          "model": "SHGP31-2000GM",
+          "tran": "nvme",
+          "rota": false,
+          "children": [
+            {
+              "name": "nvme0n1p1",
+              "type": "part",
+              "size": 2147483648,
+              "fstype": "vfat",
+              "mountpoints": [
+                "/boot"
+              ],
+              "model": null,
+              "tran": "nvme",
+              "rota": false
+            },
+            {
+              "name": "nvme0n1p2",
+              "type": "part",
+              "size": 1998249316352,
+              "fstype": "zfs_member",
+              "mountpoints": [],
+              "model": null,
+              "tran": "nvme",
+              "rota": false
+            }
+          ]
+        }
+      ],
+      "zfs": true,
+      "systemd": true,
+      "ext4_lazy_init": false,
+      "helper": {
+        "installed": true,
+        "sha256": "e3ba2eedf97c31557e883128d0e61adc4d568fc2573d9f31dc5ecbdae3be0755",
+        "sudo": true,
+        "status": {
+          "version": "2",
+          "root": "yes",
+          "config": "ok",
+          "interface": "enp10s0",
+          "qdisc": "fq_codel 0:",
+          "netem": "off",
+          "netem_timer": "off",
+          "governor": "powersave",
+          "governor_saved": "no",
+          "scratch": "/mnt/nvme",
+          "scratch_fstype_wanted": "ext4",
+          "scratch_source_configured": "",
+          "scratch_mounted": "yes",
+          "scratch_source": "/dev/nvme1n1p2",
+          "scratch_fstype": "ext4",
+          "scratch_fstab": "yes"
+        }
+      }
+    },
+    "neo": {
+      "utc": "2026-10-13T20:16:09.873+00:00",
+      "hostname": "neo",
+      "user": "sanjee",
+      "system": "Linux",
+      "kernel": "6.18.34+rpt-rpi-2712",
+      "machine": "aarch64",
+      "python": "3.13.5",
+      "cpus": 4,
+      "cpu_model": "Raspberry Pi 5 Model B Rev 1.0",
+      "tools": {
+        "rsync": "/usr/bin/rsync",
+        "ssh": "/usr/bin/ssh",
+        "ip": "/usr/bin/ip",
+        "tc": "/usr/sbin/tc",
+        "iw": "/usr/sbin/iw",
+        "ping": "/usr/bin/ping",
+        "strace": "/usr/bin/strace",
+        "perf": null,
+        "vcgencmd": "/usr/bin/vcgencmd",
+        "zstd": "/usr/bin/zstd",
+        "findmnt": "/usr/bin/findmnt",
+        "lsblk": "/usr/bin/lsblk",
+        "systemd-run": "/usr/bin/systemd-run",
+        "sudo": "/usr/bin/sudo",
+        "iperf3": "/usr/bin/iperf3",
+        "rsync_version": "rsync  version 3.4.1  protocol version 32",
+        "ssh_version": "OpenSSH_10.0p2 Debian-7+deb13u4, OpenSSL 3.5.7 9 Jun 2026"
+      },
+      "open_files_limit": 1024,
+      "paths": [
+        {
+          "target": "/",
+          "source": "/dev/nvme0n1p2",
+          "fstype": "ext4",
+          "options": "rw,noatime",
+          "free_bytes": 291380015104,
+          "total_bytes": 491737796608,
+          "path": "/home/sanjee/benchmarks/xsyncv4/lab",
+          "exists": true,
+          "writable": true
+        }
+      ],
+      "os": "Debian GNU/Linux 13 (trixie)",
+      "board": "Raspberry Pi 5 Model B Rev 1.0",
+      "memory_bytes": 4241620992,
+      "cpufreq": {
+        "driver": "cpufreq-dt",
+        "governors": [
+          "ondemand"
+        ],
+        "available": [
+          "conservative",
+          "ondemand",
+          "userspace",
+          "powersave",
+          "performance",
+          "schedutil"
+        ],
+        "max_khz": 2400000,
+        "epp": null
+      },
+      "thermal_zones": [
+        "cpu-thermal"
+      ],
+      "interfaces": [
+        {
+          "name": "eth0",
+          "operstate": "up",
+          "speed_mbps": 1000,
+          "mtu": 1500,
+          "duplex": "full",
+          "medium": "wired"
+        },
+        {
+          "name": "wlan0",
+          "operstate": "down",
+          "speed_mbps": null,
+          "mtu": 1500,
+          "duplex": null,
+          "medium": "wireless"
+        }
+      ],
+      "addresses": {
+        "lo": [
+          "127.0.0.1",
+          "::1"
+        ],
+        "eth0": [
+          "192.168.1.219",
+          "fe80::c1d4:74d7:20fd:c6f7"
+        ],
+        "wlan0": []
+      },
+      "default_qdisc": "fq_codel",
+      "tcp_congestion_control": "cubic",
+      "block_devices": [
+        {
+          "name": "nvme0n1",
+          "type": "disk",
+          "size": 500107862016,
+          "fstype": null,
+          "mountpoints": [],
+          "model": "SHGP31-500GM-2",
+          "tran": "nvme",
+          "rota": false,
+          "children": [
+            {
+              "name": "nvme0n1p1",
+              "type": "part",
+              "size": 536870912,
+              "fstype": "vfat",
+              "mountpoints": [
+                "/boot/firmware"
+              ],
+              "model": null,
+              "tran": "nvme",
+              "rota": false
+            },
+            {
+              "name": "nvme0n1p2",
+              "type": "part",
+              "size": 499562602496,
+              "fstype": "ext4",
+              "mountpoints": [
+                "/"
+              ],
+              "model": null,
+              "tran": "nvme",
+              "rota": false
+            }
+          ]
+        }
+      ],
+      "zfs": false,
+      "systemd": true,
+      "ext4_lazy_init": false,
+      "helper": {
+        "installed": true,
+        "sha256": "e3ba2eedf97c31557e883128d0e61adc4d568fc2573d9f31dc5ecbdae3be0755",
+        "sudo": true,
+        "status": {
+          "version": "2",
+          "root": "yes",
+          "config": "ok",
+          "interface": "eth0",
+          "qdisc": "fq_codel 0:",
+          "netem": "off",
+          "netem_timer": "off",
+          "governor": "ondemand",
+          "governor_saved": "no",
+          "scratch": "",
+          "scratch_fstype_wanted": "ext4",
+          "scratch_source_configured": ""
+        }
+      }
+    }
+  },
+  "routes": {
+    "lan:neo->freya": {
+      "utc": "2026-10-13T20:16:10.234+00:00",
+      "hostname": "neo",
+      "peer": "freya.local",
+      "resolved": [
+        "192.168.1.156"
+      ],
+      "ssh": {
+        "target": "sanjee@freya.local",
+        "ok": true,
+        "client_ip": "192.168.1.219",
+        "client_port": 53134,
+        "server_ip": "192.168.1.156",
+        "server_port": 22,
+        "peer_hostname": "freya"
+      },
+      "address": "192.168.1.156",
+      "dev": "eth0",
+      "source": "192.168.1.219",
+      "gateway": null,
+      "interface": {
+        "name": "eth0",
+        "operstate": "up",
+        "speed_mbps": 1000,
+        "mtu": 1500,
+        "duplex": "full",
+        "medium": "wired"
+      },
+      "interface_addresses": [
+        "192.168.1.219",
+        "fe80::c1d4:74d7:20fd:c6f7"
+      ],
+      "qdisc": "qdisc fq_codel 0: root refcnt 2 limit 10240p flows 1024 quantum 1514 target 5ms interval 100ms memory_limit 32Mb ecn drop_batch 64",
+      "ping": {
+        "loss_pct": 0.0,
+        "rtt_min_ms": 0.318,
+        "rtt_avg_ms": 0.368,
+        "rtt_max_ms": 0.435,
+        "rtt_mdev_ms": 0.034
+      }
+    },
+    "lan:freya->neo": {
+      "utc": "2026-10-13T20:16:12.413+00:00",
+      "hostname": "freya",
+      "peer": "neo.local",
+      "resolved": [
+        "192.168.1.219"
+      ],
+      "ssh": {
+        "target": "sanjee@neo.local",
+        "ok": true,
+        "client_ip": "192.168.1.156",
+        "client_port": 47600,
+        "server_ip": "192.168.1.219",
+        "server_port": 22,
+        "peer_hostname": "neo"
+      },
+      "address": "192.168.1.219",
+      "dev": "enp10s0",
+      "source": "192.168.1.156",
+      "gateway": null,
+      "interface": {
+        "name": "enp10s0",
+        "operstate": "up",
+        "speed_mbps": 1000,
+        "mtu": 1500,
+        "duplex": "full",
+        "medium": "wired"
+      },
+      "interface_addresses": [
+        "192.168.1.156",
+        "fe80::7745:7283:821c:938f"
+      ],
+      "qdisc": "qdisc fq_codel 0: root refcnt 2 limit 10240p flows 1024 quantum 1514 target 5ms interval 100ms memory_limit 32Mb ecn drop_batch 64",
+      "ping": {
+        "loss_pct": 0.0,
+        "rtt_min_ms": 0.348,
+        "rtt_avg_ms": 0.397,
+        "rtt_max_ms": 0.461,
+        "rtt_mdev_ms": 0.03
+      }
+    }
+  },
+  "problems": [],
+  "build": {
+    "revision": "e1f05b51804911995156f3ad639d671955fb6a79",
+    "rev12": "e1f05b518049",
+    "artifacts": {
+      "xs-linux-amd64": {
+        "sha256": "4308d7fd5dde7b93b1635c8bef5df46659533d1b88fb31bd4d9b939e8cc9738c",
+        "bytes": 6686904,
+        "version": "xs  version 0.1.0  protocol version 4  git e1f05b518049"
+      },
+      "xs-linux-arm64": {
+        "sha256": "38cfc25c012dc834473dbadcf4444b61cbf209785e4dcc064d544cc969637e51",
+        "bytes": 6291528,
+        "version": "xs  version 0.1.0  protocol version 4  git e1f05b518049"
+      },
+      "xs-darwin-arm64": {
+        "sha256": "f25ff52ed19aa3c8801b0cd586fbbae3bfd6bfa7254ea3bfb6ebc72b2cf7b034",
+        "bytes": 2996496,
+        "version": "xs  version 0.1.0  protocol version 4  git e1f05b518049"
+      }
+    },
+    "dockerfile_sha256": "0b14af3ffa5a3c30391f680e43ff2379e98d4f56f8a58f4675ad661c06479f3c",
+    "utc": "2026-10-12T20:53:04+00:00"
+  },
+  "staged": {
+    "freya": {
+      "utc": "2026-10-13T20:16:14.632+00:00",
+      "hostname": "freya",
+      "machine": "x86_64",
+      "system": "Linux",
+      "files": {
+        "xs-e1f05b518049": "4308d7fd5dde7b93b1635c8bef5df46659533d1b88fb31bd4d9b939e8cc9738c",
+        "probe.py": "79c5d5649359fab936d72a58ccbb0348b8388dd71969a5c56d7915ca6a0c7563",
+        "corpus.py": "d6018d3611cba607a670f3fe554d0d4be5941fb2ef8fd65d57f10bfb582625f6",
+        "corpora.json": "729929e1ba7baf3a0b8413efffab5bc26ae0cbe8514daf1c05bbb53a314bb084",
+        "agent.py": "04d9c596cea456441e99d514a3a819c2f6b3f7dc1e412e00c06ea7a693a423c4",
+        "overnight.py": "c9b81a0bbcda7d1d2431e88060e88e432425e6251e46d6af2b24e7fdd0186072",
+        "measure.py": "5065310f480ff1cabfa7c645f0db342624a02f9a081b96069d50d52b3d224777"
+      },
+      "versions": {
+        "xs-e1f05b518049": "xs  version 0.1.0  protocol version 4  git e1f05b518049"
+      },
+      "rsync": {
+        "path": "/usr/bin/rsync",
+        "sha256": "cae31f86ebfa8ecf2293a809c8f09d8176c8ead7f192de8caebcc6a1f3f14800",
+        "version": "rsync  version 3.5.0-g471e17dc  protocol version 32"
+      }
+    },
+    "neo": {
+      "utc": "2026-10-13T20:16:14.899+00:00",
+      "hostname": "neo",
+      "machine": "aarch64",
+      "system": "Linux",
+      "files": {
+        "xs-e1f05b518049": "38cfc25c012dc834473dbadcf4444b61cbf209785e4dcc064d544cc969637e51",
+        "probe.py": "79c5d5649359fab936d72a58ccbb0348b8388dd71969a5c56d7915ca6a0c7563",
+        "corpus.py": "d6018d3611cba607a670f3fe554d0d4be5941fb2ef8fd65d57f10bfb582625f6",
+        "corpora.json": "729929e1ba7baf3a0b8413efffab5bc26ae0cbe8514daf1c05bbb53a314bb084",
+        "agent.py": "04d9c596cea456441e99d514a3a819c2f6b3f7dc1e412e00c06ea7a693a423c4",
+        "overnight.py": "c9b81a0bbcda7d1d2431e88060e88e432425e6251e46d6af2b24e7fdd0186072",
+        "measure.py": "5065310f480ff1cabfa7c645f0db342624a02f9a081b96069d50d52b3d224777"
+      },
+      "versions": {
+        "xs-e1f05b518049": "xs  version 0.1.0  protocol version 4  git e1f05b518049"
+      },
+      "rsync": {
+        "path": "/usr/bin/rsync",
+        "sha256": "3852336282ee66a98c52966a8bebbf3508980a3ec47e7150f40330ada999980e",
+        "version": "rsync  version 3.4.1  protocol version 32"
+      }
+    }
+  }
+}

@@ -42,8 +42,8 @@ def utc():
 class Host:
     """One endpoint: this machine, or a peer reached over SSH."""
 
-    def __init__(self, name, spec, local):
-        self.name, self.local = name, local
+    def __init__(self, name, spec, local, bundle=None):
+        self.name, self.local, self.bundle = name, local, bundle
         self.ssh, self.root, self.interface = spec['ssh'], spec['root'], spec['interface']
         self.has_helper = spec.get('helper', False)
         self.system = spec.get('system', 'Linux')
@@ -65,7 +65,8 @@ class Host:
         return self.shell(shlex.join(map(str, argv)), **options)
 
     def bin(self, name):
-        return f'{self.root}/bin/{name}'
+        """Where a staged script is: in the plan's bundle, or beside the binaries for a plan made before bundles."""
+        return f'{self.root}/lib/{self.bundle}/{name}' if self.bundle else f'{self.root}/bin/{name}'
 
     def probe(self, *arguments):
         return json.loads(self.run('python3', self.bin('probe.py'), *arguments, timeout=120).stdout)
@@ -136,7 +137,35 @@ def client_role(arm, cell):
     return arm.get('client') or cell['client']
 
 
-def transfer_command(arm, cell, hosts, run_id, tag):
+def engine_env(arm, role, host, run_id, tag, end):
+    """measure.py options that give one end of a tunables build its constants and its metrics file."""
+    options = []
+    if tune := arm.get('tune', {}).get(role):
+        options += ['--env', f'XSYNC_TUNE={tune}']
+    if arm.get('metrics'):
+        options += ['--env', 'XSYNC_METRICS=' + work_path(host, run_id, 'logs', f'{tag}.{end}.engine.json')]
+    return options
+
+
+RESOLVE = 'import socket,sys; print(socket.getaddrinfo(sys.argv[1], 22, socket.AF_INET, socket.SOCK_STREAM)[0][4][0])'
+
+
+def ssh_target(client, peer, addresses):
+    """(user@host, extra ssh options) by which a client reaches a peer.
+
+    With an address the run looked up once, the name is not resolved again for
+    every transfer: a host's multicast DNS can take five seconds to answer when
+    its cache has lapsed, which is noise in the timing, not part of either tool.
+    The host key is still checked against the peer's name.
+    """
+    address = (addresses or {}).get(f'{client.name}>{peer.name}')
+    if not address:
+        return peer.ssh, []
+    user, _, name = peer.ssh.rpartition('@')
+    return (f'{user}@{address}' if user else address), [f'-oHostKeyAlias={name}']
+
+
+def transfer_command(arm, cell, hosts, run_id, tag, addresses=None):
     """(client host, shell script) for one timed transfer, measured on both ends."""
     sender, receiver = hosts[cell['sender']], hosts[cell['receiver']]
     client = sender if client_role(arm, cell) == 'sender' else receiver
@@ -144,19 +173,24 @@ def transfer_command(arm, cell, hosts, run_id, tag):
     source = f'{sender.root}/corpora/{cell["corpus"]}/'
     destination = work_path(receiver, run_id, cell['id'], arm['name']) + '/'
     program = arm['binary'][peer.name]
+    role = client_role(arm, cell)
     peer_program = shlex.join(['python3', peer.bin('measure.py'), '--metrics',
-                               work_path(peer, run_id, 'logs', f'{tag}.peer.json'), '--', program])
+                               work_path(peer, run_id, 'logs', f'{tag}.peer.json'),
+                               *engine_env(arm, 'receiver' if role == 'sender' else 'sender', peer, run_id, tag, 'peer'),
+                               '--', program])
     fixed = ['--stats'] + (['--no-fallback', '--no-progress'] if arm['tool'] == 'xs' else [])
-    remote = lambda path: f'{peer.ssh}:{path}'
+    target, alias = ssh_target(client, peer, addresses)
+    remote = lambda path: f'{target}:{path}'
     paths = [source, remote(destination)] if client is sender else [remote(source), destination]
     tool = [arm['binary'][client.name]]
     if delay := arm.get('delay_s', {}).get(cell['id']):
         # An injected, known slowdown, inside the measured region.
         tool = ['sh', '-c', 'sleep "$0"; exec "$@"', f'{delay:.4f}', *tool]
     # An arm may add options to the SSH client the transfer uses, such as a cipher.
-    rsh = ' '.join([RSH, *map(shlex.quote, arm.get('ssh_options', []))])
+    rsh = ' '.join([RSH, *alias, *map(shlex.quote, arm.get('ssh_options', []))])
     argv = [*CLEAN_ENV, 'python3', client.bin('measure.py'), '--metrics',
-            work_path(client, run_id, 'logs', f'{tag}.client.json'), '--', *tool,
+            work_path(client, run_id, 'logs', f'{tag}.client.json'),
+            *engine_env(arm, role, client, run_id, tag, 'client'), '--', *tool,
             *arm['flags'], *fixed, '-e', rsh, f'--rsync-path={peer_program}', *paths]
     log = work_path(client, run_id, 'logs', tag)
     return client, peer, argv, f'{shlex.join(argv)} > {shlex.quote(log + ".out")} 2> {shlex.quote(log + ".err")}'
@@ -167,7 +201,8 @@ class Run:
         self.directory = pathlib.Path(plan_path).resolve().parent
         self.plan = json.loads(pathlib.Path(plan_path).read_text())
         self.run_id = self.plan['run_id']
-        self.hosts = {name: Host(name, spec, name == self.plan['driver']) for name, spec in self.plan['hosts'].items()}
+        self.hosts = {name: Host(name, spec, name == self.plan['driver'], self.plan.get('bundle'))
+                      for name, spec in self.plan['hosts'].items()}
         self.arms = {arm['name']: arm for arm in self.plan['arms']}
         self.cells = {cell['id']: cell for cell in self.plan['cells']}
         self.samples = open(self.directory / 'samples.jsonl', 'a', buffering=1)
@@ -175,6 +210,7 @@ class Run:
         self.done = 0
         self.total = sum(len(block['orders'][0]) for block in self.plan['blocks'])
         self.seeded = set()
+        self.addresses = {}  # 'client>peer': the IPv4 address the client reaches the peer at, looked up once
         self.stopping = False
 
     def status(self, state, detail=''):
@@ -195,7 +231,7 @@ class Run:
         for host in self.hosts.values():
             names = sorted({pathlib.PurePosixPath(arm['binary'][host.name]).name for arm in self.arms.values()
                             if arm['tool'] == 'xs'} | set(self.plan['scripts']))
-            report = host.probe('staged', '--root', host.root, *names)
+            report = host.probe('staged', '--root', host.root, *(['--bundle', host.bundle] if host.bundle else []), *names)
             for arm in self.arms.values():
                 name = pathlib.PurePosixPath(arm['binary'][host.name]).name
                 if arm['tool'] == 'xs' and report['files'].get(name) != arm['sha256'][host.name]:
@@ -230,7 +266,17 @@ class Run:
                                             '--manifest', manifest, '--quick', timeout=1800).stdout)
                 if found['digest'] != corpus['digest']:
                     raise RuntimeError(f'{sender}: corpus {name} is not the pinned one')
-        if any(observed.get('trim') for observed in self.plan['observed'].values()):
+        for cell in self.cells.values():
+            for arm in self.arms.values():
+                sender, receiver = self.hosts[cell['sender']], self.hosts[cell['receiver']]
+                client = sender if client_role(arm, cell) == 'sender' else receiver
+                peer = receiver if client is sender else sender
+                key = f'{client.name}>{peer.name}'
+                if key not in self.addresses and not peer.local:
+                    name = peer.ssh.rpartition('@')[2]
+                    self.addresses[key] = client.run('python3', '-c', RESOLVE, name, timeout=60).stdout.strip()
+        self.plan['observed']['addresses'] = self.addresses
+        if any(observed.get('trim') for observed in self.plan['observed'].values() if isinstance(observed, dict)):
             time.sleep(15)  # a drive works through a large trim for a few seconds afterwards
         for host in self.hosts.values():
             host.helper('governor', 'performance')
@@ -272,10 +318,13 @@ class Run:
             # Seeded from whichever end starts this arm's transfers; the other may accept no connections.
             source = sender.root + '/corpora/' + cell['corpus'] + '/'
             if client_role(arm, cell) == 'sender':
-                client, paths = sender, (source, receiver.ssh + ':' + destination + '/')
+                target, alias = ssh_target(sender, receiver, self.addresses)
+                client, paths = sender, (source, target + ':' + destination + '/')
             else:
-                client, paths = receiver, (sender.ssh + ':' + source, destination + '/')
-            client.shell(f'rsync -aH -e {shlex.quote(RSH)} {shlex.quote(paths[0])} {shlex.quote(paths[1])}', timeout=7200)
+                target, alias = ssh_target(receiver, sender, self.addresses)
+                client, paths = receiver, (target + ':' + source, destination + '/')
+            rsh = ' '.join([RSH, *alias])
+            client.shell(f'rsync -aH -e {shlex.quote(rsh)} {shlex.quote(paths[0])} {shlex.quote(paths[1])}', timeout=7200)
             self.seeded.add((cell['id'], arm['name']))
 
     def apply_cache(self, cell, destination):
@@ -321,6 +370,7 @@ class Run:
                   'tool': arm['tool'], 'rev': arm.get('rev'), 'flags': arm['flags'],
                   'injected_delay_s': arm.get('delay_s', {}).get(cell['id']),
                   'client_role': client_role(arm, cell), 'ssh_options': arm.get('ssh_options', []),
+                  'tune': arm.get('tune', {}),
                   'corpus_files': self.plan['corpora'][cell['corpus']]['files'],
                   'corpus_bytes': self.plan['corpora'][cell['corpus']]['bytes'],
                   'valid': False, 'void_reason': None}
@@ -328,7 +378,7 @@ class Run:
             self.prepare_destination(cell, arm, destination)
             self.apply_cache(cell, destination)
             before, record['settle_s'] = self.settle(cell, destination)
-            client, peer, argv, script = transfer_command(arm, cell, self.hosts, self.run_id, tag)
+            client, peer, argv, script = transfer_command(arm, cell, self.hosts, self.run_id, tag, self.addresses)
             record.update(client_host=client.name, peer_host=peer.name, argv=argv, utc_start=utc())
             exit_status = client.shell(script, check=False, timeout=self.plan['sample_timeout_s']).returncode
             record['utc_end'] = utc()
@@ -346,6 +396,13 @@ class Run:
             for role, host in (('client', client), ('peer', peer)):
                 metrics = host.run('cat', work_path(host, self.run_id, 'logs', f'{tag}.{role}.json'), check=False)
                 record[role] = json.loads(metrics.stdout) if metrics.returncode == 0 and metrics.stdout else None
+            if arm.get('metrics'):
+                # What each end of a tunables build counted for itself.
+                record['engine'] = {}
+                for role, host in (('client', client), ('peer', peer)):
+                    lines = host.run('cat', work_path(host, self.run_id, 'logs', f'{tag}.{role}.engine.json'),
+                                     check=False).stdout.strip().splitlines()
+                    record['engine'][role] = json.loads(lines[-1]) if lines else None
             if exit_status or not record['client'] or record['client']['returncode']:
                 raise Void(f'the transfer exited {exit_status}: {record["stderr"].strip()[-300:]}')
             if not record['peer'] or record['peer']['returncode']:

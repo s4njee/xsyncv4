@@ -1,0 +1,17 @@
+experiment,kind,cell_id,corpus,scenario,sender,receiver,client,link,cache,arm,n_blocks,sigma_d,blocks_for_2pct,blocks_for_3pct,blocks_for_5pct,blocks_for_10pct,blocks_equivalent_2pct,blocks_equivalent_3pct,blocks_equivalent_5pct,blocks_equivalent_10pct
+S0-sentinel,screening,mixed-bimodal.fresh.freya-neo.sender.warm,mixed-bimodal,fresh,freya,neo,sender,lan,warm,again,6,0.005634515518423738,8,8,8,8,8,8,8,8
+S0-sentinel,screening,mixed-bimodal.fresh.freya-neo.sender.warm,mixed-bimodal,fresh,freya,neo,sender,lan,warm,rsync,6,0.007321861227736343,8,8,8,8,8,8,8,8
+S0-sentinel,screening,mixed-bimodal.fresh.neo-freya.sender.warm,mixed-bimodal,fresh,neo,freya,sender,lan,warm,again,6,0.025848282177725515,16,8,8,8,20,11,8,8
+S0-sentinel,screening,mixed-bimodal.fresh.neo-freya.sender.warm,mixed-bimodal,fresh,neo,freya,sender,lan,warm,rsync,6,0.020176743743275934,11,8,8,8,13,8,8,8
+S0-sentinel,screening,mixed-bimodal.noop.freya-neo.sender.warm,mixed-bimodal,noop,freya,neo,sender,lan,warm,again,6,0.07471493487613542,114,53,21,8,152,70,27,9
+S0-sentinel,screening,mixed-bimodal.noop.freya-neo.sender.warm,mixed-bimodal,noop,freya,neo,sender,lan,warm,rsync,6,0.04394532992612174,41,20,9,8,54,26,11,8
+S0-sentinel,screening,mixed-bimodal.noop.neo-freya.sender.warm,mixed-bimodal,noop,neo,freya,sender,lan,warm,again,6,0.049007100352886204,51,24,10,8,67,31,13,8
+S0-sentinel,screening,mixed-bimodal.noop.neo-freya.sender.warm,mixed-bimodal,noop,neo,freya,sender,lan,warm,rsync,6,0.03304344824645087,24,12,8,8,32,16,8,8
+S0-sentinel,screening,small-flat.fresh.freya-neo.sender.warm,small-flat,fresh,freya,neo,sender,lan,warm,again,6,0.01253488044797794,8,8,8,8,8,8,8,8
+S0-sentinel,screening,small-flat.fresh.freya-neo.sender.warm,small-flat,fresh,freya,neo,sender,lan,warm,rsync,6,0.07242269952047743,107,50,20,8,143,66,26,9
+S0-sentinel,screening,small-flat.fresh.neo-freya.sender.warm,small-flat,fresh,neo,freya,sender,lan,warm,again,6,0.032414282207412076,24,12,8,8,31,15,8,8
+S0-sentinel,screening,small-flat.fresh.neo-freya.sender.warm,small-flat,fresh,neo,freya,sender,lan,warm,rsync,6,0.29333616250759625,1723,775,286,77,2308,1037,382,102
+S0-sentinel,screening,small-flat.noop.freya-neo.sender.warm,small-flat,noop,freya,neo,sender,lan,warm,again,6,0.07794680354312045,124,57,23,8,165,76,29,10
+S0-sentinel,screening,small-flat.noop.freya-neo.sender.warm,small-flat,noop,freya,neo,sender,lan,warm,rsync,6,0.06391011249764704,84,39,16,8,112,52,21,8
+S0-sentinel,screening,small-flat.noop.neo-freya.sender.warm,small-flat,noop,neo,freya,sender,lan,warm,again,6,0.08249884236206471,139,64,25,8,185,84,33,10
+S0-sentinel,screening,small-flat.noop.neo-freya.sender.warm,small-flat,noop,neo,freya,sender,lan,warm,rsync,6,0.143005055913592,411,186,70,20,550,248,93,26

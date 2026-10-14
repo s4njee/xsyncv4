@@ -1,0 +1,19 @@
+{
+  "experiment": "E4a-blocks-z",
+  "kind": "screening",
+  "hypothesis": "With -z, larger blocks or larger read tasks send fewer bytes for small compressible files, and are no slower.",
+  "primary": "wall_s",
+  "control": "xs",
+  "delta": 0.03,
+  "level": 0.95,
+  "looks": 1,
+  "runs": [
+    "20261013T213303Z-E4a-blocks-z"
+  ],
+  "spec_sha256": [
+    "ac58e57170c82a624b34c710f9693002f3c15d6a5b9d59ba263302e24ef17c02"
+  ],
+  "valid_blocks": 40,
+  "void_attempts": 0,
+  "void_reasons": []
+}

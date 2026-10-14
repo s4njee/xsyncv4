@@ -1,0 +1,29 @@
+# E1 again, on the build that sends hard-linked data once and has the merged
+# adaptive compression level (8cc75bbdb801), on a scratch drive that is trimmed
+# before every run. Same cells, arms and blocks as E1; a separate experiment,
+# because its xs arm is a different build.
+id = "E1v2-baseline"
+kind = "confirmatory"
+hypothesis = "xs -a differs from rsync -a by more than 3% in time-to-durable, per corpus, scenario and direction."
+primary = "durable_s"
+delta = 0.03
+blocks = 12
+control = "rsync"
+verify = "first-last"
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[arms.xs]
+tool = "xs"
+rev = "8cc75bbdb801"
+flags = ["-a"]
+
+[matrix]
+link = "lan"
+corpus = ["tiny-one", "small-flat", "small-deep", "small-opaque", "small-real", "mixed-bimodal", "mixed-threshold"]
+scenario = ["fresh", "noop"]
+direction = ["neo>freya", "freya>neo"]
+client = ["sender"]
+cache = ["warm"]

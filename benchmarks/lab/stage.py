@@ -5,6 +5,14 @@ A build is made from `git archive` of a commit, never from the working tree,
 so a binary cannot contain uncommitted changes. Each host keeps it as
 ROOT/bin/xs-<rev12>; `check` refuses a host whose copy is missing, is not
 byte-for-byte the recorded build, or reports another or a dirty revision.
+
+The lab's scripts are staged as a bundle, ROOT/lib/<id>, named by the hash of
+its contents and never changed once written. A plan names the bundle it was
+made with, so staging newer scripts cannot disturb a queued or running plan.
+
+A revision written REV-tune is the same commit built with XSYNC_TUNABLES=ON,
+for experiments that set engine constants. It is a separate build with its own
+record, staged as ROOT/bin/xs-<rev12>-tune.
 """
 import argparse
 import datetime
@@ -46,7 +54,7 @@ def copy_to(host, paths, directory):
             shutil.copy2(path, directory)
     else:
         run('scp', '-q', '-oBatchMode=yes', *paths, f'{host["ssh"]}:{directory}/')
-SCRIPTS = (HERE / 'probe.py', HERE / 'corpus.py', HERE / 'corpora.json', HERE / 'agent.py', HERE / 'overnight.py',
+SCRIPTS = (HERE / 'probe.py', HERE / 'corpus.py', HERE / 'corpora.json', HERE / 'agent.py', HERE / 'runner.py',
            HERE.parent / 'measure.py')
 
 
@@ -56,6 +64,20 @@ def run(*command, **options):
 
 def sha256(path):
     return hashlib.sha256(pathlib.Path(path).read_bytes()).hexdigest()
+
+
+TUNE = '-tune'
+
+
+def identify(revision):
+    """(full commit hash, build id, whether it is the tunables build) of REV or REV-tune."""
+    tunables = revision.endswith(TUNE)
+    full = resolve(revision[:-len(TUNE)] if tunables else revision)
+    return full, full[:12] + (TUNE if tunables else ''), tunables
+
+
+def build_id(revision):
+    return identify(revision)[1]
 
 
 def resolve(revision):
@@ -68,7 +90,7 @@ def resolve(revision):
 
 
 def load_build(revision):
-    record = BUILDS / resolve(revision)[:12] / 'build.json'
+    record = BUILDS / build_id(revision) / 'build.json'
     if not record.exists():
         raise SystemExit(f'{revision} has not been built: run stage.py build --rev {revision}')
     return json.loads(record.read_text())
@@ -76,9 +98,10 @@ def load_build(revision):
 
 def build(revision, rebuild=False):
     """Build the static Linux release of a commit for both architectures."""
-    full = resolve(revision)
+    full, name_id, tunables = identify(revision)
     short = full[:12]
-    output = BUILDS / short
+    output = BUILDS / name_id
+    option = 'ON' if tunables else 'OFF'
     native = artifact_for(platform.system(), platform.machine()) if platform.system() == 'Darwin' else None
     artifacts = {}
     if (output / 'build.json').exists() and not rebuild:
@@ -97,25 +120,26 @@ def build(revision, rebuild=False):
             print(f'building {native} from {short}', flush=True)
             with open(output / 'build-native.log', 'w') as log:
                 done = subprocess.run(f'cmake -S {shlex.quote(source)} -B {shlex.quote(source)}/native -G Ninja '
-                                      f'-DCMAKE_BUILD_TYPE=Release -DXSYNC_GIT_HASH={short} && '
+                                      f'-DCMAKE_BUILD_TYPE=Release -DXSYNC_GIT_HASH={short} -DXSYNC_TUNABLES={option} && '
                                       f'cmake --build {shlex.quote(source)}/native --target xsync -j 8',
                                       shell=True, stdout=log, stderr=subprocess.STDOUT)
             if done.returncode:
                 raise SystemExit(f'native build failed; see {output / "build-native.log"}')
             shutil.copy2(pathlib.Path(source) / 'native' / 'xs', output / native)
             version = run(output / native, '--version', capture_output=True, text=True).stdout.splitlines()[0]
-            if problem := version_problem(version, short):
+            if problem := version_problem(version, short, tunables):
                 raise SystemExit(f'{native}: {problem}')
             artifacts[native] = {'sha256': sha256(output / native), 'bytes': (output / native).stat().st_size,
                                  'version': version}
         for arch in ('amd64', 'arm64'):
             if f'xs-linux-{arch}' in artifacts:
                 continue
-            image, name = f'xsbench-xs-{short}-{arch}', f'xs-linux-{arch}'
-            print(f'building {name} from {short}', flush=True)
+            image, name = f'xsbench-xs-{name_id}-{arch}', f'xs-linux-{arch}'
+            print(f'building {name} from {name_id}', flush=True)
             with open(output / f'build-{arch}.log', 'w') as log:
                 done = subprocess.run(['docker', 'build', '--platform', f'linux/{arch}', '--build-arg',
-                                       f'XSYNC_GIT_HASH={short}', '-t', image, '-f',
+                                       f'XSYNC_GIT_HASH={short}', '--build-arg', f'XSYNC_TUNABLES={option}',
+                                       '-t', image, '-f',
                                        f'{source}/tools/release.Dockerfile', source],
                                       stdout=log, stderr=subprocess.STDOUT)
             if done.returncode:
@@ -129,33 +153,42 @@ def build(revision, rebuild=False):
                 run('docker', 'rm', '-f', container, capture_output=True)
             (output / name).chmod(0o755)
             version = version.splitlines()[0] if version else ''
-            if problem := version_problem(version, short):
+            if problem := version_problem(version, short, tunables):
                 raise SystemExit(f'{name}: {problem}')
             artifacts[name] = {'sha256': sha256(output / name), 'bytes': (output / name).stat().st_size,
                                'version': version}
-    record = {'revision': full, 'rev12': short, 'artifacts': artifacts,
+    record = {'revision': full, 'rev12': name_id, 'git': short, 'tunables': tunables, 'artifacts': artifacts,
               'dockerfile_sha256': hashlib.sha256(run('git', '-C', REPO, 'show', f'{full}:tools/release.Dockerfile',
                                                       capture_output=True).stdout).hexdigest(),
               'utc': datetime.datetime.now(datetime.timezone.utc).isoformat(timespec='seconds')}
     (output / 'build.json').write_text(json.dumps(record, indent=2) + '\n')
     RECORDS.mkdir(parents=True, exist_ok=True)
-    (RECORDS / f'{short}.json').write_text(json.dumps(record, indent=2) + '\n')
+    (RECORDS / f'{name_id}.json').write_text(json.dumps(record, indent=2) + '\n')
     return record
 
 
-def version_problem(version, short):
+def version_problem(version, short, tunables=False):
     """Why a `--version` line is not the clean build of a revision, or None."""
     if not version:
         return 'does not run'
     if '-dirty' in version:
         return f'was built from a dirty tree ("{version}")'
-    if f'git {short}' not in version.split('  '):
+    fields = version.split('  ')
+    if f'git {short}' not in fields:
         return f'reports "{version}", expected git {short}'
+    if ('tunables' in fields) != tunables:
+        return f'is {"" if "tunables" in fields else "not "}a tunables build ("{version}")'
     return None
 
 
 def script_hashes():
     return {path.name: sha256(path) for path in SCRIPTS}
+
+
+def bundle_id(hashes=None):
+    """The name of the script bundle: a hash of every script's name and contents."""
+    hashes = script_hashes() if hashes is None else hashes
+    return hashlib.sha256(json.dumps(sorted(hashes.items())).encode()).hexdigest()[:12]
 
 
 def check_host(name, record, scripts, report):
@@ -172,7 +205,8 @@ def check_host(name, record, scripts, report):
         problems.append(f'{name}: {binary} is not staged')
     elif found != record['artifacts'][artifact]['sha256']:
         problems.append(f'{name}: {binary} is not the recorded build of {short} (stale or replaced)')
-    elif problem := version_problem(report.get('versions', {}).get(binary), short):
+    elif problem := version_problem(report.get('versions', {}).get(binary), record.get('git', short),
+                                    record.get('tunables', False)):
         problems.append(f'{name}: {binary} {problem}')
     for script, digest in scripts.items():
         found = report.get('files', {}).get(script)
@@ -187,7 +221,7 @@ def check_host(name, record, scripts, report):
 
 def staged_report(host, record):
     names = [f'xs-{record["rev12"]}', *script_hashes()]
-    return preflight.probe(host, 'staged', '--root', host['root'], *names)
+    return preflight.probe(host, 'staged', '--root', host['root'], '--bundle', bundle_id(), *names)
 
 
 def check(config, names, record):
@@ -197,6 +231,27 @@ def check(config, names, record):
         reports[name] = staged_report(config['hosts'][name], record)
         problems += check_host(name, record, scripts, reports[name])
     return reports, problems
+
+
+def push_bundle(name, host):
+    """Put the current scripts on a host as ROOT/lib/<id>, unless that bundle is already there."""
+    bundle = bundle_id()
+    library = host['root'] + '/lib'
+    final, incoming = f'{library}/{bundle}', f'{library}/{bundle}.incoming'
+    if run_on(host, f'test -d {shlex.quote(final)}').returncode == 0:
+        return bundle
+    made = run_on(host, f'rm -rf {shlex.quote(incoming)} && mkdir -p {shlex.quote(incoming)}')
+    if made.returncode:
+        raise SystemExit(f'{name}: cannot create {incoming}: {made.stderr.strip()}')
+    copy_to(host, SCRIPTS, incoming)
+    report = preflight.probe(host, 'staged', '--root', host['root'], '--bundle', f'{bundle}.incoming', *script_hashes())
+    if report.get('files') != script_hashes():
+        raise SystemExit(f'{name}: the scripts arrived damaged; nothing was installed')
+    # A directory rename is atomic, and a bundle is never written to again.
+    moved = run_on(host, f'mv {shlex.quote(incoming)} {shlex.quote(final)}')
+    if moved.returncode:
+        raise SystemExit(f'{name}: {moved.stderr.strip()}')
+    return bundle
 
 
 def push(config, names, record):
@@ -217,16 +272,15 @@ def push(config, names, record):
         shutil.copy2(BUILDS / short / artifact, staging)
         copy_to(host, [staging], directory)
         staging.unlink()
-        copy_to(host, SCRIPTS, directory + '/.incoming')
+        push_bundle(name, host)
         report = preflight.probe(host, 'staged', '--root', host['root'], f'xs-{short}.incoming')
         if report.get('files', {}).get(f'xs-{short}.incoming') != record['artifacts'][artifact]['sha256']:
             raise SystemExit(f'{name}: the copy of {artifact} arrived damaged; nothing was replaced')
         moved = run_on(host, f'cd {shlex.quote(directory)} && chmod 755 xs-{short}.incoming && '
-                             f'mv -f xs-{short}.incoming xs-{short} && '
-                             f'for f in .incoming/*; do mv -f "$f" .; done && rmdir .incoming')
+                             f'mv -f xs-{short}.incoming xs-{short}; rmdir .incoming 2>/dev/null; true')
         if moved.returncode:
             raise SystemExit(f'{name}: {moved.stderr.strip()}')
-        print(f'{name}: staged xs-{short} ({artifact}) and {len(SCRIPTS)} scripts', flush=True)
+        print(f'{name}: staged xs-{short} ({artifact}) and script bundle {bundle_id()}', flush=True)
 
 
 def main(argv=None):

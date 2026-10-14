@@ -1,0 +1,19 @@
+{
+  "experiment": "E4g-peer-poll",
+  "kind": "screening",
+  "hypothesis": "Polling for the peer's exit every 5 or 1 ms instead of 25 shortens a no-op by more than 3% on a one-file tree, and measurably on 100,000 files.",
+  "primary": "wall_s",
+  "control": "xs",
+  "delta": 0.03,
+  "level": 0.95,
+  "looks": 1,
+  "runs": [
+    "20261013T205439Z-E4g-peer-poll"
+  ],
+  "spec_sha256": [
+    "f43cea49146091e6351c7a34fa82e0e8b4c82edfc9129706febd7e0fc58108f9"
+  ],
+  "valid_blocks": 160,
+  "void_attempts": 0,
+  "void_reasons": []
+}

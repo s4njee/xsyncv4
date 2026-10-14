@@ -6,11 +6,13 @@ import json
 import math
 import os
 import pathlib
+import signal
 import subprocess
 import sys
 import tempfile
 import time
 import unittest
+import unittest.mock
 
 import agent
 import analyze
@@ -19,6 +21,7 @@ import plan
 import preflight
 import probe
 import report
+import runner
 import stage
 
 HERE = pathlib.Path(__file__).resolve().parent
@@ -334,6 +337,17 @@ class StagedBuilds(unittest.TestCase):
         self.assertEqual(self.problems(self.report()), [])
         self.assertEqual(self.problems(self.report(machine='x86_64', files={'xs-abcdef012345': 'amd'})), [])
 
+    def test_tunables_build_is_a_separate_build_of_the_same_commit(self):
+        record = {'rev12': 'abcdef012345-tune', 'git': 'abcdef012345', 'tunables': True, 'artifacts': self.RECORD['artifacts']}
+        report = self.report(files={'xs-abcdef012345-tune': 'arm'}, versions={'xs-abcdef012345-tune': self.VERSION + '  tunables'})
+        self.assertEqual(stage.check_host('neo', record, self.SCRIPTS, report), [])
+        # The release binary under the tunables name, or the reverse, is refused.
+        report = self.report(files={'xs-abcdef012345-tune': 'arm'}, versions={'xs-abcdef012345-tune': self.VERSION})
+        self.assertTrue(any('is not a tunables build' in p for p in stage.check_host('neo', record, self.SCRIPTS, report)))
+        report = self.report(versions={'xs-abcdef012345': self.VERSION + '  tunables'})
+        self.assertTrue(any('is a tunables build' in p for p in self.problems(report)))
+        self.assertIsNone(stage.version_problem(self.VERSION + '  tunables', 'abcdef012345', True))
+
     def test_stale_binary_is_refused(self):
         problems = self.problems(self.report(files={'xs-abcdef012345': 'older build'}))
         self.assertEqual(problems, ['neo: xs-abcdef012345 is not the recorded build of abcdef012345 '
@@ -392,6 +406,20 @@ class StagedBuilds(unittest.TestCase):
                                 capture_output=True, text=True)
         self.assertEqual(result.returncode, 2)
 
+    def test_scripts_are_looked_for_in_the_named_bundle_and_binaries_beside_it(self):
+        with tempfile.TemporaryDirectory() as root:
+            for place, name, data in (('bin', 'probe.py', b'old'), ('lib/abc', 'probe.py', b'new'), ('bin', 'xs-r', b'binary')):
+                (pathlib.Path(root) / place).mkdir(parents=True, exist_ok=True)
+                (pathlib.Path(root) / place / name).write_bytes(data)
+            digest = lambda data: __import__('hashlib').sha256(data).hexdigest()
+            self.assertEqual(probe.staged(root, ['probe.py', 'xs-r'])['files'],
+                             {'probe.py': digest(b'old'), 'xs-r': digest(b'binary')})
+            self.assertEqual(probe.staged(root, ['probe.py', 'xs-r', 'agent.py'], 'abc')['files'],
+                             {'probe.py': digest(b'new'), 'xs-r': digest(b'binary'), 'agent.py': None})
+        result = subprocess.run([sys.executable, str(HERE / 'probe.py'), 'staged', '--root', '/tmp', '--bundle', '../x', 'a'],
+                                capture_output=True, text=True)
+        self.assertEqual(result.returncode, 2)
+
 
 class Plans(unittest.TestCase):
     SPEC = {'id': 'E99', 'sha256': 'spec', 'kind': 'screening', 'hypothesis': 'h', 'primary': 'wall_s',
@@ -407,6 +435,44 @@ class Plans(unittest.TestCase):
 
     def make(self, seed=1, **changes):
         return plan.make_plan(dict(self.SPEC, **changes), self.config, self.pins, seed, 'run')
+
+    def xs_plan(self, build, **arm):
+        arms = {'rsync': {'tool': 'rsync'}, 'xs': dict({'tool': 'xs', 'rev': 'abcdef012345'}, **arm)}
+        record = dict({'rev12': 'abcdef012345', 'artifacts': {}}, **build)
+        with unittest.mock.patch.object(plan.stage, 'load_build', return_value=record):
+            return self.make(arms=arms)
+
+    def test_tune_and_metrics_need_a_tunables_build(self):
+        tunables = {'rev12': 'abcdef012345-tune', 'tunables': True}
+        made = self.xs_plan(tunables, tune='jobs=1,write_chunk=262144', metrics=True)
+        arm = made['arms'][1]
+        self.assertEqual(arm['tune'], {'sender': 'jobs=1,write_chunk=262144', 'receiver': 'jobs=1,write_chunk=262144'})
+        self.assertTrue(arm['metrics'])
+        self.assertEqual(arm['binary']['neo'], self.config['hosts']['neo']['root'] + '/bin/xs-abcdef012345-tune')
+        self.assertEqual(self.xs_plan(tunables, tune={'sender': 'jobs=1'})['arms'][1]['tune'], {'sender': 'jobs=1'})
+        self.assertNotIn('tune', self.xs_plan(tunables)['arms'][1])
+        for arm in ({'tune': 'jobs=1'}, {'metrics': True}):
+            with self.assertRaises(plan.SpecError):
+                self.xs_plan({}, **arm)
+        for bad in ('jobs=1; reboot', 'jobs', 'jobs=one', {'client': 'jobs=1'}, 'jobs=1,', 7):
+            with self.assertRaises(plan.SpecError, msg=bad):
+                self.xs_plan(tunables, tune=bad)
+
+    def test_a_plan_names_its_script_bundle_and_what_it_will_write(self):
+        made = self.make()
+        self.assertEqual(made['bundle'], stage.bundle_id())
+        each = sum(self.pins[name + ':full']['bytes'] for name in ('tiny-one', 'small-flat'))
+        # Per receiver: two client roles; four blocks of three arms fresh, and one seeded copy per arm for the no-op cells.
+        self.assertEqual(made['writes'], {'neo': each * 2 * (4 * 3 + 3), 'freya': each * 2 * (4 * 3 + 3)})
+        one_way = self.make(matrix=dict(self.SPEC['matrix'], direction=['neo>freya'], scenario=['noop']))
+        self.assertEqual(one_way['writes'], {'neo': 0, 'freya': each * 2 * 3})
+
+    def test_the_bundle_name_follows_the_scripts(self):
+        hashes = stage.script_hashes()
+        self.assertEqual(stage.bundle_id(), stage.bundle_id(dict(reversed(list(hashes.items())))), 'order must not matter')
+        self.assertNotEqual(stage.bundle_id(), stage.bundle_id(dict(hashes, **{'agent.py': 'changed'})))
+        self.assertEqual(len(stage.bundle_id()), 12)
+        self.assertIn('runner.py', hashes)
 
     def test_every_block_holds_every_arm_once(self):
         made = self.make()
@@ -518,6 +584,49 @@ class AgentPieces(unittest.TestCase):
         self.assertEqual(argv[-2:], ['/n/corpora/tiny-one/',
                                      'u@freya.local:/f/work/run1/tiny-one.fresh.neo-freya.sender.warm/xs/'])
         self.assertTrue(script.endswith('> /n/work/run1/logs/tag.out 2> /n/work/run1/logs/tag.err'))
+
+    def test_each_end_of_a_tunables_build_gets_its_own_constants_and_metrics_file(self):
+        arm = dict(self.XS, tune={'sender': 'jobs=1,write_chunk=262144', 'receiver': 'jobs=4'}, metrics=True)
+        _, _, argv, _ = agent.transfer_command(arm, self.CELL, self.hosts(), 'run1', 'tag')
+        end = argv.index('--')
+        self.assertEqual(argv[7:end], ['--env', 'XSYNC_TUNE=jobs=1,write_chunk=262144',
+                                       '--env', 'XSYNC_METRICS=/n/work/run1/logs/tag.client.engine.json'])
+        self.assertIn('--rsync-path=python3 /f/bin/measure.py --metrics /f/work/run1/logs/tag.peer.json '
+                      '--env XSYNC_TUNE=jobs=4 --env XSYNC_METRICS=/f/work/run1/logs/tag.peer.engine.json '
+                      '-- /f/bin/xs-r', argv)
+        # A pull swaps the ends: the client is then the receiver.
+        pull = dict(self.CELL, client='receiver')
+        client, _, argv, _ = agent.transfer_command(arm, pull, self.hosts(), 'run1', 'tag')
+        self.assertEqual(client.name, 'freya')
+        self.assertIn('XSYNC_TUNE=jobs=4', argv[:argv.index('--')])
+        self.assertTrue(any('XSYNC_TUNE=jobs=1,write_chunk=262144' in word for word in argv if word.startswith('--rsync-path=')))
+        one_sided = dict(self.XS, tune={'sender': 'jobs=2'})
+        _, _, argv, _ = agent.transfer_command(one_sided, self.CELL, self.hosts(), 'run1', 'tag')
+        self.assertFalse(any('XSYNC_TUNE' in word for word in argv if word.startswith('--rsync-path=')))
+        self.assertFalse(any('XSYNC_METRICS' in word for word in argv))
+
+    def test_measure_passes_variables_to_its_child(self):
+        with tempfile.TemporaryDirectory() as directory:
+            metrics = pathlib.Path(directory) / 'm.json'
+            done = subprocess.run([sys.executable, str(HERE.parent / 'measure.py'), '--metrics', str(metrics),
+                                   '--env', 'XSYNC_TUNE=jobs=1,pipe_size=4096', '--', 'sh', '-c',
+                                   'printf %s "$XSYNC_TUNE"; test -n "$PATH"'], capture_output=True, text=True)
+            self.assertEqual((done.returncode, done.stdout), (0, 'jobs=1,pipe_size=4096'))
+            self.assertEqual(json.loads(metrics.read_text())['returncode'], 0)
+            bad = subprocess.run([sys.executable, str(HERE.parent / 'measure.py'), '--metrics', str(metrics),
+                                  '--env', 'NOVALUE', '--', 'true'], capture_output=True, text=True)
+            self.assertEqual(bad.returncode, 2)
+
+    def test_a_peer_looked_up_once_is_reached_by_address_with_its_name_for_the_host_key(self):
+        addresses = {'neo>freya': '192.168.1.156'}
+        _, _, argv, _ = agent.transfer_command(self.XS, self.CELL, self.hosts(), 'run1', 'tag', addresses)
+        self.assertEqual(argv[-1], 'u@192.168.1.156:/f/work/run1/tiny-one.fresh.neo-freya.sender.warm/xs/')
+        rsh = argv[argv.index('-e') + 1]
+        self.assertEqual(rsh, agent.RSH + ' -oHostKeyAlias=freya.local')
+        # A pull is started by freya, which has no address recorded for neo: it uses the name.
+        _, _, argv, _ = agent.transfer_command(self.XS, dict(self.CELL, client='receiver'), self.hosts(), 'run1', 'tag', addresses)
+        self.assertEqual(argv[-2], 'u@neo.local:/n/corpora/tiny-one/')
+        self.assertNotIn('HostKeyAlias', argv[argv.index('-e') + 1])
 
     def test_injected_delay_sleeps_inside_the_measured_command(self):
         arm = dict(self.XS, delay_s={self.CELL['id']: 0.25})
@@ -747,14 +856,19 @@ class Analysis(unittest.TestCase):
         self.assertIn('nothing here is a claim', few)
 
 
-class OvernightQueue(unittest.TestCase):
-    """overnight.py with a stand-in agent that records its arguments and takes a second."""
+class ContinuousRunner(unittest.TestCase):
+    """runner.py with a stand-in agent that holds the hosts' lock for a moment, as the real one does."""
 
-    STUB = ("import json, pathlib, sys, time\n"
+    STUB = ("import fcntl, json, pathlib, sys, time\n"
             "plan = pathlib.Path(sys.argv[1])\n"
-            "time.sleep(1.0)\n"
-            "if plan.parent.name == 'broken': sys.exit(3)\n"
-            "(plan.parent / 'status.json').write_text(json.dumps({'state': 'complete', 'detail': sys.argv[3]}))\n")
+            "lock = open(plan.parent.parent / '.lock', 'a+'); fcntl.flock(lock, fcntl.LOCK_EX)\n"
+            "name = plan.parent.name\n"
+            "with open(plan.parent.parent / 'order.txt', 'a') as order: order.write(name + ' ' + pathlib.Path(__file__).parent.name + '\\n')\n"
+            "if name.startswith('dies'): (plan.parent / 'status.json').write_text('{\"state\": \"running\"}'); sys.exit(9)\n"
+            "time.sleep(json.loads(plan.read_text()).get('takes', 0.3))\n"
+            "if name.startswith('broken'): sys.exit(3)\n"
+            "(plan.parent / 'status.json').write_text(json.dumps({'state': 'complete', 'utc': __import__('datetime')."
+            "datetime.now(__import__('datetime').timezone.utc).isoformat()}))\n")
 
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
@@ -762,66 +876,187 @@ class OvernightQueue(unittest.TestCase):
         self.root = pathlib.Path(self.tmp.name)
         self.runs = self.root / 'runs'
         self.runs.mkdir()
-        self.stub = self.root / 'stub_agent.py'
-        self.stub.write_text(self.STUB)
+        for place in ('bin', 'lib/b1'):
+            (self.root / place).mkdir(parents=True)
+            (self.root / place / 'agent.py').write_text(self.STUB)
+        self.processes = []
 
-    def queue(self, *names, with_plan=True):
+    def tearDown(self):
+        for process in self.processes:
+            if process.poll() is None:
+                process.kill()
+            process.wait()
+
+    def add(self, *names, to='backlog.txt', **plan):
         for name in names:
             (self.runs / name).mkdir()
-            if with_plan:
-                (self.runs / name / 'plan.json').write_text('{}')
-        with open(self.runs / 'queue.txt', 'a') as stream:
+            (self.runs / name / 'plan.json').write_text(json.dumps(plan))
+        with open(self.runs / to, 'a') as stream:
             stream.write(''.join(name + '\n' for name in names))
 
-    def overnight(self, opens_in, closes_in):
-        moment = lambda seconds: (datetime.datetime.now(datetime.timezone.utc)
-                                  + datetime.timedelta(seconds=seconds)).isoformat()
-        done = subprocess.run([sys.executable, str(HERE / 'overnight.py'), '--root', str(self.root), '--agent',
-                               str(self.stub), '--not-before', moment(opens_in), '--deadline', moment(closes_in)],
-                              capture_output=True, text=True, timeout=60)
-        self.assertEqual(done.returncode, 0, done.stderr)
-        status = json.loads((self.runs / 'queue-status.json').read_text())
-        return status, {entry['run']: entry for entry in status['runs']}
+    def control(self, **settings):
+        (self.runs / 'control.json').write_text(json.dumps(settings))
 
-    def test_runs_in_order_and_survives_a_failure(self):
-        self.queue('first', 'broken', 'last')
-        self.queue('ghost', with_plan=False)
-        started = time.monotonic()
-        status, runs = self.overnight(1.5, 3600)
-        self.assertGreater(time.monotonic() - started, 1.5, 'it must wait for the window to open')
-        self.assertEqual(status['state'], 'finished')
-        self.assertEqual(list(runs), ['first', 'broken', 'last', 'ghost'])
-        self.assertEqual(runs['first']['state'], 'complete')
-        self.assertEqual((runs['broken']['state'], runs['broken']['exit']), ('failed', 3))
-        self.assertEqual(runs['last']['state'], 'complete', 'a failed run must not stop the queue')
-        self.assertEqual(runs['ghost']['detail'], 'no plan')
-        deadline = datetime.datetime.fromisoformat(runs['first']['detail'])
-        self.assertGreater(deadline, datetime.datetime.now(datetime.timezone.utc), 'the agent gets the window end')
+    def start(self, *arguments):
+        process = subprocess.Popen([sys.executable, str(HERE / 'runner.py'), '--root', str(self.root), *arguments],
+                                   stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        self.processes.append(process)
+        return process
 
-    def test_nothing_starts_once_the_window_is_nearly_over(self):
-        self.queue('late')
-        status, runs = self.overnight(0, 60)  # less than the reserve remains
-        self.assertEqual(runs['late']['detail'], 'the window closed first')
-        self.assertFalse((self.runs / 'late' / 'status.json').exists())
+    def status(self):
+        try:
+            return json.loads((self.runs / 'runner-status.json').read_text())
+        except (OSError, ValueError):
+            return {}
 
-    def test_a_finished_run_is_not_repeated(self):
-        self.queue('done')
+    def until(self, condition, seconds=20, message='the runner did not get there'):
+        deadline = time.monotonic() + seconds
+        while time.monotonic() < deadline:
+            if condition(self.status()):
+                return self.status()
+            time.sleep(0.1)
+        self.fail(f'{message}: {self.status()}')
+
+    def order(self):
+        try:
+            return [line.split()[0] for line in (self.runs / 'order.txt').read_text().splitlines()]
+        except OSError:
+            return []
+
+    def test_works_through_the_backlog_and_keeps_going(self):
+        self.add('first', 'broken', 'last')
+        self.add('ghost')
+        (self.runs / 'ghost' / 'plan.json').unlink()
+        self.add('done')
         (self.runs / 'done' / 'status.json').write_text('{"state": "complete"}')
-        _, runs = self.overnight(0, 3600)
-        self.assertEqual(runs['done']['detail'], 'already run')
+        runner_process = self.start()
+        status = self.until(lambda s: s.get('state') == 'idle' and len(s.get('recent', [])) == 3)
+        self.assertEqual(self.order(), ['first', 'broken', 'last'], 'in order, skipping what has no plan or has run')
+        recent = {entry['run']: entry for entry in status['recent']}
+        self.assertEqual((recent['broken']['state'], recent['broken']['exit']), ('failed', 3))
+        self.assertEqual(recent['last']['state'], 'complete', 'a failed run must not stop the queue')
+        self.assertEqual(status['consecutive_failures'], 0)
+        # It does not finish: a run added later is picked up.
+        self.add('later')
+        self.until(lambda s: any(entry['run'] == 'later' for entry in s.get('recent', [])), 45)
+        self.assertIsNone(runner_process.poll())
+        runner_process.terminate()
+        self.assertEqual(runner_process.wait(timeout=10), 0)
+        self.assertEqual(self.status()['state'], 'stopped')
 
-    def test_waits_for_a_running_experiment(self):
-        self.queue('after')
+    def test_a_plan_runs_under_the_agent_of_its_own_bundle(self):
+        self.add('old')
+        self.add('new', bundle='b1')
+        self.start()
+        self.until(lambda s: len(s.get('recent', [])) == 2)
+        self.assertEqual((self.runs / 'order.txt').read_text().split(), ['old', 'bin', 'new', 'b1'])
+
+    def test_a_sentinel_is_due_at_its_interval_whatever_is_waiting(self):
+        self.control(standing_every_s=1.5)
+        self.add('q1', 'q2', 'q3', 'q4', 'q5', 'q6', takes=0.5)
+        self.add('s1', 's2', to='standing.txt', takes=0.1)
+        self.start()
+        self.until(lambda s: len(s.get('recent', [])) == 8)
+        order = self.order()
+        self.assertEqual(order[0], 's1', 'a sentinel that has never run is due at once')
+        self.assertLess(order.index('s2'), order.index('q6'), 'the next one does not wait for the backlog to empty')
+        self.assertGreater(order.index('s2'), 1, 'nor does it run before its interval')
+        lanes = {entry['run']: entry['lane'] for entry in self.status()['recent']}
+        self.assertEqual((lanes['s1'], lanes['q1']), ('standing', 'queue'))
+
+    def test_a_run_that_would_overspend_a_drive_is_passed_over(self):
+        self.control(write_budget={'freya': 100})
+        self.add('heavy1', writes={'freya': 80, 'neo': 5000})
+        self.add('heavy2', writes={'freya': 80})
+        self.add('light', writes={'freya': 15})
+        self.start()
+        status = self.until(lambda s: s.get('state') == 'waiting for the write budget')
+        self.assertEqual(self.order(), ['heavy1', 'light'], 'neo has no limit; heavy2 must wait for freya')
+        self.assertEqual(status['written_24h'], {'freya': 95, 'neo': 5000})
+        self.assertEqual(status['queue_pending'], 1)
+
+    def test_budget_arithmetic(self):
+        self.assertTrue(runner.fits({'writes': {'freya': 500}}, {}, {'freya': 100}), 'an oversized run needs an empty day')
+        self.assertFalse(runner.fits({'writes': {'freya': 500}}, {'freya': 1}, {'freya': 100}))
+        self.assertTrue(runner.fits({'writes': {'freya': 0}}, {'freya': 100}, {'freya': 100}), 'a run that writes nothing always fits')
+        self.assertTrue(runner.fits({}, {'freya': 100}, {'freya': 100}), 'a plan made before budgets is not held back')
+        now = time.time()
+        (self.runs / 'writes.jsonl').write_text(''.join(json.dumps({'epoch': moment, 'bytes': {'freya': 10}}) + '\n'
+                                                        for moment in (now - 90000, now - 80000, now - 5)) + 'not json\n')
+        self.assertEqual(runner.written(self.runs, now), {'freya': 20}, 'only the last 24 hours count')
+
+    def test_three_failures_in_a_row_halt_it_until_someone_resumes(self):
+        self.control(halt_after=2)
+        self.add('broken1', 'broken2', 'spared')
+        self.start()
+        status = self.until(lambda s: s.get('state') == 'halted')
+        self.assertEqual(self.order(), ['broken1', 'broken2'])
+        self.assertEqual(status['consecutive_failures'], 2)
+        (self.runs / '.resume').touch()
+        self.until(lambda s: any(entry['run'] == 'spared' for entry in s.get('recent', [])), 45)
+
+    def test_pause_holds_the_next_run(self):
+        (self.runs / '.pause').touch()
+        self.add('held')
+        self.start()
+        self.until(lambda s: s.get('state') == 'paused')
+        time.sleep(1.0)
+        self.assertEqual(self.order(), [])
+        (self.runs / '.pause').unlink()
+        self.until(lambda s: len(s.get('recent', [])) == 1, 30)
+
+    def test_an_agent_that_dies_is_recorded_and_not_run_again(self):
+        self.add('dies', 'after')
+        self.start()
+        status = self.until(lambda s: len(s.get('recent', [])) == 2)
+        self.assertEqual(status['recent'][0]['state'], 'failed')
+        self.assertEqual(json.loads((self.runs / 'dies' / 'status.json').read_text())['state'], 'failed')
+        self.assertEqual(self.order(), ['dies', 'after'])
+
+    def test_waits_for_a_run_started_by_hand(self):
+        self.add('after')
         holder = subprocess.Popen([sys.executable, '-c', 'import fcntl,sys,time; f=open(sys.argv[1],"a+"); '
-                                   'fcntl.flock(f,fcntl.LOCK_EX); print("held",flush=True); time.sleep(3)',
+                                   'fcntl.flock(f,fcntl.LOCK_EX); print("held",flush=True); time.sleep(2.5)',
                                    str(self.runs / '.lock')], stdout=subprocess.PIPE, text=True)
-        self.addCleanup(holder.wait)
+        self.processes.append(holder)
         self.addCleanup(holder.stdout.close)
         holder.stdout.readline()
         started = time.monotonic()
-        _, runs = self.overnight(0, 3600)
-        self.assertGreater(time.monotonic() - started, 2.5)
-        self.assertEqual(runs['after']['state'], 'complete')
+        self.start()
+        self.until(lambda s: s.get('state') == 'waiting for a running experiment')
+        self.until(lambda s: len(s.get('recent', [])) == 1)
+        self.assertGreater(time.monotonic() - started, 2.0)
+
+    def test_a_newer_runner_takes_over_without_disturbing_the_run(self):
+        self.add('long', takes=3.0)
+        self.add('next')
+        old = self.start()
+        self.until(lambda s: s.get('state') == 'running')
+        old.send_signal(signal.SIGUSR1)
+        self.assertEqual(old.wait(timeout=10), 0)
+        self.assertEqual(self.status()['state'], 'detached')
+        self.assertFalse((self.runs / 'long' / 'status.json').exists(), 'the run is still going')
+        self.start()  # waits for the old one's run, never starts it twice, then carries on
+        self.until(lambda s: any(entry['run'] == 'next' for entry in s.get('recent', [])), 40)
+        self.assertEqual(self.order(), ['long', 'next'])
+        self.assertEqual(json.loads((self.runs / 'long' / 'status.json').read_text())['state'], 'complete')
+
+    def test_only_one_runner_works_a_root(self):
+        self.start()
+        self.until(lambda s: s.get('state') == 'idle')
+        second = subprocess.run([sys.executable, '-c', 'import sys,runner,time; runner.time.sleep=lambda s: None; '
+                                 'runner.main(["--root", sys.argv[1]])', str(self.root)],
+                                capture_output=True, text=True, cwd=HERE, timeout=30)
+        self.assertIn('another runner is working this root', second.stderr)
+
+    def test_not_before_delays_the_first_run(self):
+        self.add('first')
+        moment = (datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(seconds=2)).isoformat()
+        started = time.monotonic()
+        self.start('--not-before', moment)
+        self.until(lambda s: s.get('state') == 'waiting to begin')
+        self.until(lambda s: len(s.get('recent', [])) == 1)
+        self.assertGreater(time.monotonic() - started, 1.8)
 
 
 class HelperArguments(unittest.TestCase):

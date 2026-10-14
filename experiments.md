@@ -326,42 +326,54 @@ published tables carry sizes and depths but no file names.
 
 ### 4.7 Engine changes the experiments need
 
-None of the engine's tuning constants can be changed at run time, and `-j`
-always applies to both ends. Two additions, both behind a build option that
-release binaries do not enable:
+None of the engine's tuning constants could be changed at run time, and `-j`
+always applies to both ends. Two additions, built in M7, both behind a build
+option (`-DXSYNC_TUNABLES=ON`) that release binaries do not enable. In a
+release build the constants are one `constexpr` table (`src/tune.h`) and the
+two variables below are never read.
 
-1. **`XSYNC_TUNE`**, a `key=value` list read at start-up when built with
-   `-DXSYNC_TUNABLES=ON`. Keys, with today's values:
+1. **`XSYNC_TUNE`**, a `key=value` list read at start-up. An unknown key or
+   a value out of range ends the run with code 1 before anything is written.
 
-   | Key | Default | Defined at |
+   | Key | Default | What it sets |
    |---|---|---|
-   | `block_target` | 1 MiB | `src/remote.cpp:57` |
-   | `small_max` | 512 KiB | `src/remote.cpp:58` |
-   | `send_queue` | 48 MiB | `src/remote.cpp:254` |
-   | `recv_queue` | 16 MiB | `src/remote.cpp:2601` |
-   | `listing_window` | 65,536 entries | `src/remote.cpp:1680` |
-   | `read_batch_files` / `_bytes` | 64 / 8 MiB | `src/remote.cpp:1285` |
-   | `q1_soft_send` / `_recv` | 64 / 16 | `src/remote.cpp:1675,2603` |
-   | `write_chunk` | 64 KiB | `src/remote.cpp:359` |
-   | `coalesce_under` / `_to` | 32 KiB / 256 KiB | `src/remote.cpp:414-416` |
-   | `pipe_size` | unset | new (`F_SETPIPE_SZ`) |
-   | `jobs`, `scan_workers` | auto, n/2 | `src/local.cpp:32-59` |
-   | `zstd_fast_at` / `_slow_at` | 64 / 8 MiB/s | `src/compression.cpp:79-84` |
-   | `wait_peer_poll_ms` | 25 | `src/remote.cpp:314` |
-   | `block_hash` | on | diagnostic only |
+   | `block_target` | 1 MiB | raw bytes per DATA frame |
+   | `small_max` | 512 KiB | files up to this size share blocks; same on both ends |
+   | `send_queue` | 48 MiB | frames waiting for the transport writer |
+   | `recv_queue` | 16 MiB | DATA waiting for receiver workers |
+   | `listing_window` | 65,536 entries | source entries retained before scanning further |
+   | `read_batch_files` / `_bytes` | 64 / 8 MiB | size of one read task |
+   | `q1_soft_send` / `_recv` | 64 / 16 | backlog that takes workers off scanning or generating |
+   | `write_chunk` | 64 KiB | largest single write to the transport |
+   | `coalesce_under` / `_to` | 32 KiB / 256 KiB | small frames gathered into one write |
+   | `pipe_size` | unset | `F_SETPIPE_SZ` on the transport pipes |
+   | `jobs` | auto | workers on this end, whatever `-j` says |
+   | `scan_workers` | half of `jobs` | workers that prefer scanning |
+   | `zstd_fast_at` / `_slow_at` | 64 / 8 MiB/s | rates at which `-z` picks level 1 or 6 |
+   | `wait_peer_poll_ms` | 25 | how often the client polls for the peer's exit |
 
-   The environment does not cross SSH, so `measure.py` gains an `--env K=V`
-   option and the harness sets each end through its wrapper. That also
-   allows a different `jobs` on each end.
+   The environment does not cross SSH, so `measure.py` has an `--env K=V`
+   option and the agent sets each end through its wrapper. A spec arm gives
+   `tune = "..."` for both ends or `tune = { sender = "...", receiver =
+   "..." }`; `jobs` on one end is how the two ends get different worker
+   counts. Not built: a switch for the block hash, which was diagnostic
+   only, and a knob for parallel ranges within one file, which the default
+   never uses (they need an explicit `-j`).
 
-2. **`XSYNC_METRICS=path`**, one JSON line at exit: the existing
-   `read_ns`/`network_ns`/`write_ns` counters for both ends, plus new timers
-   for handshake, scan, generate and `finalize_tree`. Today those counters
-   run only under `-vv`, which also turns on per-file output frames and so
-   perturbs exactly the workloads being measured.
+2. **`XSYNC_METRICS=path`**, one JSON line appended at exit by each end:
+   the `read_ns`/`network_ns`/`write_ns` stage timers, phase marks
+   (`connected`, `scanned`, `transferred`, `finalized`), CPU time, context
+   switches, wire bytes, the size the kernel granted each transport pipe,
+   and the constants in force. Before this the stage timers ran only under
+   `-vv`, which also turns on per-file output frames and so perturbs
+   exactly the workloads being measured. An arm asks for it with
+   `metrics = true`, and the sample record gains an `engine` object with
+   one entry per end.
 
-A tunables build is used for an experiment only after E0c shows it is
-equivalent to the release build at default values.
+A tunables build is `REV-tune` wherever the harness takes a revision; it is
+a separate build with its own record, staged as `xs-<rev12>-tune`, and
+`--version` says `tunables`. It is used for an experiment only after E0c
+shows it is equivalent to the release build at default values.
 
 ### 4.8 Privileged helper
 
@@ -617,26 +629,99 @@ carries an interval.
 
 ## 7. Campaign
 
-**Phase A — neo ↔ freya, wired.** Everything: E0, E1, E1b, E2, E3, E4, E5,
-E6, then E7b and E8. freya's cells use the ext4 root at `/mnt/nvme` unless the
-experiment names ZFS.
-Rough cost at ~30 s per sample cycle (transfer, settle, verify): a 4-arm,
-12-block cell is about 25 minutes, so E1 is roughly a day of unattended
-running and each E3/E4 screen is one to three hours.
+Redesigned on 2026-10-13: the wired pair is measured continuously, not in a
+nightly window, and the other links are measured on demand.
 
-**Phase B — neo ↔ mars, mesh Wi-Fi.** Noise is higher and the link is the
-likely bottleneck, so:
+### 7.1 neo ↔ freya: continuous
 
-- Re-run E0 first; nothing from phase A's noise floor carries over.
+A runner on neo works a backlog around the clock (section 4.2, and
+`benchmarks/lab/README.md`). Three kinds of run share the hosts, one at a
+time:
+
+| Lane | What | When |
+|---|---|---|
+| Backlog | Experiments from the catalogue, in the order they are queued; a spec can be put at the front | Whenever the hosts are free |
+| Sentinel | `S0-sentinel`: xs twice and rsync on a small and a mixed corpus, fresh and no-op, both directions, 3 blocks, about 20 minutes | Every 6 hours, whatever is waiting |
+| By hand | A test someone runs directly | After `runner pause`; the queue resumes afterwards |
+
+What continuous running changes, and how the design answers it:
+
+- **The hosts are no longer quiet by arrangement.** Day and night differ in
+  what else the machines and the network are doing. Blocks already carry
+  that: every arm of a block runs within minutes of the others, the
+  quiet-host gate still voids a sample taken on a busy host, and the
+  sentinel measures the noise floor at each hour. The sentinel series is
+  the evidence that a ratio measured at 3 pm means what one measured at
+  3 am does. If it shows a period that is reliably noisier, that period is
+  given to screening and confirmatory runs wait.
+- **Drives wear.** A byte-bound sample writes its corpus to the receiver,
+  and at full duty the pair could write several terabytes a day to freya's
+  QLC scratch drive (rated for 800 TB) and to neo's system drive. Each plan
+  states the bytes it will write per host; the runner keeps a 24-hour total
+  and passes over a run that would exceed a host's allowance, 750 GiB a day
+  to start with. No-op and small-file experiments are nearly free and fill
+  the time that byte-bound ones may not.
+- **There is no morning.** Nothing waits for a person: a failed run does
+  not stop the queue, three in a row halt it rather than burn the backlog,
+  scripts and builds can be staged while it runs, and the runner can be
+  replaced under a run in progress. Results are collected whenever someone
+  asks.
+- **More data invites more looks.** Continuous running makes it easy to
+  add blocks until a verdict appears. The rule of section 5.6 stands: a
+  confirmatory spec declares its blocks, is queued once, and is analysed
+  once; more blocks are a new run with a declared look. The sentinel is
+  never tested; it is read as a control chart.
+- **An empty backlog is the planner's failure, not the hosts' rest.** The
+  backlog is kept a few days deep. Screens that need no new code (E3, E4
+  factors, repeat cells with high noise) are the filler between
+  experiments that wait on analysis or on a build.
+
+Order of work: what remains of phase A as it was, E1 on the current
+baseline first, then the E4 tunables, T1 candidates, E7b once the agent can
+set `netem` per arm, and E8 once its corpora are generated (generation
+runs through the queue as a maintenance job, since it loads the hosts).
+freya's cells use the ext4 scratch drive at `/mnt/nvme`.
+
+### 7.2 orion ↔ mars, a wireless mesh hop
+
+The Wi-Fi pair, from 2026-10-13: orion (Raspberry Pi 4, NVMe behind a USB
+bridge) and mars (Ryzen 9 7900X, NVMe), each wired to a mesh node, with the
+wireless backhaul between the nodes as the only radio on the path. It
+replaces neo ↔ mars as the Wi-Fi leg. The pair is a Pi and a desktop like
+the wired pair (Pi 5 and 7950X), so the question is put as a comparison:
+the same experiments on both, and where the ratios agree the hop needs no
+special tuning; where they part is where Wi-Fi tuning starts. mars drives,
+with its own runner and backlog, and results go to
+`benchmarks/results/wifi/`. Measured before the first run: 1.7 to 4 ms
+round trips and 440 to 490 Mbit/s each way through an SSH stream, about half
+the wired pair's rate. orion's own Wi-Fi radio is off; with it on, its name
+resolved to two addresses and replies left by Ethernet whichever one a
+packet arrived on. orion's drive cannot be trimmed through its USB bridge,
+so its write speed is watched instead, and its write allowance is 300 GiB a
+day. Noise is higher and the link is the likely bottleneck, so:
+
+- Re-run E0 first; nothing from the wired noise floor carries over.
 - Shorter blocks (smoke-tier corpora where needed), more of them, and δ set
   from the measured σ_d.
 - Wireless statistics, retransmits and the per-block link probe are
   recorded; a block whose probe falls outside a declared band is void.
 - Run E1, then only the link-sensitive experiments: E3a (brief), E3b, E3e,
-  E4b, E4f. Then E6 for the phase A configuration, E7 and E8.
+  E4b, E4f. Then E6 for the wired configuration, E7 and E8.
 
-**Phase C — neo ↔ Mac, wired.** E0, E1, E3a (the APFS worker cap), E6, E7,
-E8.
+W0a (the noise floor, 12 blocks, four corpora, fresh and no-op, both
+directions) started on 2026-10-13; W1 is E1's matrix on this pair.
+`small-real` is copied from freya when the wired pair is idle.
+
+### 7.3 Mac ↔ mars: on demand, supplementary
+
+Started by hand with `plan.py start` when a question needs APFS or a
+workstation in the loop, never queued, and kept in
+`benchmarks/results/supplementary/`. Small-file corpora only. A run there
+waits while a path experiment marks mars as in use.
+
+### 7.4 neo ↔ Mac, wired: deferred
+
+E0, E1, E3a (the APFS worker cap), E6, E7, E8, when the Mac is on the wire.
 Mac-specific handling: destination under a `.noindex` directory so Spotlight
 stays out, load gate, free-space check, and `purge` for cold runs.
 
@@ -1064,6 +1149,95 @@ ratio of 1.036 [1.026, 1.046]. First diagnostics, run by hand:
     no such cost, and neither does a Linux receiver (E1). A lead for the
     macOS receiver's per-directory work, to be looked at on the Mac leg.
   - `tiny-one` is noise: σ_d 0.6 to 0.8 on a 0.3 s transfer over Wi-Fi.
+
+- M7 is done (2026-10-13), on the `tunables` branch, engine commit
+  `ddefa041364e`, not yet merged. Section 4.7 describes what was built.
+  - The existing differential and wire tests pass on both builds; a new
+    engine test covers refused settings, extreme settings in both
+    directions and locally, and the metrics lines.
+  - E0c (confirmatory, 16 blocks, 64 of 64 valid): the tunables build at
+    default values against the release build of the same commit, and
+    again with its metrics file on. *Equivalent* in all eight comparisons;
+    the widest interval is 0.978 to 1.016, and the ratios on
+    `mixed-bimodal` are 1.000 [0.996, 1.004] and 0.999 [0.992, 1.006].
+    Collecting metrics costs nothing measurable. So `ddefa041364e-tune`
+    may be used for experiments.
+  - By hand over the LAN: both ends' transport descriptors are pipes, the
+    kernel grants 1 MiB when asked, and a sender with one worker faces a
+    receiver with sixteen.
+  - Queued for the night of 2026-10-13, 22:00 to 04:00 Central, both on
+    the tunables build with metrics: T1b (write path: pipe size, write
+    size, one sending worker, against default xs and rsync, on the two
+    mixed corpora, both directions, 240 samples) and T1c (worker counts
+    one end at a time: sender 1 or 2, receiver 2, 4 or 8, on three corpora,
+    fresh and no-op, both directions, 720 samples).
+
+  - Started on the afternoon of 2026-10-13, in the hours before the queue
+    opens, as a chain of three tunables screens on the LAN pair: E4g
+    (peer-exit poll of 25, 5 and 1 ms on no-ops, 40 blocks), E4a with `-z`
+    (block size, `small_max` and read-task size on compressible small
+    files), and E4b/E4d for small files (read-task size, scanning workers,
+    listing window; fresh and no-op). Each has a latest start time so that
+    none runs into the queue.
+  - In the background on the Mac and mars, S2: the deep-tree pull onto
+    APFS with one, two, four (the default) and eight receiving workers on
+    the Mac, and with one scanning worker, against rsync.
+
+- Continuous running began on 2026-10-13 (section 7.1). The windowed
+  queue and `overnight.py` are gone; `runner.py` works neo's backlog with
+  a sentinel every 6 hours and 750 GiB a day of writes allowed per host.
+  Scripts are staged as immutable bundles, so staging no longer breaks
+  queued plans. Checked by 12 runner tests and by a live run on the Mac and
+  mars: sentinel and backlog runs in turn, a pause, and two replacements of
+  the runner under a run in progress. First backlog: T1b and T1c (made for
+  the old window, run under their original scripts), E4g confirmation, E1
+  on the current baseline, and the holochart tree at 8 blocks.
+
+- Results of the first continuous night, 2026-10-14 (all blocks valid):
+  - T1b (write path, screening): a 1 MiB pipe and 256 KiB or 1 MiB writes
+    change nothing, *equivalent* or within 1% in every cell. One sending
+    worker on neo is 5% *faster* on both mixed corpora (0.947 [0.934,
+    0.961] and 0.944 [0.933, 0.956]), the same as rsync in the same blocks
+    (0.951, 0.947). From freya nothing differs. So the write path is not
+    T1's cause; the number of workers feeding the one stream is.
+  - T1c (workers per end, screening): one sending worker helps only that:
+    on neo it is 5% faster for byte-bound copies but 11 to 39% *slower* on
+    small-file no-ops and up to 36% slower on small fresh copies, and from
+    freya 16% slower on a `small-flat` no-op. Two sending workers sit in
+    between. Fewer receiving workers on freya make a `small-real` no-op
+    26 to 32% *faster* (recv2 0.680, recv4 0.689, recv8 0.741), as in E3a;
+    elsewhere receiver counts are inconclusive. The candidates for an
+    engine change: limit how many workers stream large files at once on
+    a sender with few cores, leaving the rest for small files and
+    scanning; and cap the receiver's default below 16. T1e confirms the
+    second with tunables before any code changes.
+  - E4g confirmation (Holm over 12): polling for the peer's exit every
+    1 ms is *faster* for the one-file tree from neo, 0.868 [0.854, 0.882]
+    fresh and 0.899 [0.876, 0.922] no-op, and *equivalent* on `small-flat`
+    fresh copies. The other cells are inconclusive at their noise. A small,
+    safe gain on tiny transfers; better than a shorter poll is to wait for
+    the peer's exit without polling (an E5 candidate).
+  - E4b/E4d (small-file pipeline, screening): no read-task size, scanning
+    share or listing window moves a small-file copy or no-op by a
+    detectable amount; σ_d is 0.08 to 0.4 in those cells.
+  - W0a (Wi-Fi noise floor): mars to orion behaves (A/A σ_d 0.02 on tiny
+    and `small-flat` fresh), but orion to mars does not: σ_d 0.4 to 1.9,
+    and one A/A cell even called *faster*. Of the 288 samples orion
+    started, 31 took 5 or 10 s longer than their cell's median. That is
+    orion's multicast DNS: a lookup of `mars.local` takes 5,017 ms when
+    its cache has lapsed and 8 ms otherwise. orion's SSH handshake with
+    mars also takes about 0.68 s, which pads every transfer it starts.
+    Neither is the radio. The agent now looks each peer's IPv4 address up
+    once per run and connects to it, checking the host key under the
+    peer's name. On the wired pair the same kind of spike is rare (1 in
+    100 to 1 in 400 samples) and only when neo starts the transfer.
+  - Early contrasts on the Wi-Fi pair, to be confirmed by W1: a fresh
+    `small-deep` copy into orion takes xs 36.6 s against rsync's 23.8 s,
+    where on the wired pair xs is the faster; and no-ops into orion are 1.4
+    to 2.3 times faster with xs, as on the wired pair.
+  - Queued 2026-10-14: on mars W0b (the noise floor again, with the lookup
+    fixed) then W1; on neo T1e after the holochart run. orion's write
+    allowance was raised to 400 GiB a day so that W1 follows W0b.
 
 M0 is done by the operator, not by the harness. M1–M6 need no engine
 change, so flag-only experiments (E1–E3) can start before M7.

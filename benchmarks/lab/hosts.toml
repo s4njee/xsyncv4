@@ -21,15 +21,27 @@ root = "/mnt/nvme/xsbench"    # ext4 on NVMe; the home directory is ZFS
 root_fstype = "ext4"
 helper = true
 
-# Inventoried 2026-10-12. No helper is installed yet, so no cold cache, fixed
-# governor or netem there, and mars cannot yet SSH to neo or freya.
+# Inventoried 2026-10-12; helper installed 2026-10-13. A Ryzen 9 7900X on
+# NVMe, wired to a mesh node. It cannot yet SSH to neo or freya.
 [hosts.mars]
 ssh = "sanjee@mars.local"
 name = "mars.local"
 hostname = "mars"
 root = "/home/sanjee/benchmarks/xsyncv4/lab"
 root_fstype = "ext4"
-helper = false
+helper = true
+
+# Inventoried 2026-10-13. A Raspberry Pi 4 on an NVMe drive behind a USB
+# bridge, wired by eth0 to a mesh node whose backhaul to mars's node is
+# wireless. Its own wlan0 must stay off: with both up, the name resolves to
+# either address and replies leave by eth0 whichever one a packet came in on.
+[hosts.orion]
+ssh = "sanjee@orion.local"
+name = "orion.local"
+hostname = "orion"
+root = "/home/sanjee/benchmarks/xsyncv4/lab"
+root_fstype = "ext4"
+helper = true
 
 # The controller itself, as an endpoint for the supplementary Mac experiments.
 # `local` hosts are driven without SSH. It is a busy workstation with no
@@ -56,6 +68,17 @@ interface = { neo = "eth0", freya = "enp10s0" }
 hosts = ["neo", "mars"]
 medium = "mesh"
 interface = { neo = "eth0", mars = "enp9s0" }
+
+# The Wi-Fi pair: orion and mars, both wired to mesh nodes with a wireless hop
+# between them. A Pi 4 and a 7900X here against a Pi 5 and a 7950X on the LAN,
+# so that what differs is mostly the hop. mars drives; results go to
+# benchmarks/results/wifi/.
+[links.wifi]
+hosts = ["orion", "mars"]
+medium = "mesh"
+driver = "mars"
+results = "wifi"
+interface = { orion = "eth0", mars = "enp9s0" }
 
 # Supplementary: this Mac and mars. Only the Mac can start a connection (it
 # accepts no SSH), so it is the driver and the SSH client in both directions.

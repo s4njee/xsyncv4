@@ -1,0 +1,40 @@
+# W0b: W0a again, after the harness stopped resolving names per transfer.
+# In W0a 31 of the 288 samples orion started took 5 or 10 s longer than
+# their cell's median: orion's multicast DNS lookups of mars.local, not the
+# radio hop. The agent now looks each peer up once per run.
+#
+# The noise floor of the Wi-Fi pair (orion and mars, a wireless mesh hop
+# between them). Nothing from the wired pair's noise carries over. The two xs
+# arms are the same build, so any verdict other than equivalent or
+# inconclusive is a false one, and sigma_d sets the block counts for
+# everything that follows on this link.
+id = "W0b-noise"
+kind = "screening"
+hypothesis = "On the Wi-Fi pair two identical arms are never called different, and sigma_d is within a factor of three of the wired pair's."
+primary = "wall_s"
+delta = 0.03
+blocks = 10
+control = "xs"
+verify = "first-last"
+
+[arms.xs]
+tool = "xs"
+rev = "8cc75bbdb801"
+flags = ["-a"]
+
+[arms.again]
+tool = "xs"
+rev = "8cc75bbdb801"
+flags = ["-a"]
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[matrix]
+link = "wifi"
+corpus = ["tiny-one", "small-flat", "small-deep", "mixed-bimodal"]
+scenario = ["fresh", "noop"]
+direction = ["orion>mars", "mars>orion"]
+client = ["sender"]
+cache = ["warm"]

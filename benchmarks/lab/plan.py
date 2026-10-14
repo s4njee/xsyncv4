@@ -3,9 +3,14 @@
 
 A spec (benchmarks/experiments/*.toml) names arms, cells and a block budget.
 `make` expands it into explicit blocks: every arm once per block, in an order
-drawn from the seed, with the cells interleaved. `start` checks the hosts,
-copies the plan to the driver and launches agent.py there, detached; `status`,
-`fetch` and `stop` follow it up.
+drawn from the seed, with the cells interleaved.
+
+A driver host works around the clock under runner.py. `enqueue` adds a spec
+to its backlog, `standing` gives it sentinel runs to repeat at an interval,
+`runner` starts, pauses and steers it, `queue` shows what it is doing and
+`collect` brings finished runs back. `start` runs one spec at once, outside
+the queue, for a link the runner does not own; `status`, `fetch` and `stop`
+follow a single run.
 """
 import argparse
 import datetime
@@ -28,6 +33,7 @@ RESULTS = HERE.parent / 'results' / 'lab'  # path experiments; a link may name a
 SCENARIOS = ('fresh', 'noop')
 SAFE = re.compile(r'[A-Za-z0-9][A-Za-z0-9_-]*')
 RETRIES = 2  # extra attempts at a block that was voided
+TUNE_VALUE = re.compile(r'[a-z0-9_]+=[0-9]+(,[a-z0-9_]+=[0-9]+)*')  # safe unquoted in a remote command
 
 
 class SpecError(ValueError):
@@ -132,6 +138,19 @@ def make_plan(spec, config, pins, seed, run_id, baseline=None):
         if arm['tool'] == 'xs':
             build = stage.load_build(arm['rev'])
             entry['rev'] = build['rev12']
+            # Engine constants for each end, and the engine's own counters: tunables builds only.
+            tune = arm.get('tune', {})
+            if isinstance(tune, str):
+                tune = {'sender': tune, 'receiver': tune}
+            if not isinstance(tune, dict) or set(tune) - {'sender', 'receiver'} or \
+                    not all(isinstance(value, str) and TUNE_VALUE.fullmatch(value) for value in tune.values()):
+                raise SpecError(f'arm {name}: `tune` is "key=value,..." or a table of that for sender and receiver')
+            if (tune or arm.get('metrics')) and not build.get('tunables'):
+                raise SpecError(f'arm {name}: `tune` and `metrics` need a tunables build (rev = "{arm["rev"]}-tune")')
+            if tune:
+                entry['tune'] = tune
+            if arm.get('metrics'):
+                entry['metrics'] = True
             entry['binary'] = {host: f'{hosts[host]["root"]}/bin/xs-{build["rev12"]}' for host in hosts}
             entry['sha256'] = {}  # filled per host architecture by `start`
             entry['artifacts'] = {name: artifact['sha256'] for name, artifact in build['artifacts'].items()}
@@ -153,7 +172,18 @@ def make_plan(spec, config, pins, seed, run_id, baseline=None):
             full = spec.get('verify', 'full') == 'full' or number in (0, spec['blocks'] - 1)
             blocks.append({'cell': cell['id'], 'block': number, 'verify_full': full,
                            'orders': [shuffled(names, stream) for _ in range(1 + RETRIES)]})
+    # Bytes each host's drive will take: every fresh sample rewrites its corpus on the receiver, and
+    # an unchanged destination is made once for each arm of a no-op cell.
+    writes, by_id = {name: 0 for name in hosts}, {cell['id']: cell for cell in cells}
+    for block in blocks:
+        cell = by_id[block['cell']]
+        if cell['scenario'] == 'fresh':
+            writes[cell['receiver']] += corpora[cell['corpus']]['bytes'] * len(arms)
+    for cell in cells:
+        if cell['scenario'] != 'fresh':
+            writes[cell['receiver']] += corpora[cell['corpus']]['bytes'] * len(arms)
     return {'schema': 1, 'experiment': spec['id'], 'spec_sha256': spec['sha256'], 'kind': spec['kind'],
+            'bundle': stage.bundle_id(), 'writes': writes,
             'hypothesis': spec['hypothesis'], 'primary': spec['primary'], 'delta': spec.get('delta'),
             'control': spec['control'], 'seed': seed, 'run_id': run_id, 'driver': driver,
             'sample_timeout_s': spec.get('sample_timeout_s', 3600),
@@ -176,8 +206,8 @@ def load_baseline(spec):
             if row['arm'] == source['arm'] and row['metric'] == spec['primary']}
 
 
-def new_run_id(spec):
-    return datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%dT%H%M%SZ') + '-' + spec['id']
+def new_run_id(spec, suffix=''):
+    return datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%dT%H%M%SZ') + '-' + spec['id'] + suffix
 
 
 def driver_of(plan):
@@ -209,12 +239,13 @@ def run_in_progress(driver):
                   timeout=60).returncode == 1
 
 
-def prepare_run(spec_path, config, seed):
+def prepare_run(spec_path, config, seed, suffix=''):
     """Make a plan, keep it locally and put it on the driver. Returns (plan, remote directory)."""
     spec = load_spec(spec_path)
     pins = json.loads((HERE / 'corpora.json').read_text())
-    plan = make_plan(spec, config, pins, seed, new_run_id(spec), load_baseline(spec))
+    plan = make_plan(spec, config, pins, seed, new_run_id(spec, suffix), load_baseline(spec))
     for name, host in plan['hosts'].items():
+        stage.push_bundle(name, host)  # the scripts this plan was made with, if the host lacks them
         host['system'], machine = remote(host, 'uname -s; uname -m', timeout=30).stdout.split()
         artifact = stage.artifact_for(host['system'], machine)
         for arm in plan['arms']:
@@ -239,55 +270,194 @@ def revisions_of(plan):
 
 def start(spec_path, config, seed, skip_preflight):
     spec = load_spec(spec_path)
+    link = config['links'][spec['matrix']['link']]
+    for name in link['hosts']:
+        stage.push_bundle(name, config['hosts'][name])  # preflight looks for the scripts in their bundle
     if not skip_preflight:
-        preflight_or_exit(spec['matrix']['link'], sorted({stage.resolve(arm['rev'])[:12] for arm in spec['arms'].values()
+        preflight_or_exit(spec['matrix']['link'], sorted({stage.build_id(arm['rev']) for arm in spec['arms'].values()
                                                            if arm['tool'] == 'xs'}))
     plan, directory = prepare_run(spec_path, config, seed)
     driver = driver_of(plan)
-    # The backgrounded command must be the agent alone, with every descriptor redirected, or SSH waits for it.
-    if driver.get('local'):
-        # This machine is the driver: detach the agent into its own session, and keep the machine awake.
-        with open(pathlib.Path(directory) / 'agent.log', 'w') as log:
-            subprocess.Popen(['caffeinate', '-i', sys.executable, driver['root'] + '/bin/agent.py', 'plan.json'],
-                             cwd=directory, stdout=log, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL,
-                             start_new_session=True)
-        return plan
-    launch = (f'cd {shlex.quote(directory)} || exit 1; setsid nohup python3 '
-              f'{shlex.quote(driver["root"] + "/bin/agent.py")} plan.json > agent.log 2>&1 < /dev/null & echo started')
-    remote(driver, launch, check=True, timeout=60)
+    detach(driver, directory, [f'{driver["root"]}/lib/{plan["bundle"]}/agent.py', 'plan.json'], 'agent.log')
     return plan
 
 
-def queued_runs(driver):
-    """Run ids in the driver's queue, in order."""
-    done = remote(driver, f'cat {shlex.quote(driver["root"] + "/runs/queue.txt")} 2>/dev/null', timeout=60)
+def detach(host, directory, argv, log):
+    """Start a Python script on a host, detached from this session, with its output in a log there."""
+    if host.get('local'):
+        # This machine: its own session, and kept awake while the script lives.
+        with open(pathlib.Path(directory) / log, 'a') as stream:
+            subprocess.Popen(['caffeinate', '-i', sys.executable, *argv], cwd=directory, stdout=stream,
+                             stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL, start_new_session=True)
+        return
+    # The backgrounded command must be the script alone, with every descriptor redirected, or SSH waits for it.
+    launch = (f'cd {shlex.quote(directory)} || exit 1; setsid nohup python3 {shlex.join(argv)} '
+              f'> {shlex.quote(log)} 2>&1 < /dev/null & echo started')
+    remote(host, launch, check=True, timeout=60)
+
+
+# -- the driver's queues -----------------------------------------------------
+
+def driver_named(config, name=None):
+    name = name or config.get('driver') or next(iter(config['hosts']))
+    if name not in config['hosts'] or not config['hosts'][name].get('root'):
+        raise SystemExit(f'{name} is not a host with a benchmark root')
+    return config['hosts'][name]
+
+
+def listed_runs(driver, name='backlog.txt'):
+    """Run ids in one of the driver's list files, in order."""
+    done = remote(driver, f'cat {shlex.quote(driver["root"] + "/runs/" + name)} 2>/dev/null', timeout=60)
     return [line.strip() for line in done.stdout.splitlines() if line.strip()]
 
 
-def enqueue(spec_path, config, seed):
-    plan, _ = prepare_run(spec_path, config, seed)
+def staged_or_exit(plan, config):
+    """Every host of a plan must hold the builds it names; the scripts were put there with the plan."""
+    for revision in revisions_of(plan):
+        _, problems = stage.check(config, list(plan['hosts']), stage.load_build(revision))
+        if problems:
+            raise SystemExit('not staged:\n' + '\n'.join(problems) + f'\nrun stage.py push --rev {revision}')
+
+
+def enqueue(spec_path, config, seed, front=False, name='backlog.txt', suffix=''):
+    """Make a plan and add it to one of its driver's lists; the runner there takes it when its turn comes."""
+    plan, _ = prepare_run(spec_path, config, seed, suffix)
+    staged_or_exit(plan, config)
     driver = driver_of(plan)
-    remote(driver, f'echo {shlex.quote(plan["run_id"])} >> {shlex.quote(driver["root"] + "/runs/queue.txt")}', check=True)
+    path, run_id = shlex.quote(f'{driver["root"]}/runs/{name}'), shlex.quote(plan['run_id'])
+    if front:
+        # Replace the list in one rename, so the runner never reads half of it.
+        script = f'{{ echo {run_id}; cat {path} 2>/dev/null; }} > {path}.tmp && mv {path}.tmp {path}'
+    else:
+        script = f'echo {run_id} >> {path}'
+    remote(driver, script, check=True, timeout=60)
     return plan
 
 
-def night(config, opens, closes):
-    """Check the hosts now, then start overnight.py on the driver for the given window."""
-    driver = config['hosts'][config.get('driver') or next(iter(config['hosts']))]
-    runs = queued_runs(driver)
-    if not runs:
-        raise SystemExit('the queue is empty: enqueue a spec first')
-    plans = [find_plan(run_id)[1] for run_id in runs]
-    # A run still in progress holds the performance governor; that is not a leftover.
-    expected = ('left the governor changed',) if run_in_progress(driver) else ()
-    for link in sorted({name for plan in plans for name in plan['links']}):
-        preflight_or_exit(link, sorted({revision for plan in plans for revision in revisions_of(plan)}), expected)
-    root = driver['root']
-    launch = (f'cd {shlex.quote(root + "/runs")} || exit 1; setsid nohup python3 {shlex.quote(root + "/bin/overnight.py")} '
-              f'--root {shlex.quote(root)} --not-before {shlex.quote(opens)} --deadline {shlex.quote(closes)} '
-              f'> overnight.log 2>&1 < /dev/null & echo started')
-    remote(driver, launch, check=True, timeout=60)
-    return runs
+def runner_status(driver):
+    done = remote(driver, f'cat {shlex.quote(driver["root"] + "/runs/runner-status.json")} 2>/dev/null', timeout=60)
+    try:
+        return json.loads(done.stdout)
+    except ValueError:
+        return None
+
+
+def runner_alive(driver, status):
+    return bool(status) and remote(driver, f'kill -0 {int(status["pid"])} 2>/dev/null', timeout=60).returncode == 0
+
+
+def runner(config, action, driver_name=None, not_before=None, settings=None):
+    """Start, stop, pause or adjust the runner on a driver host."""
+    name = driver_name or config.get('driver') or next(iter(config['hosts']))
+    driver = driver_named(config, name)
+    runs = driver['root'] + '/runs'
+    status = runner_status(driver)
+    alive = runner_alive(driver, status)
+    if action == 'start':
+        if alive:
+            raise SystemExit(f'a runner is already working {name} (pid {status["pid"]}); `runner restart` replaces it')
+        bundle = stage.push_bundle(name, driver)
+        remote(driver, f'mkdir -p {shlex.quote(runs)}', check=True, timeout=60)
+        detach(driver, runs, [f'{driver["root"]}/lib/{bundle}/runner.py', '--root', driver['root'],
+                              *(['--not-before', not_before] if not_before else [])], 'runner.log')
+        return f'runner started on {name} from bundle {bundle}'
+    if action == 'restart':
+        # The old runner leaves its current run alone; the new one waits for that run, then carries on.
+        if alive:
+            gone = remote(driver, f'kill -USR1 {int(status["pid"])}; for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15; do '
+                                  f'kill -0 {int(status["pid"])} 2>/dev/null || exit 0; sleep 1; done; exit 1', timeout=60)
+            if gone.returncode:
+                raise SystemExit(f'the runner on {name} (pid {status["pid"]}) did not let go')
+        return runner(config, 'start', driver_name, not_before)
+    if action == 'set':
+        current = remote(driver, f'cat {shlex.quote(runs + "/control.json")} 2>/dev/null', timeout=60).stdout
+        control = json.loads(current) if current.strip() else {}
+        control.update({key: value for key, value in (settings or {}).items() if key != 'write_budget'})
+        control['write_budget'] = {**control.get('write_budget', {}), **(settings or {}).get('write_budget', {})}
+        text = shlex.quote(json.dumps(control, indent=1))
+        remote(driver, f'mkdir -p {shlex.quote(runs)} && printf "%s\\n" {text} > {shlex.quote(runs + "/control.json.tmp")} && '
+                       f'mv {shlex.quote(runs + "/control.json.tmp")} {shlex.quote(runs + "/control.json")}',
+               check=True, timeout=60)
+        return json.dumps(control, indent=1)
+    if action in ('pause', 'resume'):
+        if action == 'pause':
+            remote(driver, f'touch {shlex.quote(runs + "/.pause")}', check=True, timeout=60)
+            return f'{name}: no further run will start; the current one finishes (`stop RUN` ends it sooner)'
+        remote(driver, f'rm -f {shlex.quote(runs + "/.pause")}; touch {shlex.quote(runs + "/.resume")}', check=True, timeout=60)
+        return f'{name}: resumed'
+    if action == 'stop':
+        if not alive:
+            return f'no runner is working {name}'
+        remote(driver, f'kill -TERM {int(status["pid"])}', check=True, timeout=60)
+        return f'{name}: the runner stops after the current sample'
+    return json.dumps(dict(status or {}, alive=alive), indent=1)
+
+
+def show_queue(config, driver_name=None):
+    driver = driver_named(config, driver_name)
+    status = runner_status(driver)
+    alive = runner_alive(driver, status)
+    if not status:
+        print('no runner has been started')
+    else:
+        gib = lambda count: f'{count / 2**30:.0f} GiB'
+        print(f'runner: {status["state"] if alive else "NOT RUNNING (last state " + status["state"] + ")"}'
+              f'{" - " + str(status["detail"]) if status.get("detail") else ""}, as of {status["utc"]}')
+        if status.get('current'):
+            current = status['current']
+            progress = remote(driver, f'cat {shlex.quote(driver["root"] + "/runs/" + current["run"] + "/status.json")} '
+                                      f'2>/dev/null', timeout=60).stdout.strip()
+            print(f'  running ({current["lane"]}): {current["run"]} since {current["started_utc"]} {progress}')
+        for host in sorted(set(status.get('written_24h', {})) | set(status.get('write_budget', {}))):
+            allowance = status.get('write_budget', {}).get(host)
+            print(f'  {host}: {gib(status.get("written_24h", {}).get(host, 0))} charged in 24 h'
+                  + (f' of {gib(allowance)}' if allowance else ', no limit'))
+        print(f'  sentinel: every {status["standing_every_s"] / 3600:g} h, last {status.get("standing_last_utc") or "never"}, '
+              f'{status["standing_pending"]} left')
+        for done in status.get('recent', [])[-5:]:
+            print(f'  finished: {done["run"]} {done["state"]} {done.get("detail") or ""}')
+    for label, name in (('backlog', 'backlog.txt'), ('sentinel', 'standing.txt')):
+        runs = listed_runs(driver, name)
+        states = remote(driver, 'cd ' + shlex.quote(driver['root'] + '/runs') + ' && for r in ' + ' '.join(map(shlex.quote, runs))
+                        + '; do test -f "$r/status.json" || echo "$r"; done', timeout=60).stdout.split() if runs else []
+        print(f'{label}: {len(states)} waiting of {len(runs)}')
+        for run_id in states[:12]:
+            try:
+                plan = find_plan(run_id)[1]
+                size = f'{sum(len(block["orders"][0]) for block in plan["blocks"])} samples, ' \
+                       f'{sum(plan.get("writes", {}).values()) / 2**30:.0f} GiB of writes'
+            except SystemExit:
+                size = 'no local plan'
+            print(f'  {run_id}  {size}')
+        if len(states) > 12:
+            print(f'  ... and {len(states) - 12} more')
+
+
+def collect(config, driver_name=None):
+    """Bring back every listed run that is not already complete here, and rewrite the reports they touch."""
+    driver = driver_named(config, driver_name)
+    experiments = set()
+    for run_id in [*listed_runs(driver), *listed_runs(driver, 'standing.txt')]:
+        try:
+            local, _ = find_plan(run_id)
+        except SystemExit:
+            continue  # queued from another checkout
+        try:
+            have = json.loads((local / 'status.json').read_text()).get('state')
+        except (OSError, ValueError):
+            have = None
+        if have in ('complete', 'stopped', 'deadline', 'failed', 'refused'):
+            continue
+        source = f'{driver["root"]}/runs/{run_id}/' if driver.get('local') else f'{driver["ssh"]}:{driver["root"]}/runs/{run_id}/'
+        done = subprocess.run(['rsync', '-a', '--exclude=plan.json', source, f'{local}/'])
+        if done.returncode == 0 and (local / 'samples.jsonl').exists():
+            status = json.loads((local / 'status.json').read_text()) if (local / 'status.json').exists() else {}
+            print(f'{run_id}: {status.get("state", "no status")} {status.get("detail", "")}')
+            experiments.add(local.parent)
+    for experiment in sorted(experiments):
+        subprocess.run([sys.executable, str(HERE / 'report.py'), str(experiment)])
+    if not experiments:
+        print('nothing new to collect')
 
 
 def find_plan(run_id):
@@ -301,24 +471,34 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--hosts', type=pathlib.Path, default=HERE / 'hosts.toml')
     commands = parser.add_subparsers(dest='command', required=True)
-    for command, text in (('make', 'print the plan a spec expands to'), ('start', 'run a spec on the driver, detached')):
+    for command, text in (('make', 'print the plan a spec expands to'),
+                          ('start', 'run a spec at once, detached, outside the queue'),
+                          ('enqueue', 'add a spec to its driver\'s backlog')):
         p = commands.add_parser(command, help=text)
         p.add_argument('spec', type=pathlib.Path)
         p.add_argument('--seed', type=int, default=1)
         if command == 'start':
             p.add_argument('--skip-preflight', action='store_true')
+        if command == 'enqueue':
+            p.add_argument('--front', action='store_true', help='run it next, ahead of the backlog')
+    p = commands.add_parser('standing', help='give the driver sentinel runs of a spec to repeat at an interval')
+    p.add_argument('spec', type=pathlib.Path)
+    p.add_argument('--count', type=int, required=True, help='how many runs to prepare')
+    p.add_argument('--first-seed', type=int, default=1)
     for command, text in (('status', 'what the agent is doing'), ('fetch', 'copy the records back'),
                           ('stop', 'ask the agent to stop after the current sample')):
         commands.add_parser(command, help=text).add_argument('run_id')
-    p = commands.add_parser('enqueue', help='put a spec in the driver\'s overnight queue')
-    p.add_argument('spec', type=pathlib.Path)
-    p.add_argument('--seed', type=int, default=1)
-    p = commands.add_parser('night', help='run the queue unattended inside a time window')
-    p.add_argument('--from', dest='opens', required=True, help='ISO-8601 with offset, e.g. 2026-10-11T22:00-05:00')
-    p.add_argument('--until', dest='closes', required=True, help='ISO-8601 with offset')
-    commands.add_parser('queue', help='what the overnight queue is doing')
-    commands.add_parser('collect', help='fetch every queued run and write its experiment\'s report')
-    commands.add_parser('stop-queue', help='stop the overnight queue after the current sample')
+    p = commands.add_parser('runner', help='start, stop, pause or adjust the runner on a driver')
+    p.add_argument('action', choices=('start', 'restart', 'stop', 'pause', 'resume', 'status', 'set'))
+    p.add_argument('--driver', help='host the runner works (default: the configured driver)')
+    p.add_argument('--not-before', help='start: ISO-8601 time with offset before which nothing is started')
+    p.add_argument('--standing-every', type=float, metavar='HOURS', help='set: hours between sentinel runs')
+    p.add_argument('--write-budget', action='append', default=[], metavar='HOST=GIB',
+                   help='set: bytes a host\'s drive may be given in any 24 hours')
+    p.add_argument('--halt-after', type=int, help='set: failed runs in a row that halt the runner')
+    for command, text in (('queue', 'what the runner is doing and what is waiting'),
+                          ('collect', 'fetch finished runs and write their experiments\' reports')):
+        commands.add_parser(command, help=text).add_argument('--driver')
     args = parser.parse_args(argv)
     try:
         config = preflight.load(args.hosts)
@@ -330,47 +510,43 @@ def main(argv=None):
             print(f'\n{len(plan["cells"])} cells, {len(plan["blocks"])} blocks, '
                   f'{len(plan["blocks"]) * len(plan["arms"])} samples', file=sys.stderr)
             return
-        if args.command == 'start':
-            plan = start(args.spec, config, args.seed, args.skip_preflight)
-            print(f'{plan["run_id"]} started on {plan["driver"]}: {len(plan["blocks"])} blocks, '
-                  f'{len(plan["blocks"]) * len(plan["arms"])} samples')
+        if args.command in ('start', 'enqueue'):
+            plan = start(args.spec, config, args.seed, args.skip_preflight) if args.command == 'start' \
+                else enqueue(args.spec, config, args.seed, args.front)
+            print(f'{plan["run_id"]} {"started" if args.command == "start" else "queued"} on {plan["driver"]}: '
+                  f'{len(plan["blocks"])} blocks, {len(plan["blocks"]) * len(plan["arms"])} samples, '
+                  f'{sum(plan["writes"].values()) / 2**30:.0f} GiB of writes')
             return
-        if args.command == 'enqueue':
-            plan = enqueue(args.spec, config, args.seed)
-            print(f'{plan["run_id"]} queued on {plan["driver"]}: {len(plan["blocks"])} blocks, '
-                  f'{len(plan["blocks"]) * len(plan["arms"])} samples')
+        if args.command == 'standing':
+            for number in range(args.count):
+                plan = enqueue(args.spec, config, args.first_seed + number, name='standing.txt',
+                               suffix=f'-s{args.first_seed + number:04d}')
+            print(f'{args.count} sentinel runs of {plan["experiment"]} prepared on {plan["driver"]}, each '
+                  f'{len(plan["blocks"]) * len(plan["arms"])} samples and {sum(plan["writes"].values()) / 2**30:.0f} GiB of writes')
             return
-        if args.command == 'night':
-            runs = night(config, args.opens, args.closes)
-            print(f'the queue will run from {args.opens} until {args.closes}:')
-            print('\n'.join('  ' + run for run in runs))
+        if args.command == 'runner':
+            settings = {}
+            if args.standing_every is not None:
+                settings['standing_every_s'] = int(args.standing_every * 3600)
+            if args.halt_after is not None:
+                settings['halt_after'] = args.halt_after
+            for item in args.write_budget:
+                host, _, amount = item.partition('=')
+                if host not in config['hosts'] or not amount.replace('.', '', 1).isdigit():
+                    parser.error(f'--write-budget {item} is not HOST=GIB')
+                settings.setdefault('write_budget', {})[host] = int(float(amount) * 2**30)
+            if settings and args.action != 'set':
+                parser.error('--standing-every, --write-budget and --halt-after go with `runner set`')
+            print(runner(config, args.action, args.driver, args.not_before, settings))
+            return
+        if args.command == 'queue':
+            show_queue(config, args.driver)
+            return
+        if args.command == 'collect':
+            collect(config, args.driver)
             return
     except (SpecError, preflight.ConfigError, OSError) as error:
         parser.error(str(error))
-    if args.command in ('queue', 'collect', 'stop-queue'):
-        driver = config['hosts'][config.get('driver') or next(iter(config['hosts']))]
-        runs_directory = shlex.quote(driver['root'] + '/runs')
-        if args.command == 'stop-queue':
-            remote(driver, f'kill -TERM "$(python3 -c \'import json;print(json.load(open("{driver["root"]}/runs/'
-                           f'queue-status.json"))["pid"])\')"', check=True, timeout=60)
-            print('asked the queue to stop after the current sample')
-            return
-        print(remote(driver, f'cat {runs_directory}/queue-status.json 2>/dev/null || echo "no queue has been started"',
-                     timeout=60).stdout.strip())
-        for run_id in queued_runs(driver):
-            status = remote(driver, f'cat {runs_directory}/{shlex.quote(run_id)}/status.json 2>/dev/null', timeout=60)
-            print(run_id, status.stdout.strip() or 'not started')
-        if args.command == 'collect':
-            experiments = set()
-            for run_id in queued_runs(driver):
-                local, _ = find_plan(run_id)
-                done = subprocess.run(['rsync', '-a', '--exclude=plan.json', f'{driver["ssh"]}:{driver["root"]}/runs/{run_id}/',
-                                       f'{local}/'])
-                if done.returncode == 0 and (local / 'samples.jsonl').exists():
-                    experiments.add(local.parent)
-            for experiment in sorted(experiments):
-                subprocess.run([sys.executable, str(HERE / 'report.py'), str(experiment)])
-        return
     local, plan = find_plan(args.run_id)
     driver = driver_of(plan)
     directory = shlex.quote(f'{driver["root"]}/runs/{args.run_id}')

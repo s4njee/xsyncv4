@@ -1,0 +1,61 @@
+# S2, supplementary: why xs is slow pulling a deep tree onto the Mac. In S1
+# small-deep (100,000 files in 116,667 directories) took xs 57 s against
+# rsync's 33 s fresh, and 11.3 s against 3.1 s as a no-op, with the Mac
+# spending most of that in the kernel. Arms change only the Mac's side: how
+# many workers it runs, and how many of them prefer scanning. If the cost is
+# contention between workers on APFS, fewer of them will be faster.
+id = "S2-mac-deep-workers"
+kind = "screening"
+hypothesis = "Pulling a deep tree onto APFS, xs with one or two receiving workers is faster than with its default of four."
+primary = "wall_s"
+delta = 0.05
+blocks = 8
+control = "xs"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[arms.xs]
+tool = "xs"
+rev = "ddefa041364e-tune"
+flags = ["-a"]
+metrics = true
+
+[arms.recv1]
+tool = "xs"
+rev = "ddefa041364e-tune"
+flags = ["-a"]
+tune = { receiver = "jobs=1" }
+metrics = true
+
+[arms.recv2]
+tool = "xs"
+rev = "ddefa041364e-tune"
+flags = ["-a"]
+tune = { receiver = "jobs=2" }
+metrics = true
+
+[arms.recv8]
+tool = "xs"
+rev = "ddefa041364e-tune"
+flags = ["-a"]
+tune = { receiver = "jobs=8" }
+metrics = true
+
+[arms.scan1]
+tool = "xs"
+rev = "ddefa041364e-tune"
+flags = ["-a"]
+tune = { receiver = "scan_workers=1" }
+metrics = true
+
+[matrix]
+link = "mac-mars"
+corpus = ["small-deep"]
+scenario = ["fresh", "noop"]
+direction = ["mars>mac"]
+client = ["initiator"]
+cache = ["warm"]

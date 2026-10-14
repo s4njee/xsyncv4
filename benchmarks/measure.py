@@ -10,9 +10,9 @@ import sys
 import time
 
 
-def measure(command, *, stdin=None, stdout=None, stderr=None):
+def measure(command, *, stdin=None, stdout=None, stderr=None, env=None):
     started = time.perf_counter()
-    child = subprocess.Popen(command, stdin=stdin, stdout=stdout, stderr=stderr)
+    child = subprocess.Popen(command, stdin=stdin, stdout=stdout, stderr=stderr, env=env)
     previous = {}
     for signum in (signal.SIGINT, signal.SIGTERM, signal.SIGHUP):
         previous[signum] = signal.signal(signum, lambda s, frame: child.send_signal(s) if child.poll() is None else None)
@@ -35,11 +35,14 @@ def measure(command, *, stdin=None, stdout=None, stderr=None):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--metrics', required=True, type=pathlib.Path)
+    parser.add_argument('--env', action='append', default=[], metavar='NAME=VALUE',
+                        help='set a variable for the child; an SSH session does not carry the environment')
     parser.add_argument('command', nargs=argparse.REMAINDER)
     args = parser.parse_args()
     command = args.command[1:] if args.command[:1]==['--'] else args.command
     if not command: parser.error('missing child command')
-    result = measure(command)
+    if bad := [item for item in args.env if '=' not in item[1:]]: parser.error(f'--env {bad[0]} is not NAME=VALUE')
+    result = measure(command, env={**os.environ, **dict(item.split('=', 1) for item in args.env)} if args.env else None)
     args.metrics.parent.mkdir(parents=True, exist_ok=True)
     temporary = args.metrics.with_suffix('.tmp')
     temporary.write_text(json.dumps(result)+'\n'); temporary.replace(args.metrics)

@@ -1,0 +1,4027 @@
+{
+ "schema": 1,
+ "experiment": "T1e-recv-cap",
+ "spec_sha256": "7f99a5f4a4bf4def604633ddd8b4efcb1add273f7c1140f3a8f9d9dfa6e0fc1b",
+ "kind": "confirmatory",
+ "bundle": "19a04427f558",
+ "writes": {
+  "neo": 0,
+  "freya": 193530012663
+ },
+ "hypothesis": "Four or eight receiving workers on a 32-thread host make no-ops of real trees faster than sixteen, and nothing slower.",
+ "primary": "wall_s",
+ "delta": 0.03,
+ "control": "xs",
+ "seed": 1,
+ "run_id": "20261014T112856Z-T1e-recv-cap",
+ "driver": "neo",
+ "sample_timeout_s": 3600,
+ "results": "lab",
+ "background": false,
+ "eager_cleanup": false,
+ "hosts": {
+  "neo": {
+   "ssh": "sanjee@neo.local",
+   "name": "neo.local",
+   "hostname": "neo",
+   "root": "/home/sanjee/benchmarks/xsyncv4/lab",
+   "interface": "eth0",
+   "helper": true,
+   "gates": {},
+   "local": false,
+   "system": "Linux"
+  },
+  "freya": {
+   "ssh": "sanjee@freya.local",
+   "name": "freya.local",
+   "hostname": "freya",
+   "root": "/mnt/nvme/xsbench",
+   "interface": "enp10s0",
+   "helper": true,
+   "gates": {},
+   "local": false,
+   "system": "Linux"
+  }
+ },
+ "links": {
+  "lan": {
+   "hosts": [
+    "neo",
+    "freya"
+   ],
+   "medium": "wired",
+   "min_speed_mbps": 1000,
+   "max_rtt_ms": 2.0
+  }
+ },
+ "arms": [
+  {
+   "name": "xs",
+   "tool": "xs",
+   "flags": [
+    "-a"
+   ],
+   "rev": "ddefa041364e-tune",
+   "binary": {
+    "neo": "/home/sanjee/benchmarks/xsyncv4/lab/bin/xs-ddefa041364e-tune",
+    "freya": "/mnt/nvme/xsbench/bin/xs-ddefa041364e-tune"
+   },
+   "sha256": {
+    "neo": "1f5c40a3f4d3ec403abcf30d64d8ade2a74f9fccfa6ba2c98709fb6f83ebebe2",
+    "freya": "fbe88e865b1d5162f6e370804f6b4683a196c272ce004d122311cac3431d05e0"
+   },
+   "artifacts": {
+    "xs-darwin-arm64": "304c6fe87a5235dc30bfc665dfe71ba8a777d8b633b9246b84bba42349c0679e",
+    "xs-linux-amd64": "fbe88e865b1d5162f6e370804f6b4683a196c272ce004d122311cac3431d05e0",
+    "xs-linux-arm64": "1f5c40a3f4d3ec403abcf30d64d8ade2a74f9fccfa6ba2c98709fb6f83ebebe2"
+   }
+  },
+  {
+   "name": "recv4",
+   "tool": "xs",
+   "flags": [
+    "-a"
+   ],
+   "rev": "ddefa041364e-tune",
+   "tune": {
+    "receiver": "jobs=4"
+   },
+   "binary": {
+    "neo": "/home/sanjee/benchmarks/xsyncv4/lab/bin/xs-ddefa041364e-tune",
+    "freya": "/mnt/nvme/xsbench/bin/xs-ddefa041364e-tune"
+   },
+   "sha256": {
+    "neo": "1f5c40a3f4d3ec403abcf30d64d8ade2a74f9fccfa6ba2c98709fb6f83ebebe2",
+    "freya": "fbe88e865b1d5162f6e370804f6b4683a196c272ce004d122311cac3431d05e0"
+   },
+   "artifacts": {
+    "xs-darwin-arm64": "304c6fe87a5235dc30bfc665dfe71ba8a777d8b633b9246b84bba42349c0679e",
+    "xs-linux-amd64": "fbe88e865b1d5162f6e370804f6b4683a196c272ce004d122311cac3431d05e0",
+    "xs-linux-arm64": "1f5c40a3f4d3ec403abcf30d64d8ade2a74f9fccfa6ba2c98709fb6f83ebebe2"
+   }
+  },
+  {
+   "name": "recv8",
+   "tool": "xs",
+   "flags": [
+    "-a"
+   ],
+   "rev": "ddefa041364e-tune",
+   "tune": {
+    "receiver": "jobs=8"
+   },
+   "binary": {
+    "neo": "/home/sanjee/benchmarks/xsyncv4/lab/bin/xs-ddefa041364e-tune",
+    "freya": "/mnt/nvme/xsbench/bin/xs-ddefa041364e-tune"
+   },
+   "sha256": {
+    "neo": "1f5c40a3f4d3ec403abcf30d64d8ade2a74f9fccfa6ba2c98709fb6f83ebebe2",
+    "freya": "fbe88e865b1d5162f6e370804f6b4683a196c272ce004d122311cac3431d05e0"
+   },
+   "artifacts": {
+    "xs-darwin-arm64": "304c6fe87a5235dc30bfc665dfe71ba8a777d8b633b9246b84bba42349c0679e",
+    "xs-linux-amd64": "fbe88e865b1d5162f6e370804f6b4683a196c272ce004d122311cac3431d05e0",
+    "xs-linux-arm64": "1f5c40a3f4d3ec403abcf30d64d8ade2a74f9fccfa6ba2c98709fb6f83ebebe2"
+   }
+  }
+ ],
+ "cells": [
+  {
+   "id": "tiny-one.fresh.neo-freya.sender.warm",
+   "corpus": "tiny-one",
+   "scenario": "fresh",
+   "sender": "neo",
+   "receiver": "freya",
+   "client": "sender",
+   "link": "lan",
+   "cache": "warm"
+  },
+  {
+   "id": "tiny-one.noop.neo-freya.sender.warm",
+   "corpus": "tiny-one",
+   "scenario": "noop",
+   "sender": "neo",
+   "receiver": "freya",
+   "client": "sender",
+   "link": "lan",
+   "cache": "warm"
+  },
+  {
+   "id": "small-flat.fresh.neo-freya.sender.warm",
+   "corpus": "small-flat",
+   "scenario": "fresh",
+   "sender": "neo",
+   "receiver": "freya",
+   "client": "sender",
+   "link": "lan",
+   "cache": "warm"
+  },
+  {
+   "id": "small-flat.noop.neo-freya.sender.warm",
+   "corpus": "small-flat",
+   "scenario": "noop",
+   "sender": "neo",
+   "receiver": "freya",
+   "client": "sender",
+   "link": "lan",
+   "cache": "warm"
+  },
+  {
+   "id": "small-deep.fresh.neo-freya.sender.warm",
+   "corpus": "small-deep",
+   "scenario": "fresh",
+   "sender": "neo",
+   "receiver": "freya",
+   "client": "sender",
+   "link": "lan",
+   "cache": "warm"
+  },
+  {
+   "id": "small-deep.noop.neo-freya.sender.warm",
+   "corpus": "small-deep",
+   "scenario": "noop",
+   "sender": "neo",
+   "receiver": "freya",
+   "client": "sender",
+   "link": "lan",
+   "cache": "warm"
+  },
+  {
+   "id": "small-opaque.fresh.neo-freya.sender.warm",
+   "corpus": "small-opaque",
+   "scenario": "fresh",
+   "sender": "neo",
+   "receiver": "freya",
+   "client": "sender",
+   "link": "lan",
+   "cache": "warm"
+  },
+  {
+   "id": "small-opaque.noop.neo-freya.sender.warm",
+   "corpus": "small-opaque",
+   "scenario": "noop",
+   "sender": "neo",
+   "receiver": "freya",
+   "client": "sender",
+   "link": "lan",
+   "cache": "warm"
+  },
+  {
+   "id": "small-real.fresh.neo-freya.sender.warm",
+   "corpus": "small-real",
+   "scenario": "fresh",
+   "sender": "neo",
+   "receiver": "freya",
+   "client": "sender",
+   "link": "lan",
+   "cache": "warm"
+  },
+  {
+   "id": "small-real.noop.neo-freya.sender.warm",
+   "corpus": "small-real",
+   "scenario": "noop",
+   "sender": "neo",
+   "receiver": "freya",
+   "client": "sender",
+   "link": "lan",
+   "cache": "warm"
+  },
+  {
+   "id": "mixed-bimodal.fresh.neo-freya.sender.warm",
+   "corpus": "mixed-bimodal",
+   "scenario": "fresh",
+   "sender": "neo",
+   "receiver": "freya",
+   "client": "sender",
+   "link": "lan",
+   "cache": "warm"
+  },
+  {
+   "id": "mixed-bimodal.noop.neo-freya.sender.warm",
+   "corpus": "mixed-bimodal",
+   "scenario": "noop",
+   "sender": "neo",
+   "receiver": "freya",
+   "client": "sender",
+   "link": "lan",
+   "cache": "warm"
+  },
+  {
+   "id": "mixed-threshold.fresh.neo-freya.sender.warm",
+   "corpus": "mixed-threshold",
+   "scenario": "fresh",
+   "sender": "neo",
+   "receiver": "freya",
+   "client": "sender",
+   "link": "lan",
+   "cache": "warm"
+  },
+  {
+   "id": "mixed-threshold.noop.neo-freya.sender.warm",
+   "corpus": "mixed-threshold",
+   "scenario": "noop",
+   "sender": "neo",
+   "receiver": "freya",
+   "client": "sender",
+   "link": "lan",
+   "cache": "warm"
+  }
+ ],
+ "corpora": {
+  "tiny-one": {
+   "files": 1,
+   "directories": 0,
+   "bytes": 19,
+   "digest": "38e12e8a867b32d7d9c7bf9c9a1bf9b731ba1a2a425f0323983ccc535e871dbe",
+   "quick_digest": "fba99983b39b06c131a47d522ecc6fa31d90fa37a84b7cb37ae68904a1ac50e7"
+  },
+  "small-flat": {
+   "files": 100000,
+   "directories": 100,
+   "bytes": 319224077,
+   "digest": "41b628c4337730be4efdfcc6673d517749132ffd50b75b29321640e6f064bbec",
+   "quick_digest": "e8de96251eaca6be3e98b1cb8097405b37ad470fc0d5ffdb7a5a48ea5b9f3805"
+  },
+  "small-deep": {
+   "files": 100000,
+   "directories": 116667,
+   "bytes": 319224077,
+   "digest": "8faf23b36caef1b8cf4a8b5419b8d0a27a5bc32ad0799798be2fd0b3fe79be3a",
+   "quick_digest": "be0b7fbe218fd5ac477df18245e63d6bd851d2e50dabd8cb556f04c98e3cf902"
+  },
+  "small-opaque": {
+   "files": 100000,
+   "directories": 100,
+   "bytes": 319224077,
+   "digest": "7b291eb520e784dea5a94bfdef3e842c75f2e4e193ab736217566ba1ce28c63e",
+   "quick_digest": "0614d31bdac509e673b100a3adb8d0fa28f2f372c3c5f4eb476e634b54f711b5"
+  },
+  "small-real": {
+   "files": 118594,
+   "directories": 59336,
+   "bytes": 1107333872,
+   "digest": "e9c84fab7d1a6dcdaf7c1c8688abe9bcb3cd114f551c27fad5b8624391005cdb",
+   "quick_digest": "65994469699350cde8ad45842d686fe1a01d87e64ed26de283fb0c860fae01e3"
+  },
+  "mixed-bimodal": {
+   "files": 20000,
+   "directories": 420,
+   "bytes": 1395127076,
+   "digest": "e9071fb7ad3b0375ffe9fab58f740bfd22d545f7678e163a6c745504cc7aa16b",
+   "quick_digest": "31af6dbe5d38a32f5f0acf560703fa557304d3936e59f7b395d13cf8d0dec7fb"
+  },
+  "mixed-threshold": {
+   "files": 1500,
+   "directories": 72,
+   "bytes": 1502174819,
+   "digest": "d3070e0dc3befde555186110544966357a2c32a1db72c20e30d464e4cea9e048",
+   "quick_digest": "1f974c87ddf6c48409178d39b34889d699e7079283dcd212889a0ea3ac6c38f2"
+  }
+ },
+ "blocks": [
+  {
+   "cell": "small-opaque.noop.neo-freya.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ],
+    [
+     "recv8",
+     "recv4",
+     "xs"
+    ],
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ]
+   ]
+  },
+  {
+   "cell": "small-real.fresh.neo-freya.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ],
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ],
+    [
+     "recv8",
+     "xs",
+     "recv4"
+    ]
+   ]
+  },
+  {
+   "cell": "small-real.noop.neo-freya.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "recv4",
+     "recv8",
+     "xs"
+    ],
+    [
+     "recv8",
+     "xs",
+     "recv4"
+    ],
+    [
+     "recv4",
+     "recv8",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.noop.neo-freya.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ],
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ],
+    [
+     "recv8",
+     "recv4",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-threshold.noop.neo-freya.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "recv8",
+     "recv4",
+     "xs"
+    ],
+    [
+     "recv8",
+     "xs",
+     "recv4"
+    ],
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ]
+   ]
+  },
+  {
+   "cell": "small-deep.noop.neo-freya.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs",
+     "recv4",
+     "recv8"
+    ],
+    [
+     "recv4",
+     "recv8",
+     "xs"
+    ],
+    [
+     "recv8",
+     "recv4",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "recv8",
+     "xs",
+     "recv4"
+    ],
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ],
+    [
+     "xs",
+     "recv8",
+     "recv4"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.neo-freya.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "recv8",
+     "xs",
+     "recv4"
+    ],
+    [
+     "recv8",
+     "recv4",
+     "xs"
+    ],
+    [
+     "recv8",
+     "recv4",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-opaque.fresh.neo-freya.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "recv8",
+     "recv4",
+     "xs"
+    ],
+    [
+     "recv4",
+     "recv8",
+     "xs"
+    ],
+    [
+     "recv8",
+     "recv4",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.neo-freya.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "recv4",
+     "recv8",
+     "xs"
+    ],
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ],
+    [
+     "xs",
+     "recv4",
+     "recv8"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-threshold.fresh.neo-freya.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "recv4",
+     "recv8",
+     "xs"
+    ],
+    [
+     "xs",
+     "recv4",
+     "recv8"
+    ],
+    [
+     "xs",
+     "recv8",
+     "recv4"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.neo-freya.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs",
+     "recv8",
+     "recv4"
+    ],
+    [
+     "recv4",
+     "recv8",
+     "xs"
+    ],
+    [
+     "xs",
+     "recv4",
+     "recv8"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.fresh.neo-freya.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "recv8",
+     "xs",
+     "recv4"
+    ],
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ],
+    [
+     "recv8",
+     "recv4",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-deep.fresh.neo-freya.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ],
+    [
+     "recv4",
+     "recv8",
+     "xs"
+    ],
+    [
+     "xs",
+     "recv8",
+     "recv4"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.neo-freya.sender.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "recv4",
+     "recv8"
+    ],
+    [
+     "recv8",
+     "xs",
+     "recv4"
+    ],
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ]
+   ]
+  },
+  {
+   "cell": "small-opaque.fresh.neo-freya.sender.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "recv8",
+     "recv4"
+    ],
+    [
+     "recv8",
+     "recv4",
+     "xs"
+    ],
+    [
+     "recv8",
+     "recv4",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.noop.neo-freya.sender.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "recv4",
+     "recv8"
+    ],
+    [
+     "recv4",
+     "recv8",
+     "xs"
+    ],
+    [
+     "recv4",
+     "recv8",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-real.noop.neo-freya.sender.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv8",
+     "xs",
+     "recv4"
+    ],
+    [
+     "recv8",
+     "xs",
+     "recv4"
+    ],
+    [
+     "recv4",
+     "recv8",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-real.fresh.neo-freya.sender.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv8",
+     "recv4",
+     "xs"
+    ],
+    [
+     "recv4",
+     "recv8",
+     "xs"
+    ],
+    [
+     "recv8",
+     "recv4",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-deep.noop.neo-freya.sender.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv8",
+     "xs",
+     "recv4"
+    ],
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ],
+    [
+     "xs",
+     "recv8",
+     "recv4"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv4",
+     "recv8",
+     "xs"
+    ],
+    [
+     "xs",
+     "recv4",
+     "recv8"
+    ],
+    [
+     "recv4",
+     "recv8",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-deep.fresh.neo-freya.sender.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ],
+    [
+     "recv8",
+     "recv4",
+     "xs"
+    ],
+    [
+     "recv4",
+     "recv8",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-threshold.fresh.neo-freya.sender.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv4",
+     "recv8",
+     "xs"
+    ],
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ],
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.neo-freya.sender.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "recv4",
+     "recv8"
+    ],
+    [
+     "xs",
+     "recv8",
+     "recv4"
+    ],
+    [
+     "xs",
+     "recv8",
+     "recv4"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-threshold.noop.neo-freya.sender.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv8",
+     "xs",
+     "recv4"
+    ],
+    [
+     "xs",
+     "recv4",
+     "recv8"
+    ],
+    [
+     "xs",
+     "recv8",
+     "recv4"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.fresh.neo-freya.sender.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "recv8",
+     "recv4"
+    ],
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ],
+    [
+     "recv4",
+     "recv8",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.neo-freya.sender.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv8",
+     "xs",
+     "recv4"
+    ],
+    [
+     "recv8",
+     "xs",
+     "recv4"
+    ],
+    [
+     "recv8",
+     "xs",
+     "recv4"
+    ]
+   ]
+  },
+  {
+   "cell": "small-opaque.noop.neo-freya.sender.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "recv4",
+     "recv8"
+    ],
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ],
+    [
+     "recv8",
+     "recv4",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-deep.noop.neo-freya.sender.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv4",
+     "recv8",
+     "xs"
+    ],
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ],
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ]
+   ]
+  },
+  {
+   "cell": "small-real.fresh.neo-freya.sender.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "recv8",
+     "recv4"
+    ],
+    [
+     "recv8",
+     "recv4",
+     "xs"
+    ],
+    [
+     "xs",
+     "recv8",
+     "recv4"
+    ]
+   ]
+  },
+  {
+   "cell": "small-opaque.noop.neo-freya.sender.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv4",
+     "recv8",
+     "xs"
+    ],
+    [
+     "recv8",
+     "recv4",
+     "xs"
+    ],
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-threshold.fresh.neo-freya.sender.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv8",
+     "recv4",
+     "xs"
+    ],
+    [
+     "xs",
+     "recv8",
+     "recv4"
+    ],
+    [
+     "xs",
+     "recv8",
+     "recv4"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-threshold.noop.neo-freya.sender.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "recv4",
+     "recv8"
+    ],
+    [
+     "recv8",
+     "xs",
+     "recv4"
+    ],
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.neo-freya.sender.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv8",
+     "recv4",
+     "xs"
+    ],
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ],
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ]
+   ]
+  },
+  {
+   "cell": "small-deep.fresh.neo-freya.sender.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv8",
+     "recv4",
+     "xs"
+    ],
+    [
+     "recv4",
+     "recv8",
+     "xs"
+    ],
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.noop.neo-freya.sender.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "recv8",
+     "recv4"
+    ],
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ],
+    [
+     "recv4",
+     "recv8",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.fresh.neo-freya.sender.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "recv8",
+     "recv4"
+    ],
+    [
+     "recv8",
+     "xs",
+     "recv4"
+    ],
+    [
+     "xs",
+     "recv8",
+     "recv4"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "recv4",
+     "recv8"
+    ],
+    [
+     "recv8",
+     "xs",
+     "recv4"
+    ],
+    [
+     "recv8",
+     "recv4",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-real.noop.neo-freya.sender.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "recv4",
+     "recv8"
+    ],
+    [
+     "xs",
+     "recv8",
+     "recv4"
+    ],
+    [
+     "recv4",
+     "recv8",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-opaque.fresh.neo-freya.sender.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ],
+    [
+     "recv8",
+     "xs",
+     "recv4"
+    ],
+    [
+     "xs",
+     "recv8",
+     "recv4"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.neo-freya.sender.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv8",
+     "xs",
+     "recv4"
+    ],
+    [
+     "recv8",
+     "xs",
+     "recv4"
+    ],
+    [
+     "xs",
+     "recv4",
+     "recv8"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.neo-freya.sender.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "recv4",
+     "recv8"
+    ],
+    [
+     "recv4",
+     "recv8",
+     "xs"
+    ],
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.noop.neo-freya.sender.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "recv4",
+     "recv8"
+    ],
+    [
+     "recv4",
+     "recv8",
+     "xs"
+    ],
+    [
+     "xs",
+     "recv8",
+     "recv4"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.neo-freya.sender.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "recv8",
+     "recv4"
+    ],
+    [
+     "xs",
+     "recv4",
+     "recv8"
+    ],
+    [
+     "xs",
+     "recv8",
+     "recv4"
+    ]
+   ]
+  },
+  {
+   "cell": "small-deep.noop.neo-freya.sender.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv8",
+     "xs",
+     "recv4"
+    ],
+    [
+     "xs",
+     "recv4",
+     "recv8"
+    ],
+    [
+     "xs",
+     "recv8",
+     "recv4"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-threshold.fresh.neo-freya.sender.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ],
+    [
+     "recv8",
+     "recv4",
+     "xs"
+    ],
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ]
+   ]
+  },
+  {
+   "cell": "small-real.fresh.neo-freya.sender.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "recv4",
+     "recv8"
+    ],
+    [
+     "xs",
+     "recv8",
+     "recv4"
+    ],
+    [
+     "recv4",
+     "recv8",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-threshold.noop.neo-freya.sender.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv4",
+     "recv8",
+     "xs"
+    ],
+    [
+     "recv4",
+     "recv8",
+     "xs"
+    ],
+    [
+     "xs",
+     "recv8",
+     "recv4"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.neo-freya.sender.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv8",
+     "recv4",
+     "xs"
+    ],
+    [
+     "recv8",
+     "xs",
+     "recv4"
+    ],
+    [
+     "recv8",
+     "xs",
+     "recv4"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.fresh.neo-freya.sender.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ],
+    [
+     "xs",
+     "recv4",
+     "recv8"
+    ],
+    [
+     "xs",
+     "recv4",
+     "recv8"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.neo-freya.sender.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ],
+    [
+     "xs",
+     "recv8",
+     "recv4"
+    ],
+    [
+     "recv8",
+     "xs",
+     "recv4"
+    ]
+   ]
+  },
+  {
+   "cell": "small-opaque.noop.neo-freya.sender.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv8",
+     "xs",
+     "recv4"
+    ],
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ],
+    [
+     "recv4",
+     "recv8",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-opaque.fresh.neo-freya.sender.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "recv8",
+     "recv4"
+    ],
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ],
+    [
+     "recv8",
+     "recv4",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-real.noop.neo-freya.sender.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv8",
+     "recv4",
+     "xs"
+    ],
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ],
+    [
+     "xs",
+     "recv4",
+     "recv8"
+    ]
+   ]
+  },
+  {
+   "cell": "small-deep.fresh.neo-freya.sender.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv8",
+     "recv4",
+     "xs"
+    ],
+    [
+     "recv8",
+     "recv4",
+     "xs"
+    ],
+    [
+     "recv8",
+     "xs",
+     "recv4"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv4",
+     "recv8",
+     "xs"
+    ],
+    [
+     "recv8",
+     "xs",
+     "recv4"
+    ],
+    [
+     "recv8",
+     "recv4",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.neo-freya.sender.warm",
+   "block": 4,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv4",
+     "recv8",
+     "xs"
+    ],
+    [
+     "xs",
+     "recv4",
+     "recv8"
+    ],
+    [
+     "recv8",
+     "xs",
+     "recv4"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.neo-freya.sender.warm",
+   "block": 4,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "recv8",
+     "recv4"
+    ],
+    [
+     "xs",
+     "recv4",
+     "recv8"
+    ],
+    [
+     "xs",
+     "recv8",
+     "recv4"
+    ]
+   ]
+  },
+  {
+   "cell": "small-real.noop.neo-freya.sender.warm",
+   "block": 4,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv8",
+     "recv4",
+     "xs"
+    ],
+    [
+     "recv8",
+     "recv4",
+     "xs"
+    ],
+    [
+     "xs",
+     "recv4",
+     "recv8"
+    ]
+   ]
+  },
+  {
+   "cell": "small-opaque.fresh.neo-freya.sender.warm",
+   "block": 4,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv8",
+     "xs",
+     "recv4"
+    ],
+    [
+     "recv8",
+     "xs",
+     "recv4"
+    ],
+    [
+     "recv8",
+     "recv4",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-threshold.noop.neo-freya.sender.warm",
+   "block": 4,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "recv4",
+     "recv8"
+    ],
+    [
+     "xs",
+     "recv8",
+     "recv4"
+    ],
+    [
+     "recv8",
+     "recv4",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.noop.neo-freya.sender.warm",
+   "block": 4,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv4",
+     "recv8",
+     "xs"
+    ],
+    [
+     "recv4",
+     "recv8",
+     "xs"
+    ],
+    [
+     "recv4",
+     "recv8",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-opaque.noop.neo-freya.sender.warm",
+   "block": 4,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "recv4",
+     "recv8"
+    ],
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ],
+    [
+     "xs",
+     "recv4",
+     "recv8"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+   "block": 4,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "recv4",
+     "recv8"
+    ],
+    [
+     "recv8",
+     "recv4",
+     "xs"
+    ],
+    [
+     "xs",
+     "recv4",
+     "recv8"
+    ]
+   ]
+  },
+  {
+   "cell": "small-deep.noop.neo-freya.sender.warm",
+   "block": 4,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "recv4",
+     "recv8"
+    ],
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ],
+    [
+     "recv8",
+     "xs",
+     "recv4"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-threshold.fresh.neo-freya.sender.warm",
+   "block": 4,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "recv8",
+     "recv4"
+    ],
+    [
+     "xs",
+     "recv4",
+     "recv8"
+    ],
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.neo-freya.sender.warm",
+   "block": 4,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "recv8",
+     "recv4"
+    ],
+    [
+     "recv4",
+     "recv8",
+     "xs"
+    ],
+    [
+     "recv4",
+     "recv8",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-deep.fresh.neo-freya.sender.warm",
+   "block": 4,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv8",
+     "xs",
+     "recv4"
+    ],
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ],
+    [
+     "xs",
+     "recv4",
+     "recv8"
+    ]
+   ]
+  },
+  {
+   "cell": "small-real.fresh.neo-freya.sender.warm",
+   "block": 4,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv4",
+     "recv8",
+     "xs"
+    ],
+    [
+     "xs",
+     "recv4",
+     "recv8"
+    ],
+    [
+     "xs",
+     "recv4",
+     "recv8"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.fresh.neo-freya.sender.warm",
+   "block": 4,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv8",
+     "recv4",
+     "xs"
+    ],
+    [
+     "recv8",
+     "xs",
+     "recv4"
+    ],
+    [
+     "recv4",
+     "recv8",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.neo-freya.sender.warm",
+   "block": 5,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv8",
+     "recv4",
+     "xs"
+    ],
+    [
+     "recv8",
+     "recv4",
+     "xs"
+    ],
+    [
+     "recv8",
+     "recv4",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.noop.neo-freya.sender.warm",
+   "block": 5,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv8",
+     "xs",
+     "recv4"
+    ],
+    [
+     "recv8",
+     "recv4",
+     "xs"
+    ],
+    [
+     "recv4",
+     "recv8",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-real.noop.neo-freya.sender.warm",
+   "block": 5,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "recv8",
+     "recv4"
+    ],
+    [
+     "xs",
+     "recv8",
+     "recv4"
+    ],
+    [
+     "recv4",
+     "recv8",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.neo-freya.sender.warm",
+   "block": 5,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv8",
+     "recv4",
+     "xs"
+    ],
+    [
+     "recv8",
+     "recv4",
+     "xs"
+    ],
+    [
+     "recv4",
+     "recv8",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-opaque.noop.neo-freya.sender.warm",
+   "block": 5,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv8",
+     "recv4",
+     "xs"
+    ],
+    [
+     "xs",
+     "recv4",
+     "recv8"
+    ],
+    [
+     "xs",
+     "recv8",
+     "recv4"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.neo-freya.sender.warm",
+   "block": 5,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv8",
+     "recv4",
+     "xs"
+    ],
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ],
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ]
+   ]
+  },
+  {
+   "cell": "small-deep.fresh.neo-freya.sender.warm",
+   "block": 5,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv8",
+     "recv4",
+     "xs"
+    ],
+    [
+     "xs",
+     "recv8",
+     "recv4"
+    ],
+    [
+     "xs",
+     "recv8",
+     "recv4"
+    ]
+   ]
+  },
+  {
+   "cell": "small-opaque.fresh.neo-freya.sender.warm",
+   "block": 5,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ],
+    [
+     "xs",
+     "recv4",
+     "recv8"
+    ],
+    [
+     "recv8",
+     "xs",
+     "recv4"
+    ]
+   ]
+  },
+  {
+   "cell": "small-deep.noop.neo-freya.sender.warm",
+   "block": 5,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv8",
+     "recv4",
+     "xs"
+    ],
+    [
+     "xs",
+     "recv8",
+     "recv4"
+    ],
+    [
+     "recv8",
+     "recv4",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-threshold.fresh.neo-freya.sender.warm",
+   "block": 5,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ],
+    [
+     "xs",
+     "recv8",
+     "recv4"
+    ],
+    [
+     "recv4",
+     "recv8",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.fresh.neo-freya.sender.warm",
+   "block": 5,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "recv4",
+     "recv8"
+    ],
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ],
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ]
+   ]
+  },
+  {
+   "cell": "small-real.fresh.neo-freya.sender.warm",
+   "block": 5,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "recv8",
+     "recv4"
+    ],
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ],
+    [
+     "recv8",
+     "xs",
+     "recv4"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-threshold.noop.neo-freya.sender.warm",
+   "block": 5,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv8",
+     "recv4",
+     "xs"
+    ],
+    [
+     "recv8",
+     "recv4",
+     "xs"
+    ],
+    [
+     "xs",
+     "recv4",
+     "recv8"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+   "block": 5,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv4",
+     "recv8",
+     "xs"
+    ],
+    [
+     "recv8",
+     "xs",
+     "recv4"
+    ],
+    [
+     "xs",
+     "recv4",
+     "recv8"
+    ]
+   ]
+  },
+  {
+   "cell": "small-real.fresh.neo-freya.sender.warm",
+   "block": 6,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ],
+    [
+     "recv8",
+     "recv4",
+     "xs"
+    ],
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ]
+   ]
+  },
+  {
+   "cell": "small-deep.noop.neo-freya.sender.warm",
+   "block": 6,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv4",
+     "recv8",
+     "xs"
+    ],
+    [
+     "recv8",
+     "recv4",
+     "xs"
+    ],
+    [
+     "xs",
+     "recv4",
+     "recv8"
+    ]
+   ]
+  },
+  {
+   "cell": "small-real.noop.neo-freya.sender.warm",
+   "block": 6,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv8",
+     "xs",
+     "recv4"
+    ],
+    [
+     "xs",
+     "recv8",
+     "recv4"
+    ],
+    [
+     "xs",
+     "recv4",
+     "recv8"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.neo-freya.sender.warm",
+   "block": 6,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv8",
+     "recv4",
+     "xs"
+    ],
+    [
+     "recv8",
+     "xs",
+     "recv4"
+    ],
+    [
+     "recv4",
+     "recv8",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.fresh.neo-freya.sender.warm",
+   "block": 6,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ],
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ],
+    [
+     "xs",
+     "recv8",
+     "recv4"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-threshold.noop.neo-freya.sender.warm",
+   "block": 6,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv8",
+     "recv4",
+     "xs"
+    ],
+    [
+     "xs",
+     "recv8",
+     "recv4"
+    ],
+    [
+     "xs",
+     "recv4",
+     "recv8"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.neo-freya.sender.warm",
+   "block": 6,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv8",
+     "recv4",
+     "xs"
+    ],
+    [
+     "xs",
+     "recv8",
+     "recv4"
+    ],
+    [
+     "xs",
+     "recv8",
+     "recv4"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.neo-freya.sender.warm",
+   "block": 6,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv8",
+     "xs",
+     "recv4"
+    ],
+    [
+     "recv8",
+     "recv4",
+     "xs"
+    ],
+    [
+     "recv8",
+     "xs",
+     "recv4"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+   "block": 6,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv8",
+     "xs",
+     "recv4"
+    ],
+    [
+     "recv8",
+     "recv4",
+     "xs"
+    ],
+    [
+     "xs",
+     "recv8",
+     "recv4"
+    ]
+   ]
+  },
+  {
+   "cell": "small-opaque.fresh.neo-freya.sender.warm",
+   "block": 6,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ],
+    [
+     "recv8",
+     "xs",
+     "recv4"
+    ],
+    [
+     "recv8",
+     "xs",
+     "recv4"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-threshold.fresh.neo-freya.sender.warm",
+   "block": 6,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ],
+    [
+     "recv8",
+     "xs",
+     "recv4"
+    ],
+    [
+     "xs",
+     "recv8",
+     "recv4"
+    ]
+   ]
+  },
+  {
+   "cell": "small-deep.fresh.neo-freya.sender.warm",
+   "block": 6,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "recv4",
+     "recv8"
+    ],
+    [
+     "xs",
+     "recv4",
+     "recv8"
+    ],
+    [
+     "recv4",
+     "recv8",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.noop.neo-freya.sender.warm",
+   "block": 6,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "recv8",
+     "recv4"
+    ],
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ],
+    [
+     "recv8",
+     "recv4",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-opaque.noop.neo-freya.sender.warm",
+   "block": 6,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "recv8",
+     "recv4"
+    ],
+    [
+     "xs",
+     "recv8",
+     "recv4"
+    ],
+    [
+     "xs",
+     "recv4",
+     "recv8"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.neo-freya.sender.warm",
+   "block": 7,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv4",
+     "recv8",
+     "xs"
+    ],
+    [
+     "recv4",
+     "recv8",
+     "xs"
+    ],
+    [
+     "xs",
+     "recv4",
+     "recv8"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+   "block": 7,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv8",
+     "recv4",
+     "xs"
+    ],
+    [
+     "recv4",
+     "recv8",
+     "xs"
+    ],
+    [
+     "xs",
+     "recv8",
+     "recv4"
+    ]
+   ]
+  },
+  {
+   "cell": "small-opaque.fresh.neo-freya.sender.warm",
+   "block": 7,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "recv4",
+     "recv8"
+    ],
+    [
+     "recv8",
+     "recv4",
+     "xs"
+    ],
+    [
+     "recv8",
+     "xs",
+     "recv4"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.neo-freya.sender.warm",
+   "block": 7,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv8",
+     "xs",
+     "recv4"
+    ],
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ],
+    [
+     "recv4",
+     "recv8",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-opaque.noop.neo-freya.sender.warm",
+   "block": 7,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ],
+    [
+     "xs",
+     "recv8",
+     "recv4"
+    ],
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-threshold.noop.neo-freya.sender.warm",
+   "block": 7,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv4",
+     "recv8",
+     "xs"
+    ],
+    [
+     "recv4",
+     "recv8",
+     "xs"
+    ],
+    [
+     "recv8",
+     "recv4",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-real.noop.neo-freya.sender.warm",
+   "block": 7,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv4",
+     "recv8",
+     "xs"
+    ],
+    [
+     "recv8",
+     "xs",
+     "recv4"
+    ],
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ]
+   ]
+  },
+  {
+   "cell": "small-deep.fresh.neo-freya.sender.warm",
+   "block": 7,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "recv4",
+     "recv8"
+    ],
+    [
+     "recv4",
+     "recv8",
+     "xs"
+    ],
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-threshold.fresh.neo-freya.sender.warm",
+   "block": 7,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "recv4",
+     "recv8"
+    ],
+    [
+     "recv8",
+     "recv4",
+     "xs"
+    ],
+    [
+     "recv4",
+     "recv8",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.noop.neo-freya.sender.warm",
+   "block": 7,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "recv8",
+     "recv4"
+    ],
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ],
+    [
+     "recv8",
+     "recv4",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-deep.noop.neo-freya.sender.warm",
+   "block": 7,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "recv4",
+     "recv8"
+    ],
+    [
+     "recv4",
+     "recv8",
+     "xs"
+    ],
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ]
+   ]
+  },
+  {
+   "cell": "small-real.fresh.neo-freya.sender.warm",
+   "block": 7,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "recv8",
+     "recv4"
+    ],
+    [
+     "recv8",
+     "xs",
+     "recv4"
+    ],
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.fresh.neo-freya.sender.warm",
+   "block": 7,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ],
+    [
+     "recv8",
+     "xs",
+     "recv4"
+    ],
+    [
+     "recv4",
+     "recv8",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.neo-freya.sender.warm",
+   "block": 7,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "recv4",
+     "recv8"
+    ],
+    [
+     "recv8",
+     "xs",
+     "recv4"
+    ],
+    [
+     "recv4",
+     "recv8",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.noop.neo-freya.sender.warm",
+   "block": 8,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ],
+    [
+     "recv8",
+     "recv4",
+     "xs"
+    ],
+    [
+     "recv8",
+     "xs",
+     "recv4"
+    ]
+   ]
+  },
+  {
+   "cell": "small-deep.noop.neo-freya.sender.warm",
+   "block": 8,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ],
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ],
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-threshold.fresh.neo-freya.sender.warm",
+   "block": 8,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv4",
+     "recv8",
+     "xs"
+    ],
+    [
+     "recv8",
+     "xs",
+     "recv4"
+    ],
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.neo-freya.sender.warm",
+   "block": 8,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ],
+    [
+     "xs",
+     "recv4",
+     "recv8"
+    ],
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ]
+   ]
+  },
+  {
+   "cell": "small-opaque.noop.neo-freya.sender.warm",
+   "block": 8,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv8",
+     "xs",
+     "recv4"
+    ],
+    [
+     "xs",
+     "recv4",
+     "recv8"
+    ],
+    [
+     "recv4",
+     "recv8",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.neo-freya.sender.warm",
+   "block": 8,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv4",
+     "recv8",
+     "xs"
+    ],
+    [
+     "recv8",
+     "xs",
+     "recv4"
+    ],
+    [
+     "recv4",
+     "recv8",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.fresh.neo-freya.sender.warm",
+   "block": 8,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv8",
+     "recv4",
+     "xs"
+    ],
+    [
+     "recv8",
+     "xs",
+     "recv4"
+    ],
+    [
+     "xs",
+     "recv4",
+     "recv8"
+    ]
+   ]
+  },
+  {
+   "cell": "small-real.noop.neo-freya.sender.warm",
+   "block": 8,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ],
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ],
+    [
+     "xs",
+     "recv8",
+     "recv4"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.neo-freya.sender.warm",
+   "block": 8,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv8",
+     "recv4",
+     "xs"
+    ],
+    [
+     "xs",
+     "recv4",
+     "recv8"
+    ],
+    [
+     "xs",
+     "recv8",
+     "recv4"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-threshold.noop.neo-freya.sender.warm",
+   "block": 8,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "recv4",
+     "recv8"
+    ],
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ],
+    [
+     "recv8",
+     "xs",
+     "recv4"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+   "block": 8,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "recv8",
+     "recv4"
+    ],
+    [
+     "recv8",
+     "recv4",
+     "xs"
+    ],
+    [
+     "recv8",
+     "xs",
+     "recv4"
+    ]
+   ]
+  },
+  {
+   "cell": "small-deep.fresh.neo-freya.sender.warm",
+   "block": 8,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv4",
+     "recv8",
+     "xs"
+    ],
+    [
+     "xs",
+     "recv4",
+     "recv8"
+    ],
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ]
+   ]
+  },
+  {
+   "cell": "small-opaque.fresh.neo-freya.sender.warm",
+   "block": 8,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv8",
+     "recv4",
+     "xs"
+    ],
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ],
+    [
+     "recv8",
+     "recv4",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-real.fresh.neo-freya.sender.warm",
+   "block": 8,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv4",
+     "recv8",
+     "xs"
+    ],
+    [
+     "xs",
+     "recv8",
+     "recv4"
+    ],
+    [
+     "xs",
+     "recv8",
+     "recv4"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+   "block": 9,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "recv4",
+     "recv8"
+    ],
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ],
+    [
+     "xs",
+     "recv8",
+     "recv4"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-threshold.fresh.neo-freya.sender.warm",
+   "block": 9,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv4",
+     "recv8",
+     "xs"
+    ],
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ],
+    [
+     "recv8",
+     "xs",
+     "recv4"
+    ]
+   ]
+  },
+  {
+   "cell": "small-real.noop.neo-freya.sender.warm",
+   "block": 9,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ],
+    [
+     "recv4",
+     "recv8",
+     "xs"
+    ],
+    [
+     "recv8",
+     "xs",
+     "recv4"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.noop.neo-freya.sender.warm",
+   "block": 9,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "recv4",
+     "recv8"
+    ],
+    [
+     "xs",
+     "recv4",
+     "recv8"
+    ],
+    [
+     "recv8",
+     "xs",
+     "recv4"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.neo-freya.sender.warm",
+   "block": 9,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "recv4",
+     "recv8"
+    ],
+    [
+     "recv8",
+     "recv4",
+     "xs"
+    ],
+    [
+     "xs",
+     "recv4",
+     "recv8"
+    ]
+   ]
+  },
+  {
+   "cell": "small-real.fresh.neo-freya.sender.warm",
+   "block": 9,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "recv4",
+     "recv8"
+    ],
+    [
+     "recv8",
+     "xs",
+     "recv4"
+    ],
+    [
+     "xs",
+     "recv8",
+     "recv4"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-threshold.noop.neo-freya.sender.warm",
+   "block": 9,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv8",
+     "recv4",
+     "xs"
+    ],
+    [
+     "recv8",
+     "recv4",
+     "xs"
+    ],
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.fresh.neo-freya.sender.warm",
+   "block": 9,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ],
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ],
+    [
+     "recv4",
+     "recv8",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.neo-freya.sender.warm",
+   "block": 9,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "recv4",
+     "recv8"
+    ],
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ],
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ]
+   ]
+  },
+  {
+   "cell": "small-opaque.fresh.neo-freya.sender.warm",
+   "block": 9,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "recv8",
+     "recv4"
+    ],
+    [
+     "xs",
+     "recv4",
+     "recv8"
+    ],
+    [
+     "recv8",
+     "xs",
+     "recv4"
+    ]
+   ]
+  },
+  {
+   "cell": "small-opaque.noop.neo-freya.sender.warm",
+   "block": 9,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "recv8",
+     "recv4"
+    ],
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ],
+    [
+     "recv8",
+     "xs",
+     "recv4"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.neo-freya.sender.warm",
+   "block": 9,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv8",
+     "recv4",
+     "xs"
+    ],
+    [
+     "xs",
+     "recv8",
+     "recv4"
+    ],
+    [
+     "xs",
+     "recv8",
+     "recv4"
+    ]
+   ]
+  },
+  {
+   "cell": "small-deep.fresh.neo-freya.sender.warm",
+   "block": 9,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv8",
+     "recv4",
+     "xs"
+    ],
+    [
+     "xs",
+     "recv8",
+     "recv4"
+    ],
+    [
+     "xs",
+     "recv8",
+     "recv4"
+    ]
+   ]
+  },
+  {
+   "cell": "small-deep.noop.neo-freya.sender.warm",
+   "block": 9,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv8",
+     "recv4",
+     "xs"
+    ],
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ],
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ]
+   ]
+  },
+  {
+   "cell": "small-opaque.fresh.neo-freya.sender.warm",
+   "block": 10,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "recv8",
+     "recv4"
+    ],
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ],
+    [
+     "recv4",
+     "recv8",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.neo-freya.sender.warm",
+   "block": 10,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ],
+    [
+     "xs",
+     "recv4",
+     "recv8"
+    ],
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ]
+   ]
+  },
+  {
+   "cell": "small-deep.fresh.neo-freya.sender.warm",
+   "block": 10,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv4",
+     "recv8",
+     "xs"
+    ],
+    [
+     "xs",
+     "recv4",
+     "recv8"
+    ],
+    [
+     "xs",
+     "recv4",
+     "recv8"
+    ]
+   ]
+  },
+  {
+   "cell": "small-real.noop.neo-freya.sender.warm",
+   "block": 10,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ],
+    [
+     "recv4",
+     "recv8",
+     "xs"
+    ],
+    [
+     "recv8",
+     "xs",
+     "recv4"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+   "block": 10,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "recv8",
+     "recv4"
+    ],
+    [
+     "recv8",
+     "recv4",
+     "xs"
+    ],
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ]
+   ]
+  },
+  {
+   "cell": "small-real.fresh.neo-freya.sender.warm",
+   "block": 10,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv8",
+     "recv4",
+     "xs"
+    ],
+    [
+     "xs",
+     "recv4",
+     "recv8"
+    ],
+    [
+     "xs",
+     "recv8",
+     "recv4"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.fresh.neo-freya.sender.warm",
+   "block": 10,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ],
+    [
+     "xs",
+     "recv4",
+     "recv8"
+    ],
+    [
+     "recv4",
+     "recv8",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-threshold.fresh.neo-freya.sender.warm",
+   "block": 10,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ],
+    [
+     "recv4",
+     "recv8",
+     "xs"
+    ],
+    [
+     "recv4",
+     "recv8",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.neo-freya.sender.warm",
+   "block": 10,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "recv4",
+     "recv8"
+    ],
+    [
+     "recv8",
+     "xs",
+     "recv4"
+    ],
+    [
+     "xs",
+     "recv4",
+     "recv8"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.neo-freya.sender.warm",
+   "block": 10,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv4",
+     "recv8",
+     "xs"
+    ],
+    [
+     "xs",
+     "recv8",
+     "recv4"
+    ],
+    [
+     "recv8",
+     "xs",
+     "recv4"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-threshold.noop.neo-freya.sender.warm",
+   "block": 10,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ],
+    [
+     "xs",
+     "recv8",
+     "recv4"
+    ],
+    [
+     "xs",
+     "recv8",
+     "recv4"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.noop.neo-freya.sender.warm",
+   "block": 10,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv4",
+     "recv8",
+     "xs"
+    ],
+    [
+     "recv8",
+     "xs",
+     "recv4"
+    ],
+    [
+     "recv8",
+     "recv4",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-opaque.noop.neo-freya.sender.warm",
+   "block": 10,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "recv4",
+     "recv8"
+    ],
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ],
+    [
+     "xs",
+     "recv8",
+     "recv4"
+    ]
+   ]
+  },
+  {
+   "cell": "small-deep.noop.neo-freya.sender.warm",
+   "block": 10,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv8",
+     "recv4",
+     "xs"
+    ],
+    [
+     "recv8",
+     "recv4",
+     "xs"
+    ],
+    [
+     "xs",
+     "recv4",
+     "recv8"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+   "block": 11,
+   "verify_full": true,
+   "orders": [
+    [
+     "recv4",
+     "recv8",
+     "xs"
+    ],
+    [
+     "recv8",
+     "recv4",
+     "xs"
+    ],
+    [
+     "xs",
+     "recv8",
+     "recv4"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.fresh.neo-freya.sender.warm",
+   "block": 11,
+   "verify_full": true,
+   "orders": [
+    [
+     "recv8",
+     "xs",
+     "recv4"
+    ],
+    [
+     "xs",
+     "recv8",
+     "recv4"
+    ],
+    [
+     "recv4",
+     "recv8",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-threshold.fresh.neo-freya.sender.warm",
+   "block": 11,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs",
+     "recv8",
+     "recv4"
+    ],
+    [
+     "xs",
+     "recv4",
+     "recv8"
+    ],
+    [
+     "recv4",
+     "recv8",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.neo-freya.sender.warm",
+   "block": 11,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs",
+     "recv4",
+     "recv8"
+    ],
+    [
+     "recv8",
+     "xs",
+     "recv4"
+    ],
+    [
+     "xs",
+     "recv4",
+     "recv8"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.neo-freya.sender.warm",
+   "block": 11,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs",
+     "recv8",
+     "recv4"
+    ],
+    [
+     "xs",
+     "recv4",
+     "recv8"
+    ],
+    [
+     "xs",
+     "recv4",
+     "recv8"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.noop.neo-freya.sender.warm",
+   "block": 11,
+   "verify_full": true,
+   "orders": [
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ],
+    [
+     "recv8",
+     "xs",
+     "recv4"
+    ],
+    [
+     "recv8",
+     "recv4",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-real.noop.neo-freya.sender.warm",
+   "block": 11,
+   "verify_full": true,
+   "orders": [
+    [
+     "recv8",
+     "xs",
+     "recv4"
+    ],
+    [
+     "recv4",
+     "recv8",
+     "xs"
+    ],
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ]
+   ]
+  },
+  {
+   "cell": "small-opaque.noop.neo-freya.sender.warm",
+   "block": 11,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs",
+     "recv8",
+     "recv4"
+    ],
+    [
+     "xs",
+     "recv8",
+     "recv4"
+    ],
+    [
+     "xs",
+     "recv4",
+     "recv8"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-threshold.noop.neo-freya.sender.warm",
+   "block": 11,
+   "verify_full": true,
+   "orders": [
+    [
+     "recv8",
+     "xs",
+     "recv4"
+    ],
+    [
+     "recv8",
+     "xs",
+     "recv4"
+    ],
+    [
+     "recv4",
+     "recv8",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-opaque.fresh.neo-freya.sender.warm",
+   "block": 11,
+   "verify_full": true,
+   "orders": [
+    [
+     "recv4",
+     "recv8",
+     "xs"
+    ],
+    [
+     "xs",
+     "recv8",
+     "recv4"
+    ],
+    [
+     "xs",
+     "recv4",
+     "recv8"
+    ]
+   ]
+  },
+  {
+   "cell": "small-real.fresh.neo-freya.sender.warm",
+   "block": 11,
+   "verify_full": true,
+   "orders": [
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ],
+    [
+     "xs",
+     "recv8",
+     "recv4"
+    ],
+    [
+     "recv4",
+     "xs",
+     "recv8"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.neo-freya.sender.warm",
+   "block": 11,
+   "verify_full": true,
+   "orders": [
+    [
+     "recv8",
+     "xs",
+     "recv4"
+    ],
+    [
+     "recv4",
+     "recv8",
+     "xs"
+    ],
+    [
+     "xs",
+     "recv8",
+     "recv4"
+    ]
+   ]
+  },
+  {
+   "cell": "small-deep.noop.neo-freya.sender.warm",
+   "block": 11,
+   "verify_full": true,
+   "orders": [
+    [
+     "recv4",
+     "recv8",
+     "xs"
+    ],
+    [
+     "xs",
+     "recv8",
+     "recv4"
+    ],
+    [
+     "recv4",
+     "recv8",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-deep.fresh.neo-freya.sender.warm",
+   "block": 11,
+   "verify_full": true,
+   "orders": [
+    [
+     "recv8",
+     "recv4",
+     "xs"
+    ],
+    [
+     "recv8",
+     "recv4",
+     "xs"
+    ],
+    [
+     "recv8",
+     "recv4",
+     "xs"
+    ]
+   ]
+  }
+ ],
+ "scripts": {
+  "probe.py": "52e78e2063c5cce8393789c90ed49c4f9c18921fd823837f5f653956f7169777",
+  "corpus.py": "d6018d3611cba607a670f3fe554d0d4be5941fb2ef8fd65d57f10bfb582625f6",
+  "corpora.json": "729929e1ba7baf3a0b8413efffab5bc26ae0cbe8514daf1c05bbb53a314bb084",
+  "agent.py": "ebc8c2ad5e79af9c9ec4da02e9f6ddd3b1e9fb6b82f5baffdf28c2ff0f053a51",
+  "runner.py": "56e384d5bf6e7b577e1eb8aa366f1a9d1378f1f9b2f7b16c24488892a25f60d4",
+  "measure.py": "5065310f480ff1cabfa7c645f0db342624a02f9a081b96069d50d52b3d224777"
+ }
+}

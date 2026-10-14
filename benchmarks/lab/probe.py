@@ -379,11 +379,17 @@ def file_sha256(path):
         return None
 
 
-def staged(root, names):
-    """Hashes of the named files under ROOT/bin, what each xs there says it is, and this host's rsync."""
+def staged(root, names, bundle=None):
+    """Hashes of the named files, what each xs there says it is, and this host's rsync.
+
+    Binaries (xs-*) are under ROOT/bin. Scripts are under ROOT/lib/BUNDLE when a
+    bundle is named, else under ROOT/bin as they were before bundles.
+    """
+    place = lambda name: os.path.join(root, 'lib', bundle, name) if bundle and not name.startswith('xs-') \
+        else os.path.join(root, 'bin', name)
     result = {'utc': utc(), 'hostname': socket.gethostname(), 'machine': platform.machine(),
               'system': platform.system(),
-              'files': {name: file_sha256(os.path.join(root, 'bin', name)) for name in names}, 'versions': {}}
+              'files': {name: file_sha256(place(name)) for name in names}, 'versions': {}}
     for name in names:
         if name.startswith('xs-') and result['files'][name]:
             status, out, _ = run([os.path.join(root, 'bin', name), '--version'], timeout=10)
@@ -463,8 +469,9 @@ def main(argv=None):
     p.add_argument('--peer', required=True, help='host name to resolve')
     p.add_argument('--ssh', help='SSH target to connect to, as the transfers will')
     p.add_argument('--pings', type=int, default=10)
-    p = commands.add_parser('staged', help='hashes and versions of files staged under ROOT/bin')
+    p = commands.add_parser('staged', help='hashes and versions of files staged under ROOT/bin and ROOT/lib')
     p.add_argument('--root', required=True)
+    p.add_argument('--bundle', help='look for scripts under ROOT/lib/BUNDLE')
     p.add_argument('names', nargs='+')
     p = commands.add_parser('storage', help='time repeated synced writes under a directory')
     p.add_argument('--path', required=True, help='an existing directory on the filesystem to test')
@@ -489,9 +496,10 @@ def main(argv=None):
             parser.error('storage needs an existing directory, at least two rounds and 8 MB per round')
         result = storage(args.path, args.rounds, args.megabytes, args.pause)
     elif args.command == 'staged':
-        if not args.root.startswith('/') or any('/' in name or name.startswith('.') for name in args.names):
+        if not args.root.startswith('/') or any('/' in name or name.startswith('.')
+                                                for name in [*args.names, args.bundle or 'x']):
             parser.error('staged needs an absolute root and plain file names')
-        result = staged(args.root, args.names)
+        result = staged(args.root, args.names, args.bundle)
     else:
         if args.interval <= 0:
             parser.error('--interval must be positive')
