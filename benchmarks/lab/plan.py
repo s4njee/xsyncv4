@@ -334,6 +334,35 @@ def enqueue(spec_path, config, seed, front=False, name='backlog.txt', suffix='')
     return plan
 
 
+def enqueue_job(config, name, hosts, command, front=False, driver_name=None):
+    """Queue maintenance: `command` on each host in turn, with {root} and {bundle} filled in for that host."""
+    if not SAFE.fullmatch(name):
+        raise SystemExit('a job needs a plain name')
+    driver_key = driver_name or config.get('driver') or next(iter(config['hosts']))
+    driver = driver_named(config, driver_key)
+    bundle = stage.bundle_id()
+    steps = []
+    for host_name in hosts:
+        host = config['hosts'].get(host_name)
+        if not host or not host.get('root'):
+            raise SystemExit(f'{host_name} is not a host with a benchmark root')
+        stage.push_bundle(host_name, host)
+        steps.append({'host': host_name, 'ssh': host['ssh'], 'local': host_name == driver_key,
+                      'command': command.format(root=shlex.quote(host['root']), bundle=bundle)})
+    run_id = datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%dT%H%M%SZ') + '-job-' + name
+    local = HERE.parent / 'results' / 'lab' / 'jobs' / run_id
+    local.mkdir(parents=True)
+    (local / 'job.json').write_text(json.dumps({'name': name, 'steps': steps}, indent=1) + '\n')
+    directory = f'{driver["root"]}/runs/{run_id}'
+    remote(driver, f'mkdir -p {shlex.quote(directory)}', check=True, timeout=60)
+    stage.copy_to(driver, [local / 'job.json'], directory)
+    path, quoted = shlex.quote(f'{driver["root"]}/runs/backlog.txt'), shlex.quote(run_id)
+    script = (f'{{ echo {quoted}; cat {path} 2>/dev/null; }} > {path}.tmp && mv {path}.tmp {path}' if front
+              else f'echo {quoted} >> {path}')
+    remote(driver, script, check=True, timeout=60)
+    return run_id, steps
+
+
 def runner_status(driver):
     done = remote(driver, f'cat {shlex.quote(driver["root"] + "/runs/runner-status.json")} 2>/dev/null', timeout=60)
     try:
@@ -358,8 +387,12 @@ def runner(config, action, driver_name=None, not_before=None, settings=None):
             raise SystemExit(f'a runner is already working {name} (pid {status["pid"]}); `runner restart` replaces it')
         bundle = stage.push_bundle(name, driver)
         remote(driver, f'mkdir -p {shlex.quote(runs)}', check=True, timeout=60)
-        detach(driver, runs, [f'{driver["root"]}/lib/{bundle}/runner.py', '--root', driver['root'],
-                              *(['--not-before', not_before] if not_before else [])], 'runner.log')
+        argv = [f'{driver["root"]}/lib/{bundle}/runner.py', '--root', driver['root']]
+        # What a reboot should start: the same runner. An @reboot line in the operator's crontab runs this.
+        boot = (f'#!/bin/sh\n# Written by plan.py runner start; starts the current runner after a reboot.\n'
+                f'cd {shlex.quote(runs)} || exit 1\nexec python3 {shlex.join(argv)} >> runner.log 2>&1 < /dev/null\n')
+        remote(driver, f'printf %s {shlex.quote(boot)} > {shlex.quote(driver["root"] + "/runner.sh")}', check=True, timeout=60)
+        detach(driver, runs, [*argv, *(['--not-before', not_before] if not_before else [])], 'runner.log')
         return f'runner started on {name} from bundle {bundle}'
     if action == 'restart':
         # The old runner leaves its current run alone; the new one waits for that run, then carries on.
@@ -427,7 +460,7 @@ def show_queue(config, driver_name=None):
                 size = f'{sum(len(block["orders"][0]) for block in plan["blocks"])} samples, ' \
                        f'{sum(plan.get("writes", {}).values()) / 2**30:.0f} GiB of writes'
             except SystemExit:
-                size = 'no local plan'
+                size = 'maintenance job' if '-job-' in run_id else 'no local plan'
             print(f'  {run_id}  {size}')
         if len(states) > 12:
             print(f'  ... and {len(states) - 12} more')
@@ -496,6 +529,12 @@ def main(argv=None):
     p.add_argument('--write-budget', action='append', default=[], metavar='HOST=GIB',
                    help='set: bytes a host\'s drive may be given in any 24 hours')
     p.add_argument('--halt-after', type=int, help='set: failed runs in a row that halt the runner')
+    p = commands.add_parser('job', help='queue maintenance, such as generating corpora, to run between experiments')
+    p.add_argument('name')
+    p.add_argument('--host', action='append', required=True, help='host to run it on, in turn')
+    p.add_argument('--command', dest='shell', required=True, help='shell command; {root} and {bundle} are filled in per host')
+    p.add_argument('--front', action='store_true')
+    p.add_argument('--driver')
     for command, text in (('queue', 'what the runner is doing and what is waiting'),
                           ('collect', 'fetch finished runs and write their experiments\' reports')):
         commands.add_parser(command, help=text).add_argument('--driver')
@@ -541,6 +580,10 @@ def main(argv=None):
             return
         if args.command == 'queue':
             show_queue(config, args.driver)
+            return
+        if args.command == 'job':
+            run_id, steps = enqueue_job(config, args.name, args.host, args.shell, args.front, args.driver)
+            print(f'{run_id} queued: ' + '; '.join(f'{step["host"]}: {step["command"]}' for step in steps))
             return
         if args.command == 'collect':
             collect(config, args.driver)

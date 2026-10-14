@@ -1,0 +1,19 @@
+{
+  "experiment": "E1r2-holochart",
+  "kind": "screening",
+  "hypothesis": "On a real JavaScript working tree, xs -aH differs from rsync -aH as it does on the small synthetic corpora.",
+  "primary": "durable_s",
+  "control": "rsync",
+  "delta": 0.03,
+  "level": 0.95,
+  "looks": 1,
+  "runs": [
+    "20261014T020836Z-E1r2-holochart"
+  ],
+  "spec_sha256": [
+    "81c34d9a338ae482b356b96a4f5912cff4e064d23f6891b9ece82c41084b1d23"
+  ],
+  "valid_blocks": 32,
+  "void_attempts": 0,
+  "void_reasons": []
+}

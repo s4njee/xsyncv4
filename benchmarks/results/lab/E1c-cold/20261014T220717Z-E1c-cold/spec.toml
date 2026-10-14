@@ -1,0 +1,29 @@
+# E1c: the baseline matrix with cold caches. Every sample so far read a
+# source that was in memory. Here the helper drops the page, dentry and inode
+# caches on both hosts before each sample, so scanning and reading go to the
+# drive: the case of a first sync after boot, or a tree larger than memory.
+id = "E1c-cold"
+kind = "confirmatory"
+hypothesis = "With cold caches xs -a differs from rsync -a by more than 3% in time-to-durable, per corpus, scenario and direction."
+primary = "durable_s"
+delta = 0.03
+blocks = 10
+control = "rsync"
+verify = "first-last"
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[arms.xs]
+tool = "xs"
+rev = "8cc75bbdb801"
+flags = ["-a"]
+
+[matrix]
+link = "lan"
+corpus = ["tiny-one", "small-flat", "small-deep", "small-opaque", "small-real", "mixed-bimodal", "mixed-threshold"]
+scenario = ["fresh", "noop"]
+direction = ["neo>freya", "freya>neo"]
+client = ["sender"]
+cache = ["cold"]

@@ -1,0 +1,53 @@
+# E4b: queue sizes, one at a time around the default. The receiver's DATA
+# queue (16 MiB) and the sender's frame queue (48 MiB) bound how much is in
+# flight; too small starves a fast link, too large only costs memory (H3).
+id = "E4b-queues"
+kind = "screening"
+hypothesis = "Neither queue is a bottleneck at its default: a quarter or four times its size changes no copy by more than 3%."
+primary = "wall_s"
+delta = 0.03
+blocks = 10
+control = "xs"
+verify = "first-last"
+
+[arms.xs]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a"]
+metrics = true
+
+[arms.recvq4m]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a"]
+tune = "recv_queue=4194304"
+metrics = true
+
+[arms.recvq64m]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a"]
+tune = "recv_queue=67108864"
+metrics = true
+
+[arms.sendq12m]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a"]
+tune = "send_queue=12582912"
+metrics = true
+
+[arms.sendq192m]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a"]
+tune = "send_queue=201326592"
+metrics = true
+
+[matrix]
+link = "lan"
+corpus = ["mixed-bimodal", "small-real"]
+scenario = ["fresh"]
+direction = ["neo>freya", "freya>neo"]
+client = ["sender"]
+cache = ["warm"]

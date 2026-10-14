@@ -1,0 +1,28 @@
+# E1z: the -z pair of the baseline, on the current build: xs -az against
+# rsync -az on the compressible and incompressible small trees and a mixed
+# one, fresh copies both directions.
+id = "E1z-compress"
+kind = "confirmatory"
+hypothesis = "xs -az differs from rsync -az by more than 3% in time-to-durable on fresh copies."
+primary = "durable_s"
+delta = 0.03
+blocks = 10
+control = "rsync"
+verify = "first-last"
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-az"]
+
+[arms.xs]
+tool = "xs"
+rev = "8cc75bbdb801"
+flags = ["-az"]
+
+[matrix]
+link = "lan"
+corpus = ["small-real", "small-opaque", "mixed-bimodal"]
+scenario = ["fresh"]
+direction = ["neo>freya", "freya>neo"]
+client = ["sender"]
+cache = ["warm"]

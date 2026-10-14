@@ -1,0 +1,51 @@
+# T1h: T1g's byte-bound cells again with twice the blocks. In T1g three and
+# two sending workers, and three with one stream, were within a few percent
+# of rsync on mixed-threshold but not on mixed-bimodal; the intervals were
+# too wide to choose. Byte-bound copies from neo only.
+id = "T1h-send-cores-bytes"
+kind = "screening"
+hypothesis = "Three sending workers on a four-core sender keep most of one worker's gain on byte-bound copies and lose nothing on small files or no-ops."
+primary = "wall_s"
+delta = 0.03
+blocks = 20
+control = "xs"
+verify = "first-last"
+
+[arms.xs]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a"]
+metrics = true
+
+[arms.send3]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a"]
+tune = { sender = "jobs=3" }
+metrics = true
+
+[arms.send2]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a"]
+tune = { sender = "jobs=2" }
+metrics = true
+
+[arms.send3s1]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a"]
+tune = { sender = "jobs=3,send_streams=1" }
+metrics = true
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[matrix]
+link = "lan"
+corpus = ["mixed-bimodal", "mixed-threshold"]
+scenario = ["fresh"]
+direction = ["neo>freya"]
+client = ["sender"]
+cache = ["warm"]

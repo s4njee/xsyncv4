@@ -1,0 +1,29 @@
+# E3c: --no-atomic writes new files in place instead of to a temporary name
+# followed by a rename. On small fresh copies the renames are a large share of
+# the receiver's metadata work (H16).
+id = "E3c-atomic"
+kind = "screening"
+hypothesis = "--no-atomic makes small fresh copies more than 3% faster and is no slower elsewhere."
+primary = "wall_s"
+delta = 0.03
+blocks = 12
+control = "xs"
+verify = "first-last"
+
+[arms.xs]
+tool = "xs"
+rev = "8cc75bbdb801"
+flags = ["-a"]
+
+[arms.no-atomic]
+tool = "xs"
+rev = "8cc75bbdb801"
+flags = ["-a", "--no-atomic"]
+
+[matrix]
+link = "lan"
+corpus = ["small-flat", "small-deep", "small-real", "mixed-bimodal"]
+scenario = ["fresh"]
+direction = ["neo>freya", "freya>neo"]
+client = ["sender"]
+cache = ["warm"]

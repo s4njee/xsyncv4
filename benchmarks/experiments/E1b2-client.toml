@@ -1,0 +1,41 @@
+# E1b on the current build: does it matter which end starts the transfer?
+# If push and pull are equivalent, every other experiment's choice of the
+# sender as client stands.
+id = "E1b2-client"
+kind = "confirmatory"
+hypothesis = "A transfer started by the receiver takes the same time, within 3%, as the same transfer started by the sender."
+primary = "wall_s"
+delta = 0.03
+blocks = 10
+control = "xs-push"
+verify = "first-last"
+
+[arms.xs-push]
+tool = "xs"
+rev = "8cc75bbdb801"
+flags = ["-a"]
+client = "sender"
+
+[arms.xs-pull]
+tool = "xs"
+rev = "8cc75bbdb801"
+flags = ["-a"]
+client = "receiver"
+
+[arms.rsync-push]
+tool = "rsync"
+flags = ["-a"]
+client = "sender"
+
+[arms.rsync-pull]
+tool = "rsync"
+flags = ["-a"]
+client = "receiver"
+
+[matrix]
+link = "lan"
+corpus = ["small-flat", "small-real", "mixed-bimodal"]
+scenario = ["fresh", "noop"]
+direction = ["neo>freya", "freya>neo"]
+client = ["arm"]
+cache = ["warm"]

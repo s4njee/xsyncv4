@@ -1,0 +1,4129 @@
+{
+ "schema": 1,
+ "experiment": "E8a-size",
+ "spec_sha256": "f11f4fa32a723ec01d04b4820c8a8c50d57395c6c79efd8ac4b71e1c527ae485",
+ "kind": "screening",
+ "bundle": "905db83a4732",
+ "writes": {
+  "neo": 30064771072,
+  "freya": 30064771072
+ },
+ "hypothesis": "Descriptive: the xs to rsync ratio as a smooth function of the swept variable, each point with its interval.",
+ "primary": "durable_s",
+ "delta": 0.03,
+ "control": "rsync",
+ "seed": 1,
+ "run_id": "20261014T220713Z-E8a-size",
+ "driver": "neo",
+ "sample_timeout_s": 3600,
+ "results": "lab",
+ "background": false,
+ "eager_cleanup": false,
+ "hosts": {
+  "neo": {
+   "ssh": "sanjee@neo.local",
+   "name": "neo.local",
+   "hostname": "neo",
+   "root": "/home/sanjee/benchmarks/xsyncv4/lab",
+   "interface": "eth0",
+   "helper": true,
+   "gates": {},
+   "local": false,
+   "system": "Linux"
+  },
+  "freya": {
+   "ssh": "sanjee@freya.local",
+   "name": "freya.local",
+   "hostname": "freya",
+   "root": "/mnt/nvme/xsbench",
+   "interface": "enp10s0",
+   "helper": true,
+   "gates": {},
+   "local": false,
+   "system": "Linux"
+  }
+ },
+ "links": {
+  "lan": {
+   "hosts": [
+    "neo",
+    "freya"
+   ],
+   "medium": "wired",
+   "min_speed_mbps": 1000,
+   "max_rtt_ms": 2.0
+  }
+ },
+ "arms": [
+  {
+   "name": "rsync",
+   "tool": "rsync",
+   "flags": [
+    "-a"
+   ],
+   "binary": {
+    "neo": "rsync",
+    "freya": "rsync"
+   }
+  },
+  {
+   "name": "xs",
+   "tool": "xs",
+   "flags": [
+    "-a"
+   ],
+   "rev": "8cc75bbdb801",
+   "binary": {
+    "neo": "/home/sanjee/benchmarks/xsyncv4/lab/bin/xs-8cc75bbdb801",
+    "freya": "/mnt/nvme/xsbench/bin/xs-8cc75bbdb801"
+   },
+   "sha256": {
+    "neo": "fc88711b3389e12acfd9c62d2ed037560d4d99c07371f81cf2474842afe4550d",
+    "freya": "2780cc842402d442918883559a01ee48e7d856a3e45c7d60559aa073bff2ac84"
+   },
+   "artifacts": {
+    "xs-darwin-arm64": "80c00669af2a98779492e47bbaeaae5bedb98a27233562353472792e32de25c3",
+    "xs-linux-amd64": "2780cc842402d442918883559a01ee48e7d856a3e45c7d60559aa073bff2ac84",
+    "xs-linux-arm64": "fc88711b3389e12acfd9c62d2ed037560d4d99c07371f81cf2474842afe4550d"
+   }
+  }
+ ],
+ "cells": [
+  {
+   "id": "scale-size-1024.fresh.neo-freya.sender.warm",
+   "corpus": "scale-size-1024",
+   "scenario": "fresh",
+   "sender": "neo",
+   "receiver": "freya",
+   "client": "sender",
+   "link": "lan",
+   "cache": "warm"
+  },
+  {
+   "id": "scale-size-1024.fresh.freya-neo.sender.warm",
+   "corpus": "scale-size-1024",
+   "scenario": "fresh",
+   "sender": "freya",
+   "receiver": "neo",
+   "client": "sender",
+   "link": "lan",
+   "cache": "warm"
+  },
+  {
+   "id": "scale-size-1024.noop.neo-freya.sender.warm",
+   "corpus": "scale-size-1024",
+   "scenario": "noop",
+   "sender": "neo",
+   "receiver": "freya",
+   "client": "sender",
+   "link": "lan",
+   "cache": "warm"
+  },
+  {
+   "id": "scale-size-1024.noop.freya-neo.sender.warm",
+   "corpus": "scale-size-1024",
+   "scenario": "noop",
+   "sender": "freya",
+   "receiver": "neo",
+   "client": "sender",
+   "link": "lan",
+   "cache": "warm"
+  },
+  {
+   "id": "scale-size-4096.fresh.neo-freya.sender.warm",
+   "corpus": "scale-size-4096",
+   "scenario": "fresh",
+   "sender": "neo",
+   "receiver": "freya",
+   "client": "sender",
+   "link": "lan",
+   "cache": "warm"
+  },
+  {
+   "id": "scale-size-4096.fresh.freya-neo.sender.warm",
+   "corpus": "scale-size-4096",
+   "scenario": "fresh",
+   "sender": "freya",
+   "receiver": "neo",
+   "client": "sender",
+   "link": "lan",
+   "cache": "warm"
+  },
+  {
+   "id": "scale-size-4096.noop.neo-freya.sender.warm",
+   "corpus": "scale-size-4096",
+   "scenario": "noop",
+   "sender": "neo",
+   "receiver": "freya",
+   "client": "sender",
+   "link": "lan",
+   "cache": "warm"
+  },
+  {
+   "id": "scale-size-4096.noop.freya-neo.sender.warm",
+   "corpus": "scale-size-4096",
+   "scenario": "noop",
+   "sender": "freya",
+   "receiver": "neo",
+   "client": "sender",
+   "link": "lan",
+   "cache": "warm"
+  },
+  {
+   "id": "scale-size-16384.fresh.neo-freya.sender.warm",
+   "corpus": "scale-size-16384",
+   "scenario": "fresh",
+   "sender": "neo",
+   "receiver": "freya",
+   "client": "sender",
+   "link": "lan",
+   "cache": "warm"
+  },
+  {
+   "id": "scale-size-16384.fresh.freya-neo.sender.warm",
+   "corpus": "scale-size-16384",
+   "scenario": "fresh",
+   "sender": "freya",
+   "receiver": "neo",
+   "client": "sender",
+   "link": "lan",
+   "cache": "warm"
+  },
+  {
+   "id": "scale-size-16384.noop.neo-freya.sender.warm",
+   "corpus": "scale-size-16384",
+   "scenario": "noop",
+   "sender": "neo",
+   "receiver": "freya",
+   "client": "sender",
+   "link": "lan",
+   "cache": "warm"
+  },
+  {
+   "id": "scale-size-16384.noop.freya-neo.sender.warm",
+   "corpus": "scale-size-16384",
+   "scenario": "noop",
+   "sender": "freya",
+   "receiver": "neo",
+   "client": "sender",
+   "link": "lan",
+   "cache": "warm"
+  },
+  {
+   "id": "scale-size-65536.fresh.neo-freya.sender.warm",
+   "corpus": "scale-size-65536",
+   "scenario": "fresh",
+   "sender": "neo",
+   "receiver": "freya",
+   "client": "sender",
+   "link": "lan",
+   "cache": "warm"
+  },
+  {
+   "id": "scale-size-65536.fresh.freya-neo.sender.warm",
+   "corpus": "scale-size-65536",
+   "scenario": "fresh",
+   "sender": "freya",
+   "receiver": "neo",
+   "client": "sender",
+   "link": "lan",
+   "cache": "warm"
+  },
+  {
+   "id": "scale-size-65536.noop.neo-freya.sender.warm",
+   "corpus": "scale-size-65536",
+   "scenario": "noop",
+   "sender": "neo",
+   "receiver": "freya",
+   "client": "sender",
+   "link": "lan",
+   "cache": "warm"
+  },
+  {
+   "id": "scale-size-65536.noop.freya-neo.sender.warm",
+   "corpus": "scale-size-65536",
+   "scenario": "noop",
+   "sender": "freya",
+   "receiver": "neo",
+   "client": "sender",
+   "link": "lan",
+   "cache": "warm"
+  },
+  {
+   "id": "scale-size-262144.fresh.neo-freya.sender.warm",
+   "corpus": "scale-size-262144",
+   "scenario": "fresh",
+   "sender": "neo",
+   "receiver": "freya",
+   "client": "sender",
+   "link": "lan",
+   "cache": "warm"
+  },
+  {
+   "id": "scale-size-262144.fresh.freya-neo.sender.warm",
+   "corpus": "scale-size-262144",
+   "scenario": "fresh",
+   "sender": "freya",
+   "receiver": "neo",
+   "client": "sender",
+   "link": "lan",
+   "cache": "warm"
+  },
+  {
+   "id": "scale-size-262144.noop.neo-freya.sender.warm",
+   "corpus": "scale-size-262144",
+   "scenario": "noop",
+   "sender": "neo",
+   "receiver": "freya",
+   "client": "sender",
+   "link": "lan",
+   "cache": "warm"
+  },
+  {
+   "id": "scale-size-262144.noop.freya-neo.sender.warm",
+   "corpus": "scale-size-262144",
+   "scenario": "noop",
+   "sender": "freya",
+   "receiver": "neo",
+   "client": "sender",
+   "link": "lan",
+   "cache": "warm"
+  },
+  {
+   "id": "scale-size-1048576.fresh.neo-freya.sender.warm",
+   "corpus": "scale-size-1048576",
+   "scenario": "fresh",
+   "sender": "neo",
+   "receiver": "freya",
+   "client": "sender",
+   "link": "lan",
+   "cache": "warm"
+  },
+  {
+   "id": "scale-size-1048576.fresh.freya-neo.sender.warm",
+   "corpus": "scale-size-1048576",
+   "scenario": "fresh",
+   "sender": "freya",
+   "receiver": "neo",
+   "client": "sender",
+   "link": "lan",
+   "cache": "warm"
+  },
+  {
+   "id": "scale-size-1048576.noop.neo-freya.sender.warm",
+   "corpus": "scale-size-1048576",
+   "scenario": "noop",
+   "sender": "neo",
+   "receiver": "freya",
+   "client": "sender",
+   "link": "lan",
+   "cache": "warm"
+  },
+  {
+   "id": "scale-size-1048576.noop.freya-neo.sender.warm",
+   "corpus": "scale-size-1048576",
+   "scenario": "noop",
+   "sender": "freya",
+   "receiver": "neo",
+   "client": "sender",
+   "link": "lan",
+   "cache": "warm"
+  },
+  {
+   "id": "scale-size-4194304.fresh.neo-freya.sender.warm",
+   "corpus": "scale-size-4194304",
+   "scenario": "fresh",
+   "sender": "neo",
+   "receiver": "freya",
+   "client": "sender",
+   "link": "lan",
+   "cache": "warm"
+  },
+  {
+   "id": "scale-size-4194304.fresh.freya-neo.sender.warm",
+   "corpus": "scale-size-4194304",
+   "scenario": "fresh",
+   "sender": "freya",
+   "receiver": "neo",
+   "client": "sender",
+   "link": "lan",
+   "cache": "warm"
+  },
+  {
+   "id": "scale-size-4194304.noop.neo-freya.sender.warm",
+   "corpus": "scale-size-4194304",
+   "scenario": "noop",
+   "sender": "neo",
+   "receiver": "freya",
+   "client": "sender",
+   "link": "lan",
+   "cache": "warm"
+  },
+  {
+   "id": "scale-size-4194304.noop.freya-neo.sender.warm",
+   "corpus": "scale-size-4194304",
+   "scenario": "noop",
+   "sender": "freya",
+   "receiver": "neo",
+   "client": "sender",
+   "link": "lan",
+   "cache": "warm"
+  },
+  {
+   "id": "scale-size-16777216.fresh.neo-freya.sender.warm",
+   "corpus": "scale-size-16777216",
+   "scenario": "fresh",
+   "sender": "neo",
+   "receiver": "freya",
+   "client": "sender",
+   "link": "lan",
+   "cache": "warm"
+  },
+  {
+   "id": "scale-size-16777216.fresh.freya-neo.sender.warm",
+   "corpus": "scale-size-16777216",
+   "scenario": "fresh",
+   "sender": "freya",
+   "receiver": "neo",
+   "client": "sender",
+   "link": "lan",
+   "cache": "warm"
+  },
+  {
+   "id": "scale-size-16777216.noop.neo-freya.sender.warm",
+   "corpus": "scale-size-16777216",
+   "scenario": "noop",
+   "sender": "neo",
+   "receiver": "freya",
+   "client": "sender",
+   "link": "lan",
+   "cache": "warm"
+  },
+  {
+   "id": "scale-size-16777216.noop.freya-neo.sender.warm",
+   "corpus": "scale-size-16777216",
+   "scenario": "noop",
+   "sender": "freya",
+   "receiver": "neo",
+   "client": "sender",
+   "link": "lan",
+   "cache": "warm"
+  }
+ ],
+ "corpora": {
+  "scale-size-1024": {
+   "files": 262144,
+   "directories": 262,
+   "bytes": 268435456,
+   "digest": "39d4b043f3bb1c67375a7b9401b6b9bcdd04c6adb7eb87fcdd7f03de1b74a1be",
+   "quick_digest": "2ddd2cb640865adb8344e61b074107d2886f174a277e12d90eaa30b2bfc01ea0"
+  },
+  "scale-size-4096": {
+   "files": 65536,
+   "directories": 65,
+   "bytes": 268435456,
+   "digest": "90d729b3e77441ed4538977bda0683a2c00d18123bdabc3549519ae3615cde51",
+   "quick_digest": "51400aa8116b0a51a6ab6253e1c3f61d3f51c7e23ed49db0f1f4b936a72dbf60"
+  },
+  "scale-size-16384": {
+   "files": 16384,
+   "directories": 16,
+   "bytes": 268435456,
+   "digest": "5e881dbb2ee1053c7a22c863fcd20dc85f3c25f7259767a11af0825c6f2db3e8",
+   "quick_digest": "98e0ef6443296adc47b91a50634c21453f699d62661eac2551e4cc5c6cc6b9a9"
+  },
+  "scale-size-65536": {
+   "files": 4096,
+   "directories": 4,
+   "bytes": 268435456,
+   "digest": "23de34fa33d888f5f00e93120fdc25698b37186daf4913f2fbc38f1d2c06e4ec",
+   "quick_digest": "00927f97ef432c5606614d0a5026cc34f0249f16d723a40b9010468e6fd2e552"
+  },
+  "scale-size-262144": {
+   "files": 1024,
+   "directories": 1,
+   "bytes": 268435456,
+   "digest": "5c0eb597d0f9d88b24225b635922ef94006f52a066115ceca826b23b40891433",
+   "quick_digest": "b3eb0795caf8c475d95fbd4741be548f0190eda18056fbfa231b1c5d93fc0d94"
+  },
+  "scale-size-1048576": {
+   "files": 256,
+   "directories": 1,
+   "bytes": 268435456,
+   "digest": "75535e06d48adaa47b6a5715f109cbfeaffee7927d5988d5b7fb73eea6d3e4a0",
+   "quick_digest": "a59ce00c0b910cdf5b02183b7a88985c3d0fba1ebd78c22940f7e914c85a1dd9"
+  },
+  "scale-size-4194304": {
+   "files": 64,
+   "directories": 1,
+   "bytes": 268435456,
+   "digest": "e91e85fd384bbb06e06d5667b4195da2710573070eae0b85d00d03eed1ea5437",
+   "quick_digest": "5b4b45e0aba3adfe37734ac6513140c910f96988b67fcc9991320ba656c1c182"
+  },
+  "scale-size-16777216": {
+   "files": 16,
+   "directories": 1,
+   "bytes": 268435456,
+   "digest": "0075d73e183ce35263b55f1c6c380b836177b8264100869f9c071b8b09aa47c0",
+   "quick_digest": "a621dcd94b88312005a55d1e4cbfb18e3944172d0ef4ce4735b7565530057a23"
+  }
+ },
+ "blocks": [
+  {
+   "cell": "scale-size-4194304.noop.freya-neo.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-1024.fresh.neo-freya.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-262144.noop.neo-freya.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-1024.noop.neo-freya.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-4194304.fresh.freya-neo.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-16777216.fresh.freya-neo.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-1048576.noop.freya-neo.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-16384.noop.freya-neo.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-4194304.fresh.neo-freya.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-16384.fresh.freya-neo.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-1024.noop.freya-neo.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-65536.noop.neo-freya.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-1048576.fresh.freya-neo.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-4096.noop.freya-neo.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-262144.fresh.neo-freya.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-4194304.noop.neo-freya.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-4096.fresh.neo-freya.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-16384.noop.neo-freya.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-1024.fresh.freya-neo.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-16384.fresh.neo-freya.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-1048576.noop.neo-freya.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-65536.fresh.neo-freya.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-1048576.fresh.neo-freya.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-65536.noop.freya-neo.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-65536.fresh.freya-neo.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-16777216.noop.neo-freya.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-16777216.fresh.neo-freya.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-4096.noop.neo-freya.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-16777216.noop.freya-neo.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-4096.fresh.freya-neo.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-262144.noop.freya-neo.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-262144.fresh.freya-neo.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-16384.fresh.freya-neo.sender.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-16384.fresh.neo-freya.sender.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-16777216.noop.freya-neo.sender.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-16384.noop.neo-freya.sender.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-16384.noop.freya-neo.sender.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-4194304.fresh.freya-neo.sender.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-4096.fresh.freya-neo.sender.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-1024.fresh.neo-freya.sender.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-262144.fresh.freya-neo.sender.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-1048576.noop.neo-freya.sender.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-1024.fresh.freya-neo.sender.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-1048576.noop.freya-neo.sender.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-4096.noop.neo-freya.sender.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-1024.noop.freya-neo.sender.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-16777216.noop.neo-freya.sender.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-65536.fresh.freya-neo.sender.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-4194304.noop.neo-freya.sender.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-262144.noop.neo-freya.sender.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-65536.noop.freya-neo.sender.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-65536.fresh.neo-freya.sender.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-4194304.noop.freya-neo.sender.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-1048576.fresh.freya-neo.sender.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-16777216.fresh.neo-freya.sender.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-4096.noop.freya-neo.sender.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-65536.noop.neo-freya.sender.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-262144.noop.freya-neo.sender.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-16777216.fresh.freya-neo.sender.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-4194304.fresh.neo-freya.sender.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-1048576.fresh.neo-freya.sender.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-1024.noop.neo-freya.sender.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-262144.fresh.neo-freya.sender.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-4096.fresh.neo-freya.sender.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-1048576.fresh.freya-neo.sender.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-1024.noop.neo-freya.sender.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-4194304.fresh.neo-freya.sender.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-262144.fresh.freya-neo.sender.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-16777216.fresh.neo-freya.sender.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-16384.fresh.freya-neo.sender.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-65536.noop.freya-neo.sender.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-1024.noop.freya-neo.sender.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-4096.fresh.freya-neo.sender.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-16384.noop.freya-neo.sender.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-65536.fresh.neo-freya.sender.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-262144.fresh.neo-freya.sender.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-1048576.noop.neo-freya.sender.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-4096.fresh.neo-freya.sender.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-1024.fresh.neo-freya.sender.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-1048576.fresh.neo-freya.sender.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-65536.fresh.freya-neo.sender.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-4096.noop.freya-neo.sender.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-4096.noop.neo-freya.sender.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-16384.noop.neo-freya.sender.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-16777216.noop.freya-neo.sender.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-4194304.noop.freya-neo.sender.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-16777216.noop.neo-freya.sender.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-1048576.noop.freya-neo.sender.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-1024.fresh.freya-neo.sender.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-16777216.fresh.freya-neo.sender.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-262144.noop.freya-neo.sender.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-65536.noop.neo-freya.sender.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-16384.fresh.neo-freya.sender.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-262144.noop.neo-freya.sender.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-4194304.noop.neo-freya.sender.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-4194304.fresh.freya-neo.sender.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-16384.fresh.neo-freya.sender.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-4194304.noop.freya-neo.sender.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-65536.noop.neo-freya.sender.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-262144.noop.freya-neo.sender.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-65536.fresh.freya-neo.sender.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-4194304.noop.neo-freya.sender.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-16777216.noop.freya-neo.sender.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-262144.noop.neo-freya.sender.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-1048576.noop.freya-neo.sender.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-4096.fresh.neo-freya.sender.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-16384.fresh.freya-neo.sender.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-16777216.noop.neo-freya.sender.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-16384.noop.neo-freya.sender.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-16384.noop.freya-neo.sender.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-1048576.fresh.neo-freya.sender.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-4194304.fresh.freya-neo.sender.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-4096.fresh.freya-neo.sender.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-1024.noop.freya-neo.sender.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-1048576.noop.neo-freya.sender.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-65536.fresh.neo-freya.sender.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-4096.noop.freya-neo.sender.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-16777216.fresh.freya-neo.sender.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-1024.fresh.freya-neo.sender.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-1048576.fresh.freya-neo.sender.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-1024.fresh.neo-freya.sender.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-4096.noop.neo-freya.sender.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-65536.noop.freya-neo.sender.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-1024.noop.neo-freya.sender.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-16777216.fresh.neo-freya.sender.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-262144.fresh.freya-neo.sender.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-262144.fresh.neo-freya.sender.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-4194304.fresh.neo-freya.sender.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-4194304.fresh.freya-neo.sender.warm",
+   "block": 4,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-16777216.noop.freya-neo.sender.warm",
+   "block": 4,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-16777216.noop.neo-freya.sender.warm",
+   "block": 4,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-16777216.fresh.neo-freya.sender.warm",
+   "block": 4,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-4096.noop.neo-freya.sender.warm",
+   "block": 4,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-16384.fresh.neo-freya.sender.warm",
+   "block": 4,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-65536.noop.freya-neo.sender.warm",
+   "block": 4,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-262144.noop.neo-freya.sender.warm",
+   "block": 4,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-65536.noop.neo-freya.sender.warm",
+   "block": 4,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-4096.fresh.neo-freya.sender.warm",
+   "block": 4,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-4096.fresh.freya-neo.sender.warm",
+   "block": 4,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-1024.noop.freya-neo.sender.warm",
+   "block": 4,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-262144.fresh.neo-freya.sender.warm",
+   "block": 4,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-262144.fresh.freya-neo.sender.warm",
+   "block": 4,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-1048576.fresh.neo-freya.sender.warm",
+   "block": 4,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-4194304.fresh.neo-freya.sender.warm",
+   "block": 4,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-16777216.fresh.freya-neo.sender.warm",
+   "block": 4,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-16384.noop.neo-freya.sender.warm",
+   "block": 4,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-1048576.noop.freya-neo.sender.warm",
+   "block": 4,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-1048576.fresh.freya-neo.sender.warm",
+   "block": 4,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-4096.noop.freya-neo.sender.warm",
+   "block": 4,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-65536.fresh.freya-neo.sender.warm",
+   "block": 4,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-1024.fresh.freya-neo.sender.warm",
+   "block": 4,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-262144.noop.freya-neo.sender.warm",
+   "block": 4,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-1024.fresh.neo-freya.sender.warm",
+   "block": 4,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-4194304.noop.neo-freya.sender.warm",
+   "block": 4,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-16384.noop.freya-neo.sender.warm",
+   "block": 4,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-65536.fresh.neo-freya.sender.warm",
+   "block": 4,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-1048576.noop.neo-freya.sender.warm",
+   "block": 4,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-16384.fresh.freya-neo.sender.warm",
+   "block": 4,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-4194304.noop.freya-neo.sender.warm",
+   "block": 4,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-1024.noop.neo-freya.sender.warm",
+   "block": 4,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-262144.fresh.neo-freya.sender.warm",
+   "block": 5,
+   "verify_full": true,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-65536.noop.freya-neo.sender.warm",
+   "block": 5,
+   "verify_full": true,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-65536.noop.neo-freya.sender.warm",
+   "block": 5,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-16777216.noop.freya-neo.sender.warm",
+   "block": 5,
+   "verify_full": true,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-262144.noop.freya-neo.sender.warm",
+   "block": 5,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-4096.noop.freya-neo.sender.warm",
+   "block": 5,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-16384.fresh.freya-neo.sender.warm",
+   "block": 5,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-16384.noop.neo-freya.sender.warm",
+   "block": 5,
+   "verify_full": true,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-4194304.noop.freya-neo.sender.warm",
+   "block": 5,
+   "verify_full": true,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-16777216.fresh.freya-neo.sender.warm",
+   "block": 5,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-1024.fresh.freya-neo.sender.warm",
+   "block": 5,
+   "verify_full": true,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-1024.noop.freya-neo.sender.warm",
+   "block": 5,
+   "verify_full": true,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-4096.fresh.freya-neo.sender.warm",
+   "block": 5,
+   "verify_full": true,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-4096.noop.neo-freya.sender.warm",
+   "block": 5,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-1024.noop.neo-freya.sender.warm",
+   "block": 5,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-65536.fresh.freya-neo.sender.warm",
+   "block": 5,
+   "verify_full": true,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-4194304.fresh.neo-freya.sender.warm",
+   "block": 5,
+   "verify_full": true,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-262144.noop.neo-freya.sender.warm",
+   "block": 5,
+   "verify_full": true,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-1048576.noop.freya-neo.sender.warm",
+   "block": 5,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-16777216.noop.neo-freya.sender.warm",
+   "block": 5,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-1048576.fresh.neo-freya.sender.warm",
+   "block": 5,
+   "verify_full": true,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-16384.fresh.neo-freya.sender.warm",
+   "block": 5,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-16384.noop.freya-neo.sender.warm",
+   "block": 5,
+   "verify_full": true,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-4194304.fresh.freya-neo.sender.warm",
+   "block": 5,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-1048576.noop.neo-freya.sender.warm",
+   "block": 5,
+   "verify_full": true,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-4096.fresh.neo-freya.sender.warm",
+   "block": 5,
+   "verify_full": true,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-4194304.noop.neo-freya.sender.warm",
+   "block": 5,
+   "verify_full": true,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-262144.fresh.freya-neo.sender.warm",
+   "block": 5,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-65536.fresh.neo-freya.sender.warm",
+   "block": 5,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-16777216.fresh.neo-freya.sender.warm",
+   "block": 5,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-1048576.fresh.freya-neo.sender.warm",
+   "block": 5,
+   "verify_full": true,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "scale-size-1024.fresh.neo-freya.sender.warm",
+   "block": 5,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  }
+ ],
+ "scripts": {
+  "probe.py": "52e78e2063c5cce8393789c90ed49c4f9c18921fd823837f5f653956f7169777",
+  "corpus.py": "d6018d3611cba607a670f3fe554d0d4be5941fb2ef8fd65d57f10bfb582625f6",
+  "corpora.json": "984149a5d4487950b49310a884fe4f32ced3a09b1396be290a1841646629ac96",
+  "agent.py": "ebc8c2ad5e79af9c9ec4da02e9f6ddd3b1e9fb6b82f5baffdf28c2ff0f053a51",
+  "runner.py": "0356c31867701629fb0b179293d4da2d6328921efb5f3d601585b1d5d6adc9e0",
+  "measure.py": "5065310f480ff1cabfa7c645f0db342624a02f9a081b96069d50d52b3d224777"
+ }
+}

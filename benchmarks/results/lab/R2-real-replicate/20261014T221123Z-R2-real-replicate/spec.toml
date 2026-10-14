@@ -1,0 +1,28 @@
+# R2: the real trees, a block at a time, as filler alternating with R1.
+# small-real and the holochart tree (249,602 files), with -aH for both tools.
+# Read as a day-to-day series; pooled, a further estimate of E1v2 and E1r2.
+id = "R2-real-replicate"
+kind = "screening"
+hypothesis = "The xs to rsync ratios on real trees hold from day to day."
+primary = "durable_s"
+delta = 0.03
+blocks = 2
+control = "rsync"
+verify = "first-last"
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-aH"]
+
+[arms.xs]
+tool = "xs"
+rev = "8cc75bbdb801"
+flags = ["-aH"]
+
+[matrix]
+link = "lan"
+corpus = ["small-real", "real-holochart"]
+scenario = ["fresh", "noop"]
+direction = ["neo>freya", "freya>neo"]
+client = ["sender"]
+cache = ["warm"]

@@ -1239,6 +1239,78 @@ ratio of 1.036 [1.026, 1.046]. First diagnostics, run by hand:
     fixed) then W1; on neo T1e after the holochart run. orion's write
     allowance was raised to 400 GiB a day so that W1 follows W0b.
 
+- The sending-worker cap, on the `tunables` branch (`453704a64528`), not
+  merged: `send_streams=N` lets at most N sender workers read files larger
+  than `small_max` at once. A worker that meets a large file while every
+  stream is busy sets it aside, finishes the small files of its task and
+  queues the large ones again, so no worker idles while small files wait.
+  Release builds compile it away. The metrics line now reports the most
+  streams that ran at once and how many files waited; the engine test
+  checks that with one stream, nine large files never overlap and the tree
+  still copies exactly. T1f (screening, 600 samples) is at the front of
+  neo's backlog: the cap at 1 and 2 against default xs, the one-worker
+  sender and rsync, on `mixed-bimodal`, `small-flat` and `small-real`,
+  fresh and no-op, both directions. If it holds, the default becomes a cap
+  for senders with four cores or fewer, measured again on the Wi-Fi pair,
+  where the sender is a Pi 4.
+
+- T1f (the stream cap, screening, 120 of 120 blocks valid): the cap is
+  harmless and nearly useless. Capping the sender at one large-file stream
+  is *equivalent* or inconclusive everywhere, including small files and
+  no-ops, but from neo it gains only 1.3% on `mixed-bimodal` (0.987
+  [0.977, 0.998]) where one sending worker gains 3.5% (0.965) and rsync is
+  level with that. The counters say why: with the cap, the Pi's sender
+  still used 12.9 s of CPU and 5,020 involuntary context switches a run,
+  against 9.7 s and 120 with one worker. The other workers keep reading
+  small files beside the one stream, and four workers plus the writer
+  thread share four cores with ssh. One sending worker again cost 13 to
+  61% on small files. So the contention is xs's workers against ssh, not
+  large-file readers against each other. T1g (queued) tries three and two
+  sending workers, and three with the cap, on the Pi only.
+- E1v2 (confirmatory, the baseline matrix on `8cc75bbdb801`, 336 of 336
+  blocks valid, Holm over 28): xs is *faster* than rsync in 20 of 28
+  cells, *equivalent* in two (byte-bound from freya), and slower in none.
+  The only cells where xs is behind are the four byte-bound copies from
+  neo, 3.7% on both mixed corpora (inconclusive at δ = 3%), which is T1.
+  No-ops are 1.1 to 6.7 times faster (`small-real` from freya 1.39 s
+  against 9.16 s), and small fresh copies from the Pi 1.6 to 1.7 times
+  faster. Against E1 on `bf596d28c5c9` nothing moved beyond its interval;
+  `mixed-threshold` from neo went from 0.955 to 1.037, which E1 had
+  inconclusive at higher noise.
+- Daily write allowances raised to 2,500 GiB on neo and freya
+  (2026-10-14): data collection is planned for one to two weeks, so drive
+  wear is not a constraint at that rate.
+
+- T1g (fewer sending workers on the Pi, screening): neither three nor two
+  sending workers, nor three with one stream, recovers the byte-bound gap
+  on `mixed-bimodal`; on `mixed-threshold` two workers and three with one
+  stream come to 0.969 and 0.966 against rsync's 0.962. Two workers cost
+  14% on a `small-flat` no-op, three cost 24% on a `small-real` no-op. No
+  setting of the existing knobs is a free win; T1h repeats the byte-bound
+  cells at 20 blocks.
+- T1e (receiver workers on freya, confirmatory, Holm over 28): four
+  receiving workers are *faster* than sixteen on a `small-real` no-op
+  (0.649 [0.562, 0.749]) and a `small-opaque` fresh copy (0.955 [0.942,
+  0.969]); eight are faster on the `small-real` no-op (0.721). Nothing is
+  slower. This is ready to become the receiver's default on many-core
+  hosts, an engine change.
+- A week unattended, from 2026-10-14 17:00 Central, neo and freya only
+  (orion and mars are paused while orion is used for other work).
+  The runner now retries a run that failed before its first sample (up to
+  three times), lifts a halt by itself after an hour, settles runs left
+  unfinished by a reboot, and runs maintenance jobs between experiments;
+  `plan.py runner start` writes `runner.sh`, which neo's crontab runs at
+  boot. The backlog, in order, about 175 hours with the sentinel every six
+  hours: generate the 13 scaling corpora on both hosts (pinned from a run
+  on the Mac); E3f ciphers; E8a and E8b, the size and count curves; E1c,
+  the baseline with cold caches; E1b2, push against pull; E3d metadata
+  flags; E3c `--no-atomic`; E3g output; E4b and E4b2, queue sizes and soft
+  limits; E4a2, block size and small-file cutoff without `-z`; E1r3,
+  `laikav2` at 8 blocks; T1h; E1z, the `-z` baseline; the two curves with
+  cold caches; the holochart tree cold; then 80 alternating pairs of R1
+  (the baseline matrix, 4 blocks) and R2 (`small-real` and holochart, 2
+  blocks) as day-to-day replicates.
+
 M0 is done by the operator, not by the harness. M1–M6 need no engine
 change, so flag-only experiments (E1–E3) can start before M7.
 

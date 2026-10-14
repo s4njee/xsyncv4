@@ -1,0 +1,436 @@
+{
+ "schema": 1,
+ "experiment": "E1r3-laikav2",
+ "spec_sha256": "82f8d5b0ce8737385153f7060f72bd2faaf92ce398fa14a0b4e56446ca0ffd80",
+ "kind": "confirmatory",
+ "bundle": "905db83a4732",
+ "writes": {
+  "neo": 725057216672,
+  "freya": 725057216672
+ },
+ "hypothesis": "Once xs -aH sends linked data once, it is within a few percent of rsync -aH on the real 42 GiB tree.",
+ "primary": "durable_s",
+ "delta": 0.03,
+ "control": "rsync",
+ "seed": 1,
+ "run_id": "20261014T220738Z-E1r3-laikav2",
+ "driver": "neo",
+ "sample_timeout_s": 7200,
+ "results": "lab",
+ "background": false,
+ "eager_cleanup": false,
+ "hosts": {
+  "neo": {
+   "ssh": "sanjee@neo.local",
+   "name": "neo.local",
+   "hostname": "neo",
+   "root": "/home/sanjee/benchmarks/xsyncv4/lab",
+   "interface": "eth0",
+   "helper": true,
+   "gates": {},
+   "local": false,
+   "system": "Linux"
+  },
+  "freya": {
+   "ssh": "sanjee@freya.local",
+   "name": "freya.local",
+   "hostname": "freya",
+   "root": "/mnt/nvme/xsbench",
+   "interface": "enp10s0",
+   "helper": true,
+   "gates": {},
+   "local": false,
+   "system": "Linux"
+  }
+ },
+ "links": {
+  "lan": {
+   "hosts": [
+    "neo",
+    "freya"
+   ],
+   "medium": "wired",
+   "min_speed_mbps": 1000,
+   "max_rtt_ms": 2.0
+  }
+ },
+ "arms": [
+  {
+   "name": "rsync",
+   "tool": "rsync",
+   "flags": [
+    "-aH"
+   ],
+   "binary": {
+    "neo": "rsync",
+    "freya": "rsync"
+   }
+  },
+  {
+   "name": "xs",
+   "tool": "xs",
+   "flags": [
+    "-aH"
+   ],
+   "rev": "8cc75bbdb801",
+   "binary": {
+    "neo": "/home/sanjee/benchmarks/xsyncv4/lab/bin/xs-8cc75bbdb801",
+    "freya": "/mnt/nvme/xsbench/bin/xs-8cc75bbdb801"
+   },
+   "sha256": {
+    "neo": "fc88711b3389e12acfd9c62d2ed037560d4d99c07371f81cf2474842afe4550d",
+    "freya": "2780cc842402d442918883559a01ee48e7d856a3e45c7d60559aa073bff2ac84"
+   },
+   "artifacts": {
+    "xs-darwin-arm64": "80c00669af2a98779492e47bbaeaae5bedb98a27233562353472792e32de25c3",
+    "xs-linux-amd64": "2780cc842402d442918883559a01ee48e7d856a3e45c7d60559aa073bff2ac84",
+    "xs-linux-arm64": "fc88711b3389e12acfd9c62d2ed037560d4d99c07371f81cf2474842afe4550d"
+   }
+  }
+ ],
+ "cells": [
+  {
+   "id": "real-laikav2.fresh.neo-freya.sender.warm",
+   "corpus": "real-laikav2",
+   "scenario": "fresh",
+   "sender": "neo",
+   "receiver": "freya",
+   "client": "sender",
+   "link": "lan",
+   "cache": "warm"
+  },
+  {
+   "id": "real-laikav2.fresh.freya-neo.sender.warm",
+   "corpus": "real-laikav2",
+   "scenario": "fresh",
+   "sender": "freya",
+   "receiver": "neo",
+   "client": "sender",
+   "link": "lan",
+   "cache": "warm"
+  }
+ ],
+ "corpora": {
+  "real-laikav2": {
+   "files": 54691,
+   "directories": 3106,
+   "bytes": 45316076042,
+   "digest": "e25b0f37618e36c7ec17588806ceeb5a74135bba74f68f21f75c376b6d10148a",
+   "quick_digest": "c545fd94c1e715bfb5abc350082ce30d9bde5857c66275bbaace2dfa0975fcbc"
+  }
+ },
+ "blocks": [
+  {
+   "cell": "real-laikav2.fresh.neo-freya.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "real-laikav2.fresh.freya-neo.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "real-laikav2.fresh.freya-neo.sender.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "real-laikav2.fresh.neo-freya.sender.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "real-laikav2.fresh.neo-freya.sender.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "real-laikav2.fresh.freya-neo.sender.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "real-laikav2.fresh.neo-freya.sender.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "real-laikav2.fresh.freya-neo.sender.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "real-laikav2.fresh.neo-freya.sender.warm",
+   "block": 4,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "real-laikav2.fresh.freya-neo.sender.warm",
+   "block": 4,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "real-laikav2.fresh.freya-neo.sender.warm",
+   "block": 5,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "real-laikav2.fresh.neo-freya.sender.warm",
+   "block": 5,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "real-laikav2.fresh.freya-neo.sender.warm",
+   "block": 6,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "real-laikav2.fresh.neo-freya.sender.warm",
+   "block": 6,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "real-laikav2.fresh.freya-neo.sender.warm",
+   "block": 7,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "real-laikav2.fresh.neo-freya.sender.warm",
+   "block": 7,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  }
+ ],
+ "scripts": {
+  "probe.py": "52e78e2063c5cce8393789c90ed49c4f9c18921fd823837f5f653956f7169777",
+  "corpus.py": "d6018d3611cba607a670f3fe554d0d4be5941fb2ef8fd65d57f10bfb582625f6",
+  "corpora.json": "984149a5d4487950b49310a884fe4f32ced3a09b1396be290a1841646629ac96",
+  "agent.py": "ebc8c2ad5e79af9c9ec4da02e9f6ddd3b1e9fb6b82f5baffdf28c2ff0f053a51",
+  "runner.py": "0356c31867701629fb0b179293d4da2d6328921efb5f3d601585b1d5d6adc9e0",
+  "measure.py": "5065310f480ff1cabfa7c645f0db342624a02f9a081b96069d50d52b3d224777"
+ }
+}

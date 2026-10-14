@@ -1,0 +1,503 @@
+{
+ "schema": 1,
+ "experiment": "R2-real-replicate",
+ "spec_sha256": "d6c15811b8ebe4113a163a9bf5ba10e7b2bf8204b043642825656777038a7381",
+ "kind": "screening",
+ "bundle": "905db83a4732",
+ "writes": {
+  "neo": 53595088332,
+  "freya": 53595088332
+ },
+ "hypothesis": "The xs to rsync ratios on real trees hold from day to day.",
+ "primary": "durable_s",
+ "delta": 0.03,
+ "control": "rsync",
+ "seed": 147,
+ "run_id": "20261014T221416Z-R2-real-replicate",
+ "driver": "neo",
+ "sample_timeout_s": 3600,
+ "results": "lab",
+ "background": false,
+ "eager_cleanup": false,
+ "hosts": {
+  "neo": {
+   "ssh": "sanjee@neo.local",
+   "name": "neo.local",
+   "hostname": "neo",
+   "root": "/home/sanjee/benchmarks/xsyncv4/lab",
+   "interface": "eth0",
+   "helper": true,
+   "gates": {},
+   "local": false,
+   "system": "Linux"
+  },
+  "freya": {
+   "ssh": "sanjee@freya.local",
+   "name": "freya.local",
+   "hostname": "freya",
+   "root": "/mnt/nvme/xsbench",
+   "interface": "enp10s0",
+   "helper": true,
+   "gates": {},
+   "local": false,
+   "system": "Linux"
+  }
+ },
+ "links": {
+  "lan": {
+   "hosts": [
+    "neo",
+    "freya"
+   ],
+   "medium": "wired",
+   "min_speed_mbps": 1000,
+   "max_rtt_ms": 2.0
+  }
+ },
+ "arms": [
+  {
+   "name": "rsync",
+   "tool": "rsync",
+   "flags": [
+    "-aH"
+   ],
+   "binary": {
+    "neo": "rsync",
+    "freya": "rsync"
+   }
+  },
+  {
+   "name": "xs",
+   "tool": "xs",
+   "flags": [
+    "-aH"
+   ],
+   "rev": "8cc75bbdb801",
+   "binary": {
+    "neo": "/home/sanjee/benchmarks/xsyncv4/lab/bin/xs-8cc75bbdb801",
+    "freya": "/mnt/nvme/xsbench/bin/xs-8cc75bbdb801"
+   },
+   "sha256": {
+    "neo": "fc88711b3389e12acfd9c62d2ed037560d4d99c07371f81cf2474842afe4550d",
+    "freya": "2780cc842402d442918883559a01ee48e7d856a3e45c7d60559aa073bff2ac84"
+   },
+   "artifacts": {
+    "xs-darwin-arm64": "80c00669af2a98779492e47bbaeaae5bedb98a27233562353472792e32de25c3",
+    "xs-linux-amd64": "2780cc842402d442918883559a01ee48e7d856a3e45c7d60559aa073bff2ac84",
+    "xs-linux-arm64": "fc88711b3389e12acfd9c62d2ed037560d4d99c07371f81cf2474842afe4550d"
+   }
+  }
+ ],
+ "cells": [
+  {
+   "id": "small-real.fresh.neo-freya.sender.warm",
+   "corpus": "small-real",
+   "scenario": "fresh",
+   "sender": "neo",
+   "receiver": "freya",
+   "client": "sender",
+   "link": "lan",
+   "cache": "warm"
+  },
+  {
+   "id": "small-real.fresh.freya-neo.sender.warm",
+   "corpus": "small-real",
+   "scenario": "fresh",
+   "sender": "freya",
+   "receiver": "neo",
+   "client": "sender",
+   "link": "lan",
+   "cache": "warm"
+  },
+  {
+   "id": "small-real.noop.neo-freya.sender.warm",
+   "corpus": "small-real",
+   "scenario": "noop",
+   "sender": "neo",
+   "receiver": "freya",
+   "client": "sender",
+   "link": "lan",
+   "cache": "warm"
+  },
+  {
+   "id": "small-real.noop.freya-neo.sender.warm",
+   "corpus": "small-real",
+   "scenario": "noop",
+   "sender": "freya",
+   "receiver": "neo",
+   "client": "sender",
+   "link": "lan",
+   "cache": "warm"
+  },
+  {
+   "id": "real-holochart.fresh.neo-freya.sender.warm",
+   "corpus": "real-holochart",
+   "scenario": "fresh",
+   "sender": "neo",
+   "receiver": "freya",
+   "client": "sender",
+   "link": "lan",
+   "cache": "warm"
+  },
+  {
+   "id": "real-holochart.fresh.freya-neo.sender.warm",
+   "corpus": "real-holochart",
+   "scenario": "fresh",
+   "sender": "freya",
+   "receiver": "neo",
+   "client": "sender",
+   "link": "lan",
+   "cache": "warm"
+  },
+  {
+   "id": "real-holochart.noop.neo-freya.sender.warm",
+   "corpus": "real-holochart",
+   "scenario": "noop",
+   "sender": "neo",
+   "receiver": "freya",
+   "client": "sender",
+   "link": "lan",
+   "cache": "warm"
+  },
+  {
+   "id": "real-holochart.noop.freya-neo.sender.warm",
+   "corpus": "real-holochart",
+   "scenario": "noop",
+   "sender": "freya",
+   "receiver": "neo",
+   "client": "sender",
+   "link": "lan",
+   "cache": "warm"
+  }
+ ],
+ "corpora": {
+  "small-real": {
+   "files": 118594,
+   "directories": 59336,
+   "bytes": 1107333872,
+   "digest": "e9c84fab7d1a6dcdaf7c1c8688abe9bcb3cd114f551c27fad5b8624391005cdb",
+   "quick_digest": "65994469699350cde8ad45842d686fe1a01d87e64ed26de283fb0c860fae01e3"
+  },
+  "real-holochart": {
+   "files": 249602,
+   "directories": 33012,
+   "bytes": 7825180850,
+   "digest": "32264d1dc67934398ecd8095344cc80d328bc57395c65910dadcc8f03c44ecf4",
+   "quick_digest": "c71e98cb0e6e4201c36d7bc9f90afc9fe925b773391ea3c9c89de0eaa5b4edd3"
+  }
+ },
+ "blocks": [
+  {
+   "cell": "real-holochart.fresh.freya-neo.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "real-holochart.noop.freya-neo.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-real.noop.neo-freya.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-real.fresh.neo-freya.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "small-real.noop.freya-neo.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "real-holochart.fresh.neo-freya.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-real.fresh.freya-neo.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "real-holochart.noop.neo-freya.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "real-holochart.noop.neo-freya.sender.warm",
+   "block": 1,
+   "verify_full": true,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-real.fresh.neo-freya.sender.warm",
+   "block": 1,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-real.noop.freya-neo.sender.warm",
+   "block": 1,
+   "verify_full": true,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "small-real.fresh.freya-neo.sender.warm",
+   "block": 1,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-real.noop.neo-freya.sender.warm",
+   "block": 1,
+   "verify_full": true,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "real-holochart.fresh.freya-neo.sender.warm",
+   "block": 1,
+   "verify_full": true,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "real-holochart.fresh.neo-freya.sender.warm",
+   "block": 1,
+   "verify_full": true,
+   "orders": [
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "real-holochart.noop.freya-neo.sender.warm",
+   "block": 1,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs"
+    ]
+   ]
+  }
+ ],
+ "scripts": {
+  "probe.py": "52e78e2063c5cce8393789c90ed49c4f9c18921fd823837f5f653956f7169777",
+  "corpus.py": "d6018d3611cba607a670f3fe554d0d4be5941fb2ef8fd65d57f10bfb582625f6",
+  "corpora.json": "984149a5d4487950b49310a884fe4f32ced3a09b1396be290a1841646629ac96",
+  "agent.py": "ebc8c2ad5e79af9c9ec4da02e9f6ddd3b1e9fb6b82f5baffdf28c2ff0f053a51",
+  "runner.py": "0356c31867701629fb0b179293d4da2d6328921efb5f3d601585b1d5d6adc9e0",
+  "measure.py": "5065310f480ff1cabfa7c645f0db342624a02f9a081b96069d50d52b3d224777"
+ }
+}

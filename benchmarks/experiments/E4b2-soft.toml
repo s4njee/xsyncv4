@@ -1,0 +1,52 @@
+# E4b, second half: the soft backlog limits that take workers off scanning
+# (sender, 64 read tasks) and off generating (receiver, 16 DATA tasks).
+id = "E4b2-soft"
+kind = "screening"
+hypothesis = "The soft backlog limits are not critical: a quarter or four times the default changes no copy by more than 3%."
+primary = "wall_s"
+delta = 0.03
+blocks = 10
+control = "xs"
+verify = "first-last"
+
+[arms.xs]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a"]
+metrics = true
+
+[arms.soft-send16]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a"]
+tune = "q1_soft_send=16"
+metrics = true
+
+[arms.soft-send256]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a"]
+tune = "q1_soft_send=256"
+metrics = true
+
+[arms.soft-recv4]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a"]
+tune = "q1_soft_recv=4"
+metrics = true
+
+[arms.soft-recv64]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a"]
+tune = "q1_soft_recv=64"
+metrics = true
+
+[matrix]
+link = "lan"
+corpus = ["small-flat", "small-real", "mixed-bimodal"]
+scenario = ["fresh", "noop"]
+direction = ["neo>freya", "freya>neo"]
+client = ["sender"]
+cache = ["warm"]

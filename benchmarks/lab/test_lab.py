@@ -924,6 +924,7 @@ class ContinuousRunner(unittest.TestCase):
             return []
 
     def test_works_through_the_backlog_and_keeps_going(self):
+        self.control(retries=0)
         self.add('first', 'broken', 'last')
         self.add('ghost')
         (self.runs / 'ghost' / 'plan.json').unlink()
@@ -986,7 +987,7 @@ class ContinuousRunner(unittest.TestCase):
         self.assertEqual(runner.written(self.runs, now), {'freya': 20}, 'only the last 24 hours count')
 
     def test_three_failures_in_a_row_halt_it_until_someone_resumes(self):
-        self.control(halt_after=2)
+        self.control(halt_after=2, retries=0)
         self.add('broken1', 'broken2', 'spared')
         self.start()
         status = self.until(lambda s: s.get('state') == 'halted')
@@ -994,6 +995,59 @@ class ContinuousRunner(unittest.TestCase):
         self.assertEqual(status['consecutive_failures'], 2)
         (self.runs / '.resume').touch()
         self.until(lambda s: any(entry['run'] == 'spared' for entry in s.get('recent', [])), 45)
+
+    def test_a_run_that_failed_before_any_sample_is_tried_again(self):
+        self.control(retries=2, halt_after=10)
+        self.add('broken', 'after')
+        self.start()
+        status = self.until(lambda s: len(s.get('recent', [])) == 4)
+        self.assertEqual(self.order(), ['broken', 'broken', 'broken', 'after'], 'two retries, then it stays failed')
+        self.assertEqual([entry.get('requeued') for entry in status['recent']], [True, True, False, False])
+        self.assertEqual(len(list((self.runs / 'broken').glob('status.attempt-*.json'))), 2)
+
+    def test_a_run_with_samples_is_not_tried_again(self):
+        self.control(retries=2, halt_after=10)
+        self.add('broken')
+        (self.runs / 'broken' / 'samples.jsonl').write_text('{"valid": true}\n')
+        self.start()
+        self.until(lambda s: len(s.get('recent', [])) == 1 and s.get('state') == 'idle')
+        self.assertEqual(self.order(), ['broken'])
+
+    def test_a_halt_lifts_itself_after_the_cool_down(self):
+        self.control(halt_after=1, retries=0, halt_cooldown_s=2)
+        self.add('broken1', 'spared')
+        self.start()
+        self.until(lambda s: s.get('state') == 'halted')
+        self.until(lambda s: any(entry['run'] == 'spared' for entry in s.get('recent', [])), 30)
+        self.assertEqual(self.order(), ['broken1', 'spared'])
+
+    def test_runs_left_unfinished_by_a_dead_runner_are_settled_on_start(self):
+        self.add('measured', 'unmeasured', 'next')
+        for name in ('measured', 'unmeasured'):
+            (self.runs / name / 'status.json').write_text('{"state": "running"}')
+        (self.runs / 'measured' / 'samples.jsonl').write_text('{"valid": true}\n{"valid": true}\n')
+        self.start()
+        self.until(lambda s: len([entry for entry in s.get('recent', []) if entry.get('lane')]) == 2)
+        self.assertEqual(json.loads((self.runs / 'measured' / 'status.json').read_text())['state'], 'interrupted')
+        self.assertEqual(self.order(), ['unmeasured', 'next'], 'the run with no samples starts again; the other keeps its data')
+
+    def test_a_maintenance_job_runs_its_steps_in_order_under_the_lock(self):
+        (self.runs / 'gen').mkdir()
+        out = self.root / 'job-out.txt'
+        steps = [{'host': 'here', 'local': True, 'command': f'echo one >> {out}'},
+                 {'host': 'here', 'local': True, 'command': f'echo two >> {out}'}]
+        (self.runs / 'gen' / 'job.json').write_text(json.dumps({'steps': steps}))
+        (self.runs / 'bad').mkdir()
+        (self.runs / 'bad' / 'job.json').write_text(json.dumps({'steps': [
+            {'host': 'here', 'local': True, 'command': 'exit 4'}, {'host': 'here', 'local': True, 'command': f'echo never >> {out}'}]}))
+        with open(self.runs / 'backlog.txt', 'a') as stream:
+            stream.write('gen\nbad\n')
+        self.add('after')
+        self.start()
+        status = self.until(lambda s: len(s.get('recent', [])) == 3)
+        self.assertEqual(out.read_text().split(), ['one', 'two'])
+        self.assertEqual([entry['state'] for entry in status['recent']], ['complete', 'failed', 'complete'])
+        self.assertTrue((self.runs / 'gen' / 'job.log').exists())
 
     def test_pause_holds_the_next_run(self):
         (self.runs / '.pause').touch()
@@ -1006,6 +1060,7 @@ class ContinuousRunner(unittest.TestCase):
         self.until(lambda s: len(s.get('recent', [])) == 1, 30)
 
     def test_an_agent_that_dies_is_recorded_and_not_run_again(self):
+        self.control(retries=0)
         self.add('dies', 'after')
         self.start()
         status = self.until(lambda s: len(s.get('recent', [])) == 2)

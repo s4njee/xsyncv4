@@ -4,9 +4,8 @@ Hour by hour, the A/A ratio stays within 3% of 1 and the xs to rsync ratio stays
 
 - Kind: screening. Primary metric: `wall_s`. Control arm: `xs`.
 - Smallest effect of interest: 3%. Interval level: 95.0%.
-- Runs: 20261014T020701Z-S0-sentinel-s0001, 20261014T020707Z-S0-sentinel-s0002.
-- Valid blocks: 48. Voided block attempts: 0.
-- **Fewer than 8 blocks in some cells: estimates only, no verdict.**
+- Runs: 20261014T020701Z-S0-sentinel-s0001, 20261014T020707Z-S0-sentinel-s0002, 20261014T020709Z-S0-sentinel-s0003.
+- Valid blocks: 72. Voided block attempts: 0.
 
 ## Ratio to the control
 
@@ -14,22 +13,22 @@ Time of the arm divided by time of the control in the same block; below 1 is fas
 
 | Cell | Arm | Blocks | Ratio | Robust | p | Verdict |
 |---|---|---|---|---|---|---|
-| `mixed-bimodal.fresh.freya-neo.sender.warm` | again | 6 | 0.995 [0.989, 1.001] | 0.994 [0.987, 1.000] | 0.1250 | too few blocks |
-| `mixed-bimodal.fresh.freya-neo.sender.warm` | rsync | 6 | 1.005 [0.997, 1.012] | 1.004 [0.995, 1.013] | 0.1875 | too few blocks |
-| `mixed-bimodal.fresh.neo-freya.sender.warm` | again | 6 | 0.995 [0.969, 1.022] | 0.997 [0.950, 1.027] | 0.7500 | too few blocks |
-| `mixed-bimodal.fresh.neo-freya.sender.warm` | rsync | 6 | 0.958 [0.938, 0.978] | 0.964 [0.921, 0.977] | 0.0312 | too few blocks |
-| `mixed-bimodal.noop.freya-neo.sender.warm` | again | 6 | 1.032 [0.954, 1.116] | 1.023 [0.935, 1.132] | 0.3438 | too few blocks |
-| `mixed-bimodal.noop.freya-neo.sender.warm` | rsync | 6 | 1.605 [1.533, 1.681] | 1.597 [1.534, 1.716] | 0.0312 | too few blocks |
-| `mixed-bimodal.noop.neo-freya.sender.warm` | again | 6 | 1.019 [0.968, 1.073] | 1.028 [0.935, 1.062] | 0.4375 | too few blocks |
-| `mixed-bimodal.noop.neo-freya.sender.warm` | rsync | 6 | 1.525 [1.473, 1.579] | 1.521 [1.465, 1.614] | 0.0312 | too few blocks |
-| `small-flat.fresh.freya-neo.sender.warm` | again | 6 | 1.003 [0.990, 1.017] | 1.001 [0.993, 1.027] | 0.6875 | too few blocks |
-| `small-flat.fresh.freya-neo.sender.warm` | rsync | 6 | 1.058 [0.981, 1.142] | 1.060 [0.976, 1.197] | 0.1250 | too few blocks |
-| `small-flat.fresh.neo-freya.sender.warm` | again | 6 | 0.978 [0.945, 1.012] | 0.975 [0.941, 1.026] | 0.1562 | too few blocks |
-| `small-flat.fresh.neo-freya.sender.warm` | rsync | 6 | 1.264 [0.929, 1.720] | 1.231 [1.013, 2.139] | 0.0312 | too few blocks |
-| `small-flat.noop.freya-neo.sender.warm` | again | 6 | 0.992 [0.914, 1.076] | 1.007 [0.893, 1.104] | 0.9375 | too few blocks |
-| `small-flat.noop.freya-neo.sender.warm` | rsync | 6 | 2.379 [2.225, 2.544] | 2.373 [2.192, 2.631] | 0.0312 | too few blocks |
-| `small-flat.noop.neo-freya.sender.warm` | again | 6 | 0.991 [0.909, 1.081] | 0.999 [0.858, 1.065] | 0.8438 | too few blocks |
-| `small-flat.noop.neo-freya.sender.warm` | rsync | 6 | 2.454 [2.112, 2.851] | 2.461 [2.128, 2.993] | 0.0312 | too few blocks |
+| `mixed-bimodal.fresh.freya-neo.sender.warm` | again | 9 | 0.998 [0.992, 1.003] | 0.998 [0.992, 1.003] | 0.3828 | equivalent |
+| `mixed-bimodal.fresh.freya-neo.sender.warm` | rsync | 9 | 1.006 [1.001, 1.011] | 1.006 [1.000, 1.011] | 0.0391 | equivalent |
+| `mixed-bimodal.fresh.neo-freya.sender.warm` | again | 9 | 1.000 [0.983, 1.017] | 1.003 [0.979, 1.017] | 0.9922 | equivalent |
+| `mixed-bimodal.fresh.neo-freya.sender.warm` | rsync | 9 | 0.964 [0.949, 0.980] | 0.965 [0.943, 0.980] | 0.0039 | inconclusive |
+| `mixed-bimodal.noop.freya-neo.sender.warm` | again | 9 | 1.017 [0.964, 1.073] | 1.019 [0.965, 1.075] | 0.5039 | inconclusive |
+| `mixed-bimodal.noop.freya-neo.sender.warm` | rsync | 9 | 1.610 [1.521, 1.705] | 1.603 [1.528, 1.716] | 0.0039 | slower |
+| `mixed-bimodal.noop.neo-freya.sender.warm` | again | 9 | 1.019 [0.988, 1.051] | 1.024 [0.986, 1.051] | 0.2070 | inconclusive |
+| `mixed-bimodal.noop.neo-freya.sender.warm` | rsync | 9 | 1.526 [1.494, 1.558] | 1.522 [1.499, 1.561] | 0.0039 | slower |
+| `small-flat.fresh.freya-neo.sender.warm` | again | 9 | 1.002 [0.994, 1.011] | 1.001 [0.993, 1.012] | 0.5898 | equivalent |
+| `small-flat.fresh.freya-neo.sender.warm` | rsync | 9 | 1.043 [0.995, 1.094] | 1.035 [0.994, 1.106] | 0.0586 | inconclusive |
+| `small-flat.fresh.neo-freya.sender.warm` | again | 9 | 0.992 [0.966, 1.019] | 0.994 [0.962, 1.026] | 0.5000 | inconclusive |
+| `small-flat.fresh.neo-freya.sender.warm` | rsync | 9 | 1.241 [1.026, 1.503] | 1.231 [1.052, 1.528] | 0.0039 | inconclusive |
+| `small-flat.noop.freya-neo.sender.warm` | again | 9 | 0.991 [0.936, 1.050] | 0.995 [0.918, 1.056] | 0.7148 | inconclusive |
+| `small-flat.noop.freya-neo.sender.warm` | rsync | 9 | 2.327 [2.207, 2.452] | 2.322 [2.192, 2.460] | 0.0039 | slower |
+| `small-flat.noop.neo-freya.sender.warm` | again | 9 | 0.968 [0.877, 1.067] | 0.999 [0.858, 1.058] | 0.5469 | inconclusive |
+| `small-flat.noop.neo-freya.sender.warm` | rsync | 9 | 2.370 [2.045, 2.747] | 2.361 [2.020, 2.846] | 0.0039 | slower |
 
 This is a screening experiment: the p-values are unadjusted and nothing here is a claim. A candidate is re-measured in a confirmatory run.
 
@@ -39,22 +38,22 @@ Descriptive only; the same ratio and interval for each.
 
 | Cell | Arm | `cpu_s` | `durable_s` | `rss_bytes` |
 |---|---|---|---|---|
-| `mixed-bimodal.fresh.freya-neo.sender.warm` | again | 0.992 [0.975, 1.009] | 1.000 [0.992, 1.008] | 1.001 [0.988, 1.014] |
-| `mixed-bimodal.fresh.freya-neo.sender.warm` | rsync | 0.507 [0.493, 0.522] | 1.003 [0.985, 1.021] | 0.099 [0.095, 0.102] |
-| `mixed-bimodal.fresh.neo-freya.sender.warm` | again | 0.971 [0.886, 1.065] | 0.994 [0.968, 1.021] | 1.007 [0.991, 1.024] |
-| `mixed-bimodal.fresh.neo-freya.sender.warm` | rsync | 0.467 [0.440, 0.496] | 0.957 [0.937, 0.978] | 0.122 [0.119, 0.126] |
-| `mixed-bimodal.noop.freya-neo.sender.warm` | again | 0.991 [0.919, 1.068] | 1.031 [0.957, 1.110] | 1.013 [0.986, 1.042] |
-| `mixed-bimodal.noop.freya-neo.sender.warm` | rsync | 0.548 [0.521, 0.577] | 1.584 [1.516, 1.656] | 0.694 [0.651, 0.739] |
-| `mixed-bimodal.noop.neo-freya.sender.warm` | again | 1.031 [0.908, 1.171] | 1.019 [0.968, 1.073] | 0.998 [0.987, 1.008] |
-| `mixed-bimodal.noop.neo-freya.sender.warm` | rsync | 0.574 [0.521, 0.634] | 1.521 [1.469, 1.575] | 0.720 [0.693, 0.749] |
-| `small-flat.fresh.freya-neo.sender.warm` | again | 1.010 [0.997, 1.023] | 1.011 [0.995, 1.027] | 1.002 [0.974, 1.030] |
-| `small-flat.fresh.freya-neo.sender.warm` | rsync | 0.687 [0.648, 0.727] | 1.059 [0.991, 1.131] | 0.100 [0.098, 0.101] |
-| `small-flat.fresh.neo-freya.sender.warm` | again | 0.976 [0.932, 1.022] | 0.982 [0.949, 1.016] | 1.119 [0.867, 1.446] |
-| `small-flat.fresh.neo-freya.sender.warm` | rsync | 0.667 [0.640, 0.697] | 1.250 [0.924, 1.690] | 0.142 [0.102, 0.197] |
-| `small-flat.noop.freya-neo.sender.warm` | again | 0.999 [0.920, 1.086] | 0.993 [0.919, 1.073] | 1.000 [0.980, 1.021] |
-| `small-flat.noop.freya-neo.sender.warm` | rsync | 0.811 [0.753, 0.873] | 2.342 [2.197, 2.496] | 0.471 [0.462, 0.481] |
-| `small-flat.noop.neo-freya.sender.warm` | again | 0.990 [0.868, 1.129] | 0.991 [0.910, 1.080] | 0.988 [0.966, 1.011] |
-| `small-flat.noop.neo-freya.sender.warm` | rsync | 0.769 [0.616, 0.961] | 2.445 [2.103, 2.842] | 0.579 [0.555, 0.604] |
+| `mixed-bimodal.fresh.freya-neo.sender.warm` | again | 0.989 [0.978, 1.000] | 0.993 [0.980, 1.006] | 0.996 [0.988, 1.005] |
+| `mixed-bimodal.fresh.freya-neo.sender.warm` | rsync | 0.502 [0.492, 0.513] | 1.004 [0.993, 1.016] | 0.099 [0.096, 0.101] |
+| `mixed-bimodal.fresh.neo-freya.sender.warm` | again | 0.992 [0.933, 1.055] | 0.999 [0.982, 1.016] | 1.004 [0.994, 1.015] |
+| `mixed-bimodal.fresh.neo-freya.sender.warm` | rsync | 0.468 [0.447, 0.489] | 0.964 [0.948, 0.979] | 0.122 [0.119, 0.125] |
+| `mixed-bimodal.noop.freya-neo.sender.warm` | again | 0.998 [0.954, 1.044] | 1.017 [0.968, 1.068] | 1.005 [0.986, 1.024] |
+| `mixed-bimodal.noop.freya-neo.sender.warm` | rsync | 0.551 [0.527, 0.576] | 1.589 [1.508, 1.674] | 0.685 [0.656, 0.715] |
+| `mixed-bimodal.noop.neo-freya.sender.warm` | again | 1.011 [0.935, 1.093] | 1.019 [0.988, 1.051] | 0.997 [0.990, 1.004] |
+| `mixed-bimodal.noop.neo-freya.sender.warm` | rsync | 0.568 [0.530, 0.609] | 1.521 [1.490, 1.553] | 0.717 [0.697, 0.738] |
+| `small-flat.fresh.freya-neo.sender.warm` | again | 1.009 [1.001, 1.018] | 1.009 [0.997, 1.020] | 0.999 [0.982, 1.016] |
+| `small-flat.fresh.freya-neo.sender.warm` | rsync | 0.682 [0.656, 0.710] | 1.040 [0.995, 1.087] | 0.100 [0.099, 0.102] |
+| `small-flat.fresh.neo-freya.sender.warm` | again | 0.996 [0.957, 1.038] | 0.998 [0.971, 1.025] | 1.061 [0.897, 1.254] |
+| `small-flat.fresh.neo-freya.sender.warm` | rsync | 0.667 [0.650, 0.685] | 1.228 [1.018, 1.481] | 0.134 [0.110, 0.164] |
+| `small-flat.noop.freya-neo.sender.warm` | again | 0.996 [0.939, 1.056] | 0.991 [0.934, 1.050] | 0.995 [0.981, 1.010] |
+| `small-flat.noop.freya-neo.sender.warm` | rsync | 0.789 [0.744, 0.836] | 2.288 [2.169, 2.413] | 0.469 [0.458, 0.480] |
+| `small-flat.noop.neo-freya.sender.warm` | again | 0.959 [0.844, 1.089] | 0.982 [0.914, 1.055] | 0.991 [0.976, 1.006] |
+| `small-flat.noop.neo-freya.sender.warm` | rsync | 0.745 [0.611, 0.908] | 2.362 [2.038, 2.737] | 0.577 [0.562, 0.592] |
 
 ## Absolute `wall_s`
 
@@ -62,14 +61,14 @@ Geometric mean over valid blocks, in seconds.
 
 | Cell | again | rsync | xs |
 |---|---|---|---|
-| `mixed-bimodal.fresh.freya-neo.sender.warm` | 12.143 | 12.265 | 12.208 |
-| `mixed-bimodal.fresh.neo-freya.sender.warm` | 12.717 | 12.240 | 12.779 |
-| `mixed-bimodal.noop.freya-neo.sender.warm` | 0.238 | 0.370 | 0.230 |
-| `mixed-bimodal.noop.neo-freya.sender.warm` | 0.186 | 0.279 | 0.183 |
-| `small-flat.fresh.freya-neo.sender.warm` | 6.388 | 6.738 | 6.366 |
-| `small-flat.fresh.neo-freya.sender.warm` | 3.362 | 4.346 | 3.438 |
-| `small-flat.noop.freya-neo.sender.warm` | 0.302 | 0.725 | 0.305 |
-| `small-flat.noop.neo-freya.sender.warm` | 0.261 | 0.646 | 0.263 |
+| `mixed-bimodal.fresh.freya-neo.sender.warm` | 12.173 | 12.270 | 12.200 |
+| `mixed-bimodal.fresh.neo-freya.sender.warm` | 12.692 | 12.237 | 12.693 |
+| `mixed-bimodal.noop.freya-neo.sender.warm` | 0.236 | 0.374 | 0.232 |
+| `mixed-bimodal.noop.neo-freya.sender.warm` | 0.188 | 0.281 | 0.184 |
+| `small-flat.fresh.freya-neo.sender.warm` | 6.459 | 6.722 | 6.443 |
+| `small-flat.fresh.neo-freya.sender.warm` | 3.379 | 4.229 | 3.406 |
+| `small-flat.noop.freya-neo.sender.warm` | 0.307 | 0.721 | 0.310 |
+| `small-flat.noop.neo-freya.sender.warm` | 0.269 | 0.659 | 0.278 |
 
 ## Noise
 
@@ -77,19 +76,19 @@ Standard deviation of the block log-ratios, and the blocks that would give 80% p
 
 | Cell | Arm | sigma_d | Blocks to detect 3% | Blocks for equivalent at 3% |
 |---|---|---|---|---|
-| `mixed-bimodal.fresh.freya-neo.sender.warm` | again | 0.0056 | 8 | 8 |
-| `mixed-bimodal.fresh.freya-neo.sender.warm` | rsync | 0.0073 | 8 | 8 |
-| `mixed-bimodal.fresh.neo-freya.sender.warm` | again | 0.0258 | 8 | 11 |
-| `mixed-bimodal.fresh.neo-freya.sender.warm` | rsync | 0.0202 | 8 | 8 |
-| `mixed-bimodal.noop.freya-neo.sender.warm` | again | 0.0747 | 53 | 70 |
-| `mixed-bimodal.noop.freya-neo.sender.warm` | rsync | 0.0439 | 20 | 26 |
-| `mixed-bimodal.noop.neo-freya.sender.warm` | again | 0.0490 | 24 | 31 |
-| `mixed-bimodal.noop.neo-freya.sender.warm` | rsync | 0.0330 | 12 | 16 |
-| `small-flat.fresh.freya-neo.sender.warm` | again | 0.0125 | 8 | 8 |
-| `small-flat.fresh.freya-neo.sender.warm` | rsync | 0.0724 | 50 | 66 |
-| `small-flat.fresh.neo-freya.sender.warm` | again | 0.0324 | 12 | 15 |
-| `small-flat.fresh.neo-freya.sender.warm` | rsync | 0.2933 | 775 | 1037 |
-| `small-flat.noop.freya-neo.sender.warm` | again | 0.0779 | 57 | 76 |
-| `small-flat.noop.freya-neo.sender.warm` | rsync | 0.0639 | 39 | 52 |
-| `small-flat.noop.neo-freya.sender.warm` | again | 0.0825 | 64 | 84 |
-| `small-flat.noop.neo-freya.sender.warm` | rsync | 0.1430 | 186 | 248 |
+| `mixed-bimodal.fresh.freya-neo.sender.warm` | again | 0.0070 | 8 | 8 |
+| `mixed-bimodal.fresh.freya-neo.sender.warm` | rsync | 0.0066 | 8 | 8 |
+| `mixed-bimodal.fresh.neo-freya.sender.warm` | again | 0.0227 | 8 | 9 |
+| `mixed-bimodal.fresh.neo-freya.sender.warm` | rsync | 0.0208 | 8 | 8 |
+| `mixed-bimodal.noop.freya-neo.sender.warm` | again | 0.0699 | 46 | 61 |
+| `mixed-bimodal.noop.freya-neo.sender.warm` | rsync | 0.0743 | 52 | 69 |
+| `mixed-bimodal.noop.neo-freya.sender.warm` | again | 0.0403 | 17 | 22 |
+| `mixed-bimodal.noop.neo-freya.sender.warm` | rsync | 0.0272 | 9 | 11 |
+| `small-flat.fresh.freya-neo.sender.warm` | again | 0.0112 | 8 | 8 |
+| `small-flat.fresh.freya-neo.sender.warm` | rsync | 0.0617 | 37 | 48 |
+| `small-flat.fresh.neo-freya.sender.warm` | again | 0.0348 | 13 | 17 |
+| `small-flat.fresh.neo-freya.sender.warm` | rsync | 0.2483 | 556 | 744 |
+| `small-flat.noop.freya-neo.sender.warm` | again | 0.0751 | 53 | 70 |
+| `small-flat.noop.freya-neo.sender.warm` | rsync | 0.0684 | 45 | 59 |
+| `small-flat.noop.neo-freya.sender.warm` | again | 0.1275 | 148 | 198 |
+| `small-flat.noop.neo-freya.sender.warm` | rsync | 0.1919 | 333 | 445 |

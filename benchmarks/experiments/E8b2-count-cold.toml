@@ -1,0 +1,29 @@
+# The same curve with cold caches on both hosts before every sample.
+# E8b, the file-count curve: the small-flat size distribution at 1,000 up to
+# 1,000,000 files. Shows where per-file costs take over and whether either
+# tool's time grows faster than the file count.
+id = "E8b2-count-cold"
+kind = "screening"
+hypothesis = "Descriptive: the xs to rsync ratio as a smooth function of the swept variable, each point with its interval."
+primary = "durable_s"
+delta = 0.03
+blocks = 4
+control = "rsync"
+verify = "first-last"
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[arms.xs]
+tool = "xs"
+rev = "8cc75bbdb801"
+flags = ["-a"]
+
+[matrix]
+link = "lan"
+corpus = ["scale-count-1000", "scale-count-3000", "scale-count-10000", "scale-count-30000", "scale-count-100000", "scale-count-300000", "scale-count-1000000"]
+scenario = ["fresh", "noop"]
+direction = ["neo>freya", "freya>neo"]
+client = ["sender"]
+cache = ["cold"]

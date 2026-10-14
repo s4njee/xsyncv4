@@ -184,7 +184,21 @@ What the runner does, in order, each time the hosts are free:
    sentinel.
 
 A run that has a status is never repeated, and a run that fails does not
-stop the queue. There is no deadline and no window: a run is whole.
+stop the queue, except that a run that failed before its first sample (a
+host was down) is tried again, up to three times. Three failures in a row
+halt the runner for an hour, after which it tries again by itself. On
+start it settles runs left unfinished by a runner that died: those with
+samples are marked interrupted, the others run again. There is no deadline
+and no window: a run is whole.
+
+Maintenance that must not overlap a measurement, such as generating
+corpora, goes in the backlog as a job; `{root}` and `{bundle}` are filled
+in for each host, and the steps run in turn:
+
+```sh
+python3 benchmarks/lab/plan.py job scale-corpora --host neo --host freya \
+  --command 'cd {root} && python3 lib/{bundle}/corpus.py generate scale-count-30000 --root corpora'
+```
 
 Scripts are staged as bundles, `ROOT/lib/<id>`, named by a hash of their
 contents and never changed. A plan names its bundle and runs under that
@@ -193,12 +207,12 @@ queued or running. `runner restart` replaces the runner with the current
 bundle's without touching the run in progress: the old one lets go, the new
 one waits for that run and carries on.
 
-The runner does not survive a reboot of the driver. To have it come back,
-the operator can add one line to their own crontab on the driver (`crontab
--e`), using the path `runner status` reports:
+`runner start` also writes `ROOT/runner.sh`, which starts that same
+runner. One line in the driver's crontab brings it back after a reboot
+(installed on neo on 2026-10-14):
 
 ```
-@reboot python3 /home/USER/benchmarks/xsyncv4/lab/lib/ID/runner.py --root /home/USER/benchmarks/xsyncv4/lab >> /home/USER/benchmarks/xsyncv4/lab/runs/runner.log 2>&1
+@reboot sh /home/sanjee/benchmarks/xsyncv4/lab/runner.sh
 ```
 
 Mac to mars runs are not queued. They are started on demand with `plan.py

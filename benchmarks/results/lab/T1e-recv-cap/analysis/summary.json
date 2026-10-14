@@ -1,0 +1,19 @@
+{
+  "experiment": "T1e-recv-cap",
+  "kind": "confirmatory",
+  "hypothesis": "Four or eight receiving workers on a 32-thread host make no-ops of real trees faster than sixteen, and nothing slower.",
+  "primary": "wall_s",
+  "control": "xs",
+  "delta": 0.03,
+  "level": 0.95,
+  "looks": 1,
+  "runs": [
+    "20261014T112856Z-T1e-recv-cap"
+  ],
+  "spec_sha256": [
+    "7f99a5f4a4bf4def604633ddd8b4efcb1add273f7c1140f3a8f9d9dfa6e0fc1b"
+  ],
+  "valid_blocks": 168,
+  "void_attempts": 0,
+  "void_reasons": []
+}

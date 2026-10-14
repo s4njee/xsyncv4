@@ -1,0 +1,19 @@
+{
+  "experiment": "E3f-ciphers",
+  "kind": "screening",
+  "hypothesis": "On the Pi, AES-GCM is cheaper than ChaCha20 and makes byte-bound copies faster for both tools.",
+  "primary": "wall_s",
+  "control": "xs",
+  "delta": 0.03,
+  "level": 0.95,
+  "looks": 1,
+  "runs": [
+    "20261014T220708Z-E3f-ciphers"
+  ],
+  "spec_sha256": [
+    "57930ae1bbeb54fef97bbed4dc879acca217a3afd5aa5bb57a6e0dc3e7ce9c69"
+  ],
+  "valid_blocks": 0,
+  "void_attempts": 0,
+  "void_reasons": []
+}
