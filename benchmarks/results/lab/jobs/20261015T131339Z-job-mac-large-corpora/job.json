@@ -1,0 +1,11 @@
+{
+ "name": "mac-large-corpora",
+ "steps": [
+  {
+   "host": "mac",
+   "ssh": "sanjee@mbp-3.local",
+   "local": true,
+   "command": "cd /Users/sanjee/benchmarks/xsbench.noindex && for c in large-four large-mixed; do test -d corpora/$c || python3 lib/92c3b3eeb811/corpus.py generate $c --root corpora > /dev/null || exit 1; done"
+  }
+ ]
+}

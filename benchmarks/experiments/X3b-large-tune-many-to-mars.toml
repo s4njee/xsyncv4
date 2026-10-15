@@ -1,0 +1,58 @@
+# X3b: X3 in the other direction, Mac to mars, now that the Mac has room to
+# hold the two generated corpora as sources.
+id = "X3b-large-tune-many-to-mars"
+kind = "screening"
+hypothesis = "The settings that help one large file also help several, or matter less there."
+primary = "durable_s"
+delta = 0.03
+blocks = 6
+control = "xs"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.xs]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a"]
+metrics = true
+
+[arms.j4]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a", "-j4"]
+metrics = true
+
+[arms.j8]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a", "-j8"]
+metrics = true
+
+[arms.block4m]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a"]
+tune = "block_target=4194304"
+metrics = true
+
+[arms.chunk1m]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a"]
+tune = "write_chunk=1048576,pipe_size=1048576"
+metrics = true
+
+[arms.queues]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a"]
+tune = "send_queue=201326592,recv_queue=67108864"
+metrics = true
+
+[matrix]
+link = "mac-mars-direct"
+corpus = ["large-four", "large-mixed"]
+scenario = ["fresh"]
+direction = ["mac>mars"]
+client = ["initiator"]
+cache = ["warm"]
