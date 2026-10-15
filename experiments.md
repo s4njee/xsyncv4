@@ -1311,6 +1311,32 @@ ratio of 1.036 [1.026, 1.046]. First diagnostics, run by hand:
   (the baseline matrix, 4 blocks) and R2 (`small-real` and holochart, 2
   blocks) as day-to-day replicates.
 
+- Direct cable, Mac and mars, 2026-10-14/15 (`benchmarks/results/direct/`;
+  the Mac's USB adapter holds TCP to about 3 Gb/s; times include the final
+  sync; rates are corpus bytes over durable time):
+  - Large files, mars to the Mac: xs runs at the link's ceiling, 3.0 to
+    3.16 Gb/s on all three large corpora, against rsync's 1.7 to 1.9 Gb/s
+    (ratios 0.56 to 0.61, *faster*). Nothing in X2 or X3 (`-j4`, `-j8`,
+    4 MiB blocks, 1 MiB writes and pipes, deeper queues) changes that:
+    there is nothing left to gain below the link.
+  - Large files, Mac to mars: xs 2.3 to 2.6 Gb/s on the ISO but 1.25 to
+    1.84 Gb/s on the four-file and mixed corpora, with wide intervals and
+    the same arm differing by a third between runs. The Mac as a sender
+    is noisy; X3b's tuning arms are not readable there.
+  - ChaCha20 costs both tools 1.4 to 1.7 times AES-128-GCM, the Mac's
+    default; AES-256-GCM costs nothing measurable. rsync `--inplace` and
+    `-W` do not close its gap.
+  - Small files onto mars's NVMe (N1): xs is twice as fast as rsync fresh
+    (`small-flat` 0.71 Gb/s against 0.41, mixed 2.6 to 2.9 against 1.3)
+    and 3 to 4 times on no-ops. Only four receiving workers with
+    `--no-atomic` reach 1 Gb/s on `small-flat` (1.01 Gb/s, 0.689 [0.517,
+    0.918], *faster*, N3); `--no-atomic` alone 0.85, inconclusive.
+    `small-deep` stays at 0.27 to 0.38 Gb/s whatever the setting.
+  - Small files onto the Mac (N2, cold on mars): 5 to 7 times slower than
+    onto mars, 0.04 to 0.12 Gb/s, and xs no better than rsync on fresh
+    small trees. APFS creating files is the limit, as in S2. Mixed trees
+    still 1.7 to 2.3 times faster with xs; no-ops 4 times.
+
 M0 is done by the operator, not by the harness. M1–M6 need no engine
 change, so flag-only experiments (E1–E3) can start before M7.
 
