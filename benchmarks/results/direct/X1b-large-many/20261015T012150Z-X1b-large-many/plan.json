@@ -1,19 +1,19 @@
 {
  "schema": 1,
  "experiment": "X1b-large-many",
- "spec_sha256": "162eb0ae9196b282735532fe1a1615fd1083413fc8943576d76e9660e93a6880",
+ "spec_sha256": "63aacded45ab20a26bef68d60aa002b03545f889be3b749807e764cd6e24f933",
  "kind": "screening",
  "bundle": "5c7f2001dd93",
  "writes": {
   "mac": 561710669824,
   "mars": 0
  },
- "hypothesis": "On a ~3 Gb/s direct link, xs -a copies large files at least as fast as rsync -a, and AES-GCM speeds both up over the default ChaCha20.",
+ "hypothesis": "On a ~3 Gb/s direct link, xs -a copies large files at least as fast as rsync -a, and ChaCha20 slows both against AES-GCM.",
  "primary": "durable_s",
  "delta": 0.03,
  "control": "rsync",
  "seed": 1,
- "run_id": "20261014T224607Z-X1b-large-many",
+ "run_id": "20261015T012150Z-X1b-large-many",
  "driver": "mac",
  "sample_timeout_s": 3600,
  "results": "direct",
@@ -74,14 +74,14 @@
    }
   },
   {
-   "name": "rsync-aes",
+   "name": "rsync-chacha",
    "tool": "rsync",
    "flags": [
     "-a"
    ],
    "ssh_options": [
     "-c",
-    "aes128-gcm@openssh.com"
+    "chacha20-poly1305@openssh.com"
    ],
    "binary": {
     "mac": "rsync",
@@ -110,14 +110,14 @@
    }
   },
   {
-   "name": "xs-aes",
+   "name": "xs-chacha",
    "tool": "xs",
    "flags": [
     "-a"
    ],
    "ssh_options": [
     "-c",
-    "aes128-gcm@openssh.com"
+    "chacha20-poly1305@openssh.com"
    ],
    "rev": "8cc75bbdb801",
    "binary": {
@@ -180,22 +180,22 @@
    "verify_full": true,
    "orders": [
     [
-     "xs-aes",
+     "xs-chacha",
      "rsync",
-     "rsync-aes",
+     "rsync-chacha",
      "xs"
     ],
     [
      "xs",
-     "rsync-aes",
+     "rsync-chacha",
      "rsync",
-     "xs-aes"
+     "xs-chacha"
     ],
     [
      "xs",
      "rsync",
-     "rsync-aes",
-     "xs-aes"
+     "rsync-chacha",
+     "xs-chacha"
     ]
    ]
   },
@@ -206,21 +206,21 @@
    "orders": [
     [
      "xs",
-     "rsync-aes",
+     "rsync-chacha",
      "rsync",
-     "xs-aes"
+     "xs-chacha"
     ],
     [
-     "xs-aes",
+     "xs-chacha",
      "rsync",
      "xs",
-     "rsync-aes"
+     "rsync-chacha"
     ],
     [
      "rsync",
      "xs",
-     "rsync-aes",
-     "xs-aes"
+     "rsync-chacha",
+     "xs-chacha"
     ]
    ]
   },
@@ -232,20 +232,20 @@
     [
      "xs",
      "rsync",
-     "xs-aes",
-     "rsync-aes"
+     "xs-chacha",
+     "rsync-chacha"
     ],
     [
      "rsync",
      "xs",
-     "rsync-aes",
-     "xs-aes"
+     "rsync-chacha",
+     "xs-chacha"
     ],
     [
      "xs",
      "rsync",
-     "rsync-aes",
-     "xs-aes"
+     "rsync-chacha",
+     "xs-chacha"
     ]
    ]
   },
@@ -255,21 +255,21 @@
    "verify_full": false,
    "orders": [
     [
-     "xs-aes",
+     "xs-chacha",
      "xs",
-     "rsync-aes",
+     "rsync-chacha",
      "rsync"
     ],
     [
-     "rsync-aes",
+     "rsync-chacha",
      "xs",
-     "xs-aes",
+     "xs-chacha",
      "rsync"
     ],
     [
      "rsync",
-     "xs-aes",
-     "rsync-aes",
+     "xs-chacha",
+     "rsync-chacha",
      "xs"
     ]
    ]
@@ -280,22 +280,22 @@
    "verify_full": false,
    "orders": [
     [
-     "xs-aes",
+     "xs-chacha",
      "rsync",
-     "rsync-aes",
+     "rsync-chacha",
      "xs"
     ],
     [
      "rsync",
-     "xs-aes",
+     "xs-chacha",
      "xs",
-     "rsync-aes"
+     "rsync-chacha"
     ],
     [
      "xs",
-     "rsync-aes",
+     "rsync-chacha",
      "rsync",
-     "xs-aes"
+     "xs-chacha"
     ]
    ]
   },
@@ -306,20 +306,20 @@
    "orders": [
     [
      "xs",
-     "rsync-aes",
-     "xs-aes",
+     "rsync-chacha",
+     "xs-chacha",
      "rsync"
     ],
     [
-     "xs-aes",
+     "xs-chacha",
      "xs",
-     "rsync-aes",
+     "rsync-chacha",
      "rsync"
     ],
     [
-     "xs-aes",
+     "xs-chacha",
      "rsync",
-     "rsync-aes",
+     "rsync-chacha",
      "xs"
     ]
    ]
@@ -330,22 +330,22 @@
    "verify_full": false,
    "orders": [
     [
-     "rsync-aes",
-     "xs-aes",
+     "rsync-chacha",
+     "xs-chacha",
      "rsync",
      "xs"
     ],
     [
      "xs",
      "rsync",
-     "xs-aes",
-     "rsync-aes"
+     "xs-chacha",
+     "rsync-chacha"
     ],
     [
-     "xs-aes",
+     "xs-chacha",
      "rsync",
      "xs",
-     "rsync-aes"
+     "rsync-chacha"
     ]
    ]
   },
@@ -357,20 +357,20 @@
     [
      "xs",
      "rsync",
-     "xs-aes",
-     "rsync-aes"
+     "xs-chacha",
+     "rsync-chacha"
     ],
     [
-     "xs-aes",
-     "rsync-aes",
+     "xs-chacha",
+     "rsync-chacha",
      "xs",
      "rsync"
     ],
     [
      "rsync",
      "xs",
-     "rsync-aes",
-     "xs-aes"
+     "rsync-chacha",
+     "xs-chacha"
     ]
    ]
   },
@@ -380,22 +380,22 @@
    "verify_full": false,
    "orders": [
     [
-     "xs-aes",
+     "xs-chacha",
      "rsync",
      "xs",
-     "rsync-aes"
+     "rsync-chacha"
     ],
     [
-     "xs-aes",
+     "xs-chacha",
      "rsync",
      "xs",
-     "rsync-aes"
+     "rsync-chacha"
     ],
     [
      "rsync",
-     "rsync-aes",
+     "rsync-chacha",
      "xs",
-     "xs-aes"
+     "xs-chacha"
     ]
    ]
   },
@@ -405,22 +405,22 @@
    "verify_full": false,
    "orders": [
     [
-     "xs-aes",
-     "rsync-aes",
+     "xs-chacha",
+     "rsync-chacha",
      "rsync",
      "xs"
     ],
     [
-     "xs-aes",
-     "rsync-aes",
+     "xs-chacha",
+     "rsync-chacha",
      "rsync",
      "xs"
     ],
     [
-     "rsync-aes",
+     "rsync-chacha",
      "xs",
      "rsync",
-     "xs-aes"
+     "xs-chacha"
     ]
    ]
   },
@@ -432,20 +432,20 @@
     [
      "xs",
      "rsync",
-     "xs-aes",
-     "rsync-aes"
+     "xs-chacha",
+     "rsync-chacha"
     ],
     [
-     "rsync-aes",
+     "rsync-chacha",
      "rsync",
-     "xs-aes",
+     "xs-chacha",
      "xs"
     ],
     [
      "rsync",
      "xs",
-     "rsync-aes",
-     "xs-aes"
+     "rsync-chacha",
+     "xs-chacha"
     ]
    ]
   },
@@ -455,20 +455,20 @@
    "verify_full": false,
    "orders": [
     [
-     "rsync-aes",
+     "rsync-chacha",
      "rsync",
-     "xs-aes",
+     "xs-chacha",
      "xs"
     ],
     [
      "rsync",
-     "rsync-aes",
+     "rsync-chacha",
      "xs",
-     "xs-aes"
+     "xs-chacha"
     ],
     [
-     "rsync-aes",
-     "xs-aes",
+     "rsync-chacha",
+     "xs-chacha",
      "rsync",
      "xs"
     ]
@@ -481,20 +481,20 @@
    "orders": [
     [
      "rsync",
-     "xs-aes",
-     "rsync-aes",
+     "xs-chacha",
+     "rsync-chacha",
      "xs"
     ],
     [
-     "rsync-aes",
-     "xs-aes",
+     "rsync-chacha",
+     "xs-chacha",
      "rsync",
      "xs"
     ],
     [
-     "rsync-aes",
+     "rsync-chacha",
      "rsync",
-     "xs-aes",
+     "xs-chacha",
      "xs"
     ]
    ]
@@ -507,20 +507,20 @@
     [
      "xs",
      "rsync",
-     "rsync-aes",
-     "xs-aes"
+     "rsync-chacha",
+     "xs-chacha"
     ],
     [
-     "rsync-aes",
+     "rsync-chacha",
      "rsync",
-     "xs-aes",
+     "xs-chacha",
      "xs"
     ],
     [
-     "rsync-aes",
+     "rsync-chacha",
      "rsync",
      "xs",
-     "xs-aes"
+     "xs-chacha"
     ]
    ]
   },
@@ -532,20 +532,20 @@
     [
      "rsync",
      "xs",
-     "rsync-aes",
-     "xs-aes"
+     "rsync-chacha",
+     "xs-chacha"
     ],
     [
      "xs",
-     "rsync-aes",
-     "xs-aes",
+     "rsync-chacha",
+     "xs-chacha",
      "rsync"
     ],
     [
      "xs",
-     "xs-aes",
+     "xs-chacha",
      "rsync",
-     "rsync-aes"
+     "rsync-chacha"
     ]
    ]
   },
@@ -555,20 +555,20 @@
    "verify_full": true,
    "orders": [
     [
-     "rsync-aes",
+     "rsync-chacha",
      "xs",
      "rsync",
-     "xs-aes"
+     "xs-chacha"
     ],
     [
-     "xs-aes",
+     "xs-chacha",
      "xs",
-     "rsync-aes",
+     "rsync-chacha",
      "rsync"
     ],
     [
-     "xs-aes",
-     "rsync-aes",
+     "xs-chacha",
+     "rsync-chacha",
      "rsync",
      "xs"
     ]

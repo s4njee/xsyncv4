@@ -1,0 +1,28 @@
+# X1r: xs against rsync on the ISO, both directions, repeated through the night
+# as filler: whether the large-file ratio holds from run to run.
+id = "X1r-large-replicate"
+kind = "screening"
+hypothesis = "The xs to rsync ratio on one large file holds from run to run."
+primary = "durable_s"
+delta = 0.03
+blocks = 6
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[arms.xs]
+tool = "xs"
+rev = "8cc75bbdb801"
+flags = ["-a"]
+
+[matrix]
+link = "mac-mars-direct"
+corpus = ["large-one"]
+scenario = ["fresh"]
+direction = ["mac>mars", "mars>mac"]
+client = ["initiator"]
+cache = ["warm"]

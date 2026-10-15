@@ -1,0 +1,48 @@
+# X4: AES-256-GCM against the Mac's default AES-128-GCM for both tools, and
+# two rsync variants that change how it writes: --inplace (no temporary file)
+# and -W (whole files, which a fresh copy uses anyway).
+id = "X4-cipher-rsync"
+kind = "screening"
+hypothesis = "AES-256 costs both tools little; neither rsync variant closes its gap to xs."
+primary = "durable_s"
+delta = 0.03
+blocks = 8
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[arms.rsync-aes256]
+tool = "rsync"
+flags = ["-a"]
+ssh_options = ["-c", "aes256-gcm@openssh.com"]
+
+[arms.rsync-inplace]
+tool = "rsync"
+flags = ["-a", "--inplace"]
+
+[arms.rsync-W]
+tool = "rsync"
+flags = ["-aW"]
+
+[arms.xs]
+tool = "xs"
+rev = "8cc75bbdb801"
+flags = ["-a"]
+
+[arms.xs-aes256]
+tool = "xs"
+rev = "8cc75bbdb801"
+flags = ["-a"]
+ssh_options = ["-c", "aes256-gcm@openssh.com"]
+
+[matrix]
+link = "mac-mars-direct"
+corpus = ["large-one"]
+scenario = ["fresh"]
+direction = ["mac>mars", "mars>mac"]
+client = ["initiator"]
+cache = ["warm"]

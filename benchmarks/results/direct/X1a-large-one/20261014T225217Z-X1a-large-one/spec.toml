@@ -1,10 +1,11 @@
 # X1a: large files over the Mac-mars direct cable (about 3 Gb/s of TCP each
 # way; ssh alone carries 1.0-1.7 Gb/s with ChaCha20 and 2.1-2.5 with
 # AES-GCM). One 7.45 GiB file (a Windows ISO), both directions, fresh copies.
-# The Mac starts every transfer. Fresh only: the Mac has room for one copy.
+# The Mac starts every transfer; its ssh prefers AES-128-GCM, so the plain
+# arms use that and the -chacha arms force ChaCha20. Fresh only: the Mac has room for one copy.
 id = "X1a-large-one"
 kind = "screening"
-hypothesis = "On a ~3 Gb/s direct link, xs -a copies large files at least as fast as rsync -a, and AES-GCM speeds both up over the default ChaCha20."
+hypothesis = "On a ~3 Gb/s direct link, xs -a copies large files at least as fast as rsync -a, and ChaCha20 slows both against AES-GCM."
 primary = "durable_s"
 delta = 0.03
 blocks = 8
@@ -16,21 +17,21 @@ cleanup = "eager"
 tool = "rsync"
 flags = ["-a"]
 
-[arms.rsync-aes]
+[arms.rsync-chacha]
 tool = "rsync"
 flags = ["-a"]
-ssh_options = ["-c", "aes128-gcm@openssh.com"]
+ssh_options = ["-c", "chacha20-poly1305@openssh.com"]
 
 [arms.xs]
 tool = "xs"
 rev = "8cc75bbdb801"
 flags = ["-a"]
 
-[arms.xs-aes]
+[arms.xs-chacha]
 tool = "xs"
 rev = "8cc75bbdb801"
 flags = ["-a"]
-ssh_options = ["-c", "aes128-gcm@openssh.com"]
+ssh_options = ["-c", "chacha20-poly1305@openssh.com"]
 
 [matrix]
 link = "mac-mars-direct"

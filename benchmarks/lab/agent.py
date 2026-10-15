@@ -259,6 +259,11 @@ class Run:
                 # Tell background runs that share this host to wait.
                 host.run('touch', f'{host.root}/runs/.foreground-{self.run_id}')
         for name, corpus in self.plan['corpora'].items():
+            # Every copy is checked against the receiver's own manifest; without one, no sample could be valid.
+            for receiver in sorted({cell['receiver'] for cell in self.cells.values() if cell['corpus'] == name}):
+                host = self.hosts[receiver]
+                if host.run('test', '-f', f'{host.root}/corpora/{name}.manifest.json', check=False).returncode:
+                    raise RuntimeError(f'{receiver}: no manifest for corpus {name} to check copies against')
             for sender in sorted({cell['sender'] for cell in self.cells.values() if cell['corpus'] == name}):
                 host = self.hosts[sender]
                 manifest = f'{host.root}/corpora/{name}.manifest.json'
