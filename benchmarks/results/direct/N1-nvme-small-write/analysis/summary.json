@@ -1,0 +1,19 @@
+{
+  "experiment": "N1-nvme-small-write",
+  "kind": "screening",
+  "hypothesis": "xs -a writes small and mixed trees onto NVMe faster than rsync -a, durably, and passes 1 Gb/s.",
+  "primary": "durable_s",
+  "control": "rsync",
+  "delta": 0.03,
+  "level": 0.95,
+  "looks": 1,
+  "runs": [
+    "20261015T034423Z-N1-nvme-small-write"
+  ],
+  "spec_sha256": [
+    "ef1be1fdff45a0cb947bd17adb31d9be5188f3f6fb39c5c7b0a9fbfcc68891eb"
+  ],
+  "valid_blocks": 96,
+  "void_attempts": 0,
+  "void_reasons": []
+}

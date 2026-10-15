@@ -1,0 +1,19 @@
+{
+  "experiment": "X3-large-tune-many",
+  "kind": "screening",
+  "hypothesis": "The settings that help one large file also help several, or matter less there.",
+  "primary": "durable_s",
+  "control": "xs",
+  "delta": 0.03,
+  "level": 0.95,
+  "looks": 1,
+  "runs": [
+    "20261015T030432Z-X3-large-tune-many"
+  ],
+  "spec_sha256": [
+    "cc5864ee4effd8515f42a769a14c07f67ce1a9a5c9fa5b5aadb7d13724900f75"
+  ],
+  "valid_blocks": 12,
+  "void_attempts": 0,
+  "void_reasons": []
+}

@@ -1,0 +1,4 @@
+experiment,kind,cell_id,corpus,scenario,sender,receiver,client,link,cache,arm,n_blocks,sigma_d,blocks_for_2pct,blocks_for_3pct,blocks_for_5pct,blocks_for_10pct,blocks_equivalent_2pct,blocks_equivalent_3pct,blocks_equivalent_5pct,blocks_equivalent_10pct
+X1c-large-one-to-mac,screening,large-one.fresh.mars-mac.receiver.warm,large-one,fresh,mars,mac,receiver,mac-mars-direct,warm,rsync-chacha,8,0.15453759936984454,480,217,81,23,642,290,108,30
+X1c-large-one-to-mac,screening,large-one.fresh.mars-mac.receiver.warm,large-one,fresh,mars,mac,receiver,mac-mars-direct,warm,xs,8,0.10681777395036529,231,105,40,12,308,140,53,16
+X1c-large-one-to-mac,screening,large-one.fresh.mars-mac.receiver.warm,large-one,fresh,mars,mac,receiver,mac-mars-direct,warm,xs-chacha,8,0.12133301224140317,297,135,51,15,397,180,67,20

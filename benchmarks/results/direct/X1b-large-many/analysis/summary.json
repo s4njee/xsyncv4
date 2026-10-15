@@ -1,0 +1,37 @@
+{
+  "experiment": "X1b-large-many",
+  "kind": "screening",
+  "hypothesis": "On a ~3 Gb/s direct link, xs -a copies large files at least as fast as rsync -a, and ChaCha20 slows both against AES-GCM.",
+  "primary": "durable_s",
+  "control": "rsync",
+  "delta": 0.03,
+  "level": 0.95,
+  "looks": 1,
+  "runs": [
+    "20261014T225219Z-X1b-large-many",
+    "20261015T012150Z-X1b-large-many",
+    "20261015T030424Z-X1b-large-many"
+  ],
+  "spec_sha256": [
+    "63aacded45ab20a26bef68d60aa002b03545f889be3b749807e764cd6e24f933"
+  ],
+  "valid_blocks": 16,
+  "void_attempts": 96,
+  "void_reasons": [
+    "rsync-chacha: the destination does not match the corpus manifest: ",
+    "rsync-chacha: the transfer exited 11: rsync: [receiver] write failed on \"/Users/sanjee/benchmarks/xsbench.noindex/work/20261014T225219Z-X1b-large-many/large-fou",
+    "rsync-chacha: the transfer exited 11: rsync: [receiver] write failed on \"/Users/sanjee/benchmarks/xsbench.noindex/work/20261014T225219Z-X1b-large-many/large-mix",
+    "rsync-chacha: the transfer exited 13: rsync error: errors with program diagnostics (code 13) at log.c(245) [receiver=3.4.4]",
+    "rsync-chacha: the transfer exited 13: rsync error: errors with program diagnostics (code 13) at log.c(245) [receiver=3.4.4]\nrsync: [generator] write error: Brok",
+    "rsync: the destination does not match the corpus manifest: ",
+    "rsync: the transfer exited 11: rsync: [receiver] write failed on \"/Users/sanjee/benchmarks/xsbench.noindex/work/20261014T225219Z-X1b-large-many/large-four.fresh",
+    "rsync: the transfer exited 11: rsync: [receiver] write failed on \"/Users/sanjee/benchmarks/xsbench.noindex/work/20261014T225219Z-X1b-large-many/large-mixed.fres",
+    "rsync: the transfer exited 13: rsync error: errors with program diagnostics (code 13) at log.c(245) [receiver=3.4.4]",
+    "xs-chacha: the destination does not match the corpus manifest: ",
+    "xs-chacha: the transfer exited 11:  (28)\nxs: error summary: 1 error (showing first 1)\n  file IO (code 11): 1 error\n    write failed on \"/Users/sanjee/benchmarks",
+    "xs-chacha: the transfer exited 11: (28)\nxs: error summary: 1 error (showing first 1)\n  file IO (code 11): 1 error\n    write failed on \"/Users/sanjee/benchmarks/",
+    "xs: the destination does not match the corpus manifest: ",
+    "xs: the transfer exited 11:  device (28)\nxs: error summary: 1 error (showing first 1)\n  file IO (code 11): 1 error\n    write failed on \"/Users/sanjee/benchmarks",
+    "xs: the transfer exited 11: device (28)\nxs: error summary: 1 error (showing first 1)\n  file IO (code 11): 1 error\n    write failed on \"/Users/sanjee/benchmarks/"
+  ]
+}

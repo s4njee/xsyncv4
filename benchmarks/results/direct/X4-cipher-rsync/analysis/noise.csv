@@ -1,0 +1,11 @@
+experiment,kind,cell_id,corpus,scenario,sender,receiver,client,link,cache,arm,n_blocks,sigma_d,blocks_for_2pct,blocks_for_3pct,blocks_for_5pct,blocks_for_10pct,blocks_equivalent_2pct,blocks_equivalent_3pct,blocks_equivalent_5pct,blocks_equivalent_10pct
+X4-cipher-rsync,screening,large-one.fresh.mac-mars.sender.warm,large-one,fresh,mac,mars,sender,mac-mars-direct,warm,rsync-aes256,8,0.26621937179470617,1419,638,236,64,1902,855,315,84
+X4-cipher-rsync,screening,large-one.fresh.mac-mars.sender.warm,large-one,fresh,mac,mars,sender,mac-mars-direct,warm,rsync-inplace,8,0.30664162793635585,1882,846,312,84,2522,1133,418,111
+X4-cipher-rsync,screening,large-one.fresh.mac-mars.sender.warm,large-one,fresh,mac,mars,sender,mac-mars-direct,warm,rsync-W,8,0.3499599281074721,2451,1101,406,108,3284,1475,543,144
+X4-cipher-rsync,screening,large-one.fresh.mac-mars.sender.warm,large-one,fresh,mac,mars,sender,mac-mars-direct,warm,xs,8,0.47064889943831034,4431,1990,732,194,5938,2666,980,259
+X4-cipher-rsync,screening,large-one.fresh.mac-mars.sender.warm,large-one,fresh,mac,mars,sender,mac-mars-direct,warm,xs-aes256,8,0.42445065786931757,3604,1619,596,158,4830,2169,798,211
+X4-cipher-rsync,screening,large-one.fresh.mars-mac.receiver.warm,large-one,fresh,mars,mac,receiver,mac-mars-direct,warm,rsync-aes256,8,0.08723920558853408,155,71,28,9,206,94,36,11
+X4-cipher-rsync,screening,large-one.fresh.mars-mac.receiver.warm,large-one,fresh,mars,mac,receiver,mac-mars-direct,warm,rsync-inplace,8,0.11415598951370691,263,119,45,14,352,159,60,18
+X4-cipher-rsync,screening,large-one.fresh.mars-mac.receiver.warm,large-one,fresh,mars,mac,receiver,mac-mars-direct,warm,rsync-W,8,0.08117402296948546,134,62,24,8,179,82,32,10
+X4-cipher-rsync,screening,large-one.fresh.mars-mac.receiver.warm,large-one,fresh,mars,mac,receiver,mac-mars-direct,warm,xs,8,0.06763179033219706,94,44,18,8,125,58,23,8
+X4-cipher-rsync,screening,large-one.fresh.mars-mac.receiver.warm,large-one,fresh,mars,mac,receiver,mac-mars-direct,warm,xs-aes256,8,0.12677301461172333,324,147,55,16,433,196,73,21

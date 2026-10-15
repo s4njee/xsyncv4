@@ -1,0 +1,13 @@
+experiment,kind,cell_id,corpus,scenario,sender,receiver,client,link,cache,arm,n_blocks,sigma_d,blocks_for_2pct,blocks_for_3pct,blocks_for_5pct,blocks_for_10pct,blocks_equivalent_2pct,blocks_equivalent_3pct,blocks_equivalent_5pct,blocks_equivalent_10pct
+N2-nvme-small-read,screening,mixed-bimodal.fresh.mars-mac.receiver.cold,mixed-bimodal,fresh,mars,mac,receiver,mac-mars-direct,cold,xs,3,0.38970775333053936,3039,1365,503,134,4072,1829,673,178
+N2-nvme-small-read,screening,mixed-bimodal.noop.mars-mac.receiver.cold,mixed-bimodal,noop,mars,mac,receiver,mac-mars-direct,cold,xs,2,0.6723232950416981,9040,4059,1491,393,12115,5439,1998,525
+N2-nvme-small-read,screening,mixed-threshold.fresh.mars-mac.receiver.cold,mixed-threshold,fresh,mars,mac,receiver,mac-mars-direct,cold,xs,2,1.1695367514295587,27349,12276,4507,1183,36654,16452,6040,1585
+N2-nvme-small-read,screening,mixed-threshold.noop.mars-mac.receiver.cold,mixed-threshold,noop,mars,mac,receiver,mac-mars-direct,cold,xs,2,0.1508009163538149,457,207,77,22,612,276,103,29
+N2-nvme-small-read,screening,small-deep.fresh.mars-mac.receiver.cold,small-deep,fresh,mars,mac,receiver,mac-mars-direct,cold,xs,2,0.11927628825708918,287,130,49,15,384,174,65,19
+N2-nvme-small-read,screening,small-deep.noop.mars-mac.receiver.cold,small-deep,noop,mars,mac,receiver,mac-mars-direct,cold,xs,2,0.1575610546933956,499,225,84,24,668,301,112,31
+N2-nvme-small-read,screening,small-flat.fresh.mars-mac.receiver.cold,small-flat,fresh,mars,mac,receiver,mac-mars-direct,cold,xs,2,0.5553186464169894,6168,2770,1018,269,8266,3711,1364,359
+N2-nvme-small-read,screening,small-flat.noop.mars-mac.receiver.cold,small-flat,noop,mars,mac,receiver,mac-mars-direct,cold,xs,3,0.1812340251134212,659,297,111,31,883,398,147,40
+N2-nvme-small-read,screening,small-opaque.fresh.mars-mac.receiver.cold,small-opaque,fresh,mars,mac,receiver,mac-mars-direct,cold,xs,3,0.5667349454578021,6424,2885,1060,280,8609,3865,1420,374
+N2-nvme-small-read,screening,small-opaque.noop.mars-mac.receiver.cold,small-opaque,noop,mars,mac,receiver,mac-mars-direct,cold,xs,2,0.2980060042213818,1778,799,295,79,2382,1071,395,105
+N2-nvme-small-read,screening,tiny-one.fresh.mars-mac.receiver.cold,tiny-one,fresh,mars,mac,receiver,mac-mars-direct,cold,xs,2,0.2793672644610659,1563,703,260,70,2094,941,347,93
+N2-nvme-small-read,screening,tiny-one.noop.mars-mac.receiver.cold,tiny-one,noop,mars,mac,receiver,mac-mars-direct,cold,xs,2,0.052109083835759386,57,27,11,8,75,35,14,8

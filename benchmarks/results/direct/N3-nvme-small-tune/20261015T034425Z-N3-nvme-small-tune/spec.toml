@@ -1,0 +1,62 @@
+# The NVMe ceiling for the hdd series: the same runs as H1-H3 with mars's end
+# on its NVMe drive instead of the hard disk, to learn whether xs can pass
+# 1 Gb/s on small and mixed files when the disk is not the limit. The
+# hard-drive runs follow later and are read against these.
+# N3: tuning xs's writes onto NVMe: fewer receiving workers than the default 16, and --no-atomic.
+id = "N3-nvme-small-tune"
+kind = "screening"
+hypothesis = "Fewer receiving workers or --no-atomic make small and mixed copies onto NVMe faster."
+primary = "durable_s"
+delta = 0.03
+blocks = 8
+control = "xs"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.xs]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a"]
+metrics = true
+
+[arms.recv1]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a"]
+tune = { receiver = "jobs=1" }
+metrics = true
+
+[arms.recv2]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a"]
+tune = { receiver = "jobs=2" }
+metrics = true
+
+[arms.recv4]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a"]
+tune = { receiver = "jobs=4" }
+metrics = true
+
+[arms.no-atomic]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a", "--no-atomic"]
+metrics = true
+
+[arms.recv4-noatomic]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a", "--no-atomic"]
+tune = { receiver = "jobs=4" }
+metrics = true
+
+[matrix]
+link = "mac-mars-direct"
+corpus = ["small-flat", "small-deep", "mixed-bimodal"]
+scenario = ["fresh"]
+direction = ["mac>mars"]
+client = ["initiator"]
+cache = ["warm"]

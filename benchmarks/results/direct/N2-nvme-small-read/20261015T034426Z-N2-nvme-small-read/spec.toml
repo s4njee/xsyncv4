@@ -1,0 +1,31 @@
+# The NVMe ceiling for the hdd series: the same runs as H1-H3 with mars's end
+# on its NVMe drive instead of the hard disk, to learn whether xs can pass
+# 1 Gb/s on small and mixed files when the disk is not the limit. The
+# hard-drive runs follow later and are read against these.
+# N2: reading off mars's NVMe with caches dropped before every sample; the Mac receives.
+id = "N2-nvme-small-read"
+kind = "screening"
+hypothesis = "xs -a reads small and mixed trees off a cold NVMe drive faster than rsync -a."
+primary = "durable_s"
+delta = 0.03
+blocks = 6
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[arms.xs]
+tool = "xs"
+rev = "8cc75bbdb801"
+flags = ["-a"]
+
+[matrix]
+link = "mac-mars-direct"
+corpus = ["tiny-one", "small-flat", "small-deep", "small-opaque", "mixed-bimodal", "mixed-threshold"]
+scenario = ["fresh", "noop"]
+direction = ["mars>mac"]
+client = ["initiator"]
+cache = ["cold"]

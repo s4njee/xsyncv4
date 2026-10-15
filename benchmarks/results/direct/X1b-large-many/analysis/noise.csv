@@ -1,0 +1,7 @@
+experiment,kind,cell_id,corpus,scenario,sender,receiver,client,link,cache,arm,n_blocks,sigma_d,blocks_for_2pct,blocks_for_3pct,blocks_for_5pct,blocks_for_10pct,blocks_equivalent_2pct,blocks_equivalent_3pct,blocks_equivalent_5pct,blocks_equivalent_10pct
+X1b-large-many,screening,large-four.fresh.mars-mac.receiver.warm,large-four,fresh,mars,mac,receiver,mac-mars-direct,warm,rsync-chacha,8,0.08333506996026242,141,65,25,8,189,86,33,11
+X1b-large-many,screening,large-four.fresh.mars-mac.receiver.warm,large-four,fresh,mars,mac,receiver,mac-mars-direct,warm,xs,8,0.13955113865899185,392,177,67,19,524,237,88,25
+X1b-large-many,screening,large-four.fresh.mars-mac.receiver.warm,large-four,fresh,mars,mac,receiver,mac-mars-direct,warm,xs-chacha,8,0.11511320799111471,267,121,46,14,358,162,61,18
+X1b-large-many,screening,large-mixed.fresh.mars-mac.receiver.warm,large-mixed,fresh,mars,mac,receiver,mac-mars-direct,warm,rsync-chacha,8,0.19006598111055337,725,327,121,34,970,437,162,44
+X1b-large-many,screening,large-mixed.fresh.mars-mac.receiver.warm,large-mixed,fresh,mars,mac,receiver,mac-mars-direct,warm,xs,8,0.19363083336631468,752,339,126,35,1007,453,168,46
+X1b-large-many,screening,large-mixed.fresh.mars-mac.receiver.warm,large-mixed,fresh,mars,mac,receiver,mac-mars-direct,warm,xs-chacha,8,0.23387618573533245,1096,493,183,50,1468,660,244,66

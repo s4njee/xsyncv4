@@ -1,0 +1,607 @@
+{
+ "schema": 1,
+ "run_id": "20261014T225217Z-X1a-large-one",
+ "started_utc": "2026-10-14T22:52:31.663+00:00",
+ "driver": "MacBookPro",
+ "plan": {
+  "schema": 1,
+  "experiment": "X1a-large-one",
+  "spec_sha256": "bc448a58ae906bf7bd42b4a33cdc6d418397b3900c41fd623535d1637e553431",
+  "kind": "screening",
+  "bundle": "5c7f2001dd93",
+  "writes": {
+   "mac": 255821283328,
+   "mars": 255821283328
+  },
+  "hypothesis": "On a ~3 Gb/s direct link, xs -a copies large files at least as fast as rsync -a, and ChaCha20 slows both against AES-GCM.",
+  "primary": "durable_s",
+  "delta": 0.03,
+  "control": "rsync",
+  "seed": 1,
+  "run_id": "20261014T225217Z-X1a-large-one",
+  "driver": "mac",
+  "sample_timeout_s": 3600,
+  "results": "direct",
+  "background": false,
+  "eager_cleanup": true,
+  "hosts": {
+   "mac": {
+    "ssh": "sanjee@mbp-3.local",
+    "name": "mbp-3.local",
+    "hostname": "MacBookPro",
+    "root": "/Users/sanjee/benchmarks/xsbench.noindex",
+    "interface": "en11",
+    "helper": false,
+    "gates": {},
+    "local": true,
+    "system": "Darwin"
+   },
+   "mars": {
+    "ssh": "sanjee@mars.local",
+    "name": "mars.local",
+    "hostname": "mars",
+    "root": "/home/sanjee/benchmarks/xsyncv4/lab",
+    "interface": "enp7s0f0",
+    "helper": true,
+    "gates": {},
+    "local": false,
+    "system": "Linux"
+   }
+  },
+  "links": {
+   "mac-mars-direct": {
+    "hosts": [
+     "mac",
+     "mars"
+    ],
+    "medium": "wired",
+    "min_speed_mbps": 2500,
+    "max_rtt_ms": 2.0,
+    "initiator": "mac",
+    "driver": "mac",
+    "results": "direct",
+    "address": {
+     "mac": "10.25.0.1",
+     "mars": "10.25.0.2"
+    }
+   }
+  },
+  "arms": [
+   {
+    "name": "rsync",
+    "tool": "rsync",
+    "flags": [
+     "-a"
+    ],
+    "binary": {
+     "mac": "rsync",
+     "mars": "rsync"
+    }
+   },
+   {
+    "name": "rsync-chacha",
+    "tool": "rsync",
+    "flags": [
+     "-a"
+    ],
+    "ssh_options": [
+     "-c",
+     "chacha20-poly1305@openssh.com"
+    ],
+    "binary": {
+     "mac": "rsync",
+     "mars": "rsync"
+    }
+   },
+   {
+    "name": "xs",
+    "tool": "xs",
+    "flags": [
+     "-a"
+    ],
+    "rev": "8cc75bbdb801",
+    "binary": {
+     "mac": "/Users/sanjee/benchmarks/xsbench.noindex/bin/xs-8cc75bbdb801",
+     "mars": "/home/sanjee/benchmarks/xsyncv4/lab/bin/xs-8cc75bbdb801"
+    },
+    "sha256": {
+     "mac": "80c00669af2a98779492e47bbaeaae5bedb98a27233562353472792e32de25c3",
+     "mars": "2780cc842402d442918883559a01ee48e7d856a3e45c7d60559aa073bff2ac84"
+    },
+    "artifacts": {
+     "xs-darwin-arm64": "80c00669af2a98779492e47bbaeaae5bedb98a27233562353472792e32de25c3",
+     "xs-linux-amd64": "2780cc842402d442918883559a01ee48e7d856a3e45c7d60559aa073bff2ac84",
+     "xs-linux-arm64": "fc88711b3389e12acfd9c62d2ed037560d4d99c07371f81cf2474842afe4550d"
+    }
+   },
+   {
+    "name": "xs-chacha",
+    "tool": "xs",
+    "flags": [
+     "-a"
+    ],
+    "ssh_options": [
+     "-c",
+     "chacha20-poly1305@openssh.com"
+    ],
+    "rev": "8cc75bbdb801",
+    "binary": {
+     "mac": "/Users/sanjee/benchmarks/xsbench.noindex/bin/xs-8cc75bbdb801",
+     "mars": "/home/sanjee/benchmarks/xsyncv4/lab/bin/xs-8cc75bbdb801"
+    },
+    "sha256": {
+     "mac": "80c00669af2a98779492e47bbaeaae5bedb98a27233562353472792e32de25c3",
+     "mars": "2780cc842402d442918883559a01ee48e7d856a3e45c7d60559aa073bff2ac84"
+    },
+    "artifacts": {
+     "xs-darwin-arm64": "80c00669af2a98779492e47bbaeaae5bedb98a27233562353472792e32de25c3",
+     "xs-linux-amd64": "2780cc842402d442918883559a01ee48e7d856a3e45c7d60559aa073bff2ac84",
+     "xs-linux-arm64": "fc88711b3389e12acfd9c62d2ed037560d4d99c07371f81cf2474842afe4550d"
+    }
+   }
+  ],
+  "cells": [
+   {
+    "id": "large-one.fresh.mac-mars.sender.warm",
+    "corpus": "large-one",
+    "scenario": "fresh",
+    "sender": "mac",
+    "receiver": "mars",
+    "client": "sender",
+    "link": "mac-mars-direct",
+    "cache": "warm"
+   },
+   {
+    "id": "large-one.fresh.mars-mac.receiver.warm",
+    "corpus": "large-one",
+    "scenario": "fresh",
+    "sender": "mars",
+    "receiver": "mac",
+    "client": "receiver",
+    "link": "mac-mars-direct",
+    "cache": "warm"
+   }
+  ],
+  "corpora": {
+   "large-one": {
+    "files": 1,
+    "directories": 0,
+    "bytes": 7994415104,
+    "digest": "e86245ba1191231af17bf2587f6cd07540b1b4f469c914c3e4572df606d2b9c9",
+    "quick_digest": "b5c225f81cc5828f266b5662d64827470bcbea52379acdd76c656970bcfb5f9a"
+   }
+  },
+  "blocks": [
+   {
+    "cell": "large-one.fresh.mac-mars.sender.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs-chacha",
+      "rsync-chacha",
+      "xs",
+      "rsync"
+     ],
+     [
+      "rsync-chacha",
+      "xs",
+      "xs-chacha",
+      "rsync"
+     ],
+     [
+      "rsync-chacha",
+      "xs",
+      "rsync",
+      "xs-chacha"
+     ]
+    ]
+   },
+   {
+    "cell": "large-one.fresh.mars-mac.receiver.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "rsync",
+      "rsync-chacha",
+      "xs-chacha",
+      "xs"
+     ],
+     [
+      "xs-chacha",
+      "rsync-chacha",
+      "xs",
+      "rsync"
+     ],
+     [
+      "xs-chacha",
+      "rsync-chacha",
+      "rsync",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "large-one.fresh.mac-mars.sender.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "rsync-chacha",
+      "xs-chacha",
+      "xs"
+     ],
+     [
+      "rsync",
+      "xs",
+      "xs-chacha",
+      "rsync-chacha"
+     ],
+     [
+      "xs",
+      "rsync",
+      "xs-chacha",
+      "rsync-chacha"
+     ]
+    ]
+   },
+   {
+    "cell": "large-one.fresh.mars-mac.receiver.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync-chacha",
+      "rsync",
+      "xs",
+      "xs-chacha"
+     ],
+     [
+      "xs",
+      "rsync-chacha",
+      "rsync",
+      "xs-chacha"
+     ],
+     [
+      "xs",
+      "xs-chacha",
+      "rsync",
+      "rsync-chacha"
+     ]
+    ]
+   },
+   {
+    "cell": "large-one.fresh.mars-mac.receiver.warm",
+    "block": 2,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "xs-chacha",
+      "rsync-chacha",
+      "rsync"
+     ],
+     [
+      "rsync-chacha",
+      "rsync",
+      "xs",
+      "xs-chacha"
+     ],
+     [
+      "xs",
+      "rsync",
+      "rsync-chacha",
+      "xs-chacha"
+     ]
+    ]
+   },
+   {
+    "cell": "large-one.fresh.mac-mars.sender.warm",
+    "block": 2,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync-chacha",
+      "rsync",
+      "xs",
+      "xs-chacha"
+     ],
+     [
+      "xs-chacha",
+      "xs",
+      "rsync",
+      "rsync-chacha"
+     ],
+     [
+      "xs",
+      "rsync-chacha",
+      "xs-chacha",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "large-one.fresh.mac-mars.sender.warm",
+    "block": 3,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync-chacha",
+      "xs-chacha",
+      "xs",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs-chacha",
+      "xs",
+      "rsync-chacha"
+     ],
+     [
+      "rsync",
+      "xs-chacha",
+      "rsync-chacha",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "large-one.fresh.mars-mac.receiver.warm",
+    "block": 3,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "xs-chacha",
+      "rsync",
+      "rsync-chacha"
+     ],
+     [
+      "xs-chacha",
+      "rsync",
+      "rsync-chacha",
+      "xs"
+     ],
+     [
+      "rsync",
+      "xs",
+      "xs-chacha",
+      "rsync-chacha"
+     ]
+    ]
+   },
+   {
+    "cell": "large-one.fresh.mars-mac.receiver.warm",
+    "block": 4,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync-chacha",
+      "xs",
+      "rsync",
+      "xs-chacha"
+     ],
+     [
+      "rsync-chacha",
+      "xs",
+      "rsync",
+      "xs-chacha"
+     ],
+     [
+      "rsync",
+      "rsync-chacha",
+      "xs",
+      "xs-chacha"
+     ]
+    ]
+   },
+   {
+    "cell": "large-one.fresh.mac-mars.sender.warm",
+    "block": 4,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync-chacha",
+      "xs",
+      "xs-chacha",
+      "rsync"
+     ],
+     [
+      "xs",
+      "rsync",
+      "xs-chacha",
+      "rsync-chacha"
+     ],
+     [
+      "rsync",
+      "xs-chacha",
+      "xs",
+      "rsync-chacha"
+     ]
+    ]
+   },
+   {
+    "cell": "large-one.fresh.mac-mars.sender.warm",
+    "block": 5,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync-chacha",
+      "xs",
+      "rsync",
+      "xs-chacha"
+     ],
+     [
+      "xs-chacha",
+      "xs",
+      "rsync-chacha",
+      "rsync"
+     ],
+     [
+      "rsync-chacha",
+      "xs-chacha",
+      "xs",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "large-one.fresh.mars-mac.receiver.warm",
+    "block": 5,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "rsync-chacha",
+      "rsync",
+      "xs-chacha"
+     ],
+     [
+      "xs",
+      "xs-chacha",
+      "rsync-chacha",
+      "rsync"
+     ],
+     [
+      "xs-chacha",
+      "rsync-chacha",
+      "xs",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "large-one.fresh.mac-mars.sender.warm",
+    "block": 6,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "rsync-chacha",
+      "xs",
+      "xs-chacha"
+     ],
+     [
+      "rsync-chacha",
+      "rsync",
+      "xs-chacha",
+      "xs"
+     ],
+     [
+      "rsync",
+      "xs",
+      "rsync-chacha",
+      "xs-chacha"
+     ]
+    ]
+   },
+   {
+    "cell": "large-one.fresh.mars-mac.receiver.warm",
+    "block": 6,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-chacha",
+      "rsync-chacha",
+      "xs",
+      "rsync"
+     ],
+     [
+      "xs-chacha",
+      "rsync-chacha",
+      "xs",
+      "rsync"
+     ],
+     [
+      "rsync-chacha",
+      "xs-chacha",
+      "xs",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "large-one.fresh.mac-mars.sender.warm",
+    "block": 7,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs-chacha",
+      "rsync-chacha",
+      "rsync",
+      "xs"
+     ],
+     [
+      "rsync",
+      "xs-chacha",
+      "xs",
+      "rsync-chacha"
+     ],
+     [
+      "xs",
+      "rsync-chacha",
+      "xs-chacha",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "large-one.fresh.mars-mac.receiver.warm",
+    "block": 7,
+    "verify_full": true,
+    "orders": [
+     [
+      "rsync",
+      "xs-chacha",
+      "xs",
+      "rsync-chacha"
+     ],
+     [
+      "rsync-chacha",
+      "rsync",
+      "xs",
+      "xs-chacha"
+     ],
+     [
+      "rsync-chacha",
+      "xs",
+      "rsync",
+      "xs-chacha"
+     ]
+    ]
+   }
+  ],
+  "scripts": {
+   "probe.py": "ef8873ef9ee3b3583e2592f8c88fb32a69bee4337814c8af333f1e6a15a18f23",
+   "corpus.py": "5e971be04ab61be1ef7fd0bce2877a69a4ef64f4f4147063fb6d8953a7ee071f",
+   "corpora.json": "4025ae1311d55d31a6665f4b7674b101c46e73ceb9faccf9f15ca389dea30824",
+   "agent.py": "1cfd006dff0dc2db3b11d36216f0dcad95c8c6d9785cc8630b3d79ab6a594167",
+   "runner.py": "0356c31867701629fb0b179293d4da2d6328921efb5f3d601585b1d5d6adc9e0",
+   "measure.py": "5065310f480ff1cabfa7c645f0db342624a02f9a081b96069d50d52b3d224777"
+  },
+  "observed": {
+   "mac": {
+    "rsync": {
+     "path": "/opt/homebrew/bin/rsync",
+     "sha256": "98d3d56b3e7ee67412203236afc6da8f4021527e98eaa72909340d2b40bcf98c",
+     "version": "rsync  version 3.4.4  protocol version 32"
+    },
+    "hostname": "MacBookPro"
+   },
+   "mars": {
+    "rsync": {
+     "path": "/usr/bin/rsync",
+     "sha256": "cae31f86ebfa8ecf2293a809c8f09d8176c8ead7f192de8caebcc6a1f3f14800",
+     "version": "rsync  version 3.5.0-g471e17dc  protocol version 32"
+    },
+    "hostname": "mars",
+    "trim": null
+   },
+   "addresses": {
+    "mac>mars": "10.25.0.2"
+   }
+  }
+ }
+}
