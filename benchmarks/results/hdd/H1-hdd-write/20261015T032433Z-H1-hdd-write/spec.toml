@@ -1,0 +1,30 @@
+# H1: copying onto a hard drive. The Mac sends over the direct cable (about
+# 3 Gb/s) to mars's 6 TB HGST on btrfs; time includes syncing the drive, so it
+# is what the disk took, not what it buffered. The question for the hdd series:
+# can small and mixed trees reach 1 Gb/s (125 MB/s) on a spinning disk?
+id = "H1-hdd-write"
+kind = "screening"
+hypothesis = "xs -a writes small and mixed trees onto a hard drive faster than rsync -a, durably."
+primary = "durable_s"
+delta = 0.03
+blocks = 8
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[arms.xs]
+tool = "xs"
+rev = "8cc75bbdb801"
+flags = ["-a"]
+
+[matrix]
+link = "mac-mars-hdd"
+corpus = ["tiny-one", "small-flat", "small-deep", "small-opaque", "mixed-bimodal", "mixed-threshold"]
+scenario = ["fresh", "noop"]
+direction = ["mac>mars-hdd"]
+client = ["initiator"]
+cache = ["warm"]

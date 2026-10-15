@@ -31,6 +31,18 @@ root = "/home/sanjee/benchmarks/xsyncv4/lab"
 root_fstype = "ext4"
 helper = true
 
+# mars again, with its benchmark root on the hard drive: an HGST Ultrastar
+# 7K6000 6 TB (SATA, 7,200 rpm), btrfs, bfq scheduler, which also holds the
+# operator's own files. Everything the harness writes stays under
+# /mnt/hdd/xsbench. For tuning small and mixed files against a spinning disk.
+[hosts.mars-hdd]
+ssh = "sanjee@mars.local"
+name = "mars.local"
+hostname = "mars"
+root = "/mnt/hdd/xsbench"
+root_fstype = "btrfs"
+helper = true
+
 # Inventoried 2026-10-13. A Raspberry Pi 4 on an NVMe drive behind a USB
 # bridge, wired by eth0 to a mesh node whose backhaul to mars's node is
 # wireless. Its own wlan0 must stay off: with both up, the name resolves to
@@ -108,3 +120,15 @@ driver = "mac"
 results = "direct"
 address = { mac = "10.25.0.1", mars = "10.25.0.2" }
 interface = { mac = "en11", mars = "enp7s0f0" }
+
+# The same cable, with mars's end on its hard drive (2026-10-15).
+[links.mac-mars-hdd]
+hosts = ["mac", "mars-hdd"]
+medium = "wired"
+min_speed_mbps = 2500  # the Mac reports 2500Base-T for this 10G link
+max_rtt_ms = 2.0
+initiator = "mac"
+driver = "mac"
+results = "hdd"
+address = { mac = "10.25.0.1", mars-hdd = "10.25.0.2" }
+interface = { mac = "en11", mars-hdd = "enp7s0f0" }

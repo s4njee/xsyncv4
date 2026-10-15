@@ -1,0 +1,28 @@
+# H2: copying off the hard drive, with caches dropped on mars before every
+# sample so that scanning and reading go to the disk. The Mac receives.
+id = "H2-hdd-read"
+kind = "screening"
+hypothesis = "xs -a reads small and mixed trees off a cold hard drive faster than rsync -a."
+primary = "durable_s"
+delta = 0.03
+blocks = 6
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[arms.xs]
+tool = "xs"
+rev = "8cc75bbdb801"
+flags = ["-a"]
+
+[matrix]
+link = "mac-mars-hdd"
+corpus = ["tiny-one", "small-flat", "small-deep", "small-opaque", "mixed-bimodal", "mixed-threshold"]
+scenario = ["fresh", "noop"]
+direction = ["mars-hdd>mac"]
+client = ["initiator"]
+cache = ["cold"]
