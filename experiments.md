@@ -1401,6 +1401,15 @@ ratio of 1.036 [1.026, 1.046]. First diagnostics, run by hand:
   - rsync stays at 2.8 to 3.2 Gb/s on every large corpus in both
     directions, with its Mac side at about one core: a single thread's
     limit.
+  - End of the 10 Gb/s phase, 2026-10-16: Z4 (codecs) is the last run on
+    mars; Z2b was dropped. The GPU goes back in mars's x8 slot and the X540
+    comes out; later Mac-to-mars work (the HDD set, H1–H5) uses mars's
+    onboard 2.5GbE. A Thunderbolt/USB4 host link between the Mac and mars's
+    ASM4242 was tried: it trains at 2 × 10 Gb/s and logs in, but drops every
+    few seconds, so it is not usable. On 2026-10-17 freya's and mars's
+    motherboards are swapped (thermal paste arriving), which puts a free
+    PCIe 4.0 x4 slot in mars for the X540; freya's later runs are a new
+    hardware configuration and are marked as such.
 
 M0 is done by the operator, not by the harness. M1–M6 need no engine
 change, so flag-only experiments (E1–E3) can start before M7.
