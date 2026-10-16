@@ -54,10 +54,19 @@ def load_spec(path):
     if len(spec['arms']) > 6:
         raise SpecError('at most six arms fit in a block')
     for name, arm in spec['arms'].items():
-        if not SAFE.fullmatch(name) or arm.get('tool') not in ('xs', 'rsync'):
-            raise SpecError(f'arm {name}: needs a plain name and tool xs or rsync')
+        if not SAFE.fullmatch(name) or arm.get('tool') not in ('xs', 'rsync', 'pipe'):
+            raise SpecError(f'arm {name}: needs a plain name and tool xs, rsync or pipe')
         if arm['tool'] == 'xs' and not arm.get('rev'):
             raise SpecError(f'arm {name}: an xs arm names the commit it runs')
+        if arm['tool'] == 'pipe':
+            # tar streams by xspipe.py: `streams` at once, through `codec`, and with `local` both ends
+            # on the receiver (its own ceiling, no network).
+            streams = arm.get('streams', 1)
+            if not isinstance(streams, int) or not 1 <= streams <= 32 or arm.get('codec', 'none') not in ('none', 'zstd1') \
+                    or not isinstance(arm.get('local', False), bool):
+                raise SpecError(f'arm {name}: a pipe arm has streams 1-32, codec none or zstd1, local true or false')
+        if arm.get('writeback', 'default') not in ('default', 'eager'):
+            raise SpecError(f'arm {name}: `writeback` is default or eager (the receiver flushes as it goes)')
     if not isinstance(spec['blocks'], int) or spec['blocks'] < 1:
         raise SpecError('`blocks` must be a positive integer')
     return spec
@@ -154,8 +163,17 @@ def make_plan(spec, config, pins, seed, run_id, baseline=None):
             entry['binary'] = {host: f'{hosts[host]["root"]}/bin/xs-{build["rev12"]}' for host in hosts}
             entry['sha256'] = {}  # filled per host architecture by `start`
             entry['artifacts'] = {name: artifact['sha256'] for name, artifact in build['artifacts'].items()}
+        elif arm['tool'] == 'pipe':
+            if any(cell['scenario'] != 'fresh' for cell in cells):
+                raise SpecError(f'arm {name}: a pipe copies everything, so it runs only fresh cells')
+            entry.update(flags=[], streams=arm.get('streams', 1), codec=arm.get('codec', 'none'),
+                         local=arm.get('local', False), binary={host: 'xspipe.py' for host in hosts})
+            # A pipe pushes from the sender; a local one runs wholly on the receiver.
+            entry['client'] = 'receiver' if entry['local'] else 'sender'
         else:
             entry['binary'] = {host: 'rsync' for host in hosts}
+        if arm.get('writeback', 'default') == 'eager':
+            entry['writeback'] = 'eager'
         arms.append(entry)
     corpora = {}
     for name in spec['matrix']['corpus']:

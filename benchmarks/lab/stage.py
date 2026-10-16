@@ -55,7 +55,7 @@ def copy_to(host, paths, directory):
     else:
         run('scp', '-q', '-oBatchMode=yes', *preflight.jump_for(host['ssh']), *paths, f'{host["ssh"]}:{directory}/')
 SCRIPTS = (HERE / 'probe.py', HERE / 'corpus.py', HERE / 'corpora.json', HERE / 'agent.py', HERE / 'runner.py',
-           HERE.parent / 'measure.py')
+           HERE / 'xspipe.py', HERE.parent / 'measure.py')
 
 
 def run(*command, **options):

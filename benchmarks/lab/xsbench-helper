@@ -27,6 +27,11 @@
 #                                  mounted, from fstab or from scratch_source
 #   trim-scratch                   tell the drive which blocks of the scratch
 #                                  filesystem are unused (fstrim)
+#   writeback eager|restore        eager: start flushing dirty pages after 64 MiB
+#                                  and write back every 0.5 s, so a copy is
+#                                  mostly on disk when it ends; restore: put
+#                                  back the host's own settings, saved by the
+#                                  first eager call
 #
 # Exit status: 0 done, 1 failed, 2 usage, 3 not configured or not supported
 # on this host, 4 refused.
@@ -35,7 +40,7 @@ umask 077
 PATH=/usr/sbin:/usr/bin:/sbin:/bin
 export PATH
 
-VERSION=2
+VERSION=3
 SELF=/usr/local/sbin/xsbench-helper
 CONF=/etc/xsbench-helper.conf
 STATE=/run/xsbench-helper
@@ -59,7 +64,7 @@ die() {
 }
 
 usage() {
-  die 2 "usage: xsbench-helper status | drop-caches | governor performance|restore | netem set DELAY_MS LOSS_PCT LIFETIME_S | netem clear | mount-scratch | trim-scratch"
+  die 2 "usage: xsbench-helper status | drop-caches | governor performance|restore | netem set DELAY_MS LOSS_PCT LIFETIME_S | netem clear | mount-scratch | trim-scratch | writeback eager|restore"
 }
 
 need_root() {
@@ -187,6 +192,8 @@ do_status() {
   else
     echo governor_saved=no
   fi
+  if [ -d "$STATE/writeback" ]; then echo writeback_saved=yes; else echo writeback_saved=no; fi
+  echo "dirty_background_bytes=$(cat /proc/sys/vm/dirty_background_bytes)"
   echo "scratch=$SCRATCH"
   echo "scratch_fstype_wanted=$SCRATCH_FS"
   echo "scratch_source_configured=$SCRATCH_SOURCE"
@@ -351,6 +358,43 @@ do_trim_scratch() {
   echo "trimmed=yes $trimmed"
 }
 
+WRITEBACK_KEYS="dirty_background_bytes dirty_background_ratio dirty_expire_centisecs dirty_writeback_centisecs"
+
+do_writeback_eager() {
+  need_root
+  # Keep the first saved values: a second call must not record the eager ones.
+  if [ ! -d "$STATE/writeback" ]; then
+    mkdir -p "$STATE/writeback.new"
+    for key in $WRITEBACK_KEYS; do cat "/proc/sys/vm/$key" >"$STATE/writeback.new/$key"; done
+    mv "$STATE/writeback.new" "$STATE/writeback"
+  fi
+  echo 67108864 >/proc/sys/vm/dirty_background_bytes
+  echo 100 >/proc/sys/vm/dirty_expire_centisecs
+  echo 50 >/proc/sys/vm/dirty_writeback_centisecs
+  audit writeback eager
+  echo writeback=eager
+}
+
+do_writeback_restore() {
+  need_root
+  [ -d "$STATE/writeback" ] || { echo writeback=default; return 0; }
+  for key in $WRITEBACK_KEYS; do
+    value=$(cat "$STATE/writeback/$key")
+    case "$value" in '' | *[!0-9]*) die 1 "saved $key is not a number" ;; esac
+  done
+  # The kernel keeps one of bytes and ratio: setting either zeroes the other, so set the saved non-zero one.
+  if [ "$(cat "$STATE/writeback/dirty_background_bytes")" -ne 0 ]; then
+    cat "$STATE/writeback/dirty_background_bytes" >/proc/sys/vm/dirty_background_bytes
+  else
+    cat "$STATE/writeback/dirty_background_ratio" >/proc/sys/vm/dirty_background_ratio
+  fi
+  cat "$STATE/writeback/dirty_expire_centisecs" >/proc/sys/vm/dirty_expire_centisecs
+  cat "$STATE/writeback/dirty_writeback_centisecs" >/proc/sys/vm/dirty_writeback_centisecs
+  rm -rf "$STATE/writeback"
+  audit writeback restore
+  echo writeback=default
+}
+
 case "${1:-}" in
   status)
     [ $# -eq 1 ] || usage
@@ -388,6 +432,14 @@ case "${1:-}" in
   trim-scratch)
     [ $# -eq 1 ] || usage
     do_trim_scratch
+    ;;
+  writeback)
+    [ $# -eq 2 ] || usage
+    case "$2" in
+      eager) do_writeback_eager ;;
+      restore) do_writeback_restore ;;
+      *) usage ;;
+    esac
     ;;
   *) usage ;;
 esac

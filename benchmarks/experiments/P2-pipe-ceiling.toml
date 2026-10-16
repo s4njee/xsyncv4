@@ -1,0 +1,54 @@
+# P2: the receiver's own ceiling, and flushing as it goes. The same tar streams
+# run wholly on mars (its own copy of the corpus, no network) with 1, 4 and 8
+# extractors: if mars cannot create files at link speed by itself, no transfer
+# can. Then four network streams and xs's best setting with the receiver
+# flushing dirty pages after 64 MiB instead of all at the final sync.
+id = "P2-pipe-ceiling"
+kind = "screening"
+hypothesis = "mars creates small files locally much faster than any copy delivers them, and flushing as it goes shortens the final sync."
+primary = "durable_s"
+delta = 0.03
+blocks = 6
+control = "tar-x4"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.tar-x4]
+tool = "pipe"
+streams = 4
+
+[arms.local-x1]
+tool = "pipe"
+streams = 1
+local = true
+
+[arms.local-x4]
+tool = "pipe"
+streams = 4
+local = true
+
+[arms.local-x8]
+tool = "pipe"
+streams = 8
+local = true
+
+[arms.tar-x4-eager]
+tool = "pipe"
+streams = 4
+writeback = "eager"
+
+[arms.xs-best-eager]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-a", "--no-atomic"]
+tune = { receiver = "jobs=4" }
+writeback = "eager"
+
+[matrix]
+link = "mac-mars-2g5"
+corpus = ["small-flat", "small-deep", "real-congress"]
+scenario = ["fresh"]
+direction = ["mac>mars"]
+client = ["initiator"]
+cache = ["warm"]

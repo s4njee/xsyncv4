@@ -1,0 +1,53 @@
+# P1: what a bare pipe does with small files, Mac to mars's NVMe over 2.5GbE.
+# Plain tar streams (xspipe.py) against xs's best small-file setting (four
+# receiving workers, --no-atomic): one stream, one through zstd -1, and the tree
+# cut into 4 and 8 streams extracted at once. If a pipe is much faster, the gap
+# is xs's protocol; if not, it is the receiver creating files. 2.5 Gb/s needs
+# about 100,000 small files a second; xs managed about 28,000 onto this disk.
+id = "P1-pipe-streams"
+kind = "screening"
+hypothesis = "Plain tar streams, compressed or cut into several at once, copy small trees onto NVMe faster than xs."
+primary = "durable_s"
+delta = 0.03
+blocks = 6
+control = "xs-best"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.xs-best]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-a", "--no-atomic"]
+tune = { receiver = "jobs=4" }
+
+[arms.xs]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-a"]
+
+[arms.tar]
+tool = "pipe"
+streams = 1
+
+[arms.tar-zstd]
+tool = "pipe"
+streams = 1
+codec = "zstd1"
+
+[arms.tar-x4]
+tool = "pipe"
+streams = 4
+
+[arms.tar-x8]
+tool = "pipe"
+streams = 8
+
+[matrix]
+link = "mac-mars-2g5"
+corpus = ["small-flat", "small-deep", "real-congress"]
+scenario = ["fresh"]
+direction = ["mac>mars"]
+client = ["initiator"]
+cache = ["warm"]

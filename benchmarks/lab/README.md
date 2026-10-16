@@ -146,6 +146,17 @@ The spec's `[baseline]` table names the analysed experiment and arm the
 times come from. It exists to give the analysis a known effect to find
 (`E0b-known.toml`).
 
+An arm with `tool = "pipe"` copies the tree as plain tar streams, the
+yardstick for what a bare pipe achieves (`xspipe.py`, `P1`–`P3`): `streams`
+(1 to 32) cuts the sorted file list into that many shares sent and extracted
+at once, `codec = "zstd1"` passes each through `zstd -1`, and `local = true`
+runs both ends on the receiver from its own copy of the corpus, with no
+network: the receiver's own ceiling. The directories go last in a stream of
+their own, so their modes and times survive. Pipes push from the sender and
+run only fresh cells. Any arm may set `writeback = "eager"`: the receiver's
+helper starts flushing dirty pages after 64 MiB around each of its samples,
+so less is left for the final sync (helper version 3).
+
 ## Running around the clock
 
 The LAN pair works continuously. A runner (`runner.py`) lives on the driver,
@@ -398,6 +409,8 @@ installed copy's SHA-256 with the one in this directory.
 | `netem set DELAY_MS LOSS_PCT LIFETIME_S` | Installs a `netem` root qdisc on the configured interface, and a timer that removes it after `LIFETIME_S` (at most 3600). Delay applies to outgoing packets only, so it adds `DELAY_MS` to the round trip. Refuses if the interface already has a qdisc someone configured. |
 | `netem clear` | Removes that qdisc and its timer. |
 | `mount-scratch` | Mounts the configured scratch mount point if it is not mounted, from `fstab` or else from `scratch_source`, and checks its type. |
+| `writeback eager` | Saves `vm.dirty_background_*`, `dirty_expire_centisecs` and `dirty_writeback_centisecs` (once), then flushes after 64 MiB and every 0.5 s. Version 3. |
+| `writeback restore` | Puts the saved values back. |
 | `trim-scratch` | Runs `fstrim` on the scratch filesystem. The agent calls it at the start of every run: freya's QLC scratch drive fell from 3,000 MB/s to 155 MB/s within a day of write-and-delete cycles without it. |
 
 Exit status: 0 done, 1 failed, 2 usage, 3 not configured or not supported

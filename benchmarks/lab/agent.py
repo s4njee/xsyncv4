@@ -165,8 +165,45 @@ def ssh_target(client, peer, addresses):
     return (f'{user}@{address}' if user else address), [f'-oHostKeyAlias={name}']
 
 
+def pipe_command(arm, cell, hosts, run_id, tag, addresses=None):
+    """A pipe arm's transfer: xspipe.py's tar streams, pushed from the sender or, local, run on the receiver."""
+    sender, receiver = hosts[cell['sender']], hosts[cell['receiver']]
+    client = receiver if arm['local'] else sender
+    source = f'{client.root}/corpora/{cell["corpus"]}'
+    destination = work_path(receiver, run_id, cell['id'], arm['name'])
+    pipe = ['python3', client.bin('xspipe.py'), 'push', '--src', source, '--dest', destination,
+            '--streams', str(arm['streams']), '--codec', arm['codec']]
+    if not arm['local']:
+        target, alias = ssh_target(sender, receiver, addresses)
+        pipe += ['--rsh', ' '.join([RSH, *alias, *map(shlex.quote, arm.get('ssh_options', []))]), '--target', target,
+                 '--measure', shlex.join(['python3', receiver.bin('measure.py')]),
+                 '--metrics-base', work_path(receiver, run_id, 'logs', f'{tag}.peer')]
+    argv = [*CLEAN_ENV, 'python3', client.bin('measure.py'), '--metrics',
+            work_path(client, run_id, 'logs', f'{tag}.client.json'), '--', *pipe]
+    log = work_path(client, run_id, 'logs', tag)
+    peer = sender if client is receiver else receiver
+    return client, peer, argv, f'{shlex.join(argv)} > {shlex.quote(log + ".out")} 2> {shlex.quote(log + ".err")}'
+
+
+def merged_metrics(text):
+    """One measure.py record from several (a pipe's receiving streams): the slowest wall, summed CPU."""
+    parts = [json.loads(line) for line in text.splitlines() if line.strip()]
+    if not parts:
+        return None
+    return {'returncode': max((part['returncode'] for part in parts), key=abs),
+            'wall_seconds': max(part['wall_seconds'] for part in parts),
+            'user_seconds': sum(part['user_seconds'] for part in parts),
+            'system_seconds': sum(part['system_seconds'] for part in parts),
+            'max_rss_bytes': max(part['max_rss_bytes'] for part in parts),
+            'voluntary_switches': sum(part['voluntary_switches'] for part in parts),
+            'involuntary_switches': sum(part['involuntary_switches'] for part in parts),
+            'streams': len(parts)}
+
+
 def transfer_command(arm, cell, hosts, run_id, tag, addresses=None):
     """(client host, shell script) for one timed transfer, measured on both ends."""
+    if arm['tool'] == 'pipe':
+        return pipe_command(arm, cell, hosts, run_id, tag, addresses)
     sender, receiver = hosts[cell['sender']], hosts[cell['receiver']]
     client = sender if client_role(arm, cell) == 'sender' else receiver
     peer = receiver if client is sender else sender
@@ -264,7 +301,11 @@ class Run:
                 host = self.hosts[receiver]
                 if host.run('test', '-f', f'{host.root}/corpora/{name}.manifest.json', check=False).returncode:
                     raise RuntimeError(f'{receiver}: no manifest for corpus {name} to check copies against')
-            for sender in sorted({cell['sender'] for cell in self.cells.values() if cell['corpus'] == name}):
+            # A local pipe reads the receiver's own copy, so that copy must be the pinned one as well.
+            readers = {cell['sender'] for cell in self.cells.values() if cell['corpus'] == name}
+            if any(arm.get('local') for arm in self.arms.values()):
+                readers |= {cell['receiver'] for cell in self.cells.values() if cell['corpus'] == name}
+            for sender in sorted(readers):
                 host = self.hosts[sender]
                 manifest = f'{host.root}/corpora/{name}.manifest.json'
                 found = json.loads(host.run('python3', host.bin('corpus.py'), 'verify', f'{host.root}/corpora/{name}',
@@ -282,6 +323,16 @@ class Run:
                     name = peer.ssh.rpartition('@')[2]
                     self.addresses[key] = fixed or client.run('python3', '-c', RESOLVE, name, timeout=60).stdout.strip()
         self.plan['observed']['addresses'] = self.addresses
+        for receiver in sorted({cell['receiver'] for cell in self.cells.values()}):
+            host = self.hosts[receiver]
+            if any(arm.get('writeback') for arm in self.arms.values()):
+                if not host.has_helper:
+                    raise RuntimeError(f'{receiver}: a writeback arm needs the helper on the receiver')
+                version = dict(line.split('=', 1) for line in host.run(HELPER, 'status', check=False).stdout.splitlines()
+                               if '=' in line).get('version', '0')
+                if int(version) < 3:
+                    raise RuntimeError(f'{receiver}: the helper is version {version}; writeback needs version 3')
+                host.helper('writeback', 'restore')  # start from the host's own settings
         if any(observed.get('trim') for observed in self.plan['observed'].values() if isinstance(observed, dict)):
             time.sleep(15)  # a drive works through a large trim for a few seconds afterwards
         for host in self.hosts.values():
@@ -313,6 +364,9 @@ class Run:
             try:
                 host.run('rm', '-f', f'{host.root}/runs/.foreground-{self.run_id}', check=False, timeout=60)
                 host.helper('governor', 'restore')
+                if any(arm.get('writeback') for arm in self.arms.values()) and host.name in {
+                        cell['receiver'] for cell in self.cells.values()}:
+                    host.helper('writeback', 'restore')
                 host.run('rm', '-rf', '--', work_path(host, self.run_id), check=False, timeout=600)
             except Exception as error:  # every host gets its turn
                 print(f'cleanup on {host.name}: {error}', flush=True)
@@ -340,14 +394,15 @@ class Run:
             client.shell(f'rsync -aH -e {shlex.quote(rsh)} {shlex.quote(paths[0])} {shlex.quote(paths[1])}', timeout=7200)
             self.seeded.add((cell['id'], arm['name']))
 
-    def apply_cache(self, cell, destination):
+    def apply_cache(self, cell, destination, arm=None):
         sender, receiver = self.hosts[cell['sender']], self.hosts[cell['receiver']]
         if cell['cache'] == 'cold':
             for host in (sender, receiver):
                 host.helper('drop-caches')
             return
-        source = shlex.quote(f'{sender.root}/corpora/{cell["corpus"]}')
-        sender.shell(f'find {source} -type f -exec cat {{}} + > /dev/null', timeout=3600)
+        reader = receiver if (arm or {}).get('local') else sender  # a local pipe reads the receiver's own copy
+        source = shlex.quote(f'{reader.root}/corpora/{cell["corpus"]}')
+        reader.shell(f'find {source} -type f -exec cat {{}} + > /dev/null', timeout=3600)
         if cell['scenario'] != 'fresh':
             receiver.shell(f'find {shlex.quote(destination)} -type f -size +0 > /dev/null', timeout=3600)
 
@@ -388,8 +443,10 @@ class Run:
                   'corpus_bytes': self.plan['corpora'][cell['corpus']]['bytes'],
                   'valid': False, 'void_reason': None}
         try:
+            if arm.get('writeback'):
+                receiver.helper('writeback', arm['writeback'])  # before the settle, which flushes under it
             self.prepare_destination(cell, arm, destination)
-            self.apply_cache(cell, destination)
+            self.apply_cache(cell, destination, arm)
             before, record['settle_s'] = self.settle(cell, destination)
             client, peer, argv, script = transfer_command(arm, cell, self.hosts, self.run_id, tag, self.addresses)
             record.update(client_host=client.name, peer_host=peer.name, argv=argv, utc_start=utc())
@@ -407,6 +464,12 @@ class Run:
             record['stdout'], _, record['stderr'] = output.partition('\x1e')
             record['stats'] = parse_stats(record['stdout'])
             for role, host in (('client', client), ('peer', peer)):
+                if arm['tool'] == 'pipe' and role == 'peer':
+                    # One record per receiving stream, merged; a local pipe has no peer at all.
+                    found = None if arm['local'] else host.shell(
+                        'cat ' + shlex.quote(work_path(host, self.run_id, 'logs', tag)) + '.peer.*.json', check=False)
+                    record[role] = merged_metrics(found.stdout) if found and found.returncode == 0 else None
+                    continue
                 metrics = host.run('cat', work_path(host, self.run_id, 'logs', f'{tag}.{role}.json'), check=False)
                 record[role] = json.loads(metrics.stdout) if metrics.returncode == 0 and metrics.stdout else None
             if arm.get('metrics'):
@@ -418,7 +481,7 @@ class Run:
                     record['engine'][role] = json.loads(lines[-1]) if lines else None
             if exit_status or not record['client'] or record['client']['returncode']:
                 raise Void(f'the transfer exited {exit_status}: {record["stderr"].strip()[-300:]}')
-            if not record['peer'] or record['peer']['returncode']:
+            if not arm.get('local') and (not record['peer'] or record['peer']['returncode']):
                 raise Void('the peer process failed or left no metrics')
             if sync.returncode:
                 raise Void('could not sync the destination filesystem: ' + sync.stderr.strip()[-200:])
@@ -446,6 +509,9 @@ class Run:
             record['void_reason'] = str(void)
         except (RuntimeError, subprocess.TimeoutExpired, ValueError) as error:
             record['void_reason'] = f'harness error: {error}'
+        finally:
+            if arm.get('writeback'):
+                receiver.helper('writeback', 'restore')
         if self.plan.get('eager_cleanup') and cell['scenario'] == 'fresh':
             receiver.run('rm', '-rf', '--', destination, check=False, timeout=1800)  # a host short of space
         self.append(self.samples, record)

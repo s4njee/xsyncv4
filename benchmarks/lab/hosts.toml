@@ -127,6 +127,33 @@ results = "direct"
 address = { mac = "10.25.0.1", mars = "10.25.0.2" }
 interface = { mac = "en13", mars = "enp1s0f0" }
 
+# Mac to mars over mars's onboard 2.5GbE port, once the GPU is back in the x8 slot
+# (2026-10-16/17). The Mac keeps its Thunderbolt adapter, which also runs at 2.5
+# Gb/s, and both ends keep their direct-cable addresses. mars's interface name is
+# the X870 board's; it changes with the motherboard swap of 2026-10-17 and must be
+# set again then.
+[links.mac-mars-2g5]
+hosts = ["mac", "mars"]
+medium = "wired"
+min_speed_mbps = 2500
+max_rtt_ms = 2.0
+initiator = "mac"
+driver = "mac"
+results = "pipes"
+address = { mac = "10.25.0.1", mars = "10.25.0.2" }
+interface = { mac = "en13", mars = "enp7s0" }
+
+[links.mac-mars-hdd-2g5]
+hosts = ["mac", "mars-hdd"]
+medium = "wired"
+min_speed_mbps = 2500
+max_rtt_ms = 2.0
+initiator = "mac"
+driver = "mac"
+results = "hdd"
+address = { mac = "10.25.0.1", mars-hdd = "10.25.0.2" }
+interface = { mac = "en13", mars-hdd = "enp7s0" }
+
 # The same cable, with mars's end on its hard drive (2026-10-15).
 [links.mac-mars-hdd]
 hosts = ["mac", "mars-hdd"]
