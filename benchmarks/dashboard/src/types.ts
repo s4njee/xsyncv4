@@ -158,9 +158,12 @@ export interface State {
   runners: Record<string, RunnerMessage>;
   hosts: Record<string, HostMessage>;
   results: ExperimentIndex[];
+  runs?: RunIndex[];
   events: DashEvent[];
   // driver -> interface -> [utc, rx bits/s, tx bits/s], oldest first
   speed: Record<string, Record<string, [number, number, number][]>>;
+  // driver -> interface -> negotiated link speed in Mb/s, where the host reports one
+  link?: Record<string, Record<string, number>>;
   started: number;
 }
 
@@ -202,4 +205,72 @@ export interface ExperimentDetail {
   absolutes: Absolute[];
   summary: unknown;
   report: string | null;
+}
+
+// A past run, as server/runs.mjs reads it from benchmarks/results.
+export interface RunIndex {
+  key: string; // group/experiment/run
+  group: string;
+  experiment: string;
+  run: string;
+  kind: string | null;
+  hypothesis: string | null;
+  primary: string;
+  control: string | null;
+  driver: string | null;
+  links: string[];
+  started: number | null;
+  ended: number | null;
+  samples: number;
+  valid: number;
+  voided: number;
+  planned: number | null;
+  state: string | null;
+  arms: string[];
+  corpora: string[];
+  cells: number;
+}
+
+export interface RunCell {
+  id: string;
+  corpus: string;
+  scenario: string;
+  sender: string;
+  receiver: string;
+  client: string;
+  link: string;
+  cache: string;
+  files: number | null;
+  bytes: number | null;
+}
+
+// One array per field, one entry per sample; cell, arm and rev are indexes.
+export interface RunColumns {
+  cell: number[];
+  arm: number[];
+  block: (number | null)[];
+  attempt: (number | null)[];
+  position: (number | null)[];
+  control: number[];
+  valid: number[];
+  void: (string | null)[];
+  utc: (number | null)[];
+  wall_s: (number | null)[];
+  sync_s: (number | null)[];
+  durable_s: (number | null)[];
+  client_cpu_s: (number | null)[];
+  peer_cpu_s: (number | null)[];
+  client_rss: (number | null)[];
+  peer_rss: (number | null)[];
+  wire_bytes: (number | null)[];
+  retransmits: (number | null)[];
+  rev: (number | null)[];
+}
+
+export interface RunDetail extends Omit<RunIndex, 'arms' | 'cells'> {
+  delta: number | null;
+  arms: { name: string; tool: string; flags: string[] }[];
+  cells: RunCell[];
+  revs: string[];
+  columns: RunColumns;
 }

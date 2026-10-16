@@ -3,8 +3,9 @@ import { createTheme } from '@mk7s/holocss/theme';
 import { createToastQueue } from '@mk7s/holocss/components/controllers';
 import { Live } from './live';
 import { ago, cellLabel, clock, duration, esc, gib, rate, runName, seconds, VERDICT_STATUS } from './format';
-import { ForestChart, type ForestRow } from './charts';
+import { ForestChart, SpeedChart, type ForestRow } from './charts';
 import { startInk } from './ink';
+import { renderRunList, runsUpdated, setupRuns, showRuns } from './runs';
 import type { DashEvent, Effect, ExperimentDetail, ExperimentIndex, HostMessage, RunnerMessage, State } from './types';
 
 const live = new Live();
@@ -17,16 +18,20 @@ theme.subscribe(({ theme: value }: { theme: string }) => (themeSelect.value = va
 themeSelect.addEventListener('change', () => theme.set(themeSelect.value as never));
 const toasts = createToastQueue($('toast'), { maxPending: 5, duration: 8000 });
 
-const views = ['live', 'results', 'events'];
+const views = ['live', 'results', 'runs', 'events'];
 function showView(): void {
-  const view = views.includes(location.hash.slice(1)) ? location.hash.slice(1) : 'live';
+  // #runs/<group>/<experiment>/<run> opens one run.
+  const [name, ...rest] = location.hash.slice(1).split('/');
+  const view = views.includes(name) ? name : 'live';
   for (const name of views) {
     $(`view-${name}`).hidden = name !== view;
     document.querySelector(`[data-view="${name}"]`)?.toggleAttribute('aria-current', name === view);
     if (name === view) document.querySelector(`[data-view="${name}"]`)?.setAttribute('aria-current', 'page');
   }
   if (view === 'results') renderResults();
+  if (view === 'runs') showRuns(live.state.runs, rest.join('/'));
 }
+setupRuns(() => live.state.runs);
 addEventListener('hashchange', showView);
 
 // --- connection status ------------------------------------------------------------
@@ -37,7 +42,34 @@ live.onStatus((status) => {
 });
 setInterval(() => {
   $('updated').textContent = live.lastMessage ? `updated ${ago(live.lastMessage / 1000)}` : '';
+  tickClocks(document);
 }, 1000);
+
+// The run clocks count on their own between updates: "running for" as a stopwatch, and
+// "left" down to the estimated finish. When "left" shows a new value it slides in (CSS
+// dash-roll); a card rebuilt with the same value does not replay it.
+const shownLeft = new Map<string, string>();
+const stopwatch = (total: number) => {
+  const t = Math.max(0, Math.floor(total)), h = Math.floor(t / 3600), m = Math.floor((t % 3600) / 60), s = t % 60;
+  return `${h ? `${h}:${String(m).padStart(2, '0')}` : m}:${String(s).padStart(2, '0')}`;
+};
+function tickClocks(root: ParentNode): void {
+  const now = Date.now() / 1000;
+  for (const el of root.querySelectorAll<HTMLElement>('[data-since]')) el.textContent = stopwatch(now - Number(el.dataset.since));
+  for (const el of root.querySelectorAll<HTMLElement>('[data-until]')) {
+    const text = el.dataset.until ? duration(Math.max(0, Number(el.dataset.until) - now)) : '—';
+    const key = el.dataset.key ?? '';
+    if (el.textContent !== text) {
+      el.textContent = text;
+      if (shownLeft.has(key) && shownLeft.get(key) !== text) {
+        el.removeAttribute('data-changed');
+        void el.offsetWidth; // restart the animation
+        el.setAttribute('data-changed', '');
+      }
+    }
+    shownLeft.set(key, text);
+  }
+}
 
 // --- runner cards -----------------------------------------------------------------
 // Drivers in the order their cards appear: the week's wired pair first.
@@ -47,7 +79,7 @@ const LINK_NAMES: Record<string, string> = {
   lan: 'neo ↔ freya (wired)', mesh: 'neo ↔ mars', wifi: 'orion ↔ mars (Wi-Fi)', 'mac-mars': 'Mac ↔ mars (mesh)',
   'mac-mars-direct': 'Mac ↔ mars (10 GbE)', 'mac-mars-hdd': 'Mac ↔ mars hard drive',
 };
-interface Card { root: HTMLElement; body: HTMLElement; speed: HTMLElement; chart: ForestChart | null; chartHost: HTMLElement; chartKey: string; shown: number }
+interface Card { root: HTMLElement; body: HTMLElement; speed: HTMLElement; spark: SpeedChart; chart: ForestChart | null; chartHost: HTMLElement; chartKey: string; shown: number }
 const cards = new Map<string, Card>();
 
 function stateBadge(message: RunnerMessage): [string, string] {
@@ -70,13 +102,7 @@ function ensureCard(driver: string): Card {
     <div class="dash-speed" aria-label="Link speed">
       <div class="dash-speed-figure"><span class="dash-speed-value">0</span><span class="dash-speed-unit">Mbps</span></div>
       <div class="dash-speed-detail"><span class="dash-speed-dir" data-dir="rx">↓ 0</span><span class="dash-speed-dir" data-dir="tx">↑ 0</span><span class="dash-speed-iface dash-muted"></span></div>
-      <svg class="dash-spark" viewBox="0 0 90 30" preserveAspectRatio="none" aria-hidden="true">
-        <defs><linearGradient id="spark-fill-${driver}" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="var(--dash-blue)" stop-opacity="0.55"/><stop offset="100%" stop-color="var(--dash-blue)" stop-opacity="0"/>
-        </linearGradient></defs>
-        <polygon class="dash-spark-area" fill="url(#spark-fill-${driver})" points=""/>
-        <polyline class="dash-spark-rx" points=""/><polyline class="dash-spark-tx" points=""/>
-      </svg>
+      <div class="dash-spark" aria-hidden="true"></div>
     </div>
     <div class="dash-runner-body hcss-stack"></div>
     <figure class="dash-chart-figure"><figcaption class="dash-muted">Each arm against the control, by cell, over the blocks so far (below 1 is faster)</figcaption><div class="dash-chart"></div></figure>`;
@@ -86,7 +112,7 @@ function ensureCard(driver: string): Card {
   root.dataset.wtOrbit = cards.size % 2 ? 'ccw' : 'cw';
   root.style.order = String(DRIVER_ORDER.includes(driver) ? DRIVER_ORDER.indexOf(driver) : 99);
   $('runners').append(root);
-  card = { root, body: root.querySelector('.dash-runner-body')!, speed: root.querySelector('.dash-speed')!, chart: null, chartHost: root.querySelector('.dash-chart')!, chartKey: '', shown: 0 };
+  card = { root, body: root.querySelector('.dash-runner-body')!, speed: root.querySelector('.dash-speed')!, spark: new SpeedChart(root.querySelector('.dash-spark')!), chart: null, chartHost: root.querySelector('.dash-chart')!, chartKey: '', shown: 0 };
   cards.set(driver, card);
   return card;
 }
@@ -114,9 +140,11 @@ function renderRunner(message: RunnerMessage): void {
     const plan = current.plan, run = current.status;
     const done = run?.samples_done ?? 0, planned = run?.samples_planned ?? plan.samples ?? 0;
     const started = new Date(current.started_utc).getTime() / 1000;
-    const elapsed = Date.now() / 1000 - started;
-    const eta = done > 3 && planned > done ? (elapsed / done) * (planned - done) : NaN;
     const last = current.samples[current.samples.length - 1];
+    // Estimate the finish from the pace up to the latest sample, so it holds still between
+    // samples; the page counts down to it on its own (see tickClocks).
+    const lastUtc = last?.utc ? new Date(last.utc).getTime() / 1000 : Date.now() / 1000;
+    const finish = done > 3 && planned > done ? lastUtc + ((lastUtc - started) / done) * (planned - done) : NaN;
     parts.push(`
       <div class="hcss-stack dash-tight">
         <p class="dash-current"><strong>${esc(plan.experiment || runName(current.run))}</strong>
@@ -128,8 +156,8 @@ function renderRunner(message: RunnerMessage): void {
       <div class="hcss-stat-row dash-stats">
         <dl class="hcss-stat"><dt>Samples</dt><dd>${done} / ${planned}</dd></dl>
         <dl class="hcss-stat"><dt>Voided</dt><dd>${current.voided}</dd></dl>
-        <dl class="hcss-stat"><dt>Running for</dt><dd>${duration(elapsed)}</dd></dl>
-        <dl class="hcss-stat"><dt>Left, about</dt><dd>${isNaN(eta) ? '—' : duration(eta)}</dd></dl>
+        <dl class="hcss-stat"><dt>Running for</dt><dd class="dash-clock" data-since="${started}"></dd></dl>
+        <dl class="hcss-stat"><dt>Left, about</dt><dd class="dash-clock" data-until="${isNaN(finish) ? '' : finish}" data-key="${esc(message.driver)}"></dd></dl>
       </div>
       <p class="dash-muted">Now: ${esc(run?.detail || run?.state || '—')}</p>`);
     if (current.samples.length) {
@@ -161,6 +189,7 @@ function renderRunner(message: RunnerMessage): void {
     ${budgets ? `<section><h3>Drive writes</h3><ul class="dash-list">${budgets}</ul></section>` : ''}
   </div>`);
   card.body.innerHTML = parts.join('');
+  tickClocks(card.body);
 
   // The chart: one row per cell and arm, the running ratio to the control.
   const rows: ForestRow[] = [];
@@ -194,14 +223,8 @@ function renderSpeed(driver: string): void {
   card.speed.querySelector<HTMLElement>('[data-dir="tx"]')!.textContent = `↑ ${formatMbps(mbps(tx))}`;
   card.speed.querySelector<HTMLElement>('.dash-speed-iface')!.textContent = iface;
   card.speed.setAttribute('aria-label', `Link speed on ${iface}: ${formatMbps(target)} Mbps`);
-  // Sparkline over the last 90 seconds, scaled to the window's peak (at least 100 Mbps).
-  const peak = Math.max(1e8, ...series.map(([, r, t]) => Math.max(r, t)));
-  const offset = 90 - series.length;
-  const line = (index: 1 | 2) => series.map((point, i) => `${offset + i},${(30 - (point[index] / peak) * 28).toFixed(1)}`).join(' ');
-  const rxLine = line(1);
-  card.speed.querySelector('.dash-spark-rx')!.setAttribute('points', rxLine);
-  card.speed.querySelector('.dash-spark-area')!.setAttribute('points', series.length ? `${offset},30 ${rxLine} 89,30` : '');
-  card.speed.querySelector('.dash-spark-tx')!.setAttribute('points', line(2));
+  // The last 90 seconds on an axis fixed by the link's own speed (1 or 10 Gb/s).
+  card.spark.update(series, live.state.link?.[driver]?.[iface]);
   // Count the big number toward the new value over most of a second.
   const value = card.speed.querySelector<HTMLElement>('.dash-speed-value')!;
   const from = card.shown, start = performance.now();
@@ -322,6 +345,7 @@ live.onChange((state, changed) => {
     renderHosts(state);
     renderEvents(state);
     renderResults();
+    renderRunList(state.runs);
   } else if (changed.kind === 'runner' && changed.key) {
     renderRunner(state.runners[changed.key]);
     renderHosts(state);
@@ -329,6 +353,7 @@ live.onChange((state, changed) => {
   else if (changed.kind === 'speed' && changed.key) renderSpeed(changed.key);
   else if (changed.kind === 'event') renderEvents(state);
   else if (changed.kind === 'results') renderResults();
+  else if (changed.kind === 'runs') runsUpdated(state.runs);
 });
 showView();
 live.connect();

@@ -6,7 +6,7 @@ type Listener = (state: State, changed: { kind: string; key?: string }) => void;
 type Status = 'connecting' | 'live' | 'reconnecting';
 
 export class Live {
-  state: State = { config: null, runners: {}, hosts: {}, results: [], events: [], speed: {}, started: 0 };
+  state: State = { config: null, runners: {}, hosts: {}, results: [], runs: [], events: [], speed: {}, link: {}, started: 0 };
   status: Status = 'connecting';
   lastMessage = 0;
   private listeners = new Set<Listener>();
@@ -80,11 +80,13 @@ export class Live {
       else if (message.type === 'runner') this.state.runners[message.driver] = message;
       else if (message.type === 'host') this.state.hosts[message.host] = message;
       else if (message.type === 'results') this.state.results = message.experiments;
+      else if (message.type === 'runs') this.state.runs = message.runs;
       else if (message.type === 'speed') {
         const driver = (this.state.speed[message.driver] ??= {});
         const series = (driver[message.iface] ??= []);
         series.push([message.utc, message.rx_bps, message.tx_bps]);
         if (series.length > 90) series.splice(0, series.length - 90);
+        if (message.link_mbps) ((this.state.link ??= {})[message.driver] ??= {})[message.iface] = message.link_mbps;
       }
       this.notify(message.type, message.driver ?? message.host);
     }

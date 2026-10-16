@@ -11,6 +11,7 @@ import { createInterface } from 'node:readline';
 import { dirname, extname, join, normalize, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { WebSocketServer } from 'ws';
+import { runDetail, runsIndex } from './runs.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const DASHBOARD = resolve(HERE, '..');
@@ -19,7 +20,7 @@ const DIST = join(DASHBOARD, 'dist');
 const PORT = Number(process.env.XSDASH_PORT || 8787);
 const INTERVAL = process.env.XSDASH_INTERVAL || '5';
 
-const state = { config: null, runners: {}, hosts: {}, results: [], events: [], speed: {}, started: Date.now() / 1000 };
+const state = { config: null, runners: {}, hosts: {}, results: [], runs: [], events: [], speed: {}, link: {}, started: Date.now() / 1000 };
 const SPEED_HISTORY = 90; // seconds of per-interface rates kept for the sparklines
 const MAX_EVENTS = 200;
 
@@ -58,13 +59,26 @@ function apply(message) {
     const series = (driver[message.iface] ??= []);
     series.push([message.utc, message.rx_bps, message.tx_bps]);
     if (series.length > SPEED_HISTORY) series.splice(0, series.length - SPEED_HISTORY);
+    if (message.link_mbps) (state.link[message.driver] ??= {})[message.iface] = message.link_mbps;
   }
   else if (message.type === 'results') {
     if (state.results.length && message.experiments.length > state.results.length)
       event('results', null, `${message.experiments.length - state.results.length} new analysed experiment(s)`);
     state.results = message.experiments;
-  }
+  } else if (message.type === 'runs') state.runs = message.runs;
   broadcast({ type: 'update', message });
+}
+
+// Past runs, from the run directories under benchmarks/results; rescanned each minute
+// (unchanged files are not read again).
+let runsSeen = '';
+function scanRuns() {
+  let runs;
+  try { runs = runsIndex(RESULTS); } catch (error) { console.error(`runs: ${error.message}`); return; }
+  const seen = runs.map((r) => r.stamp).join('|');
+  if (seen === runsSeen) return;
+  runsSeen = seen;
+  apply({ type: 'runs', utc: Date.now() / 1000, runs });
 }
 
 let collector;
@@ -167,8 +181,21 @@ const relay = (() => {
     }
   }
   setInterval(flush, 3000);
+  // Each past run's samples, once per change, for the Runs view.
+  const pushedRuns = new Map();
+  async function pushRuns() {
+    for (const entry of state.runs) {
+      if (pushedRuns.get(entry.key) === entry.stamp) continue;
+      const detail = runDetail(RESULTS, entry.key);
+      if (!detail) continue;
+      try { await post([{ type: 'run', key: entry.key, detail }]); pushedRuns.set(entry.key, entry.stamp); }
+      catch (error) { console.error(`relay: could not push run ${entry.key}: ${error.message}`); return; }
+    }
+  }
   setInterval(pushResults, 60_000);
   setTimeout(pushResults, 10_000);
+  setInterval(pushRuns, 60_000);
+  setTimeout(pushRuns, 15_000);
   console.log(`relay: pushing to ${endpoint}`);
   return { queue(payload) { if (pending.length < 2000) pending.push(payload); } };
 })();
@@ -199,6 +226,10 @@ function experiment(group, name) {
 const server = createServer((request, response) => {
   const url = new URL(request.url, 'http://localhost');
   if (url.pathname === '/api/state') return send(response, 200, state);
+  if (url.pathname === '/api/run') {
+    const found = runDetail(RESULTS, url.searchParams.get('key'));
+    return send(response, found ? 200 : 404, found || { error: 'no such run' });
+  }
   if (url.pathname === '/api/experiment') {
     const found = experiment(url.searchParams.get('group') || '', url.searchParams.get('name') || '');
     return send(response, found ? 200 : 404, found || { error: 'no such analysed experiment' });
@@ -227,6 +258,8 @@ wss.on('connection', (socket) => {
 server.listen(PORT, '127.0.0.1', () => {
   console.log(`xs bench dashboard server on http://127.0.0.1:${PORT}`);
   startCollector();
+  setTimeout(scanRuns, 2000);
+  setInterval(scanRuns, 60_000);
 });
 process.on('SIGINT', () => { collector?.kill(); process.exit(0); });
 process.on('SIGTERM', () => { collector?.kill(); process.exit(0); });

@@ -10,6 +10,7 @@ const MAX_BODY = 4 << 20;          // bytes accepted per push
 const MAX_SKEW_MS = 120_000;       // a signed push older or newer than this is refused
 const SPEED_HISTORY = 90;
 const MAX_VIEWERS = 200;           // open WebSockets at once; more are turned away
+const RUN_KEY = /^[A-Za-z0-9_-]+\/[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/;
 
 export default {
   async fetch(request, env) {
@@ -132,7 +133,7 @@ export class Hub {
     this.env = env;
     this.state = null;
     this.ready = ctx.blockConcurrencyWhile(async () => {
-      this.state = (await ctx.storage.get('state')) || { config: null, runners: {}, hosts: {}, results: [], events: [], speed: {}, started: Date.now() / 1000 };
+      this.state = (await ctx.storage.get('state')) || { config: null, runners: {}, hosts: {}, results: [], runs: [], events: [], speed: {}, link: {}, started: Date.now() / 1000 };
     });
     this.dirty = false;
   }
@@ -150,6 +151,11 @@ export class Hub {
       return new Response(null, { status: 101, webSocket: client });
     }
     if (url.pathname === '/api/state') return json(200, this.state);
+    if (url.pathname === '/api/run') {
+      const key = url.searchParams.get('key') || '';
+      const detail = RUN_KEY.test(key) ? await this.ctx.storage.get(`run:${key}`) : null;
+      return detail ? json(200, detail) : json(404, { error: 'no such run' });
+    }
     if (url.pathname === '/api/experiment') {
       const key = `experiment:${url.searchParams.get('group')}/${url.searchParams.get('name')}`;
       const detail = await this.ctx.storage.get(key);
@@ -168,7 +174,7 @@ export class Hub {
     const outgoing = [];
     for (const payload of batch.messages || []) {
       if (payload.type === 'state') {
-        this.state = { ...payload.state, speed: payload.state.speed || this.state.speed || {} };
+        this.state = { ...payload.state, speed: payload.state.speed || this.state.speed || {}, link: payload.state.link || this.state.link || {} };
         outgoing.push(payload);
       } else if (payload.type === 'update') {
         this.apply(payload.message);
@@ -179,6 +185,8 @@ export class Hub {
         outgoing.push(payload);
       } else if (payload.type === 'experiment' && typeof payload.key === 'string' && /^[A-Za-z0-9_-]+\/[A-Za-z0-9_.-]+$/.test(payload.key)) {
         await this.ctx.storage.put(`experiment:${payload.key}`, payload.detail);
+      } else if (payload.type === 'run' && typeof payload.key === 'string' && RUN_KEY.test(payload.key)) {
+        await this.ctx.storage.put(`run:${payload.key}`, payload.detail);
       }
     }
     const sockets = this.ctx.getWebSockets();
@@ -202,11 +210,13 @@ export class Hub {
     else if (message.type === 'runner') state.runners[message.driver] = message;
     else if (message.type === 'host') state.hosts[message.host] = message;
     else if (message.type === 'results') state.results = message.experiments;
+    else if (message.type === 'runs') state.runs = message.runs;
     else if (message.type === 'speed') {
       const driver = (state.speed[message.driver] ??= {});
       const series = (driver[message.iface] ??= []);
       series.push([message.utc, message.rx_bps, message.tx_bps]);
       if (series.length > SPEED_HISTORY) series.splice(0, series.length - SPEED_HISTORY);
+      if (message.link_mbps) ((state.link ??= {})[message.driver] ??= {})[message.iface] = message.link_mbps;
     }
   }
 

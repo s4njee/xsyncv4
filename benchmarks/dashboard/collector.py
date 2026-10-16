@@ -128,6 +128,13 @@ def watch_speed(name, reach, interfaces, interval):
     One remote command samples every interface twice, `interval` apart, so the rate is
     measured on the host itself and the SSH round trip does not distort it.
     """
+    # Each interface's negotiated speed, once: it sets the chart's fixed axis (1 or 10 Gb/s).
+    link = {}
+    for iface in interfaces:
+        result = reach.run(f"cat /sys/class/net/{iface}/speed 2>/dev/null || ifconfig {iface} 2>/dev/null | grep -o 'media:.*'", timeout=30)
+        text = result[1].stdout.strip() if result and result[1] is not None else ''
+        found = __import__('re').search(r'(\d+)(G?)base', text, __import__('re').I)
+        link[iface] = int(found.group(1)) * (1000 if found.group(2) else 1) if found else (int(text) if text.isdigit() else None)
     script = '; '.join(f'echo {i}; ' + COUNTERS.format(iface=i) for i in interfaces)
     probe = f'{script}; echo -; sleep {interval}; {script}; echo -; python3 -c "import time; print(time.time())"'
     while True:
@@ -155,7 +162,7 @@ def watch_speed(name, reach, interfaces, interval):
             a, b = first.get(iface), second.get(iface)
             if not a or not b or len(a) < 2 or len(b) < 2:
                 continue
-            emit({'type': 'speed', 'driver': name, 'iface': iface, 'utc': time.time(),
+            emit({'type': 'speed', 'driver': name, 'iface': iface, 'utc': time.time(), 'link_mbps': link.get(iface),
                   'rx_bps': max(0, b[0] - a[0]) * 8 / interval, 'tx_bps': max(0, b[1] - a[1]) * 8 / interval})
 
 

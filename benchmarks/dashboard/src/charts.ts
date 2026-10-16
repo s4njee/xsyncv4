@@ -91,3 +91,153 @@ export class ForestChart {
     } as unknown as FigureInput;
   }
 }
+
+// The live link-speed strip on each runner card: receive (filled) and send over the last 90
+// seconds. Gigabit links keep a fixed 0-1 Gb/s axis; faster links step through 1, 2.5, 5 and
+// 10 Gb/s, taking the smallest step that holds the window's highest point, so a quiet 10GbE
+// link is still readable. Each update animates: the points slide left with the time axis as
+// the new second arrives, and a change of step rescales smoothly.
+const STEPS = [1, 2.5, 5, 10];
+
+export class SpeedChart {
+  private chart: Chart | null = null;
+  private stop: (() => void) | null = null;
+  private series: [number, number, number][] = [];
+  private gbps = 1;
+  private theme: ChartTheme;
+  private failed = false;
+
+  constructor(private host: HTMLElement) {
+    this.theme = chartTheme(host);
+  }
+
+  update(series: [number, number, number][], linkMbps: number | undefined): void {
+    this.series = series;
+    // The link's own ceiling, in Gb/s; unknown links get the gigabit axis.
+    const link = Math.max(1, (linkMbps ?? 1000) / 1000);
+    const peak = Math.max(0, ...series.map(([, rx, tx]) => Math.max(rx, tx))) / 1e9;
+    this.gbps = STEPS.find((step) => step >= link || step >= peak * 1.05) ?? link;
+    if (this.failed || !series.length) return;
+    const figure = this.figure(true);
+    if (!this.chart) {
+      try {
+        this.chart = createChart(this.host, this.figure(false));
+      } catch {
+        this.failed = true;
+        this.host.hidden = true;
+        return;
+      }
+      this.stop = watchChartTheme(this.host, (theme) => {
+        this.theme = theme;
+        void this.chart?.react(this.figure(false));
+      });
+    } else void this.chart.react(figure);
+  }
+
+  destroy(): void {
+    this.stop?.();
+    this.chart?.destroy();
+    this.chart = null;
+    this.stop = null;
+  }
+
+  private figure(animate: boolean): FigureInput {
+    const style = getComputedStyle(this.host);
+    const blue = style.getPropertyValue('--dash-blue').trim() || '#1f6bff';
+    const cyan = style.getPropertyValue('--dash-cyan').trim() || '#22d3ee';
+    const muted = this.theme.colors?.muted ?? '#888';
+    const series = this.series;
+    const now = series[series.length - 1][0];
+    const x = series.map(([utc]) => utc);
+    const gb = (index: 1 | 2) => series.map((point) => point[index] / 1e9);
+    const top = this.gbps;
+    const ticks = [0, top / 2, top];
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    return {
+      data: [
+        { type: 'scatter', mode: 'lines', name: 'receive', x, y: gb(1), fill: 'tozeroy',
+          line: { color: blue, width: 2, shape: 'linear' }, fillcolor: alpha(blue, 0.28),
+          hovertemplate: '↓ %{y:.2f} Gb/s<extra></extra>' },
+        { type: 'scatter', mode: 'lines', name: 'send', x, y: gb(2),
+          line: { color: cyan, width: 1.5, shape: 'linear' },
+          hovertemplate: '↑ %{y:.2f} Gb/s<extra></extra>' },
+      ],
+      layout: {
+        template: composeTemplates(holochartTemplate, this.theme.template),
+        showlegend: false,
+        margin: { l: 30, r: 4, t: 8, b: 8 },
+        paper_bgcolor: 'rgba(0,0,0,0)',
+        plot_bgcolor: 'rgba(0,0,0,0)',
+        hovermode: 'x unified',
+        xaxis: { range: [now - 89, now], showticklabels: false, ticks: '', showgrid: false, showline: false, zeroline: false, fixedrange: true },
+        yaxis: { range: [-top * 0.03, top * 1.03], fixedrange: true, ticks: '', showline: false, tickvals: ticks, ticktext: ticks.map((t) => `${t}G`),
+          tickfont: { size: 9, color: muted }, gridcolor: alpha(muted, 0.22), zeroline: false },
+        ...(animate && !reduced ? { transition: { duration: 700, easing: 'cubic-in-out' } } : {}),
+      },
+      config: CONFIG,
+    };
+  }
+}
+
+// A CSS colour (#rgb, #rrggbb or rgb()) at the given opacity, as rgba() the renderer reads.
+function alpha(color: string, opacity: number): string {
+  let rgb: number[] | undefined;
+  const hex = color.match(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i);
+  if (hex) {
+    const h = hex[1].length === 3 ? [...hex[1]].map((c) => c + c).join('') : hex[1];
+    rgb = [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16));
+  } else {
+    const m = color.match(/rgba?\(\s*(\d+)[ ,]+(\d+)[ ,]+(\d+)/);
+    if (m) rgb = [m[1], m[2], m[3]].map(Number);
+  }
+  return rgb ? `rgba(${rgb.join(',')},${opacity})` : color;
+}
+
+// Any chart drawn from a figure function, re-drawn when the theme changes. `draw` makes the
+// figure from the current HoloChart theme; later draws animate when `transition` is set.
+export class Plot {
+  private chart: Chart | null = null;
+  private stop: (() => void) | null = null;
+  private theme: ChartTheme;
+  private draw: ((theme: ChartTheme) => FigureInput) | null = null;
+  private failed = false;
+
+  constructor(private host: HTMLElement) {
+    this.theme = chartTheme(host);
+  }
+
+  show(draw: (theme: ChartTheme) => FigureInput, transition = true): void {
+    this.draw = draw;
+    if (this.failed) return;
+    const figure = withConfig(draw(this.theme));
+    if (!this.chart) {
+      try {
+        this.chart = createChart(this.host, figure);
+      } catch {
+        this.failed = true;
+        return;
+      }
+      this.stop = watchChartTheme(this.host, (theme) => {
+        this.theme = theme;
+        if (this.draw) void this.chart?.react(withConfig(this.draw(theme)));
+      });
+      return;
+    }
+    const animate = transition && !matchMedia('(prefers-reduced-motion: reduce)').matches;
+    void this.chart.react(animate ? { ...figure, layout: { ...figure.layout, transition: { duration: 450, easing: 'cubic-in-out' } } } : figure);
+  }
+
+  destroy(): void {
+    this.stop?.();
+    this.chart?.destroy();
+    this.chart = null;
+    this.stop = null;
+  }
+}
+
+function withConfig(figure: FigureInput): FigureInput {
+  return { ...figure, config: CONFIG };
+}
+
+export { alpha, composeTemplates, holochartTemplate };
+export type { ChartTheme };

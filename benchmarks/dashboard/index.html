@@ -14,6 +14,7 @@
       <nav aria-label="Views">
         <a href="#live" data-view="live" aria-current="page">Live</a
         ><a href="#results" data-view="results">Results</a
+        ><a href="#runs" data-view="runs">Runs</a
         ><a href="#events" data-view="events">Events</a>
       </nav>
       <div class="hcss-cluster dash-topbar-end">
@@ -51,6 +52,22 @@
           <section class="hcss-card hcss-stack" id="experiment" aria-live="polite" data-wt-obstacle data-wt-orbit="cw">
             <div class="hcss-empty-state"><p>Choose an experiment to see its ratios and verdicts.</p></div>
           </section>
+        </div>
+      </section>
+
+      <section id="view-runs" class="hcss-stack" aria-labelledby="runs-title" hidden>
+        <div class="hcss-cluster dash-results-head">
+          <h1 id="runs-title">Runs</h1>
+          <label class="hcss-sr-only" for="runs-filter">Filter runs</label>
+          <input class="hcss-text-field dash-filter" id="runs-filter" type="search" placeholder="Filter: experiment, arm, corpus" />
+          <label class="hcss-sr-only" for="runs-group">Link</label>
+          <select class="hcss-select" id="runs-group">
+            <option value="">All links</option>
+          </select>
+        </div>
+        <div class="hcss-sidebar-layout dash-results">
+          <aside class="hcss-card dash-experiment-list" aria-label="Runs" data-wt-obstacle data-wt-orbit="ccw"><p class="dash-muted dash-runs-count" id="runs-count" role="status"></p><ul id="runs-list"></ul></aside>
+          <section class="hcss-card hcss-stack dash-run" id="run" aria-live="polite" data-wt-obstacle data-wt-orbit="cw"></section>
         </div>
       </section>
 

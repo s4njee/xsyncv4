@@ -51,11 +51,7 @@ progress.hcss-progress::-moz-progress-bar { background: linear-gradient(90deg, v
   -webkit-background-clip: text; background-clip: text; color: transparent;
   filter: drop-shadow(0 0 12px color-mix(in srgb, var(--dash-blue) 45%, transparent)); }
 .dash-speed-detail { grid-area: detail; display: flex; gap: 0.8rem; font-size: 0.85rem; font-variant-numeric: tabular-nums; }
-.dash-spark { grid-area: spark; inline-size: 100%; block-size: 3.4rem; overflow: visible; }
-.dash-spark polyline { fill: none; stroke-width: 2; vector-effect: non-scaling-stroke; stroke-linejoin: miter; stroke-linecap: square; }
-.dash-spark-area { stroke: none; }
-.dash-spark-rx { stroke: var(--dash-blue); }
-.dash-spark-tx { stroke: var(--dash-cyan); opacity: 0.9; }
+.dash-spark { grid-area: spark; inline-size: 100%; block-size: 4.5rem; min-inline-size: 0; }
 /* The page is transparent so the ink orbit canvas shows through between the opaque cards. */
 html { background: var(--hcss-background, var(--hcss-surface)); }
 .dash-body { min-height: 100vh; background: transparent; }
@@ -99,7 +95,7 @@ html { background: var(--hcss-background, var(--hcss-surface)); }
 .dash-results { --hcss-sidebar-width: 22rem; align-items: start; }
 .dash-experiment-list { max-block-size: 80vh; overflow: auto; padding: 0.35rem; }
 .dash-experiment-list ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.15rem; }
-.dash-exp { inline-size: 100%; display: grid; justify-items: start; text-align: start; gap: 0.2rem; block-size: auto; padding-block: 0.5rem; white-space: normal; }
+.dash-exp { inline-size: 100%; display: grid; justify-items: start; justify-content: stretch; text-align: start; gap: 0.2rem; block-size: auto; padding-block: 0.5rem; white-space: normal; }
 .dash-exp[aria-current='true'] { background: color-mix(in srgb, var(--dash-blue) 14%, transparent); box-shadow: inset 3px 0 0 var(--dash-blue); }
 .dash-exp-name { font-weight: 600; }
 .dash-report { white-space: pre-wrap; font-size: 0.8rem; max-block-size: 40rem; overflow: auto; }
@@ -112,3 +108,30 @@ html { background: var(--hcss-background, var(--hcss-surface)); }
   .dash-topbar-end #updated { display: none; }
   .dash-results { display: grid; }
 }
+
+/* Run clocks: digits that don't jostle as they tick, and a short roll when the time left changes. */
+.dash-clock { font-variant-numeric: tabular-nums; }
+.dash-clock[data-changed] { animation: dash-roll var(--hcss-duration-medium, 450ms) var(--hcss-ease-out, cubic-bezier(0.2, 0.8, 0.2, 1)); }
+@keyframes dash-roll {
+  from { opacity: 0; transform: translateY(0.45em); filter: blur(2px); }
+  to { opacity: 1; transform: none; filter: none; }
+}
+@media (prefers-reduced-motion: reduce) { .dash-clock[data-changed] { animation: none; } }
+[data-hcss-motion="none"] .dash-clock[data-changed] { animation: none; }
+
+/* Runs view */
+.dash-run { min-inline-size: 0; }
+.dash-run h2 { margin: 0; }
+.dash-run-id { font-size: 0.8em; font-weight: 400; font-variant-numeric: tabular-nums; }
+.dash-run-controls { align-items: end; gap: var(--hcss-space-medium, 1rem); }
+.dash-control { display: grid; gap: 0.25rem; font-size: 0.85rem; color: var(--hcss-text-muted); }
+.dash-control .hcss-select { min-inline-size: 12rem; color: var(--hcss-text, inherit); }
+.dash-run-figure { margin: 0; display: grid; gap: 0.35rem; }
+.dash-run-chart { block-size: 22rem; min-inline-size: 0; }
+.dash-run-chart-short { block-size: 13rem; }
+.dash-run[aria-busy='true'] { opacity: 0.6; transition: opacity 200ms; }
+.dash-swatch { display: inline-block; inline-size: 0.7em; block-size: 0.7em; margin-inline-end: 0.45em; background: var(--swatch); vertical-align: baseline; }
+#run-table th[scope='rowgroup'] { font-weight: 500; vertical-align: top; white-space: nowrap; }
+/* Stacked (narrow) layout: keep the run list short so the chosen run is close by. */
+@media (max-width: 60rem) { #view-runs .dash-experiment-list { max-block-size: 38vh; } }
+.dash-runs-count { margin: 0.25rem 0.5rem 0.5rem; font-size: 0.85rem; }
