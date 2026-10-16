@@ -9,13 +9,17 @@
 const MAX_BODY = 4 << 20;          // bytes accepted per push
 const MAX_SKEW_MS = 120_000;       // a signed push older or newer than this is refused
 const SPEED_HISTORY = 90;
+const MAX_VIEWERS = 200;           // open WebSockets at once; more are turned away
 
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     if (url.pathname === '/ingest') return ingest(request, env);
-    const denied = await checkAccess(request, env);
-    if (denied) return denied;
+    // PUBLIC_READ makes the page and its feed readable by anyone; pushes stay signed either way.
+    if (env.PUBLIC_READ !== 'true') {
+      const denied = await checkAccess(request, env);
+      if (denied) return denied;
+    } else if (!['GET', 'HEAD'].includes(request.method)) return text(405, 'read-only');
     if (url.pathname === '/ws' || url.pathname.startsWith('/api/')) {
       const hub = env.HUB.get(env.HUB.idFromName('lab'));
       return hub.fetch(request);
@@ -139,6 +143,7 @@ export class Hub {
     if (url.pathname === '/ingest') return this.ingest(await request.text());
     if (url.pathname === '/ws') {
       if (request.headers.get('upgrade') !== 'websocket') return new Response('expected a WebSocket', { status: 426 });
+      if (this.ctx.getWebSockets().length >= MAX_VIEWERS) return new Response('too many viewers', { status: 503 });
       const [client, server] = Object.values(new WebSocketPair());
       this.ctx.acceptWebSocket(server);
       server.send(JSON.stringify({ type: 'state', state: this.state }));
@@ -153,8 +158,8 @@ export class Hub {
     return new Response('not found', { status: 404 });
   }
 
-  // Browsers only listen; anything they send is ignored.
-  webSocketMessage() {}
+  // Browsers only listen; one that sends anything is disconnected.
+  webSocketMessage(ws) { try { ws.close(1008, 'read-only'); } catch {} }
   webSocketClose(ws) { try { ws.close(); } catch {} }
 
   async ingest(body) {

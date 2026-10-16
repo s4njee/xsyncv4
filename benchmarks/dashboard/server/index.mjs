@@ -91,6 +91,34 @@ function broadcast(payload) {
 // --- the relay: push-only copy of everything to dashboard.mk7s.dev -------------------
 // Configured by ~/.config/xsdash/relay.json, {"url": "https://dashboard.mk7s.dev", "secret": "..."},
 // kept outside the repository. Nothing on the relay can call back into this machine.
+// What leaves this machine is scrubbed first: no usernames or home paths, no addresses,
+// no SSH routes or error text, no process ids or host roots. Numbers and names stay.
+const DROP = new Set(['route', 'root', 'pid', 'runner_path']);
+function scrubText(text) {
+  return text
+    .replace(/\/(?:Users|home)\/[^/\s"'`]+/g, '~')
+    .replace(/\b[\w.+-]+@[\w.-]+\b/g, '[host]')
+    .replace(/\b\d{1,3}(?:\.\d{1,3}){3}\b/g, '[address]')
+    .replace(/\bfe80:[0-9a-f:%\w]*/gi, '[address]');
+}
+function scrub(value, key) {
+  if (typeof value === 'string') {
+    if (key === 'runner' || key === 'error') return key === 'error' ? 'unreachable' : undefined;
+    return scrubText(value);
+  }
+  if (Array.isArray(value)) return value.map((item) => scrub(item));
+  if (value && typeof value === 'object') {
+    const out = {};
+    for (const [k, v] of Object.entries(value)) {
+      if (DROP.has(k)) continue;
+      const cleaned = scrub(v, k);
+      if (cleaned !== undefined) out[k] = cleaned;
+    }
+    return out;
+  }
+  return value;
+}
+
 const RELAY_FILE = process.env.XSDASH_RELAY_FILE || join(homedir(), '.config', 'xsdash', 'relay.json');
 const relay = (() => {
   let settings;
@@ -100,7 +128,7 @@ const relay = (() => {
   let pending = [], failures = 0, lastFull = 0;
   const pushed = new Map(); // experiment key -> mtime pushed
   async function post(messages) {
-    const body = JSON.stringify({ sent: Date.now(), messages });
+    const body = JSON.stringify({ sent: Date.now(), messages: scrub(messages) });
     const stamp = String(Date.now());
     const signature = createHmac('sha256', settings.secret).update(`${stamp}.${body}`).digest('hex');
     const response = await fetch(endpoint, { method: 'POST', body, headers: { 'content-type': 'application/json', 'x-timestamp': stamp, 'x-signature': signature } });
