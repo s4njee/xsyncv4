@@ -1337,6 +1337,27 @@ ratio of 1.036 [1.026, 1.046]. First diagnostics, run by hand:
     small trees. APFS creating files is the limit, as in S2. Mixed trees
     still 1.7 to 2.3 times faster with xs; no-ops 4 times.
 
+- Direct cable at 10 Gb/s, 2026-10-15/16. The earlier 3 Gb/s ceiling was
+  mars's X540 in a chipset PCIe 2.0 x1 slot, not the Mac's USB adapter;
+  moved to an x8 slot, raw TCP is 9.41 Gb/s each way on one stream with
+  the Mac's Thunderbolt 4 adapter (Aquantia, en13), and 4.3 to 5.2 Gb/s
+  with the USB adapter. One ssh connection carries 7.7 to 8.6 Gb/s with
+  AES-GCM and 2.2 with ChaCha20.
+  - X5 (6 blocks a cell, stopped early): mars to the Mac, xs 8.1 to 8.7
+    Gb/s against rsync's 2.8 to 2.9, ratios 0.33 to 0.36 with narrow
+    intervals. That is one ssh connection's ceiling. Mac to mars, xs 5.6
+    to 7.0 Gb/s against about 3, but with intervals from 0.29 to 0.98.
+  - X6 (tuning at 10 Gb/s): mars to the Mac, nothing moves by more than
+    2% (`-j4` and 1 MiB writes 0.982 to 0.989); there is no headroom left
+    under ssh. Mac to mars is unreadable: the default arm itself took 9.8
+    to 28 s, and the engine's counters show the Mac's sender spending the
+    whole run writing into ssh. mars's NVMe takes synced writes at 3.1
+    GB/s median, so the receiving disk is not the limit; the Mac was
+    heavily loaded (load average 75 to 200) through these runs.
+  - rsync stays at 2.8 to 3.2 Gb/s on every large corpus in both
+    directions, with its Mac side at about one core: a single thread's
+    limit.
+
 M0 is done by the operator, not by the harness. M1–M6 need no engine
 change, so flag-only experiments (E1–E3) can start before M7.
 
