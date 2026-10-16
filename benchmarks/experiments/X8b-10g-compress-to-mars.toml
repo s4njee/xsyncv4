@@ -3,8 +3,8 @@
 # (up to 1 MiB, packing many small files) on its own and in parallel; rsync
 # -z runs one zstd stream across the whole transfer, on one thread, which
 # compresses better and slower. xs without -z, xs -z adaptive and at levels 3
-# and 6, against rsync -z, on compressible small and mixed trees and on
-# incompressible small and large ones.
+# and 6, against rsync -z, on compressible small and mixed trees and an
+# incompressible small one. Large files are settled (X5, X6) and left out.
 id = "X8b-10g-compress-to-mars"
 kind = "screening"
 hypothesis = "At 10 Gb/s xs -z beats rsync -z on compressible trees and costs little on incompressible ones."
@@ -42,7 +42,7 @@ flags = ["-az"]
 
 [matrix]
 link = "mac-mars-direct"
-corpus = ["mixed-bimodal", "small-flat", "small-opaque", "large-mixed"]
+corpus = ["mixed-bimodal", "small-flat", "small-opaque"]
 scenario = ["fresh"]
 direction = ["mac>mars"]
 client = ["initiator"]
