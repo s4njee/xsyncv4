@@ -1,0 +1,28 @@
+# N2b: N2 at 10 Gb/s. Small and mixed trees off mars's NVMe with mars's
+# caches dropped, the Mac receiving.
+id = "N2b-10g-small-read"
+kind = "screening"
+hypothesis = "At 10 Gb/s xs reads small and mixed trees off a cold NVMe drive faster than rsync."
+primary = "durable_s"
+delta = 0.03
+blocks = 8
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[arms.xs]
+tool = "xs"
+rev = "8cc75bbdb801"
+flags = ["-a"]
+
+[matrix]
+link = "mac-mars-direct"
+corpus = ["tiny-one", "small-flat", "small-deep", "small-opaque", "mixed-bimodal", "mixed-threshold"]
+scenario = ["fresh", "noop"]
+direction = ["mars>mac"]
+client = ["initiator"]
+cache = ["cold"]

@@ -135,6 +135,16 @@ def fits(plan, used, budget):
     return True
 
 
+def in_hours(plan, now):
+    """Whether a plan's declared window of local hours includes `now` (epoch seconds)."""
+    hours = plan.get('hours')
+    if not hours:
+        return True
+    start, end = hours
+    hour = time.localtime(now).tm_hour
+    return start <= hour < end if start < end else hour >= start or hour < end
+
+
 def choose(runs, control, now):
     """(run id, lane) of the next run to start, or (None, reason for waiting)."""
     used, budget = written(runs, now), control['write_budget']
@@ -144,11 +154,17 @@ def choose(runs, control, now):
         if fits(read_json(runs / standing[0] / 'plan.json', {}), used, budget):
             return standing[0], 'standing'
         waiting_for_budget = True
+    waiting_for_hours = False
     for run_id in pending(runs, 'backlog.txt'):
-        if fits(read_json(runs / run_id / 'plan.json', {}), used, budget):
+        plan = read_json(runs / run_id / 'plan.json', {})
+        if not in_hours(plan, now):
+            waiting_for_hours = True  # passed over until its window opens; later runs may go first
+            continue
+        if fits(plan, used, budget):
             return run_id, 'queue'
         waiting_for_budget = True
-    return None, 'waiting for the write budget' if waiting_for_budget else 'idle'
+    return None, ('waiting for the write budget' if waiting_for_budget
+                  else 'waiting for a run\'s hours' if waiting_for_hours else 'idle')
 
 
 def agent_for(root, plan):

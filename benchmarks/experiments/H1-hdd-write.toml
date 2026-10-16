@@ -11,6 +11,7 @@ blocks = 8
 control = "rsync"
 verify = "first-last"
 cleanup = "eager"
+hours = [23, 5]  # the Mac sends: run while it is idle overnight
 
 [arms.rsync]
 tool = "rsync"

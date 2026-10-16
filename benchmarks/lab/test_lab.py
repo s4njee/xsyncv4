@@ -1049,6 +1049,21 @@ class ContinuousRunner(unittest.TestCase):
         self.assertEqual([entry['state'] for entry in status['recent']], ['complete', 'failed', 'complete'])
         self.assertTrue((self.runs / 'gen' / 'job.log').exists())
 
+    def test_a_run_outside_its_hours_is_passed_over_until_they_come(self):
+        hour = time.localtime().tm_hour
+        self.add('night', hours=[(hour + 3) % 24, (hour + 5) % 24])
+        self.add('day', hours=[hour, (hour + 1) % 24])
+        self.add('any')
+        self.start()
+        status = self.until(lambda s: len(s.get('recent', [])) == 2 and s.get('state') == "waiting for a run's hours")
+        self.assertEqual(self.order(), ['day', 'any'])
+        self.assertEqual(status['queue_pending'], 1)
+        wrap = {'hours': [22, 7]}
+        at = lambda h: time.mktime((2026, 10, 16, h, 30, 0, 0, 0, -1))
+        self.assertTrue(runner.in_hours(wrap, at(23)) and runner.in_hours(wrap, at(3)))
+        self.assertFalse(runner.in_hours(wrap, at(7)) or runner.in_hours(wrap, at(12)))
+        self.assertTrue(runner.in_hours({}, at(12)))
+
     def test_pause_holds_the_next_run(self):
         (self.runs / '.pause').touch()
         self.add('held')

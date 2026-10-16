@@ -1,0 +1,11 @@
+{
+ "name": "hdd-corpora",
+ "steps": [
+  {
+   "host": "mars-hdd",
+   "ssh": "sanjee@mars.local",
+   "local": false,
+   "command": "cd /mnt/hdd/xsbench && mkdir -p corpora && for c in tiny-one small-flat small-deep small-opaque mixed-bimodal mixed-threshold; do test -f corpora/$c.manifest.json || python3 lib/fb2053825ef1/corpus.py generate $c --root corpora > /dev/null || exit 1; done"
+  }
+ ]
+}

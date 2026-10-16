@@ -188,10 +188,24 @@ def make_plan(spec, config, pins, seed, run_id, baseline=None):
             'control': spec['control'], 'seed': seed, 'run_id': run_id, 'driver': driver,
             'sample_timeout_s': spec.get('sample_timeout_s', 3600),
             'results': link.get('results', 'lab'), 'background': bool(link.get('background')),
-            'eager_cleanup': spec.get('cleanup') == 'eager',
+            'eager_cleanup': spec.get('cleanup') == 'eager', 'hours': hours_of(spec),
             'hosts': hosts, 'links': {spec['matrix']['link']: {key: link[key] for key in link if key != 'interface'}},
             'arms': arms, 'cells': cells, 'corpora': corpora, 'blocks': blocks,
             'scripts': {path.name: stage.sha256(path) for path in stage.SCRIPTS}}
+
+
+def hours_of(spec):
+    """[start, end) local hours on the driver in which the runner may start this plan, or None for any time.
+
+    A window may wrap midnight: [22, 7] is ten at night to seven in the morning.
+    """
+    hours = spec.get('hours')
+    if hours is None:
+        return None
+    if not (isinstance(hours, list) and len(hours) == 2 and all(isinstance(h, int) and 0 <= h <= 24 for h in hours)
+            and hours[0] != hours[1]):
+        raise SpecError('`hours` is [start, end], whole local hours on the driver, e.g. [22, 7]')
+    return hours
 
 
 def load_baseline(spec):
@@ -256,6 +270,9 @@ def prepare_run(spec_path, config, seed, suffix=''):
     driver = driver_of(plan)
     directory = f'{driver["root"]}/runs/{plan["run_id"]}'
     local = HERE.parent / 'results' / plan['results'] / spec['id'] / plan['run_id']
+    while local.exists():  # two runs of a spec queued within one second
+        plan['run_id'] = new_run_id(spec, f'{suffix}-{seed}-{len(list(local.parent.glob(plan["run_id"] + "*")))}')
+        local = local.parent / plan['run_id']
     local.mkdir(parents=True)
     (local / 'plan.json').write_text(json.dumps(plan, indent=1) + '\n')
     (local / 'spec.toml').write_bytes(pathlib.Path(spec_path).read_bytes())
