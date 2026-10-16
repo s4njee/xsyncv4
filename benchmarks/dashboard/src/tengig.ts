@@ -3,7 +3,6 @@
 // on the same cable topped out near 3 Gb/s). The commentary is in index.html; the charts and
 // table here are computed from the runs themselves, so they follow new runs as they arrive.
 import { alpha, Plot, type ChartTheme } from './charts';
-import { CODEC, CODEC_RUN } from './codec';
 import { esc } from './format';
 import { fetchRun, forgetRun } from './runs';
 import type { RunDetail, RunIndex } from './types';
@@ -33,7 +32,7 @@ interface Cell {
 const seen = new Map<string, number>(); // run key -> samples when fetched
 let spread: Plot | null = null;
 let codecs: Plot | null = null;
-let ceilings: Plot | null = null;
+let rates: Plot | null = null;
 let drawn = '';
 
 export function tenGigRuns(all: RunIndex[] | undefined): RunIndex[] {
@@ -60,86 +59,70 @@ export async function renderTenGig(all: RunIndex[] | undefined): Promise<void> {
   drawSpread(cells);
   drawCodecs(cells);
   renderTable(cells);
-  drawCeilings(details.filter((d) => d.experiment === CEILING_EXPERIMENT));
+  drawRates(details.filter((d) => d.experiment === RATE_EXPERIMENT));
 }
 
-// --- the most data the link can deliver, by compression level ------------------------------------
+// --- the most data each compression level delivered, measured ---------------------------------
 
-const CEILING_EXPERIMENT = 'Z5-10g-zstd-levels';
+const RATE_EXPERIMENT = 'Z5-10g-zstd-levels';
 const LEVELS = [
-  { arm: 'xs', level: 0, label: 'no compression' },
-  { arm: 'xs-z1', level: 1, label: 'zstd level 1' },
-  { arm: 'xs-z2', level: 2, label: 'zstd level 2' },
-  { arm: 'xs-z3', level: 3, label: 'zstd level 3' },
+  { arm: 'xs', label: 'no compression' },
+  { arm: 'xs-z1', label: 'zstd level 1' },
+  { arm: 'xs-z2', label: 'zstd level 2' },
+  { arm: 'xs-z3', label: 'zstd level 3' },
 ] as const;
-// xs compresses block by block, which cost level 1 about 6% of zstd's ratio on a whole file
-// (2.62 in Z4 against 2.79); until Z5 measures a level, its ratio is estimated the same way.
-const BLOCK_RATIO = 2.62 / 2.793;
 
-interface Ceiling {
-  toMac: boolean; level: number; label: string;
-  ratio: number; ratioMeasured: boolean;
-  data: number; wire: number; samples: number;
-  full: number; compressor: number; max: number; limit: string;
-}
+interface Rate { toMac: boolean; label: string; data: number[]; wire: number[]; ratio: number[] }
 
-function ceilingRows(details: RunDetail[]): Ceiling[] {
-  const rows: Ceiling[] = [];
+function rateRows(details: RunDetail[]): Rate[] {
+  const rows: Rate[] = [];
   for (const toMac of [true, false]) {
-    const sender = CODEC[toMac ? 'mars' : 'mac'];
     for (const step of LEVELS) {
-      const data: number[] = [], wire: number[] = [], ratios: number[] = [];
+      const row: Rate = { toMac, label: step.label, data: [], wire: [], ratio: [] };
       for (const d of details) {
         const c = d.columns;
         for (let i = 0; i < c.cell.length; i++) {
           const cell = d.cells[c.cell[i]];
           if (!c.valid[i] || d.arms[c.arm[i]].name !== step.arm || (cell.receiver === 'mac') !== toMac || !cell.bytes) continue;
           const t = c.durable_s[i], w = c.wire_bytes[i], wall = c.wall_s[i];
-          if (t) data.push((cell.bytes * 8) / t / 1e9);
-          if (w && wall) { wire.push((w * 8) / wall / 1e9); ratios.push(cell.bytes / w); }
+          if (t) row.data.push((cell.bytes * 8) / t / 1e9);
+          if (w && wall) { row.wire.push((w * 8) / wall / 1e9); row.ratio.push(cell.bytes / w); }
         }
       }
-      const measured = ratios.length > 0;
-      const ratio = step.level === 0 ? 1 : measured ? median(ratios) : sender.levels[step.level as 1 | 2 | 3].ratio * BLOCK_RATIO;
-      const full = TEN_GIG * Math.max(1, ratio);
-      const compressor = step.level === 0 ? Infinity : (sender.levels[step.level as 1 | 2 | 3].compress8 * 8) / 1000;
-      rows.push({
-        toMac, level: step.level, label: step.label, ratio, ratioMeasured: measured || step.level === 0,
-        data: median(data), wire: median(wire), samples: data.length,
-        full, compressor, max: Math.min(full, compressor),
-        limit: compressor < full ? `${sender.name}'s compressor` : 'the link',
-      });
+      rows.push(row);
     }
   }
   return rows;
 }
 
-function drawCeilings(details: RunDetail[]): void {
-  const rows = ceilingRows(details);
-  ceilings ??= new Plot($('tengig-ceiling-chart'));
+function drawRates(details: RunDetail[]): void {
+  const rows = rateRows(details);
+  const measured = rows.some((r) => r.data.length);
+  $('tengig-rates-figure').hidden = !measured;
+  $('tengig-rates-pending').hidden = measured;
+  if (!measured) return;
+  rates ??= new Plot($('tengig-rates-chart'));
   const directions = [
     { toMac: true, name: 'mars → Mac', color: BLUE },
     { toMac: false, name: 'Mac → mars', color: CYAN },
   ];
-  ceilings.show((theme) => {
+  rates.show((theme) => {
     const { muted, layout } = base(theme);
     return {
-      data: directions.flatMap((dir) => {
+      data: directions.map((dir) => {
         const mine = rows.filter((r) => r.toMac === dir.toMac);
-        return [
-          { type: 'bar', name: `${dir.name}, theoretical max`, x: mine.map((r) => r.label), y: mine.map((r) => r.max),
-            marker: { color: alpha(dir.color, 0.22), line: { color: dir.color, width: 1.5 } },
-            hovertemplate: `${dir.name}<br>%{x}: up to %{y:.1f} Gb/s of data<extra></extra>` },
-          { type: 'bar', name: `${dir.name}, measured`, x: mine.map((r) => r.label), y: mine.map((r) => (isFinite(r.data) ? r.data : null)),
-            marker: { color: dir.color },
-            hovertemplate: `${dir.name}<br>%{x}: %{y:.1f} Gb/s of data, measured<extra></extra>` },
-        ];
+        return {
+          type: 'bar', name: dir.name, x: mine.map((r) => r.label),
+          y: mine.map((r) => (r.data.length ? median(r.data) : null)), marker: { color: dir.color },
+          customdata: mine.map((r) => [r.data.length ? Math.max(...r.data) : 0, r.wire.length ? median(r.wire) : 0, r.data.length]),
+          hovertemplate: `${dir.name}<br>%{x}: %{y:.1f} Gb/s of data (best %{customdata[0]:.1f})<br>%{customdata[1]:.1f} Gb/s on the wire · %{customdata[2]} samples<extra></extra>`,
+        };
       }),
       layout: {
         ...layout,
         barmode: 'group',
-        margin: { l: 56, r: 16, t: 12, b: 84 },
-        legend: { orientation: 'h', x: 0, y: -0.2, yanchor: 'top' },
+        margin: { l: 56, r: 16, t: 12, b: 72 },
+        legend: { orientation: 'h', x: 0, y: -0.18, yanchor: 'top' },
         xaxis: { tickfont: { color: muted } },
         yaxis: { title: { text: 'Gb/s of data delivered' }, rangemode: 'tozero', tickfont: { color: muted } },
         shapes: [{ type: 'line', xref: 'paper', x0: 0, x1: 1, y0: TEN_GIG, y1: TEN_GIG, line: { color: muted, width: 1, dash: 'dash' } }],
@@ -148,20 +131,13 @@ function drawCeilings(details: RunDetail[]): void {
       },
     };
   });
-  const g = (v: number) => (isFinite(v) ? v.toFixed(1) : '—');
-  $('tengig-ceiling-table').innerHTML = `<thead><tr><th>Direction</th><th>Compression</th><th data-numeric>Ratio in xs</th>
-      <th data-numeric>Link full</th><th data-numeric>Sender's compressor</th><th data-numeric>Theoretical max</th>
-      <th data-numeric>Measured</th><th data-numeric>On the wire</th><th data-numeric>Of max</th></tr></thead><tbody>${rows.map((r) =>
+  const g = (values: number[], pick: (v: number[]) => number) => (values.length ? pick(values).toFixed(1) : '—');
+  $('tengig-rates-table').innerHTML = `<thead><tr><th>Direction</th><th>Compression</th><th data-numeric>Data delivered, median</th>
+      <th data-numeric>Best sample</th><th data-numeric>On the wire</th><th data-numeric>Compressed</th><th data-numeric>Samples</th></tr></thead><tbody>${rows.map((r) =>
     `<tr><th scope="row">${r.toMac ? 'mars → Mac' : 'Mac → mars'}</th><td>${esc(r.label)}</td>
-      <td data-numeric>${r.level ? `${r.ratio.toFixed(2)}×${r.ratioMeasured ? '' : ' (est.)'}` : '1×'}</td>
-      <td data-numeric>${g(r.full)}</td><td data-numeric>${g(r.compressor)}</td>
-      <td data-numeric><strong>${g(r.max)}</strong> <span class="dash-muted">${esc(r.limit)}</span></td>
-      <td data-numeric>${g(r.data)}${r.samples ? ` <span class="dash-muted">n=${r.samples}</span>` : ''}</td><td data-numeric>${g(r.wire)}</td>
-      <td data-numeric>${isFinite(r.data) ? `${Math.round((100 * r.data) / r.max)}%` : '—'}</td></tr>`).join('')}</tbody>`;
-  const measuredRuns = details.length;
-  $('tengig-ceiling-note').textContent = measuredRuns
-    ? `Measured: ${CEILING_EXPERIMENT}, median of the valid samples so far. Compressor speeds: the ${CODEC_RUN.job} job, ${CODEC_RUN.date}, ${CODEC_RUN.file}, eight threads (mars ${CODEC.mars.note}; ${CODEC.mac.name} ${CODEC.mac.note}, so its figures vary).`
-    : `${CEILING_EXPERIMENT} has not reported yet: ratios are estimated from zstd's own and the measured columns fill in as its samples arrive. Compressor speeds: the ${CODEC_RUN.job} job, ${CODEC_RUN.date}.`;
+      <td data-numeric><strong>${g(r.data, median)}</strong></td><td data-numeric>${g(r.data, (v) => Math.max(...v))}</td>
+      <td data-numeric>${g(r.wire, median)}</td><td data-numeric>${r.ratio.length ? `${median(r.ratio).toFixed(2)}×` : '—'}</td>
+      <td data-numeric>${r.data.length}</td></tr>`).join('')}</tbody>`;
 }
 
 // Every valid sample's delivered rate (corpus bytes over the run's primary time), grouped by

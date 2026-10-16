@@ -152,19 +152,20 @@
           <div class="dash-tengig-chart" id="tengig-codecs"></div>
         </figure>
 
-        <section class="hcss-card hcss-stack" aria-labelledby="tengig-ceiling-title" data-wt-obstacle data-wt-orbit="ccw">
-          <h2 id="tengig-ceiling-title">Max theoretical data transfer rates</h2>
+        <section class="hcss-card hcss-stack" aria-labelledby="tengig-rates-title" data-wt-obstacle data-wt-orbit="ccw">
+          <h2 id="tengig-rates-title">Max effective data transfer rates</h2>
           <div class="hcss-prose dash-prose">
-            <p>Compression lets more data arrive than the cable carries: at 4× compression, a full 9.41 Gb/s
-              link delivers about 38 Gb/s of files. What stops it is the slower of two things, the link full
-              of compressed bytes, or the sender compressing fast enough to fill it. Both are worked out
-              here for each zstd level on <code>large-text</code>, the lab's most compressible corpus, beside
-              what <code>xs</code> actually delivered in each direction. This is the best case: real data
-              compresses less, and files that are already compressed (video, images, archives) not at all.</p>
+            <p>With compression, more data arrives than the cable carries. These are the rates <code>xs</code>
+              measured on <code>large-text</code>, the lab's most compressible corpus, at each zstd level and
+              without compression, in both directions: the data delivered (the corpus over the time to have it
+              safely on disk), the bytes that crossed the wire, and how much smaller they were. It is the best
+              case: real data compresses less, and files that are already compressed not at all.</p>
           </div>
-          <div class="dash-tengig-chart" id="tengig-ceiling-chart"></div>
-          <div class="hcss-table-scroll" role="region" tabindex="0" aria-labelledby="tengig-ceiling-title"><table class="hcss-table dash-table" id="tengig-ceiling-table"></table></div>
-          <p class="dash-muted dash-small" id="tengig-ceiling-note"></p>
+          <p class="dash-muted" id="tengig-rates-pending">Z5 is still running; the rates appear here as its samples arrive.</p>
+          <div class="hcss-stack" id="tengig-rates-figure" hidden>
+            <div class="dash-tengig-chart" id="tengig-rates-chart"></div>
+            <div class="hcss-table-scroll" role="region" tabindex="0" aria-labelledby="tengig-rates-title"><table class="hcss-table dash-table" id="tengig-rates-table"></table></div>
+          </div>
         </section>
 
         <section class="hcss-card hcss-stack" aria-labelledby="tengig-table-title" data-wt-obstacle data-wt-orbit="ccw">
