@@ -59,6 +59,11 @@ SPECS = {
                    'parts': [{'weight': 1000, 'size': ('fixed', 2048 * MIB), 'text': 0}]},
     'large-mixed': {'files': 32, 'family': 'large', 'layout': ('flat', 0),
                     'parts': [{'weight': 1000, 'size': ('loguniform', 24, 30), 'text': 0}]},
+    # Large and compressible, for -z at link rates: all text-like (about 4x at zstd level 3), and half.
+    'large-text': {'files': 8, 'family': 'large', 'layout': ('flat', 0),
+                   'parts': [{'weight': 1000, 'size': ('fixed', 1024 * MIB), 'text': 1000}]},
+    'large-half': {'files': 32, 'family': 'large', 'layout': ('flat', 0),
+                   'parts': [{'weight': 1000, 'size': ('loguniform', 24, 30), 'text': 500}]},
 }
 
 

@@ -44,7 +44,7 @@ def artifact_for(system, machine):
 def run_on(host, script, **options):
     """Run a shell command on a host: directly if it is this machine, else over SSH."""
     # The login shell there may not be a POSIX one, so sh runs the script on either kind of host.
-    command = ['sh', '-c', script] if host.get('local') else [*preflight.SSH, host['ssh'], 'sh -c ' + shlex.quote(script)]
+    command = ['sh', '-c', script] if host.get('local') else [*preflight.SSH, *preflight.jump_for(host['ssh']), host['ssh'], 'sh -c ' + shlex.quote(script)]
     return subprocess.run(command, capture_output=True, text=True, stdin=subprocess.DEVNULL, **options)
 
 
@@ -53,7 +53,7 @@ def copy_to(host, paths, directory):
         for path in paths:
             shutil.copy2(path, directory)
     else:
-        run('scp', '-q', '-oBatchMode=yes', *paths, f'{host["ssh"]}:{directory}/')
+        run('scp', '-q', '-oBatchMode=yes', *preflight.jump_for(host['ssh']), *paths, f'{host["ssh"]}:{directory}/')
 SCRIPTS = (HERE / 'probe.py', HERE / 'corpus.py', HERE / 'corpora.json', HERE / 'agent.py', HERE / 'runner.py',
            HERE.parent / 'measure.py')
 

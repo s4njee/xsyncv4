@@ -15,6 +15,22 @@
   "digest": "9a3bd338d0e25634f2f59d5d0fc49513e63b11b6e965b3cd698b1c342850eaf3",
   "quick_digest": "fa796469c2722adb9bb29f62efb909b0f218bf5c6413991b96dcc5a59b3fd151"
  },
+ "large-half:full": {
+  "generator": 1,
+  "files": 32,
+  "directories": 0,
+  "bytes": 8963523840,
+  "digest": "2f5d25773a21522ca058845299a18a57cf2db9e4b7b18ebf3564784bef9def0d",
+  "quick_digest": "fcb724477ada212a5b987c306f25429ce118109cdb7da054f4d4eca7c9a944cf"
+ },
+ "large-half:test": {
+  "generator": 1,
+  "files": 1,
+  "directories": 0,
+  "bytes": 28930304,
+  "digest": "4408e4176e76c5cfdda5d92a60aca19c5c52d028ea6b6a818403b87572eda172",
+  "quick_digest": "d4db8d5141adc969c735409048948a3a88cb1f8b9441badf6df7e80393aa41fd"
+ },
  "large-mixed:full": {
   "generator": 1,
   "files": 32,
@@ -48,6 +64,22 @@
   "quick_digest": "b5c225f81cc5828f266b5662d64827470bcbea52379acdd76c656970bcfb5f9a",
   "utc": "2026-10-14T22:42:51+00:00"
  },
+ "large-text:full": {
+  "generator": 1,
+  "files": 8,
+  "directories": 0,
+  "bytes": 8589934592,
+  "digest": "4f11b85fcc6034d648465e257e02fb7fe958c1b88152264d6be0ff5adfc43f1e",
+  "quick_digest": "c2712b8ed9434c4872376b901d4cdcd651d858c9f60d5fcdae16423b4bb3f8f4"
+ },
+ "large-text:test": {
+  "generator": 1,
+  "files": 1,
+  "directories": 0,
+  "bytes": 1073741824,
+  "digest": "3c944a463bc8935511b255ac9536ef42a4a41e4b66f31a2057e623adcbfcee2a",
+  "quick_digest": "2ba8376bb84736ac72ee35527c98129395cf53692354dcc365dd1fbae99e3bd2"
+ },
  "mixed-bimodal:full": {
   "generator": 1,
   "files": 20000,
@@ -79,6 +111,23 @@
   "bytes": 11264974,
   "digest": "78705c3adf3f5005dd4996352cfef5f3ec099ef01f045be130c99bf9b1443a2b",
   "quick_digest": "915b2165e9d76a6bfc730f6abd5c531963b641b6a00f09c99ad3ad8c7884eb61"
+ },
+ "real-congress:real": {
+  "files": 216518,
+  "directories": 52593,
+  "symlinks": 0,
+  "hardlinks": 0,
+  "bytes": 1159189826,
+  "size_quantiles": {
+   "p10": 24,
+   "p50": 2137,
+   "p90": 12576,
+   "p99": 53438,
+   "max": 3114410
+  },
+  "digest": "29d93dcc4c117de24dc4f6e1b8d26f0e7bbc9c26cfb4aa03d2d52de078b6a102",
+  "quick_digest": "0f493d25789a420e24c282fb3a4ba40bc690b1a3e65184088bf66e7fa0868a6b",
+  "utc": "2026-10-16T15:28:57+00:00"
  },
  "real-holochart:real": {
   "files": 249602,

@@ -230,7 +230,7 @@ def driver_of(plan):
 
 def remote(host, script, **options):
     """Run a shell command on a plan's host: directly if it is this machine, else over SSH."""
-    command = ['sh', '-c', script] if host.get('local') else [*preflight.SSH, host['ssh'], 'sh -c ' + shlex.quote(script)]
+    command = ['sh', '-c', script] if host.get('local') else [*preflight.SSH, *preflight.jump_for(host['ssh']), host['ssh'], 'sh -c ' + shlex.quote(script)]
     return subprocess.run(command, capture_output=True, text=True, stdin=subprocess.DEVNULL, **options)
 
 
@@ -499,7 +499,7 @@ def collect(config, driver_name=None):
         if have in ('complete', 'stopped', 'deadline', 'failed', 'refused'):
             continue
         source = f'{driver["root"]}/runs/{run_id}/' if driver.get('local') else f'{driver["ssh"]}:{driver["root"]}/runs/{run_id}/'
-        done = subprocess.run(['rsync', '-a', '--exclude=plan.json', source, f'{local}/'])
+        done = subprocess.run(['rsync', '-a', '--exclude=plan.json', '-e', shlex.join(['ssh', *preflight.jump_for(driver['ssh'])]), source, f'{local}/'])
         if done.returncode == 0 and (local / 'samples.jsonl').exists():
             status = json.loads((local / 'status.json').read_text()) if (local / 'status.json').exists() else {}
             print(f'{run_id}: {status.get("state", "no status")} {status.get("detail", "")}')
@@ -620,7 +620,7 @@ def main(argv=None):
         print('asked the agent to stop after the current sample')
     else:
         source = f'{driver["root"]}/runs/{args.run_id}/' if driver.get('local') else f'{driver["ssh"]}:{directory}/'
-        subprocess.run(['rsync', '-a', '--exclude=plan.json', source, f'{local}/'], check=True)
+        subprocess.run(['rsync', '-a', '--exclude=plan.json', '-e', shlex.join(['ssh', *preflight.jump_for(driver['ssh'])]), source, f'{local}/'], check=True)
         status = json.loads((local / 'status.json').read_text()) if (local / 'status.json').exists() else {}
         print(f'{local}: {status.get("state", "no status")} {status.get("detail", "")}')
 

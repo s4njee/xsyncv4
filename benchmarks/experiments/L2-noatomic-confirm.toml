@@ -1,0 +1,29 @@
+# L2: confirming --no-atomic on the small trees where E3c and the direct link
+# found it faster (small-flat 0.755 and small-real 0.906 into neo), with fresh
+# blocks and Holm over the comparisons.
+id = "L2-noatomic-confirm"
+kind = "confirmatory"
+hypothesis = "--no-atomic makes fresh copies of flat small-file trees more than 3% faster."
+primary = "wall_s"
+delta = 0.03
+blocks = 16
+control = "xs"
+verify = "first-last"
+
+[arms.xs]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a"]
+
+[arms.no-atomic]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a", "--no-atomic"]
+
+[matrix]
+link = "lan"
+corpus = ["small-flat", "small-real", "small-opaque"]
+scenario = ["fresh"]
+direction = ["neo>freya", "freya>neo"]
+client = ["sender"]
+cache = ["warm"]

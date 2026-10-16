@@ -8,6 +8,7 @@ import argparse
 import datetime
 import hashlib
 import json
+import os
 import pathlib
 import subprocess
 import sys
@@ -16,6 +17,20 @@ import tomllib
 HERE = pathlib.Path(__file__).resolve().parent
 RESULTS = HERE.parent / 'results' / 'lab' / 'preflight'
 SSH = ('ssh', '-oBatchMode=yes', '-oConnectTimeout=10')
+
+
+def jump_for(target):
+    """['-J', host] when XSBENCH_JUMP names a jump host for this SSH target, else [].
+
+    XSBENCH_JUMP=user@host:name1,name2 sends connections to name1 and name2 through user@host,
+    for a controller on another network than the lab (the Mac reaching neo through mars).
+    """
+    setting = os.environ.get('XSBENCH_JUMP', '')
+    if not setting or ':' not in setting:
+        return []
+    jump, _, names = setting.partition(':')
+    host = target.rpartition('@')[2]
+    return ['-J', jump] if host in [n.strip() for n in names.split(',')] else []
 MEDIA = ('wired', 'wireless', 'mesh')
 MAX_CLOCK_SKEW_S = 2.0
 
@@ -51,7 +66,7 @@ def probe(host, *arguments, timeout=90):
     if host.get('local'):
         command = [sys.executable, str(HERE / 'probe.py'), *arguments]
     else:
-        command = [*SSH, host['ssh'], 'python3', '-', *arguments]
+        command = [*SSH, *jump_for(host['ssh']), host['ssh'], 'python3', '-', *arguments]
     try:
         with open(HERE / 'probe.py', 'rb') as script:
             done = subprocess.run(command, stdin=script, capture_output=True, timeout=timeout)
