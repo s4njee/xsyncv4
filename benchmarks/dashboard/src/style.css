@@ -1,6 +1,54 @@
 @import url('@mk7s/holocss/all.css');
 
 /* Project CSS on HoloCSS tokens; kept out of the hcss- namespace. */
+
+/* A bright, vibrant blue accent. HoloCSS's default themes use a neutral accent;
+   the high-contrast theme keeps its own. */
+:root { --dash-blue: #1f6bff; --dash-cyan: #22d3ee; }
+:root:not([data-hcss-theme='high-contrast']) {
+  --hcss-accent: var(--dash-blue);
+  --hcss-accent-text: #ffffff;
+  --hcss-focus: var(--dash-blue);
+}
+@media (prefers-color-scheme: dark) { :root[data-hcss-theme='auto'] { --dash-blue: #3b82ff; } }
+:root[data-hcss-theme='shadcn-dark'], :root[data-hcss-theme='dark'] { --dash-blue: #3b82ff; }
+
+.hcss-topbar { border-block-end: 0; box-shadow: 0 1px 0 var(--hcss-subtle-border, #8883); position: relative; }
+.hcss-topbar::after { content: ''; position: absolute; inset-inline: 0; inset-block-end: -2px; block-size: 2px;
+  background: linear-gradient(90deg, var(--dash-blue), var(--dash-cyan) 60%, transparent); }
+.hcss-topbar .hcss-brand { color: var(--dash-blue); font-weight: 800; letter-spacing: -0.01em; }
+.hcss-topbar .hcss-brand::before { content: ''; display: inline-block; inline-size: 0.6em; block-size: 0.6em; margin-inline-end: 0.45em; border-radius: 2px;
+  background: linear-gradient(135deg, var(--dash-blue), var(--dash-cyan)); vertical-align: 0.05em; }
+.hcss-topbar nav a[aria-current='page'] { color: var(--dash-blue); }
+progress.hcss-progress { accent-color: var(--dash-blue); }
+progress.hcss-progress::-webkit-progress-value { background: linear-gradient(90deg, var(--dash-blue), var(--dash-cyan)); }
+progress.hcss-progress::-moz-progress-bar { background: linear-gradient(90deg, var(--dash-blue), var(--dash-cyan)); }
+.dash-runner { border-block-start: 3px solid var(--hcss-subtle-border, #8883); }
+.dash-runner:has(.hcss-badge[data-status='success']) { border-block-start-color: var(--dash-blue);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--dash-blue) 18%, transparent), 0 8px 30px -12px color-mix(in srgb, var(--dash-blue) 45%, transparent); }
+.dash-stats dd { color: var(--dash-blue); font-variant-numeric: tabular-nums; }
+
+/* Live link speed */
+.dash-speed {
+  display: grid; grid-template-columns: auto 1fr; grid-template-areas: 'figure spark' 'detail spark';
+  column-gap: var(--hcss-space-medium, 1rem); row-gap: 0.15rem; align-items: center;
+  padding: 0.7rem 1rem; border-radius: var(--hcss-radius-medium, 0.5rem);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--dash-blue) 12%, transparent), color-mix(in srgb, var(--dash-cyan) 6%, transparent));
+  border: 1px solid color-mix(in srgb, var(--dash-blue) 30%, transparent);
+}
+.dash-speed-figure { grid-area: figure; display: flex; align-items: baseline; gap: 0.35rem; }
+.dash-speed-value { font-size: 2.5rem; font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: -0.03em; line-height: 1;
+  min-inline-size: 4ch; text-align: end; color: var(--dash-blue); }
+.dash-speed-unit { color: var(--hcss-text-muted); font-weight: 600; }
+.dash-speed[data-active='true'] .dash-speed-value { background: linear-gradient(90deg, var(--dash-blue), var(--dash-cyan));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  filter: drop-shadow(0 0 12px color-mix(in srgb, var(--dash-blue) 45%, transparent)); }
+.dash-speed-detail { grid-area: detail; display: flex; gap: 0.8rem; font-size: 0.85rem; font-variant-numeric: tabular-nums; }
+.dash-spark { grid-area: spark; inline-size: 100%; block-size: 3.4rem; overflow: visible; }
+.dash-spark polyline { fill: none; stroke-width: 2; vector-effect: non-scaling-stroke; stroke-linejoin: round; stroke-linecap: round; }
+.dash-spark-area { stroke: none; }
+.dash-spark-rx { stroke: var(--dash-blue); }
+.dash-spark-tx { stroke: var(--dash-cyan); opacity: 0.9; }
 .dash-body { min-height: 100vh; background: var(--hcss-background, var(--hcss-surface)); }
 .dash-main { width: min(100% - 2 * var(--hcss-space-medium, 1rem), 110rem); margin-inline: auto; padding-block: var(--hcss-space-medium, 1rem) var(--hcss-space-large, 2rem); }
 .dash-topbar-end { margin-inline-start: auto; align-items: center; --hcss-gap: var(--hcss-space-small, 0.5rem); }
@@ -13,7 +61,7 @@
 .dash-host { min-inline-size: 11rem; padding: var(--hcss-space-small, 0.5rem) var(--hcss-space-medium, 1rem); display: grid; gap: 0.15rem; }
 .dash-host p { margin: 0; }
 .dash-host[data-ok='false'] { border-color: var(--hcss-danger, #dc2626); }
-.dash-meter { display: block; block-size: 4px; border-radius: 2px; background: linear-gradient(90deg, var(--hcss-primary, #2563eb) var(--dash-fill, 0%), var(--hcss-subtle-border, #8883) 0); margin-block-start: 0.25rem; }
+.dash-meter { display: block; block-size: 4px; border-radius: 2px; background: linear-gradient(90deg, var(--dash-blue) var(--dash-fill, 0%), var(--hcss-subtle-border, #8883) 0); margin-block-start: 0.25rem; }
 
 .dash-runners { display: grid; gap: var(--hcss-space-medium, 1rem); grid-template-columns: repeat(auto-fit, minmax(min(100%, 34rem), 1fr)); align-items: start; }
 .dash-runner { min-inline-size: 0; }
@@ -39,7 +87,7 @@
 .dash-experiment-list { max-block-size: 80vh; overflow: auto; padding: 0.35rem; }
 .dash-experiment-list ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.15rem; }
 .dash-exp { inline-size: 100%; display: grid; justify-items: start; text-align: start; gap: 0.2rem; block-size: auto; padding-block: 0.5rem; white-space: normal; }
-.dash-exp[aria-current='true'] { background: var(--hcss-elevated-surface, #8881); }
+.dash-exp[aria-current='true'] { background: color-mix(in srgb, var(--dash-blue) 14%, transparent); box-shadow: inset 3px 0 0 var(--dash-blue); }
 .dash-exp-name { font-weight: 600; }
 .dash-report { white-space: pre-wrap; font-size: 0.8rem; max-block-size: 40rem; overflow: auto; }
 

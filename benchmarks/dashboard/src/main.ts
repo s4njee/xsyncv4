@@ -69,7 +69,13 @@ function ensureCard(driver: string): Card {
     <div class="dash-speed" aria-label="Link speed">
       <div class="dash-speed-figure"><span class="dash-speed-value">0</span><span class="dash-speed-unit">Mbps</span></div>
       <div class="dash-speed-detail"><span class="dash-speed-dir" data-dir="rx">↓ 0</span><span class="dash-speed-dir" data-dir="tx">↑ 0</span><span class="dash-speed-iface dash-muted"></span></div>
-      <svg class="dash-spark" viewBox="0 0 90 30" preserveAspectRatio="none" aria-hidden="true"><polyline class="dash-spark-rx" points=""/><polyline class="dash-spark-tx" points=""/></svg>
+      <svg class="dash-spark" viewBox="0 0 90 30" preserveAspectRatio="none" aria-hidden="true">
+        <defs><linearGradient id="spark-fill-${driver}" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="var(--dash-blue)" stop-opacity="0.55"/><stop offset="100%" stop-color="var(--dash-blue)" stop-opacity="0"/>
+        </linearGradient></defs>
+        <polygon class="dash-spark-area" fill="url(#spark-fill-${driver})" points=""/>
+        <polyline class="dash-spark-rx" points=""/><polyline class="dash-spark-tx" points=""/>
+      </svg>
     </div>
     <div class="dash-runner-body hcss-stack"></div>
     <figure class="dash-chart-figure"><figcaption class="dash-muted">Each arm against the control, by cell, over the blocks so far (below 1 is faster)</figcaption><div class="dash-chart"></div></figure>`;
@@ -188,7 +194,9 @@ function renderSpeed(driver: string): void {
   const peak = Math.max(1e8, ...series.map(([, r, t]) => Math.max(r, t)));
   const offset = 90 - series.length;
   const line = (index: 1 | 2) => series.map((point, i) => `${offset + i},${(30 - (point[index] / peak) * 28).toFixed(1)}`).join(' ');
-  card.speed.querySelector('.dash-spark-rx')!.setAttribute('points', line(1));
+  const rxLine = line(1);
+  card.speed.querySelector('.dash-spark-rx')!.setAttribute('points', rxLine);
+  card.speed.querySelector('.dash-spark-area')!.setAttribute('points', series.length ? `${offset},30 ${rxLine} 89,30` : '');
   card.speed.querySelector('.dash-spark-tx')!.setAttribute('points', line(2));
   // Count the big number toward the new value over most of a second.
   const value = card.speed.querySelector<HTMLElement>('.dash-speed-value')!;

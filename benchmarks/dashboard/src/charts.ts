@@ -62,7 +62,8 @@ export class ForestChart {
   private figure(): FigureInput {
     const rows = this.rows;
     const muted = this.theme.colors?.muted ?? '#888';
-    const colors = rows.map((r) => STATUS_COLOR[r.status] ?? muted);
+    const accent = getComputedStyle(this.host).getPropertyValue('--dash-blue').trim() || '#1f6bff';
+    const colors = rows.map((r) => STATUS_COLOR[r.status] ?? accent);
     const intervals = rows.some((r) => r.lo != null && r.hi != null);
     const lows = rows.map((r) => r.lo ?? r.ratio), highs = rows.map((r) => r.hi ?? r.ratio);
     const span = Math.max(1.25, ...highs, ...rows.map((r) => 1 / Math.min(r.ratio, r.lo ?? r.ratio)));
