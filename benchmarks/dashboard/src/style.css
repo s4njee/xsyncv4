@@ -5,6 +5,13 @@
 /* A bright, vibrant blue accent. HoloCSS's default themes use a neutral accent;
    the high-contrast theme keeps its own. */
 :root { --dash-blue: #1f6bff; --dash-cyan: #22d3ee; }
+
+/* A boxy look: every HoloCSS radius is square, pills included. */
+:root, [data-hcss-theme] {
+  --hcss-radius-small: 0; --hcss-radius-medium: 0; --hcss-radius-large: 0; --hcss-radius-pill: 0;
+}
+progress.hcss-progress, progress.hcss-progress::-webkit-progress-bar, progress.hcss-progress::-webkit-progress-value,
+progress.hcss-progress::-moz-progress-bar { border-radius: 0; }
 :root:not([data-hcss-theme='high-contrast']) {
   --hcss-accent: var(--dash-blue);
   --hcss-accent-text: #ffffff;
@@ -17,7 +24,7 @@
 .hcss-topbar::after { content: ''; position: absolute; inset-inline: 0; inset-block-end: -2px; block-size: 2px;
   background: linear-gradient(90deg, var(--dash-blue), var(--dash-cyan) 60%, transparent); }
 .hcss-topbar .hcss-brand { color: var(--dash-blue); font-weight: 800; letter-spacing: -0.01em; }
-.hcss-topbar .hcss-brand::before { content: ''; display: inline-block; inline-size: 0.6em; block-size: 0.6em; margin-inline-end: 0.45em; border-radius: 2px;
+.hcss-topbar .hcss-brand::before { content: ''; display: inline-block; inline-size: 0.6em; block-size: 0.6em; margin-inline-end: 0.45em; border-radius: 0;
   background: linear-gradient(135deg, var(--dash-blue), var(--dash-cyan)); vertical-align: 0.05em; }
 .hcss-topbar nav a[aria-current='page'] { color: var(--dash-blue); }
 progress.hcss-progress { accent-color: var(--dash-blue); }
@@ -32,7 +39,7 @@ progress.hcss-progress::-moz-progress-bar { background: linear-gradient(90deg, v
 .dash-speed {
   display: grid; grid-template-columns: auto 1fr; grid-template-areas: 'figure spark' 'detail spark';
   column-gap: var(--hcss-space-medium, 1rem); row-gap: 0.15rem; align-items: center;
-  padding: 0.7rem 1rem; border-radius: var(--hcss-radius-medium, 0.5rem);
+  padding: 0.7rem 1rem; border-radius: 0;
   background: linear-gradient(135deg, color-mix(in srgb, var(--dash-blue) 12%, transparent), color-mix(in srgb, var(--dash-cyan) 6%, transparent));
   border: 1px solid color-mix(in srgb, var(--dash-blue) 30%, transparent);
 }
@@ -45,7 +52,7 @@ progress.hcss-progress::-moz-progress-bar { background: linear-gradient(90deg, v
   filter: drop-shadow(0 0 12px color-mix(in srgb, var(--dash-blue) 45%, transparent)); }
 .dash-speed-detail { grid-area: detail; display: flex; gap: 0.8rem; font-size: 0.85rem; font-variant-numeric: tabular-nums; }
 .dash-spark { grid-area: spark; inline-size: 100%; block-size: 3.4rem; overflow: visible; }
-.dash-spark polyline { fill: none; stroke-width: 2; vector-effect: non-scaling-stroke; stroke-linejoin: round; stroke-linecap: round; }
+.dash-spark polyline { fill: none; stroke-width: 2; vector-effect: non-scaling-stroke; stroke-linejoin: miter; stroke-linecap: square; }
 .dash-spark-area { stroke: none; }
 .dash-spark-rx { stroke: var(--dash-blue); }
 .dash-spark-tx { stroke: var(--dash-cyan); opacity: 0.9; }
@@ -61,7 +68,7 @@ progress.hcss-progress::-moz-progress-bar { background: linear-gradient(90deg, v
 .dash-host { min-inline-size: 11rem; padding: var(--hcss-space-small, 0.5rem) var(--hcss-space-medium, 1rem); display: grid; gap: 0.15rem; }
 .dash-host p { margin: 0; }
 .dash-host[data-ok='false'] { border-color: var(--hcss-danger, #dc2626); }
-.dash-meter { display: block; block-size: 4px; border-radius: 2px; background: linear-gradient(90deg, var(--dash-blue) var(--dash-fill, 0%), var(--hcss-subtle-border, #8883) 0); margin-block-start: 0.25rem; }
+.dash-meter { display: block; block-size: 4px; border-radius: 0; background: linear-gradient(90deg, var(--dash-blue) var(--dash-fill, 0%), var(--hcss-subtle-border, #8883) 0); margin-block-start: 0.25rem; }
 
 .dash-runners { display: grid; gap: var(--hcss-space-medium, 1rem); grid-template-columns: repeat(auto-fit, minmax(min(100%, 34rem), 1fr)); align-items: start; }
 .dash-runner { min-inline-size: 0; }
