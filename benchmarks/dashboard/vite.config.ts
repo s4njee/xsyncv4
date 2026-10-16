@@ -32,7 +32,7 @@ export default defineConfig({
     host: '127.0.0.1',
     port: 5174,
     // HoloCSS and HoloChart are linked from sibling checkouts outside this folder.
-    fs: { allow: ['.', '../../../holocss', '../../../holochart'] },
+    fs: { allow: ['.', '../../../holocss', '../../../holochart', '../../../research/holofx'] },
     proxy: {
       '/ws': { target: 'ws://127.0.0.1:8787', ws: true },
       '/api': 'http://127.0.0.1:8787',

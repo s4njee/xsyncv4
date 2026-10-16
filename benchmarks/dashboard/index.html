@@ -7,8 +7,9 @@
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='0' fill='%231f6bff'/%3E%3Cpath d='M4 4l8 8M12 4l-8 8' stroke='white' stroke-width='2'/%3E%3C/svg%3E" />
     <script src="/theme-bootstrap.js"></script>
   </head>
-  <body class="hcss-stack dash-body">
-    <header class="hcss-topbar">
+  <body class="hcss-stack dash-body" data-wt-obstacle-root>
+    <div id="stage" class="dash-stage" aria-hidden="true" hidden></div>
+    <header class="hcss-topbar" data-wt-obstacle data-wt-orbit="cw">
       <a class="hcss-brand" href="#live">xs bench</a>
       <nav aria-label="Views">
         <a href="#live" data-view="live" aria-current="page">Live</a
@@ -31,7 +32,7 @@
     <main class="hcss-stack dash-main">
       <section id="view-live" class="hcss-stack" aria-labelledby="live-title">
         <h1 id="live-title" class="hcss-sr-only">Live runners</h1>
-        <div id="hosts" class="hcss-cluster dash-hosts" aria-label="Hosts"></div>
+        <div id="hosts" class="hcss-cluster dash-hosts" aria-label="Hosts" data-wt-obstacle data-wt-orbit="ccw"></div>
         <div id="runners" class="dash-runners"></div>
       </section>
 
@@ -46,8 +47,8 @@
           </select>
         </div>
         <div class="hcss-sidebar-layout dash-results">
-          <aside class="hcss-card dash-experiment-list" aria-label="Experiments"><ul id="experiments"></ul></aside>
-          <section class="hcss-card hcss-stack" id="experiment" aria-live="polite">
+          <aside class="hcss-card dash-experiment-list" aria-label="Experiments" data-wt-obstacle data-wt-orbit="ccw"><ul id="experiments"></ul></aside>
+          <section class="hcss-card hcss-stack" id="experiment" aria-live="polite" data-wt-obstacle data-wt-orbit="cw">
             <div class="hcss-empty-state"><p>Choose an experiment to see its ratios and verdicts.</p></div>
           </section>
         </div>
@@ -55,7 +56,7 @@
 
       <section id="view-events" class="hcss-stack" aria-labelledby="events-title" hidden>
         <h1 id="events-title">Events</h1>
-        <ol id="events" class="dash-events hcss-card"></ol>
+        <ol id="events" class="dash-events hcss-card" data-wt-obstacle data-wt-orbit="ccw"></ol>
       </section>
     </main>
 

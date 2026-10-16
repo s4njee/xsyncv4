@@ -56,7 +56,13 @@ progress.hcss-progress::-moz-progress-bar { background: linear-gradient(90deg, v
 .dash-spark-area { stroke: none; }
 .dash-spark-rx { stroke: var(--dash-blue); }
 .dash-spark-tx { stroke: var(--dash-cyan); opacity: 0.9; }
-.dash-body { min-height: 100vh; background: var(--hcss-background, var(--hcss-surface)); }
+/* The page is transparent so the ink orbit canvas shows through between the opaque cards. */
+html { background: var(--hcss-background, var(--hcss-surface)); }
+.dash-body { min-height: 100vh; background: transparent; }
+.dash-stage { position: fixed; inset: 0; z-index: -1; pointer-events: none; }
+.dash-stage[hidden] { display: none; }
+.dash-ink-canvas { display: block; inline-size: 100%; block-size: 100%; }
+.hcss-topbar, .hcss-card, .dash-host { background-color: var(--hcss-surface); }
 .dash-main { width: min(100% - 2 * var(--hcss-space-medium, 1rem), 110rem); margin-inline: auto; padding-block: var(--hcss-space-medium, 1rem) var(--hcss-space-large, 2rem); }
 .dash-topbar-end { margin-inline-start: auto; align-items: center; --hcss-gap: var(--hcss-space-small, 0.5rem); }
 .dash-theme { inline-size: auto; }

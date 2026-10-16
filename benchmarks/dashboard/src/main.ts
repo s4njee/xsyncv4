@@ -4,6 +4,7 @@ import { createToastQueue } from '@mk7s/holocss/components/controllers';
 import { Live } from './live';
 import { ago, cellLabel, clock, duration, esc, gib, rate, runName, seconds, VERDICT_STATUS } from './format';
 import { ForestChart, type ForestRow } from './charts';
+import { startInk } from './ink';
 import type { DashEvent, Effect, ExperimentDetail, ExperimentIndex, HostMessage, RunnerMessage, State } from './types';
 
 const live = new Live();
@@ -80,6 +81,9 @@ function ensureCard(driver: string): Card {
     <div class="dash-runner-body hcss-stack"></div>
     <figure class="dash-chart-figure"><figcaption class="dash-muted">Each arm against the control, by cell, over the blocks so far (below 1 is faster)</figcaption><div class="dash-chart"></div></figure>`;
   root.dataset.driver = driver;
+  // Solid to the ink orbit behind the page; neighbouring cards turn it opposite ways.
+  root.setAttribute('data-wt-obstacle', '');
+  root.dataset.wtOrbit = cards.size % 2 ? 'ccw' : 'cw';
   root.style.order = String(DRIVER_ORDER.includes(driver) ? DRIVER_ORDER.indexOf(driver) : 99);
   $('runners').append(root);
   card = { root, body: root.querySelector('.dash-runner-body')!, speed: root.querySelector('.dash-speed')!, chart: null, chartHost: root.querySelector('.dash-chart')!, chartKey: '', shown: 0 };
@@ -328,3 +332,4 @@ live.onChange((state, changed) => {
 });
 showView();
 live.connect();
+void startInk($('stage'));
