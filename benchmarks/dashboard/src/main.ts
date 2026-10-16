@@ -1,4 +1,5 @@
 import './style.css';
+import './text';
 import { createTheme } from '@mk7s/holocss/theme';
 import { createToastQueue } from '@mk7s/holocss/components/controllers';
 import { Live } from './live';
