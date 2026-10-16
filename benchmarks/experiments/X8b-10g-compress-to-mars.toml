@@ -1,0 +1,49 @@
+# X8b: compression at 10 Gb/s, the Mac to mars. One ssh connection carries about 8 Gb/s,
+# so -z can only win where data compresses well. xs compresses each DATA block
+# (up to 1 MiB, packing many small files) on its own and in parallel; rsync
+# -z runs one zstd stream across the whole transfer, on one thread, which
+# compresses better and slower. xs without -z, xs -z adaptive and at levels 3
+# and 6, against rsync -z, on compressible small and mixed trees and on
+# incompressible small and large ones.
+id = "X8b-10g-compress-to-mars"
+kind = "screening"
+hypothesis = "At 10 Gb/s xs -z beats rsync -z on compressible trees and costs little on incompressible ones."
+primary = "durable_s"
+delta = 0.03
+blocks = 6
+control = "xs"
+verify = "first-last"
+cleanup = "eager"
+hours = [23, 5]  # the Mac sends: run while it is idle overnight
+
+[arms.xs]
+tool = "xs"
+rev = "8cc75bbdb801"
+flags = ["-a"]
+
+[arms.xs-z]
+tool = "xs"
+rev = "8cc75bbdb801"
+flags = ["-az"]
+
+[arms.xs-z3]
+tool = "xs"
+rev = "8cc75bbdb801"
+flags = ["-az", "--compress-level=3"]
+
+[arms.xs-z6]
+tool = "xs"
+rev = "8cc75bbdb801"
+flags = ["-az", "--compress-level=6"]
+
+[arms.rsync-z]
+tool = "rsync"
+flags = ["-az"]
+
+[matrix]
+link = "mac-mars-direct"
+corpus = ["mixed-bimodal", "small-flat", "small-opaque", "large-mixed"]
+scenario = ["fresh"]
+direction = ["mac>mars"]
+client = ["initiator"]
+cache = ["warm"]
