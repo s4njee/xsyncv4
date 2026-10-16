@@ -141,7 +141,7 @@ initiator = "mac"
 driver = "mac"
 results = "pipes"
 address = { mac = "10.25.0.1", mars = "10.25.0.2" }
-interface = { mac = "en13", mars = "enp7s0" }
+interface = { mac = "en13", mars = "enp9s0" }
 
 [links.mac-mars-hdd-2g5]
 hosts = ["mac", "mars-hdd"]
@@ -152,7 +152,7 @@ initiator = "mac"
 driver = "mac"
 results = "hdd"
 address = { mac = "10.25.0.1", mars-hdd = "10.25.0.2" }
-interface = { mac = "en13", mars-hdd = "enp7s0" }
+interface = { mac = "en13", mars-hdd = "enp9s0" }
 
 # The same cable, with mars's end on its hard drive (2026-10-15).
 [links.mac-mars-hdd]

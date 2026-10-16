@@ -81,6 +81,7 @@ const DRIVER_TITLES: Record<string, string> = { neo: 'neo ↔ freya', mac: 'Mac 
 const LINK_NAMES: Record<string, string> = {
   lan: 'neo ↔ freya (wired)', mesh: 'neo ↔ mars', wifi: 'orion ↔ mars (Wi-Fi)', 'mac-mars': 'Mac ↔ mars (mesh)',
   'mac-mars-direct': 'Mac ↔ mars (10 GbE)', 'mac-mars-hdd': 'Mac ↔ mars hard drive',
+  'mac-mars-2g5': 'Mac ↔ mars (2.5 GbE)', 'mac-mars-hdd-2g5': 'Mac ↔ mars hard drive (2.5 GbE)',
 };
 interface Card { root: HTMLElement; body: HTMLElement; speed: HTMLElement; spark: SpeedChart; chart: ForestChart | null; chartHost: HTMLElement; chartKey: string; shown: number }
 const cards = new Map<string, Card>();
@@ -224,7 +225,10 @@ function renderSpeed(driver: string): void {
   card.speed.dataset.active = String(target > 5);
   card.speed.querySelector<HTMLElement>('[data-dir="rx"]')!.textContent = `↓ ${formatMbps(mbps(rx))}`;
   card.speed.querySelector<HTMLElement>('[data-dir="tx"]')!.textContent = `↑ ${formatMbps(mbps(tx))}`;
-  card.speed.querySelector<HTMLElement>('.dash-speed-iface')!.textContent = iface;
+  // The interface and what it is linked at now, e.g. "en13 · 2.5 GbE".
+  const linked = live.state.link?.[driver]?.[iface];
+  card.speed.querySelector<HTMLElement>('.dash-speed-iface')!.textContent =
+    linked ? `${iface} · ${linked >= 1000 ? `${linked / 1000} GbE` : `${linked} Mb/s`}` : iface;
   card.speed.setAttribute('aria-label', `Link speed on ${iface}: ${formatMbps(target)} Mbps`);
   // The last 90 seconds on an axis fixed by the link's own speed (1 or 10 Gb/s).
   card.spark.update(series, live.state.link?.[driver]?.[iface]);

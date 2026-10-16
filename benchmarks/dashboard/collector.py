@@ -15,6 +15,7 @@ when it is on another Wi-Fi network). Nothing here changes any host.
 """
 import argparse
 import json
+import re
 import pathlib
 import subprocess
 import sys
@@ -128,16 +129,22 @@ def watch_speed(name, reach, interfaces, interval):
     One remote command samples every interface twice, `interval` apart, so the rate is
     measured on the host itself and the SSH round trip does not distort it.
     """
-    # Each interface's negotiated speed, once: it sets the chart's fixed axis (1 or 10 Gb/s).
-    link = {}
-    for iface in interfaces:
-        result = reach.run(f"cat /sys/class/net/{iface}/speed 2>/dev/null || ifconfig {iface} 2>/dev/null | grep -o 'media:.*'", timeout=30)
-        text = result[1].stdout.strip() if result and result[1] is not None else ''
-        found = __import__('re').search(r'(\d+)(G?)base', text, __import__('re').I)
-        link[iface] = int(found.group(1)) * (1000 if found.group(2) else 1) if found else (int(text) if text.isdigit() else None)
+    # Each interface's negotiated speed, read again every half minute: it sets the chart's axis and
+    # the card's label, and a cable can be moved to another port (10 GbE to 2.5 GbE on 2026-10-16).
+    def link_speeds():
+        speeds = {}
+        for iface in interfaces:
+            result = reach.run(f"cat /sys/class/net/{iface}/speed 2>/dev/null || ifconfig {iface} 2>/dev/null | grep -o 'media:.*'", timeout=30)
+            text = result[1].stdout.strip() if result and result[1] is not None else ''
+            found = re.search(r'(\d+(?:\.\d+)?)(G?)base', text, re.I)
+            speeds[iface] = round(float(found.group(1)) * (1000 if found.group(2) else 1)) if found else (int(text) if text.isdigit() and int(text) > 0 else None)
+        return speeds
+    link, checked = link_speeds(), time.monotonic()
     script = '; '.join(f'echo {i}; ' + COUNTERS.format(iface=i) for i in interfaces)
     probe = f'{script}; echo -; sleep {interval}; {script}; echo -; python3 -c "import time; print(time.time())"'
     while True:
+        if time.monotonic() - checked > 30:
+            link, checked = link_speeds(), time.monotonic()
         result = reach.run(probe, timeout=interval + 20)
         if not (result and result[1] is not None and result[1].returncode == 0):
             time.sleep(5)
