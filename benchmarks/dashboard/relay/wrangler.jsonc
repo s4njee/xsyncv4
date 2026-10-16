@@ -1,0 +1,18 @@
+{
+  // xs bench dashboard relay. Deploy from this folder with `wrangler deploy`
+  // after `npm run build` in the dashboard folder; see ../README.md.
+  "name": "xs-bench-dashboard",
+  "main": "src/index.js",
+  "compatibility_date": "2026-04-01",
+  "routes": [{ "pattern": "dashboard.mk7s.dev", "custom_domain": true }],
+  "workers_dev": false,
+  "preview_urls": false,
+  // The built page. Every request reaches the Worker first, which checks the Access login before serving it.
+  "assets": { "directory": "../dist", "binding": "ASSETS", "run_worker_first": true, "not_found_handling": "single-page-application" },
+  "durable_objects": { "bindings": [{ "name": "HUB", "class_name": "Hub" }] },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["Hub"] }],
+  // Filled in after the Access application exists: the team domain (TEAM.cloudflareaccess.com)
+  // and the application's audience tag. Until both are set, every browser request is refused.
+  "vars": { "ACCESS_TEAM_DOMAIN": "", "ACCESS_AUD": "" },
+  "observability": { "enabled": true }
+}

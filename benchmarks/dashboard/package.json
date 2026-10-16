@@ -1,0 +1,21 @@
+{
+  "name": "xs-bench-dashboard",
+  "private": true,
+  "type": "module",
+  "description": "Live dashboard for the xs benchmark lab: runners, samples, hosts and analysed results.",
+  "scripts": {
+    "server": "node server/index.mjs",
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "start": "node server/index.mjs"
+  },
+  "dependencies": {
+    "@mk7s/holochart": "link:../../../holochart/packages/holochart",
+    "@mk7s/holocss": "link:../../../holocss",
+    "ws": "8.18.3"
+  },
+  "devDependencies": {
+    "typescript": "5.9.3",
+    "vite": "7.3.7"
+  }
+}

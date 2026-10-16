@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en" data-hcss-theme="auto">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>xs bench</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%2322c55e'/%3E%3Cpath d='M4 4l8 8M12 4l-8 8' stroke='white' stroke-width='2'/%3E%3C/svg%3E" />
+    <script src="/theme-bootstrap.js"></script>
+  </head>
+  <body class="hcss-stack dash-body">
+    <header class="hcss-topbar">
+      <a class="hcss-brand" href="#live">xs bench</a>
+      <nav aria-label="Views">
+        <a href="#live" data-view="live" aria-current="page">Live</a
+        ><a href="#results" data-view="results">Results</a
+        ><a href="#events" data-view="events">Events</a>
+      </nav>
+      <div class="hcss-cluster dash-topbar-end">
+        <span class="hcss-badge" id="connection" data-status="neutral" role="status">connecting</span>
+        <span class="dash-muted" id="updated"></span>
+        <label class="hcss-sr-only" for="theme">Theme</label>
+        <select class="hcss-select dash-theme" id="theme">
+          <option value="auto">Auto</option>
+          <option value="shadcn-dark">Dark</option>
+          <option value="shadcn-light">Light</option>
+          <option value="high-contrast">High contrast</option>
+        </select>
+      </div>
+    </header>
+
+    <main class="hcss-stack dash-main">
+      <section id="view-live" class="hcss-stack" aria-labelledby="live-title">
+        <h1 id="live-title" class="hcss-sr-only">Live runners</h1>
+        <div id="hosts" class="hcss-cluster dash-hosts" aria-label="Hosts"></div>
+        <div id="runners" class="dash-runners"></div>
+      </section>
+
+      <section id="view-results" class="hcss-stack" aria-labelledby="results-title" hidden>
+        <div class="hcss-cluster dash-results-head">
+          <h1 id="results-title">Results</h1>
+          <label class="hcss-sr-only" for="results-filter">Filter experiments</label>
+          <input class="hcss-text-field dash-filter" id="results-filter" type="search" placeholder="Filter experiments" />
+          <label class="hcss-sr-only" for="results-group">Link</label>
+          <select class="hcss-select" id="results-group">
+            <option value="">All links</option>
+          </select>
+        </div>
+        <div class="hcss-sidebar-layout dash-results">
+          <aside class="hcss-card dash-experiment-list" aria-label="Experiments"><ul id="experiments"></ul></aside>
+          <section class="hcss-card hcss-stack" id="experiment" aria-live="polite">
+            <div class="hcss-empty-state"><p>Choose an experiment to see its ratios and verdicts.</p></div>
+          </section>
+        </div>
+      </section>
+
+      <section id="view-events" class="hcss-stack" aria-labelledby="events-title" hidden>
+        <h1 id="events-title">Events</h1>
+        <ol id="events" class="dash-events hcss-card"></ol>
+      </section>
+    </main>
+
+    <div class="hcss-toast hcss-transition hcss-fade hcss-slide-up dash-toast" id="toast" data-hcss-state="closed" hidden inert>
+      <span class="hcss-sr-only" role="status"></span>
+      <p data-hcss-message></p>
+      <button class="hcss-button" data-size="sm" data-variant="outline" type="button" data-hcss-close>Dismiss</button>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

@@ -1,0 +1,53 @@
+@import url('@mk7s/holocss/all.css');
+
+/* Project CSS on HoloCSS tokens; kept out of the hcss- namespace. */
+.dash-body { min-height: 100vh; background: var(--hcss-background, var(--hcss-surface)); }
+.dash-main { width: min(100% - 2 * var(--hcss-space-medium, 1rem), 110rem); margin-inline: auto; padding-block: var(--hcss-space-medium, 1rem) var(--hcss-space-large, 2rem); }
+.dash-topbar-end { margin-inline-start: auto; align-items: center; --hcss-gap: var(--hcss-space-small, 0.5rem); }
+.dash-theme { inline-size: auto; }
+.dash-muted { color: var(--hcss-text-muted); font-size: 0.875em; }
+.dash-tight { --hcss-gap: 0.25rem; gap: 0.25rem; }
+.dash-push { margin-inline-start: auto; }
+
+.dash-hosts { --hcss-gap: var(--hcss-space-small, 0.5rem); }
+.dash-host { min-inline-size: 11rem; padding: var(--hcss-space-small, 0.5rem) var(--hcss-space-medium, 1rem); display: grid; gap: 0.15rem; }
+.dash-host p { margin: 0; }
+.dash-host[data-ok='false'] { border-color: var(--hcss-danger, #dc2626); }
+.dash-meter { display: block; block-size: 4px; border-radius: 2px; background: linear-gradient(90deg, var(--hcss-primary, #2563eb) var(--dash-fill, 0%), var(--hcss-subtle-border, #8883) 0); margin-block-start: 0.25rem; }
+
+.dash-runners { display: grid; gap: var(--hcss-space-medium, 1rem); grid-template-columns: repeat(auto-fit, minmax(min(100%, 34rem), 1fr)); align-items: start; }
+.dash-runner { min-inline-size: 0; }
+.dash-runner-head { align-items: start; }
+.dash-runner-head h2 { margin: 0; font-size: 1.15rem; }
+.dash-runner-head p { margin: 0; }
+.dash-runner-head .hcss-eyebrow { margin: 0; }
+.dash-current { margin: 0; display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
+.dash-hypothesis { margin: 0; }
+.dash-runner progress { inline-size: 100%; }
+.dash-stats { --hcss-gap: 1.5rem; }
+.dash-lists h3 { font-size: 0.95rem; margin: 0 0 0.35rem; }
+.dash-list { margin: 0; padding: 0; list-style: none; display: grid; gap: 0.3rem; font-size: 0.9rem; }
+.dash-list li { display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: baseline; }
+.dash-table td, .dash-table th { white-space: nowrap; }
+.dash-chart-figure { margin: 0; display: grid; gap: 0.35rem; }
+.dash-chart { inline-size: 100%; block-size: calc(2.2rem * var(--dash-rows, 4) + 4rem); min-block-size: 10rem; max-block-size: 60rem; }
+
+.dash-results-head { align-items: center; }
+.dash-results-head h1 { margin: 0; }
+.dash-filter { inline-size: min(100%, 20rem); }
+.dash-results { --hcss-sidebar-width: 22rem; align-items: start; }
+.dash-experiment-list { max-block-size: 80vh; overflow: auto; padding: 0.35rem; }
+.dash-experiment-list ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.15rem; }
+.dash-exp { inline-size: 100%; display: grid; justify-items: start; text-align: start; gap: 0.2rem; block-size: auto; padding-block: 0.5rem; white-space: normal; }
+.dash-exp[aria-current='true'] { background: var(--hcss-elevated-surface, #8881); }
+.dash-exp-name { font-weight: 600; }
+.dash-report { white-space: pre-wrap; font-size: 0.8rem; max-block-size: 40rem; overflow: auto; }
+
+.dash-events { list-style: none; margin: 0; padding: var(--hcss-space-medium, 1rem); display: grid; gap: 0.4rem; }
+.dash-events li { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: baseline; }
+.dash-toast { position: fixed; inset-block-end: 1rem; inset-inline-end: 1rem; z-index: 10; }
+
+@media (max-width: 40rem) {
+  .dash-topbar-end #updated { display: none; }
+  .dash-results { display: grid; }
+}
