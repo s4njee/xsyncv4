@@ -1,0 +1,58 @@
+# X6: X2's tuning settings again at 10 Gb/s, where the network no longer
+# hides what the engine costs. Tunables build with metrics.
+id = "X6-10g-tune"
+kind = "screening"
+hypothesis = "At 10 Gb/s, parallel ranges, larger blocks or writes, or deeper queues bring xs closer to the ssh ceiling."
+primary = "durable_s"
+delta = 0.03
+blocks = 6
+control = "xs"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.xs]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a"]
+metrics = true
+
+[arms.j4]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a", "-j4"]
+metrics = true
+
+[arms.j8]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a", "-j8"]
+metrics = true
+
+[arms.block4m]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a"]
+tune = "block_target=4194304"
+metrics = true
+
+[arms.chunk1m]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a"]
+tune = "write_chunk=1048576,pipe_size=1048576"
+metrics = true
+
+[arms.queues]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a"]
+tune = "send_queue=201326592,recv_queue=67108864"
+metrics = true
+
+[matrix]
+link = "mac-mars-direct"
+corpus = ["large-one", "large-mixed"]
+scenario = ["fresh"]
+direction = ["mac>mars", "mars>mac"]
+client = ["initiator"]
+cache = ["warm"]

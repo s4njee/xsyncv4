@@ -1,0 +1,30 @@
+# X5: large files over a real 10 Gb/s path. The Mac's Thunderbolt 4 adapter
+# to mars's X540 in an x8 slot: raw TCP 9.41 Gb/s each way on one stream, and
+# a single ssh connection 7.7 to 8.6 Gb/s with AES-GCM (2.2 with ChaCha20).
+# xs against rsync on all three large corpora, both directions.
+id = "X5-10g-baseline"
+kind = "screening"
+hypothesis = "At 10 Gb/s xs copies large files faster than rsync and approaches what one ssh connection carries."
+primary = "durable_s"
+delta = 0.03
+blocks = 8
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[arms.xs]
+tool = "xs"
+rev = "8cc75bbdb801"
+flags = ["-a"]
+
+[matrix]
+link = "mac-mars-direct"
+corpus = ["large-one", "large-four", "large-mixed"]
+scenario = ["fresh"]
+direction = ["mac>mars", "mars>mac"]
+client = ["initiator"]
+cache = ["warm"]

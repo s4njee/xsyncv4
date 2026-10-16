@@ -105,6 +105,12 @@ results = "supplementary"
 background = true
 interface = { mac = "en8", mars = "enp9s0" }
 
+# On 2026-10-15 the X540 moved from a chipset PCIe 2.0 x1 slot, which held the
+# link to about 3.4 Gb/s each way whatever the Mac's adapter, to an x8 slot;
+# its port is now enp1s0f0.
+# Since 2026-10-15 evening the Mac's end is a Thunderbolt 4 10GbE adapter
+# (en13, Aquantia, linked at 10GBASE-T); before that a USB adapter (en11)
+# that held TCP to about 3 Gb/s.
 # Direct cable between this Mac and mars, for large-file tuning (2026-10-14):
 # the Mac's USB adapter (10 Gb/s USB, en11, 10.25.0.1) to mars's Intel X540
 # (enp7s0f0, 10.25.0.2), linked at 10 Gb/s; USB holds it to about 3 Gb/s of
@@ -113,22 +119,22 @@ interface = { mac = "en8", mars = "enp9s0" }
 [links.mac-mars-direct]
 hosts = ["mac", "mars"]
 medium = "wired"
-min_speed_mbps = 2500  # the Mac reports 2500Base-T for this 10G link
+min_speed_mbps = 10000
 max_rtt_ms = 2.0
 initiator = "mac"
 driver = "mac"
 results = "direct"
 address = { mac = "10.25.0.1", mars = "10.25.0.2" }
-interface = { mac = "en11", mars = "enp7s0f0" }
+interface = { mac = "en13", mars = "enp1s0f0" }
 
 # The same cable, with mars's end on its hard drive (2026-10-15).
 [links.mac-mars-hdd]
 hosts = ["mac", "mars-hdd"]
 medium = "wired"
-min_speed_mbps = 2500  # the Mac reports 2500Base-T for this 10G link
+min_speed_mbps = 10000
 max_rtt_ms = 2.0
 initiator = "mac"
 driver = "mac"
 results = "hdd"
 address = { mac = "10.25.0.1", mars-hdd = "10.25.0.2" }
-interface = { mac = "en11", mars-hdd = "enp7s0f0" }
+interface = { mac = "en13", mars-hdd = "enp1s0f0" }
