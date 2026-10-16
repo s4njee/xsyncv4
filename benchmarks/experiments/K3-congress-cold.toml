@@ -1,0 +1,43 @@
+# K3: congress with every cache dropped first, both ends: the realistic first backup of a
+# big tree of small files, where the sender reads 216,000 files from its drive and the
+# receiver starts with nothing cached. The Pi sending cold is the case to watch.
+id = "K3-congress-cold"
+kind = "screening"
+hypothesis = "With cold caches, xs's lead over rsync on congress grows, and the Pi sending cold is the slowest case."
+primary = "durable_s"
+delta = 0.03
+blocks = 6
+control = "xs-z"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.xs-z]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-az"]
+
+[arms.xs-z-best]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-az", "--no-atomic"]
+tune = { receiver = "jobs=4" }
+
+[arms.xs]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-a"]
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[matrix]
+link = "lan"
+corpus = ["real-congress"]
+scenario = ["fresh"]
+direction = ["neo>freya", "freya>neo"]
+client = ["sender"]
+cache = ["cold"]

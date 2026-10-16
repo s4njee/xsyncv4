@@ -24,7 +24,9 @@ helper = true
 # Inventoried 2026-10-12; helper installed 2026-10-13. A Ryzen 9 7900X on
 # NVMe, wired to a mesh node. It cannot yet SSH to neo or freya.
 [hosts.mars]
-ssh = "sanjee@mars.local"
+# By the direct cable: mars.local resolves to its Wi-Fi address on some networks, and the Mac
+# changes networks (a P2b run hung 30 minutes on it, 2026-10-16). neo and orion cannot use this.
+ssh = "sanjee@10.25.0.2"
 name = "mars.local"
 hostname = "mars"
 root = "/home/sanjee/benchmarks/xsyncv4/lab"
@@ -36,7 +38,7 @@ helper = true
 # operator's own files. Everything the harness writes stays under
 # /mnt/hdd/xsbench. For tuning small and mixed files against a spinning disk.
 [hosts.mars-hdd]
-ssh = "sanjee@mars.local"
+ssh = "sanjee@10.25.0.2"   # by the direct cable, as for mars
 name = "mars.local"
 hostname = "mars"
 root = "/mnt/hdd/xsbench"
@@ -69,6 +71,46 @@ helper = false
 # medium: "wired" and "wireless" must match the interface each host uses.
 # "mesh" means a wireless hop somewhere on the path, whatever the hosts' own
 # interfaces are, so it is not checked against them.
+# neo and freya again, with copies landing in RAM (/dev/shm, tmpfs): the receiver as a
+# destination with no disk or journal, to separate what the filesystem costs small files from what
+# the protocol and the CPUs do (K2, 2026-10-16). Each root is a folder of symlinks: bin, lib,
+# corpora (and on neo runs, so neo's runner sees these plans) point at the host's real root, and
+# work, where copies land, points at /dev/shm/xsbench-work. /dev/shm is emptied by a reboot.
+[hosts.neo-shm]
+ssh = "sanjee@neo.local"
+name = "neo.local"
+hostname = "neo"
+root = "/home/sanjee/benchmarks/xsyncv4/lab-shm"
+root_fstype = "ext4"           # the root's own filesystem; copies land on tmpfs through work/
+helper = true
+
+[hosts.freya-shm]
+ssh = "sanjee@freya.local"
+name = "freya.local"
+hostname = "freya"
+root = "/mnt/nvme/xsbench/shm-root"
+root_fstype = "ext4"           # the root's own filesystem; copies land on tmpfs through work/
+helper = true
+
+[links.lan-shm-freya]
+hosts = ["neo", "freya-shm"]
+medium = "wired"
+min_speed_mbps = 1000
+max_rtt_ms = 2.0
+driver = "neo"
+results = "lab"
+interface = { neo = "eth0", freya-shm = "enp10s0" }
+
+# neo-shm drives: its runs folder is neo's, so neo's runner picks these plans up.
+[links.lan-shm-neo]
+hosts = ["freya", "neo-shm"]
+medium = "wired"
+min_speed_mbps = 1000
+max_rtt_ms = 2.0
+driver = "neo-shm"
+results = "lab"
+interface = { freya = "enp10s0", neo-shm = "eth0" }
+
 [links.lan]
 hosts = ["neo", "freya"]
 medium = "wired"

@@ -1,0 +1,46 @@
+# K2a: copying into RAM on freya (/dev/shm), so no disk or journal is involved. If xs is
+# no faster into RAM than onto freya's NVMe, the small-file limit is the protocol or the
+# Pi sending, not freya's filesystem.
+id = "K2a-tmpfs-freya"
+kind = "screening"
+hypothesis = "xs copies small trees into RAM on freya no faster than onto its NVMe: the receiver's disk is not the limit."
+primary = "durable_s"
+delta = 0.03
+blocks = 6
+control = "xs-z"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.xs-z]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-az"]
+
+[arms.xs-z-best]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-az", "--no-atomic"]
+tune = { receiver = "jobs=4" }
+
+[arms.xs]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-a"]
+
+[arms.xs-best]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-a", "--no-atomic"]
+tune = { receiver = "jobs=4" }
+
+[matrix]
+link = "lan-shm-freya"
+corpus = ["real-congress", "small-deep", "small-flat"]
+scenario = ["fresh"]
+direction = ["neo>freya-shm"]
+client = ["sender"]
+cache = ["warm"]

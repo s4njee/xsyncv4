@@ -1,0 +1,46 @@
+# K2b: copying into RAM on neo, the Pi (/dev/shm, 2 GB). The Pi receiving is the slowest
+# small-file path measured (13-15,000 files/s in C1). If it is much faster into RAM, the
+# Pi's NVMe or ext4 is the limit; if not, it is the Pi's CPU and the protocol.
+id = "K2b-tmpfs-neo"
+kind = "screening"
+hypothesis = "xs copies small trees into RAM on the Pi much faster than onto its NVMe: the Pi's filesystem is the limit."
+primary = "durable_s"
+delta = 0.03
+blocks = 6
+control = "xs-z"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.xs-z]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-az"]
+
+[arms.xs-z-best]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-az", "--no-atomic"]
+tune = { receiver = "jobs=4" }
+
+[arms.xs]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-a"]
+
+[arms.xs-best]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-a", "--no-atomic"]
+tune = { receiver = "jobs=4" }
+
+[matrix]
+link = "lan-shm-neo"
+corpus = ["real-congress", "small-deep", "small-flat"]
+scenario = ["fresh"]
+direction = ["freya>neo-shm"]
+client = ["sender"]
+cache = ["warm"]

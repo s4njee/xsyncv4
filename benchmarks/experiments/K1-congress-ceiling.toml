@@ -1,0 +1,50 @@
+# K1: each receiver's own ceiling for small files, against what xs delivers to it. In C1
+# congress ran at 26,500 files/s onto freya but only 13-15,000 onto neo (the Pi), whatever
+# the settings. Here the same files are also created wholly on the receiver, from its own
+# copy with no network (tar streams, 1, 4 and 8 at once): if a receiver creates files
+# locally far faster than xs delivers them, its disk is not the limit.
+id = "K1-congress-ceiling"
+kind = "screening"
+hypothesis = "Each receiver creates small files locally much faster than xs delivers them over gigabit."
+primary = "durable_s"
+delta = 0.03
+blocks = 6
+control = "xs-z"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.xs-z]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-az"]
+
+[arms.xs-z-best]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-az", "--no-atomic"]
+tune = { receiver = "jobs=4" }
+
+[arms.local-x1]
+tool = "pipe"
+streams = 1
+local = true
+
+[arms.local-x4]
+tool = "pipe"
+streams = 4
+local = true
+
+[arms.local-x8]
+tool = "pipe"
+streams = 8
+local = true
+
+[matrix]
+link = "lan"
+corpus = ["real-congress", "small-deep", "small-flat"]
+scenario = ["fresh"]
+direction = ["neo>freya", "freya>neo"]
+client = ["sender"]
+cache = ["warm"]
