@@ -52,6 +52,22 @@ setInterval(() => {
 // "left" down to the estimated finish. When "left" shows a new value it slides in (CSS
 // dash-roll); a card rebuilt with the same value does not replay it.
 const shownLeft = new Map<string, string>();
+
+// The samples count, one card per digit like a flip clock. A digit that differs from what this
+// counter last showed flips in; the card is rebuilt on every update, so the last value is kept here
+// and a rebuild with the same count does not flip again. Digits are matched from the right, so
+// 99 -> 100 flips every place. Reduced motion turns the flip off (CSS).
+const shownSamples = new Map<string, string>();
+function flipDigits(key: string, value: number): string {
+  const text = String(value);
+  const before = shownSamples.get(key);
+  shownSamples.set(key, text);
+  return `<span class="dash-flip" aria-hidden="true">${[...text].map((digit, i) => {
+    const old = before?.[before.length - text.length + i];
+    const flips = before !== undefined && old !== digit;
+    return `<span class="dash-flip-digit${flips ? ' is-flipping' : ''}">${digit}</span>`;
+  }).join('')}</span>`;
+}
 const stopwatch = (total: number) => {
   const t = Math.max(0, Math.floor(total)), h = Math.floor(t / 3600), m = Math.floor((t % 3600) / 60), s = t % 60;
   return `${h ? `${h}:${String(m).padStart(2, '0')}` : m}:${String(s).padStart(2, '0')}`;
@@ -158,7 +174,7 @@ function renderRunner(message: RunnerMessage): void {
       </div>
       <progress class="hcss-progress" max="${planned || 1}" value="${done}" aria-label="Samples done">${done} of ${planned}</progress>
       <div class="hcss-stat-row dash-stats">
-        <dl class="hcss-stat"><dt>Samples</dt><dd>${done} / ${planned}</dd></dl>
+        <dl class="hcss-stat"><dt>Samples</dt><dd aria-label="${done} of ${planned} samples">${flipDigits(`${message.driver}:${current.run}`, done)} / ${planned}</dd></dl>
         <dl class="hcss-stat"><dt>Voided</dt><dd>${current.voided}</dd></dl>
         <dl class="hcss-stat"><dt>Running for</dt><dd class="dash-clock" data-since="${started}"></dd></dl>
         <dl class="hcss-stat"><dt>Left, about</dt><dd class="dash-clock" data-until="${isNaN(finish) ? '' : finish}" data-key="${esc(message.driver)}"></dd></dl>
