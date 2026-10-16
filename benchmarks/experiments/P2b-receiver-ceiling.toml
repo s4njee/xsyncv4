@@ -1,0 +1,55 @@
+# P2b: how fast mars creates small files by itself, against what xs delivers to it.
+# P1 (stopped early, 2026-10-16) settled the network tar question: xs beat plain tar
+# streams on every corpus, tar being held to one file at a time per stream by the
+# Mac reading files. What remains is where the small-file limit sits. These tar
+# streams run wholly on mars, from its own copy of the corpus with no network, with
+# 1, 4 and 8 extractors; if mars creates files several times faster than xs delivers
+# them, the limit is the sending side. xs's best setting is also run with eager
+# writeback (dirty pages flushed after 64 MiB), which should change little on NVMe.
+id = "P2b-receiver-ceiling"
+kind = "screening"
+hypothesis = "mars creates small files locally several times faster than xs delivers them over 2.5GbE."
+primary = "durable_s"
+delta = 0.03
+blocks = 6
+control = "xs-best"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.xs-best]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-a", "--no-atomic"]
+tune = { receiver = "jobs=4" }
+
+[arms.xs-best-eager]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-a", "--no-atomic"]
+tune = { receiver = "jobs=4" }
+writeback = "eager"
+
+[arms.local-x1]
+tool = "pipe"
+streams = 1
+local = true
+
+[arms.local-x4]
+tool = "pipe"
+streams = 4
+local = true
+
+[arms.local-x8]
+tool = "pipe"
+streams = 8
+local = true
+
+[matrix]
+link = "mac-mars-2g5"
+corpus = ["small-flat", "small-deep", "real-congress"]
+scenario = ["fresh"]
+direction = ["mac>mars"]
+client = ["initiator"]
+cache = ["warm"]
