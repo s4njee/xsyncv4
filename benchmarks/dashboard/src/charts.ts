@@ -81,7 +81,9 @@ export class ForestChart {
       }],
       layout: {
         template: composeTemplates(holochartTemplate, this.theme.template),
-        xaxis: { type: 'log', range: [Math.log10(1 / span), Math.log10(span)], title: { text: 'ratio to control (log)' }, zeroline: false },
+        // A fifth beyond the outermost ratio on each side, so the extreme points and their
+        // intervals sit inside the plot rather than half off its edge.
+        xaxis: { type: 'log', range: [Math.log10(1 / (span * 1.2)), Math.log10(span * 1.2)], title: { text: 'ratio to control (log)' }, zeroline: false },
         yaxis: { autorange: 'reversed', automargin: true },
         shapes: [{ type: 'line', xref: 'x', yref: 'paper', x0: 1, x1: 1, y0: 0, y1: 1, line: { dash: 'dash', width: 1, color: muted } }],
         margin: { l: 16, r: 16, t: 8, b: 44 },

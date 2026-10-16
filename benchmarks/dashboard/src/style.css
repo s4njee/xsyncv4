@@ -174,3 +174,14 @@ html { background: var(--hcss-background, var(--hcss-surface)); }
 }
 @media (prefers-reduced-motion: reduce) { .dash-flip-digit.is-flipping { animation: none; } }
 [data-hcss-motion="none"] .dash-flip-digit.is-flipping { animation: none; }
+/* Charts follow their card's width. Without these, a chart's container is as wide as the canvas
+   it already holds, so it never narrows and the chart, drawn once at a wider layout, runs past the
+   card (seen going from one column to two). */
+.dash-runner, .dash-chart-figure, .dash-chart, .dash-run-chart, .dash-tengig-chart { min-inline-size: 0; max-inline-size: 100%; }
+.dash-chart-figure { margin: 0; }
+.dash-chart, .dash-run-chart, .dash-tengig-chart { overflow: hidden; }
+/* On a phone the speed chart goes under the figure, across the card, instead of beside it. */
+@media (max-width: 40rem) {
+  .dash-speed { grid-template-columns: 1fr; grid-template-areas: 'figure' 'detail' 'spark'; }
+  .dash-spark { block-size: 5rem; }
+}
