@@ -76,7 +76,8 @@ function load(root, group, experiment, run) {
     columns.peer_cpu_s.push(cpu(s.peer));
     columns.client_rss.push(s.client?.max_rss_bytes ?? null);
     columns.peer_rss.push(s.peer?.max_rss_bytes ?? null);
-    columns.wire_bytes.push(s.wire?.sender_tx_bytes ?? null);
+    // Bytes that crossed the link, from whichever end counts its interface (the Mac reports neither).
+    columns.wire_bytes.push(s.wire?.sender_tx_bytes || s.wire?.receiver_rx_bytes || null);
     columns.retransmits.push(s.wire?.sender_retransmits ?? null);
     columns.rev.push(s.rev ? revs.indexOf(s.rev) : null);
   }

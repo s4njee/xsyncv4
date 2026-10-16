@@ -152,6 +152,21 @@
           <div class="dash-tengig-chart" id="tengig-codecs"></div>
         </figure>
 
+        <section class="hcss-card hcss-stack" aria-labelledby="tengig-ceiling-title" data-wt-obstacle data-wt-orbit="ccw">
+          <h2 id="tengig-ceiling-title">Max theoretical data transfer rates</h2>
+          <div class="hcss-prose dash-prose">
+            <p>Compression lets more data arrive than the cable carries: at 4× compression, a full 9.41 Gb/s
+              link delivers about 38 Gb/s of files. What stops it is the slower of two things, the link full
+              of compressed bytes, or the sender compressing fast enough to fill it. Both are worked out
+              here for each zstd level on <code>large-text</code>, the lab's most compressible corpus, beside
+              what <code>xs</code> actually delivered in each direction. This is the best case: real data
+              compresses less, and files that are already compressed (video, images, archives) not at all.</p>
+          </div>
+          <div class="dash-tengig-chart" id="tengig-ceiling-chart"></div>
+          <div class="hcss-table-scroll" role="region" tabindex="0" aria-labelledby="tengig-ceiling-title"><table class="hcss-table dash-table" id="tengig-ceiling-table"></table></div>
+          <p class="dash-muted dash-small" id="tengig-ceiling-note"></p>
+        </section>
+
         <section class="hcss-card hcss-stack" aria-labelledby="tengig-table-title" data-wt-obstacle data-wt-orbit="ccw">
           <h2 id="tengig-table-title">By corpus, fresh copies <span class="dash-muted">(median Gb/s)</span></h2>
           <div class="hcss-table-scroll" role="region" tabindex="0" aria-labelledby="tengig-table-title"><table class="hcss-table dash-table" id="tengig-table"></table></div>
