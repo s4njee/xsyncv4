@@ -85,10 +85,13 @@ function load(root, group, experiment, run) {
   const utcs = columns.utc.filter((u) => u != null);
   const valid = columns.valid.reduce((a, b) => a + b, 0);
   const links = [...new Set(cells.map((c) => c.link).filter(Boolean))];
+  // The speed the run's preflight required of its link: on the direct cable, 2500 while it
+  // ran at about 3 Gb/s and 10000 once it reached 10 GbE, which is how the 10 GbE view picks runs.
+  const floors = links.map((l) => plan.links?.[l]?.min_speed_mbps).filter((v) => typeof v === 'number');
   const index = {
     key: `${group}/${experiment}/${run}`, group, experiment, run,
     kind: plan.kind ?? null, hypothesis: plan.hypothesis ?? null, primary: plan.primary ?? 'wall_s', control: plan.control ?? null,
-    driver: plan.driver ?? null, links,
+    driver: plan.driver ?? null, links, link_mbps: floors.length ? Math.max(...floors) : null,
     started: utcs.length ? Math.min(...utcs) : null, ended: utcs.length ? Math.max(...utcs) : null,
     samples: n, valid, voided: n - valid,
     planned: status.samples_planned ?? null, state: status.state ?? null,

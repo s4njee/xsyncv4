@@ -92,7 +92,12 @@ export function renderRunList(all: RunIndex[] | undefined): void {
 
 // --- one run ---------------------------------------------------------------------------
 
-function fetchRun(key: string): Promise<RunDetail | null> {
+// Drop a cached run so the next fetch reads it again (it has grown).
+export function forgetRun(key: string): void {
+  details.delete(key);
+}
+
+export function fetchRun(key: string): Promise<RunDetail | null> {
   let pending = details.get(key);
   if (!pending) {
     pending = fetch(`/api/run?key=${encodeURIComponent(key)}`).then((r) => (r.ok ? r.json() : null)).catch(() => null);

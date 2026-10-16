@@ -219,6 +219,7 @@ export interface RunIndex {
   control: string | null;
   driver: string | null;
   links: string[];
+  link_mbps?: number | null; // the link speed the run's preflight required
   started: number | null;
   ended: number | null;
   samples: number;

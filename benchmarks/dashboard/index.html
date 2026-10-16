@@ -15,6 +15,7 @@
         <a href="#live" data-view="live" aria-current="page">Live</a
         ><a href="#results" data-view="results">Results</a
         ><a href="#runs" data-view="runs">Runs</a
+        ><a href="#tengig" data-view="tengig">10 GbE</a
         ><a href="#events" data-view="events">Events</a>
       </nav>
       <div class="hcss-cluster dash-topbar-end">
@@ -69,6 +70,123 @@
           <aside class="hcss-card dash-experiment-list" aria-label="Runs" data-wt-obstacle data-wt-orbit="ccw"><p class="dash-muted dash-runs-count" id="runs-count" role="status"></p><ul id="runs-list"></ul></aside>
           <section class="hcss-card hcss-stack dash-run" id="run" aria-live="polite" data-wt-obstacle data-wt-orbit="cw"></section>
         </div>
+      </section>
+
+      <section id="view-tengig" class="hcss-stack dash-tengig" aria-labelledby="tengig-title" hidden>
+        <article class="hcss-card hcss-stack" data-wt-obstacle data-wt-orbit="cw">
+          <p class="hcss-eyebrow">Direct cable · Mac ↔ mars</p>
+          <h1 id="tengig-title">What 10 GbE is actually useful for</h1>
+          <div class="hcss-prose dash-prose">
+            <p>These results come from a direct 10 GbE cable between the MacBook Pro (M1 Max, OWC
+              Thunderbolt 10G adapter) and mars (Ryzen 9 7900X, Intel X540), which carries 9.41 Gb/s of
+              raw TCP each way. Only runs made once the link ran at full speed are counted; earlier runs
+              on the same cable topped out near 3 Gb/s and are left out. Rates are the data delivered:
+              the size of what was copied over the time to have it safely on disk.</p>
+            <p class="dash-takeaway"><strong>In short:</strong> 10 GbE pays off when most of the bytes are in
+              files of a megabyte or more and the tool can keep several streams busy. When files average a
+              few kilobytes, the receiving disk creating files sets the pace, well under 1 Gb/s, and
+              gigabit is already enough.</p>
+          </div>
+        </article>
+
+        <figure class="hcss-card hcss-stack dash-tengig-figure" data-wt-obstacle data-wt-orbit="ccw">
+          <figcaption><strong>Fresh copies: speed against average file size.</strong>
+            <span class="dash-muted">Each point is one corpus in one direction, the median of its samples.
+            The shaded band is what gigabit can carry; above it is what only a faster link delivers.</span></figcaption>
+          <div class="dash-tengig-chart" id="tengig-spread"></div>
+        </figure>
+
+        <div class="dash-tengig-notes">
+          <article class="hcss-card hcss-stack" data-wt-obstacle data-wt-orbit="cw">
+            <h2>Large files: this is what it is for</h2>
+            <p>Files of hundreds of megabytes and up move at 8.5 to 9 Gb/s with <code>xs</code> from mars to the
+              Mac: about nine times what gigabit carries, and close to the 9.41 Gb/s raw ceiling.
+              <code>xs</code> splits files into blocks and keeps several workers sending, so one copy can fill
+              the link. rsync stops at 2.9 to 3.3 Gb/s whatever the link: one thread on each side does all the
+              work. With rsync, 10 GbE buys about three times gigabit, not ten.</p>
+          </article>
+          <article class="hcss-card hcss-stack" data-wt-obstacle data-wt-orbit="ccw">
+            <h2>Mixed trees: it depends on where the bytes are</h2>
+            <p>A tree of 1,500 files averaging about a megabyte still runs at 6 to 7.4 Gb/s. A tree of 20,000
+              files, mostly small with a few large ones, reaches about 7 Gb/s onto mars's NVMe because most
+              of its bytes are in the large files, but only 1.9 to 2.6 Gb/s onto the Mac, where APFS creating
+              the small files holds it back.</p>
+          </article>
+          <article class="hcss-card hcss-stack" data-wt-obstacle data-wt-orbit="cw">
+            <h2>Small files: gigabit is enough</h2>
+            <p>100,000 files of about 3 KB copy at 0.05 to 0.7 Gb/s on this link, under what gigabit carries.
+              The limit is the receiver creating files: up to about 28,000 a second onto mars (fewer in a deep
+              tree), 1,500 to 7,000 onto the Mac. The 216,000-file congress data set (5 KB a file) runs at 0.1 to 0.6 Gb/s.
+              A faster network changes nothing here; fewer, larger files would (an archive, or a database
+              instead of a directory of records), or a filesystem that creates files faster.</p>
+          </article>
+          <article class="hcss-card hcss-stack" data-wt-obstacle data-wt-orbit="ccw">
+            <h2>Syncs where little changed: the link hardly matters</h2>
+            <p>Re-running a sync over an unchanged tree sends file lists, not file contents, so the time
+              goes to walking and comparing directories. <code>xs</code> checks 100,000 unchanged files in a flat
+              tree about three times faster than rsync, but on gigabit it would take little longer: the
+              network is not what it waits for.</p>
+          </article>
+          <article class="hcss-card hcss-stack" data-wt-obstacle data-wt-orbit="cw">
+            <h2>Compression: only with a fast codec</h2>
+            <p>On text that compresses about four times, <code>xs</code> at zstd level 1 delivered more than 9 Gb/s
+              of data from mars to the Mac, more than the same files without compression in the same session.
+              Level 3 cannot compress fast enough to keep 10 GbE full on these machines, and rsync's
+              single-threaded <code>-z</code> stays between 0.7 and 2 Gb/s. On data that is half
+              incompressible the gain is smaller, from a few percent to half again, and which level wins
+              varies. Whether zstd's faster levels or LZ4 do better is still being measured.</p>
+          </article>
+          <article class="hcss-card hcss-stack dash-caveat" data-wt-obstacle data-wt-orbit="ccw">
+            <h2>Caveats</h2>
+            <p>The Mac was heavily loaded during the tuning and compression runs (load averages of 75 to 250),
+              so the Mac's side of those runs is slower than it would be on a quiet machine, and copies from
+              the Mac vary more than copies to it. Some of these runs are still in progress; the charts and
+              the table update as samples arrive, the text was written on 16 October 2026.</p>
+          </article>
+        </div>
+
+        <figure class="hcss-card hcss-stack dash-tengig-figure" id="tengig-codecs-figure" data-wt-obstacle data-wt-orbit="cw">
+          <figcaption><strong>Compression at 10 GbE.</strong>
+            <span class="dash-muted"><code>large-text</code> compresses about 4.2 times, <code>large-half</code> is half
+            incompressible. Bars are data delivered, not bytes on the wire.</span></figcaption>
+          <div class="dash-tengig-chart" id="tengig-codecs"></div>
+        </figure>
+
+        <section class="hcss-card hcss-stack" aria-labelledby="tengig-table-title" data-wt-obstacle data-wt-orbit="ccw">
+          <h2 id="tengig-table-title">By corpus, fresh copies <span class="dash-muted">(median Gb/s)</span></h2>
+          <div class="hcss-table-scroll" role="region" tabindex="0" aria-labelledby="tengig-table-title"><table class="hcss-table dash-table" id="tengig-table"></table></div>
+          <h3>Runs counted</h3>
+          <ul class="dash-list" id="tengig-runs"></ul>
+        </section>
+
+        <article class="hcss-card hcss-stack dash-pitch" aria-labelledby="tengig-pitch-title" data-wt-obstacle data-wt-orbit="cw">
+          <p class="hcss-eyebrow">The pitch</p>
+          <h2 id="tengig-pitch-title">A terabyte before the coffee goes cold</h2>
+          <p class="dash-disclosure" role="note"><strong>Disclosure:</strong> what follows was written by Claude, an AI,
+            imitating the style of Hunter S. Thompson. It is a pastiche, not his words, and he had nothing to do
+            with it. The numbers in it are the measured ones from this page.</p>
+          <div class="hcss-prose dash-prose dash-gonzo">
+            <p>It was past two in the morning when the numbers came in, and they were savage. Eight and a half,
+              nine gigabits a second, a fat single-file firehose screaming down one copper cable from the big AMD
+              box to the laptop, and the laptop taking it, gulping it, every byte landing on disk and synced like a
+              signed confession. Nine times what the gigabit wire could ever carry. I had seen rsync choke at three
+              on the same cable, one thread grinding like a man trying to bail out a lake with a coffee cup, and I
+              understood that the wire had never been the problem. The wire was waiting for us.</p>
+            <p>Consider the terabyte. Every serious person has one now: four hours of camera footage, a season of
+              raw photographs, the virtual machine you swore you would delete, the model weights some committee
+              decided you needed. On gigabit that terabyte crawls across in about two and a half hours, long enough
+              to lose faith in the whole enterprise. On this link, with a tool that keeps its workers moving, it is
+              fifteen minutes. Fifteen. You start the copy, you make the coffee, and the thing is done before the
+              cup is cool enough to drink. That is not a benchmark. That is a different way to live.</p>
+            <p>But hear me, because the swine who sell switches will not tell you this: the fast wire is useless
+              for a hundred thousand tiny files. I watched them go at a fraction of a gigabit, the receiving disk
+              creating them one at a time like a clerk stamping forms in triplicate, and no amount of copper would
+              have hurried it. Ten gig is for the big stuff: footage, disk images, backups, datasets, the heavy
+              freight. Put your small files in an archive, buy the card, run the cable, and stop waiting on your
+              own machines. The future arrives at nine gigabits a second, and it does not care whether you are
+              ready.</p>
+          </div>
+        </article>
       </section>
 
       <section id="view-events" class="hcss-stack" aria-labelledby="events-title" hidden>

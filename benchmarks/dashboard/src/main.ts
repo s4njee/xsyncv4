@@ -7,6 +7,7 @@ import { ago, cellLabel, clock, duration, esc, gib, rate, runName, seconds, VERD
 import { ForestChart, SpeedChart, type ForestRow } from './charts';
 import { startInk } from './ink';
 import { renderRunList, runsUpdated, setupRuns, showRuns } from './runs';
+import { renderTenGig } from './tengig';
 import type { DashEvent, Effect, ExperimentDetail, ExperimentIndex, HostMessage, RunnerMessage, State } from './types';
 
 const live = new Live();
@@ -19,7 +20,7 @@ theme.subscribe(({ theme: value }: { theme: string }) => (themeSelect.value = va
 themeSelect.addEventListener('change', () => theme.set(themeSelect.value as never));
 const toasts = createToastQueue($('toast'), { maxPending: 5, duration: 8000 });
 
-const views = ['live', 'results', 'runs', 'events'];
+const views = ['live', 'results', 'runs', 'tengig', 'events'];
 function showView(): void {
   // #runs/<group>/<experiment>/<run> opens one run.
   const [name, ...rest] = location.hash.slice(1).split('/');
@@ -31,6 +32,7 @@ function showView(): void {
   }
   if (view === 'results') renderResults();
   if (view === 'runs') showRuns(live.state.runs, rest.join('/'));
+  if (view === 'tengig') void renderTenGig(live.state.runs);
 }
 setupRuns(() => live.state.runs);
 addEventListener('hashchange', showView);
@@ -347,6 +349,7 @@ live.onChange((state, changed) => {
     renderEvents(state);
     renderResults();
     renderRunList(state.runs);
+    if (!$('view-tengig').hidden) void renderTenGig(state.runs);
   } else if (changed.kind === 'runner' && changed.key) {
     renderRunner(state.runners[changed.key]);
     renderHosts(state);
@@ -354,7 +357,10 @@ live.onChange((state, changed) => {
   else if (changed.kind === 'speed' && changed.key) renderSpeed(changed.key);
   else if (changed.kind === 'event') renderEvents(state);
   else if (changed.kind === 'results') renderResults();
-  else if (changed.kind === 'runs') runsUpdated(state.runs);
+  else if (changed.kind === 'runs') {
+    runsUpdated(state.runs);
+    if (!$('view-tengig').hidden) void renderTenGig(state.runs);
+  }
 });
 showView();
 live.connect();
