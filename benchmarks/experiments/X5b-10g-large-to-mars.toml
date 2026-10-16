@@ -9,7 +9,7 @@ blocks = 8
 control = "rsync"
 verify = "first-last"
 cleanup = "eager"
-hours = [23, 5]  # the Mac sends: run while it is idle overnight
+# No hours: run by day at the operator's request (2026-10-16), to free the GPU slot sooner.
 
 [arms.rsync]
 tool = "rsync"
