@@ -1,0 +1,17 @@
+{
+ "name": "codec-bench",
+ "steps": [
+  {
+   "host": "mac",
+   "ssh": "sanjee@mbp-3.local",
+   "local": true,
+   "command": "cd /Users/sanjee/benchmarks/xsbench.noindex/corpora && f=large-text/$(ls large-text | head -1) && echo \"== $(hostname) $(nproc 2>/dev/null || sysctl -n hw.ncpu) cores, file $f\" && for t in 1 8; do echo \"-- zstd levels 1..3, $t thread(s)\"; zstd -b1 -e3 -i3 -T$t \"$f\" 2>&1 | tr \"\\r\" \"\\n\" | grep -E \"^ *[0-9-]+#\" | tail -3; for n in 1 5 20; do zstd --fast=$n -b -i3 -T$t \"$f\" 2>&1 | tr \"\\r\" \"\\n\" | grep -E \"#\" | tail -1; done; done; echo \"-- lz4 level 1, 1 thread\"; lz4 -b1 -i3 \"$f\" 2>&1 | tr \"\\r\" \"\\n\" | grep -E \"#\" | tail -1"
+  },
+  {
+   "host": "mars",
+   "ssh": "sanjee@mars.local",
+   "local": false,
+   "command": "cd /home/sanjee/benchmarks/xsyncv4/lab/corpora && f=large-text/$(ls large-text | head -1) && echo \"== $(hostname) $(nproc 2>/dev/null || sysctl -n hw.ncpu) cores, file $f\" && for t in 1 8; do echo \"-- zstd levels 1..3, $t thread(s)\"; zstd -b1 -e3 -i3 -T$t \"$f\" 2>&1 | tr \"\\r\" \"\\n\" | grep -E \"^ *[0-9-]+#\" | tail -3; for n in 1 5 20; do zstd --fast=$n -b -i3 -T$t \"$f\" 2>&1 | tr \"\\r\" \"\\n\" | grep -E \"#\" | tail -1; done; done; echo \"-- lz4 level 1, 1 thread\"; lz4 -b1 -i3 \"$f\" 2>&1 | tr \"\\r\" \"\\n\" | grep -E \"#\" | tail -1"
+  }
+ ]
+}

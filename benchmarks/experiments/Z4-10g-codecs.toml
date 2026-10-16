@@ -1,0 +1,49 @@
+# Z4: zstd's fast levels and LZ4 at 10 Gb/s (research questions RQ-Z1 and RQ-Z2
+# in experiments.md). xs speaks only zstd, but accepts negative levels, which
+# trade ratio for speed towards LZ4's; rsync can use LZ4 itself (--zc=lz4).
+# Control: xs at level 1, what its adaptive policy picks at this rate.
+id = "Z4-10g-codecs"
+kind = "screening"
+hypothesis = "At 10 Gb/s a zstd fast level delivers compressible data faster than level 1, and LZ4 is faster than zstd for rsync."
+primary = "durable_s"
+delta = 0.03
+blocks = 6
+control = "xs-z1"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.xs-z1]
+tool = "xs"
+rev = "8cc75bbdb801"
+flags = ["-az", "--compress-level=1"]
+
+[arms.xs-zfast1]
+tool = "xs"
+rev = "8cc75bbdb801"
+flags = ["-az", "--compress-level=-1"]
+
+[arms.xs-zfast5]
+tool = "xs"
+rev = "8cc75bbdb801"
+flags = ["-az", "--compress-level=-5"]
+
+[arms.xs-zfast20]
+tool = "xs"
+rev = "8cc75bbdb801"
+flags = ["-az", "--compress-level=-20"]
+
+[arms.rsync-zstd]
+tool = "rsync"
+flags = ["-az", "--zc=zstd"]
+
+[arms.rsync-lz4]
+tool = "rsync"
+flags = ["-az", "--zc=lz4"]
+
+[matrix]
+link = "mac-mars-direct"
+corpus = ["large-text", "large-half"]
+scenario = ["fresh"]
+direction = ["mac>mars", "mars>mac"]
+client = ["initiator"]
+cache = ["warm"]

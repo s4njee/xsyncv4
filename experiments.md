@@ -725,6 +725,50 @@ E0, E1, E3a (the APFS worker cap), E6, E7, E8, when the Mac is on the wire.
 Mac-specific handling: destination under a `.noindex` directory so Spotlight
 stays out, load gate, free-space check, and `purge` for cold runs.
 
+## 7.5 Open research questions
+
+Questions raised while running the campaign, with what would answer them.
+Each names the runs queued for it; findings go in the progress log.
+
+**RQ-Z1. Does zstd level 3 have enough throughput for 10 GbE?**
+rsync `-z` compresses at about level 3 on one thread; `xs -z` picks level 1
+above 64 MiB/s and level 3 only below it or when asked. To fill a 10 Gb/s
+link the sender must emit about 1.25 GB/s of compressed data, so on data
+that compresses r times it must compress r × 1.25 GB/s of input: about
+5 GB/s on `large-text` (4.2×), across all its workers together. The
+receiver must decompress as fast, though zstd decompresses much faster than
+it compresses.
+- Evidence so far (Z1, one block, Mac to mars, the Mac loaded):
+  `large-text` at level 3 delivered 2.96 Gb/s of data, against 7.27 Gb/s
+  at level 1 and 3.13 Gb/s without `-z`; rsync `-z` 0.94 Gb/s. At level 3
+  the Mac's eight performance cores could not keep up: compressing slowed
+  the copy below not compressing at all.
+- To answer it: `codec-bench`, a job on the Mac and mars measuring zstd
+  levels 1 to 3 on one thread and on eight, the zstd fast levels and LZ4,
+  on a 1 GiB file of `large-text`; Z1b (no `-z`, adaptive, levels 1 and 3,
+  both directions, `large-text` and `large-half`); Z2b (`-j16` and larger
+  blocks at levels 1 and 3, with engine metrics, so each end's CPU is
+  recorded); and on gigabit, Z3 from neo and freya, where level 3 may be
+  affordable except on the Pi.
+- Answer in the form: the highest data rate each host delivers at level 3
+  with all its workers, against line rate, and which end limits it.
+
+**RQ-Z2. Should zstd level 1 be compared with LZ4, and is LZ4 worth adding?**
+LZ4 compresses several times faster than zstd level 1 per core but less
+well. At 10 Gb/s the trade is CPU against bytes, and which wins depends on
+the data and the cores. `xs` speaks only zstd, but zstd's negative ("fast")
+levels trade ratio for speed in LZ4's direction while keeping the format,
+and `xs --compress-level` already accepts them; rsync can use LZ4 itself
+(`--zc=lz4`).
+- To answer it: `codec-bench` (ratio and MB/s of `lz4 -1` against zstd 1
+  and `--fast=1`, `5`, `20`); Z4 end to end at 10 Gb/s (`xs` at levels 1,
+  -1, -5 and -20 against rsync with zstd and with LZ4, both directions,
+  `large-text` and `large-half`).
+- Decision rule: add an LZ4 codec to `xs` only if no zstd fast level matches
+  LZ4's delivered rate at a similar ratio. Otherwise extend the adaptive
+  policy to choose a negative level at high link rates, which needs no
+  protocol change.
+
 ## 8. Build order
 
 | Milestone | Deliverable | Done when |
