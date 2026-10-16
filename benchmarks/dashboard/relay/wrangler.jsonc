@@ -13,6 +13,6 @@
   "migrations": [{ "tag": "v1", "new_sqlite_classes": ["Hub"] }],
   // Filled in after the Access application exists: the team domain (TEAM.cloudflareaccess.com)
   // and the application's audience tag. Until both are set, every browser request is refused.
-  "vars": { "ACCESS_TEAM_DOMAIN": "", "ACCESS_AUD": "" },
+  "vars": { "ACCESS_TEAM_DOMAIN": "s8njee.cloudflareaccess.com", "ACCESS_AUD": "366a0066a37d0e502f1e6e035f7f62189df33695465c98378ca58f40fa393b29" },
   "observability": { "enabled": true }
 }
