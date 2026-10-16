@@ -173,6 +173,29 @@ class ProgressTests(unittest.TestCase):
                 # A receiver retains its record across chunk/worker changes.
                 self.assertTrue(any(re.search(rb' [1-9]\d?%', row) for row in rows), rows)
 
+    def test_finished_file_leaves_its_row_blank(self):
+        # A finished file's row stays as a blank line and the next file takes it: the lines below
+        # (small files, the total) never move up and down as files come and go.
+        for path in self.source.iterdir(): path.unlink()
+        (self.source/'a-first.dat').write_bytes(b'x' * (1024 * 1024))
+        (self.source/'b-second.dat').write_bytes(b'x' * (4 * 1024 * 1024))
+        code, data = capture(self.command(('--bwlimit=3072',)), width=120)
+        self.assertEqual(code, 0, data)
+        frames = [[line.strip(b'\r') for line in CSI.sub(b'', frame).split(b'\n')]
+                  for frame in re.findall(rb'\x1b\[\?2026h(.*?)\x1b\[\?2026l', data, re.S)]
+        def row_of(frame, name):
+            return next((i for i, line in enumerate(frame) if name in line), None)
+        first = [i for i, frame in enumerate(frames) if row_of(frame, b'a-first') is not None]
+        second = [i for i, frame in enumerate(frames) if row_of(frame, b'b-second') is not None]
+        self.assertTrue(first and second, [b'|'.join(frame) for frame in frames[:8]])
+        row = row_of(frames[first[0]], b'a-first')
+        self.assertEqual(row_of(frames[second[0]], b'b-second'), row)  # the next file takes the same row
+        between = frames[first[-1] + 1:second[0]]
+        for frame in between:
+            self.assertEqual(frame[row], b'', frame)  # blank, not filled by the lines below
+        shown = frames[first[0]:]
+        self.assertEqual(len({len(frame) for frame in shown}), 1, [len(frame) for frame in shown])
+
     def test_many_small_files_have_one_collapsed_row(self):
         for path in self.source.iterdir(): path.unlink()
         for n in range(120): (self.source/f'tiny-{n:03d}').write_bytes(b'x'*4096)

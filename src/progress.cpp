@@ -46,6 +46,12 @@ constexpr int MAX_ROWS = 4;
 constexpr u64 ROW_DELAY = 200000000;
 struct FileRate { u64 started = 0, time = 0; i64 bytes = 0; double rate = 0; };
 FileRate file_rates[MAX_WORKERS];
+// The rows of the per-file block: which file each shows, or none (a blank row). A file keeps its
+// row while it transfers and a finished one leaves its row blank until the next file takes it, so
+// the lines below never shift. The block grows to the most files shown at once and does not shrink.
+struct FileRow { int worker = -1; u64 started = 0; };
+std::vector<FileRow> file_rows;
+bool small_shown = false;  // the small-files line stays once it has appeared, for the same reason
 
 struct Snap {
   bool active = false;
@@ -413,12 +419,30 @@ void draw_locked() {
   }
   std::stable_sort(visible.begin(), visible.end(), [&](int a, int b) { return snaps[a].started < snaps[b].started; });
   u64 small = small_completed.load(std::memory_order_relaxed);
-  bool show_small = rows && (small_active || small);
+  bool show_small = rows && (small_shown || small_active || small);
+  small_shown = show_small;
   if (show_small) --rows;
-  for (int w : visible) {
-    if (rows-- <= 0) break;
-    const Snap& s = snaps[w];
+  if ((int)file_rows.size() > rows) file_rows.resize(std::max(0, rows));
+  for (FileRow& row : file_rows)  // a row whose file ended, or whose worker moved on to another file, is free
+    if (row.worker >= 0 && (snaps[row.worker].started != row.started ||
+                            std::find(visible.begin(), visible.end(), row.worker) == visible.end()))
+      row.worker = -1;
+  for (int w : visible) {  // oldest first, so the longest-running files keep their place when rows run out
+    if (std::any_of(file_rows.begin(), file_rows.end(), [&](const FileRow& row) { return row.worker == w; })) continue;
+    auto blank = std::find_if(file_rows.begin(), file_rows.end(), [](const FileRow& row) { return row.worker < 0; });
+    if (blank != file_rows.end()) *blank = {w, snaps[w].started};
+    else if ((int)file_rows.size() < rows) file_rows.push_back({w, snaps[w].started});
+  }
+  for (const FileRow& row : file_rows) {
     std::string line;
+    if (row.worker < 0) {
+      out += '\n';
+      drawn_widths.push_back(0);
+      ++drawn;
+      continue;
+    }
+    int w = row.worker;
+    const Snap& s = snaps[w];
     if (s.cloning) line = "  cloning " + display_name(s.name);
     else {
       double fr = s.size > 0 ? (double)s.done / (double)s.size : 1.0;
@@ -546,6 +570,8 @@ void ui_write(bool is_err, std::string_view text) {
 void progress_start(int n) {
   std::lock_guard<std::mutex> lk(ui_mu);
   t_start = t_last = now_ns();
+  file_rows.clear();
+  small_shown = false;
   if (!g_opt.progress || g_opt.am_server) return;
   g_progress_on = true;
   tty = isatty(2);
