@@ -58,6 +58,13 @@ int default_jobs(const std::string& destination) {
   return std::clamp(n, 1, 16);
 }
 
+int receiver_jobs(const std::string& destination) {
+  int n = default_jobs(destination);
+  // On many-core receivers, four automatic workers beat sixteen on small-file
+  // no-ops and fresh copies, and match them on byte-bound trees (T1e).
+  return g_opt.jobs > 0 ? n : std::min(n, 4);
+}
+
 SourceGuard::SourceGuard(const std::string& dest) {
   if (dest.empty()) return;
   std::error_code ec;

@@ -52,6 +52,8 @@ bool setup_dest(const std::string& dest, DirWork& root, bool single);
 
 // Destination pools can apply a measured filesystem budget. Explicit -j wins.
 int default_jobs(const std::string& destination = {});
+// The receiving end of a remote transfer: as default_jobs, but at most four unless -j is given.
+int receiver_jobs(const std::string& destination);
 // Drive the UI until the pool has finished; handles interruption.
 void wait_pool(Pool& pool);
 

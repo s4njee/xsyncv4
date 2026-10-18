@@ -300,6 +300,9 @@ struct Conn {
   int wait_peer() {
     if (peer_pid <= 0) return 0;  // The app adapter owns its SSH process.
     int status = 0;
+    // Most peers exit within a few milliseconds of the stream closing: poll
+    // soon, then back off so a long wait does not spin (E4g).
+    useconds_t pause = 1000;
     for (;;) {
       {
         // Serialize reaping with cancellation so a reused PID is never killed.
@@ -314,7 +317,8 @@ struct Conn {
       if (g_stop.load()) { cancel_remote_peer(); exit_signal(); }
       progress_tick();
       check_timeout();
-      usleep(25000);
+      usleep(pause);
+      pause = std::min<useconds_t>(pause * 2, 25000);
     }
   }
   void start() {
@@ -2699,7 +2703,7 @@ struct Receiver {
     put_str(identity, guard.path);
     put_var(identity, guard.dev), put_var(identity, guard.ino);
     c.send(std::move(identity));
-    int n = default_jobs(dest.empty() ? "." : dest);
+    int n = receiver_jobs(dest.empty() ? "." : dest);
     // Small DATA records expand into much larger retained Entry records. Keep
     // the wire backlog small as well as bounding the sender's live listings.
     pool.max_bytes = 16 << 20;
