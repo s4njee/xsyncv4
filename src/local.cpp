@@ -75,6 +75,11 @@ bool SourceGuard::excludes(const std::string& source) const {
   if (path.empty()) return false;
   struct stat st;
   if (ino && stat(source.c_str(), &st) == 0 && (u64)st.st_dev == dev && (u64)st.st_ino == ino) return true;
+  // Without -L the walk descends real directories, so a directory under a source resolves under it,
+  // and when no source contains the destination only the same inode can be it, checked above.
+  // Resolving every directory's path cost one failing readlinkat per component (musl's realpath):
+  // millions on a tree with as many directories as files.
+  if (!subtree && !g_opt.copy_links && !g_opt.files_from_set) return false;
   std::error_code ec;
   std::string p = std::filesystem::weakly_canonical(std::filesystem::absolute(source, ec), ec).string();
   return !ec && (p == path || (subtree && p.starts_with(path) && (path == "/" || p[path.size()] == '/')));
