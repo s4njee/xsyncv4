@@ -19,10 +19,11 @@ concurrency:
 jobs:
   linux:
     runs-on: ubuntu-24.04
-    timeout-minutes: 60
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          fetch-depth: 0
           persist-credentials: false
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
@@ -31,30 +32,49 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install --yes --no-install-recommends ninja-build libzstd-dev libxxhash-dev libicu-dev rsync
-      - name: Build
+      - name: Build this change and its base
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
         run: |
           cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release "-DXSYNC_GIT_HASH=${GITHUB_SHA::12}"
           cmake --build build --target xsync -j4
-      - name: C++ unit tests
-        run: |
-          for test in filter_test xattr_value_test sparse_test scan_admission_test; do
-            cmake --build build --target "$test" -j4 && "build/$test"
-          done
-      # The suite the engineer's gate runs (benchmarks/lab/engineer.py, PY_TESTS).
-      - name: Protocol and behaviour tests
+          git worktree add --detach base "$BASE"
+          cmake -S base -B base/build -G Ninja -DCMAKE_BUILD_TYPE=Release "-DXSYNC_GIT_HASH=${BASE::12}"
+          cmake --build base/build --target xsync -j4
+      # The rule of the lab's gate (benchmarks/lab/engineer.py): no test that passes on the base may fail
+      # with the change, and a test the change adds must pass. A test that already fails on the base (such
+      # as one this runner's environment cannot support) does not count against the change.
+      - name: Tests (no test that passes on the base may fail)
         env:
           XSYNC_FALLBACK: '0'
         run: |
-          XSYNC_TEST_RSYNC=$(command -v rsync)
-          export XSYNC_TEST_BINARY="$PWD/build/xs" XSYNC_TEST_RSYNC
-          for test in destination_scope_test.py delta_test.py deletion_test.py directory_lifetime_test.py p0_test.py \
-                      wire_test.py error_test.py output_test.py broken_stdout_test.py list_test.py filter_merge_test.py \
-                      prune_wire_test.py defaults_test.py dry_summary_test.py; do
-            [ -f "tests/$test" ] || continue
-            echo "::group::$test"
-            python3 "tests/$test"
-            echo "::endgroup::"
-          done
+          python3 - <<'PY'
+          import os, pathlib, shutil, subprocess, sys
+          cpp = ['filter_test', 'xattr_value_test', 'sparse_test', 'scan_admission_test']
+          py = ['destination_scope_test.py', 'delta_test.py', 'deletion_test.py', 'directory_lifetime_test.py', 'p0_test.py',
+                'wire_test.py', 'error_test.py', 'output_test.py', 'broken_stdout_test.py', 'list_test.py',
+                'filter_merge_test.py', 'prune_wire_test.py', 'defaults_test.py', 'dry_summary_test.py']
+          def run(tree, test):
+              tree = pathlib.Path(tree).resolve()
+              if test in cpp:
+                  built = subprocess.run(['cmake', '--build', tree / 'build', '--target', test, '-j4'])
+                  return built.returncode == 0 and subprocess.run([tree / 'build' / test], cwd=tree).returncode == 0
+              if not (tree / 'tests' / test).exists():
+                  return None
+              env = {**os.environ, 'XSYNC_TEST_BINARY': str(tree / 'build' / 'xs'), 'XSYNC_TEST_RSYNC': shutil.which('rsync')}
+              return subprocess.run([sys.executable, f'tests/{test}'], cwd=tree, env=env).returncode == 0
+          regressions = []
+          for test in cpp + py:
+              print(f'::group::{test}', flush=True)
+              here = run('.', test)
+              base = run('base', test) if here is False else None
+              print('::endgroup::', flush=True)
+              print(f'{test}: {"pass" if here else "skipped" if here is None else "fail" + (" (fails on the base too)" if base is False else "")}', flush=True)
+              if here is False and base is not False:
+                  regressions.append(test)
+          if regressions:
+              sys.exit(f'tests that pass on the base fail with this change: {", ".join(regressions)}')
+          PY
       - name: xs-rs (tests against this build, clippy, rustfmt)
         if: hashFiles('rs/Cargo.toml') != ''
         run: |
