@@ -1,0 +1,10 @@
+# xs-rs: a Rust implementation of xs that interoperates with the C++ xs on the wire
+# (backlog-vps-lab.md, P5). Grown by the VPS lab's engineer from this seed.
+[workspace]
+members = ["xs-wire"]
+resolver = "2"
+
+[workspace.package]
+edition = "2021"
+license = "MIT"
+publish = false
