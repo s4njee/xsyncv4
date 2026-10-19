@@ -1,0 +1,133 @@
+name: Nightly release build
+
+# Every night, the release set of the experimental branch (where the lab's engineering cases merge):
+# a universal macOS binary and static musl Linux binaries for amd64 and arm64, each built and
+# smoke-tested on its own platform by tools/release.py, published as the `nightly` prerelease.
+# A night when experimental has not moved since the last nightly builds nothing.
+
+on:
+  schedule:
+    - cron: '30 9 * * *'   # 09:30 UTC, early morning in the US
+  workflow_dispatch:
+    inputs:
+      force:
+        description: Build even if experimental has not moved since the last nightly
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: nightly
+  cancel-in-progress: false
+
+env:
+  BRANCH: experimental
+  TAG: nightly
+
+jobs:
+  decide:
+    runs-on: ubuntu-24.04
+    outputs:
+      sha: ${{ steps.head.outputs.sha }}
+      build: ${{ steps.head.outputs.build }}
+    steps:
+      - id: head
+        env:
+          GH_TOKEN: ${{ github.token }}
+          FORCE: ${{ inputs.force }}
+        run: |
+          sha=$(gh api "repos/$GITHUB_REPOSITORY/commits/$BRANCH" --jq .sha)
+          built=$(gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json targetCommitish --jq .targetCommitish 2>/dev/null || true)
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+          if [ "$sha" = "$built" ] && [ "$FORCE" != true ]; then
+            echo "build=false" >> "$GITHUB_OUTPUT"
+            echo "$BRANCH is still at ${sha:0:12}, as last night: nothing to build." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "build=true" >> "$GITHUB_OUTPUT"
+          fi
+
+  linux:
+    needs: decide
+    if: needs.decide.outputs.build == 'true'
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: amd64
+            runner: ubuntu-24.04
+          - arch: arm64
+            runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.decide.outputs.sha }}
+          persist-credentials: false
+      - name: Build and smoke-test the static Linux binary
+        run: python3 tools/release.py --revision "${GITHUB_SHA_SHORT}" --linux-arch ${{ matrix.arch }}
+        env:
+          GITHUB_SHA_SHORT: ${{ needs.decide.outputs.sha }}
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: xs-linux-${{ matrix.arch }}
+          path: dist/xs-linux-${{ matrix.arch }}
+          if-no-files-found: error
+
+  macos:
+    needs: decide
+    if: needs.decide.outputs.build == 'true'
+    runs-on: macos-15
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.decide.outputs.sha }}
+          persist-credentials: false
+      - name: Build the universal binary with vendored dependencies
+        env:
+          SHA: ${{ needs.decide.outputs.sha }}
+        run: |
+          brew install ninja
+          cmake --preset release-static -DXSYNC_BUILD_RELEASE_SET=OFF "-DXSYNC_GIT_HASH=${SHA:0:12}"
+          cmake --build build-release --target xsync -j3
+      - name: Check it is universal and self-contained, and that it copies
+        env:
+          SHA: ${{ needs.decide.outputs.sha }}
+        run: |
+          python3 tools/release.py --native build-release/xs --revision "${SHA:0:12}" --no-linux
+          mkdir -p "$RUNNER_TEMP/source/deep" && printf 'nightly\n' > "$RUNNER_TEMP/source/deep/file"
+          dist/xs-darwin-universal --no-fallback -a "$RUNNER_TEMP/source/" "$RUNNER_TEMP/copy/"
+          cmp "$RUNNER_TEMP/source/deep/file" "$RUNNER_TEMP/copy/deep/file"
+          dist/xs-darwin-universal --version
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: xs-darwin-universal
+          path: dist/xs-darwin-universal
+          if-no-files-found: error
+
+  publish:
+    needs: [decide, linux, macos]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          path: dist
+          merge-multiple: true
+      - name: Replace the nightly prerelease
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SHA: ${{ needs.decide.outputs.sha }}
+        run: |
+          cd dist
+          chmod 755 xs-*
+          sha256sum xs-* > SHA256SUMS
+          cat SHA256SUMS
+          notes="The release set of \`$BRANCH\` at ${SHA:0:12}, built $(date -u '+%Y-%m-%d %H:%M UTC'), where the lab's accepted engineering changes merge. Not a release: every binary passed its platform's smoke tests, nothing more."
+          gh release delete "$TAG" --repo "$GITHUB_REPOSITORY" --cleanup-tag --yes 2>/dev/null || true
+          gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --prerelease --target "$SHA" \
+            --title "Nightly: $BRANCH ${SHA:0:12}" --notes "$notes" xs-* SHA256SUMS
