@@ -28,8 +28,20 @@ std::atomic<unsigned> retained_parents{0};
 unsigned parent_budget() {
   static const unsigned budget = [] {
     rlimit limit{};
-    if (getrlimit(RLIMIT_NOFILE, &limit) != 0 || limit.rlim_cur < 512) return 0u;
-    return (unsigned)std::min<rlim_t>(256, limit.rlim_cur / 8);
+    if (getrlimit(RLIMIT_NOFILE, &limit) != 0) return 0u;
+    // A directory without a retained parent descriptor is reached by walking its whole path from the
+    // destination root, one openat per component: on a tree with as many directories as files that is
+    // most of a no-op's kernel time (psample: 4.2 million opens for 548,000 directories at depth 7.6).
+    // Default soft limits (256 on macOS, 1,024 on Linux) allow few parents, so raise the soft limit
+    // towards the hard one first; macOS refuses more than OPEN_MAX per process. A limit someone set
+    // below the system default is deliberate and stays as it is.
+    for (rlim_t want : {rlim_t(65536), rlim_t(10240)}) {
+      if (limit.rlim_cur >= want || limit.rlim_cur < 256) break;
+      rlimit raised{std::min(want, limit.rlim_max), limit.rlim_max};
+      if (raised.rlim_cur > limit.rlim_cur && setrlimit(RLIMIT_NOFILE, &raised) == 0) { limit = raised; break; }
+    }
+    if (limit.rlim_cur < 512) return 0u;
+    return (unsigned)std::min<rlim_t>(8192, limit.rlim_cur / 4);
   }();
   return budget;
 }
@@ -146,6 +158,8 @@ DestPath destination_path_impl(const std::string& path, bool owned) {
 DestPath destination_path(const std::string& path) {
   return destination_path_impl(path, true);
 }
+
+unsigned destination_parent_budget() { return parent_budget(); }
 
 int destination_open_dir(const char* path) {
   auto p = destination_path_impl(path, false);

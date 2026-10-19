@@ -29,7 +29,8 @@ size_t descriptors() {
   rlimit limit{};
   require(getrlimit(RLIMIT_NOFILE, &limit) == 0, "descriptor limit lookup failed");
   size_t count = 0;
-  for (int fd = 0; fd < (int)std::min<rlim_t>(4096, limit.rlim_cur); ++fd)
+  // Up to the raised limit: a parent budget of thousands puts descriptors above 4,096.
+  for (int fd = 0; fd < (int)std::min<rlim_t>(65536, limit.rlim_cur); ++fd)
     if (fcntl(fd, F_GETFD) >= 0) ++count;
   return count;
 }
@@ -252,11 +253,13 @@ int main(int argc, char** argv) {
       DestinationDirectory pin(a.string());
       size_t before = descriptors();
       std::vector<std::shared_ptr<const DestinationParent>> parents;
-      for (int i = 0; i < 300; ++i) {
+      const size_t budget = destination_parent_budget();
+      require(budget >= 256, "the parent budget did not grow with the raised descriptor limit");
+      for (size_t i = 0; i < budget + 44; ++i) {
         auto parent = pin.share();
         if (parent) parents.push_back(std::move(parent));
       }
-      require(parents.size() == 256 && descriptors() == before + 256,
+      require(parents.size() == budget && descriptors() == before + budget,
               "retained parent descriptors are not bounded");
       {
         DestinationDirectory fallback(b.string());
