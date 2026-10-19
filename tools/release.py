@@ -18,13 +18,20 @@ def run(*args, **kwargs):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--native', required=True, type=pathlib.Path)
+    parser.add_argument('--native', type=pathlib.Path, help='the macOS universal binary, on a Mac')
     parser.add_argument('--revision', required=True)
+    # One machine builds the whole set by default (the release-set target). CI builds each platform on
+    # its own runner: macOS with --no-linux, each Linux architecture with --linux-arch on a native runner.
+    parser.add_argument('--linux-arch', action='append', choices=('amd64', 'arm64'), dest='linux_arches')
+    parser.add_argument('--no-linux', action='store_true')
     args = parser.parse_args()
+    if platform.system() == 'Darwin' and not args.native:
+        parser.error('--native is required on macOS')
+    linux_arches = [] if args.no_linux else args.linux_arches or ['amd64', 'arm64']
     out = REPO / 'dist'
     out.mkdir(exist_ok=True)
     artifacts = []
-    if platform.system() == 'Darwin':
+    if platform.system() == 'Darwin' and args.native:
         arches = run('lipo', '-archs', args.native, capture_output=True, text=True).stdout.split()
         if set(arches) != {'arm64', 'x86_64'}:
             raise RuntimeError('native macOS release must contain arm64 and x86_64')
@@ -34,7 +41,7 @@ def main():
         binary = out / 'xs-darwin-universal'
         shutil.copy2(args.native, binary)
         artifacts.append(binary)
-    for arch in ('amd64', 'arm64'):
+    for arch in linux_arches:
         image = 'xsync-release-' + arch
         run('docker', 'build', '--platform', 'linux/' + arch, '--build-arg', 'XSYNC_GIT_HASH=' + args.revision,
             '-t', image, '-f', REPO / 'tools/release.Dockerfile', REPO)
