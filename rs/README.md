@@ -1,8 +1,9 @@
 # xs-rs
 
 A Rust implementation of xs that is compatible with the C++ xs on the wire, so a C++ client can push
-to or pull from a Rust server and the other way round. Developed by the VPS lab's engineer
-(backlog-vps-lab.md, P5) against the lab's measurements and the mars lab's results.
+to or pull from a Rust server and the other way round. It is grown one step at a time by the
+benchmark lab's engineer, whose port cases land here on the experimental branch once their gate and
+this repository's CI pass.
 
 The C++ protocol lives in `src/remote.cpp` and `src/common.h`; there is no separate written
 specification, so the C++ source and its wire tests (`tests/*wire_test.py`) are the reference.
