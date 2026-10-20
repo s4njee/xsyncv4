@@ -31,7 +31,7 @@ use crate::parallel::{WriteDone, WritePool};
 
 use super::file::{
     add_range, contiguous, covered_from, create_temp, destination_listing, finish_infile, make_dir, remove_any,
-    reserve_chunk, set_dir_working_mode, write_whole, InFile,
+    reserve_chunk, set_dir_working_mode_with, write_whole, InFile,
 };
 use super::hardlink::{finalize_hardlinks, hardlink_member, HardLinks};
 use super::{
@@ -43,6 +43,39 @@ struct FinalDir {
     path: PathBuf,
     attrs: Attrs,
     apply: bool,
+}
+
+/// A directory's metadata only needs writing back when one of the attributes
+/// the transfer preserves differs. An unchanged directory costs no syscalls.
+fn dir_attrs_differ(opts: &Options, before: &fs::Metadata, attrs: &Attrs) -> bool {
+    (opts.times && before.mtime() != attrs.mtime)
+        || (opts.perms && before.mode() & 0o7777 != attrs.mode & 0o7777)
+        || (opts.owner && before.uid() != attrs.uid)
+        || (opts.group && before.gid() != attrs.gid)
+}
+
+/// Change ownership only when a target id differs from what the entry already
+/// has, as `tweak_attrs` does; a matching lchown still dirties the inode.
+fn chown_changed(path: &Path, opts: &Options, attrs: &Attrs, nofollow: bool, before: Option<&fs::Metadata>) {
+    let id_differs = match before {
+        Some(metadata) => {
+            (opts.owner && metadata.uid() != attrs.uid) || (opts.group && metadata.gid() != attrs.gid)
+        }
+        None => true,
+    };
+    if !id_differs {
+        return;
+    }
+    let (uid, gid) = idmap::targets(opts, attrs);
+    let needed = match before {
+        Some(metadata) => {
+            uid.is_some_and(|id| metadata.uid() != id) || gid.is_some_and(|id| metadata.gid() != id)
+        }
+        None => uid.is_some() || gid.is_some(),
+    };
+    if needed {
+        idmap::chown_path(path, opts, attrs, nofollow);
+    }
 }
 
 struct RecvDir {
@@ -122,6 +155,7 @@ fn process_dir<W: Write + Send + 'static>(
         ids.apply(&mut entry.attrs, opts);
     }
 
+    let mut working_changed = false;
     let (dir_path, rename_to, apply_attrs, before, created) = if parent_plus1 == 0 {
         if !rel.is_empty() || id != 0 {
             return bad("protocol error: nonempty root path");
@@ -168,9 +202,15 @@ fn process_dir<W: Write + Send + 'static>(
         }
         let path = parent.dest.join(OsStr::from_bytes(&entry.name));
         let created = parent.dir_created.get(pidx as usize).copied().unwrap_or(false);
-        let before = if created { None } else { fs::metadata(&path).ok().filter(|m| m.is_dir()) };
-        if before.is_some() {
-            set_dir_working_mode(&path);
+        // The parent's destination listing already carries this entry's metadata;
+        // do not stat it again just to decide whether it needs work.
+        let before = if created {
+            None
+        } else {
+            parent.existing.get(pidx as usize).cloned().flatten().filter(|m| m.is_dir())
+        };
+        if let Some(metadata) = &before {
+            working_changed = set_dir_working_mode_with(&path, metadata);
         } else if !created {
             remove_any(&path)?;
             if make_dir(&path, entry.attrs.mode)? {
@@ -179,9 +219,7 @@ fn process_dir<W: Write + Send + 'static>(
         }
         (path, None, true, before, created)
     };
-    if apply_attrs {
-        finals.push(FinalDir { path: dir_path.clone(), attrs: attrs.clone(), apply: true });
-    }
+    let mut dir_modified = created;
     if rename_to.is_none() {
         directory_event(
             output,
@@ -212,13 +250,16 @@ fn process_dir<W: Write + Send + 'static>(
                 let keep = existing.map(|m| m.is_dir()).unwrap_or(false);
                 let made = if !keep {
                     remove_any(&target)?;
+                    dir_modified = true;
                     let made = make_dir(&target, entry.attrs.mode)?;
                     if made {
                         *created_dirs += 1;
                     }
                     made
                 } else {
-                    set_dir_working_mode(&target);
+                    if let Some(metadata) = existing {
+                        set_dir_working_mode_with(&target, metadata);
+                    }
                     false
                 };
                 dir_created[index] = made;
@@ -229,17 +270,15 @@ fn process_dir<W: Write + Send + 'static>(
                     .map(|m| !opts.ignore_times && m.len() as i64 == entry.size && m.mtime() == entry.attrs.mtime)
                     .unwrap_or(false);
                 if same {
-                    if opts.perms {
-                        if let Ok(m) = fs::metadata(&target) {
-                            if m.mode() & 0o7777 != entry.attrs.mode & 0o7777 {
-                                let _ = fs::set_permissions(&target, fs::Permissions::from_mode(entry.attrs.mode & 0o7777));
-                            }
+                    if let Some(metadata) = existing {
+                        if opts.perms && metadata.mode() & 0o7777 != entry.attrs.mode & 0o7777 {
+                            let _ = fs::set_permissions(&target, fs::Permissions::from_mode(entry.attrs.mode & 0o7777));
                         }
+                        if opts.times && metadata.mtime() != entry.attrs.mtime {
+                            let _ = ffi::set_mtime(&target, entry.attrs.mtime, entry.attrs.mtime_ns as i64, false);
+                        }
+                        chown_changed(&target, opts, &entry.attrs, false, Some(metadata));
                     }
-                    if opts.times {
-                        let _ = ffi::set_mtime(&target, entry.attrs.mtime, entry.attrs.mtime_ns as i64, false);
-                    }
-                    idmap::chown_path(&target, opts, &entry.attrs, false);
                     if let Some(key) = link_key.clone() {
                         hardlinks.register_ready(key, hardlink_member(entry, &event_path, &target, existing));
                     }
@@ -254,6 +293,7 @@ fn process_dir<W: Write + Send + 'static>(
                         }
                     }
                 } else {
+                    dir_modified = true;
                     if let Some(m) = existing {
                         if !m.is_file() {
                             remove_any(&target)?;
@@ -280,6 +320,7 @@ fn process_dir<W: Write + Send + 'static>(
                     hardlinks.register_ready(key, hardlink_member(entry, &event_path, &target, existing));
                 }
                 if !same {
+                    dir_modified = true;
                     remove_any(&target)?;
                     std::os::unix::fs::symlink(OsStr::from_bytes(&entry.link), &target)?;
                     *created_links += 1;
@@ -303,9 +344,15 @@ fn process_dir<W: Write + Send + 'static>(
                     }
                 }
                 if opts.times {
-                    let _ = ffi::set_mtime(&target, entry.attrs.mtime, entry.attrs.mtime_ns as i64, true);
+                    let need = match (same, existing) {
+                        (true, Some(metadata)) => metadata.mtime() != entry.attrs.mtime,
+                        _ => true,
+                    };
+                    if need {
+                        let _ = ffi::set_mtime(&target, entry.attrs.mtime, entry.attrs.mtime_ns as i64, true);
+                    }
                 }
-                idmap::chown_path(&target, opts, &entry.attrs, true);
+                chown_changed(&target, opts, &entry.attrs, true, if same { existing } else { None });
             }
             T_FIFO => {
                 let same = existing.map(|m| m.file_type().is_fifo()).unwrap_or(false);
@@ -313,6 +360,7 @@ fn process_dir<W: Write + Send + 'static>(
                     hardlinks.register_ready(key, hardlink_member(entry, &event_path, &target, existing));
                 }
                 if !same {
+                    dir_modified = true;
                     remove_any(&target)?;
                     ffi::make_fifo(&target, entry.attrs.mode)?;
                     let event = taken_event(b"cS+++++++++", &event_path, &entry.output_source, T_FIFO, entry.size, 0);
@@ -332,9 +380,15 @@ fn process_dir<W: Write + Send + 'static>(
                     }
                 }
                 if opts.times {
-                    let _ = ffi::set_mtime(&target, entry.attrs.mtime, entry.attrs.mtime_ns as i64, false);
+                    let need = match (same, existing) {
+                        (true, Some(metadata)) => metadata.mtime() != entry.attrs.mtime,
+                        _ => true,
+                    };
+                    if need {
+                        let _ = ffi::set_mtime(&target, entry.attrs.mtime, entry.attrs.mtime_ns as i64, false);
+                    }
                 }
-                idmap::chown_path(&target, opts, &entry.attrs, false);
+                chown_changed(&target, opts, &entry.attrs, false, if same { existing } else { None });
             }
             T_CHR | T_BLK => {
                 if let Some(key) = link_key.clone() {
@@ -354,6 +408,16 @@ fn process_dir<W: Write + Send + 'static>(
             _ => {}
         }
         existing_entries.push(before);
+    }
+    let apply_attrs = apply_attrs
+        && (dir_modified
+            || working_changed
+            || match &before {
+                Some(metadata) => dir_attrs_differ(opts, metadata, &attrs),
+                None => true,
+            });
+    if apply_attrs {
+        finals.push(FinalDir { path: dir_path.clone(), attrs: attrs.clone(), apply: true });
     }
     let resume_enabled = opts.partial && features & feature::RESUME != 0;
     let delta_enabled = features & feature::DELTA != 0;

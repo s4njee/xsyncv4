@@ -140,12 +140,20 @@ pub(super) fn remove_any(path: &Path) -> io::Result<()> {
     }
 }
 
-pub(super) fn set_dir_working_mode(path: &Path) {
-    if let Ok(metadata) = fs::metadata(path) {
-        let mode = metadata.permissions().mode() & 0o7777;
-        if mode & 0o300 != 0o300 {
-            let _ = fs::set_permissions(path, fs::Permissions::from_mode(mode | 0o700));
-        }
+pub(super) fn set_dir_working_mode_with(path: &Path, metadata: &fs::Metadata) -> bool {
+    let mode = metadata.permissions().mode() & 0o7777;
+    if mode & 0o300 != 0o300 {
+        let _ = fs::set_permissions(path, fs::Permissions::from_mode(mode | 0o700));
+        true
+    } else {
+        false
+    }
+}
+
+pub(super) fn set_dir_working_mode(path: &Path) -> bool {
+    match fs::metadata(path) {
+        Ok(metadata) => set_dir_working_mode_with(path, &metadata),
+        Err(_) => false,
     }
 }
 
