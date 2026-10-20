@@ -1,0 +1,15 @@
+[package]
+name = "xs-rs"
+version = "0.1.0"
+description = "A Rust xs that copies trees to and from the C++ xs on the wire."
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+build = "build.rs"
+
+[dependencies]
+xs-wire = { path = "../xs-wire" }
+
+[[bin]]
+name = "xs-rs"
+path = "src/main.rs"
