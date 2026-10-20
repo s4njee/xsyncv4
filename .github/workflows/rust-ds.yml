@@ -1,0 +1,61 @@
+name: rust-ds
+
+# Pull requests into rust-ds, where xs-rs (rs/, the Rust implementation of xs that DeepSeek writes in the
+# lab's port cases) lands once the lab's gate accepts a step (benchmarks/lab/engineer.py). Every PR builds
+# this branch's C++ xs, the reference, and runs xs-rs's tests against it, interop included, with clippy and
+# rustfmt. A PR from an engineer/ branch of this repository, opened by the repository's owner (the lab's
+# controller pushes with the owner's token), is then approved and merged automatically.
+
+on:
+  pull_request:
+    branches: [rust-ds]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rust-ds-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  xs-rs:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends ninja-build libzstd-dev libxxhash-dev libicu-dev
+      - name: Build the C++ xs (the reference xs-rs is tested against)
+        run: |
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release "-DXSYNC_GIT_HASH=${GITHUB_SHA::12}"
+          cmake --build build --target xsync -j4
+      - name: xs-rs (tests against the C++ xs, clippy, rustfmt)
+        run: |
+          rustup component add clippy rustfmt
+          XS_BIN="$PWD/build/xs" cargo test --manifest-path rs/Cargo.toml
+          cargo clippy --manifest-path rs/Cargo.toml --all-targets -- -D warnings
+          cargo fmt --manifest-path rs/Cargo.toml --check
+
+  merge:
+    needs: [xs-rs]
+    if: >-
+      startsWith(github.event.pull_request.head.ref, 'engineer/') &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.pull_request.user.login == github.repository_owner
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Approve and merge the engineer's step
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          gh pr review "$PR" --repo "$GITHUB_REPOSITORY" --approve \
+            --body "The lab's gate accepted this step, and xs-rs passes its tests against the C++ xs."
+          gh pr merge "$PR" --repo "$GITHUB_REPOSITORY" --squash --delete-branch
