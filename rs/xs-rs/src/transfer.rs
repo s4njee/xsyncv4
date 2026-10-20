@@ -13,9 +13,10 @@ use std::path::{Path, PathBuf};
 use std::sync::mpsc::{channel, Sender, TryRecvError};
 use std::sync::{Arc, OnceLock};
 use std::thread::JoinHandle;
-use std::time::Instant;
+use std::time::{Duration, Instant};
 
-use xs_wire::{read_frame, write_frame, Decoder, Encoder, Frame, Suffixes};
+use xs_wire::io_control::IoControl;
+use xs_wire::{Decoder, Encoder, Frame, Suffixes};
 
 use crate::compression::{CompressionLink, Transport};
 use crate::ffi;
@@ -45,17 +46,40 @@ fn link_now() -> u64 {
     START.get_or_init(Instant::now).elapsed().as_nanos() as u64
 }
 
-/// Write one frame and give the compression policy what the transport saw.
-fn write_observed(output: &mut impl Write, link: Option<&CompressionLink>, kind: u8, payload: &[u8]) -> io::Result<()> {
-    let started = Instant::now();
-    xs_wire::write_frame(output, kind, payload)?;
-    if let Some(link) = link {
+/// Write one frame, charging the rate limiter and giving the compression policy what the
+/// transport saw. A keep-alive is not charged and does not count as activity.
+fn write_observed(
+    output: &mut impl Write,
+    link: Option<&CompressionLink>,
+    control: &IoControl,
+    kind: u8,
+    payload: &[u8],
+    activity: bool,
+) -> io::Result<()> {
+    let mut bytes = Vec::with_capacity(xs_wire::HEADER_LEN + payload.len());
+    bytes.extend_from_slice(&(payload.len() as u32).to_le_bytes());
+    bytes.push(kind);
+    bytes.extend_from_slice(payload);
+    let started = activity.then(Instant::now);
+    let mut written = 0;
+    while written < bytes.len() {
+        let wanted = (bytes.len() - written).min(65536);
+        let count = if activity { control.limiter().acquire(wanted) } else { wanted };
+        if count == 0 {
+            return Err(io::Error::new(io::ErrorKind::TimedOut, "I/O timeout"));
+        }
+        control.begin_write();
+        output.write_all(&bytes[written..written + count])?;
+        written += count;
+        control.note_write(activity);
+    }
+    if let (Some(started), Some(link)) = (started, link) {
         link.observe(
-            (payload.len() + xs_wire::HEADER_LEN) as u64,
+            bytes.len() as u64,
             started.elapsed().as_nanos() as u64,
             Transport::Queued,
             link_now(),
-            0,
+            control.rate_limit(),
         );
     }
     Ok(())
@@ -64,39 +88,74 @@ fn write_observed(output: &mut impl Write, link: Option<&CompressionLink>, kind:
 /// A writer thread with an unbounded queue. Listings can be produced while the
 /// peer's NEED pipe is momentarily full, so the two directions never deadlock.
 struct FrameOut<W: Write + Send + 'static> {
-    tx: Option<Sender<(u8, Vec<u8>)>>,
+    tx: Option<Sender<(u8, Vec<u8>, bool)>>,
     handle: Option<JoinHandle<io::Result<()>>>,
     _marker: std::marker::PhantomData<W>,
 }
 
 impl<W: Write + Send + 'static> FrameOut<W> {
-    fn new(output: W, link: Option<Arc<CompressionLink>>) -> Self {
-        let (tx, rx) = channel::<(u8, Vec<u8>)>();
+    fn new(output: W, link: Option<Arc<CompressionLink>>, control: Arc<IoControl>) -> Self {
+        let (tx, rx) = channel::<(u8, Vec<u8>, bool)>();
+        control.set_writer_active(true);
+        let worker_control = control.clone();
         let handle = std::thread::spawn(move || -> io::Result<()> {
-            let mut output = BufWriter::with_capacity(256 << 10, output);
-            loop {
-                match rx.try_recv() {
-                    Ok((kind, payload)) => write_observed(&mut output, link.as_deref(), kind, &payload)?,
-                    Err(TryRecvError::Empty) => {
-                        output.flush()?;
-                        match rx.recv() {
-                            Ok((kind, payload)) => write_observed(&mut output, link.as_deref(), kind, &payload)?,
-                            Err(_) => break,
+            let result = (|| -> io::Result<()> {
+                let mut output = BufWriter::with_capacity(256 << 10, output);
+                loop {
+                    match rx.try_recv() {
+                        Ok((kind, payload, activity)) => {
+                            write_observed(&mut output, link.as_deref(), &worker_control, kind, &payload, activity)?
                         }
+                        Err(TryRecvError::Empty) => {
+                            output.flush()?;
+                            match rx.recv_timeout(Duration::from_millis(100)) {
+                                Ok((kind, payload, activity)) => write_observed(
+                                    &mut output,
+                                    link.as_deref(),
+                                    &worker_control,
+                                    kind,
+                                    &payload,
+                                    activity,
+                                )?,
+                                Err(std::sync::mpsc::RecvTimeoutError::Timeout) => {
+                                    if worker_control.heartbeat_due() {
+                                        write_observed(
+                                            &mut output,
+                                            link.as_deref(),
+                                            &worker_control,
+                                            frame_type::KEEPALIVE,
+                                            &[],
+                                            false,
+                                        )?;
+                                        output.flush()?;
+                                    }
+                                    if worker_control.timed_out() {
+                                        return Err(io::Error::new(io::ErrorKind::TimedOut, "I/O timeout"));
+                                    }
+                                }
+                                Err(std::sync::mpsc::RecvTimeoutError::Disconnected) => break,
+                            }
+                        }
+                        Err(TryRecvError::Disconnected) => break,
                     }
-                    Err(TryRecvError::Disconnected) => break,
                 }
-            }
-            output.flush()
+                output.flush()
+            })();
+            control.set_writer_active(false);
+            result
         });
         Self { tx: Some(tx), handle: Some(handle), _marker: std::marker::PhantomData }
     }
 
     fn send(&mut self, kind: u8, payload: &[u8]) -> io::Result<()> {
+        self.send_with(kind, payload, true)
+    }
+
+    fn send_with(&mut self, kind: u8, payload: &[u8], activity: bool) -> io::Result<()> {
         self.tx
             .as_ref()
             .ok_or_else(|| io::Error::new(io::ErrorKind::BrokenPipe, "sender already finished"))?
-            .send((kind, payload.to_vec()))
+            .send((kind, payload.to_vec(), activity))
             .map_err(|_| io::Error::new(io::ErrorKind::BrokenPipe, "the writer thread stopped"))
     }
 
@@ -118,10 +177,9 @@ impl<W: Write + Send + 'static> Drop for FrameOut<W> {
     }
 }
 
-fn send_fatal(output: &mut impl Write, text: &str) -> io::Result<()> {
+fn send_fatal(output: &mut FrameOut<impl Write + Send + 'static>, text: &str) -> io::Result<()> {
     let message = xs_wire::Message { kind: msg_kind::FATAL, code: 2, text: text.to_string() };
-    write_frame(output, frame_type::MSG, &message.encode())?;
-    output.flush()
+    output.send(frame_type::MSG, &message.encode())
 }
 
 struct SentDir {
@@ -167,7 +225,7 @@ fn send_dir<W: Write + Send + 'static>(
     frame.var(id as u64).var(parent_plus1 as u64).var(pidx as u64);
     let flag_at = frame.bytes.len();
     frame.byte(flags);
-    let level = link.level(opts.compress_level_explicit, opts.compress_level, 0);
+    let level = link.level(opts.compress_level_explicit, opts.compress_level, opts.bwlimit);
     if protocol::pack_body(&mut frame, &body.bytes, opts.compress, level) {
         frame.bytes[flag_at] |= protocol::DF_ZSTD;
         link.set_last_level(level);
@@ -228,7 +286,7 @@ fn flush_data<W: Write + Send + 'static>(
     let digest = ffi::xxh3_64(block);
     let mut payload = Encoder::new();
     payload.byte(0).raw(&digest.to_le_bytes());
-    let level = link.level(opts.compress_level_explicit, opts.compress_level, 0);
+    let level = link.level(opts.compress_level_explicit, opts.compress_level, opts.bwlimit);
     let compressed = protocol::pack_body(&mut payload, block, compress, level);
     if compressed {
         payload.bytes[0] = 1;
@@ -375,11 +433,13 @@ pub fn run_sender<R: Read, W: Write + Send + 'static>(
     opts: &Options,
     features: u64,
     sources: &[OsString],
+    control: Arc<IoControl>,
 ) -> io::Result<i32> {
     let link = Arc::new(CompressionLink::new());
-    let mut output = FrameOut::new(output, Some(link.clone()));
+    let mut output = FrameOut::new(output, Some(link.clone()), control);
+    let keepalive = features & feature::IO_CONTROL != 0;
     loop {
-        let Some(frame) = read_frame(input).map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e.to_string()))? else {
+        let Some(frame) = protocol::read_checked(input, keepalive)? else {
             return Ok(12);
         };
         match frame.kind {
@@ -389,7 +449,7 @@ pub fn run_sender<R: Read, W: Write + Send + 'static>(
                     return Ok(code);
                 }
             }
-            frame_type::KEEPALIVE | frame_type::IDMAP => {}
+            frame_type::IDMAP => {}
             _ => return bad(format!("protocol error: unexpected frame {} before F_DEST", frame.kind)),
         }
     }
@@ -426,7 +486,7 @@ pub fn run_sender<R: Read, W: Write + Send + 'static>(
 
     let mut needs = 0u32;
     loop {
-        let Some(frame) = read_frame(input).map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e.to_string()))? else {
+        let Some(frame) = protocol::read_checked(input, keepalive)? else {
             return Ok(12);
         };
         match frame.kind {
@@ -475,7 +535,7 @@ pub fn run_sender<R: Read, W: Write + Send + 'static>(
                     return Ok(code);
                 }
             }
-            frame_type::KEEPALIVE | frame_type::IDMAP => {}
+            frame_type::IDMAP => {}
             other => return bad(format!("protocol error: unexpected frame {other} from receiver")),
         }
     }
@@ -652,9 +712,9 @@ fn destination_listing(path: &Path) -> BTreeMap<Vec<u8>, fs::Metadata> {
 }
 
 #[allow(clippy::too_many_arguments)]
-fn process_dir<R: Read, W: Write>(
+fn process_dir<R: Read, W: Write + Send + 'static>(
     _input: &mut R,
-    output: &mut W,
+    output: &mut FrameOut<W>,
     opts: &Options,
     features: u64,
     dest_arg: &Path,
@@ -844,8 +904,7 @@ fn process_dir<R: Read, W: Write>(
         f.var((index - previous) as u64);
         previous = index;
     }
-    write_frame(output, frame_type::NEED, &f.bytes)?;
-    output.flush()?;
+    output.send(frame_type::NEED, &f.bytes)?;
     if dirs.len() <= id as usize {
         dirs.resize_with(id as usize + 1, || None);
     }
@@ -1007,17 +1066,19 @@ fn process_data(
 
 /// Receiver: send F_DEST, answer each DIR with a NEED, write DATA records, then
 /// apply deferred directory metadata and send DONE.
-pub fn run_receiver<R: Read, W: Write>(
+pub fn run_receiver<R: Read, W: Write + Send + 'static>(
     input: &mut R,
-    mut output: W,
+    output: W,
     opts: &Options,
     features: u64,
     dest: &[u8],
+    control: Arc<IoControl>,
 ) -> io::Result<i32> {
+    let mut output = FrameOut::new(output, None, control);
+    let keepalive = features & feature::IO_CONTROL != 0;
     let mut identity = Encoder::new();
     identity.str(b"").str(b"").var(0).var(0);
-    write_frame(&mut output, frame_type::DEST, &identity.bytes)?;
-    output.flush()?;
+    output.send(frame_type::DEST, &identity.bytes)?;
     let dest_path = PathBuf::from(OsString::from_vec(dest.to_vec()));
     let mut ids = idmap::Receiver::default();
     let mut dirs: Vec<Option<RecvDir>> = Vec::new();
@@ -1030,7 +1091,7 @@ pub fn run_receiver<R: Read, W: Write>(
     let mut sender_code: Option<i32> = None;
     let mut ended = false;
     while !ended {
-        let frame = match read_frame(input) {
+        let frame = match protocol::read_checked(input, keepalive) {
             Ok(Some(frame)) => frame,
             Ok(None) => return Ok(12),
             Err(error) => {
@@ -1077,7 +1138,6 @@ pub fn run_receiver<R: Read, W: Write>(
                 }
             }
             frame_type::CHOWN_CONFIG => bad("protocol error: unnegotiated ownership configuration"),
-            frame_type::KEEPALIVE => Ok(()),
             frame_type::MSG => match msg_code(&frame) {
                 Ok(Some(code)) => return Ok(code),
                 Ok(None) => Ok(()),
@@ -1111,7 +1171,7 @@ pub fn run_receiver<R: Read, W: Write>(
     let sender_code = sender_code.unwrap_or(0);
     done.var(if sender_code != 0 { sender_code as u64 } else { 0 });
     done.var(created_files).var(created_dirs).var(created_links).var(0).var(0);
-    write_frame(&mut output, frame_type::DONE, &done.bytes)?;
-    output.flush()?;
+    output.send(frame_type::DONE, &done.bytes)?;
+    output.finish()?;
     Ok(if sender_code != 0 { sender_code } else { 0 })
 }

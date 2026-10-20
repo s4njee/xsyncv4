@@ -129,6 +129,19 @@ pub fn parse(args: Vec<OsString>) -> Result<Cli, String> {
                 }
                 continue;
             }
+            if name == "bwlimit" || name == "timeout" {
+                let value = match inline {
+                    Some(value) => value,
+                    None => iter.next().ok_or_else(|| format!("--{name} needs a value"))?,
+                };
+                let value = text(&value);
+                if name == "bwlimit" {
+                    cli.options.bwlimit = xs_wire::io_control::parse_rate(&value)?;
+                } else {
+                    cli.options.timeout = xs_wire::io_control::parse_timeout(&value)?;
+                }
+                continue;
+            }
             if name == "compress-level" || name == "zl" {
                 let value = match inline {
                     Some(value) => value,

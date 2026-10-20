@@ -213,8 +213,10 @@ fn a_negotiated_ownership_configuration_is_accepted() {
 #[test]
 fn idmap_records_survive_an_unrelated_name_and_are_bounded() {
     // A name that cannot exist still consumes the record without failing a transfer.
-    let mut server = start_server(feature::CORE | feature::IDMAP, Role::Receive, &[]);
+    let mut server = start_server(feature::CORE | feature::IDMAP | feature::IO_CONTROL, Role::Receive, &[]);
     assert_eq!(next(&mut server).kind, frame_type::HELLO);
+    let io = Config::Io { bwlimit: 0, timeout: 0 }.encode();
+    write_frame(&mut server.input, io.kind, &io.payload).unwrap();
     assert_eq!(next(&mut server).kind, frame_type::DEST);
     let map = xs_wire::idmap::encode(&[xs_wire::idmap::Entry {
         kind: xs_wire::idmap::USER,
