@@ -22,6 +22,8 @@ extern "C" {
     fn ZSTD_compress(dst: *mut c_void, dst_capacity: usize, src: *const c_void, src_size: usize, level: c_int) -> usize;
     fn ZSTD_decompress(dst: *mut c_void, dst_capacity: usize, src: *const c_void, compressed_size: usize) -> usize;
     fn ZSTD_isError(code: usize) -> u32;
+    fn ZSTD_minCLevel() -> c_int;
+    fn ZSTD_maxCLevel() -> c_int;
     fn utimensat(dirfd: c_int, pathname: *const c_char, times: *const Timespec, flags: c_int) -> c_int;
     fn mkfifo(pathname: *const c_char, mode: u32) -> c_int;
 }
@@ -31,19 +33,24 @@ pub fn xxh3_64(bytes: &[u8]) -> u64 {
     unsafe { XXH3_64bits(bytes.as_ptr().cast(), bytes.len()) }
 }
 
-/// One-shot zstd, as `ZSTD_compressCCtx` does for each frame. Returns None when
-/// the compressed form is not smaller, so callers write the raw payload.
-pub fn zstd_compress(raw: &[u8], level: i32) -> Option<Vec<u8>> {
+/// The levels this libzstd accepts, `ZSTD_minCLevel` to `ZSTD_maxCLevel`.
+pub fn zstd_level_bounds() -> (i32, i32) {
+    // SAFETY: both are constant queries with no arguments.
+    unsafe { (ZSTD_minCLevel(), ZSTD_maxCLevel()) }
+}
+
+/// One zstd frame, whatever its size, as `ZSTD_compressCCtx` writes it for `level`.
+pub fn zstd_compress_exact(raw: &[u8], level: i32) -> io::Result<Vec<u8>> {
     // SAFETY: the capacity is the library's own bound and both buffers are live.
     unsafe {
         let bound = ZSTD_compressBound(raw.len());
         let mut out = vec![0u8; bound];
         let n = ZSTD_compress(out.as_mut_ptr().cast(), bound, raw.as_ptr().cast(), raw.len(), level);
-        if ZSTD_isError(n) != 0 || n >= raw.len() {
-            return None;
+        if ZSTD_isError(n) != 0 {
+            return Err(io::Error::new(io::ErrorKind::InvalidData, "zstd compression failed"));
         }
         out.truncate(n);
-        Some(out)
+        Ok(out)
     }
 }
 
@@ -85,5 +92,29 @@ pub fn make_fifo(path: &Path, mode: u32) -> io::Result<()> {
         Ok(())
     } else {
         Err(io::Error::last_os_error())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn the_zstd_frame_is_the_one_the_cpp_reference_writes() {
+        // Hex from ZSTD_compressCCtx on the parent's libzstd, level 3, for this input.
+        let raw = b"xs zstd compressor test\n".repeat(20);
+        let expected = [
+            0x28, 0xb5, 0x2f, 0xfd, 0x60, 0xe0, 0x00, 0xfd, 0x00, 0x00, 0xc0, 0x78, 0x73, 0x20, 0x7a, 0x73, 0x74, 0x64,
+            0x20, 0x63, 0x6f, 0x6d, 0x70, 0x72, 0x65, 0x73, 0x73, 0x6f, 0x72, 0x20, 0x74, 0x65, 0x73, 0x74, 0x0a, 0x01,
+            0x00, 0x14, 0xaf, 0x3a, 0xc7,
+        ];
+        assert_eq!(zstd_compress_exact(&raw, 3).unwrap(), expected);
+        assert_eq!(zstd_decompress(&expected, raw.len()).unwrap(), raw);
+    }
+
+    #[test]
+    fn the_level_bounds_come_from_the_library() {
+        let (minimum, maximum) = zstd_level_bounds();
+        assert!(minimum <= -5 && maximum >= 22);
     }
 }

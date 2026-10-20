@@ -61,6 +61,7 @@ pub fn parse(args: Vec<OsString>) -> Result<Cli, String> {
     let mut cli = Cli::default();
     let mut iter = args.into_iter().peekable();
     let mut rest = false;
+    let mut compression_none = false;
     while let Some(arg) = iter.next() {
         let s = text(&arg);
         if rest {
@@ -92,12 +93,43 @@ pub fn parse(args: Vec<OsString>) -> Result<Cli, String> {
                 }
                 continue;
             }
-            if name == "compress-level" {
+            if name == "compress-level" || name == "zl" {
                 let value = match inline {
                     Some(value) => value,
                     None => iter.next().ok_or_else(|| "--compress-level needs a value".to_string())?,
                 };
-                cli.options.compress_level = text(&value).parse().unwrap_or(0);
+                cli.options.compress_level =
+                    text(&value).parse().map_err(|_| "--compress-level requires an integer".to_string())?;
+                cli.options.compress_level_explicit = true;
+                cli.options.compress = true;
+                continue;
+            }
+            if name == "skip-compress" {
+                let value = match inline {
+                    Some(value) => value,
+                    None => iter.next().ok_or_else(|| "--skip-compress needs a value".to_string())?,
+                };
+                let list = value.as_bytes().to_vec();
+                if !xs_wire::Suffixes::default().assign(&list) {
+                    return Err("invalid --skip-compress suffix list".into());
+                }
+                cli.options.skip_compress = list;
+                cli.options.skip_compress_set = true;
+                continue;
+            }
+            if name == "compress-choice" || name == "zc" {
+                let value = match inline {
+                    Some(value) => value,
+                    None => iter.next().ok_or_else(|| "--compress-choice needs a value".to_string())?,
+                };
+                match text(&value).as_str() {
+                    "zstd" => {
+                        cli.options.compress = true;
+                        compression_none = false;
+                    }
+                    "none" => compression_none = true,
+                    _ => return Err("--compress-choice supports only zstd or none".into()),
+                }
                 continue;
             }
             if name == "verbose" {
@@ -154,6 +186,9 @@ pub fn parse(args: Vec<OsString>) -> Result<Cli, String> {
             continue;
         }
         cli.paths.push(arg);
+    }
+    if compression_none {
+        cli.options.compress = false;
     }
     Ok(cli)
 }

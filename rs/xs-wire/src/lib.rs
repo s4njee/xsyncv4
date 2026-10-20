@@ -6,10 +6,13 @@
 //! strings are a `var` length and the bytes.
 
 pub mod codec;
+pub mod compress;
 pub mod config;
 pub mod consts;
 pub mod frame;
 pub mod hello;
+
+pub use compress::{Suffixes, DEFAULT_SKIP_COMPRESS};
 
 pub use codec::{DecodeError, Decoder, Encoder};
 pub use consts::*;

@@ -11,10 +11,13 @@ use std::os::unix::ffi::{OsStrExt, OsStringExt};
 use std::os::unix::fs::{FileExt, FileTypeExt, MetadataExt, OpenOptionsExt, PermissionsExt};
 use std::path::{Path, PathBuf};
 use std::sync::mpsc::{channel, Sender, TryRecvError};
+use std::sync::{Arc, OnceLock};
 use std::thread::JoinHandle;
+use std::time::Instant;
 
-use xs_wire::{read_frame, write_frame, Decoder, Encoder, Frame};
+use xs_wire::{read_frame, write_frame, Decoder, Encoder, Frame, Suffixes};
 
+use crate::compression::{CompressionLink, Transport};
 use crate::ffi;
 use crate::protocol::{
     self, bad, decode_err, feature, frame_type, msg_kind, rec, Attrs, EntryMeta, Options, T_DIR, T_FIFO, T_LNK, T_REG,
@@ -35,6 +38,28 @@ fn msg_code(frame: &Frame) -> io::Result<Option<i32>> {
     Ok(None)
 }
 
+/// Nanoseconds on the same monotonic clock for every compression observation.
+fn link_now() -> u64 {
+    static START: OnceLock<Instant> = OnceLock::new();
+    START.get_or_init(Instant::now).elapsed().as_nanos() as u64
+}
+
+/// Write one frame and give the compression policy what the transport saw.
+fn write_observed(output: &mut impl Write, link: Option<&CompressionLink>, kind: u8, payload: &[u8]) -> io::Result<()> {
+    let started = Instant::now();
+    xs_wire::write_frame(output, kind, payload)?;
+    if let Some(link) = link {
+        link.observe(
+            (payload.len() + xs_wire::HEADER_LEN) as u64,
+            started.elapsed().as_nanos() as u64,
+            Transport::Queued,
+            link_now(),
+            0,
+        );
+    }
+    Ok(())
+}
+
 /// A writer thread with an unbounded queue. Listings can be produced while the
 /// peer's NEED pipe is momentarily full, so the two directions never deadlock.
 struct FrameOut<W: Write + Send + 'static> {
@@ -44,17 +69,17 @@ struct FrameOut<W: Write + Send + 'static> {
 }
 
 impl<W: Write + Send + 'static> FrameOut<W> {
-    fn new(output: W) -> Self {
+    fn new(output: W, link: Option<Arc<CompressionLink>>) -> Self {
         let (tx, rx) = channel::<(u8, Vec<u8>)>();
         let handle = std::thread::spawn(move || -> io::Result<()> {
             let mut output = BufWriter::with_capacity(256 << 10, output);
             loop {
                 match rx.try_recv() {
-                    Ok((kind, payload)) => xs_wire::write_frame(&mut output, kind, &payload)?,
+                    Ok((kind, payload)) => write_observed(&mut output, link.as_deref(), kind, &payload)?,
                     Err(TryRecvError::Empty) => {
                         output.flush()?;
                         match rx.recv() {
-                            Ok((kind, payload)) => xs_wire::write_frame(&mut output, kind, &payload)?,
+                            Ok((kind, payload)) => write_observed(&mut output, link.as_deref(), kind, &payload)?,
                             Err(_) => break,
                         }
                     }
@@ -107,6 +132,7 @@ fn send_dir<W: Write + Send + 'static>(
     output: &mut FrameOut<W>,
     opts: &Options,
     features: u64,
+    link: &CompressionLink,
     id: u32,
     parent_plus1: u32,
     pidx: u32,
@@ -139,8 +165,13 @@ fn send_dir<W: Write + Send + 'static>(
     frame.var(id as u64).var(parent_plus1 as u64).var(pidx as u64);
     let flag_at = frame.bytes.len();
     frame.byte(flags);
-    if protocol::put_body(&mut frame, &body.bytes, opts.compress, features) {
+    let level = link.level(opts.compress_level_explicit, opts.compress_level, 0);
+    if protocol::pack_body(&mut frame, &body.bytes, opts.compress, level) {
         frame.bytes[flag_at] |= protocol::DF_ZSTD;
+        link.set_last_level(level);
+        if !opts.compress_level_explicit {
+            link.count(level, body.bytes.len() as u64);
+        }
     }
     output.send(frame_type::DIR, &frame.bytes)?;
     if dirs.len() <= id as usize {
@@ -157,6 +188,7 @@ fn send_dir<W: Write + Send + 'static>(
                 output,
                 opts,
                 features,
+                link,
                 child_id,
                 id + 1,
                 index as u32,
@@ -181,7 +213,8 @@ fn flush_data<W: Write + Send + 'static>(
     output: &mut FrameOut<W>,
     block: &mut Vec<u8>,
     compress: bool,
-    features: u64,
+    link: &CompressionLink,
+    opts: &Options,
 ) -> io::Result<()> {
     if block.is_empty() {
         return Ok(());
@@ -189,9 +222,14 @@ fn flush_data<W: Write + Send + 'static>(
     let digest = ffi::xxh3_64(block);
     let mut payload = Encoder::new();
     payload.byte(0).raw(&digest.to_le_bytes());
-    let compressed = protocol::put_body(&mut payload, block, compress, features);
+    let level = link.level(opts.compress_level_explicit, opts.compress_level, 0);
+    let compressed = protocol::pack_body(&mut payload, block, compress, level);
     if compressed {
         payload.bytes[0] = 1;
+        link.set_last_level(level);
+        if !opts.compress_level_explicit {
+            link.count(level, block.len() as u64);
+        }
     }
     output.send(frame_type::DATA, &payload.bytes)?;
     block.clear();
@@ -212,6 +250,7 @@ fn fail_record(id: u32, idx: u32) -> Encoder {
     e
 }
 
+#[allow(clippy::too_many_arguments)]
 fn send_large<W: Write + Send + 'static>(
     output: &mut FrameOut<W>,
     id: u32,
@@ -219,11 +258,13 @@ fn send_large<W: Write + Send + 'static>(
     entry: &SourceEntry,
     features: u64,
     compress: bool,
+    link: &CompressionLink,
+    opts: &Options,
     block: &mut Vec<u8>,
 ) -> io::Result<()> {
     let mut file = match File::open(&entry.path) {
         Ok(file) => file,
-        Err(_) => return flush_data(output, block, compress, features),
+        Err(_) => return flush_data(output, block, compress, link, opts),
     };
     let planned = entry.meta.size.max(0) as u64;
     let mut buffer = vec![0u8; protocol::BLOCK_TARGET];
@@ -256,30 +297,34 @@ fn send_large<W: Write + Send + 'static>(
         record(e, block);
         offset += got as u64;
         if block.len() >= protocol::BLOCK_TARGET || failed {
-            flush_data(output, block, compress, features)?;
+            flush_data(output, block, compress, link, opts)?;
         }
         if failed {
             break;
         }
     }
-    flush_data(output, block, compress, features)?;
+    flush_data(output, block, compress, link, opts)?;
     let mut e = Encoder::new();
     e.var(id as u64).var(idx as u64).byte(rec::END);
     e.var(0).var(offset).byte(if failed { 2 } else { 0 });
     protocol::put_file_attrs(&mut e, &entry.meta.attrs, features);
     record(e, block);
-    flush_data(output, block, compress, features)
+    flush_data(output, block, compress, link, opts)
 }
 
+#[allow(clippy::too_many_arguments)]
 fn send_need_data<W: Write + Send + 'static>(
     output: &mut FrameOut<W>,
     id: u32,
     indices: &[u32],
     dir: &SentDir,
     features: u64,
-    compress: bool,
+    link: &CompressionLink,
+    opts: &Options,
+    suffixes: &Suffixes,
 ) -> io::Result<()> {
     let mut block = Vec::with_capacity(protocol::BLOCK_TARGET);
+    let mut block_skip = false;
     for &idx in indices {
         let Some(entry) = dir.dest_entries.get(idx as usize) else {
             return bad("protocol error: bad NEED index");
@@ -287,12 +332,18 @@ fn send_need_data<W: Write + Send + 'static>(
         if entry.meta.kind != T_REG {
             continue;
         }
+        // A skipped suffix gets a block of its own, as `RawFileBlock` isolates it.
+        let skip = opts.compress && suffixes.matches(&entry.meta.name);
+        if skip || skip != block_skip {
+            flush_data(output, &mut block, opts.compress && !block_skip, link, opts)?;
+        }
+        block_skip = skip;
         if entry.meta.size <= protocol::SMALL_MAX as i64 {
             match fs::read(&entry.path) {
                 Ok(bytes) => {
                     record(whole_record(id, idx, &entry.meta.attrs, &bytes, features), &mut block);
                     if block.len() >= protocol::BLOCK_TARGET {
-                        flush_data(output, &mut block, compress, features)?;
+                        flush_data(output, &mut block, opts.compress && !block_skip, link, opts)?;
                     }
                 }
                 Err(_) => {
@@ -300,11 +351,14 @@ fn send_need_data<W: Write + Send + 'static>(
                 }
             }
         } else {
-            flush_data(output, &mut block, compress, features)?;
-            send_large(output, id, idx, entry, features, compress, &mut block)?;
+            flush_data(output, &mut block, opts.compress && !block_skip, link, opts)?;
+            send_large(output, id, idx, entry, features, opts.compress && !skip, link, opts, &mut block)?;
+        }
+        if skip {
+            flush_data(output, &mut block, false, link, opts)?;
         }
     }
-    flush_data(output, &mut block, compress, features)
+    flush_data(output, &mut block, opts.compress && !block_skip, link, opts)
 }
 
 /// Sender: wait for the receiver's F_DEST, send every listing, then answer each
@@ -316,7 +370,8 @@ pub fn run_sender<R: Read, W: Write + Send + 'static>(
     features: u64,
     sources: &[OsString],
 ) -> io::Result<i32> {
-    let mut output = FrameOut::new(output);
+    let link = Arc::new(CompressionLink::new());
+    let mut output = FrameOut::new(output, Some(link.clone()));
     loop {
         let Some(frame) = read_frame(input).map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e.to_string()))? else {
             return Ok(12);
@@ -339,9 +394,25 @@ pub fn run_sender<R: Read, W: Write + Send + 'static>(
     if root.single {
         flags |= protocol::DF_SINGLE;
     }
+    let suffixes = crate::compression::suffixes(&opts.skip_compress);
     let mut dirs: Vec<Option<SentDir>> = Vec::new();
     let mut next_id = 1u32;
-    send_dir(&mut output, opts, features, 0, 0, 0, b"", &root.base, &attrs, root.entries, flags, &mut dirs, &mut next_id)?;
+    send_dir(
+        &mut output,
+        opts,
+        features,
+        &link,
+        0,
+        0,
+        0,
+        b"",
+        &root.base,
+        &attrs,
+        root.entries,
+        flags,
+        &mut dirs,
+        &mut next_id,
+    )?;
     let dir_count = dirs.len() as u32;
     output.send(frame_type::LIST_END, &[])?;
 
@@ -377,7 +448,7 @@ pub fn run_sender<R: Read, W: Write + Send + 'static>(
                     .get_mut(id as usize)
                     .and_then(Option::take)
                     .ok_or_else(|| io::Error::new(io::ErrorKind::InvalidData, "protocol error: bad NEED directory"))?;
-                send_need_data(&mut output, id, &indices, &dir, features, opts.compress)?;
+                send_need_data(&mut output, id, &indices, &dir, features, &link, opts, &suffixes)?;
                 needs += 1;
                 if needs == dir_count {
                     let mut end = Encoder::new();
