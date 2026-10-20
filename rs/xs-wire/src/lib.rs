@@ -13,6 +13,7 @@ pub mod frame;
 pub mod hello;
 pub mod idmap;
 pub mod io_control;
+pub mod output;
 
 pub use compress::{Suffixes, DEFAULT_SKIP_COMPRESS};
 
@@ -20,3 +21,4 @@ pub use codec::{DecodeError, Decoder, Encoder};
 pub use consts::*;
 pub use frame::{read_frame, write_frame, Frame, FrameError};
 pub use hello::{ClientHello, Message, Options, Role, ServerHello};
+pub use output::{OutputEvent, ProgressAck};

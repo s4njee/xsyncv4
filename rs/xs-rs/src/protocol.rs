@@ -42,7 +42,7 @@ pub fn decode_err(error: xs_wire::DecodeError) -> io::Error {
 
 /// Read the next frame, consuming legal keep-alives as `Conn::read_frame` does. A keep-alive
 /// before `F_IO_CONFIG` is negotiated, or one carrying a payload, is a protocol error.
-pub fn read_checked<R: io::Read>(input: &mut R, negotiated: bool) -> io::Result<Option<xs_wire::Frame>> {
+pub fn read_checked<R: io::Read>(input: &mut R, negotiated: bool, features: u64) -> io::Result<Option<xs_wire::Frame>> {
     loop {
         let Some(frame) = xs_wire::read_frame(input)
             .map_err(|error| io::Error::new(io::ErrorKind::InvalidData, error.to_string()))?
@@ -54,6 +54,12 @@ pub fn read_checked<R: io::Read>(input: &mut R, negotiated: bool) -> io::Result<
                 return bad("protocol error: invalid or unnegotiated keep-alive");
             }
             continue;
+        }
+        if frame.kind == frame_type::PROGRESS
+            && (features & feature::PROGRESS_ACK == 0
+                || frame.payload.len() > xs_wire::output::max_progress_len(features) as usize)
+        {
+            return bad("protocol error: oversized or unnegotiated progress acknowledgment");
         }
         return Ok(Some(frame));
     }
@@ -68,6 +74,8 @@ pub struct Attrs {
     pub mtime_ns: u32,
     #[allow(dead_code)]
     pub atime: i64,
+    /// `st_size`, sent for directories and non-regular entries with `PF_OUTPUT`.
+    pub size: i64,
 }
 
 #[derive(Clone, Debug)]
@@ -78,6 +86,8 @@ pub struct EntryMeta {
     pub size: i64,
     pub link: Vec<u8>,
     pub rdev: u32,
+    /// The sender's source path, carried by every entry when `PF_OUTPUT` is negotiated.
+    pub output_source: Vec<u8>,
 }
 
 /// DIR header attributes, in `put_var(mode), put_svar(mtime), put_var(mtime_ns), uid, gid` order.
@@ -95,7 +105,7 @@ pub fn get_dir_attrs(d: &mut Decoder<'_>, features: u64) -> Res<Attrs> {
     let uid = u32::try_from(d.var().map_err(decode_err)?).map_err(|_| io_err("directory uid"))?;
     let gid = u32::try_from(d.var().map_err(decode_err)?).map_err(|_| io_err("directory gid"))?;
     let atime = if features & feature::ATIMES != 0 { d.svar().map_err(decode_err)? } else { 0 };
-    Ok(Attrs { mode, uid, gid, mtime, mtime_ns, atime })
+    Ok(Attrs { mode, uid, gid, mtime, mtime_ns, atime, size: 0 })
 }
 
 pub fn put_entry(e: &mut Encoder, entry: &EntryMeta, opts: &Options, features: u64) {
@@ -127,6 +137,12 @@ pub fn put_entry(e: &mut Encoder, entry: &EntryMeta, opts: &Options, features: u
         }
         _ => {}
     }
+    if features & feature::OUTPUT != 0 {
+        if entry.kind != T_REG {
+            e.var(entry.size.max(0) as u64);
+        }
+        e.str(&entry.output_source);
+    }
 }
 
 pub fn get_entry(d: &mut Decoder<'_>, opts: &Options, features: u64) -> Res<EntryMeta> {
@@ -149,7 +165,7 @@ pub fn get_entry(d: &mut Decoder<'_>, opts: &Options, features: u64) -> Res<Entr
         0
     };
     let atime = if features & feature::ATIMES != 0 { d.svar().map_err(decode_err)? } else { 0 };
-    let attrs = Attrs { mode, uid, gid, mtime, mtime_ns, atime };
+    let mut attrs = Attrs { mode, uid, gid, mtime, mtime_ns, atime, size: 0 };
     let mut size = 0i64;
     let mut link = Vec::new();
     let mut rdev = 0u32;
@@ -174,7 +190,15 @@ pub fn get_entry(d: &mut Decoder<'_>, opts: &Options, features: u64) -> Res<Entr
         }
         _ => {}
     }
-    Ok(EntryMeta { name, kind, attrs, size, link, rdev })
+    let mut output_source = Vec::new();
+    if features & feature::OUTPUT != 0 {
+        if kind != T_REG {
+            size = i64::try_from(d.var().map_err(decode_err)?).map_err(|_| io_err("entry size"))?;
+        }
+        attrs.size = size;
+        output_source = d.str().map_err(decode_err)?.to_vec();
+    }
+    Ok(EntryMeta { name, kind, attrs, size, link, rdev, output_source })
 }
 
 /// File attributes inside DATA records: mode, uid, gid, mtime, nanoseconds.
@@ -192,7 +216,7 @@ pub fn get_file_attrs(d: &mut Decoder<'_>, features: u64) -> Res<Attrs> {
     let mtime = d.svar().map_err(decode_err)?;
     let mtime_ns = u32::try_from(d.var().map_err(decode_err)?).map_err(|_| io_err("file mtime nanoseconds"))?;
     let atime = if features & feature::ATIMES != 0 { d.svar().map_err(decode_err)? } else { 0 };
-    Ok(Attrs { mode, uid, gid, mtime, mtime_ns, atime })
+    Ok(Attrs { mode, uid, gid, mtime, mtime_ns, atime, size: 0 })
 }
 
 fn io_err(what: &str) -> io::Error {
@@ -279,6 +303,18 @@ pub struct Options {
     pub ownership: Ownership,
     pub bwlimit: u64,
     pub timeout: u32,
+    pub itemize_level: u32,
+    pub out_format: Vec<u8>,
+    pub out_format_set: bool,
+    pub output_attrs: bool,
+    pub output_unchanged: bool,
+    pub mkpath: bool,
+    pub delete_before: bool,
+    pub progress: bool,
+    pub raw_names: bool,
+    pub am_server: bool,
+    pub pushing: bool,
+    pub local_peer: bool,
 }
 
 impl Default for Options {
@@ -302,6 +338,18 @@ impl Default for Options {
             ownership: Ownership::default(),
             bwlimit: 0,
             timeout: 0,
+            itemize_level: 0,
+            out_format: Vec::new(),
+            out_format_set: false,
+            output_attrs: false,
+            output_unchanged: false,
+            mkpath: false,
+            delete_before: false,
+            progress: false,
+            raw_names: false,
+            am_server: false,
+            pushing: false,
+            local_peer: false,
         }
     }
 }
@@ -310,6 +358,17 @@ impl Options {
     /// The C++ receiver maps names only for `-o`/`-g` and not `--numeric-ids`.
     pub fn maps_names(&self) -> bool {
         (self.owner || self.group) && !self.numeric_ids
+    }
+
+    /// `output_enabled` for the flags this client implements.
+    pub fn output_enabled(&self, verbose: i64) -> bool {
+        self.itemize_level > 0 || verbose > 0 || self.out_format_set
+    }
+
+    /// `output_configure`: `-i` and a format with `%i` need attributes, `-ii` unchanged rows.
+    pub fn configure_output(&mut self) {
+        self.output_attrs = self.itemize_level > 0 || self.out_format.contains(&b'i');
+        self.output_unchanged = self.itemize_level > 1;
     }
 }
 
