@@ -972,3 +972,19 @@ including IDs present on only one machine and real sudo elevation on both ends.
 | `src/pool.h` | two-queue worker pool |
 | `src/progress.cpp` | live progress display |
 | `src/filter.cpp` | rsync include/exclude rules |
+
+## Changelog
+
+### 2026-10-20
+
+- Added the post-HELLO configuration frames for IO, compression, xattrs, ACLs, ownership, sparse files, link destinations, relative and files-from paths, filters, deletion, pruning and output.
+- Added the xs-rs Linux client and server, which copy trees to and from the C++ xs in both directions.
+- Added zstd-compressed directory listings and data blocks with the C++ suffix policy and adaptive levels.
+- Added user and group name mapping and `--chown` overrides.
+- Added keepalives, bandwidth limits and idle timeouts.
+- Added itemized output, directory output metadata and progress acknowledgments.
+- Added hard-link preservation on DIR entries, DATA records and the receiver.
+- Split the transfer engine into `transfer.rs` for the sender and shared helpers, with the receiver, hard links and destination files in `transfer/receiver.rs`, `transfer/hardlink.rs` and `transfer/file.rs`.
+- Moved the post-HELLO configuration reader from `main.rs` into `config.rs`.
+- Reused `scan::kind_of` instead of keeping a second metadata-kind mapping.
+- Shared partial-file creation between the CHUNK and END paths.

@@ -41,7 +41,7 @@ pub fn attrs_from(m: &fs::Metadata) -> Attrs {
     }
 }
 
-fn kind_of(m: &fs::Metadata) -> u8 {
+pub(crate) fn kind_of(m: &fs::Metadata) -> u8 {
     let ft = m.file_type();
     if ft.is_file() {
         T_REG
