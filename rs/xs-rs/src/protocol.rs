@@ -131,6 +131,11 @@ pub struct EntryMeta {
     pub rdev: u32,
     /// The sender's source path, carried by every entry when `PF_OUTPUT` is negotiated.
     pub output_source: Vec<u8>,
+    /// `FilterList::absolute_path` of the source, carried when filters, relative
+    /// paths or files-from are negotiated.
+    pub filter_source: Vec<u8>,
+    /// Whether a selected directory must be descended into (`IF_SELECTED_CHILD`).
+    pub selected: bool,
 }
 
 /// DIR header attributes, in `put_var(mode), put_svar(mtime), put_var(mtime_ns), uid, gid` order.
@@ -169,7 +174,7 @@ pub fn put_entry(e: &mut Encoder, entry: &EntryMeta, opts: &Options, features: u
         T_DIR => {
             e.var(0);
             if features & (feature::RELATIVE | feature::FILES_FROM) != 0 {
-                e.byte(0);
+                e.byte(u8::from(entry.selected));
             }
         }
         T_LNK => {
@@ -188,6 +193,9 @@ pub fn put_entry(e: &mut Encoder, entry: &EntryMeta, opts: &Options, features: u
             e.var(entry.size.max(0) as u64);
         }
         e.str(&entry.output_source);
+    }
+    if features & (feature::CVS_FILTERS | feature::RELATIVE | feature::FILES_FROM) != 0 {
+        e.str(&entry.filter_source);
     }
 }
 
@@ -215,14 +223,19 @@ pub fn get_entry(d: &mut Decoder<'_>, opts: &Options, features: u64) -> Res<Entr
     let mut size = 0i64;
     let mut link = Vec::new();
     let mut rdev = 0u32;
+    let mut selected = false;
     match kind {
         T_REG => {
             size = i64::try_from(d.var().map_err(decode_err)?).map_err(|_| io_err("file size"))?;
         }
         T_DIR => {
             rdev = u32::try_from(d.var().map_err(decode_err)?).map_err(|_| io_err("directory rdev"))?;
-            if features & (feature::RELATIVE | feature::FILES_FROM) != 0 && d.byte().map_err(decode_err)? > 1 {
-                return bad("protocol error: bad selected directory flag");
+            if features & (feature::RELATIVE | feature::FILES_FROM) != 0 {
+                let flag = d.byte().map_err(decode_err)?;
+                if flag > 1 {
+                    return bad("protocol error: bad selected directory flag");
+                }
+                selected = flag != 0;
             }
         }
         T_LNK => {
@@ -247,7 +260,14 @@ pub fn get_entry(d: &mut Decoder<'_>, opts: &Options, features: u64) -> Res<Entr
         attrs.size = size;
         output_source = d.str().map_err(decode_err)?.to_vec();
     }
-    Ok(EntryMeta { name, kind, attrs, size, link, rdev, output_source })
+    let mut filter_source = Vec::new();
+    if features & (feature::CVS_FILTERS | feature::RELATIVE | feature::FILES_FROM) != 0 {
+        filter_source = d.str().map_err(decode_err)?.to_vec();
+        if filter_source.contains(&0) {
+            return bad("protocol error: NUL in filter source path");
+        }
+    }
+    Ok(EntryMeta { name, kind, attrs, size, link, rdev, output_source, filter_source, selected })
 }
 
 /// File attributes inside DATA records: mode, uid, gid, mtime, nanoseconds.
@@ -342,6 +362,12 @@ fn resolve(name: &[u8], lookup: fn(&[u8]) -> Option<u32>) -> Result<Option<u32>,
 #[derive(Clone, Debug)]
 pub struct Options {
     pub recursive: bool,
+    pub dir_requested: bool,
+    pub relative: bool,
+    pub files_from_set: bool,
+    pub from0: bool,
+    pub file_names: Vec<Vec<u8>>,
+    pub filters: crate::filter::FilterList,
     pub links: bool,
     pub copy_links: bool,
     pub perms: bool,
@@ -384,6 +410,12 @@ impl Default for Options {
     fn default() -> Self {
         Self {
             recursive: false,
+            dir_requested: false,
+            relative: false,
+            files_from_set: false,
+            from0: false,
+            file_names: Vec::new(),
+            filters: crate::filter::FilterList::default(),
             links: false,
             copy_links: false,
             perms: false,
@@ -526,6 +558,8 @@ mod tests {
             link: Vec::new(),
             rdev: 0,
             output_source: b"/s/a".to_vec(),
+            filter_source: Vec::new(),
+            selected: false,
         };
         let opts = Options { owner: true, group: true, ..Options::default() };
         let features = feature::CORE | feature::HLINK | feature::OUTPUT;

@@ -7,6 +7,7 @@ mod compression;
 mod config;
 mod delta;
 mod ffi;
+mod filter;
 mod idmap;
 mod output;
 mod parallel;
@@ -43,6 +44,11 @@ const SUPPORTED: u64 = feature::CORE
     | feature::HLINK
     | feature::RESUME
     | feature::DELTA
+    | feature::FILTERS
+    | feature::MERGE_FILTERS
+    | feature::CVS_FILTERS
+    | feature::RELATIVE
+    | feature::FILES_FROM
     | feature::PROGRESS_ACK;
 
 /// What a client advertises: the compression policy frame exists only with `-z`,
@@ -64,6 +70,21 @@ fn client_advertised(options: &Options, verbose: i64, role: u8) -> u64 {
     }
     if options.whole_file {
         features &= !(feature::RESUME | feature::DELTA);
+    }
+    if !options.filters.needs_extended() {
+        features &= !feature::FILTERS;
+    }
+    if !options.filters.has_merges() {
+        features &= !feature::MERGE_FILTERS;
+    }
+    if !options.filters.has_merges() && !options.filters.has_cvs() {
+        features &= !feature::CVS_FILTERS;
+    }
+    if !options.relative {
+        features &= !feature::RELATIVE;
+    }
+    if !options.files_from_set {
+        features &= !feature::FILES_FROM;
     }
     if role != b'R' || !options.progress {
         features &= !feature::PROGRESS_ACK;
@@ -123,8 +144,10 @@ fn read_hello(payload: &[u8]) -> io::Result<(u64, Hello)> {
     if rules > 100_000 {
         return protocol::bad("protocol error: too many filter rules");
     }
+    let mut filters = crate::filter::FilterList::default();
     for _ in 0..rules {
-        d.str().map_err(protocol::decode_err)?;
+        let rule = d.str().map_err(protocol::decode_err)?.to_vec();
+        filters.add_filter(&rule).map_err(|error| io::Error::new(io::ErrorKind::InvalidData, format!("protocol error: bad filter rule from client: {error}")))?;
     }
     let count = d.var().map_err(protocol::decode_err)?;
     if count > 1024 {
@@ -137,7 +160,9 @@ fn read_hello(payload: &[u8]) -> io::Result<(u64, Hello)> {
     if !d.is_empty() {
         return protocol::bad("protocol error: trailing hello");
     }
-    Ok((version, Hello { role, features, options: options_from_flags(&flags, &ints), paths }))
+    let mut options = options_from_flags(&flags, &ints);
+    options.filters = filters;
+    Ok((version, Hello { role, features, options, paths }))
 }
 
 fn write_message(output: &mut impl Write, kind: u8, code: u64, text: &str) -> io::Result<()> {
@@ -198,7 +223,7 @@ fn server<R: Read, W: Write + Send + 'static>(
     xs_wire::write_frame(&mut writer, frame_type::HELLO, &answer.bytes)?;
     writer.flush()?;
     control.note_write(true);
-    if let Err((code, text)) = read_configuration(&mut input, &mut hello.options, features, hello.role, &control) {
+    if let Err((code, text)) = read_configuration(&mut input, &mut writer, &mut hello.options, features, hello.role, &control) {
         write_message(&mut writer, msg_kind::FATAL, code as u64, &text)?;
         writer.flush()?;
         return Ok(code);
@@ -271,7 +296,11 @@ fn client_hello(cli: &cli::Cli, role: u8, paths: &[OsString]) -> Vec<u8> {
     for value in [cli.verbose, o.compress_level, 0, 0, 0, o.jobs, 0] {
         e.svar(value);
     }
-    e.var(0);
+    let rules = if o.filters.needs_extended() { Vec::new() } else { o.filters.to_strings() };
+    e.var(rules.len() as u64);
+    for rule in &rules {
+        e.str(rule);
+    }
     e.var(paths.len() as u64);
     for path in paths {
         e.str(path.as_bytes());
@@ -320,9 +349,30 @@ fn spawn_peer(cli: &cli::Cli, host: &[u8], local: bool) -> io::Result<Child> {
     command.stdin(Stdio::piped()).stdout(Stdio::piped()).stderr(Stdio::inherit()).spawn()
 }
 
+fn load_files_from(cli: &mut cli::Cli) -> io::Result<Vec<u8>> {
+    let Some(path) = cli.files_from.clone() else {
+        return Ok(Vec::new());
+    };
+    use std::os::unix::ffi::OsStrExt;
+    if path.as_bytes() == b"-" {
+        let mut content = Vec::new();
+        io::stdin().read_to_end(&mut content)?;
+        Ok(content)
+    } else {
+        std::fs::read(path)
+    }
+}
+
 fn run_client(cli: &mut cli::Cli) -> io::Result<i32> {
     if cli.paths.len() < 2 {
         return Err(io::Error::new(io::ErrorKind::InvalidInput, "usage: xs-rs [options] SRC... DEST"));
+    }
+    let files_content = load_files_from(cli)?;
+    if cli.options.files_from_set {
+        let mut record = Vec::new();
+        let mut names = Vec::new();
+        crate::config::parse_names(&files_content, cli.options.from0, &mut names, &mut record);
+        cli.options.file_names = names;
     }
     let specs: Vec<cli::RemoteSpec> = cli.paths.iter().map(|path| cli::parse_remote(path)).collect();
     let remote_indices: Vec<usize> = specs.iter().enumerate().filter(|(_, spec)| spec.remote).map(|(i, _)| i).collect();
@@ -438,6 +488,24 @@ fn run_client(cli: &mut cli::Cli) -> io::Result<i32> {
         let _ = child.wait();
         return Ok(4);
     }
+    if cli.options.files_from_set && features & feature::FILES_FROM == 0 {
+        eprintln!("xs-rs: peer does not support --files-from");
+        let _ = child.kill();
+        let _ = child.wait();
+        return Ok(4);
+    }
+    if cli.options.relative && features & feature::RELATIVE == 0 {
+        eprintln!("xs-rs: peer does not support --relative");
+        let _ = child.kill();
+        let _ = child.wait();
+        return Ok(4);
+    }
+    if cli.options.filters.needs_extended() && features & feature::FILTERS == 0 {
+        eprintln!("xs-rs: peer does not support extended filters");
+        let _ = child.kill();
+        let _ = child.wait();
+        return Ok(4);
+    }
     if features & feature::IO_CONTROL != 0 {
         let config = Config::Io { bwlimit: cli.options.bwlimit, timeout: u64::from(cli.options.timeout) }.encode();
         control.configure(cli.options.bwlimit, cli.options.timeout, true);
@@ -462,6 +530,56 @@ fn run_client(cli: &mut cli::Cli) -> io::Result<i32> {
             (Vec::new(), Vec::new())
         };
         let config = Config::Chown { user, group }.encode();
+        xs_wire::write_frame(&mut output, config.kind, &config.payload)?;
+        output.flush()?;
+        control.note_write(true);
+    }
+    if features & feature::RELATIVE != 0 {
+        let config = Config::Relative.encode();
+        xs_wire::write_frame(&mut output, config.kind, &config.payload)?;
+        output.flush()?;
+        control.note_write(true);
+    }
+    if features & feature::FILES_FROM != 0 {
+        let config = Config::Files { mode: 1, from0: cli.options.from0, path: Vec::new() }.encode();
+        xs_wire::write_frame(&mut output, config.kind, &config.payload)?;
+        output.flush()?;
+        let mut written = 0;
+        while written < files_content.len() {
+            let end = (written + 65536).min(files_content.len());
+            let frame = xs_wire::config::files_data(&files_content[written..end]).map_err(protocol::decode_err)?;
+            xs_wire::write_frame(&mut output, frame.kind, &frame.payload)?;
+            written = end;
+        }
+        let end = xs_wire::config::files_end(files_content.len() as u64);
+        xs_wire::write_frame(&mut output, end.kind, &end.payload)?;
+        output.flush()?;
+        let Some(frame) = protocol::read_checked(&mut input, true, features)? else {
+            return Ok(12);
+        };
+        if frame.kind == frame_type::MSG {
+            let message = xs_wire::Message::decode(&frame.payload).map_err(protocol::decode_err)?;
+            if !message.text.is_empty() {
+                eprintln!("xs-rs: {}", message.text);
+            }
+            let _ = child.kill();
+            let _ = child.wait();
+            return Ok(message.code as i32);
+        }
+        if frame.kind != frame_type::FILES_CONFIG || frame.payload.len() != 1 || frame.payload[0] > 1 {
+            return protocol::bad("protocol error: malformed files-from acknowledgement");
+        }
+        control.note_write(true);
+    }
+    if features & feature::FILTERS != 0 {
+        let cvs = if features & feature::CVS_FILTERS != 0 { Some(cli.options.filters.has_cvs()) } else { None };
+        let config = Config::Filter { cvs, rules: cli.options.filters.to_strings() }.encode();
+        if config.payload.len() > 1024 * 1024 {
+            eprintln!("xs-rs: filter configuration exceeds 1 MiB");
+            let _ = child.kill();
+            let _ = child.wait();
+            return Ok(4);
+        }
         xs_wire::write_frame(&mut output, config.kind, &config.payload)?;
         output.flush()?;
         control.note_write(true);

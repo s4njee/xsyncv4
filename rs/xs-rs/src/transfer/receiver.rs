@@ -45,6 +45,73 @@ struct FinalDir {
     apply: bool,
 }
 
+struct FileRequests {
+    exact: HashSet<Vec<u8>>,
+    parents: HashSet<Vec<u8>>,
+    roots: HashSet<Vec<u8>>,
+    recursive: bool,
+    dirs: bool,
+}
+
+impl FileRequests {
+    fn new(opts: &Options) -> Self {
+        let mut exact = HashSet::new();
+        let mut parents = HashSet::new();
+        let mut roots = HashSet::new();
+        for name in &opts.file_names {
+            let mut name = scan::clean_list_name(name);
+            if opts.relative {
+                if let Some(at) = name.windows(3).position(|w| w == b"/./") {
+                    name.drain(..at + 3);
+                }
+            } else if let Some(at) = name.iter().rposition(|&b| b == b'/') {
+                name.drain(..at + 1);
+            }
+            let mut path = Vec::new();
+            for part in name.split(|&b| b == b'/') {
+                if !part.is_empty() && part != b"." {
+                    path = scan::join_rel(&path, part);
+                }
+            }
+            if !path.is_empty() {
+                exact.insert(path.clone());
+            }
+            if opts.recursive || opts.dir_requested {
+                roots.insert(path.clone());
+            }
+            if opts.relative {
+                let mut parent = path;
+                while let Some(at) = parent.iter().rposition(|&b| b == b'/') {
+                    parent.truncate(at);
+                    parents.insert(parent.clone());
+                }
+            }
+        }
+        Self { exact, parents, roots, recursive: opts.recursive, dirs: opts.dir_requested }
+    }
+
+    fn permits(&self, path: &[u8], directory: bool) -> bool {
+        if path.is_empty() || path == b"." || self.exact.contains(path) || (directory && self.parents.contains(path)) {
+            return true;
+        }
+        let parent = path.iter().rposition(|&b| b == b'/').map(|at| &path[..at]).unwrap_or(&[]);
+        if self.roots.contains(parent) {
+            return true;
+        }
+        if self.recursive {
+            let mut parent = parent;
+            while !parent.is_empty() {
+                parent = parent.iter().rposition(|&b| b == b'/').map(|at| &parent[..at]).unwrap_or(&[]);
+                if self.roots.contains(parent) {
+                    return true;
+                }
+            }
+        }
+        let _ = self.dirs;
+        false
+    }
+}
+
 /// A directory's metadata only needs writing back when one of the attributes
 /// the transfer preserves differs. An unchanged directory costs no syscalls.
 fn dir_attrs_differ(opts: &Options, before: &fs::Metadata, attrs: &Attrs) -> bool {
@@ -149,6 +216,18 @@ fn process_dir<W: Write + Send + 'static>(
     }
     if !d.is_empty() {
         return bad("protocol error: trailing DIR payload");
+    }
+    if opts.files_from_set && !opts.am_server {
+        let requests = FileRequests::new(opts);
+        for entry in &entries {
+            let path = scan::join_rel(&rel, &entry.name);
+            if !requests.permits(&path, entry.kind == T_DIR) {
+                return bad(format!(
+                    "rejecting unrequested file-list name: {}",
+                    String::from_utf8_lossy(&path)
+                ));
+            }
+        }
     }
     ids.apply(&mut attrs, opts);
     for entry in &mut entries {
@@ -1119,10 +1198,13 @@ pub fn run_receiver<R: Read, W: Write + Send + 'static>(
             other => bad(format!("protocol error: unexpected frame {other} from sender")),
         };
         if let Err(error) = result {
-            let _ = send_fatal(&mut output, &error.to_string());
+            let text = error.to_string();
+            let code = if text.starts_with("rejecting ") { 4 } else { 2 };
+            let message = xs_wire::Message { kind: protocol::msg_kind::FATAL, code, text };
+            let _ = output.send(frame_type::MSG, &message.encode());
             settle(&mut infiles, &pool);
             cleanup_partial(&mut infiles, opts);
-            return Ok(2);
+            return Ok(code as i32);
         }
     }
     // DATA_END may follow the last END while that file's range writes are still

@@ -372,7 +372,17 @@ fn send_dir<W: Write + Send + 'static>(
     flags: u8,
     dirs: &mut Vec<Option<SentDir>>,
     next_id: &mut u32,
+    selection: Option<&scan::Selection>,
+    filters: &crate::filter::FilterList,
 ) -> io::Result<()> {
+    let entries: Vec<SourceEntry> = if selection.is_some() {
+        entries
+    } else {
+        entries
+            .into_iter()
+            .filter(|entry| !filters.excluded(&scan::join_rel(rel, &entry.meta.name), entry.meta.kind == T_DIR))
+            .collect()
+    };
     let child_specs: Vec<(usize, PathBuf, Attrs)> = entries
         .iter()
         .enumerate()
@@ -391,7 +401,7 @@ fn send_dir<W: Write + Send + 'static>(
         body.str(&source);
     }
     if features & feature::DIR_CHILDREN != 0 {
-        let count = if opts.recursive { child_specs.len() as u64 } else { 0 };
+        let count = if opts.recursive || selection.is_some() { child_specs.len() as u64 } else { 0 };
         body.var(count);
     }
     body.var(entries.len() as u64);
@@ -418,12 +428,19 @@ fn send_dir<W: Write + Send + 'static>(
         dirs.resize_with(id as usize + 1, || None);
     }
     dirs[id as usize] = Some(SentDir { dest_entries: entries });
-    if opts.recursive {
+    if opts.recursive || selection.is_some() {
         for (index, child_path, child_attrs) in child_specs {
             let child_id = *next_id;
             *next_id += 1;
             let child_rel = scan::join_rel(rel, &dirs[id as usize].as_ref().unwrap().dest_entries[index].meta.name);
-            let child_entries = scan::scan_dir(&child_path, opts).unwrap_or_default();
+            let (child_entries, child_filter);
+            if let Some(selection) = selection {
+                child_entries = selection.dirs.get(&child_rel).map(|dir| dir.entries.clone()).unwrap_or_default();
+                child_filter = crate::filter::FilterList::default();
+            } else {
+                child_filter = filters.in_directory(&child_path, false);
+                child_entries = scan::scan_dir_filtered(&child_path, opts, &child_filter, &child_rel).unwrap_or_default();
+            }
             send_dir(
                 output,
                 opts,
@@ -440,6 +457,8 @@ fn send_dir<W: Write + Send + 'static>(
                 protocol::DF_ATTRS,
                 dirs,
                 next_id,
+                selection,
+                &child_filter,
             )?;
         }
     }
@@ -820,7 +839,17 @@ pub fn run_sender<R: Read, W: Write + Send + 'static>(
             _ => return bad(format!("protocol error: unexpected frame {} before F_DEST", frame.kind)),
         }
     }
-    let root = scan::build_root(sources, opts)?;
+    let root = if opts.relative || opts.files_from_set {
+        let names = if opts.files_from_set { Some(opts.file_names.as_slice()) } else { None };
+        scan::build_selection(sources, names, opts, &opts.filters)?
+    } else {
+        scan::build_root(sources, opts)?
+    };
+    let root_filters = if root.selection.is_some() {
+        crate::filter::FilterList::default()
+    } else {
+        opts.filters.in_directory(&root.base, false)
+    };
     let empty = Attrs::default();
     let attrs = root.attrs.clone().unwrap_or(empty);
     let mut flags = if root.attrs.is_some() { protocol::DF_ATTRS } else { 0 };
@@ -849,6 +878,8 @@ pub fn run_sender<R: Read, W: Write + Send + 'static>(
         flags,
         &mut dirs,
         &mut next_id,
+        root.selection.as_ref(),
+        &root_filters,
     )?;
     let dir_count = dirs.len() as u32;
     output.send(frame_type::LIST_END, &[])?;
