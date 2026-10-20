@@ -59,6 +59,7 @@ impl Cli {
             "progress" => self.options.progress = on,
             "partial" => self.options.partial = on,
             "whole-file" => self.options.whole_file = on,
+            "ignore-times" => self.options.ignore_times = on,
             "8-bit-output" => self.options.raw_names = on,
             "local-peer" => self.options.local_peer = on,
             // Accepted no-ops that C++ also accepts: their behaviour is intrinsic
@@ -380,6 +381,7 @@ pub fn parse(args: Vec<OsString>) -> Result<Cli, String> {
                 | "8-bit-output"
                 | "local-peer"
                 | "whole-file"
+                | "ignore-times"
                 | "protect-args"
                 | "secluded-args"
                 | "blocking-io"
@@ -416,7 +418,8 @@ pub fn parse(args: Vec<OsString>) -> Result<Cli, String> {
                     'd' => {}
                     'L' => cli.options.copy_links = true,
                     'W' => cli.options.whole_file = true,
-                    'u' | 'c' | 'I' | 'x' | 'O' | 'J' | 's' | 'S' | 'C' | 'F' | 'm' | '0' => {}
+                    'I' => cli.options.ignore_times = true,
+                    'u' | 'c' | 'x' | 'O' | 'J' | 's' | 'S' | 'C' | 'F' | 'm' | '0' => {}
                     'A' => {
                         cli.options.perms = true;
                     }

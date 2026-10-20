@@ -7,7 +7,7 @@ use std::ffi::{OsStr, OsString};
 use std::fs;
 use std::io::{self, Read, Write};
 use std::os::unix::ffi::{OsStrExt, OsStringExt};
-use std::os::unix::fs::{FileTypeExt, MetadataExt, PermissionsExt};
+use std::os::unix::fs::{FileExt, FileTypeExt, MetadataExt, PermissionsExt};
 use std::os::unix::io::AsRawFd;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
@@ -17,6 +17,7 @@ use xs_wire::io_control::IoControl;
 use xs_wire::resume::ResumePrefix;
 use xs_wire::{Decoder, Encoder, Frame};
 
+use crate::delta;
 use crate::ffi;
 use crate::idmap;
 use crate::output::Output;
@@ -53,6 +54,9 @@ struct RecvDir {
     existing: Vec<Option<fs::Metadata>>,
     dir_created: Vec<bool>,
     prefixes: HashMap<u32, ResumePrefix>,
+    delta_candidates: HashSet<u32>,
+    delta_requested: HashSet<u32>,
+    bases: HashMap<u32, Arc<delta::DeltaBasis>>,
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -222,7 +226,7 @@ fn process_dir<W: Write + Send + 'static>(
             T_REG => {
                 let same = existing
                     .filter(|m| m.is_file())
-                    .map(|m| m.len() as i64 == entry.size && m.mtime() == entry.attrs.mtime)
+                    .map(|m| !opts.ignore_times && m.len() as i64 == entry.size && m.mtime() == entry.attrs.mtime)
                     .unwrap_or(false);
                 if same {
                     if opts.perms {
@@ -352,7 +356,9 @@ fn process_dir<W: Write + Send + 'static>(
         existing_entries.push(before);
     }
     let resume_enabled = opts.partial && features & feature::RESUME != 0;
+    let delta_enabled = features & feature::DELTA != 0;
     let mut prefixes = HashMap::new();
+    let mut delta_candidates = HashSet::new();
     let mut f = Encoder::new();
     f.var(id as u64).var(need.len() as u64);
     let mut previous = 0u32;
@@ -372,6 +378,13 @@ fn process_dir<W: Write + Send + 'static>(
                 prefixes.insert(index, prefix);
             }
         }
+        if delta_enabled {
+            let eligible = existing_entries[index as usize].as_ref().map(|m| m.is_file()).unwrap_or(false);
+            f.byte(u8::from(eligible));
+            if eligible {
+                delta_candidates.insert(index);
+            }
+        }
     }
     output.send(frame_type::NEED, &f.bytes)?;
     if dirs.len() <= id as usize {
@@ -387,6 +400,9 @@ fn process_dir<W: Write + Send + 'static>(
         existing: existing_entries,
         dir_created,
         prefixes,
+        delta_candidates,
+        delta_requested: HashSet::new(),
+        bases: HashMap::new(),
     });
     Ok(())
 }
@@ -404,6 +420,7 @@ fn open_infile(
     before: Option<fs::Metadata>,
     link_key: Option<crate::protocol::HardlinkKey>,
     prefix: ResumePrefix,
+    delta: bool,
 ) -> io::Result<InFile> {
     let name = dir.rename_to.clone().unwrap_or_else(|| entry.name.clone());
     let final_path = dir.dest.join(OsStr::from_bytes(&name));
@@ -426,7 +443,56 @@ fn open_infile(
         prefix: prefix.size,
         prefix_ok,
         chunks: Default::default(),
+        delta,
+        delta_sum: [0, 0],
+        ok: true,
     })
+}
+
+/// `Receiver::on_delta_request`: only a requested regular file gets a basis, and
+/// one request per file is allowed. The reply carries the signature or a zero
+/// presence byte, compressed exactly as the C++ sender reads it.
+fn process_delta_request<W: Write + Send + 'static>(
+    output: &mut FrameOut<W>,
+    payload: &[u8],
+    opts: &Options,
+    features: u64,
+    dirs: &mut [Option<RecvDir>],
+) -> io::Result<()> {
+    if features & feature::DELTA == 0 {
+        return bad("protocol error: unnegotiated delta request");
+    }
+    let mut d = Decoder::new(payload);
+    let id = u32::try_from(d.var().map_err(decode_err)?)
+        .map_err(|_| io::Error::new(io::ErrorKind::InvalidData, "protocol error: bad delta request"))?;
+    let idx = u32::try_from(d.var().map_err(decode_err)?)
+        .map_err(|_| io::Error::new(io::ErrorKind::InvalidData, "protocol error: bad delta request"))?;
+    if !d.is_empty() {
+        return bad("protocol error: trailing delta request");
+    }
+    let dir = dirs
+        .get_mut(id as usize)
+        .and_then(Option::as_mut)
+        .ok_or_else(|| io::Error::new(io::ErrorKind::InvalidData, "protocol error: premature delta request"))?;
+    let entry = dir
+        .entries
+        .get(idx as usize)
+        .ok_or_else(|| io::Error::new(io::ErrorKind::InvalidData, "protocol error: unrequested delta basis"))?;
+    if entry.kind != T_REG || !dir.need.contains(&idx) || !dir.delta_candidates.contains(&idx) {
+        return bad("protocol error: unrequested delta basis");
+    }
+    if !dir.delta_requested.insert(idx) {
+        return bad("protocol error: duplicate delta request");
+    }
+    let name = dir.rename_to.clone().unwrap_or_else(|| entry.name.clone());
+    let path = dir.dest.join(OsStr::from_bytes(&name));
+    let basis = delta::destination_basis(&path).ok().flatten().map(Arc::new);
+    let signature = basis.as_ref().map(|basis| basis.signature.clone());
+    let reply = delta::signature_reply(id, idx, signature.as_ref(), opts.compress, opts.compress_level);
+    if let Some(basis) = basis {
+        dir.bases.insert(idx, basis);
+    }
+    output.send(frame_type::DELTA_SIGNATURE, &reply)
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -478,6 +544,18 @@ fn process_data<W: Write + Send + 'static>(
         let event_path = scan::join_rel(&dir.rel, &entry.name);
         let event_source = entry.output_source.clone();
         let link_key = HardLinks::key(&entry, features);
+        let delta = matches!(kind, rec::LITERAL | rec::COPY | rec::DELTA_END);
+        let basis = if delta {
+            if features & feature::DELTA == 0 {
+                return bad("protocol error: unnegotiated delta data");
+            }
+            match dir.bases.get(&idx) {
+                Some(basis) => Some(basis.clone()),
+                None => return bad("protocol error: unrequested delta data"),
+            }
+        } else {
+            None
+        };
         match kind {
             rec::WHOLE => {
                 let mut attrs = protocol::get_file_attrs(&mut d, features)?;
@@ -498,19 +576,39 @@ fn process_data<W: Write + Send + 'static>(
                     report_event(output, local_output.as_deref_mut(), features, opts, event)?;
                 }
             }
-            rec::CHUNK => {
+            rec::CHUNK | rec::LITERAL | rec::COPY => {
+                let is_delta = kind != rec::CHUNK;
                 let attempt = u32::try_from(d.var().map_err(decode_err)?)
                     .map_err(|_| io::Error::new(io::ErrorKind::InvalidData, "bad attempt"))?;
-                let prefix = if resume_enabled { data_prefix(&mut d)? } else { ResumePrefix::default() };
+                let prefix = if !is_delta && resume_enabled { data_prefix(&mut d)? } else { ResumePrefix::default() };
                 let offset = i64::try_from(d.var().map_err(decode_err)?)
                     .map_err(|_| io::Error::new(io::ErrorKind::InvalidData, "bad chunk offset"))?;
                 let total = i64::try_from(d.var().map_err(decode_err)?)
                     .map_err(|_| io::Error::new(io::ErrorKind::InvalidData, "bad chunk total"))?;
-                let bytes = d.str().map_err(decode_err)?;
+                let mut first = 0u32;
+                let mut count = 0u32;
+                let bytes = if kind == rec::COPY {
+                    first = u32::try_from(d.var().map_err(decode_err)?)
+                        .map_err(|_| io::Error::new(io::ErrorKind::InvalidData, "protocol error: bad delta reference"))?;
+                    count = u32::try_from(d.var().map_err(decode_err)?)
+                        .map_err(|_| io::Error::new(io::ErrorKind::InvalidData, "protocol error: bad delta reference"))?;
+                    &[][..]
+                } else {
+                    d.str().map_err(decode_err)?
+                };
+                let length = if kind == rec::COPY {
+                    let signature = &basis.as_ref().unwrap().signature;
+                    signature.length(first, count)
+                } else {
+                    bytes.len() as i64
+                };
                 if offset < 0
                     || total < 0
-                    || bytes.is_empty()
-                    || offset.checked_add(bytes.len() as i64).map(|e| e > total).unwrap_or(true)
+                    || length <= 0
+                    || length > total
+                    || offset > total - length
+                    || (is_delta && bytes.len() > (1 << 16))
+                    || (kind == rec::COPY && length > (8 << 20))
                 {
                     return bad("protocol error: bad chunk");
                 }
@@ -526,32 +624,75 @@ fn process_data<W: Write + Send + 'static>(
                             added_bytes += prefix.size as u64;
                         }
                         let restore = if prefix.size > 0 { offered.copied().unwrap_or_default() } else { ResumePrefix::default() };
-                        vacant.insert(open_infile(dir, &entry, total, before.clone(), link_key.clone(), restore)?)
+                        vacant.insert(open_infile(dir, &entry, total, before.clone(), link_key.clone(), restore, is_delta)?)
                     }
                 };
                 if infile.total != Some(total) {
                     return bad("protocol error: inconsistent file size");
                 }
-                if infile.prefix != prefix.size {
+                let end = offset + length;
+                if let Some(status) = infile.status {
+                    let strict = if is_delta { status == 0 } else { status != 2 };
+                    if end > total || (strict && total != infile.total.unwrap_or(total)) {
+                        return bad("protocol error: inconsistent file size");
+                    }
+                }
+                if infile.prefix != prefix.size || infile.delta != is_delta {
                     return bad("protocol error: inconsistent transfer method");
                 }
-                let end = offset + bytes.len() as i64;
                 if !reserve_chunk(&mut infile.chunks, offset, end) {
                     return bad("protocol error: overlapping file chunks");
                 }
-                infile.pending += 1;
-                pool.submit(infile.file.as_raw_fd(), bytes.to_vec(), offset, end, key);
-                added_bytes += bytes.len() as u64;
+                if is_delta {
+                    let basis = basis.as_ref().unwrap();
+                    if infile.ok {
+                        let written = if count != 0 {
+                            let mut scratch = Vec::new();
+                            let mut at = offset;
+                            let mut written = Ok(());
+                            for index in first..first + count {
+                                if let Err(error) = basis.read_block(index, &mut scratch) {
+                                    written = Err(error);
+                                    break;
+                                }
+                                if let Err(error) = infile.file.write_all_at(&scratch, at as u64) {
+                                    written = Err(error);
+                                    break;
+                                }
+                                at += scratch.len() as i64;
+                            }
+                            written
+                        } else {
+                            infile.file.write_all_at(bytes, offset as u64)
+                        };
+                        if written.is_err() {
+                            infile.ok = false;
+                        }
+                    }
+                    add_range(&mut infile.ranges, offset, end);
+                    added_bytes += length as u64;
+                } else {
+                    infile.pending += 1;
+                    pool.submit(infile.file.as_raw_fd(), bytes.to_vec(), offset, end, key);
+                    added_bytes += bytes.len() as u64;
+                }
             }
-            rec::END => {
+            rec::END | rec::DELTA_END => {
+                let is_delta = kind == rec::DELTA_END;
                 let attempt = u32::try_from(d.var().map_err(decode_err)?)
                     .map_err(|_| io::Error::new(io::ErrorKind::InvalidData, "bad attempt"))?;
-                let prefix = if resume_enabled { data_prefix(&mut d)? } else { ResumePrefix::default() };
+                let prefix = if !is_delta && resume_enabled { data_prefix(&mut d)? } else { ResumePrefix::default() };
                 let total = i64::try_from(d.var().map_err(decode_err)?)
                     .map_err(|_| io::Error::new(io::ErrorKind::InvalidData, "bad file total"))?;
                 let status = d.byte().map_err(decode_err)?;
                 let mut attrs = protocol::get_file_attrs(&mut d, features)?;
                 ids.apply(&mut attrs, opts);
+                let mut delta_sum = [0u64; 2];
+                if is_delta {
+                    let digest = d.raw(16).map_err(decode_err)?;
+                    delta_sum[0] = u64::from_le_bytes(digest[..8].try_into().unwrap());
+                    delta_sum[1] = u64::from_le_bytes(digest[8..].try_into().unwrap());
+                }
                 if status > 2 || total < 0 {
                     return bad("protocol error: bad file completion");
                 }
@@ -567,15 +708,28 @@ fn process_data<W: Write + Send + 'static>(
                             added_bytes += prefix.size as u64;
                         }
                         let restore = if prefix.size > 0 { offered.copied().unwrap_or_default() } else { ResumePrefix::default() };
-                        vacant.insert(open_infile(dir, &entry, total, before.clone(), link_key.clone(), restore)?)
+                        vacant.insert(open_infile(dir, &entry, total, before.clone(), link_key.clone(), restore, is_delta)?)
                     }
                 };
-                if infile.prefix != prefix.size {
+                if infile.prefix != prefix.size || infile.delta != is_delta {
                     return bad("protocol error: inconsistent transfer method");
+                }
+                if infile.status.is_some() {
+                    return bad("protocol error: duplicate file completion");
+                }
+                if let Some(current) = infile.total {
+                    let strict = status != 2;
+                    if total > current || (strict && total != current) {
+                        return bad("protocol error: inconsistent file size");
+                    }
+                    if infile.chunks.iter().next_back().map(|(_, &end)| end > total).unwrap_or(false) {
+                        return bad("protocol error: inconsistent file size");
+                    }
                 }
                 infile.total = Some(total);
                 infile.attrs = Some(attrs);
                 infile.status = Some(status);
+                infile.delta_sum = delta_sum;
             }
             rec::FAIL => {
                 dir.need.remove(&idx);
@@ -635,10 +789,18 @@ fn finish_ready<W: Write + Send + 'static>(
     local_output: Option<&mut Output>,
     partial_failure: &mut bool,
 ) -> io::Result<u64> {
-    let Some((pending, status, total, prefix, prefix_ok)) = infiles
-        .get(&key)
-        .map(|infile| (infile.pending, infile.status, infile.total.unwrap_or(0), infile.prefix, infile.prefix_ok))
-    else {
+    let Some((pending, status, total, prefix, prefix_ok, delta, delta_sum, ok)) = infiles.get(&key).map(|infile| {
+        (
+            infile.pending,
+            infile.status,
+            infile.total.unwrap_or(0),
+            infile.prefix,
+            infile.prefix_ok,
+            infile.delta,
+            infile.delta_sum,
+            infile.ok,
+        )
+    }) else {
         return Ok(0);
     };
     if pending != 0 {
@@ -647,10 +809,33 @@ fn finish_ready<W: Write + Send + 'static>(
     let Some(status) = status else {
         return Ok(0);
     };
-    if !prefix_ok || status != 0 {
+    // Completion is published only after every byte range has arrived; END can
+    // precede the COPY records it authorizes.
+    if !infiles.get(&key).map(|infile| covered_from(&infile.ranges, prefix, total)).unwrap_or(false) {
+        return Ok(0);
+    }
+    // A source that changed between attempts ends with status 1. The sender will
+    // resend the same file; a delta retry waits for our acknowledgment first.
+    if status == 1 {
+        let infile = infiles.remove(&key).unwrap();
+        let _ = fs::remove_file(&infile.temp);
+        if delta {
+            let mut ack = Encoder::new();
+            ack.var(u64::from(key.0)).var(u64::from(key.1));
+            output.send(frame_type::DELTA_RETRY_ACK, &ack.bytes)?;
+        }
+        return Ok(0);
+    }
+    let verified = if delta && status == 0 && prefix_ok {
+        delta::verify_file(&infiles.get(&key).unwrap().file, total, delta_sum).unwrap_or(false)
+    } else {
+        true
+    };
+    if !prefix_ok || status != 0 || !ok || !verified {
         let infile = infiles.remove(&key).unwrap();
         if let Some(dir) = dirs.get_mut(key.0 as usize).and_then(Option::as_mut) {
             dir.need.remove(&key.1);
+            dir.bases.remove(&key.1);
         }
         *partial_failure = true;
         if opts.partial && prefix_ok && status == 2 {
@@ -660,9 +845,6 @@ fn finish_ready<W: Write + Send + 'static>(
             }
         }
         let _ = fs::remove_file(&infile.temp);
-        return Ok(0);
-    }
-    if !infiles.get(&key).map(|infile| covered_from(&infile.ranges, prefix, total)).unwrap_or(false) {
         return Ok(0);
     }
     let infile = infiles.get_mut(&key).unwrap();
@@ -676,6 +858,7 @@ fn finish_ready<W: Write + Send + 'static>(
     infiles.remove(&key);
     if let Some(dir) = dirs.get_mut(key.0 as usize).and_then(Option::as_mut) {
         dir.need.remove(&key.1);
+        dir.bases.remove(&key.1);
     }
     let code = transferred_code(opts, before.as_ref(), &entry);
     let event = taken_event(&code, &event_path, &entry.output_source, T_REG, total, total);
@@ -840,6 +1023,9 @@ pub fn run_receiver<R: Read, W: Write + Send + 'static>(
                 }
                 Err(error) => Err(error),
             },
+            frame_type::DELTA_REQUEST => {
+                process_delta_request(&mut output, &frame.payload, opts, features, &mut dirs)
+            }
             frame_type::LIST_END => Ok(()),
             frame_type::DATA_END => {
                 let mut d = Decoder::new(&frame.payload);
@@ -910,7 +1096,8 @@ pub fn run_receiver<R: Read, W: Write + Send + 'static>(
     )?;
     created_files += finished;
     progress_files += finished;
-    if !infiles.is_empty() {
+    let missing = dirs.iter().flatten().any(|dir| !dir.need.is_empty());
+    if !infiles.is_empty() || missing {
         let _ = send_fatal(&mut output, "protocol error: incomplete file data");
         cleanup_partial(&mut infiles, opts);
         output.finish()?;

@@ -3,7 +3,7 @@
 //! differences, and publishes files. One reader and one writer per side; the stream
 //! stays pipelined because listings go first.
 
-use std::collections::HashMap;
+use std::collections::{HashMap, VecDeque};
 use std::ffi::OsString;
 use std::fs::{self, File};
 use std::io::{self, BufWriter, Read, Seek, SeekFrom, Write};
@@ -20,6 +20,7 @@ use xs_wire::resume::ResumePrefix;
 use xs_wire::{Decoder, Encoder, Frame, Suffixes};
 
 use crate::compression::{CompressionLink, Transport};
+use crate::delta::{DeltaSignature, DELTA_THRESHOLD};
 use crate::ffi;
 use crate::idmap;
 use crate::output::Output;
@@ -504,6 +505,9 @@ fn send_large<W: Write + Send + 'static>(
     ranges: bool,
     offered: Option<&ResumePrefix>,
     resume: bool,
+    delta: bool,
+    eligible: bool,
+    wait: &mut dyn FnMut(u32, u32) -> io::Result<Option<DeltaSignature>>,
 ) -> io::Result<()> {
     let planned = entry.meta.size.max(0) as u64;
     let mut prefix = if resume {
@@ -514,6 +518,15 @@ fn send_large<W: Write + Send + 'static>(
     } else {
         ResumePrefix::default()
     };
+    if delta && eligible && prefix.is_empty() && planned > DELTA_THRESHOLD as u64 {
+        flush_data(output, block, compress, link, opts)?;
+        let mut request = Encoder::new();
+        request.var(id as u64).var(idx as u64);
+        output.send(frame_type::DELTA_REQUEST, &request.bytes)?;
+        if let Some(signature) = wait(id, idx)? {
+            return send_delta(output, id, idx, entry, features, compress, link, opts, block, &signature, planned);
+        }
+    }
     if ranges && prefix.is_empty() && planned >= crate::parallel::RANGE_MIN {
         let jobs = crate::parallel::effective_jobs(opts.jobs);
         let complete = crate::parallel::read_ranges(
@@ -612,6 +625,55 @@ fn send_large<W: Write + Send + 'static>(
     flush_data(output, block, compress, link, opts)
 }
 
+/// `Sender::read_one`'s delta branch: one LITERAL or COPY record per emitted op,
+/// then DELTA_END with the source digest.
+#[allow(clippy::too_many_arguments)]
+fn send_delta<W: Write + Send + 'static>(
+    output: &mut FrameOut<W>,
+    id: u32,
+    idx: u32,
+    entry: &SourceEntry,
+    features: u64,
+    compress: bool,
+    link: &CompressionLink,
+    opts: &Options,
+    block: &mut Vec<u8>,
+    signature: &DeltaSignature,
+    planned: u64,
+) -> io::Result<()> {
+    let matched = match File::open(&entry.path) {
+        Ok(file) => crate::delta::match_file(&file, planned as i64, signature, |offset, first, count, literal| {
+            let mut e = Encoder::new();
+            e.var(id as u64).var(idx as u64).byte(if count != 0 { rec::COPY } else { rec::LITERAL });
+            e.var(0).var(offset.max(0) as u64).var(planned);
+            if count != 0 {
+                e.var(first as u64).var(count as u64);
+            } else {
+                e.str(literal);
+            }
+            record(e, block);
+            if block.len() >= protocol::BLOCK_TARGET {
+                flush_data(output, block, compress, link, opts)?;
+            }
+            Ok(())
+        }),
+        Err(error) => Err(error),
+    };
+    let (processed, status, sum) = match matched {
+        Ok(result) if result.ok => (result.processed, 0u8, result.sum),
+        Ok(result) => (result.processed, 2u8, result.sum),
+        Err(_) => (0, 2u8, [0u64; 2]),
+    };
+    flush_data(output, block, compress, link, opts)?;
+    let mut e = Encoder::new();
+    e.var(id as u64).var(idx as u64).byte(rec::DELTA_END);
+    e.var(0).var(processed.max(0) as u64).byte(status);
+    protocol::put_file_attrs(&mut e, &entry.meta.attrs, features);
+    e.raw(&sum[0].to_le_bytes()).raw(&sum[1].to_le_bytes());
+    record(e, block);
+    flush_data(output, block, compress, link, opts)
+}
+
 #[allow(clippy::too_many_arguments)]
 fn send_need_data<W: Write + Send + 'static>(
     output: &mut FrameOut<W>,
@@ -624,6 +686,9 @@ fn send_need_data<W: Write + Send + 'static>(
     suffixes: &Suffixes,
     prefixes: &HashMap<u32, ResumePrefix>,
     resume: bool,
+    delta: bool,
+    eligible: &[bool],
+    wait: &mut dyn FnMut(u32, u32) -> io::Result<Option<DeltaSignature>>,
 ) -> io::Result<()> {
     // `parallel_file_ranges`: split only when an explicit -jN asked for it and
     // the NEED does not already offer several large files as parallel work.
@@ -639,7 +704,7 @@ fn send_need_data<W: Write + Send + 'static>(
     let ranges = crate::parallel::explicit_ranges(opts.jobs) && large <= 1;
     let mut block = Vec::with_capacity(protocol::BLOCK_TARGET);
     let mut block_skip = false;
-    for &idx in indices {
+    for (position, &idx) in indices.iter().enumerate() {
         let Some(entry) = dir.dest_entries.get(idx as usize) else {
             return bad("protocol error: bad NEED index");
         };
@@ -679,6 +744,9 @@ fn send_need_data<W: Write + Send + 'static>(
                 ranges,
                 prefixes.get(&idx),
                 resume,
+                delta,
+                eligible.get(position).copied().unwrap_or(false),
+                wait,
             )?;
         }
         if skip {
@@ -686,6 +754,41 @@ fn send_need_data<W: Write + Send + 'static>(
         }
     }
     flush_data(output, &mut block, opts.compress && !block_skip, link, opts)
+}
+
+/// Read until the reply to one F_DELTA_REQUEST. Any other frame is kept for the
+/// main loop, because the C++ receiver pipelines NEEDs from other directories.
+fn wait_signature<R: Read>(
+    input: &mut R,
+    pending: &mut VecDeque<Frame>,
+    keepalive: bool,
+    features: u64,
+    id: u32,
+    idx: u32,
+) -> io::Result<Option<DeltaSignature>> {
+    loop {
+        let Some(frame) = protocol::read_checked(input, keepalive, features)? else {
+            return Err(io::Error::new(io::ErrorKind::UnexpectedEof, "receiver closed before its delta signature"));
+        };
+        match frame.kind {
+            frame_type::DELTA_SIGNATURE => {
+                let (reply_id, reply_idx, signature) = crate::delta::decode_signature(&frame.payload, features)?;
+                if reply_id != id || reply_idx != idx {
+                    return bad("protocol error: unsolicited delta reply");
+                }
+                return Ok(signature);
+            }
+            frame_type::NEED | frame_type::OUTPUT | frame_type::PROGRESS | frame_type::IDMAP => {
+                pending.push_back(frame);
+            }
+            frame_type::MSG => {
+                if let Some(code) = msg_code(&frame)? {
+                    return Err(io::Error::other(format!("receiver exited with status {code}")));
+                }
+            }
+            other => return bad(format!("protocol error: unexpected frame {other} before a delta reply")),
+        }
+    }
 }
 
 /// Sender: wait for the receiver's F_DEST, send every listing, then answer each
@@ -726,6 +829,7 @@ pub fn run_sender<R: Read, W: Write + Send + 'static>(
     }
     let suffixes = crate::compression::suffixes(&opts.skip_compress);
     let resume = opts.partial && features & feature::RESUME != 0;
+    let delta = features & feature::DELTA != 0;
     let mut ids = idmap::Sender::default();
     let mut dirs: Vec<Option<SentDir>> = Vec::new();
     let mut next_id = 1u32;
@@ -750,86 +854,134 @@ pub fn run_sender<R: Read, W: Write + Send + 'static>(
     output.send(frame_type::LIST_END, &[])?;
 
     let mut needs = 0u32;
+    let mut pending: VecDeque<Frame> = VecDeque::new();
     loop {
-        let Some(frame) = protocol::read_checked(input, keepalive, features)? else {
-            return Ok(12);
+        let frame = match pending.pop_front() {
+            Some(frame) => frame,
+            None => {
+                let Some(frame) = protocol::read_checked(input, keepalive, features)? else {
+                    return Ok(12);
+                };
+                frame
+            }
         };
-        match frame.kind {
-            frame_type::OUTPUT => {
-                if features & feature::OUTPUT == 0 {
-                    return bad("file output without negotiated support");
-                }
-                let event = OutputEvent::decode(&frame.payload, features).map_err(decode_err)?;
-                if let Some(local) = local_output.as_deref_mut() {
-                    local.push(event);
-                }
-            }
-            frame_type::PROGRESS => {
-                ProgressAck::decode(&frame.payload, features)
-                    .map_err(|_| io::Error::new(io::ErrorKind::InvalidData, "protocol error: malformed progress acknowledgment"))?;
-            }
-            frame_type::NEED => {
-                let mut d = Decoder::new(&frame.payload);
-                let id = u32::try_from(d.var().map_err(decode_err)?)
-                    .map_err(|_| io::Error::new(io::ErrorKind::InvalidData, "bad NEED id"))?;
-                let count = usize::try_from(d.var().map_err(decode_err)?)
-                    .map_err(|_| io::Error::new(io::ErrorKind::InvalidData, "bad NEED count"))?;
-                let mut indices = Vec::with_capacity(count);
-                let mut offered = Vec::with_capacity(count);
-                let mut previous = 0u32;
-                for i in 0..count {
-                    let difference = u32::try_from(d.var().map_err(decode_err)?)
-                        .map_err(|_| io::Error::new(io::ErrorKind::InvalidData, "bad NEED index"))?;
-                    if i > 0 && difference == 0 {
-                        return bad("protocol error: bad NEED index");
+        let action: io::Result<Option<i32>> = (|| {
+            match frame.kind {
+                frame_type::OUTPUT => {
+                    if features & feature::OUTPUT == 0 {
+                        return bad("file output without negotiated support");
                     }
-                    previous = previous
-                        .checked_add(difference)
-                        .ok_or_else(|| io::Error::new(io::ErrorKind::InvalidData, "bad NEED index"))?;
-                    indices.push(previous);
-                    offered.push(if resume { ResumePrefix::get(&mut d).map_err(decode_err)? } else { ResumePrefix::default() });
-                }
-                if !d.is_empty() {
-                    return bad("protocol error: trailing NEED payload");
-                }
-                let dir = dirs
-                    .get_mut(id as usize)
-                    .and_then(Option::take)
-                    .ok_or_else(|| io::Error::new(io::ErrorKind::InvalidData, "protocol error: bad NEED directory"))?;
-                let mut prefixes = HashMap::new();
-                for (&idx, prefix) in indices.iter().zip(&offered) {
-                    let entry = dir
-                        .dest_entries
-                        .get(idx as usize)
-                        .ok_or_else(|| io::Error::new(io::ErrorKind::InvalidData, "protocol error: bad NEED index"))?;
-                    if prefix.size > entry.meta.size {
-                        return bad("protocol error: bad resume prefix");
+                    let event = OutputEvent::decode(&frame.payload, features).map_err(decode_err)?;
+                    if let Some(local) = local_output.as_deref_mut() {
+                        local.push(event);
                     }
-                    if !prefix.is_empty() {
-                        prefixes.insert(idx, *prefix);
+                    Ok(None)
+                }
+                frame_type::PROGRESS => {
+                    ProgressAck::decode(&frame.payload, features).map_err(|_| {
+                        io::Error::new(io::ErrorKind::InvalidData, "protocol error: malformed progress acknowledgment")
+                    })?;
+                    Ok(None)
+                }
+                frame_type::NEED => {
+                    let mut d = Decoder::new(&frame.payload);
+                    let id = u32::try_from(d.var().map_err(decode_err)?)
+                        .map_err(|_| io::Error::new(io::ErrorKind::InvalidData, "bad NEED id"))?;
+                    let count = usize::try_from(d.var().map_err(decode_err)?)
+                        .map_err(|_| io::Error::new(io::ErrorKind::InvalidData, "bad NEED count"))?;
+                    let mut indices = Vec::with_capacity(count);
+                    let mut offered = Vec::with_capacity(count);
+                    let mut eligible = Vec::with_capacity(count);
+                    let mut previous = 0u32;
+                    for i in 0..count {
+                        let difference = u32::try_from(d.var().map_err(decode_err)?)
+                            .map_err(|_| io::Error::new(io::ErrorKind::InvalidData, "bad NEED index"))?;
+                        if i > 0 && difference == 0 {
+                            return bad("protocol error: bad NEED index");
+                        }
+                        previous = previous
+                            .checked_add(difference)
+                            .ok_or_else(|| io::Error::new(io::ErrorKind::InvalidData, "bad NEED index"))?;
+                        indices.push(previous);
+                        offered.push(if resume { ResumePrefix::get(&mut d).map_err(decode_err)? } else { ResumePrefix::default() });
+                        eligible.push(if delta {
+                            let value = d.byte().map_err(decode_err)?;
+                            if value > 1 {
+                                return bad("protocol error: bad delta candidate");
+                            }
+                            value != 0
+                        } else {
+                            false
+                        });
                     }
+                    if !d.is_empty() {
+                        return bad("protocol error: trailing NEED payload");
+                    }
+                    let dir = dirs
+                        .get_mut(id as usize)
+                        .and_then(Option::take)
+                        .ok_or_else(|| io::Error::new(io::ErrorKind::InvalidData, "protocol error: bad NEED directory"))?;
+                    let mut prefixes = HashMap::new();
+                    for (position, (&idx, prefix)) in indices.iter().zip(&offered).enumerate() {
+                        let entry = dir
+                            .dest_entries
+                            .get(idx as usize)
+                            .ok_or_else(|| io::Error::new(io::ErrorKind::InvalidData, "protocol error: bad NEED index"))?;
+                        if prefix.size > entry.meta.size {
+                            return bad("protocol error: bad resume prefix");
+                        }
+                        if eligible[position] && entry.meta.kind != T_REG {
+                            return bad("protocol error: bad delta candidate");
+                        }
+                        if !prefix.is_empty() {
+                            prefixes.insert(idx, *prefix);
+                        }
+                    }
+                    send_need_data(
+                        &mut output,
+                        id,
+                        &indices,
+                        &dir,
+                        features,
+                        &link,
+                        opts,
+                        &suffixes,
+                        &prefixes,
+                        resume,
+                        delta,
+                        &eligible,
+                        &mut |id, idx| wait_signature(input, &mut pending, keepalive, features, id, idx),
+                    )?;
+                    needs += 1;
+                    if needs == dir_count {
+                        let mut end = Encoder::new();
+                        end.var(0);
+                        output.send(frame_type::DATA_END, &end.bytes)?;
+                    }
+                    Ok(None)
                 }
-                send_need_data(&mut output, id, &indices, &dir, features, &link, opts, &suffixes, &prefixes, resume)?;
-                needs += 1;
-                if needs == dir_count {
-                    let mut end = Encoder::new();
-                    end.var(0);
-                    output.send(frame_type::DATA_END, &end.bytes)?;
+                frame_type::DONE => {
+                    let mut d = Decoder::new(&frame.payload);
+                    let code = i32::try_from(d.var().map_err(decode_err)?).unwrap_or(0);
+                    Ok(Some(code))
                 }
+                frame_type::MSG => Ok(msg_code(&frame)?),
+                frame_type::IDMAP => Ok(None),
+                other => bad(format!("protocol error: unexpected frame {other} from receiver")),
             }
-            frame_type::DONE => {
-                let mut d = Decoder::new(&frame.payload);
-                let code = i32::try_from(d.var().map_err(decode_err)?).unwrap_or(0);
+        })();
+        match action {
+            Ok(Some(code)) => {
                 output.finish()?;
                 return Ok(code);
             }
-            frame_type::MSG => {
-                if let Some(code) = msg_code(&frame)? {
-                    return Ok(code);
-                }
+            Ok(None) => {}
+            Err(error) => {
+                eprintln!("xs-rs: {error}");
+                let _ = send_fatal(&mut output, &error.to_string());
+                output.finish()?;
+                return Ok(2);
             }
-            frame_type::IDMAP => {}
-            other => return bad(format!("protocol error: unexpected frame {other} from receiver")),
         }
     }
 }
