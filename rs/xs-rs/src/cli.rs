@@ -17,10 +17,14 @@ pub struct Cli {
     pub options: Options,
     pub rsh: Option<OsString>,
     pub rsync_path: Option<OsString>,
+    pub files_from: Option<OsString>,
     pub paths: Vec<OsString>,
     pub verbose: i64,
     pub help: bool,
     pub version: bool,
+    recursive_setting: i8,
+    relative_explicit: bool,
+    dirs_explicit: bool,
 }
 
 impl Cli {
@@ -43,8 +47,19 @@ impl Cli {
                     self.archive();
                 }
             }
-            "recursive" | "recursion" => self.options.recursive = on,
-            "dirs" => {}
+            "recursive" | "recursion" => {
+                self.options.recursive = on;
+                self.recursive_setting = if on { 1 } else { -1 };
+            }
+            "dirs" => {
+                self.options.dir_requested = on;
+                self.dirs_explicit = true;
+            }
+            "relative" => {
+                self.options.relative = on;
+                self.relative_explicit = true;
+            }
+            "from0" => self.options.from0 = on,
             "links" => self.options.links = on,
             "copy-links" => self.options.copy_links = on,
             "perms" => self.options.perms = on,
@@ -65,7 +80,7 @@ impl Cli {
             // Accepted no-ops that C++ also accepts: their behaviour is intrinsic
             // to this engine, so there is nothing to switch off.
             "protect-args" | "secluded-args" | "blocking-io" | "open-noatime" | "motd"
-            | "clone" | "atomic" | "fallback" | "from0" | "stats" | "human-readable" => {}
+            | "clone" | "atomic" | "fallback" | "stats" | "human-readable" => {}
             _ => {}
         }
     }
@@ -312,6 +327,34 @@ pub fn parse(args: Vec<OsString>) -> Result<Cli, String> {
                 cli.options.progress = true;
                 continue;
             }
+            if matches!(name, "filter" | "exclude" | "include") {
+                let value = match inline {
+                    Some(value) => value,
+                    None => iter.next().ok_or_else(|| format!("--{name} needs a value"))?,
+                };
+                let result = match name {
+                    "filter" => cli.options.filters.add_filter(value.as_bytes()),
+                    "include" => {
+                        let _ = cli.options.filters.add_old_style(value.as_bytes(), true);
+                        Ok(())
+                    }
+                    _ => {
+                        let _ = cli.options.filters.add_old_style(value.as_bytes(), false);
+                        Ok(())
+                    }
+                };
+                result?;
+                continue;
+            }
+            if name == "files-from" {
+                let value = match inline {
+                    Some(value) => value,
+                    None => iter.next().ok_or_else(|| "--files-from needs a value".to_string())?,
+                };
+                cli.files_from = Some(value);
+                cli.options.files_from_set = true;
+                continue;
+            }
             // Options xs itself supports but this port does not implement yet are
             // refused rather than silently doing something else.
             if matches!(
@@ -321,13 +364,7 @@ pub fn parse(args: Vec<OsString>) -> Result<Cli, String> {
                     | "max-size"
                     | "min-size"
                     | "modify-window"
-                    | "exclude"
-                    | "include"
-                    | "exclude-from"
-                    | "include-from"
-                    | "filter"
                     | "info"
-                    | "files-from"
                     | "link-dest"
                     | "chmod"
                     | "log-file"
@@ -360,7 +397,10 @@ pub fn parse(args: Vec<OsString>) -> Result<Cli, String> {
                     cli.options.devices = on;
                     cli.options.specials = on;
                 }
-                "R" | "relative" => {}
+                "R" | "relative" => {
+                    cli.options.relative = on;
+                    cli.relative_explicit = true;
+                }
                 // `set_long` owns every other boolean and documented no-op.
                 "archive"
                 | "recursive"
@@ -405,7 +445,10 @@ pub fn parse(args: Vec<OsString>) -> Result<Cli, String> {
                 index += 1;
                 match ch {
                     'a' => cli.archive(),
-                    'r' => cli.options.recursive = true,
+                    'r' => {
+                        cli.options.recursive = true;
+                        cli.recursive_setting = 1;
+                    }
                     'l' => cli.options.links = true,
                     'p' => cli.options.perms = true,
                     't' => cli.options.times = true,
@@ -415,11 +458,22 @@ pub fn parse(args: Vec<OsString>) -> Result<Cli, String> {
                         cli.options.devices = true;
                         cli.options.specials = true;
                     }
-                    'd' => {}
+                    'd' => {
+                        cli.options.dir_requested = true;
+                        cli.dirs_explicit = true;
+                    }
+                    'R' => {
+                        cli.options.relative = true;
+                        cli.relative_explicit = true;
+                    }
                     'L' => cli.options.copy_links = true,
                     'W' => cli.options.whole_file = true,
                     'I' => cli.options.ignore_times = true,
-                    'u' | 'c' | 'x' | 'O' | 'J' | 's' | 'S' | 'C' | 'F' | 'm' | '0' => {}
+                    'C' => {
+                        let _ = cli.options.filters.add_filter(b"-C");
+                    }
+                    '0' => cli.options.from0 = true,
+                    'u' | 'c' | 'x' | 'O' | 'J' | 's' | 'S' | 'm' => {}
                     'A' => {
                         cli.options.perms = true;
                     }
@@ -456,6 +510,16 @@ pub fn parse(args: Vec<OsString>) -> Result<Cli, String> {
                         };
                         cli.rsh = Some(value);
                     }
+                    'f' => {
+                        let value = if index < bytes.len() {
+                            let value = OsString::from_vec(bytes[index..].to_vec());
+                            index = bytes.len();
+                            value
+                        } else {
+                            iter.next().ok_or_else(|| "-f needs a rule".to_string())?
+                        };
+                        cli.options.filters.add_filter(value.as_bytes())?;
+                    }
                     '4' => return Err("--ipv4 is not supported by xs".into()),
                     '6' => return Err("--ipv6 is not supported by xs".into()),
                     'B' => return Err("--block-size is not supported by xs".into()),
@@ -472,6 +536,15 @@ pub fn parse(args: Vec<OsString>) -> Result<Cli, String> {
     }
     if compression_none {
         cli.options.compress = false;
+    }
+    if cli.options.files_from_set {
+        cli.options.recursive = cli.recursive_setting == 1;
+        if !cli.relative_explicit {
+            cli.options.relative = true;
+        }
+        if !cli.dirs_explicit {
+            cli.options.dir_requested = true;
+        }
     }
     cli.options.configure_output();
     Ok(cli)
