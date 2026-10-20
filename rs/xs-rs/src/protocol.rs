@@ -40,6 +40,25 @@ pub fn decode_err(error: xs_wire::DecodeError) -> io::Error {
     io::Error::new(io::ErrorKind::InvalidData, text)
 }
 
+/// Read the next frame, consuming legal keep-alives as `Conn::read_frame` does. A keep-alive
+/// before `F_IO_CONFIG` is negotiated, or one carrying a payload, is a protocol error.
+pub fn read_checked<R: io::Read>(input: &mut R, negotiated: bool) -> io::Result<Option<xs_wire::Frame>> {
+    loop {
+        let Some(frame) = xs_wire::read_frame(input)
+            .map_err(|error| io::Error::new(io::ErrorKind::InvalidData, error.to_string()))?
+        else {
+            return Ok(None);
+        };
+        if frame.kind == frame_type::KEEPALIVE {
+            if !xs_wire::io_control::valid_keepalive(&frame, negotiated) {
+                return bad("protocol error: invalid or unnegotiated keep-alive");
+            }
+            continue;
+        }
+        return Ok(Some(frame));
+    }
+}
+
 #[derive(Clone, Debug, Default)]
 pub struct Attrs {
     pub mode: u32,
@@ -258,6 +277,8 @@ pub struct Options {
     pub skip_compress: Vec<u8>,
     pub skip_compress_set: bool,
     pub ownership: Ownership,
+    pub bwlimit: u64,
+    pub timeout: u32,
 }
 
 impl Default for Options {
@@ -279,6 +300,8 @@ impl Default for Options {
             skip_compress: xs_wire::DEFAULT_SKIP_COMPRESS.as_bytes().to_vec(),
             skip_compress_set: false,
             ownership: Ownership::default(),
+            bwlimit: 0,
+            timeout: 0,
         }
     }
 }

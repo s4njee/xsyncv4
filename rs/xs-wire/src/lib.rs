@@ -12,6 +12,7 @@ pub mod consts;
 pub mod frame;
 pub mod hello;
 pub mod idmap;
+pub mod io_control;
 
 pub use compress::{Suffixes, DEFAULT_SKIP_COMPRESS};
 

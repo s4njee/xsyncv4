@@ -14,8 +14,10 @@ use std::ffi::{OsStr, OsString};
 use std::io::{self, BufReader, BufWriter, Read, Write};
 use std::os::unix::ffi::{OsStrExt, OsStringExt};
 use std::process::{Child, Command, Stdio};
+use std::sync::Arc;
 
 use xs_wire::config::Config;
+use xs_wire::io_control::{ActivityReader, IoControl, Watchdog};
 use xs_wire::{Decoder, Encoder, Frame};
 
 use crate::protocol::{feature, frame_type, msg_kind, Options};
@@ -23,8 +25,13 @@ use crate::transfer::{run_receiver, run_sender};
 
 const VERSION: u64 = 4;
 const MAGIC: &[u8; 6] = b"XSYNC\x01";
-const SUPPORTED: u64 =
-    feature::CORE | feature::ZSTD | feature::IDMAP | feature::DIR_CHILDREN | feature::COMPRESS_POLICY | feature::CHOWN;
+const SUPPORTED: u64 = feature::CORE
+    | feature::ZSTD
+    | feature::IDMAP
+    | feature::IO_CONTROL
+    | feature::DIR_CHILDREN
+    | feature::COMPRESS_POLICY
+    | feature::CHOWN;
 
 /// What a client advertises: the compression policy frame exists only with `-z`,
 /// and the ownership override only with `--chown`, as `run_client` masks them.
@@ -109,54 +116,90 @@ fn write_message(output: &mut impl Write, kind: u8, code: u64, text: &str) -> io
     xs_wire::write_frame(output, frame_type::MSG, &message.encode())
 }
 
-/// One configuration frame, with the compression header bound checked before its body is
-/// read: a hostile peer cannot make us wait for a megabyte it never sends.
-fn read_config_frame<R: Read>(reader: &mut R) -> io::Result<Option<Frame>> {
-    let mut header = [0u8; xs_wire::HEADER_LEN];
-    let mut filled = 0;
-    while filled < header.len() {
-        match reader.read(&mut header[filled..]) {
-            Ok(0) if filled == 0 => return Ok(None),
-            Ok(0) => return protocol::bad("connection closed inside a configuration frame"),
-            Ok(n) => filled += n,
-            Err(error) if error.kind() == io::ErrorKind::Interrupted => {}
-            Err(error) => return Err(error),
+/// One configuration frame, with the header bound checked before its body is read: a
+/// hostile peer cannot make us wait for a megabyte it never sends. Legal keep-alives are
+/// swallowed here, exactly as `Conn::read_frame` does.
+fn read_config_frame<R: Read>(reader: &mut R, allow_keepalive: bool) -> io::Result<Option<Frame>> {
+    loop {
+        let mut header = [0u8; xs_wire::HEADER_LEN];
+        let mut filled = 0;
+        while filled < header.len() {
+            match reader.read(&mut header[filled..]) {
+                Ok(0) if filled == 0 => return Ok(None),
+                Ok(0) => return protocol::bad("connection closed inside a configuration frame"),
+                Ok(n) => filled += n,
+                Err(error) if error.kind() == io::ErrorKind::Interrupted => {}
+                Err(error) => return Err(error),
+            }
         }
+        let len = u32::from_le_bytes([header[0], header[1], header[2], header[3]]);
+        let kind = header[4];
+        if len > xs_wire::MAX_PAYLOAD {
+            return protocol::bad("protocol error: oversized frame");
+        }
+        if kind == frame_type::IO_CONFIG && len > 20 {
+            return protocol::bad("protocol error: malformed I/O configuration (oversized)");
+        }
+        if kind == frame_type::KEEPALIVE && len != 0 {
+            return protocol::bad("protocol error: invalid or unnegotiated keep-alive");
+        }
+        if kind == frame_type::COMPRESS_CONFIG && len > 65536 + 16 {
+            return protocol::bad("protocol error: oversized or unnegotiated compression configuration");
+        }
+        if kind == frame_type::CHOWN_CONFIG && len > 1024 * 1024 {
+            return protocol::bad("protocol error: oversized ownership configuration");
+        }
+        let mut payload = vec![0u8; len as usize];
+        reader.read_exact(&mut payload).map_err(|error| match error.kind() {
+            io::ErrorKind::UnexpectedEof => io::Error::new(io::ErrorKind::InvalidData, "connection closed inside a frame"),
+            _ => error,
+        })?;
+        let frame = Frame::new(kind, payload);
+        if frame.kind == frame_type::KEEPALIVE {
+            if !allow_keepalive || !frame.payload.is_empty() {
+                return protocol::bad("protocol error: invalid or unnegotiated keep-alive");
+            }
+            continue;
+        }
+        return Ok(Some(frame));
     }
-    let len = u32::from_le_bytes([header[0], header[1], header[2], header[3]]);
-    let kind = header[4];
-    if len > xs_wire::MAX_PAYLOAD {
-        return protocol::bad("protocol error: oversized frame");
-    }
-    if kind == frame_type::COMPRESS_CONFIG && len > 65536 + 16 {
-        return protocol::bad("protocol error: oversized or unnegotiated compression configuration");
-    }
-    if kind == frame_type::CHOWN_CONFIG && len > 1024 * 1024 {
-        return protocol::bad("protocol error: oversized ownership configuration");
-    }
-    let mut payload = vec![0u8; len as usize];
-    reader.read_exact(&mut payload).map_err(|error| match error.kind() {
-        io::ErrorKind::UnexpectedEof => io::Error::new(io::ErrorKind::InvalidData, "connection closed inside a frame"),
-        _ => error,
-    })?;
-    Ok(Some(Frame::new(kind, payload)))
 }
 
 type ConfigResult<T> = Result<T, (i32, String)>;
 
-fn config_frame<R: Read>(reader: &mut R) -> ConfigResult<Frame> {
-    match read_config_frame(reader) {
+fn config_frame<R: Read>(reader: &mut R, allow_keepalive: bool) -> ConfigResult<Frame> {
+    match read_config_frame(reader, allow_keepalive) {
         Ok(Some(frame)) => Ok(frame),
         Ok(None) => Err((12, "connection closed inside a configuration frame".into())),
         Err(error) => Err((2, error.to_string())),
     }
 }
 
-/// The client sends configuration frames in feature order. This implementation
-/// negotiates only the compression policy and the ownership override.
-fn read_configuration<R: Read>(reader: &mut R, options: &mut Options, features: u64, role: u8) -> ConfigResult<()> {
+/// The client sends configuration frames in feature order: IO, compression, ownership.
+/// This implementation negotiates only those three.
+fn read_configuration<R: Read>(
+    reader: &mut R,
+    options: &mut Options,
+    features: u64,
+    role: u8,
+    control: &IoControl,
+) -> ConfigResult<()> {
+    if features & feature::IO_CONTROL != 0 {
+        let frame = config_frame(reader, false)?;
+        if frame.kind != frame_type::IO_CONFIG {
+            return Err((2, "protocol error: malformed I/O configuration".into()));
+        }
+        let config = Config::decode(frame.kind, &frame.payload, features)
+            .map_err(|error| (2, format!("protocol error: {error}")))?;
+        let Config::Io { bwlimit, timeout } = config else {
+            return Err((2, "protocol error: malformed I/O configuration".into()));
+        };
+        options.bwlimit = bwlimit;
+        options.timeout = timeout as u32;
+        control.configure(bwlimit, timeout as u32, true);
+    }
     if features & feature::COMPRESS_POLICY != 0 {
-        let frame = config_frame(reader)?;
+        let frame = config_frame(reader, control.keepalive_enabled())?;
         if frame.kind != frame_type::COMPRESS_CONFIG {
             return Err((2, "protocol error: malformed compression configuration".into()));
         }
@@ -175,7 +218,7 @@ fn read_configuration<R: Read>(reader: &mut R, options: &mut Options, features: 
         }
     }
     if features & feature::CHOWN != 0 {
-        let frame = config_frame(reader)?;
+        let frame = config_frame(reader, control.keepalive_enabled())?;
         if frame.kind != frame_type::CHOWN_CONFIG {
             return Err((2, "protocol error: malformed ownership configuration".into()));
         }
@@ -209,7 +252,12 @@ fn server<R: Read, W: Write + Send + 'static>(
     mut writer: W,
     server_options: &Options,
 ) -> io::Result<i32> {
-    let Some(frame) = xs_wire::read_frame(reader).map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e.to_string()))? else {
+    let control = Arc::new(IoControl::new());
+    let _watchdog = Watchdog::spawn(control.clone());
+    let mut input = ActivityReader::new(reader, control.clone());
+    let Some(frame) =
+        xs_wire::read_frame(&mut input).map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e.to_string()))?
+    else {
         return Ok(2);
     };
     if frame.kind != frame_type::HELLO {
@@ -248,7 +296,8 @@ fn server<R: Read, W: Write + Send + 'static>(
     answer.raw(MAGIC).var(VERSION).var(features);
     xs_wire::write_frame(&mut writer, frame_type::HELLO, &answer.bytes)?;
     writer.flush()?;
-    if let Err((code, text)) = read_configuration(reader, &mut hello.options, features, hello.role) {
+    control.note_write(true);
+    if let Err((code, text)) = read_configuration(&mut input, &mut hello.options, features, hello.role, &control) {
         write_message(&mut writer, msg_kind::FATAL, code as u64, &text)?;
         writer.flush()?;
         return Ok(code);
@@ -270,10 +319,10 @@ fn server<R: Read, W: Write + Send + 'static>(
     if hello.role == b'R' {
         let dest = hello.paths.first().cloned().unwrap_or_else(|| b".".to_vec());
         let dest = cli::expand_home(&dest);
-        run_receiver(reader, writer, &hello.options, features, &dest)
+        run_receiver(&mut input, writer, &hello.options, features, &dest, control)
     } else {
         let sources: Vec<OsString> = hello.paths.iter().map(|path| OsString::from_vec(cli::expand_home(path))).collect();
-        run_sender(reader, writer, &hello.options, features, &sources)
+        run_sender(&mut input, writer, &hello.options, features, &sources, control)
     }
 }
 
@@ -398,15 +447,17 @@ fn run_client(cli: &mut cli::Cli) -> io::Result<i32> {
     let hello = client_hello(cli, role, &hello_paths);
 
     let mut child = spawn_peer(cli, &host, local)?;
-    let mut input = BufReader::new(child.stdout.take().unwrap());
+    let control = Arc::new(IoControl::new());
+    control.configure(0, cli.options.timeout, false);
+    let _watchdog = Watchdog::spawn(control.clone());
+    let mut input = ActivityReader::new(BufReader::new(child.stdout.take().unwrap()), control.clone());
     let mut output = BufWriter::new(child.stdin.take().unwrap());
     xs_wire::write_frame(&mut output, frame_type::HELLO, &hello)?;
     output.flush()?;
+    control.note_write(true);
 
     let reply: Frame = loop {
-        let Some(frame) =
-            xs_wire::read_frame(&mut input).map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e.to_string()))?
-        else {
+        let Some(frame) = protocol::read_checked(&mut input, false)? else {
             let status = child.wait()?;
             return Ok(status.code().unwrap_or(12));
         };
@@ -463,6 +514,12 @@ fn run_client(cli: &mut cli::Cli) -> io::Result<i32> {
         let _ = child.wait();
         return Ok(4);
     }
+    if (cli.options.bwlimit != 0 || cli.options.timeout != 0) && features & feature::IO_CONTROL == 0 {
+        eprintln!("xs-rs: peer does not support bandwidth limits and idle timeouts");
+        let _ = child.kill();
+        let _ = child.wait();
+        return Ok(4);
+    }
     if cli.options.compress
         && cli.options.skip_compress_set
         && role == b'S'
@@ -473,6 +530,13 @@ fn run_client(cli: &mut cli::Cli) -> io::Result<i32> {
         let _ = child.wait();
         return Ok(4);
     }
+    if features & feature::IO_CONTROL != 0 {
+        let config = Config::Io { bwlimit: cli.options.bwlimit, timeout: u64::from(cli.options.timeout) }.encode();
+        control.configure(cli.options.bwlimit, cli.options.timeout, true);
+        xs_wire::write_frame(&mut output, config.kind, &config.payload)?;
+        output.flush()?;
+        control.note_write(true);
+    }
     if features & feature::COMPRESS_POLICY != 0 {
         let config = Config::Compress {
             explicit_level: cli.options.compress_level_explicit,
@@ -481,6 +545,7 @@ fn run_client(cli: &mut cli::Cli) -> io::Result<i32> {
         .encode();
         xs_wire::write_frame(&mut output, config.kind, &config.payload)?;
         output.flush()?;
+        control.note_write(true);
     }
     if features & feature::CHOWN != 0 {
         let (user, group) = if push {
@@ -491,6 +556,7 @@ fn run_client(cli: &mut cli::Cli) -> io::Result<i32> {
         let config = Config::Chown { user, group }.encode();
         xs_wire::write_frame(&mut output, config.kind, &config.payload)?;
         output.flush()?;
+        control.note_write(true);
     }
     if !push {
         if let Err(text) = cli.options.ownership.init() {
@@ -502,13 +568,17 @@ fn run_client(cli: &mut cli::Cli) -> io::Result<i32> {
     }
 
     let result = if push {
-        run_sender(&mut input, output, &cli.options, features, &local_sources)
+        run_sender(&mut input, output, &cli.options, features, &local_sources, control)
     } else {
-        run_receiver(&mut input, output, &cli.options, features, &local_dest)
+        run_receiver(&mut input, output, &cli.options, features, &local_dest, control)
     };
     drop(input);
     let status = child.wait()?;
     let code = result?;
+    if code == 12 && status.code() == Some(30) {
+        eprintln!("xs-rs: remote peer timed out in data send/receive");
+        return Ok(30);
+    }
     if code != 0 {
         Ok(code)
     } else {
