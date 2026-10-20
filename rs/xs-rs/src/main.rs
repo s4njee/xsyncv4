@@ -10,6 +10,7 @@ mod idmap;
 mod output;
 mod parallel;
 mod protocol;
+mod resume;
 mod scan;
 mod transfer;
 
@@ -39,6 +40,7 @@ const SUPPORTED: u64 = feature::CORE
     | feature::OUTPUT
     | feature::DIR_OUTPUT
     | feature::HLINK
+    | feature::RESUME
     | feature::PROGRESS_ACK;
 
 /// What a client advertises: the compression policy frame exists only with `-z`,
@@ -57,6 +59,9 @@ fn client_advertised(options: &Options, verbose: i64, role: u8) -> u64 {
     }
     if !options.hard_links {
         features &= !feature::HLINK;
+    }
+    if options.whole_file {
+        features &= !feature::RESUME;
     }
     if role != b'R' || !options.progress {
         features &= !feature::PROGRESS_ACK;
@@ -85,6 +90,7 @@ fn options_from_flags(flags: &[bool; 32], ints: &[i64; 7]) -> Options {
         compress: flags[10],
         numeric_ids: flags[25],
         itemize_level: u32::from(flags[26]),
+        partial: flags[27],
         jobs: ints[5],
         compress_level: ints[1],
         ..Options::default()
@@ -250,7 +256,7 @@ fn client_hello(cli: &cli::Cli, role: u8, paths: &[OsString]) -> Vec<u8> {
         false,
         o.numeric_ids,
         o.itemize_level > 0 || o.out_format_set,
-        false,
+        o.partial,
         false,
         false,
         false,
@@ -567,6 +573,24 @@ mod worker_tests {
         }
         let ints: Vec<i64> = (0..7).map(|_| d.svar().unwrap()).collect();
         assert_eq!(ints, vec![cli.verbose, cli.options.compress_level, 0, 0, 0, 3, 0]);
+    }
+
+    #[test]
+    fn partial_sets_the_wire_option_and_whole_file_withdraws_resume() {
+        let cli = cli::parse(["-a", "-P", "src", "dst"].iter().map(OsString::from).collect()).unwrap();
+        assert!(cli.options.partial && cli.options.progress);
+        let advertised = client_advertised(&cli.options, cli.verbose, b'R');
+        assert_ne!(advertised & feature::RESUME, 0);
+        let bytes = client_hello(&cli, b'R', &[OsString::from("dst")]);
+        let mut d = Decoder::new(&bytes);
+        d.raw(MAGIC.len()).unwrap();
+        d.var().unwrap();
+        d.byte().unwrap();
+        d.var().unwrap();
+        let flags: Vec<u8> = (0..32).map(|_| d.byte().unwrap()).collect();
+        assert_eq!(flags[27], 1, "the partial option is the 28th HELLO byte");
+        let cli = cli::parse(["-a", "--whole-file", "src", "dst"].iter().map(OsString::from).collect()).unwrap();
+        assert_eq!(client_advertised(&cli.options, cli.verbose, b'R') & feature::RESUME, 0);
     }
 
     #[test]

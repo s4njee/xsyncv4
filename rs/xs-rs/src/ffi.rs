@@ -12,6 +12,13 @@ struct Timespec {
     tv_nsec: i64,
 }
 
+#[repr(C)]
+#[derive(Clone, Copy)]
+struct Xxh128 {
+    low64: u64,
+    high64: u64,
+}
+
 const AT_FDCWD: c_int = -100;
 const AT_SYMLINK_NOFOLLOW: c_int = 0x100;
 const UTIME_OMIT: i64 = (1 << 30) - 2;
@@ -49,6 +56,11 @@ extern "C" {
     fn lchown(path: *const c_char, owner: u32, group: u32) -> c_int;
     fn fchown(fd: c_int, owner: u32, group: u32) -> c_int;
     fn XXH3_64bits(input: *const c_void, length: usize) -> u64;
+    fn XXH3_createState() -> *mut c_void;
+    fn XXH3_freeState(state: *mut c_void) -> c_int;
+    fn XXH3_128bits_reset(state: *mut c_void) -> c_int;
+    fn XXH3_128bits_update(state: *mut c_void, input: *const c_void, length: usize) -> c_int;
+    fn XXH3_128bits_digest(state: *const c_void) -> Xxh128;
     fn ZSTD_compressBound(src_size: usize) -> usize;
     fn ZSTD_compress(dst: *mut c_void, dst_capacity: usize, src: *const c_void, src_size: usize, level: c_int) -> usize;
     fn ZSTD_decompress(dst: *mut c_void, dst_capacity: usize, src: *const c_void, compressed_size: usize) -> usize;
@@ -112,6 +124,50 @@ pub fn local_time(seconds: i64) -> String {
 pub fn xxh3_64(bytes: &[u8]) -> u64 {
     // SAFETY: the pointer and length describe a live slice for the call.
     unsafe { XXH3_64bits(bytes.as_ptr().cast(), bytes.len()) }
+}
+
+/// Incremental XXH3-128, the hash `hash_prefix_fd` computes over a resume prefix.
+pub struct Xxh3_128 {
+    state: *mut c_void,
+}
+
+impl Xxh3_128 {
+    pub fn new() -> io::Result<Self> {
+        // SAFETY: createState allocates the opaque state; we free it on drop.
+        let state = unsafe { XXH3_createState() };
+        if state.is_null() {
+            return Err(io::Error::other("cannot allocate an XXH3-128 state"));
+        }
+        let hash = Self { state };
+        // SAFETY: the state came from createState and is live.
+        if unsafe { XXH3_128bits_reset(hash.state) } != 0 {
+            return Err(io::Error::other("cannot reset an XXH3-128 state"));
+        }
+        Ok(hash)
+    }
+
+    pub fn update(&mut self, bytes: &[u8]) -> io::Result<()> {
+        // SAFETY: the state is live and the slice describes readable bytes.
+        let code = unsafe { XXH3_128bits_update(self.state, bytes.as_ptr().cast(), bytes.len()) };
+        if code == 0 {
+            Ok(())
+        } else {
+            Err(io::Error::other("XXH3-128 update failed"))
+        }
+    }
+
+    pub fn digest(&self) -> [u64; 2] {
+        // SAFETY: digest only reads the live state.
+        let hash = unsafe { XXH3_128bits_digest(self.state) };
+        [hash.low64, hash.high64]
+    }
+}
+
+impl Drop for Xxh3_128 {
+    fn drop(&mut self) {
+        // SAFETY: the state was allocated by createState and has not been freed.
+        unsafe { XXH3_freeState(self.state) };
+    }
 }
 
 /// The levels this libzstd accepts, `ZSTD_minCLevel` to `ZSTD_maxCLevel`.
@@ -302,6 +358,15 @@ mod tests {
         ];
         assert_eq!(zstd_compress_exact(&raw, 3).unwrap(), expected);
         assert_eq!(zstd_decompress(&expected, raw.len()).unwrap(), raw);
+    }
+
+    #[test]
+    fn the_resume_hash_is_xxh3_128_as_the_cpp_computes_it() {
+        let mut hash = Xxh3_128::new().unwrap();
+        assert_eq!(hash.digest(), [0x6001_c324_468d_497f, 0x99aa_06d3_0147_98d8]);
+        hash.update(b"a").unwrap();
+        hash.update(b"bc").unwrap();
+        assert_eq!(hash.digest(), [0x78af_5f94_892f_3950, 0x06b0_5ab6_733a_6185]);
     }
 
     #[test]

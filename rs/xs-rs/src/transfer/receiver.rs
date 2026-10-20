@@ -14,6 +14,7 @@ use std::sync::Arc;
 use std::time::Instant;
 
 use xs_wire::io_control::IoControl;
+use xs_wire::resume::ResumePrefix;
 use xs_wire::{Decoder, Encoder, Frame};
 
 use crate::ffi;
@@ -22,13 +23,14 @@ use crate::output::Output;
 use crate::protocol::{
     self, bad, decode_err, feature, frame_type, rec, Attrs, EntryMeta, Options, T_BLK, T_CHR, T_DIR, T_FIFO, T_LNK, T_REG,
 };
+use crate::resume;
 use crate::scan;
 
 use crate::parallel::{WriteDone, WritePool};
 
 use super::file::{
-    add_range, covered, create_temp, destination_listing, finish_infile, make_dir, remove_any, set_dir_working_mode,
-    write_whole, InFile,
+    add_range, contiguous, covered_from, create_temp, destination_listing, finish_infile, make_dir, remove_any,
+    reserve_chunk, set_dir_working_mode, write_whole, InFile,
 };
 use super::hardlink::{finalize_hardlinks, hardlink_member, HardLinks};
 use super::{
@@ -50,6 +52,7 @@ struct RecvDir {
     need: HashSet<u32>,
     existing: Vec<Option<fs::Metadata>>,
     dir_created: Vec<bool>,
+    prefixes: HashMap<u32, ResumePrefix>,
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -348,21 +351,50 @@ fn process_dir<W: Write + Send + 'static>(
         }
         existing_entries.push(before);
     }
+    let resume_enabled = opts.partial && features & feature::RESUME != 0;
+    let mut prefixes = HashMap::new();
     let mut f = Encoder::new();
     f.var(id as u64).var(need.len() as u64);
     let mut previous = 0u32;
     for &index in &need {
         f.var((index - previous) as u64);
         previous = index;
+        if resume_enabled {
+            let entry = &entries[index as usize];
+            let prefix = if entry.size > protocol::SMALL_MAX as i64 {
+                let name = rename_to.as_deref().unwrap_or(&entry.name);
+                resume::destination_prefix(&dir_path.join(OsStr::from_bytes(name)), entry.size)
+            } else {
+                ResumePrefix::default()
+            };
+            prefix.put(&mut f);
+            if !prefix.is_empty() {
+                prefixes.insert(index, prefix);
+            }
+        }
     }
     output.send(frame_type::NEED, &f.bytes)?;
     if dirs.len() <= id as usize {
         dirs.resize_with(id as usize + 1, || None);
     }
     let need_set = need.iter().copied().collect();
-    dirs[id as usize] =
-        Some(RecvDir { rel, dest: dir_path, entries, rename_to, need: need_set, existing: existing_entries, dir_created });
+    dirs[id as usize] = Some(RecvDir {
+        rel,
+        dest: dir_path,
+        entries,
+        rename_to,
+        need: need_set,
+        existing: existing_entries,
+        dir_created,
+        prefixes,
+    });
     Ok(())
+}
+
+fn data_prefix(d: &mut Decoder<'_>) -> io::Result<ResumePrefix> {
+    let size = i64::try_from(d.var().map_err(decode_err)?)
+        .map_err(|_| io::Error::new(io::ErrorKind::InvalidData, "protocol error: bad resume prefix"))?;
+    Ok(ResumePrefix { size, ..ResumePrefix::default() })
 }
 
 fn open_infile(
@@ -371,10 +403,12 @@ fn open_infile(
     total: i64,
     before: Option<fs::Metadata>,
     link_key: Option<crate::protocol::HardlinkKey>,
+    prefix: ResumePrefix,
 ) -> io::Result<InFile> {
     let name = dir.rename_to.clone().unwrap_or_else(|| entry.name.clone());
     let final_path = dir.dest.join(OsStr::from_bytes(&name));
     let (temp, file) = create_temp(&dir.dest, &name)?;
+    let prefix_ok = prefix.is_empty() || resume::restore_prefix(&file, &final_path, &prefix).is_ok();
     Ok(InFile {
         temp,
         file,
@@ -389,6 +423,9 @@ fn open_infile(
         before,
         event_path: scan::join_rel(&dir.rel, &entry.name),
         link_key,
+        prefix: prefix.size,
+        prefix_ok,
+        chunks: Default::default(),
     })
 }
 
@@ -417,6 +454,7 @@ fn process_data<W: Write + Send + 'static>(
     if ffi::xxh3_64(&raw) != want {
         return bad("data corruption detected in transfer stream");
     }
+    let resume_enabled = opts.partial && features & feature::RESUME != 0;
     let mut d = Decoder::new(&raw);
     while !d.is_empty() {
         let id =
@@ -463,6 +501,7 @@ fn process_data<W: Write + Send + 'static>(
             rec::CHUNK => {
                 let attempt = u32::try_from(d.var().map_err(decode_err)?)
                     .map_err(|_| io::Error::new(io::ErrorKind::InvalidData, "bad attempt"))?;
+                let prefix = if resume_enabled { data_prefix(&mut d)? } else { ResumePrefix::default() };
                 let offset = i64::try_from(d.var().map_err(decode_err)?)
                     .map_err(|_| io::Error::new(io::ErrorKind::InvalidData, "bad chunk offset"))?;
                 let total = i64::try_from(d.var().map_err(decode_err)?)
@@ -475,29 +514,39 @@ fn process_data<W: Write + Send + 'static>(
                 {
                     return bad("protocol error: bad chunk");
                 }
+                let offered = dir.prefixes.get(&idx);
+                if !xs_wire::resume::verified(offered, prefix.size, total, attempt, offset, false) {
+                    return bad("protocol error: unverified resume prefix");
+                }
                 let key = (id, idx, attempt);
                 let infile = match infiles.entry(key) {
                     Entry::Occupied(occupied) => occupied.into_mut(),
                     Entry::Vacant(vacant) => {
-                        vacant.insert(open_infile(dir, &entry, total, before.clone(), link_key.clone())?)
+                        if prefix.size > 0 {
+                            added_bytes += prefix.size as u64;
+                        }
+                        let restore = if prefix.size > 0 { offered.copied().unwrap_or_default() } else { ResumePrefix::default() };
+                        vacant.insert(open_infile(dir, &entry, total, before.clone(), link_key.clone(), restore)?)
                     }
                 };
                 if infile.total != Some(total) {
                     return bad("protocol error: inconsistent file size");
                 }
+                if infile.prefix != prefix.size {
+                    return bad("protocol error: inconsistent transfer method");
+                }
+                let end = offset + bytes.len() as i64;
+                if !reserve_chunk(&mut infile.chunks, offset, end) {
+                    return bad("protocol error: overlapping file chunks");
+                }
                 infile.pending += 1;
-                pool.submit(
-                    infile.file.as_raw_fd(),
-                    bytes.to_vec(),
-                    offset,
-                    offset + bytes.len() as i64,
-                    key,
-                );
+                pool.submit(infile.file.as_raw_fd(), bytes.to_vec(), offset, end, key);
                 added_bytes += bytes.len() as u64;
             }
             rec::END => {
                 let attempt = u32::try_from(d.var().map_err(decode_err)?)
                     .map_err(|_| io::Error::new(io::ErrorKind::InvalidData, "bad attempt"))?;
+                let prefix = if resume_enabled { data_prefix(&mut d)? } else { ResumePrefix::default() };
                 let total = i64::try_from(d.var().map_err(decode_err)?)
                     .map_err(|_| io::Error::new(io::ErrorKind::InvalidData, "bad file total"))?;
                 let status = d.byte().map_err(decode_err)?;
@@ -506,13 +555,24 @@ fn process_data<W: Write + Send + 'static>(
                 if status > 2 || total < 0 {
                     return bad("protocol error: bad file completion");
                 }
+                let offered = dir.prefixes.get(&idx);
+                if !xs_wire::resume::verified(offered, prefix.size, total, attempt, 0, true) {
+                    return bad("protocol error: unverified resume prefix");
+                }
                 let key = (id, idx, attempt);
                 let infile = match infiles.entry(key) {
                     Entry::Occupied(occupied) => occupied.into_mut(),
                     Entry::Vacant(vacant) => {
-                        vacant.insert(open_infile(dir, &entry, total, before.clone(), link_key.clone())?)
+                        if prefix.size > 0 {
+                            added_bytes += prefix.size as u64;
+                        }
+                        let restore = if prefix.size > 0 { offered.copied().unwrap_or_default() } else { ResumePrefix::default() };
+                        vacant.insert(open_infile(dir, &entry, total, before.clone(), link_key.clone(), restore)?)
                     }
                 };
+                if infile.prefix != prefix.size {
+                    return bad("protocol error: inconsistent transfer method");
+                }
                 infile.total = Some(total);
                 infile.attrs = Some(attrs);
                 infile.status = Some(status);
@@ -536,6 +596,31 @@ fn apply_write(done: WriteDone, infiles: &mut HashMap<(u32, u32, u32), InFile>) 
     Ok(Some(done.key))
 }
 
+fn settle(infiles: &mut HashMap<(u32, u32, u32), InFile>, pool: &WritePool) {
+    while infiles.values().any(|infile| infile.pending > 0) {
+        let Some(done) = pool.recv_done() else { break };
+        let _ = apply_write(done, infiles);
+    }
+}
+
+/// The C++ cleanup path: with --partial, keep the contiguous prefix and rename
+/// it over the destination; otherwise remove the temporary file.
+fn cleanup_partial(infiles: &mut HashMap<(u32, u32, u32), InFile>, opts: &Options) {
+    for (_, infile) in infiles.drain() {
+        if infile.finished {
+            continue;
+        }
+        if opts.partial && infile.prefix_ok && infile.status != Some(1) {
+            let total = infile.total.unwrap_or(0);
+            let keep = contiguous(&infile.ranges, total);
+            if infile.file.set_len(keep as u64).is_ok() && fs::rename(&infile.temp, &infile.final_path).is_ok() {
+                continue;
+            }
+        }
+        let _ = fs::remove_file(&infile.temp);
+    }
+}
+
 /// Publish a file once its END has arrived and every queued range write has
 /// returned; a failed attempt is removed only after its writes have drained.
 #[allow(clippy::too_many_arguments)]
@@ -548,9 +633,11 @@ fn finish_ready<W: Write + Send + 'static>(
     key: (u32, u32, u32),
     hardlinks: &mut HardLinks,
     local_output: Option<&mut Output>,
+    partial_failure: &mut bool,
 ) -> io::Result<u64> {
-    let Some((pending, status, total)) =
-        infiles.get(&key).map(|infile| (infile.pending, infile.status, infile.total.unwrap_or(0)))
+    let Some((pending, status, total, prefix, prefix_ok)) = infiles
+        .get(&key)
+        .map(|infile| (infile.pending, infile.status, infile.total.unwrap_or(0), infile.prefix, infile.prefix_ok))
     else {
         return Ok(0);
     };
@@ -560,15 +647,22 @@ fn finish_ready<W: Write + Send + 'static>(
     let Some(status) = status else {
         return Ok(0);
     };
-    if status != 0 || !infiles.get(&key).map(|infile| covered(&infile.ranges, total)).unwrap_or(false) {
-        if status == 0 {
-            return Ok(0);
-        }
+    if !prefix_ok || status != 0 {
         let infile = infiles.remove(&key).unwrap();
-        let _ = fs::remove_file(&infile.temp);
         if let Some(dir) = dirs.get_mut(key.0 as usize).and_then(Option::as_mut) {
             dir.need.remove(&key.1);
         }
+        *partial_failure = true;
+        if opts.partial && prefix_ok && status == 2 {
+            let keep = contiguous(&infile.ranges, total);
+            if infile.file.set_len(keep as u64).is_ok() && fs::rename(&infile.temp, &infile.final_path).is_ok() {
+                return Ok(0);
+            }
+        }
+        let _ = fs::remove_file(&infile.temp);
+        return Ok(0);
+    }
+    if !infiles.get(&key).map(|infile| covered_from(&infile.ranges, prefix, total)).unwrap_or(false) {
         return Ok(0);
     }
     let infile = infiles.get_mut(&key).unwrap();
@@ -603,6 +697,7 @@ fn drain_writes<W: Write + Send + 'static>(
     pool: &WritePool,
     hardlinks: &mut HardLinks,
     mut local_output: Option<&mut Output>,
+    partial_failure: &mut bool,
 ) -> io::Result<u64> {
     let mut files = 0;
     while let Some(done) = pool.try_done() {
@@ -616,6 +711,7 @@ fn drain_writes<W: Write + Send + 'static>(
                 key,
                 hardlinks,
                 local_output.as_deref_mut(),
+                partial_failure,
             )?;
         }
     }
@@ -632,6 +728,7 @@ fn drain_writes<W: Write + Send + 'static>(
             key,
             hardlinks,
             local_output.as_deref_mut(),
+            partial_failure,
         )?;
     }
     Ok(files)
@@ -669,6 +766,7 @@ pub fn run_receiver<R: Read, W: Write + Send + 'static>(
     let mut created_dirs = 0u64;
     let mut created_links = 0u64;
     let mut sender_code: Option<i32> = None;
+    let mut partial_failure = false;
     let mut ended = false;
     let ack_enabled = opts.am_server && features & feature::PROGRESS_ACK != 0;
     let mut progress_bytes = 0u64;
@@ -677,9 +775,15 @@ pub fn run_receiver<R: Read, W: Write + Send + 'static>(
     while !ended {
         let frame = match protocol::read_checked(input, keepalive, features) {
             Ok(Some(frame)) => frame,
-            Ok(None) => return Ok(12),
+            Ok(None) => {
+                settle(&mut infiles, &pool);
+                cleanup_partial(&mut infiles, opts);
+                return Ok(12);
+            }
             Err(error) => {
                 let _ = send_fatal(&mut output, &error.to_string());
+                settle(&mut infiles, &pool);
+                cleanup_partial(&mut infiles, opts);
                 return Ok(2);
             }
         };
@@ -724,6 +828,7 @@ pub fn run_receiver<R: Read, W: Write + Send + 'static>(
                         &pool,
                         &mut hardlinks,
                         local_output.as_deref_mut(),
+                        &mut partial_failure,
                     ) {
                         Ok(finished) => {
                             created_files += finished;
@@ -765,6 +870,8 @@ pub fn run_receiver<R: Read, W: Write + Send + 'static>(
         };
         if let Err(error) = result {
             let _ = send_fatal(&mut output, &error.to_string());
+            settle(&mut infiles, &pool);
+            cleanup_partial(&mut infiles, opts);
             return Ok(2);
         }
     }
@@ -784,6 +891,7 @@ pub fn run_receiver<R: Read, W: Write + Send + 'static>(
                 key,
                 &mut hardlinks,
                 local_output.as_deref_mut(),
+                &mut partial_failure,
             )?;
             created_files += finished;
             progress_files += finished;
@@ -798,14 +906,17 @@ pub fn run_receiver<R: Read, W: Write + Send + 'static>(
         &pool,
         &mut hardlinks,
         local_output.as_deref_mut(),
+        &mut partial_failure,
     )?;
     created_files += finished;
     progress_files += finished;
-    for (_, infile) in infiles.drain() {
-        if !infile.finished {
-            let _ = fs::remove_file(&infile.temp);
-        }
+    if !infiles.is_empty() {
+        let _ = send_fatal(&mut output, "protocol error: incomplete file data");
+        cleanup_partial(&mut infiles, opts);
+        output.finish()?;
+        return Ok(2);
     }
+    cleanup_partial(&mut infiles, opts);
     if hardlinks.enabled {
         finalize_hardlinks(
             &mut hardlinks,
@@ -832,10 +943,11 @@ pub fn run_receiver<R: Read, W: Write + Send + 'static>(
         progress_ack(&mut output, features, progress_bytes, progress_files, true, &mut progress_last)?;
     }
     let sender_code = sender_code.unwrap_or(0);
+    let code = if sender_code != 0 { sender_code } else if partial_failure { 23 } else { 0 };
     let mut done = Encoder::new();
-    done.var(if sender_code != 0 { sender_code as u64 } else { 0 });
+    done.var(code as u64);
     done.var(created_files).var(created_dirs).var(created_links).var(0).var(0);
     output.send(frame_type::DONE, &done.bytes)?;
     output.finish()?;
-    Ok(if sender_code != 0 { sender_code } else { 0 })
+    Ok(code)
 }

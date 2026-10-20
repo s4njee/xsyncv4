@@ -14,6 +14,7 @@ pub mod hello;
 pub mod idmap;
 pub mod io_control;
 pub mod output;
+pub mod resume;
 
 pub use compress::{Suffixes, DEFAULT_SKIP_COMPRESS};
 

@@ -3,9 +3,10 @@
 //! differences, and publishes files. One reader and one writer per side; the stream
 //! stays pipelined because listings go first.
 
+use std::collections::HashMap;
 use std::ffi::OsString;
 use std::fs::{self, File};
-use std::io::{self, BufWriter, Read, Write};
+use std::io::{self, BufWriter, Read, Seek, SeekFrom, Write};
 use std::os::unix::ffi::OsStrExt;
 use std::os::unix::fs::MetadataExt;
 use std::path::{Path, PathBuf};
@@ -15,6 +16,7 @@ use std::thread::JoinHandle;
 use std::time::{Duration, Instant};
 
 use xs_wire::io_control::IoControl;
+use xs_wire::resume::ResumePrefix;
 use xs_wire::{Decoder, Encoder, Frame, Suffixes};
 
 use crate::compression::{CompressionLink, Transport};
@@ -500,9 +502,19 @@ fn send_large<W: Write + Send + 'static>(
     opts: &Options,
     block: &mut Vec<u8>,
     ranges: bool,
+    offered: Option<&ResumePrefix>,
+    resume: bool,
 ) -> io::Result<()> {
     let planned = entry.meta.size.max(0) as u64;
-    if ranges && planned >= crate::parallel::RANGE_MIN {
+    let mut prefix = if resume {
+        offered
+            .filter(|p| p.size <= planned as i64)
+            .and_then(|p| crate::resume::source_prefix(&entry.path, p))
+            .unwrap_or_default()
+    } else {
+        ResumePrefix::default()
+    };
+    if ranges && prefix.is_empty() && planned >= crate::parallel::RANGE_MIN {
         let jobs = crate::parallel::effective_jobs(opts.jobs);
         let complete = crate::parallel::read_ranges(
             &entry.path,
@@ -512,7 +524,11 @@ fn send_large<W: Write + Send + 'static>(
             |offset, bytes| {
                 let mut e = Encoder::new();
                 e.var(id as u64).var(idx as u64).byte(rec::CHUNK);
-                e.var(0).var(offset).var(planned);
+                e.var(0);
+                if resume {
+                    e.var(prefix.size.max(0) as u64);
+                }
+                e.var(offset).var(planned);
                 e.str(&bytes);
                 record(e, block);
                 if block.len() >= protocol::BLOCK_TARGET {
@@ -524,7 +540,11 @@ fn send_large<W: Write + Send + 'static>(
         flush_data(output, block, compress, link, opts)?;
         let mut e = Encoder::new();
         e.var(id as u64).var(idx as u64).byte(rec::END);
-        e.var(0).var(planned).byte(if complete { 0 } else { 2 });
+        e.var(0);
+        if resume {
+            e.var(prefix.size.max(0) as u64);
+        }
+        e.var(planned).byte(if complete { 0 } else { 2 });
         protocol::put_file_attrs(&mut e, &entry.meta.attrs, features);
         record(e, block);
         return flush_data(output, block, compress, link, opts);
@@ -534,10 +554,14 @@ fn send_large<W: Write + Send + 'static>(
         Err(_) => return flush_data(output, block, compress, link, opts),
     };
     let mut buffer = vec![0u8; protocol::BLOCK_TARGET];
-    let mut offset = 0u64;
+    let mut offset = prefix.size.max(0) as u64;
+    if offset > 0 && file.seek(SeekFrom::Start(offset)).is_err() {
+        prefix = ResumePrefix::default();
+        offset = 0;
+    }
     let mut failed = false;
     loop {
-        let want = (planned - offset).min(buffer.len() as u64) as usize;
+        let want = (planned.saturating_sub(offset)).min(buffer.len() as u64) as usize;
         if want == 0 {
             break;
         }
@@ -554,11 +578,16 @@ fn send_large<W: Write + Send + 'static>(
             }
         }
         if got == 0 {
+            failed = true;
             break;
         }
         let mut e = Encoder::new();
         e.var(id as u64).var(idx as u64).byte(rec::CHUNK);
-        e.var(0).var(offset).var(planned);
+        e.var(0);
+        if resume {
+            e.var(prefix.size.max(0) as u64);
+        }
+        e.var(offset).var(planned);
         e.str(&buffer[..got]);
         record(e, block);
         offset += got as u64;
@@ -572,7 +601,12 @@ fn send_large<W: Write + Send + 'static>(
     flush_data(output, block, compress, link, opts)?;
     let mut e = Encoder::new();
     e.var(id as u64).var(idx as u64).byte(rec::END);
-    e.var(0).var(offset).byte(if failed { 2 } else { 0 });
+    e.var(0);
+    if resume {
+        e.var(prefix.size.max(0) as u64);
+    }
+    let complete = !failed && offset == planned;
+    e.var(offset).byte(if complete { 0 } else { 2 });
     protocol::put_file_attrs(&mut e, &entry.meta.attrs, features);
     record(e, block);
     flush_data(output, block, compress, link, opts)
@@ -588,6 +622,8 @@ fn send_need_data<W: Write + Send + 'static>(
     link: &CompressionLink,
     opts: &Options,
     suffixes: &Suffixes,
+    prefixes: &HashMap<u32, ResumePrefix>,
+    resume: bool,
 ) -> io::Result<()> {
     // `parallel_file_ranges`: split only when an explicit -jN asked for it and
     // the NEED does not already offer several large files as parallel work.
@@ -630,7 +666,20 @@ fn send_need_data<W: Write + Send + 'static>(
             }
         } else {
             flush_data(output, &mut block, opts.compress && !block_skip, link, opts)?;
-            send_large(output, id, idx, entry, features, opts.compress && !skip, link, opts, &mut block, ranges)?;
+            send_large(
+                output,
+                id,
+                idx,
+                entry,
+                features,
+                opts.compress && !skip,
+                link,
+                opts,
+                &mut block,
+                ranges,
+                prefixes.get(&idx),
+                resume,
+            )?;
         }
         if skip {
             flush_data(output, &mut block, false, link, opts)?;
@@ -676,6 +725,7 @@ pub fn run_sender<R: Read, W: Write + Send + 'static>(
         flags |= protocol::DF_SINGLE;
     }
     let suffixes = crate::compression::suffixes(&opts.skip_compress);
+    let resume = opts.partial && features & feature::RESUME != 0;
     let mut ids = idmap::Sender::default();
     let mut dirs: Vec<Option<SentDir>> = Vec::new();
     let mut next_id = 1u32;
@@ -725,6 +775,7 @@ pub fn run_sender<R: Read, W: Write + Send + 'static>(
                 let count = usize::try_from(d.var().map_err(decode_err)?)
                     .map_err(|_| io::Error::new(io::ErrorKind::InvalidData, "bad NEED count"))?;
                 let mut indices = Vec::with_capacity(count);
+                let mut offered = Vec::with_capacity(count);
                 let mut previous = 0u32;
                 for i in 0..count {
                     let difference = u32::try_from(d.var().map_err(decode_err)?)
@@ -736,6 +787,7 @@ pub fn run_sender<R: Read, W: Write + Send + 'static>(
                         .checked_add(difference)
                         .ok_or_else(|| io::Error::new(io::ErrorKind::InvalidData, "bad NEED index"))?;
                     indices.push(previous);
+                    offered.push(if resume { ResumePrefix::get(&mut d).map_err(decode_err)? } else { ResumePrefix::default() });
                 }
                 if !d.is_empty() {
                     return bad("protocol error: trailing NEED payload");
@@ -744,7 +796,20 @@ pub fn run_sender<R: Read, W: Write + Send + 'static>(
                     .get_mut(id as usize)
                     .and_then(Option::take)
                     .ok_or_else(|| io::Error::new(io::ErrorKind::InvalidData, "protocol error: bad NEED directory"))?;
-                send_need_data(&mut output, id, &indices, &dir, features, &link, opts, &suffixes)?;
+                let mut prefixes = HashMap::new();
+                for (&idx, prefix) in indices.iter().zip(&offered) {
+                    let entry = dir
+                        .dest_entries
+                        .get(idx as usize)
+                        .ok_or_else(|| io::Error::new(io::ErrorKind::InvalidData, "protocol error: bad NEED index"))?;
+                    if prefix.size > entry.meta.size {
+                        return bad("protocol error: bad resume prefix");
+                    }
+                    if !prefix.is_empty() {
+                        prefixes.insert(idx, *prefix);
+                    }
+                }
+                send_need_data(&mut output, id, &indices, &dir, features, &link, opts, &suffixes, &prefixes, resume)?;
                 needs += 1;
                 if needs == dir_count {
                     let mut end = Encoder::new();
