@@ -8,6 +8,7 @@ mod config;
 mod ffi;
 mod idmap;
 mod output;
+mod parallel;
 mod protocol;
 mod scan;
 mod transfer;
@@ -84,6 +85,7 @@ fn options_from_flags(flags: &[bool; 32], ints: &[i64; 7]) -> Options {
         compress: flags[10],
         numeric_ids: flags[25],
         itemize_level: u32::from(flags[26]),
+        jobs: ints[5],
         compress_level: ints[1],
         ..Options::default()
     }
@@ -257,7 +259,7 @@ fn client_hello(cli: &cli::Cli, role: u8, paths: &[OsString]) -> Vec<u8> {
     for flag in flags {
         e.byte(flag as u8);
     }
-    for value in [cli.verbose, o.compress_level, 0, 0, 0, 0, 0] {
+    for value in [cli.verbose, o.compress_level, 0, 0, 0, o.jobs, 0] {
         e.svar(value);
     }
     e.var(0);
@@ -511,6 +513,23 @@ fn main() {
             std::process::exit(1);
         }
     };
+    if cli.help {
+        println!(
+            "xs-rs: a Rust xs speaking the version 4 stream\n\n\
+             usage: xs-rs [options] SRC... DEST\n       xs-rs --server\n\n\
+             -a, --archive         archive mode\n\
+             -j, --jobs=N          worker threads (default 4; -jN splits one large file)\n\
+             -z, --compress        zstd frames\n\
+             -e COMMAND            remote shell (or $XSYNC_RSH, $RSYNC_RSH)\n\
+                 --rsync-path=P    remote program\n\
+                 --server          speak the server side on stdin/stdout"
+        );
+        return;
+    }
+    if cli.version {
+        println!("xs-rs 0.1.0 (protocol 4)");
+        return;
+    }
     let result = if cli.server {
         let mut reader = BufReader::new(io::stdin());
         server(&mut reader, BufWriter::new(io::stdout()), &cli.options)
@@ -524,5 +543,45 @@ fn main() {
             let code = if error.kind() == io::ErrorKind::InvalidData { 2 } else { 12 };
             std::process::exit(code);
         }
+    }
+}
+
+#[cfg(test)]
+mod worker_tests {
+    use super::*;
+
+    #[test]
+    fn the_client_hello_carries_jobs_in_the_cpp_int_slot() {
+        let cli = cli::parse(
+            ["-a", "--jobs=3", "src", "dst"].iter().map(OsString::from).collect(),
+        )
+        .unwrap();
+        let bytes = client_hello(&cli, b'R', &[OsString::from("dst")]);
+        let mut d = Decoder::new(&bytes);
+        assert_eq!(d.raw(MAGIC.len()).unwrap(), MAGIC);
+        assert_eq!(d.var().unwrap(), VERSION);
+        assert_eq!(d.byte().unwrap(), b'R');
+        let _features = d.var().unwrap();
+        for _ in 0..32 {
+            d.byte().unwrap();
+        }
+        let ints: Vec<i64> = (0..7).map(|_| d.svar().unwrap()).collect();
+        assert_eq!(ints, vec![cli.verbose, cli.options.compress_level, 0, 0, 0, 3, 0]);
+    }
+
+    #[test]
+    fn a_zero_jobs_hello_matches_the_default_the_cpp_sends() {
+        let cli = cli::parse(["-a", "src", "dst"].iter().map(OsString::from).collect()).unwrap();
+        let bytes = client_hello(&cli, b'R', &[OsString::from("dst")]);
+        let mut d = Decoder::new(&bytes);
+        d.raw(MAGIC.len()).unwrap();
+        d.var().unwrap();
+        d.byte().unwrap();
+        d.var().unwrap();
+        for _ in 0..32 {
+            d.byte().unwrap();
+        }
+        let ints: Vec<i64> = (0..7).map(|_| d.svar().unwrap()).collect();
+        assert_eq!(ints[5], 0);
     }
 }

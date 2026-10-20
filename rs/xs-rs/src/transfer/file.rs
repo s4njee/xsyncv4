@@ -11,7 +11,7 @@ use std::path::{Path, PathBuf};
 
 use crate::ffi;
 use crate::idmap;
-use crate::protocol::{Attrs, Options};
+use crate::protocol::{Attrs, EntryMeta, HardlinkKey, Options};
 
 pub(super) struct InFile {
     pub(super) temp: PathBuf,
@@ -22,6 +22,13 @@ pub(super) struct InFile {
     pub(super) attrs: Option<Attrs>,
     pub(super) status: Option<u8>,
     pub(super) finished: bool,
+    /// Ranges handed to the write pool but not yet completed.
+    pub(super) pending: usize,
+    /// Everything the completion event needs once the last write returns.
+    pub(super) entry: EntryMeta,
+    pub(super) before: Option<fs::Metadata>,
+    pub(super) event_path: Vec<u8>,
+    pub(super) link_key: Option<HardlinkKey>,
 }
 
 pub(super) fn add_range(ranges: &mut Vec<(i64, i64)>, start: i64, end: i64) {

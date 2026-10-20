@@ -1,5 +1,10 @@
-//! The command line the MVP needs: archive bits, `-z`, `-e`, `--rsync-path`,
+//! The command line the MVP needs: archive bits, `-z`, `-j`, `-e`, `--rsync-path`,
 //! `--server`, and the host:path split `parse_remote_spec` performs in C++.
+//!
+//! As `main.cpp`'s parser does, an option this program does not know is a usage
+//! error; it is never silently ignored (the C++ has an explicit unsupported list
+//! and an `unknown option` fallthrough). `-j/--jobs` is the worker budget: an
+//! explicit value above one also permits splitting one large file into ranges.
 
 use std::ffi::{OsStr, OsString};
 use std::os::unix::ffi::{OsStrExt, OsStringExt};
@@ -14,6 +19,8 @@ pub struct Cli {
     pub rsync_path: Option<OsString>,
     pub paths: Vec<OsString>,
     pub verbose: i64,
+    pub help: bool,
+    pub version: bool,
 }
 
 impl Cli {
@@ -52,9 +59,89 @@ impl Cli {
             "progress" => self.options.progress = on,
             "8-bit-output" => self.options.raw_names = on,
             "local-peer" => self.options.local_peer = on,
+            // Accepted no-ops that C++ also accepts: their behaviour is intrinsic
+            // to this engine, so there is nothing to switch off.
+            "whole-file" | "protect-args" | "secluded-args" | "blocking-io" | "open-noatime" | "motd"
+            | "clone" | "atomic" | "fallback" | "from0" | "stats" | "human-readable" => {}
             _ => {}
         }
     }
+
+    fn set_jobs(&mut self, value: &OsStr) -> Result<(), String> {
+        let text = text(value);
+        self.options.jobs = text.parse().map_err(|_| "--jobs requires an integer".to_string())?;
+        Ok(())
+    }
+}
+
+/// Options `main.cpp` names explicitly as unsupported. They are refused rather
+/// than ignored, before a destination is touched.
+const UNSUPPORTED: &[&str] = &[
+    "backup",
+    "backup-dir",
+    "suffix",
+    "compare-dest",
+    "copy-dest",
+    "usermap",
+    "groupmap",
+    "append",
+    "append-verify",
+    "partial-dir",
+    "delay-updates",
+    "fuzzy",
+    "remove-source-files",
+    "keep-dirlinks",
+    "copy-dirlinks",
+    "copy-unsafe-links",
+    "munge-links",
+    "daemon",
+    "port",
+    "password-file",
+    "write-batch",
+    "read-batch",
+    "only-write-batch",
+    "super",
+    "fake-super",
+    "temp-dir",
+    "iconv",
+    "checksum-seed",
+    "address",
+    "sockopts",
+    "stop-after",
+    "stop-at",
+    "max-alloc",
+    "write-devices",
+    "copy-devices",
+    "delete-missing-args",
+    "ignore-missing-args",
+    "trust-sender",
+    "copy-as",
+    "early-input",
+    "remote-option",
+    "contimeout",
+    "fsync",
+    "preallocate",
+    "block-size",
+    "checksum-choice",
+    "cc",
+    "log-file-format",
+    "debug",
+    "outbuf",
+    "inc-recursive",
+    "i-r",
+    "no-protect-args",
+    "ipv4",
+    "ipv6",
+    "msgs2stderr",
+    "new-compress",
+    "old-compress",
+    "implied-dirs",
+    "old-args",
+];
+
+fn unsupported(name: &str) -> bool {
+    let bare = name.strip_prefix("no-").unwrap_or(name);
+    UNSUPPORTED.contains(&name) || UNSUPPORTED.contains(&bare)
 }
 
 fn text(arg: &OsStr) -> String {
@@ -80,11 +167,30 @@ pub fn parse(args: Vec<OsString>) -> Result<Cli, String> {
             cli.server = true;
             continue;
         }
+        if s == "--help" {
+            cli.help = true;
+            continue;
+        }
+        if s == "--version" {
+            cli.version = true;
+            continue;
+        }
         if let Some(long) = s.strip_prefix("--") {
             let (name, inline) = match long.split_once('=') {
                 Some((name, value)) => (name, Some(OsString::from(value))),
                 None => (long, None),
             };
+            if unsupported(name) {
+                return Err(format!("--{} is not supported by xs", name.strip_prefix("no-").unwrap_or(name)));
+            }
+            if name == "jobs" {
+                let value = match inline {
+                    Some(value) => value,
+                    None => iter.next().ok_or_else(|| "--jobs needs a value".to_string())?,
+                };
+                cli.set_jobs(&value)?;
+                continue;
+            }
             if name == "rsh" || name == "rsync-path" {
                 let value = match inline {
                     Some(value) => value,
@@ -185,14 +291,6 @@ pub fn parse(args: Vec<OsString>) -> Result<Cli, String> {
                 }
                 continue;
             }
-            if name == "verbose" {
-                cli.verbose += 1;
-                continue;
-            }
-            if name == "itemize-changes" {
-                cli.options.itemize_level += 1;
-                continue;
-            }
             if name == "out-format" || name == "log-format" {
                 let value = match inline {
                     Some(value) => value,
@@ -203,21 +301,94 @@ pub fn parse(args: Vec<OsString>) -> Result<Cli, String> {
                 continue;
             }
             if name == "progress" {
+                if let Some(value) = &inline {
+                    if value.as_bytes() != b"json" {
+                        return Err("--progress accepts only =json".into());
+                    }
+                }
                 cli.options.progress = true;
                 continue;
             }
-            if name == "old-args" || name == "stats" || name == "human-readable" {
-                continue;
+            // Options xs itself supports but this port does not implement yet are
+            // refused rather than silently doing something else.
+            if matches!(
+                name,
+                "install"
+                    | "max-delete"
+                    | "max-size"
+                    | "min-size"
+                    | "modify-window"
+                    | "exclude"
+                    | "include"
+                    | "exclude-from"
+                    | "include-from"
+                    | "filter"
+                    | "info"
+                    | "files-from"
+                    | "link-dest"
+                    | "chmod"
+                    | "log-file"
+                    | "list-only"
+            ) {
+                return Err(format!("--{name} is not supported by xs-rs"));
             }
-            if let Some(negative) = name.strip_prefix("no-") {
-                cli.set_long(negative, false);
-            } else if inline.is_none()
-                || matches!(name, "archive" | "recursive" | "links" | "perms" | "times" | "group" | "owner" | "compress")
-            {
-                cli.set_long(name, true);
-            } else {
-                // Unknown options with a value were already consumed by the '=' split;
-                // tolerate them so older client invocations still reach the protocol.
+            let (base, on) = match name.strip_prefix("no-") {
+                Some(base) => (base, false),
+                None => (name, true),
+            };
+            match base {
+                "verbose" => {
+                    if on {
+                        cli.verbose += 1;
+                    } else {
+                        cli.verbose = 0;
+                    }
+                }
+                "quiet" => cli.verbose = -1,
+                "itemize-changes" => {
+                    if on {
+                        cli.options.itemize_level += 1;
+                    } else {
+                        cli.options.itemize_level = 0;
+                    }
+                }
+                "progress" => cli.options.progress = on,
+                "D" => {
+                    cli.options.devices = on;
+                    cli.options.specials = on;
+                }
+                "R" | "relative" => {}
+                // `set_long` owns every other boolean and documented no-op.
+                "archive"
+                | "recursive"
+                | "recursion"
+                | "dirs"
+                | "links"
+                | "copy-links"
+                | "perms"
+                | "times"
+                | "group"
+                | "owner"
+                | "devices"
+                | "specials"
+                | "compress"
+                | "numeric-ids"
+                | "hard-links"
+                | "8-bit-output"
+                | "local-peer"
+                | "whole-file"
+                | "protect-args"
+                | "secluded-args"
+                | "blocking-io"
+                | "open-noatime"
+                | "motd"
+                | "clone"
+                | "atomic"
+                | "fallback"
+                | "from0"
+                | "stats"
+                | "human-readable" => cli.set_long(base, on),
+                _ => return Err(format!("--{name}: unknown option")),
             }
             continue;
         }
@@ -239,6 +410,13 @@ pub fn parse(args: Vec<OsString>) -> Result<Cli, String> {
                         cli.options.devices = true;
                         cli.options.specials = true;
                     }
+                    'd' => {}
+                    'L' => cli.options.copy_links = true,
+                    'u' | 'c' | 'I' | 'x' | 'O' | 'J' | 'W' | 's' | 'S' | 'C' | 'F' | 'm' | '0' => {}
+                    'A' => {
+                        cli.options.perms = true;
+                    }
+                    'X' => {}
                     'z' => cli.options.compress = true,
                     'H' => cli.options.hard_links = true,
                     'n' => {}
@@ -248,6 +426,16 @@ pub fn parse(args: Vec<OsString>) -> Result<Cli, String> {
                     'h' => {}
                     'q' => cli.verbose = -1,
                     'v' => cli.verbose += 1,
+                    'j' => {
+                        let value = if index < bytes.len() {
+                            let value = OsString::from_vec(bytes[index..].to_vec());
+                            index = bytes.len();
+                            value
+                        } else {
+                            iter.next().ok_or_else(|| "-j needs a value".to_string())?
+                        };
+                        cli.set_jobs(&value)?;
+                    }
                     'e' => {
                         let value = if index < bytes.len() {
                             let value = OsString::from_vec(bytes[index..].to_vec());
@@ -258,7 +446,14 @@ pub fn parse(args: Vec<OsString>) -> Result<Cli, String> {
                         };
                         cli.rsh = Some(value);
                     }
-                    _ => {}
+                    '4' => return Err("--ipv4 is not supported by xs".into()),
+                    '6' => return Err("--ipv6 is not supported by xs".into()),
+                    'B' => return Err("--block-size is not supported by xs".into()),
+                    'T' => return Err("--temp-dir is not supported by xs".into()),
+                    'M' => return Err("--remote-option is not supported by xs".into()),
+                    'b' => return Err("--backup is not supported by xs".into()),
+                    'y' => return Err("--fuzzy is not supported by xs".into()),
+                    _ => return Err(format!("-{ch}: unknown option")),
                 }
             }
             continue;
@@ -364,4 +559,42 @@ pub fn expand_home(path: &[u8]) -> Vec<u8> {
         out.extend_from_slice(&path[slash..]);
     }
     out
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn args(values: &[&str]) -> Vec<OsString> {
+        values.iter().map(OsString::from).collect()
+    }
+
+    #[test]
+    fn jobs_is_a_wire_integer_in_every_spelling() {
+        for value in ["-j4", "-aj4"] {
+            assert_eq!(parse(args(&[value, "src", "dst"])).unwrap().options.jobs, 4);
+        }
+        assert_eq!(parse(args(&["-j", "7", "src", "dst"])).unwrap().options.jobs, 7);
+        assert_eq!(parse(args(&["--jobs=2", "src", "dst"])).unwrap().options.jobs, 2);
+        assert_eq!(parse(args(&["--jobs", "3", "src", "dst"])).unwrap().options.jobs, 3);
+        assert_eq!(parse(args(&["-a", "src", "dst"])).unwrap().options.jobs, 0);
+    }
+
+    #[test]
+    fn an_unknown_or_unsupported_option_is_refused() {
+        for option in ["--bogus", "--bogus=1", "-Z"] {
+            assert!(parse(args(&[option, "src", "dst"])).is_err(), "{option}");
+        }
+        for option in ["--backup", "--block-size=4096", "--old-args", "--no-protect-args", "-B4096", "-T/tmp", "-4"] {
+            assert!(parse(args(&[option, "src", "dst"])).is_err(), "{option}");
+        }
+        assert!(parse(args(&["--jobs", "src", "dst"])).is_err());
+    }
+
+    #[test]
+    fn documented_no_ops_are_still_accepted() {
+        for option in ["-s", "-W", "--protect-args", "--blocking-io", "--no-blocking-io", "--no-motd", "--no-clone"] {
+            assert!(parse(args(&[option, "src", "dst"])).is_ok(), "{option}");
+        }
+    }
 }
