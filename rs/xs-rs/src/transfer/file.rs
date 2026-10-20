@@ -34,6 +34,11 @@ pub(super) struct InFile {
     pub(super) prefix_ok: bool,
     /// Incoming chunk ranges reserved before their writes finish, for overlap checks.
     pub(super) chunks: BTreeMap<i64, i64>,
+    /// This attempt carries LITERAL/COPY records and a DELTA_END digest.
+    pub(super) delta: bool,
+    pub(super) delta_sum: [u64; 2],
+    /// A basis block or temp write failed; the attempt drains but never publishes.
+    pub(super) ok: bool,
 }
 
 pub(super) fn add_range(ranges: &mut Vec<(i64, i64)>, start: i64, end: i64) {

@@ -5,6 +5,7 @@
 mod cli;
 mod compression;
 mod config;
+mod delta;
 mod ffi;
 mod idmap;
 mod output;
@@ -41,6 +42,7 @@ const SUPPORTED: u64 = feature::CORE
     | feature::DIR_OUTPUT
     | feature::HLINK
     | feature::RESUME
+    | feature::DELTA
     | feature::PROGRESS_ACK;
 
 /// What a client advertises: the compression policy frame exists only with `-z`,
@@ -61,7 +63,7 @@ fn client_advertised(options: &Options, verbose: i64, role: u8) -> u64 {
         features &= !feature::HLINK;
     }
     if options.whole_file {
-        features &= !feature::RESUME;
+        features &= !(feature::RESUME | feature::DELTA);
     }
     if role != b'R' || !options.progress {
         features &= !feature::PROGRESS_ACK;
@@ -88,6 +90,7 @@ fn options_from_flags(flags: &[bool; 32], ints: &[i64; 7]) -> Options {
         devices: flags[8],
         specials: flags[9],
         compress: flags[10],
+        ignore_times: flags[18],
         numeric_ids: flags[25],
         itemize_level: u32::from(flags[26]),
         partial: flags[27],
@@ -247,7 +250,7 @@ fn client_hello(cli: &cli::Cli, role: u8, paths: &[OsString]) -> Vec<u8> {
         false,
         false,
         false,
-        false,
+        o.ignore_times,
         false,
         false,
         false,
