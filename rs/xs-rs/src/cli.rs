@@ -93,6 +93,42 @@ pub fn parse(args: Vec<OsString>) -> Result<Cli, String> {
                 }
                 continue;
             }
+            if name == "chown" {
+                let value = match inline {
+                    Some(value) => value,
+                    None => iter.next().ok_or_else(|| "--chown needs a value".to_string())?,
+                };
+                let supported = {
+                    let text = value.as_bytes();
+                    let colon = text.iter().position(|&byte| byte == b':');
+                    let user = &text[..colon.unwrap_or(text.len())];
+                    let group = colon.map(|at| &text[at + 1..]).unwrap_or(&[]);
+                    let ownership = &mut cli.options.ownership;
+                    if text.contains(&b',')
+                        || text.contains(&0)
+                        || (!user.is_empty() && ownership.user_set)
+                        || (!group.is_empty() && ownership.group_set)
+                    {
+                        false
+                    } else {
+                        if !user.is_empty() {
+                            ownership.user = user.to_vec();
+                            ownership.user_set = true;
+                            cli.options.owner = true;
+                        }
+                        if !group.is_empty() {
+                            ownership.group = group.to_vec();
+                            ownership.group_set = true;
+                            cli.options.group = true;
+                        }
+                        true
+                    }
+                };
+                if !supported {
+                    return Err(format!("Invalid or repeated --chown ({})", text(&value)));
+                }
+                continue;
+            }
             if name == "compress-level" || name == "zl" {
                 let value = match inline {
                     Some(value) => value,

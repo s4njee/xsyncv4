@@ -5,6 +5,7 @@
 mod cli;
 mod compression;
 mod ffi;
+mod idmap;
 mod protocol;
 mod scan;
 mod transfer;
@@ -22,15 +23,20 @@ use crate::transfer::{run_receiver, run_sender};
 
 const VERSION: u64 = 4;
 const MAGIC: &[u8; 6] = b"XSYNC\x01";
-const SUPPORTED: u64 = feature::CORE | feature::ZSTD | feature::IDMAP | feature::DIR_CHILDREN | feature::COMPRESS_POLICY;
+const SUPPORTED: u64 =
+    feature::CORE | feature::ZSTD | feature::IDMAP | feature::DIR_CHILDREN | feature::COMPRESS_POLICY | feature::CHOWN;
 
-/// What we tell a peer about: the compression policy frame exists only with `-z`.
-fn advertised(options: &Options) -> u64 {
-    if options.compress {
-        SUPPORTED
-    } else {
-        SUPPORTED & !feature::COMPRESS_POLICY
+/// What a client advertises: the compression policy frame exists only with `-z`,
+/// and the ownership override only with `--chown`, as `run_client` masks them.
+fn client_advertised(options: &Options) -> u64 {
+    let mut features = SUPPORTED;
+    if !options.compress {
+        features &= !feature::COMPRESS_POLICY;
     }
+    if !options.ownership.requested() {
+        features &= !feature::CHOWN;
+    }
+    features
 }
 
 struct Hello {
@@ -125,6 +131,9 @@ fn read_config_frame<R: Read>(reader: &mut R) -> io::Result<Option<Frame>> {
     if kind == frame_type::COMPRESS_CONFIG && len > 65536 + 16 {
         return protocol::bad("protocol error: oversized or unnegotiated compression configuration");
     }
+    if kind == frame_type::CHOWN_CONFIG && len > 1024 * 1024 {
+        return protocol::bad("protocol error: oversized ownership configuration");
+    }
     let mut payload = vec![0u8; len as usize];
     reader.read_exact(&mut payload).map_err(|error| match error.kind() {
         io::ErrorKind::UnexpectedEof => io::Error::new(io::ErrorKind::InvalidData, "connection closed inside a frame"),
@@ -133,33 +142,73 @@ fn read_config_frame<R: Read>(reader: &mut R) -> io::Result<Option<Frame>> {
     Ok(Some(Frame::new(kind, payload)))
 }
 
-/// The client sends configuration frames in feature order. Only the compression policy is
-/// negotiated by this implementation, so it is the one frame read here.
-fn read_configuration<R: Read>(reader: &mut R, options: &mut Options, features: u64) -> io::Result<()> {
-    if features & feature::COMPRESS_POLICY == 0 {
-        return Ok(());
-    }
-    let Some(frame) = read_config_frame(reader)? else {
-        return protocol::bad("protocol error: missing compression configuration");
-    };
-    let config = Config::decode(frame.kind, &frame.payload, features).map_err(|error| {
-        io::Error::new(io::ErrorKind::InvalidData, format!("protocol error: {error}"))
-    })?;
-    match config {
-        Config::Compress { explicit_level, skip_compress } => {
-            if !options.compress {
-                return protocol::bad("protocol error: malformed compression configuration");
-            }
-            options.compress_level_explicit = explicit_level;
-            options.skip_compress = skip_compress;
-            options.skip_compress_set = true;
-            Ok(())
-        }
-        _ => protocol::bad("protocol error: malformed compression configuration"),
+type ConfigResult<T> = Result<T, (i32, String)>;
+
+fn config_frame<R: Read>(reader: &mut R) -> ConfigResult<Frame> {
+    match read_config_frame(reader) {
+        Ok(Some(frame)) => Ok(frame),
+        Ok(None) => Err((12, "connection closed inside a configuration frame".into())),
+        Err(error) => Err((2, error.to_string())),
     }
 }
 
-fn server<R: Read, W: Write + Send + 'static>(reader: &mut R, mut writer: W) -> io::Result<i32> {
+/// The client sends configuration frames in feature order. This implementation
+/// negotiates only the compression policy and the ownership override.
+fn read_configuration<R: Read>(reader: &mut R, options: &mut Options, features: u64, role: u8) -> ConfigResult<()> {
+    if features & feature::COMPRESS_POLICY != 0 {
+        let frame = config_frame(reader)?;
+        if frame.kind != frame_type::COMPRESS_CONFIG {
+            return Err((2, "protocol error: malformed compression configuration".into()));
+        }
+        let config = Config::decode(frame.kind, &frame.payload, features)
+            .map_err(|error| (2, format!("protocol error: {error}")))?;
+        match config {
+            Config::Compress { explicit_level, skip_compress } => {
+                if !options.compress {
+                    return Err((2, "protocol error: malformed compression configuration".into()));
+                }
+                options.compress_level_explicit = explicit_level;
+                options.skip_compress = skip_compress;
+                options.skip_compress_set = true;
+            }
+            _ => return Err((2, "protocol error: malformed compression configuration".into())),
+        }
+    }
+    if features & feature::CHOWN != 0 {
+        let frame = config_frame(reader)?;
+        if frame.kind != frame_type::CHOWN_CONFIG {
+            return Err((2, "protocol error: malformed ownership configuration".into()));
+        }
+        let config = Config::decode(frame.kind, &frame.payload, features)
+            .map_err(|error| (2, format!("protocol error: {error}")))?;
+        let Config::Chown { user, group } = config else {
+            return Err((2, "protocol error: malformed ownership configuration".into()));
+        };
+        // A pushing client names its overrides; a pulling client's fields are empty.
+        let wrong_side = if role == b'R' { user.is_empty() && group.is_empty() } else { !user.is_empty() || !group.is_empty() };
+        if wrong_side {
+            return Err((2, "protocol error: malformed ownership configuration".into()));
+        }
+        if (!user.is_empty() && options.ownership.user_set) || (!group.is_empty() && options.ownership.group_set) {
+            return Err((1, "You can only specify a user/group-affecting --chown once".into()));
+        }
+        if !user.is_empty() {
+            options.ownership.user = user;
+            options.ownership.user_set = true;
+        }
+        if !group.is_empty() {
+            options.ownership.group = group;
+            options.ownership.group_set = true;
+        }
+    }
+    Ok(())
+}
+
+fn server<R: Read, W: Write + Send + 'static>(
+    reader: &mut R,
+    mut writer: W,
+    server_options: &Options,
+) -> io::Result<i32> {
     let Some(frame) = xs_wire::read_frame(reader).map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e.to_string()))? else {
         return Ok(2);
     };
@@ -169,6 +218,7 @@ fn server<R: Read, W: Write + Send + 'static>(reader: &mut R, mut writer: W) -> 
         return Ok(2);
     }
     let (version, mut hello) = read_hello(&frame.payload)?;
+    hello.options.ownership = server_options.ownership.clone();
     if version != VERSION {
         let text = format!("protocol version mismatch: client {version}, server {VERSION} (supports 4 and 3)");
         write_message(&mut writer, msg_kind::FATAL, 2, &text)?;
@@ -180,15 +230,41 @@ fn server<R: Read, W: Write + Send + 'static>(reader: &mut R, mut writer: W) -> 
         writer.flush()?;
         return Ok(2);
     }
-    let features = hello.features & advertised(&hello.options);
+    let features = hello.features & SUPPORTED;
+    if hello.options.ownership.requested() && features & feature::CHOWN == 0 {
+        write_message(&mut writer, msg_kind::FATAL, 4, "peer does not support --chown")?;
+        writer.flush()?;
+        return Ok(4);
+    }
+    if !hello.options.numeric_ids
+        && (hello.options.owner || hello.options.group || hello.options.ownership.requested())
+        && features & feature::IDMAP == 0
+    {
+        write_message(&mut writer, msg_kind::FATAL, 4, "peer does not support user/group name mapping (use --numeric-ids)")?;
+        writer.flush()?;
+        return Ok(4);
+    }
     let mut answer = Encoder::new();
     answer.raw(MAGIC).var(VERSION).var(features);
     xs_wire::write_frame(&mut writer, frame_type::HELLO, &answer.bytes)?;
     writer.flush()?;
-    if let Err(error) = read_configuration(reader, &mut hello.options, features) {
-        write_message(&mut writer, msg_kind::FATAL, 2, &error.to_string())?;
+    if let Err((code, text)) = read_configuration(reader, &mut hello.options, features, hello.role) {
+        write_message(&mut writer, msg_kind::FATAL, code as u64, &text)?;
         writer.flush()?;
-        return Ok(2);
+        return Ok(code);
+    }
+    if hello.role == b'R' {
+        if hello.options.ownership.user_set {
+            hello.options.owner = true;
+        }
+        if hello.options.ownership.group_set {
+            hello.options.group = true;
+        }
+        if let Err(text) = hello.options.ownership.init() {
+            write_message(&mut writer, msg_kind::FATAL, 1, &text)?;
+            writer.flush()?;
+            return Ok(1);
+        }
     }
 
     if hello.role == b'R' {
@@ -204,7 +280,7 @@ fn server<R: Read, W: Write + Send + 'static>(reader: &mut R, mut writer: W) -> 
 fn client_hello(cli: &cli::Cli, role: u8, paths: &[OsString]) -> Vec<u8> {
     let o = &cli.options;
     let mut e = Encoder::new();
-    e.raw(MAGIC).var(VERSION).byte(role).var(advertised(o));
+    e.raw(MAGIC).var(VERSION).byte(role).var(client_advertised(o));
     let flags = [
         o.recursive,
         false,
@@ -255,12 +331,19 @@ fn client_hello(cli: &cli::Cli, role: u8, paths: &[OsString]) -> Vec<u8> {
 
 fn spawn_peer(cli: &cli::Cli, host: &[u8], local: bool) -> io::Result<Child> {
     if local {
-        return Command::new(std::env::current_exe()?)
-            .arg("--server")
-            .stdin(Stdio::piped())
-            .stdout(Stdio::piped())
-            .stderr(Stdio::inherit())
-            .spawn();
+        let mut command = Command::new(std::env::current_exe()?);
+        command.arg("--server");
+        if cli.options.ownership.requested() {
+            let mut value = cli.options.ownership.user.clone();
+            if cli.options.ownership.group_set {
+                value.push(b':');
+                value.extend_from_slice(&cli.options.ownership.group);
+            }
+            let mut argument = b"--chown=".to_vec();
+            argument.extend_from_slice(&value);
+            command.arg(OsString::from_vec(argument));
+        }
+        return command.stdin(Stdio::piped()).stdout(Stdio::piped()).stderr(Stdio::inherit()).spawn();
     }
     let rsh = cli
         .rsh
@@ -287,7 +370,7 @@ fn spawn_peer(cli: &cli::Cli, host: &[u8], local: bool) -> io::Result<Child> {
     command.stdin(Stdio::piped()).stdout(Stdio::piped()).stderr(Stdio::inherit()).spawn()
 }
 
-fn run_client(cli: &cli::Cli) -> io::Result<i32> {
+fn run_client(cli: &mut cli::Cli) -> io::Result<i32> {
     if cli.paths.len() < 2 {
         return Err(io::Error::new(io::ErrorKind::InvalidInput, "usage: xs-rs [options] SRC... DEST"));
     }
@@ -361,9 +444,24 @@ fn run_client(cli: &cli::Cli) -> io::Result<i32> {
         let _ = child.wait();
         return Ok(2);
     }
-    let features = d.var().map_err(protocol::decode_err)? & advertised(&cli.options);
+    let features = d.var().map_err(protocol::decode_err)? & client_advertised(&cli.options);
     if !d.is_empty() {
         return protocol::bad("protocol error: malformed server hello");
+    }
+    if cli.options.ownership.requested() && features & feature::CHOWN == 0 {
+        eprintln!("xs-rs: peer does not support --chown");
+        let _ = child.kill();
+        let _ = child.wait();
+        return Ok(4);
+    }
+    if !cli.options.numeric_ids
+        && (cli.options.owner || cli.options.group || cli.options.ownership.requested())
+        && features & feature::IDMAP == 0
+    {
+        eprintln!("xs-rs: peer does not support user/group name mapping (use --numeric-ids)");
+        let _ = child.kill();
+        let _ = child.wait();
+        return Ok(4);
     }
     if cli.options.compress
         && cli.options.skip_compress_set
@@ -384,6 +482,24 @@ fn run_client(cli: &cli::Cli) -> io::Result<i32> {
         xs_wire::write_frame(&mut output, config.kind, &config.payload)?;
         output.flush()?;
     }
+    if features & feature::CHOWN != 0 {
+        let (user, group) = if push {
+            (cli.options.ownership.user.clone(), cli.options.ownership.group.clone())
+        } else {
+            (Vec::new(), Vec::new())
+        };
+        let config = Config::Chown { user, group }.encode();
+        xs_wire::write_frame(&mut output, config.kind, &config.payload)?;
+        output.flush()?;
+    }
+    if !push {
+        if let Err(text) = cli.options.ownership.init() {
+            eprintln!("xs-rs: {text}");
+            let _ = child.kill();
+            let _ = child.wait();
+            return Ok(1);
+        }
+    }
 
     let result = if push {
         run_sender(&mut input, output, &cli.options, features, &local_sources)
@@ -401,7 +517,7 @@ fn run_client(cli: &cli::Cli) -> io::Result<i32> {
 }
 
 fn main() {
-    let cli = match cli::parse(std::env::args_os().skip(1).collect()) {
+    let mut cli = match cli::parse(std::env::args_os().skip(1).collect()) {
         Ok(cli) => cli,
         Err(message) => {
             eprintln!("xs-rs: {message}");
@@ -410,9 +526,9 @@ fn main() {
     };
     let result = if cli.server {
         let mut reader = BufReader::new(io::stdin());
-        server(&mut reader, BufWriter::new(io::stdout()))
+        server(&mut reader, BufWriter::new(io::stdout()), &cli.options)
     } else {
-        run_client(&cli)
+        run_client(&mut cli)
     };
     match result {
         Ok(code) => std::process::exit(code),

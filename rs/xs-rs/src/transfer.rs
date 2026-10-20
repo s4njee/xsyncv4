@@ -19,6 +19,7 @@ use xs_wire::{read_frame, write_frame, Decoder, Encoder, Frame, Suffixes};
 
 use crate::compression::{CompressionLink, Transport};
 use crate::ffi;
+use crate::idmap;
 use crate::protocol::{
     self, bad, decode_err, feature, frame_type, msg_kind, rec, Attrs, EntryMeta, Options, T_DIR, T_FIFO, T_LNK, T_REG,
 };
@@ -133,6 +134,7 @@ fn send_dir<W: Write + Send + 'static>(
     opts: &Options,
     features: u64,
     link: &CompressionLink,
+    ids: &mut idmap::Sender,
     id: u32,
     parent_plus1: u32,
     pidx: u32,
@@ -173,6 +175,9 @@ fn send_dir<W: Write + Send + 'static>(
             link.count(level, body.bytes.len() as u64);
         }
     }
+    if let Some(map) = ids.describe(opts, features, attrs, &entries) {
+        output.send(map.kind, &map.payload)?;
+    }
     output.send(frame_type::DIR, &frame.bytes)?;
     if dirs.len() <= id as usize {
         dirs.resize_with(id as usize + 1, || None);
@@ -189,6 +194,7 @@ fn send_dir<W: Write + Send + 'static>(
                 opts,
                 features,
                 link,
+                ids,
                 child_id,
                 id + 1,
                 index as u32,
@@ -395,6 +401,7 @@ pub fn run_sender<R: Read, W: Write + Send + 'static>(
         flags |= protocol::DF_SINGLE;
     }
     let suffixes = crate::compression::suffixes(&opts.skip_compress);
+    let mut ids = idmap::Sender::default();
     let mut dirs: Vec<Option<SentDir>> = Vec::new();
     let mut next_id = 1u32;
     send_dir(
@@ -402,6 +409,7 @@ pub fn run_sender<R: Read, W: Write + Send + 'static>(
         opts,
         features,
         &link,
+        &mut ids,
         0,
         0,
         0,
@@ -580,6 +588,7 @@ fn finish_infile(infile: &mut InFile, opts: &Options) -> io::Result<bool> {
     infile.finished = true;
     infile.file.set_len(total as u64)?;
     let attrs = infile.attrs.clone().unwrap_or_default();
+    idmap::chown_file(&infile.file, opts, &attrs);
     if opts.perms {
         let _ = infile.file.set_permissions(fs::Permissions::from_mode(attrs.mode & 0o7777));
     }
@@ -600,6 +609,7 @@ fn write_whole(path_dir: &Path, name: &[u8], final_path: &Path, attrs: &Attrs, b
     let result = (|| {
         file.write_all(bytes)?;
         file.set_len(bytes.len() as u64)?;
+        idmap::chown_file(&file, opts, attrs);
         if opts.perms {
             file.set_permissions(fs::Permissions::from_mode(attrs.mode & 0o7777))?;
         }
@@ -649,6 +659,7 @@ fn process_dir<R: Read, W: Write>(
     features: u64,
     dest_arg: &Path,
     frame: &Frame,
+    ids: &idmap::Receiver,
     dirs: &mut Vec<Option<RecvDir>>,
     finals: &mut Vec<FinalDir>,
     created_dirs: &mut u64,
@@ -676,7 +687,7 @@ fn process_dir<R: Read, W: Write>(
     let body = protocol::unpack_body(header.rest(), flags & protocol::DF_ZSTD != 0, features)?;
     let mut d = Decoder::new(&body);
     let rel = d.str().map_err(decode_err)?.to_vec();
-    let attrs = protocol::get_dir_attrs(&mut d, features)?;
+    let mut attrs = protocol::get_dir_attrs(&mut d, features)?;
     if features & feature::DIR_CHILDREN != 0 {
         let _children = d.var().map_err(decode_err)?;
     }
@@ -691,6 +702,10 @@ fn process_dir<R: Read, W: Write>(
     }
     if !d.is_empty() {
         return bad("protocol error: trailing DIR payload");
+    }
+    ids.apply(&mut attrs, opts);
+    for entry in &mut entries {
+        ids.apply(&mut entry.attrs, opts);
     }
 
     let (dir_path, rename_to, apply_attrs) = if parent_plus1 == 0 {
@@ -784,6 +799,7 @@ fn process_dir<R: Read, W: Write>(
                     if opts.times {
                         let _ = ffi::set_mtime(&target, entry.attrs.mtime, entry.attrs.mtime_ns as i64, false);
                     }
+                    idmap::chown_path(&target, opts, &entry.attrs, false);
                 } else {
                     if let Some(m) = existing {
                         if !m.is_file() {
@@ -806,6 +822,7 @@ fn process_dir<R: Read, W: Write>(
                 if opts.times {
                     let _ = ffi::set_mtime(&target, entry.attrs.mtime, entry.attrs.mtime_ns as i64, true);
                 }
+                idmap::chown_path(&target, opts, &entry.attrs, true);
             }
             T_FIFO => {
                 if !existing.map(|m| m.file_type().is_fifo()).unwrap_or(false) {
@@ -815,6 +832,7 @@ fn process_dir<R: Read, W: Write>(
                 if opts.times {
                     let _ = ffi::set_mtime(&target, entry.attrs.mtime, entry.attrs.mtime_ns as i64, false);
                 }
+                idmap::chown_path(&target, opts, &entry.attrs, false);
             }
             _ => {}
         }
@@ -840,6 +858,7 @@ fn process_data(
     payload: &[u8],
     opts: &Options,
     features: u64,
+    ids: &idmap::Receiver,
     dirs: &mut [Option<RecvDir>],
     infiles: &mut HashMap<(u32, u32, u32), InFile>,
     created_files: &mut u64,
@@ -874,7 +893,8 @@ fn process_data(
         }
         match kind {
             rec::WHOLE => {
-                let attrs = protocol::get_file_attrs(&mut d, features)?;
+                let mut attrs = protocol::get_file_attrs(&mut d, features)?;
+                ids.apply(&mut attrs, opts);
                 let bytes = d.str().map_err(decode_err)?;
                 let name = dir.rename_to.as_deref().unwrap_or(&entry.name);
                 let final_path = dir.dest.join(OsStr::from_bytes(name));
@@ -933,7 +953,8 @@ fn process_data(
                 let total = i64::try_from(d.var().map_err(decode_err)?)
                     .map_err(|_| io::Error::new(io::ErrorKind::InvalidData, "bad file total"))?;
                 let status = d.byte().map_err(decode_err)?;
-                let attrs = protocol::get_file_attrs(&mut d, features)?;
+                let mut attrs = protocol::get_file_attrs(&mut d, features)?;
+                ids.apply(&mut attrs, opts);
                 if status > 2 || total < 0 {
                     return bad("protocol error: bad file completion");
                 }
@@ -998,6 +1019,7 @@ pub fn run_receiver<R: Read, W: Write>(
     write_frame(&mut output, frame_type::DEST, &identity.bytes)?;
     output.flush()?;
     let dest_path = PathBuf::from(OsString::from_vec(dest.to_vec()));
+    let mut ids = idmap::Receiver::default();
     let mut dirs: Vec<Option<RecvDir>> = Vec::new();
     let mut seen_dirs: Vec<bool> = Vec::new();
     let mut finals: Vec<FinalDir> = Vec::new();
@@ -1024,13 +1046,16 @@ pub fn run_receiver<R: Read, W: Write>(
                 features,
                 &dest_path,
                 &frame,
+                &ids,
                 &mut dirs,
                 &mut finals,
                 &mut created_dirs,
                 &mut created_links,
                 &mut seen_dirs,
             ),
-            frame_type::DATA => process_data(&frame.payload, opts, features, &mut dirs, &mut infiles, &mut created_files),
+            frame_type::DATA => {
+                process_data(&frame.payload, opts, features, &ids, &mut dirs, &mut infiles, &mut created_files)
+            }
             frame_type::LIST_END => Ok(()),
             frame_type::DATA_END => {
                 let mut d = Decoder::new(&frame.payload);
@@ -1043,7 +1068,16 @@ pub fn run_receiver<R: Read, W: Write>(
                     Err(error) => Err(error),
                 }
             }
-            frame_type::IDMAP | frame_type::KEEPALIVE => Ok(()),
+            frame_type::IDMAP => {
+                if features & feature::IDMAP == 0 {
+                    bad("ID map without negotiated name-mapping support")
+                } else {
+                    ids.learn(&frame.payload);
+                    Ok(())
+                }
+            }
+            frame_type::CHOWN_CONFIG => bad("protocol error: unnegotiated ownership configuration"),
+            frame_type::KEEPALIVE => Ok(()),
             frame_type::MSG => match msg_code(&frame) {
                 Ok(Some(code)) => return Ok(code),
                 Ok(None) => Ok(()),
@@ -1065,6 +1099,7 @@ pub fn run_receiver<R: Read, W: Write>(
         if !final_dir.apply {
             continue;
         }
+        idmap::chown_path(&final_dir.path, opts, &final_dir.attrs, false);
         if opts.perms {
             let _ = fs::set_permissions(&final_dir.path, fs::Permissions::from_mode(final_dir.attrs.mode & 0o7777));
         }
