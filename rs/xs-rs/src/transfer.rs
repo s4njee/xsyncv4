@@ -499,12 +499,40 @@ fn send_large<W: Write + Send + 'static>(
     link: &CompressionLink,
     opts: &Options,
     block: &mut Vec<u8>,
+    ranges: bool,
 ) -> io::Result<()> {
+    let planned = entry.meta.size.max(0) as u64;
+    if ranges && planned >= crate::parallel::RANGE_MIN {
+        let jobs = crate::parallel::effective_jobs(opts.jobs);
+        let complete = crate::parallel::read_ranges(
+            &entry.path,
+            planned,
+            jobs,
+            crate::parallel::RANGE_SPAN,
+            |offset, bytes| {
+                let mut e = Encoder::new();
+                e.var(id as u64).var(idx as u64).byte(rec::CHUNK);
+                e.var(0).var(offset).var(planned);
+                e.str(&bytes);
+                record(e, block);
+                if block.len() >= protocol::BLOCK_TARGET {
+                    flush_data(output, block, compress, link, opts)?;
+                }
+                Ok(())
+            },
+        )?;
+        flush_data(output, block, compress, link, opts)?;
+        let mut e = Encoder::new();
+        e.var(id as u64).var(idx as u64).byte(rec::END);
+        e.var(0).var(planned).byte(if complete { 0 } else { 2 });
+        protocol::put_file_attrs(&mut e, &entry.meta.attrs, features);
+        record(e, block);
+        return flush_data(output, block, compress, link, opts);
+    }
     let mut file = match File::open(&entry.path) {
         Ok(file) => file,
         Err(_) => return flush_data(output, block, compress, link, opts),
     };
-    let planned = entry.meta.size.max(0) as u64;
     let mut buffer = vec![0u8; protocol::BLOCK_TARGET];
     let mut offset = 0u64;
     let mut failed = false;
@@ -561,6 +589,18 @@ fn send_need_data<W: Write + Send + 'static>(
     opts: &Options,
     suffixes: &Suffixes,
 ) -> io::Result<()> {
+    // `parallel_file_ranges`: split only when an explicit -jN asked for it and
+    // the NEED does not already offer several large files as parallel work.
+    let large = indices
+        .iter()
+        .filter(|&&idx| {
+            dir.dest_entries
+                .get(idx as usize)
+                .map(|entry| entry.meta.kind == T_REG && entry.meta.size >= crate::parallel::RANGE_MIN as i64)
+                .unwrap_or(false)
+        })
+        .count();
+    let ranges = crate::parallel::explicit_ranges(opts.jobs) && large <= 1;
     let mut block = Vec::with_capacity(protocol::BLOCK_TARGET);
     let mut block_skip = false;
     for &idx in indices {
@@ -590,7 +630,7 @@ fn send_need_data<W: Write + Send + 'static>(
             }
         } else {
             flush_data(output, &mut block, opts.compress && !block_skip, link, opts)?;
-            send_large(output, id, idx, entry, features, opts.compress && !skip, link, opts, &mut block)?;
+            send_large(output, id, idx, entry, features, opts.compress && !skip, link, opts, &mut block, ranges)?;
         }
         if skip {
             flush_data(output, &mut block, false, link, opts)?;

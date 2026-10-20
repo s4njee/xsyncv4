@@ -352,6 +352,9 @@ pub struct Options {
     pub specials: bool,
     pub compress: bool,
     pub numeric_ids: bool,
+    /// `-j/--jobs`; zero means the default worker budget (four), as the wire's
+    /// INT_OPTIONS value does for the C++ engine.
+    pub jobs: i64,
     pub compress_level: i64,
     pub compress_level_explicit: bool,
     pub skip_compress: Vec<u8>,
@@ -388,6 +391,7 @@ impl Default for Options {
             specials: false,
             compress: false,
             numeric_ids: false,
+            jobs: 0,
             compress_level: 3,
             compress_level_explicit: false,
             skip_compress: xs_wire::DEFAULT_SKIP_COMPRESS.as_bytes().to_vec(),

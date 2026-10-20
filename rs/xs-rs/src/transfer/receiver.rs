@@ -7,7 +7,8 @@ use std::ffi::{OsStr, OsString};
 use std::fs;
 use std::io::{self, Read, Write};
 use std::os::unix::ffi::{OsStrExt, OsStringExt};
-use std::os::unix::fs::{FileExt, FileTypeExt, MetadataExt, PermissionsExt};
+use std::os::unix::fs::{FileTypeExt, MetadataExt, PermissionsExt};
+use std::os::unix::io::AsRawFd;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use std::time::Instant;
@@ -23,9 +24,11 @@ use crate::protocol::{
 };
 use crate::scan;
 
+use crate::parallel::{WriteDone, WritePool};
+
 use super::file::{
-    add_range, create_temp, destination_listing, finish_infile, make_dir, remove_any, set_dir_working_mode, write_whole,
-    InFile,
+    add_range, covered, create_temp, destination_listing, finish_infile, make_dir, remove_any, set_dir_working_mode,
+    write_whole, InFile,
 };
 use super::hardlink::{finalize_hardlinks, hardlink_member, HardLinks};
 use super::{
@@ -239,7 +242,7 @@ fn process_dir<W: Write + Send + 'static>(
                             if let Some(key) = &link_key {
                                 hardlinks.defer_event(key, &event_path, event);
                             } else {
-                                report_event(output, local_output.as_deref_mut(), features, opts, event)?;
+        report_event(output, local_output.as_deref_mut(), features, opts, event)?;
                             }
                         }
                     }
@@ -362,10 +365,16 @@ fn process_dir<W: Write + Send + 'static>(
     Ok(())
 }
 
-fn open_infile(dir: &RecvDir, entry: &EntryMeta, total: i64) -> io::Result<InFile> {
-    let name = dir.rename_to.as_deref().unwrap_or(&entry.name);
-    let final_path = dir.dest.join(OsStr::from_bytes(name));
-    let (temp, file) = create_temp(&dir.dest, name)?;
+fn open_infile(
+    dir: &RecvDir,
+    entry: &EntryMeta,
+    total: i64,
+    before: Option<fs::Metadata>,
+    link_key: Option<crate::protocol::HardlinkKey>,
+) -> io::Result<InFile> {
+    let name = dir.rename_to.clone().unwrap_or_else(|| entry.name.clone());
+    let final_path = dir.dest.join(OsStr::from_bytes(&name));
+    let (temp, file) = create_temp(&dir.dest, &name)?;
     Ok(InFile {
         temp,
         file,
@@ -375,6 +384,11 @@ fn open_infile(dir: &RecvDir, entry: &EntryMeta, total: i64) -> io::Result<InFil
         attrs: None,
         status: None,
         finished: false,
+        pending: 0,
+        entry: entry.clone(),
+        before,
+        event_path: scan::join_rel(&dir.rel, &entry.name),
+        link_key,
     })
 }
 
@@ -387,6 +401,7 @@ fn process_data<W: Write + Send + 'static>(
     ids: &idmap::Receiver,
     dirs: &mut [Option<RecvDir>],
     infiles: &mut HashMap<(u32, u32, u32), InFile>,
+    pool: &mut WritePool,
     created_files: &mut u64,
     hardlinks: &mut HardLinks,
     mut local_output: Option<&mut Output>,
@@ -463,28 +478,22 @@ fn process_data<W: Write + Send + 'static>(
                 let key = (id, idx, attempt);
                 let infile = match infiles.entry(key) {
                     Entry::Occupied(occupied) => occupied.into_mut(),
-                    Entry::Vacant(vacant) => vacant.insert(open_infile(dir, &entry, total)?),
+                    Entry::Vacant(vacant) => {
+                        vacant.insert(open_infile(dir, &entry, total, before.clone(), link_key.clone())?)
+                    }
                 };
                 if infile.total != Some(total) {
                     return bad("protocol error: inconsistent file size");
                 }
-                infile.file.write_all_at(bytes, offset as u64)?;
-                add_range(&mut infile.ranges, offset, offset + bytes.len() as i64);
+                infile.pending += 1;
+                pool.submit(
+                    infile.file.as_raw_fd(),
+                    bytes.to_vec(),
+                    offset,
+                    offset + bytes.len() as i64,
+                    key,
+                );
                 added_bytes += bytes.len() as u64;
-                if infile.status == Some(0) && finish_infile(infile, opts)? {
-                    *created_files += 1;
-                    added_files += 1;
-                    let total = infile.total.unwrap_or(0);
-                    infiles.remove(&key);
-                    dir.need.remove(&idx);
-                    let code = transferred_code(opts, before.as_ref(), &entry);
-                    let event = taken_event(&code, &event_path, &event_source, T_REG, total, total);
-                    if let Some(key) = &link_key {
-                        hardlinks.defer_event(key, &event_path, event);
-                    } else {
-                        report_event(output, local_output.as_deref_mut(), features, opts, event)?;
-                    }
-                }
             }
             rec::END => {
                 let attempt = u32::try_from(d.var().map_err(decode_err)?)
@@ -500,34 +509,13 @@ fn process_data<W: Write + Send + 'static>(
                 let key = (id, idx, attempt);
                 let infile = match infiles.entry(key) {
                     Entry::Occupied(occupied) => occupied.into_mut(),
-                    Entry::Vacant(vacant) => vacant.insert(open_infile(dir, &entry, total)?),
+                    Entry::Vacant(vacant) => {
+                        vacant.insert(open_infile(dir, &entry, total, before.clone(), link_key.clone())?)
+                    }
                 };
                 infile.total = Some(total);
                 infile.attrs = Some(attrs);
                 infile.status = Some(status);
-                if status == 2 {
-                    let _ = fs::remove_file(&infile.temp);
-                    infiles.remove(&key);
-                    dir.need.remove(&idx);
-                } else if status == 0 {
-                    if finish_infile(infile, opts)? {
-                        *created_files += 1;
-                        added_files += 1;
-                        infiles.remove(&key);
-                        dir.need.remove(&idx);
-                        let code = transferred_code(opts, before.as_ref(), &entry);
-                        let event = taken_event(&code, &event_path, &event_source, T_REG, total, total);
-                        if let Some(key) = &link_key {
-                            hardlinks.defer_event(key, &event_path, event);
-                        } else {
-                            report_event(output, local_output.as_deref_mut(), features, opts, event)?;
-                        }
-                    }
-                } else {
-                    let _ = fs::remove_file(&infile.temp);
-                    infiles.remove(&key);
-                    dir.need.remove(&idx);
-                }
             }
             rec::FAIL => {
                 dir.need.remove(&idx);
@@ -536,6 +524,117 @@ fn process_data<W: Write + Send + 'static>(
         }
     }
     Ok((added_bytes, added_files))
+}
+
+fn apply_write(done: WriteDone, infiles: &mut HashMap<(u32, u32, u32), InFile>) -> io::Result<Option<(u32, u32, u32)>> {
+    done.result?;
+    let Some(infile) = infiles.get_mut(&done.key) else {
+        return Ok(None);
+    };
+    infile.pending = infile.pending.saturating_sub(1);
+    add_range(&mut infile.ranges, done.start, done.end);
+    Ok(Some(done.key))
+}
+
+/// Publish a file once its END has arrived and every queued range write has
+/// returned; a failed attempt is removed only after its writes have drained.
+#[allow(clippy::too_many_arguments)]
+fn finish_ready<W: Write + Send + 'static>(
+    output: &mut FrameOut<W>,
+    opts: &Options,
+    features: u64,
+    dirs: &mut [Option<RecvDir>],
+    infiles: &mut HashMap<(u32, u32, u32), InFile>,
+    key: (u32, u32, u32),
+    hardlinks: &mut HardLinks,
+    local_output: Option<&mut Output>,
+) -> io::Result<u64> {
+    let Some((pending, status, total)) =
+        infiles.get(&key).map(|infile| (infile.pending, infile.status, infile.total.unwrap_or(0)))
+    else {
+        return Ok(0);
+    };
+    if pending != 0 {
+        return Ok(0);
+    }
+    let Some(status) = status else {
+        return Ok(0);
+    };
+    if status != 0 || !infiles.get(&key).map(|infile| covered(&infile.ranges, total)).unwrap_or(false) {
+        if status == 0 {
+            return Ok(0);
+        }
+        let infile = infiles.remove(&key).unwrap();
+        let _ = fs::remove_file(&infile.temp);
+        if let Some(dir) = dirs.get_mut(key.0 as usize).and_then(Option::as_mut) {
+            dir.need.remove(&key.1);
+        }
+        return Ok(0);
+    }
+    let infile = infiles.get_mut(&key).unwrap();
+    if !finish_infile(infile, opts)? {
+        return Ok(0);
+    }
+    let entry = infile.entry.clone();
+    let before = infile.before.clone();
+    let event_path = infile.event_path.clone();
+    let link_key = infile.link_key.clone();
+    infiles.remove(&key);
+    if let Some(dir) = dirs.get_mut(key.0 as usize).and_then(Option::as_mut) {
+        dir.need.remove(&key.1);
+    }
+    let code = transferred_code(opts, before.as_ref(), &entry);
+    let event = taken_event(&code, &event_path, &entry.output_source, T_REG, total, total);
+    if let Some(key) = &link_key {
+        hardlinks.defer_event(key, &event_path, event);
+    } else {
+        report_event(output, local_output, features, opts, event)?;
+    }
+    Ok(1)
+}
+
+#[allow(clippy::too_many_arguments)]
+fn drain_writes<W: Write + Send + 'static>(
+    output: &mut FrameOut<W>,
+    opts: &Options,
+    features: u64,
+    dirs: &mut [Option<RecvDir>],
+    infiles: &mut HashMap<(u32, u32, u32), InFile>,
+    pool: &WritePool,
+    hardlinks: &mut HardLinks,
+    mut local_output: Option<&mut Output>,
+) -> io::Result<u64> {
+    let mut files = 0;
+    while let Some(done) = pool.try_done() {
+        if let Some(key) = apply_write(done, infiles)? {
+            files += finish_ready(
+                output,
+                opts,
+                features,
+                dirs,
+                infiles,
+                key,
+                hardlinks,
+                local_output.as_deref_mut(),
+            )?;
+        }
+    }
+    // An END can arrive after the last write already completed. Try every
+    // settled entry, not only those whose completion this call observed.
+    let keys: Vec<_> = infiles.keys().copied().collect();
+    for key in keys {
+        files += finish_ready(
+            output,
+            opts,
+            features,
+            dirs,
+            infiles,
+            key,
+            hardlinks,
+            local_output.as_deref_mut(),
+        )?;
+    }
+    Ok(files)
 }
 
 /// Receiver: send F_DEST, answer each DIR with a NEED, write DATA records, then
@@ -560,6 +659,11 @@ pub fn run_receiver<R: Read, W: Write + Send + 'static>(
     let mut seen_dirs: Vec<bool> = Vec::new();
     let mut finals: Vec<FinalDir> = Vec::new();
     let mut infiles: HashMap<(u32, u32, u32), InFile> = HashMap::new();
+    // Like the C++ receiver, one file's ranges stay serial unless an explicit
+    // -jN (N > 1) asked for range concurrency; the default budget is for files.
+    let write_workers =
+        if crate::parallel::explicit_ranges(opts.jobs) { crate::parallel::effective_jobs(opts.jobs) } else { 1 };
+    let mut pool = WritePool::new(write_workers);
     let mut hardlinks = HardLinks::new(opts.hard_links && features & feature::HLINK != 0);
     let mut created_files = 0u64;
     let mut created_dirs = 0u64;
@@ -603,6 +707,7 @@ pub fn run_receiver<R: Read, W: Write + Send + 'static>(
                 &ids,
                 &mut dirs,
                 &mut infiles,
+                &mut pool,
                 &mut created_files,
                 &mut hardlinks,
                 local_output.as_deref_mut(),
@@ -610,7 +715,23 @@ pub fn run_receiver<R: Read, W: Write + Send + 'static>(
                 Ok((bytes, files)) => {
                     progress_bytes += bytes;
                     progress_files += files;
-                    progress_ack(&mut output, features, progress_bytes, progress_files, false, &mut progress_last)
+                    match drain_writes(
+                        &mut output,
+                        opts,
+                        features,
+                        &mut dirs,
+                        &mut infiles,
+                        &pool,
+                        &mut hardlinks,
+                        local_output.as_deref_mut(),
+                    ) {
+                        Ok(finished) => {
+                            created_files += finished;
+                            progress_files += finished;
+                            progress_ack(&mut output, features, progress_bytes, progress_files, false, &mut progress_last)
+                        }
+                        Err(error) => Err(error),
+                    }
                 }
                 Err(error) => Err(error),
             },
@@ -647,6 +768,39 @@ pub fn run_receiver<R: Read, W: Write + Send + 'static>(
             return Ok(2);
         }
     }
+    // DATA_END may follow the last END while that file's range writes are still
+    // in the pool; drain every completion before publishing or cleaning up.
+    while infiles.values().any(|infile| infile.pending > 0) {
+        let Some(done) = pool.recv_done() else {
+            break;
+        };
+        if let Some(key) = apply_write(done, &mut infiles)? {
+            let finished = finish_ready(
+                &mut output,
+                opts,
+                features,
+                &mut dirs,
+                &mut infiles,
+                key,
+                &mut hardlinks,
+                local_output.as_deref_mut(),
+            )?;
+            created_files += finished;
+            progress_files += finished;
+        }
+    }
+    let finished = drain_writes(
+        &mut output,
+        opts,
+        features,
+        &mut dirs,
+        &mut infiles,
+        &pool,
+        &mut hardlinks,
+        local_output.as_deref_mut(),
+    )?;
+    created_files += finished;
+    progress_files += finished;
     for (_, infile) in infiles.drain() {
         if !infile.finished {
             let _ = fs::remove_file(&infile.temp);
