@@ -10,6 +10,7 @@ use std::io::{self, BufWriter, Read, Write};
 use std::os::unix::ffi::{OsStrExt, OsStringExt};
 use std::os::unix::fs::{FileExt, FileTypeExt, MetadataExt, OpenOptionsExt, PermissionsExt};
 use std::path::{Path, PathBuf};
+use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::mpsc::{channel, Sender, TryRecvError};
 use std::sync::{Arc, OnceLock};
 use std::thread::JoinHandle;
@@ -23,8 +24,8 @@ use crate::ffi;
 use crate::idmap;
 use crate::output::Output;
 use crate::protocol::{
-    self, bad, decode_err, feature, frame_type, msg_kind, rec, Attrs, EntryMeta, Options, T_BLK, T_CHR, T_DIR, T_FIFO, T_LNK,
-    T_REG,
+    self, bad, decode_err, feature, frame_type, msg_kind, rec, Attrs, EntryMeta, HardlinkKey, Options, T_BLK, T_CHR, T_DIR,
+    T_FIFO, T_LNK, T_REG,
 };
 use crate::scan::{self, SourceEntry};
 use xs_wire::output::file_type;
@@ -903,6 +904,276 @@ fn destination_listing(path: &Path) -> BTreeMap<Vec<u8>, fs::Metadata> {
     map
 }
 
+#[derive(Clone, Debug)]
+struct HLinkMember {
+    rel: Vec<u8>,
+    path: PathBuf,
+    source: Vec<u8>,
+    kind: u8,
+    attrs: Attrs,
+    existed: bool,
+    before_inode: Option<(u64, u64)>,
+    follower: bool,
+    event: Option<OutputEvent>,
+}
+
+#[derive(Clone, Debug, Default)]
+struct HLinkGroup {
+    members: Vec<HLinkMember>,
+    leader: Option<usize>,
+}
+
+/// The receiver's view of `src/hardlink.cpp`: source inodes are claimed by the
+/// first name that holds their data, later new names follow it, and every group
+/// is linked once all data has arrived.
+#[derive(Clone, Debug)]
+struct HardLinks {
+    enabled: bool,
+    groups: BTreeMap<HardlinkKey, HLinkGroup>,
+}
+
+impl HardLinks {
+    fn new(enabled: bool) -> Self {
+        Self { enabled, groups: BTreeMap::new() }
+    }
+
+    fn key(entry: &EntryMeta, features: u64) -> Option<HardlinkKey> {
+        if features & feature::HLINK == 0 {
+            return None;
+        }
+        entry.attrs.hardlink_key(entry.kind, &entry.link)
+    }
+
+    fn register_ready(&mut self, key: HardlinkKey, member: HLinkMember) {
+        let group = self.groups.entry(key).or_default();
+        let index = group.members.len();
+        group.members.push(member);
+        if group.leader.is_none() {
+            group.leader = Some(index);
+        }
+    }
+
+    /// Returns true when this new name may reuse an inode another name holds.
+    fn register_transfer(&mut self, key: HardlinkKey, mut member: HLinkMember, may_follow: bool) -> bool {
+        let group = self.groups.entry(key).or_default();
+        if may_follow && group.leader.is_some() {
+            member.follower = true;
+            group.members.push(member);
+            return true;
+        }
+        let index = group.members.len();
+        group.members.push(member);
+        if group.leader.is_none() {
+            group.leader = Some(index);
+        }
+        false
+    }
+
+    fn defer_event(&mut self, key: &HardlinkKey, rel: &[u8], event: OutputEvent) {
+        if let Some(member) = self.groups.get_mut(key).and_then(|group| group.members.iter_mut().find(|m| m.rel == rel)) {
+            member.event = Some(event);
+        }
+    }
+}
+
+fn metadata_kind(metadata: &fs::Metadata) -> u8 {
+    let kind = metadata.file_type();
+    if kind.is_file() {
+        T_REG
+    } else if kind.is_dir() {
+        T_DIR
+    } else if kind.is_symlink() {
+        T_LNK
+    } else if kind.is_fifo() {
+        T_FIFO
+    } else if kind.is_socket() {
+        protocol::T_SOCK
+    } else if kind.is_char_device() {
+        T_CHR
+    } else if kind.is_block_device() {
+        T_BLK
+    } else {
+        protocol::T_NONE
+    }
+}
+
+fn hardlink_member(entry: &EntryMeta, rel: &[u8], path: &Path, before: Option<&fs::Metadata>) -> HLinkMember {
+    let existed = before.map(|m| metadata_kind(m) == entry.kind).unwrap_or(false);
+    HLinkMember {
+        rel: rel.to_vec(),
+        path: path.to_path_buf(),
+        source: entry.output_source.clone(),
+        kind: entry.kind,
+        attrs: entry.attrs.clone(),
+        existed,
+        before_inode: if existed { before.map(|m| (m.dev(), m.ino())) } else { None },
+        follower: false,
+        event: None,
+    }
+}
+
+fn hardlink_dir(rel: &[u8]) -> &[u8] {
+    match rel.iter().rposition(|&byte| byte == b'/') {
+        Some(slash) => &rel[..slash],
+        None => &[],
+    }
+}
+
+fn kind_letter(kind: u8) -> u8 {
+    match kind {
+        T_REG => b'f',
+        T_LNK => b'L',
+        T_CHR | T_BLK => b'D',
+        _ => b'S',
+    }
+}
+
+fn linked_event(member: &HLinkMember, anchor: &HLinkMember, already: bool) -> OutputEvent {
+    let mut event = member.event.clone().unwrap_or_default();
+    event.path = member.rel.clone();
+    event.source = member.source.clone();
+    event.kind = member.kind;
+    event.size = member.attrs.size;
+    if already {
+        event.code = b"hf         ".to_vec();
+        event.target = Vec::new();
+        event.hardlink_target = false;
+    } else {
+        event.target = anchor.rel.clone();
+        event.hardlink_target = true;
+        if !member.existed {
+            event.code = b"hf+++++++++".to_vec();
+        } else if event.code.is_empty() {
+            event.code = b".f         ".to_vec();
+        }
+    }
+    if event.code.len() >= 2 {
+        event.code[0] = b'h';
+        event.code[1] = kind_letter(member.kind);
+    }
+    event
+}
+
+fn same_inode(left: &Path, right: &Path) -> bool {
+    match (fs::symlink_metadata(left), fs::symlink_metadata(right)) {
+        (Ok(a), Ok(b)) => a.dev() == b.dev() && a.ino() == b.ino(),
+        _ => false,
+    }
+}
+
+fn publish_hardlink(source: &Path, target: &Path) -> io::Result<()> {
+    if same_inode(source, target) {
+        return Ok(());
+    }
+    static ATTEMPT: AtomicU64 = AtomicU64::new(0);
+    let parent = target.parent().filter(|p| !p.as_os_str().is_empty()).unwrap_or(Path::new("."));
+    for _ in 0..100 {
+        let temp = parent.join(format!(".xsync-hardlink-{}-{}", std::process::id(), ATTEMPT.fetch_add(1, Ordering::Relaxed)));
+        match fs::hard_link(source, &temp) {
+            Ok(()) => {
+                let result = fs::rename(&temp, target);
+                if result.is_err() {
+                    let _ = fs::remove_file(&temp);
+                }
+                return result;
+            }
+            Err(error) if error.kind() == io::ErrorKind::AlreadyExists => continue,
+            Err(error) => return Err(error),
+        }
+    }
+    Err(io::Error::new(io::ErrorKind::AlreadyExists, "cannot create a temporary hard link"))
+}
+
+#[allow(clippy::too_many_arguments)]
+fn finalize_hardlinks<W: Write + Send + 'static>(
+    hardlinks: &mut HardLinks,
+    output: &mut FrameOut<W>,
+    features: u64,
+    opts: &Options,
+    created_files: &mut u64,
+    mut local_output: Option<&mut Output>,
+) -> io::Result<()> {
+    let groups = std::mem::take(&mut hardlinks.groups);
+    for (_, mut group) in groups {
+        if group.members.is_empty() {
+            continue;
+        }
+        // `hardlink_finalize` sorts by parent directory then relative name. A
+        // regular group's first choice is its last member; an existing name wins.
+        let mut order: Vec<usize> = (0..group.members.len()).collect();
+        order.sort_by(|&left, &right| {
+            let a = &group.members[left];
+            let b = &group.members[right];
+            (hardlink_dir(&a.rel), &a.rel).cmp(&(hardlink_dir(&b.rel), &b.rel))
+        });
+        let mut anchor_index = order[0];
+        if group.members[anchor_index].kind == T_REG {
+            anchor_index = *order.last().unwrap();
+        }
+        for &index in &order {
+            if group.members[index].existed {
+                anchor_index = index;
+                break;
+            }
+        }
+        if fs::symlink_metadata(&group.members[anchor_index].path).is_err() {
+            // The name reported as transferred may be an alias. Link the name
+            // that holds the data into it first, as hardlink_finalize does.
+            let holder_index = group
+                .leader
+                .filter(|&i| fs::symlink_metadata(&group.members[i].path).is_ok())
+                .or_else(|| order.iter().copied().find(|&i| fs::symlink_metadata(&group.members[i].path).is_ok()));
+            let Some(holder_index) = holder_index else {
+                if group.members.len() > 1 {
+                    eprintln!(
+                        "xs-rs: cannot link \"{}\": its data was not transferred",
+                        String::from_utf8_lossy(&group.members[0].rel)
+                    );
+                }
+                continue;
+            };
+            if holder_index != anchor_index {
+                let holder_path = group.members[holder_index].path.clone();
+                let holder_event = group.members[holder_index].event.clone();
+                publish_hardlink(&holder_path, &group.members[anchor_index].path)?;
+                if !group.members[anchor_index].existed {
+                    *created_files += 1;
+                }
+                if let Some(mut event) = holder_event {
+                    event.path = group.members[anchor_index].rel.clone();
+                    event.source = group.members[anchor_index].source.clone();
+                    group.members[anchor_index].event = Some(event);
+                }
+            }
+        }
+        let anchor = group.members[anchor_index].clone();
+        if let Some(event) = anchor.event.clone() {
+            report_event(output, local_output.as_deref_mut(), features, opts, event)?;
+        }
+        for (index, member) in group.members.iter().enumerate() {
+            if index == anchor_index {
+                continue;
+            }
+            let already = same_inode(&anchor.path, &member.path);
+            if !already {
+                publish_hardlink(&anchor.path, &member.path)?;
+                if !member.existed {
+                    *created_files += 1;
+                }
+            }
+            let original = member.existed
+                && anchor.existed
+                && member.before_inode == anchor.before_inode;
+            let already_output = original && already;
+            if !already_output || opts.output_unchanged {
+                let event = linked_event(member, &anchor, already_output);
+                report_event(output, local_output.as_deref_mut(), features, opts, event)?;
+            }
+        }
+    }
+    Ok(())
+}
+
 #[allow(clippy::too_many_arguments)]
 fn process_dir<R: Read, W: Write + Send + 'static>(
     _input: &mut R,
@@ -917,6 +1188,7 @@ fn process_dir<R: Read, W: Write + Send + 'static>(
     created_dirs: &mut u64,
     created_links: &mut u64,
     seen: &mut Vec<bool>,
+    hardlinks: &mut HardLinks,
     mut local_output: Option<&mut Output>,
 ) -> io::Result<()> {
     let mut header = Decoder::new(&frame.payload);
@@ -1050,6 +1322,7 @@ fn process_dir<R: Read, W: Write + Send + 'static>(
         let before = listing.get(&name).cloned();
         let existing = before.as_ref();
         let event_path = scan::join_rel(&rel, &entry.name);
+        let link_key = HardLinks::key(entry, features);
         match entry.kind {
             T_DIR => {
                 let keep = existing.map(|m| m.is_dir()).unwrap_or(false);
@@ -1083,10 +1356,17 @@ fn process_dir<R: Read, W: Write + Send + 'static>(
                         let _ = ffi::set_mtime(&target, entry.attrs.mtime, entry.attrs.mtime_ns as i64, false);
                     }
                     idmap::chown_path(&target, opts, &entry.attrs, false);
+                    if let Some(key) = link_key.clone() {
+                        hardlinks.register_ready(key, hardlink_member(entry, &event_path, &target, existing));
+                    }
                     if let Some(before) = existing {
                         if let Some(code) = metadata_code(opts, T_REG, before, entry) {
                             let event = taken_event(&code, &event_path, &entry.output_source, T_REG, entry.size, 0);
-                            report_event(output, local_output.as_deref_mut(), features, opts, event)?;
+                            if let Some(key) = &link_key {
+                                hardlinks.defer_event(key, &event_path, event);
+                            } else {
+                                report_event(output, local_output.as_deref_mut(), features, opts, event)?;
+                            }
                         }
                     }
                 } else {
@@ -1095,7 +1375,16 @@ fn process_dir<R: Read, W: Write + Send + 'static>(
                             remove_any(&target)?;
                         }
                     }
-                    need.push(index as u32);
+                    let follow = match link_key.clone() {
+                        Some(key) => {
+                            let member = hardlink_member(entry, &event_path, &target, existing);
+                            hardlinks.register_transfer(key, member, existing.is_none())
+                        }
+                        None => false,
+                    };
+                    if !follow {
+                        need.push(index as u32);
+                    }
                 }
             }
             T_LNK => {
@@ -1103,17 +1392,30 @@ fn process_dir<R: Read, W: Write + Send + 'static>(
                     .and_then(|m| if m.file_type().is_symlink() { fs::read_link(&target).ok() } else { None })
                     .map(|p| p.as_os_str().as_bytes() == entry.link.as_slice())
                     .unwrap_or(false);
+                if let Some(key) = link_key.clone() {
+                    hardlinks.register_ready(key, hardlink_member(entry, &event_path, &target, existing));
+                }
                 if !same {
                     remove_any(&target)?;
                     std::os::unix::fs::symlink(OsStr::from_bytes(&entry.link), &target)?;
                     *created_links += 1;
-                    let event =
+                    let mut event =
                         taken_event(b"cL+++++++++", &event_path, &entry.output_source, T_LNK, entry.size, 0);
-                    report_event(output, local_output.as_deref_mut(), features, opts, event)?;
+                    event.target = entry.link.clone();
+                    if let Some(key) = &link_key {
+                        hardlinks.defer_event(key, &event_path, event);
+                    } else {
+                        report_event(output, local_output.as_deref_mut(), features, opts, event)?;
+                    }
                 } else if let Some(before) = existing {
                     if let Some(code) = metadata_code(opts, T_LNK, before, entry) {
-                        let event = taken_event(&code, &event_path, &entry.output_source, T_LNK, entry.size, 0);
-                        report_event(output, local_output.as_deref_mut(), features, opts, event)?;
+                        let mut event = taken_event(&code, &event_path, &entry.output_source, T_LNK, entry.size, 0);
+                        event.target = entry.link.clone();
+                        if let Some(key) = &link_key {
+                            hardlinks.defer_event(key, &event_path, event);
+                        } else {
+                            report_event(output, local_output.as_deref_mut(), features, opts, event)?;
+                        }
                     }
                 }
                 if opts.times {
@@ -1123,15 +1425,26 @@ fn process_dir<R: Read, W: Write + Send + 'static>(
             }
             T_FIFO => {
                 let same = existing.map(|m| m.file_type().is_fifo()).unwrap_or(false);
+                if let Some(key) = link_key.clone() {
+                    hardlinks.register_ready(key, hardlink_member(entry, &event_path, &target, existing));
+                }
                 if !same {
                     remove_any(&target)?;
                     ffi::make_fifo(&target, entry.attrs.mode)?;
                     let event = taken_event(b"cS+++++++++", &event_path, &entry.output_source, T_FIFO, entry.size, 0);
-                    report_event(output, local_output.as_deref_mut(), features, opts, event)?;
+                    if let Some(key) = &link_key {
+                        hardlinks.defer_event(key, &event_path, event);
+                    } else {
+                        report_event(output, local_output.as_deref_mut(), features, opts, event)?;
+                    }
                 } else if let Some(before) = existing {
                     if let Some(code) = metadata_code(opts, T_FIFO, before, entry) {
                         let event = taken_event(&code, &event_path, &entry.output_source, T_FIFO, entry.size, 0);
-                        report_event(output, local_output.as_deref_mut(), features, opts, event)?;
+                        if let Some(key) = &link_key {
+                            hardlinks.defer_event(key, &event_path, event);
+                        } else {
+                            report_event(output, local_output.as_deref_mut(), features, opts, event)?;
+                        }
                     }
                 }
                 if opts.times {
@@ -1140,10 +1453,17 @@ fn process_dir<R: Read, W: Write + Send + 'static>(
                 idmap::chown_path(&target, opts, &entry.attrs, false);
             }
             T_CHR | T_BLK => {
+                if let Some(key) = link_key.clone() {
+                    hardlinks.register_ready(key, hardlink_member(entry, &event_path, &target, existing));
+                }
                 if let Some(before) = existing {
                     if let Some(code) = metadata_code(opts, entry.kind, before, entry) {
                         let event = taken_event(&code, &event_path, &entry.output_source, entry.kind, entry.size, 0);
-                        report_event(output, local_output.as_deref_mut(), features, opts, event)?;
+                        if let Some(key) = &link_key {
+                            hardlinks.defer_event(key, &event_path, event);
+                        } else {
+                            report_event(output, local_output.as_deref_mut(), features, opts, event)?;
+                        }
                     }
                 }
             }
@@ -1178,6 +1498,7 @@ fn process_data<W: Write + Send + 'static>(
     dirs: &mut [Option<RecvDir>],
     infiles: &mut HashMap<(u32, u32, u32), InFile>,
     created_files: &mut u64,
+    hardlinks: &mut HardLinks,
     mut local_output: Option<&mut Output>,
 ) -> io::Result<(u64, u64)> {
     let mut added_bytes = 0u64;
@@ -1213,6 +1534,7 @@ fn process_data<W: Write + Send + 'static>(
         let before = dir.existing.get(idx as usize).and_then(Clone::clone);
         let event_path = scan::join_rel(&dir.rel, &entry.name);
         let event_source = entry.output_source.clone();
+        let link_key = HardLinks::key(&entry, features);
         match kind {
             rec::WHOLE => {
                 let mut attrs = protocol::get_file_attrs(&mut d, features)?;
@@ -1227,7 +1549,11 @@ fn process_data<W: Write + Send + 'static>(
                 dir.need.remove(&idx);
                 let code = transferred_code(opts, before.as_ref(), &entry);
                 let event = taken_event(&code, &event_path, &event_source, T_REG, bytes.len() as i64, bytes.len() as i64);
-                report_event(output, local_output.as_deref_mut(), features, opts, event)?;
+                if let Some(key) = &link_key {
+                    hardlinks.defer_event(key, &event_path, event);
+                } else {
+                    report_event(output, local_output.as_deref_mut(), features, opts, event)?;
+                }
             }
             rec::CHUNK => {
                 let attempt = u32::try_from(d.var().map_err(decode_err)?)
@@ -1277,7 +1603,11 @@ fn process_data<W: Write + Send + 'static>(
                     dir.need.remove(&idx);
                     let code = transferred_code(opts, before.as_ref(), &entry);
                     let event = taken_event(&code, &event_path, &event_source, T_REG, total, total);
-                    report_event(output, local_output.as_deref_mut(), features, opts, event)?;
+                    if let Some(key) = &link_key {
+                        hardlinks.defer_event(key, &event_path, event);
+                    } else {
+                        report_event(output, local_output.as_deref_mut(), features, opts, event)?;
+                    }
                 }
             }
             rec::END => {
@@ -1325,7 +1655,11 @@ fn process_data<W: Write + Send + 'static>(
                         dir.need.remove(&idx);
                         let code = transferred_code(opts, before.as_ref(), &entry);
                         let event = taken_event(&code, &event_path, &event_source, T_REG, total, total);
-                        report_event(output, local_output.as_deref_mut(), features, opts, event)?;
+                        if let Some(key) = &link_key {
+                            hardlinks.defer_event(key, &event_path, event);
+                        } else {
+                            report_event(output, local_output.as_deref_mut(), features, opts, event)?;
+                        }
                     }
                 } else {
                     let _ = fs::remove_file(&infile.temp);
@@ -1364,6 +1698,7 @@ pub fn run_receiver<R: Read, W: Write + Send + 'static>(
     let mut seen_dirs: Vec<bool> = Vec::new();
     let mut finals: Vec<FinalDir> = Vec::new();
     let mut infiles: HashMap<(u32, u32, u32), InFile> = HashMap::new();
+    let mut hardlinks = HardLinks::new(opts.hard_links && features & feature::HLINK != 0);
     let mut created_files = 0u64;
     let mut created_dirs = 0u64;
     let mut created_links = 0u64;
@@ -1396,6 +1731,7 @@ pub fn run_receiver<R: Read, W: Write + Send + 'static>(
                 &mut created_dirs,
                 &mut created_links,
                 &mut seen_dirs,
+                &mut hardlinks,
                 local_output.as_deref_mut(),
             ),
             frame_type::DATA => match process_data(
@@ -1407,6 +1743,7 @@ pub fn run_receiver<R: Read, W: Write + Send + 'static>(
                 &mut dirs,
                 &mut infiles,
                 &mut created_files,
+                &mut hardlinks,
                 local_output.as_deref_mut(),
             ) {
                 Ok((bytes, files)) => {
@@ -1453,6 +1790,16 @@ pub fn run_receiver<R: Read, W: Write + Send + 'static>(
         if !infile.finished {
             let _ = fs::remove_file(&infile.temp);
         }
+    }
+    if hardlinks.enabled {
+        finalize_hardlinks(
+            &mut hardlinks,
+            &mut output,
+            features,
+            opts,
+            &mut created_files,
+            local_output,
+        )?;
     }
     for final_dir in finals.into_iter().rev() {
         if !final_dir.apply {

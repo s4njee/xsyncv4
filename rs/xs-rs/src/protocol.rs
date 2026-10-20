@@ -76,6 +76,49 @@ pub struct Attrs {
     pub atime: i64,
     /// `st_size`, sent for directories and non-regular entries with `PF_OUTPUT`.
     pub size: i64,
+    /// The source inode fields `PF_HLINK` carries, in `put_file_attrs` order.
+    pub hdev: u64,
+    pub ino: u64,
+    pub nlink: u64,
+    pub ctime: i64,
+    pub ctime_ns: u32,
+}
+
+/// What the C++ calls an entry's identity for hard-link grouping. Directories
+/// are never hard-linked; a symlink's target keeps its aliases apart.
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
+pub struct HardlinkKey {
+    pub dev: u64,
+    pub ino: u64,
+    pub kind: u8,
+    pub target: Vec<u8>,
+}
+
+impl Attrs {
+    pub fn hardlink_key(&self, kind: u8, target: &[u8]) -> Option<HardlinkKey> {
+        if self.nlink < 2 || kind == T_DIR || kind == T_NONE {
+            return None;
+        }
+        Some(HardlinkKey {
+            dev: self.hdev,
+            ino: self.ino,
+            kind,
+            target: if kind == T_LNK { target.to_vec() } else { Vec::new() },
+        })
+    }
+}
+
+pub fn put_hlink(e: &mut Encoder, a: &Attrs) {
+    e.var(a.hdev).var(a.ino).var(a.nlink).svar(a.ctime).var(a.ctime_ns as u64);
+}
+
+pub fn get_hlink(d: &mut Decoder<'_>) -> Res<(u64, u64, u64, i64, u32)> {
+    let hdev = d.var().map_err(decode_err)?;
+    let ino = d.var().map_err(decode_err)?;
+    let nlink = d.var().map_err(decode_err)?;
+    let ctime = d.svar().map_err(decode_err)?;
+    let ctime_ns = u32::try_from(d.var().map_err(decode_err)?).map_err(|_| io_err("ctime nanoseconds"))?;
+    Ok((hdev, ino, nlink, ctime, ctime_ns))
 }
 
 #[derive(Clone, Debug)]
@@ -105,7 +148,7 @@ pub fn get_dir_attrs(d: &mut Decoder<'_>, features: u64) -> Res<Attrs> {
     let uid = u32::try_from(d.var().map_err(decode_err)?).map_err(|_| io_err("directory uid"))?;
     let gid = u32::try_from(d.var().map_err(decode_err)?).map_err(|_| io_err("directory gid"))?;
     let atime = if features & feature::ATIMES != 0 { d.svar().map_err(decode_err)? } else { 0 };
-    Ok(Attrs { mode, uid, gid, mtime, mtime_ns, atime, size: 0 })
+    Ok(Attrs { mode, uid, gid, mtime, mtime_ns, atime, size: 0, ..Attrs::default() })
 }
 
 pub fn put_entry(e: &mut Encoder, entry: &EntryMeta, opts: &Options, features: u64) {
@@ -137,6 +180,9 @@ pub fn put_entry(e: &mut Encoder, entry: &EntryMeta, opts: &Options, features: u
         }
         _ => {}
     }
+    if features & feature::HLINK != 0 {
+        put_hlink(e, &entry.attrs);
+    }
     if features & feature::OUTPUT != 0 {
         if entry.kind != T_REG {
             e.var(entry.size.max(0) as u64);
@@ -165,7 +211,7 @@ pub fn get_entry(d: &mut Decoder<'_>, opts: &Options, features: u64) -> Res<Entr
         0
     };
     let atime = if features & feature::ATIMES != 0 { d.svar().map_err(decode_err)? } else { 0 };
-    let mut attrs = Attrs { mode, uid, gid, mtime, mtime_ns, atime, size: 0 };
+    let mut attrs = Attrs { mode, uid, gid, mtime, mtime_ns, atime, size: 0, ..Attrs::default() };
     let mut size = 0i64;
     let mut link = Vec::new();
     let mut rdev = 0u32;
@@ -190,6 +236,9 @@ pub fn get_entry(d: &mut Decoder<'_>, opts: &Options, features: u64) -> Res<Entr
         }
         _ => {}
     }
+    if features & feature::HLINK != 0 {
+        (attrs.hdev, attrs.ino, attrs.nlink, attrs.ctime, attrs.ctime_ns) = get_hlink(d)?;
+    }
     let mut output_source = Vec::new();
     if features & feature::OUTPUT != 0 {
         if kind != T_REG {
@@ -207,6 +256,9 @@ pub fn put_file_attrs(e: &mut Encoder, a: &Attrs, features: u64) {
     if features & feature::ATIMES != 0 {
         e.svar(a.atime);
     }
+    if features & feature::HLINK != 0 {
+        put_hlink(e, a);
+    }
 }
 
 pub fn get_file_attrs(d: &mut Decoder<'_>, features: u64) -> Res<Attrs> {
@@ -216,7 +268,11 @@ pub fn get_file_attrs(d: &mut Decoder<'_>, features: u64) -> Res<Attrs> {
     let mtime = d.svar().map_err(decode_err)?;
     let mtime_ns = u32::try_from(d.var().map_err(decode_err)?).map_err(|_| io_err("file mtime nanoseconds"))?;
     let atime = if features & feature::ATIMES != 0 { d.svar().map_err(decode_err)? } else { 0 };
-    Ok(Attrs { mode, uid, gid, mtime, mtime_ns, atime, size: 0 })
+    let mut attrs = Attrs { mode, uid, gid, mtime, mtime_ns, atime, size: 0, ..Attrs::default() };
+    if features & feature::HLINK != 0 {
+        (attrs.hdev, attrs.ino, attrs.nlink, attrs.ctime, attrs.ctime_ns) = get_hlink(d)?;
+    }
+    Ok(attrs)
 }
 
 fn io_err(what: &str) -> io::Error {
@@ -312,6 +368,7 @@ pub struct Options {
     pub delete_before: bool,
     pub progress: bool,
     pub raw_names: bool,
+    pub hard_links: bool,
     pub am_server: bool,
     pub pushing: bool,
     pub local_peer: bool,
@@ -347,6 +404,7 @@ impl Default for Options {
             delete_before: false,
             progress: false,
             raw_names: false,
+            hard_links: false,
             am_server: false,
             pushing: false,
             local_peer: false,
@@ -407,4 +465,87 @@ pub fn unpack_body(input: &[u8], compressed: bool, features: u64) -> Res<Vec<u8>
         return bad("protocol error: bad compressed frame");
     }
     crate::ffi::zstd_decompress(d.rest(), raw)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn attrs() -> Attrs {
+        Attrs {
+            mode: 0o644,
+            uid: 1000,
+            gid: 100,
+            mtime: 1,
+            mtime_ns: 5,
+            size: 3,
+            hdev: 2049,
+            ino: 42,
+            nlink: 2,
+            ctime: -5,
+            ctime_ns: 7,
+            ..Attrs::default()
+        }
+    }
+
+    #[test]
+    fn file_attrs_carry_hlink_after_times_as_put_file_attrs_writes_them() {
+        let mut e = Encoder::new();
+        put_file_attrs(&mut e, &attrs(), feature::CORE | feature::HLINK);
+        assert_eq!(e.bytes, [0xa4, 0x03, 0xe8, 0x07, 0x64, 0x02, 0x05, 0x81, 0x10, 0x2a, 0x02, 0x09, 0x07]);
+        let mut d = Decoder::new(&e.bytes);
+        let parsed = get_file_attrs(&mut d, feature::CORE | feature::HLINK).unwrap();
+        assert!(d.is_empty());
+        assert_eq!((parsed.hdev, parsed.ino, parsed.nlink, parsed.ctime, parsed.ctime_ns), (2049, 42, 2, -5, 7));
+
+        let mut without = Encoder::new();
+        put_file_attrs(&mut without, &attrs(), feature::CORE);
+        assert_eq!(without.bytes, [0xa4, 0x03, 0xe8, 0x07, 0x64, 0x02, 0x05]);
+        let mut d = Decoder::new(&without.bytes);
+        let parsed = get_file_attrs(&mut d, feature::CORE).unwrap();
+        assert_eq!((parsed.hdev, parsed.ino, parsed.nlink), (0, 0, 0));
+    }
+
+    #[test]
+    fn a_directory_entry_puts_hlink_after_its_kind_fields_and_before_output() {
+        let entry = EntryMeta {
+            name: b"a".to_vec(),
+            kind: T_REG,
+            attrs: attrs(),
+            size: 3,
+            link: Vec::new(),
+            rdev: 0,
+            output_source: b"/s/a".to_vec(),
+        };
+        let opts = Options { owner: true, group: true, ..Options::default() };
+        let features = feature::CORE | feature::HLINK | feature::OUTPUT;
+        let mut e = Encoder::new();
+        put_entry(&mut e, &entry, &opts, features);
+        assert_eq!(
+            e.bytes,
+            [
+                1, b'a', 1, 0xa4, 0x03, 0x02, 0x05, 0xe8, 0x07, 0x64, 3, 0x81, 0x10, 0x2a, 0x02, 0x09, 0x07, 4, b'/',
+                b's', b'/', b'a'
+            ]
+        );
+        let mut d = Decoder::new(&e.bytes);
+        let parsed = get_entry(&mut d, &opts, features).unwrap();
+        assert!(d.is_empty());
+        assert_eq!(parsed.name, entry.name);
+        assert_eq!(parsed.attrs.hdev, 2049);
+        assert_eq!(parsed.attrs.ino, 42);
+        assert_eq!(parsed.attrs.nlink, 2);
+        assert_eq!(parsed.attrs.ctime, -5);
+        assert_eq!(parsed.output_source, b"/s/a");
+    }
+
+    #[test]
+    fn only_a_linked_non_directory_forms_a_hard_link_group() {
+        let linked = attrs();
+        assert!(linked.hardlink_key(T_REG, b"").is_some());
+        assert!(linked.hardlink_key(T_LNK, b"target").is_some());
+        assert!(linked.hardlink_key(T_DIR, b"").is_none());
+        let single = Attrs { nlink: 1, ..attrs() };
+        assert!(single.hardlink_key(T_REG, b"").is_none());
+    }
 }
