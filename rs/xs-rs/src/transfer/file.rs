@@ -29,6 +29,11 @@ pub(super) struct InFile {
     pub(super) before: Option<fs::Metadata>,
     pub(super) event_path: Vec<u8>,
     pub(super) link_key: Option<HardlinkKey>,
+    /// The verified destination prefix restored into the temporary output.
+    pub(super) prefix: i64,
+    pub(super) prefix_ok: bool,
+    /// Incoming chunk ranges reserved before their writes finish, for overlap checks.
+    pub(super) chunks: BTreeMap<i64, i64>,
 }
 
 pub(super) fn add_range(ranges: &mut Vec<(i64, i64)>, start: i64, end: i64) {
@@ -47,8 +52,8 @@ pub(super) fn add_range(ranges: &mut Vec<(i64, i64)>, start: i64, end: i64) {
     ranges.sort_unstable();
 }
 
-pub(super) fn covered(ranges: &[(i64, i64)], total: i64) -> bool {
-    let mut position = 0i64;
+pub(super) fn covered_from(ranges: &[(i64, i64)], prefix: i64, total: i64) -> bool {
+    let mut position = prefix;
     for &(start, end) in ranges {
         if start > position {
             return false;
@@ -58,6 +63,40 @@ pub(super) fn covered(ranges: &[(i64, i64)], total: i64) -> bool {
         }
     }
     position >= total
+}
+
+/// The bytes to keep from a partly transferred file: the contiguous run from zero.
+pub(super) fn contiguous(ranges: &[(i64, i64)], total: i64) -> i64 {
+    let mut position = 0i64;
+    for &(start, end) in ranges {
+        if start > position {
+            break;
+        }
+        if end > position {
+            position = end;
+        }
+    }
+    position.min(total)
+}
+
+/// Reserve a chunk before its write is queued. The C++ `std::map<i64,i64>`
+/// rejects any overlap, including one that arrives in the same DATA frame.
+pub(super) fn reserve_chunk(chunks: &mut BTreeMap<i64, i64>, start: i64, end: i64) -> bool {
+    if start >= end {
+        return false;
+    }
+    if let Some((_, &previous_end)) = chunks.range(..=start).next_back() {
+        if previous_end > start {
+            return false;
+        }
+    }
+    if let Some((&next_start, _)) = chunks.range(start..).next() {
+        if next_start < end {
+            return false;
+        }
+    }
+    chunks.insert(start, end);
+    true
 }
 
 pub(super) fn create_temp(dir: &Path, name: &[u8]) -> io::Result<(PathBuf, File)> {
@@ -107,7 +146,7 @@ pub(super) fn set_dir_working_mode(path: &Path) {
 
 pub(super) fn finish_infile(infile: &mut InFile, opts: &Options) -> io::Result<bool> {
     let Some(total) = infile.total else { return Ok(false) };
-    if infile.status != Some(0) || !covered(&infile.ranges, total) {
+    if infile.status != Some(0) || !covered_from(&infile.ranges, infile.prefix, total) {
         return Ok(false);
     }
     infile.finished = true;

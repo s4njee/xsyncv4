@@ -57,11 +57,13 @@ impl Cli {
             "numeric-ids" => self.options.numeric_ids = on,
             "hard-links" => self.options.hard_links = on,
             "progress" => self.options.progress = on,
+            "partial" => self.options.partial = on,
+            "whole-file" => self.options.whole_file = on,
             "8-bit-output" => self.options.raw_names = on,
             "local-peer" => self.options.local_peer = on,
             // Accepted no-ops that C++ also accepts: their behaviour is intrinsic
             // to this engine, so there is nothing to switch off.
-            "whole-file" | "protect-args" | "secluded-args" | "blocking-io" | "open-noatime" | "motd"
+            "protect-args" | "secluded-args" | "blocking-io" | "open-noatime" | "motd"
             | "clone" | "atomic" | "fallback" | "from0" | "stats" | "human-readable" => {}
             _ => {}
         }
@@ -374,6 +376,7 @@ pub fn parse(args: Vec<OsString>) -> Result<Cli, String> {
                 | "compress"
                 | "numeric-ids"
                 | "hard-links"
+                | "partial"
                 | "8-bit-output"
                 | "local-peer"
                 | "whole-file"
@@ -412,7 +415,8 @@ pub fn parse(args: Vec<OsString>) -> Result<Cli, String> {
                     }
                     'd' => {}
                     'L' => cli.options.copy_links = true,
-                    'u' | 'c' | 'I' | 'x' | 'O' | 'J' | 'W' | 's' | 'S' | 'C' | 'F' | 'm' | '0' => {}
+                    'W' => cli.options.whole_file = true,
+                    'u' | 'c' | 'I' | 'x' | 'O' | 'J' | 's' | 'S' | 'C' | 'F' | 'm' | '0' => {}
                     'A' => {
                         cli.options.perms = true;
                     }
@@ -422,7 +426,10 @@ pub fn parse(args: Vec<OsString>) -> Result<Cli, String> {
                     'n' => {}
                     'i' => cli.options.itemize_level += 1,
                     '8' => cli.options.raw_names = true,
-                    'P' => cli.options.progress = true,
+                    'P' => {
+                        cli.options.partial = true;
+                        cli.options.progress = true;
+                    }
                     'h' => {}
                     'q' => cli.verbose = -1,
                     'v' => cli.verbose += 1,
