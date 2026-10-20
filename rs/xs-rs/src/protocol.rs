@@ -178,7 +178,7 @@ fn io_err(what: &str) -> io::Error {
     io::Error::new(io::ErrorKind::InvalidData, format!("protocol error: bad {what}"))
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug)]
 pub struct Options {
     pub recursive: bool,
     pub links: bool,
@@ -192,21 +192,53 @@ pub struct Options {
     pub compress: bool,
     pub numeric_ids: bool,
     pub compress_level: i64,
+    pub compress_level_explicit: bool,
+    pub skip_compress: Vec<u8>,
+    pub skip_compress_set: bool,
 }
 
-/// Append a compressed body when zstd is negotiated and `-z` is on: `var raw_len`
-/// then one independent zstd frame. Return true when the body was compressed.
-pub fn put_body(frame: &mut Encoder, body: &[u8], compress: bool, features: u64) -> bool {
-    if compress && features & feature::ZSTD != 0 && body.len() >= 128 {
-        if let Some(compressed) = crate::ffi::zstd_compress(body, 1) {
-            if compressed.len() + 2 < body.len() {
-                frame.var(body.len() as u64).raw(&compressed);
-                return true;
-            }
+impl Default for Options {
+    fn default() -> Self {
+        Self {
+            recursive: false,
+            links: false,
+            copy_links: false,
+            perms: false,
+            times: false,
+            group: false,
+            owner: false,
+            devices: false,
+            specials: false,
+            compress: false,
+            numeric_ids: false,
+            compress_level: 3,
+            compress_level_explicit: false,
+            skip_compress: xs_wire::DEFAULT_SKIP_COMPRESS.as_bytes().to_vec(),
+            skip_compress_set: false,
         }
     }
-    frame.raw(body);
-    false
+}
+
+/// Append a compressed body when `compress` is on: `var raw_len` then one independent
+/// zstd frame. This is `pack` in remote.cpp: small bodies and blocks whose sample does
+/// not shrink are left raw, and compression is kept only when it is smaller.
+pub fn pack_body(frame: &mut Encoder, body: &[u8], compress: bool, level: i32) -> bool {
+    if !compress || body.len() < 128 || !crate::compression::worthwhile(body) {
+        frame.raw(body);
+        return false;
+    }
+    let (minimum, maximum) = crate::ffi::zstd_level_bounds();
+    let level = level.clamp(minimum, maximum);
+    match crate::ffi::zstd_compress_exact(body, level) {
+        Ok(compressed) if compressed.len() < body.len() => {
+            frame.var(body.len() as u64).raw(&compressed);
+            true
+        }
+        _ => {
+            frame.raw(body);
+            false
+        }
+    }
 }
 
 pub fn unpack_body(input: &[u8], compressed: bool, features: u64) -> Res<Vec<u8>> {

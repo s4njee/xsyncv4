@@ -3,6 +3,7 @@
 //! and nanosecond mtimes; unchanged files are compared on size and whole seconds.
 
 mod cli;
+mod compression;
 mod ffi;
 mod protocol;
 mod scan;
@@ -13,6 +14,7 @@ use std::io::{self, BufReader, BufWriter, Read, Write};
 use std::os::unix::ffi::{OsStrExt, OsStringExt};
 use std::process::{Child, Command, Stdio};
 
+use xs_wire::config::Config;
 use xs_wire::{Decoder, Encoder, Frame};
 
 use crate::protocol::{feature, frame_type, msg_kind, Options};
@@ -20,7 +22,16 @@ use crate::transfer::{run_receiver, run_sender};
 
 const VERSION: u64 = 4;
 const MAGIC: &[u8; 6] = b"XSYNC\x01";
-const SUPPORTED: u64 = feature::CORE | feature::ZSTD | feature::IDMAP | feature::DIR_CHILDREN;
+const SUPPORTED: u64 = feature::CORE | feature::ZSTD | feature::IDMAP | feature::DIR_CHILDREN | feature::COMPRESS_POLICY;
+
+/// What we tell a peer about: the compression policy frame exists only with `-z`.
+fn advertised(options: &Options) -> u64 {
+    if options.compress {
+        SUPPORTED
+    } else {
+        SUPPORTED & !feature::COMPRESS_POLICY
+    }
+}
 
 struct Hello {
     role: u8,
@@ -43,6 +54,7 @@ fn options_from_flags(flags: &[bool; 32], ints: &[i64; 7]) -> Options {
         compress: flags[10],
         numeric_ids: flags[25],
         compress_level: ints[1],
+        ..Options::default()
     }
 }
 
@@ -91,6 +103,62 @@ fn write_message(output: &mut impl Write, kind: u8, code: u64, text: &str) -> io
     xs_wire::write_frame(output, frame_type::MSG, &message.encode())
 }
 
+/// One configuration frame, with the compression header bound checked before its body is
+/// read: a hostile peer cannot make us wait for a megabyte it never sends.
+fn read_config_frame<R: Read>(reader: &mut R) -> io::Result<Option<Frame>> {
+    let mut header = [0u8; xs_wire::HEADER_LEN];
+    let mut filled = 0;
+    while filled < header.len() {
+        match reader.read(&mut header[filled..]) {
+            Ok(0) if filled == 0 => return Ok(None),
+            Ok(0) => return protocol::bad("connection closed inside a configuration frame"),
+            Ok(n) => filled += n,
+            Err(error) if error.kind() == io::ErrorKind::Interrupted => {}
+            Err(error) => return Err(error),
+        }
+    }
+    let len = u32::from_le_bytes([header[0], header[1], header[2], header[3]]);
+    let kind = header[4];
+    if len > xs_wire::MAX_PAYLOAD {
+        return protocol::bad("protocol error: oversized frame");
+    }
+    if kind == frame_type::COMPRESS_CONFIG && len > 65536 + 16 {
+        return protocol::bad("protocol error: oversized or unnegotiated compression configuration");
+    }
+    let mut payload = vec![0u8; len as usize];
+    reader.read_exact(&mut payload).map_err(|error| match error.kind() {
+        io::ErrorKind::UnexpectedEof => io::Error::new(io::ErrorKind::InvalidData, "connection closed inside a frame"),
+        _ => error,
+    })?;
+    Ok(Some(Frame::new(kind, payload)))
+}
+
+/// The client sends configuration frames in feature order. Only the compression policy is
+/// negotiated by this implementation, so it is the one frame read here.
+fn read_configuration<R: Read>(reader: &mut R, options: &mut Options, features: u64) -> io::Result<()> {
+    if features & feature::COMPRESS_POLICY == 0 {
+        return Ok(());
+    }
+    let Some(frame) = read_config_frame(reader)? else {
+        return protocol::bad("protocol error: missing compression configuration");
+    };
+    let config = Config::decode(frame.kind, &frame.payload, features).map_err(|error| {
+        io::Error::new(io::ErrorKind::InvalidData, format!("protocol error: {error}"))
+    })?;
+    match config {
+        Config::Compress { explicit_level, skip_compress } => {
+            if !options.compress {
+                return protocol::bad("protocol error: malformed compression configuration");
+            }
+            options.compress_level_explicit = explicit_level;
+            options.skip_compress = skip_compress;
+            options.skip_compress_set = true;
+            Ok(())
+        }
+        _ => protocol::bad("protocol error: malformed compression configuration"),
+    }
+}
+
 fn server<R: Read, W: Write + Send + 'static>(reader: &mut R, mut writer: W) -> io::Result<i32> {
     let Some(frame) = xs_wire::read_frame(reader).map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e.to_string()))? else {
         return Ok(2);
@@ -100,7 +168,7 @@ fn server<R: Read, W: Write + Send + 'static>(reader: &mut R, mut writer: W) -> 
         writer.flush()?;
         return Ok(2);
     }
-    let (version, hello) = read_hello(&frame.payload)?;
+    let (version, mut hello) = read_hello(&frame.payload)?;
     if version != VERSION {
         let text = format!("protocol version mismatch: client {version}, server {VERSION} (supports 4 and 3)");
         write_message(&mut writer, msg_kind::FATAL, 2, &text)?;
@@ -112,11 +180,16 @@ fn server<R: Read, W: Write + Send + 'static>(reader: &mut R, mut writer: W) -> 
         writer.flush()?;
         return Ok(2);
     }
-    let features = hello.features & SUPPORTED;
+    let features = hello.features & advertised(&hello.options);
     let mut answer = Encoder::new();
     answer.raw(MAGIC).var(VERSION).var(features);
     xs_wire::write_frame(&mut writer, frame_type::HELLO, &answer.bytes)?;
     writer.flush()?;
+    if let Err(error) = read_configuration(reader, &mut hello.options, features) {
+        write_message(&mut writer, msg_kind::FATAL, 2, &error.to_string())?;
+        writer.flush()?;
+        return Ok(2);
+    }
 
     if hello.role == b'R' {
         let dest = hello.paths.first().cloned().unwrap_or_else(|| b".".to_vec());
@@ -131,7 +204,7 @@ fn server<R: Read, W: Write + Send + 'static>(reader: &mut R, mut writer: W) -> 
 fn client_hello(cli: &cli::Cli, role: u8, paths: &[OsString]) -> Vec<u8> {
     let o = &cli.options;
     let mut e = Encoder::new();
-    e.raw(MAGIC).var(VERSION).byte(role).var(SUPPORTED);
+    e.raw(MAGIC).var(VERSION).byte(role).var(advertised(o));
     let flags = [
         o.recursive,
         false,
@@ -288,9 +361,28 @@ fn run_client(cli: &cli::Cli) -> io::Result<i32> {
         let _ = child.wait();
         return Ok(2);
     }
-    let features = d.var().map_err(protocol::decode_err)? & SUPPORTED;
+    let features = d.var().map_err(protocol::decode_err)? & advertised(&cli.options);
     if !d.is_empty() {
         return protocol::bad("protocol error: malformed server hello");
+    }
+    if cli.options.compress
+        && cli.options.skip_compress_set
+        && role == b'S'
+        && features & feature::COMPRESS_POLICY == 0
+    {
+        eprintln!("xs-rs: peer does not support --skip-compress");
+        let _ = child.kill();
+        let _ = child.wait();
+        return Ok(4);
+    }
+    if features & feature::COMPRESS_POLICY != 0 {
+        let config = Config::Compress {
+            explicit_level: cli.options.compress_level_explicit,
+            skip_compress: cli.options.skip_compress.clone(),
+        }
+        .encode();
+        xs_wire::write_frame(&mut output, config.kind, &config.payload)?;
+        output.flush()?;
     }
 
     let result = if push {

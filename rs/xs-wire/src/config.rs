@@ -134,6 +134,7 @@ fn compress(payload: &[u8]) -> Result<Config, DecodeError> {
         || explicit_level > 1
         || skip_compress.len() > 65536
         || skip_compress.contains(&0)
+        || !crate::compress::Suffixes::default().assign(&skip_compress)
     {
         return Err(bad("malformed compression configuration"));
     }
@@ -304,6 +305,11 @@ mod tests {
     fn hostile_or_unnegotiated_configurations_are_refused() {
         assert!(Config::decode(17, &[0, 0], feature::CORE).is_err());
         assert!(Config::decode(37, &[0, 3, b'a', 0, b'b'], FEATURES).is_err());
+        assert!(Config::decode(37, &[0, 2, b'[', b']'], FEATURES).is_err());
+        assert_eq!(
+            Config::decode(37, &[0, 0], FEATURES).unwrap(),
+            Config::Compress { explicit_level: false, skip_compress: vec![] }
+        );
         assert!(Config::decode(31, &[3, b'a', b':', b'b', 0], FEATURES).is_err());
         assert!(Config::decode(32, &[1], feature::CORE).is_err());
         assert!(Config::decode(33, &[1, 3, b'a', 0, b'b'], FEATURES).is_err());
