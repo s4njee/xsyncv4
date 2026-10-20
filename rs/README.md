@@ -10,10 +10,12 @@ specification, so the C++ source and its wire tests (`tests/*wire_test.py`) are 
 | Crate | What it holds |
 |---|---|
 | `xs-wire` | Frames, LEB128 and zigzag integers, strings, frame types, feature bits, HELLO and `F_MSG` |
+| `xs-rs` | The `xs-rs` client and `--server`: DIR/NEED/DATA transfer, source walk, destination write |
 
 ```sh
 cargo test --manifest-path rs/Cargo.toml                         # unit tests
 XS_BIN=build/xs cargo test --manifest-path rs/Cargo.toml        # also against a C++ xs --server
+cargo build --manifest-path rs/Cargo.toml                       # rs/target/debug/xs-rs
 ```
 
 The order of the port (`benchmarks/lab/engineer.py`, `PORT_STEPS`), each step proven against the C++

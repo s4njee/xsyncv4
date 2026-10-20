@@ -1,7 +1,18 @@
 # xs-rs: a Rust implementation of xs that interoperates with the C++ xs on the wire
 # (backlog-vps-lab.md, P5). Grown by the VPS lab's engineer from this seed.
+[package]
+name = "xs-rs-workspace"
+version = "0.0.0"
+edition = "2021"
+license = "MIT"
+publish = false
+
+[lib]
+path = "src/lib.rs"
+
 [workspace]
-members = ["xs-wire"]
+members = ["xs-wire", "xs-rs"]
+default-members = ["xs-wire", "xs-rs"]
 resolver = "2"
 
 [workspace.package]

@@ -3,5 +3,16 @@
 version = 4
 
 [[package]]
+name = "xs-rs"
+version = "0.1.0"
+dependencies = [
+ "xs-wire",
+]
+
+[[package]]
+name = "xs-rs-workspace"
+version = "0.0.0"
+
+[[package]]
 name = "xs-wire"
 version = "0.1.0"
