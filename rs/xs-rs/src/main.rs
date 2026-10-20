@@ -35,6 +35,7 @@ const SUPPORTED: u64 = feature::CORE
     | feature::CHOWN
     | feature::OUTPUT
     | feature::DIR_OUTPUT
+    | feature::HLINK
     | feature::PROGRESS_ACK;
 
 /// What a client advertises: the compression policy frame exists only with `-z`,
@@ -50,6 +51,9 @@ fn client_advertised(options: &Options, verbose: i64, role: u8) -> u64 {
     }
     if !options.output_enabled(verbose) {
         features &= !(feature::OUTPUT | feature::DIR_OUTPUT);
+    }
+    if !options.hard_links {
+        features &= !feature::HLINK;
     }
     if role != b'R' || !options.progress {
         features &= !feature::PROGRESS_ACK;
@@ -306,6 +310,7 @@ fn server<R: Read, W: Write + Send + 'static>(
         return Ok(2);
     }
     let features = hello.features & SUPPORTED;
+    hello.options.hard_links = features & feature::HLINK != 0;
     hello.options.am_server = true;
     hello.options.pushing = hello.role == b'R' && !server_options.local_peer;
     if hello.options.ownership.requested() && features & feature::CHOWN == 0 {
@@ -528,6 +533,12 @@ fn run_client(cli: &mut cli::Cli) -> io::Result<i32> {
     let features = d.var().map_err(protocol::decode_err)? & client_advertised(&cli.options, cli.verbose, role);
     if !d.is_empty() {
         return protocol::bad("protocol error: malformed server hello");
+    }
+    if cli.options.hard_links && features & feature::HLINK == 0 {
+        eprintln!("xs-rs: peer does not support hard-link preservation");
+        let _ = child.kill();
+        let _ = child.wait();
+        return Ok(4);
     }
     if cli.options.ownership.requested() && features & feature::CHOWN == 0 {
         eprintln!("xs-rs: peer does not support --chown");

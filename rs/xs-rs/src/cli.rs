@@ -48,6 +48,7 @@ impl Cli {
             "specials" => self.options.specials = on,
             "compress" => self.options.compress = on,
             "numeric-ids" => self.options.numeric_ids = on,
+            "hard-links" => self.options.hard_links = on,
             "progress" => self.options.progress = on,
             "8-bit-output" => self.options.raw_names = on,
             "local-peer" => self.options.local_peer = on,
@@ -239,6 +240,7 @@ pub fn parse(args: Vec<OsString>) -> Result<Cli, String> {
                         cli.options.specials = true;
                     }
                     'z' => cli.options.compress = true,
+                    'H' => cli.options.hard_links = true,
                     'n' => {}
                     'i' => cli.options.itemize_level += 1,
                     '8' => cli.options.raw_names = true,

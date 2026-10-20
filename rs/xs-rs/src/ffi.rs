@@ -92,7 +92,7 @@ pub fn local_time(seconds: i64) -> String {
         tm_zone: std::ptr::null(),
     };
     let format = CString::new("%Y/%m/%d %H:%M:%S").unwrap();
-    let mut buffer = [0i8; 64];
+    let mut buffer = [0 as c_char; 64];
     // SAFETY: the seconds pointer, tm and format are valid for the call; `localtime_r`
     // copies into our storage and returns null when the value is out of range.
     unsafe {

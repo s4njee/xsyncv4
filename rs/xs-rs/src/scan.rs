@@ -33,6 +33,11 @@ pub fn attrs_from(m: &fs::Metadata) -> Attrs {
         mtime_ns: m.mtime_nsec().clamp(0, 999_999_999) as u32,
         atime: m.atime(),
         size: m.len() as i64,
+        hdev: m.dev(),
+        ino: m.ino(),
+        nlink: m.nlink(),
+        ctime: m.ctime(),
+        ctime_ns: m.ctime_nsec().clamp(0, 999_999_999) as u32,
     }
 }
 
