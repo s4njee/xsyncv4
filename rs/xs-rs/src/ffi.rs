@@ -57,6 +57,56 @@ extern "C" {
     fn ZSTD_maxCLevel() -> c_int;
     fn utimensat(dirfd: c_int, pathname: *const c_char, times: *const Timespec, flags: c_int) -> c_int;
     fn mkfifo(pathname: *const c_char, mode: u32) -> c_int;
+    fn localtime_r(timep: *const i64, result: *mut Tm) -> *mut Tm;
+    fn strftime(s: *mut c_char, max: usize, format: *const c_char, tm: *const Tm) -> usize;
+}
+
+#[repr(C)]
+struct Tm {
+    tm_sec: c_int,
+    tm_min: c_int,
+    tm_hour: c_int,
+    tm_mday: c_int,
+    tm_mon: c_int,
+    tm_year: c_int,
+    tm_wday: c_int,
+    tm_yday: c_int,
+    tm_isdst: c_int,
+    tm_gmtoff: i64,
+    tm_zone: *const c_char,
+}
+
+/// `render`'s `%t`: local time as `%Y/%m/%d %H:%M:%S`, or `?` when it is not representable.
+pub fn local_time(seconds: i64) -> String {
+    let mut tm = Tm {
+        tm_sec: 0,
+        tm_min: 0,
+        tm_hour: 0,
+        tm_mday: 0,
+        tm_mon: 0,
+        tm_year: 0,
+        tm_wday: 0,
+        tm_yday: 0,
+        tm_isdst: 0,
+        tm_gmtoff: 0,
+        tm_zone: std::ptr::null(),
+    };
+    let format = CString::new("%Y/%m/%d %H:%M:%S").unwrap();
+    let mut buffer = [0i8; 64];
+    // SAFETY: the seconds pointer, tm and format are valid for the call; `localtime_r`
+    // copies into our storage and returns null when the value is out of range.
+    unsafe {
+        if localtime_r(&seconds, &mut tm).is_null() {
+            return "?".into();
+        }
+        let n = strftime(buffer.as_mut_ptr(), buffer.len(), format.as_ptr(), &tm);
+        if n == 0 {
+            "?".into()
+        } else {
+            let bytes: Vec<u8> = buffer[..n].iter().map(|&byte| byte as u8).collect();
+            String::from_utf8_lossy(&bytes).into_owned()
+        }
+    }
 }
 
 pub fn xxh3_64(bytes: &[u8]) -> u64 {

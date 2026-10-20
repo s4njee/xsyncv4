@@ -6,6 +6,7 @@ mod cli;
 mod compression;
 mod ffi;
 mod idmap;
+mod output;
 mod protocol;
 mod scan;
 mod transfer;
@@ -31,17 +32,27 @@ const SUPPORTED: u64 = feature::CORE
     | feature::IO_CONTROL
     | feature::DIR_CHILDREN
     | feature::COMPRESS_POLICY
-    | feature::CHOWN;
+    | feature::CHOWN
+    | feature::OUTPUT
+    | feature::DIR_OUTPUT
+    | feature::PROGRESS_ACK;
 
 /// What a client advertises: the compression policy frame exists only with `-z`,
-/// and the ownership override only with `--chown`, as `run_client` masks them.
-fn client_advertised(options: &Options) -> u64 {
+/// the ownership override only with `--chown`, output only when the caller asked
+/// for file events, and progress acknowledgments only for a pushing `--progress`.
+fn client_advertised(options: &Options, verbose: i64, role: u8) -> u64 {
     let mut features = SUPPORTED;
     if !options.compress {
         features &= !feature::COMPRESS_POLICY;
     }
     if !options.ownership.requested() {
         features &= !feature::CHOWN;
+    }
+    if !options.output_enabled(verbose) {
+        features &= !(feature::OUTPUT | feature::DIR_OUTPUT);
+    }
+    if role != b'R' || !options.progress {
+        features &= !feature::PROGRESS_ACK;
     }
     features
 }
@@ -66,6 +77,7 @@ fn options_from_flags(flags: &[bool; 32], ints: &[i64; 7]) -> Options {
         specials: flags[9],
         compress: flags[10],
         numeric_ids: flags[25],
+        itemize_level: u32::from(flags[26]),
         compress_level: ints[1],
         ..Options::default()
     }
@@ -244,6 +256,21 @@ fn read_configuration<R: Read>(
             options.ownership.group_set = true;
         }
     }
+    if features & feature::DIR_OUTPUT != 0 {
+        let frame = config_frame(reader, control.keepalive_enabled())?;
+        if frame.kind != frame_type::OUTPUT_CONFIG {
+            return Err((2, "protocol error: malformed output configuration".into()));
+        }
+        let config = Config::decode(frame.kind, &frame.payload, features)
+            .map_err(|error| (2, format!("protocol error: {error}")))?;
+        let Config::Output { attrs, unchanged, mkpath, delete_before } = config else {
+            return Err((2, "protocol error: malformed output configuration".into()));
+        };
+        options.output_attrs = attrs;
+        options.output_unchanged = unchanged;
+        options.mkpath = mkpath;
+        options.delete_before = delete_before;
+    }
     Ok(())
 }
 
@@ -279,6 +306,8 @@ fn server<R: Read, W: Write + Send + 'static>(
         return Ok(2);
     }
     let features = hello.features & SUPPORTED;
+    hello.options.am_server = true;
+    hello.options.pushing = hello.role == b'R' && !server_options.local_peer;
     if hello.options.ownership.requested() && features & feature::CHOWN == 0 {
         write_message(&mut writer, msg_kind::FATAL, 4, "peer does not support --chown")?;
         writer.flush()?;
@@ -319,17 +348,17 @@ fn server<R: Read, W: Write + Send + 'static>(
     if hello.role == b'R' {
         let dest = hello.paths.first().cloned().unwrap_or_else(|| b".".to_vec());
         let dest = cli::expand_home(&dest);
-        run_receiver(&mut input, writer, &hello.options, features, &dest, control)
+        run_receiver(&mut input, writer, &hello.options, features, &dest, control, None)
     } else {
         let sources: Vec<OsString> = hello.paths.iter().map(|path| OsString::from_vec(cli::expand_home(path))).collect();
-        run_sender(&mut input, writer, &hello.options, features, &sources, control)
+        run_sender(&mut input, writer, &hello.options, features, &sources, control, None)
     }
 }
 
 fn client_hello(cli: &cli::Cli, role: u8, paths: &[OsString]) -> Vec<u8> {
     let o = &cli.options;
     let mut e = Encoder::new();
-    e.raw(MAGIC).var(VERSION).byte(role).var(client_advertised(o));
+    e.raw(MAGIC).var(VERSION).byte(role).var(client_advertised(o, cli.verbose, role));
     let flags = [
         o.recursive,
         false,
@@ -357,7 +386,7 @@ fn client_hello(cli: &cli::Cli, role: u8, paths: &[OsString]) -> Vec<u8> {
         false,
         false,
         o.numeric_ids,
-        false,
+        o.itemize_level > 0 || o.out_format_set,
         false,
         false,
         false,
@@ -381,7 +410,7 @@ fn client_hello(cli: &cli::Cli, role: u8, paths: &[OsString]) -> Vec<u8> {
 fn spawn_peer(cli: &cli::Cli, host: &[u8], local: bool) -> io::Result<Child> {
     if local {
         let mut command = Command::new(std::env::current_exe()?);
-        command.arg("--server");
+        command.arg("--server").arg("--local-peer");
         if cli.options.ownership.requested() {
             let mut value = cli.options.ownership.user.clone();
             if cli.options.ownership.group_set {
@@ -443,6 +472,7 @@ fn run_client(cli: &mut cli::Cli) -> io::Result<i32> {
         (specs[remote_indices[0]].host.clone(), remote, sources, dest)
     };
     let role = if push { b'R' } else { b'S' };
+    cli.options.pushing = push;
     let hello_paths: Vec<OsString> = remote_paths.iter().map(|p| OsString::from_vec(p.clone())).collect();
     let hello = client_hello(cli, role, &hello_paths);
 
@@ -457,7 +487,7 @@ fn run_client(cli: &mut cli::Cli) -> io::Result<i32> {
     control.note_write(true);
 
     let reply: Frame = loop {
-        let Some(frame) = protocol::read_checked(&mut input, false)? else {
+        let Some(frame) = protocol::read_checked(&mut input, false, 0)? else {
             let status = child.wait()?;
             return Ok(status.code().unwrap_or(12));
         };
@@ -495,7 +525,7 @@ fn run_client(cli: &mut cli::Cli) -> io::Result<i32> {
         let _ = child.wait();
         return Ok(2);
     }
-    let features = d.var().map_err(protocol::decode_err)? & client_advertised(&cli.options);
+    let features = d.var().map_err(protocol::decode_err)? & client_advertised(&cli.options, cli.verbose, role);
     if !d.is_empty() {
         return protocol::bad("protocol error: malformed server hello");
     }
@@ -558,6 +588,18 @@ fn run_client(cli: &mut cli::Cli) -> io::Result<i32> {
         output.flush()?;
         control.note_write(true);
     }
+    if features & feature::DIR_OUTPUT != 0 {
+        let config = Config::Output {
+            attrs: cli.options.output_attrs,
+            unchanged: cli.options.output_unchanged,
+            mkpath: cli.options.mkpath,
+            delete_before: cli.options.delete_before,
+        }
+        .encode();
+        xs_wire::write_frame(&mut output, config.kind, &config.payload)?;
+        output.flush()?;
+        control.note_write(true);
+    }
     if !push {
         if let Err(text) = cli.options.ownership.init() {
             eprintln!("xs-rs: {text}");
@@ -567,11 +609,19 @@ fn run_client(cli: &mut cli::Cli) -> io::Result<i32> {
         }
     }
 
+    if cli.verbose > 0 {
+        let line: &[u8] = if push { b"sending incremental file list\n" } else { b"receiving incremental file list\n" };
+        let mut stdout = io::stdout().lock();
+        let _ = stdout.write_all(line);
+        let _ = stdout.flush();
+    }
+    let mut events = output::Output::new(&cli.options, cli.verbose);
     let result = if push {
-        run_sender(&mut input, output, &cli.options, features, &local_sources, control)
+        run_sender(&mut input, output, &cli.options, features, &local_sources, control, Some(&mut events))
     } else {
-        run_receiver(&mut input, output, &cli.options, features, &local_dest, control)
+        run_receiver(&mut input, output, &cli.options, features, &local_dest, control, Some(&mut events))
     };
+    events.flush();
     drop(input);
     let status = child.wait()?;
     let code = result?;

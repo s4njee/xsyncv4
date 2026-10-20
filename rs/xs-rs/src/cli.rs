@@ -48,6 +48,9 @@ impl Cli {
             "specials" => self.options.specials = on,
             "compress" => self.options.compress = on,
             "numeric-ids" => self.options.numeric_ids = on,
+            "progress" => self.options.progress = on,
+            "8-bit-output" => self.options.raw_names = on,
+            "local-peer" => self.options.local_peer = on,
             _ => {}
         }
     }
@@ -185,6 +188,26 @@ pub fn parse(args: Vec<OsString>) -> Result<Cli, String> {
                 cli.verbose += 1;
                 continue;
             }
+            if name == "itemize-changes" {
+                cli.options.itemize_level += 1;
+                continue;
+            }
+            if name == "out-format" || name == "log-format" {
+                let value = match inline {
+                    Some(value) => value,
+                    None => iter.next().ok_or_else(|| format!("--{name} needs a value"))?,
+                };
+                cli.options.out_format = value.as_bytes().to_vec();
+                cli.options.out_format_set = true;
+                continue;
+            }
+            if name == "progress" {
+                cli.options.progress = true;
+                continue;
+            }
+            if name == "old-args" || name == "stats" || name == "human-readable" {
+                continue;
+            }
             if let Some(negative) = name.strip_prefix("no-") {
                 cli.set_long(negative, false);
             } else if inline.is_none()
@@ -217,6 +240,10 @@ pub fn parse(args: Vec<OsString>) -> Result<Cli, String> {
                     }
                     'z' => cli.options.compress = true,
                     'n' => {}
+                    'i' => cli.options.itemize_level += 1,
+                    '8' => cli.options.raw_names = true,
+                    'P' => cli.options.progress = true,
+                    'h' => {}
                     'q' => cli.verbose = -1,
                     'v' => cli.verbose += 1,
                     'e' => {
@@ -239,6 +266,7 @@ pub fn parse(args: Vec<OsString>) -> Result<Cli, String> {
     if compression_none {
         cli.options.compress = false;
     }
+    cli.options.configure_output();
     Ok(cli)
 }
 

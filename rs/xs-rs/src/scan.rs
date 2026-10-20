@@ -32,6 +32,7 @@ pub fn attrs_from(m: &fs::Metadata) -> Attrs {
         mtime: m.mtime(),
         mtime_ns: m.mtime_nsec().clamp(0, 999_999_999) as u32,
         atime: m.atime(),
+        size: m.len() as i64,
     }
 }
 
@@ -68,17 +69,15 @@ pub fn entry_for(path: &Path, name: Vec<u8>, opts: &Options) -> io::Result<Sourc
     let m = stat_for(path, opts)?;
     let kind = kind_of(&m);
     let link = if kind == T_LNK { fs::read_link(path)?.into_os_string().into_vec() } else { Vec::new() };
-    let mut meta = EntryMeta {
+    let meta = EntryMeta {
         name,
         kind,
         attrs: attrs_from(&m),
         size: m.len() as i64,
         link,
         rdev: if kind == T_CHR || kind == T_BLK { m.rdev() as u32 } else { 0 },
+        output_source: path.as_os_str().as_bytes().to_vec(),
     };
-    if kind == T_DIR {
-        meta.size = 0;
-    }
     Ok(SourceEntry { meta, path: path.to_path_buf() })
 }
 
