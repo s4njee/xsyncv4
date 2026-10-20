@@ -1,7 +1,7 @@
 //! The few system calls the standard library does not expose: XXH3-64, one-shot zstd,
 //! nanosecond timestamps on symlinks, and FIFO creation. Linux only, as the case asks.
 
-use std::ffi::{c_char, c_int, c_void, CString};
+use std::ffi::{c_char, c_int, c_void, CStr, CString};
 use std::io;
 use std::os::unix::ffi::OsStrExt;
 use std::path::Path;
@@ -16,7 +16,38 @@ const AT_FDCWD: c_int = -100;
 const AT_SYMLINK_NOFOLLOW: c_int = 0x100;
 const UTIME_OMIT: i64 = (1 << 30) - 2;
 
+#[repr(C)]
+struct Passwd {
+    pw_name: *mut c_char,
+    pw_passwd: *mut c_char,
+    pw_uid: u32,
+    pw_gid: u32,
+    pw_gecos: *mut c_char,
+    pw_dir: *mut c_char,
+    pw_shell: *mut c_char,
+}
+
+#[repr(C)]
+struct Group {
+    gr_name: *mut c_char,
+    gr_passwd: *mut c_char,
+    gr_gid: u32,
+    gr_mem: *mut *mut c_char,
+}
+
+const NO_ID: u32 = u32::MAX;
+
 extern "C" {
+    fn getpwuid(uid: u32) -> *mut Passwd;
+    fn getgrgid(gid: u32) -> *mut Group;
+    fn getpwnam(name: *const c_char) -> *mut Passwd;
+    fn getgrnam(name: *const c_char) -> *mut Group;
+    fn geteuid() -> u32;
+    fn getegid() -> u32;
+    fn getgroups(size: c_int, list: *mut u32) -> c_int;
+    fn chown(path: *const c_char, owner: u32, group: u32) -> c_int;
+    fn lchown(path: *const c_char, owner: u32, group: u32) -> c_int;
+    fn fchown(fd: c_int, owner: u32, group: u32) -> c_int;
     fn XXH3_64bits(input: *const c_void, length: usize) -> u64;
     fn ZSTD_compressBound(src_size: usize) -> usize;
     fn ZSTD_compress(dst: *mut c_void, dst_capacity: usize, src: *const c_void, src_size: usize, level: c_int) -> usize;
@@ -88,6 +119,117 @@ pub fn make_fifo(path: &Path, mode: u32) -> io::Result<()> {
     let path = c_path(path)?;
     // SAFETY: the C string is NUL terminated and lives through the call.
     let rc = unsafe { mkfifo(path.as_ptr(), mode & 0o7777) };
+    if rc == 0 {
+        Ok(())
+    } else {
+        Err(io::Error::last_os_error())
+    }
+}
+
+fn name_ptr(ptr: *mut c_char) -> Option<Vec<u8>> {
+    if ptr.is_null() {
+        return None;
+    }
+    // SAFETY: libc returned a NUL-terminated string that lives until the next lookup.
+    Some(unsafe { CStr::from_ptr(ptr) }.to_bytes().to_vec())
+}
+
+/// `getpwuid`: the name the sender puts in an `F_IDMAP` record.
+pub fn user_name(id: u32) -> Option<Vec<u8>> {
+    // SAFETY: getpwuid returns either null or a pointer to static passwd storage.
+    let entry = unsafe { getpwuid(id) };
+    if entry.is_null() {
+        None
+    } else {
+        // SAFETY: the pointer is non-null and owned by libc.
+        name_ptr(unsafe { (*entry).pw_name })
+    }
+}
+
+/// `getgrgid`: the group name the sender puts in an `F_IDMAP` record.
+pub fn group_name(id: u32) -> Option<Vec<u8>> {
+    // SAFETY: getgrgid returns either null or a pointer to static group storage.
+    let entry = unsafe { getgrgid(id) };
+    if entry.is_null() {
+        None
+    } else {
+        // SAFETY: the pointer is non-null and owned by libc.
+        name_ptr(unsafe { (*entry).gr_name })
+    }
+}
+
+/// `getpwnam`: the local id the receiver learns from a name.
+pub fn user_id(name: &[u8]) -> Option<u32> {
+    let name = CString::new(name).ok()?;
+    // SAFETY: the name is NUL terminated and lives for the call; the result is static.
+    let entry = unsafe { getpwnam(name.as_ptr()) };
+    if entry.is_null() {
+        None
+    } else {
+        // SAFETY: the pointer is non-null and owned by libc.
+        Some(unsafe { (*entry).pw_uid })
+    }
+}
+
+/// `getgrnam`: the local id the receiver learns from a name.
+pub fn group_id(name: &[u8]) -> Option<u32> {
+    let name = CString::new(name).ok()?;
+    // SAFETY: the name is NUL terminated and lives for the call; the result is static.
+    let entry = unsafe { getgrnam(name.as_ptr()) };
+    if entry.is_null() {
+        None
+    } else {
+        // SAFETY: the pointer is non-null and owned by libc.
+        Some(unsafe { (*entry).gr_gid })
+    }
+}
+
+pub fn is_root() -> bool {
+    // SAFETY: geteuid has no arguments and no failure mode.
+    unsafe { geteuid() == 0 }
+}
+
+/// Whether this process may switch a file to `gid`, as `can_set_gid` in fs.cpp.
+pub fn can_set_gid(gid: u32) -> bool {
+    // SAFETY: getegid and getgroups are simple process queries.
+    unsafe {
+        if geteuid() == 0 || gid == getegid() {
+            return true;
+        }
+        let count = getgroups(0, std::ptr::null_mut());
+        if count <= 0 {
+            return false;
+        }
+        let mut groups = vec![0u32; count as usize];
+        let got = getgroups(count, groups.as_mut_ptr());
+        got > 0 && groups[..got as usize].contains(&gid)
+    }
+}
+
+/// Change the owner or group of an open file, leaving the other one alone.
+pub fn fchown_fd(fd: c_int, uid: Option<u32>, gid: Option<u32>) -> io::Result<()> {
+    // SAFETY: fd is a live descriptor; -1 (NO_ID) tells the kernel to leave that id alone.
+    let rc = unsafe { fchown(fd, uid.unwrap_or(NO_ID), gid.unwrap_or(NO_ID)) };
+    if rc == 0 {
+        Ok(())
+    } else {
+        Err(io::Error::last_os_error())
+    }
+}
+
+/// Change the owner or group of a path, optionally without following a symlink.
+pub fn chown_path(path: &Path, uid: Option<u32>, gid: Option<u32>, nofollow: bool) -> io::Result<()> {
+    let path = c_path(path)?;
+    // SAFETY: the C string is NUL terminated and lives through the call.
+    let rc = unsafe {
+        let owner = uid.unwrap_or(NO_ID);
+        let group = gid.unwrap_or(NO_ID);
+        if nofollow {
+            lchown(path.as_ptr(), owner, group)
+        } else {
+            chown(path.as_ptr(), owner, group)
+        }
+    };
     if rc == 0 {
         Ok(())
     } else {

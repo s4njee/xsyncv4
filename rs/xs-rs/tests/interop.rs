@@ -322,7 +322,7 @@ fn the_rust_server_refuses_a_hostile_file_name() {
     let mut input = child.stdin.take().unwrap();
     let mut output = child.stdout.take().unwrap();
     let mut hello = Encoder::new();
-    hello.raw(b"XSYNC\x01").var(4).byte(b'R').var(1);
+    hello.raw(b"XSYNC\x01").var(4).byte(b'R').var(1 | 4);
     for index in 0..32 {
         hello.byte(u8::from(index == 6 || index == 7));
     }

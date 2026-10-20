@@ -35,7 +35,9 @@ pub fn bad<T>(message: impl Into<String>) -> Res<T> {
 }
 
 pub fn decode_err(error: xs_wire::DecodeError) -> io::Error {
-    io::Error::new(io::ErrorKind::InvalidData, error.to_string())
+    let text = error.to_string();
+    let text = if text.starts_with("protocol error") { text } else { format!("protocol error: {text}") };
+    io::Error::new(io::ErrorKind::InvalidData, text)
 }
 
 #[derive(Clone, Debug, Default)]
@@ -178,6 +180,66 @@ fn io_err(what: &str) -> io::Error {
     io::Error::new(io::ErrorKind::InvalidData, format!("protocol error: bad {what}"))
 }
 
+/// `--chown` and the `F_CHOWN_CONFIG` fields, as `OwnershipOverride` in ownership.h.
+#[derive(Clone, Debug, Default)]
+pub struct Ownership {
+    pub user: Vec<u8>,
+    pub group: Vec<u8>,
+    pub user_set: bool,
+    pub group_set: bool,
+    pub uid: Option<u32>,
+    pub gid: Option<u32>,
+}
+
+impl Ownership {
+    pub fn requested(&self) -> bool {
+        self.user_set || self.group_set
+    }
+
+    /// Resolve names and numeric ids once, as `init_ownership` does. An unknown
+    /// name leaves that field unset; an id above a `u32` is a syntax error.
+    pub fn init(&mut self) -> Result<(), String> {
+        self.uid = None;
+        self.gid = None;
+        if self.user_set {
+            self.uid = resolve(&self.user, crate::ffi::user_id)?;
+            if self.uid.is_none() {
+                eprintln!("xs-rs: Unknown --usermap name on receiver: {}", String::from_utf8_lossy(&self.user));
+            }
+        }
+        if self.group_set {
+            self.gid = resolve(&self.group, crate::ffi::group_id)?;
+            if self.gid.is_none() {
+                eprintln!("xs-rs: Unknown --groupmap name on receiver: {}", String::from_utf8_lossy(&self.group));
+            }
+        }
+        Ok(())
+    }
+
+    pub fn uid_for(&self, source: u32) -> u32 {
+        self.uid.unwrap_or(source)
+    }
+
+    pub fn gid_for(&self, source: u32) -> u32 {
+        self.gid.unwrap_or(source)
+    }
+}
+
+fn resolve(name: &[u8], lookup: fn(&[u8]) -> Option<u32>) -> Result<Option<u32>, String> {
+    if !name.is_empty() && name.iter().all(u8::is_ascii_digit) {
+        let mut value = 0u64;
+        for &byte in name {
+            value = value * 10 + u64::from(byte - b'0');
+            if value > u32::MAX as u64 {
+                return Err(format!("Invalid ID number: {}", String::from_utf8_lossy(name)));
+            }
+        }
+        Ok(Some(value as u32))
+    } else {
+        Ok(lookup(name))
+    }
+}
+
 #[derive(Clone, Debug)]
 pub struct Options {
     pub recursive: bool,
@@ -195,6 +257,7 @@ pub struct Options {
     pub compress_level_explicit: bool,
     pub skip_compress: Vec<u8>,
     pub skip_compress_set: bool,
+    pub ownership: Ownership,
 }
 
 impl Default for Options {
@@ -215,7 +278,15 @@ impl Default for Options {
             compress_level_explicit: false,
             skip_compress: xs_wire::DEFAULT_SKIP_COMPRESS.as_bytes().to_vec(),
             skip_compress_set: false,
+            ownership: Ownership::default(),
         }
+    }
+}
+
+impl Options {
+    /// The C++ receiver maps names only for `-o`/`-g` and not `--numeric-ids`.
+    pub fn maps_names(&self) -> bool {
+        (self.owner || self.group) && !self.numeric_ids
     }
 }
 
