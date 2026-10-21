@@ -1,5 +1,5 @@
 //! The few system calls the standard library does not expose: XXH3-64, one-shot zstd,
-//! nanosecond timestamps on symlinks, and FIFO creation. Linux only, as the case asks.
+//! nanosecond timestamps on symlinks, and FIFO creation, for Linux and macOS.
 
 use std::ffi::{c_char, c_int, c_void, CStr, CString};
 use std::io;
@@ -19,9 +19,18 @@ struct Xxh128 {
     high64: u64,
 }
 
+#[cfg(target_os = "linux")]
 const AT_FDCWD: c_int = -100;
+#[cfg(target_os = "linux")]
 const AT_SYMLINK_NOFOLLOW: c_int = 0x100;
+#[cfg(target_os = "linux")]
 const UTIME_OMIT: i64 = (1 << 30) - 2;
+#[cfg(target_os = "macos")]
+const AT_FDCWD: c_int = -2;
+#[cfg(target_os = "macos")]
+const AT_SYMLINK_NOFOLLOW: c_int = 0x20;
+#[cfg(target_os = "macos")]
+const UTIME_OMIT: i64 = -2;
 
 #[repr(C)]
 struct Passwd {

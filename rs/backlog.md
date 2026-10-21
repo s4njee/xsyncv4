@@ -1,0 +1,52 @@
+# xs-rs speed backlog
+
+What stands between xs-rs and xs-c++, in the order to work on it: one pull request into `rust-ds` each, with the
+race numbers before and after in its description. From a review on 2026-10-21 of `rs/` against `src/`.
+
+Where things stood: a local race through `tests/fakessh.sh` (no network) had xs-rs slightly ahead on small-deep
+(fresh 0.93, no-op 0.89, update 0.98 of xs-c++'s time). Over a real internet link (11 ms RTT) it lost: projects
+tree fresh 1.46, no-op 1.66; congress update 1.19. The difference is structure: both ends of xs-rs do nearly
+everything on one thread, which costs little on a zero-latency pipe and a lot when every NEED waits a round trip.
+
+## 1. macOS: per-OS constants, and the macOS build
+- [x] `ffi.rs` hard-coded Linux's `AT_FDCWD` (-100), `AT_SYMLINK_NOFOLLOW` (0x100) and `UTIME_OMIT`; macOS's are
+  -2, 0x20 and -2. Symlink mtimes were never set, and `UTIME_OMIT` wrote a bogus atime.
+- [x] The xs-wire configuration test offered POSIX ACLs to a macOS xs, which wants Darwin ACLs.
+
+## 2. A round trip in the race
+- [ ] `rs/race.py --rtt MS`: run the remote side behind a relay that delays each direction by half the RTT, so a
+  local race shows what a real link does to a pipeline that waits.
+
+## 3. Sender: walk, read and answer NEEDs at once
+- [ ] `run_sender` (`transfer.rs`) walks and lists the whole tree before it serves one NEED, then reads every file
+  on that same thread. xs-c++ runs `-j` workers (half of them scanning), a reader thread for NEEDs, tasks of 64
+  files or 8 MiB, each worker filling its own 1 MiB DATA block (`remote.cpp:1374-1421`, `:1774-1794`).
+- [ ] A delta signature wait (`wait_signature`) stalls only its own worker, not the sender.
+
+## 4. Receiver: a reader thread and a worker pool
+- [ ] `run_receiver` (`transfer/receiver.rs`) parses DIRs, lists the destination, diffs, builds NEEDs and writes
+  every small file on one thread; a DIR behind a 1 MiB DATA frame waits for ~160 file writes. xs-c++'s reader
+  only queues: DIRs to queue 0 (LIFO, preferred by half the workers), DATA to queue 1, 16 MiB bound
+  (`remote.cpp:2603-2706`).
+
+## 5. Directory fds and fewer syscalls per file
+- [ ] A directory-fd cache keyed by directory id, each opened from its parent's fd; `openat`, `futimens`,
+  `renameat`, `mkdirat`. Raise `RLIMIT_NOFILE` to its hard limit.
+- [ ] Per file: no `set_len` on a new file, `fchmod` only when the created mode differs, `fchown` only when the
+  group differs, ids and groups looked up once (`fs.cpp:1882-2165`, `:136-151`).
+- [ ] Per new directory: one `mkdirat(mode|0700)`, no `lstat` when the parent listing says the name is absent; the
+  final pass skips directories already right (`fs.cpp:1172`, `:1553-1589`).
+
+## 6. Bulk listings
+- [ ] Destination listing and source walk: `getattrlistbulk` on macOS (`fs.cpp:327-442`), `getdents64` + `statx`
+  on the directory fd on Linux (`linux_scan.cpp`), into a sorted compact entry list instead of a
+  `BTreeMap<_, fs::Metadata>` of full-path `lstat`s. Skip listing a directory just created.
+
+## 7. The output path
+- [ ] The server writes through `io::stdout()`, whose `LineWriter` splits writes at newline bytes: write fd 1
+  directly (and read fd 0 directly).
+- [ ] A byte-bounded writer queue (48 MiB, `Conn::MAX_Q`) that gathers small frames into writes of up to 256 KiB
+  with `write_vectored`, instead of an unbounded channel flushed whenever it is momentarily empty.
+- [ ] Fewer copies: DATA built in a reused buffer with the header reserved, files read straight into it, frames
+  passed by value; no 1 MiB allocation per NEED.
+- [ ] `Watchdog::drop` joins a thread that sleeps 50 ms at a time, on both ends: wake it instead.

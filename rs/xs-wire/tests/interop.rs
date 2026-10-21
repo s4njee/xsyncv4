@@ -97,7 +97,12 @@ fn send(input: &mut ChildStdin, config: &Config) {
 fn the_cpp_server_accepts_every_configuration_frame_in_order() {
     let mut options = Options::default();
     options.set_flag("recursive", true).set_flag("compress", true).set_flag("del", true);
-    let features = !(feature::LIST | feature::ACL_DARWIN | feature::ACL_UUID | feature::CRTIMES | feature::FILEFLAGS);
+    // Every feature but listing and what this platform's xs does not have (PF_UNSUPPORTED_NATIVE, common.h).
+    #[cfg(target_os = "macos")]
+    let unsupported = feature::ACL_POSIX;
+    #[cfg(not(target_os = "macos"))]
+    let unsupported = feature::ACL_DARWIN | feature::ACL_UUID | feature::CRTIMES | feature::FILEFLAGS;
+    let features = !(feature::LIST | unsupported);
     let Some((mut child, mut input, mut output, dir)) = open_server(features, options) else { return };
     for config in [
         Config::Io { bwlimit: 1 << 20, timeout: 60 },
