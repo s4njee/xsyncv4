@@ -12,6 +12,7 @@ use std::path::{Path, PathBuf};
 use crate::ffi;
 use crate::idmap;
 use crate::protocol::{Attrs, EntryMeta, HardlinkKey, Options};
+use crate::xattr;
 
 pub(super) struct InFile {
     pub(super) temp: PathBuf,
@@ -172,6 +173,9 @@ pub(super) fn finish_infile(infile: &mut InFile, opts: &Options) -> io::Result<b
     if opts.times {
         let _ = ffi::set_mtime(&infile.temp, attrs.mtime, attrs.mtime_ns as i64, false);
     }
+    if opts.xattrs != 0 {
+        let _ = xattr::apply(&attrs.xattrs, &infile.temp, crate::protocol::T_REG, &opts.filters, opts);
+    }
     match fs::rename(&infile.temp, &infile.final_path) {
         Ok(()) => Ok(true),
         Err(error) => {
@@ -192,6 +196,9 @@ pub(super) fn write_whole(path_dir: &Path, name: &[u8], final_path: &Path, attrs
         }
         if opts.times {
             let _ = ffi::set_mtime(&temp, attrs.mtime, attrs.mtime_ns as i64, false);
+        }
+        if opts.xattrs != 0 {
+            let _ = xattr::apply(&attrs.xattrs, &temp, crate::protocol::T_REG, &opts.filters, opts);
         }
         drop(file);
         fs::rename(&temp, final_path)

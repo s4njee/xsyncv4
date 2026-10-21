@@ -45,6 +45,9 @@ fn read_config_frame<R: Read>(reader: &mut R, allow_keepalive: bool) -> io::Resu
         if kind == frame_type::CHOWN_CONFIG && len > 1024 * 1024 {
             return protocol::bad("protocol error: oversized ownership configuration");
         }
+        if kind == frame_type::XATTR_CONFIG && len != 1 {
+            return protocol::bad("protocol error: malformed or unnegotiated xattr configuration");
+        }
         let mut payload = vec![0u8; len as usize];
         reader.read_exact(&mut payload).map_err(|error| match error.kind() {
             io::ErrorKind::UnexpectedEof => io::Error::new(io::ErrorKind::InvalidData, "connection closed inside a frame"),
@@ -113,6 +116,18 @@ pub(crate) fn read_configuration<R: Read, W: Write>(
             }
             _ => return Err((2, "protocol error: malformed compression configuration".into())),
         }
+    }
+    if features & feature::XATTRS != 0 {
+        let frame = config_frame(reader, control.keepalive_enabled())?;
+        if frame.kind != frame_type::XATTR_CONFIG {
+            return Err((2, "protocol error: malformed xattr configuration".into()));
+        }
+        let config = Config::decode(frame.kind, &frame.payload, features)
+            .map_err(|error| (2, format!("protocol error: {error}")))?;
+        let Config::Xattr(mode) = config else {
+            return Err((2, "protocol error: malformed xattr configuration".into()));
+        };
+        options.xattrs = mode;
     }
     if features & feature::CHOWN != 0 {
         let frame = config_frame(reader, control.keepalive_enabled())?;

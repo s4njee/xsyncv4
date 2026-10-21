@@ -78,6 +78,25 @@ fn dowild(p: &[u8], t: &[u8]) -> bool {
     }
 }
 
+fn rule_matches(rule: &Rule, path: &[u8], is_dir: bool) -> bool {
+    let slash = path.iter().rposition(|&c| c == b'/');
+    let base = slash.map(|at| &path[at + 1..]).unwrap_or(path);
+    if !rule.path {
+        wildmatch(&rule.pat, base, false)
+    } else if rule.anchored {
+        wildmatch(&rule.pat, path, is_dir)
+    } else {
+        let mut text = path;
+        let mut matched = wildmatch(&rule.pat, text, is_dir);
+        while !matched {
+            let Some(at) = text.iter().position(|&c| c == b'/') else { break };
+            text = &text[at + 1..];
+            matched = wildmatch(&rule.pat, text, is_dir);
+        }
+        matched
+    }
+}
+
 impl FilterList {
     pub fn empty(&self) -> bool {
         self.rules.is_empty()
@@ -242,12 +261,44 @@ impl FilterList {
         self.decide(path, is_dir) == Some(false)
     }
 
+    pub fn has_xattr_filters(&self) -> bool {
+        self.rules
+            .iter()
+            .any(|rule| rule.modifiers.contains(&b'x') || rule.merged.as_ref().is_some_and(|merged| merged.has_xattr_filters()))
+    }
+
+    /// `FilterList::xattr_excluded`: only rules carrying the `x` modifier take part.
+    pub fn xattr_excluded(&self, name: &[u8], receiver: bool, delete_excluded: bool) -> bool {
+        if name.is_empty() {
+            return false;
+        }
+        for rule in &self.rules {
+            if rule.merge || rule.cvs {
+                if let Some(merged) = &rule.merged {
+                    if merged.xattr_excluded(name, receiver, delete_excluded) {
+                        return true;
+                    }
+                }
+                continue;
+            }
+            if !rule.modifiers.contains(&b'x') || (!receiver && rule.dir_only) {
+                continue;
+            }
+            let sides = if rule.sides != 0 { rule.sides } else if delete_excluded { 1 } else { 3 };
+            if sides & if receiver { 2 } else { 1 } == 0 {
+                continue;
+            }
+            if rule_matches(rule, name, false) != rule.negate {
+                return !rule.include;
+            }
+        }
+        false
+    }
+
     fn decide(&self, path: &[u8], is_dir: bool) -> Option<bool> {
         if path.is_empty() {
             return None;
         }
-        let slash = path.iter().rposition(|&c| c == b'/');
-        let base = slash.map(|at| &path[at + 1..]).unwrap_or(path);
         for r in &self.rules {
             if r.merge || r.cvs {
                 if let Some(merged) = &r.merged {
@@ -261,21 +312,7 @@ impl FilterList {
             if sides & 1 == 0 || (!is_dir && r.dir_only) {
                 continue;
             }
-            let matched = if !r.path {
-                wildmatch(&r.pat, base, false)
-            } else if r.anchored {
-                wildmatch(&r.pat, path, is_dir)
-            } else {
-                let mut text = path;
-                let mut matched = wildmatch(&r.pat, text, is_dir);
-                while !matched {
-                    let Some(at) = text.iter().position(|&c| c == b'/') else { break };
-                    text = &text[at + 1..];
-                    matched = wildmatch(&r.pat, text, is_dir);
-                }
-                matched
-            };
-            if matched != r.negate {
+            if rule_matches(r, path, is_dir) != r.negate {
                 return Some(r.include);
             }
         }

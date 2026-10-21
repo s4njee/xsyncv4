@@ -26,6 +26,7 @@ use crate::protocol::{
 };
 use crate::resume;
 use crate::scan;
+use crate::xattr;
 
 use crate::parallel::{WriteDone, WritePool};
 
@@ -166,6 +167,7 @@ fn process_dir<W: Write + Send + 'static>(
     features: u64,
     dest_arg: &Path,
     frame: &Frame,
+    streams: &mut xattr::Incoming,
     ids: &idmap::Receiver,
     dirs: &mut Vec<Option<RecvDir>>,
     finals: &mut Vec<FinalDir>,
@@ -202,6 +204,9 @@ fn process_dir<W: Write + Send + 'static>(
         attrs.size = i64::try_from(d.var().map_err(decode_err)?).map_err(|_| io::Error::new(io::ErrorKind::InvalidData, "protocol error: negative directory size"))?;
         attr_source = d.str().map_err(decode_err)?.to_vec();
     }
+    if features & feature::XATTRS != 0 {
+        attrs.xattrs = xattr::get_xattrs(&mut d, features, streams)?;
+    }
     if features & feature::DIR_CHILDREN != 0 {
         let _children = d.var().map_err(decode_err)?;
     }
@@ -212,7 +217,11 @@ fn process_dir<W: Write + Send + 'static>(
     }
     let mut entries = Vec::with_capacity(count);
     for _ in 0..count {
-        entries.push(protocol::get_entry(&mut d, opts, features)?);
+        let mut entry = protocol::get_entry(&mut d, opts, features)?;
+        if features & feature::XATTRS != 0 {
+            entry.attrs.xattrs = xattr::get_xattrs(&mut d, features, streams)?;
+        }
+        entries.push(entry);
     }
     if !d.is_empty() {
         return bad("protocol error: trailing DIR payload");
@@ -358,6 +367,9 @@ fn process_dir<W: Write + Send + 'static>(
                         }
                         chown_changed(&target, opts, &entry.attrs, false, Some(metadata));
                     }
+                    if opts.xattrs != 0 {
+                        xattr::apply(&entry.attrs.xattrs, &target, T_REG, &opts.filters, opts)?;
+                    }
                     if let Some(key) = link_key.clone() {
                         hardlinks.register_ready(key, hardlink_member(entry, &event_path, &target, existing));
                     }
@@ -432,6 +444,9 @@ fn process_dir<W: Write + Send + 'static>(
                     }
                 }
                 chown_changed(&target, opts, &entry.attrs, true, if same { existing } else { None });
+                if opts.xattrs != 0 {
+                    xattr::apply(&entry.attrs.xattrs, &target, T_LNK, &opts.filters, opts)?;
+                }
             }
             T_FIFO => {
                 let same = existing.map(|m| m.file_type().is_fifo()).unwrap_or(false);
@@ -468,6 +483,9 @@ fn process_dir<W: Write + Send + 'static>(
                     }
                 }
                 chown_changed(&target, opts, &entry.attrs, false, if same { existing } else { None });
+                if opts.xattrs != 0 {
+                    xattr::apply(&entry.attrs.xattrs, &target, T_FIFO, &opts.filters, opts)?;
+                }
             }
             T_CHR | T_BLK => {
                 if let Some(key) = link_key.clone() {
@@ -483,13 +501,17 @@ fn process_dir<W: Write + Send + 'static>(
                         }
                     }
                 }
+                if opts.xattrs != 0 {
+                    let _ = xattr::apply(&entry.attrs.xattrs, &target, entry.kind, &opts.filters, opts);
+                }
             }
             _ => {}
         }
         existing_entries.push(before);
     }
     let apply_attrs = apply_attrs
-        && (dir_modified
+        && (opts.xattrs != 0
+            || dir_modified
             || working_changed
             || match &before {
                 Some(metadata) => dir_attrs_differ(opts, metadata, &attrs),
@@ -644,6 +666,7 @@ fn process_data<W: Write + Send + 'static>(
     payload: &[u8],
     opts: &Options,
     features: u64,
+    streams: &mut xattr::Incoming,
     ids: &idmap::Receiver,
     dirs: &mut [Option<RecvDir>],
     infiles: &mut HashMap<(u32, u32, u32), InFile>,
@@ -702,6 +725,12 @@ fn process_data<W: Write + Send + 'static>(
         match kind {
             rec::WHOLE => {
                 let mut attrs = protocol::get_file_attrs(&mut d, features)?;
+                if features & feature::XATTRS != 0 {
+                    attrs.xattrs = xattr::get_xattrs(&mut d, features, streams)?;
+                    if !attrs.xattrs.complete {
+                        return bad("protocol error: truncated DATA record or incomplete file xattrs");
+                    }
+                }
                 ids.apply(&mut attrs, opts);
                 let bytes = d.str().map_err(decode_err)?;
                 let name = dir.rename_to.as_deref().unwrap_or(&entry.name);
@@ -829,6 +858,12 @@ fn process_data<W: Write + Send + 'static>(
                     .map_err(|_| io::Error::new(io::ErrorKind::InvalidData, "bad file total"))?;
                 let status = d.byte().map_err(decode_err)?;
                 let mut attrs = protocol::get_file_attrs(&mut d, features)?;
+                if features & feature::XATTRS != 0 {
+                    attrs.xattrs = xattr::get_xattrs(&mut d, features, streams)?;
+                    if !attrs.xattrs.complete {
+                        return bad("protocol error: truncated DATA record or incomplete file xattrs");
+                    }
+                }
                 ids.apply(&mut attrs, opts);
                 let mut delta_sum = [0u64; 2];
                 if is_delta {
@@ -1082,6 +1117,7 @@ pub fn run_receiver<R: Read, W: Write + Send + 'static>(
     let mut seen_dirs: Vec<bool> = Vec::new();
     let mut finals: Vec<FinalDir> = Vec::new();
     let mut infiles: HashMap<(u32, u32, u32), InFile> = HashMap::new();
+    let mut streams = xattr::Incoming::new();
     // Like the C++ receiver, one file's ranges stay serial unless an explicit
     // -jN (N > 1) asked for range concurrency; the default budget is for files.
     let write_workers =
@@ -1120,6 +1156,7 @@ pub fn run_receiver<R: Read, W: Write + Send + 'static>(
                 features,
                 &dest_path,
                 &frame,
+                &mut streams,
                 &ids,
                 &mut dirs,
                 &mut finals,
@@ -1134,6 +1171,7 @@ pub fn run_receiver<R: Read, W: Write + Send + 'static>(
                 &frame.payload,
                 opts,
                 features,
+                &mut streams,
                 &ids,
                 &mut dirs,
                 &mut infiles,
@@ -1168,6 +1206,13 @@ pub fn run_receiver<R: Read, W: Write + Send + 'static>(
             },
             frame_type::DELTA_REQUEST => {
                 process_delta_request(&mut output, &frame.payload, opts, features, &mut dirs)
+            }
+            frame_type::XATTR_START | frame_type::XATTR_CHUNK | frame_type::XATTR_END => {
+                if features & feature::XATTR_STREAM == 0 {
+                    bad("protocol error: unnegotiated xattr value stream")
+                } else {
+                    streams.receive(frame.kind, &frame.payload)
+                }
             }
             frame_type::LIST_END => Ok(()),
             frame_type::DATA_END => {
@@ -1206,6 +1251,12 @@ pub fn run_receiver<R: Read, W: Write + Send + 'static>(
             cleanup_partial(&mut infiles, opts);
             return Ok(code as i32);
         }
+    }
+    if !streams.drained() {
+        let _ = send_fatal(&mut output, "protocol error: unreferenced xattr value stream");
+        cleanup_partial(&mut infiles, opts);
+        output.finish()?;
+        return Ok(2);
     }
     // DATA_END may follow the last END while that file's range writes are still
     // in the pool; drain every completion before publishing or cleaning up.
@@ -1270,6 +1321,9 @@ pub fn run_receiver<R: Read, W: Write + Send + 'static>(
         }
         if opts.times {
             let _ = ffi::set_mtime(&final_dir.path, final_dir.attrs.mtime, final_dir.attrs.mtime_ns as i64, false);
+        }
+        if opts.xattrs != 0 {
+            let _ = xattr::apply(&final_dir.attrs.xattrs, &final_dir.path, T_DIR, &opts.filters, opts);
         }
     }
     if ack_enabled {
