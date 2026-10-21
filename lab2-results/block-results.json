@@ -1319,8 +1319,8 @@
   "PS-aa7aee150987-laikav2-noop": {
    "run": "20261021T161601Z-PS-aa7aee150987-laikav2-noop",
    "experiment": "PS-aa7aee150987-laikav2-noop",
-   "key": "laikav2-sample.noop.a-aws.sender.warm|0|0",
-   "utc": 1792599411.653,
+   "key": "laikav2-sample.noop.a-aws.sender.warm|4|0",
+   "utc": 1792599468.736,
    "cell": "laikav2-sample.noop.a-aws.sender.warm",
    "factors": {
     "corpus": "laikav2-sample",
@@ -1331,7 +1331,7 @@
     "link": "a-aws",
     "cache": "warm"
    },
-   "block": 0,
+   "block": 4,
    "attempt": 0,
    "control": "xs-cpp",
    "primary": "durable_s",
@@ -1342,9 +1342,9 @@
      "control": true,
      "valid": true,
      "void": null,
-     "seconds": 0.432,
-     "gbps": 1.741,
-     "files_per_s": 3096,
+     "seconds": 0.419,
+     "gbps": 1.795,
+     "files_per_s": 3192,
      "speed": 1
     },
     {
@@ -1353,10 +1353,10 @@
      "control": false,
      "valid": true,
      "void": null,
-     "seconds": 0.376,
-     "gbps": 1.998,
-     "files_per_s": 3553,
-     "speed": 1.15
+     "seconds": 0.355,
+     "gbps": 2.118,
+     "files_per_s": 3767,
+     "speed": 1.18
     },
     {
      "arm": "rsync",
@@ -1364,10 +1364,10 @@
      "control": false,
      "valid": true,
      "void": null,
-     "seconds": 0.489,
-     "gbps": 1.538,
-     "files_per_s": 2736,
-     "speed": 0.88
+     "seconds": 0.465,
+     "gbps": 1.616,
+     "files_per_s": 2874,
+     "speed": 0.9
     }
    ],
    "soFar": [
@@ -1375,19 +1375,92 @@
      "arm": "rsync",
      "label": "rsync",
      "speed": 0.88,
-     "blocks": 1
+     "blocks": 5
     },
     {
      "arm": "xs-rs",
      "label": "xs-rs",
      "speed": 1.15,
-     "blocks": 1
+     "blocks": 5
     }
    ],
    "question": "Is xs-rs at aa7aee150987 (rust-ds head, with automatic compression) as fast as xs-c++ on congress-sample and laikav2-sample, and than rsync?",
-   "summary": "xs-rs was fastest at 0.376 s, 1.15x the control xs-c++ (0.432 s), while rsync ran at 0.88x. This cell\u2019s cumulative picture rests on one block each: xs-rs 1.15x and rsync 0.88x, so the evidence is still thin. It suggests xs-rs can match or beat xs-c++ here and beat rsync, but one block cannot settle the experiment question.",
+   "summary": null,
+   "model": null,
+   "driver": "a"
+  },
+  "PS-aa7aee150987-noop": {
+   "run": "20261021T161556Z-PS-aa7aee150987-noop",
+   "experiment": "PS-aa7aee150987-noop",
+   "key": "congress-sample.noop.a-aws.sender.warm|3|0",
+   "utc": 1792599555.535,
+   "cell": "congress-sample.noop.a-aws.sender.warm",
+   "factors": {
+    "corpus": "congress-sample",
+    "scenario": "noop",
+    "sender": "a",
+    "receiver": "aws",
+    "client": "sender",
+    "link": "a-aws",
+    "cache": "warm"
+   },
+   "block": 3,
+   "attempt": 0,
+   "control": "xs-cpp",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 0.852,
+     "gbps": 2.048,
+     "files_per_s": 29625,
+     "speed": 1
+    },
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.846,
+     "gbps": 2.062,
+     "files_per_s": 29825,
+     "speed": 1.01
+    },
+    {
+     "arm": "rsync",
+     "label": "rsync",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 1.579,
+     "gbps": 1.105,
+     "files_per_s": 15986,
+     "speed": 0.54
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "rsync",
+     "label": "rsync",
+     "speed": 0.48,
+     "blocks": 4
+    },
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "speed": 1.04,
+     "blocks": 4
+    }
+   ],
+   "question": "Is xs-rs at aa7aee150987 (rust-ds head, with automatic compression) as fast as xs-c++ on congress-sample and laikav2-sample, and than rsync?",
+   "summary": "In this block xs-rs was fastest at 1.01x the xs-c++ control (0.846 s versus 0.852 s), while rsync ran at 0.54x. Cumulatively for this cell, xs-rs is at 1.04x and rsync at 0.48x, each over four blocks, so the evidence is not thin. That bears on the question by showing xs-rs essentially matching xs-c++ here and clearly outpacing rsync, without proving more.",
    "model": "opencode/deepseek-v4.1-flash",
-   "summarizedUtc": 1792599419.736,
+   "summarizedUtc": 1792599600.212,
    "driver": "a"
   }
  }

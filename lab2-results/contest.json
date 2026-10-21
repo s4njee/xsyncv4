@@ -1,15 +1,15 @@
 {
- "updated": "2026-10-21T16:13:40+00:00",
+ "updated": "2026-10-21T17:13:38+00:00",
  "enabled": true,
  "cpp_rev": "fe012667764a",
  "rs": {
-  "commit": "dc2b0344ba2bb97937dd3a512f652c756fec2031",
-  "step": "acls"
+  "commit": "aa7aee15098700d78754be2638e607d9467686de",
+  "step": "rust-ds head, PR #30"
  },
  "margin": 0.05,
  "score": {
-  "xs-rs": 0,
-  "xs-cpp": 4,
+  "xs-rs": 2,
+  "xs-cpp": 3,
   "tie": 1,
   "pending": 0
  },
@@ -69,31 +69,20 @@
    "scenario": "noop",
    "link": "a-aws",
    "metric": "durable_s",
-   "experiment": "BL1-congress-sample",
-   "run": "20261021T003554Z-BL1-congress-sample",
+   "experiment": "PS-aa7aee150987-noop",
+   "run": "20261021T161556Z-PS-aa7aee150987-noop",
    "tools": {
-    "rsync": {
-     "arm": "rsync",
-     "flags": [
-      "-a"
-     ],
-     "rev": null,
-     "seconds": 1.81,
-     "lo": 0.957,
-     "hi": 3.424,
-     "blocks": 3
-    },
     "xs-cpp": {
      "arm": "xs-cpp",
      "flags": [
       "-a",
       "-j4"
      ],
-     "rev": "0c94b3d70b9d",
-     "seconds": 0.797,
-     "lo": 0.757,
-     "hi": 0.838,
-     "blocks": 3
+     "rev": "fe012667764a",
+     "seconds": 0.826,
+     "lo": 0.743,
+     "hi": 0.919,
+     "blocks": 5
     },
     "xs-rs": {
      "arm": "xs-rs",
@@ -101,16 +90,27 @@
       "-a",
       "-j4"
      ],
-     "rev": "3b891bf5e8fb-rs",
-     "seconds": 0.852,
-     "lo": 0.793,
-     "hi": 0.915,
-     "blocks": 3
+     "rev": "aa7aee150987-rs",
+     "seconds": 0.772,
+     "lo": 0.703,
+     "hi": 0.848,
+     "blocks": 5
+    },
+    "rsync": {
+     "arm": "rsync",
+     "flags": [
+      "-a"
+     ],
+     "rev": null,
+     "seconds": 1.671,
+     "lo": 1.493,
+     "hi": 1.871,
+     "blocks": 5
     }
    },
-   "verdict": "xs-cpp",
-   "rs_vs_cpp": 1.069,
-   "fastest": "xs-cpp"
+   "verdict": "xs-rs",
+   "rs_vs_cpp": 0.935,
+   "fastest": "xs-rs"
   },
   {
    "cell": "congress-sample.update-10pct.a-aws.sender.warm",
@@ -160,6 +160,55 @@
    "verdict": "xs-cpp",
    "rs_vs_cpp": 1.193,
    "fastest": "xs-cpp"
+  },
+  {
+   "cell": "laikav2-sample.noop.a-aws.sender.warm",
+   "corpus": "laikav2-sample",
+   "scenario": "noop",
+   "link": "a-aws",
+   "metric": "durable_s",
+   "experiment": "PS-aa7aee150987-laikav2-noop",
+   "run": "20261021T161601Z-PS-aa7aee150987-laikav2-noop",
+   "tools": {
+    "xs-cpp": {
+     "arm": "xs-cpp",
+     "flags": [
+      "-a",
+      "-j4"
+     ],
+     "rev": "fe012667764a",
+     "seconds": 0.421,
+     "lo": 0.397,
+     "hi": 0.446,
+     "blocks": 5
+    },
+    "xs-rs": {
+     "arm": "xs-rs",
+     "flags": [
+      "-a",
+      "-j4"
+     ],
+     "rev": "aa7aee150987-rs",
+     "seconds": 0.368,
+     "lo": 0.338,
+     "hi": 0.4,
+     "blocks": 5
+    },
+    "rsync": {
+     "arm": "rsync",
+     "flags": [
+      "-a"
+     ],
+     "rev": null,
+     "seconds": 0.477,
+     "lo": 0.462,
+     "hi": 0.493,
+     "blocks": 5
+    }
+   },
+   "verdict": "xs-rs",
+   "rs_vs_cpp": 0.874,
+   "fastest": "xs-rs"
   },
   {
    "cell": "real-projects.fresh.a-aws.sender.warm",

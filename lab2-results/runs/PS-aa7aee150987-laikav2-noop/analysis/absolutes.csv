@@ -1,0 +1,13 @@
+experiment,kind,cell_id,corpus,scenario,sender,receiver,client,link,cache,arm,metric,n_blocks,geomean,lo,hi
+PS-aa7aee150987-laikav2-noop,screening,laikav2-sample.noop.a-aws.sender.warm,laikav2-sample,noop,a,aws,sender,a-aws,warm,xs-cpp,durable_s,5,0.42125051515029843,0.39749686076815693,0.4464236426206446
+PS-aa7aee150987-laikav2-noop,screening,laikav2-sample.noop.a-aws.sender.warm,laikav2-sample,noop,a,aws,sender,a-aws,warm,xs-rs,durable_s,5,0.36774321425313883,0.338225977767668,0.39983644225614384
+PS-aa7aee150987-laikav2-noop,screening,laikav2-sample.noop.a-aws.sender.warm,laikav2-sample,noop,a,aws,sender,a-aws,warm,rsync,durable_s,5,0.4773332514661311,0.46173086700564653,0.49346285734118445
+PS-aa7aee150987-laikav2-noop,screening,laikav2-sample.noop.a-aws.sender.warm,laikav2-sample,noop,a,aws,sender,a-aws,warm,xs-cpp,wall_s,5,0.38452002673970004,0.3606899880441177,0.4099244666192805
+PS-aa7aee150987-laikav2-noop,screening,laikav2-sample.noop.a-aws.sender.warm,laikav2-sample,noop,a,aws,sender,a-aws,warm,xs-rs,wall_s,5,0.3306226614013986,0.3005706747405004,0.363679338732957
+PS-aa7aee150987-laikav2-noop,screening,laikav2-sample.noop.a-aws.sender.warm,laikav2-sample,noop,a,aws,sender,a-aws,warm,rsync,wall_s,5,0.4405679293220572,0.4244868946842621,0.4572581692810538
+PS-aa7aee150987-laikav2-noop,screening,laikav2-sample.noop.a-aws.sender.warm,laikav2-sample,noop,a,aws,sender,a-aws,warm,xs-cpp,cpu_s,5,0.12196659304678345,0.11583923640726805,0.12841805834371278
+PS-aa7aee150987-laikav2-noop,screening,laikav2-sample.noop.a-aws.sender.warm,laikav2-sample,noop,a,aws,sender,a-aws,warm,xs-rs,cpu_s,5,0.05685430495660935,0.05452403211397589,0.059284170058116176
+PS-aa7aee150987-laikav2-noop,screening,laikav2-sample.noop.a-aws.sender.warm,laikav2-sample,noop,a,aws,sender,a-aws,warm,rsync,cpu_s,5,0.09255955422225541,0.08974428017928998,0.0954631432856451
+PS-aa7aee150987-laikav2-noop,screening,laikav2-sample.noop.a-aws.sender.warm,laikav2-sample,noop,a,aws,sender,a-aws,warm,xs-cpp,rss_bytes,5,12451840.000000007,0.0,0.0
+PS-aa7aee150987-laikav2-noop,screening,laikav2-sample.noop.a-aws.sender.warm,laikav2-sample,noop,a,aws,sender,a-aws,warm,xs-rs,rss_bytes,5,12451840.000000007,0.0,0.0
+PS-aa7aee150987-laikav2-noop,screening,laikav2-sample.noop.a-aws.sender.warm,laikav2-sample,noop,a,aws,sender,a-aws,warm,rsync,rss_bytes,5,12451840.000000007,0.0,0.0
