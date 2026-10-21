@@ -14,7 +14,7 @@ everything on one thread, which costs little on a zero-latency pipe and a lot wh
 - [x] The xs-wire configuration test offered POSIX ACLs to a macOS xs, which wants Darwin ACLs.
 
 ## 2. A round trip in the race
-- [ ] `rs/race.py --rtt MS`: run the remote side behind a relay that delays each direction by half the RTT, so a
+- [x] `rs/race.py --rtt MS`: run the remote side behind a relay that delays each direction by half the RTT, so a
   local race shows what a real link does to a pipeline that waits.
 
 ## 3. Sender: walk, read and answer NEEDs at once
