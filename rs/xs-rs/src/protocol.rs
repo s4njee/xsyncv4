@@ -503,22 +503,26 @@ impl Options {
 /// zstd frame. This is `pack` in remote.cpp: small bodies and blocks whose sample does
 /// not shrink are left raw, and compression is kept only when it is smaller.
 pub fn pack_body(frame: &mut Encoder, body: &[u8], compress: bool, level: i32) -> bool {
-    if !compress || body.len() < 128 || !crate::compression::worthwhile(body) {
-        frame.raw(body);
-        return false;
-    }
-    let (minimum, maximum) = crate::ffi::zstd_level_bounds();
-    let level = level.clamp(minimum, maximum);
-    match crate::ffi::zstd_compress_exact(body, level) {
-        Ok(compressed) if compressed.len() < body.len() => {
+    match compress.then(|| compress_body(body, level)).flatten() {
+        Some(compressed) => {
             frame.var(body.len() as u64).raw(&compressed);
             true
         }
-        _ => {
+        None => {
             frame.raw(body);
             false
         }
     }
+}
+
+/// `body` as one zstd frame, when it is worth compressing and comes out smaller.
+pub fn compress_body(body: &[u8], level: i32) -> Option<Vec<u8>> {
+    if body.len() < 128 || !crate::compression::worthwhile(body) {
+        return None;
+    }
+    let (minimum, maximum) = crate::ffi::zstd_level_bounds();
+    let level = level.clamp(minimum, maximum);
+    crate::ffi::zstd_compress_exact(body, level).ok().filter(|compressed| compressed.len() < body.len())
 }
 
 pub fn unpack_body(input: &[u8], compressed: bool, features: u64) -> Res<Vec<u8>> {
