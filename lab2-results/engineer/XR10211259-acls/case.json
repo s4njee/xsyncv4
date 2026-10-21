@@ -4,7 +4,7 @@
  "step": "acls",
  "opened_utc": "2026-10-21T12:59:09Z",
  "origin": "the engineer, after the previous step merged",
- "state": "prepared",
+ "state": "review",
  "question": "POSIX ACLs (PF_ACL_POSIX)",
  "why": "",
  "hypothesis": "",
@@ -14,7 +14,7 @@
  "base_rev": "ec2fc307b56c17cdac3fc59a4d015c888879654c",
  "base_build": "ec2fc307b56c",
  "branch": "auto/XR10211259-acls",
- "commit": null,
+ "commit": "aab8d54a821abb55d4088f7d19ad21124057e7d7",
  "history": [
   {
    "utc": "2026-10-21T12:59:09Z",
@@ -25,6 +25,16 @@
    "utc": "2026-10-21T13:07:10Z",
    "state": "prepared",
    "text": "parent built; xs-rs checks passing on it: test, clippy, fmt, arm64"
+  },
+  {
+   "utc": "2026-10-21T13:33:12Z",
+   "state": "review",
+   "text": "aab8d54a821a on auto/XR10211259-acls: 11 file(s), 722 lines and 201 of tests; xs-rs's tests, clippy and rustfmt pass against xs-c++; waiting for it to be merged"
+  },
+  {
+   "utc": "2026-10-21T13:33:24Z",
+   "state": "review",
+   "text": "pull request https://github.com/s4njee/xsyncv4/pull/15"
   }
  ],
  "tests": {
@@ -33,6 +43,93 @@
    "clippy": true,
    "fmt": true,
    "arm64": true
+  },
+  "candidate": {
+   "test": true,
+   "clippy": true,
+   "fmt": true,
+   "arm64": true
   }
+ },
+ "agent": {
+  "summary": "xs-rs now implements PF_ACL_POSIX: -A/--acls parsing, ACL_CONFIG negotiation, access/default ACL record encoding and decoding after xattrs, validation before publication, and application on receipt. C++ xs and xs-rs carry ACLs in both directions, including no-op and ACL-only updates.",
+  "diagnosis": "The work was protocol and metadata conversion, not throughput: Linux system.posix_acl_access/default values are exported to validated records and imported back to canonical kernel values, mirroring src/acls.cpp and put_acls/get_acls. Under -A the only added steady-state cost is up to two lgetxattr reads per inode; no transfer timing regression was measured or targeted for this metadata step.",
+  "change": "Added rs/xs-rs/src/acls.rs with POSIX ACL read/write, record export/import, the C++ validation rules, and exact put_acls/get_acls codecs. Wired -A/--acls through cli, Options and HELLO advertisement; added ACL style refusals and ACL_CONFIG send/read in the C++ frame order; encoded ACLs after xattrs in DIR and DATA records; applied ACLs to files, FIFOs, specials and directories; and marked incomplete ACL metadata so existing destination files are preserved and the transfer exits 23.",
+  "expected_effect": "A C++ client can push ACLs to xs-rs and pull them from it, and an xs-rs client can do the same against xs-c++, byte for byte. Invalid, incomplete, ambiguous or unnegotiated ACL data is refused before any destination file is created or replaced.",
+  "risks": "Linux POSIX ACLs only: Darwin ACL_DARWIN/PF_ACL_UUID are explicitly refused, as on the C++ Linux build. ACL changes are not yet reflected in itemized output with an 'a' code, and --chmod ACL interaction is not implemented because xs-rs does not support --chmod.",
+  "tests": "All four gate commands pass with XS_BIN set: cargo test (31 unit + all integration tests, including 2 new rs/xs-rs/tests/acls.rs interop tests), host clippy -D warnings, cargo fmt --check, and aarch64 clippy -D warnings. The parent's tests/acls_wire_test.py also passes 5 tests with 1 Darwin-only skip when XSYNC_TEST_BINARY points at xs-rs.",
+  "cpp_lesson": "",
+  "cost_usd": 0.2,
+  "turns": 93,
+  "session": "ses_ea166f22dffeXvkftKOwDR9GlT",
+  "model": "opencode-go/deepseek-v4.1-flash"
+ },
+ "diff": [
+  {
+   "path": "rs/xs-rs/src/acls.rs",
+   "added": "565",
+   "deleted": "0"
+  },
+  {
+   "path": "rs/xs-rs/src/cli.rs",
+   "added": "8",
+   "deleted": "0"
+  },
+  {
+   "path": "rs/xs-rs/src/config.rs",
+   "added": "15",
+   "deleted": "0"
+  },
+  {
+   "path": "rs/xs-rs/src/main.rs",
+   "added": "35",
+   "deleted": "0"
+  },
+  {
+   "path": "rs/xs-rs/src/protocol.rs",
+   "added": "5",
+   "deleted": "0"
+  },
+  {
+   "path": "rs/xs-rs/src/scan.rs",
+   "added": "1",
+   "deleted": "0"
+  },
+  {
+   "path": "rs/xs-rs/src/transfer.rs",
+   "added": "34",
+   "deleted": "2"
+  },
+  {
+   "path": "rs/xs-rs/src/transfer/file.rs",
+   "added": "7",
+   "deleted": "0"
+  },
+  {
+   "path": "rs/xs-rs/src/transfer/receiver.rs",
+   "added": "39",
+   "deleted": "0"
+  },
+  {
+   "path": "rs/xs-rs/src/xattr.rs",
+   "added": "7",
+   "deleted": "4"
+  },
+  {
+   "path": "rs/xs-rs/tests/acls.rs",
+   "added": "201",
+   "deleted": "0"
+  }
+ ],
+ "pr": {
+  "number": 15,
+  "url": "https://github.com/s4njee/xsyncv4/pull/15",
+  "branch": "engineer/XR10211259-acls",
+  "commit": "8ebc61604170b0e7491e10cb60f08949c6218443",
+  "base": "bc4d1bbf3ebaedef9dc7e352f59418c9b9dca8c6"
+ },
+ "merged": {
+  "commit": "71872a77ee26922af3eb19089d87342ab2185980",
+  "utc": "2026-10-21T13:34:47Z"
  }
 }

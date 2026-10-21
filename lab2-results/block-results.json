@@ -1241,6 +1241,80 @@
    "model": "opencode/deepseek-v4.1-flash",
    "summarizedUtc": 1792588185.249,
    "driver": "a"
+  },
+  "PS-71872a77ee26-fresh": {
+   "run": "20261021T134609Z-PS-71872a77ee26-fresh",
+   "experiment": "PS-71872a77ee26-fresh",
+   "key": "congress-sample.fresh.a-aws.sender.warm|1|0",
+   "utc": 1792590535.864,
+   "cell": "congress-sample.fresh.a-aws.sender.warm",
+   "factors": {
+    "corpus": "congress-sample",
+    "scenario": "fresh",
+    "sender": "a",
+    "receiver": "aws",
+    "client": "sender",
+    "link": "a-aws",
+    "cache": "warm"
+   },
+   "block": 1,
+   "attempt": 0,
+   "control": "xs-cpp",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 3.403,
+     "gbps": 0.513,
+     "files_per_s": 7419,
+     "speed": 1
+    },
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 3.699,
+     "gbps": 0.472,
+     "files_per_s": 6825,
+     "speed": 0.92
+    },
+    {
+     "arm": "rsync",
+     "label": "rsync",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 3.189,
+     "gbps": 0.547,
+     "files_per_s": 7918,
+     "speed": 1.07
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "rsync",
+     "label": "rsync",
+     "speed": 1.12,
+     "blocks": 2
+    },
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "speed": 0.99,
+     "blocks": 2
+    }
+   ],
+   "question": "Is xs-rs at 71872a77ee26 (after port step acls) as fast as xs-c++, and than rsync?",
+   "summary": "In block 1, rsync was fastest at 1.07x the xs-c++ control (3.189 s vs 3.403 s), while xs-rs ran at 0.92x (3.699 s), 8% slower than control. Cumulatively in this cell, rsync is at 1.12x and xs-rs at 0.99x, each resting on only two blocks, so the evidence is still thin. This tentatively suggests xs-rs is near xs-c++ overall, but block 1 does not show it matching, and rsync\u2019s lead is not yet well established.",
+   "model": "opencode/deepseek-v4.1-flash",
+   "summarizedUtc": 1792590606.327,
+   "driver": "a"
   }
  }
 }

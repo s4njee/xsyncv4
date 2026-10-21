@@ -1,0 +1,33 @@
+# Written by the engineer: xs-rs at 71872a77ee26 (port_base after step acls merged) against
+# xs-c++ and rsync. Each port screen is queued once per commit of port_base, one spec per scenario.
+id = "PS-71872a77ee26-fresh"
+kind = "screening"
+hypothesis = "xs-rs at 71872a77ee26 differs from xs-c++ (-a -j4) by more than 5% in time-to-durable on congress-sample, fresh, a>aws."
+primary = "durable_s"
+delta = 0.05
+blocks = 3
+control = "xs-cpp"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.xs-cpp]
+tool = "xs"
+rev = "fe012667764a"
+flags = ["-a", "-j4"]
+
+[arms.xs-rs]
+tool = "xs"
+rev = "71872a77ee26922af3eb19089d87342ab2185980-rs"
+flags = ["-a", "-j4"]
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[matrix]
+link = "a-aws"
+corpus = ["congress-sample"]
+scenario = ["fresh"]
+direction = ["a>aws"]
+client = ["sender"]
+cache = ["warm"]

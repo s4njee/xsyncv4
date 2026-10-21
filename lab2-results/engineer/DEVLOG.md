@@ -195,3 +195,13 @@ Written by benchmarks/lab/engineer.py whenever a case moves: every case that has
 **The change.** New rs/xs-rs/src/xattr.rs implements xattr reading/writing via llistxattr/lgetxattr/lsetxattr/lremovexattr, protocol list encoding/decoding, stream sender/receiver, namespace mapping and filters. Wired -X/--xattrs/--no-xattrs and -XX into CLI, HELLO feature advertisement and validation, XATTR_CONFIG handling, DIR entry and DATA attribute encoding/decoding, and receiver application for files, directories, links and special files. Added xattr filter predicates to FilterList. (pull request #14)
 
 **Since.** Measured by the lab (PS-b47b9014adfd-fresh, PS-b47b9014adfd-update-10pct, time to durable): xs-rs 0.988x xs-c++ [0.892, 1.093], too few blocks, on congress-sample fresh (3 blocks); rsync 0.897x xs-c++ [0.837, 0.961], too few blocks, on congress-sample fresh (3 blocks); xs-rs 1.193x xs-c++ [1.023, 1.392], too few blocks, on congress-sample update-10pct (2 blocks); rsync 1.110x xs-c++ [0.724, 1.703], too few blocks, on congress-sample update-10pct (2 blocks). API cost $0.21. For xs-c++: Nothing to change: xs-c++'s put_xattrs/get_xattrs, namespace rules and stream framing are correct and are followed byte for byte; the new code lives entirely under rs/.
+
+### 2026-10-21 13:34 · xs-rs, port step `acls` (`71872a77ee26`, merged)
+
+**Commit.** https://github.com/s4njee/xsyncv4/commit/71872a77ee26922af3eb19089d87342ab2185980
+
+**The data.** POSIX ACLs (PF_ACL_POSIX). Diagnosis: The work was protocol and metadata conversion, not throughput: Linux system.posix_acl_access/default values are exported to validated records and imported back to canonical kernel values, mirroring src/acls.cpp and put_acls/get_acls. Under -A the only added steady-state cost is up to two lgetxattr reads per inode; no transfer timing regression was measured or targeted for this metadata step.
+
+**The change.** Added rs/xs-rs/src/acls.rs with POSIX ACL read/write, record export/import, the C++ validation rules, and exact put_acls/get_acls codecs. Wired -A/--acls through cli, Options and HELLO advertisement; added ACL style refusals and ACL_CONFIG send/read in the C++ frame order; encoded ACLs after xattrs in DIR and DATA records; applied ACLs to files, FIFOs, specials and directories; and marked incomplete ACL metadata so existing destination files are preserved and the transfer exits 23. (pull request #15)
+
+**Since.** Measured by the lab (PS-71872a77ee26-fresh, PS-71872a77ee26-update-10pct, time to durable): xs-rs 1.010x xs-c++ [0.838, 1.217], too few blocks, on congress-sample fresh (3 blocks); rsync 0.907x xs-c++ [0.787, 1.045], too few blocks, on congress-sample fresh (3 blocks). API cost $0.20.
