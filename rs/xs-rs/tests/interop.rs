@@ -48,7 +48,10 @@ fn make_tree(root: &Path) {
     fs::write(root.join("a/huge.bin"), (0u8..=255).cycle().take(2_500_000).collect::<Vec<_>>()).unwrap();
     fs::write(root.join("empty"), b"").unwrap();
     fs::write(root.join("with space.txt"), b"space").unwrap();
-    fs::write(root.join(OsStr::from_bytes(b"non-utf8-\xff")), b"raw name").unwrap();
+    // APFS (macOS) refuses a name that is not UTF-8 (EILSEQ); Linux file systems take any bytes.
+    if cfg!(target_os = "linux") {
+        fs::write(root.join(OsStr::from_bytes(b"non-utf8-\xff")), b"raw name").unwrap();
+    }
     fs::set_permissions(root.join("a/b/c/small.txt"), fs::Permissions::from_mode(0o640)).unwrap();
     std::os::unix::fs::symlink("a/b/c/small.txt", root.join("link")).unwrap();
     std::os::unix::fs::symlink("missing-target", root.join("dangling")).unwrap();

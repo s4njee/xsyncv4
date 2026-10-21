@@ -1,6 +1,8 @@
 //! Extended attributes against the parent's C++ xs. Run with
 //! `XS_BIN=.../parent/build/xs cargo test --manifest-path rs/Cargo.toml`; every
 //! test returns early when XS_BIN is unset.
+// Linux only: user.* xattr names and POSIX ACLs kept in xattrs; macOS has neither.
+#![cfg(target_os = "linux")]
 
 use std::collections::BTreeMap;
 use std::ffi::CString;

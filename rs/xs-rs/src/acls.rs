@@ -5,12 +5,12 @@
 
 use std::ffi::CString;
 use std::io;
-use std::os::raw::{c_char, c_int, c_void};
 use std::os::unix::ffi::OsStrExt;
 use std::path::Path;
 
 use xs_wire::{Decoder, Encoder};
 
+use crate::xattr::{lgetxattr, lremovexattr, lsetxattr};
 use crate::ffi;
 use crate::protocol::{self, feature, Options, T_BLK, T_DIR, T_LNK, T_REG};
 
@@ -21,15 +21,18 @@ pub const UNDEFINED: u32 = u32::MAX;
 
 const ACCESS: &[u8] = b"system.posix_acl_access";
 const DEFAULT: &[u8] = b"system.posix_acl_default";
+#[cfg(target_os = "linux")]
 const ENODATA: i32 = 61;
+#[cfg(target_os = "linux")]
 const ENOTSUP: i32 = 95;
+// macOS has no POSIX ACLs in xattrs (xs-c++ sends Darwin ACLs there, PF_ACL_DARWIN): reading one finds nothing (ENOATTR).
+#[cfg(target_os = "macos")]
+const ENODATA: i32 = 93;
+#[cfg(target_os = "macos")]
+const ENOTSUP: i32 = 45;
 const ERANGE: i32 = 34;
 
-extern "C" {
-    fn lgetxattr(path: *const c_char, name: *const c_char, value: *mut c_void, size: usize) -> isize;
-    fn lsetxattr(path: *const c_char, name: *const c_char, value: *const c_void, size: usize, flags: c_int) -> c_int;
-    fn lremovexattr(path: *const c_char, name: *const c_char) -> c_int;
-}
+
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct AclRecord {
