@@ -21,6 +21,8 @@ pub enum Transport {
 }
 
 const DROP_BYTES: u64 = 16 << 20;
+/// The writer rate (bytes per second of writing) above which automatic compression stops.
+const AUTO_COMPRESS_BELOW: f64 = 256.0 * 1024.0 * 1024.0;
 const WINDOW_BYTES: u64 = 4 << 20;
 
 #[derive(Debug, Default)]
@@ -116,6 +118,19 @@ impl CompressionLink {
             3
         };
         chosen.min(self.cap())
+    }
+
+    /// Without `-z`, whether compressing still pays: from the start, and then while the
+    /// writer moves less than `AUTO_COMPRESS_BELOW`. Over an internet link the writer waits
+    /// on ssh, so its rate is the link's, and fewer bytes on the wire are worth level 1-3
+    /// CPU; a local pipe or a 10 GbE link is better served by the raw bytes.
+    pub fn auto_worthwhile(&self) -> bool {
+        let count = self.bytes.load(Ordering::Relaxed);
+        let elapsed = self.nanoseconds.load(Ordering::Relaxed);
+        if count < 4 << 20 || elapsed < 1_000_000 {
+            return true;
+        }
+        (count as f64 * 1e9 / elapsed as f64) < AUTO_COMPRESS_BELOW
     }
 
     /// Record that a worker compressed `raw` bytes at an automatic level.

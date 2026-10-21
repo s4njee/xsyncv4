@@ -214,6 +214,9 @@ fn server<R: Read, W: Write + Send + 'static>(
     }
     let (version, mut hello) = read_hello(&frame.payload)?;
     hello.options.ownership = server_options.ownership.clone();
+    // Automatic compression is a pushing client's choice: a server compresses only when the
+    // client asks with -z, since an explicit "no compression" on its side never reaches the wire.
+    hello.options.auto_compress = false;
     if version != VERSION {
         let text = format!("protocol version mismatch: client {version}, server {VERSION} (supports 4 and 3)");
         write_message(&mut writer, msg_kind::FATAL, 2, &text)?;
@@ -735,6 +738,8 @@ fn main() {
              -a, --archive         archive mode\n\
              -j, --jobs=N          worker threads (default 4; -jN splits one large file)\n\
              -z, --compress        zstd frames\n\
+                 --no-auto-compress  pushing without -z, never compress (by default a pushing\n\
+                                   client compresses while the link is slower than compression)\n\
              -e COMMAND            remote shell (or $XSYNC_RSH, $RSYNC_RSH)\n\
                  --rsync-path=P    remote program\n\
                  --server          speak the server side on stdin/stdout"

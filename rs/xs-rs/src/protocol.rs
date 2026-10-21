@@ -424,6 +424,10 @@ pub struct Options {
     pub am_server: bool,
     pub pushing: bool,
     pub local_peer: bool,
+    /// Without `-z`, a pushing client still compresses what it sends while the link is slower
+    /// than compression (`--no-auto-compress` turns it off). Local: never on the wire, and
+    /// never a server's choice.
+    pub auto_compress: bool,
 }
 
 impl Default for Options {
@@ -472,6 +476,7 @@ impl Default for Options {
             am_server: false,
             pushing: false,
             local_peer: false,
+            auto_compress: true,
         }
     }
 }
