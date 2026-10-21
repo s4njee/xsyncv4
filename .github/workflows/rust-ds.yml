@@ -18,13 +18,19 @@ on:
     branches: [rust-ds]
     # The labs publish results here (lab2-results/ hourly, main-lab-results/ from the main lab): those commits change no code.
     paths-ignore: ['lab2-results/**', 'main-lab-results/**']
+  # The merge job dispatches this for the commit it merged: GitHub starts no push workflow for a commit
+  # pushed with the workflow's own token, so a merged step would otherwise get no binaries.
   workflow_dispatch:
+    inputs:
+      commit:
+        description: the commit to build (the branch's tip if empty)
+        required: false
 
 permissions:
   contents: read
 
 concurrency:
-  group: rust-ds-${{ github.event.pull_request.number || github.sha }}
+  group: rust-ds-${{ github.event.pull_request.number || inputs.commit || github.sha }}
   cancel-in-progress: true
 
 jobs:
@@ -70,6 +76,7 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
+      actions: write
     steps:
       - name: Approve and merge the engineer's step
         env:
@@ -79,6 +86,8 @@ jobs:
           gh pr review "$PR" --repo "$GITHUB_REPOSITORY" --approve \
             --body "The lab's gate accepted this step, and xs-rs passes its tests against the C++ xs on amd64 and arm64."
           gh pr merge "$PR" --repo "$GITHUB_REPOSITORY" --squash --delete-branch
+          merged=$(gh pr view "$PR" --repo "$GITHUB_REPOSITORY" --json mergeCommit --jq .mergeCommit.oid)
+          gh workflow run rust-ds.yml --repo "$GITHUB_REPOSITORY" --ref rust-ds -f commit="$merged"
 
   binaries:
     if: github.event_name != 'pull_request'
@@ -95,6 +104,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          ref: ${{ inputs.commit || github.sha }}
           persist-credentials: false
       # As the lab's Dockerfile did: xs-rs's build.rs links libzstd and libxxhash by name, so with only their
       # static archives present the binary needs nothing on a host beyond glibc (this runner's 2.39, or newer).
@@ -105,10 +115,12 @@ jobs:
           sudo rm -f /usr/lib/*-linux-gnu/libzstd.so /usr/lib/*-linux-gnu/libxxhash.so
           command -v cargo || { curl -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal; echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"; }
       - name: Build xs-rs
+        env:
+          COMMIT: ${{ inputs.commit || github.sha }}
         run: |
           cargo build --release --locked --manifest-path rs/Cargo.toml -p xs-rs
           if ldd rs/target/release/xs-rs | grep -E 'zstd|xxhash'; then echo 'xs-rs links zstd or xxhash dynamically'; exit 1; fi
-          name="xs-rs-${GITHUB_SHA::12}-linux-${{ matrix.arch }}"
+          name="xs-rs-${COMMIT::12}-linux-${{ matrix.arch }}"
           cp rs/target/release/xs-rs "$name"
           sha256sum "$name" > "$name.sha256"
           echo "NAME=$name" >> "$GITHUB_ENV"
