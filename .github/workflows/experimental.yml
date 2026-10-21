@@ -15,13 +15,19 @@ on:
     branches: [experimental]
   push:
     branches: [experimental]
+  # The merge job dispatches this for the commit it merged: GitHub starts no push workflow for a commit
+  # pushed with the workflow's own token, so a merged step would otherwise get no binaries.
   workflow_dispatch:
+    inputs:
+      commit:
+        description: the commit to build (the branch's tip if empty)
+        required: false
 
 permissions:
   contents: read
 
 concurrency:
-  group: experimental-${{ github.event.pull_request.number || github.sha }}
+  group: experimental-${{ github.event.pull_request.number || inputs.commit || github.sha }}
   cancel-in-progress: true
 
 jobs:
@@ -127,6 +133,7 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
+      actions: write
     steps:
       - name: Approve and merge the engineer's change
         env:
@@ -136,6 +143,8 @@ jobs:
           gh pr review "$PR" --repo "$GITHUB_REPOSITORY" --approve \
             --body "The lab's gate accepted this change, and it builds and passes the tests on Linux and macOS."
           gh pr merge "$PR" --repo "$GITHUB_REPOSITORY" --squash --delete-branch
+          merged=$(gh pr view "$PR" --repo "$GITHUB_REPOSITORY" --json mergeCommit --jq .mergeCommit.oid)
+          gh workflow run experimental.yml --repo "$GITHUB_REPOSITORY" --ref experimental -f commit="$merged"
 
   binaries:
     if: github.event_name != 'pull_request'
@@ -152,10 +161,13 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          ref: ${{ inputs.commit || github.sha }}
           persist-credentials: false
       - name: Build the static release (tools/release.Dockerfile, as the lab builds it)
+        env:
+          COMMIT: ${{ inputs.commit || github.sha }}
         run: |
-          short="${GITHUB_SHA::12}"
+          short="${COMMIT::12}"
           docker build --build-arg "XSYNC_GIT_HASH=$short" -t xs-release -f tools/release.Dockerfile .
           name="xs-cpp-$short-linux-${{ matrix.arch }}"
           container=$(docker create xs-release /xs)
