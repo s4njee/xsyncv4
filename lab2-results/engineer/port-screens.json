@@ -220,5 +220,22 @@
   "step": "acls",
   "failed": "stage.py build of xs-rs at e9a497d2aa2e failed; see port-screen-e9a497d2aa2e.log",
   "utc": "2026-10-21T16:16:33Z"
+ },
+ "61d1dd83a530": {
+  "commit": "61d1dd83a53091460ffb50fb08f0a6622fc51fcf",
+  "step": "acls",
+  "spec": "PS-61d1dd83a530-fresh",
+  "specs": [
+   "PS-61d1dd83a530-fresh",
+   "PS-61d1dd83a530-update-10pct"
+  ],
+  "tree": "PORT-61d1dd83a530",
+  "congress": null,
+  "utc": "2026-10-21T19:54:00Z",
+  "conductor_ok": true,
+  "retired": [
+   "20261021T161558Z-PS-aa7aee150987-update-10pct",
+   "20261021T161555Z-PS-aa7aee150987-fresh"
+  ]
  }
 }

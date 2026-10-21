@@ -204,4 +204,12 @@ Written by benchmarks/lab/engineer.py whenever a case moves: every case that has
 
 **The change.** Added rs/xs-rs/src/acls.rs with POSIX ACL read/write, record export/import, the C++ validation rules, and exact put_acls/get_acls codecs. Wired -A/--acls through cli, Options and HELLO advertisement; added ACL style refusals and ACL_CONFIG send/read in the C++ frame order; encoded ACLs after xattrs in DIR and DATA records; applied ACLs to files, FIFOs, specials and directories; and marked incomplete ACL metadata so existing destination files are preserved and the transfer exits 23. (pull request #15)
 
-**Since.** The lab's screen of xs-rs after this step failed: stage.py build of xs-rs at e9a497d2aa2e failed; see port-screen-e9a497d2aa2e.log API cost $0.20.
+**Since.** The lab's screen of xs-rs after this step (PS-61d1dd83a530-fresh, PS-61d1dd83a530-update-10pct) is queued against xs-c++ and rsync. API cost $0.20.
+
+### 2026-10-21 19:44 · xs-rs maintenance: simplifications and the changelog (`61d1dd83a530`, merged)
+
+**The data.** Maintenance: simplify xs-rs, and log what merged in README.md. Diagnosis: The first gate measured 5,147 changed lines because splitting both `transfer.rs` and `transfer/receiver.rs` moved roughly 2,500 lines in each direction. I kept the receiver split only: `transfer/receiver.rs` went from 1,710 to 546 lines, with `receiver/dir.rs` (632) and `receiver/data.rs` (593). Final diff is 1,255 insertions and 1,182 deletions, total 2,437, under the 3,000-line ceiling.
+
+**The change.** Moved directory decoding/comparison/generation into `transfer/receiver/dir.rs` and DATA decoding/assembly/publication into `transfer/receiver/data.rs`, leaving `receiver.rs` as coordination and worker scheduling. Removed the unused `FileRequests.dirs` field and its dead-code suppression. README gained only the dated changelog section.
+
+**Since.** Merged; the lab has not screened xs-rs since. API cost $0.15.

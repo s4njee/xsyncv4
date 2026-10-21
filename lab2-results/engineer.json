@@ -402,15 +402,15 @@
    "kind": "maintenance",
    "step": "maintain-20261021",
    "question": "Maintenance: simplify xs-rs, and log what merged in README.md",
-   "state": "prepared",
+   "state": "review",
    "opened": "2026-10-21T19:13:41Z",
-   "ended": "2026-10-21T19:16:58Z",
-   "last": "parent built; xs-rs checks passing on it: test, clippy, fmt, arm64",
-   "outcome": null,
-   "summary": null,
-   "cost_usd": null,
+   "ended": "2026-10-21T19:44:10Z",
+   "last": "d4731e0b4fc7 pushed to rust-ds: 4 file(s), 2437 lines; xs-rs's checks pass",
+   "outcome": "patched",
+   "summary": "Kept the cleanup focused on the receiver, which was the largest mixed-responsibility file, and removed its unused `FileRequests.dirs` field. The first attempt split the sender too and measured 5,147 changed lines, so I reverted those extra splits; the final patch is 2,437 changed lines outside tests. All four gate commands pass.",
+   "cost_usd": 0.15,
    "pull_request": null,
-   "merged": null
+   "merged": "61d1dd83a53091460ffb50fb08f0a6622fc51fcf"
   }
  ]
 }
