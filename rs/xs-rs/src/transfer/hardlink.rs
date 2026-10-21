@@ -12,7 +12,6 @@ use xs_wire::OutputEvent;
 
 use crate::output::Output;
 use crate::protocol::{feature, Attrs, EntryMeta, HardlinkKey, Options, T_BLK, T_CHR, T_LNK, T_REG};
-use crate::scan;
 
 use super::{report_event, FrameOut};
 
@@ -88,8 +87,8 @@ impl HardLinks {
     }
 }
 
-pub(super) fn hardlink_member(entry: &EntryMeta, rel: &[u8], path: &Path, before: Option<&fs::Metadata>) -> HLinkMember {
-    let existed = before.map(|m| scan::kind_of(m) == entry.kind).unwrap_or(false);
+pub(super) fn hardlink_member(entry: &EntryMeta, rel: &[u8], path: &Path, before: Option<&super::file::Stat>) -> HLinkMember {
+    let existed = before.map(|m| m.kind() == entry.kind).unwrap_or(false);
     HLinkMember {
         rel: rel.to_vec(),
         path: path.to_path_buf(),

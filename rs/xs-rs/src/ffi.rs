@@ -566,3 +566,226 @@ mod tests {
         assert!(minimum <= -5 && maximum >= 22);
     }
 }
+
+/// One entry of a macOS bulk directory listing (`list_dir_fd`, fs.cpp). `complete` is false
+/// when an attribute the receiver needs did not come back; such an entry is stat'ed instead.
+#[cfg(target_os = "macos")]
+pub struct BulkEntry {
+    pub name: Vec<u8>,
+    /// `st_mode`: the type bits from the object type, and the permission bits.
+    pub mode: u32,
+    pub size: u64,
+    pub mtime: i64,
+    pub mtime_nsec: i64,
+    pub uid: u32,
+    pub gid: u32,
+    pub dev: u64,
+    pub ino: u64,
+    pub ctime: i64,
+    pub ctime_nsec: i64,
+    pub atime: i64,
+    /// Files only: directories do not report a link count.
+    pub nlink: Option<u64>,
+    pub complete: bool,
+}
+
+#[cfg(target_os = "macos")]
+mod bulk {
+    use super::*;
+
+    #[repr(C)]
+    struct AttrList {
+        bitmapcount: u16,
+        reserved: u16,
+        commonattr: u32,
+        volattr: u32,
+        dirattr: u32,
+        fileattr: u32,
+        forkattr: u32,
+    }
+
+    extern "C" {
+        fn getattrlistbulk(dirfd: c_int, attrs: *mut AttrList, buffer: *mut c_void, size: usize, options: u64) -> c_int;
+    }
+
+    // sys/attr.h; vtype from sys/vnode.h.
+    const ATTR_BIT_MAP_COUNT: u16 = 5;
+    const ATTR_CMN_NAME: u32 = 0x0000_0001;
+    const ATTR_CMN_DEVID: u32 = 0x0000_0002;
+    const ATTR_CMN_OBJTYPE: u32 = 0x0000_0008;
+    const ATTR_CMN_MODTIME: u32 = 0x0000_0400;
+    const ATTR_CMN_CHGTIME: u32 = 0x0000_0800;
+    const ATTR_CMN_ACCTIME: u32 = 0x0000_1000;
+    const ATTR_CMN_OWNERID: u32 = 0x0000_8000;
+    const ATTR_CMN_GRPID: u32 = 0x0001_0000;
+    const ATTR_CMN_ACCESSMASK: u32 = 0x0002_0000;
+    const ATTR_CMN_FILEID: u32 = 0x0200_0000;
+    const ATTR_CMN_ERROR: u32 = 0x2000_0000;
+    const ATTR_CMN_RETURNED_ATTRS: u32 = 0x8000_0000;
+    const ATTR_FILE_LINKCOUNT: u32 = 0x0000_0001;
+    const ATTR_FILE_DATALENGTH: u32 = 0x0000_0200;
+    const VREG: u32 = 1;
+    const VDIR: u32 = 2;
+    const VBLK: u32 = 3;
+    const VCHR: u32 = 4;
+    const VLNK: u32 = 5;
+    const VSOCK: u32 = 6;
+    const VFIFO: u32 = 7;
+    const EINTR: i32 = 4;
+    const EINVAL: i32 = 22;
+    const ENOTSUP: i32 = 45;
+
+    fn u32_at(buffer: &[u8], at: usize) -> u32 {
+        u32::from_ne_bytes(buffer[at..at + 4].try_into().unwrap())
+    }
+
+    fn u64_at(buffer: &[u8], at: usize) -> u64 {
+        u64::from_ne_bytes(buffer[at..at + 8].try_into().unwrap())
+    }
+
+    /// List `dir` with getattrlistbulk into a 128 KiB buffer, several hundred entries a call.
+    /// `Ok(false)`: the file system does not support it, and nothing was listed.
+    pub fn list(dir: &std::fs::File, out: &mut Vec<BulkEntry>) -> io::Result<bool> {
+        use std::os::unix::io::AsRawFd;
+        thread_local! {
+            static BUFFER: std::cell::RefCell<Vec<u8>> = std::cell::RefCell::new(vec![0u8; 128 * 1024]);
+        }
+        let want = ATTR_CMN_OBJTYPE | ATTR_CMN_MODTIME | ATTR_CMN_OWNERID | ATTR_CMN_GRPID | ATTR_CMN_ACCESSMASK | ATTR_CMN_DEVID | ATTR_CMN_FILEID;
+        let mut attrs = AttrList {
+            bitmapcount: ATTR_BIT_MAP_COUNT,
+            reserved: 0,
+            commonattr: ATTR_CMN_RETURNED_ATTRS | ATTR_CMN_ERROR | ATTR_CMN_NAME | want | ATTR_CMN_CHGTIME | ATTR_CMN_ACCTIME,
+            volattr: 0,
+            dirattr: 0,
+            fileattr: ATTR_FILE_LINKCOUNT | ATTR_FILE_DATALENGTH,
+            forkattr: 0,
+        };
+        let first = out.len();
+        BUFFER.with(|buffer| {
+            let mut buffer = buffer.borrow_mut();
+            loop {
+                // SAFETY: the descriptor is live, and the buffer is valid for its whole length.
+                let count = unsafe { getattrlistbulk(dir.as_raw_fd(), &mut attrs, buffer.as_mut_ptr().cast(), buffer.len(), 0) };
+                if count < 0 {
+                    let error = io::Error::last_os_error();
+                    match error.raw_os_error() {
+                        Some(EINTR) => continue,
+                        Some(ENOTSUP) | Some(EINVAL) if out.len() == first => return Ok(false),
+                        _ => return Err(error),
+                    }
+                }
+                if count == 0 {
+                    return Ok(true);
+                }
+                let mut at = 0usize;
+                for _ in 0..count {
+                    let length = u32_at(&buffer, at) as usize;
+                    let mut field = at + 4;
+                    let common = u32_at(&buffer, field);
+                    let file = u32_at(&buffer, field + 12);
+                    field += 20;
+                    let mut failed = 0;
+                    if common & ATTR_CMN_ERROR != 0 {
+                        failed = u32_at(&buffer, field);
+                        field += 4;
+                    }
+                    let mut name: Option<Vec<u8>> = None;
+                    if common & ATTR_CMN_NAME != 0 {
+                        let offset = u32_at(&buffer, field) as i32;
+                        let size = u32_at(&buffer, field + 4) as usize;
+                        let start = (field as isize + offset as isize) as usize;
+                        name = Some(buffer[start..start + size.saturating_sub(1)].to_vec());
+                        field += 8;
+                    }
+                    let mut entry = BulkEntry {
+                        name: Vec::new(),
+                        mode: 0,
+                        size: 0,
+                        mtime: 0,
+                        mtime_nsec: 0,
+                        uid: 0,
+                        gid: 0,
+                        dev: 0,
+                        ino: 0,
+                        ctime: 0,
+                        ctime_nsec: 0,
+                        atime: 0,
+                        nlink: None,
+                        complete: false,
+                    };
+                    let mut kind = 0;
+                    if common & ATTR_CMN_DEVID != 0 {
+                        entry.dev = u64::from(u32_at(&buffer, field));
+                        field += 4;
+                    }
+                    if common & ATTR_CMN_OBJTYPE != 0 {
+                        kind = u32_at(&buffer, field);
+                        field += 4;
+                    }
+                    if common & ATTR_CMN_MODTIME != 0 {
+                        entry.mtime = u64_at(&buffer, field) as i64;
+                        entry.mtime_nsec = u64_at(&buffer, field + 8) as i64;
+                        field += 16;
+                    }
+                    if common & ATTR_CMN_CHGTIME != 0 {
+                        entry.ctime = u64_at(&buffer, field) as i64;
+                        entry.ctime_nsec = u64_at(&buffer, field + 8) as i64;
+                        field += 16;
+                    }
+                    if common & ATTR_CMN_ACCTIME != 0 {
+                        entry.atime = u64_at(&buffer, field) as i64;
+                        field += 16;
+                    }
+                    if common & ATTR_CMN_OWNERID != 0 {
+                        entry.uid = u32_at(&buffer, field);
+                        field += 4;
+                    }
+                    if common & ATTR_CMN_GRPID != 0 {
+                        entry.gid = u32_at(&buffer, field);
+                        field += 4;
+                    }
+                    if common & ATTR_CMN_ACCESSMASK != 0 {
+                        entry.mode = u32_at(&buffer, field) & 0o7777;
+                        field += 4;
+                    }
+                    if common & ATTR_CMN_FILEID != 0 {
+                        entry.ino = u64_at(&buffer, field);
+                        field += 8;
+                    }
+                    if file & ATTR_FILE_LINKCOUNT != 0 {
+                        entry.nlink = Some(u64::from(u32_at(&buffer, field)));
+                        field += 4;
+                    }
+                    if file & ATTR_FILE_DATALENGTH != 0 {
+                        entry.size = u64_at(&buffer, field);
+                    }
+                    at += length;
+                    let Some(name) = name else { continue };
+                    let type_bits = match kind {
+                        VREG => 0o100000,
+                        VDIR => 0o040000,
+                        VLNK => 0o120000,
+                        VFIFO => 0o010000,
+                        VSOCK => 0o140000,
+                        VCHR => 0o020000,
+                        VBLK => 0o060000,
+                        _ => 0,
+                    };
+                    entry.mode |= type_bits;
+                    if kind != VREG {
+                        entry.size = 0;
+                    }
+                    entry.complete = failed == 0
+                        && common & want == want
+                        && type_bits != 0
+                        && (kind != VREG || file & ATTR_FILE_DATALENGTH != 0);
+                    entry.name = name;
+                    out.push(entry);
+                }
+            }
+        })
+    }
+}
+
+#[cfg(target_os = "macos")]
+pub use bulk::list as list_bulk;

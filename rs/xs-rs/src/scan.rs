@@ -115,7 +115,80 @@ fn entry_from(path: &Path, name: Vec<u8>, m: &fs::Metadata) -> io::Result<Source
     Ok(SourceEntry { meta, path: path.to_path_buf() })
 }
 
+/// macOS: list with getattrlistbulk, as `list_dir_fd` does, and take a regular file straight
+/// from it; anything else, or a file it could not describe fully, is stat'ed as before. None
+/// when the file system does not support it.
+#[cfg(target_os = "macos")]
+fn scan_bulk(path: &Path, opts: &Options) -> Option<Vec<SourceEntry>> {
+    if opts.copy_links {
+        return None;
+    }
+    let dir = fs::File::open(path).ok()?;
+    let mut listed = Vec::new();
+    if !crate::ffi::list_bulk(&dir, &mut listed).ok()? {
+        return None;
+    }
+    let mut entries = Vec::with_capacity(listed.len());
+    for item in listed {
+        if item.name.is_empty() || item.name == b"." || item.name == b".." {
+            continue;
+        }
+        let child = path.join(OsString::from_vec(item.name.clone()));
+        let entry = match item.nlink {
+            Some(nlink) if item.complete && item.mode & 0o170000 == 0o100000 => {
+                let attrs = Attrs {
+                    mode: item.mode & 0o7777,
+                    uid: item.uid,
+                    gid: item.gid,
+                    mtime: item.mtime,
+                    mtime_ns: item.mtime_nsec.clamp(0, 999_999_999) as u32,
+                    atime: item.atime,
+                    size: item.size as i64,
+                    hdev: item.dev,
+                    ino: item.ino,
+                    nlink,
+                    ctime: item.ctime,
+                    ctime_ns: item.ctime_nsec.clamp(0, 999_999_999) as u32,
+                    xattrs: crate::xattr::XattrSet::default(),
+                    acls: crate::acls::AclSet::default(),
+                };
+                let source = child.as_os_str().as_bytes().to_vec();
+                let meta = EntryMeta {
+                    name: item.name,
+                    kind: T_REG,
+                    attrs,
+                    size: item.size as i64,
+                    link: Vec::new(),
+                    rdev: 0,
+                    output_source: source.clone(),
+                    filter_source: source,
+                    selected: false,
+                };
+                SourceEntry { meta, path: child }
+            }
+            _ => match entry_for(&child, item.name, opts) {
+                Ok(entry) => entry,
+                Err(_) => continue,
+            },
+        };
+        let keep = match entry.meta.kind {
+            T_LNK => opts.links || opts.copy_links,
+            T_FIFO | T_SOCK | T_CHR | T_BLK => opts.specials || opts.devices,
+            _ => true,
+        };
+        if keep {
+            entries.push(entry);
+        }
+    }
+    entries.sort_by(|a, b| a.meta.name.cmp(&b.meta.name));
+    Some(entries)
+}
+
 pub fn scan_dir(path: &Path, opts: &Options) -> io::Result<Vec<SourceEntry>> {
+    #[cfg(target_os = "macos")]
+    if let Some(entries) = scan_bulk(path, opts) {
+        return Ok(entries);
+    }
     let mut entries = Vec::new();
     for item in fs::read_dir(path)? {
         let item = match item {
