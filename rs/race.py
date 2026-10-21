@@ -22,6 +22,9 @@ import time
 REPO = pathlib.Path(__file__).resolve().parent.parent
 FAKESSH = REPO / 'tests' / 'fakessh.sh'
 TOOLS = {'xs-c++': REPO / 'build' / 'xs', 'xs-rs': REPO / 'rs' / 'target' / 'release' / 'xs-rs'}
+# The main lab measures over this machine's cable too: while this file exists (and is under 12 hours old) its
+# runs wait before each block, so a race does not skew them, nor they the race.
+FOREGROUND = pathlib.Path('/Volumes/xsbench/lab/runs/.foreground-xs-rs-dev')
 
 
 def copy(tool, source, dest, jobs):
@@ -61,6 +64,21 @@ def main():
         subprocess.run(['cp', '-Rp', f'{source}/', str(work)], check=True)
         source = work
     times = {(t, s): [] for t in TOOLS for s in args.scenario}
+    held = FOREGROUND.parent.is_dir() and not FOREGROUND.exists()
+    if held:
+        FOREGROUND.touch()
+    try:
+        race(args, source, times)
+    finally:
+        if held:
+            FOREGROUND.unlink(missing_ok=True)
+    print(f'\n{source.name}, {args.rounds} rounds, -a -j{args.jobs}, median seconds')
+    for scenario in args.scenario:
+        cpp, rs = (statistics.median(times[(t, scenario)]) for t in TOOLS)
+        print(f'{scenario:6}  xs-c++ {cpp:8.2f}   xs-rs {rs:8.2f}   xs-rs/xs-c++ {rs / cpp:5.2f}')
+
+
+def race(args, source, times):
     for round_ in range(args.rounds):
         order = list(TOOLS) if round_ % 2 == 0 else list(reversed(TOOLS))
         for tool in order:
@@ -75,10 +93,8 @@ def main():
                 times[(tool, scenario)].append(took)
                 print(f'round {round_ + 1} {tool:6} {scenario:6} {took:8.2f} s', flush=True)
             shutil.rmtree(dest, ignore_errors=True)
-    print(f'\n{source.name}, {args.rounds} rounds, -a -j{args.jobs}, median seconds')
-    for scenario in args.scenario:
-        cpp, rs = (statistics.median(times[(t, scenario)]) for t in TOOLS)
-        print(f'{scenario:6}  xs-c++ {cpp:8.2f}   xs-rs {rs:8.2f}   xs-rs/xs-c++ {rs / cpp:5.2f}')
+            if FOREGROUND.exists():
+                FOREGROUND.touch()  # a long race keeps the main lab waiting
 
 
 if __name__ == '__main__':
