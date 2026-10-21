@@ -94,12 +94,17 @@ pub fn entry_for(path: &Path, name: Vec<u8>, opts: &Options) -> io::Result<Sourc
 
 pub fn entry_for_followed(path: &Path, name: Vec<u8>, opts: &Options, follow: bool) -> io::Result<SourceEntry> {
     let m = if follow || opts.copy_links { fs::metadata(path)? } else { fs::symlink_metadata(path)? };
-    let kind = kind_of(&m);
+    entry_from(path, name, &m)
+}
+
+/// An entry from its metadata, already looked up; only a symlink's target is read here.
+fn entry_from(path: &Path, name: Vec<u8>, m: &fs::Metadata) -> io::Result<SourceEntry> {
+    let kind = kind_of(m);
     let link = if kind == T_LNK { fs::read_link(path)?.into_os_string().into_vec() } else { Vec::new() };
     let meta = EntryMeta {
         name,
         kind,
-        attrs: attrs_from(&m),
+        attrs: attrs_from(m),
         size: m.len() as i64,
         link,
         rdev: if kind == T_CHR || kind == T_BLK { m.rdev() as u32 } else { 0 },
@@ -122,7 +127,9 @@ pub fn scan_dir(path: &Path, opts: &Options) -> io::Result<Vec<SourceEntry>> {
             continue;
         }
         let child = path.join(item.file_name());
-        let entry = match entry_for(&child, name, opts) {
+        // DirEntry::metadata does not follow a symlink and, on Linux, is a statx relative to
+        // the directory's fd, as linux_scan.cpp does, rather than a walk of the whole path.
+        let entry = match if opts.copy_links { entry_for(&child, name, opts) } else { item.metadata().and_then(|m| entry_from(&child, name, &m)) } {
             Ok(entry) => entry,
             Err(_) => continue,
         };
