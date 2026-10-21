@@ -923,7 +923,7 @@ fn process_delta_request(
 
 #[allow(clippy::too_many_arguments)]
 fn process_data(
-    payload: &[u8],
+    payload: Vec<u8>,
     opts: &Options,
     features: u64,
     streams: &mut xattr::Incoming,
@@ -939,12 +939,19 @@ fn process_data(
     }
     let compressed = payload[0] & 1 != 0;
     let want = u64::from_le_bytes(payload[1..9].try_into().unwrap());
-    let raw = Arc::new(protocol::unpack_body(&payload[9..], compressed, features)?);
-    if ffi::xxh3_64(&raw) != want {
+    // The records stay where they arrived (or were decompressed to); small files and chunks
+    // are written from them without another copy.
+    let (records, base) = if compressed {
+        (Arc::new(protocol::unpack_body(&payload[9..], compressed, features)?), 0)
+    } else {
+        (Arc::new(payload), 9)
+    };
+    let raw = &records[base..];
+    if ffi::xxh3_64(raw) != want {
         return bad("data corruption detected in transfer stream");
     }
     let resume_enabled = opts.partial && features & feature::RESUME != 0;
-    let mut d = Decoder::new(&raw);
+    let mut d = Decoder::new(raw);
     while !d.is_empty() {
         let id =
             u32::try_from(d.var().map_err(decode_err)?).map_err(|_| io::Error::new(io::ErrorKind::InvalidData, "bad DATA id"))?;
@@ -996,7 +1003,7 @@ fn process_data(
                 }
                 ids.apply(&mut attrs, opts);
                 let bytes = d.str().map_err(decode_err)?;
-                let start = bytes.as_ptr() as usize - raw.as_ptr() as usize;
+                let start = bytes.as_ptr() as usize - records.as_ptr() as usize;
                 let name = dir.rename_to.clone().unwrap_or_else(|| entry.name.clone());
                 let final_path = dir.dest.join(OsStr::from_bytes(&name));
                 added_bytes += bytes.len() as u64;
@@ -1009,7 +1016,7 @@ fn process_data(
                     name,
                     final_path,
                     attrs,
-                    records: raw.clone(),
+                    records: records.clone(),
                     bytes: start..start + bytes.len(),
                     event,
                     event_path,
@@ -1113,7 +1120,8 @@ fn process_data(
                     added_bytes += length as u64;
                 } else {
                     infile.pending += 1;
-                    pool.submit(infile.file.as_raw_fd(), bytes.to_vec(), offset, end, key);
+                    let start = bytes.as_ptr() as usize - records.as_ptr() as usize;
+                    pool.submit(infile.file.as_raw_fd(), records.clone(), start..start + bytes.len(), offset, end, key);
                     added_bytes += bytes.len() as u64;
                 }
             }
@@ -1416,7 +1424,7 @@ fn receive<R: Read, W: Write + Send + 'static>(
     let mut progress_bytes = 0u64;
     let mut progress_last = (0u64, 0u64, Instant::now());
     while !ended {
-        let frame = match protocol::read_checked(input, keepalive, features) {
+        let mut frame = match protocol::read_checked(input, keepalive, features) {
             Ok(Some(frame)) => frame,
             Ok(None) => {
                 settle(&mut infiles, &pool);
@@ -1437,7 +1445,8 @@ fn receive<R: Read, W: Write + Send + 'static>(
             frame_type::DATA => {
                 let mut table = r.table.lock().unwrap();
                 let table = &mut *table;
-                process_data(&frame.payload, opts, features, &mut streams, &ids, &mut table.dirs, &mut infiles, &mut pool, r)
+                let payload = std::mem::take(&mut frame.payload);
+                process_data(payload, opts, features, &mut streams, &ids, &mut table.dirs, &mut infiles, &mut pool, r)
                     .and_then(|bytes| {
                         progress_bytes += bytes;
                         drain_writes(r, &mut table.dirs, &mut infiles, &pool)
