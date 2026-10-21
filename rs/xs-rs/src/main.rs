@@ -710,6 +710,12 @@ fn run_client(cli: &mut cli::Cli) -> io::Result<i32> {
     };
     events.flush();
     drop(input);
+    if matches!(result, Ok(0)) {
+        // DONE settled it: the receiver has published everything, and its code carries the
+        // sender's. ssh delivers what is left and closes its channel on its own; waiting for
+        // that costs a round trip. A failure still waits for the remote's status below.
+        return Ok(0);
+    }
     let status = child.wait()?;
     let code = result?;
     if code == 12 && status.code() == Some(30) {
