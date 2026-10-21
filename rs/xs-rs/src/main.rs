@@ -194,12 +194,32 @@ fn protocol_stdio() -> io::Result<(std::fs::File, std::fs::File)> {
     Ok((input, output))
 }
 
+/// The protocol input: it waits for data in polls of 100 ms, so the reader sees a worker's
+/// stop request even when the peer goes quiet without closing its end.
+struct StoppableInput<F> {
+    inner: F,
+    control: Arc<IoControl>,
+}
+
+impl<F: Read + std::os::unix::io::AsRawFd> Read for StoppableInput<F> {
+    fn read(&mut self, buffer: &mut [u8]) -> io::Result<usize> {
+        loop {
+            if self.control.stop_requested() {
+                return Err(io::Error::other("stopped after a failure"));
+            }
+            if ffi::readable_within(self.inner.as_raw_fd(), 100)? {
+                return self.inner.read(buffer);
+            }
+        }
+    }
+}
+
 fn server<R: Read, W: Write + Send + 'static>(
     reader: &mut R,
     mut writer: W,
     server_options: &Options,
+    control: Arc<IoControl>,
 ) -> io::Result<i32> {
-    let control = Arc::new(IoControl::new());
     let _watchdog = Watchdog::spawn(control.clone());
     let mut input = ActivityReader::new(reader, control.clone());
     let Some(frame) =
@@ -457,7 +477,8 @@ fn run_client(cli: &mut cli::Cli) -> io::Result<i32> {
     let control = Arc::new(IoControl::new());
     control.configure(0, cli.options.timeout, false);
     let _watchdog = Watchdog::spawn(control.clone());
-    let mut input = ActivityReader::new(BufReader::new(child.stdout.take().unwrap()), control.clone());
+    let stdout = StoppableInput { inner: child.stdout.take().unwrap(), control: control.clone() };
+    let mut input = ActivityReader::new(BufReader::with_capacity(256 << 10, stdout), control.clone());
     let mut output = BufWriter::new(child.stdin.take().unwrap());
     xs_wire::write_frame(&mut output, frame_type::HELLO, &hello)?;
     output.flush()?;
@@ -759,8 +780,10 @@ fn main() {
     let result = if cli.server {
         match protocol_stdio() {
             Ok((input, output)) => {
+                let control = Arc::new(IoControl::new());
+                let input = StoppableInput { inner: input, control: control.clone() };
                 let mut reader = BufReader::with_capacity(256 << 10, input);
-                server(&mut reader, BufWriter::new(output), &cli.options)
+                server(&mut reader, BufWriter::new(output), &cli.options, control)
             }
             Err(error) => Err(error),
         }

@@ -199,6 +199,8 @@ pub struct IoControl {
     reading: AtomicBool,
     timed_out: AtomicBool,
     done: AtomicBool,
+    /// A worker failed and told the peer: the reader stops waiting for it.
+    stop: AtomicBool,
 }
 
 impl Default for IoControl {
@@ -223,7 +225,18 @@ impl IoControl {
             reading: AtomicBool::new(false),
             timed_out: AtomicBool::new(false),
             done: AtomicBool::new(false),
+            stop: AtomicBool::new(false),
         }
+    }
+
+    /// Ask the frame reader to stop, as `die` ends a C++ process from any thread: a worker
+    /// has failed and sent its fatal message, and the peer may never close its end.
+    pub fn request_stop(&self) {
+        self.stop.store(true, Ordering::Relaxed);
+    }
+
+    pub fn stop_requested(&self) -> bool {
+        self.stop.load(Ordering::Relaxed)
     }
 
     /// `Conn::configure`: the rate, the idle deadline and whether this side sends heartbeats.
