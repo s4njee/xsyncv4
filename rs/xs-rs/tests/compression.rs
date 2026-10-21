@@ -269,9 +269,28 @@ fn a_cpp_server_still_accepts_a_rust_compression_configuration() {
     let dest = root.join("dest");
     fs::create_dir_all(&dest).unwrap();
     let log = root.join("raw.log");
-    captured(Path::new(xs_rs()), &cpp, &log, &source, &dest, false, &[]);
+    captured(Path::new(xs_rs()), &cpp, &log, &source, &dest, false, &["--no-auto-compress"]);
     let frames = frames(&log);
     assert!(!frames.iter().any(|f| f.kind == 37));
     assert!(frames.iter().filter(|f| f.kind == 4).all(|f| f.flag == 0));
+    let _ = fs::remove_dir_all(root);
+}
+
+#[test]
+fn a_cpp_server_takes_an_automatically_compressed_push() {
+    // Without -z a pushing xs-rs still compresses while the link is slower than compression
+    // (from the start, here); C++ decodes any flagged frame once zstd is negotiated.
+    let Some(cpp) = xs_bin() else { return };
+    let root = temp_root("auto");
+    let source = root.join("source");
+    make_source(&source);
+    let dest = root.join("dest");
+    fs::create_dir_all(&dest).unwrap();
+    let log = root.join("auto.log");
+    captured(Path::new(xs_rs()), &cpp, &log, &source, &dest, false, &[]);
+    let frames = frames(&log);
+    assert!(!frames.iter().any(|f| f.kind == 37), "no -z, no policy frame");
+    assert!(frames.iter().any(|f| f.kind == 4 && f.flag == 1), "compressible data is packed");
+    assert_eq!(fs::read(dest.join("archive.gz")).unwrap(), fs::read(source.join("archive.gz")).unwrap());
     let _ = fs::remove_dir_all(root);
 }

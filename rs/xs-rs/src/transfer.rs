@@ -490,6 +490,9 @@ struct Sending<'a> {
     tx: FrameTx,
     opts: &'a Options,
     features: u64,
+    /// `-z`, or automatic compression with zstd negotiated: the frames this end sends may be
+    /// compressed (each receiver decodes a flagged frame whenever zstd was negotiated).
+    compress: bool,
     link: &'a CompressionLink,
     suffixes: Suffixes,
     resume: bool,
@@ -601,6 +604,12 @@ impl Sending<'_> {
         self.abort();
     }
 
+    /// Whether the next frame may be compressed: always with `-z`, and automatically while
+    /// the link is slower than compression.
+    fn compressing(&self) -> bool {
+        self.compress && (self.opts.compress || self.link.auto_worthwhile())
+    }
+
     fn has_failed(&self) -> bool {
         *self.failed.lock().unwrap()
     }
@@ -691,7 +700,7 @@ fn walk_dir(s: &Sending, task: WalkTask) -> io::Result<()> {
     let flag_at = frame.bytes.len();
     frame.byte(flags);
     let level = s.link.level(opts.compress_level_explicit, opts.compress_level, opts.bwlimit);
-    if protocol::pack_body(&mut frame, &body.bytes, opts.compress, level) {
+    if protocol::pack_body(&mut frame, &body.bytes, s.compressing(), level) {
         frame.bytes[flag_at] |= protocol::DF_ZSTD;
         s.link.set_last_level(level);
         if !opts.compress_level_explicit {
@@ -740,7 +749,7 @@ fn flush_data(s: &Sending, block: &mut Vec<u8>, compress: bool) -> io::Result<()
     let mut payload = Encoder::new();
     payload.byte(0).raw(&digest.to_le_bytes());
     let level = s.link.level(opts.compress_level_explicit, opts.compress_level, opts.bwlimit);
-    let compressed = protocol::pack_body(&mut payload, block, compress, level);
+    let compressed = protocol::pack_body(&mut payload, block, compress && s.compressing(), level);
     if compressed {
         payload.bytes[0] = 1;
         s.link.set_last_level(level);
@@ -963,9 +972,9 @@ fn send_task(s: &Sending, task: &ReadTask, block: &mut Vec<u8>) -> io::Result<()
             continue;
         }
         // A skipped suffix gets a block of its own, as `RawFileBlock` isolates it.
-        let skip = opts.compress && s.suffixes.matches(&entry.meta.name);
+        let skip = s.compress && s.suffixes.matches(&entry.meta.name);
         if skip || skip != block_skip {
-            flush_data(s, block, opts.compress && !block_skip)?;
+            flush_data(s, block, s.compress && !block_skip)?;
         }
         block_skip = skip;
         if entry.meta.size <= protocol::SMALL_MAX as i64 {
@@ -983,19 +992,19 @@ fn send_task(s: &Sending, task: &ReadTask, block: &mut Vec<u8>) -> io::Result<()
                     e.str(&bytes);
                     record(e, block);
                     if block.len() >= protocol::BLOCK_TARGET {
-                        flush_data(s, block, opts.compress && !block_skip)?;
+                        flush_data(s, block, s.compress && !block_skip)?;
                     }
                 }
                 Err(_) => record(fail_record(id, idx), block),
             }
         } else {
-            flush_data(s, block, opts.compress && !block_skip)?;
+            flush_data(s, block, s.compress && !block_skip)?;
             send_large(
                 s,
                 id,
                 idx,
                 entry,
-                opts.compress && !skip,
+                s.compress && !skip,
                 block,
                 task.ranges,
                 task.prefixes.get(&idx),
@@ -1006,7 +1015,7 @@ fn send_task(s: &Sending, task: &ReadTask, block: &mut Vec<u8>) -> io::Result<()
             flush_data(s, block, false)?;
         }
     }
-    flush_data(s, block, opts.compress && !block_skip)
+    flush_data(s, block, s.compress && !block_skip)
 }
 
 enum SendJob {
@@ -1196,6 +1205,7 @@ pub fn run_sender<R: Read, W: Write + Send + 'static>(
         tx: output.tx(),
         opts,
         features,
+        compress: opts.compress || (opts.auto_compress && features & feature::ZSTD != 0),
         link: &link,
         suffixes: crate::compression::suffixes(&opts.skip_compress),
         resume: opts.partial && features & feature::RESUME != 0,

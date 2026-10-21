@@ -93,7 +93,8 @@ fn a_rust_sender_charges_compressed_bytes_to_the_rate_limit() {
     fs::write(source.join("file"), vec![b'x'; 512 * 1024]).unwrap();
     let started = Instant::now();
     let output =
-        transfer(Path::new(xs_rs()), &cpp, &source, &dest, false, &["--bwlimit=256k", "--timeout=5"]);
+        // Raw, so the limit decides the time: compressed, 512 KiB of one byte is a few bytes.
+        transfer(Path::new(xs_rs()), &cpp, &source, &dest, false, &["--bwlimit=256k", "--timeout=5", "--no-auto-compress"]);
     let elapsed = started.elapsed();
     assert!(output.status.success(), "{}", String::from_utf8_lossy(&output.stderr));
     assert_eq!(fs::read(dest.join("file")).unwrap(), vec![b'x'; 512 * 1024]);

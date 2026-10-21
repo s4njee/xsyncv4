@@ -69,6 +69,7 @@ impl Cli {
             "devices" => self.options.devices = on,
             "specials" => self.options.specials = on,
             "compress" => self.options.compress = on,
+            "auto-compress" => self.options.auto_compress = on,
             "numeric-ids" => self.options.numeric_ids = on,
             "hard-links" => self.options.hard_links = on,
             "xattrs" | "X" => {
@@ -428,6 +429,7 @@ pub fn parse(args: Vec<OsString>) -> Result<Cli, String> {
                 | "devices"
                 | "specials"
                 | "compress"
+                | "auto-compress"
                 | "numeric-ids"
                 | "hard-links"
                 | "xattrs"

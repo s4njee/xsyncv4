@@ -60,3 +60,12 @@ everything on one thread, which costs little on a zero-latency pipe and a lot wh
   from an atomic as each DIR goes out, the directory registered first, children queued after their parent's
   frame (so a parent always precedes its children), LIST_END when the last walk task ends. The id map's
   frame goes out under the same lock that decides it, before the DIR that relies on it.
+
+## 9. Over a real link: fewer bytes
+- [x] Without `-z`, xs-rs compresses what it sends (listings and data) while the link is slower than compression:
+  from the start, then while its writer moves under 256 MiB/s, at the level xs-c++'s rate rule picks (1 at
+  64 MiB/s and up), skipping incompressible blocks (sampled) and the skip-compress suffixes. Every receiver,
+  xs-c++'s included, decodes a flagged frame whenever zstd was negotiated, which both always offer, so this is
+  wire-compatible; a local pipe or a 10 GbE link stays uncompressed. `--no-auto-compress` turns it off.
+  Note for a contest: xs-c++ compresses only with `-z`, so under the same `-a -j4` this is an engine choice
+  xs-c++ does not make; it also cuts xs-rs's share of a metered link's bytes.
