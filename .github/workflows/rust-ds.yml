@@ -3,23 +3,39 @@ name: rust-ds
 # Pull requests into rust-ds, where xs-rs (rs/, the Rust implementation of xs that DeepSeek writes in the
 # lab's port cases) lands once the lab's gate accepts a step (benchmarks/lab/engineer.py). Every PR builds
 # this branch's C++ xs, the reference, and runs xs-rs's tests against it, interop included, with clippy and
-# rustfmt. A PR from an engineer/ branch of this repository, opened by the repository's owner (the lab's
-# controller pushes with the owner's token), is then approved and merged automatically.
+# rustfmt, natively on Linux amd64 and arm64 (the lab's sender is amd64 and its receiver arm64). A PR from an
+# engineer/ branch of this repository, opened by the repository's owner (the lab's controller pushes with the
+# owner's token), is then approved and merged automatically once both pass.
+#
+# Every push to rust-ds (each merged step) builds xs-rs's release binary for both architectures and attaches
+# them to the rolling pre-release xs-rs-builds, as xs-rs-<commit12>-linux-<arch> with a .sha256 beside each;
+# the lab stages those (benchmarks/lab/stage.py) rather than building them itself.
 
 on:
   pull_request:
     branches: [rust-ds]
+  push:
+    branches: [rust-ds]
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: rust-ds-${{ github.event.pull_request.number }}
+  group: rust-ds-${{ github.event.pull_request.number || github.sha }}
   cancel-in-progress: true
 
 jobs:
   xs-rs:
-    runs-on: ubuntu-24.04
+    if: github.event_name == 'pull_request'
+    name: xs-rs (${{ matrix.arch }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { arch: amd64, runner: ubuntu-24.04 }
+          - { arch: arm64, runner: ubuntu-24.04-arm }
+    runs-on: ${{ matrix.runner }}
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -29,6 +45,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install --yes --no-install-recommends ninja-build libzstd-dev libxxhash-dev libicu-dev
+          command -v cargo || { curl -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal; echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"; }
       - name: Build the C++ xs (the reference xs-rs is tested against)
         run: |
           cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release "-DXSYNC_GIT_HASH=${GITHUB_SHA::12}"
@@ -43,6 +60,7 @@ jobs:
   merge:
     needs: [xs-rs]
     if: >-
+      github.event_name == 'pull_request' &&
       startsWith(github.event.pull_request.head.ref, 'engineer/') &&
       github.event.pull_request.head.repo.full_name == github.repository &&
       github.event.pull_request.user.login == github.repository_owner
@@ -57,5 +75,62 @@ jobs:
           PR: ${{ github.event.pull_request.number }}
         run: |
           gh pr review "$PR" --repo "$GITHUB_REPOSITORY" --approve \
-            --body "The lab's gate accepted this step, and xs-rs passes its tests against the C++ xs."
+            --body "The lab's gate accepted this step, and xs-rs passes its tests against the C++ xs on amd64 and arm64."
           gh pr merge "$PR" --repo "$GITHUB_REPOSITORY" --squash --delete-branch
+
+  binaries:
+    if: github.event_name != 'pull_request'
+    name: binary (${{ matrix.arch }})
+    strategy:
+      matrix:
+        include:
+          - { arch: amd64, runner: ubuntu-24.04 }
+          - { arch: arm64, runner: ubuntu-24.04-arm }
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 45
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # As the lab's Dockerfile did: xs-rs's build.rs links libzstd and libxxhash by name, so with only their
+      # static archives present the binary needs nothing on a host beyond glibc (this runner's 2.39, or newer).
+      - name: Build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends libzstd-dev libxxhash-dev
+          sudo rm -f /usr/lib/*-linux-gnu/libzstd.so /usr/lib/*-linux-gnu/libxxhash.so
+          command -v cargo || { curl -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal; echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"; }
+      - name: Build xs-rs
+        run: |
+          cargo build --release --locked --manifest-path rs/Cargo.toml -p xs-rs
+          if ldd rs/target/release/xs-rs | grep -E 'zstd|xxhash'; then echo 'xs-rs links zstd or xxhash dynamically'; exit 1; fi
+          name="xs-rs-${GITHUB_SHA::12}-linux-${{ matrix.arch }}"
+          cp rs/target/release/xs-rs "$name"
+          sha256sum "$name" > "$name.sha256"
+          echo "NAME=$name" >> "$GITHUB_ENV"
+      - name: Attach it to xs-rs-builds
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # Both architectures' jobs may find the release missing at once: the second create fails and finds it.
+          gh release view xs-rs-builds --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1 ||
+            gh release create xs-rs-builds --repo "$GITHUB_REPOSITORY" --prerelease --target rust-ds \
+              --title "xs-rs builds" --notes "Release binaries of xs-rs for each commit of rust-ds, built by the rust-ds workflow." ||
+            gh release view xs-rs-builds --repo "$GITHUB_REPOSITORY" >/dev/null
+          gh release upload xs-rs-builds "$NAME" "$NAME.sha256" --repo "$GITHUB_REPOSITORY" --clobber
+
+  prune:
+    needs: [binaries]
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - name: Keep the newest 40 builds (four files each)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api "repos/$GITHUB_REPOSITORY/releases/tags/xs-rs-builds" --jq '.assets | sort_by(.created_at) | reverse | .[160:] | .[].id' |
+            while read -r id; do gh api -X DELETE "repos/$GITHUB_REPOSITORY/releases/assets/$id"; done
