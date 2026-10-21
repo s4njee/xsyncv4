@@ -975,6 +975,18 @@ including IDs present on only one machine and real sudo elevation on both ends.
 
 ## Changelog
 
+### 2026-10-21
+
+- Added parallel workers: `-j/--jobs` with a default of 4, explicit `-jN` splitting one large file into 4 MiB ranges, and refusal of unknown or unsupported options.
+- Added `PF_RESUME` for resuming partial files after verifying and re-hashing the destination prefix.
+- Added `PF_DELTA` for transferring changed files from destination signatures with block matching and final verification.
+- Made the no-op receiver reuse the destination listing and write only attributes that differ, beating xs-c++ on congress-sample noop.
+- Added filters, relative paths and files-from (`PF_FILTERS`, `PF_RELATIVE`, `PF_FILES_FROM`).
+- Added extended attributes (`PF_XATTRS`, `PF_XATTR_STREAM`) with streamed large values and receiver-side set/remove.
+- Added POSIX ACLs (`PF_ACL_POSIX`) with configuration negotiation, access/default records and application on receipt.
+- Split the receiver into `transfer/receiver.rs` for coordination plus `transfer/receiver/dir.rs` for listing comparison and `transfer/receiver/data.rs` for DATA records and file publication.
+- Removed the unused `FileRequests.dirs` field and its dead-code suppression.
+
 ### 2026-10-20
 
 - Added the post-HELLO configuration frames for IO, compression, xattrs, ACLs, ownership, sparse files, link destinations, relative and files-from paths, filters, deletion, pruning and output.
