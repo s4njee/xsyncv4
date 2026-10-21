@@ -1,6 +1,2560 @@
 {
  "reports": [
   {
+   "id": "2026-10-21T09:00:00.000Z",
+   "start": 1792486800,
+   "end": 1792573200,
+   "generatedAt": 1792576064.331,
+   "model": "opencode/deepseek-v4.1-flash",
+   "samples": 181,
+   "invalid": 12,
+   "runCount": 16,
+   "runKeys": [
+    "vps/PS-8428aac9a210-update-10pct/20261021T005449Z-PS-8428aac9a210-update-10pct",
+    "vps/PS-8428aac9a210-fresh/20261021T005447Z-PS-8428aac9a210-fresh",
+    "vps/BL2-real-projects/20261021T003556Z-BL2-real-projects",
+    "vps/BL1-congress-sample/20261021T003554Z-BL1-congress-sample",
+    "vps/PS-3b891bf5e8fb-fresh/20261020T234716Z-PS-3b891bf5e8fb-fresh",
+    "vps/PS-3b891bf5e8fb-noop/20261020T234715Z-PS-3b891bf5e8fb-noop",
+    "vps/PS-f4e30e4ed207-noop/20261020T214720Z-PS-f4e30e4ed207-noop",
+    "vps/PS-2c0bec1da693-noop/20261020T205318Z-PS-2c0bec1da693-noop",
+    "vps/PS-e3b546f679b9-noop/20261020T201315Z-PS-e3b546f679b9-noop",
+    "vps/FC-d843682-noop/20261020T193555Z-FC-d843682-noop",
+    "vps/FC-5a45360-noop/20261020T190640Z-FC-5a45360-noop",
+    "vps/FC-5a45360-noop/20261020T190426Z-FC-5a45360-noop",
+    "vps/FC-02bd268-noop/20261020T184215Z-FC-02bd268-noop",
+    "vps/FC-02bd268-noop/20261020T184016Z-FC-02bd268-noop",
+    "vps/FC-02bd268-noop/20261020T183246Z-FC-02bd268-noopf2",
+    "vps/FC-02bd268-noop/20261020T181617Z-FC-02bd268-noopf1"
+   ],
+   "evidenceRuns": [
+    {
+     "key": "vps/PS-8428aac9a210-update-10pct/20261021T005449Z-PS-8428aac9a210-update-10pct",
+     "experiment": "PS-8428aac9a210-update-10pct",
+     "question": "Is xs-rs at 8428aac9a210 (after port step filters) as fast as xs-c++, and than rsync?",
+     "state": "complete",
+     "hypothesis": "xs-rs at 8428aac9a210 differs from xs-c++ (-a -j4) by more than 5% in time-to-durable on congress-sample, update-10pct, a>aws.",
+     "primary": "durable_s",
+     "control": "xs-cpp",
+     "revisions": [
+      "0c94b3d70b9d",
+      "8428aac9a210-rs"
+     ],
+     "arms": [
+      {
+       "name": "xs-cpp",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 4,
+         "group": "45a1aa7590567fe70d3da067"
+        }
+       ],
+       "tuningFlags": [
+        "-j4"
+       ]
+      },
+      {
+       "name": "xs-rs",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 4,
+         "group": "7d5c3d25346720b71e22874a"
+        }
+       ],
+       "tuningFlags": [
+        "-j4"
+       ]
+      },
+      {
+       "name": "rsync",
+       "tool": "rsync",
+       "client": null,
+       "scales": [],
+       "tuningFlags": []
+      }
+     ],
+     "samples": 6,
+     "invalid": 0,
+     "cells": [
+      {
+       "factors": {
+        "id": "congress-sample.update-10pct.a-aws.sender.warm",
+        "corpus": "congress-sample",
+        "scenario": "update-10pct",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 25246,
+        "bytes": 218210440
+       },
+       "arm": "xs-cpp",
+       "validSamples": 2,
+       "blocks": 2,
+       "medianSeconds": 1.6311,
+       "medianGbps": 1.1506257029192126,
+       "medianClientCpuSeconds": 1.282,
+       "pairedBlocks": 2,
+       "medianPairedSpeedVsControl": 1
+      },
+      {
+       "factors": {
+        "id": "congress-sample.update-10pct.a-aws.sender.warm",
+        "corpus": "congress-sample",
+        "scenario": "update-10pct",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 25246,
+        "bytes": 218210440
+       },
+       "arm": "rsync",
+       "validSamples": 2,
+       "blocks": 2,
+       "medianSeconds": 1.6701000000000001,
+       "medianGbps": 1.0747583904502216,
+       "medianClientCpuSeconds": 0.808,
+       "pairedBlocks": 2,
+       "medianPairedSpeedVsControl": 0.9602397875640745
+      },
+      {
+       "factors": {
+        "id": "congress-sample.update-10pct.a-aws.sender.warm",
+        "corpus": "congress-sample",
+        "scenario": "update-10pct",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 25246,
+        "bytes": 218210440
+       },
+       "arm": "xs-rs",
+       "validSamples": 2,
+       "blocks": 2,
+       "medianSeconds": 1.6127500000000001,
+       "medianGbps": 1.0824821330748229,
+       "medianClientCpuSeconds": 1.1425,
+       "pairedBlocks": 2,
+       "medianPairedSpeedVsControl": 1.0095154885144397
+      }
+     ]
+    },
+    {
+     "key": "vps/PS-8428aac9a210-fresh/20261021T005447Z-PS-8428aac9a210-fresh",
+     "experiment": "PS-8428aac9a210-fresh",
+     "question": "Is xs-rs at 8428aac9a210 (after port step filters) as fast as xs-c++, and than rsync?",
+     "state": "complete",
+     "hypothesis": "xs-rs at 8428aac9a210 differs from xs-c++ (-a -j4) by more than 5% in time-to-durable on congress-sample, fresh, a>aws.",
+     "primary": "durable_s",
+     "control": "xs-cpp",
+     "revisions": [
+      "8428aac9a210-rs",
+      "0c94b3d70b9d"
+     ],
+     "arms": [
+      {
+       "name": "xs-cpp",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 4,
+         "group": "45a1aa7590567fe70d3da067"
+        }
+       ],
+       "tuningFlags": [
+        "-j4"
+       ]
+      },
+      {
+       "name": "xs-rs",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 4,
+         "group": "7d5c3d25346720b71e22874a"
+        }
+       ],
+       "tuningFlags": [
+        "-j4"
+       ]
+      },
+      {
+       "name": "rsync",
+       "tool": "rsync",
+       "client": null,
+       "scales": [],
+       "tuningFlags": []
+      }
+     ],
+     "samples": 9,
+     "invalid": 0,
+     "cells": [
+      {
+       "factors": {
+        "id": "congress-sample.fresh.a-aws.sender.warm",
+        "corpus": "congress-sample",
+        "scenario": "fresh",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 25246,
+        "bytes": 218210440
+       },
+       "arm": "xs-rs",
+       "validSamples": 3,
+       "blocks": 3,
+       "medianSeconds": 3.5856,
+       "medianGbps": 0.4868595269968764,
+       "medianClientCpuSeconds": 2.609,
+       "pairedBlocks": 3,
+       "medianPairedSpeedVsControl": 0.9991424406140125
+      },
+      {
+       "factors": {
+        "id": "congress-sample.fresh.a-aws.sender.warm",
+        "corpus": "congress-sample",
+        "scenario": "fresh",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 25246,
+        "bytes": 218210440
+       },
+       "arm": "xs-cpp",
+       "validSamples": 3,
+       "blocks": 3,
+       "medianSeconds": 3.5188,
+       "medianGbps": 0.4961019438444924,
+       "medianClientCpuSeconds": 3.749,
+       "pairedBlocks": 3,
+       "medianPairedSpeedVsControl": 1
+      },
+      {
+       "factors": {
+        "id": "congress-sample.fresh.a-aws.sender.warm",
+        "corpus": "congress-sample",
+        "scenario": "fresh",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 25246,
+        "bytes": 218210440
+       },
+       "arm": "rsync",
+       "validSamples": 3,
+       "blocks": 3,
+       "medianSeconds": 3.1899,
+       "medianGbps": 0.5472533684441518,
+       "medianClientCpuSeconds": 2.543,
+       "pairedBlocks": 3,
+       "medianPairedSpeedVsControl": 1.103383399705246
+      }
+     ]
+    },
+    {
+     "key": "vps/BL2-real-projects/20261021T003556Z-BL2-real-projects",
+     "experiment": "BL2-real-projects",
+     "question": "Baseline on real-projects, a 1% sample of a real projects folder (69,316 files, 2.13 GB): how do rsync, xs-c++ and xs-rs compare, A to AWS?",
+     "state": "complete",
+     "hypothesis": "On real-projects, xs-rs and xs-c++ differ from rsync, and from each other, by more than 5% in time to durable.",
+     "primary": "durable_s",
+     "control": "rsync",
+     "revisions": [
+      "3b891bf5e8fb-rs",
+      "0c94b3d70b9d"
+     ],
+     "arms": [
+      {
+       "name": "rsync",
+       "tool": "rsync",
+       "client": null,
+       "scales": [],
+       "tuningFlags": []
+      },
+      {
+       "name": "xs-cpp",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 4,
+         "group": "45a1aa7590567fe70d3da067"
+        }
+       ],
+       "tuningFlags": [
+        "-j4"
+       ]
+      },
+      {
+       "name": "xs-rs",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 4,
+         "group": "91edc7fa464ca86f79bd825d"
+        }
+       ],
+       "tuningFlags": [
+        "-j4"
+       ]
+      }
+     ],
+     "samples": 12,
+     "invalid": 0,
+     "cells": [
+      {
+       "factors": {
+        "id": "real-projects.fresh.a-aws.sender.warm",
+        "corpus": "real-projects",
+        "scenario": "fresh",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 69316,
+        "bytes": 2134981089
+       },
+       "arm": "xs-rs",
+       "validSamples": 2,
+       "blocks": 2,
+       "medianSeconds": 42.9319,
+       "medianGbps": 0.4002061465757156,
+       "medianClientCpuSeconds": 44.7725,
+       "pairedBlocks": 2,
+       "medianPairedSpeedVsControl": 0.46991329870916626
+      },
+      {
+       "factors": {
+        "id": "real-projects.fresh.a-aws.sender.warm",
+        "corpus": "real-projects",
+        "scenario": "fresh",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 69316,
+        "bytes": 2134981089
+       },
+       "arm": "rsync",
+       "validSamples": 2,
+       "blocks": 2,
+       "medianSeconds": 20.0549,
+       "medianGbps": 0.8516546483676741,
+       "medianClientCpuSeconds": 17.0905,
+       "pairedBlocks": 2,
+       "medianPairedSpeedVsControl": 1
+      },
+      {
+       "factors": {
+        "id": "real-projects.fresh.a-aws.sender.warm",
+        "corpus": "real-projects",
+        "scenario": "fresh",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 69316,
+        "bytes": 2134981089
+       },
+       "arm": "xs-cpp",
+       "validSamples": 2,
+       "blocks": 2,
+       "medianSeconds": 29.4307,
+       "medianGbps": 0.5855944517097191,
+       "medianClientCpuSeconds": 28.235,
+       "pairedBlocks": 2,
+       "medianPairedSpeedVsControl": 0.6876010182310155
+      },
+      {
+       "factors": {
+        "id": "real-projects.noop.a-aws.sender.warm",
+        "corpus": "real-projects",
+        "scenario": "noop",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 69316,
+        "bytes": 2134981089
+       },
+       "arm": "rsync",
+       "validSamples": 2,
+       "blocks": 2,
+       "medianSeconds": 3.7728,
+       "medianGbps": 4.533984694508987,
+       "medianClientCpuSeconds": 1.9765,
+       "pairedBlocks": 2,
+       "medianPairedSpeedVsControl": 1
+      },
+      {
+       "factors": {
+        "id": "real-projects.noop.a-aws.sender.warm",
+        "corpus": "real-projects",
+        "scenario": "noop",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 69316,
+        "bytes": 2134981089
+       },
+       "arm": "xs-rs",
+       "validSamples": 2,
+       "blocks": 2,
+       "medianSeconds": 3.00895,
+       "medianGbps": 5.776013310499187,
+       "medianClientCpuSeconds": 3.1224999999999996,
+       "pairedBlocks": 2,
+       "medianPairedSpeedVsControl": 1.2693443969568303
+      },
+      {
+       "factors": {
+        "id": "real-projects.noop.a-aws.sender.warm",
+        "corpus": "real-projects",
+        "scenario": "noop",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 69316,
+        "bytes": 2134981089
+       },
+       "arm": "xs-cpp",
+       "validSamples": 2,
+       "blocks": 2,
+       "medianSeconds": 1.7986499999999999,
+       "medianGbps": 9.559475220475775,
+       "medianClientCpuSeconds": 2.705,
+       "pairedBlocks": 2,
+       "medianPairedSpeedVsControl": 2.1183186637588904
+      }
+     ]
+    },
+    {
+     "key": "vps/BL1-congress-sample/20261021T003554Z-BL1-congress-sample",
+     "experiment": "BL1-congress-sample",
+     "question": "Baseline on congress-sample, a small-file tree (25,246 files, 218 MB): how do rsync, xs-c++ and xs-rs compare, A to AWS?",
+     "state": "complete",
+     "hypothesis": "On congress-sample, xs-rs and xs-c++ differ from rsync, and from each other, by more than 5% in time to durable.",
+     "primary": "durable_s",
+     "control": "rsync",
+     "revisions": [
+      "3b891bf5e8fb-rs",
+      "0c94b3d70b9d"
+     ],
+     "arms": [
+      {
+       "name": "rsync",
+       "tool": "rsync",
+       "client": null,
+       "scales": [],
+       "tuningFlags": []
+      },
+      {
+       "name": "xs-cpp",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 4,
+         "group": "45a1aa7590567fe70d3da067"
+        }
+       ],
+       "tuningFlags": [
+        "-j4"
+       ]
+      },
+      {
+       "name": "xs-rs",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 4,
+         "group": "91edc7fa464ca86f79bd825d"
+        }
+       ],
+       "tuningFlags": [
+        "-j4"
+       ]
+      }
+     ],
+     "samples": 18,
+     "invalid": 0,
+     "cells": [
+      {
+       "factors": {
+        "id": "congress-sample.fresh.a-aws.sender.warm",
+        "corpus": "congress-sample",
+        "scenario": "fresh",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 25246,
+        "bytes": 218210440
+       },
+       "arm": "rsync",
+       "validSamples": 3,
+       "blocks": 3,
+       "medianSeconds": 3.4219,
+       "medianGbps": 0.5101503609106053,
+       "medianClientCpuSeconds": 2.594,
+       "pairedBlocks": 3,
+       "medianPairedSpeedVsControl": 1
+      },
+      {
+       "factors": {
+        "id": "congress-sample.fresh.a-aws.sender.warm",
+        "corpus": "congress-sample",
+        "scenario": "fresh",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 25246,
+        "bytes": 218210440
+       },
+       "arm": "xs-rs",
+       "validSamples": 3,
+       "blocks": 3,
+       "medianSeconds": 3.4488,
+       "medianGbps": 0.5061712827650198,
+       "medianClientCpuSeconds": 3.226,
+       "pairedBlocks": 3,
+       "medianPairedSpeedVsControl": 0.9922001855717931
+      },
+      {
+       "factors": {
+        "id": "congress-sample.fresh.a-aws.sender.warm",
+        "corpus": "congress-sample",
+        "scenario": "fresh",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 25246,
+        "bytes": 218210440
+       },
+       "arm": "xs-cpp",
+       "validSamples": 3,
+       "blocks": 3,
+       "medianSeconds": 3.5397,
+       "medianGbps": 0.49317273215244234,
+       "medianClientCpuSeconds": 3.211,
+       "pairedBlocks": 3,
+       "medianPairedSpeedVsControl": 1.0025195558550377
+      },
+      {
+       "factors": {
+        "id": "congress-sample.noop.a-aws.sender.warm",
+        "corpus": "congress-sample",
+        "scenario": "noop",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 25246,
+        "bytes": 218210440
+       },
+       "arm": "xs-rs",
+       "validSamples": 3,
+       "blocks": 3,
+       "medianSeconds": 0.8485,
+       "medianGbps": 2.0573759811431938,
+       "medianClientCpuSeconds": 0.87,
+       "pairedBlocks": 3,
+       "medianPairedSpeedVsControl": 1.8247495580436064
+      },
+      {
+       "factors": {
+        "id": "congress-sample.noop.a-aws.sender.warm",
+        "corpus": "congress-sample",
+        "scenario": "noop",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 25246,
+        "bytes": 218210440
+       },
+       "arm": "xs-cpp",
+       "validSamples": 3,
+       "blocks": 3,
+       "medianSeconds": 0.7874,
+       "medianGbps": 2.217022504445009,
+       "medianClientCpuSeconds": 0.903,
+       "pairedBlocks": 3,
+       "medianPairedSpeedVsControl": 1.96709439715411
+      },
+      {
+       "factors": {
+        "id": "congress-sample.noop.a-aws.sender.warm",
+        "corpus": "congress-sample",
+        "scenario": "noop",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 25246,
+        "bytes": 218210440
+       },
+       "arm": "rsync",
+       "validSamples": 3,
+       "blocks": 3,
+       "medianSeconds": 1.5734,
+       "medianGbps": 1.1094975975594257,
+       "medianClientCpuSeconds": 0.661,
+       "pairedBlocks": 3,
+       "medianPairedSpeedVsControl": 1
+      }
+     ]
+    },
+    {
+     "key": "vps/PS-3b891bf5e8fb-fresh/20261020T234716Z-PS-3b891bf5e8fb-fresh",
+     "experiment": "PS-3b891bf5e8fb-fresh",
+     "question": "Is xs-rs at 3b891bf5e8fb (after port step filters) as fast as xs-c++, and than rsync?",
+     "state": "complete",
+     "hypothesis": "xs-rs at 3b891bf5e8fb differs from xs-c++ (-a -j4) by more than 5% in time-to-durable on congress-sample, fresh, a>aws.",
+     "primary": "durable_s",
+     "control": "xs-cpp",
+     "revisions": [
+      "a3e52c2c61de",
+      "3b891bf5e8fb-rs"
+     ],
+     "arms": [
+      {
+       "name": "xs-cpp",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 4,
+         "group": "25be34e79948a0b2417407f3"
+        }
+       ],
+       "tuningFlags": [
+        "-j4"
+       ]
+      },
+      {
+       "name": "xs-rs",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 4,
+         "group": "91edc7fa464ca86f79bd825d"
+        }
+       ],
+       "tuningFlags": [
+        "-j4"
+       ]
+      },
+      {
+       "name": "rsync",
+       "tool": "rsync",
+       "client": null,
+       "scales": [],
+       "tuningFlags": []
+      }
+     ],
+     "samples": 6,
+     "invalid": 0,
+     "cells": [
+      {
+       "factors": {
+        "id": "congress-sample.fresh.a-aws.sender.warm",
+        "corpus": "congress-sample",
+        "scenario": "fresh",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 25246,
+        "bytes": 218210440
+       },
+       "arm": "rsync",
+       "validSamples": 2,
+       "blocks": 2,
+       "medianSeconds": 3.15035,
+       "medianGbps": 0.5541261442224188,
+       "medianClientCpuSeconds": 2.515,
+       "pairedBlocks": 2,
+       "medianPairedSpeedVsControl": 1.2011360524166623
+      },
+      {
+       "factors": {
+        "id": "congress-sample.fresh.a-aws.sender.warm",
+        "corpus": "congress-sample",
+        "scenario": "fresh",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 25246,
+        "bytes": 218210440
+       },
+       "arm": "xs-cpp",
+       "validSamples": 2,
+       "blocks": 2,
+       "medianSeconds": 3.78335,
+       "medianGbps": 0.46432091345869453,
+       "medianClientCpuSeconds": 3.377,
+       "pairedBlocks": 2,
+       "medianPairedSpeedVsControl": 1
+      },
+      {
+       "factors": {
+        "id": "congress-sample.fresh.a-aws.sender.warm",
+        "corpus": "congress-sample",
+        "scenario": "fresh",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 25246,
+        "bytes": 218210440
+       },
+       "arm": "xs-rs",
+       "validSamples": 2,
+       "blocks": 2,
+       "medianSeconds": 4.11935,
+       "medianGbps": 0.43472905805260537,
+       "medianClientCpuSeconds": 2.8955,
+       "pairedBlocks": 2,
+       "medianPairedSpeedVsControl": 0.9540074803624812
+      }
+     ]
+    },
+    {
+     "key": "vps/PS-3b891bf5e8fb-noop/20261020T234715Z-PS-3b891bf5e8fb-noop",
+     "experiment": "PS-3b891bf5e8fb-noop",
+     "question": "Is xs-rs at 3b891bf5e8fb (after port step filters) as fast as xs-c++, and than rsync?",
+     "state": "complete",
+     "hypothesis": "xs-rs at 3b891bf5e8fb differs from xs-c++ (-a -j4) by more than 5% in time-to-durable on congress-sample, noop, a>aws.",
+     "primary": "durable_s",
+     "control": "xs-cpp",
+     "revisions": [
+      "3b891bf5e8fb-rs",
+      "a3e52c2c61de"
+     ],
+     "arms": [
+      {
+       "name": "xs-cpp",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 4,
+         "group": "25be34e79948a0b2417407f3"
+        }
+       ],
+       "tuningFlags": [
+        "-j4"
+       ]
+      },
+      {
+       "name": "xs-rs",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 4,
+         "group": "91edc7fa464ca86f79bd825d"
+        }
+       ],
+       "tuningFlags": [
+        "-j4"
+       ]
+      },
+      {
+       "name": "rsync",
+       "tool": "rsync",
+       "client": null,
+       "scales": [],
+       "tuningFlags": []
+      }
+     ],
+     "samples": 9,
+     "invalid": 0,
+     "cells": [
+      {
+       "factors": {
+        "id": "congress-sample.noop.a-aws.sender.warm",
+        "corpus": "congress-sample",
+        "scenario": "noop",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 25246,
+        "bytes": 218210440
+       },
+       "arm": "xs-rs",
+       "validSamples": 3,
+       "blocks": 3,
+       "medianSeconds": 0.8344,
+       "medianGbps": 2.0921422818791946,
+       "medianClientCpuSeconds": 0.839,
+       "pairedBlocks": 3,
+       "medianPairedSpeedVsControl": 0.9575743048897412
+      },
+      {
+       "factors": {
+        "id": "congress-sample.noop.a-aws.sender.warm",
+        "corpus": "congress-sample",
+        "scenario": "noop",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 25246,
+        "bytes": 218210440
+       },
+       "arm": "xs-cpp",
+       "validSamples": 3,
+       "blocks": 3,
+       "medianSeconds": 0.7654,
+       "medianGbps": 2.280746694538803,
+       "medianClientCpuSeconds": 0.905,
+       "pairedBlocks": 3,
+       "medianPairedSpeedVsControl": 1
+      },
+      {
+       "factors": {
+        "id": "congress-sample.noop.a-aws.sender.warm",
+        "corpus": "congress-sample",
+        "scenario": "noop",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 25246,
+        "bytes": 218210440
+       },
+       "arm": "rsync",
+       "validSamples": 3,
+       "blocks": 3,
+       "medianSeconds": 1.5897,
+       "medianGbps": 1.0981213562307355,
+       "medianClientCpuSeconds": 0.652,
+       "pairedBlocks": 3,
+       "medianPairedSpeedVsControl": 0.4835734142026788
+      }
+     ]
+    },
+    {
+     "key": "vps/PS-f4e30e4ed207-noop/20261020T214720Z-PS-f4e30e4ed207-noop",
+     "experiment": "PS-f4e30e4ed207-noop",
+     "question": "Is xs-rs at f4e30e4ed207 (after port step delta) as fast as xs-c++, and than rsync?",
+     "state": "complete",
+     "hypothesis": "xs-rs at f4e30e4ed207 differs from xs-c++ (-a -j4) by more than 5% in time-to-durable on congress-sample, noop, a>aws.",
+     "primary": "durable_s",
+     "control": "xs-cpp",
+     "revisions": [
+      "f4e30e4ed207-rs",
+      "a3e52c2c61de"
+     ],
+     "arms": [
+      {
+       "name": "xs-cpp",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 4,
+         "group": "25be34e79948a0b2417407f3"
+        }
+       ],
+       "tuningFlags": [
+        "-j4"
+       ]
+      },
+      {
+       "name": "xs-rs",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 4,
+         "group": "bc55abf15f11912d54a1a2c9"
+        }
+       ],
+       "tuningFlags": [
+        "-j4"
+       ]
+      },
+      {
+       "name": "rsync",
+       "tool": "rsync",
+       "client": null,
+       "scales": [],
+       "tuningFlags": []
+      }
+     ],
+     "samples": 9,
+     "invalid": 0,
+     "cells": [
+      {
+       "factors": {
+        "id": "congress-sample.noop.a-aws.sender.warm",
+        "corpus": "congress-sample",
+        "scenario": "noop",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 25246,
+        "bytes": 218210440
+       },
+       "arm": "rsync",
+       "validSamples": 3,
+       "blocks": 3,
+       "medianSeconds": 1.5898,
+       "medianGbps": 1.098052283306076,
+       "medianClientCpuSeconds": 0.632,
+       "pairedBlocks": 3,
+       "medianPairedSpeedVsControl": 0.5631873432375073
+      },
+      {
+       "factors": {
+        "id": "congress-sample.noop.a-aws.sender.warm",
+        "corpus": "congress-sample",
+        "scenario": "noop",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 25246,
+        "bytes": 218210440
+       },
+       "arm": "xs-rs",
+       "validSamples": 3,
+       "blocks": 3,
+       "medianSeconds": 1.4734,
+       "medianGbps": 1.1847994570381428,
+       "medianClientCpuSeconds": 0.984,
+       "pairedBlocks": 3,
+       "medianPairedSpeedVsControl": 0.6035699742093118
+      },
+      {
+       "factors": {
+        "id": "congress-sample.noop.a-aws.sender.warm",
+        "corpus": "congress-sample",
+        "scenario": "noop",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 25246,
+        "bytes": 218210440
+       },
+       "arm": "xs-cpp",
+       "validSamples": 3,
+       "blocks": 3,
+       "medianSeconds": 0.8893,
+       "medianGbps": 1.9629860789384912,
+       "medianClientCpuSeconds": 1.114,
+       "pairedBlocks": 3,
+       "medianPairedSpeedVsControl": 1
+      }
+     ]
+    },
+    {
+     "key": "vps/PS-2c0bec1da693-noop/20261020T205318Z-PS-2c0bec1da693-noop",
+     "experiment": "PS-2c0bec1da693-noop",
+     "question": "Is xs-rs at 2c0bec1da693 (after port step resume) as fast as xs-c++, and than rsync?",
+     "state": "complete",
+     "hypothesis": "xs-rs at 2c0bec1da693 differs from xs-c++ (-a -j4) by more than 5% in time-to-durable on congress-sample, noop, a>aws.",
+     "primary": "durable_s",
+     "control": "xs-cpp",
+     "revisions": [
+      "2c0bec1da693-rs",
+      "a3e52c2c61de"
+     ],
+     "arms": [
+      {
+       "name": "xs-cpp",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 4,
+         "group": "25be34e79948a0b2417407f3"
+        }
+       ],
+       "tuningFlags": [
+        "-j4"
+       ]
+      },
+      {
+       "name": "xs-rs",
+       "tool": "xs",
+       "client": null,
+       "scales": [],
+       "tuningFlags": []
+      },
+      {
+       "name": "rsync",
+       "tool": "rsync",
+       "client": null,
+       "scales": [],
+       "tuningFlags": []
+      }
+     ],
+     "samples": 9,
+     "invalid": 0,
+     "cells": [
+      {
+       "factors": {
+        "id": "congress-sample.noop.a-aws.sender.warm",
+        "corpus": "congress-sample",
+        "scenario": "noop",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 25246,
+        "bytes": 218210440
+       },
+       "arm": "xs-rs",
+       "validSamples": 3,
+       "blocks": 3,
+       "medianSeconds": 1.4541,
+       "medianGbps": 1.2005250808059968,
+       "medianClientCpuSeconds": 0.899,
+       "pairedBlocks": 3,
+       "medianPairedSpeedVsControl": 0.624578777250533
+      },
+      {
+       "factors": {
+        "id": "congress-sample.noop.a-aws.sender.warm",
+        "corpus": "congress-sample",
+        "scenario": "noop",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 25246,
+        "bytes": 218210440
+       },
+       "arm": "xs-cpp",
+       "validSamples": 3,
+       "blocks": 3,
+       "medianSeconds": 0.8134,
+       "medianGbps": 2.146156282271945,
+       "medianClientCpuSeconds": 0.943,
+       "pairedBlocks": 3,
+       "medianPairedSpeedVsControl": 1
+      },
+      {
+       "factors": {
+        "id": "congress-sample.noop.a-aws.sender.warm",
+        "corpus": "congress-sample",
+        "scenario": "noop",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 25246,
+        "bytes": 218210440
+       },
+       "arm": "rsync",
+       "validSamples": 3,
+       "blocks": 3,
+       "medianSeconds": 1.5681,
+       "medianGbps": 1.1132475734965883,
+       "medianClientCpuSeconds": 0.634,
+       "pairedBlocks": 3,
+       "medianPairedSpeedVsControl": 0.5615532059605516
+      }
+     ]
+    },
+    {
+     "key": "vps/PS-e3b546f679b9-noop/20261020T201315Z-PS-e3b546f679b9-noop",
+     "experiment": "PS-e3b546f679b9-noop",
+     "question": "Is xs-rs at e3b546f679b9 (after port step workers) as fast as xs-c++, and than rsync?",
+     "state": "complete",
+     "hypothesis": "xs-rs at e3b546f679b9 differs from xs-c++ (-a -j4) by more than 5% in time-to-durable on congress-sample, noop, a>aws.",
+     "primary": "durable_s",
+     "control": "xs-cpp",
+     "revisions": [
+      "e3b546f679b9-rs",
+      "a3e52c2c61de"
+     ],
+     "arms": [
+      {
+       "name": "xs-cpp",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 4,
+         "group": "25be34e79948a0b2417407f3"
+        }
+       ],
+       "tuningFlags": [
+        "-j4"
+       ]
+      },
+      {
+       "name": "xs-rs",
+       "tool": "xs",
+       "client": null,
+       "scales": [],
+       "tuningFlags": []
+      },
+      {
+       "name": "rsync",
+       "tool": "rsync",
+       "client": null,
+       "scales": [],
+       "tuningFlags": []
+      }
+     ],
+     "samples": 9,
+     "invalid": 0,
+     "cells": [
+      {
+       "factors": {
+        "id": "congress-sample.noop.a-aws.sender.warm",
+        "corpus": "congress-sample",
+        "scenario": "noop",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 25246,
+        "bytes": 218210440
+       },
+       "arm": "xs-rs",
+       "validSamples": 3,
+       "blocks": 3,
+       "medianSeconds": 1.7046,
+       "medianGbps": 1.024101560483398,
+       "medianClientCpuSeconds": 0.934,
+       "pairedBlocks": 3,
+       "medianPairedSpeedVsControl": 0.48580312096679573
+      },
+      {
+       "factors": {
+        "id": "congress-sample.noop.a-aws.sender.warm",
+        "corpus": "congress-sample",
+        "scenario": "noop",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 25246,
+        "bytes": 218210440
+       },
+       "arm": "rsync",
+       "validSamples": 3,
+       "blocks": 3,
+       "medianSeconds": 1.5126,
+       "medianGbps": 1.1540946185376175,
+       "medianClientCpuSeconds": 0.647,
+       "pairedBlocks": 3,
+       "medianPairedSpeedVsControl": 0.5179140634961112
+      },
+      {
+       "factors": {
+        "id": "congress-sample.noop.a-aws.sender.warm",
+        "corpus": "congress-sample",
+        "scenario": "noop",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 25246,
+        "bytes": 218210440
+       },
+       "arm": "xs-cpp",
+       "validSamples": 3,
+       "blocks": 3,
+       "medianSeconds": 0.8124,
+       "medianGbps": 2.148798030526834,
+       "medianClientCpuSeconds": 0.948,
+       "pairedBlocks": 3,
+       "medianPairedSpeedVsControl": 1
+      }
+     ]
+    },
+    {
+     "key": "vps/FC-d843682-noop/20261020T193555Z-FC-d843682-noop",
+     "experiment": "FC-d843682-noop",
+     "question": "On congress-sample, noop copies: how do rsync, xs-c++ and xs-rs at d84368234dad compare?",
+     "state": "complete",
+     "hypothesis": "On congress-sample, noop, the three tools differ by more than 5% in time to durable.",
+     "primary": "durable_s",
+     "control": "rsync",
+     "revisions": [
+      "a3e52c2c61de",
+      "d84368234dad-rs"
+     ],
+     "arms": [
+      {
+       "name": "rsync",
+       "tool": "rsync",
+       "client": null,
+       "scales": [],
+       "tuningFlags": []
+      },
+      {
+       "name": "xs-cpp",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 4,
+         "group": "25be34e79948a0b2417407f3"
+        }
+       ],
+       "tuningFlags": [
+        "-j4"
+       ]
+      },
+      {
+       "name": "xs-rs",
+       "tool": "xs",
+       "client": null,
+       "scales": [],
+       "tuningFlags": []
+      }
+     ],
+     "samples": 12,
+     "invalid": 0,
+     "cells": [
+      {
+       "factors": {
+        "id": "congress-sample.noop.a-aws.sender.warm",
+        "corpus": "congress-sample",
+        "scenario": "noop",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 25246,
+        "bytes": 218210440
+       },
+       "arm": "xs-cpp",
+       "validSamples": 4,
+       "blocks": 4,
+       "medianSeconds": 0.7695000000000001,
+       "medianGbps": 2.2690251280075335,
+       "medianClientCpuSeconds": 0.944,
+       "pairedBlocks": 4,
+       "medianPairedSpeedVsControl": 2.1035361198685063
+      },
+      {
+       "factors": {
+        "id": "congress-sample.noop.a-aws.sender.warm",
+        "corpus": "congress-sample",
+        "scenario": "noop",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 25246,
+        "bytes": 218210440
+       },
+       "arm": "rsync",
+       "validSamples": 4,
+       "blocks": 4,
+       "medianSeconds": 1.6629,
+       "medianGbps": 1.0519053058780883,
+       "medianClientCpuSeconds": 0.6655,
+       "pairedBlocks": 4,
+       "medianPairedSpeedVsControl": 1
+      },
+      {
+       "factors": {
+        "id": "congress-sample.noop.a-aws.sender.warm",
+        "corpus": "congress-sample",
+        "scenario": "noop",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 25246,
+        "bytes": 218210440
+       },
+       "arm": "xs-rs",
+       "validSamples": 4,
+       "blocks": 4,
+       "medianSeconds": 1.6878,
+       "medianGbps": 1.0345351147077921,
+       "medianClientCpuSeconds": 0.8925000000000001,
+       "pairedBlocks": 4,
+       "medianPairedSpeedVsControl": 1.0297288366447381
+      }
+     ]
+    },
+    {
+     "key": "vps/FC-5a45360-noop/20261020T190640Z-FC-5a45360-noop",
+     "experiment": "FC-5a45360-noop",
+     "question": "On congress-sample, noop copies: how do rsync, xs-c++ and xs-rs at 5a4536053183 compare?",
+     "state": "complete",
+     "hypothesis": "On congress-sample, noop, the three tools differ by more than 5% in time to durable.",
+     "primary": "durable_s",
+     "control": "rsync",
+     "revisions": [
+      "a3e52c2c61de",
+      "5a4536053183-rs"
+     ],
+     "arms": [
+      {
+       "name": "rsync",
+       "tool": "rsync",
+       "client": null,
+       "scales": [],
+       "tuningFlags": []
+      },
+      {
+       "name": "xs-cpp",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 4,
+         "group": "25be34e79948a0b2417407f3"
+        }
+       ],
+       "tuningFlags": [
+        "-j4"
+       ]
+      },
+      {
+       "name": "xs-rs",
+       "tool": "xs",
+       "client": null,
+       "scales": [],
+       "tuningFlags": []
+      }
+     ],
+     "samples": 12,
+     "invalid": 0,
+     "cells": [
+      {
+       "factors": {
+        "id": "congress-sample.noop.a-aws.sender.warm",
+        "corpus": "congress-sample",
+        "scenario": "noop",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 25246,
+        "bytes": 218210440
+       },
+       "arm": "xs-cpp",
+       "validSamples": 4,
+       "blocks": 4,
+       "medianSeconds": 0.8574999999999999,
+       "medianGbps": 2.037473039739312,
+       "medianClientCpuSeconds": 1.0015,
+       "pairedBlocks": 4,
+       "medianPairedSpeedVsControl": 1.759292467242513
+      },
+      {
+       "factors": {
+        "id": "congress-sample.noop.a-aws.sender.warm",
+        "corpus": "congress-sample",
+        "scenario": "noop",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 25246,
+        "bytes": 218210440
+       },
+       "arm": "xs-rs",
+       "validSamples": 4,
+       "blocks": 4,
+       "medianSeconds": 1.5384,
+       "medianGbps": 1.1350714162896707,
+       "medianClientCpuSeconds": 0.973,
+       "pairedBlocks": 4,
+       "medianPairedSpeedVsControl": 0.9605886537969737
+      },
+      {
+       "factors": {
+        "id": "congress-sample.noop.a-aws.sender.warm",
+        "corpus": "congress-sample",
+        "scenario": "noop",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 25246,
+        "bytes": 218210440
+       },
+       "arm": "rsync",
+       "validSamples": 4,
+       "blocks": 4,
+       "medianSeconds": 1.4969999999999999,
+       "medianGbps": 1.1661453175777003,
+       "medianClientCpuSeconds": 0.601,
+       "pairedBlocks": 4,
+       "medianPairedSpeedVsControl": 1
+      }
+     ]
+    },
+    {
+     "key": "vps/FC-5a45360-noop/20261020T190426Z-FC-5a45360-noop",
+     "experiment": "FC-5a45360-noop",
+     "question": "On congress-sample, noop copies: how do rsync, xs-c++ and xs-rs at 5a4536053183 compare?",
+     "state": "complete",
+     "hypothesis": "On congress-sample, noop, the three tools differ by more than 5% in time to durable.",
+     "primary": "durable_s",
+     "control": "rsync",
+     "revisions": [
+      "a3e52c2c61de",
+      "5a4536053183-rs"
+     ],
+     "arms": [
+      {
+       "name": "rsync",
+       "tool": "rsync",
+       "client": null,
+       "scales": [],
+       "tuningFlags": []
+      },
+      {
+       "name": "xs-cpp",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 4,
+         "group": "25be34e79948a0b2417407f3"
+        }
+       ],
+       "tuningFlags": [
+        "-j4"
+       ]
+      },
+      {
+       "name": "xs-rs",
+       "tool": "xs",
+       "client": null,
+       "scales": [],
+       "tuningFlags": []
+      }
+     ],
+     "samples": 12,
+     "invalid": 0,
+     "cells": [
+      {
+       "factors": {
+        "id": "congress-sample.noop.a-aws.sender.warm",
+        "corpus": "congress-sample",
+        "scenario": "noop",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 25246,
+        "bytes": 218210440
+       },
+       "arm": "rsync",
+       "validSamples": 4,
+       "blocks": 4,
+       "medianSeconds": 1.5607,
+       "medianGbps": 1.1187839854587431,
+       "medianClientCpuSeconds": 0.637,
+       "pairedBlocks": 4,
+       "medianPairedSpeedVsControl": 1
+      },
+      {
+       "factors": {
+        "id": "congress-sample.noop.a-aws.sender.warm",
+        "corpus": "congress-sample",
+        "scenario": "noop",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 25246,
+        "bytes": 218210440
+       },
+       "arm": "xs-cpp",
+       "validSamples": 4,
+       "blocks": 4,
+       "medianSeconds": 0.8009999999999999,
+       "medianGbps": 2.1801447193533905,
+       "medianClientCpuSeconds": 0.9225000000000001,
+       "pairedBlocks": 4,
+       "medianPairedSpeedVsControl": 1.9959475656530077
+      },
+      {
+       "factors": {
+        "id": "congress-sample.noop.a-aws.sender.warm",
+        "corpus": "congress-sample",
+        "scenario": "noop",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 25246,
+        "bytes": 218210440
+       },
+       "arm": "xs-rs",
+       "validSamples": 4,
+       "blocks": 4,
+       "medianSeconds": 1.5618500000000002,
+       "medianGbps": 1.117704159283447,
+       "medianClientCpuSeconds": 0.919,
+       "pairedBlocks": 4,
+       "medianPairedSpeedVsControl": 0.969199728135876
+      }
+     ]
+    },
+    {
+     "key": "vps/FC-02bd268-noop/20261020T184215Z-FC-02bd268-noop",
+     "experiment": "FC-02bd268-noop",
+     "question": "On congress-sample, noop copies: how do rsync, xs-c++ and xs-rs at 02bd26868504 compare?",
+     "state": "complete",
+     "hypothesis": "On congress-sample, noop, the three tools differ by more than 5% in time to durable.",
+     "primary": "durable_s",
+     "control": "rsync",
+     "revisions": [
+      "a3e52c2c61de",
+      "02bd26868504-rs"
+     ],
+     "arms": [
+      {
+       "name": "rsync",
+       "tool": "rsync",
+       "client": null,
+       "scales": [],
+       "tuningFlags": []
+      },
+      {
+       "name": "xs-cpp",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 4,
+         "group": "25be34e79948a0b2417407f3"
+        }
+       ],
+       "tuningFlags": [
+        "-j4"
+       ]
+      },
+      {
+       "name": "xs-rs",
+       "tool": "xs",
+       "client": null,
+       "scales": [],
+       "tuningFlags": []
+      }
+     ],
+     "samples": 12,
+     "invalid": 0,
+     "cells": [
+      {
+       "factors": {
+        "id": "congress-sample.noop.a-aws.sender.warm",
+        "corpus": "congress-sample",
+        "scenario": "noop",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 25246,
+        "bytes": 218210440
+       },
+       "arm": "xs-cpp",
+       "validSamples": 4,
+       "blocks": 4,
+       "medianSeconds": 0.75395,
+       "medianGbps": 2.3162344837159763,
+       "medianClientCpuSeconds": 0.8855,
+       "pairedBlocks": 4,
+       "medianPairedSpeedVsControl": 2.083868842784547
+      },
+      {
+       "factors": {
+        "id": "congress-sample.noop.a-aws.sender.warm",
+        "corpus": "congress-sample",
+        "scenario": "noop",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 25246,
+        "bytes": 218210440
+       },
+       "arm": "rsync",
+       "validSamples": 4,
+       "blocks": 4,
+       "medianSeconds": 1.556,
+       "medianGbps": 1.1220564041088772,
+       "medianClientCpuSeconds": 0.6285000000000001,
+       "pairedBlocks": 4,
+       "medianPairedSpeedVsControl": 1
+      },
+      {
+       "factors": {
+        "id": "congress-sample.noop.a-aws.sender.warm",
+        "corpus": "congress-sample",
+        "scenario": "noop",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 25246,
+        "bytes": 218210440
+       },
+       "arm": "xs-rs",
+       "validSamples": 4,
+       "blocks": 4,
+       "medianSeconds": 1.39265,
+       "medianGbps": 1.2632478407444618,
+       "medianClientCpuSeconds": 0.8514999999999999,
+       "pairedBlocks": 4,
+       "medianPairedSpeedVsControl": 1.1512848450081568
+      }
+     ]
+    },
+    {
+     "key": "vps/FC-02bd268-noop/20261020T184016Z-FC-02bd268-noop",
+     "experiment": "FC-02bd268-noop",
+     "question": "On congress-sample, noop copies: how do rsync, xs-c++ and xs-rs at 02bd26868504 compare?",
+     "state": "complete",
+     "hypothesis": "On congress-sample, noop, the three tools differ by more than 5% in time to durable.",
+     "primary": "durable_s",
+     "control": "rsync",
+     "revisions": [
+      "a3e52c2c61de",
+      "02bd26868504-rs"
+     ],
+     "arms": [
+      {
+       "name": "rsync",
+       "tool": "rsync",
+       "client": null,
+       "scales": [],
+       "tuningFlags": []
+      },
+      {
+       "name": "xs-cpp",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 4,
+         "group": "25be34e79948a0b2417407f3"
+        }
+       ],
+       "tuningFlags": [
+        "-j4"
+       ]
+      },
+      {
+       "name": "xs-rs",
+       "tool": "xs",
+       "client": null,
+       "scales": [],
+       "tuningFlags": []
+      }
+     ],
+     "samples": 12,
+     "invalid": 0,
+     "cells": [
+      {
+       "factors": {
+        "id": "congress-sample.noop.a-aws.sender.warm",
+        "corpus": "congress-sample",
+        "scenario": "noop",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 25246,
+        "bytes": 218210440
+       },
+       "arm": "rsync",
+       "validSamples": 4,
+       "blocks": 4,
+       "medianSeconds": 1.54355,
+       "medianGbps": 1.1310116216887462,
+       "medianClientCpuSeconds": 0.6285000000000001,
+       "pairedBlocks": 4,
+       "medianPairedSpeedVsControl": 1
+      },
+      {
+       "factors": {
+        "id": "congress-sample.noop.a-aws.sender.warm",
+        "corpus": "congress-sample",
+        "scenario": "noop",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 25246,
+        "bytes": 218210440
+       },
+       "arm": "xs-cpp",
+       "validSamples": 4,
+       "blocks": 4,
+       "medianSeconds": 0.8279000000000001,
+       "medianGbps": 2.1113035294664866,
+       "medianClientCpuSeconds": 0.908,
+       "pairedBlocks": 4,
+       "medianPairedSpeedVsControl": 1.827878659350059
+      },
+      {
+       "factors": {
+        "id": "congress-sample.noop.a-aws.sender.warm",
+        "corpus": "congress-sample",
+        "scenario": "noop",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 25246,
+        "bytes": 218210440
+       },
+       "arm": "xs-rs",
+       "validSamples": 4,
+       "blocks": 4,
+       "medianSeconds": 1.32855,
+       "medianGbps": 1.31448969931035,
+       "medianClientCpuSeconds": 0.8825000000000001,
+       "pairedBlocks": 4,
+       "medianPairedSpeedVsControl": 1.146247063602877
+      }
+     ]
+    },
+    {
+     "key": "vps/FC-02bd268-noop/20261020T183246Z-FC-02bd268-noopf2",
+     "experiment": "FC-02bd268-noop",
+     "question": "On congress-sample, noop copies: how do rsync, xs-c++ and xs-rs at 02bd26868504 compare?",
+     "state": "complete",
+     "hypothesis": "On congress-sample, noop, the three tools differ by more than 5% in time to durable.",
+     "primary": "durable_s",
+     "control": "rsync",
+     "revisions": [
+      "02bd26868504-rs",
+      "a3e52c2c61de"
+     ],
+     "arms": [
+      {
+       "name": "rsync",
+       "tool": "rsync",
+       "client": null,
+       "scales": [],
+       "tuningFlags": []
+      },
+      {
+       "name": "xs-cpp",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 4,
+         "group": "25be34e79948a0b2417407f3"
+        }
+       ],
+       "tuningFlags": [
+        "-j4"
+       ]
+      },
+      {
+       "name": "xs-rs",
+       "tool": "xs",
+       "client": null,
+       "scales": [],
+       "tuningFlags": []
+      }
+     ],
+     "samples": 12,
+     "invalid": 0,
+     "cells": [
+      {
+       "factors": {
+        "id": "congress-sample.noop.a-aws.sender.warm",
+        "corpus": "congress-sample",
+        "scenario": "noop",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 25246,
+        "bytes": 218210440
+       },
+       "arm": "xs-rs",
+       "validSamples": 4,
+       "blocks": 4,
+       "medianSeconds": 1.1756,
+       "medianGbps": 1.495949804672806,
+       "medianClientCpuSeconds": 0.9405,
+       "pairedBlocks": 4,
+       "medianPairedSpeedVsControl": 1.3545467520591012
+      },
+      {
+       "factors": {
+        "id": "congress-sample.noop.a-aws.sender.warm",
+        "corpus": "congress-sample",
+        "scenario": "noop",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 25246,
+        "bytes": 218210440
+       },
+       "arm": "rsync",
+       "validSamples": 4,
+       "blocks": 4,
+       "medianSeconds": 1.5782500000000002,
+       "medianGbps": 1.1064425832314289,
+       "medianClientCpuSeconds": 0.633,
+       "pairedBlocks": 4,
+       "medianPairedSpeedVsControl": 1
+      },
+      {
+       "factors": {
+        "id": "congress-sample.noop.a-aws.sender.warm",
+        "corpus": "congress-sample",
+        "scenario": "noop",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 25246,
+        "bytes": 218210440
+       },
+       "arm": "xs-cpp",
+       "validSamples": 4,
+       "blocks": 4,
+       "medianSeconds": 0.8894500000000001,
+       "medianGbps": 1.9626699254381756,
+       "medianClientCpuSeconds": 0.9570000000000001,
+       "pairedBlocks": 4,
+       "medianPairedSpeedVsControl": 1.7206876165838279
+      }
+     ]
+    },
+    {
+     "key": "vps/FC-02bd268-noop/20261020T181617Z-FC-02bd268-noopf1",
+     "experiment": "FC-02bd268-noop",
+     "question": "On congress-sample, noop copies: how do rsync, xs-c++ and xs-rs at 02bd26868504 compare?",
+     "state": "complete",
+     "hypothesis": "On congress-sample, noop, the three tools differ by more than 5% in time to durable.",
+     "primary": "durable_s",
+     "control": "rsync",
+     "revisions": [
+      "02bd26868504-rs",
+      "a3e52c2c61de"
+     ],
+     "arms": [
+      {
+       "name": "rsync",
+       "tool": "rsync",
+       "client": null,
+       "scales": [],
+       "tuningFlags": []
+      },
+      {
+       "name": "xs-cpp",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 4,
+         "group": "25be34e79948a0b2417407f3"
+        }
+       ],
+       "tuningFlags": [
+        "-j4"
+       ]
+      },
+      {
+       "name": "xs-rs",
+       "tool": "xs",
+       "client": null,
+       "scales": [],
+       "tuningFlags": []
+      }
+     ],
+     "samples": 22,
+     "invalid": 12,
+     "cells": [
+      {
+       "factors": {
+        "id": "congress-sample.noop.a-aws.sender.warm",
+        "corpus": "congress-sample",
+        "scenario": "noop",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 25246,
+        "bytes": 218210440
+       },
+       "arm": "rsync",
+       "validSamples": 6,
+       "blocks": 3,
+       "medianSeconds": 1.54245,
+       "medianGbps": 1.1317635402883266,
+       "medianClientCpuSeconds": 0.6305000000000001,
+       "pairedBlocks": 6,
+       "medianPairedSpeedVsControl": 1
+      },
+      {
+       "factors": {
+        "id": "congress-sample.noop.a-aws.sender.warm",
+        "corpus": "congress-sample",
+        "scenario": "noop",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 25246,
+        "bytes": 218210440
+       },
+       "arm": "xs-cpp",
+       "validSamples": 4,
+       "blocks": 3,
+       "medianSeconds": 0.78175,
+       "medianGbps": 2.2332652428760555,
+       "medianClientCpuSeconds": 0.909,
+       "pairedBlocks": 4,
+       "medianPairedSpeedVsControl": 1.9395648064252715
+      }
+     ]
+    }
+   ],
+   "commentary": {
+    "headline": "xs-rs stays winless against xs-c++, with a useful update-copy tie and clear metadata-path losses",
+    "paragraphs": [
+     "The day's scoreboard is blunt: xs-cpp takes four of five contest cells, xs-rs wins none, and one cell is a tie. The tie is update-10pct, where xs-rs records 1.613s against xs-c++ at 1.573s, an rs_vs_cpp ratio of 1.025, so essentially parity. Everywhere else xs-rs trails, and on the large real-projects tree the gap is material: 42.805s versus 29.298s on fresh copies, ratio 1.461, and 2.983s versus 1.793s on noop, ratio 1.664. The reference arm, rsync, is faster than both on real-projects fresh at 20.055s, but both xs arms beat it on real-projects noop.",
+     "The small-file congress results are more encouraging but less stable. Baseline fresh medians are almost tied: xs-rs 3.4488s, xs-c++ 3.5397s, reference 3.4219s. Yet the later fresh contest cell puts xs-rs at 4.329s against xs-c++ at 3.569s, ratio 1.213, while the run's own paired ratio is about 0.999. Noop tells a similar story: congress noop is 0.852s versus 0.797s, ratio 1.069, and port-step noop runs range from close (0.834s versus 0.765s) to clearly slow (1.705s versus 0.812s). This looks like an unstable metadata or scheduling path rather than a bandwidth ceiling.",
+     "CPU does not give xs-rs a clean escape. It uses less client CPU than xs-c++ on fresh congress (2.609s versus 3.749s) despite similar elapsed time, but much more on real-projects fresh (44.77s versus 28.24s) while also running slower. With only two to four matched blocks per cell, different revisions, and only one A-to-AWS warm-cache direction, these are screening signals, not proof. The practical message is to treat update copies as the one credible xs-rs candidate, and to tune and profile xs-rs on real-projects noop and fresh, then congress noop and fresh, before claiming any default."
+    ]
+   },
+   "overview": "These experiments provided useful tuning insights. Here are the insights: xs-rs still trails xs-c++, with no contest wins, one tie on update copies, and clear losses on fresh and noop. The update tie shows parity is reachable on small-file updates, but the real-projects and noop results point to a metadata-path gap. Provisional guidance is to keep the update setting as a candidate, avoid promoting fresh or noop behaviour, and tune xs-rs next on real-projects noop and fresh, then congress noop and fresh. Small matched samples limit confidence.",
+   "insights": [
+    {
+     "caveat": "Small matched samples; contest seconds and run-cell paired ratios are not always aligned.",
+     "evidence": "Contest score is xs-cpp 4, xs-rs 0, tie 1; rs_vs_cpp ratios are 1.213 fresh congress, 1.069 congress noop, 1.025 update, 1.461 real-projects fresh and 1.664 real-projects noop.",
+     "finding": "xs-rs does not win any contest cell. Its best result is update-10pct parity at 1.613s versus xs-c++ 1.573s, ratio 1.025; its worst is real-projects noop at 2.983s versus 1.793s, ratio 1.664.",
+     "runKeys": [
+      "vps/PS-8428aac9a210-update-10pct/20261021T005449Z-PS-8428aac9a210-update-10pct",
+      "vps/PS-8428aac9a210-fresh/20261021T005447Z-PS-8428aac9a210-fresh",
+      "vps/BL2-real-projects/20261021T003556Z-BL2-real-projects",
+      "vps/BL1-congress-sample/20261021T003554Z-BL1-congress-sample"
+     ],
+     "title": "Scoreboard: xs-cpp takes four cells, xs-rs none"
+    },
+    {
+     "caveat": "Only two paired blocks; parity is a candidate, not a proven win.",
+     "evidence": "xs-rs median 1.61275s versus xs-c++ 1.6311s and rsync 1.6701s; run-cell paired speed 1.0095; contest ratio 1.025.",
+     "finding": "Update-10pct is the one encouraging xs-rs result: 1.613s versus xs-c++ 1.573s in the contest ledger, and 1.61275s versus 1.6311s in the run cell, with paired speed 1.0095.",
+     "runKeys": [
+      "vps/PS-8428aac9a210-update-10pct/20261021T005449Z-PS-8428aac9a210-update-10pct"
+     ],
+     "title": "Update copies reach parity"
+    },
+    {
+     "caveat": "Two blocks per arm; different revisions and experiments are not controlled comparisons.",
+     "evidence": "xs-rs 42.805s versus xs-c++ 29.298s, ratio 1.461; rsync 20.055s. xs-rs CPU 44.7725s versus xs-c++ 28.235s; throughput 0.400 vs 0.586 Gb/s.",
+     "finding": "Real-projects fresh copies expose a large xs-rs regression: 42.805s versus 29.298s for xs-c++, ratio 1.461, while rsync takes 20.055s and xs-rs burns 44.77 CPU seconds versus 28.24.",
+     "runKeys": [
+      "vps/BL2-real-projects/20261021T003556Z-BL2-real-projects"
+     ],
+     "title": "Large-tree fresh copy is xs-rs's clearest loss"
+    },
+    {
+     "caveat": "Warm cache and only two blocks; no storage or direction variants supplied.",
+     "evidence": "xs-rs 2.983s versus xs-c++ 1.793s, ratio 1.664; xs-cpp speed vs rsync 2.118, xs-rs 1.269; throughput 5.776 vs 9.559 Gb/s.",
+     "finding": "On real-projects noop, xs-c++ is 2.12x rsync while xs-rs is only 1.27x; xs-rs still beats the reference at 2.983s versus 3.77s, but trails xs-c++ by 66%.",
+     "runKeys": [
+      "vps/BL2-real-projects/20261021T003556Z-BL2-real-projects"
+     ],
+     "title": "Metadata/noop gap is large on real-projects"
+    },
+    {
+     "caveat": "Different revisions and experiments; baseline medians and contest seconds diverge.",
+     "evidence": "BL1 fresh: xs-rs 3.4488s, xs-c++ 3.5397s, rsync 3.4219s. PS-8428 fresh contest: 4.329 vs 3.569, ratio 1.213. PS-3 fresh: 4.119 vs 3.783.",
+     "finding": "Small-file fresh results hover near parity but are unstable: baseline medians are almost tied (3.449s versus 3.540s), while other fresh cells show xs-rs 21% and 9% slower.",
+     "runKeys": [
+      "vps/BL1-congress-sample/20261021T003554Z-BL1-congress-sample",
+      "vps/PS-8428aac9a210-fresh/20261021T005447Z-PS-8428aac9a210-fresh",
+      "vps/PS-3b891bf5e8fb-fresh/20261020T234716Z-PS-3b891bf5e8fb-fresh"
+     ],
+     "title": "Small-file fresh is near parity but not a robust win"
+    },
+    {
+     "caveat": "Three blocks per run and different revision labels; not a controlled change series.",
+     "evidence": "PS-f4: 1.4734s vs 0.8893s, paired 0.604. PS-2c: 1.4541s vs 0.8134s, paired 0.625. PS-e3: 1.7046s vs 0.8124s, paired 0.486. PS-3: 0.8344s vs 0.7654s, paired 0.958.",
+     "finding": "Port-step noop runs show a real weak spot: xs-rs ranges from close in PS-3 (0.834s versus 0.765s, paired 0.958) to about half the speed of xs-c++ in PS-e3 (paired 0.486).",
+     "runKeys": [
+      "vps/PS-3b891bf5e8fb-noop/20261020T234715Z-PS-3b891bf5e8fb-noop",
+      "vps/PS-f4e30e4ed207-noop/20261020T214720Z-PS-f4e30e4ed207-noop",
+      "vps/PS-2c0bec1da693-noop/20261020T205318Z-PS-2c0bec1da693-noop",
+      "vps/PS-e3b546f679b9-noop/20261020T201315Z-PS-e3b546f679b9-noop"
+     ],
+     "title": "Noop regressions appear across port-step runs"
+    },
+    {
+     "caveat": "Four blocks per cell; runs are separate experiments, not a controlled comparison.",
+     "evidence": "FC-d843: 1.688s vs 0.770s. FC-5a: 1.538/1.562s vs 0.857/0.801s. FC-02: 1.393/1.329/1.176s vs 0.754/0.828/0.889s; best xs-rs is still 1.32x xs-c++.",
+     "finding": "Repeated congress noop runs confirm the pattern: xs-rs stays about 1.3x to 2.2x slower than xs-c++ by raw medians, with FC-02's best run still 1.176s versus 0.889s.",
+     "runKeys": [
+      "vps/FC-d843682-noop/20261020T193555Z-FC-d843682-noop",
+      "vps/FC-5a45360-noop/20261020T190640Z-FC-5a45360-noop",
+      "vps/FC-5a45360-noop/20261020T190426Z-FC-5a45360-noop",
+      "vps/FC-02bd268-noop/20261020T184215Z-FC-02bd268-noop",
+      "vps/FC-02bd268-noop/20261020T184016Z-FC-02bd268-noop",
+      "vps/FC-02bd268-noop/20261020T183246Z-FC-02bd268-noopf2"
+     ],
+     "title": "Repeated noop runs still favour xs-c++"
+    },
+    {
+     "caveat": "Only A-to-AWS warm-cache runs; CPU was observed during transfer, not isolated.",
+     "evidence": "Fresh congress CPU: xs-rs 2.609s vs xs-c++ 3.749s. Real-projects fresh: 44.7725s vs 28.235s. Update: 1.1425s vs 1.282s.",
+     "finding": "CPU does not consistently favour xs-rs: it is lower on fresh congress despite similar elapsed time, higher on real-projects fresh while also slower, and slightly lower on update.",
+     "runKeys": [
+      "vps/BL1-congress-sample/20261021T003554Z-BL1-congress-sample",
+      "vps/BL2-real-projects/20261021T003556Z-BL2-real-projects",
+      "vps/PS-8428aac9a210-update-10pct/20261021T005449Z-PS-8428aac9a210-update-10pct"
+     ],
+     "title": "CPU tradeoff is workload-dependent"
+    }
+   ],
+   "limitations": [
+    "Medians from two to four matched blocks per cell; no confidence intervals or significance tests.",
+    "Contest scoreboard seconds and run-cell paired ratios can diverge because of pairing and window handling; the contest ledger is the scoreboard, not a second independent measurement.",
+    "Different xs-rs revisions and experiments are not controlled comparisons, so specific code changes cannot be credited or blamed.",
+    "Only one direction, A sender to AWS receiver, with sender client and warm cache; no storage, compression or alternate-link evidence is supplied.",
+    "Small-file corpora dominate; real-projects has only two blocks for fresh and noop.",
+    "FC-02 noopf1 contains 12 invalid samples and no xs-rs cell; it is excluded from xs-rs comparisons."
+   ],
+   "nextSteps": [
+    "Tune xs-rs first for the real-projects fresh and real-projects noop cells, where the losses are largest and CPU is highest.",
+    "Then tune congress-sample noop and congress-sample fresh, where xs-rs is close but unstable and loses the contest scoreboard.",
+    "Repeat update-10pct with more matched blocks to confirm whether parity is repeatable rather than a two-block result.",
+    "Hold the supplied xs-cpp -j4 and xs-rs workers=4 settings fixed while profiling metadata/noop separately from data transfer.",
+    "Isolate which port-step change produced the noop regressions in the PS runs, then validate with a controlled paired run; keep rsync as the reference arm only."
+   ],
+   "tuningImplications": [
+    {
+     "evidenceStrength": "low; two matched blocks",
+     "experiment": "PS-8428aac9a210-update-10pct",
+     "nextTest": "Repeat update-10pct with more matched blocks and CPU profiling while holding supplied settings.",
+     "recommendation": "Keep update copies as the strongest xs-rs candidate, but treat it as parity, not a win.",
+     "runKeys": [
+      "vps/PS-8428aac9a210-update-10pct/20261021T005449Z-PS-8428aac9a210-update-10pct"
+     ],
+     "settings": [
+      "xs-cpp workers=4 (-j4)",
+      "xs-rs workers=4 (-j4)"
+     ],
+     "tradeoffs": "Contest ratio 1.025; run-cell paired speed 1.0095; CPU 1.1425s versus 1.282s."
+    },
+    {
+     "evidenceStrength": "low; three blocks",
+     "experiment": "PS-8428aac9a210-fresh",
+     "nextTest": "Repeat fresh congress with more matched blocks and inspect why contest and run-cell paired ratios diverge.",
+     "recommendation": "Do not promote xs-rs fresh behaviour yet; the result is mixed rather than a clear win.",
+     "runKeys": [
+      "vps/PS-8428aac9a210-fresh/20261021T005447Z-PS-8428aac9a210-fresh"
+     ],
+     "settings": [
+      "xs-cpp workers=4 (-j4)",
+      "xs-rs workers=4 (-j4)"
+     ],
+     "tradeoffs": "Contest shows xs-rs 4.329s versus xs-c++ 3.569s, ratio 1.213; run-cell paired speed is 0.999."
+    },
+    {
+     "evidenceStrength": "low-moderate; two blocks but consistent loss in both scenarios",
+     "experiment": "BL2-real-projects",
+     "nextTest": "Profile real-projects fresh and noop separately with more matched blocks, holding supplied settings fixed.",
+     "recommendation": "Prioritize profiling xs-rs metadata/noop and large-tree fresh paths; avoid treating current xs-rs as ready for this workload.",
+     "runKeys": [
+      "vps/BL2-real-projects/20261021T003556Z-BL2-real-projects"
+     ],
+     "settings": [
+      "xs-cpp workers=4 (-j4)",
+      "xs-rs workers=4 (-j4)"
+     ],
+     "tradeoffs": "Fresh: 42.805s versus 29.298s and CPU 44.77s versus 28.24s; noop: 2.983s versus 1.793s."
+    },
+    {
+     "evidenceStrength": "low; three blocks per cell",
+     "experiment": "BL1-congress-sample",
+     "nextTest": "Repeat baseline fresh and noop with more blocks to see whether near-parity is repeatable.",
+     "recommendation": "Use as a baseline, not a winner; xs-rs is close on fresh but still behind xs-c++ on noop.",
+     "runKeys": [
+      "vps/BL1-congress-sample/20261021T003554Z-BL1-congress-sample"
+     ],
+     "settings": [
+      "xs-cpp workers=4 (-j4)",
+      "xs-rs workers=4 (-j4)"
+     ],
+     "tradeoffs": "Fresh medians 3.4488s versus 3.5397s; noop 0.8485s versus 0.7874s; rsync is reference only."
+    },
+    {
+     "evidenceStrength": "low; two blocks",
+     "experiment": "PS-3b891bf5e8fb-fresh",
+     "nextTest": "Repeat with more matched blocks and compare pairing against the baseline fresh cell.",
+     "recommendation": "Do not promote this xs-rs fresh result; it is slower than xs-c++.",
+     "runKeys": [
+      "vps/PS-3b891bf5e8fb-fresh/20261020T234716Z-PS-3b891bf5e8fb-fresh"
+     ],
+     "settings": [
+      "xs-cpp workers=4 (-j4)",
+      "xs-rs workers=4 (-j4)"
+     ],
+     "tradeoffs": "xs-rs 4.119s versus xs-c++ 3.783s; paired speed 0.954; rsync 3.150s."
+    },
+    {
+     "evidenceStrength": "low; three blocks",
+     "experiment": "PS-3b891bf5e8fb-noop",
+     "nextTest": "Profile noop scanning and compare against the faster noop variants before changing settings.",
+     "recommendation": "No promotion; xs-rs is close but still slower than xs-c++ on noop.",
+     "runKeys": [
+      "vps/PS-3b891bf5e8fb-noop/20261020T234715Z-PS-3b891bf5e8fb-noop"
+     ],
+     "settings": [
+      "xs-cpp workers=4 (-j4)",
+      "xs-rs workers=4 (-j4)"
+     ],
+     "tradeoffs": "xs-rs 0.8344s versus xs-c++ 0.7654s; paired speed 0.958."
+    },
+    {
+     "evidenceStrength": "low; three blocks",
+     "experiment": "PS-f4e30e4ed207-noop",
+     "nextTest": "Isolate the noop-path delta and retest with matched blocks and fixed supplied settings.",
+     "recommendation": "Do not carry this noop behaviour forward without isolating the regression.",
+     "runKeys": [
+      "vps/PS-f4e30e4ed207-noop/20261020T214720Z-PS-f4e30e4ed207-noop"
+     ],
+     "settings": [
+      "xs-cpp workers=4 (-j4)",
+      "xs-rs workers=4 (-j4)"
+     ],
+     "tradeoffs": "xs-rs 1.4734s versus xs-c++ 0.8893s; paired speed 0.604."
+    },
+    {
+     "evidenceStrength": "low; three blocks",
+     "experiment": "PS-2c0bec1da693-noop",
+     "nextTest": "Retest after profiling noop metadata handling; do not infer settings from the variant label.",
+     "recommendation": "Avoid using this xs-rs noop configuration as a candidate until the regression is explained.",
+     "runKeys": [
+      "vps/PS-2c0bec1da693-noop/20261020T205318Z-PS-2c0bec1da693-noop"
+     ],
+     "settings": [
+      "xs-cpp workers=4 (-j4)",
+      "xs-rs no scale or tuning flags supplied"
+     ],
+     "tradeoffs": "xs-rs 1.4541s versus xs-c++ 0.8134s; paired speed 0.625."
+    },
+    {
+     "evidenceStrength": "low; three blocks",
+     "experiment": "PS-e3b546f679b9-noop",
+     "nextTest": "Profile noop path first, then rerun with matched blocks and fixed supplied settings.",
+     "recommendation": "Treat this noop result as a strong negative signal and do not promote it.",
+     "runKeys": [
+      "vps/PS-e3b546f679b9-noop/20261020T201315Z-PS-e3b546f679b9-noop"
+     ],
+     "settings": [
+      "xs-cpp workers=4 (-j4)",
+      "xs-rs no scale or tuning flags supplied"
+     ],
+     "tradeoffs": "xs-rs 1.7046s versus xs-c++ 0.8124s; paired speed 0.486."
+    },
+    {
+     "evidenceStrength": "low; four blocks",
+     "experiment": "FC-d843682-noop",
+     "nextTest": "Profile metadata/noop handling with more blocks and compare against xs-cpp under the same supplied flags.",
+     "recommendation": "Avoid choosing this xs-rs noop behaviour; xs-c++ is far faster despite the reference comparison.",
+     "runKeys": [
+      "vps/FC-d843682-noop/20261020T193555Z-FC-d843682-noop"
+     ],
+     "settings": [
+      "xs-cpp workers=4 (-j4)",
+      "xs-rs no scale or tuning flags supplied"
+     ],
+     "tradeoffs": "xs-rs 1.688s versus xs-c++ 0.770s; xs-rs is only 1.03x rsync while xs-c++ is 2.10x."
+    },
+    {
+     "evidenceStrength": "low-moderate; two runs of four blocks each",
+     "experiment": "FC-5a45360-noop",
+     "nextTest": "Repeat with more blocks and profile the noop path before any setting change.",
+     "recommendation": "Do not promote this xs-rs noop result; xs-c++ is consistently much faster.",
+     "runKeys": [
+      "vps/FC-5a45360-noop/20261020T190640Z-FC-5a45360-noop",
+      "vps/FC-5a45360-noop/20261020T190426Z-FC-5a45360-noop"
+     ],
+     "settings": [
+      "xs-cpp workers=4 (-j4)",
+      "xs-rs no scale or tuning flags supplied"
+     ],
+     "tradeoffs": "xs-rs 1.538s and 1.562s versus xs-c++ 0.857s and 0.801s."
+    },
+    {
+     "evidenceStrength": "low; three runs of four blocks",
+     "experiment": "FC-02bd268-noop",
+     "nextTest": "Focus the next controlled validation on this noop cell; profile metadata handling with fixed supplied settings.",
+     "recommendation": "Best xs-rs noop run is still slower than xs-c++; keep as a tuning target, not a default.",
+     "runKeys": [
+      "vps/FC-02bd268-noop/20261020T184215Z-FC-02bd268-noop",
+      "vps/FC-02bd268-noop/20261020T184016Z-FC-02bd268-noop",
+      "vps/FC-02bd268-noop/20261020T183246Z-FC-02bd268-noopf2"
+     ],
+     "settings": [
+      "xs-cpp workers=4 (-j4)",
+      "xs-rs no scale or tuning flags supplied"
+     ],
+     "tradeoffs": "Best xs-rs 1.176s versus xs-c++ 0.889s; others 1.329-1.393s versus 0.754-0.828s."
+    }
+   ],
+   "charts": [
+    {
+     "id": "0-0-medianPairedSpeedVsControl",
+     "title": "Speed vs xs-cpp: congress-sample (a \u2192 aws)",
+     "runKey": "vps/PS-8428aac9a210-update-10pct/20261021T005449Z-PS-8428aac9a210-update-10pct",
+     "metric": "medianPairedSpeedVsControl",
+     "unit": "\u00d7 xs-cpp",
+     "primary": "durable_s",
+     "factors": {
+      "id": "congress-sample.update-10pct.a-aws.sender.warm",
+      "corpus": "congress-sample",
+      "scenario": "update-10pct",
+      "sender": "a",
+      "receiver": "aws",
+      "client": "sender",
+      "link": "a-aws",
+      "cache": "warm",
+      "files": 25246,
+      "bytes": 218210440
+     },
+     "values": [
+      {
+       "arm": "xs-cpp",
+       "value": 1,
+       "samples": 2,
+       "blocks": 2
+      },
+      {
+       "arm": "rsync",
+       "value": 0.9602397875640745,
+       "samples": 2,
+       "blocks": 2
+      },
+      {
+       "arm": "xs-rs",
+       "value": 1.0095154885144397,
+       "samples": 2,
+       "blocks": 2
+      }
+     ],
+     "note": "Window-only medians; no confidence intervals. Compare arms within this cell. "
+    },
+    {
+     "id": "1-0-medianPairedSpeedVsControl",
+     "title": "Speed vs xs-cpp: congress-sample (a \u2192 aws)",
+     "runKey": "vps/PS-8428aac9a210-fresh/20261021T005447Z-PS-8428aac9a210-fresh",
+     "metric": "medianPairedSpeedVsControl",
+     "unit": "\u00d7 xs-cpp",
+     "primary": "durable_s",
+     "factors": {
+      "id": "congress-sample.fresh.a-aws.sender.warm",
+      "corpus": "congress-sample",
+      "scenario": "fresh",
+      "sender": "a",
+      "receiver": "aws",
+      "client": "sender",
+      "link": "a-aws",
+      "cache": "warm",
+      "files": 25246,
+      "bytes": 218210440
+     },
+     "values": [
+      {
+       "arm": "xs-rs",
+       "value": 0.9991424406140125,
+       "samples": 3,
+       "blocks": 3
+      },
+      {
+       "arm": "xs-cpp",
+       "value": 1,
+       "samples": 3,
+       "blocks": 3
+      },
+      {
+       "arm": "rsync",
+       "value": 1.103383399705246,
+       "samples": 3,
+       "blocks": 3
+      }
+     ],
+     "note": "Window-only medians; no confidence intervals. Compare arms within this cell. "
+    },
+    {
+     "id": "2-0-medianSeconds",
+     "title": "Transfer duration: real-projects (a \u2192 aws)",
+     "runKey": "vps/BL2-real-projects/20261021T003556Z-BL2-real-projects",
+     "metric": "medianSeconds",
+     "unit": "s",
+     "primary": "durable_s",
+     "factors": {
+      "id": "real-projects.fresh.a-aws.sender.warm",
+      "corpus": "real-projects",
+      "scenario": "fresh",
+      "sender": "a",
+      "receiver": "aws",
+      "client": "sender",
+      "link": "a-aws",
+      "cache": "warm",
+      "files": 69316,
+      "bytes": 2134981089
+     },
+     "values": [
+      {
+       "arm": "xs-rs",
+       "value": 42.9319,
+       "samples": 2,
+       "blocks": 2
+      },
+      {
+       "arm": "rsync",
+       "value": 20.0549,
+       "samples": 2,
+       "blocks": 2
+      },
+      {
+       "arm": "xs-cpp",
+       "value": 29.4307,
+       "samples": 2,
+       "blocks": 2
+      }
+     ],
+     "note": "Window-only medians; no confidence intervals. Compare arms within this cell. "
+    },
+    {
+     "id": "2-1-medianSeconds",
+     "title": "Transfer duration: real-projects (a \u2192 aws)",
+     "runKey": "vps/BL2-real-projects/20261021T003556Z-BL2-real-projects",
+     "metric": "medianSeconds",
+     "unit": "s",
+     "primary": "durable_s",
+     "factors": {
+      "id": "real-projects.noop.a-aws.sender.warm",
+      "corpus": "real-projects",
+      "scenario": "noop",
+      "sender": "a",
+      "receiver": "aws",
+      "client": "sender",
+      "link": "a-aws",
+      "cache": "warm",
+      "files": 69316,
+      "bytes": 2134981089
+     },
+     "values": [
+      {
+       "arm": "rsync",
+       "value": 3.7728,
+       "samples": 2,
+       "blocks": 2
+      },
+      {
+       "arm": "xs-rs",
+       "value": 3.00895,
+       "samples": 2,
+       "blocks": 2
+      },
+      {
+       "arm": "xs-cpp",
+       "value": 1.7986499999999999,
+       "samples": 2,
+       "blocks": 2
+      }
+     ],
+     "note": "Window-only medians; no confidence intervals. Compare arms within this cell. "
+    },
+    {
+     "id": "3-1-medianPairedSpeedVsControl",
+     "title": "Speed vs rsync: congress-sample (a \u2192 aws)",
+     "runKey": "vps/BL1-congress-sample/20261021T003554Z-BL1-congress-sample",
+     "metric": "medianPairedSpeedVsControl",
+     "unit": "\u00d7 rsync",
+     "primary": "durable_s",
+     "factors": {
+      "id": "congress-sample.noop.a-aws.sender.warm",
+      "corpus": "congress-sample",
+      "scenario": "noop",
+      "sender": "a",
+      "receiver": "aws",
+      "client": "sender",
+      "link": "a-aws",
+      "cache": "warm",
+      "files": 25246,
+      "bytes": 218210440
+     },
+     "values": [
+      {
+       "arm": "xs-rs",
+       "value": 1.8247495580436064,
+       "samples": 3,
+       "blocks": 3
+      },
+      {
+       "arm": "xs-cpp",
+       "value": 1.96709439715411,
+       "samples": 3,
+       "blocks": 3
+      },
+      {
+       "arm": "rsync",
+       "value": 1,
+       "samples": 3,
+       "blocks": 3
+      }
+     ],
+     "note": "Window-only medians; no confidence intervals. Compare arms within this cell. "
+    },
+    {
+     "id": "8-0-medianPairedSpeedVsControl",
+     "title": "Speed vs xs-cpp: congress-sample (a \u2192 aws)",
+     "runKey": "vps/PS-e3b546f679b9-noop/20261020T201315Z-PS-e3b546f679b9-noop",
+     "metric": "medianPairedSpeedVsControl",
+     "unit": "\u00d7 xs-cpp",
+     "primary": "durable_s",
+     "factors": {
+      "id": "congress-sample.noop.a-aws.sender.warm",
+      "corpus": "congress-sample",
+      "scenario": "noop",
+      "sender": "a",
+      "receiver": "aws",
+      "client": "sender",
+      "link": "a-aws",
+      "cache": "warm",
+      "files": 25246,
+      "bytes": 218210440
+     },
+     "values": [
+      {
+       "arm": "xs-rs",
+       "value": 0.48580312096679573,
+       "samples": 3,
+       "blocks": 3
+      },
+      {
+       "arm": "rsync",
+       "value": 0.5179140634961112,
+       "samples": 3,
+       "blocks": 3
+      },
+      {
+       "arm": "xs-cpp",
+       "value": 1,
+       "samples": 3,
+       "blocks": 3
+      }
+     ],
+     "note": "Window-only medians; no confidence intervals. Compare arms within this cell. "
+    }
+   ]
+  },
+  {
    "id": "2026-10-20T19:25:42.151Z",
    "start": 1792437942.151,
    "end": 1792524342.151,
@@ -2401,6 +4955,6 @@
    "charts": []
   }
  ],
- "error": "Analysis API returned HTTP 503; retrying in five minutes.",
- "lastAttempt": 1792574134.919
+ "error": null,
+ "lastAttempt": 1792575994.968
 }
