@@ -35,7 +35,7 @@ everything on one thread, which costs little on a zero-latency pipe and a lot wh
 - [x] Per file: no `set_len` on a new file, `fchmod` only when the created mode differs, `fchown` only when the
   group differs, ids and groups looked up once (`fs.cpp:1882-2165`, `:136-151`).
 - [x] Per new directory: one `mkdir(mode|0700)`, no `lstat` when the parent listing says the name is absent.
-- [ ] The final pass skips directories already right, and works on directory fds (`fs.cpp:1553-1589`).
+- [x] The final pass skips what is already right: owner, mode and times each only when they differ (`fs.cpp:1553-1589`).
 
 ## 6. Bulk listings
 - [x] Linux: a `statx` relative to the directory's fd per entry (`DirEntry::metadata`), as `linux_scan.cpp`
