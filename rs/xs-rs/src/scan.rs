@@ -55,6 +55,7 @@ pub fn attrs_from(m: &fs::Metadata) -> Attrs {
         ctime: m.ctime(),
         ctime_ns: m.ctime_nsec().clamp(0, 999_999_999) as u32,
         xattrs: crate::xattr::XattrSet::default(),
+        acls: crate::acls::AclSet::default(),
     }
 }
 

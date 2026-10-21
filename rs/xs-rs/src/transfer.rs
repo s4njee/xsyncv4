@@ -19,6 +19,7 @@ use xs_wire::io_control::IoControl;
 use xs_wire::resume::ResumePrefix;
 use xs_wire::{Decoder, Encoder, Frame, Suffixes};
 
+use crate::acls;
 use crate::compression::{CompressionLink, Transport};
 use crate::delta::{DeltaSignature, DELTA_THRESHOLD};
 use crate::ffi;
@@ -379,6 +380,7 @@ fn send_dir<W: Write + Send + 'static>(
 ) -> io::Result<()> {
     let mut attrs = attrs.clone();
     attrs.xattrs = xattr::source_xattrs(path, T_DIR, filters, opts);
+    attrs.acls = acls::source_acls(path, T_DIR, opts);
     let attrs = &attrs;
     let mut entries: Vec<SourceEntry> = if selection.is_some() {
         entries
@@ -390,6 +392,7 @@ fn send_dir<W: Write + Send + 'static>(
     };
     for entry in &mut entries {
         entry.meta.attrs.xattrs = xattr::source_xattrs(&entry.path, entry.meta.kind, filters, opts);
+        entry.meta.attrs.acls = acls::source_acls(&entry.path, entry.meta.kind, opts);
     }
     let child_specs: Vec<(usize, PathBuf, Attrs)> = entries
         .iter()
@@ -411,6 +414,9 @@ fn send_dir<W: Write + Send + 'static>(
     if features & feature::XATTRS != 0 {
         streams.put_xattrs(&mut body, &attrs.xattrs, features);
     }
+    if features & acls::NATIVE_ACL != 0 {
+        acls::put_acls(&mut body, &attrs.acls, opts.numeric_ids);
+    }
     if features & feature::DIR_CHILDREN != 0 {
         let count = if opts.recursive || selection.is_some() { child_specs.len() as u64 } else { 0 };
         body.var(count);
@@ -420,6 +426,9 @@ fn send_dir<W: Write + Send + 'static>(
         protocol::put_entry(&mut body, &entry.meta, opts, features);
         if features & feature::XATTRS != 0 {
             streams.put_xattrs(&mut body, &entry.meta.attrs.xattrs, features);
+        }
+        if features & acls::NATIVE_ACL != 0 {
+            acls::put_acls(&mut body, &entry.meta.attrs.acls, opts.numeric_ids);
         }
     }
     let mut frame = Encoder::new();
@@ -518,12 +527,23 @@ fn flush_data<W: Write + Send + 'static>(
     Ok(())
 }
 
-fn whole_record(id: u32, idx: u32, attrs: &Attrs, bytes: &[u8], features: u64, streams: &mut xattr::Streams) -> Encoder {
+fn whole_record(
+    id: u32,
+    idx: u32,
+    attrs: &Attrs,
+    bytes: &[u8],
+    features: u64,
+    streams: &mut xattr::Streams,
+    numeric_ids: bool,
+) -> Encoder {
     let mut e = Encoder::new();
     e.var(id as u64).var(idx as u64).byte(rec::WHOLE);
     protocol::put_file_attrs(&mut e, attrs, features);
     if features & feature::XATTRS != 0 {
         streams.put_xattrs(&mut e, &attrs.xattrs, features);
+    }
+    if features & acls::NATIVE_ACL != 0 {
+        acls::put_acls(&mut e, &attrs.acls, numeric_ids);
     }
     e.str(bytes);
     e
@@ -607,6 +627,9 @@ fn send_large<W: Write + Send + 'static>(
         if features & feature::XATTRS != 0 {
             streams.put_xattrs(&mut e, &entry.meta.attrs.xattrs, features);
         }
+        if features & acls::NATIVE_ACL != 0 {
+            acls::put_acls(&mut e, &entry.meta.attrs.acls, opts.numeric_ids);
+        }
         record(e, block);
         return flush_data(output, streams, block, compress, link, opts);
     }
@@ -672,6 +695,9 @@ fn send_large<W: Write + Send + 'static>(
     if features & feature::XATTRS != 0 {
         streams.put_xattrs(&mut e, &entry.meta.attrs.xattrs, features);
     }
+    if features & acls::NATIVE_ACL != 0 {
+        acls::put_acls(&mut e, &entry.meta.attrs.acls, opts.numeric_ids);
+    }
     record(e, block);
     flush_data(output, streams, block, compress, link, opts)
 }
@@ -723,6 +749,9 @@ fn send_delta<W: Write + Send + 'static>(
     protocol::put_file_attrs(&mut e, &entry.meta.attrs, features);
     if features & feature::XATTRS != 0 {
         streams.put_xattrs(&mut e, &entry.meta.attrs.xattrs, features);
+    }
+    if features & acls::NATIVE_ACL != 0 {
+        acls::put_acls(&mut e, &entry.meta.attrs.acls, opts.numeric_ids);
     }
     e.raw(&sum[0].to_le_bytes()).raw(&sum[1].to_le_bytes());
     record(e, block);
@@ -776,7 +805,10 @@ fn send_need_data<W: Write + Send + 'static>(
         if entry.meta.size <= protocol::SMALL_MAX as i64 {
             match fs::read(&entry.path) {
                 Ok(bytes) => {
-                    record(whole_record(id, idx, &entry.meta.attrs, &bytes, features, streams), &mut block);
+                    record(
+                        whole_record(id, idx, &entry.meta.attrs, &bytes, features, streams, opts.numeric_ids),
+                        &mut block,
+                    );
                     if block.len() >= protocol::BLOCK_TARGET {
                         flush_data(output, streams, &mut block, opts.compress && !block_skip, link, opts)?;
                     }

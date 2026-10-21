@@ -96,6 +96,8 @@ pub struct Attrs {
     pub ctime_ns: u32,
     /// Extended attributes in protocol order, sent with `PF_XATTRS`.
     pub xattrs: crate::xattr::XattrSet,
+    /// POSIX ACL values, sent with `PF_ACL_POSIX`.
+    pub acls: crate::acls::AclSet,
 }
 
 /// What the C++ calls an entry's identity for hard-link grouping. Directories
@@ -417,6 +419,8 @@ pub struct Options {
     pub hard_links: bool,
     /// `-X` once, twice to include the rsync internal namespace.
     pub xattrs: u8,
+    /// `-A/--acls`, negotiated with `PF_ACL_POSIX`.
+    pub acls: bool,
     pub am_server: bool,
     pub pushing: bool,
     pub local_peer: bool,
@@ -464,6 +468,7 @@ impl Default for Options {
             raw_names: false,
             hard_links: false,
             xattrs: 0,
+            acls: false,
             am_server: false,
             pushing: false,
             local_peer: false,

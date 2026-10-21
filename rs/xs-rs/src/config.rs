@@ -48,6 +48,9 @@ fn read_config_frame<R: Read>(reader: &mut R, allow_keepalive: bool) -> io::Resu
         if kind == frame_type::XATTR_CONFIG && len != 1 {
             return protocol::bad("protocol error: malformed or unnegotiated xattr configuration");
         }
+        if kind == frame_type::ACL_CONFIG && len != 1 {
+            return protocol::bad("protocol error: malformed or unnegotiated ACL configuration");
+        }
         let mut payload = vec![0u8; len as usize];
         reader.read_exact(&mut payload).map_err(|error| match error.kind() {
             io::ErrorKind::UnexpectedEof => io::Error::new(io::ErrorKind::InvalidData, "connection closed inside a frame"),
@@ -128,6 +131,18 @@ pub(crate) fn read_configuration<R: Read, W: Write>(
             return Err((2, "protocol error: malformed xattr configuration".into()));
         };
         options.xattrs = mode;
+    }
+    if features & xs_wire::config::NATIVE_ACL != 0 {
+        let frame = config_frame(reader, control.keepalive_enabled())?;
+        if frame.kind != frame_type::ACL_CONFIG {
+            return Err((2, "protocol error: malformed ACL configuration".into()));
+        }
+        let config = Config::decode(frame.kind, &frame.payload, features)
+            .map_err(|error| (2, format!("protocol error: {error}")))?;
+        if config != Config::Acl {
+            return Err((2, "protocol error: malformed ACL configuration".into()));
+        }
+        options.acls = true;
     }
     if features & feature::CHOWN != 0 {
         let frame = config_frame(reader, control.keepalive_enabled())?;

@@ -9,6 +9,7 @@ use std::os::unix::ffi::{OsStrExt, OsStringExt};
 use std::os::unix::fs::{OpenOptionsExt, PermissionsExt};
 use std::path::{Path, PathBuf};
 
+use crate::acls;
 use crate::ffi;
 use crate::idmap;
 use crate::protocol::{Attrs, EntryMeta, HardlinkKey, Options};
@@ -176,6 +177,9 @@ pub(super) fn finish_infile(infile: &mut InFile, opts: &Options) -> io::Result<b
     if opts.xattrs != 0 {
         let _ = xattr::apply(&attrs.xattrs, &infile.temp, crate::protocol::T_REG, &opts.filters, opts);
     }
+    if opts.acls {
+        let _ = acls::apply(&attrs.acls, &infile.temp, crate::protocol::T_REG, attrs.mode, opts);
+    }
     match fs::rename(&infile.temp, &infile.final_path) {
         Ok(()) => Ok(true),
         Err(error) => {
@@ -199,6 +203,9 @@ pub(super) fn write_whole(path_dir: &Path, name: &[u8], final_path: &Path, attrs
         }
         if opts.xattrs != 0 {
             let _ = xattr::apply(&attrs.xattrs, &temp, crate::protocol::T_REG, &opts.filters, opts);
+        }
+        if opts.acls {
+            let _ = acls::apply(&attrs.acls, &temp, crate::protocol::T_REG, attrs.mode, opts);
         }
         drop(file);
         fs::rename(&temp, final_path)
