@@ -7,7 +7,7 @@ name: rust-ds
 # engineer/ branch of this repository, opened by the repository's owner (the lab's controller pushes with the
 # owner's token), is then approved and merged automatically once both pass.
 #
-# Every push to rust-ds (each merged step) builds xs-rs's release binary for both architectures and attaches
+# Every push to rust-ds that changes code (each merged step) builds xs-rs's release binary for both architectures and attaches
 # them to the rolling pre-release xs-rs-builds, as xs-rs-<commit12>-linux-<arch> with a .sha256 beside each;
 # the lab stages those (benchmarks/lab/stage.py) rather than building them itself.
 
@@ -16,6 +16,8 @@ on:
     branches: [rust-ds]
   push:
     branches: [rust-ds]
+    # The VPS lab publishes its results here once an hour (lab2-results/): those commits change no code.
+    paths-ignore: ['lab2-results/**']
   workflow_dispatch:
 
 permissions:
