@@ -179,7 +179,46 @@
   "conductor_ok": true,
   "retired": []
  },
- "_paused": [
-  "a"
- ]
+ "dc2b0344ba2b": {
+  "commit": "dc2b0344ba2bb97937dd3a512f652c756fec2031",
+  "step": "acls",
+  "spec": "PS-dc2b0344ba2b-fresh",
+  "specs": [
+   "PS-dc2b0344ba2b-fresh",
+   "PS-dc2b0344ba2b-update-10pct"
+  ],
+  "tree": "PORT-dc2b0344ba2b",
+  "congress": null,
+  "utc": "2026-10-21T16:05:45Z",
+  "conductor_ok": true,
+  "retired": [
+   "20261021T134610Z-PS-71872a77ee26-update-10pct"
+  ]
+ },
+ "aa7aee150987": {
+  "commit": "aa7aee15098700d78754be2638e607d9467686de",
+  "step": "rust-ds head, PR #30",
+  "spec": "PS-aa7aee150987-fresh",
+  "specs": [
+   "PS-aa7aee150987-fresh",
+   "PS-aa7aee150987-noop",
+   "PS-aa7aee150987-update-10pct",
+   "PS-aa7aee150987-laikav2-fresh",
+   "PS-aa7aee150987-laikav2-noop"
+  ],
+  "tree": "PORT-aa7aee150987",
+  "congress": null,
+  "utc": "2026-10-21T16:16:09Z",
+  "conductor_ok": true,
+  "retired": [
+   "20261021T160543Z-PS-dc2b0344ba2b-fresh",
+   "20261021T160544Z-PS-dc2b0344ba2b-update-10pct"
+  ]
+ },
+ "e9a497d2aa2e": {
+  "commit": "e9a497d2aa2ebb24c3747385824b6daecff46b07",
+  "step": "acls",
+  "failed": "stage.py build of xs-rs at e9a497d2aa2e failed; see port-screen-e9a497d2aa2e.log",
+  "utc": "2026-10-21T16:16:33Z"
+ }
 }

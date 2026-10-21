@@ -1,0 +1,244 @@
+{
+ "schema": 1,
+ "experiment": "PS-aa7aee150987-laikav2-fresh",
+ "spec_sha256": "16fec4d1372b7edc45cfce1bcea6ac3c12600b388bffdaeb3294cf151e03de29",
+ "kind": "screening",
+ "bundle": "02209f28b2c7",
+ "writes": {
+  "a": 0,
+  "aws": 1409576115
+ },
+ "hypothesis": "xs-rs at aa7aee150987 differs from xs-c++ (-a -j4) by more than 5% in time-to-durable on laikav2-sample, fresh, a>aws.",
+ "primary": "durable_s",
+ "delta": 0.05,
+ "control": "xs-cpp",
+ "seed": 97848,
+ "run_id": "20261021T161559Z-PS-aa7aee150987-laikav2-fresh",
+ "driver": "a",
+ "sample_timeout_s": 3600,
+ "results": "vps",
+ "background": false,
+ "local_link": false,
+ "eager_cleanup": true,
+ "hours": null,
+ "hosts": {
+  "a": {
+   "system": "Linux"
+  },
+  "aws": {
+   "system": "Linux"
+  }
+ },
+ "links": {
+  "a-aws": {
+   "hosts": [
+    "a",
+    "aws"
+   ],
+   "medium": "internet",
+   "initiator": "a",
+   "driver": "a",
+   "results": "vps",
+   "directions": [
+    "a>aws"
+   ]
+  }
+ },
+ "arms": [
+  {
+   "name": "xs-cpp",
+   "tool": "xs",
+   "flags": [
+    "-a",
+    "-j4"
+   ],
+   "rev": "fe012667764a",
+   "binary": {
+    "a": "~/benchmarks/lab/bin/xs-fe012667764a",
+    "aws": "~/benchmarks/lab/bin/xs-fe012667764a"
+   },
+   "sha256": {
+    "a": "b2ddbd5b430d89bfd4622f7044008ac84bdcb3e1e67fff43866405d946aa94b8",
+    "aws": "564cdd8e3bd6658152d5f5952724996b7058ba4d09df709d6e0baef2631d4d76"
+   },
+   "artifacts": {
+    "xs-linux-amd64": "b2ddbd5b430d89bfd4622f7044008ac84bdcb3e1e67fff43866405d946aa94b8",
+    "xs-linux-arm64": "564cdd8e3bd6658152d5f5952724996b7058ba4d09df709d6e0baef2631d4d76"
+   }
+  },
+  {
+   "name": "xs-rs",
+   "tool": "xs",
+   "flags": [
+    "-a",
+    "-j4"
+   ],
+   "rev": "aa7aee150987-rs",
+   "binary": {
+    "a": "~/benchmarks/lab/bin/xs-aa7aee150987-rs",
+    "aws": "~/benchmarks/lab/bin/xs-aa7aee150987-rs"
+   },
+   "sha256": {
+    "a": "d80efe802c5d9de50ff945450f58ed78d560c5c259c0a991f7a88ad0c5c31047",
+    "aws": "d284a922af56998e1490694f05eff66b065cd34579288dd323e946a2597d553a"
+   },
+   "artifacts": {
+    "xs-linux-amd64": "d80efe802c5d9de50ff945450f58ed78d560c5c259c0a991f7a88ad0c5c31047",
+    "xs-linux-arm64": "d284a922af56998e1490694f05eff66b065cd34579288dd323e946a2597d553a"
+   }
+  },
+  {
+   "name": "rsync",
+   "tool": "rsync",
+   "flags": [
+    "-a"
+   ],
+   "binary": {
+    "a": "rsync",
+    "aws": "rsync"
+   }
+  }
+ ],
+ "cells": [
+  {
+   "id": "laikav2-sample.fresh.a-aws.sender.warm",
+   "corpus": "laikav2-sample",
+   "scenario": "fresh",
+   "sender": "a",
+   "receiver": "aws",
+   "client": "sender",
+   "link": "a-aws",
+   "cache": "warm"
+  }
+ ],
+ "corpora": {
+  "laikav2-sample": {
+   "files": 1337,
+   "directories": 129,
+   "bytes": 93971741,
+   "digest": "8a8a292b04ba5560eea28cbfdb39b07ea11c2a8bf23c0e215095c53fab9932e3",
+   "quick_digest": "ce8f999b0213ad221ccc047c81330378acb07563e106afb6da63ac480fcb40ca"
+  }
+ },
+ "blocks": [
+  {
+   "cell": "laikav2-sample.fresh.a-aws.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs-cpp",
+     "xs-rs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs-cpp",
+     "xs-rs"
+    ],
+    [
+     "rsync",
+     "xs-rs",
+     "xs-cpp"
+    ]
+   ]
+  },
+  {
+   "cell": "laikav2-sample.fresh.a-aws.sender.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-rs",
+     "rsync",
+     "xs-cpp"
+    ],
+    [
+     "rsync",
+     "xs-rs",
+     "xs-cpp"
+    ],
+    [
+     "rsync",
+     "xs-cpp",
+     "xs-rs"
+    ]
+   ]
+  },
+  {
+   "cell": "laikav2-sample.fresh.a-aws.sender.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-cpp",
+     "xs-rs",
+     "rsync"
+    ],
+    [
+     "xs-cpp",
+     "xs-rs",
+     "rsync"
+    ],
+    [
+     "xs-cpp",
+     "rsync",
+     "xs-rs"
+    ]
+   ]
+  },
+  {
+   "cell": "laikav2-sample.fresh.a-aws.sender.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-cpp",
+     "xs-rs",
+     "rsync"
+    ],
+    [
+     "xs-rs",
+     "xs-cpp",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs-rs",
+     "xs-cpp"
+    ]
+   ]
+  },
+  {
+   "cell": "laikav2-sample.fresh.a-aws.sender.warm",
+   "block": 4,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs-cpp",
+     "xs-rs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs-cpp",
+     "xs-rs"
+    ],
+    [
+     "xs-rs",
+     "rsync",
+     "xs-cpp"
+    ]
+   ]
+  }
+ ],
+ "scripts": {
+  "probe.py": "a89b145b8f76fc4d5444cea6af3c124a5b2e5885226998c726ca95fd9d881d36",
+  "corpus.py": "410aa282e29466cbe0b4134c6c520a1eeaded966b1710941382730f89f27125c",
+  "corpora.json": "ea2e4dbcb956564354ed3c254ec38563f44612cf21f4d9b1234822894bfc99bc",
+  "agent.py": "d8e49fdc54233a7a5397e0a87689451ee02cb9225472178044a7e60df3f38120",
+  "runner.py": "21b474a24377a2f177b3f611172a912408fb0f1fb068ac298605fac634b3132e",
+  "xspipe.py": "94b3fccfc6e994d227077c453f90323ab55337fd8a98231d16a10696e8ebab6b",
+  "measure.py": "5065310f480ff1cabfa7c645f0db342624a02f9a081b96069d50d52b3d224777"
+ }
+}

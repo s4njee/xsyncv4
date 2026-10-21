@@ -1,0 +1,33 @@
+# Written by the engineer: xs-rs at dc2b0344ba2b (port_base after step acls merged) against
+# xs-c++ and rsync. Each port screen is queued once per commit of port_base, one spec per scenario.
+id = "PS-dc2b0344ba2b-update-10pct"
+kind = "screening"
+hypothesis = "xs-rs at dc2b0344ba2b differs from xs-c++ (-a -j4) by more than 5% in time-to-durable on congress-sample, update-10pct, a>aws."
+primary = "durable_s"
+delta = 0.05
+blocks = 2
+control = "xs-cpp"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.xs-cpp]
+tool = "xs"
+rev = "fe012667764a"
+flags = ["-a", "-j4"]
+
+[arms.xs-rs]
+tool = "xs"
+rev = "dc2b0344ba2bb97937dd3a512f652c756fec2031-rs"
+flags = ["-a", "-j4"]
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[matrix]
+link = "a-aws"
+corpus = ["congress-sample"]
+scenario = ["update-10pct"]
+direction = ["a>aws"]
+client = ["sender"]
+cache = ["warm"]

@@ -204,4 +204,4 @@ Written by benchmarks/lab/engineer.py whenever a case moves: every case that has
 
 **The change.** Added rs/xs-rs/src/acls.rs with POSIX ACL read/write, record export/import, the C++ validation rules, and exact put_acls/get_acls codecs. Wired -A/--acls through cli, Options and HELLO advertisement; added ACL style refusals and ACL_CONFIG send/read in the C++ frame order; encoded ACLs after xattrs in DIR and DATA records; applied ACLs to files, FIFOs, specials and directories; and marked incomplete ACL metadata so existing destination files are preserved and the transfer exits 23. (pull request #15)
 
-**Since.** Measured by the lab (PS-71872a77ee26-fresh, PS-71872a77ee26-update-10pct, time to durable): xs-rs 1.010x xs-c++ [0.838, 1.217], too few blocks, on congress-sample fresh (3 blocks); rsync 0.907x xs-c++ [0.787, 1.045], too few blocks, on congress-sample fresh (3 blocks). API cost $0.20.
+**Since.** The lab's screen of xs-rs after this step failed: stage.py build of xs-rs at e9a497d2aa2e failed; see port-screen-e9a497d2aa2e.log API cost $0.20.

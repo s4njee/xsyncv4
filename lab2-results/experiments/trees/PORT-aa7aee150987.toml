@@ -1,0 +1,30 @@
+# Queued by hand for the xs-rs session: rust-ds head after twelve merged steps, A to AWS, 5 blocks a cell.
+id = "PORT-aa7aee150987"
+question = "Is xs-rs at aa7aee150987 (rust-ds head, with automatic compression) as fast as xs-c++ on congress-sample and laikav2-sample, and than rsync?"
+deadline = "2026-10-24T16:15Z"
+start = ["N0", "N1", "N2", "N3", "N4"]
+
+[nodes.N0]
+spec = "auto/PS-aa7aee150987-fresh.toml"
+question = "Is xs-rs at aa7aee150987 (rust-ds head, with automatic compression) as fast as xs-c++ on congress-sample and laikav2-sample, and than rsync?"
+front = true
+
+[nodes.N1]
+spec = "auto/PS-aa7aee150987-noop.toml"
+question = "Is xs-rs at aa7aee150987 (rust-ds head, with automatic compression) as fast as xs-c++ on congress-sample and laikav2-sample, and than rsync?"
+front = true
+
+[nodes.N2]
+spec = "auto/PS-aa7aee150987-update-10pct.toml"
+question = "Is xs-rs at aa7aee150987 (rust-ds head, with automatic compression) as fast as xs-c++ on congress-sample and laikav2-sample, and than rsync?"
+front = true
+
+[nodes.N3]
+spec = "auto/PS-aa7aee150987-laikav2-fresh.toml"
+question = "Is xs-rs at aa7aee150987 (rust-ds head, with automatic compression) as fast as xs-c++ on congress-sample and laikav2-sample, and than rsync?"
+front = true
+
+[nodes.N4]
+spec = "auto/PS-aa7aee150987-laikav2-noop.toml"
+question = "Is xs-rs at aa7aee150987 (rust-ds head, with automatic compression) as fast as xs-c++ on congress-sample and laikav2-sample, and than rsync?"
+front = true

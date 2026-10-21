@@ -1,6 +1,6 @@
 {
- "utc": "2026-10-21T15:17:26+00:00",
- "vps_lab_commit": "e18a8ba17ae69c2196a82dbcc966e6bcb0838c68",
+ "utc": "2026-10-21T16:17:06+00:00",
+ "vps_lab_commit": "051f810bb88f09f42052c2e5c84b7b7d3a867ff6",
  "goal": "xs-rs tries to beat xs-c++; rsync runs beside them as the reference (contest.py)",
  "xs_cpp": {
   "rev": "fe012667764a",
@@ -16,8 +16,8 @@
   ]
  },
  "xs_rs": {
-  "rev": "71872a77ee26",
-  "after_step": "acls",
+  "rev": "aa7aee150987",
+  "after_step": "rust-ds head, PR #30",
   "branch": "rust-ds",
   "flags": [
    "-a",

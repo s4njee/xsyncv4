@@ -1,0 +1,33 @@
+# Written by the engineer: xs-rs at aa7aee150987 (port_base after step rust-ds head, PR #30 merged) against
+# xs-c++ and rsync. Each port screen is queued once per commit of port_base, one spec per scenario.
+id = "PS-aa7aee150987-laikav2-fresh"
+kind = "screening"
+hypothesis = "xs-rs at aa7aee150987 differs from xs-c++ (-a -j4) by more than 5% in time-to-durable on laikav2-sample, fresh, a>aws."
+primary = "durable_s"
+delta = 0.05
+blocks = 5
+control = "xs-cpp"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.xs-cpp]
+tool = "xs"
+rev = "fe012667764a"
+flags = ["-a", "-j4"]
+
+[arms.xs-rs]
+tool = "xs"
+rev = "aa7aee15098700d78754be2638e607d9467686de-rs"
+flags = ["-a", "-j4"]
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[matrix]
+link = "a-aws"
+corpus = ["laikav2-sample"]
+scenario = ["fresh"]
+direction = ["a>aws"]
+client = ["sender"]
+cache = ["warm"]
