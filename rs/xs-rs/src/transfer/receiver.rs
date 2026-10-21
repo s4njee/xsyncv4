@@ -280,6 +280,10 @@ struct FinalDir {
     path: PathBuf,
     attrs: Attrs,
     apply: bool,
+    /// What already matches and needs no syscall in the final pass (`mode_ok`, `time_ok`, fs.cpp).
+    mode_ok: bool,
+    time_ok: bool,
+    owner_ok: bool,
 }
 
 struct FileRequests {
@@ -768,7 +772,29 @@ fn generate(r: &Receiving, dir: ParsedDir) -> io::Result<()> {
                 None => true,
             });
     if apply_attrs {
-        r.finals.lock().unwrap().push(FinalDir { path: dir_path.clone(), attrs: attrs.clone(), apply: true });
+        let mode = attrs.mode & 0o7777;
+        let (uid, gid) = idmap::targets(opts, &attrs);
+        let (mode_ok, time_ok, owner_ok) = match &before {
+            Some(metadata) => (
+                !working_changed && metadata.mode() & 0o7777 == mode,
+                !dir_modified && metadata.mtime() == attrs.mtime && metadata.mtime_nsec() == attrs.mtime_ns as i64,
+                uid.is_none_or(|id| metadata.uid() == id) && gid.is_none_or(|id| metadata.gid() == id),
+            ),
+            // Made by make_dir with mode | 0700 under the umask; its times changed as it filled.
+            None => (
+                mode & 0o7000 == 0 && (mode | 0o700) & !ffi::current_umask() == mode,
+                false,
+                uid.is_none() && gid.is_none(),
+            ),
+        };
+        r.finals.lock().unwrap().push(FinalDir {
+            path: dir_path.clone(),
+            attrs: attrs.clone(),
+            apply: true,
+            mode_ok,
+            time_ok,
+            owner_ok,
+        });
     }
     let resume_enabled = opts.partial && features & feature::RESUME != 0;
     let delta_enabled = features & feature::DELTA != 0;
@@ -1559,11 +1585,15 @@ fn receive<R: Read, W: Write + Send + 'static>(
         if !final_dir.apply {
             continue;
         }
-        idmap::chown_path(&final_dir.path, opts, &final_dir.attrs, false);
-        if opts.perms {
-            let _ = fs::set_permissions(&final_dir.path, fs::Permissions::from_mode(final_dir.attrs.mode & 0o7777));
+        // Only what differs: a directory already right costs no syscall, as in fs.cpp's final pass.
+        if !final_dir.owner_ok {
+            idmap::chown_path(&final_dir.path, opts, &final_dir.attrs, false);
         }
-        if opts.times {
+        let mode = final_dir.attrs.mode & 0o7777;
+        if opts.perms && (!final_dir.mode_ok || (!final_dir.owner_ok && mode & 0o6000 != 0)) {
+            let _ = fs::set_permissions(&final_dir.path, fs::Permissions::from_mode(mode));
+        }
+        if opts.times && !final_dir.time_ok {
             let _ = ffi::set_mtime(&final_dir.path, final_dir.attrs.mtime, final_dir.attrs.mtime_ns as i64, false);
         }
         if opts.xattrs != 0 {
