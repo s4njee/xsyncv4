@@ -34,7 +34,7 @@ use crate::parallel::{WriteDone, WritePool};
 
 use super::file::{
     add_range, contiguous, covered_from, create_temp, destination_listing, finish_infile, make_dir, remove_any,
-    reserve_chunk, set_dir_working_mode_with, write_whole, InFile,
+    reserve_chunk, set_dir_working_mode_with, write_whole, DestDir, InFile,
 };
 use super::hardlink::{finalize_hardlinks, hardlink_member, HardLinks};
 use super::{
@@ -44,7 +44,7 @@ use super::{
 
 /// One small file (a WHOLE record) for a worker to write and publish.
 struct WholeJob {
-    dir: PathBuf,
+    dir: Arc<DestDir>,
     name: Vec<u8>,
     final_path: PathBuf,
     attrs: Attrs,
@@ -394,6 +394,18 @@ struct RecvDir {
     delta_candidates: HashSet<u32>,
     delta_requested: HashSet<u32>,
     bases: HashMap<u32, Arc<delta::DeltaBasis>>,
+    /// The directory, open while files it needs are still to come.
+    out: Option<Arc<DestDir>>,
+}
+
+impl RecvDir {
+    /// A needed entry has arrived (or failed): once none is left, let the directory go.
+    fn received(&mut self, idx: u32) {
+        self.need.remove(&idx);
+        if self.need.is_empty() {
+            self.out = None;
+        }
+    }
 }
 
 /// Decode a DIR frame on the reader: its xattr values and id maps apply in wire order.
@@ -584,7 +596,9 @@ fn generate(r: &Receiving, dir: ParsedDir) -> io::Result<()> {
             T_DIR => {
                 let keep = existing.map(|m| m.is_dir()).unwrap_or(false);
                 let made = if !keep {
-                    remove_any(&target)?;
+                    if existing.is_some() {
+                        remove_any(&target)?;
+                    }
                     dir_modified = true;
                     let made = make_dir(&target, entry.attrs.mode)?;
                     if made {
@@ -658,7 +672,9 @@ fn generate(r: &Receiving, dir: ParsedDir) -> io::Result<()> {
                 }
                 if !same {
                     dir_modified = true;
-                    remove_any(&target)?;
+                    if existing.is_some() {
+                        remove_any(&target)?;
+                    }
                     std::os::unix::fs::symlink(OsStr::from_bytes(&entry.link), &target)?;
                     r.created_links.fetch_add(1, Ordering::Relaxed);
                     let mut event =
@@ -786,13 +802,15 @@ fn generate(r: &Receiving, dir: ParsedDir) -> io::Result<()> {
     }
     // Known before its NEED goes out, since data for it may follow at once; then its
     // children may run.
-    let need_set = need.iter().copied().collect();
+    let need_set: HashSet<u32> = need.iter().copied().collect();
+    let out = (!need_set.is_empty()).then(|| Arc::new(DestDir::open(&dir_path)));
     let children = {
         let mut table = r.table.lock().unwrap();
         if table.dirs.len() <= id as usize {
             table.dirs.resize_with(id as usize + 1, || None);
         }
         table.dirs[id as usize] = Some(RecvDir {
+            out,
             rel,
             dest: dir_path,
             entries,
@@ -981,11 +999,12 @@ fn process_data(
                 let name = dir.rename_to.clone().unwrap_or_else(|| entry.name.clone());
                 let final_path = dir.dest.join(OsStr::from_bytes(&name));
                 added_bytes += bytes.len() as u64;
-                dir.need.remove(&idx);
+                let target = dir.out.clone().unwrap_or_else(|| Arc::new(DestDir::by_path(&dir.dest)));
+                dir.received(idx);
                 let code = transferred_code(opts, before.as_ref(), &entry);
                 let event = taken_event(&code, &event_path, &event_source, T_REG, bytes.len() as i64, bytes.len() as i64);
                 r.queue_write(WholeJob {
-                    dir: dir.dest.clone(),
+                    dir: target,
                     name,
                     final_path,
                     attrs,
@@ -1164,7 +1183,7 @@ fn process_data(
                 infile.delta_sum = delta_sum;
             }
             rec::FAIL => {
-                dir.need.remove(&idx);
+                dir.received(idx);
             }
             _ => return bad("protocol error: unknown DATA record"),
         }
@@ -1261,7 +1280,7 @@ fn finish_ready(
     if !prefix_ok || status != 0 || !ok || !verified {
         let infile = infiles.remove(&key).unwrap();
         if let Some(dir) = dirs.get_mut(key.0 as usize).and_then(Option::as_mut) {
-            dir.need.remove(&key.1);
+            dir.received(key.1);
             dir.bases.remove(&key.1);
         }
         r.partial_failure.store(true, Ordering::Relaxed);
@@ -1284,7 +1303,7 @@ fn finish_ready(
     let link_key = infile.link_key.clone();
     infiles.remove(&key);
     if let Some(dir) = dirs.get_mut(key.0 as usize).and_then(Option::as_mut) {
-        dir.need.remove(&key.1);
+        dir.received(key.1);
         dir.bases.remove(&key.1);
     }
     let code = transferred_code(opts, before.as_ref(), &entry);

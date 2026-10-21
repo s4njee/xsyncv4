@@ -31,6 +31,34 @@ const AT_FDCWD: c_int = -2;
 const AT_SYMLINK_NOFOLLOW: c_int = 0x20;
 #[cfg(target_os = "macos")]
 const UTIME_OMIT: i64 = -2;
+// Linux's values are the same on x86-64 and arm64; O_EXCL with O_CREAT never follows a symlink.
+const O_WRONLY: c_int = 1;
+#[cfg(target_os = "linux")]
+const O_CREAT: c_int = 0o100;
+#[cfg(target_os = "linux")]
+const O_EXCL: c_int = 0o200;
+#[cfg(target_os = "linux")]
+const O_CLOEXEC: c_int = 0o2000000;
+#[cfg(target_os = "linux")]
+const RLIMIT_NOFILE: c_int = 7;
+#[cfg(target_os = "macos")]
+const O_CREAT: c_int = 0x200;
+#[cfg(target_os = "macos")]
+const O_EXCL: c_int = 0x800;
+#[cfg(target_os = "macos")]
+const O_CLOEXEC: c_int = 0x0100_0000;
+#[cfg(target_os = "macos")]
+const RLIMIT_NOFILE: c_int = 8;
+#[cfg(target_os = "linux")]
+type ModeT = u32;
+#[cfg(target_os = "macos")]
+type ModeT = u16;
+
+#[repr(C)]
+struct Rlimit {
+    current: u64,
+    maximum: u64,
+}
 
 #[repr(C)]
 struct Passwd {
@@ -64,6 +92,13 @@ extern "C" {
     fn chown(path: *const c_char, owner: u32, group: u32) -> c_int;
     fn lchown(path: *const c_char, owner: u32, group: u32) -> c_int;
     fn fchown(fd: c_int, owner: u32, group: u32) -> c_int;
+    fn openat(dirfd: c_int, pathname: *const c_char, flags: c_int, ...) -> c_int;
+    fn renameat(olddirfd: c_int, oldpath: *const c_char, newdirfd: c_int, newpath: *const c_char) -> c_int;
+    fn unlinkat(dirfd: c_int, pathname: *const c_char, flags: c_int) -> c_int;
+    fn futimens(fd: c_int, times: *const Timespec) -> c_int;
+    fn umask(mask: ModeT) -> ModeT;
+    fn getrlimit(resource: c_int, limit: *mut Rlimit) -> c_int;
+    fn setrlimit(resource: c_int, limit: *const Rlimit) -> c_int;
     fn XXH3_64bits(input: *const c_void, length: usize) -> u64;
     fn XXH3_createState() -> *mut c_void;
     fn XXH3_freeState(state: *mut c_void) -> c_int;
@@ -299,25 +334,135 @@ pub fn group_id(name: &[u8]) -> Option<u32> {
     }
 }
 
+/// This process's ids and groups, looked up once, as `init_ids` in fs.cpp.
+struct Ids {
+    uid: u32,
+    gid: u32,
+    groups: Vec<u32>,
+}
+
+fn ids() -> &'static Ids {
+    static IDS: std::sync::OnceLock<Ids> = std::sync::OnceLock::new();
+    IDS.get_or_init(|| {
+        // SAFETY: geteuid, getegid and getgroups are simple process queries.
+        unsafe {
+            let mut groups = Vec::new();
+            let count = getgroups(0, std::ptr::null_mut());
+            if count > 0 {
+                groups.resize(count as usize, 0);
+                let got = getgroups(count, groups.as_mut_ptr());
+                groups.truncate(got.max(0) as usize);
+            }
+            Ids { uid: geteuid(), gid: getegid(), groups }
+        }
+    })
+}
+
 pub fn is_root() -> bool {
-    // SAFETY: geteuid has no arguments and no failure mode.
-    unsafe { geteuid() == 0 }
+    ids().uid == 0
+}
+
+pub fn effective_uid() -> u32 {
+    ids().uid
+}
+
+pub fn effective_gid() -> u32 {
+    ids().gid
 }
 
 /// Whether this process may switch a file to `gid`, as `can_set_gid` in fs.cpp.
 pub fn can_set_gid(gid: u32) -> bool {
-    // SAFETY: getegid and getgroups are simple process queries.
-    unsafe {
-        if geteuid() == 0 || gid == getegid() {
-            return true;
+    let ids = ids();
+    ids.uid == 0 || gid == ids.gid || ids.groups.contains(&gid)
+}
+
+/// The process umask, read once.
+pub fn current_umask() -> u32 {
+    static UMASK: std::sync::OnceLock<u32> = std::sync::OnceLock::new();
+    *UMASK.get_or_init(|| {
+        // SAFETY: umask cannot fail; the old mask is put straight back.
+        unsafe {
+            let old = umask(0o077);
+            umask(old);
+            #[allow(clippy::useless_conversion)] // mode_t is u16 on macOS
+            let old = u32::from(old);
+            old & 0o777
         }
-        let count = getgroups(0, std::ptr::null_mut());
-        if count <= 0 {
-            return false;
+    })
+}
+
+/// Raise the open-file limit toward its hard limit and return the limit now in force,
+/// so destination directories can stay open while their files are written.
+pub fn raise_open_files() -> u64 {
+    let mut limit = Rlimit { current: 0, maximum: 0 };
+    // SAFETY: the struct is valid for writing.
+    if unsafe { getrlimit(RLIMIT_NOFILE, &mut limit) } != 0 {
+        return 256;
+    }
+    // macOS refuses a soft limit above kern.maxfilesperproc: halve until one is taken.
+    let mut want = limit.maximum.min(1 << 20);
+    while want > limit.current {
+        let next = Rlimit { current: want, maximum: limit.maximum };
+        // SAFETY: the struct is valid for reading.
+        if unsafe { setrlimit(RLIMIT_NOFILE, &next) } == 0 {
+            return want;
         }
-        let mut groups = vec![0u32; count as usize];
-        let got = getgroups(count, groups.as_mut_ptr());
-        got > 0 && groups[..got as usize].contains(&gid)
+        want /= 2;
+    }
+    limit.current
+}
+
+fn c_name(name: &[u8]) -> io::Result<CString> {
+    CString::new(name).map_err(|_| io::Error::new(io::ErrorKind::InvalidInput, "name contains NUL"))
+}
+
+/// Create `name` in the directory `dir` for writing; it must not exist (a symlink counts).
+pub fn create_at(dir: &std::fs::File, name: &[u8], mode: u32) -> io::Result<std::fs::File> {
+    use std::os::unix::io::{AsRawFd, FromRawFd};
+    let name = c_name(name)?;
+    // SAFETY: the name is NUL terminated; the mode goes through the variadic slot as an unsigned int.
+    let fd = unsafe {
+        openat(dir.as_raw_fd(), name.as_ptr(), O_WRONLY | O_CREAT | O_EXCL | O_CLOEXEC, (mode & 0o7777) as std::ffi::c_uint)
+    };
+    if fd < 0 {
+        return Err(io::Error::last_os_error());
+    }
+    // SAFETY: openat returned a new descriptor that nothing else owns.
+    Ok(unsafe { std::fs::File::from_raw_fd(fd) })
+}
+
+/// Rename within one directory.
+pub fn rename_at(dir: &std::fs::File, from: &[u8], to: &[u8]) -> io::Result<()> {
+    use std::os::unix::io::AsRawFd;
+    let (from, to) = (c_name(from)?, c_name(to)?);
+    // SAFETY: both names are NUL terminated and live through the call.
+    if unsafe { renameat(dir.as_raw_fd(), from.as_ptr(), dir.as_raw_fd(), to.as_ptr()) } == 0 {
+        Ok(())
+    } else {
+        Err(io::Error::last_os_error())
+    }
+}
+
+pub fn unlink_at(dir: &std::fs::File, name: &[u8]) -> io::Result<()> {
+    use std::os::unix::io::AsRawFd;
+    let name = c_name(name)?;
+    // SAFETY: the name is NUL terminated and lives through the call.
+    if unsafe { unlinkat(dir.as_raw_fd(), name.as_ptr(), 0) } == 0 {
+        Ok(())
+    } else {
+        Err(io::Error::last_os_error())
+    }
+}
+
+/// Set an open file's modification time with nanoseconds, leaving its access time alone.
+pub fn set_file_mtime(file: &std::fs::File, sec: i64, nsec: i64) -> io::Result<()> {
+    use std::os::unix::io::AsRawFd;
+    let times = [Timespec { tv_sec: 0, tv_nsec: UTIME_OMIT }, Timespec { tv_sec: sec, tv_nsec: nsec.clamp(0, 999_999_999) }];
+    // SAFETY: the descriptor is live and the array holds two timespecs.
+    if unsafe { futimens(file.as_raw_fd(), times.as_ptr()) } == 0 {
+        Ok(())
+    } else {
+        Err(io::Error::last_os_error())
     }
 }
 
