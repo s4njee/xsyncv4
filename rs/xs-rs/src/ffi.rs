@@ -92,6 +92,7 @@ extern "C" {
     fn chown(path: *const c_char, owner: u32, group: u32) -> c_int;
     fn lchown(path: *const c_char, owner: u32, group: u32) -> c_int;
     fn fchown(fd: c_int, owner: u32, group: u32) -> c_int;
+    fn dup2(oldfd: c_int, newfd: c_int) -> c_int;
     fn openat(dirfd: c_int, pathname: *const c_char, flags: c_int, ...) -> c_int;
     fn renameat(olddirfd: c_int, oldpath: *const c_char, newdirfd: c_int, newpath: *const c_char) -> c_int;
     fn unlinkat(dirfd: c_int, pathname: *const c_char, flags: c_int) -> c_int;
@@ -356,6 +357,16 @@ fn ids() -> &'static Ids {
             Ids { uid: geteuid(), gid: getegid(), groups }
         }
     })
+}
+
+/// Point `to` at what `from` refers to (dup2).
+pub fn redirect(from: c_int, to: c_int) -> io::Result<()> {
+    // SAFETY: dup2 only manipulates the descriptor table.
+    if unsafe { dup2(from, to) } < 0 {
+        Err(io::Error::last_os_error())
+    } else {
+        Ok(())
+    }
 }
 
 pub fn is_root() -> bool {

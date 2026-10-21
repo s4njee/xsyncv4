@@ -181,6 +181,19 @@ fn write_message(output: &mut impl Write, kind: u8, code: u64, text: &str) -> io
     xs_wire::write_frame(output, frame_type::MSG, &message.encode())
 }
 
+/// The server's protocol streams: stdin, and a duplicate of stdout, with fd 1 itself
+/// pointed at /dev/null so nothing else can write protocol bytes (`remote.cpp:3218-3221`).
+/// Both are plain files: `io::stdout()` is line buffered, and binary frames are full of newlines.
+fn protocol_stdio() -> io::Result<(std::fs::File, std::fs::File)> {
+    use std::os::unix::io::{AsFd, AsRawFd, FromRawFd};
+    let output = std::fs::File::from(io::stdout().as_fd().try_clone_to_owned()?);
+    let null = std::fs::OpenOptions::new().write(true).open("/dev/null")?;
+    ffi::redirect(null.as_raw_fd(), 1)?;
+    // SAFETY: fd 0 is this process's stdin, which nothing else reads once the server runs.
+    let input = unsafe { std::fs::File::from_raw_fd(0) };
+    Ok((input, output))
+}
+
 fn server<R: Read, W: Write + Send + 'static>(
     reader: &mut R,
     mut writer: W,
@@ -733,8 +746,13 @@ fn main() {
         return;
     }
     let result = if cli.server {
-        let mut reader = BufReader::new(io::stdin());
-        server(&mut reader, BufWriter::new(io::stdout()), &cli.options)
+        match protocol_stdio() {
+            Ok((input, output)) => {
+                let mut reader = BufReader::with_capacity(256 << 10, input);
+                server(&mut reader, BufWriter::new(output), &cli.options)
+            }
+            Err(error) => Err(error),
+        }
     } else {
         run_client(&mut cli)
     };

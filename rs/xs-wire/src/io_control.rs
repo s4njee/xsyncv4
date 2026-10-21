@@ -324,7 +324,7 @@ impl Watchdog {
                     );
                     std::process::exit(30);
                 }
-                std::thread::sleep(Duration::from_millis(50));
+                std::thread::park_timeout(Duration::from_millis(50));
             }
         });
         Self { control, handle: Some(handle) }
@@ -335,6 +335,8 @@ impl Drop for Watchdog {
     fn drop(&mut self) {
         self.control.finish();
         if let Some(handle) = self.handle.take() {
+            // Wake it rather than wait out its sleep: both ends of every transfer drop one.
+            handle.thread().unpark();
             let _ = handle.join();
         }
     }

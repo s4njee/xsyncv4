@@ -12,7 +12,9 @@ use std::os::raw::{c_int, c_void};
 use std::os::unix::io::AsRawFd;
 use std::path::Path;
 use std::sync::atomic::{AtomicUsize, Ordering};
+use std::ops::Range;
 use std::sync::mpsc::{channel, Receiver, Sender};
+use std::sync::Arc;
 use std::thread::JoinHandle;
 
 /// The port's default worker budget when `-j` was not given.
@@ -131,7 +133,9 @@ where
 
 pub struct WriteJob {
     fd: c_int,
-    bytes: Vec<u8>,
+    /// A DATA frame's records, and where in them this write's bytes are.
+    records: Arc<Vec<u8>>,
+    bytes: Range<usize>,
     offset: i64,
     key: (u32, u32, u32),
     end: i64,
@@ -187,7 +191,7 @@ impl WritePool {
             let done_tx = done_tx.clone();
             workers.push(std::thread::spawn(move || {
                 while let Ok(job) = rx.recv() {
-                    let result = write_at(job.fd, &job.bytes, job.offset);
+                    let result = write_at(job.fd, &job.records[job.bytes.clone()], job.offset);
                     let _ = done_tx.send(WriteDone { key: job.key, start: job.offset, end: job.end, result });
                 }
             }));
@@ -195,10 +199,10 @@ impl WritePool {
         Self { jobs, done, workers, next: 0 }
     }
 
-    pub fn submit(&mut self, fd: c_int, bytes: Vec<u8>, offset: i64, end: i64, key: (u32, u32, u32)) {
+    pub fn submit(&mut self, fd: c_int, records: Arc<Vec<u8>>, bytes: Range<usize>, offset: i64, end: i64, key: (u32, u32, u32)) {
         let index = self.next % self.jobs.len();
         self.next = self.next.wrapping_add(1);
-        let _ = self.jobs[index].send(WriteJob { fd, bytes, offset, key, end });
+        let _ = self.jobs[index].send(WriteJob { fd, records, bytes, offset, key, end });
     }
 
     pub fn try_done(&self) -> Option<WriteDone> {

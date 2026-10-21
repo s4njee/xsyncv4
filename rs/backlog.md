@@ -45,10 +45,11 @@ everything on one thread, which costs little on a zero-latency pipe and a lot wh
   place of `fs::Metadata` in the receiver's listing; the sender's walk on worker threads (`scan_workers`).
 
 ## 7. The output path
-- [ ] The server writes through `io::stdout()`, whose `LineWriter` splits writes at newline bytes: write fd 1
+- [x] The server writes through `io::stdout()`, whose `LineWriter` splits writes at newline bytes: write fd 1
   directly (and read fd 0 directly).
-- [ ] A byte-bounded writer queue (48 MiB, `Conn::MAX_Q`) that gathers small frames into writes of up to 256 KiB
+- [x] A byte-bounded writer queue (48 MiB, `Conn::MAX_Q`) that gathers small frames into writes of up to 256 KiB
   with `write_vectored`, instead of an unbounded channel flushed whenever it is momentarily empty.
-- [ ] Fewer copies: DATA built in a reused buffer with the header reserved, files read straight into it, frames
-  passed by value; no 1 MiB allocation per NEED.
-- [ ] `Watchdog::drop` joins a thread that sleeps 50 ms at a time, on both ends: wake it instead.
+- [x] Fewer copies: frames passed by value, written without a header-plus-payload copy (unlimited, one piece);
+  the receiver writes small files and chunks from the DATA frame as it arrived; no 1 MiB allocation per NEED.
+- [ ] DATA built in a reused buffer with its header reserved and files read straight into it (`remote.cpp:1395`).
+- [x] `Watchdog::drop` joins a thread that sleeps 50 ms at a time, on both ends: wake it instead.

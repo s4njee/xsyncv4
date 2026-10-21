@@ -224,26 +224,36 @@ fn write_observed(
     payload: &[u8],
     activity: bool,
 ) -> io::Result<()> {
-    let mut bytes = Vec::with_capacity(xs_wire::HEADER_LEN + payload.len());
-    bytes.extend_from_slice(&(payload.len() as u32).to_le_bytes());
-    bytes.push(kind);
-    bytes.extend_from_slice(payload);
+    let mut header = [0u8; xs_wire::HEADER_LEN];
+    header[..4].copy_from_slice(&(payload.len() as u32).to_le_bytes());
+    header[4] = kind;
+    let total = header.len() + payload.len();
     let started = activity.then(Instant::now);
+    // The header and the payload go out as they are, in pieces the rate limiter grants: the
+    // buffered writer gathers small frames, and a large payload passes straight through it.
+    // Unlimited, a frame is one piece, and one of 256 KiB or more is written without a copy.
+    let piece = if activity && control.rate_limit() != 0 { 65536 } else { total };
     let mut written = 0;
-    while written < bytes.len() {
-        let wanted = (bytes.len() - written).min(65536);
+    while written < total {
+        let wanted = (total - written).min(piece);
         let count = if activity { control.limiter().acquire(wanted) } else { wanted };
         if count == 0 {
             return Err(io::Error::new(io::ErrorKind::TimedOut, "I/O timeout"));
         }
         control.begin_write();
-        output.write_all(&bytes[written..written + count])?;
-        written += count;
+        let end = written + count;
+        if written < header.len() {
+            output.write_all(&header[written..end.min(header.len())])?;
+        }
+        if end > header.len() {
+            output.write_all(&payload[written.max(header.len()) - header.len()..end - header.len()])?;
+        }
+        written = end;
         control.note_write(activity);
     }
     if let (Some(started), Some(link)) = (started, link) {
         link.observe(
-            bytes.len() as u64,
+            total as u64,
             started.elapsed().as_nanos() as u64,
             Transport::Queued,
             link_now(),
