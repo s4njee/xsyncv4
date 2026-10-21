@@ -2,6 +2,7 @@
 //! The MVP carries regular files, directories, symlinks and FIFOs with modes
 //! and nanosecond mtimes; unchanged files are compared on size and whole seconds.
 
+mod acls;
 mod cli;
 mod compression;
 mod config;
@@ -52,6 +53,7 @@ const SUPPORTED: u64 = feature::CORE
     | feature::FILES_FROM
     | feature::XATTRS
     | feature::XATTR_STREAM
+    | feature::ACL_POSIX
     | feature::PROGRESS_ACK;
 
 /// What a client advertises: the compression policy frame exists only with `-z`,
@@ -91,6 +93,9 @@ fn client_advertised(options: &Options, verbose: i64, role: u8) -> u64 {
     }
     if options.xattrs == 0 {
         features &= !(feature::XATTRS | feature::XATTR_STREAM);
+    }
+    if !options.acls {
+        features &= !(feature::ACL_POSIX | feature::ACL_DARWIN | feature::ACL_UUID);
     }
     if role != b'R' || !options.progress {
         features &= !feature::PROGRESS_ACK;
@@ -218,6 +223,24 @@ fn server<R: Read, W: Write + Send + 'static>(
         writer.flush()?;
         return Ok(4);
     }
+    if hello.features & feature::ACL_UUID != 0 && hello.features & feature::ACL_DARWIN == 0 {
+        write_message(&mut writer, msg_kind::FATAL, 2, "protocol error: ACL UUID principals require Darwin ACL metadata")?;
+        writer.flush()?;
+        return Ok(2);
+    }
+    if hello.features & (feature::ACL_POSIX | feature::ACL_DARWIN) == (feature::ACL_POSIX | feature::ACL_DARWIN) {
+        write_message(&mut writer, msg_kind::FATAL, 2, "protocol error: ambiguous ACL style")?;
+        writer.flush()?;
+        return Ok(2);
+    }
+    if (server_options.acls || hello.features & (feature::ACL_POSIX | feature::ACL_DARWIN) != 0)
+        && features & acls::NATIVE_ACL == 0
+    {
+        write_message(&mut writer, msg_kind::FATAL, 4, "peer does not support the required ACL style")?;
+        writer.flush()?;
+        return Ok(4);
+    }
+    hello.options.acls = features & acls::NATIVE_ACL != 0;
     hello.options.hard_links = features & feature::HLINK != 0;
     hello.options.am_server = true;
     hello.options.pushing = hello.role == b'R' && !server_options.local_peer;
@@ -540,6 +563,12 @@ fn run_client(cli: &mut cli::Cli) -> io::Result<i32> {
         let _ = child.wait();
         return Ok(4);
     }
+    if cli.options.acls && features & acls::NATIVE_ACL == 0 {
+        eprintln!("xs-rs: peer does not support the required ACL style");
+        let _ = child.kill();
+        let _ = child.wait();
+        return Ok(4);
+    }
     if features & feature::IO_CONTROL != 0 {
         let config = Config::Io { bwlimit: cli.options.bwlimit, timeout: u64::from(cli.options.timeout) }.encode();
         control.configure(cli.options.bwlimit, cli.options.timeout, true);
@@ -559,6 +588,12 @@ fn run_client(cli: &mut cli::Cli) -> io::Result<i32> {
     }
     if features & feature::XATTRS != 0 {
         let config = Config::Xattr(cli.options.xattrs).encode();
+        xs_wire::write_frame(&mut output, config.kind, &config.payload)?;
+        output.flush()?;
+        control.note_write(true);
+    }
+    if features & acls::NATIVE_ACL != 0 {
+        let config = Config::Acl.encode();
         xs_wire::write_frame(&mut output, config.kind, &config.payload)?;
         output.flush()?;
         control.note_write(true);

@@ -17,6 +17,7 @@ use xs_wire::io_control::IoControl;
 use xs_wire::resume::ResumePrefix;
 use xs_wire::{Decoder, Encoder, Frame};
 
+use crate::acls;
 use crate::delta;
 use crate::ffi;
 use crate::idmap;
@@ -175,6 +176,7 @@ fn process_dir<W: Write + Send + 'static>(
     created_links: &mut u64,
     seen: &mut Vec<bool>,
     hardlinks: &mut HardLinks,
+    partial_failure: &mut bool,
     mut local_output: Option<&mut Output>,
 ) -> io::Result<()> {
     let mut header = Decoder::new(&frame.payload);
@@ -207,6 +209,9 @@ fn process_dir<W: Write + Send + 'static>(
     if features & feature::XATTRS != 0 {
         attrs.xattrs = xattr::get_xattrs(&mut d, features, streams)?;
     }
+    if features & acls::NATIVE_ACL != 0 {
+        attrs.acls = acls::get_acls(&mut d, T_DIR, opts)?;
+    }
     if features & feature::DIR_CHILDREN != 0 {
         let _children = d.var().map_err(decode_err)?;
     }
@@ -220,6 +225,9 @@ fn process_dir<W: Write + Send + 'static>(
         let mut entry = protocol::get_entry(&mut d, opts, features)?;
         if features & feature::XATTRS != 0 {
             entry.attrs.xattrs = xattr::get_xattrs(&mut d, features, streams)?;
+        }
+        if features & acls::NATIVE_ACL != 0 {
+            entry.attrs.acls = acls::get_acls(&mut d, entry.kind, opts)?;
         }
         entries.push(entry);
     }
@@ -333,6 +341,11 @@ fn process_dir<W: Write + Send + 'static>(
         let existing = before.as_ref();
         let event_path = scan::join_rel(&rel, &entry.name);
         let link_key = HardLinks::key(entry, features);
+        if (opts.xattrs != 0 || opts.acls) && (!entry.attrs.xattrs.complete || !entry.attrs.acls.complete) {
+            *partial_failure = true;
+            existing_entries.push(before);
+            continue;
+        }
         match entry.kind {
             T_DIR => {
                 let keep = existing.map(|m| m.is_dir()).unwrap_or(false);
@@ -369,6 +382,9 @@ fn process_dir<W: Write + Send + 'static>(
                     }
                     if opts.xattrs != 0 {
                         xattr::apply(&entry.attrs.xattrs, &target, T_REG, &opts.filters, opts)?;
+                    }
+                    if opts.acls {
+                        acls::apply(&entry.attrs.acls, &target, T_REG, entry.attrs.mode, opts)?;
                     }
                     if let Some(key) = link_key.clone() {
                         hardlinks.register_ready(key, hardlink_member(entry, &event_path, &target, existing));
@@ -486,6 +502,9 @@ fn process_dir<W: Write + Send + 'static>(
                 if opts.xattrs != 0 {
                     xattr::apply(&entry.attrs.xattrs, &target, T_FIFO, &opts.filters, opts)?;
                 }
+                if opts.acls {
+                    acls::apply(&entry.attrs.acls, &target, T_FIFO, entry.attrs.mode, opts)?;
+                }
             }
             T_CHR | T_BLK => {
                 if let Some(key) = link_key.clone() {
@@ -504,6 +523,9 @@ fn process_dir<W: Write + Send + 'static>(
                 if opts.xattrs != 0 {
                     let _ = xattr::apply(&entry.attrs.xattrs, &target, entry.kind, &opts.filters, opts);
                 }
+                if opts.acls {
+                    let _ = acls::apply(&entry.attrs.acls, &target, entry.kind, entry.attrs.mode, opts);
+                }
             }
             _ => {}
         }
@@ -511,6 +533,7 @@ fn process_dir<W: Write + Send + 'static>(
     }
     let apply_attrs = apply_attrs
         && (opts.xattrs != 0
+            || opts.acls
             || dir_modified
             || working_changed
             || match &before {
@@ -731,6 +754,12 @@ fn process_data<W: Write + Send + 'static>(
                         return bad("protocol error: truncated DATA record or incomplete file xattrs");
                     }
                 }
+                if features & acls::NATIVE_ACL != 0 {
+                    attrs.acls = acls::get_acls(&mut d, T_REG, opts)?;
+                    if !attrs.acls.complete {
+                        return bad("protocol error: truncated DATA record or incomplete file xattrs");
+                    }
+                }
                 ids.apply(&mut attrs, opts);
                 let bytes = d.str().map_err(decode_err)?;
                 let name = dir.rename_to.as_deref().unwrap_or(&entry.name);
@@ -862,6 +891,12 @@ fn process_data<W: Write + Send + 'static>(
                     attrs.xattrs = xattr::get_xattrs(&mut d, features, streams)?;
                     if !attrs.xattrs.complete {
                         return bad("protocol error: truncated DATA record or incomplete file xattrs");
+                    }
+                }
+                if features & acls::NATIVE_ACL != 0 {
+                    attrs.acls = acls::get_acls(&mut d, T_REG, opts)?;
+                    if status == 0 && !attrs.acls.complete {
+                        return bad("protocol error: bad file completion");
                     }
                 }
                 ids.apply(&mut attrs, opts);
@@ -1164,6 +1199,7 @@ pub fn run_receiver<R: Read, W: Write + Send + 'static>(
                 &mut created_links,
                 &mut seen_dirs,
                 &mut hardlinks,
+                &mut partial_failure,
                 local_output.as_deref_mut(),
             ),
             frame_type::DATA => match process_data(
@@ -1324,6 +1360,9 @@ pub fn run_receiver<R: Read, W: Write + Send + 'static>(
         }
         if opts.xattrs != 0 {
             let _ = xattr::apply(&final_dir.attrs.xattrs, &final_dir.path, T_DIR, &opts.filters, opts);
+        }
+        if opts.acls {
+            let _ = acls::apply(&final_dir.attrs.acls, &final_dir.path, T_DIR, final_dir.attrs.mode, opts);
         }
     }
     if ack_enabled {

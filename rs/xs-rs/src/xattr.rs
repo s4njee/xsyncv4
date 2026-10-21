@@ -167,8 +167,11 @@ pub fn local_name(name: &[u8], filters: &FilterList) -> Vec<u8> {
     }
 }
 
-fn eligible(name: &[u8], filters: &FilterList, source: bool, xattrs: u8) -> bool {
+fn eligible(name: &[u8], filters: &FilterList, source: bool, xattrs: u8, acls: bool) -> bool {
     if source && xattrs < 2 && internal(name) {
+        return false;
+    }
+    if acls && (name == b"system.posix_acl_access" || name == b"system.posix_acl_default") {
         return false;
     }
     if !filters.has_xattr_filters() {
@@ -199,7 +202,7 @@ pub fn source_xattrs(path: &Path, kind: u8, filters: &FilterList, opts: &Options
         }
     };
     for name in names {
-        if !eligible(&name, filters, true, opts.xattrs) {
+        if !eligible(&name, filters, true, opts.xattrs, opts.acls) {
             continue;
         }
         match get(path, &name) {
@@ -223,7 +226,7 @@ fn desired(source: &XattrSet, filters: &FilterList, opts: &Options) -> BTreeMap<
             continue;
         }
         let local = local_name(name, filters);
-        if local.is_empty() || (opts.xattrs < 2 && internal(&local)) || !eligible(&local, filters, false, opts.xattrs) {
+        if local.is_empty() || (opts.xattrs < 2 && internal(&local)) || !eligible(&local, filters, false, opts.xattrs, opts.acls) {
             continue;
         }
         result.insert(local, value.clone());
@@ -234,7 +237,7 @@ fn desired(source: &XattrSet, filters: &FilterList, opts: &Options) -> BTreeMap<
 fn local_values(path: &Path, filters: &FilterList, opts: &Options) -> io::Result<XattrSet> {
     let mut result = XattrSet::default();
     for name in list(path)? {
-        if !eligible(&name, filters, false, opts.xattrs) {
+        if !eligible(&name, filters, false, opts.xattrs, opts.acls) {
             continue;
         }
         result.values.insert(name.clone(), get(path, &name)?);

@@ -78,6 +78,12 @@ impl Cli {
                     self.options.xattrs = 0;
                 }
             }
+            "acls" => {
+                self.options.acls = on;
+                if on {
+                    self.options.perms = true;
+                }
+            }
             "progress" => self.options.progress = on,
             "partial" => self.options.partial = on,
             "whole-file" => self.options.whole_file = on,
@@ -426,6 +432,7 @@ pub fn parse(args: Vec<OsString>) -> Result<Cli, String> {
                 | "hard-links"
                 | "xattrs"
                 | "X"
+                | "acls"
                 | "partial"
                 | "8-bit-output"
                 | "local-peer"
@@ -484,6 +491,7 @@ pub fn parse(args: Vec<OsString>) -> Result<Cli, String> {
                     '0' => cli.options.from0 = true,
                     'u' | 'c' | 'x' | 'O' | 'J' | 's' | 'S' | 'm' => {}
                     'A' => {
+                        cli.options.acls = true;
                         cli.options.perms = true;
                     }
                     'X' => cli.options.xattrs = (cli.options.xattrs + 1).min(2),
