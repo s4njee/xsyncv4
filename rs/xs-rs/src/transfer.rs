@@ -9,8 +9,9 @@ use std::fs::{self, File};
 use std::io::{self, BufWriter, Read, Seek, SeekFrom, Write};
 use std::os::unix::ffi::OsStrExt;
 use std::os::unix::fs::MetadataExt;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use std::sync::mpsc;
+use std::sync::atomic::{AtomicU32, Ordering};
 use std::sync::{Arc, Condvar, Mutex, OnceLock};
 use std::thread::JoinHandle;
 use std::time::{Duration, Instant};
@@ -455,6 +456,10 @@ struct ReadTask {
 
 #[derive(Default)]
 struct WorkState {
+    /// Directories to walk, newest first so the walk goes deep before wide, and how many
+    /// are queued or being walked.
+    walks: Vec<WalkTask>,
+    walking: usize,
     tasks: VecDeque<ReadTask>,
     /// Tasks a worker has taken and not finished.
     active: usize,
@@ -496,7 +501,28 @@ struct Sending<'a> {
     /// Workers waiting for a delta signature, by (directory, index).
     replies: Mutex<HashMap<(u32, u32), SignatureReply>>,
     failed: Mutex<bool>,
+    /// `--relative` and `--files-from`: the directories and entries chosen up front.
+    selection: Option<&'a scan::Selection>,
+    /// Ids for the listings, taken as each goes out.
+    next_dir: AtomicU32,
+    /// Names already described in an F_IDMAP.
+    ids: Mutex<idmap::Sender>,
 }
+
+/// One directory for a walker to list and send (`K_WALK`).
+struct WalkTask {
+    parent_plus1: u32,
+    pidx: u32,
+    rel: Vec<u8>,
+    path: PathBuf,
+    attrs: Attrs,
+    flags: u8,
+    /// The root's entries, listed already; any other directory is listed by its walker.
+    entries: Option<Vec<SourceEntry>>,
+    /// The root's own filters, or a child's parent's.
+    filters: Arc<crate::filter::FilterList>,
+}
+
 
 impl Sending<'_> {
     /// Change the work state, then wake one worker per task it added, or every worker
@@ -530,6 +556,38 @@ impl Sending<'_> {
         self.replies.lock().unwrap().clear();
     }
 
+    fn push_walks(&self, mut tasks: Vec<WalkTask>) {
+        let count = tasks.len();
+        if count == 0 {
+            return;
+        }
+        // The first child is walked first.
+        tasks.reverse();
+        {
+            let mut state = self.work.lock().unwrap();
+            state.walking += count;
+            state.walks.extend(tasks);
+        }
+        for _ in 0..count.min(crate::parallel::MAX_WORKERS) {
+            self.work_changed.notify_one();
+        }
+    }
+
+    /// One walk task is over; after the last, LIST_END goes out (before DATA_END can).
+    fn walked(&self) -> io::Result<()> {
+        let last = {
+            let mut state = self.work.lock().unwrap();
+            state.walking -= 1;
+            state.walking == 0
+        };
+        if last {
+            self.tx.send_bounded(frame_type::LIST_END, Vec::new())?;
+            let dirs = self.next_dir.load(Ordering::Relaxed);
+            self.update_work(|state| state.dirs = Some(dirs))?;
+        }
+        Ok(())
+    }
+
     /// The first error ends the transfer with a fatal message to the receiver.
     fn fail(&self, error: &io::Error) {
         let mut failed = self.failed.lock().unwrap();
@@ -548,25 +606,26 @@ impl Sending<'_> {
     }
 }
 
-#[allow(clippy::too_many_arguments)]
-fn send_dir(
-    s: &Sending,
-    ids: &mut idmap::Sender,
-    id: u32,
-    parent_plus1: u32,
-    pidx: u32,
-    rel: &[u8],
-    path: &Path,
-    attrs: &Attrs,
-    entries: Vec<SourceEntry>,
-    flags: u8,
-    next_id: &mut u32,
-    selection: Option<&scan::Selection>,
-    filters: &crate::filter::FilterList,
-) -> io::Result<()> {
-    let (opts, features) = (s.opts, s.features);
-    let mut attrs = attrs.clone();
-    attrs.xattrs = xattr::source_xattrs(path, T_DIR, filters, opts);
+/// `Sender::walk` for one directory: list it, send its DIR, and queue its children, which
+/// can only go out after it.
+fn walk_dir(s: &Sending, task: WalkTask) -> io::Result<()> {
+    let (opts, features, selection) = (s.opts, s.features, s.selection);
+    let WalkTask { parent_plus1, pidx, rel, path, attrs, flags, entries, filters } = task;
+    let (entries, filters) = match (entries, selection) {
+        (Some(entries), _) => (entries, filters),
+        (None, Some(selection)) => (
+            selection.dirs.get(&rel).map(|dir| dir.entries.clone()).unwrap_or_default(),
+            Arc::new(crate::filter::FilterList::default()),
+        ),
+        (None, None) => {
+            let own = Arc::new(filters.in_directory(&path, false));
+            (scan::scan_dir_filtered(&path, opts, &own, &rel).unwrap_or_default(), own)
+        }
+    };
+    let rel = &rel[..];
+    let path = path.as_path();
+    let mut attrs = attrs;
+    attrs.xattrs = xattr::source_xattrs(path, T_DIR, &filters, opts);
     attrs.acls = acls::source_acls(path, T_DIR, opts);
     let attrs = &attrs;
     let mut entries: Vec<SourceEntry> = if selection.is_some() {
@@ -578,7 +637,7 @@ fn send_dir(
             .collect()
     };
     for entry in &mut entries {
-        entry.meta.attrs.xattrs = xattr::source_xattrs(&entry.path, entry.meta.kind, filters, opts);
+        entry.meta.attrs.xattrs = xattr::source_xattrs(&entry.path, entry.meta.kind, &filters, opts);
         entry.meta.attrs.acls = acls::source_acls(&entry.path, entry.meta.kind, opts);
     }
     let child_specs: Vec<(usize, PathBuf, Attrs)> = entries
@@ -598,8 +657,13 @@ fn send_dir(
         }
         body.str(&source);
     }
-    if let Some(map) = ids.describe(opts, features, attrs, &entries) {
-        s.tx.send_bounded(map.kind, map.payload)?;
+    {
+        // Decided and queued under one lock, so the names reach the wire before any DIR
+        // that leaves them out because another walker described them.
+        let mut ids = s.ids.lock().unwrap();
+        if let Some(map) = ids.describe(opts, features, attrs, &entries) {
+            s.tx.send_bounded(map.kind, map.payload)?;
+        }
     }
     if features & feature::XATTRS != 0 {
         s.streams.put(&mut body, &attrs.xattrs, features, &s.tx)?;
@@ -621,6 +685,7 @@ fn send_dir(
             acls::put_acls(&mut body, &entry.meta.attrs.acls, opts.numeric_ids);
         }
     }
+    let id = s.next_dir.fetch_add(1, Ordering::Relaxed);
     let mut frame = Encoder::new();
     frame.var(id as u64).var(parent_plus1 as u64).var(pidx as u64);
     let flag_at = frame.bytes.len();
@@ -644,34 +709,20 @@ fn send_dir(
     }
     s.tx.send_bounded(frame_type::DIR, frame.bytes)?;
     if opts.recursive || selection.is_some() {
-        for (index, child_path, child_attrs) in child_specs {
-            let child_id = *next_id;
-            *next_id += 1;
-            let child_rel = scan::join_rel(rel, &sent.dest_entries[index].meta.name);
-            let (child_entries, child_filter);
-            if let Some(selection) = selection {
-                child_entries = selection.dirs.get(&child_rel).map(|dir| dir.entries.clone()).unwrap_or_default();
-                child_filter = crate::filter::FilterList::default();
-            } else {
-                child_filter = filters.in_directory(&child_path, false);
-                child_entries = scan::scan_dir_filtered(&child_path, opts, &child_filter, &child_rel).unwrap_or_default();
-            }
-            send_dir(
-                s,
-                ids,
-                child_id,
-                id + 1,
-                index as u32,
-                &child_rel,
-                &child_path,
-                &child_attrs,
-                child_entries,
-                protocol::DF_ATTRS,
-                next_id,
-                selection,
-                &child_filter,
-            )?;
-        }
+        let children = child_specs
+            .into_iter()
+            .map(|(index, child_path, child_attrs)| WalkTask {
+                parent_plus1: id + 1,
+                pidx: index as u32,
+                rel: scan::join_rel(rel, &sent.dest_entries[index].meta.name),
+                path: child_path,
+                attrs: child_attrs,
+                flags: protocol::DF_ATTRS,
+                entries: None,
+                filters: filters.clone(),
+            })
+            .collect();
+        s.push_walks(children);
     }
     Ok(())
 }
@@ -958,19 +1009,34 @@ fn send_task(s: &Sending, task: &ReadTask, block: &mut Vec<u8>) -> io::Result<()
     flush_data(s, block, opts.compress && !block_skip)
 }
 
-/// A read worker: takes tasks until DATA_END is out or the transfer stops.
-fn read_worker(s: &Sending) {
+enum SendJob {
+    Walk(WalkTask),
+    Read(ReadTask),
+}
+
+/// A sending worker, as the C++ pool's: walks directories and reads what NEEDs ask for until
+/// DATA_END is out or the transfer stops. Half prefer walking (`scan_workers`), but reads come
+/// first for everyone once 64 are queued (`q1_soft_limit`).
+fn send_worker(s: &Sending, prefers_walk: bool) {
     let mut block = Vec::new();
     loop {
-        let task = {
+        let job = {
             let mut state = s.work.lock().unwrap();
             loop {
                 if state.aborted {
                     return;
                 }
-                if let Some(task) = state.tasks.pop_front() {
-                    state.active += 1;
-                    break task;
+                let walk_first = prefers_walk && state.tasks.len() < 64;
+                let job = if walk_first {
+                    state.walks.pop().map(SendJob::Walk).or_else(|| state.tasks.pop_front().map(SendJob::Read))
+                } else {
+                    state.tasks.pop_front().map(SendJob::Read).or_else(|| state.walks.pop().map(SendJob::Walk))
+                };
+                if let Some(job) = job {
+                    if matches!(job, SendJob::Read(_)) {
+                        state.active += 1;
+                    }
+                    break job;
                 }
                 if state.ended {
                     return;
@@ -978,9 +1044,15 @@ fn read_worker(s: &Sending) {
                 state = s.work_changed.wait(state).unwrap();
             }
         };
-        let result = send_task(s, &task, &mut block);
-        drop(task);
-        if let Err(error) = result.and_then(|()| s.update_work(|state| state.active -= 1)) {
+        let result = match job {
+            SendJob::Walk(task) => walk_dir(s, task).and_then(|()| s.walked()),
+            SendJob::Read(task) => {
+                let result = send_task(s, &task, &mut block);
+                drop(task);
+                result.and_then(|()| s.update_work(|state| state.active -= 1))
+            }
+        };
+        if let Err(error) = result {
             s.fail(&error);
             return;
         }
@@ -1134,37 +1206,27 @@ pub fn run_sender<R: Read, W: Write + Send + 'static>(
         work_changed: Condvar::new(),
         replies: Mutex::new(HashMap::new()),
         failed: Mutex::new(false),
+        selection: root.selection.as_ref(),
+        next_dir: AtomicU32::new(0),
+        ids: Mutex::new(idmap::Sender::default()),
     };
+    s.push_walks(vec![WalkTask {
+        parent_plus1: 0,
+        pidx: 0,
+        rel: Vec::new(),
+        path: root.base.clone(),
+        attrs,
+        flags,
+        entries: Some(root.entries),
+        filters: Arc::new(root_filters),
+    }]);
     let code = std::thread::scope(|scope| {
         let s = &s;
-        let (root_entries, root_selection) = (root.entries, root.selection.as_ref());
-        let (root_base, root_filters, attrs) = (&root.base, &root_filters, &attrs);
-        scope.spawn(move || {
-            let mut ids = idmap::Sender::default();
-            let mut next_id = 1u32;
-            let walked = send_dir(
-                s,
-                &mut ids,
-                0,
-                0,
-                0,
-                b"",
-                root_base,
-                attrs,
-                root_entries,
-                flags,
-                &mut next_id,
-                root_selection,
-                root_filters,
-            )
-            .and_then(|()| s.tx.send_bounded(frame_type::LIST_END, Vec::new()))
-            .and_then(|()| s.update_work(|state| state.dirs = Some(next_id)));
-            if let Err(error) = walked {
-                s.fail(&error);
-            }
-        });
-        for _ in 0..crate::parallel::effective_jobs(opts.jobs) {
-            scope.spawn(move || read_worker(s));
+        let jobs = crate::parallel::effective_jobs(opts.jobs);
+        for worker in 0..jobs {
+            // Half of them, at least one, prefer walking (`scan_workers`).
+            let prefers_walk = worker < (jobs / 2).max(1);
+            scope.spawn(move || send_worker(s, prefers_walk));
         }
         let code = read_replies(s, input, keepalive, local_output);
         // Whatever ended it, the walk and the workers stop now; frames already queued still go out.

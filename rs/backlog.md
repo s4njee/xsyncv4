@@ -53,3 +53,10 @@ everything on one thread, which costs little on a zero-latency pipe and a lot wh
   the receiver writes small files and chunks from the DATA frame as it arrived; no 1 MiB allocation per NEED.
 - [ ] DATA built in a reused buffer with its header reserved and files read straight into it (`remote.cpp:1395`).
 - [x] `Watchdog::drop` joins a thread that sleeps 50 ms at a time, on both ends: wake it instead.
+
+## 8. Sender: a parallel walk
+- [x] One walk task per directory, on the same `-j` workers as the reads, half preferring walks (`scan_workers`,
+  `K_WALK`, `remote.cpp:1144-1300`): ids
+  from an atomic as each DIR goes out, the directory registered first, children queued after their parent's
+  frame (so a parent always precedes its children), LIST_END when the last walk task ends. The id map's
+  frame goes out under the same lock that decides it, before the DIR that relies on it.
