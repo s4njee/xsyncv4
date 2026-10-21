@@ -1,0 +1,38 @@
+{
+ "id": "XR10211259-acls",
+ "kind": "port",
+ "step": "acls",
+ "opened_utc": "2026-10-21T12:59:09Z",
+ "origin": "the engineer, after the previous step merged",
+ "state": "prepared",
+ "question": "POSIX ACLs (PF_ACL_POSIX)",
+ "why": "",
+ "hypothesis": "",
+ "evidence": [],
+ "link": null,
+ "runner": null,
+ "base_rev": "ec2fc307b56c17cdac3fc59a4d015c888879654c",
+ "base_build": "ec2fc307b56c",
+ "branch": "auto/XR10211259-acls",
+ "commit": null,
+ "history": [
+  {
+   "utc": "2026-10-21T12:59:09Z",
+   "state": "opened",
+   "text": "opened by the engineer, after the previous step merged: port step acls, POSIX ACLs (PF_ACL_POSIX)"
+  },
+  {
+   "utc": "2026-10-21T13:07:10Z",
+   "state": "prepared",
+   "text": "parent built; xs-rs checks passing on it: test, clippy, fmt, arm64"
+  }
+ ],
+ "tests": {
+  "parent": {
+   "test": true,
+   "clippy": true,
+   "fmt": true,
+   "arm64": true
+  }
+ }
+}

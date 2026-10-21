@@ -186,12 +186,12 @@ Written by benchmarks/lab/engineer.py whenever a case moves: every case that has
 
 **Since.** Abandoned: postponed: the lab works on copies that move data for now, and comes back to no-op copies later
 
-### 2026-10-21 02:32 · xs-rs, port step `xattrs` (`2e3f80676d73`, review)
+### 2026-10-21 12:47 · xs-rs, port step `xattrs` (`b47b9014adfd`, merged)
 
-**Commit.** https://github.com/s4njee/xsyncv4/commit/2e3f80676d7306122d9fa42216d1b79dc4a9e194
+**Commit.** https://github.com/s4njee/xsyncv4/commit/b47b9014adfd8df2a8bfce805ba849329df8fa76
 
 **The data.** extended attributes (PF_XATTRS, PF_XATTR_STREAM). Diagnosis: Most work went into matching src/xattrs.cpp namespace rules (user.*, user.rsync.% internal names, -X versus -XX) and the remote.cpp framing: XATTR_CONFIG after compression, XATTR_START/CHUNK/END before the DIR/DATA that references them, and xattr fields after filter_source and after HLINK. Tests pin the exact list bytes and verify a 65 KiB streamed value round-trips with the C++ digest.
 
 **The change.** New rs/xs-rs/src/xattr.rs implements xattr reading/writing via llistxattr/lgetxattr/lsetxattr/lremovexattr, protocol list encoding/decoding, stream sender/receiver, namespace mapping and filters. Wired -X/--xattrs/--no-xattrs and -XX into CLI, HELLO feature advertisement and validation, XATTR_CONFIG handling, DIR entry and DATA attribute encoding/decoding, and receiver application for files, directories, links and special files. Added xattr filter predicates to FilterList. (pull request #14)
 
-**Since.** xs-rs's tests, clippy and rustfmt pass against xs-c++; the step waits for its pull request to merge. API cost $0.21. For xs-c++: Nothing to change: xs-c++'s put_xattrs/get_xattrs, namespace rules and stream framing are correct and are followed byte for byte; the new code lives entirely under rs/.
+**Since.** Measured by the lab (PS-b47b9014adfd-fresh, PS-b47b9014adfd-update-10pct, time to durable): xs-rs 0.988x xs-c++ [0.892, 1.093], too few blocks, on congress-sample fresh (3 blocks); rsync 0.897x xs-c++ [0.837, 0.961], too few blocks, on congress-sample fresh (3 blocks); xs-rs 1.193x xs-c++ [1.023, 1.392], too few blocks, on congress-sample update-10pct (2 blocks); rsync 1.110x xs-c++ [0.724, 1.703], too few blocks, on congress-sample update-10pct (2 blocks). API cost $0.21. For xs-c++: Nothing to change: xs-c++'s put_xattrs/get_xattrs, namespace rules and stream framing are correct and are followed byte for byte; the new code lives entirely under rs/.

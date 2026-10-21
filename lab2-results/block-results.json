@@ -1093,6 +1093,154 @@
    "model": "opencode/deepseek-v4.1-flash",
    "summarizedUtc": 1792544520.885,
    "driver": "a"
+  },
+  "PS-b47b9014adfd-fresh": {
+   "run": "20261021T125903Z-PS-b47b9014adfd-fresh",
+   "experiment": "PS-b47b9014adfd-fresh",
+   "key": "congress-sample.fresh.a-aws.sender.warm|1|0",
+   "utc": 1792587621.282,
+   "cell": "congress-sample.fresh.a-aws.sender.warm",
+   "factors": {
+    "corpus": "congress-sample",
+    "scenario": "fresh",
+    "sender": "a",
+    "receiver": "aws",
+    "client": "sender",
+    "link": "a-aws",
+    "cache": "warm"
+   },
+   "block": 1,
+   "attempt": 0,
+   "control": "xs-cpp",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 3.669,
+     "gbps": 0.476,
+     "files_per_s": 6881,
+     "speed": 1
+    },
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 3.467,
+     "gbps": 0.504,
+     "files_per_s": 7283,
+     "speed": 1.06
+    },
+    {
+     "arm": "rsync",
+     "label": "rsync",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 3.216,
+     "gbps": 0.543,
+     "files_per_s": 7849,
+     "speed": 1.14
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "rsync",
+     "label": "rsync",
+     "speed": 1.13,
+     "blocks": 2
+    },
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "speed": 1.02,
+     "blocks": 2
+    }
+   ],
+   "question": "Is xs-rs at b47b9014adfd (after port step xattrs) as fast as xs-c++, and than rsync?",
+   "summary": "In block 1, rsync was fastest at 3.216 s, 1.14x the xs-c++ control, with xs-rs at 3.467 s (1.06x). Cumulatively, rsync is 1.13x and xs-rs 1.02x versus control, each based on two blocks, so the evidence is still thin. For the question, xs-rs looks near xs-c++ so far, while rsync is ahead, but two blocks do not establish parity or a durable advantage.",
+   "model": "opencode/deepseek-v4.1-flash",
+   "summarizedUtc": 1792587696.733,
+   "driver": "a"
+  },
+  "PS-b47b9014adfd-update-10pct": {
+   "run": "20261021T125905Z-PS-b47b9014adfd-update-10pct",
+   "experiment": "PS-b47b9014adfd-update-10pct",
+   "key": "congress-sample.update-10pct.a-aws.sender.warm|1|0",
+   "utc": 1792588165.785,
+   "cell": "congress-sample.update-10pct.a-aws.sender.warm",
+   "factors": {
+    "corpus": "congress-sample",
+    "scenario": "update-10pct",
+    "sender": "a",
+    "receiver": "aws",
+    "client": "sender",
+    "link": "a-aws",
+    "cache": "warm"
+   },
+   "block": 1,
+   "attempt": 0,
+   "control": "xs-cpp",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 1.229,
+     "gbps": 0.124,
+     "files_per_s": 20537,
+     "speed": 1
+    },
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 1.449,
+     "gbps": 0.106,
+     "files_per_s": 17425,
+     "speed": 0.85
+    },
+    {
+     "arm": "rsync",
+     "label": "rsync",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 1.411,
+     "gbps": 0.108,
+     "files_per_s": 17886,
+     "speed": 0.87
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "rsync",
+     "label": "rsync",
+     "speed": 0.9,
+     "blocks": 2
+    },
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "speed": 0.84,
+     "blocks": 2
+    }
+   ],
+   "question": "Is xs-rs at b47b9014adfd (after port step xattrs) as fast as xs-c++, and than rsync?",
+   "summary": "This block's fastest arm was the control xs-c++, at 1.229 s; xs-rs took 1.449 s (0.85x) and rsync 1.411 s (0.87x), so both were about 13\u201315% slower. In the running cell picture, xs-rs stands at 0.84x and rsync at 0.90x versus control over two blocks, which is still thin evidence. Thus xs-rs is not yet shown to be as fast as xs-c++, and it trails rsync slightly in both this block and the cumulative ratios.",
+   "model": "opencode/deepseek-v4.1-flash",
+   "summarizedUtc": 1792588185.249,
+   "driver": "a"
   }
  }
 }

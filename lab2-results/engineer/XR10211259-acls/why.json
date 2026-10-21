@@ -1,0 +1,5 @@
+{
+ "text": "This case adds POSIX ACL support to xs-rs, so it can preserve the same per-file access permissions as xs-c++ instead of falling short on trees that rely on ACLs. That closes a feature gap in the port and makes byte-for-byte comparison possible on ACL-bearing data. The scoreboard still shows xs-rs behind on fresh and no-op runs, up to 1.66x xs-c++\u2019s time on real-projects, so this step also has to land without losing speed in those scenarios.",
+ "model": "opencode/deepseek-v4.1-flash",
+ "utc": "2026-10-21T12:59:13.398Z"
+}

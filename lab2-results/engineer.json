@@ -57,12 +57,12 @@
   },
   {
    "id": "xattrs",
-   "state": "review",
+   "state": "merged",
    "attempts": 0
   },
   {
    "id": "acls",
-   "state": "todo",
+   "state": "open",
    "attempts": 0
   }
  ],
@@ -380,6 +380,21 @@
    "summary": "Added PF_XATTRS and PF_XATTR_STREAM to xs-rs: xattr configuration negotiation, per-entry and per-file xattr lists, streamed large values with XXH3-64 verification, xattr filtering, and receiver-side set/remove. C++ clients and servers exchange user and rsync-internal attributes in both directions, including a second -XX pass.",
    "cost_usd": 0.21,
    "pull_request": "https://github.com/s4njee/xsyncv4/pull/14",
+   "merged": "b47b9014adfd8df2a8bfce805ba849329df8fa76"
+  },
+  {
+   "id": "XR10211259-acls",
+   "kind": "port",
+   "step": "acls",
+   "question": "POSIX ACLs (PF_ACL_POSIX)",
+   "state": "prepared",
+   "opened": "2026-10-21T12:59:09Z",
+   "ended": "2026-10-21T13:07:10Z",
+   "last": "parent built; xs-rs checks passing on it: test, clippy, fmt, arm64",
+   "outcome": null,
+   "summary": null,
+   "cost_usd": null,
+   "pull_request": null,
    "merged": null
   }
  ]

@@ -1,6 +1,6 @@
 {
- "utc": "2026-10-21T12:17:07+00:00",
- "vps_lab_commit": "7d86fb3ec045bd86644f1c2f1380cf4a4040b78e",
+ "utc": "2026-10-21T13:17:39+00:00",
+ "vps_lab_commit": "3cb97340c79b7cc76658ce1a9de0c8bd18ace7f9",
  "goal": "xs-rs tries to beat xs-c++; rsync runs beside them as the reference (contest.py)",
  "xs_cpp": {
   "rev": "0c94b3d70b9d",
@@ -15,8 +15,8 @@
   ]
  },
  "xs_rs": {
-  "rev": "8428aac9a210",
-  "after_step": "filters",
+  "rev": "b47b9014adfd",
+  "after_step": "xattrs",
   "branch": "rust-ds",
   "flags": [
    "-a",
@@ -48,8 +48,13 @@
  },
  "sprint": {
   "start": "2026-10-20T19:40:49Z",
-  "until": "2026-10-21T19:40:49Z",
+  "until": "2026-10-22T06:10:49Z",
   "engineer_usd": 20,
-  "why": "the next 24 hours go to DeepSeek engineering xs-rs toward performance and feature parity with xs-c++"
+  "why": "the next 24 hours go to DeepSeek engineering xs-rs toward performance and feature parity with xs-c++",
+  "extended": {
+   "utc": "2026-10-21T13:16:00Z",
+   "hours": 10.5,
+   "why": "the engineer waited 10.5 hours on a pull request that failed GitHub arm64 checks"
+  }
  }
 }
