@@ -6,7 +6,6 @@
 use std::collections::{BTreeMap, HashMap};
 use std::ffi::CString;
 use std::io;
-use std::os::raw::{c_char, c_int, c_void};
 use std::path::Path;
 
 use xs_wire::{Decoder, Encoder, Frame};
@@ -20,15 +19,56 @@ const MAX_NAME: usize = 1024;
 const MAX_COUNT: u64 = 65536;
 const MAX_ACTIVE: usize = 1024;
 const CHUNK_MAX: usize = 65536;
+#[cfg(target_os = "linux")]
 const ENOTSUP: i32 = 95;
+#[cfg(target_os = "macos")]
+const ENOTSUP: i32 = 45;
 
 extern "C" {
     fn geteuid() -> u32;
-    fn llistxattr(path: *const c_char, list: *mut c_char, size: usize) -> isize;
-    fn lgetxattr(path: *const c_char, name: *const c_char, value: *mut c_void, size: usize) -> isize;
-    fn lsetxattr(path: *const c_char, name: *const c_char, value: *const c_void, size: usize, flags: c_int) -> c_int;
-    fn lremovexattr(path: *const c_char, name: *const c_char) -> c_int;
 }
+
+// The link-level xattr calls, shared with acls.rs (Linux keeps POSIX ACLs in xattrs).
+#[cfg(target_os = "linux")]
+mod linux {
+    use std::os::raw::{c_char, c_int, c_void};
+    extern "C" {
+        pub fn llistxattr(path: *const c_char, list: *mut c_char, size: usize) -> isize;
+        pub fn lgetxattr(path: *const c_char, name: *const c_char, value: *mut c_void, size: usize) -> isize;
+        pub fn lsetxattr(path: *const c_char, name: *const c_char, value: *const c_void, size: usize, flags: c_int) -> c_int;
+        pub fn lremovexattr(path: *const c_char, name: *const c_char) -> c_int;
+    }
+}
+#[cfg(target_os = "linux")]
+pub(crate) use linux::{lgetxattr, llistxattr, lremovexattr, lsetxattr};
+
+// macOS has the same calls without the l prefix: XATTR_NOFOLLOW makes them act on a link itself, and the
+// position argument (resource forks) is always 0 here.
+#[cfg(target_os = "macos")]
+mod darwin {
+    use std::os::raw::{c_char, c_int, c_void};
+    const XATTR_NOFOLLOW: c_int = 0x0001;
+    extern "C" {
+        fn listxattr(path: *const c_char, list: *mut c_char, size: usize, options: c_int) -> isize;
+        fn getxattr(path: *const c_char, name: *const c_char, value: *mut c_void, size: usize, position: u32, options: c_int) -> isize;
+        fn setxattr(path: *const c_char, name: *const c_char, value: *const c_void, size: usize, position: u32, options: c_int) -> c_int;
+        fn removexattr(path: *const c_char, name: *const c_char, options: c_int) -> c_int;
+    }
+    pub unsafe fn llistxattr(path: *const c_char, list: *mut c_char, size: usize) -> isize {
+        unsafe { listxattr(path, list, size, XATTR_NOFOLLOW) }
+    }
+    pub unsafe fn lgetxattr(path: *const c_char, name: *const c_char, value: *mut c_void, size: usize) -> isize {
+        unsafe { getxattr(path, name, value, size, 0, XATTR_NOFOLLOW) }
+    }
+    pub unsafe fn lsetxattr(path: *const c_char, name: *const c_char, value: *const c_void, size: usize, flags: c_int) -> c_int {
+        unsafe { setxattr(path, name, value, size, 0, flags | XATTR_NOFOLLOW) }
+    }
+    pub unsafe fn lremovexattr(path: *const c_char, name: *const c_char) -> c_int {
+        unsafe { removexattr(path, name, XATTR_NOFOLLOW) }
+    }
+}
+#[cfg(target_os = "macos")]
+pub(crate) use darwin::{lgetxattr, llistxattr, lremovexattr, lsetxattr};
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct XattrSet {
