@@ -71,6 +71,13 @@ impl Cli {
             "compress" => self.options.compress = on,
             "numeric-ids" => self.options.numeric_ids = on,
             "hard-links" => self.options.hard_links = on,
+            "xattrs" | "X" => {
+                if on {
+                    self.options.xattrs = (self.options.xattrs + 1).min(2);
+                } else {
+                    self.options.xattrs = 0;
+                }
+            }
             "progress" => self.options.progress = on,
             "partial" => self.options.partial = on,
             "whole-file" => self.options.whole_file = on,
@@ -417,6 +424,8 @@ pub fn parse(args: Vec<OsString>) -> Result<Cli, String> {
                 | "compress"
                 | "numeric-ids"
                 | "hard-links"
+                | "xattrs"
+                | "X"
                 | "partial"
                 | "8-bit-output"
                 | "local-peer"
@@ -477,7 +486,7 @@ pub fn parse(args: Vec<OsString>) -> Result<Cli, String> {
                     'A' => {
                         cli.options.perms = true;
                     }
-                    'X' => {}
+                    'X' => cli.options.xattrs = (cli.options.xattrs + 1).min(2),
                     'z' => cli.options.compress = true,
                     'H' => cli.options.hard_links = true,
                     'n' => {}

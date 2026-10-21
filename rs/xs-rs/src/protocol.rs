@@ -61,6 +61,18 @@ pub fn read_checked<R: io::Read>(input: &mut R, negotiated: bool, features: u64)
         {
             return bad("protocol error: oversized or unnegotiated progress acknowledgment");
         }
+        if (frame_type::XATTR_START..=frame_type::XATTR_END).contains(&frame.kind) {
+            if features & feature::XATTR_STREAM == 0 {
+                return bad("protocol error: unnegotiated xattr value stream");
+            }
+            let len = frame.payload.len();
+            if (frame.kind == frame_type::XATTR_START && len > 20)
+                || (frame.kind == frame_type::XATTR_CHUNK && !(4..=65536 + 32).contains(&len))
+                || (frame.kind == frame_type::XATTR_END && len > 18)
+            {
+                return bad("protocol error: oversized xattr value frame");
+            }
+        }
         return Ok(Some(frame));
     }
 }
@@ -82,6 +94,8 @@ pub struct Attrs {
     pub nlink: u64,
     pub ctime: i64,
     pub ctime_ns: u32,
+    /// Extended attributes in protocol order, sent with `PF_XATTRS`.
+    pub xattrs: crate::xattr::XattrSet,
 }
 
 /// What the C++ calls an entry's identity for hard-link grouping. Directories
@@ -401,6 +415,8 @@ pub struct Options {
     pub ignore_times: bool,
     pub raw_names: bool,
     pub hard_links: bool,
+    /// `-X` once, twice to include the rsync internal namespace.
+    pub xattrs: u8,
     pub am_server: bool,
     pub pushing: bool,
     pub local_peer: bool,
@@ -447,6 +463,7 @@ impl Default for Options {
             ignore_times: false,
             raw_names: false,
             hard_links: false,
+            xattrs: 0,
             am_server: false,
             pushing: false,
             local_peer: false,
@@ -528,6 +545,7 @@ mod tests {
             ctime_ns: 7,
             ..Attrs::default()
         }
+        // Attributes start without extended attributes; tests add them explicitly.
     }
 
     #[test]

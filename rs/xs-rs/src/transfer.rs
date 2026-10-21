@@ -28,6 +28,7 @@ use crate::protocol::{
     self, bad, decode_err, feature, frame_type, msg_kind, rec, Attrs, EntryMeta, Options, T_BLK, T_CHR, T_DIR, T_LNK, T_REG,
 };
 use crate::scan::{self, SourceEntry};
+use crate::xattr;
 use xs_wire::output::file_type;
 use xs_wire::{OutputEvent, ProgressAck};
 
@@ -361,6 +362,7 @@ fn send_dir<W: Write + Send + 'static>(
     opts: &Options,
     features: u64,
     link: &CompressionLink,
+    streams: &mut xattr::Streams,
     ids: &mut idmap::Sender,
     id: u32,
     parent_plus1: u32,
@@ -375,7 +377,10 @@ fn send_dir<W: Write + Send + 'static>(
     selection: Option<&scan::Selection>,
     filters: &crate::filter::FilterList,
 ) -> io::Result<()> {
-    let entries: Vec<SourceEntry> = if selection.is_some() {
+    let mut attrs = attrs.clone();
+    attrs.xattrs = xattr::source_xattrs(path, T_DIR, filters, opts);
+    let attrs = &attrs;
+    let mut entries: Vec<SourceEntry> = if selection.is_some() {
         entries
     } else {
         entries
@@ -383,6 +388,9 @@ fn send_dir<W: Write + Send + 'static>(
             .filter(|entry| !filters.excluded(&scan::join_rel(rel, &entry.meta.name), entry.meta.kind == T_DIR))
             .collect()
     };
+    for entry in &mut entries {
+        entry.meta.attrs.xattrs = xattr::source_xattrs(&entry.path, entry.meta.kind, filters, opts);
+    }
     let child_specs: Vec<(usize, PathBuf, Attrs)> = entries
         .iter()
         .enumerate()
@@ -400,6 +408,9 @@ fn send_dir<W: Write + Send + 'static>(
         }
         body.str(&source);
     }
+    if features & feature::XATTRS != 0 {
+        streams.put_xattrs(&mut body, &attrs.xattrs, features);
+    }
     if features & feature::DIR_CHILDREN != 0 {
         let count = if opts.recursive || selection.is_some() { child_specs.len() as u64 } else { 0 };
         body.var(count);
@@ -407,6 +418,9 @@ fn send_dir<W: Write + Send + 'static>(
     body.var(entries.len() as u64);
     for entry in &entries {
         protocol::put_entry(&mut body, &entry.meta, opts, features);
+        if features & feature::XATTRS != 0 {
+            streams.put_xattrs(&mut body, &entry.meta.attrs.xattrs, features);
+        }
     }
     let mut frame = Encoder::new();
     frame.var(id as u64).var(parent_plus1 as u64).var(pidx as u64);
@@ -422,6 +436,9 @@ fn send_dir<W: Write + Send + 'static>(
     }
     if let Some(map) = ids.describe(opts, features, attrs, &entries) {
         output.send(map.kind, &map.payload)?;
+    }
+    for value in streams.drain() {
+        output.send(value.kind, &value.payload)?;
     }
     output.send(frame_type::DIR, &frame.bytes)?;
     if dirs.len() <= id as usize {
@@ -446,6 +463,7 @@ fn send_dir<W: Write + Send + 'static>(
                 opts,
                 features,
                 link,
+                streams,
                 ids,
                 child_id,
                 id + 1,
@@ -471,11 +489,15 @@ fn record(e: Encoder, block: &mut Vec<u8>) {
 
 fn flush_data<W: Write + Send + 'static>(
     output: &mut FrameOut<W>,
+    streams: &mut xattr::Streams,
     block: &mut Vec<u8>,
     compress: bool,
     link: &CompressionLink,
     opts: &Options,
 ) -> io::Result<()> {
+    for value in streams.drain() {
+        output.send(value.kind, &value.payload)?;
+    }
     if block.is_empty() {
         return Ok(());
     }
@@ -496,10 +518,13 @@ fn flush_data<W: Write + Send + 'static>(
     Ok(())
 }
 
-fn whole_record(id: u32, idx: u32, attrs: &Attrs, bytes: &[u8], features: u64) -> Encoder {
+fn whole_record(id: u32, idx: u32, attrs: &Attrs, bytes: &[u8], features: u64, streams: &mut xattr::Streams) -> Encoder {
     let mut e = Encoder::new();
     e.var(id as u64).var(idx as u64).byte(rec::WHOLE);
     protocol::put_file_attrs(&mut e, attrs, features);
+    if features & feature::XATTRS != 0 {
+        streams.put_xattrs(&mut e, &attrs.xattrs, features);
+    }
     e.str(bytes);
     e
 }
@@ -513,6 +538,7 @@ fn fail_record(id: u32, idx: u32) -> Encoder {
 #[allow(clippy::too_many_arguments)]
 fn send_large<W: Write + Send + 'static>(
     output: &mut FrameOut<W>,
+    streams: &mut xattr::Streams,
     id: u32,
     idx: u32,
     entry: &SourceEntry,
@@ -538,12 +564,12 @@ fn send_large<W: Write + Send + 'static>(
         ResumePrefix::default()
     };
     if delta && eligible && prefix.is_empty() && planned > DELTA_THRESHOLD as u64 {
-        flush_data(output, block, compress, link, opts)?;
+        flush_data(output, streams, block, compress, link, opts)?;
         let mut request = Encoder::new();
         request.var(id as u64).var(idx as u64);
         output.send(frame_type::DELTA_REQUEST, &request.bytes)?;
         if let Some(signature) = wait(id, idx)? {
-            return send_delta(output, id, idx, entry, features, compress, link, opts, block, &signature, planned);
+            return send_delta(output, streams, id, idx, entry, features, compress, link, opts, block, &signature, planned);
         }
     }
     if ranges && prefix.is_empty() && planned >= crate::parallel::RANGE_MIN {
@@ -564,12 +590,12 @@ fn send_large<W: Write + Send + 'static>(
                 e.str(&bytes);
                 record(e, block);
                 if block.len() >= protocol::BLOCK_TARGET {
-                    flush_data(output, block, compress, link, opts)?;
+                    flush_data(output, streams, block, compress, link, opts)?;
                 }
                 Ok(())
             },
         )?;
-        flush_data(output, block, compress, link, opts)?;
+        flush_data(output, streams, block, compress, link, opts)?;
         let mut e = Encoder::new();
         e.var(id as u64).var(idx as u64).byte(rec::END);
         e.var(0);
@@ -578,12 +604,15 @@ fn send_large<W: Write + Send + 'static>(
         }
         e.var(planned).byte(if complete { 0 } else { 2 });
         protocol::put_file_attrs(&mut e, &entry.meta.attrs, features);
+        if features & feature::XATTRS != 0 {
+            streams.put_xattrs(&mut e, &entry.meta.attrs.xattrs, features);
+        }
         record(e, block);
-        return flush_data(output, block, compress, link, opts);
+        return flush_data(output, streams, block, compress, link, opts);
     }
     let mut file = match File::open(&entry.path) {
         Ok(file) => file,
-        Err(_) => return flush_data(output, block, compress, link, opts),
+        Err(_) => return flush_data(output, streams, block, compress, link, opts),
     };
     let mut buffer = vec![0u8; protocol::BLOCK_TARGET];
     let mut offset = prefix.size.max(0) as u64;
@@ -624,13 +653,13 @@ fn send_large<W: Write + Send + 'static>(
         record(e, block);
         offset += got as u64;
         if block.len() >= protocol::BLOCK_TARGET || failed {
-            flush_data(output, block, compress, link, opts)?;
+            flush_data(output, streams, block, compress, link, opts)?;
         }
         if failed {
             break;
         }
     }
-    flush_data(output, block, compress, link, opts)?;
+    flush_data(output, streams, block, compress, link, opts)?;
     let mut e = Encoder::new();
     e.var(id as u64).var(idx as u64).byte(rec::END);
     e.var(0);
@@ -640,8 +669,11 @@ fn send_large<W: Write + Send + 'static>(
     let complete = !failed && offset == planned;
     e.var(offset).byte(if complete { 0 } else { 2 });
     protocol::put_file_attrs(&mut e, &entry.meta.attrs, features);
+    if features & feature::XATTRS != 0 {
+        streams.put_xattrs(&mut e, &entry.meta.attrs.xattrs, features);
+    }
     record(e, block);
-    flush_data(output, block, compress, link, opts)
+    flush_data(output, streams, block, compress, link, opts)
 }
 
 /// `Sender::read_one`'s delta branch: one LITERAL or COPY record per emitted op,
@@ -649,6 +681,7 @@ fn send_large<W: Write + Send + 'static>(
 #[allow(clippy::too_many_arguments)]
 fn send_delta<W: Write + Send + 'static>(
     output: &mut FrameOut<W>,
+    streams: &mut xattr::Streams,
     id: u32,
     idx: u32,
     entry: &SourceEntry,
@@ -672,7 +705,7 @@ fn send_delta<W: Write + Send + 'static>(
             }
             record(e, block);
             if block.len() >= protocol::BLOCK_TARGET {
-                flush_data(output, block, compress, link, opts)?;
+                flush_data(output, streams, block, compress, link, opts)?;
             }
             Ok(())
         }),
@@ -683,19 +716,23 @@ fn send_delta<W: Write + Send + 'static>(
         Ok(result) => (result.processed, 2u8, result.sum),
         Err(_) => (0, 2u8, [0u64; 2]),
     };
-    flush_data(output, block, compress, link, opts)?;
+    flush_data(output, streams, block, compress, link, opts)?;
     let mut e = Encoder::new();
     e.var(id as u64).var(idx as u64).byte(rec::DELTA_END);
     e.var(0).var(processed.max(0) as u64).byte(status);
     protocol::put_file_attrs(&mut e, &entry.meta.attrs, features);
+    if features & feature::XATTRS != 0 {
+        streams.put_xattrs(&mut e, &entry.meta.attrs.xattrs, features);
+    }
     e.raw(&sum[0].to_le_bytes()).raw(&sum[1].to_le_bytes());
     record(e, block);
-    flush_data(output, block, compress, link, opts)
+    flush_data(output, streams, block, compress, link, opts)
 }
 
 #[allow(clippy::too_many_arguments)]
 fn send_need_data<W: Write + Send + 'static>(
     output: &mut FrameOut<W>,
+    streams: &mut xattr::Streams,
     id: u32,
     indices: &[u32],
     dir: &SentDir,
@@ -733,15 +770,15 @@ fn send_need_data<W: Write + Send + 'static>(
         // A skipped suffix gets a block of its own, as `RawFileBlock` isolates it.
         let skip = opts.compress && suffixes.matches(&entry.meta.name);
         if skip || skip != block_skip {
-            flush_data(output, &mut block, opts.compress && !block_skip, link, opts)?;
+            flush_data(output, streams, &mut block, opts.compress && !block_skip, link, opts)?;
         }
         block_skip = skip;
         if entry.meta.size <= protocol::SMALL_MAX as i64 {
             match fs::read(&entry.path) {
                 Ok(bytes) => {
-                    record(whole_record(id, idx, &entry.meta.attrs, &bytes, features), &mut block);
+                    record(whole_record(id, idx, &entry.meta.attrs, &bytes, features, streams), &mut block);
                     if block.len() >= protocol::BLOCK_TARGET {
-                        flush_data(output, &mut block, opts.compress && !block_skip, link, opts)?;
+                        flush_data(output, streams, &mut block, opts.compress && !block_skip, link, opts)?;
                     }
                 }
                 Err(_) => {
@@ -749,9 +786,10 @@ fn send_need_data<W: Write + Send + 'static>(
                 }
             }
         } else {
-            flush_data(output, &mut block, opts.compress && !block_skip, link, opts)?;
+            flush_data(output, streams, &mut block, opts.compress && !block_skip, link, opts)?;
             send_large(
                 output,
+                streams,
                 id,
                 idx,
                 entry,
@@ -769,10 +807,10 @@ fn send_need_data<W: Write + Send + 'static>(
             )?;
         }
         if skip {
-            flush_data(output, &mut block, false, link, opts)?;
+            flush_data(output, streams, &mut block, false, link, opts)?;
         }
     }
-    flush_data(output, &mut block, opts.compress && !block_skip, link, opts)
+    flush_data(output, streams, &mut block, opts.compress && !block_skip, link, opts)
 }
 
 /// Read until the reply to one F_DELTA_REQUEST. Any other frame is kept for the
@@ -862,11 +900,13 @@ pub fn run_sender<R: Read, W: Write + Send + 'static>(
     let mut ids = idmap::Sender::default();
     let mut dirs: Vec<Option<SentDir>> = Vec::new();
     let mut next_id = 1u32;
+    let mut streams = xattr::Streams::new();
     send_dir(
         &mut output,
         opts,
         features,
         &link,
+        &mut streams,
         &mut ids,
         0,
         0,
@@ -970,6 +1010,7 @@ pub fn run_sender<R: Read, W: Write + Send + 'static>(
                     }
                     send_need_data(
                         &mut output,
+                        &mut streams,
                         id,
                         &indices,
                         &dir,
