@@ -30,12 +30,12 @@ everything on one thread, which costs little on a zero-latency pipe and a lot wh
   (`remote.cpp:2603-2706`).
 
 ## 5. Directory fds and fewer syscalls per file
-- [ ] A directory-fd cache keyed by directory id, each opened from its parent's fd; `openat`, `futimens`,
+- [x] A directory-fd cache keyed by directory id, each opened from its parent's fd; `openat`, `futimens`,
   `renameat`, `mkdirat`. Raise `RLIMIT_NOFILE` to its hard limit.
-- [ ] Per file: no `set_len` on a new file, `fchmod` only when the created mode differs, `fchown` only when the
+- [x] Per file: no `set_len` on a new file, `fchmod` only when the created mode differs, `fchown` only when the
   group differs, ids and groups looked up once (`fs.cpp:1882-2165`, `:136-151`).
-- [ ] Per new directory: one `mkdirat(mode|0700)`, no `lstat` when the parent listing says the name is absent; the
-  final pass skips directories already right (`fs.cpp:1172`, `:1553-1589`).
+- [x] Per new directory: one `mkdir(mode|0700)`, no `lstat` when the parent listing says the name is absent.
+- [ ] The final pass skips directories already right, and works on directory fds (`fs.cpp:1553-1589`).
 
 ## 6. Bulk listings
 - [ ] Destination listing and source walk: `getattrlistbulk` on macOS (`fs.cpp:327-442`), `getdents64` + `statx`

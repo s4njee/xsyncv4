@@ -6,8 +6,11 @@ use std::ffi::OsString;
 use std::fs::{self, File, OpenOptions};
 use std::io::{self, Write};
 use std::os::unix::ffi::{OsStrExt, OsStringExt};
-use std::os::unix::fs::{OpenOptionsExt, PermissionsExt};
+use std::os::unix::fs::{DirBuilderExt, MetadataExt, OpenOptionsExt, PermissionsExt};
+use std::os::unix::io::AsRawFd;
 use std::path::{Path, PathBuf};
+use std::sync::atomic::{AtomicUsize, Ordering};
+use std::sync::OnceLock;
 
 use crate::acls;
 use crate::ffi;
@@ -106,19 +109,77 @@ pub(super) fn reserve_chunk(chunks: &mut BTreeMap<i64, i64>, start: i64, end: i6
     true
 }
 
+/// `.name.XXXXXX`, the temporary name a file is written under before it is renamed into place.
+fn temp_name(name: &[u8], attempt: u64) -> Vec<u8> {
+    let mut tmp = b".".to_vec();
+    let keep = name.len().min(240);
+    tmp.extend_from_slice(&name[..keep]);
+    tmp.push(b'.');
+    let mut value = std::process::id() as u64 * 31 + attempt;
+    for _ in 0..6 {
+        let alphabet = b"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        tmp.push(alphabet[(value % 62) as usize]);
+        value /= 62;
+    }
+    tmp
+}
+
+/// Destination directories held open at once, and how many may be: half the open-file
+/// limit, raised to its hard limit first, as `RLIMIT_NOFILE` allows.
+static OPEN_DIRS: AtomicUsize = AtomicUsize::new(0);
+
+fn open_dir_budget() -> usize {
+    static BUDGET: OnceLock<usize> = OnceLock::new();
+    *BUDGET.get_or_init(|| (ffi::raise_open_files() / 2).min(1 << 16) as usize)
+}
+
+/// A destination directory held open while its files are written, so each one is created,
+/// timed and renamed relative to it instead of by walking its path again. Past the budget,
+/// or when the directory cannot be opened, files fall back to paths.
+pub(super) struct DestDir {
+    pub(super) path: PathBuf,
+    fd: Option<File>,
+    /// The group a file created here gets: the directory's on macOS, or on Linux when it is
+    /// setgid, ours otherwise (`need_dgid`, fs.cpp). A file already in that group needs no fchown.
+    new_gid: Option<u32>,
+}
+
+impl DestDir {
+    pub(super) fn open(path: &Path) -> Self {
+        let mut dir = Self::by_path(path);
+        if OPEN_DIRS.fetch_add(1, Ordering::Relaxed) < open_dir_budget() {
+            if let Ok(fd) = File::open(path) {
+                dir.new_gid = fd.metadata().ok().map(|metadata| {
+                    if cfg!(target_os = "macos") || metadata.mode() & 0o2000 != 0 {
+                        metadata.gid()
+                    } else {
+                        ffi::effective_gid()
+                    }
+                });
+                dir.fd = Some(fd);
+                return dir;
+            }
+        }
+        OPEN_DIRS.fetch_sub(1, Ordering::Relaxed);
+        dir
+    }
+
+    pub(super) fn by_path(path: &Path) -> Self {
+        Self { path: path.to_path_buf(), fd: None, new_gid: None }
+    }
+}
+
+impl Drop for DestDir {
+    fn drop(&mut self) {
+        if self.fd.is_some() {
+            OPEN_DIRS.fetch_sub(1, Ordering::Relaxed);
+        }
+    }
+}
+
 pub(super) fn create_temp(dir: &Path, name: &[u8]) -> io::Result<(PathBuf, File)> {
     for attempt in 0..100u64 {
-        let mut tmp = b".".to_vec();
-        let keep = name.len().min(240);
-        tmp.extend_from_slice(&name[..keep]);
-        tmp.push(b'.');
-        let mut value = std::process::id() as u64 * 31 + attempt;
-        for _ in 0..6 {
-            let alphabet = b"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-            tmp.push(alphabet[(value % 62) as usize]);
-            value /= 62;
-        }
-        let path = dir.join(OsString::from_vec(tmp));
+        let path = dir.join(OsString::from_vec(temp_name(name, attempt)));
         match OpenOptions::new().read(true).write(true).create_new(true).mode(0o600).open(&path) {
             Ok(file) => return Ok((path, file)),
             Err(error) if error.kind() == io::ErrorKind::AlreadyExists => continue,
@@ -189,7 +250,65 @@ pub(super) fn finish_infile(infile: &mut InFile, opts: &Options) -> io::Result<b
     }
 }
 
-pub(super) fn write_whole(path_dir: &Path, name: &[u8], final_path: &Path, attrs: &Attrs, bytes: &[u8], opts: &Options) -> io::Result<()> {
+/// Write a small file under a temporary name in `dir` and rename it into place, with the
+/// syscalls fs.cpp makes: create, write, fchown and fchmod only when they change something,
+/// futimens, close, rename. No path is walked when the directory is open.
+pub(super) fn write_whole(dir: &DestDir, name: &[u8], final_path: &Path, attrs: &Attrs, bytes: &[u8], opts: &Options) -> io::Result<()> {
+    let Some(fd) = &dir.fd else {
+        return write_whole_by_path(&dir.path, name, final_path, attrs, bytes, opts);
+    };
+    let created = if opts.perms { (attrs.mode & 0o7777) | 0o600 } else { 0o600 };
+    let mut made = None;
+    for attempt in 0..100u64 {
+        let temp = temp_name(name, attempt);
+        match ffi::create_at(fd, &temp, created) {
+            Ok(file) => {
+                made = Some((temp, file));
+                break;
+            }
+            Err(error) if error.kind() == io::ErrorKind::AlreadyExists => continue,
+            Err(error) => return Err(error),
+        }
+    }
+    let Some((temp, mut file)) = made else {
+        return Err(io::Error::new(io::ErrorKind::AlreadyExists, "cannot create a temporary file"));
+    };
+    let result = (|| {
+        file.write_all(bytes)?;
+        let uid = (opts.owner && ffi::is_root() && attrs.uid != ffi::effective_uid()).then_some(attrs.uid);
+        let gid = (opts.group && ffi::can_set_gid(attrs.gid) && Some(attrs.gid) != dir.new_gid).then_some(attrs.gid);
+        if uid.is_some() || gid.is_some() {
+            let _ = ffi::fchown_fd(file.as_raw_fd(), uid, gid);
+        }
+        if opts.perms {
+            // Set-id and sticky bits are always set explicitly: create may drop them, and so does fchown.
+            let mode = attrs.mode & 0o7777;
+            if mode & 0o7000 != 0 || created & 0o777 & !ffi::current_umask() != mode {
+                file.set_permissions(fs::Permissions::from_mode(mode))?;
+            }
+        }
+        if opts.times {
+            let _ = ffi::set_file_mtime(&file, attrs.mtime, attrs.mtime_ns as i64);
+        }
+        if opts.xattrs != 0 || opts.acls {
+            let temp_path = dir.path.join(OsString::from_vec(temp.clone()));
+            if opts.xattrs != 0 {
+                let _ = xattr::apply(&attrs.xattrs, &temp_path, crate::protocol::T_REG, &opts.filters, opts);
+            }
+            if opts.acls {
+                let _ = acls::apply(&attrs.acls, &temp_path, crate::protocol::T_REG, attrs.mode, opts);
+            }
+        }
+        drop(file);
+        ffi::rename_at(fd, &temp, name)
+    })();
+    if result.is_err() {
+        let _ = ffi::unlink_at(fd, &temp);
+    }
+    result
+}
+
+fn write_whole_by_path(path_dir: &Path, name: &[u8], final_path: &Path, attrs: &Attrs, bytes: &[u8], opts: &Options) -> io::Result<()> {
     let (temp, mut file) = create_temp(path_dir, name)?;
     let result = (|| {
         file.write_all(bytes)?;
@@ -217,9 +336,14 @@ pub(super) fn write_whole(path_dir: &Path, name: &[u8], final_path: &Path, attrs
 }
 
 pub(super) fn make_dir(path: &Path, mode: u32) -> io::Result<bool> {
-    match fs::create_dir(path) {
+    let working = (mode & 0o7777) | 0o700;
+    match fs::DirBuilder::new().mode(working).create(path) {
         Ok(()) => {
-            let _ = fs::set_permissions(path, fs::Permissions::from_mode((mode & 0o7777) | 0o700));
+            // The final pass sets the real mode; until then only our own rwx matters, which
+            // the umask rarely touches.
+            if ffi::current_umask() & 0o700 != 0 {
+                let _ = fs::set_permissions(path, fs::Permissions::from_mode(working));
+            }
             Ok(true)
         }
         Err(error) if error.kind() == io::ErrorKind::AlreadyExists => {
