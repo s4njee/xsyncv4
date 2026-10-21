@@ -1,0 +1,33 @@
+# Written by the engineer to keep the runner busy: xs-rs at 5a4536053183 against the C++ xs and rsync,
+# noop copies of congress-sample. Every run of it pools into one analysis.
+id = "FC-5a45360-noop"
+kind = "screening"
+hypothesis = "On congress-sample, noop, the three tools differ by more than 5% in time to durable."
+primary = "durable_s"
+delta = 0.05
+blocks = 4
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[arms.xs-cpp]
+tool = "xs"
+rev = "a3e52c2c61de"
+flags = ["-a", "-j4"]
+
+[arms.xs-rs]
+tool = "xs"
+rev = "5a4536053183a5edf3e36a5ded4640bfdd8d93b4-rs"
+flags = ["-a"]
+
+[matrix]
+link = "a-aws"
+corpus = ["congress-sample"]
+scenario = ["noop"]
+direction = ["a>aws"]
+client = ["sender"]
+cache = ["warm"]

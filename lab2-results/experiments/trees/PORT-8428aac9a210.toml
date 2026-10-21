@@ -1,0 +1,13 @@
+# Written by the engineer: the port screen of xs-rs at 8428aac9a210; nothing is queued after the deadline.
+id = "PORT-8428aac9a210"
+question = "Is xs-rs at 8428aac9a210 (after port step filters) as fast as xs-c++, and than rsync?"
+deadline = "2026-10-24T00:54Z"
+start = ["N0", "N1"]
+
+[nodes.N0]
+spec = "auto/PS-8428aac9a210-fresh.toml"
+question = "Is xs-rs at 8428aac9a210 (after port step filters) as fast as xs-c++, and than rsync?"
+
+[nodes.N1]
+spec = "auto/PS-8428aac9a210-update-10pct.toml"
+question = "Is xs-rs at 8428aac9a210 (after port step filters) as fast as xs-c++, and than rsync?"

@@ -1,0 +1,9 @@
+# Written by the 6-hourly planner at 2026-10-20T01:12Z for a; nothing is queued after the deadline.
+id = "AUTO-10200112-a"
+question = "Runner a is idle with no backlog, so it has the full 6.0 h window; only the a-aws link and the real-projects corpus are available, and only build a3e52c2c61de is staged on both hosts. No -tune build is staged, so this plan uses only flag settings. The four 12-block screens cost about 2.5 h at 0.7 min/sample, leaving ample headroom. Priority is the largest measured deficit (no-op), then the fresh deficit and its compression × jobs interaction, then the two untested incremental-update scenarios, where xs may first beat rsync. No confirm arm is set because no xs setting has yet produced a winning screening interval, and engineering stays closed because jobs/compression have not been screened and the gap is not yet shown to need code rather than settings."
+deadline = "2026-10-20T07:12Z"
+start = ["N0"]
+
+[nodes.N0]
+spec = "auto/AP10200112-A1-noop-jobs.toml"
+question = "Does raising xs's parallelism close the no-op deficit against rsync -a on real-projects from a to aws?"

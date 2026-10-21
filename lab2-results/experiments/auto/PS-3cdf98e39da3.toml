@@ -1,0 +1,33 @@
+# Written by the engineer: xs-rs at 3cdf98e39da3 (port_base after step zstd merged) against the
+# C++ xs and rsync. Each port screen is queued once per commit of port_base.
+id = "PS-3cdf98e39da3"
+kind = "screening"
+hypothesis = "xs-rs at 3cdf98e39da3 differs from the C++ xs (-a -j4) by more than 5% in time-to-durable on real-projects, fresh and noop, a>aws."
+primary = "durable_s"
+delta = 0.05
+blocks = 3
+control = "xs-cpp"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.xs-cpp]
+tool = "xs"
+rev = "a3e52c2c61de"
+flags = ["-a", "-j4"]
+
+[arms.xs-rs]
+tool = "xs"
+rev = "3cdf98e39da34923a42db4a832d7b44baf087b15-rs"
+flags = ["-a"]
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[matrix]
+link = "a-aws"
+corpus = ["real-projects"]
+scenario = ["fresh", "noop"]
+direction = ["a>aws"]
+client = ["sender"]
+cache = ["warm"]

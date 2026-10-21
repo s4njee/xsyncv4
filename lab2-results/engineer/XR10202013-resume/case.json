@@ -1,0 +1,135 @@
+{
+ "id": "XR10202013-resume",
+ "kind": "port",
+ "step": "resume",
+ "opened_utc": "2026-10-20T20:13:20Z",
+ "origin": "the engineer, after the previous step merged",
+ "state": "review",
+ "question": "resuming partial files (PF_RESUME)",
+ "why": "",
+ "hypothesis": "",
+ "evidence": [],
+ "link": null,
+ "runner": null,
+ "base_rev": "e3b546f679b970ac4b718bc9e983ae40c35ea359",
+ "base_build": "e3b546f679b9",
+ "branch": "auto/XR10202013-resume",
+ "commit": "b95010d885cd2365e54d26a6fdf996d44ba2517e",
+ "history": [
+  {
+   "utc": "2026-10-20T20:13:20Z",
+   "state": "opened",
+   "text": "opened by the engineer, after the previous step merged: port step resume, resuming partial files (PF_RESUME)"
+  },
+  {
+   "utc": "2026-10-20T20:16:14Z",
+   "state": "prepared",
+   "text": "parent built; xs-rs checks passing on it: test, clippy, fmt, arm64"
+  },
+  {
+   "utc": "2026-10-20T20:44:19Z",
+   "state": "review",
+   "text": "b95010d885cd on auto/XR10202013-resume: 11 file(s), 612 lines and 130 of tests; xs-rs's tests, clippy and rustfmt pass against xs-c++; waiting for it to be merged"
+  },
+  {
+   "utc": "2026-10-20T20:44:29Z",
+   "state": "review",
+   "text": "pull request https://github.com/s4njee/xsyncv4/pull/10"
+  }
+ ],
+ "tests": {
+  "parent": {
+   "test": true,
+   "clippy": true,
+   "fmt": true,
+   "arm64": true
+  },
+  "candidate": {
+   "test": true,
+   "clippy": true,
+   "fmt": true,
+   "arm64": true
+  }
+ },
+ "agent": {
+  "summary": "Implemented PF_RESUME in xs-rs: the receiver hashes and offers a destination prefix in NEED, the sender verifies the source prefix and sends only the suffix, and the receiver re-hashes the prefix before publishing. Added framing, negotiation, CLI and hostile-peer validation, plus C++ interop tests in both directions.",
+  "diagnosis": "Before this step xs-rs did not advertise or parse RESUME, so a partially present destination was retransmitted in full. The C++ reference resume tests now pass 4/4 against the Rust server, and the new interop tests show a 4 MiB file with a verified 3 MiB destination prefix placing less than 2 MiB of DATA on the wire instead of the full file.",
+  "change": "Added xs-wire::resume for the NEED prefix layout (size, then XXH3-128 low/high) and the receiver's validation rules. Added XXH3-128 streaming through libxxhash, destination/source prefix hashing and restore in xs-rs/src/resume.rs, PF_RESUME advertisement (withdrawn by --whole-file), --partial/-P and -W/--no-whole-file parsing, prefix fields in NEED/DATA/END, overlap detection, failed-prefix rejection, and partial cleanup matching fs.cpp.",
+  "expected_effect": "Interrupted or partially present large files resume from a verified prefix on mars-orion and orion-mars pushes and pulls, cutting redundant transfer bytes while refusing stale, unoffered or overlapping prefixes.",
+  "risks": "A destination can change between the NEED hash and the restore hash; the restore re-hashes and refuses publication, returning RERR_PARTIAL. The prefix is read twice (NEED and restore), as in the C++ reference. Delta is not negotiated, so no resume/delta interaction is exercised. Partial retention keeps only the contiguous prefix, matching fs.cpp.",
+  "tests": "XS_BIN=.../parent/build/xs cargo test --manifest-path rs/Cargo.toml: all workspace tests pass, including 4 new resume interop tests (C++ client push/pull and Rust client push/pull) and new xs-wire prefix byte tests; the reference tests/resume_wire_test.py passes 4/4 with XSYNC_TEST_BINARY pointing at xs-rs. cargo clippy --all-targets -D warnings, cargo fmt --check and cargo check --target aarch64-unknown-linux-gnu all pass.",
+  "cpp_lesson": "",
+  "cost_usd": 0.22,
+  "turns": 149,
+  "session": "ses_ea50595e7ffe22qxRgtD1z4yY2",
+  "model": "opencode-go/deepseek-v4.1-flash"
+ },
+ "diff": [
+  {
+   "path": "rs/xs-rs/src/cli.rs",
+   "added": "10",
+   "deleted": "3"
+  },
+  {
+   "path": "rs/xs-rs/src/ffi.rs",
+   "added": "65",
+   "deleted": "0"
+  },
+  {
+   "path": "rs/xs-rs/src/main.rs",
+   "added": "25",
+   "deleted": "1"
+  },
+  {
+   "path": "rs/xs-rs/src/protocol.rs",
+   "added": "4",
+   "deleted": "0"
+  },
+  {
+   "path": "rs/xs-rs/src/resume.rs",
+   "added": "115",
+   "deleted": "0"
+  },
+  {
+   "path": "rs/xs-rs/src/transfer.rs",
+   "added": "75",
+   "deleted": "10"
+  },
+  {
+   "path": "rs/xs-rs/src/transfer/file.rs",
+   "added": "42",
+   "deleted": "3"
+  },
+  {
+   "path": "rs/xs-rs/src/transfer/receiver.rs",
+   "added": "139",
+   "deleted": "27"
+  },
+  {
+   "path": "rs/xs-rs/tests/resume.rs",
+   "added": "130",
+   "deleted": "0"
+  },
+  {
+   "path": "rs/xs-wire/src/lib.rs",
+   "added": "1",
+   "deleted": "0"
+  },
+  {
+   "path": "rs/xs-wire/src/resume.rs",
+   "added": "92",
+   "deleted": "0"
+  }
+ ],
+ "pr": {
+  "number": 10,
+  "url": "https://github.com/s4njee/xsyncv4/pull/10",
+  "branch": "engineer/XR10202013-resume",
+  "commit": "7bad5629449e574b0df27ae6cfd33914e389e8ea",
+  "base": "e3b546f679b970ac4b718bc9e983ae40c35ea359"
+ },
+ "merged": {
+  "commit": "2c0bec1da6930369686d8965b2c074bb47459bcd",
+  "utc": "2026-10-20T20:46:00Z"
+ }
+}

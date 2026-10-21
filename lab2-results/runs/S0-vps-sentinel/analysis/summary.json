@@ -1,0 +1,22 @@
+{
+ "experiment": "S0-vps-sentinel",
+ "kind": "screening",
+ "hypothesis": "Hour by hour, the A/A ratio stays within 3% of 1 and the xs to rsync ratio stays where the baseline put it.",
+ "primary": "wall_s",
+ "control": "xs",
+ "delta": 0.03,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261019T235430Z-S0-vps-sentinel-s0001",
+  "20261020T000739Z-S0-vps-sentinel-s0001",
+  "20261020T030134Z-S0-vps-sentinel-s0002"
+ ],
+ "spec_sha256": [
+  "59a2421a77778946166ab5d63cbaca692e25ecabae5ee96b08efc285f0d3c79b",
+  "72e86bb4dc61d262d4c54e8545b7c7900ad43edd4ed23652128396029758edba"
+ ],
+ "valid_blocks": 6,
+ "void_attempts": 0,
+ "void_reasons": []
+}

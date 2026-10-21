@@ -1,0 +1,125 @@
+{
+ "id": "XR10202238-filters",
+ "kind": "port",
+ "step": "filters",
+ "opened_utc": "2026-10-20T22:38:44Z",
+ "origin": "the engineer, after the previous step merged",
+ "state": "review",
+ "question": "filters, relative paths and files-from (PF_FILTERS, PF_RELATIVE, PF_FILES_FROM)",
+ "why": "",
+ "hypothesis": "",
+ "evidence": [],
+ "link": null,
+ "runner": null,
+ "base_rev": "3b42279cc4fc50390170c444a157cdece631c751",
+ "base_build": "3b42279cc4fc",
+ "branch": "auto/XR10202238-filters",
+ "commit": "588123f4e5fe794e2e2c2aed953210e54599d5df",
+ "history": [
+  {
+   "utc": "2026-10-20T22:38:44Z",
+   "state": "opened",
+   "text": "opened by the engineer, after the previous step merged: port step filters, filters, relative paths and files-from (PF_FILTERS, PF_RELATIVE, PF_FILES_FROM)"
+  },
+  {
+   "utc": "2026-10-20T22:41:50Z",
+   "state": "prepared",
+   "text": "parent built; xs-rs checks passing on it: test, clippy, fmt, arm64"
+  },
+  {
+   "utc": "2026-10-20T23:36:51Z",
+   "state": "review",
+   "text": "588123f4e5fe on auto/XR10202238-filters: 9 file(s), 1195 lines and 272 of tests; xs-rs's tests, clippy and rustfmt pass against xs-c++; waiting for it to be merged"
+  },
+  {
+   "utc": "2026-10-20T23:37:01Z",
+   "state": "review",
+   "text": "pull request https://github.com/s4njee/xsyncv4/pull/13"
+  }
+ ],
+ "tests": {
+  "parent": {
+   "test": true,
+   "clippy": true,
+   "fmt": true,
+   "arm64": true
+  },
+  "candidate": {
+   "test": true,
+   "clippy": true,
+   "fmt": true,
+   "arm64": true
+  }
+ },
+ "agent": {
+  "summary": "Reduced the implementation to 1,195 changed lines outside tests (from 1,231), under the gate's 1,200-line ceiling, by dropping the unused exclude-from/include-from reader and a few redundant filter helpers. The feature still covers PF_FILTERS, PF_RELATIVE and PF_FILES_FROM, and all four gate commands pass again.",
+  "diagnosis": "The gate counted 1,231 changed lines because it includes both additions and deletions: 1,198 additions plus 33 deletions. I removed 32 implementation lines that were not needed for the wire feature (the unused --exclude-from/--include-from file reader, the -F short option, and legacy '+ '/'- ' old-style overrides), leaving 1,162 additions and 33 deletions. The full suite reports 21+5+9+6+5+9+5+12+8+4+3+31+4+4 passing tests, including the six new filters/relative/files-from interop tests.",
+  "change": "Added rs/xs-rs/src/filter.rs (rule parsing, wildmatch, per-directory merge rules); extended DIR entries with the selected-directory byte and filter-source string; taught the server to read RELATIVE_CONFIG, the FILES_CONFIG/FILES_DATA/FILES_END stream with acknowledgement, and FILTER_CONFIG in C++ order; taught the client to advertise and send those frames plus HELLO legacy rules; added --filter/-f, --exclude/--include, --files-from, -0/--from0 and -C; and added relative/files-from selection with implied directories, selected flags, duplicate-name merging and receiver-side unrequested-name rejection.",
+  "expected_effect": "A C++ xs can push or pull with -R, --files-from and filter/merge rules against xs-rs, and xs-rs can do the same against a C++ xs server. Simple filters travel in HELLO; extended filters and selection configuration travel in the negotiated frames with the C++ field order and selected-directory flags.",
+  "risks": "The filter engine covers common rsync rules, modifiers and line-based merge files, but not the built-in CVS pattern set, word-mode merge files, bracket wildcard classes, or CLI single-instance '.' merge files. --exclude-from and --include-from are no longer accepted. Relative selection covers /./ cuts, trailing-slash contents, implied directories, implied-symlink following and duplicates; deletion ownership is not implemented because deletion is outside this step.",
+  "tests": "Ran the four gate commands after the size fix: XS_BIN=<parent/build/xs> cargo test --manifest-path rs/Cargo.toml (all pass, including rs/xs-rs/tests/filters.rs: simple filters both directions, merge rules both directions, relative push/pull in all four peer combinations, files-from in all four peer combinations); cargo clippy --all-targets -- -D warnings; cargo fmt --check; cargo check --all-targets --target aarch64-unknown-linux-gnu. All four passed. Changed lines outside tests: 1,162 additions + 33 deletions = 1,195.",
+  "cpp_lesson": "",
+  "cost_usd": 0.27,
+  "turns": 14,
+  "session": "ses_ea481e23fffen33dV1qSOEQoz0",
+  "model": "opencode-go/deepseek-v4.1-flash"
+ },
+ "diff": [
+  {
+   "path": "rs/xs-rs/src/cli.rs",
+   "added": "86",
+   "deleted": "13"
+  },
+  {
+   "path": "rs/xs-rs/src/config.rs",
+   "added": "165",
+   "deleted": "3"
+  },
+  {
+   "path": "rs/xs-rs/src/filter.rs",
+   "added": "338",
+   "deleted": "0"
+  },
+  {
+   "path": "rs/xs-rs/src/main.rs",
+   "added": "122",
+   "deleted": "4"
+  },
+  {
+   "path": "rs/xs-rs/src/protocol.rs",
+   "added": "38",
+   "deleted": "4"
+  },
+  {
+   "path": "rs/xs-rs/src/scan.rs",
+   "added": "294",
+   "deleted": "3"
+  },
+  {
+   "path": "rs/xs-rs/src/transfer.rs",
+   "added": "35",
+   "deleted": "4"
+  },
+  {
+   "path": "rs/xs-rs/src/transfer/receiver.rs",
+   "added": "84",
+   "deleted": "2"
+  },
+  {
+   "path": "rs/xs-rs/tests/filters.rs",
+   "added": "272",
+   "deleted": "0"
+  }
+ ],
+ "pr": {
+  "number": 13,
+  "url": "https://github.com/s4njee/xsyncv4/pull/13",
+  "branch": "engineer/XR10202238-filters",
+  "commit": "d9e0e321bcdd72c95ad3aa0734961293c10c7f5f",
+  "base": "3b42279cc4fc50390170c444a157cdece631c751"
+ },
+ "merged": {
+  "commit": "3b891bf5e8fb51c26f64347a4163e81fe3c0c2d9",
+  "utc": "2026-10-20T23:38:07Z"
+ }
+}

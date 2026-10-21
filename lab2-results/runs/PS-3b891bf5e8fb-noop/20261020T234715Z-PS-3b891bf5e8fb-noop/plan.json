@@ -1,0 +1,200 @@
+{
+ "schema": 1,
+ "experiment": "PS-3b891bf5e8fb-noop",
+ "spec_sha256": "b4e9b2a1c38cb26ae25ab120b2abe2b3807d3970cde6167467b5e737a7d9b8e4",
+ "kind": "screening",
+ "bundle": "5dbe1736e605",
+ "writes": {
+  "a": 0,
+  "aws": 218210440
+ },
+ "hypothesis": "xs-rs at 3b891bf5e8fb differs from xs-c++ (-a -j4) by more than 5% in time-to-durable on congress-sample, noop, a>aws.",
+ "primary": "durable_s",
+ "delta": 0.05,
+ "control": "xs-cpp",
+ "seed": 53112,
+ "run_id": "20261020T234715Z-PS-3b891bf5e8fb-noop",
+ "driver": "a",
+ "sample_timeout_s": 3600,
+ "results": "vps",
+ "background": false,
+ "local_link": false,
+ "eager_cleanup": true,
+ "hours": null,
+ "hosts": {
+  "a": {
+   "system": "Linux"
+  },
+  "aws": {
+   "system": "Linux"
+  }
+ },
+ "links": {
+  "a-aws": {
+   "hosts": [
+    "a",
+    "aws"
+   ],
+   "medium": "internet",
+   "initiator": "a",
+   "driver": "a",
+   "results": "vps",
+   "directions": [
+    "a>aws"
+   ]
+  }
+ },
+ "arms": [
+  {
+   "name": "xs-cpp",
+   "tool": "xs",
+   "flags": [
+    "-a",
+    "-j4"
+   ],
+   "rev": "a3e52c2c61de",
+   "binary": {
+    "a": "~/benchmarks/lab/bin/xs-a3e52c2c61de",
+    "aws": "~/benchmarks/lab/bin/xs-a3e52c2c61de"
+   },
+   "sha256": {
+    "a": "e2c44be3c3581e2ed688a0bc2f7f29187d0d4bae085895f2c5f5bd06e850995d",
+    "aws": "06537fcc7da341e04702176af0e7ed790ab4e31a634c971881b6220ae26eb746"
+   },
+   "artifacts": {
+    "xs-linux-amd64": "e2c44be3c3581e2ed688a0bc2f7f29187d0d4bae085895f2c5f5bd06e850995d",
+    "xs-linux-arm64": "06537fcc7da341e04702176af0e7ed790ab4e31a634c971881b6220ae26eb746"
+   }
+  },
+  {
+   "name": "xs-rs",
+   "tool": "xs",
+   "flags": [
+    "-a",
+    "-j4"
+   ],
+   "rev": "3b891bf5e8fb-rs",
+   "binary": {
+    "a": "~/benchmarks/lab/bin/xs-3b891bf5e8fb-rs",
+    "aws": "~/benchmarks/lab/bin/xs-3b891bf5e8fb-rs"
+   },
+   "sha256": {
+    "a": "50bd7d473b2e00c84d68d41327b4af501263486f68bb303434251fedc8dfe775",
+    "aws": "9ee7d53e53d8c703aadd81aec351efa72f2dafa84fa2b368b2bbd9a82511a9b6"
+   },
+   "artifacts": {
+    "xs-linux-amd64": "50bd7d473b2e00c84d68d41327b4af501263486f68bb303434251fedc8dfe775",
+    "xs-linux-arm64": "9ee7d53e53d8c703aadd81aec351efa72f2dafa84fa2b368b2bbd9a82511a9b6"
+   }
+  },
+  {
+   "name": "rsync",
+   "tool": "rsync",
+   "flags": [
+    "-a"
+   ],
+   "binary": {
+    "a": "rsync",
+    "aws": "rsync"
+   }
+  }
+ ],
+ "cells": [
+  {
+   "id": "congress-sample.noop.a-aws.sender.warm",
+   "corpus": "congress-sample",
+   "scenario": "noop",
+   "sender": "a",
+   "receiver": "aws",
+   "client": "sender",
+   "link": "a-aws",
+   "cache": "warm"
+  }
+ ],
+ "corpora": {
+  "congress-sample": {
+   "files": 25246,
+   "directories": 9797,
+   "bytes": 218210440,
+   "digest": "62261d78f7e2c2d273d371f02cb5479fdb9f2df1a3880315949e8aabfa6e6911",
+   "quick_digest": "4194ff0bf17861c9104b8d8dd641587f279ce58bd698624dce6572a21ce6a1ad"
+  }
+ },
+ "blocks": [
+  {
+   "cell": "congress-sample.noop.a-aws.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs-rs",
+     "xs-cpp",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs-rs",
+     "xs-cpp"
+    ],
+    [
+     "xs-cpp",
+     "rsync",
+     "xs-rs"
+    ]
+   ]
+  },
+  {
+   "cell": "congress-sample.noop.a-aws.sender.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-rs",
+     "rsync",
+     "xs-cpp"
+    ],
+    [
+     "rsync",
+     "xs-cpp",
+     "xs-rs"
+    ],
+    [
+     "rsync",
+     "xs-rs",
+     "xs-cpp"
+    ]
+   ]
+  },
+  {
+   "cell": "congress-sample.noop.a-aws.sender.warm",
+   "block": 2,
+   "verify_full": true,
+   "orders": [
+    [
+     "rsync",
+     "xs-cpp",
+     "xs-rs"
+    ],
+    [
+     "rsync",
+     "xs-cpp",
+     "xs-rs"
+    ],
+    [
+     "xs-rs",
+     "rsync",
+     "xs-cpp"
+    ]
+   ]
+  }
+ ],
+ "scripts": {
+  "probe.py": "a89b145b8f76fc4d5444cea6af3c124a5b2e5885226998c726ca95fd9d881d36",
+  "corpus.py": "410aa282e29466cbe0b4134c6c520a1eeaded966b1710941382730f89f27125c",
+  "corpora.json": "eb8e13c6cb97ad734265ceaacb1a333aa2bded545665ada66b617f7f7916f135",
+  "agent.py": "d8e49fdc54233a7a5397e0a87689451ee02cb9225472178044a7e60df3f38120",
+  "runner.py": "21b474a24377a2f177b3f611172a912408fb0f1fb068ac298605fac634b3132e",
+  "xspipe.py": "94b3fccfc6e994d227077c453f90323ab55337fd8a98231d16a10696e8ebab6b",
+  "measure.py": "5065310f480ff1cabfa7c645f0db342624a02f9a081b96069d50d52b3d224777"
+ }
+}

@@ -1,0 +1,14 @@
+{
+ "outcome": "patched",
+ "summary": "Added the post-HELLO configuration frames to xs-wire: IO, COMPRESS, XATTR, ACL, CHOWN, SPARSE, LINKDEST, RELATIVE, FILES_CONFIG/DATA/END, FILTER, DELETE, PRUNE and OUTPUT. Encoding matches run_client byte for byte, decoding checks framing, negotiated features and hostile-peer bounds. Unit byte tests and a C++ server interop test pass, along with clippy and fmt.",
+ "diagnosis": "Read remote.cpp's run_client (around 2892) and run_server (around 3209) together with wire_test.py, compression_wire_test.py, chown_wire_test.py and filter_wire_test.py. The sandbox denies the benchmarks/lab path, so I built the same parent C++ source into rs/target/cpp-build and used that as XS_BIN. The first interop run exposed that the test HELLO had to negotiate ZSTD and XATTR_STREAM; after that the C++ server accepted all configuration frames in order.",
+ "change": "Added rs/xs-wire/src/config.rs with typed Config variants for all configuration frames, files-data/end helpers, frame-type and feature mapping, C++ size/count limits, and unnegotiated-feature refusal. Added byte-pinned unit tests, malformed-frame tests, and an interop test that sends the whole negotiated sequence to the C++ xs --server and expects F_DEST. Exported the module from lib.rs.",
+ "expected_effect": "xs-wire can now write and read the complete configuration exchange that follows HELLO, so a C++ client can push to or pull from an xs-rs peer without the C++ side rejecting the configuration stage.",
+ "risks": "Filter rule grammar and compression suffix character-class semantics are only structurally validated here; full rule/suffix semantics belong to the later filter and compression steps. Interop was proven against a locally built copy of the same parent source rather than the lab's prebuilt XS_BIN, which the gate will use.",
+ "tests": "Without XS_BIN: 13 unit tests pass. With XS_BIN pointing at a locally built parent xs: 13 unit tests and 4 interop tests pass. cargo clippy --all-targets -- -D warnings is clean. cargo fmt --check is clean. Net change is 397 lines under rs/.",
+ "commit_title": "Add xs-wire configuration frames after HELLO",
+ "commit_body": "Implement the configuration frames that run_client writes and run_server reads after HELLO: IO, compression, xattr, ACL, ownership, sparse, link-dest, relative, files-from, filters, delete-after, prune-empty and output, plus the files-data/end stream. Encoding matches the C++ wire bytes; decoding checks framing, negotiated features and hostile-peer bounds. Add byte-pinned unit tests and an XS_BIN-gated interop test that makes the C++ server accept the whole sequence.",
+ "cost_usd": 0.16,
+ "turns": 131,
+ "session": "ses_ea9b20221ffe8rnZXbTxKIdvS0"
+}

@@ -1,0 +1,123 @@
+{
+ "id": "XR10201943-workers",
+ "kind": "port",
+ "step": "workers",
+ "opened_utc": "2026-10-20T19:43:30Z",
+ "origin": "the engineer, after the previous step merged",
+ "state": "review",
+ "question": "parallel workers: -j/--jobs, default 4, splitting the file work as the C++ engine does; unsupported options are refused, not ignored",
+ "why": "",
+ "hypothesis": "",
+ "evidence": [],
+ "link": null,
+ "runner": null,
+ "base_rev": "d84368234dad2206e03199f7faad148a629cc40a",
+ "base_build": "d84368234dad",
+ "branch": "auto/XR10201943-workers",
+ "commit": "36d5b194b2b999861a990599dc7127b8e35f34e0",
+ "history": [
+  {
+   "utc": "2026-10-20T19:43:30Z",
+   "state": "opened",
+   "text": "opened by the engineer, after the previous step merged: port step workers, parallel workers: -j/--jobs, default 4, splitting the file work as the C++ engine does; unsupported options are refused, not ignored"
+  },
+  {
+   "utc": "2026-10-20T19:46:24Z",
+   "state": "prepared",
+   "text": "parent built; xs-rs checks passing on it: test, clippy, fmt, arm64"
+  },
+  {
+   "utc": "2026-10-20T20:05:52Z",
+   "state": "review",
+   "text": "36d5b194b2b9 on auto/XR10201943-workers: 8 file(s), 867 lines and 140 of tests; xs-rs's tests, clippy and rustfmt pass against xs-c++; waiting for it to be merged"
+  },
+  {
+   "utc": "2026-10-20T20:06:00Z",
+   "state": "review",
+   "text": "pull request https://github.com/s4njee/xsyncv4/pull/9"
+  }
+ ],
+ "max_lines": 2500,
+ "budget_usd": 4.0,
+ "session_hours": 6,
+ "tests": {
+  "parent": {
+   "test": true,
+   "clippy": true,
+   "fmt": true,
+   "arm64": true
+  },
+  "candidate": {
+   "test": true,
+   "clippy": true,
+   "fmt": true,
+   "arm64": true
+  }
+ },
+ "agent": {
+  "summary": "Added C++-compatible `-j/--jobs` handling and a worker budget to xs-rs: explicit `-jN` now splits a single large file into 4 MiB ranges on the sender and writes them concurrently on the receiver, while the default and `-j1` keep one-file I/O serial as the C++ does. The CLI now refuses unknown and explicitly unsupported options instead of ignoring them. All four gate commands pass, and the parent's `parallel_ranges_test.py` passes against the Rust binary.",
+  "diagnosis": "The previous sender scanned and emitted DATA entirely on one thread and the receiver wrote every CHUNK inline in its frame loop; reading `src/remote.cpp:1560-1600` and `:2498-2510` showed the C++ only splits ranges when the raw `jobs` value is greater than one, and only unlocks concurrent per-file writes when that directory's `file_ranges` is true. The Rust HELLO writer also dropped the `jobs` INT_OPTIONS slot (index 5), so a C++ server never saw the client's budget. No timing regression was measured because the step is structural; correctness was measured by the parent range suite (26.25 s) and the cargo interop suite.",
+  "change": "Added `rs/xs-rs/src/parallel.rs` with the default budget (4, clamped to MAX_WORKERS 64), explicit-range detection, parallel pread ranges, and a bounded-by-END write pool using pwrite. Threaded `jobs` through `Options`, the client HELLO and `options_from_flags`; `send_large`/`send_need_data` now split only when `-jN` (N>1) was explicit and at most one large file is in the NEED; the receiver stores completion context in `InFile` and publishes only after all queued writes finish. Rewrote relevant CLI parsing to add `-j`/`--jobs`, the C++ unsupported list, and unknown-option refusal, with `--help`/`--version`.",
+  "expected_effect": "A single file of 32 MiB or more transfers with up to N overlapping reads and writes under explicit `-jN`, while default and `-j1` remain single-file serial, matching the C++ range semantics. `--jobs` now crosses HELLO so either side honours it, and a typo or unsupported rsync/xs option exits 1 before creating a destination.",
+  "risks": "The write-pool queue is currently unbounded (like the pre-existing FrameOut queue), so a very fast sender into a slow disk can hold more than the C++ receiver's 16 MiB backlog. Options xs supports but xs-rs has not ported yet (filters, link-dest, files-from, chmod, info, size limits, install) are now refused as unsupported instead of silently ignored.",
+  "tests": "Ran `XS_BIN=.../parent/build/xs cargo test --manifest-path rs/Cargo.toml`: all 17 binary unit tests, 5 compression, 5 hardlink, 9 interop, 5 io_control, 12 output, 8 ownership, 3 workers, 28 xs-wire unit, 4+4 xs-wire interop passed. Added CLI unit tests for `-j4`, `-aj4`, `-j 7`, `--jobs=2`, `--jobs 3`, default zero, refusal of unknown/unsupported options, and no-op acceptance; added HELLO byte-slot tests for jobs; added `rs/xs-rs/tests/workers.rs` covering all four C++/Rust directions with `-j4`, `-j1`/`-j0` large-file copies, and refusal before destination creation. Also ran `XSYNC_TEST_BINARY=.../rs/target/debug/xs-rs python3 tests/parallel_ranges_test.py` (OK, 5 tests, 1 skipped). Clippy `-D warnings`, fmt `--check`, and aarch64 `cargo check --all-targets` all pass.",
+  "cpp_lesson": "",
+  "cost_usd": 0.15,
+  "turns": 90,
+  "session": "ses_ea5210ab8ffen1F4eh3EBfqfMB",
+  "model": "opencode-go/deepseek-v4.1-flash"
+ },
+ "diff": [
+  {
+   "path": "rs/xs-rs/src/cli.rs",
+   "added": "254",
+   "deleted": "21"
+  },
+  {
+   "path": "rs/xs-rs/src/main.rs",
+   "added": "60",
+   "deleted": "1"
+  },
+  {
+   "path": "rs/xs-rs/src/parallel.rs",
+   "added": "220",
+   "deleted": "0"
+  },
+  {
+   "path": "rs/xs-rs/src/protocol.rs",
+   "added": "4",
+   "deleted": "0"
+  },
+  {
+   "path": "rs/xs-rs/src/transfer.rs",
+   "added": "42",
+   "deleted": "2"
+  },
+  {
+   "path": "rs/xs-rs/src/transfer/file.rs",
+   "added": "8",
+   "deleted": "1"
+  },
+  {
+   "path": "rs/xs-rs/src/transfer/receiver.rs",
+   "added": "204",
+   "deleted": "50"
+  },
+  {
+   "path": "rs/xs-rs/tests/workers.rs",
+   "added": "140",
+   "deleted": "0"
+  }
+ ],
+ "pr": {
+  "number": 9,
+  "url": "https://github.com/s4njee/xsyncv4/pull/9",
+  "branch": "engineer/XR10201943-workers",
+  "commit": "6d42610d2628478337db9084feb0a4c243eafd82",
+  "base": "d84368234dad2206e03199f7faad148a629cc40a"
+ },
+ "merged": {
+  "commit": "e3b546f679b970ac4b718bc9e983ae40c35ea359",
+  "utc": "2026-10-20T20:07:25Z"
+ }
+}

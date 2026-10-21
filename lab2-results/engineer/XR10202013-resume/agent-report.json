@@ -1,0 +1,16 @@
+{
+ "outcome": "patched",
+ "summary": "Implemented PF_RESUME in xs-rs: the receiver hashes and offers a destination prefix in NEED, the sender verifies the source prefix and sends only the suffix, and the receiver re-hashes the prefix before publishing. Added framing, negotiation, CLI and hostile-peer validation, plus C++ interop tests in both directions.",
+ "diagnosis": "Before this step xs-rs did not advertise or parse RESUME, so a partially present destination was retransmitted in full. The C++ reference resume tests now pass 4/4 against the Rust server, and the new interop tests show a 4 MiB file with a verified 3 MiB destination prefix placing less than 2 MiB of DATA on the wire instead of the full file.",
+ "change": "Added xs-wire::resume for the NEED prefix layout (size, then XXH3-128 low/high) and the receiver's validation rules. Added XXH3-128 streaming through libxxhash, destination/source prefix hashing and restore in xs-rs/src/resume.rs, PF_RESUME advertisement (withdrawn by --whole-file), --partial/-P and -W/--no-whole-file parsing, prefix fields in NEED/DATA/END, overlap detection, failed-prefix rejection, and partial cleanup matching fs.cpp.",
+ "expected_effect": "Interrupted or partially present large files resume from a verified prefix on mars-orion and orion-mars pushes and pulls, cutting redundant transfer bytes while refusing stale, unoffered or overlapping prefixes.",
+ "risks": "A destination can change between the NEED hash and the restore hash; the restore re-hashes and refuses publication, returning RERR_PARTIAL. The prefix is read twice (NEED and restore), as in the C++ reference. Delta is not negotiated, so no resume/delta interaction is exercised. Partial retention keeps only the contiguous prefix, matching fs.cpp.",
+ "tests": "XS_BIN=.../parent/build/xs cargo test --manifest-path rs/Cargo.toml: all workspace tests pass, including 4 new resume interop tests (C++ client push/pull and Rust client push/pull) and new xs-wire prefix byte tests; the reference tests/resume_wire_test.py passes 4/4 with XSYNC_TEST_BINARY pointing at xs-rs. cargo clippy --all-targets -D warnings, cargo fmt --check and cargo check --target aarch64-unknown-linux-gnu all pass.",
+ "cpp_lesson": "",
+ "commit_title": "Port PF_RESUME verified prefixes to xs-rs",
+ "commit_body": "Advertise and negotiate PF_RESUME, with --partial and -P enabling it and --whole-file withdrawing it.\n\nNEED now carries each needed file's destination prefix size and XXH3-128. The sender checks those bytes against the source and starts CHUNK/END at the verified prefix; the receiver validates the offered size, rejects retries and overlaps, restores the prefix into the temporary output only after re-hashing it, and keeps only a verified contiguous partial on interruption.\n\nAdds xs-wire prefix framing tests, XXH3-128 streaming, and C++ interop tests in all four directions.",
+ "cost_usd": 0.22,
+ "turns": 149,
+ "session": "ses_ea50595e7ffe22qxRgtD1z4yY2",
+ "model": "opencode-go/deepseek-v4.1-flash"
+}

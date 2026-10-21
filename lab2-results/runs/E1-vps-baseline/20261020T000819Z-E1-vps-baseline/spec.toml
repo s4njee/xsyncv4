@@ -1,0 +1,30 @@
+# E1 for the VPS lab: xs against rsync on real-projects, the 1% sample of the operator's ~/projects
+# (69,316 files, 2.13 GB), from VPS A to the AWS endpoint across the internet, one way. A fresh copy and
+# a no-op copy; warm cache only, as neither host can drop caches. A transfer of the sample costs about
+# 1% of moving the whole folder, so these times x 100 estimate it. About 19 GiB of A's traffic, which with
+# the daily sentinel keeps a day under the 32 GiB that A's 1 TB a month allows.
+id = "E1-vps-baseline"
+kind = "screening"
+hypothesis = "xs -a differs from rsync -a by more than 3% in time-to-durable on real-projects, fresh and no-op, A to AWS."
+primary = "durable_s"
+delta = 0.03
+blocks = 4
+control = "rsync"
+verify = "first-last"
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[arms.xs]
+tool = "xs"
+rev = "a3e52c2c61de"
+flags = ["-a"]
+
+[matrix]
+link = "a-aws"
+corpus = ["real-projects"]
+scenario = ["fresh", "noop"]
+direction = ["a>aws"]
+client = ["sender"]
+cache = ["warm"]

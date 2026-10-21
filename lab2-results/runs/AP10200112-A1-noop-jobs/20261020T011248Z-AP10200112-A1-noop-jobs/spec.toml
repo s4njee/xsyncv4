@@ -1,0 +1,38 @@
+# Written by the 6-hourly planner (2026-10-20T01:12Z). Why: No-op is the largest and most repeatable measured loss, and -j is the strongest available flag lever before considering a code change.
+id = "AP10200112-A1-noop-jobs"
+kind = "screening"
+hypothesis = "The E1 no-op ratio of 1.495 [1.305,1.712] is dominated by serial per-file/metadata work; xs -a -j8 will bring the ratio below 1.10, with -j4 intermediate, while failure of both would show the deficit is not job-count-fixable."
+primary = "wall_s"
+delta = 0.1
+blocks = 12
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+sample_timeout_s = 7200
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[arms.xs]
+tool = "xs"
+rev = "a3e52c2c61de"
+flags = ["-a"]
+
+[arms.xs-j4]
+tool = "xs"
+rev = "a3e52c2c61de"
+flags = ["-a", "-j4"]
+
+[arms.xs-j8]
+tool = "xs"
+rev = "a3e52c2c61de"
+flags = ["-a", "-j8"]
+
+[matrix]
+link = "a-aws"
+corpus = ["real-projects"]
+scenario = ["noop"]
+direction = ["a>aws"]
+client = ["initiator"]
+cache = ["warm"]

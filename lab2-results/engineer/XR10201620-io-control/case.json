@@ -1,0 +1,123 @@
+{
+ "id": "XR10201620-io-control",
+ "kind": "port",
+ "step": "io-control",
+ "opened_utc": "2026-10-20T16:20:45Z",
+ "origin": "the engineer, after the previous step merged",
+ "state": "review",
+ "question": "keepalives, bandwidth limits and timeouts (PF_IO_CONTROL)",
+ "why": "",
+ "hypothesis": "",
+ "evidence": [],
+ "link": null,
+ "runner": null,
+ "base_rev": "02bd268685045570cd5cecf99f508d30a63d1a99",
+ "base_build": "02bd26868504",
+ "branch": "auto/XR10201620-io-control",
+ "commit": "4d19b189761cb49265a510891b891dbe1b636b09",
+ "history": [
+  {
+   "utc": "2026-10-20T16:20:45Z",
+   "state": "opened",
+   "text": "opened by the engineer, after the previous step merged: port step io-control, keepalives, bandwidth limits and timeouts (PF_IO_CONTROL)"
+  },
+  {
+   "utc": "2026-10-20T16:23:19Z",
+   "state": "prepared",
+   "text": "parent built; xs-rs checks passing on it: test, clippy, fmt"
+  },
+  {
+   "utc": "2026-10-20T16:54:45Z",
+   "state": "review",
+   "text": "4d19b189761c on auto/XR10201620-io-control: 9 file(s), 810 lines and 410 of tests; xs-rs's tests, clippy and rustfmt pass against the C++ xs; waiting for it to be merged"
+  },
+  {
+   "utc": "2026-10-20T16:54:54Z",
+   "state": "review",
+   "text": "pull request https://github.com/s4njee/xsyncv4/pull/6"
+  }
+ ],
+ "tests": {
+  "parent": {
+   "test": true,
+   "clippy": true,
+   "fmt": true
+  },
+  "candidate": {
+   "test": true,
+   "clippy": true,
+   "fmt": true
+  }
+ },
+ "agent": {
+  "summary": "Implemented PF_IO_CONTROL in xs-rs: exact --bwlimit/--timeout parsing, the token-bucket rate limiter, F_IO_CONFIG negotiation in the C++ order, negotiated keep-alives, and idle-timeout exit code 30. C++ clients and servers interoperate in both directions, and hostile or older peers are refused for invalid or unnegotiated keep-alives and malformed I/O configuration.",
+  "diagnosis": "The C++ reference in src/rate_limit.cpp, Conn::configure/check_timeout/writer, run_client and run_server, plus tests/io_limit_test.py defined the work. The previous xs-rs advertised no IO_CONTROL, sent no IO_CONFIG, accepted keep-alives unconditionally and had no rate or idle deadline; its receiver also wrote synchronously, so it could not emit heartbeats during long work. I matched the C++ frame order and rejection messages, added a writer thread for receiver-side heartbeats, and verified pacing with a measured 512 KiB transfer at 256 KiB/s that stayed above the 1.5 s floor.",
+  "change": "Added xs-wire/src/io_control.rs with parse_rate/parse_timeout, the RateLimiter token bucket, IoControl deadlines and heartbeat state, an ActivityReader, and a watchdog. Added --bwlimit and --timeout to xs-rs CLI/Options, negotiated IO_CONTROL, sent and validated IO_CONFIG first after HELLO, wired rate limiting and keep-alives into the writer, moved receiver output onto the same queued writer, and enforced idle exit 30. Extended integration coverage under rs/*/tests/.",
+  "expected_effect": "C++ xs with --bwlimit/--timeout can push to and pull from xs-rs; xs-rs can do the same against C++ xs. Wire writes are paced after compression, idle connections emit empty F_KEEPALIVE frames at one third of the deadline, blocked writers and idle readers expire with code 30, and invalid keep-alives or malformed IO_CONFIG are refused as protocol errors before a destination is created.",
+  "risks": "Timeout expiry is enforced by a watchdog that exits the process with code 30, matching the C++ exit status but without C++'s explicit peer SIGTERM or receiver temp-file cleanup on timeout. The rate bucket charges complete frames rather than C++'s occasional coalesced small-frame batch, which preserves the configured bytes-per-second over time but can differ by one bucket window.",
+  "tests": "Added 5 xs-wire io_control unit tests, 4 xs-wire/C++ integration tests (accepted IO config plus keep-alives; refusal of pre-config, non-empty and unnegotiated keep-alives; oversized/malformed IO config), and 5 xs-rs integration tests (four-way C++/Rust push and pull with IO control, measured rate pacing, client timeout exit 30, and Rust server keep-alive/config refusal). Ran XS_BIN=~/benchmarks/lab/engineer/XR10201620-io-control/parent/build/xs cargo test --manifest-path rs/Cargo.toml: all 68 tests passed. Also ran cargo test without XS_BIN (integration tests skip or use Rust only), cargo clippy --all-targets -- -D warnings, and cargo fmt --check: all passed.",
+  "cpp_lesson": null,
+  "cost_usd": 0.12,
+  "turns": 118,
+  "session": "ses_ea5dc04c1ffep37iP3NYI23EBL",
+  "model": "opencode-go/deepseek-v4.1-flash"
+ },
+ "diff": [
+  {
+   "path": "rs/xs-rs/src/cli.rs",
+   "added": "13",
+   "deleted": "0"
+  },
+  {
+   "path": "rs/xs-rs/src/main.rs",
+   "added": "118",
+   "deleted": "48"
+  },
+  {
+   "path": "rs/xs-rs/src/protocol.rs",
+   "added": "23",
+   "deleted": "0"
+  },
+  {
+   "path": "rs/xs-rs/src/transfer.rs",
+   "added": "107",
+   "deleted": "47"
+  },
+  {
+   "path": "rs/xs-rs/tests/io_control.rs",
+   "added": "238",
+   "deleted": "0"
+  },
+  {
+   "path": "rs/xs-rs/tests/ownership.rs",
+   "added": "3",
+   "deleted": "1"
+  },
+  {
+   "path": "rs/xs-wire/src/io_control.rs",
+   "added": "453",
+   "deleted": "0"
+  },
+  {
+   "path": "rs/xs-wire/src/lib.rs",
+   "added": "1",
+   "deleted": "0"
+  },
+  {
+   "path": "rs/xs-wire/tests/io_control.rs",
+   "added": "168",
+   "deleted": "0"
+  }
+ ],
+ "pr": {
+  "number": 6,
+  "url": "https://github.com/s4njee/xsyncv4/pull/6",
+  "branch": "engineer/XR10201620-io-control",
+  "commit": "ecea045178ee1a5e1b1f7dde2a71988444924267",
+  "base": "02bd268685045570cd5cecf99f508d30a63d1a99"
+ },
+ "merged": {
+  "commit": "deb9d92657aaa03e66d724f982f4ce98ed834ccb",
+  "utc": "2026-10-20T16:56:07Z"
+ }
+}

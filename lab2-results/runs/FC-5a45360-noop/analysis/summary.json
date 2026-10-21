@@ -1,0 +1,20 @@
+{
+ "experiment": "FC-5a45360-noop",
+ "kind": "screening",
+ "hypothesis": "On congress-sample, noop, the three tools differ by more than 5% in time to durable.",
+ "primary": "durable_s",
+ "control": "rsync",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261020T190426Z-FC-5a45360-noop",
+  "20261020T190640Z-FC-5a45360-noop"
+ ],
+ "spec_sha256": [
+  "6395c4e257b3108374fa3958ea0c2716a1390afec60b9bbf60e81b6d785f4084"
+ ],
+ "valid_blocks": 8,
+ "void_attempts": 0,
+ "void_reasons": []
+}

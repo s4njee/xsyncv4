@@ -1,0 +1,5 @@
+{
+ "text": "This case ports extended-attribute support into xs-rs, so transfers can preserve the extra metadata some files carry instead of dropping it; that closes a feature gap with xs-c++ and makes such files a supported scenario for the port. It is a parity step rather than a tuning pass, so it does not yet address the speed gap: on the noop run over congress-sample, xs-rs takes 1.542 times as long as xs-c++, and the real-projects noop result is still pending.",
+ "model": "opencode/deepseek-v4.1-flash",
+ "utc": "2026-10-21T00:12:00.668Z"
+}

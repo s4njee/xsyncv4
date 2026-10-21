@@ -1,0 +1,13 @@
+experiment,kind,cell_id,corpus,scenario,sender,receiver,client,link,cache,arm,metric,n_blocks,geomean,lo,hi
+FC-02bd268-noop,screening,congress-sample.noop.a-aws.sender.warm,congress-sample,noop,a,aws,sender,a-aws,warm,rsync,durable_s,12,1.553826769116339,1.526517565790179,1.581624530584916
+FC-02bd268-noop,screening,congress-sample.noop.a-aws.sender.warm,congress-sample,noop,a,aws,sender,a-aws,warm,xs-cpp,durable_s,12,0.8258926885539603,0.7711608262637252,0.8845090541121724
+FC-02bd268-noop,screening,congress-sample.noop.a-aws.sender.warm,congress-sample,noop,a,aws,sender,a-aws,warm,xs-rs,durable_s,12,1.3357248477226193,1.1606686564326494,1.5371836388752738
+FC-02bd268-noop,screening,congress-sample.noop.a-aws.sender.warm,congress-sample,noop,a,aws,sender,a-aws,warm,rsync,wall_s,12,1.5277698803480817,1.4989337293935212,1.5571607747082834
+FC-02bd268-noop,screening,congress-sample.noop.a-aws.sender.warm,congress-sample,noop,a,aws,sender,a-aws,warm,xs-cpp,wall_s,12,0.7988220139096636,0.743855644738451,0.8578500605867695
+FC-02bd268-noop,screening,congress-sample.noop.a-aws.sender.warm,congress-sample,noop,a,aws,sender,a-aws,warm,xs-rs,wall_s,12,1.2874290329366436,1.1138954735599402,1.4879973518080647
+FC-02bd268-noop,screening,congress-sample.noop.a-aws.sender.warm,congress-sample,noop,a,aws,sender,a-aws,warm,rsync,cpu_s,12,0.8280733769856591,0.8165136981137043,0.8397967104000071
+FC-02bd268-noop,screening,congress-sample.noop.a-aws.sender.warm,congress-sample,noop,a,aws,sender,a-aws,warm,xs-cpp,cpu_s,12,1.4493457030821546,1.4116918188108154,1.4880039248312826
+FC-02bd268-noop,screening,congress-sample.noop.a-aws.sender.warm,congress-sample,noop,a,aws,sender,a-aws,warm,xs-rs,cpu_s,12,1.526902721440911,1.4767466448825208,1.5787622940082127
+FC-02bd268-noop,screening,congress-sample.noop.a-aws.sender.warm,congress-sample,noop,a,aws,sender,a-aws,warm,rsync,rss_bytes,12,13382029.82456204,12027914.81432518,14888592.494202416
+FC-02bd268-noop,screening,congress-sample.noop.a-aws.sender.warm,congress-sample,noop,a,aws,sender,a-aws,warm,xs-cpp,rss_bytes,12,17870231.185494587,17462823.105068274,18287144.106174853
+FC-02bd268-noop,screening,congress-sample.noop.a-aws.sender.warm,congress-sample,noop,a,aws,sender,a-aws,warm,xs-rs,rss_bytes,12,15507080.346863445,15301985.70155645,15714923.904262897

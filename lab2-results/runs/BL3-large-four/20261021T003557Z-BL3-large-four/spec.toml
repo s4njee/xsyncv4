@@ -1,0 +1,32 @@
+# A baseline: rsync, xs-c++ (0c94b3d70b9d) and xs-rs (3b891bf5e8fb, after step filters) on large-four, A to AWS.
+id = "BL3-large-four"
+kind = "screening"
+hypothesis = "On large-four, xs-rs and xs-c++ differ from rsync, and from each other, by more than 5% in time to durable."
+primary = "durable_s"
+delta = 0.05
+blocks = 1
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[arms.xs-cpp]
+tool = "xs"
+rev = "0c94b3d70b9d"
+flags = ["-a", "-j4"]
+
+[arms.xs-rs]
+tool = "xs"
+rev = "3b891bf5e8fb51c26f64347a4163e81fe3c0c2d9-rs"
+flags = ["-a", "-j4"]
+
+[matrix]
+link = "a-aws"
+corpus = ["large-four"]
+scenario = ["fresh"]
+direction = ["a>aws"]
+client = ["sender"]
+cache = ["warm"]

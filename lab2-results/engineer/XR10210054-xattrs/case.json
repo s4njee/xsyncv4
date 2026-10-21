@@ -1,0 +1,38 @@
+{
+ "id": "XR10210054-xattrs",
+ "kind": "port",
+ "step": "xattrs",
+ "opened_utc": "2026-10-21T00:54:52Z",
+ "origin": "the engineer, after the previous step merged",
+ "state": "prepared",
+ "question": "extended attributes (PF_XATTRS, PF_XATTR_STREAM)",
+ "why": "",
+ "hypothesis": "",
+ "evidence": [],
+ "link": null,
+ "runner": null,
+ "base_rev": "8428aac9a2108cd10c2afdb2badab76f90ddd1a1",
+ "base_build": "8428aac9a210",
+ "branch": "auto/XR10210054-xattrs",
+ "commit": null,
+ "history": [
+  {
+   "utc": "2026-10-21T00:54:52Z",
+   "state": "opened",
+   "text": "opened by the engineer, after the previous step merged: port step xattrs, extended attributes (PF_XATTRS, PF_XATTR_STREAM)"
+  },
+  {
+   "utc": "2026-10-21T00:57:56Z",
+   "state": "prepared",
+   "text": "parent built; xs-rs checks passing on it: test, clippy, fmt, arm64"
+  }
+ ],
+ "tests": {
+  "parent": {
+   "test": true,
+   "clippy": true,
+   "fmt": true,
+   "arm64": true
+  }
+ }
+}

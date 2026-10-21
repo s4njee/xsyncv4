@@ -1,0 +1,177 @@
+{
+ "schema": 1,
+ "experiment": "PS-2c0bec1da693-fresh",
+ "spec_sha256": "dd6de8504e7105e93fc4a129bda712357222aacbf047aaef8c68b0ec8c1796a8",
+ "kind": "screening",
+ "bundle": "0b7224e1040f",
+ "writes": {
+  "a": 0,
+  "aws": 1309262640
+ },
+ "hypothesis": "xs-rs at 2c0bec1da693 differs from xs-c++ (-a -j4) by more than 5% in time-to-durable on congress-sample, fresh, a>aws.",
+ "primary": "durable_s",
+ "delta": 0.05,
+ "control": "xs-cpp",
+ "seed": 75674,
+ "run_id": "20261020T205320Z-PS-2c0bec1da693-fresh",
+ "driver": "a",
+ "sample_timeout_s": 3600,
+ "results": "vps",
+ "background": false,
+ "local_link": false,
+ "eager_cleanup": true,
+ "hours": null,
+ "hosts": {
+  "a": {
+   "system": "Linux"
+  },
+  "aws": {
+   "system": "Linux"
+  }
+ },
+ "links": {
+  "a-aws": {
+   "hosts": [
+    "a",
+    "aws"
+   ],
+   "medium": "internet",
+   "initiator": "a",
+   "driver": "a",
+   "results": "vps",
+   "directions": [
+    "a>aws"
+   ]
+  }
+ },
+ "arms": [
+  {
+   "name": "xs-cpp",
+   "tool": "xs",
+   "flags": [
+    "-a",
+    "-j4"
+   ],
+   "rev": "a3e52c2c61de",
+   "binary": {
+    "a": "~/benchmarks/lab/bin/xs-a3e52c2c61de",
+    "aws": "~/benchmarks/lab/bin/xs-a3e52c2c61de"
+   },
+   "sha256": {
+    "a": "e2c44be3c3581e2ed688a0bc2f7f29187d0d4bae085895f2c5f5bd06e850995d",
+    "aws": "06537fcc7da341e04702176af0e7ed790ab4e31a634c971881b6220ae26eb746"
+   },
+   "artifacts": {
+    "xs-linux-amd64": "e2c44be3c3581e2ed688a0bc2f7f29187d0d4bae085895f2c5f5bd06e850995d",
+    "xs-linux-arm64": "06537fcc7da341e04702176af0e7ed790ab4e31a634c971881b6220ae26eb746"
+   }
+  },
+  {
+   "name": "xs-rs",
+   "tool": "xs",
+   "flags": [
+    "-a"
+   ],
+   "rev": "2c0bec1da693-rs",
+   "binary": {
+    "a": "~/benchmarks/lab/bin/xs-2c0bec1da693-rs",
+    "aws": "~/benchmarks/lab/bin/xs-2c0bec1da693-rs"
+   },
+   "sha256": {
+    "a": "edb2542c6cb874fe0f5f8ff883dcd7492d3b1099d4b584ecb2b6fccdf9b076f9",
+    "aws": "7185560d1c7826a7b6a032021e1b44aa5ae74c3ed2270d1f5a1313133ca173c5"
+   },
+   "artifacts": {
+    "xs-linux-amd64": "edb2542c6cb874fe0f5f8ff883dcd7492d3b1099d4b584ecb2b6fccdf9b076f9",
+    "xs-linux-arm64": "7185560d1c7826a7b6a032021e1b44aa5ae74c3ed2270d1f5a1313133ca173c5"
+   }
+  },
+  {
+   "name": "rsync",
+   "tool": "rsync",
+   "flags": [
+    "-a"
+   ],
+   "binary": {
+    "a": "rsync",
+    "aws": "rsync"
+   }
+  }
+ ],
+ "cells": [
+  {
+   "id": "congress-sample.fresh.a-aws.sender.warm",
+   "corpus": "congress-sample",
+   "scenario": "fresh",
+   "sender": "a",
+   "receiver": "aws",
+   "client": "sender",
+   "link": "a-aws",
+   "cache": "warm"
+  }
+ ],
+ "corpora": {
+  "congress-sample": {
+   "files": 25246,
+   "directories": 9797,
+   "bytes": 218210440,
+   "digest": "62261d78f7e2c2d273d371f02cb5479fdb9f2df1a3880315949e8aabfa6e6911",
+   "quick_digest": "4194ff0bf17861c9104b8d8dd641587f279ce58bd698624dce6572a21ce6a1ad"
+  }
+ },
+ "blocks": [
+  {
+   "cell": "congress-sample.fresh.a-aws.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs-cpp",
+     "rsync",
+     "xs-rs"
+    ],
+    [
+     "xs-cpp",
+     "xs-rs",
+     "rsync"
+    ],
+    [
+     "xs-cpp",
+     "rsync",
+     "xs-rs"
+    ]
+   ]
+  },
+  {
+   "cell": "congress-sample.fresh.a-aws.sender.warm",
+   "block": 1,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs-cpp",
+     "rsync",
+     "xs-rs"
+    ],
+    [
+     "xs-cpp",
+     "rsync",
+     "xs-rs"
+    ],
+    [
+     "rsync",
+     "xs-cpp",
+     "xs-rs"
+    ]
+   ]
+  }
+ ],
+ "scripts": {
+  "probe.py": "a89b145b8f76fc4d5444cea6af3c124a5b2e5885226998c726ca95fd9d881d36",
+  "corpus.py": "410aa282e29466cbe0b4134c6c520a1eeaded966b1710941382730f89f27125c",
+  "corpora.json": "eb8e13c6cb97ad734265ceaacb1a333aa2bded545665ada66b617f7f7916f135",
+  "agent.py": "d8e49fdc54233a7a5397e0a87689451ee02cb9225472178044a7e60df3f38120",
+  "runner.py": "aaf71b7b7f46afb6ba98ee423142eb51b0647b29b98646a59636afd52b3eb484",
+  "xspipe.py": "94b3fccfc6e994d227077c453f90323ab55337fd8a98231d16a10696e8ebab6b",
+  "measure.py": "5065310f480ff1cabfa7c645f0db342624a02f9a081b96069d50d52b3d224777"
+ }
+}

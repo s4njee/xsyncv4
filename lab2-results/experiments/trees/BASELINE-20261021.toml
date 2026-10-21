@@ -1,0 +1,17 @@
+# Baselines of rsync, xs-c++ and xs-rs on three corpora, asked for on 2026-10-21; nothing new is queued after the deadline.
+id = "BASELINE-20261021"
+question = "Where do rsync, xs-c++ and xs-rs stand on small files, a real projects folder and large files?"
+deadline = "2026-10-25T00:35Z"
+start = ["N0", "N1", "N2"]
+
+[nodes.N0]
+spec = "auto/BL1-congress-sample.toml"
+question = "Baseline on congress-sample, a small-file tree (25,246 files, 218 MB): how do rsync, xs-c++ and xs-rs compare, A to AWS?"
+
+[nodes.N1]
+spec = "auto/BL2-real-projects.toml"
+question = "Baseline on real-projects, a 1% sample of a real projects folder (69,316 files, 2.13 GB): how do rsync, xs-c++ and xs-rs compare, A to AWS?"
+
+[nodes.N2]
+spec = "auto/BL3-large-four.toml"
+question = "Baseline on large-four, four 2 GiB files (8.6 GB): how do rsync, xs-c++ and xs-rs compare, A to AWS?"

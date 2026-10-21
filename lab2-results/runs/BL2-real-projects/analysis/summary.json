@@ -1,0 +1,19 @@
+{
+ "experiment": "BL2-real-projects",
+ "kind": "screening",
+ "hypothesis": "On real-projects, xs-rs and xs-c++ differ from rsync, and from each other, by more than 5% in time to durable.",
+ "primary": "durable_s",
+ "control": "rsync",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261021T003556Z-BL2-real-projects"
+ ],
+ "spec_sha256": [
+  "280e84a9d2b761b48bae08a7f6339131f48a3e61fc0d7d7754edbdb137434540"
+ ],
+ "valid_blocks": 4,
+ "void_attempts": 0,
+ "void_reasons": []
+}

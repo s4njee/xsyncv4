@@ -1,0 +1,33 @@
+# Written by the engineer: xs-rs at e3b546f679b9 (port_base after step workers merged) against
+# xs-c++ and rsync. Each port screen is queued once per commit of port_base, one spec per scenario.
+id = "PS-e3b546f679b9-noop"
+kind = "screening"
+hypothesis = "xs-rs at e3b546f679b9 differs from xs-c++ (-a -j4) by more than 5% in time-to-durable on congress-sample, noop, a>aws."
+primary = "durable_s"
+delta = 0.05
+blocks = 3
+control = "xs-cpp"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.xs-cpp]
+tool = "xs"
+rev = "a3e52c2c61de"
+flags = ["-a", "-j4"]
+
+[arms.xs-rs]
+tool = "xs"
+rev = "e3b546f679b970ac4b718bc9e983ae40c35ea359-rs"
+flags = ["-a"]
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[matrix]
+link = "a-aws"
+corpus = ["congress-sample"]
+scenario = ["noop"]
+direction = ["a>aws"]
+client = ["sender"]
+cache = ["warm"]

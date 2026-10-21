@@ -1,0 +1,5 @@
+{
+ "text": "This case ports extended-attribute support into xs-rs, so transfers can carry the extra file metadata that xs-c++ already handles and the Rust port moves closer to matching it feature for feature. It matters now because the scoreboard still shows xs-rs slower than xs-c++ in every listed scenario\u2014about 1.14x and 1.07x on congress-sample fresh and noop, and 1.46x and 1.66x on real-projects fresh and noop\u2014so closing this remaining behavior gap comes before tuning those measured speed losses. Once extended attributes are covered, later speed work can target the same scenarios without leaving the two tools unmatched.",
+ "model": "opencode/deepseek-v4.1-flash",
+ "utc": "2026-10-21T00:54:57.246Z"
+}

@@ -1,0 +1,44 @@
+{
+ "id": "XR10202147-filters",
+ "kind": "port",
+ "step": "filters",
+ "opened_utc": "2026-10-20T21:47:24Z",
+ "origin": "the engineer, after the previous step merged",
+ "state": "failed",
+ "question": "filters, relative paths and files-from (PF_FILTERS, PF_RELATIVE, PF_FILES_FROM)",
+ "why": "",
+ "hypothesis": "",
+ "evidence": [],
+ "link": null,
+ "runner": null,
+ "base_rev": "f4e30e4ed207e8bfd17db793a42d1e8523b3e447",
+ "base_build": "f4e30e4ed207",
+ "branch": "auto/XR10202147-filters",
+ "commit": null,
+ "history": [
+  {
+   "utc": "2026-10-20T21:47:24Z",
+   "state": "opened",
+   "text": "opened by the engineer, after the previous step merged: port step filters, filters, relative paths and files-from (PF_FILTERS, PF_RELATIVE, PF_FILES_FROM)"
+  },
+  {
+   "utc": "2026-10-20T21:54:22Z",
+   "state": "prepared",
+   "text": "parent built; xs-rs checks passing on it: test, clippy, fmt, arm64"
+  },
+  {
+   "utc": "2026-10-20T22:00:53Z",
+   "state": "failed",
+   "text": "the agent session ended without a report (error_invalid_report: the last message held no valid report); $0.01 spent"
+  }
+ ],
+ "tests": {
+  "parent": {
+   "test": true,
+   "clippy": true,
+   "fmt": true,
+   "arm64": true
+  }
+ },
+ "agent": {}
+}

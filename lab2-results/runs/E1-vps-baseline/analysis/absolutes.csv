@@ -1,0 +1,17 @@
+experiment,kind,cell_id,corpus,scenario,sender,receiver,client,link,cache,arm,metric,n_blocks,geomean,lo,hi
+E1-vps-baseline,screening,real-projects.fresh.a-aws.sender.warm,real-projects,fresh,a,aws,sender,a-aws,warm,rsync,durable_s,4,20.481143703580752,19.458045492240018,21.558036112826205
+E1-vps-baseline,screening,real-projects.fresh.a-aws.sender.warm,real-projects,fresh,a,aws,sender,a-aws,warm,xs,durable_s,4,27.428840607480307,19.851950654853027,37.89760060110983
+E1-vps-baseline,screening,real-projects.fresh.a-aws.sender.warm,real-projects,fresh,a,aws,sender,a-aws,warm,rsync,wall_s,4,19.8391575777833,18.50535461882205,21.26909651305944
+E1-vps-baseline,screening,real-projects.fresh.a-aws.sender.warm,real-projects,fresh,a,aws,sender,a-aws,warm,xs,wall_s,4,27.291073393694603,19.738852278971574,37.73282643051579
+E1-vps-baseline,screening,real-projects.fresh.a-aws.sender.warm,real-projects,fresh,a,aws,sender,a-aws,warm,rsync,cpu_s,4,24.96671386877722,24.399235984206875,25.5473901645472
+E1-vps-baseline,screening,real-projects.fresh.a-aws.sender.warm,real-projects,fresh,a,aws,sender,a-aws,warm,xs,cpu_s,4,45.81599947465505,35.35697884871201,59.36892450125327
+E1-vps-baseline,screening,real-projects.fresh.a-aws.sender.warm,real-projects,fresh,a,aws,sender,a-aws,warm,rsync,rss_bytes,4,18316491.6272525,17843946.0127018,18801551.253988188
+E1-vps-baseline,screening,real-projects.fresh.a-aws.sender.warm,real-projects,fresh,a,aws,sender,a-aws,warm,xs,rss_bytes,4,156247203.89421222,152034445.0766334,160576695.05390036
+E1-vps-baseline,screening,real-projects.noop.a-aws.sender.warm,real-projects,noop,a,aws,sender,a-aws,warm,rsync,durable_s,4,3.585404688292631,3.4827974721666624,3.691034830926747
+E1-vps-baseline,screening,real-projects.noop.a-aws.sender.warm,real-projects,noop,a,aws,sender,a-aws,warm,xs,durable_s,4,5.359301330375439,4.705142513992096,6.104408243608027
+E1-vps-baseline,screening,real-projects.noop.a-aws.sender.warm,real-projects,noop,a,aws,sender,a-aws,warm,rsync,wall_s,4,3.555378033703094,3.4637270530596918,3.6494541194786905
+E1-vps-baseline,screening,real-projects.noop.a-aws.sender.warm,real-projects,noop,a,aws,sender,a-aws,warm,xs,wall_s,4,5.326267293032396,4.662045239422207,6.0851239788360765
+E1-vps-baseline,screening,real-projects.noop.a-aws.sender.warm,real-projects,noop,a,aws,sender,a-aws,warm,rsync,cpu_s,4,2.467249983263047,2.3843985533951257,2.552980277245939
+E1-vps-baseline,screening,real-projects.noop.a-aws.sender.warm,real-projects,noop,a,aws,sender,a-aws,warm,xs,cpu_s,4,11.07547599126933,10.62382437318614,11.546328715936326
+E1-vps-baseline,screening,real-projects.noop.a-aws.sender.warm,real-projects,noop,a,aws,sender,a-aws,warm,rsync,rss_bytes,4,12767998.124567507,12619780.594425745,12917956.44854296
+E1-vps-baseline,screening,real-projects.noop.a-aws.sender.warm,real-projects,noop,a,aws,sender,a-aws,warm,xs,rss_bytes,4,26098331.39797621,24654901.63454279,27626267.257310916

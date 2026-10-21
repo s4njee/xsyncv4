@@ -1,0 +1,15 @@
+{
+ "outcome": "patched",
+ "summary": "Implemented PF_IDMAP name records and PF_CHOWN ownership configuration in xs-rs, matching remote.cpp and ownership.cpp. The C++ client can now push/pull names and --chown overrides to/from xs-rs, and hostile or unnegotiated ownership frames are refused with the reference exit codes.",
+ "diagnosis": "Read the C++ IdMaps, run_client/run_server configuration order, and ownership resolution first, then added the wire format, sender/receiver mapping, config negotiation, CLI parsing, and actual chown calls. Verified against the parent's C++ xs with the gate tests and the repository's tests/chown_wire_test.py pointed at xs-rs; all pass.",
+ "change": "Added xs_wire::idmap for F_IDMAP records; added xs-rs idmap state, libc name/id lookups, --chown parsing and resolution, CHOWN_CONFIG negotiation/validation, IDMAP advertisement and send/receive, name mapping on DIR and DATA attributes, ownership overrides, and best-effort fchown/lchown/chown of files, directories, symlinks and FIFOs. Added integration tests under rs/xs-rs/tests/ownership.rs.",
+ "expected_effect": "C++ and Rust peers interoperate for user/group names and --chown overrides; name records travel before each listing as in C++; malformed, wrong-side, oversized, repeated or unnegotiated ownership configuration is rejected with protocol/syntax/unsupported codes matching the reference.",
+ "risks": "Id mapping uses libc passwd/group static storage, which is safe here because sending and learning happen on one thread. Ownership changes follow C++ permissions: uid only as root, gid only if the process may set it; unsupported --usermap/--groupmap and listing mode remain out of scope.",
+ "tests": "XS_BIN=<parent>/build/xs cargo test --manifest-path rs/Cargo.toml: all 54 tests pass. cargo clippy --all-targets -- -D warnings: clean. cargo fmt --check: clean. XSYNC_TEST_BINARY=rs/target/debug/xs-rs python3 tests/chown_wire_test.py: 5/5 pass.",
+ "commit_title": "Port IDMAP name mapping and CHOWN overrides to xs-rs",
+ "commit_body": "Add the F_IDMAP record format and sender/receiver name maps, negotiate and validate F_CHOWN_CONFIG, parse --chown, apply resolved ownership to DIR and DATA metadata, and refuse hostile or unnegotiated frames with the C++ exit codes. Integration tests cover C++/Rust --chown pushes and the ownership wire rejection cases.",
+ "cost_usd": 0.1,
+ "turns": 95,
+ "session": "ses_ea5f382deffeLyAmDWCZMlL0Th",
+ "model": "opencode-go/deepseek-v4.1-flash"
+}

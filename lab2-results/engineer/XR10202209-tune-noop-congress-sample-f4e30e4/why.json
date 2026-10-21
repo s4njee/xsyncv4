@@ -1,0 +1,5 @@
+{
+ "text": "This case is a performance-tuning step for xs-rs\u2019s no-op run on the congress-sample corpus, where xs-rs currently takes 1.502 seconds versus 0.974 seconds for the C++ version\u2014about 1.54 times slower. Closing that gap matters because the lab wants xs-rs to match and then beat the original on speed, with rsync\u2019s 1.582 seconds serving only as a reference. A second no-op measurement on real projects is still pending, so this is the active speed target.",
+ "model": "opencode/deepseek-v4.1-flash",
+ "utc": "2026-10-20T22:09:12.754Z"
+}

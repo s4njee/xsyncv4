@@ -1,0 +1,19 @@
+{
+ "experiment": "PS-2c0bec1da693-noop",
+ "kind": "screening",
+ "hypothesis": "xs-rs at 2c0bec1da693 differs from xs-c++ (-a -j4) by more than 5% in time-to-durable on congress-sample, noop, a>aws.",
+ "primary": "durable_s",
+ "control": "xs-cpp",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261020T205318Z-PS-2c0bec1da693-noop"
+ ],
+ "spec_sha256": [
+  "7c2989ff652f671e78ff7bd36a81de4b20c2658e117b7e5d204a6c317b8ef841"
+ ],
+ "valid_blocks": 3,
+ "void_attempts": 0,
+ "void_reasons": []
+}

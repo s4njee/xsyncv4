@@ -1,0 +1,198 @@
+{
+ "schema": 1,
+ "experiment": "S0-vps-sentinel",
+ "spec_sha256": "72e86bb4dc61d262d4c54e8545b7c7900ad43edd4ed23652128396029758edba",
+ "kind": "screening",
+ "bundle": "8b908ac7e7e4",
+ "writes": {
+  "a": 0,
+  "aws": 6404943267
+ },
+ "hypothesis": "Hour by hour, the A/A ratio stays within 3% of 1 and the xs to rsync ratio stays where the baseline put it.",
+ "primary": "wall_s",
+ "delta": 0.03,
+ "control": "xs",
+ "seed": 20,
+ "run_id": "20261019T235448Z-S0-vps-sentinel-s0020",
+ "driver": "a",
+ "sample_timeout_s": 3600,
+ "results": "vps",
+ "background": false,
+ "local_link": false,
+ "eager_cleanup": false,
+ "hours": null,
+ "hosts": {
+  "a": {
+   "system": "Linux"
+  },
+  "aws": {
+   "system": "Linux"
+  }
+ },
+ "links": {
+  "a-aws": {
+   "hosts": [
+    "a",
+    "aws"
+   ],
+   "medium": "internet",
+   "initiator": "a",
+   "driver": "a",
+   "results": "vps",
+   "directions": [
+    "a>aws"
+   ]
+  }
+ },
+ "arms": [
+  {
+   "name": "xs",
+   "tool": "xs",
+   "flags": [
+    "-a"
+   ],
+   "rev": "a3e52c2c61de",
+   "binary": {
+    "a": "~/benchmarks/lab/bin/xs-a3e52c2c61de",
+    "aws": "~/benchmarks/lab/bin/xs-a3e52c2c61de"
+   },
+   "sha256": {
+    "a": "e2c44be3c3581e2ed688a0bc2f7f29187d0d4bae085895f2c5f5bd06e850995d",
+    "aws": "06537fcc7da341e04702176af0e7ed790ab4e31a634c971881b6220ae26eb746"
+   },
+   "artifacts": {
+    "xs-linux-amd64": "e2c44be3c3581e2ed688a0bc2f7f29187d0d4bae085895f2c5f5bd06e850995d",
+    "xs-linux-arm64": "06537fcc7da341e04702176af0e7ed790ab4e31a634c971881b6220ae26eb746"
+   }
+  },
+  {
+   "name": "again",
+   "tool": "xs",
+   "flags": [
+    "-a"
+   ],
+   "rev": "a3e52c2c61de",
+   "binary": {
+    "a": "~/benchmarks/lab/bin/xs-a3e52c2c61de",
+    "aws": "~/benchmarks/lab/bin/xs-a3e52c2c61de"
+   },
+   "sha256": {
+    "a": "e2c44be3c3581e2ed688a0bc2f7f29187d0d4bae085895f2c5f5bd06e850995d",
+    "aws": "06537fcc7da341e04702176af0e7ed790ab4e31a634c971881b6220ae26eb746"
+   },
+   "artifacts": {
+    "xs-linux-amd64": "e2c44be3c3581e2ed688a0bc2f7f29187d0d4bae085895f2c5f5bd06e850995d",
+    "xs-linux-arm64": "06537fcc7da341e04702176af0e7ed790ab4e31a634c971881b6220ae26eb746"
+   }
+  },
+  {
+   "name": "rsync",
+   "tool": "rsync",
+   "flags": [
+    "-a"
+   ],
+   "binary": {
+    "a": "rsync",
+    "aws": "rsync"
+   }
+  }
+ ],
+ "cells": [
+  {
+   "id": "real-projects.noop.a-aws.sender.warm",
+   "corpus": "real-projects",
+   "scenario": "noop",
+   "sender": "a",
+   "receiver": "aws",
+   "client": "sender",
+   "link": "a-aws",
+   "cache": "warm"
+  }
+ ],
+ "corpora": {
+  "real-projects": {
+   "files": 69316,
+   "directories": 26652,
+   "bytes": 2134981089,
+   "digest": "1f5937d2eddadb2cc697e584e859b7fd881dccf733b89af1a3175111e81d45bc",
+   "quick_digest": "be68763ae02f8a71e01645cf85c44692fa4e4a99f0513063158ba915f6994121"
+  }
+ },
+ "blocks": [
+  {
+   "cell": "real-projects.noop.a-aws.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "again",
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "again",
+     "rsync"
+    ],
+    [
+     "again",
+     "xs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "real-projects.noop.a-aws.sender.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "again",
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "again",
+     "xs"
+    ],
+    [
+     "again",
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "real-projects.noop.a-aws.sender.warm",
+   "block": 2,
+   "verify_full": true,
+   "orders": [
+    [
+     "rsync",
+     "again",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync",
+     "again"
+    ],
+    [
+     "xs",
+     "again",
+     "rsync"
+    ]
+   ]
+  }
+ ],
+ "scripts": {
+  "probe.py": "a89b145b8f76fc4d5444cea6af3c124a5b2e5885226998c726ca95fd9d881d36",
+  "corpus.py": "21dd4f794aaea8bd1a692f521a4da935b186859ae3d9b9875eb0876c236ff205",
+  "corpora.json": "ac954a54b6e8b99366c30374b787529c118fd98c44f5f1b247658f33120fb27d",
+  "agent.py": "1f6e50554aa0f424fdb1289041df2e6a8988ed54c295fdba54a02745524c26f7",
+  "runner.py": "cce71fee149764ad1a5c913061f19620a8ff44f792d23d55f7a290d59a9e20ff",
+  "xspipe.py": "94b3fccfc6e994d227077c453f90323ab55337fd8a98231d16a10696e8ebab6b",
+  "measure.py": "5065310f480ff1cabfa7c645f0db342624a02f9a081b96069d50d52b3d224777"
+ }
+}

@@ -1,0 +1,8 @@
+{
+ "state": "failed",
+ "detail": "RuntimeError: a: `python3 -c 'import socket,sys; print(socket.getaddrinfo(sys.argv[1], 22, socket.AF_INET, socket.SOCK_STREAM)[0][4][0])' [host]` exited 1: socket.SOCK_STREAM)[0][4][0])\n                             ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.13/socket.py\", line 977, in getaddrinfo\n    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):\n               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nsocket.gaierror: [Errno -2] Name or service not known",
+ "utc": "2026-10-20T00:02:19.551+00:00",
+ "pid": 85776,
+ "samples_done": 0,
+ "samples_planned": 9
+}

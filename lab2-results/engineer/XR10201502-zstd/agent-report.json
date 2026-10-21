@@ -1,0 +1,15 @@
+{
+ "outcome": "patched",
+ "summary": "Ported the PF_ZSTD compression policy into xs-rs: exact C++ suffix-list parsing, F_COMPRESS_CONFIG negotiation and refusal, compression sampling, adaptive levels, and per-suffix isolation of raw DATA blocks. Rust clients and servers now exchange ZSTD directory listings and data blocks with the C++ xs and refuse hostile or unnegotiated compression frames.",
+ "diagnosis": "The starting tree had only a partial zstd path: it always compressed at level 1, did not sample bodies, did not implement --skip-compress or the compression configuration frame, and did not isolate skipped suffixes. The C++ reference (src/compression.cpp, pack/unpack and flush_block in src/remote.cpp) showed the missing policy and framing rules.",
+ "change": "Added xs-wire::compress for the reference suffix syntax and defaults; added xs-rs::compression for compression_worthwhile, CompressionLink and adaptive/explicit levels; added pack_body matching src/remote.cpp; added COMPRESS_POLICY negotiation plus F_COMPRESS_CONFIG send/read/validation; added --skip-compress and --compress-choice; and isolated skipped-suffix DATA blocks as RawFileBlock does.",
+ "expected_effect": "Compressed transfers are wire-compatible and policy-compatible with C++ xs in both directions. Compressible DIR/DATA bodies use the same sampling and zstd frame layout, explicit levels are honored, incompressible or skipped payloads stay raw, and malformed or unnegotiated compression configuration is refused before any destination is created.",
+ "risks": "The pinned zstd unit-test frame is tied to the build environment's libzstd, and the transport-observation path treats queue state as Queued, so the adaptive cap logic is exercised by unit tests but not by real backpressure. Both are limited to compression choice, not data correctness.",
+ "tests": "Ran XS_BIN=.../parent/build/xs cargo test --manifest-path rs/Cargo.toml: all 40 tests passed (unit and interop). Ran cargo clippy --all-targets -- -D warnings and cargo fmt --check: both clean. Also ran the reference tests/compression_wire_test.py against the Rust server (3 tests OK) and 8 compression_test.py policy cases OK.",
+ "commit_title": "Port zstd compression policy and DATA/DIR packing to xs-rs",
+ "commit_body": "Implement PF_ZSTD policy for xs-rs against src/compression.cpp and remote.cpp: suffix parsing with rsync character classes and defaults, F_COMPRESS_CONFIG negotiation and hostile-frame refusal, compression_worthwhile sampling, adaptive and explicit zstd levels, and raw isolation of skipped suffixes. Add unit tests pinning the C++ frame bytes and interop tests recording DATA/COMPRESS_CONFIG flags against the parent C++ xs in both directions.",
+ "cost_usd": 0.13,
+ "turns": 115,
+ "session": "ses_ea623123bffe59z73WD4dfHJKt",
+ "model": "opencode-go/deepseek-v4.1-flash"
+}

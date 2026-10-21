@@ -1,0 +1,5 @@
+{
+ "text": "This case ports extended-attribute handling into xs-rs, letting transfers preserve the extra file metadata that xs-c++ already supports, including the stream form. It matters because closing that feature gap is a prerequisite for true feature-for-feature parity before speed tuning. The scoreboard also shows noop on congress-sample still favoring xs-c++, with xs-rs taking 1.542 times as long, while the real-projects noop result is pending.",
+ "model": "opencode/deepseek-v4.1-flash",
+ "utc": "2026-10-20T23:47:25.276Z"
+}

@@ -1,0 +1,20 @@
+{
+ "experiment": "E1-vps-baseline",
+ "kind": "screening",
+ "hypothesis": "xs -a differs from rsync -a by more than 3% in time-to-durable on real-projects, fresh and no-op, A to AWS.",
+ "primary": "durable_s",
+ "control": "rsync",
+ "delta": 0.03,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261019T235543Z-E1-vps-baseline",
+  "20261020T000819Z-E1-vps-baseline"
+ ],
+ "spec_sha256": [
+  "5db91032fedbb66ae44742ce0934dd3f732846d8a919fdd6c3c859e66bc0d3a9"
+ ],
+ "valid_blocks": 8,
+ "void_attempts": 0,
+ "void_reasons": []
+}

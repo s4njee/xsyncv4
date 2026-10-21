@@ -1,0 +1,13 @@
+experiment,kind,cell_id,corpus,scenario,sender,receiver,client,link,cache,arm,metric,n_blocks,geomean,lo,hi
+PS-8428aac9a210-fresh,screening,congress-sample.fresh.a-aws.sender.warm,congress-sample,fresh,a,aws,sender,a-aws,warm,xs-cpp,durable_s,3,3.568692599926216,3.3094234201017088,3.848273628394378
+PS-8428aac9a210-fresh,screening,congress-sample.fresh.a-aws.sender.warm,congress-sample,fresh,a,aws,sender,a-aws,warm,xs-rs,durable_s,3,4.329322276123745,1.8237580731730736,10.277147855434098
+PS-8428aac9a210-fresh,screening,congress-sample.fresh.a-aws.sender.warm,congress-sample,fresh,a,aws,sender,a-aws,warm,rsync,durable_s,3,3.231529187723327,3.054529481178183,3.4187854317516138
+PS-8428aac9a210-fresh,screening,congress-sample.fresh.a-aws.sender.warm,congress-sample,fresh,a,aws,sender,a-aws,warm,xs-cpp,wall_s,3,3.2319033708103646,2.9340432765704167,3.5600018178548205
+PS-8428aac9a210-fresh,screening,congress-sample.fresh.a-aws.sender.warm,congress-sample,fresh,a,aws,sender,a-aws,warm,xs-rs,wall_s,3,4.035578478102042,1.5833376641309744,10.28579943612913
+PS-8428aac9a210-fresh,screening,congress-sample.fresh.a-aws.sender.warm,congress-sample,fresh,a,aws,sender,a-aws,warm,rsync,wall_s,3,2.9857488170190836,2.855134313370173,3.122338573209901
+PS-8428aac9a210-fresh,screening,congress-sample.fresh.a-aws.sender.warm,congress-sample,fresh,a,aws,sender,a-aws,warm,xs-cpp,cpu_s,3,6.017318961302394,5.262298360358511,6.880667914006783
+PS-8428aac9a210-fresh,screening,congress-sample.fresh.a-aws.sender.warm,congress-sample,fresh,a,aws,sender,a-aws,warm,xs-rs,cpu_s,3,5.233261350236353,3.2080694324300585,8.536917587576156
+PS-8428aac9a210-fresh,screening,congress-sample.fresh.a-aws.sender.warm,congress-sample,fresh,a,aws,sender,a-aws,warm,rsync,cpu_s,3,4.777842198946443,4.587447865182499,4.976138530377661
+PS-8428aac9a210-fresh,screening,congress-sample.fresh.a-aws.sender.warm,congress-sample,fresh,a,aws,sender,a-aws,warm,xs-cpp,rss_bytes,3,121598986.7210185,116670882.61471833,126735250.82009709
+PS-8428aac9a210-fresh,screening,congress-sample.fresh.a-aws.sender.warm,congress-sample,fresh,a,aws,sender,a-aws,warm,xs-rs,rss_bytes,3,130858999.96939865,24587358.897511404,696458612.9144711
+PS-8428aac9a210-fresh,screening,congress-sample.fresh.a-aws.sender.warm,congress-sample,fresh,a,aws,sender,a-aws,warm,rsync,rss_bytes,3,12572909.356173761,12255139.617490515,12898918.70778469

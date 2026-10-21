@@ -1,0 +1,31 @@
+{
+ "id": "XR10210005-xattrs",
+ "kind": "port",
+ "step": "xattrs",
+ "opened_utc": "2026-10-21T00:05:52Z",
+ "origin": "the engineer, after the previous step merged",
+ "state": "failed",
+ "question": "extended attributes (PF_XATTRS, PF_XATTR_STREAM)",
+ "why": "",
+ "hypothesis": "",
+ "evidence": [],
+ "link": null,
+ "runner": null,
+ "base_rev": "3b891bf5e8fb51c26f64347a4163e81fe3c0c2d9",
+ "base_build": "3b891bf5e8fb",
+ "branch": null,
+ "commit": null,
+ "history": [
+  {
+   "utc": "2026-10-21T00:05:52Z",
+   "state": "opened",
+   "text": "opened by the engineer, after the previous step merged: port step xattrs, extended attributes (PF_XATTRS, PF_XATTR_STREAM)"
+  },
+  {
+   "utc": "2026-10-21T00:05:59Z",
+   "state": "failed",
+   "text": "~/xsyncv4/benchmarks/lab/engineer.py prepare exited 1: ubprocess.py\", line 577, in run\n    raise CalledProcessError(retcode, process.args,\n                             output=stdout, stderr=stderr)\nsubprocess.CalledProcessError: Command '['git', '-C', '~/xsyncv4', 'worktree', 'add', '-b', 'auto/XR10210005-xattrs', '~/xsyncv4-auto/XR10210005-xattrs', '3b891bf5e8f"
+  }
+ ],
+ "agent": {}
+}

@@ -1,0 +1,120 @@
+{
+ "id": "XR10202053-delta",
+ "kind": "port",
+ "step": "delta",
+ "opened_utc": "2026-10-20T20:53:23Z",
+ "origin": "the engineer, after the previous step merged",
+ "state": "review",
+ "question": "delta transfer of changed files (PF_DELTA)",
+ "why": "",
+ "hypothesis": "",
+ "evidence": [],
+ "link": null,
+ "runner": null,
+ "base_rev": "2c0bec1da6930369686d8965b2c074bb47459bcd",
+ "base_build": "2c0bec1da693",
+ "branch": "auto/XR10202053-delta",
+ "commit": "869e0e432570671f765d295fa36ad34837708d4a",
+ "history": [
+  {
+   "utc": "2026-10-20T20:53:23Z",
+   "state": "opened",
+   "text": "opened by the engineer, after the previous step merged: port step delta, delta transfer of changed files (PF_DELTA)"
+  },
+  {
+   "utc": "2026-10-20T21:04:54Z",
+   "state": "prepared",
+   "text": "parent built; xs-rs checks passing on it: test, clippy, fmt, arm64"
+  },
+  {
+   "utc": "2026-10-20T21:44:11Z",
+   "state": "review",
+   "text": "869e0e432570 on auto/XR10202053-delta: 8 file(s), 1051 lines and 554 of tests; xs-rs's tests, clippy and rustfmt pass against xs-c++; waiting for it to be merged"
+  },
+  {
+   "utc": "2026-10-20T21:44:20Z",
+   "state": "review",
+   "text": "pull request https://github.com/s4njee/xsyncv4/pull/11"
+  }
+ ],
+ "tests": {
+  "parent": {
+   "test": true,
+   "clippy": true,
+   "fmt": true,
+   "arm64": true
+  },
+  "candidate": {
+   "test": true,
+   "clippy": true,
+   "fmt": true,
+   "arm64": true
+  }
+ },
+ "agent": {
+  "summary": "Implemented PF_DELTA in xs-rs: negotiation, destination signatures, streaming weak/strong block matching, LITERAL/COPY/DELTA_END records, retry acknowledgments, changed-basis rejection, and final XXH3-128 verification. C++ and Rust now delta in all four client/server directions, and the C++ delta wire suite passes unchanged against the Rust binary.",
+  "diagnosis": "This step targets wire volume rather than a timed optimization. With the frame recorder, a 4 MiB file with a 100 KiB changed region sent less than half the file as DATA in all four interop directions; before PF_DELTA the same runs send the whole file. The new receiver tests also confirm that a bad digest or changed basis publishes nothing and exits 23.",
+  "change": "Added rs/xs-rs/src/delta.rs (signature generation/encoding, streaming block matcher, basis verification) and wired PF_DELTA through sender NEED parsing, F_DELTA_REQUEST/signature exchange, LITERAL/COPY/DELTA_END emission, receiver signature replies, retry acks, serialized delta writes and final digest checks. Also added --ignore-times/-I and the HELLO flag so the C++ delta tests can force a transfer.",
+  "expected_effect": "Changed large files cross the wire as literals plus verified basis-block copies instead of full contents, while missing bases, non-regular destinations, unsupported peers and --whole-file safely fall back to normal or non-delta transfers.",
+  "risks": "No --inplace or --link-dest basis snapshot is needed yet because xs-rs does not implement those modes; it writes through temp files. Delta reads and writes are serialized as in C++, so per-file range parallelism does not apply during a delta attempt. The sender now sends a fatal MSG (and stderr text) on protocol errors, matching C++ instead of only exiting.",
+  "tests": "XS_BIN=~/benchmarks/lab/engineer/XR10202053-delta/parent/build/xs cargo test --manifest-path rs/Cargo.toml: all suites pass, including 9 new delta tests (four C++ interop directions, signature/reconstruction bytes, hostile requests, bad references, checksum failure, changed/replaced basis, retry ack). cargo clippy --all-targets -- -D warnings, cargo fmt --check, and cargo check --target aarch64-unknown-linux-gnu all pass. Additionally, tests/delta_wire_test.py passes 7/7 against rs/target/debug/xs-rs as XSYNC_TEST_BINARY.",
+  "cpp_lesson": "",
+  "cost_usd": 0.22,
+  "turns": 140,
+  "session": "ses_ea4d7d0c9ffeI6wGgzhV4jy7ea",
+  "model": "opencode-go/deepseek-v4.1-flash"
+ },
+ "diff": [
+  {
+   "path": "rs/xs-rs/src/cli.rs",
+   "added": "4",
+   "deleted": "1"
+  },
+  {
+   "path": "rs/xs-rs/src/delta.rs",
+   "added": "505",
+   "deleted": "0"
+  },
+  {
+   "path": "rs/xs-rs/src/main.rs",
+   "added": "5",
+   "deleted": "2"
+  },
+  {
+   "path": "rs/xs-rs/src/protocol.rs",
+   "added": "2",
+   "deleted": "0"
+  },
+  {
+   "path": "rs/xs-rs/src/transfer.rs",
+   "added": "220",
+   "deleted": "68"
+  },
+  {
+   "path": "rs/xs-rs/src/transfer/file.rs",
+   "added": "5",
+   "deleted": "0"
+  },
+  {
+   "path": "rs/xs-rs/src/transfer/receiver.rs",
+   "added": "213",
+   "deleted": "26"
+  },
+  {
+   "path": "rs/xs-rs/tests/delta.rs",
+   "added": "554",
+   "deleted": "0"
+  }
+ ],
+ "pr": {
+  "number": 11,
+  "url": "https://github.com/s4njee/xsyncv4/pull/11",
+  "branch": "engineer/XR10202053-delta",
+  "commit": "fe9b64265f3056a55a7d618256b5d29f8bc1f752",
+  "base": "2c0bec1da6930369686d8965b2c074bb47459bcd"
+ },
+ "merged": {
+  "commit": "f4e30e4ed207e8bfd17db793a42d1e8523b3e447",
+  "utc": "2026-10-20T21:45:49Z"
+ }
+}

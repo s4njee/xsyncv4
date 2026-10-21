@@ -1,0 +1,132 @@
+{
+ "id": "XR10201502-zstd",
+ "kind": "port",
+ "step": "zstd",
+ "opened_utc": "2026-10-20T15:02:17Z",
+ "origin": "the engineer, after the previous step merged",
+ "state": "review",
+ "question": "zstd: compressed directory listings and data blocks (PF_ZSTD)",
+ "why": "",
+ "hypothesis": "",
+ "evidence": [],
+ "link": null,
+ "runner": null,
+ "base_rev": "bbde3463d31242a8c544be1bdb4ea35fe8153b92",
+ "base_build": "bbde3463d312",
+ "branch": "auto/XR10201502-zstd",
+ "commit": "46f2f0f77617a345346cc6d9059d30f6b5cef4c5",
+ "history": [
+  {
+   "utc": "2026-10-20T15:02:17Z",
+   "state": "opened",
+   "text": "opened by the engineer, after the previous step merged: port step zstd, zstd: compressed directory listings and data blocks (PF_ZSTD)"
+  },
+  {
+   "utc": "2026-10-20T15:04:50Z",
+   "state": "prepared",
+   "text": "parent built; xs-rs checks passing on it: test, clippy, fmt"
+  },
+  {
+   "utc": "2026-10-20T15:21:46Z",
+   "state": "review",
+   "text": "46f2f0f77617 on auto/XR10201502-zstd: 11 file(s), 849 lines and 330 of tests; xs-rs's tests, clippy and rustfmt pass against the C++ xs; waiting for it to be merged"
+  },
+  {
+   "utc": "2026-10-20T15:21:56Z",
+   "state": "review",
+   "text": "pull request https://github.com/s4njee/xsyncv4/pull/4"
+  }
+ ],
+ "tests": {
+  "parent": {
+   "test": true,
+   "clippy": true,
+   "fmt": true
+  },
+  "candidate": {
+   "test": true,
+   "clippy": true,
+   "fmt": true
+  }
+ },
+ "agent": {
+  "summary": "Ported the PF_ZSTD compression policy into xs-rs: exact C++ suffix-list parsing, F_COMPRESS_CONFIG negotiation and refusal, compression sampling, adaptive levels, and per-suffix isolation of raw DATA blocks. Rust clients and servers now exchange ZSTD directory listings and data blocks with the C++ xs and refuse hostile or unnegotiated compression frames.",
+  "diagnosis": "The starting tree had only a partial zstd path: it always compressed at level 1, did not sample bodies, did not implement --skip-compress or the compression configuration frame, and did not isolate skipped suffixes. The C++ reference (src/compression.cpp, pack/unpack and flush_block in src/remote.cpp) showed the missing policy and framing rules.",
+  "change": "Added xs-wire::compress for the reference suffix syntax and defaults; added xs-rs::compression for compression_worthwhile, CompressionLink and adaptive/explicit levels; added pack_body matching src/remote.cpp; added COMPRESS_POLICY negotiation plus F_COMPRESS_CONFIG send/read/validation; added --skip-compress and --compress-choice; and isolated skipped-suffix DATA blocks as RawFileBlock does.",
+  "expected_effect": "Compressed transfers are wire-compatible and policy-compatible with C++ xs in both directions. Compressible DIR/DATA bodies use the same sampling and zstd frame layout, explicit levels are honored, incompressible or skipped payloads stay raw, and malformed or unnegotiated compression configuration is refused before any destination is created.",
+  "risks": "The pinned zstd unit-test frame is tied to the build environment's libzstd, and the transport-observation path treats queue state as Queued, so the adaptive cap logic is exercised by unit tests but not by real backpressure. Both are limited to compression choice, not data correctness.",
+  "tests": "Ran XS_BIN=.../parent/build/xs cargo test --manifest-path rs/Cargo.toml: all 40 tests passed (unit and interop). Ran cargo clippy --all-targets -- -D warnings and cargo fmt --check: both clean. Also ran the reference tests/compression_wire_test.py against the Rust server (3 tests OK) and 8 compression_test.py policy cases OK.",
+  "cost_usd": 0.13,
+  "turns": 115,
+  "session": "ses_ea623123bffe59z73WD4dfHJKt",
+  "model": "opencode-go/deepseek-v4.1-flash"
+ },
+ "diff": [
+  {
+   "path": "rs/xs-rs/src/cli.rs",
+   "added": "37",
+   "deleted": "2"
+  },
+  {
+   "path": "rs/xs-rs/src/compression.rs",
+   "added": "316",
+   "deleted": "0"
+  },
+  {
+   "path": "rs/xs-rs/src/ffi.rs",
+   "added": "37",
+   "deleted": "6"
+  },
+  {
+   "path": "rs/xs-rs/src/main.rs",
+   "added": "97",
+   "deleted": "5"
+  },
+  {
+   "path": "rs/xs-rs/src/protocol.rs",
+   "added": "44",
+   "deleted": "12"
+  },
+  {
+   "path": "rs/xs-rs/src/transfer.rs",
+   "added": "90",
+   "deleted": "19"
+  },
+  {
+   "path": "rs/xs-rs/tests/compression.rs",
+   "added": "277",
+   "deleted": "0"
+  },
+  {
+   "path": "rs/xs-rs/tests/frame_recorder.py",
+   "added": "53",
+   "deleted": "0"
+  },
+  {
+   "path": "rs/xs-wire/src/compress.rs",
+   "added": "175",
+   "deleted": "0"
+  },
+  {
+   "path": "rs/xs-wire/src/config.rs",
+   "added": "6",
+   "deleted": "0"
+  },
+  {
+   "path": "rs/xs-wire/src/lib.rs",
+   "added": "3",
+   "deleted": "0"
+  }
+ ],
+ "pr": {
+  "number": 4,
+  "url": "https://github.com/s4njee/xsyncv4/pull/4",
+  "branch": "engineer/XR10201502-zstd",
+  "commit": "cdd90dae20d24be26de2bfd68419e6f0c37cf8ed",
+  "base": "bbde3463d31242a8c544be1bdb4ea35fe8153b92"
+ },
+ "merged": {
+  "commit": "3cdf98e39da34923a42db4a832d7b44baf087b15",
+  "utc": "2026-10-20T15:22:55Z"
+ }
+}

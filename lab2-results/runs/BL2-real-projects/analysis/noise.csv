@@ -1,0 +1,5 @@
+experiment,kind,cell_id,corpus,scenario,sender,receiver,client,link,cache,arm,n_blocks,sigma_d,blocks_for_2pct,blocks_for_3pct,blocks_for_5pct,blocks_for_10pct,blocks_equivalent_2pct,blocks_equivalent_3pct,blocks_equivalent_5pct,blocks_equivalent_10pct
+BL2-real-projects,screening,real-projects.fresh.a-aws.sender.warm,real-projects,fresh,a,aws,sender,a-aws,warm,xs-cpp,2,0.13445140170467393,364,165,62,18,487,220,82,23
+BL2-real-projects,screening,real-projects.fresh.a-aws.sender.warm,real-projects,fresh,a,aws,sender,a-aws,warm,xs-rs,2,0.10894703432110335,240,109,42,13,321,145,55,16
+BL2-real-projects,screening,real-projects.noop.a-aws.sender.warm,real-projects,noop,a,aws,sender,a-aws,warm,xs-cpp,2,0.17068759203783104,585,264,98,28,783,353,131,36
+BL2-real-projects,screening,real-projects.noop.a-aws.sender.warm,real-projects,noop,a,aws,sender,a-aws,warm,xs-rs,2,0.13173715825300134,349,158,60,17,468,211,79,23

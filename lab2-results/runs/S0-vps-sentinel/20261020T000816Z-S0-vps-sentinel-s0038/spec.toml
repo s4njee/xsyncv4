@@ -1,0 +1,34 @@
+# S0 for the VPS lab: the sentinel the runner repeats every 24 hours on A -> AWS, whatever else waits.
+# Its two xs arms are the same build, so their ratio is the noise floor at that hour on a shared
+# internet path; xs against rsync should not move. No-op copies only: each moves little beyond the
+# one seeding copy per arm, which keeps the sentinel within A's 1 TB a month (backlog-vps-lab.md).
+id = "S0-vps-sentinel"
+kind = "screening"
+hypothesis = "Hour by hour, the A/A ratio stays within 3% of 1 and the xs to rsync ratio stays where the baseline put it."
+primary = "wall_s"
+delta = 0.03
+blocks = 3
+control = "xs"
+verify = "first-last"
+
+[arms.xs]
+tool = "xs"
+rev = "a3e52c2c61de"
+flags = ["-a"]
+
+[arms.again]
+tool = "xs"
+rev = "a3e52c2c61de"
+flags = ["-a"]
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[matrix]
+link = "a-aws"
+corpus = ["real-projects"]
+scenario = ["noop"]
+direction = ["a>aws"]
+client = ["sender"]
+cache = ["warm"]

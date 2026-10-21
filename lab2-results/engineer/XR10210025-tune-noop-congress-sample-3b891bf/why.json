@@ -1,0 +1,5 @@
+{
+ "text": "This case tunes xs-rs\u2019s no-op run on the congress-sample corpus, where the goal is to beat the C++ original. It goes after a measured loss: xs-rs takes 0.852 seconds versus 0.767 for xs-c++, making it about 11% slower, while rsync\u2019s 1.588 seconds is only a reference. That matters because the lab\u2019s aim is for xs-rs to match xs-c++ feature for feature and then win on speed; the scoreboard also shows an 8% gap on the fresh congress-sample case, with the real-projects no-op result still pending.",
+ "model": "opencode/deepseek-v4.1-flash",
+ "utc": "2026-10-21T00:29:00.477Z"
+}

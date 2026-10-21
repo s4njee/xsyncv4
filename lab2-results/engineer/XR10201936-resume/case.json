@@ -1,0 +1,44 @@
+{
+ "id": "XR10201936-resume",
+ "kind": "port",
+ "step": "resume",
+ "opened_utc": "2026-10-20T19:36:01Z",
+ "origin": "the engineer, after the previous step merged",
+ "state": "abandoned",
+ "question": "resuming partial files (PF_RESUME)",
+ "why": "",
+ "hypothesis": "",
+ "evidence": [],
+ "link": null,
+ "runner": null,
+ "base_rev": "d84368234dad2206e03199f7faad148a629cc40a",
+ "base_build": "d84368234dad",
+ "branch": "auto/XR10201936-resume",
+ "commit": null,
+ "history": [
+  {
+   "utc": "2026-10-20T19:36:01Z",
+   "state": "opened",
+   "text": "opened by the engineer, after the previous step merged: port step resume, resuming partial files (PF_RESUME)"
+  },
+  {
+   "utc": "2026-10-20T19:38:57Z",
+   "state": "prepared",
+   "text": "parent built; xs-rs checks passing on it: test, clippy, fmt, arm64"
+  },
+  {
+   "utc": "2026-10-20T19:41:56Z",
+   "state": "abandoned",
+   "text": "set aside before its session started: the parallel-workers step goes first (sprint of 2026-10-20)"
+  }
+ ],
+ "tests": {
+  "parent": {
+   "test": true,
+   "clippy": true,
+   "fmt": true,
+   "arm64": true
+  }
+ },
+ "agent": {}
+}

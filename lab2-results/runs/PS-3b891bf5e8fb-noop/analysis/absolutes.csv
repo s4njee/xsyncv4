@@ -1,0 +1,13 @@
+experiment,kind,cell_id,corpus,scenario,sender,receiver,client,link,cache,arm,metric,n_blocks,geomean,lo,hi
+PS-3b891bf5e8fb-noop,screening,congress-sample.noop.a-aws.sender.warm,congress-sample,noop,a,aws,sender,a-aws,warm,xs-cpp,durable_s,3,0.7673011270120723,0.6958041106528828,0.8461447848613067
+PS-3b891bf5e8fb-noop,screening,congress-sample.noop.a-aws.sender.warm,congress-sample,noop,a,aws,sender,a-aws,warm,xs-rs,durable_s,3,0.8523166703311262,0.593871679240223,1.2232334558430578
+PS-3b891bf5e8fb-noop,screening,congress-sample.noop.a-aws.sender.warm,congress-sample,noop,a,aws,sender,a-aws,warm,rsync,durable_s,3,1.5877542577120471,1.5769684622346485,1.5986138234561735
+PS-3b891bf5e8fb-noop,screening,congress-sample.noop.a-aws.sender.warm,congress-sample,noop,a,aws,sender,a-aws,warm,xs-cpp,wall_s,3,0.7373294106442128,0.6486928259508862,0.8380771885430152
+PS-3b891bf5e8fb-noop,screening,congress-sample.noop.a-aws.sender.warm,congress-sample,noop,a,aws,sender,a-aws,warm,xs-rs,wall_s,3,0.8225866870757773,0.5650694612522895,1.1974613815702135
+PS-3b891bf5e8fb-noop,screening,congress-sample.noop.a-aws.sender.warm,congress-sample,noop,a,aws,sender,a-aws,warm,rsync,wall_s,3,1.550613850265943,1.5390478044996632,1.5622668156290518
+PS-3b891bf5e8fb-noop,screening,congress-sample.noop.a-aws.sender.warm,congress-sample,noop,a,aws,sender,a-aws,warm,xs-cpp,cpu_s,3,1.4690519351669193,1.3556100172793983,1.5919870469449862
+PS-3b891bf5e8fb-noop,screening,congress-sample.noop.a-aws.sender.warm,congress-sample,noop,a,aws,sender,a-aws,warm,xs-rs,cpu_s,3,1.2729734886402526,1.0823947465603543,1.4971076937784995
+PS-3b891bf5e8fb-noop,screening,congress-sample.noop.a-aws.sender.warm,congress-sample,noop,a,aws,sender,a-aws,warm,rsync,cpu_s,3,0.8424619574025859,0.7567961684251635,0.9378247132877495
+PS-3b891bf5e8fb-noop,screening,congress-sample.noop.a-aws.sender.warm,congress-sample,noop,a,aws,sender,a-aws,warm,xs-cpp,rss_bytes,3,17691988.911825687,17680242.795715544,17703742.831632037
+PS-3b891bf5e8fb-noop,screening,congress-sample.noop.a-aws.sender.warm,congress-sample,noop,a,aws,sender,a-aws,warm,xs-rs,rss_bytes,3,28835840.00000003,0.0,0.0
+PS-3b891bf5e8fb-noop,screening,congress-sample.noop.a-aws.sender.warm,congress-sample,noop,a,aws,sender,a-aws,warm,rsync,rss_bytes,3,12451840.000000007,0.0,0.0

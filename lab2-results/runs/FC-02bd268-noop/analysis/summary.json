@@ -1,0 +1,24 @@
+{
+ "experiment": "FC-02bd268-noop",
+ "kind": "screening",
+ "hypothesis": "On congress-sample, noop, the three tools differ by more than 5% in time to durable.",
+ "primary": "durable_s",
+ "control": "rsync",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261020T181617Z-FC-02bd268-noopf1",
+  "20261020T183246Z-FC-02bd268-noopf2",
+  "20261020T184016Z-FC-02bd268-noop",
+  "20261020T184215Z-FC-02bd268-noop"
+ ],
+ "spec_sha256": [
+  "09ae50e70cac49bb860d12a77dffaf646d82fbe7128e0f0702d899902769a789"
+ ],
+ "valid_blocks": 12,
+ "void_attempts": 12,
+ "void_reasons": [
+  "xs-rs: the transfer exited 255: ssh: Could not resolve hostname [2600: Name or service not known"
+ ]
+}

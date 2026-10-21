@@ -1,0 +1,171 @@
+{
+ "id": "XR10201904-maintain-20261020",
+ "kind": "port",
+ "step": "maintain-20261020",
+ "maintain": {
+  "since": "2026-10-19T00:00:00Z",
+  "merged": [
+   {
+    "id": "XR10192224-config-frames",
+    "step": "config-frames",
+    "title": "xs-wire: the configuration frames that follow HELLO",
+    "commit": "2db28ea9c31a",
+    "utc": "2026-10-19T22:51:27Z",
+    "summary": "Added the post-HELLO configuration frames to xs-wire: IO, COMPRESS, XATTR, ACL, CHOWN, SPARSE, LINKDEST, RELATIVE, FILES_CONFIG/DATA/END, FILTER, DELETE, PRUNE and OUTPUT. Encoding matches run_client byte for byte, decoding checks framing, negotiated features and hostile-peer bounds. Unit byte tests and a C++ server interop test pass, along with clippy and fmt."
+   },
+   {
+    "id": "XR10200022-mvp",
+    "step": "mvp",
+    "title": "xs-rs MVP: a Linux client and server that copy trees to and from the C++ xs, at least as fast",
+    "commit": "bbde3463d312",
+    "utc": "2026-10-20T01:47:22Z",
+    "summary": "Added the xs-rs binary crate with a Linux client and server that speak the C++ xs version 4 stream in both directions. A C++ client can push to and pull from xs-rs, and xs-rs can push to and pull from a C++ xs server; trees compare equal including modes, nanosecond mtimes, symlinks, empty entries and non-UTF-8 names, with compressed and no-op transfers verified."
+   },
+   {
+    "id": "XR10201502-zstd",
+    "step": "zstd",
+    "title": "zstd: compressed directory listings and data blocks (PF_ZSTD)",
+    "commit": "3cdf98e39da3",
+    "utc": "2026-10-20T15:22:55Z",
+    "summary": "Ported the PF_ZSTD compression policy into xs-rs: exact C++ suffix-list parsing, F_COMPRESS_CONFIG negotiation and refusal, compression sampling, adaptive levels, and per-suffix isolation of raw DATA blocks. Rust clients and servers now exchange ZSTD directory listings and data blocks with the C++ xs and refuse hostile or unnegotiated compression frames."
+   },
+   {
+    "id": "XR10201553-idmap",
+    "step": "idmap",
+    "title": "user and group names (PF_IDMAP, PF_CHOWN)",
+    "commit": "02bd26868504",
+    "utc": "2026-10-20T16:19:08Z",
+    "summary": "Implemented PF_IDMAP name records and PF_CHOWN ownership configuration in xs-rs, matching remote.cpp and ownership.cpp. The C++ client can now push/pull names and --chown overrides to/from xs-rs, and hostile or unnegotiated ownership frames are refused with the reference exit codes."
+   },
+   {
+    "id": "XR10201620-io-control",
+    "step": "io-control",
+    "title": "keepalives, bandwidth limits and timeouts (PF_IO_CONTROL)",
+    "commit": "deb9d92657aa",
+    "utc": "2026-10-20T16:56:07Z",
+    "summary": "Implemented PF_IO_CONTROL in xs-rs: exact --bwlimit/--timeout parsing, the token-bucket rate limiter, F_IO_CONFIG negotiation in the C++ order, negotiated keep-alives, and idle-timeout exit code 30. C++ clients and servers interoperate in both directions, and hostile or older peers are refused for invalid or unnegotiated keep-alives and malformed I/O configuration."
+   },
+   {
+    "id": "XR10201658-output",
+    "step": "output",
+    "title": "itemized output and progress (PF_OUTPUT, PF_DIR_OUTPUT, PF_PROGRESS_ACK)",
+    "commit": "2413c9f0288c",
+    "utc": "2026-10-20T18:04:00Z",
+    "summary": "Added the itemized-output and progress-acknowledgment protocol to xs-rs and xs-wire. C++ clients now get itemized events from xs-rs receivers, xs-rs clients render C++ receiver events, DIR frames carry the negotiated output metadata, and progress acknowledgments are bounded and feature-gated. All three gate commands pass with XS_BIN set to the parent C++ xs."
+   },
+   {
+    "id": "XR10201808-hlink",
+    "step": "hlink",
+    "title": "hard links (PF_HLINK)",
+    "commit": "5a4536053183",
+    "utc": "2026-10-20T19:02:36Z",
+    "summary": "Implemented PF_HLINK in xs-rs: DIR entries and DATA file attributes now carry the C++ hdev/ino/nlink/ctime/ctime_ns fields, -H negotiates the feature, and the receiver groups source inodes, sends each group's data once, links aliases after transfer, and itemizes them exactly as the C++ xs does. Cross-direction C++/Rust push, pull and local copies preserve hard-link topology, including symlink and FIFO aliases."
+   }
+  ]
+ },
+ "opened_utc": "2026-10-20T19:04:32Z",
+ "origin": "the engineer, once a day",
+ "state": "review",
+ "question": "Maintenance: simplify xs-rs, and log what merged in README.md",
+ "why": "",
+ "hypothesis": "",
+ "evidence": [],
+ "link": null,
+ "runner": null,
+ "base_rev": "5a4536053183a5edf3e36a5ded4640bfdd8d93b4",
+ "base_build": "5a4536053183",
+ "branch": "auto/XR10201904-maintain-20261020",
+ "commit": "d84368234dad2206e03199f7faad148a629cc40a",
+ "history": [
+  {
+   "utc": "2026-10-20T19:04:32Z",
+   "state": "opened",
+   "text": "opened by the engineer, once a day: Maintenance: simplify xs-rs, and log what merged in README.md"
+  },
+  {
+   "utc": "2026-10-20T19:14:28Z",
+   "state": "prepared",
+   "text": "parent built; xs-rs checks passing on it: test, clippy, fmt, arm64"
+  },
+  {
+   "utc": "2026-10-20T19:32:42Z",
+   "state": "review",
+   "text": "d84368234dad pushed to rust-ds: 8 file(s), 2562 lines; xs-rs's checks pass"
+  }
+ ],
+ "max_lines": 3000,
+ "budget_usd": 1.0,
+ "tests": {
+  "parent": {
+   "test": true,
+   "clippy": true,
+   "fmt": true,
+   "arm64": true
+  },
+  "candidate": {
+   "test": true,
+   "clippy": true,
+   "fmt": true,
+   "arm64": true
+  }
+ },
+ "agent": {
+  "summary": "Split the oversized xs-rs transfer engine into sender/shared, receiver, hard-link and destination-file modules, and moved the post-HELLO configuration reader out of main.rs into config.rs. Also removed duplicate metadata-kind and partial-file setup code. Added the requested 2026-10-20 README changelog; all four gates pass.",
+  "diagnosis": "The dominant problem was rs/xs-rs/src/transfer.rs at 1,826 lines, mixing the sender, receiver, hard-link grouping, destination file handling and shared frame/event helpers. I read it end to end, traced which helpers both engines use, and cut at function boundaries so no logic changed. transfer.rs is now 735 lines; the receiver is 687, hard links 266 and destination files 170. main.rs fell from 672 to 528 lines after moving 157 lines of configuration-frame handling into config.rs. The measured change is 2,562 lines including the README entry, under the 3,000-line budget.",
+  "change": "Moved the receiver engine to transfer/receiver.rs, hard-link logic to transfer/hardlink.rs and destination file helpers to transfer/file.rs, leaving the sender and shared helpers in transfer.rs. Extracted read_configuration, config_frame and read_config_frame into src/config.rs. Reused scan::kind_of instead of a duplicate metadata-kind mapping in the hard-link code. Factored the duplicated InFile construction used by DATA CHUNK and END records into open_infile. Removed process_dir's unused input parameter. Added module documentation and the dated README changelog listing all seven merged steps and the four cleanups.",
+  "expected_effect": "No behaviour or wire-byte changes. The crate is easier to navigate by responsibility, with the sender, receiver, hard-link and file-publishing concerns separated and the configuration protocol isolated from process startup. Duplicated logic is reduced, so future receiver and configuration changes have one place to edit.",
+  "risks": "The refactor is mechanical and all moved functions retain their original bodies except the two deduplications, the unused-parameter removal and visibility annotations needed by sibling modules. The full interop suite in both directions passed, covering compression, ownership, IO control, output and hard links against the C++ xs.",
+  "tests": "Ran the required XS_BIN=... cargo test: 92 tests passed (12 xs-rs unit, 5 compression, 5 hardlink, 9 interop, 5 io_control, 12 output, 8 ownership, 28 xs-wire unit, 4 wire interop, 4 wire io_control). Also ran cargo clippy --all-targets -- -D warnings, cargo fmt --check, and cargo check --all-targets --target aarch64-unknown-linux-gnu; all passed.",
+  "cpp_lesson": "",
+  "cost_usd": 0.08,
+  "turns": 46,
+  "session": "ses_ea53c52d3ffel04wfBPXGw9jXP",
+  "model": "opencode-go/deepseek-v4.1-flash"
+ },
+ "diff": [
+  {
+   "path": "README.md",
+   "added": "16",
+   "deleted": "0"
+  },
+  {
+   "path": "rs/xs-rs/src/config.rs",
+   "added": "157",
+   "deleted": "0"
+  },
+  {
+   "path": "rs/xs-rs/src/main.rs",
+   "added": "2",
+   "deleted": "146"
+  },
+  {
+   "path": "rs/xs-rs/src/scan.rs",
+   "added": "1",
+   "deleted": "1"
+  },
+  {
+   "path": "rs/xs-rs/src/transfer.rs",
+   "added": "13",
+   "deleted": "1103"
+  },
+  {
+   "path": "rs/xs-rs/src/transfer/file.rs",
+   "added": "170",
+   "deleted": "0"
+  },
+  {
+   "path": "rs/xs-rs/src/transfer/hardlink.rs",
+   "added": "266",
+   "deleted": "0"
+  },
+  {
+   "path": "rs/xs-rs/src/transfer/receiver.rs",
+   "added": "687",
+   "deleted": "0"
+  }
+ ],
+ "merged": {
+  "commit": "d84368234dad2206e03199f7faad148a629cc40a",
+  "utc": "2026-10-20T19:32:42Z"
+ }
+}

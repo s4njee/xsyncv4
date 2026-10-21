@@ -1,0 +1,128 @@
+{
+ "id": "XR10201658-output",
+ "kind": "port",
+ "step": "output",
+ "opened_utc": "2026-10-20T16:58:31Z",
+ "origin": "the engineer, after the previous step merged",
+ "state": "review",
+ "question": "itemized output and progress (PF_OUTPUT, PF_DIR_OUTPUT, PF_PROGRESS_ACK)",
+ "why": "",
+ "hypothesis": "",
+ "evidence": [],
+ "link": null,
+ "runner": null,
+ "base_rev": "deb9d92657aaa03e66d724f982f4ce98ed834ccb",
+ "base_build": "deb9d92657aa",
+ "branch": "auto/XR10201658-output",
+ "commit": "16f0cc34e931451e344000407517653d6842641e",
+ "history": [
+  {
+   "utc": "2026-10-20T16:58:31Z",
+   "state": "opened",
+   "text": "opened by the engineer, after the previous step merged: port step output, itemized output and progress (PF_OUTPUT, PF_DIR_OUTPUT, PF_PROGRESS_ACK)"
+  },
+  {
+   "utc": "2026-10-20T17:06:15Z",
+   "state": "prepared",
+   "text": "parent built; xs-rs checks passing on it: test, clippy, fmt"
+  },
+  {
+   "utc": "2026-10-20T18:02:05Z",
+   "state": "review",
+   "text": "16f0cc34e931 on auto/XR10201658-output: 10 file(s), 1045 lines and 337 of tests; xs-rs's tests, clippy and rustfmt pass against the C++ xs; waiting for it to be merged"
+  },
+  {
+   "utc": "2026-10-20T18:02:14Z",
+   "state": "review",
+   "text": "pull request https://github.com/s4njee/xsyncv4/pull/7"
+  }
+ ],
+ "tests": {
+  "parent": {
+   "test": true,
+   "clippy": true,
+   "fmt": true
+  },
+  "candidate": {
+   "test": true,
+   "clippy": true,
+   "fmt": true
+  }
+ },
+ "agent": {
+  "summary": "Added the itemized-output and progress-acknowledgment protocol to xs-rs and xs-wire. C++ clients now get itemized events from xs-rs receivers, xs-rs clients render C++ receiver events, DIR frames carry the negotiated output metadata, and progress acknowledgments are bounded and feature-gated. All three gate commands pass with XS_BIN set to the parent C++ xs.",
+  "diagnosis": "The work was protocol and interop work rather than benchmarking: the C++ reference puts per-entry size/source fields in DIR whenever PF_OUTPUT is negotiated, directory size/attr_source in the DIR header only with PF_DIR_OUTPUT, output events on F_OUTPUT, and completion snapshots on F_PROGRESS. The time went into matching those layouts and validating them against the parent binary; the new integration suite runs each direction across both implementations plus hostile-peer cases.",
+  "change": "Added xs-wire::output with byte-pinned OutputEvent, OutputConfig handling and ProgressAck codecs plus strict C++-style validation. Advertise PF_OUTPUT, PF_DIR_OUTPUT and PF_PROGRESS_ACK conditionally; send and parse OUTPUT_CONFIG in feature order; add the PF_OUTPUT per-entry fields and PF_DIR_OUTPUT directory header fields. xs-rs now renders %i/%n/%f/%L/%l/%b/%o/%t/%% with C++ escaping and sorted output, generates itemized events for local and remote receivers, sends throttled progress snapshots before DONE, and refuses malformed, unnegotiated or oversized output/progress frames.",
+  "expected_effect": "C++ clients can use -v, -i, -ii and --out-format against xs-rs, and --progress pushes receive receiver completion snapshots; xs-rs clients interoperate with C++ servers for the same flags. Transfer data paths and speed are otherwise unchanged.",
+  "risks": "Itemization of unusual metadata-only changes (replaced non-regular types, hard-link and extended-attribute columns) is approximated; deletion output, --log-file, --stats and dry-run summaries are outside this step. The C++ client's own output_event fills zero timestamps, so xs-rs also stamps zero-time events locally.",
+  "tests": "Added 4 xs-wire unit tests pinning F_OUTPUT/F_PROGRESS bytes and refusals, and 12 rs/xs-rs/tests/output.rs integration tests covering C++ push/pull itemization, xs-rs push/pull rendering, format fields, local copies, progress ACK ordering, malformed output configuration, unnegotiated configuration and a hostile control-byte output event. Ran: XS_BIN=~/benchmarks/lab/engineer/XR10201658-output/parent/build/xs cargo test --manifest-path rs/Cargo.toml (all 84 tests passed); cargo clippy --manifest-path rs/Cargo.toml --all-targets -- -D warnings; cargo fmt --manifest-path rs/Cargo.toml --check (both clean).",
+  "cpp_lesson": "",
+  "cost_usd": 0.16,
+  "turns": 138,
+  "session": "ses_ea591cdc4ffezHFyWoS34L44mA",
+  "model": "opencode-go/deepseek-v4.1-flash"
+ },
+ "diff": [
+  {
+   "path": "rs/xs-rs/src/cli.rs",
+   "added": "28",
+   "deleted": "0"
+  },
+  {
+   "path": "rs/xs-rs/src/ffi.rs",
+   "added": "50",
+   "deleted": "0"
+  },
+  {
+   "path": "rs/xs-rs/src/main.rs",
+   "added": "62",
+   "deleted": "12"
+  },
+  {
+   "path": "rs/xs-rs/src/output.rs",
+   "added": "230",
+   "deleted": "0"
+  },
+  {
+   "path": "rs/xs-rs/src/protocol.rs",
+   "added": "64",
+   "deleted": "5"
+  },
+  {
+   "path": "rs/xs-rs/src/scan.rs",
+   "added": "3",
+   "deleted": "4"
+  },
+  {
+   "path": "rs/xs-rs/src/transfer.rs",
+   "added": "328",
+   "deleted": "26"
+  },
+  {
+   "path": "rs/xs-rs/tests/output.rs",
+   "added": "337",
+   "deleted": "0"
+  },
+  {
+   "path": "rs/xs-wire/src/lib.rs",
+   "added": "2",
+   "deleted": "0"
+  },
+  {
+   "path": "rs/xs-wire/src/output.rs",
+   "added": "231",
+   "deleted": "0"
+  }
+ ],
+ "pr": {
+  "number": 7,
+  "url": "https://github.com/s4njee/xsyncv4/pull/7",
+  "branch": "engineer/XR10201658-output",
+  "commit": "4b5fd5fcb0875131fcd7291cf4d247c7ca432a5d",
+  "base": "deb9d92657aaa03e66d724f982f4ce98ed834ccb"
+ },
+ "merged": {
+  "commit": "2413c9f0288cb568718084594ce6ba3bf55c333a",
+  "utc": "2026-10-20T18:04:00Z"
+ }
+}

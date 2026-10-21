@@ -1,0 +1,13 @@
+experiment,kind,cell_id,corpus,scenario,sender,receiver,client,link,cache,arm,metric,n_blocks,geomean,lo,hi
+S0-vps-sentinel,screening,real-projects.noop.a-aws.sender.warm,real-projects,noop,a,aws,sender,a-aws,warm,xs,wall_s,6,4.923840919956721,4.370697773453163,5.546988298366279
+S0-vps-sentinel,screening,real-projects.noop.a-aws.sender.warm,real-projects,noop,a,aws,sender,a-aws,warm,again,wall_s,6,4.877478146506896,4.286952288716257,5.5493486905067195
+S0-vps-sentinel,screening,real-projects.noop.a-aws.sender.warm,real-projects,noop,a,aws,sender,a-aws,warm,rsync,wall_s,6,3.5397963999051045,3.33051987363986,3.762223024685685
+S0-vps-sentinel,screening,real-projects.noop.a-aws.sender.warm,real-projects,noop,a,aws,sender,a-aws,warm,xs,durable_s,6,4.956577159680017,4.414423038999331,5.565315540177741
+S0-vps-sentinel,screening,real-projects.noop.a-aws.sender.warm,real-projects,noop,a,aws,sender,a-aws,warm,again,durable_s,6,4.907603252887366,4.318780696615382,5.576705875949124
+S0-vps-sentinel,screening,real-projects.noop.a-aws.sender.warm,real-projects,noop,a,aws,sender,a-aws,warm,rsync,durable_s,6,3.5677237827031267,3.3607965780132654,3.7873916775974727
+S0-vps-sentinel,screening,real-projects.noop.a-aws.sender.warm,real-projects,noop,a,aws,sender,a-aws,warm,xs,cpu_s,6,10.361417911152945,9.122266382427386,11.768893455728424
+S0-vps-sentinel,screening,real-projects.noop.a-aws.sender.warm,real-projects,noop,a,aws,sender,a-aws,warm,again,cpu_s,6,10.433242108309972,9.311532464603435,11.6900780085771
+S0-vps-sentinel,screening,real-projects.noop.a-aws.sender.warm,real-projects,noop,a,aws,sender,a-aws,warm,rsync,cpu_s,6,2.461663777398032,2.3571816127078487,2.57077711801437
+S0-vps-sentinel,screening,real-projects.noop.a-aws.sender.warm,real-projects,noop,a,aws,sender,a-aws,warm,xs,rss_bytes,6,26634457.428628504,25896980.647174515,27392935.57740765
+S0-vps-sentinel,screening,real-projects.noop.a-aws.sender.warm,real-projects,noop,a,aws,sender,a-aws,warm,again,rss_bytes,6,26984078.93168961,26424772.764681775,27555223.360893253
+S0-vps-sentinel,screening,real-projects.noop.a-aws.sender.warm,real-projects,noop,a,aws,sender,a-aws,warm,rsync,rss_bytes,6,12760359.47188137,12721061.553833446,12799778.789103126

@@ -1,0 +1,94 @@
+{
+ "id": "XR10210025-tune-noop-congress-sample-3b891bf",
+ "kind": "port",
+ "step": "tune-noop-congress-sample-3b891bf",
+ "opened_utc": "2026-10-21T00:25:53Z",
+ "origin": "the engineer, after the previous step merged",
+ "state": "abandoned",
+ "question": "xs-rs performance: beat xs-c++ on congress-sample noop",
+ "why": "",
+ "hypothesis": "",
+ "evidence": [],
+ "link": null,
+ "runner": null,
+ "base_rev": "3b891bf5e8fb51c26f64347a4163e81fe3c0c2d9",
+ "base_build": "3b891bf5e8fb",
+ "branch": "auto/XR10210025-tune-noop-congress-sample-3b891bf",
+ "commit": null,
+ "history": [
+  {
+   "utc": "2026-10-21T00:25:53Z",
+   "state": "opened",
+   "text": "opened by the engineer, after the previous step merged: port step tune-noop-congress-sample-3b891bf, xs-rs performance: beat xs-c++ on congress-sample noop"
+  },
+  {
+   "utc": "2026-10-21T00:28:56Z",
+   "state": "prepared",
+   "text": "parent built; xs-rs checks passing on it: test, clippy, fmt, arm64"
+  },
+  {
+   "utc": "2026-10-21T00:53:04Z",
+   "state": "abandoned",
+   "text": "postponed: the lab works on copies that move data for now, and comes back to no-op copies later"
+  }
+ ],
+ "max_lines": 1200,
+ "tune": {
+  "cell": "congress-sample.noop.a-aws.sender.warm",
+  "corpus": "congress-sample",
+  "scenario": "noop",
+  "link": "a-aws",
+  "metric": "durable_s",
+  "experiment": "PS-3b891bf5e8fb-noop",
+  "run": "20261020T234715Z-PS-3b891bf5e8fb-noop",
+  "tools": {
+   "xs-cpp": {
+    "arm": "xs-cpp",
+    "flags": [
+     "-a",
+     "-j4"
+    ],
+    "rev": "a3e52c2c61de",
+    "seconds": 0.767,
+    "lo": 0.696,
+    "hi": 0.846,
+    "blocks": 3
+   },
+   "xs-rs": {
+    "arm": "xs-rs",
+    "flags": [
+     "-a",
+     "-j4"
+    ],
+    "rev": "3b891bf5e8fb-rs",
+    "seconds": 0.852,
+    "lo": 0.594,
+    "hi": 1.223,
+    "blocks": 3
+   },
+   "rsync": {
+    "arm": "rsync",
+    "flags": [
+     "-a"
+    ],
+    "rev": null,
+    "seconds": 1.588,
+    "lo": 1.577,
+    "hi": 1.599,
+    "blocks": 3
+   }
+  },
+  "verdict": "xs-cpp",
+  "rs_vs_cpp": 1.111,
+  "fastest": "xs-cpp"
+ },
+ "tests": {
+  "parent": {
+   "test": true,
+   "clippy": true,
+   "fmt": true,
+   "arm64": true
+  }
+ },
+ "agent": {}
+}

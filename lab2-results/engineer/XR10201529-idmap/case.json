@@ -1,0 +1,43 @@
+{
+ "id": "XR10201529-idmap",
+ "kind": "port",
+ "step": "idmap",
+ "opened_utc": "2026-10-20T15:29:05Z",
+ "origin": "planner window 20261020T1527Z",
+ "state": "failed",
+ "question": "user and group names (PF_IDMAP, PF_CHOWN)",
+ "why": "No performance gap now warrants an engineering case, and idmap is the next unmerged port step, so the Rust port can advance without pausing the Mac runner.",
+ "hypothesis": "",
+ "evidence": [],
+ "link": null,
+ "runner": null,
+ "base_rev": "3cdf98e39da34923a42db4a832d7b44baf087b15",
+ "base_build": "3cdf98e39da3",
+ "branch": "auto/XR10201529-idmap",
+ "commit": null,
+ "history": [
+  {
+   "utc": "2026-10-20T15:29:05Z",
+   "state": "opened",
+   "text": "opened by planner window 20261020T1527Z: port step idmap, user and group names (PF_IDMAP, PF_CHOWN)"
+  },
+  {
+   "utc": "2026-10-20T15:34:52Z",
+   "state": "prepared",
+   "text": "parent built; xs-rs checks passing on it: test, clippy, fmt"
+  },
+  {
+   "utc": "2026-10-20T15:50:23Z",
+   "state": "failed",
+   "text": "-R g+rwX exited 1: e052': Operation not permitted\nchmod: changing permissions of '~/xsyncv4-auto/XR10201529-idmap/rs/target/tmp': Operation not permitted\nchmod: changing permissions of '~/xsyncv4-auto/XR10201529-idmap/rs/target/CACHEDIR.TAG': Operation not permitted\nchmod: changing permissions of '~/xsyncv4-auto/XR10201529-idmap/rs/target/.rustc_info.json': Oper"
+  }
+ ],
+ "tests": {
+  "parent": {
+   "test": true,
+   "clippy": true,
+   "fmt": true
+  }
+ },
+ "agent": {}
+}

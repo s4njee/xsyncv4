@@ -1,0 +1,16 @@
+{
+ "outcome": "patched",
+ "summary": "Implemented PF_DELTA in xs-rs: negotiation, destination signatures, streaming weak/strong block matching, LITERAL/COPY/DELTA_END records, retry acknowledgments, changed-basis rejection, and final XXH3-128 verification. C++ and Rust now delta in all four client/server directions, and the C++ delta wire suite passes unchanged against the Rust binary.",
+ "diagnosis": "This step targets wire volume rather than a timed optimization. With the frame recorder, a 4 MiB file with a 100 KiB changed region sent less than half the file as DATA in all four interop directions; before PF_DELTA the same runs send the whole file. The new receiver tests also confirm that a bad digest or changed basis publishes nothing and exits 23.",
+ "change": "Added rs/xs-rs/src/delta.rs (signature generation/encoding, streaming block matcher, basis verification) and wired PF_DELTA through sender NEED parsing, F_DELTA_REQUEST/signature exchange, LITERAL/COPY/DELTA_END emission, receiver signature replies, retry acks, serialized delta writes and final digest checks. Also added --ignore-times/-I and the HELLO flag so the C++ delta tests can force a transfer.",
+ "expected_effect": "Changed large files cross the wire as literals plus verified basis-block copies instead of full contents, while missing bases, non-regular destinations, unsupported peers and --whole-file safely fall back to normal or non-delta transfers.",
+ "risks": "No --inplace or --link-dest basis snapshot is needed yet because xs-rs does not implement those modes; it writes through temp files. Delta reads and writes are serialized as in C++, so per-file range parallelism does not apply during a delta attempt. The sender now sends a fatal MSG (and stderr text) on protocol errors, matching C++ instead of only exiting.",
+ "tests": "XS_BIN=~/benchmarks/lab/engineer/XR10202053-delta/parent/build/xs cargo test --manifest-path rs/Cargo.toml: all suites pass, including 9 new delta tests (four C++ interop directions, signature/reconstruction bytes, hostile requests, bad references, checksum failure, changed/replaced basis, retry ack). cargo clippy --all-targets -- -D warnings, cargo fmt --check, and cargo check --target aarch64-unknown-linux-gnu all pass. Additionally, tests/delta_wire_test.py passes 7/7 against rs/target/debug/xs-rs as XSYNC_TEST_BINARY.",
+ "cpp_lesson": "",
+ "commit_title": "Port PF_DELTA signed block transfer to xs-rs",
+ "commit_body": "Adds the delta module with destination signatures, weak/strong block matching, LITERAL, COPY and DELTA_END records, retry handling and final XXH3-128 verification. Negotiates PF_DELTA, sends and answers F_DELTA_REQUEST, and refuses unnegotiated, duplicate, unrequested or malformed delta traffic like xs-c++. Interop tests cover C++ and Rust in both directions, and the parent's delta wire suite passes against the Rust binary.",
+ "cost_usd": 0.22,
+ "turns": 140,
+ "session": "ses_ea4d7d0c9ffeI6wGgzhV4jy7ea",
+ "model": "opencode-go/deepseek-v4.1-flash"
+}

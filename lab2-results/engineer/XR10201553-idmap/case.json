@@ -1,0 +1,127 @@
+{
+ "id": "XR10201553-idmap",
+ "kind": "port",
+ "step": "idmap",
+ "opened_utc": "2026-10-20T15:53:36Z",
+ "origin": "the engineer, after the previous step merged",
+ "state": "review",
+ "question": "user and group names (PF_IDMAP, PF_CHOWN)",
+ "why": "",
+ "hypothesis": "",
+ "evidence": [],
+ "link": null,
+ "runner": null,
+ "base_rev": "3cdf98e39da34923a42db4a832d7b44baf087b15",
+ "base_build": "3cdf98e39da3",
+ "branch": "auto/XR10201553-idmap",
+ "commit": "9baee0f2a610ab8cecbe8ec5c707954ba0cb1f06",
+ "history": [
+  {
+   "utc": "2026-10-20T15:53:36Z",
+   "state": "opened",
+   "text": "opened by the engineer, after the previous step merged: port step idmap, user and group names (PF_IDMAP, PF_CHOWN)"
+  },
+  {
+   "utc": "2026-10-20T15:56:11Z",
+   "state": "prepared",
+   "text": "parent built; xs-rs checks passing on it: test, clippy, fmt"
+  },
+  {
+   "utc": "2026-10-20T16:17:34Z",
+   "state": "review",
+   "text": "9baee0f2a610 on auto/XR10201553-idmap: 10 file(s), 726 lines and 250 of tests; xs-rs's tests, clippy and rustfmt pass against the C++ xs; waiting for it to be merged"
+  },
+  {
+   "utc": "2026-10-20T16:17:44Z",
+   "state": "review",
+   "text": "pull request https://github.com/s4njee/xsyncv4/pull/5"
+  }
+ ],
+ "tests": {
+  "parent": {
+   "test": true,
+   "clippy": true,
+   "fmt": true
+  },
+  "candidate": {
+   "test": true,
+   "clippy": true,
+   "fmt": true
+  }
+ },
+ "agent": {
+  "summary": "Implemented PF_IDMAP name records and PF_CHOWN ownership configuration in xs-rs, matching remote.cpp and ownership.cpp. The C++ client can now push/pull names and --chown overrides to/from xs-rs, and hostile or unnegotiated ownership frames are refused with the reference exit codes.",
+  "diagnosis": "Read the C++ IdMaps, run_client/run_server configuration order, and ownership resolution first, then added the wire format, sender/receiver mapping, config negotiation, CLI parsing, and actual chown calls. Verified against the parent's C++ xs with the gate tests and the repository's tests/chown_wire_test.py pointed at xs-rs; all pass.",
+  "change": "Added xs_wire::idmap for F_IDMAP records; added xs-rs idmap state, libc name/id lookups, --chown parsing and resolution, CHOWN_CONFIG negotiation/validation, IDMAP advertisement and send/receive, name mapping on DIR and DATA attributes, ownership overrides, and best-effort fchown/lchown/chown of files, directories, symlinks and FIFOs. Added integration tests under rs/xs-rs/tests/ownership.rs.",
+  "expected_effect": "C++ and Rust peers interoperate for user/group names and --chown overrides; name records travel before each listing as in C++; malformed, wrong-side, oversized, repeated or unnegotiated ownership configuration is rejected with protocol/syntax/unsupported codes matching the reference.",
+  "risks": "Id mapping uses libc passwd/group static storage, which is safe here because sending and learning happen on one thread. Ownership changes follow C++ permissions: uid only as root, gid only if the process may set it; unsupported --usermap/--groupmap and listing mode remain out of scope.",
+  "tests": "XS_BIN=<parent>/build/xs cargo test --manifest-path rs/Cargo.toml: all 54 tests pass. cargo clippy --all-targets -- -D warnings: clean. cargo fmt --check: clean. XSYNC_TEST_BINARY=rs/target/debug/xs-rs python3 tests/chown_wire_test.py: 5/5 pass.",
+  "cost_usd": 0.1,
+  "turns": 95,
+  "session": "ses_ea5f382deffeLyAmDWCZMlL0Th",
+  "model": "opencode-go/deepseek-v4.1-flash"
+ },
+ "diff": [
+  {
+   "path": "rs/xs-rs/src/cli.rs",
+   "added": "36",
+   "deleted": "0"
+  },
+  {
+   "path": "rs/xs-rs/src/ffi.rs",
+   "added": "143",
+   "deleted": "1"
+  },
+  {
+   "path": "rs/xs-rs/src/idmap.rs",
+   "added": "145",
+   "deleted": "0"
+  },
+  {
+   "path": "rs/xs-rs/src/main.rs",
+   "added": "161",
+   "deleted": "45"
+  },
+  {
+   "path": "rs/xs-rs/src/protocol.rs",
+   "added": "72",
+   "deleted": "1"
+  },
+  {
+   "path": "rs/xs-rs/src/transfer.rs",
+   "added": "40",
+   "deleted": "5"
+  },
+  {
+   "path": "rs/xs-rs/tests/interop.rs",
+   "added": "1",
+   "deleted": "1"
+  },
+  {
+   "path": "rs/xs-rs/tests/ownership.rs",
+   "added": "248",
+   "deleted": "0"
+  },
+  {
+   "path": "rs/xs-wire/src/idmap.rs",
+   "added": "76",
+   "deleted": "0"
+  },
+  {
+   "path": "rs/xs-wire/src/lib.rs",
+   "added": "1",
+   "deleted": "0"
+  }
+ ],
+ "pr": {
+  "number": 5,
+  "url": "https://github.com/s4njee/xsyncv4/pull/5",
+  "branch": "engineer/XR10201553-idmap",
+  "commit": "9e69b9c05b340b9a40012377ab83b6e2e7c2398e",
+  "base": "3cdf98e39da34923a42db4a832d7b44baf087b15"
+ },
+ "merged": {
+  "commit": "02bd268685045570cd5cecf99f508d30a63d1a99",
+  "utc": "2026-10-20T16:19:08Z"
+ }
+}

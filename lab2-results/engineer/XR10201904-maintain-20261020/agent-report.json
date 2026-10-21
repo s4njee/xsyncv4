@@ -1,0 +1,16 @@
+{
+ "outcome": "patched",
+ "summary": "Split the oversized xs-rs transfer engine into sender/shared, receiver, hard-link and destination-file modules, and moved the post-HELLO configuration reader out of main.rs into config.rs. Also removed duplicate metadata-kind and partial-file setup code. Added the requested 2026-10-20 README changelog; all four gates pass.",
+ "diagnosis": "The dominant problem was rs/xs-rs/src/transfer.rs at 1,826 lines, mixing the sender, receiver, hard-link grouping, destination file handling and shared frame/event helpers. I read it end to end, traced which helpers both engines use, and cut at function boundaries so no logic changed. transfer.rs is now 735 lines; the receiver is 687, hard links 266 and destination files 170. main.rs fell from 672 to 528 lines after moving 157 lines of configuration-frame handling into config.rs. The measured change is 2,562 lines including the README entry, under the 3,000-line budget.",
+ "change": "Moved the receiver engine to transfer/receiver.rs, hard-link logic to transfer/hardlink.rs and destination file helpers to transfer/file.rs, leaving the sender and shared helpers in transfer.rs. Extracted read_configuration, config_frame and read_config_frame into src/config.rs. Reused scan::kind_of instead of a duplicate metadata-kind mapping in the hard-link code. Factored the duplicated InFile construction used by DATA CHUNK and END records into open_infile. Removed process_dir's unused input parameter. Added module documentation and the dated README changelog listing all seven merged steps and the four cleanups.",
+ "expected_effect": "No behaviour or wire-byte changes. The crate is easier to navigate by responsibility, with the sender, receiver, hard-link and file-publishing concerns separated and the configuration protocol isolated from process startup. Duplicated logic is reduced, so future receiver and configuration changes have one place to edit.",
+ "risks": "The refactor is mechanical and all moved functions retain their original bodies except the two deduplications, the unused-parameter removal and visibility annotations needed by sibling modules. The full interop suite in both directions passed, covering compression, ownership, IO control, output and hard links against the C++ xs.",
+ "tests": "Ran the required XS_BIN=... cargo test: 92 tests passed (12 xs-rs unit, 5 compression, 5 hardlink, 9 interop, 5 io_control, 12 output, 8 ownership, 28 xs-wire unit, 4 wire interop, 4 wire io_control). Also ran cargo clippy --all-targets -- -D warnings, cargo fmt --check, and cargo check --all-targets --target aarch64-unknown-linux-gnu; all passed.",
+ "cpp_lesson": "",
+ "commit_title": "Split xs-rs transfer and configuration code",
+ "commit_body": "Move the receiver into transfer/receiver.rs, hard links into transfer/hardlink.rs and destination file helpers into transfer/file.rs, leaving the sender and shared helpers in transfer.rs. Move post-HELLO configuration reading from main.rs into config.rs. Reuse scan::kind_of and share partial-file creation between CHUNK and END, with no wire or behaviour changes.",
+ "cost_usd": 0.08,
+ "turns": 46,
+ "session": "ses_ea53c52d3ffel04wfBPXGw9jXP",
+ "model": "opencode-go/deepseek-v4.1-flash"
+}

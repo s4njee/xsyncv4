@@ -1,0 +1,19 @@
+{
+ "experiment": "PS-8428aac9a210-fresh",
+ "kind": "screening",
+ "hypothesis": "xs-rs at 8428aac9a210 differs from xs-c++ (-a -j4) by more than 5% in time-to-durable on congress-sample, fresh, a>aws.",
+ "primary": "durable_s",
+ "control": "xs-cpp",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261021T005447Z-PS-8428aac9a210-fresh"
+ ],
+ "spec_sha256": [
+  "f533783b6cb23a65a1a3929d2a9b2d0b725b8ae59e7739f03570b31685d6ad2f"
+ ],
+ "valid_blocks": 3,
+ "void_attempts": 0,
+ "void_reasons": []
+}

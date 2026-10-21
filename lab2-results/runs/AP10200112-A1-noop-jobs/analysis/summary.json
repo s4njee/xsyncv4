@@ -1,0 +1,19 @@
+{
+ "experiment": "AP10200112-A1-noop-jobs",
+ "kind": "screening",
+ "hypothesis": "The E1 no-op ratio of 1.495 [1.305,1.712] is dominated by serial per-file/metadata work; xs -a -j8 will bring the ratio below 1.10, with -j4 intermediate, while failure of both would show the deficit is not job-count-fixable.",
+ "primary": "wall_s",
+ "control": "rsync",
+ "delta": 0.1,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261020T011248Z-AP10200112-A1-noop-jobs"
+ ],
+ "spec_sha256": [
+  "46866971013fefcac108f7841b2d490dbbedb5b10227700bdf38265ddd97fd54"
+ ],
+ "valid_blocks": 12,
+ "void_attempts": 0,
+ "void_reasons": []
+}

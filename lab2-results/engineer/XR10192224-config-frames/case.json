@@ -1,0 +1,89 @@
+{
+ "id": "XR10192224-config-frames",
+ "kind": "port",
+ "step": "config-frames",
+ "opened_utc": "2026-10-19T22:24:54Z",
+ "origin": "the operator, by hand",
+ "state": "review",
+ "question": "xs-wire: the configuration frames that follow HELLO",
+ "why": "The first step of xs-rs, opened by hand by the operator while B is unreachable.",
+ "hypothesis": "",
+ "evidence": [],
+ "link": null,
+ "runner": null,
+ "base_rev": "4736353041781906a7b931331753a192fd4ffb09",
+ "base_build": "473635304178",
+ "branch": "auto/XR10192224-config-frames",
+ "commit": "2db28ea9c31aad45b50640cb660e1cc95ab70bf5",
+ "history": [
+  {
+   "utc": "2026-10-19T22:24:54Z",
+   "state": "opened",
+   "text": "opened by the operator, by hand: port step config-frames, xs-wire: the configuration frames that follow HELLO"
+  },
+  {
+   "utc": "2026-10-19T22:28:51Z",
+   "state": "prepared",
+   "text": "parent built; xs-rs checks passing on it: test, clippy, fmt"
+  },
+  {
+   "utc": "2026-10-19T22:48:45Z",
+   "state": "failed",
+   "text": "budget.record is not a function"
+  },
+  {
+   "utc": "2026-10-19T22:51:11Z",
+   "state": "failed",
+   "text": "the agent reported patched, but a bug in engineer.mjs (budget.record hidden by a parameter) closed the case before its gate; the operator ran the gate by hand on the agent report (bash.16, 131 turns)"
+  },
+  {
+   "utc": "2026-10-19T22:51:27Z",
+   "state": "review",
+   "text": "2db28ea9c31a on auto/XR10192224-config-frames: 3 file(s), 326 lines and 72 of tests; xs-rs's tests, clippy and rustfmt pass against the C++ xs; waiting for a person to merge it"
+  }
+ ],
+ "tests": {
+  "parent": {
+   "test": true,
+   "clippy": true,
+   "fmt": true
+  },
+  "candidate": {
+   "test": true,
+   "clippy": true,
+   "fmt": true
+  }
+ },
+ "agent": {
+  "summary": "Added the post-HELLO configuration frames to xs-wire: IO, COMPRESS, XATTR, ACL, CHOWN, SPARSE, LINKDEST, RELATIVE, FILES_CONFIG/DATA/END, FILTER, DELETE, PRUNE and OUTPUT. Encoding matches run_client byte for byte, decoding checks framing, negotiated features and hostile-peer bounds. Unit byte tests and a C++ server interop test pass, along with clippy and fmt.",
+  "diagnosis": "Read remote.cpp's run_client (around 2892) and run_server (around 3209) together with wire_test.py, compression_wire_test.py, chown_wire_test.py and filter_wire_test.py. The sandbox denies the benchmarks/lab path, so I built the same parent C++ source into rs/target/cpp-build and used that as XS_BIN. The first interop run exposed that the test HELLO had to negotiate ZSTD and XATTR_STREAM; after that the C++ server accepted all configuration frames in order.",
+  "change": "Added rs/xs-wire/src/config.rs with typed Config variants for all configuration frames, files-data/end helpers, frame-type and feature mapping, C++ size/count limits, and unnegotiated-feature refusal. Added byte-pinned unit tests, malformed-frame tests, and an interop test that sends the whole negotiated sequence to the C++ xs --server and expects F_DEST. Exported the module from lib.rs.",
+  "expected_effect": "xs-wire can now write and read the complete configuration exchange that follows HELLO, so a C++ client can push to or pull from an xs-rs peer without the C++ side rejecting the configuration stage.",
+  "risks": "Filter rule grammar and compression suffix character-class semantics are only structurally validated here; full rule/suffix semantics belong to the later filter and compression steps. Interop was proven against a locally built copy of the same parent source rather than the lab's prebuilt XS_BIN, which the gate will use.",
+  "tests": "Without XS_BIN: 13 unit tests pass. With XS_BIN pointing at a locally built parent xs: 13 unit tests and 4 interop tests pass. cargo clippy --all-targets -- -D warnings is clean. cargo fmt --check is clean. Net change is 397 lines under rs/.",
+  "cost_usd": 0.16,
+  "turns": 131,
+  "session": "ses_ea9b20221ffe8rnZXbTxKIdvS0"
+ },
+ "diff": [
+  {
+   "path": "rs/xs-wire/src/config.rs",
+   "added": "325",
+   "deleted": "0"
+  },
+  {
+   "path": "rs/xs-wire/src/lib.rs",
+   "added": "1",
+   "deleted": "0"
+  },
+  {
+   "path": "rs/xs-wire/tests/interop.rs",
+   "added": "71",
+   "deleted": "1"
+  }
+ ],
+ "merged": {
+  "commit": "2db28ea9c31aad45b50640cb660e1cc95ab70bf5",
+  "utc": "2026-10-19T22:51:27Z"
+ }
+}

@@ -1,0 +1,5 @@
+{
+ "text": "This case adds three ways for people to steer what gets copied: filter rules that include or exclude files, handling of relative paths, and the option to read the list of files to transfer from a file. Those are standard parts of the original tool's interface, so xs-rs cannot match it feature for feature until they behave the same way, byte for byte. On the one comparison measured so far, xs-rs takes about 1.54 times as long as the original in the noop scenario, while the real-projects result is still pending \u2014 so closing gaps like this is what puts the port on equal footing before the speed work can mean anything.",
+ "model": "opencode/deepseek-v4.1-flash",
+ "utc": "2026-10-20T22:38:51.895Z"
+}
