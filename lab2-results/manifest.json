@@ -1,0 +1,55 @@
+{
+ "utc": "2026-10-21T01:12:07+00:00",
+ "vps_lab_commit": "f56ca8473a73cc4885f0db0af379553ed0b1096a",
+ "goal": "xs-rs tries to beat xs-c++; rsync runs beside them as the reference (contest.py)",
+ "xs_cpp": {
+  "rev": "0c94b3d70b9d",
+  "since": "2026-10-21T00:35:18+00:00",
+  "earlier": [
+   "a3e52c2c61de"
+  ],
+  "branch": "experimental",
+  "flags": [
+   "-a",
+   "-j4"
+  ]
+ },
+ "xs_rs": {
+  "rev": "8428aac9a210",
+  "after_step": "filters",
+  "branch": "rust-ds",
+  "flags": [
+   "-a",
+   "-j4"
+  ]
+ },
+ "rsync": {
+  "flags": [
+   "-a"
+  ]
+ },
+ "metric": "durable_s (time until the copy is durable at the receiver)",
+ "machines": {
+  "a": {
+   "role": "sender",
+   "system": "Linux amd64",
+   "about": "an LXC container with 2 vCPUs of a Xeon Gold 6138, 2 GB of memory and 30 GB of disk, IPv6 only"
+  },
+  "aws": {
+   "role": "receiver",
+   "system": "Linux arm64",
+   "about": "an AWS t4g.small in us-west-1: 2 Graviton2 vCPUs, 2 GB of memory and a 16 GB disk, IPv6 only"
+  }
+ },
+ "link": {
+  "id": "a-aws",
+  "direction": "a>aws",
+  "about": "the internet over IPv6, one way from A to AWS; about 11 ms round trip"
+ },
+ "sprint": {
+  "start": "2026-10-20T19:40:49Z",
+  "until": "2026-10-21T19:40:49Z",
+  "engineer_usd": 20,
+  "why": "the next 24 hours go to DeepSeek engineering xs-rs toward performance and feature parity with xs-c++"
+ }
+}
