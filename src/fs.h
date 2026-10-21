@@ -144,6 +144,7 @@ struct OutFile {
   ItemPtr item;
   DestinationRevision output_identity;
   int ownership_fd = -1; // Keep an app staging inode alive through close/publication.
+  u64 output_id = 0;     // Registry key while open; another worker may reuse a closed fd number.
   int fd = -1;
   int dir_fd = -1;
   int stage_fd = -1; // Private app job directory; -1 stages beside the final name.
