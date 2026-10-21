@@ -115,7 +115,7 @@ pub fn local_time(seconds: i64) -> String {
         if n == 0 {
             "?".into()
         } else {
-            let bytes: Vec<u8> = buffer[..n].iter().map(|&byte| byte as u8).collect();
+            let bytes: Vec<u8> = buffer[..n].iter().map(|byte| byte.to_ne_bytes()[0]).collect();
             String::from_utf8_lossy(&bytes).into_owned()
         }
     }
