@@ -376,9 +376,9 @@
    "opened": "2026-10-21T00:54:52Z",
    "ended": "2026-10-21T00:57:56Z",
    "last": "parent built; xs-rs checks passing on it: test, clippy, fmt, arm64",
-   "outcome": null,
-   "summary": null,
-   "cost_usd": null,
+   "outcome": "patched",
+   "summary": "xs-rs now negotiates PF_XATTRS with PF_XATTR_STREAM, carries extended attributes in DIR entries and DATA records in the C++ field order, applies them on both sides, and validates XATTR_START/CHUNK/END before any destination work. It interoperates with the parent C++ xs in both directions, including -X filtering and -XX internal names.",
+   "cost_usd": 0.27,
    "pull_request": null,
    "merged": null
   }
