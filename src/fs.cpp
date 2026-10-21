@@ -1550,31 +1550,48 @@ void finalize_tree() {
     }
   }
   worker.flush_log();
-  std::sort(final_directories.begin(), final_directories.end(), [](const auto& a, const auto& b) {
-    return std::count(a.path.begin(), a.path.end(), '/') > std::count(b.path.begin(), b.path.end(), '/');
-  });
-  for (const auto& dir : final_directories) {
+  const std::unordered_set<std::string> dirty_paths(dirty.begin(), dirty.end());
+  // A run of siblings shares one open parent, so each needs one openat instead
+  // of a walk from the destination root.
+  struct Parent {
+    std::string path;
+    int fd = -1;
+    ~Parent() { if (fd >= 0) close(fd); }
+  };
+  auto finish = [&](const FinalDirectory& dir, Worker& log, Parent& parent) {
     ItemScope observation(dir.item);
     ItemFinalizer outcome(dir.item);
-    if (!item_preview_source_valid(dir.item)) continue;
+    if (!item_preview_source_valid(dir.item)) return;
     if (dir.item) dir.item->applied.store(false);
-    if (!item_destination_valid(dir.item, true)) continue;
-    if (!app_partials::validate_entry(dir.item)) continue;
+    if (!item_destination_valid(dir.item, true)) return;
+    if (!app_partials::validate_entry(dir.item)) return;
+    const bool dirty_dir = dirty_paths.count(dir.path) != 0;
     if (dir.rel.empty() && !dir.reported && g_opt.delete_before && g_opt.output_attrs && g_opt.times &&
-        !g_opt.omit_dir_times && std::find(dirty.begin(), dirty.end(), dir.path) != dirty.end())
-      item(worker, ".d..t......", dir.rel, dir.attrs, dir.source);
-    const bool time_needed = g_opt.times && !g_opt.omit_dir_times &&
-      (!dir.time_ok || dir.modified || std::find(dirty.begin(), dirty.end(), dir.path) != dirty.end());
+        !g_opt.omit_dir_times && dirty_dir)
+      item(log, ".d..t......", dir.rel, dir.attrs, dir.source);
+    const bool time_needed = g_opt.times && !g_opt.omit_dir_times && (!dir.time_ok || dir.modified || dirty_dir);
     if (dir.mode_ok && !time_needed && !preserve_atime(dir.attrs) &&
         !preserve_crtime(dir.attrs) && !g_opt.fileflags) {
       if (dir.item) dir.item->applied.store(true);
-      continue;
+      return;
     }
     MetadataActivity metadata;
-    int fd = destination_open_dir(dir.path.c_str());
+    size_t slash = dir.path.rfind('/');
+    std::string_view parent_path = slash == std::string::npos ? std::string_view() : std::string_view(dir.path).substr(0, slash);
+    std::string name = slash == std::string::npos ? dir.path : dir.path.substr(slash + 1);
+    if (name.empty() || name == "." || name == "..") parent_path = {};
+    else if (parent.path != parent_path || parent.fd < 0) {
+      if (parent.fd >= 0) close(parent.fd);
+      DestPath p = destination_path(dir.path);
+      parent.path = parent_path;
+      parent.fd = p.fd >= 0 && p.name == name ? p.release() : -1;
+    }
+    int fd = !parent_path.empty() && parent.fd >= 0
+      ? openat(parent.fd, name.c_str(), O_RDONLY | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC)
+      : destination_open_dir(dir.path.c_str());
     if (fd < 0) {
       check_attr(-1, dir.path.c_str(), "open directory for final attributes");
-      continue;
+      return;
     }
     if (!dir.mode_ok) check_attr(fchmod(fd, dir.attrs.mode), dir.path.c_str(), "permissions");
     set_extra_times(dir.path.c_str(), dir.attrs);
@@ -1586,6 +1603,37 @@ void finalize_tree() {
     close(fd);
     if (dir.item) dir.item->applied.store(true);
     app_partials::own_entry(dir.item);
+  };
+  // Deepest first: a parent's final mode can deny access to its children. The
+  // directories of one depth are independent, so they run in parallel, with
+  // siblings sorted together to share their parent.
+  auto depth = [](const FinalDirectory& d) { return std::count(d.path.begin(), d.path.end(), '/'); };
+  std::sort(final_directories.begin(), final_directories.end(), [&](const auto& a, const auto& b) {
+    auto da = depth(a), db = depth(b);
+    return da != db ? da > db : a.path < b.path;
+  });
+  // App sessions observe each directory's outcome in order, so they stay serial.
+  const bool serial = g_item_sink || app_partials::active();
+  const size_t jobs = (size_t)std::max(1, default_jobs());
+  constexpr size_t CHUNK = 256;  // Directories per claim: whole sibling runs, little contention.
+  for (size_t begin = 0; begin < final_directories.size() && !g_stop.load();) {
+    size_t end = begin;
+    bool root = false;
+    while (end < final_directories.size() && depth(final_directories[end]) == depth(final_directories[begin]))
+      root |= final_directories[end++].rel.empty();
+    // The transfer root is the only directory itemized here; it keeps this thread's log.
+    size_t threads = serial || root ? 1 : std::min(jobs, (end - begin + CHUNK - 1) / CHUNK);
+    std::atomic<size_t> next{begin};
+    auto run = [&](Worker& log) {
+      Parent parent;
+      for (size_t first; !g_stop.load() && (first = next.fetch_add(CHUNK)) < end;)
+        for (size_t i = first; i < std::min(end, first + CHUNK); ++i) finish(final_directories[i], log, parent);
+    };
+    std::vector<std::thread> helpers;
+    for (size_t t = 1; t < threads; ++t) helpers.emplace_back([&] { Worker log; run(log); log.flush_log(); });
+    run(worker);
+    for (auto& helper : helpers) helper.join();
+    begin = end;
   }
   worker.flush_log();
   delete_candidates.clear();
@@ -1611,11 +1659,50 @@ struct OpenOutput {
   bool app_owned;
   DestinationRevision identity;
   int ownership_fd;
+  int fd;
 };
-std::recursive_mutex output_mu;
+// Interrupt cleanup must never see an output between its creation and its
+// registration, or between its publication and unregistration. Workers share
+// this lock across those steps, so the creates, metadata and renames of
+// different files run in parallel; cleanup takes it exclusively. App sessions
+// keep outputs serialized, as their conflict decisions and private partials expect.
+std::shared_mutex output_lifecycle_mu;
+thread_local int output_lifecycle_depth = 0;  // Nested entries (out_finish -> out_abort) lock once.
+thread_local bool output_lifecycle_exclusive = false;
+std::atomic<bool> output_stopping{false};  // Cleanup is waiting: admit no new outputs.
 std::shared_mutex output_io_mu;
-std::unordered_map<int, OpenOutput> open_outputs;
+std::mutex open_outputs_mu;  // Guards the registry and next_output_id.
+std::unordered_map<u64, OpenOutput> open_outputs;
+u64 next_output_id = 0;
 std::atomic<bool> output_shutdown{false};
+
+class OutputLifecycle {
+ public:
+  OutputLifecycle() {
+    if (output_lifecycle_depth) { ++output_lifecycle_depth; return; }
+    if (output_stopping.load()) { refused_ = true; return; }
+    output_lifecycle_exclusive = g_item_sink || app_partials::active();
+    if (output_lifecycle_exclusive) output_lifecycle_mu.lock();
+    else output_lifecycle_mu.lock_shared();
+    output_lifecycle_depth = 1;
+  }
+  ~OutputLifecycle() {
+    // Cleanup takes over the lock of a worker that failed inside; depth is 0 then.
+    if (refused_ || !output_lifecycle_depth || --output_lifecycle_depth) return;
+    if (output_lifecycle_exclusive) output_lifecycle_mu.unlock();
+    else output_lifecycle_mu.unlock_shared();
+  }
+  OutputLifecycle(const OutputLifecycle&) = delete;
+  OutputLifecycle& operator=(const OutputLifecycle&) = delete;
+  explicit operator bool() const { return !refused_; }
+ private:
+  bool refused_ = false;
+};
+
+void forget_output(const OutFile& f) {
+  std::lock_guard<std::mutex> lock(open_outputs_mu);
+  open_outputs.erase(f.output_id);
+}
 
 bool register_output(OutFile& f) {
   large_file_cache_policy(f.fd, f.sparse_size_hint);
@@ -1631,8 +1718,12 @@ bool register_output(OutFile& f) {
       if (f.ownership_fd < 0) error = errno;
     }
   }
-  open_outputs[f.fd] = {f.dir_fd, f.stage_fd, f.name, f.tmp_name, f.path, f.temp, f.existed, g_opt.partial, true, f.progress,
-                       bool(f.item && f.temp), f.output_identity, f.ownership_fd};
+  {
+    std::lock_guard<std::mutex> lock(open_outputs_mu);
+    f.output_id = ++next_output_id;
+    open_outputs[f.output_id] = {f.dir_fd, f.stage_fd, f.name, f.tmp_name, f.path, f.temp, f.existed, g_opt.partial, true,
+                                 f.progress, bool(f.item && f.temp), f.output_identity, f.ownership_fd, f.fd};
+  }
   if (!error) return true;
   file_io_error(error, f.path.c_str(), "retain output identity");
   out_abort(f);
@@ -1669,7 +1760,17 @@ bool trim_partial(int fd, const OpenOutput& file) {
 }
 
 void cleanup_open_outputs() {
-  std::lock_guard<std::recursive_mutex> lock(output_mu);
+  // New outputs stay out so the workers holding the shared lock drain.
+  output_stopping.store(true);
+  std::unique_lock<std::shared_mutex> lifecycle(output_lifecycle_mu, std::defer_lock);
+  // A worker that fails fatally inside out_open/out_finish arrives here holding
+  // the lifecycle lock, and exits without returning to release it.
+  if (!(output_lifecycle_depth && output_lifecycle_exclusive)) {
+    if (output_lifecycle_depth) output_lifecycle_mu.unlock_shared();
+    lifecycle.lock();
+  }
+  output_lifecycle_depth = 0;
+  std::lock_guard<std::mutex> registry(open_outputs_mu);
   output_shutdown.store(true);
   // Wait for writes to finish before trimming, closing and publishing a prefix.
   // Writes hold only the shared I/O lock and their own progress mutex.
@@ -1680,7 +1781,8 @@ void cleanup_open_outputs() {
     // entering die(), which would recursively attempt cleanup under this lock.
     err_line(RERR_PARTIAL,"%s failed on \"%s\": %s",operation,file.path.c_str(),errstr(error).c_str());
   };
-  for (const auto& [fd, f] : open_outputs) {
+  for (const auto& [id, f] : open_outputs) {
+    int fd = f.fd;
     bool keep = f.partial && trim_partial(fd, f);
     if (!keep && f.partial && f.stage_fd >= 0) private_error(errno,f,"trim private partial");
     if (f.fd_open && close(fd)) {
@@ -1880,8 +1982,8 @@ static u64 next_rand(Worker& t) {
 }
 
 bool out_open(OutFile& f, DirWork& w, u32 idx, Worker& t, bool force_temp, bool readable) {
-  std::lock_guard<std::recursive_mutex> lock(output_mu);
-  if (output_shutdown || g_stop.load()) return false;
+  OutputLifecycle lifecycle;
+  if (!lifecycle || output_shutdown || g_stop.load()) return false;
   const Options& o = g_opt;
   const Entry& s = w.src.e[idx];
   f.item = w.app_items.empty() ? ItemPtr{} : w.app_items[idx];
@@ -1889,6 +1991,7 @@ bool out_open(OutFile& f, DirWork& w, u32 idx, Worker& t, bool force_temp, bool 
   std::string_view name = w.dst_name(idx);
   f.path = path_join(w.dst_path, name);
   f.fd = f.dir_fd = f.stage_fd = -1;
+  f.output_id = 0;
   f.temp = false;
   f.cloned_flags = false, f.clone_fileflags = 0;
   f.size = -1;
@@ -1972,13 +2075,19 @@ bool out_open(OutFile& f, DirWork& w, u32 idx, Worker& t, bool force_temp, bool 
 }
 
 void out_abort(OutFile& f, bool keep_partial) {
-  std::lock_guard<std::recursive_mutex> lock(output_mu);
-  if (output_shutdown) { f.fd = f.dir_fd = f.stage_fd = -1; return; }
+  OutputLifecycle lifecycle;
+  if (!lifecycle || output_shutdown) { f.fd = f.dir_fd = f.stage_fd = -1; return; }
   if (keep_partial && f.fd >= 0) {
-    auto found = open_outputs.find(f.fd);
-    if (found != open_outputs.end() && !trim_partial(f.fd, found->second)) keep_partial = false;
+    OpenOutput entry{};
+    bool found = false;
+    {
+      std::lock_guard<std::mutex> lock(open_outputs_mu);
+      auto it = open_outputs.find(f.output_id);
+      if ((found = it != open_outputs.end())) entry = it->second;
+    }
+    if (found && !trim_partial(f.fd, entry)) keep_partial = false;
   }
-  open_outputs.erase(f.fd);
+  forget_output(f);
   if (f.fd >= 0) close(f.fd);
   f.fd = -1;
   if (f.dir_fd < 0) return;
@@ -2001,8 +2110,8 @@ void out_abort(OutFile& f, bool keep_partial) {
 }
 
 bool out_finish(OutFile& f, DirWork& w, u32 idx, Worker&, bool ok, const Entry* attrs, const XattrSet* xattrs) {
-  std::lock_guard<std::recursive_mutex> lock(output_mu);
-  if (output_shutdown) { f.fd = f.dir_fd = f.stage_fd = -1; return false; }
+  OutputLifecycle lifecycle;
+  if (!lifecycle || output_shutdown) { f.fd = f.dir_fd = f.stage_fd = -1; return false; }
   if (ok && !item_preview_source_valid(f.item)) { out_abort(f); return false; }
   const Options& o = g_opt;
   Entry s = attrs ? *attrs : w.src.e[idx];
@@ -2076,12 +2185,15 @@ bool out_finish(OutFile& f, DirWork& w, u32 idx, Worker&, bool ok, const Entry* 
   int fd = f.fd;
   f.fd = -1;
   int closed = close(fd);
-  open_outputs.at(fd).fd_open = false;
+  {
+    std::lock_guard<std::mutex> lock(open_outputs_mu);
+    open_outputs.at(f.output_id).fd_open = false;
+  }
   if (closed != 0) {
     int error = errno;
     if (immutable_fd >= 0) close(immutable_fd);
     file_io_error(error, f.path.c_str(), "close");
-    open_outputs.erase(fd);
+    forget_output(f);
     out_abort(f);
     return false;
   }
@@ -2089,11 +2201,11 @@ bool out_finish(OutFile& f, DirWork& w, u32 idx, Worker&, bool ok, const Entry* 
     bool exclusive = f.item && f.item->expected_destination.known && !f.item->expected_destination.exists;
     if (!item_preview_source_valid(f.item)) {
       if (immutable_fd >= 0) close(immutable_fd);
-      open_outputs.erase(fd); out_abort(f); return false;
+      forget_output(f); out_abort(f); return false;
     }
     if (f.item && (!item_destination_valid(f.item, false, exclusive) || !validate_output_ownership(f))) {
       if (immutable_fd >= 0) close(immutable_fd);
-      open_outputs.erase(fd); out_abort(f); return false;
+      forget_output(f); out_abort(f); return false;
     }
     refresh_target();
     if (f.item && !o.perms && s.mode != final_mode) {
@@ -2109,7 +2221,7 @@ bool out_finish(OutFile& f, DirWork& w, u32 idx, Worker&, bool ok, const Entry* 
         if (g_app_conflict_recheck(f.item, {})) continue;
       } else file_io_error(error, f.path.c_str(), "replace destination directory");
       if (immutable_fd >= 0) close(immutable_fd);
-      open_outputs.erase(fd); out_abort(f); return false;
+      forget_output(f); out_abort(f); return false;
     }
     exclusive = f.item && !f.item->expected_destination.exists;
     if (f.stage_fd >= 0) {
@@ -2117,7 +2229,7 @@ bool out_finish(OutFile& f, DirWork& w, u32 idx, Worker&, bool ok, const Entry* 
       auto path = f.path;
       if (!app_partials::preparing_publication(f) || !item_preview_source_valid(f.item) || !item_destination_valid(f.item, false, exclusive) || !validate_output_ownership(f)) {
         if (immutable_fd >= 0) close(immutable_fd);
-        open_outputs.erase(fd); out_abort(f, o.partial); return false;
+        forget_output(f); out_abort(f, o.partial); return false;
       }
       refresh_target();
       // Digest/metadata work can block. A new conflict choice requires another
@@ -2133,18 +2245,18 @@ bool out_finish(OutFile& f, DirWork& w, u32 idx, Worker&, bool ok, const Entry* 
     if (exclusive && error == EEXIST && g_app_conflict_recheck) {
       if (g_app_conflict_recheck(f.item, {})) continue;
       if (immutable_fd >= 0) close(immutable_fd);
-      open_outputs.erase(fd); out_abort(f); return false;
+      forget_output(f); out_abort(f); return false;
     }
     if (immutable_fd >= 0) close(immutable_fd);
     if (exclusive && error == EEXIST) item_destination_changed(f.item, error);
     else file_io_error(error, f.path.c_str(), exclusive ? "publish without replace" : "rename");
-    open_outputs.erase(fd); out_abort(f); return false;
+    forget_output(f); out_abort(f); return false;
   }
   if (immutable_fd >= 0) {
     check_attr(fd_fileflags(immutable_fd, desired_flags), f.path.c_str(), "file flags");
     close(immutable_fd);
   }
-  open_outputs.erase(fd);
+  forget_output(f);
   if (f.stage_fd >= 0) { app_partials::published(f); close(f.stage_fd); f.stage_fd = -1; }
   if (f.ownership_fd >= 0) close(f.ownership_fd);
   f.ownership_fd = -1;
@@ -2169,7 +2281,8 @@ bool clone_copy(DirWork& w, u32 idx, const char* source, unsigned flags, Worker&
 #ifdef __APPLE__
   struct stat resident;
   if (lstat(source, &resident) != 0 || (resident.st_flags & SF_DATALESS)) return false;
-  std::lock_guard<std::recursive_mutex> lock(output_mu);
+  OutputLifecycle lifecycle;
+  if (!lifecycle) return false;
   OutFile f;
   Entry fresh;
   int source_fd = -1;
@@ -2235,7 +2348,7 @@ bool clone_copy(DirWork& w, u32 idx, const char* source, unsigned flags, Worker&
     out_abort(f);
     return false;
   }
-  open_outputs.erase(f.fd);
+  forget_output(f);
   close(f.fd);
   f.fd = fd;
   f.created_mode = st.st_mode & 07777;
