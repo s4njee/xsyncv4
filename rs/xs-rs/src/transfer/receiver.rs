@@ -576,7 +576,8 @@ fn generate(r: &Receiving, dir: ParsedDir) -> io::Result<()> {
         }
     }
 
-    let listing = destination_listing(&dir_path);
+    // A directory made just now is empty: nothing to list (`if (!w.created)`, fs.cpp).
+    let listing = if created { Default::default() } else { destination_listing(&dir_path) };
     let mut need = Vec::new();
     let mut existing_entries = Vec::with_capacity(entries.len());
     let mut dir_created = vec![false; entries.len()];

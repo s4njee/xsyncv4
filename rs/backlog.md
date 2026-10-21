@@ -38,9 +38,11 @@ everything on one thread, which costs little on a zero-latency pipe and a lot wh
 - [ ] The final pass skips directories already right, and works on directory fds (`fs.cpp:1553-1589`).
 
 ## 6. Bulk listings
-- [ ] Destination listing and source walk: `getattrlistbulk` on macOS (`fs.cpp:327-442`), `getdents64` + `statx`
-  on the directory fd on Linux (`linux_scan.cpp`), into a sorted compact entry list instead of a
-  `BTreeMap<_, fs::Metadata>` of full-path `lstat`s. Skip listing a directory just created.
+- [x] Linux: a `statx` relative to the directory's fd per entry (`DirEntry::metadata`), as `linux_scan.cpp`
+  does, instead of a full-path `lstat`, for the destination listing and the source walk.
+- [x] Skip listing a directory just created.
+- [ ] macOS: `getattrlistbulk` into a 128 KiB buffer (`fs.cpp:327-442`), which needs a compact entry type in
+  place of `fs::Metadata` in the receiver's listing; the sender's walk on worker threads (`scan_workers`).
 
 ## 7. The output path
 - [ ] The server writes through `io::stdout()`, whose `LineWriter` splits writes at newline bytes: write fd 1

@@ -358,7 +358,8 @@ pub(super) fn destination_listing(path: &Path) -> BTreeMap<Vec<u8>, fs::Metadata
     let mut map = BTreeMap::new();
     if let Ok(items) = fs::read_dir(path) {
         for item in items.flatten() {
-            if let Ok(metadata) = fs::symlink_metadata(item.path()) {
+            // Not followed, and on Linux a statx relative to the directory's fd.
+            if let Ok(metadata) = item.metadata() {
                 map.insert(item.file_name().as_bytes().to_vec(), metadata);
             }
         }
