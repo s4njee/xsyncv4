@@ -24,7 +24,7 @@ everything on one thread, which costs little on a zero-latency pipe and a lot wh
 - [x] A delta signature wait (`wait_signature`) stalls only its own worker, not the sender.
 
 ## 4. Receiver: a reader thread and a worker pool
-- [ ] `run_receiver` (`transfer/receiver.rs`) parses DIRs, lists the destination, diffs, builds NEEDs and writes
+- [x] `run_receiver` (`transfer/receiver.rs`) parses DIRs, lists the destination, diffs, builds NEEDs and writes
   every small file on one thread; a DIR behind a 1 MiB DATA frame waits for ~160 file writes. xs-c++'s reader
   only queues: DIRs to queue 0 (LIFO, preferred by half the workers), DATA to queue 1, 16 MiB bound
   (`remote.cpp:2603-2706`).

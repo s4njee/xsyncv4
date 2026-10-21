@@ -2,7 +2,7 @@
 //! write DATA records, then apply deferred directory metadata and send DONE.
 
 use std::collections::hash_map::Entry;
-use std::collections::{HashMap, HashSet};
+use std::collections::{HashMap, HashSet, VecDeque};
 use std::ffi::{OsStr, OsString};
 use std::fs;
 use std::io::{self, Read, Write};
@@ -10,12 +10,13 @@ use std::os::unix::ffi::{OsStrExt, OsStringExt};
 use std::os::unix::fs::{FileExt, FileTypeExt, MetadataExt, PermissionsExt};
 use std::os::unix::io::AsRawFd;
 use std::path::{Path, PathBuf};
-use std::sync::Arc;
+use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
+use std::sync::{Arc, Condvar, Mutex};
 use std::time::Instant;
 
 use xs_wire::io_control::IoControl;
 use xs_wire::resume::ResumePrefix;
-use xs_wire::{Decoder, Encoder, Frame};
+use xs_wire::{Decoder, Encoder, Frame, OutputEvent};
 
 use crate::acls;
 use crate::delta;
@@ -37,9 +38,243 @@ use super::file::{
 };
 use super::hardlink::{finalize_hardlinks, hardlink_member, HardLinks};
 use super::{
-    directory_event, metadata_code, msg_code, progress_ack, report_event, send_fatal, taken_event, transferred_code,
-    FrameOut,
+    directory_event, metadata_code, msg_code, progress_ack, send_fatal, taken_event, transferred_code, FrameOut,
+    FrameTx,
 };
+
+/// One small file (a WHOLE record) for a worker to write and publish.
+struct WholeJob {
+    dir: PathBuf,
+    name: Vec<u8>,
+    final_path: PathBuf,
+    attrs: Attrs,
+    /// The DATA frame's records, shared by the jobs it holds.
+    records: Arc<Vec<u8>>,
+    bytes: std::ops::Range<usize>,
+    /// Reported once the file is in place.
+    event: OutputEvent,
+    event_path: Vec<u8>,
+    link_key: Option<crate::protocol::HardlinkKey>,
+}
+
+impl WholeJob {
+    /// What a queued job is charged: its bytes, and a page for the syscalls a file costs.
+    fn charge(&self) -> usize {
+        self.bytes.len() + 4096
+    }
+}
+
+/// The receiver holds at most this much queued for its workers (`remote.cpp:2705`).
+const QUEUE_MAX: usize = 16 << 20;
+/// Past this much queued data, even the workers that prefer listings write files first
+/// (`q1_soft_limit`, `remote.cpp:2707`).
+const WRITES_FIRST: usize = 4 << 20;
+
+/// A DIR frame as the reader decodes it, in wire order, so xattr values and id maps apply
+/// as they arrived; a worker does the rest (`Receiver::gen`).
+struct ParsedDir {
+    id: u32,
+    parent_plus1: u32,
+    pidx: u32,
+    flags: u8,
+    rel: Vec<u8>,
+    attrs: Attrs,
+    attr_source: Vec<u8>,
+    entries: Vec<EntryMeta>,
+}
+
+/// Directories whose generator has run, and directories waiting for their parent's.
+#[derive(Default)]
+struct DirTable {
+    dirs: Vec<Option<RecvDir>>,
+    waiting: HashMap<u32, Vec<ParsedDir>>,
+}
+
+// One per turn of a worker's loop, moved once: its size does not matter.
+#[allow(clippy::large_enum_variant)]
+enum Job {
+    Generate(ParsedDir),
+    Write(WholeJob),
+}
+
+/// The workers' two queues, as the C++ pool's: listings to compare (newest first, so the walk
+/// goes deep before wide) and small files to write.
+#[derive(Default)]
+struct Lanes {
+    dirs: VecDeque<ParsedDir>,
+    writes: VecDeque<WholeJob>,
+    write_bytes: usize,
+    active: usize,
+    closed: bool,
+}
+
+/// What the frame reader and the receiver's workers share. The reader decodes frames and
+/// queues work; workers compare listings, create what is missing, send NEEDs and write files.
+/// No lock is held across a file's creation and publication.
+struct Receiving<'a> {
+    opts: &'a Options,
+    features: u64,
+    dest: &'a Path,
+    tx: FrameTx,
+    local: Mutex<Option<&'a mut Output>>,
+    table: Mutex<DirTable>,
+    finals: Mutex<Vec<FinalDir>>,
+    hardlinks: Mutex<HardLinks>,
+    created_files: AtomicU64,
+    created_dirs: AtomicU64,
+    created_links: AtomicU64,
+    partial_failure: AtomicBool,
+    lanes: Mutex<Lanes>,
+    work: Condvar,
+    settled: Condvar,
+    /// The first worker failure, already sent to the sender as a fatal message.
+    failed: Mutex<Option<i32>>,
+}
+
+impl Receiving<'_> {
+    /// Report one event: a server receiver sends `F_OUTPUT`; a client receiver renders it.
+    fn emit(&self, event: OutputEvent) -> io::Result<()> {
+        if self.opts.am_server {
+            if self.features & feature::OUTPUT != 0 {
+                self.tx.send(frame_type::OUTPUT, event.encode(self.features).payload)?;
+            }
+        } else if let Some(local) = self.local.lock().unwrap().as_deref_mut() {
+            local.push(event);
+        }
+        Ok(())
+    }
+
+    /// A hard-link member's event waits for its group; any other is reported now.
+    fn emit_or_defer(&self, link_key: Option<&crate::protocol::HardlinkKey>, path: &[u8], event: OutputEvent) -> io::Result<()> {
+        match link_key {
+            Some(key) => {
+                self.hardlinks.lock().unwrap().defer_event(key, path, event);
+                Ok(())
+            }
+            None => self.emit(event),
+        }
+    }
+
+    fn queue_dir(&self, dir: ParsedDir) {
+        self.lanes.lock().unwrap().dirs.push_back(dir);
+        self.work.notify_one();
+    }
+
+    fn queue_write(&self, job: WholeJob) {
+        {
+            let mut lanes = self.lanes.lock().unwrap();
+            lanes.write_bytes += job.charge();
+            lanes.writes.push_back(job);
+        }
+        self.work.notify_one();
+    }
+
+    /// A DIR goes to the workers once its parent's generator has run (`p->waiters`).
+    fn dir_arrived(&self, dir: ParsedDir) {
+        if dir.parent_plus1 != 0 {
+            let parent = dir.parent_plus1 - 1;
+            let mut table = self.table.lock().unwrap();
+            if table.dirs.get(parent as usize).is_none_or(Option::is_none) {
+                table.waiting.entry(parent).or_default().push(dir);
+                return;
+            }
+        }
+        self.queue_dir(dir);
+    }
+
+    /// Wait until `done` holds for the queues, or a worker failed.
+    fn wait_lanes(&self, done: impl Fn(&Lanes) -> bool) {
+        let mut lanes = self.lanes.lock().unwrap();
+        while !done(&lanes) && !lanes.closed {
+            lanes = self.settled.wait(lanes).unwrap();
+        }
+    }
+
+    fn idle(lanes: &Lanes) -> bool {
+        lanes.dirs.is_empty() && lanes.writes.is_empty() && lanes.active == 0
+    }
+
+    /// Stop the workers; queued work is dropped.
+    fn close(&self) {
+        {
+            let mut lanes = self.lanes.lock().unwrap();
+            lanes.closed = true;
+            lanes.dirs.clear();
+            lanes.writes.clear();
+            lanes.write_bytes = 0;
+        }
+        self.work.notify_all();
+        self.settled.notify_all();
+    }
+
+    /// The first failure ends the transfer with a fatal message to the sender.
+    fn fail(&self, error: &io::Error) {
+        let text = error.to_string();
+        let code = if text.starts_with("rejecting ") { 4 } else { 2 };
+        {
+            let mut failed = self.failed.lock().unwrap();
+            if failed.is_none() {
+                *failed = Some(code);
+                let message = xs_wire::Message { kind: protocol::msg_kind::FATAL, code: code as u64, text };
+                let _ = self.tx.send(frame_type::MSG, message.encode());
+            }
+        }
+        self.close();
+    }
+
+    fn failure(&self) -> Option<i32> {
+        *self.failed.lock().unwrap()
+    }
+}
+
+/// A receiving worker: half of them prefer listings, the rest files (`scan_workers`).
+fn receive_worker(r: &Receiving, prefers_dirs: bool) {
+    loop {
+        let job = {
+            let mut lanes = r.lanes.lock().unwrap();
+            loop {
+                let dirs_first = prefers_dirs && lanes.write_bytes < WRITES_FIRST;
+                let job = if dirs_first {
+                    lanes.dirs.pop_back().map(Job::Generate).or_else(|| lanes.writes.pop_front().map(Job::Write))
+                } else {
+                    lanes.writes.pop_front().map(Job::Write).or_else(|| lanes.dirs.pop_back().map(Job::Generate))
+                };
+                if let Some(job) = job {
+                    lanes.active += 1;
+                    break job;
+                }
+                if lanes.closed {
+                    return;
+                }
+                lanes = r.work.wait(lanes).unwrap();
+            }
+        };
+        let (result, charge) = match job {
+            Job::Generate(dir) => (generate(r, dir), 0),
+            Job::Write(job) => {
+                let charge = job.charge();
+                (write_job(r, job), charge)
+            }
+        };
+        {
+            let mut lanes = r.lanes.lock().unwrap();
+            lanes.active -= 1;
+            lanes.write_bytes = lanes.write_bytes.saturating_sub(charge);
+        }
+        r.settled.notify_all();
+        if let Err(error) = result {
+            r.fail(&error);
+        }
+    }
+}
+
+/// Write one small file and report it.
+fn write_job(r: &Receiving, job: WholeJob) -> io::Result<()> {
+    let bytes = &job.records[job.bytes.clone()];
+    write_whole(&job.dir, &job.name, &job.final_path, &job.attrs, bytes, r.opts)?;
+    r.created_files.fetch_add(1, Ordering::Relaxed);
+    r.emit_or_defer(job.link_key.as_ref(), &job.event_path, job.event)
+}
 
 struct FinalDir {
     path: PathBuf,
@@ -161,24 +396,15 @@ struct RecvDir {
     bases: HashMap<u32, Arc<delta::DeltaBasis>>,
 }
 
-#[allow(clippy::too_many_arguments)]
-fn process_dir<W: Write + Send + 'static>(
-    output: &mut FrameOut<W>,
+/// Decode a DIR frame on the reader: its xattr values and id maps apply in wire order.
+fn parse_dir(
     opts: &Options,
     features: u64,
-    dest_arg: &Path,
     frame: &Frame,
     streams: &mut xattr::Incoming,
     ids: &idmap::Receiver,
-    dirs: &mut Vec<Option<RecvDir>>,
-    finals: &mut Vec<FinalDir>,
-    created_dirs: &mut u64,
-    created_links: &mut u64,
     seen: &mut Vec<bool>,
-    hardlinks: &mut HardLinks,
-    partial_failure: &mut bool,
-    mut local_output: Option<&mut Output>,
-) -> io::Result<()> {
+) -> io::Result<ParsedDir> {
     let mut header = Decoder::new(&frame.payload);
     let id =
         u32::try_from(header.var().map_err(decode_err)?).map_err(|_| io::Error::new(io::ErrorKind::InvalidData, "bad DIR id"))?;
@@ -195,6 +421,9 @@ fn process_dir<W: Write + Send + 'static>(
     }
     if seen[id as usize] {
         return bad("protocol error: duplicate directory");
+    }
+    if parent_plus1 != 0 && !seen.get(parent_plus1 as usize - 1).copied().unwrap_or(false) {
+        return bad("protocol error: DIR frame before its parent");
     }
     seen[id as usize] = true;
     let body = protocol::unpack_body(header.rest(), flags & protocol::DF_ZSTD != 0, features)?;
@@ -250,7 +479,15 @@ fn process_dir<W: Write + Send + 'static>(
     for entry in &mut entries {
         ids.apply(&mut entry.attrs, opts);
     }
+    Ok(ParsedDir { id, parent_plus1, pidx, flags, rel, attrs, attr_source, entries })
+}
 
+/// `Receiver::gen` for one directory, on a worker: find or make it, compare its listing
+/// with the destination's, create what needs no data, and ask for the rest with a NEED.
+/// Its parent's generator has run.
+fn generate(r: &Receiving, dir: ParsedDir) -> io::Result<()> {
+    let (opts, features, dest_arg) = (r.opts, r.features, r.dest);
+    let ParsedDir { id, parent_plus1, pidx, flags, rel, attrs, attr_source, entries } = dir;
     let mut working_changed = false;
     let (dir_path, rename_to, apply_attrs, before, created) = if parent_plus1 == 0 {
         if !rel.is_empty() || id != 0 {
@@ -274,60 +511,57 @@ fn process_dir<W: Write + Send + 'static>(
                 false
             } else {
                 fs::create_dir_all(dest_arg)?;
-                *created_dirs += 1;
+                r.created_dirs.fetch_add(1, Ordering::Relaxed);
                 true
             };
             (dest_arg.to_path_buf(), None, flags & protocol::DF_ATTRS != 0, exists, created)
         }
     } else {
-        let parent_index = (parent_plus1 - 1) as usize;
-        let parent = dirs
-            .get(parent_index)
-            .and_then(|d| d.as_ref())
-            .ok_or_else(|| io::Error::new(io::ErrorKind::InvalidData, "protocol error: DIR frame before its parent"))?;
-        let entry = parent
-            .entries
-            .get(pidx as usize)
-            .ok_or_else(|| io::Error::new(io::ErrorKind::InvalidData, "protocol error: bad parent in DIR frame"))?;
-        if entry.kind != T_DIR {
-            return bad("protocol error: inconsistent directory path");
-        }
-        let expected = scan::join_rel(&parent.rel, &entry.name);
-        if expected != rel {
-            return bad("protocol error: inconsistent directory path");
-        }
-        let path = parent.dest.join(OsStr::from_bytes(&entry.name));
-        let created = parent.dir_created.get(pidx as usize).copied().unwrap_or(false);
-        // The parent's destination listing already carries this entry's metadata;
-        // do not stat it again just to decide whether it needs work.
-        let before = if created {
-            None
-        } else {
-            parent.existing.get(pidx as usize).cloned().flatten().filter(|m| m.is_dir())
+        let (path, created, before, mode) = {
+            let table = r.table.lock().unwrap();
+            let parent = table
+                .dirs
+                .get((parent_plus1 - 1) as usize)
+                .and_then(|d| d.as_ref())
+                .ok_or_else(|| io::Error::new(io::ErrorKind::InvalidData, "protocol error: DIR frame before its parent"))?;
+            let entry = parent
+                .entries
+                .get(pidx as usize)
+                .ok_or_else(|| io::Error::new(io::ErrorKind::InvalidData, "protocol error: bad parent in DIR frame"))?;
+            if entry.kind != T_DIR {
+                return bad("protocol error: inconsistent directory path");
+            }
+            let expected = scan::join_rel(&parent.rel, &entry.name);
+            if expected != rel {
+                return bad("protocol error: inconsistent directory path");
+            }
+            let path = parent.dest.join(OsStr::from_bytes(&entry.name));
+            let created = parent.dir_created.get(pidx as usize).copied().unwrap_or(false);
+            // The parent's destination listing already carries this entry's metadata;
+            // do not stat it again just to decide whether it needs work.
+            let before = if created {
+                None
+            } else {
+                parent.existing.get(pidx as usize).cloned().flatten().filter(|m| m.is_dir())
+            };
+            (path, created, before, entry.attrs.mode)
         };
         if let Some(metadata) = &before {
             working_changed = set_dir_working_mode_with(&path, metadata);
         } else if !created {
             remove_any(&path)?;
-            if make_dir(&path, entry.attrs.mode)? {
-                *created_dirs += 1;
+            if make_dir(&path, mode)? {
+                r.created_dirs.fetch_add(1, Ordering::Relaxed);
             }
         }
         (path, None, true, before, created)
     };
     let mut dir_modified = created;
     if rename_to.is_none() {
-        directory_event(
-            output,
-            local_output.as_deref_mut(),
-            features,
-            opts,
-            &rel,
-            if attr_source.is_empty() { dir_path.as_os_str().as_bytes() } else { &attr_source },
-            &attrs,
-            before.as_ref(),
-            created,
-        )?;
+        let source = if attr_source.is_empty() { dir_path.as_os_str().as_bytes() } else { &attr_source };
+        if let Some(event) = directory_event(opts, &rel, source, &attrs, before.as_ref(), created) {
+            r.emit(event)?;
+        }
     }
 
     let listing = destination_listing(&dir_path);
@@ -342,7 +576,7 @@ fn process_dir<W: Write + Send + 'static>(
         let event_path = scan::join_rel(&rel, &entry.name);
         let link_key = HardLinks::key(entry, features);
         if (opts.xattrs != 0 || opts.acls) && (!entry.attrs.xattrs.complete || !entry.attrs.acls.complete) {
-            *partial_failure = true;
+            r.partial_failure.store(true, Ordering::Relaxed);
             existing_entries.push(before);
             continue;
         }
@@ -354,7 +588,7 @@ fn process_dir<W: Write + Send + 'static>(
                     dir_modified = true;
                     let made = make_dir(&target, entry.attrs.mode)?;
                     if made {
-                        *created_dirs += 1;
+                        r.created_dirs.fetch_add(1, Ordering::Relaxed);
                     }
                     made
                 } else {
@@ -387,16 +621,12 @@ fn process_dir<W: Write + Send + 'static>(
                         acls::apply(&entry.attrs.acls, &target, T_REG, entry.attrs.mode, opts)?;
                     }
                     if let Some(key) = link_key.clone() {
-                        hardlinks.register_ready(key, hardlink_member(entry, &event_path, &target, existing));
+                        r.hardlinks.lock().unwrap().register_ready(key, hardlink_member(entry, &event_path, &target, existing));
                     }
                     if let Some(before) = existing {
                         if let Some(code) = metadata_code(opts, T_REG, before, entry) {
                             let event = taken_event(&code, &event_path, &entry.output_source, T_REG, entry.size, 0);
-                            if let Some(key) = &link_key {
-                                hardlinks.defer_event(key, &event_path, event);
-                            } else {
-        report_event(output, local_output.as_deref_mut(), features, opts, event)?;
-                            }
+                            r.emit_or_defer(link_key.as_ref(), &event_path, event)?;
                         }
                     }
                 } else {
@@ -409,7 +639,7 @@ fn process_dir<W: Write + Send + 'static>(
                     let follow = match link_key.clone() {
                         Some(key) => {
                             let member = hardlink_member(entry, &event_path, &target, existing);
-                            hardlinks.register_transfer(key, member, existing.is_none())
+                            r.hardlinks.lock().unwrap().register_transfer(key, member, existing.is_none())
                         }
                         None => false,
                     };
@@ -424,30 +654,22 @@ fn process_dir<W: Write + Send + 'static>(
                     .map(|p| p.as_os_str().as_bytes() == entry.link.as_slice())
                     .unwrap_or(false);
                 if let Some(key) = link_key.clone() {
-                    hardlinks.register_ready(key, hardlink_member(entry, &event_path, &target, existing));
+                    r.hardlinks.lock().unwrap().register_ready(key, hardlink_member(entry, &event_path, &target, existing));
                 }
                 if !same {
                     dir_modified = true;
                     remove_any(&target)?;
                     std::os::unix::fs::symlink(OsStr::from_bytes(&entry.link), &target)?;
-                    *created_links += 1;
+                    r.created_links.fetch_add(1, Ordering::Relaxed);
                     let mut event =
                         taken_event(b"cL+++++++++", &event_path, &entry.output_source, T_LNK, entry.size, 0);
                     event.target = entry.link.clone();
-                    if let Some(key) = &link_key {
-                        hardlinks.defer_event(key, &event_path, event);
-                    } else {
-                        report_event(output, local_output.as_deref_mut(), features, opts, event)?;
-                    }
+                    r.emit_or_defer(link_key.as_ref(), &event_path, event)?;
                 } else if let Some(before) = existing {
                     if let Some(code) = metadata_code(opts, T_LNK, before, entry) {
                         let mut event = taken_event(&code, &event_path, &entry.output_source, T_LNK, entry.size, 0);
                         event.target = entry.link.clone();
-                        if let Some(key) = &link_key {
-                            hardlinks.defer_event(key, &event_path, event);
-                        } else {
-                            report_event(output, local_output.as_deref_mut(), features, opts, event)?;
-                        }
+                        r.emit_or_defer(link_key.as_ref(), &event_path, event)?;
                     }
                 }
                 if opts.times {
@@ -467,26 +689,18 @@ fn process_dir<W: Write + Send + 'static>(
             T_FIFO => {
                 let same = existing.map(|m| m.file_type().is_fifo()).unwrap_or(false);
                 if let Some(key) = link_key.clone() {
-                    hardlinks.register_ready(key, hardlink_member(entry, &event_path, &target, existing));
+                    r.hardlinks.lock().unwrap().register_ready(key, hardlink_member(entry, &event_path, &target, existing));
                 }
                 if !same {
                     dir_modified = true;
                     remove_any(&target)?;
                     ffi::make_fifo(&target, entry.attrs.mode)?;
                     let event = taken_event(b"cS+++++++++", &event_path, &entry.output_source, T_FIFO, entry.size, 0);
-                    if let Some(key) = &link_key {
-                        hardlinks.defer_event(key, &event_path, event);
-                    } else {
-                        report_event(output, local_output.as_deref_mut(), features, opts, event)?;
-                    }
+                    r.emit_or_defer(link_key.as_ref(), &event_path, event)?;
                 } else if let Some(before) = existing {
                     if let Some(code) = metadata_code(opts, T_FIFO, before, entry) {
                         let event = taken_event(&code, &event_path, &entry.output_source, T_FIFO, entry.size, 0);
-                        if let Some(key) = &link_key {
-                            hardlinks.defer_event(key, &event_path, event);
-                        } else {
-                            report_event(output, local_output.as_deref_mut(), features, opts, event)?;
-                        }
+                        r.emit_or_defer(link_key.as_ref(), &event_path, event)?;
                     }
                 }
                 if opts.times {
@@ -508,16 +722,12 @@ fn process_dir<W: Write + Send + 'static>(
             }
             T_CHR | T_BLK => {
                 if let Some(key) = link_key.clone() {
-                    hardlinks.register_ready(key, hardlink_member(entry, &event_path, &target, existing));
+                    r.hardlinks.lock().unwrap().register_ready(key, hardlink_member(entry, &event_path, &target, existing));
                 }
                 if let Some(before) = existing {
                     if let Some(code) = metadata_code(opts, entry.kind, before, entry) {
                         let event = taken_event(&code, &event_path, &entry.output_source, entry.kind, entry.size, 0);
-                        if let Some(key) = &link_key {
-                            hardlinks.defer_event(key, &event_path, event);
-                        } else {
-                            report_event(output, local_output.as_deref_mut(), features, opts, event)?;
-                        }
+                        r.emit_or_defer(link_key.as_ref(), &event_path, event)?;
                     }
                 }
                 if opts.xattrs != 0 {
@@ -541,7 +751,7 @@ fn process_dir<W: Write + Send + 'static>(
                 None => true,
             });
     if apply_attrs {
-        finals.push(FinalDir { path: dir_path.clone(), attrs: attrs.clone(), apply: true });
+        r.finals.lock().unwrap().push(FinalDir { path: dir_path.clone(), attrs: attrs.clone(), apply: true });
     }
     let resume_enabled = opts.partial && features & feature::RESUME != 0;
     let delta_enabled = features & feature::DELTA != 0;
@@ -574,24 +784,33 @@ fn process_dir<W: Write + Send + 'static>(
             }
         }
     }
-    output.send(frame_type::NEED, &f.bytes)?;
-    if dirs.len() <= id as usize {
-        dirs.resize_with(id as usize + 1, || None);
-    }
+    // Known before its NEED goes out, since data for it may follow at once; then its
+    // children may run.
     let need_set = need.iter().copied().collect();
-    dirs[id as usize] = Some(RecvDir {
-        rel,
-        dest: dir_path,
-        entries,
-        rename_to,
-        need: need_set,
-        existing: existing_entries,
-        dir_created,
-        prefixes,
-        delta_candidates,
-        delta_requested: HashSet::new(),
-        bases: HashMap::new(),
-    });
+    let children = {
+        let mut table = r.table.lock().unwrap();
+        if table.dirs.len() <= id as usize {
+            table.dirs.resize_with(id as usize + 1, || None);
+        }
+        table.dirs[id as usize] = Some(RecvDir {
+            rel,
+            dest: dir_path,
+            entries,
+            rename_to,
+            need: need_set,
+            existing: existing_entries,
+            dir_created,
+            prefixes,
+            delta_candidates,
+            delta_requested: HashSet::new(),
+            bases: HashMap::new(),
+        });
+        table.waiting.remove(&id).unwrap_or_default()
+    };
+    r.tx.send(frame_type::NEED, f.bytes)?;
+    for child in children {
+        r.queue_dir(child);
+    }
     Ok(())
 }
 
@@ -640,8 +859,8 @@ fn open_infile(
 /// `Receiver::on_delta_request`: only a requested regular file gets a basis, and
 /// one request per file is allowed. The reply carries the signature or a zero
 /// presence byte, compressed exactly as the C++ sender reads it.
-fn process_delta_request<W: Write + Send + 'static>(
-    output: &mut FrameOut<W>,
+fn process_delta_request(
+    tx: &FrameTx,
     payload: &[u8],
     opts: &Options,
     features: u64,
@@ -680,12 +899,11 @@ fn process_delta_request<W: Write + Send + 'static>(
     if let Some(basis) = basis {
         dir.bases.insert(idx, basis);
     }
-    output.send(frame_type::DELTA_SIGNATURE, &reply)
+    tx.send(frame_type::DELTA_SIGNATURE, reply)
 }
 
 #[allow(clippy::too_many_arguments)]
-fn process_data<W: Write + Send + 'static>(
-    output: &mut FrameOut<W>,
+fn process_data(
     payload: &[u8],
     opts: &Options,
     features: u64,
@@ -694,18 +912,15 @@ fn process_data<W: Write + Send + 'static>(
     dirs: &mut [Option<RecvDir>],
     infiles: &mut HashMap<(u32, u32, u32), InFile>,
     pool: &mut WritePool,
-    created_files: &mut u64,
-    hardlinks: &mut HardLinks,
-    mut local_output: Option<&mut Output>,
-) -> io::Result<(u64, u64)> {
+    r: &Receiving,
+) -> io::Result<u64> {
     let mut added_bytes = 0u64;
-    let mut added_files = 0u64;
     if payload.len() < 9 {
         return bad("protocol error: short DATA frame");
     }
     let compressed = payload[0] & 1 != 0;
     let want = u64::from_le_bytes(payload[1..9].try_into().unwrap());
-    let raw = protocol::unpack_body(&payload[9..], compressed, features)?;
+    let raw = Arc::new(protocol::unpack_body(&payload[9..], compressed, features)?);
     if ffi::xxh3_64(&raw) != want {
         return bad("data corruption detected in transfer stream");
     }
@@ -762,20 +977,24 @@ fn process_data<W: Write + Send + 'static>(
                 }
                 ids.apply(&mut attrs, opts);
                 let bytes = d.str().map_err(decode_err)?;
-                let name = dir.rename_to.as_deref().unwrap_or(&entry.name);
-                let final_path = dir.dest.join(OsStr::from_bytes(name));
-                write_whole(&dir.dest, name, &final_path, &attrs, bytes, opts)?;
-                *created_files += 1;
+                let start = bytes.as_ptr() as usize - raw.as_ptr() as usize;
+                let name = dir.rename_to.clone().unwrap_or_else(|| entry.name.clone());
+                let final_path = dir.dest.join(OsStr::from_bytes(&name));
                 added_bytes += bytes.len() as u64;
-                added_files += 1;
                 dir.need.remove(&idx);
                 let code = transferred_code(opts, before.as_ref(), &entry);
                 let event = taken_event(&code, &event_path, &event_source, T_REG, bytes.len() as i64, bytes.len() as i64);
-                if let Some(key) = &link_key {
-                    hardlinks.defer_event(key, &event_path, event);
-                } else {
-                    report_event(output, local_output.as_deref_mut(), features, opts, event)?;
-                }
+                r.queue_write(WholeJob {
+                    dir: dir.dest.clone(),
+                    name,
+                    final_path,
+                    attrs,
+                    records: raw.clone(),
+                    bytes: start..start + bytes.len(),
+                    event,
+                    event_path,
+                    link_key,
+                });
             }
             rec::CHUNK | rec::LITERAL | rec::COPY => {
                 let is_delta = kind != rec::CHUNK;
@@ -950,7 +1169,7 @@ fn process_data<W: Write + Send + 'static>(
             _ => return bad("protocol error: unknown DATA record"),
         }
     }
-    Ok((added_bytes, added_files))
+    Ok(added_bytes)
 }
 
 fn apply_write(done: WriteDone, infiles: &mut HashMap<(u32, u32, u32), InFile>) -> io::Result<Option<(u32, u32, u32)>> {
@@ -990,18 +1209,13 @@ fn cleanup_partial(infiles: &mut HashMap<(u32, u32, u32), InFile>, opts: &Option
 
 /// Publish a file once its END has arrived and every queued range write has
 /// returned; a failed attempt is removed only after its writes have drained.
-#[allow(clippy::too_many_arguments)]
-fn finish_ready<W: Write + Send + 'static>(
-    output: &mut FrameOut<W>,
-    opts: &Options,
-    features: u64,
+fn finish_ready(
+    r: &Receiving,
     dirs: &mut [Option<RecvDir>],
     infiles: &mut HashMap<(u32, u32, u32), InFile>,
     key: (u32, u32, u32),
-    hardlinks: &mut HardLinks,
-    local_output: Option<&mut Output>,
-    partial_failure: &mut bool,
 ) -> io::Result<u64> {
+    let opts = r.opts;
     let Some((pending, status, total, prefix, prefix_ok, delta, delta_sum, ok)) = infiles.get(&key).map(|infile| {
         (
             infile.pending,
@@ -1035,7 +1249,7 @@ fn finish_ready<W: Write + Send + 'static>(
         if delta {
             let mut ack = Encoder::new();
             ack.var(u64::from(key.0)).var(u64::from(key.1));
-            output.send(frame_type::DELTA_RETRY_ACK, &ack.bytes)?;
+            r.tx.send(frame_type::DELTA_RETRY_ACK, ack.bytes)?;
         }
         return Ok(0);
     }
@@ -1050,7 +1264,7 @@ fn finish_ready<W: Write + Send + 'static>(
             dir.need.remove(&key.1);
             dir.bases.remove(&key.1);
         }
-        *partial_failure = true;
+        r.partial_failure.store(true, Ordering::Relaxed);
         if opts.partial && prefix_ok && status == 2 {
             let keep = contiguous(&infile.ranges, total);
             if infile.file.set_len(keep as u64).is_ok() && fs::rename(&infile.temp, &infile.final_path).is_ok() {
@@ -1075,63 +1289,34 @@ fn finish_ready<W: Write + Send + 'static>(
     }
     let code = transferred_code(opts, before.as_ref(), &entry);
     let event = taken_event(&code, &event_path, &entry.output_source, T_REG, total, total);
-    if let Some(key) = &link_key {
-        hardlinks.defer_event(key, &event_path, event);
-    } else {
-        report_event(output, local_output, features, opts, event)?;
-    }
+    r.emit_or_defer(link_key.as_ref(), &event_path, event)?;
     Ok(1)
 }
 
-#[allow(clippy::too_many_arguments)]
-fn drain_writes<W: Write + Send + 'static>(
-    output: &mut FrameOut<W>,
-    opts: &Options,
-    features: u64,
+fn drain_writes(
+    r: &Receiving,
     dirs: &mut [Option<RecvDir>],
     infiles: &mut HashMap<(u32, u32, u32), InFile>,
     pool: &WritePool,
-    hardlinks: &mut HardLinks,
-    mut local_output: Option<&mut Output>,
-    partial_failure: &mut bool,
 ) -> io::Result<u64> {
     let mut files = 0;
     while let Some(done) = pool.try_done() {
         if let Some(key) = apply_write(done, infiles)? {
-            files += finish_ready(
-                output,
-                opts,
-                features,
-                dirs,
-                infiles,
-                key,
-                hardlinks,
-                local_output.as_deref_mut(),
-                partial_failure,
-            )?;
+            files += finish_ready(r, dirs, infiles, key)?;
         }
     }
     // An END can arrive after the last write already completed. Try every
     // settled entry, not only those whose completion this call observed.
     let keys: Vec<_> = infiles.keys().copied().collect();
     for key in keys {
-        files += finish_ready(
-            output,
-            opts,
-            features,
-            dirs,
-            infiles,
-            key,
-            hardlinks,
-            local_output.as_deref_mut(),
-            partial_failure,
-        )?;
+        files += finish_ready(r, dirs, infiles, key)?;
     }
     Ok(files)
 }
 
-/// Receiver: send F_DEST, answer each DIR with a NEED, write DATA records, then
-/// apply deferred directory metadata and send DONE.
+/// Receiver: send F_DEST; the reader decodes the sender's frames while `-j` workers compare
+/// listings (answering each with a NEED) and write small files, as `Receiver::run` does;
+/// then apply deferred directory metadata and send DONE.
 pub fn run_receiver<R: Read, W: Write + Send + 'static>(
     input: &mut R,
     output: W,
@@ -1139,7 +1324,7 @@ pub fn run_receiver<R: Read, W: Write + Send + 'static>(
     features: u64,
     dest: &[u8],
     control: Arc<IoControl>,
-    mut local_output: Option<&mut Output>,
+    local_output: Option<&mut Output>,
 ) -> io::Result<i32> {
     let mut output = FrameOut::new(output, None, control);
     let keepalive = features & feature::IO_CONTROL != 0;
@@ -1147,10 +1332,57 @@ pub fn run_receiver<R: Read, W: Write + Send + 'static>(
     identity.str(b"").str(b"").var(0).var(0);
     output.send(frame_type::DEST, &identity.bytes)?;
     let dest_path = PathBuf::from(OsString::from_vec(dest.to_vec()));
+    let r = Receiving {
+        opts,
+        features,
+        dest: &dest_path,
+        tx: output.tx(),
+        local: Mutex::new(local_output),
+        table: Mutex::new(DirTable::default()),
+        finals: Mutex::new(Vec::new()),
+        hardlinks: Mutex::new(HardLinks::new(opts.hard_links && features & feature::HLINK != 0)),
+        created_files: AtomicU64::new(0),
+        created_dirs: AtomicU64::new(0),
+        created_links: AtomicU64::new(0),
+        partial_failure: AtomicBool::new(false),
+        lanes: Mutex::new(Lanes::default()),
+        work: Condvar::new(),
+        settled: Condvar::new(),
+        failed: Mutex::new(None),
+    };
+    let jobs = crate::parallel::effective_jobs(opts.jobs);
+    let received = std::thread::scope(|scope| {
+        let r = &r;
+        for worker in 0..jobs {
+            // Half of them, at least one, prefer listings (`pool.scan_workers`).
+            let prefers_dirs = worker < (jobs / 2).max(1);
+            scope.spawn(move || receive_worker(r, prefers_dirs));
+        }
+        let received = receive(r, &mut output, input, keepalive);
+        r.close();
+        received
+    });
+    match received {
+        Ok((code, true)) => {
+            output.finish()?;
+            Ok(code)
+        }
+        Ok((code, false)) => Ok(code),
+        Err(error) => Err(error),
+    }
+}
+
+/// The reader's side of a receive, and its end. Returns the exit code, and whether the
+/// output should be finished cleanly.
+fn receive<R: Read, W: Write + Send + 'static>(
+    r: &Receiving,
+    output: &mut FrameOut<W>,
+    input: &mut R,
+    keepalive: bool,
+) -> io::Result<(i32, bool)> {
+    let (opts, features) = (r.opts, r.features);
     let mut ids = idmap::Receiver::default();
-    let mut dirs: Vec<Option<RecvDir>> = Vec::new();
     let mut seen_dirs: Vec<bool> = Vec::new();
-    let mut finals: Vec<FinalDir> = Vec::new();
     let mut infiles: HashMap<(u32, u32, u32), InFile> = HashMap::new();
     let mut streams = xattr::Incoming::new();
     // Like the C++ receiver, one file's ranges stay serial unless an explicit
@@ -1158,16 +1390,10 @@ pub fn run_receiver<R: Read, W: Write + Send + 'static>(
     let write_workers =
         if crate::parallel::explicit_ranges(opts.jobs) { crate::parallel::effective_jobs(opts.jobs) } else { 1 };
     let mut pool = WritePool::new(write_workers);
-    let mut hardlinks = HardLinks::new(opts.hard_links && features & feature::HLINK != 0);
-    let mut created_files = 0u64;
-    let mut created_dirs = 0u64;
-    let mut created_links = 0u64;
     let mut sender_code: Option<i32> = None;
-    let mut partial_failure = false;
     let mut ended = false;
     let ack_enabled = opts.am_server && features & feature::PROGRESS_ACK != 0;
     let mut progress_bytes = 0u64;
-    let mut progress_files = 0u64;
     let mut progress_last = (0u64, 0u64, Instant::now());
     while !ended {
         let frame = match protocol::read_checked(input, keepalive, features) {
@@ -1175,73 +1401,34 @@ pub fn run_receiver<R: Read, W: Write + Send + 'static>(
             Ok(None) => {
                 settle(&mut infiles, &pool);
                 cleanup_partial(&mut infiles, opts);
-                return Ok(12);
+                return Ok((r.failure().unwrap_or(12), false));
             }
             Err(error) => {
-                let _ = send_fatal(&mut output, &error.to_string());
+                let _ = send_fatal(output, &error.to_string());
                 settle(&mut infiles, &pool);
                 cleanup_partial(&mut infiles, opts);
-                return Ok(2);
+                return Ok((2, false));
             }
         };
         let result = match frame.kind {
-            frame_type::DIR => process_dir(
-                &mut output,
-                opts,
-                features,
-                &dest_path,
-                &frame,
-                &mut streams,
-                &ids,
-                &mut dirs,
-                &mut finals,
-                &mut created_dirs,
-                &mut created_links,
-                &mut seen_dirs,
-                &mut hardlinks,
-                &mut partial_failure,
-                local_output.as_deref_mut(),
-            ),
-            frame_type::DATA => match process_data(
-                &mut output,
-                &frame.payload,
-                opts,
-                features,
-                &mut streams,
-                &ids,
-                &mut dirs,
-                &mut infiles,
-                &mut pool,
-                &mut created_files,
-                &mut hardlinks,
-                local_output.as_deref_mut(),
-            ) {
-                Ok((bytes, files)) => {
-                    progress_bytes += bytes;
-                    progress_files += files;
-                    match drain_writes(
-                        &mut output,
-                        opts,
-                        features,
-                        &mut dirs,
-                        &mut infiles,
-                        &pool,
-                        &mut hardlinks,
-                        local_output.as_deref_mut(),
-                        &mut partial_failure,
-                    ) {
-                        Ok(finished) => {
-                            created_files += finished;
-                            progress_files += finished;
-                            progress_ack(&mut output, features, progress_bytes, progress_files, false, &mut progress_last)
-                        }
-                        Err(error) => Err(error),
-                    }
-                }
-                Err(error) => Err(error),
-            },
+            frame_type::DIR => {
+                parse_dir(opts, features, &frame, &mut streams, &ids, &mut seen_dirs).map(|dir| r.dir_arrived(dir))
+            }
+            frame_type::DATA => {
+                let mut table = r.table.lock().unwrap();
+                let table = &mut *table;
+                process_data(&frame.payload, opts, features, &mut streams, &ids, &mut table.dirs, &mut infiles, &mut pool, r)
+                    .and_then(|bytes| {
+                        progress_bytes += bytes;
+                        drain_writes(r, &mut table.dirs, &mut infiles, &pool)
+                    })
+                    .map(|finished| {
+                        r.created_files.fetch_add(finished, Ordering::Relaxed);
+                    })
+            }
             frame_type::DELTA_REQUEST => {
-                process_delta_request(&mut output, &frame.payload, opts, features, &mut dirs)
+                let mut table = r.table.lock().unwrap();
+                process_delta_request(&r.tx, &frame.payload, opts, features, &mut table.dirs)
             }
             frame_type::XATTR_START | frame_type::XATTR_CHUNK | frame_type::XATTR_END => {
                 if features & feature::XATTR_STREAM == 0 {
@@ -1272,28 +1459,44 @@ pub fn run_receiver<R: Read, W: Write + Send + 'static>(
             }
             frame_type::CHOWN_CONFIG => bad("protocol error: unnegotiated ownership configuration"),
             frame_type::MSG => match msg_code(&frame) {
-                Ok(Some(code)) => return Ok(code),
+                Ok(Some(code)) => return Ok((code, false)),
                 Ok(None) => Ok(()),
                 Err(error) => Err(error),
             },
             other => bad(format!("protocol error: unexpected frame {other} from sender")),
         };
+        let result = result.and_then(|()| {
+            if frame.kind == frame_type::DATA {
+                let files = r.created_files.load(Ordering::Relaxed);
+                progress_ack(output, features, progress_bytes, files, false, &mut progress_last)?;
+                // Wait for the workers while too much is queued for them.
+                r.wait_lanes(|lanes| lanes.write_bytes <= QUEUE_MAX);
+            }
+            Ok(())
+        });
         if let Err(error) = result {
-            let text = error.to_string();
-            let code = if text.starts_with("rejecting ") { 4 } else { 2 };
-            let message = xs_wire::Message { kind: protocol::msg_kind::FATAL, code, text };
-            let _ = output.send(frame_type::MSG, &message.encode());
+            r.fail(&error);
+        }
+        if let Some(code) = r.failure() {
             settle(&mut infiles, &pool);
             cleanup_partial(&mut infiles, opts);
-            return Ok(code as i32);
+            return Ok((code, false));
         }
     }
-    if !streams.drained() {
-        let _ = send_fatal(&mut output, "protocol error: unreferenced xattr value stream");
+    // Every listing has been compared and every small file written once the workers are idle.
+    r.wait_lanes(Receiving::idle);
+    if let Some(code) = r.failure() {
+        settle(&mut infiles, &pool);
         cleanup_partial(&mut infiles, opts);
-        output.finish()?;
-        return Ok(2);
+        return Ok((code, false));
     }
+    if !streams.drained() {
+        let _ = send_fatal(output, "protocol error: unreferenced xattr value stream");
+        cleanup_partial(&mut infiles, opts);
+        return Ok((2, true));
+    }
+    let mut table = r.table.lock().unwrap();
+    let table = &mut *table;
     // DATA_END may follow the last END while that file's range writes are still
     // in the pool; drain every completion before publishing or cleaning up.
     while infiles.values().any(|infile| infile.pending > 0) {
@@ -1301,53 +1504,29 @@ pub fn run_receiver<R: Read, W: Write + Send + 'static>(
             break;
         };
         if let Some(key) = apply_write(done, &mut infiles)? {
-            let finished = finish_ready(
-                &mut output,
-                opts,
-                features,
-                &mut dirs,
-                &mut infiles,
-                key,
-                &mut hardlinks,
-                local_output.as_deref_mut(),
-                &mut partial_failure,
-            )?;
-            created_files += finished;
-            progress_files += finished;
+            let finished = finish_ready(r, &mut table.dirs, &mut infiles, key)?;
+            r.created_files.fetch_add(finished, Ordering::Relaxed);
         }
     }
-    let finished = drain_writes(
-        &mut output,
-        opts,
-        features,
-        &mut dirs,
-        &mut infiles,
-        &pool,
-        &mut hardlinks,
-        local_output.as_deref_mut(),
-        &mut partial_failure,
-    )?;
-    created_files += finished;
-    progress_files += finished;
-    let missing = dirs.iter().flatten().any(|dir| !dir.need.is_empty());
+    let finished = drain_writes(r, &mut table.dirs, &mut infiles, &pool)?;
+    r.created_files.fetch_add(finished, Ordering::Relaxed);
+    let missing = !table.waiting.is_empty() || table.dirs.iter().flatten().any(|dir| !dir.need.is_empty());
     if !infiles.is_empty() || missing {
-        let _ = send_fatal(&mut output, "protocol error: incomplete file data");
+        let _ = send_fatal(output, "protocol error: incomplete file data");
         cleanup_partial(&mut infiles, opts);
-        output.finish()?;
-        return Ok(2);
+        return Ok((2, true));
     }
     cleanup_partial(&mut infiles, opts);
+    let mut created_files = r.created_files.load(Ordering::Relaxed);
+    let mut hardlinks = r.hardlinks.lock().unwrap();
     if hardlinks.enabled {
-        finalize_hardlinks(
-            &mut hardlinks,
-            &mut output,
-            features,
-            opts,
-            &mut created_files,
-            local_output,
-        )?;
+        let local = r.local.lock().unwrap().take();
+        finalize_hardlinks(&mut hardlinks, output, features, opts, &mut created_files, local)?;
     }
-    for final_dir in finals.into_iter().rev() {
+    // Deepest first, so setting a directory's times comes after every change inside it.
+    let mut finals = std::mem::take(&mut *r.finals.lock().unwrap());
+    finals.sort_by_key(|final_dir| std::cmp::Reverse(final_dir.path.components().count()));
+    for final_dir in finals {
         if !final_dir.apply {
             continue;
         }
@@ -1366,14 +1545,18 @@ pub fn run_receiver<R: Read, W: Write + Send + 'static>(
         }
     }
     if ack_enabled {
-        progress_ack(&mut output, features, progress_bytes, progress_files, true, &mut progress_last)?;
+        progress_ack(output, features, progress_bytes, created_files, true, &mut progress_last)?;
     }
     let sender_code = sender_code.unwrap_or(0);
+    let partial_failure = r.partial_failure.load(Ordering::Relaxed);
     let code = if sender_code != 0 { sender_code } else if partial_failure { 23 } else { 0 };
     let mut done = Encoder::new();
     done.var(code as u64);
-    done.var(created_files).var(created_dirs).var(created_links).var(0).var(0);
+    done.var(created_files)
+        .var(r.created_dirs.load(Ordering::Relaxed))
+        .var(r.created_links.load(Ordering::Relaxed))
+        .var(0)
+        .var(0);
     output.send(frame_type::DONE, &done.bytes)?;
-    output.finish()?;
-    Ok(code)
+    Ok((code, true))
 }

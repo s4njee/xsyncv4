@@ -104,18 +104,15 @@ fn taken_event(code: &[u8], path: &[u8], source: &[u8], kind: u8, size: i64, byt
     }
 }
 
-#[allow(clippy::too_many_arguments)]
+/// The event for a directory, if the output asks for one.
 fn directory_event(
-    output: &mut FrameOut<impl Write + Send + 'static>,
-    local: Option<&mut Output>,
-    features: u64,
     opts: &Options,
     path: &[u8],
     source: &[u8],
     attrs: &Attrs,
     before: Option<&fs::Metadata>,
     created: bool,
-) -> io::Result<()> {
+) -> Option<OutputEvent> {
     let mut code = *b".d.........";
     let mut changed = created;
     if created {
@@ -139,14 +136,14 @@ fn directory_event(
         }
     }
     if !changed && !opts.output_unchanged {
-        return Ok(());
+        return None;
     }
     if !changed {
         code[2..].fill(b' ');
     } else if !created && !opts.output_attrs {
-        return Ok(());
+        return None;
     }
-    report_event(output, local, features, opts, taken_event(&code, path, source, file_type::DIR, attrs.size, 0))
+    Some(taken_event(&code, path, source, file_type::DIR, attrs.size, 0))
 }
 
 fn transferred_code(opts: &Options, before: Option<&fs::Metadata>, entry: &EntryMeta) -> Vec<u8> {
