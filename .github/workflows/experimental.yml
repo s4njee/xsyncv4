@@ -4,20 +4,29 @@ name: Experimental
 # (benchmarks/lab/engineer.py). Every PR is built and tested on Linux and macOS, with xs-rs's checks
 # when rs/ exists. A PR from an engineer/ branch of this repository, opened by the repository's owner
 # (the lab's controllers push with the owner's token), is then approved and merged automatically.
+#
+# Every push to experimental builds xs's static Linux release (tools/release.Dockerfile) natively on amd64 and
+# arm64 and attaches both to the rolling pre-release xs-cpp-builds, as xs-cpp-<commit12>-linux-<arch> with a .sha256
+# and its --version line (.version) beside each. The VPS lab races each new xs-rs against the newest of these
+# (benchmarks/lab/stage.py and contest.py) instead of building xs itself.
 
 on:
   pull_request:
     branches: [experimental]
+  push:
+    branches: [experimental]
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: experimental-${{ github.event.pull_request.number }}
+  group: experimental-${{ github.event.pull_request.number || github.sha }}
   cancel-in-progress: true
 
 jobs:
   linux:
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-24.04
     timeout-minutes: 90
     steps:
@@ -84,6 +93,7 @@ jobs:
           cargo fmt --manifest-path rs/Cargo.toml --check
 
   macos:
+    if: github.event_name == 'pull_request'
     runs-on: macos-15
     timeout-minutes: 60
     steps:
@@ -109,6 +119,7 @@ jobs:
   merge:
     needs: [linux, macos]
     if: >-
+      github.event_name == 'pull_request' &&
       startsWith(github.event.pull_request.head.ref, 'engineer/') &&
       github.event.pull_request.head.repo.full_name == github.repository &&
       github.event.pull_request.user.login == github.repository_owner
@@ -125,3 +136,57 @@ jobs:
           gh pr review "$PR" --repo "$GITHUB_REPOSITORY" --approve \
             --body "The lab's gate accepted this change, and it builds and passes the tests on Linux and macOS."
           gh pr merge "$PR" --repo "$GITHUB_REPOSITORY" --squash --delete-branch
+
+  binaries:
+    if: github.event_name != 'pull_request'
+    name: binary (${{ matrix.arch }})
+    strategy:
+      matrix:
+        include:
+          - { arch: amd64, runner: ubuntu-24.04 }
+          - { arch: arm64, runner: ubuntu-24.04-arm }
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 90
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Build the static release (tools/release.Dockerfile, as the lab builds it)
+        run: |
+          short="${GITHUB_SHA::12}"
+          docker build --build-arg "XSYNC_GIT_HASH=$short" -t xs-release -f tools/release.Dockerfile .
+          name="xs-cpp-$short-linux-${{ matrix.arch }}"
+          container=$(docker create xs-release /xs)
+          docker cp "$container:/xs" "$name"
+          docker rm "$container"
+          chmod 755 "$name"
+          "./$name" --version | head -n 1 > "$name.version"
+          cat "$name.version"
+          sha256sum "$name" > "$name.sha256"
+          echo "NAME=$name" >> "$GITHUB_ENV"
+      - name: Attach it to xs-cpp-builds
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # Both architectures' jobs may find the release missing at once: the second create fails and finds it.
+          gh release view xs-cpp-builds --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1 ||
+            gh release create xs-cpp-builds --repo "$GITHUB_REPOSITORY" --prerelease --target experimental \
+              --title "xs-c++ builds" --notes "Static Linux releases of xs for each commit of experimental, built by the Experimental workflow." ||
+            gh release view xs-cpp-builds --repo "$GITHUB_REPOSITORY" >/dev/null
+          gh release upload xs-cpp-builds "$NAME" "$NAME.sha256" "$NAME.version" --repo "$GITHUB_REPOSITORY" --clobber
+
+  prune:
+    needs: [binaries]
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - name: Keep the newest 40 builds (six files each)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api "repos/$GITHUB_REPOSITORY/releases/tags/xs-cpp-builds" --jq '.assets | sort_by(.created_at) | reverse | .[240:] | .[].id' |
+            while read -r id; do gh api -X DELETE "repos/$GITHUB_REPOSITORY/releases/assets/$id"; done
