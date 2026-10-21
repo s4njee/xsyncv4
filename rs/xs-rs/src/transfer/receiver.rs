@@ -7,7 +7,7 @@ use std::ffi::{OsStr, OsString};
 use std::fs;
 use std::io::{self, Read, Write};
 use std::os::unix::ffi::{OsStrExt, OsStringExt};
-use std::os::unix::fs::{FileExt, FileTypeExt, MetadataExt, PermissionsExt};
+use std::os::unix::fs::{FileExt, PermissionsExt};
 use std::os::unix::io::AsRawFd;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
@@ -34,7 +34,7 @@ use crate::parallel::{WriteDone, WritePool};
 
 use super::file::{
     add_range, contiguous, covered_from, create_temp, destination_listing, finish_infile, make_dir, remove_any,
-    reserve_chunk, set_dir_working_mode_with, write_whole, DestDir, InFile,
+    reserve_chunk, set_dir_working_mode_with, write_whole, DestDir, InFile, Stat,
 };
 use super::hardlink::{finalize_hardlinks, hardlink_member, HardLinks};
 use super::{
@@ -443,7 +443,7 @@ impl FileRequests {
 
 /// A directory's metadata only needs writing back when one of the attributes
 /// the transfer preserves differs. An unchanged directory costs no syscalls.
-fn dir_attrs_differ(opts: &Options, before: &fs::Metadata, attrs: &Attrs) -> bool {
+fn dir_attrs_differ(opts: &Options, before: &Stat, attrs: &Attrs) -> bool {
     (opts.times && before.mtime() != attrs.mtime)
         || (opts.perms && before.mode() & 0o7777 != attrs.mode & 0o7777)
         || (opts.owner && before.uid() != attrs.uid)
@@ -452,7 +452,7 @@ fn dir_attrs_differ(opts: &Options, before: &fs::Metadata, attrs: &Attrs) -> boo
 
 /// Change ownership only when a target id differs from what the entry already
 /// has, as `tweak_attrs` does; a matching lchown still dirties the inode.
-fn chown_changed(path: &Path, opts: &Options, attrs: &Attrs, nofollow: bool, before: Option<&fs::Metadata>) {
+fn chown_changed(path: &Path, opts: &Options, attrs: &Attrs, nofollow: bool, before: Option<&Stat>) {
     let id_differs = match before {
         Some(metadata) => {
             (opts.owner && metadata.uid() != attrs.uid) || (opts.group && metadata.gid() != attrs.gid)
@@ -480,7 +480,7 @@ struct RecvDir {
     entries: Vec<EntryMeta>,
     rename_to: Option<Vec<u8>>,
     need: HashSet<u32>,
-    existing: Vec<Option<fs::Metadata>>,
+    existing: Vec<Option<Stat>>,
     dir_created: Vec<bool>,
     prefixes: HashMap<u32, ResumePrefix>,
     delta_candidates: HashSet<u32>,
@@ -618,7 +618,7 @@ fn generate(r: &Receiving, dir: ParsedDir) -> io::Result<()> {
                 r.created_dirs.fetch_add(1, Ordering::Relaxed);
                 true
             };
-            (dest_arg.to_path_buf(), None, flags & protocol::DF_ATTRS != 0, exists, created)
+            (dest_arg.to_path_buf(), None, flags & protocol::DF_ATTRS != 0, exists.as_ref().map(Stat::from), created)
         }
     } else {
         let (path, created, before, mode) = {
@@ -757,7 +757,7 @@ fn generate(r: &Receiving, dir: ParsedDir) -> io::Result<()> {
             }
             T_LNK => {
                 let same = existing
-                    .and_then(|m| if m.file_type().is_symlink() { fs::read_link(&target).ok() } else { None })
+                    .and_then(|m| if m.is_symlink() { fs::read_link(&target).ok() } else { None })
                     .map(|p| p.as_os_str().as_bytes() == entry.link.as_slice())
                     .unwrap_or(false);
                 if let Some(key) = link_key.clone() {
@@ -796,7 +796,7 @@ fn generate(r: &Receiving, dir: ParsedDir) -> io::Result<()> {
                 }
             }
             T_FIFO => {
-                let same = existing.map(|m| m.file_type().is_fifo()).unwrap_or(false);
+                let same = existing.map(|m| m.is_fifo()).unwrap_or(false);
                 if let Some(key) = link_key.clone() {
                     r.hardlinks.lock().unwrap().register_ready(key, hardlink_member(entry, &event_path, &target, existing));
                 }
@@ -957,7 +957,7 @@ fn open_infile(
     dir: &RecvDir,
     entry: &EntryMeta,
     total: i64,
-    before: Option<fs::Metadata>,
+    before: Option<Stat>,
     link_key: Option<crate::protocol::HardlinkKey>,
     prefix: ResumePrefix,
     delta: bool,
@@ -1171,7 +1171,7 @@ fn process_data(
                             added_bytes += prefix.size as u64;
                         }
                         let restore = if prefix.size > 0 { offered.copied().unwrap_or_default() } else { ResumePrefix::default() };
-                        vacant.insert(open_infile(dir, &entry, total, before.clone(), link_key.clone(), restore, is_delta)?)
+                        vacant.insert(open_infile(dir, &entry, total, before, link_key.clone(), restore, is_delta)?)
                     }
                 };
                 if infile.total != Some(total) {
@@ -1268,7 +1268,7 @@ fn process_data(
                             added_bytes += prefix.size as u64;
                         }
                         let restore = if prefix.size > 0 { offered.copied().unwrap_or_default() } else { ResumePrefix::default() };
-                        vacant.insert(open_infile(dir, &entry, total, before.clone(), link_key.clone(), restore, is_delta)?)
+                        vacant.insert(open_infile(dir, &entry, total, before, link_key.clone(), restore, is_delta)?)
                     }
                 };
                 if infile.prefix != prefix.size || infile.delta != is_delta {
@@ -1407,7 +1407,7 @@ fn finish_ready(
         return Ok(0);
     }
     let entry = infile.entry.clone();
-    let before = infile.before.clone();
+    let before = infile.before;
     let event_path = infile.event_path.clone();
     let link_key = infile.link_key.clone();
     infiles.remove(&key);

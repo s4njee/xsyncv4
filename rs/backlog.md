@@ -41,8 +41,9 @@ everything on one thread, which costs little on a zero-latency pipe and a lot wh
 - [x] Linux: a `statx` relative to the directory's fd per entry (`DirEntry::metadata`), as `linux_scan.cpp`
   does, instead of a full-path `lstat`, for the destination listing and the source walk.
 - [x] Skip listing a directory just created.
-- [ ] macOS: `getattrlistbulk` into a 128 KiB buffer (`fs.cpp:327-442`), which needs a compact entry type in
-  place of `fs::Metadata` in the receiver's listing; the sender's walk on worker threads (`scan_workers`).
+- [x] macOS: `getattrlistbulk` into a 128 KiB buffer (`fs.cpp:327-442`) for the destination listing (a compact
+  `Stat` in place of `fs::Metadata`) and the source walk's regular files; anything it cannot describe fully
+  is stat'ed. The sender's walk runs on its workers (step 8).
 
 ## 7. The output path
 - [x] The server writes through `io::stdout()`, whose `LineWriter` splits writes at newline bytes: write fd 1

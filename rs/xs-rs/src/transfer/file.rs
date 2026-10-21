@@ -18,6 +18,94 @@ use crate::idmap;
 use crate::protocol::{Attrs, EntryMeta, HardlinkKey, Options};
 use crate::xattr;
 
+/// What the receiver keeps of a destination entry: from a bulk listing on macOS
+/// (`getattrlistbulk`), or a stat. Its accessors are `fs::Metadata`'s; `mode` carries the
+/// type bits as `st_mode` does.
+#[derive(Clone, Copy, Debug, Default)]
+pub(super) struct Stat {
+    mode: u32,
+    size: u64,
+    mtime: i64,
+    mtime_nsec: i64,
+    uid: u32,
+    gid: u32,
+    dev: u64,
+    ino: u64,
+}
+
+const S_IFMT: u32 = 0o170000;
+const S_IFDIR: u32 = 0o040000;
+const S_IFREG: u32 = 0o100000;
+const S_IFLNK: u32 = 0o120000;
+const S_IFIFO: u32 = 0o010000;
+
+impl Stat {
+    pub(super) fn mode(&self) -> u32 {
+        self.mode
+    }
+    pub(super) fn is_dir(&self) -> bool {
+        self.mode & S_IFMT == S_IFDIR
+    }
+    pub(super) fn is_file(&self) -> bool {
+        self.mode & S_IFMT == S_IFREG
+    }
+    pub(super) fn is_symlink(&self) -> bool {
+        self.mode & S_IFMT == S_IFLNK
+    }
+    pub(super) fn is_fifo(&self) -> bool {
+        self.mode & S_IFMT == S_IFIFO
+    }
+    /// The wire's entry type, as `scan::kind_of` gives it for a stat.
+    pub(super) fn kind(&self) -> u8 {
+        match self.mode & S_IFMT {
+            S_IFREG => crate::protocol::T_REG,
+            S_IFDIR => crate::protocol::T_DIR,
+            S_IFLNK => crate::protocol::T_LNK,
+            S_IFIFO => crate::protocol::T_FIFO,
+            0o140000 => crate::protocol::T_SOCK,
+            0o020000 => crate::protocol::T_CHR,
+            0o060000 => crate::protocol::T_BLK,
+            _ => crate::protocol::T_NONE,
+        }
+    }
+    pub(super) fn len(&self) -> u64 {
+        self.size
+    }
+    pub(super) fn mtime(&self) -> i64 {
+        self.mtime
+    }
+    pub(super) fn mtime_nsec(&self) -> i64 {
+        self.mtime_nsec
+    }
+    pub(super) fn uid(&self) -> u32 {
+        self.uid
+    }
+    pub(super) fn gid(&self) -> u32 {
+        self.gid
+    }
+    pub(super) fn dev(&self) -> u64 {
+        self.dev
+    }
+    pub(super) fn ino(&self) -> u64 {
+        self.ino
+    }
+}
+
+impl From<&fs::Metadata> for Stat {
+    fn from(metadata: &fs::Metadata) -> Self {
+        Self {
+            mode: metadata.mode(),
+            size: metadata.len(),
+            mtime: metadata.mtime(),
+            mtime_nsec: metadata.mtime_nsec(),
+            uid: metadata.uid(),
+            gid: metadata.gid(),
+            dev: metadata.dev(),
+            ino: metadata.ino(),
+        }
+    }
+}
+
 pub(super) struct InFile {
     pub(super) temp: PathBuf,
     pub(super) file: File,
@@ -31,7 +119,7 @@ pub(super) struct InFile {
     pub(super) pending: usize,
     /// Everything the completion event needs once the last write returns.
     pub(super) entry: EntryMeta,
-    pub(super) before: Option<fs::Metadata>,
+    pub(super) before: Option<Stat>,
     pub(super) event_path: Vec<u8>,
     pub(super) link_key: Option<HardlinkKey>,
     /// The verified destination prefix restored into the temporary output.
@@ -203,8 +291,8 @@ pub(super) fn remove_any(path: &Path) -> io::Result<()> {
     }
 }
 
-pub(super) fn set_dir_working_mode_with(path: &Path, metadata: &fs::Metadata) -> bool {
-    let mode = metadata.permissions().mode() & 0o7777;
+pub(super) fn set_dir_working_mode_with(path: &Path, metadata: &Stat) -> bool {
+    let mode = metadata.mode() & 0o7777;
     if mode & 0o300 != 0o300 {
         let _ = fs::set_permissions(path, fs::Permissions::from_mode(mode | 0o700));
         true
@@ -215,7 +303,7 @@ pub(super) fn set_dir_working_mode_with(path: &Path, metadata: &fs::Metadata) ->
 
 pub(super) fn set_dir_working_mode(path: &Path) -> bool {
     match fs::metadata(path) {
-        Ok(metadata) => set_dir_working_mode_with(path, &metadata),
+        Ok(metadata) => set_dir_working_mode_with(path, &Stat::from(&metadata)),
         Err(_) => false,
     }
 }
@@ -354,13 +442,53 @@ pub(super) fn make_dir(path: &Path, mode: u32) -> io::Result<bool> {
     }
 }
 
-pub(super) fn destination_listing(path: &Path) -> BTreeMap<Vec<u8>, fs::Metadata> {
+/// macOS: one getattrlistbulk call per several hundred entries instead of an lstat each
+/// (`list_dir_fd`, fs.cpp); an entry it could not describe fully is stat'ed. None when the
+/// file system does not support it.
+#[cfg(target_os = "macos")]
+fn bulk_listing(path: &Path) -> Option<BTreeMap<Vec<u8>, Stat>> {
+    let dir = File::open(path).ok()?;
+    let mut entries = Vec::new();
+    match ffi::list_bulk(&dir, &mut entries) {
+        Ok(true) => {}
+        Ok(false) => return None,
+        Err(_) => return Some(BTreeMap::new()),
+    }
+    let mut map = BTreeMap::new();
+    for entry in entries {
+        let stat = if entry.complete {
+            Stat {
+                mode: entry.mode,
+                size: entry.size,
+                mtime: entry.mtime,
+                mtime_nsec: entry.mtime_nsec,
+                uid: entry.uid,
+                gid: entry.gid,
+                dev: entry.dev,
+                ino: entry.ino,
+            }
+        } else {
+            match fs::symlink_metadata(path.join(OsString::from_vec(entry.name.clone()))) {
+                Ok(metadata) => Stat::from(&metadata),
+                Err(_) => continue,
+            }
+        };
+        map.insert(entry.name, stat);
+    }
+    Some(map)
+}
+
+pub(super) fn destination_listing(path: &Path) -> BTreeMap<Vec<u8>, Stat> {
+    #[cfg(target_os = "macos")]
+    if let Some(map) = bulk_listing(path) {
+        return map;
+    }
     let mut map = BTreeMap::new();
     if let Ok(items) = fs::read_dir(path) {
         for item in items.flatten() {
             // Not followed, and on Linux a statx relative to the directory's fd.
             if let Ok(metadata) = item.metadata() {
-                map.insert(item.file_name().as_bytes().to_vec(), metadata);
+                map.insert(item.file_name().as_bytes().to_vec(), Stat::from(&metadata));
             }
         }
     }

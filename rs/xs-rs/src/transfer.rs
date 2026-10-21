@@ -5,10 +5,9 @@
 
 use std::collections::{HashMap, VecDeque};
 use std::ffi::OsString;
-use std::fs::{self, File};
+use std::fs::File;
 use std::io::{self, BufWriter, Read, Seek, SeekFrom, Write};
 use std::os::unix::ffi::OsStrExt;
-use std::os::unix::fs::MetadataExt;
 use std::path::PathBuf;
 use std::sync::mpsc;
 use std::sync::atomic::{AtomicU32, Ordering};
@@ -111,7 +110,7 @@ fn directory_event(
     path: &[u8],
     source: &[u8],
     attrs: &Attrs,
-    before: Option<&fs::Metadata>,
+    before: Option<&file::Stat>,
     created: bool,
 ) -> Option<OutputEvent> {
     let mut code = *b".d.........";
@@ -147,7 +146,7 @@ fn directory_event(
     Some(taken_event(&code, path, source, file_type::DIR, attrs.size, 0))
 }
 
-fn transferred_code(opts: &Options, before: Option<&fs::Metadata>, entry: &EntryMeta) -> Vec<u8> {
+fn transferred_code(opts: &Options, before: Option<&file::Stat>, entry: &EntryMeta) -> Vec<u8> {
     let mut code = if opts.pushing { *b"<f+++++++++" } else { *b">f+++++++++" };
     if let Some(before) = before.filter(|before| before.is_file()) {
         code[2..].fill(b'.');
@@ -172,7 +171,7 @@ fn transferred_code(opts: &Options, before: Option<&fs::Metadata>, entry: &Entry
     code.to_vec()
 }
 
-fn metadata_code(opts: &Options, kind: u8, before: &fs::Metadata, entry: &EntryMeta) -> Option<Vec<u8>> {
+fn metadata_code(opts: &Options, kind: u8, before: &file::Stat, entry: &EntryMeta) -> Option<Vec<u8>> {
     let letter = match kind {
         T_REG => b'f',
         T_LNK => b'L',
