@@ -1462,6 +1462,80 @@
    "model": "opencode/deepseek-v4.1-flash",
    "summarizedUtc": 1792599600.212,
    "driver": "a"
+  },
+  "PS-aa7aee150987-laikav2-fresh": {
+   "run": "20261021T161559Z-PS-aa7aee150987-laikav2-fresh",
+   "experiment": "PS-aa7aee150987-laikav2-fresh",
+   "key": "laikav2-sample.fresh.a-aws.sender.warm|4|0",
+   "utc": 1792608117.913,
+   "cell": "laikav2-sample.fresh.a-aws.sender.warm",
+   "factors": {
+    "corpus": "laikav2-sample",
+    "scenario": "fresh",
+    "sender": "a",
+    "receiver": "aws",
+    "client": "sender",
+    "link": "a-aws",
+    "cache": "warm"
+   },
+   "block": 4,
+   "attempt": 0,
+   "control": "xs-cpp",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 1.257,
+     "gbps": 0.598,
+     "files_per_s": 1064,
+     "speed": 1
+    },
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 1.116,
+     "gbps": 0.674,
+     "files_per_s": 1198,
+     "speed": 1.13
+    },
+    {
+     "arm": "rsync",
+     "label": "rsync",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 1.349,
+     "gbps": 0.557,
+     "files_per_s": 991,
+     "speed": 0.93
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "rsync",
+     "label": "rsync",
+     "speed": 0.97,
+     "blocks": 5
+    },
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "speed": 1.06,
+     "blocks": 5
+    }
+   ],
+   "question": "Is xs-rs at aa7aee150987 (rust-ds head, with automatic compression) as fast as xs-c++ on congress-sample and laikav2-sample, and than rsync?",
+   "summary": "In this block xs-rs was fastest, at 1.116 s versus xs-c++ at 1.257 s, or 1.13x the control; rsync was 0.93x. Across five blocks in this cell, xs-rs averages 1.06x and rsync 0.97x against xs-c++, so the evidence is not thin by the three-block threshold. This supports xs-rs being about as fast as xs-c++ here and faster than rsync, but the margins are modest.",
+   "model": "opencode/deepseek-v4.1-flash",
+   "summarizedUtc": 1792608140.478,
+   "driver": "a"
   }
  }
 }

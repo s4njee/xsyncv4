@@ -1,0 +1,19 @@
+{
+ "experiment": "PS-aa7aee150987-laikav2-fresh",
+ "kind": "screening",
+ "hypothesis": "xs-rs at aa7aee150987 differs from xs-c++ (-a -j4) by more than 5% in time-to-durable on laikav2-sample, fresh, a>aws.",
+ "primary": "durable_s",
+ "control": "xs-cpp",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261021T161559Z-PS-aa7aee150987-laikav2-fresh"
+ ],
+ "spec_sha256": [
+  "16fec4d1372b7edc45cfce1bcea6ac3c12600b388bffdaeb3294cf151e03de29"
+ ],
+ "valid_blocks": 5,
+ "void_attempts": 0,
+ "void_reasons": []
+}

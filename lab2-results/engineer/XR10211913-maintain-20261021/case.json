@@ -1,0 +1,101 @@
+{
+ "id": "XR10211913-maintain-20261021",
+ "kind": "port",
+ "step": "maintain-20261021",
+ "maintain": {
+  "since": "2026-10-20T19:04:32Z",
+  "merged": [
+   {
+    "id": "XR10201943-workers",
+    "step": "workers",
+    "title": "parallel workers: -j/--jobs, default 4, splitting the file work as the C++ engine does; unsupported options are refused, not ignored",
+    "commit": "e3b546f679b9",
+    "utc": "2026-10-20T20:07:25Z",
+    "summary": "Added C++-compatible `-j/--jobs` handling and a worker budget to xs-rs: explicit `-jN` now splits a single large file into 4 MiB ranges on the sender and writes them concurrently on the receiver, while the default and `-j1` keep one-file I/O serial as the C++ does. The CLI now refuses unknown and explicitly unsupported options instead of ignoring them. All four gate commands pass, and the parent's `parallel_ranges_test.py` passes against the Rust binary."
+   },
+   {
+    "id": "XR10202013-resume",
+    "step": "resume",
+    "title": "resuming partial files (PF_RESUME)",
+    "commit": "2c0bec1da693",
+    "utc": "2026-10-20T20:46:00Z",
+    "summary": "Implemented PF_RESUME in xs-rs: the receiver hashes and offers a destination prefix in NEED, the sender verifies the source prefix and sends only the suffix, and the receiver re-hashes the prefix before publishing. Added framing, negotiation, CLI and hostile-peer validation, plus C++ interop tests in both directions."
+   },
+   {
+    "id": "XR10202053-delta",
+    "step": "delta",
+    "title": "delta transfer of changed files (PF_DELTA)",
+    "commit": "f4e30e4ed207",
+    "utc": "2026-10-20T21:45:49Z",
+    "summary": "Implemented PF_DELTA in xs-rs: negotiation, destination signatures, streaming weak/strong block matching, LITERAL/COPY/DELTA_END records, retry acknowledgments, changed-basis rejection, and final XXH3-128 verification. C++ and Rust now delta in all four client/server directions, and the C++ delta wire suite passes unchanged against the Rust binary."
+   },
+   {
+    "id": "XR10202209-tune-noop-congress-sample-f4e30e4",
+    "step": "tune-noop-congress-sample-f4e30e4",
+    "title": "xs-rs performance: beat xs-c++ on congress-sample noop",
+    "commit": "3b42279cc4fc",
+    "utc": "2026-10-20T22:37:02Z",
+    "summary": "The no-op receiver was rewriting ownership, mode and mtime on every unchanged destination entry, even when the values already matched. It now reuses the destination listing and writes only attributes that differ, cutting the congress-sample no-op from about 0.91 s to 0.51 s locally while xs-c++ stays near 1.07 s."
+   },
+   {
+    "id": "XR10202238-filters",
+    "step": "filters",
+    "title": "filters, relative paths and files-from (PF_FILTERS, PF_RELATIVE, PF_FILES_FROM)",
+    "commit": "3b891bf5e8fb",
+    "utc": "2026-10-20T23:38:07Z",
+    "summary": "Reduced the implementation to 1,195 changed lines outside tests (from 1,231), under the gate's 1,200-line ceiling, by dropping the unused exclude-from/include-from reader and a few redundant filter helpers. The feature still covers PF_FILTERS, PF_RELATIVE and PF_FILES_FROM, and all four gate commands pass again."
+   },
+   {
+    "id": "XR10210054-xattrs",
+    "step": "xattrs",
+    "title": "extended attributes (PF_XATTRS, PF_XATTR_STREAM)",
+    "commit": "b47b9014adfd",
+    "utc": "2026-10-21T12:47:15Z",
+    "summary": "Added PF_XATTRS and PF_XATTR_STREAM to xs-rs: xattr configuration negotiation, per-entry and per-file xattr lists, streamed large values with XXH3-64 verification, xattr filtering, and receiver-side set/remove. C++ clients and servers exchange user and rsync-internal attributes in both directions, including a second -XX pass."
+   },
+   {
+    "id": "XR10211259-acls",
+    "step": "acls",
+    "title": "POSIX ACLs (PF_ACL_POSIX)",
+    "commit": "71872a77ee26",
+    "utc": "2026-10-21T13:34:47Z",
+    "summary": "xs-rs now implements PF_ACL_POSIX: -A/--acls parsing, ACL_CONFIG negotiation, access/default ACL record encoding and decoding after xattrs, validation before publication, and application on receipt. C++ xs and xs-rs carry ACLs in both directions, including no-op and ACL-only updates."
+   }
+  ]
+ },
+ "opened_utc": "2026-10-21T19:13:41Z",
+ "origin": "the engineer, once a day",
+ "state": "prepared",
+ "question": "Maintenance: simplify xs-rs, and log what merged in README.md",
+ "why": "",
+ "hypothesis": "",
+ "evidence": [],
+ "link": null,
+ "runner": null,
+ "base_rev": "ee9e21426090c32257b738127df5ab51d25d70db",
+ "base_build": "ee9e21426090",
+ "branch": "auto/XR10211913-maintain-20261021",
+ "commit": null,
+ "history": [
+  {
+   "utc": "2026-10-21T19:13:41Z",
+   "state": "opened",
+   "text": "opened by the engineer, once a day: Maintenance: simplify xs-rs, and log what merged in README.md"
+  },
+  {
+   "utc": "2026-10-21T19:16:58Z",
+   "state": "prepared",
+   "text": "parent built; xs-rs checks passing on it: test, clippy, fmt, arm64"
+  }
+ ],
+ "max_lines": 3000,
+ "budget_usd": 1.0,
+ "tests": {
+  "parent": {
+   "test": true,
+   "clippy": true,
+   "fmt": true,
+   "arm64": true
+  }
+ }
+}

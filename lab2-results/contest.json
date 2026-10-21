@@ -1,5 +1,5 @@
 {
- "updated": "2026-10-21T18:13:38+00:00",
+ "updated": "2026-10-21T19:13:48+00:00",
  "enabled": true,
  "cpp_rev": "fe012667764a",
  "rs": {
@@ -8,7 +8,7 @@
  },
  "margin": 0.05,
  "score": {
-  "xs-rs": 2,
+  "xs-rs": 3,
   "xs-cpp": 3,
   "tie": 1,
   "pending": 0
@@ -160,6 +160,55 @@
    "verdict": "xs-cpp",
    "rs_vs_cpp": 1.193,
    "fastest": "xs-cpp"
+  },
+  {
+   "cell": "laikav2-sample.fresh.a-aws.sender.warm",
+   "corpus": "laikav2-sample",
+   "scenario": "fresh",
+   "link": "a-aws",
+   "metric": "durable_s",
+   "experiment": "PS-aa7aee150987-laikav2-fresh",
+   "run": "20261021T161559Z-PS-aa7aee150987-laikav2-fresh",
+   "tools": {
+    "xs-cpp": {
+     "arm": "xs-cpp",
+     "flags": [
+      "-a",
+      "-j4"
+     ],
+     "rev": "fe012667764a",
+     "seconds": 1.4,
+     "lo": 1.209,
+     "hi": 1.621,
+     "blocks": 5
+    },
+    "xs-rs": {
+     "arm": "xs-rs",
+     "flags": [
+      "-a",
+      "-j4"
+     ],
+     "rev": "aa7aee150987-rs",
+     "seconds": 1.323,
+     "lo": 1.113,
+     "hi": 1.573,
+     "blocks": 5
+    },
+    "rsync": {
+     "arm": "rsync",
+     "flags": [
+      "-a"
+     ],
+     "rev": null,
+     "seconds": 1.437,
+     "lo": 1.248,
+     "hi": 1.655,
+     "blocks": 5
+    }
+   },
+   "verdict": "xs-rs",
+   "rs_vs_cpp": 0.945,
+   "fastest": "xs-rs"
   },
   {
    "cell": "laikav2-sample.noop.a-aws.sender.warm",

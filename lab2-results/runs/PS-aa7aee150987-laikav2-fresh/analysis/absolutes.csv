@@ -1,0 +1,13 @@
+experiment,kind,cell_id,corpus,scenario,sender,receiver,client,link,cache,arm,metric,n_blocks,geomean,lo,hi
+PS-aa7aee150987-laikav2-fresh,screening,laikav2-sample.fresh.a-aws.sender.warm,laikav2-sample,fresh,a,aws,sender,a-aws,warm,xs-cpp,durable_s,5,1.4000601395935266,1.2091345043323352,1.6211334532720323
+PS-aa7aee150987-laikav2-fresh,screening,laikav2-sample.fresh.a-aws.sender.warm,laikav2-sample,fresh,a,aws,sender,a-aws,warm,xs-rs,durable_s,5,1.3229049412889378,1.1129230950307964,1.572505316405767
+PS-aa7aee150987-laikav2-fresh,screening,laikav2-sample.fresh.a-aws.sender.warm,laikav2-sample,fresh,a,aws,sender,a-aws,warm,rsync,durable_s,5,1.4370066962682049,1.2476237605367386,1.6551369975763246
+PS-aa7aee150987-laikav2-fresh,screening,laikav2-sample.fresh.a-aws.sender.warm,laikav2-sample,fresh,a,aws,sender,a-aws,warm,xs-cpp,wall_s,5,1.1709868685719709,0.9668878993906173,1.4181687941613477
+PS-aa7aee150987-laikav2-fresh,screening,laikav2-sample.fresh.a-aws.sender.warm,laikav2-sample,fresh,a,aws,sender,a-aws,warm,xs-rs,wall_s,5,1.035991438621204,0.8047120236538231,1.3337420460342744
+PS-aa7aee150987-laikav2-fresh,screening,laikav2-sample.fresh.a-aws.sender.warm,laikav2-sample,fresh,a,aws,sender,a-aws,warm,rsync,wall_s,5,1.232434615434621,1.0297566204903787,1.4750039486011481
+PS-aa7aee150987-laikav2-fresh,screening,laikav2-sample.fresh.a-aws.sender.warm,laikav2-sample,fresh,a,aws,sender,a-aws,warm,xs-cpp,cpu_s,5,1.0897113166203363,0.9641292686273137,1.2316509748335895
+PS-aa7aee150987-laikav2-fresh,screening,laikav2-sample.fresh.a-aws.sender.warm,laikav2-sample,fresh,a,aws,sender,a-aws,warm,xs-rs,cpu_s,5,0.8380502565710559,0.740066375360144,0.9490070835835956
+PS-aa7aee150987-laikav2-fresh,screening,laikav2-sample.fresh.a-aws.sender.warm,laikav2-sample,fresh,a,aws,sender,a-aws,warm,rsync,cpu_s,5,0.8702389654677377,0.8179558547393256,0.9258639725241742
+PS-aa7aee150987-laikav2-fresh,screening,laikav2-sample.fresh.a-aws.sender.warm,laikav2-sample,fresh,a,aws,sender,a-aws,warm,xs-cpp,rss_bytes,5,97143662.22224155,96484820.79970269,97807002.5080882
+PS-aa7aee150987-laikav2-fresh,screening,laikav2-sample.fresh.a-aws.sender.warm,laikav2-sample,fresh,a,aws,sender,a-aws,warm,xs-rs,rss_bytes,5,80892478.576594,77704608.34763142,84211132.76821734
+PS-aa7aee150987-laikav2-fresh,screening,laikav2-sample.fresh.a-aws.sender.warm,laikav2-sample,fresh,a,aws,sender,a-aws,warm,rsync,rss_bytes,5,13113988.002099952,12727112.127659561,13512624.041825503
