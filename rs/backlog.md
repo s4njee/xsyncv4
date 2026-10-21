@@ -18,10 +18,10 @@ everything on one thread, which costs little on a zero-latency pipe and a lot wh
   local race shows what a real link does to a pipeline that waits.
 
 ## 3. Sender: walk, read and answer NEEDs at once
-- [ ] `run_sender` (`transfer.rs`) walks and lists the whole tree before it serves one NEED, then reads every file
+- [x] `run_sender` (`transfer.rs`) walks and lists the whole tree before it serves one NEED, then reads every file
   on that same thread. xs-c++ runs `-j` workers (half of them scanning), a reader thread for NEEDs, tasks of 64
   files or 8 MiB, each worker filling its own 1 MiB DATA block (`remote.cpp:1374-1421`, `:1774-1794`).
-- [ ] A delta signature wait (`wait_signature`) stalls only its own worker, not the sender.
+- [x] A delta signature wait (`wait_signature`) stalls only its own worker, not the sender.
 
 ## 4. Receiver: a reader thread and a worker pool
 - [ ] `run_receiver` (`transfer/receiver.rs`) parses DIRs, lists the destination, diffs, builds NEEDs and writes
