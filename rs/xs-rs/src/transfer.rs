@@ -736,30 +736,50 @@ fn walk_dir(s: &Sending, task: WalkTask) -> io::Result<()> {
     Ok(())
 }
 
+/// A DATA payload's flags byte and XXH3-64, reserved at the front of each block so an
+/// uncompressed block goes out as it is (`begin_block`, remote.cpp).
+const DATA_HEADER: usize = 9;
+
 fn record(e: Encoder, block: &mut Vec<u8>) {
+    if block.is_empty() {
+        block.resize(DATA_HEADER, 0);
+    }
     block.extend_from_slice(&e.bytes);
 }
 
-fn flush_data(s: &Sending, block: &mut Vec<u8>, compress: bool) -> io::Result<()> {
+/// Encode a record straight into the DATA block, after its reserved header.
+fn encode_into(block: &mut Vec<u8>, write: impl FnOnce(&mut Encoder) -> io::Result<()>) -> io::Result<()> {
     if block.is_empty() {
+        block.resize(DATA_HEADER, 0);
+    }
+    let mut e = Encoder { bytes: std::mem::take(block) };
+    let result = write(&mut e);
+    *block = e.bytes;
+    result
+}
+
+fn flush_data(s: &Sending, block: &mut Vec<u8>, compress: bool) -> io::Result<()> {
+    if block.len() <= DATA_HEADER {
         return Ok(());
     }
     let opts = s.opts;
-    let digest = ffi::xxh3_64(block);
-    let mut payload = Encoder::new();
-    payload.byte(0).raw(&digest.to_le_bytes());
+    let records = &block[DATA_HEADER..];
+    let digest = ffi::xxh3_64(records);
     let level = s.link.level(opts.compress_level_explicit, opts.compress_level, opts.bwlimit);
-    let compressed = protocol::pack_body(&mut payload, block, compress && s.compressing(), level);
-    if compressed {
-        payload.bytes[0] = 1;
+    if let Some(compressed) = (compress && s.compressing()).then(|| protocol::compress_body(records, level)).flatten() {
+        let mut payload = Encoder { bytes: Vec::with_capacity(DATA_HEADER + 10 + compressed.len()) };
+        payload.byte(1).raw(&digest.to_le_bytes()).var(records.len() as u64).raw(&compressed);
         s.link.set_last_level(level);
         if !opts.compress_level_explicit {
-            s.link.count(level, block.len() as u64);
+            s.link.count(level, records.len() as u64);
         }
+        block.clear();
+        return s.tx.send_bounded(frame_type::DATA, payload.bytes);
     }
-    s.tx.send_bounded(frame_type::DATA, payload.bytes)?;
-    block.clear();
-    Ok(())
+    block[0] = 0;
+    block[1..DATA_HEADER].copy_from_slice(&digest.to_le_bytes());
+    let payload = std::mem::replace(block, Vec::with_capacity(protocol::BLOCK_TARGET + (64 << 10)));
+    s.tx.send_bounded(frame_type::DATA, payload)
 }
 
 /// The attributes, xattrs and ACLs that close a WHOLE, END or DELTA_END record.
@@ -826,15 +846,16 @@ fn send_large(
             jobs,
             crate::parallel::RANGE_SPAN,
             |offset, bytes| {
-                let mut e = Encoder::new();
-                e.var(id as u64).var(idx as u64).byte(rec::CHUNK);
-                e.var(0);
-                if resume {
-                    e.var(prefix.size.max(0) as u64);
-                }
-                e.var(offset).var(planned);
-                e.str(&bytes);
-                record(e, block);
+                encode_into(block, |e| {
+                    e.var(id as u64).var(idx as u64).byte(rec::CHUNK);
+                    e.var(0);
+                    if resume {
+                        e.var(prefix.size.max(0) as u64);
+                    }
+                    e.var(offset).var(planned);
+                    e.str(&bytes);
+                    Ok(())
+                })?;
                 if block.len() >= protocol::BLOCK_TARGET {
                     flush_data(s, block, compress)?;
                 }
@@ -885,15 +906,16 @@ fn send_large(
             failed = true;
             break;
         }
-        let mut e = Encoder::new();
-        e.var(id as u64).var(idx as u64).byte(rec::CHUNK);
-        e.var(0);
-        if resume {
-            e.var(prefix.size.max(0) as u64);
-        }
-        e.var(offset).var(planned);
-        e.str(&buffer[..got]);
-        record(e, block);
+        encode_into(block, |e| {
+            e.var(id as u64).var(idx as u64).byte(rec::CHUNK);
+            e.var(0);
+            if resume {
+                e.var(prefix.size.max(0) as u64);
+            }
+            e.var(offset).var(planned);
+            e.str(&buffer[..got]);
+            Ok(())
+        })?;
         offset += got as u64;
         if block.len() >= protocol::BLOCK_TARGET || failed {
             flush_data(s, block, compress)?;
@@ -963,7 +985,7 @@ fn send_delta(
 }
 
 /// Read one task's files into DATA frames of about `BLOCK_TARGET`.
-fn send_task(s: &Sending, task: &ReadTask, block: &mut Vec<u8>) -> io::Result<()> {
+fn send_task(s: &Sending, task: &ReadTask, block: &mut Vec<u8>, contents: &mut Vec<u8>) -> io::Result<()> {
     let (opts, features, id) = (s.opts, s.features, task.id);
     let mut block_skip = false;
     for (position, &idx) in task.indices.iter().enumerate() {
@@ -978,19 +1000,22 @@ fn send_task(s: &Sending, task: &ReadTask, block: &mut Vec<u8>) -> io::Result<()
         }
         block_skip = skip;
         if entry.meta.size <= protocol::SMALL_MAX as i64 {
-            match fs::read(&entry.path) {
-                Ok(bytes) => {
-                    let mut e = Encoder::new();
-                    e.var(id as u64).var(idx as u64).byte(rec::WHOLE);
-                    protocol::put_file_attrs(&mut e, &entry.meta.attrs, features);
-                    if features & feature::XATTRS != 0 {
-                        s.streams.put(&mut e, &entry.meta.attrs.xattrs, features, &s.tx)?;
-                    }
-                    if features & acls::NATIVE_ACL != 0 {
-                        acls::put_acls(&mut e, &entry.meta.attrs.acls, opts.numeric_ids);
-                    }
-                    e.str(&bytes);
-                    record(e, block);
+            // Read into the worker's reused buffer, then once into the block (`read_one`).
+            contents.clear();
+            match File::open(&entry.path).and_then(|mut file| file.read_to_end(&mut *contents)) {
+                Ok(_) => {
+                    encode_into(block, |e| {
+                        e.var(id as u64).var(idx as u64).byte(rec::WHOLE);
+                        protocol::put_file_attrs(e, &entry.meta.attrs, features);
+                        if features & feature::XATTRS != 0 {
+                            s.streams.put(e, &entry.meta.attrs.xattrs, features, &s.tx)?;
+                        }
+                        if features & acls::NATIVE_ACL != 0 {
+                            acls::put_acls(e, &entry.meta.attrs.acls, opts.numeric_ids);
+                        }
+                        e.str(&contents[..]);
+                        Ok(())
+                    })?;
                     if block.len() >= protocol::BLOCK_TARGET {
                         flush_data(s, block, s.compress && !block_skip)?;
                     }
@@ -1028,6 +1053,7 @@ enum SendJob {
 /// first for everyone once 64 are queued (`q1_soft_limit`).
 fn send_worker(s: &Sending, prefers_walk: bool) {
     let mut block = Vec::new();
+    let mut contents = Vec::new();
     loop {
         let job = {
             let mut state = s.work.lock().unwrap();
@@ -1056,7 +1082,7 @@ fn send_worker(s: &Sending, prefers_walk: bool) {
         let result = match job {
             SendJob::Walk(task) => walk_dir(s, task).and_then(|()| s.walked()),
             SendJob::Read(task) => {
-                let result = send_task(s, &task, &mut block);
+                let result = send_task(s, &task, &mut block, &mut contents);
                 drop(task);
                 result.and_then(|()| s.update_work(|state| state.active -= 1))
             }

@@ -51,7 +51,8 @@ everything on one thread, which costs little on a zero-latency pipe and a lot wh
   with `write_vectored`, instead of an unbounded channel flushed whenever it is momentarily empty.
 - [x] Fewer copies: frames passed by value, written without a header-plus-payload copy (unlimited, one piece);
   the receiver writes small files and chunks from the DATA frame as it arrived; no 1 MiB allocation per NEED.
-- [ ] DATA built in a reused buffer with its header reserved and files read straight into it (`remote.cpp:1395`).
+- [x] DATA built with its header reserved and records encoded straight into it; small files read into a reused
+  buffer and copied once; an uncompressed block is sent as it is (`remote.cpp:1395-1418`).
 - [x] `Watchdog::drop` joins a thread that sleeps 50 ms at a time, on both ends: wake it instead.
 
 ## 8. Sender: a parallel walk
