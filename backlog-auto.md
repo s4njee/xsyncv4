@@ -20,8 +20,8 @@ scheduled.
 
 | # | Item | Expected on congress | Size | State | Commit | Verdict (fresh / no-op) |
 |---|---|---|---|---|---|---|
-| A1 | Remove the receiver's global output lock | fresh: large | ~130 lines | todo (written: `4c5c425c2434`) | | |
-| A2 | Parallel final directory pass | fresh: large | ~80 lines | todo (written: `4c5c425c2434`, with A1) | | |
+| A1 | Remove the receiver's global output lock | fresh: large | ~130 lines | built, waiting for its race | `c5b765eb54fc` |  |
+| A2 | Parallel final directory pass | fresh: large | ~80 lines | built, waiting for its race | `c5b765eb54fc` |  |
 | A3 | Batch NEED frames across directories | fresh, no-op: small | ~100 lines | todo | | |
 | A4 | Stream fresh subtrees without per-directory NEEDs | fresh: large | ~300 lines | todo | | |
 | A5 | Stage a fresh subtree and rename it into place once | fresh: medium | ~200 lines | todo | | |
