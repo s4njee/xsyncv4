@@ -16,8 +16,8 @@ on:
     branches: [rust-ds]
   push:
     branches: [rust-ds]
-    # The VPS lab publishes its results here once an hour (lab2-results/): those commits change no code.
-    paths-ignore: ['lab2-results/**']
+    # The labs publish results here (lab2-results/ hourly, main-lab-results/ from the main lab): those commits change no code.
+    paths-ignore: ['lab2-results/**', 'main-lab-results/**']
   workflow_dispatch:
 
 permissions:
