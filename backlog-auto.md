@@ -20,8 +20,8 @@ scheduled.
 
 | # | Item | Expected on congress | Size | State | Commit | Verdict (fresh / no-op) |
 |---|---|---|---|---|---|---|
-| A1 | Remove the receiver's global output lock | fresh: large | ~130 lines | todo (written, uncommitted) | | |
-| A2 | Parallel final directory pass | fresh: large | ~80 lines | todo (written, uncommitted) | | |
+| A1 | Remove the receiver's global output lock | fresh: large | ~130 lines | todo (written: `4c5c425c2434`) | | |
+| A2 | Parallel final directory pass | fresh: large | ~80 lines | todo (written: `4c5c425c2434`, with A1) | | |
 | A3 | Batch NEED frames across directories | fresh, no-op: small | ~100 lines | todo | | |
 | A4 | Stream fresh subtrees without per-directory NEEDs | fresh: large | ~300 lines | todo | | |
 | A5 | Stage a fresh subtree and rename it into place once | fresh: medium | ~200 lines | todo | | |
@@ -42,9 +42,11 @@ regression.md), **failed** (did not build or pass its tests in three tries; skip
   receiver's write_ns grew with the worker count (2.9, 5.9, 12.1, 47 s): about 18 µs per file serialized (30 µs with
   the rename), a cap of 35k to 56k files a second. Congress is 216k files.
 - **Risk:** interrupt cleanup of temporary files and partials must stay correct. No wire change.
-- **Note:** written in worktree `~/projects/xsyncv4-receiver-locks` (branch `engine/receiver-locks`), with A2,
-  not yet committed; its regression tests are running there. Take that change as this item once it is committed,
-  rather than writing it again. A draft experiment is `benchmarks/experiments/LK1-receiver-locks.toml` there.
+- **Note:** written with A2 as commit `4c5c425c2434` on branch `engine/receiver-locks` (parent `21ae6844`), with a
+  new `tests/receiver_concurrency_test.py`. It applies cleanly onto `auto-cpp`: the loop cherry-picks it as A1+A2
+  and races the pair as one item, rather than writing it again. On the Mac its 33 test files gave the same results as
+  its parent's (the shared failures come from that environment); not yet run on Linux, nor in app sessions over ssh.
+  In the xs Exploration Tree this is node A1 (LK1).
 
 ## A2 · Parallel final directory pass
 
@@ -57,7 +59,7 @@ regression.md), **failed** (did not build or pass its tests in three tries; skip
   52,593 directories.
 - **Risk:** parents must still get their modes after their children: a barrier per depth keeps that. App sessions and
   the root directory stay serial.
-- **Note:** written with A1 in `~/projects/xsyncv4-receiver-locks`; take it from there once committed.
+- **Note:** in the same commit as A1, `4c5c425c2434`, and raced with it.
 
 ## A3 · Batch NEED frames across directories
 
