@@ -72,5 +72,5 @@ everything on one thread, which costs little on a zero-latency pipe and a lot wh
   xs-c++ does not make; it also cuts xs-rs's share of a metered link's bytes.
 - [x] After a clean DONE the client returns without waiting for ssh to close its channel (a round trip
   on a real link); a failure still waits for the remote's status.
-- [ ] Decompress DATA on the receiver's workers rather than its reader, if a small receiver's reader
-  ever becomes the limit (about a fifth of a core per 1 Gb/s of compressed data at level 1).
+- [x] DATA frames go to the receiver's workers whole (`K_DATA`): decompressed and checked there with no lock
+  held, so a small receiver's reader only reads.

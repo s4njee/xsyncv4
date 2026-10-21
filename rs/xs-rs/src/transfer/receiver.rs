@@ -94,6 +94,7 @@ struct DirTable {
 #[allow(clippy::large_enum_variant)]
 enum Job {
     Generate(ParsedDir),
+    Data(Vec<u8>, usize),
     Write(WholeJob),
 }
 
@@ -102,6 +103,8 @@ enum Job {
 #[derive(Default)]
 struct Lanes {
     dirs: VecDeque<ParsedDir>,
+    /// DATA frames as they arrived, with what each is charged: its raw size (`t.charge`).
+    frames: VecDeque<(Vec<u8>, usize)>,
     writes: VecDeque<WholeJob>,
     write_bytes: usize,
     active: usize,
@@ -129,6 +132,19 @@ struct Receiving<'a> {
     settled: Condvar,
     /// The first worker failure, already sent to the sender as a fatal message.
     failed: Mutex<Option<i32>>,
+    control: Arc<IoControl>,
+    /// Decoding state the reader keeps and DATA records read: xattr values by stream id, and
+    /// the sender's id map. (Locked after `data` and `table`.)
+    streams: Mutex<xattr::Incoming>,
+    ids: Mutex<idmap::Receiver>,
+    /// Large files being assembled from chunks, and their write pool. (Locked before `table`.)
+    data: Mutex<DataState>,
+    progress_bytes: AtomicU64,
+}
+
+struct DataState {
+    infiles: HashMap<(u32, u32, u32), InFile>,
+    pool: WritePool,
 }
 
 impl Receiving<'_> {
@@ -191,7 +207,19 @@ impl Receiving<'_> {
     }
 
     fn idle(lanes: &Lanes) -> bool {
-        lanes.dirs.is_empty() && lanes.writes.is_empty() && lanes.active == 0
+        lanes.dirs.is_empty() && lanes.frames.is_empty() && lanes.writes.is_empty() && lanes.active == 0
+    }
+
+    /// A DATA frame goes to the workers whole, as `K_DATA` does: they decompress, check and
+    /// apply it, so a small receiver's reader only reads.
+    fn queue_frame(&self, payload: Vec<u8>) {
+        let charge = data_charge(&payload);
+        {
+            let mut lanes = self.lanes.lock().unwrap();
+            lanes.write_bytes += charge;
+            lanes.frames.push_back((payload, charge));
+        }
+        self.work.notify_one();
     }
 
     /// Stop the workers; queued work is dropped.
@@ -200,6 +228,7 @@ impl Receiving<'_> {
             let mut lanes = self.lanes.lock().unwrap();
             lanes.closed = true;
             lanes.dirs.clear();
+            lanes.frames.clear();
             lanes.writes.clear();
             lanes.write_bytes = 0;
         }
@@ -220,6 +249,7 @@ impl Receiving<'_> {
             }
         }
         self.close();
+        self.control.request_stop();
     }
 
     fn failure(&self) -> Option<i32> {
@@ -234,10 +264,18 @@ fn receive_worker(r: &Receiving, prefers_dirs: bool) {
             let mut lanes = r.lanes.lock().unwrap();
             loop {
                 let dirs_first = prefers_dirs && lanes.write_bytes < WRITES_FIRST;
+                let frame = |lanes: &mut Lanes| lanes.frames.pop_front().map(|(payload, charge)| Job::Data(payload, charge));
                 let job = if dirs_first {
-                    lanes.dirs.pop_back().map(Job::Generate).or_else(|| lanes.writes.pop_front().map(Job::Write))
+                    lanes
+                        .dirs
+                        .pop_back()
+                        .map(Job::Generate)
+                        .or_else(|| frame(&mut lanes))
+                        .or_else(|| lanes.writes.pop_front().map(Job::Write))
                 } else {
-                    lanes.writes.pop_front().map(Job::Write).or_else(|| lanes.dirs.pop_back().map(Job::Generate))
+                    frame(&mut lanes)
+                        .or_else(|| lanes.writes.pop_front().map(Job::Write))
+                        .or_else(|| lanes.dirs.pop_back().map(Job::Generate))
                 };
                 if let Some(job) = job {
                     lanes.active += 1;
@@ -251,6 +289,7 @@ fn receive_worker(r: &Receiving, prefers_dirs: bool) {
         };
         let (result, charge) = match job {
             Job::Generate(dir) => (generate(r, dir), 0),
+            Job::Data(payload, charge) => (data_job(r, payload), charge),
             Job::Write(job) => {
                 let charge = job.charge();
                 (write_job(r, job), charge)
@@ -266,6 +305,55 @@ fn receive_worker(r: &Receiving, prefers_dirs: bool) {
             r.fail(&error);
         }
     }
+}
+
+/// What a queued DATA frame is charged: a compressed frame its raw size, as the reader's
+/// bound counts work, not bytes on the wire.
+fn data_charge(payload: &[u8]) -> usize {
+    if payload.len() > 9 && payload[0] & 1 != 0 {
+        if let Ok(size) = Decoder::new(&payload[9..]).var() {
+            return (size as usize).min(1 << 30) + 9;
+        }
+    }
+    payload.len()
+}
+
+/// One DATA frame on a worker: decompress and check it with no lock held, then apply its
+/// records in order.
+fn data_job(r: &Receiving, payload: Vec<u8>) -> io::Result<()> {
+    let (records, base) = decode_data(payload, r.features)?;
+    let mut data = r.data.lock().unwrap();
+    let data = &mut *data;
+    let mut table = r.table.lock().unwrap();
+    let table = &mut *table;
+    let bytes = {
+        let mut streams = r.streams.lock().unwrap();
+        let ids = r.ids.lock().unwrap();
+        process_data(&records, base, r.opts, r.features, &mut streams, &ids, &mut table.dirs, &mut data.infiles, &mut data.pool, r)?
+    };
+    r.progress_bytes.fetch_add(bytes, Ordering::Relaxed);
+    let finished = drain_writes(r, &mut table.dirs, &mut data.infiles, &data.pool)?;
+    r.created_files.fetch_add(finished, Ordering::Relaxed);
+    Ok(())
+}
+
+/// A DATA frame's records, decompressed if they were and checked against their XXH3-64,
+/// and where in the buffer they start. Uncompressed records stay where they arrived.
+fn decode_data(payload: Vec<u8>, features: u64) -> io::Result<(Arc<Vec<u8>>, usize)> {
+    if payload.len() < 9 {
+        return bad("protocol error: short DATA frame");
+    }
+    let compressed = payload[0] & 1 != 0;
+    let want = u64::from_le_bytes(payload[1..9].try_into().unwrap());
+    let (records, base) = if compressed {
+        (Arc::new(protocol::unpack_body(&payload[9..], compressed, features)?), 0)
+    } else {
+        (Arc::new(payload), 9)
+    };
+    if ffi::xxh3_64(&records[base..]) != want {
+        return bad("data corruption detected in transfer stream");
+    }
+    Ok((records, base))
 }
 
 /// Write one small file and report it.
@@ -949,7 +1037,8 @@ fn process_delta_request(
 
 #[allow(clippy::too_many_arguments)]
 fn process_data(
-    payload: Vec<u8>,
+    records: &Arc<Vec<u8>>,
+    base: usize,
     opts: &Options,
     features: u64,
     streams: &mut xattr::Incoming,
@@ -960,22 +1049,7 @@ fn process_data(
     r: &Receiving,
 ) -> io::Result<u64> {
     let mut added_bytes = 0u64;
-    if payload.len() < 9 {
-        return bad("protocol error: short DATA frame");
-    }
-    let compressed = payload[0] & 1 != 0;
-    let want = u64::from_le_bytes(payload[1..9].try_into().unwrap());
-    // The records stay where they arrived (or were decompressed to); small files and chunks
-    // are written from them without another copy.
-    let (records, base) = if compressed {
-        (Arc::new(protocol::unpack_body(&payload[9..], compressed, features)?), 0)
-    } else {
-        (Arc::new(payload), 9)
-    };
     let raw = &records[base..];
-    if ffi::xxh3_64(raw) != want {
-        return bad("data corruption detected in transfer stream");
-    }
     let resume_enabled = opts.partial && features & feature::RESUME != 0;
     let mut d = Decoder::new(raw);
     while !d.is_empty() {
@@ -1380,7 +1454,7 @@ pub fn run_receiver<R: Read, W: Write + Send + 'static>(
     control: Arc<IoControl>,
     local_output: Option<&mut Output>,
 ) -> io::Result<i32> {
-    let mut output = FrameOut::new(output, None, control);
+    let mut output = FrameOut::new(output, None, control.clone());
     let keepalive = features & feature::IO_CONTROL != 0;
     let mut identity = Encoder::new();
     identity.str(b"").str(b"").var(0).var(0);
@@ -1403,6 +1477,20 @@ pub fn run_receiver<R: Read, W: Write + Send + 'static>(
         work: Condvar::new(),
         settled: Condvar::new(),
         failed: Mutex::new(None),
+        control,
+        streams: Mutex::new(xattr::Incoming::new()),
+        ids: Mutex::new(idmap::Receiver::default()),
+        // Like the C++ receiver, one file's ranges stay serial unless an explicit
+        // -jN (N > 1) asked for range concurrency; the default budget is for files.
+        data: Mutex::new(DataState {
+            infiles: HashMap::new(),
+            pool: WritePool::new(if crate::parallel::explicit_ranges(opts.jobs) {
+                crate::parallel::effective_jobs(opts.jobs)
+            } else {
+                1
+            }),
+        }),
+        progress_bytes: AtomicU64::new(0),
     };
     let jobs = crate::parallel::effective_jobs(opts.jobs);
     let received = std::thread::scope(|scope| {
@@ -1435,51 +1523,50 @@ fn receive<R: Read, W: Write + Send + 'static>(
     keepalive: bool,
 ) -> io::Result<(i32, bool)> {
     let (opts, features) = (r.opts, r.features);
-    let mut ids = idmap::Receiver::default();
     let mut seen_dirs: Vec<bool> = Vec::new();
-    let mut infiles: HashMap<(u32, u32, u32), InFile> = HashMap::new();
-    let mut streams = xattr::Incoming::new();
-    // Like the C++ receiver, one file's ranges stay serial unless an explicit
-    // -jN (N > 1) asked for range concurrency; the default budget is for files.
-    let write_workers =
-        if crate::parallel::explicit_ranges(opts.jobs) { crate::parallel::effective_jobs(opts.jobs) } else { 1 };
-    let mut pool = WritePool::new(write_workers);
+    // On every way out but the clean one, let large files' writes settle and keep or
+    // remove what they left.
+    let abandon = || {
+        let mut data = r.data.lock().unwrap();
+        let data = &mut *data;
+        settle(&mut data.infiles, &data.pool);
+        cleanup_partial(&mut data.infiles, opts);
+    };
     let mut sender_code: Option<i32> = None;
     let mut ended = false;
     let ack_enabled = opts.am_server && features & feature::PROGRESS_ACK != 0;
-    let mut progress_bytes = 0u64;
     let mut progress_last = (0u64, 0u64, Instant::now());
     while !ended {
         let mut frame = match protocol::read_checked(input, keepalive, features) {
             Ok(Some(frame)) => frame,
             Ok(None) => {
-                settle(&mut infiles, &pool);
-                cleanup_partial(&mut infiles, opts);
+                r.close();
+                abandon();
                 return Ok((r.failure().unwrap_or(12), false));
             }
             Err(error) => {
-                let _ = send_fatal(output, &error.to_string());
-                settle(&mut infiles, &pool);
-                cleanup_partial(&mut infiles, opts);
-                return Ok((2, false));
+                // A worker's failure has been sent already; this read only stopped for it.
+                let code = r.failure().unwrap_or_else(|| {
+                    let _ = send_fatal(output, &error.to_string());
+                    2
+                });
+                r.close();
+                abandon();
+                return Ok((code, false));
             }
         };
         let result = match frame.kind {
             frame_type::DIR => {
-                parse_dir(opts, features, &frame, &mut streams, &ids, &mut seen_dirs).map(|dir| r.dir_arrived(dir))
+                let parsed = {
+                    let mut streams = r.streams.lock().unwrap();
+                    let ids = r.ids.lock().unwrap();
+                    parse_dir(opts, features, &frame, &mut streams, &ids, &mut seen_dirs)
+                };
+                parsed.map(|dir| r.dir_arrived(dir))
             }
             frame_type::DATA => {
-                let mut table = r.table.lock().unwrap();
-                let table = &mut *table;
-                let payload = std::mem::take(&mut frame.payload);
-                process_data(payload, opts, features, &mut streams, &ids, &mut table.dirs, &mut infiles, &mut pool, r)
-                    .and_then(|bytes| {
-                        progress_bytes += bytes;
-                        drain_writes(r, &mut table.dirs, &mut infiles, &pool)
-                    })
-                    .map(|finished| {
-                        r.created_files.fetch_add(finished, Ordering::Relaxed);
-                    })
+                r.queue_frame(std::mem::take(&mut frame.payload));
+                Ok(())
             }
             frame_type::DELTA_REQUEST => {
                 let mut table = r.table.lock().unwrap();
@@ -1489,7 +1576,7 @@ fn receive<R: Read, W: Write + Send + 'static>(
                 if features & feature::XATTR_STREAM == 0 {
                     bad("protocol error: unnegotiated xattr value stream")
                 } else {
-                    streams.receive(frame.kind, &frame.payload)
+                    r.streams.lock().unwrap().receive(frame.kind, &frame.payload)
                 }
             }
             frame_type::LIST_END => Ok(()),
@@ -1508,7 +1595,7 @@ fn receive<R: Read, W: Write + Send + 'static>(
                 if features & feature::IDMAP == 0 {
                     bad("ID map without negotiated name-mapping support")
                 } else {
-                    ids.learn(&frame.payload);
+                    r.ids.lock().unwrap().learn(&frame.payload);
                     Ok(())
                 }
             }
@@ -1522,8 +1609,8 @@ fn receive<R: Read, W: Write + Send + 'static>(
         };
         let result = result.and_then(|()| {
             if frame.kind == frame_type::DATA {
-                let files = r.created_files.load(Ordering::Relaxed);
-                progress_ack(output, features, progress_bytes, files, false, &mut progress_last)?;
+                let (bytes, files) = (r.progress_bytes.load(Ordering::Relaxed), r.created_files.load(Ordering::Relaxed));
+                progress_ack(output, features, bytes, files, false, &mut progress_last)?;
                 // Wait for the workers while too much is queued for them.
                 r.wait_lanes(|lanes| lanes.write_bytes <= QUEUE_MAX);
             }
@@ -1533,21 +1620,22 @@ fn receive<R: Read, W: Write + Send + 'static>(
             r.fail(&error);
         }
         if let Some(code) = r.failure() {
-            settle(&mut infiles, &pool);
-            cleanup_partial(&mut infiles, opts);
+            r.close();
+            abandon();
             return Ok((code, false));
         }
     }
-    // Every listing has been compared and every small file written once the workers are idle.
+    // Every listing has been compared and every frame applied once the workers are idle.
     r.wait_lanes(Receiving::idle);
     if let Some(code) = r.failure() {
-        settle(&mut infiles, &pool);
-        cleanup_partial(&mut infiles, opts);
+        abandon();
         return Ok((code, false));
     }
-    if !streams.drained() {
+    let mut data = r.data.lock().unwrap();
+    let DataState { infiles, pool } = &mut *data;
+    if !r.streams.lock().unwrap().drained() {
         let _ = send_fatal(output, "protocol error: unreferenced xattr value stream");
-        cleanup_partial(&mut infiles, opts);
+        cleanup_partial(infiles, opts);
         return Ok((2, true));
     }
     let mut table = r.table.lock().unwrap();
@@ -1558,20 +1646,20 @@ fn receive<R: Read, W: Write + Send + 'static>(
         let Some(done) = pool.recv_done() else {
             break;
         };
-        if let Some(key) = apply_write(done, &mut infiles)? {
-            let finished = finish_ready(r, &mut table.dirs, &mut infiles, key)?;
+        if let Some(key) = apply_write(done, infiles)? {
+            let finished = finish_ready(r, &mut table.dirs, infiles, key)?;
             r.created_files.fetch_add(finished, Ordering::Relaxed);
         }
     }
-    let finished = drain_writes(r, &mut table.dirs, &mut infiles, &pool)?;
+    let finished = drain_writes(r, &mut table.dirs, infiles, pool)?;
     r.created_files.fetch_add(finished, Ordering::Relaxed);
     let missing = !table.waiting.is_empty() || table.dirs.iter().flatten().any(|dir| !dir.need.is_empty());
     if !infiles.is_empty() || missing {
         let _ = send_fatal(output, "protocol error: incomplete file data");
-        cleanup_partial(&mut infiles, opts);
+        cleanup_partial(infiles, opts);
         return Ok((2, true));
     }
-    cleanup_partial(&mut infiles, opts);
+    cleanup_partial(infiles, opts);
     let mut created_files = r.created_files.load(Ordering::Relaxed);
     let mut hardlinks = r.hardlinks.lock().unwrap();
     if hardlinks.enabled {
@@ -1604,7 +1692,8 @@ fn receive<R: Read, W: Write + Send + 'static>(
         }
     }
     if ack_enabled {
-        progress_ack(output, features, progress_bytes, created_files, true, &mut progress_last)?;
+        let bytes = r.progress_bytes.load(Ordering::Relaxed);
+        progress_ack(output, features, bytes, created_files, true, &mut progress_last)?;
     }
     let sender_code = sender_code.unwrap_or(0);
     let partial_failure = r.partial_failure.load(Ordering::Relaxed);

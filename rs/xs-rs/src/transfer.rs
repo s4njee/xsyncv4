@@ -504,6 +504,7 @@ struct Sending<'a> {
     /// Workers waiting for a delta signature, by (directory, index).
     replies: Mutex<HashMap<(u32, u32), SignatureReply>>,
     failed: Mutex<bool>,
+    control: Arc<IoControl>,
     /// `--relative` and `--files-from`: the directories and entries chosen up front.
     selection: Option<&'a scan::Selection>,
     /// Ids for the listings, taken as each goes out.
@@ -602,6 +603,7 @@ impl Sending<'_> {
         }
         drop(failed);
         self.abort();
+        self.control.request_stop();
     }
 
     /// Whether the next frame may be compressed: always with `-z`, and automatically while
@@ -1194,7 +1196,7 @@ pub fn run_sender<R: Read, W: Write + Send + 'static>(
     local_output: Option<&mut Output>,
 ) -> io::Result<i32> {
     let link = Arc::new(CompressionLink::new());
-    let output = FrameOut::new(output, Some(link.clone()), control);
+    let output = FrameOut::new(output, Some(link.clone()), control.clone());
     let keepalive = features & feature::IO_CONTROL != 0;
     loop {
         let Some(frame) = protocol::read_checked(input, keepalive, features)? else {
@@ -1242,6 +1244,7 @@ pub fn run_sender<R: Read, W: Write + Send + 'static>(
         work_changed: Condvar::new(),
         replies: Mutex::new(HashMap::new()),
         failed: Mutex::new(false),
+        control,
         selection: root.selection.as_ref(),
         next_dir: AtomicU32::new(0),
         ids: Mutex::new(idmap::Sender::default()),
@@ -1279,8 +1282,12 @@ pub fn run_sender<R: Read, W: Write + Send + 'static>(
 fn read_replies<R: Read>(s: &Sending, input: &mut R, keepalive: bool, mut local_output: Option<&mut Output>) -> io::Result<i32> {
     let features = s.features;
     loop {
-        let Some(frame) = protocol::read_checked(input, keepalive, features)? else {
-            return Ok(if s.has_failed() { 2 } else { 12 });
+        let frame = match protocol::read_checked(input, keepalive, features) {
+            Ok(Some(frame)) => frame,
+            Ok(None) => return Ok(if s.has_failed() { 2 } else { 12 }),
+            // A worker's failure has been sent already; this read only stopped for it.
+            Err(_) if s.has_failed() => return Ok(2),
+            Err(error) => return Err(error),
         };
         let action: io::Result<Option<i32>> = match frame.kind {
             frame_type::OUTPUT => {

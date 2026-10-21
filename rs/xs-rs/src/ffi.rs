@@ -55,6 +55,19 @@ type ModeT = u32;
 type ModeT = u16;
 
 #[repr(C)]
+struct PollFd {
+    fd: c_int,
+    events: i16,
+    revents: i16,
+}
+
+const POLLIN: i16 = 1;
+#[cfg(target_os = "linux")]
+type NfdsT = std::ffi::c_ulong;
+#[cfg(target_os = "macos")]
+type NfdsT = std::ffi::c_uint;
+
+#[repr(C)]
 struct Rlimit {
     current: u64,
     maximum: u64,
@@ -93,6 +106,7 @@ extern "C" {
     fn lchown(path: *const c_char, owner: u32, group: u32) -> c_int;
     fn fchown(fd: c_int, owner: u32, group: u32) -> c_int;
     fn dup2(oldfd: c_int, newfd: c_int) -> c_int;
+    fn poll(fds: *mut PollFd, count: NfdsT, timeout: c_int) -> c_int;
     fn openat(dirfd: c_int, pathname: *const c_char, flags: c_int, ...) -> c_int;
     fn renameat(olddirfd: c_int, oldpath: *const c_char, newdirfd: c_int, newpath: *const c_char) -> c_int;
     fn unlinkat(dirfd: c_int, pathname: *const c_char, flags: c_int) -> c_int;
@@ -357,6 +371,18 @@ fn ids() -> &'static Ids {
             Ids { uid: geteuid(), gid: getegid(), groups }
         }
     })
+}
+
+/// Whether `fd` has something to read (or has closed) within `milliseconds`.
+pub fn readable_within(fd: c_int, milliseconds: c_int) -> io::Result<bool> {
+    let mut entry = PollFd { fd, events: POLLIN, revents: 0 };
+    // SAFETY: one valid pollfd for the duration of the call.
+    let count = unsafe { poll(&mut entry, 1, milliseconds) };
+    if count < 0 {
+        let error = io::Error::last_os_error();
+        return if error.kind() == io::ErrorKind::Interrupted { Ok(false) } else { Err(error) };
+    }
+    Ok(count > 0)
 }
 
 /// Point `to` at what `from` refers to (dup2).
