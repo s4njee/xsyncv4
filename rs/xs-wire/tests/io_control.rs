@@ -155,8 +155,10 @@ fn the_cpp_server_refuses_an_oversized_or_malformed_io_configuration() {
     for payload in [vec![0u8; 21], vec![0x80], vec![0, 0, 0]] {
         let Some(mut server) = open_server(feature::CORE | feature::IO_CONTROL, &dir) else { return };
         assert_eq!(next(&mut server).kind, frame_type::HELLO);
-        write_frame(&mut server.input, frame_type::IO_CONFIG, &payload).unwrap();
-        server.input.flush().unwrap();
+        // xs may refuse an oversized frame from its length alone and exit before the rest is
+        // written: a broken pipe here is the race, not a failure. Its refusal is still read.
+        let _ = write_frame(&mut server.input, frame_type::IO_CONFIG, &payload);
+        let _ = server.input.flush();
         let frame = next(&mut server);
         assert_eq!(frame.kind, frame_type::MSG);
         let message = Message::decode(&frame.payload).unwrap();
