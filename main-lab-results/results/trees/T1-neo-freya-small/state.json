@@ -1,0 +1,64 @@
+{
+ "tree": "T1-neo-freya-small",
+ "started_utc": "2026-10-16T23:54:22Z",
+ "nodes": {
+  "K2a": {
+   "state": "decided",
+   "runs": [
+    "20261016T223005Z-K2a-tmpfs-freya"
+   ],
+   "decision": {
+    "utc": "2026-10-17T00:27:41Z",
+    "text": "K2a: RAM on freya is not clearly faster than its NVMe: the Pi sending is the limit",
+    "next": [
+     "D3",
+     "D9"
+    ],
+    "branch": 1
+   }
+  },
+  "K2b": {
+   "state": "decided",
+   "runs": [
+    "20261016T222957Z-K2b-tmpfs-neo"
+   ],
+   "decision": {
+    "utc": "2026-10-17T00:42:09Z",
+    "text": "K2b: into RAM on the Pi is at least 15% faster than onto its disk: the Pi's write path matters (small-flat freya\u2192neo-shm xs-z-best 1.81\u00d7 vs K1-congress-ceiling xs-z-best)",
+    "next": [
+     "D4",
+     "D10"
+    ],
+    "branch": 0
+   }
+  },
+  "D3": {
+   "state": "queued",
+   "runs": [
+    "20261017T002741Z-D3-pi-send-small"
+   ],
+   "spec": "D3-pi-send-small.toml"
+  },
+  "D9": {
+   "state": "queued",
+   "runs": [
+    "20261017T002751Z-D9-lan-best-default"
+   ],
+   "spec": "D9-lan-best-default.toml"
+  },
+  "D4": {
+   "state": "queued",
+   "runs": [
+    "20261017T004209Z-D4-pi-receive-small"
+   ],
+   "spec": "D4-pi-receive-small.toml"
+  },
+  "D10": {
+   "state": "queued",
+   "runs": [
+    "20261017T004214Z-D10-lan-noop-best"
+   ],
+   "spec": "D10-lan-noop-best.toml"
+  }
+ }
+}

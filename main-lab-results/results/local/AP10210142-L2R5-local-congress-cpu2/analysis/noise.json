@@ -1,0 +1,25 @@
+[
+ {
+  "experiment": "AP10210142-L2R5-local-congress-cpu2",
+  "kind": "screening",
+  "cell_id": "real-congress.fresh.neo-neo-ssd.receiver.warm",
+  "corpus": "real-congress",
+  "scenario": "fresh",
+  "sender": "neo",
+  "receiver": "neo-ssd",
+  "client": "receiver",
+  "link": "neo-local-ssd",
+  "cache": "warm",
+  "arm": "rsync",
+  "n_blocks": 12,
+  "sigma_d": 0.05744200611434715,
+  "blocks_for_2pct": 68,
+  "blocks_for_3pct": 32,
+  "blocks_for_5pct": 13,
+  "blocks_for_10pct": 8,
+  "blocks_equivalent_2pct": 91,
+  "blocks_equivalent_3pct": 42,
+  "blocks_equivalent_5pct": 17,
+  "blocks_equivalent_10pct": 8
+ }
+]

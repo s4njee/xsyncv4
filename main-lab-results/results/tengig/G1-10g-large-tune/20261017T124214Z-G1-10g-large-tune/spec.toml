@@ -1,0 +1,61 @@
+# G1 (tree T3, if xs leaves the link short on large files): what holds a large-file copy
+# below 10 Gb/s. More large-file streams, bigger blocks, deeper queues, more workers, and
+# all four, against xs's default, both ways.
+id = "G1-10g-large-tune"
+kind = "screening"
+hypothesis = "A larger stream count, block size, queue or worker count brings large files closer to 10 Gb/s."
+primary = "durable_s"
+delta = 0.03
+blocks = 8
+control = "xs"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.xs]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-a"]
+
+[arms.streams8]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-a"]
+tune = { sender = "send_streams=8" }
+
+[arms.block4m]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-a"]
+tune = { sender = "block_target=4194304", receiver = "block_target=4194304" }
+
+[arms.queues]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-a"]
+tune = { sender = "send_queue=268435456", receiver = "recv_queue=268435456" }
+
+[arms.jobs16]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-a"]
+tune = { sender = "jobs=16", receiver = "jobs=16" }
+
+[arms.all-four]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-a"]
+tune = { sender = "send_streams=8,block_target=4194304,send_queue=268435456,jobs=16", receiver = "block_target=4194304,recv_queue=268435456,jobs=16" }
+
+[matrix]
+link = "mac-freya-10g"
+corpus = ["large-text", "mixed-bimodal"]
+scenario = ["fresh"]
+direction = ["mac>freya", "freya>mac"]
+client = ["initiator"]
+cache = ["warm"]

@@ -1,0 +1,38 @@
+# T2a: the adaptive compression level, before and after the fix on the
+# adaptive-compression branch. The old policy starts at level 3 and leaves it
+# only when transport writes measure at 64 MiB/s or more; on the Pi, level 3
+# starves ssh of CPU, the link measures slow, and about one transfer in five
+# (sometimes most of them) runs at level 3 throughout, twice as slow. The new
+# policy also drops the level when the writer keeps up with what is produced.
+# xs-z1-old, a fixed level 1 on the old build, shows what level 1 costs.
+id = "T2a-adaptive-level"
+kind = "confirmatory"
+hypothesis = "With -z, the new adaptive policy is faster than the old one when neo sends over gigabit, and no slower when freya sends."
+primary = "wall_s"
+delta = 0.03
+blocks = 12
+control = "xs-z-old"
+verify = "first-last"
+
+[arms.xs-z-old]
+tool = "xs"
+rev = "bf596d28c5c9"
+flags = ["-a", "-z"]
+
+[arms.xs-z-new]
+tool = "xs"
+rev = "5aa5555ec8dd"
+flags = ["-a", "-z"]
+
+[arms.xs-z1-old]
+tool = "xs"
+rev = "bf596d28c5c9"
+flags = ["-a", "-z", "--compress-level=1"]
+
+[matrix]
+link = "lan"
+corpus = ["mixed-bimodal", "small-real", "small-flat"]
+scenario = ["fresh"]
+direction = ["neo>freya", "freya>neo"]
+client = ["sender"]
+cache = ["warm"]

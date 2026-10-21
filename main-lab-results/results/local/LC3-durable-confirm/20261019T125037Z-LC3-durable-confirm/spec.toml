@@ -1,0 +1,30 @@
+# Made by conduct.py for tree T14-neo-local-psample, node Cc: confirms xs-eager from LC3-psample-local-durable,
+# faster there on real-psample: real-psample neo→neo-ssd xs-eager 1.62×
+id = "LC3-durable-confirm"
+kind = "confirmatory"
+hypothesis = "xs-eager is more than 5% faster than xs on real-psample (from LC3-psample-local-durable, confirmed with fresh blocks)."
+primary = "durable_s"
+delta = 0.05
+blocks = 12
+control = "xs"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.xs]
+tool = "xs"
+rev = "21ae6844ed20"
+flags = ["-aH"]
+
+[arms.xs-eager]
+tool = "xs"
+rev = "21ae6844ed20"
+flags = ["-aH"]
+writeback = "eager"
+
+[matrix]
+link = "neo-local-ssd"
+corpus = ["real-psample"]
+scenario = ["fresh"]
+direction = ["neo>neo-ssd"]
+client = ["receiver"]
+cache = ["cold"]

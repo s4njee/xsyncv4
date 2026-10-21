@@ -1,0 +1,28 @@
+# Written by the 6-hourly planner (2026-10-19T12:50Z). Why: LC4 planned this cell but reported only the no-op result, so the incremental case that most backups hit is still unmeasured locally.
+id = "AP10191250-LC10-local-resync-1pct"
+kind = "screening"
+hypothesis = "xs -aH finishes the 1% update re-sync of psample onto the T5 faster than rsync -aH, as it did for the no-op re-sync (time ratio 0.52)."
+primary = "durable_s"
+delta = 0.05
+blocks = 4
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+sample_timeout_s = 7200
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-aH"]
+
+[arms.xs]
+tool = "xs"
+rev = "dd6f5121d506"
+flags = ["-aH"]
+
+[matrix]
+link = "neo-local-ssd"
+corpus = ["real-psample"]
+scenario = ["update-1pct"]
+direction = ["neo>neo-ssd"]
+client = ["receiver"]
+cache = ["cold"]

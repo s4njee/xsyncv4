@@ -1,0 +1,50 @@
+# G4 (tree T3): compression with a 16-core sender. At 10 Gb/s from the Mac only zstd
+# level 1 kept up (Z5); freya's 7950X has more cores to spend. From freya: adaptive -z and
+# levels 1, 2 and 3 against none, on compressible trees.
+id = "G4-10g-compress-freya"
+kind = "screening"
+hypothesis = "With freya sending, compression beats sending uncompressed at 10 Gb/s."
+primary = "durable_s"
+delta = 0.03
+blocks = 8
+control = "xs"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.xs]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-a"]
+
+[arms.xs-z]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-az"]
+
+[arms.xs-z1]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-az", "--compress-level=1"]
+
+[arms.xs-z2]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-az", "--compress-level=2"]
+
+[arms.xs-z3]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-az", "--compress-level=3"]
+
+[matrix]
+link = "mac-freya-10g"
+corpus = ["large-text", "real-congress", "mixed-bimodal"]
+scenario = ["fresh"]
+direction = ["freya>mac"]
+client = ["initiator"]
+cache = ["warm"]

@@ -1,0 +1,66 @@
+{
+ "summary": "Neither lab2 gap has reproduced at home yet. Under lab2's 11 ms and a 2-CPU sender, rsync was still 1.40x slower than xs on fresh real-congress (L2R1), 1.39x slower with the CPU cap alone (L2R2) and 1.96x slower locally (L2R5), so no development case is opened. neo now tries the one lab2 condition not yet reproduced for both gaps (step 1): an arm64 receiver held to 2 CPUs behind 11 ms, as AWS's 2-vCPU Graviton is, on real-congress and real-psample. Both runners also probe cells lab2 has not reported (small trees, no-ops and updates) under 2 CPUs, so a loss is found at home before lab2 finds it.",
+ "window_end": "2026-10-21T13:51Z",
+ "runners": [
+  {
+   "runner": "neo",
+   "rationale": "neo has 4.0 h of room: 6 h minus 0.2 h left on the sentinel and 1.8 h for the queued L2R4 plain psample baseline, which runs first as planned. The plan uses about 190 min, including rsync's possible confirmation on real-congress, which leaves margin for netem and the CPU cap stretching sample times. Every earlier reproduction capped neo as the sender. Here neo, an arm64 Linux Pi like lab2's Graviton receiver, receives from mars with 11 ms added and is held to 2 CPUs. This tests whether a starved receiver explains the congress-sample and real-projects losses. It does not duplicate L2R3/L2R4 (psample neo>mars) or the waiting confirmations, which only run if rsync screened ahead.",
+   "accepted": [
+    {
+     "id": "AP10210751-AP10210749-L2R7-congress-pull-wan11-cpu2",
+     "hours": 0.3,
+     "front": false,
+     "question": "For lab2's congress-sample fresh gap: does xs -a -j4 lose its lead over rsync -a on a fresh real-congress copy when the receiver, not the sender, is an arm64 host held to 2 CPUs behind 11 ms?"
+    },
+    {
+     "id": "AP10210751-AP10210749-L2R8-psample-pull-wan11-cpu2",
+     "hours": 1.8,
+     "front": false,
+     "question": "For lab2's real-projects fresh gap: on a fresh real-psample copy into a 2-CPU arm64 receiver behind 11 ms, is xs -a -j4 slower than rsync -a, or does it show a block-to-block stall like lab2's 8.8 to 98 s spread?"
+    },
+    {
+     "id": "AP10210751-AP10210749-L2P1-small-pull-wan11-cpu2",
+     "hours": 0.4,
+     "front": false,
+     "question": "Before lab2 measures them: does xs -a -j4 still beat rsync -a on fresh and no-op copies of small-flat, small-deep and mixed-bimodal into a 2-CPU arm64 receiver behind 11 ms?"
+    },
+    {
+     "id": "AP10210751-AP10210749-L2P2-congress-resync-wan11-cp",
+     "hours": 0.4,
+     "front": false,
+     "question": "In lab2's direction (2-CPU sender, 11 ms), does xs -a -j4 still beat rsync -a when re-syncing real-congress at a no-op and after a 1% change?"
+    }
+   ],
+   "rejected": [],
+   "tree": "AUTO-10210751-neo"
+  },
+  {
+   "runner": "neo-ssd",
+   "rationale": "neo-ssd has 4.8 h of room: 6 h minus 1.2 h left on L2R6, the running local psample 2-CPU fresh copy, and nothing queued. Its local link cannot add latency, so it probes cells lab2 has not reported under the 2-CPU cap: real-congress no-op and updates, small-tree fresh and no-op copies, and real-psample re-syncs. These are compared with the plain-link baselines from J2 and LC4. The plan uses about 198 min and leaves the waiting T16 nodes alone.",
+   "accepted": [
+    {
+     "id": "AP10210751-AP10210749-L2P3-local-congress-resync-cp",
+     "hours": 0.8,
+     "front": false,
+     "question": "With neo held to 2 CPUs, as lab2's sender is, does xs -a -j4 keep its local lead over rsync -a on real-congress no-op and update re-syncs?"
+    },
+    {
+     "id": "AP10210751-AP10210749-L2P4-local-small-cpu2",
+     "hours": 0.6,
+     "front": false,
+     "question": "With neo held to 2 CPUs, does xs -a -j4 still beat rsync -a on local fresh and no-op copies of small-flat, small-deep and mixed-bimodal?"
+    },
+    {
+     "id": "AP10210751-AP10210749-L2P5-local-psample-resync-cpu",
+     "hours": 2.0,
+     "front": false,
+     "question": "For the corpus behind lab2's real-projects gap: with neo held to 2 CPUs, does xs -a -j4 still re-sync real-psample faster than rsync -a at a no-op and after a 1% change?"
+    }
+   ],
+   "rejected": [],
+   "tree": "AUTO-10210751-neo-ssd"
+  }
+ ],
+ "engineering": null,
+ "conductor": "N0 queued on neo-ssd (80 samples): start of the tree\nN1 queued on neo-ssd (96 samples): start of the tree\nN2 queued on neo-ssd (16 samples): start of the tree\nN0 queued on neo (24 samples): start of the tree\nN1 queued on neo (12 samples): start of the tree\nN2 queued on neo (72 samples): start of the tree\nN3 queued on neo (32 samples): start of the tree\n"
+}

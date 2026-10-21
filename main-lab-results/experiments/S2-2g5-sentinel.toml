@@ -1,0 +1,33 @@
+# S2: S0 again on neo and freya's USB 2.5 GbE link, after freya's motherboard swap.
+# Read as a control chart, never tested: the A/A ratio is the noise floor at that
+# hour, and xs against rsync should not move.
+id = "S2-2g5-sentinel"
+kind = "screening"
+hypothesis = "Hour by hour, the A/A ratio stays within 3% of 1 and the xs to rsync ratio stays where E6a's rsync arm put it."
+primary = "wall_s"
+delta = 0.03
+blocks = 3
+control = "xs"
+verify = "first-last"
+
+[arms.xs]
+tool = "xs"
+rev = "21ae6844ed20"
+flags = ["-a"]
+
+[arms.again]
+tool = "xs"
+rev = "21ae6844ed20"
+flags = ["-a"]
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[matrix]
+link = "neo-freya-usb-2g5"
+corpus = ["small-flat", "mixed-bimodal"]
+scenario = ["fresh", "noop"]
+direction = ["neo>freya", "freya>neo"]
+client = ["sender"]
+cache = ["warm"]

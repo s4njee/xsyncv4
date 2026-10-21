@@ -1,0 +1,20 @@
+{
+ "summary": "Neither runner has room for new work this window, so this plan adds no experiments. The Mac is still running the 7-hour MA7 psample pull study, which ends after the window closes. neo-ssd's current run plus its 10.2 hours of queued local-copy work (LC6, LC3, LC4) already exceed six hours.",
+ "window_end": "2026-10-19T05:07Z",
+ "runners": [
+  {
+   "runner": "mac",
+   "rationale": "No room: the current run MA7-psample-pull-apfs has 7.0 hours left, which is more than the 6-hour window, so nothing new can start before 05:07Z. Open follow-ups for a later window on mac-mars-10g: the xs-recv4 near-ties from E6b, and rsync beating xs on the small-deep no-op pull onto the Mac (ratio 0.536).",
+   "accepted": [],
+   "rejected": [],
+   "tree": null
+  },
+  {
+   "runner": "neo-ssd",
+   "rationale": "No room: LC2-psample-local-workers has 2.7 hours left and 10.2 hours are already queued (LC6, LC3, LC4), well past the 6-hour window. Trees T16 and T14 already cover the open local-copy questions, including whether xs can beat rsync -aH and what holds xs back.",
+   "accepted": [],
+   "rejected": [],
+   "tree": null
+  }
+ ]
+}

@@ -1,0 +1,17 @@
+# Written by the 6-hourly planner at 2026-10-21T07:51Z for neo-ssd; nothing is queued after the deadline.
+id = "AUTO-10210751-neo-ssd"
+question = "neo-ssd has 4.8 h of room: 6 h minus 1.2 h left on L2R6, the running local psample 2-CPU fresh copy, and nothing queued. Its local link cannot add latency, so it probes cells lab2 has not reported under the 2-CPU cap: real-congress no-op and updates, small-tree fresh and no-op copies, and real-psample re-syncs. These are compared with the plain-link baselines from J2 and LC4. The plan uses about 198 min and leaves the waiting T16 nodes alone."
+deadline = "2026-10-21T13:51Z"
+start = ["N0", "N1", "N2"]
+
+[nodes.N0]
+spec = "auto/AP10210751-AP10210749-L2P3-local-congress-resync-cp.toml"
+question = "With neo held to 2 CPUs, as lab2's sender is, does xs -a -j4 keep its local lead over rsync -a on real-congress no-op and update re-syncs?"
+
+[nodes.N1]
+spec = "auto/AP10210751-AP10210749-L2P4-local-small-cpu2.toml"
+question = "With neo held to 2 CPUs, does xs -a -j4 still beat rsync -a on local fresh and no-op copies of small-flat, small-deep and mixed-bimodal?"
+
+[nodes.N2]
+spec = "auto/AP10210751-AP10210749-L2P5-local-psample-resync-cpu.toml"
+question = "For the corpus behind lab2's real-projects gap: with neo held to 2 CPUs, does xs -a -j4 still re-sync real-psample faster than rsync -a at a no-op and after a 1% change?"

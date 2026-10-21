@@ -1,0 +1,30 @@
+# E1n: xs against rsync between neo (Raspberry Pi 5, Linux, ext4) and mars (Ryzen 9 7950X, macOS
+# 26, APFS) on the home LAN at 1 GbE, both ways, fresh and no-op, warm cache (mars has no helper to
+# drop its caches). The first measurement of a Linux/macOS pair on different hardware; the
+# sentinel S4 reads its ratios against this one.
+id = "E1n-neo-mars-baseline"
+kind = "screening"
+hypothesis = "xs -a differs from rsync -a by more than 3% in time-to-durable, both ways between neo and mars."
+primary = "durable_s"
+delta = 0.03
+blocks = 4
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[arms.xs]
+tool = "xs"
+rev = "e51c1df1329a"
+flags = ["-a"]
+
+[matrix]
+link = "neo-mars-lan"
+corpus = ["small-flat", "small-deep", "mixed-bimodal"]
+scenario = ["fresh", "noop"]
+direction = ["neo>mars", "mars>neo"]
+client = ["initiator"]
+cache = ["warm"]

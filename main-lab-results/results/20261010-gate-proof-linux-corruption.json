@@ -1,0 +1,58 @@
+{
+ "schema": 1,
+ "utc": "2026-10-10T21:16:51.825404+00:00",
+ "host": "f09282e9198d",
+ "platform": "Linux-7.0.14-linuxkit-aarch64-with-glibc2.36",
+ "cpus": 10,
+ "initial_loadavg": [
+  0.18408203125,
+  0.57666015625,
+  0.40283203125
+ ],
+ "cache": "retained OS caches",
+ "policy": {
+  "schema": 1,
+  "reference": "3c8ec2d2216544641eba78ff7032d4d05296be7d",
+  "minimum_relative_ratio": 0.6,
+  "samples": 24,
+  "fixture_seed": 20261010
+ },
+ "policy_sha256": "11cc12cd894f1c3c3c8b9c8bd7be87c4de76b05363f820a53b6bb2f7adabb407",
+ "samples_per_tool": 1,
+ "smoke_fixtures": true,
+ "warmups_per_tool": 1,
+ "warmups": [],
+ "records": [],
+ "ratios": [],
+ "binaries": {
+  "reference": {
+   "path": "/output/p3-linux-scan-build/xs",
+   "sha256": "811beab4ebc99e182b45d864420d8d427e5cdd3b0c585a76c9fedd26fca0b067",
+   "version": "xs  version 0.1.0  protocol version 4  git 742bbd5fbe38-dirty"
+  },
+  "candidate": {
+   "path": "/tmp/tmpxqhjxi_a/corrupt-xs",
+   "sha256": "b6850b2b50d4ed6bfe027fa233e52cff2eece1ed4b9fc710cf1ab481700384ed",
+   "version": "xs  version 0.1.0  protocol version 4  git 742bbd5fbe38-dirty"
+  },
+  "rsync": {
+   "path": "/usr/bin/rsync",
+   "sha256": "9e5f67e9f13b62bbded845a3cfd2b29974273b014f8639e02bf1579cd99e5f3c",
+   "version": "rsync  version 3.2.7  protocol version 32"
+  }
+ },
+ "fixtures": {
+  "small_files": 128,
+  "small_file_bytes": 512,
+  "changed_files": 1,
+  "changed_fraction": 0.0078125,
+  "large_files": 2,
+  "large_file_bytes": 1048576,
+  "tiny_bytes": 19
+ },
+ "error": "local-fresh candidate verification failed: *deleting   wrong\ncd+++++++++ group-000/\ncd+++++++++ group-000/branch-0000/\ncd+++++++++ group-000/branch-0000/leaf-00000/\n>f+++++++++ group-000/branch-0000/leaf-00000/file-00.json\n>f+++++++++ group-000/branch-0000/leaf-00000/file-01.json\n>f+++++++++ group-000/branch-0000/leaf-00000/file-02.json\n>f+++++++++ group-000/branch-0000/leaf-00000/file-03.json\ncd+++++++++ group-000/branch-0000/leaf-00001/\n>f+++++++++ group-000/branch-0000/leaf-00001/file-00.json\n>f+++++++++ group-000/branch-0000/leaf-00001/file-01.json\n>f+++++++++ group-000/branch-0000/leaf-00001/file-02.json\n>f+++++++++ group-000/branch-0000/leaf-00001/file-03.json\ncd+++++++++ group-000/branch-0000/leaf-00002/\n>f+++++++++ group-000/branch-0000/leaf-00002/file-00.json\n>f+++++++++ group-000/branch-0000/leaf-00002/file-01.json\n>f+++++++++ group-000/branch-0000/leaf-00002/file-02.json\n>f+++++++++ group-000/branch-0000/leaf-00002/file-03.json\ncd+++++++++ group-000/branch-0000/leaf-00003/\n>f+++++++++ group-000/branch-0000/leaf-00003/file-00.json\n>f+++++++++ group-000/branch-0000/leaf-00003/file-01.json\n>f+++++++++ group-000/branch-0000/leaf-00003/file-02.json\n>f+++++++++ group-000/branch-0000/leaf-00003/file-03.json\ncd+++++++++ group-000/branch-0001/\ncd+++++++++ group-000/branch-0001/leaf-00004/\n>f+++++++++ group-000/branch-0001/leaf-00004/file-00.json\n>f+++++++++ group-000/branch-0001/leaf-00004/file-01.json\n>f+++++++++ group-000/branch-0001/leaf-00004/file-02.json\n>f+++++++++ group-000/branch-0001/leaf-00004/file-03.json\ncd+++++++++ group-000/branch-0001/leaf-00005/\n>f+++++++++ group-000/branch-0001/leaf-00005/file-00.json\n>f+++++++++ group-000/branch-0001/leaf-00005/file-01.json\n>f+++++++++ group-000/branch-0001/leaf-00005/file-02.json\n>f+++++++++ group-000/branch-0001/leaf-00005/file-03.json\ncd+++++++++ group-000/branch-0001/leaf-00006/\n>f+++++++++ group-000/branch-0001/leaf-00006/file-00.json\n>f+++++++++ group-000/branch-0001/leaf-00006/file-01.json\n>f+++++++++ group-000/branch-0001/leaf-00006/file-02.json\n>f+++++++++ group-000/branch-0001/leaf-00006/file-03.json\ncd+++++++++ group-000/branch-0001/leaf-00007/\n>f+++++++++ group-000/branch-0001/leaf-00007/file-00.json\n>f+++++++++ group-000/branch-0001/leaf-00007/file-01.json\n>f+++++++++ group-000/branch-0001/leaf-00007/file-02.json\n>f+++++++++ group-000/branch-0001/leaf-00007/file-03.json\ncd+++++++++ group-000/branch-0002/\ncd+++++++++ group-000/branch-0002/leaf-00008/\n>f+++++++++ group-000/branch-0002/leaf-00008/file-00.json\n>f+++++++++ group-000/branch-0002/leaf-00008/file-01.json\n>f+++++++++ group-000/branch-0002/leaf-00008/file-02.json\n>f+++++++++ group-000/branch-0002/leaf-00008/file-03.json\ncd+++++++++ group-000/branch-0002/leaf-00009/\n>f+++++++++ group-000/branch-0002/leaf-00009/file-00.json\n>f+++++++++ group-000/branch-0002/leaf-00009/file-01.json\n>f+++++++++ group-000/branch-0002/leaf-00009/file-02.json\n>f+++++++++ group-000/branch-0002/leaf-00009/file-03.json\ncd+++++++++ group-000/branch-0002/leaf-00010/\n>f+++++++++ group-000/branch-0002/leaf-00010/file-00.json\n>f+++++++++ group-000/branch-0002/leaf-00010/file-01.json\n>f+++++++++ group-000/branch-0002/leaf-00010/file-02.json\n>f+++++++++ group-000/branch-0002/leaf-00010/file-03.json\ncd+++++++++ group-000/branch-0002/leaf-00011/\n>f+++++++++ group-000/branch-0002/leaf-00011/file-00.json\n>f+++++++++ group-000/branch-0002/leaf-00011/file-01.json\n>f+++++++++ group-000/branch-0002/leaf-00011/file-02.json\n>f+++++++++ group-000/branch-0002/leaf-00011/file-03.json\ncd+++++++++ group-000/branch-0003/\ncd+++++++++ group-000/branch-0003/leaf-00012/\n>f+++++++++ group-000/branch-0003/leaf-00012/file-00.json\n>f+++++++++ group-000/branch-0003/leaf-00012/file-01.json\n>f+++++++++ group-000/branch-0003/leaf-00012/file-02.json\n>f+++++++++ group-000/branch-0003/leaf-00012/file-03.json\ncd+++++++++ group-000/branch-0003/leaf-00013/\n>f+++++++++ group-000/branch-0003/leaf-00013/file-00.json\n>f+++++++++ group-000/branch-0003/leaf-00013/file-01.json\n>f+++++++++ group-000/branch-0003/leaf-0001",
+ "passed": false,
+ "self_test": "test_corruption_is_a_failure_even_when_tool_exits_zero",
+ "production_measurement": false,
+ "control_startup_delay_seconds": 0
+}

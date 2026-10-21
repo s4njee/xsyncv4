@@ -1,0 +1,23 @@
+{
+ "experiment": "N1g-compress-cost",
+ "kind": "screening",
+ "hypothesis": "On a tree that will not compress, xs -z costs time against xs -a, and level 1 less than adaptive.",
+ "primary": "durable_s",
+ "control": "xs",
+ "delta": 0.03,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261017T165108Z-N1g-compress-cost",
+  "20261017T185524Z-N1g-compress-cost"
+ ],
+ "spec_sha256": [
+  "414d17ccf35012e9455c0c50b3827fa21077ce1939d3a25948965310a9931d12",
+  "b3cc39a83dc9fa073bfd6d6c0dc51022f52db15e99af9e7a3225e739ee7d8ef9"
+ ],
+ "valid_blocks": 8,
+ "void_attempts": 24,
+ "void_reasons": [
+  "neo does not answer ping"
+ ]
+}

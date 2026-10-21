@@ -1,0 +1,35 @@
+# S4: the neo and mars sentinel on the home LAN at 1 GbE (link neo-mars-lan), since mars runs macOS
+# (2026-10-20). Two identical xs arms and rsync, a small and a mixed tree, fresh and no-op, both
+# ways; neo starts every connection, so mars>neo is a pull. Read as a control chart: the A/A ratio
+# at each hour is the noise floor of a Linux Pi against a macOS x86 host. Warm only: mars has no helper.
+id = "S4-neo-mars-sentinel"
+kind = "screening"
+hypothesis = "Hour by hour, the A/A ratio stays within 5% of 1 and the xs to rsync ratio stays where E1n's put it."
+primary = "wall_s"
+delta = 0.05
+blocks = 2
+control = "xs"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.xs]
+tool = "xs"
+rev = "e51c1df1329a"
+flags = ["-a"]
+
+[arms.again]
+tool = "xs"
+rev = "e51c1df1329a"
+flags = ["-a"]
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[matrix]
+link = "neo-mars-lan"
+corpus = ["small-flat", "mixed-bimodal"]
+scenario = ["fresh", "noop"]
+direction = ["neo>mars", "mars>neo"]
+client = ["initiator"]
+cache = ["warm"]

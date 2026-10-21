@@ -1,0 +1,37 @@
+# Made by conduct.py: the 3 blocks per cell that 20261017T224604Z-F1a-lan-replicate did not finish.
+# F1a (tree T1 fill): a short replicate of the main comparison on the wired pair,
+# repeated while the tree has nothing else to run, so drift over the weekend is measured.
+id = "F1a-lan-replicate"
+kind = "screening"
+hypothesis = "xs's best setting with -z stays ahead of rsync -az from run to run."
+primary = "durable_s"
+delta = 0.03
+blocks = 3
+control = "xs-z"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.xs-z]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-az"]
+
+[arms.xs-z-best]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-az", "--no-atomic"]
+tune = { receiver = "jobs=4" }
+
+[arms.rsync-z]
+tool = "rsync"
+flags = ["-az"]
+
+[matrix]
+link = "lan"
+corpus = ["small-flat", "real-congress", "mixed-bimodal"]
+scenario = ["fresh"]
+direction = ["neo>freya", "freya>neo"]
+client = ["sender"]
+cache = ["warm"]

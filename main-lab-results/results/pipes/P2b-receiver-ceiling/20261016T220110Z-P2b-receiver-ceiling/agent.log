@@ -1,0 +1,31 @@
+Traceback (most recent call last):
+  File "~/benchmarks/xsbench.noindex/lib/0a93aa78ad4f/agent.py", line 597, in <module>
+    sys.exit(Run(sys.argv[1]).execute(limit))
+             ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "~/benchmarks/xsbench.noindex/lib/0a93aa78ad4f/agent.py", line 571, in execute
+    self.prepare()
+    ~~~~~~~~~~~~^^
+  File "~/benchmarks/xsbench.noindex/lib/0a93aa78ad4f/agent.py", line 311, in prepare
+    found = json.loads(host.run('python3', host.bin('corpus.py'), 'verify', f'{host.root}/corpora/{name}',
+                       ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                                '--manifest', manifest, '--quick', timeout=1800).stdout)
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "~/benchmarks/xsbench.noindex/lib/0a93aa78ad4f/agent.py", line 65, in run
+    return self.shell(shlex.join(map(str, argv)), **options)
+           ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "~/benchmarks/xsbench.noindex/lib/0a93aa78ad4f/agent.py", line 59, in shell
+    done = subprocess.run(argv, capture_output=True, text=True, timeout=timeout, stdin=subprocess.DEVNULL)
+  File "/opt/homebrew/Cellar/python@3.14/3.14.8/Frameworks/Python.framework/Versions/3.14/lib/python3.14/subprocess.py", line 557, in run
+    stdout, stderr = process.communicate(input, timeout=timeout)
+                     ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.8/Frameworks/Python.framework/Versions/3.14/lib/python3.14/subprocess.py", line 1221, in communicate
+    stdout, stderr = self._communicate(input, endtime, timeout)
+                     ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.8/Frameworks/Python.framework/Versions/3.14/lib/python3.14/subprocess.py", line 2154, in _communicate
+    self._check_timeout(endtime, orig_timeout, stdout, stderr)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.8/Frameworks/Python.framework/Versions/3.14/lib/python3.14/subprocess.py", line 1268, in _check_timeout
+    raise TimeoutExpired(
+    ...<2 lines>...
+            stderr=b''.join(stderr_seq) if stderr_seq else None)
+subprocess.TimeoutExpired: Command '['ssh', '-oBatchMode=yes', '-oConnectTimeout=10', '[email]', "sh -c 'python3 ~/benchmarks/xsyncv4/lab/lib/0a93aa78ad4f/corpus.py verify ~/benchmarks/xsyncv4/lab/corpora/small-deep --manifest ~/benchmarks/xsyncv4/lab/corpora/small-deep.manifest.json --quick'"]' timed out after 1800 seconds

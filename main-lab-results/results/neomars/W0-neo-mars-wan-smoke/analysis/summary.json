@@ -1,0 +1,19 @@
+{
+ "experiment": "W0-neo-mars-wan-smoke",
+ "kind": "screening",
+ "hypothesis": "With 11 ms added and neo held to 2 CPUs, both tools complete every block and the link probe passes.",
+ "primary": "durable_s",
+ "control": "rsync",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261021T011813Z-W0-neo-mars-wan-smoke"
+ ],
+ "spec_sha256": [
+  "16b95b0938f2982acb732f1a51e11f8380821207423201b496e564856356e28c"
+ ],
+ "valid_blocks": 4,
+ "void_attempts": 0,
+ "void_reasons": []
+}

@@ -1,0 +1,53 @@
+# LC6 (tree T16): can xs beat rsync -aH on the Pi's local psample copy with the same
+# semantics? strace found xs's four default workers contending (futex calls were 45% of
+# its syscall time), and by hand two workers took 230 s against four's 301-306 s and
+# rsync's 214 s. This screens two and three workers on the release build and on the
+# source-guard fix (dd6f5121d506, which stops resolving every directory's path), against
+# rsync as the control. Default xs is kept for reference to LC1 and LC2.
+id = "LC6-local-beat-rsync"
+kind = "screening"
+hypothesis = "With two or three workers, alone or with the source-guard fix, xs -aH copies psample to the T5 at least as fast as rsync -aH."
+primary = "durable_s"
+delta = 0.03
+blocks = 4
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+sample_timeout_s = 7200
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-aH"]
+
+[arms.xs]
+tool = "xs"
+rev = "21ae6844ed20"
+flags = ["-aH"]
+
+[arms.xs-j2]
+tool = "xs"
+rev = "21ae6844ed20"
+flags = ["-aH", "-j2"]
+
+[arms.xs-j3]
+tool = "xs"
+rev = "21ae6844ed20"
+flags = ["-aH", "-j3"]
+
+[arms.xs-guard-j2]
+tool = "xs"
+rev = "dd6f5121d506"
+flags = ["-aH", "-j2"]
+
+[arms.xs-guard-j3]
+tool = "xs"
+rev = "dd6f5121d506"
+flags = ["-aH", "-j3"]
+
+[matrix]
+link = "neo-local-ssd"
+corpus = ["real-psample"]
+scenario = ["fresh"]
+direction = ["neo>neo-ssd"]
+client = ["receiver"]
+cache = ["cold"]

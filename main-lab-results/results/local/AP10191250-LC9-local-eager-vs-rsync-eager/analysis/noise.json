@@ -1,0 +1,25 @@
+[
+ {
+  "experiment": "AP10191250-LC9-local-eager-vs-rsync-eager",
+  "kind": "screening",
+  "cell_id": "real-psample.fresh.neo-neo-ssd.receiver.cold",
+  "corpus": "real-psample",
+  "scenario": "fresh",
+  "sender": "neo",
+  "receiver": "neo-ssd",
+  "client": "receiver",
+  "link": "neo-local-ssd",
+  "cache": "cold",
+  "arm": "xs-eager",
+  "n_blocks": 6,
+  "sigma_d": 0.009343530766441168,
+  "blocks_for_2pct": 8,
+  "blocks_for_3pct": 8,
+  "blocks_for_5pct": 8,
+  "blocks_for_10pct": 8,
+  "blocks_equivalent_2pct": 8,
+  "blocks_equivalent_3pct": 8,
+  "blocks_equivalent_5pct": 8,
+  "blocks_equivalent_10pct": 8
+ }
+]

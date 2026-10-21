@@ -1,0 +1,19 @@
+{
+ "experiment": "MA6-mac-mars-shapes",
+ "kind": "screening",
+ "hypothesis": "The mac/mars tool ranking from psample holds on other real trees: many small compressible files, and a large compressible file.",
+ "primary": "wall_s",
+ "control": "rsync",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261018T075636Z-MA6-mac-mars-shapes"
+ ],
+ "spec_sha256": [
+  "4fbc3aca6085e2ff4ce76a62feff9887218b7e64af54ce869e2e5424d5be4250"
+ ],
+ "valid_blocks": 16,
+ "void_attempts": 0,
+ "void_reasons": []
+}

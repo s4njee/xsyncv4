@@ -1,0 +1,61 @@
+# T1c: worker counts chosen per end. E3a moved both ends together with -j and
+# found no single count that is right: one worker helps the Pi send bytes and
+# hurts everything small; sixteen receiving workers on freya slow a no-op.
+# Here one end at a time departs from its default (4 on neo, 16 on freya).
+id = "T1c-side-jobs"
+kind = "screening"
+hypothesis = "The sender's and the receiver's worker counts matter separately: fewer sending workers help only byte-bound copies from neo, and fewer receiving workers help no-ops on freya."
+primary = "wall_s"
+delta = 0.03
+blocks = 10
+control = "xs"
+verify = "first-last"
+
+[arms.xs]
+tool = "xs"
+rev = "ddefa041364e-tune"
+flags = ["-a"]
+metrics = true
+
+[arms.send1]
+tool = "xs"
+rev = "ddefa041364e-tune"
+flags = ["-a"]
+tune = { sender = "jobs=1" }
+metrics = true
+
+[arms.send2]
+tool = "xs"
+rev = "ddefa041364e-tune"
+flags = ["-a"]
+tune = { sender = "jobs=2" }
+metrics = true
+
+[arms.recv2]
+tool = "xs"
+rev = "ddefa041364e-tune"
+flags = ["-a"]
+tune = { receiver = "jobs=2" }
+metrics = true
+
+[arms.recv4]
+tool = "xs"
+rev = "ddefa041364e-tune"
+flags = ["-a"]
+tune = { receiver = "jobs=4" }
+metrics = true
+
+[arms.recv8]
+tool = "xs"
+rev = "ddefa041364e-tune"
+flags = ["-a"]
+tune = { receiver = "jobs=8" }
+metrics = true
+
+[matrix]
+link = "lan"
+corpus = ["small-flat", "small-real", "mixed-bimodal"]
+scenario = ["fresh", "noop"]
+direction = ["neo>freya", "freya>neo"]
+client = ["sender"]
+cache = ["warm"]

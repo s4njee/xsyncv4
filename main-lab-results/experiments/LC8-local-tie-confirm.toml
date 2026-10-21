@@ -1,0 +1,30 @@
+# LC8 (tree T16): when LC6 puts xs within a few percent of rsync but not clearly ahead,
+# eight fresh blocks of the likeliest winner, the source-guard fix with two workers,
+# against rsync: enough blocks for the lab to call it faster, equivalent or slower.
+id = "LC8-local-tie-confirm"
+kind = "confirmatory"
+hypothesis = "xs -aH with two workers and the source-guard fix copies psample to the T5 at least as fast as rsync -aH."
+primary = "durable_s"
+delta = 0.03
+blocks = 8
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+sample_timeout_s = 7200
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-aH"]
+
+[arms.xs-guard-j2]
+tool = "xs"
+rev = "dd6f5121d506"
+flags = ["-aH", "-j2"]
+
+[matrix]
+link = "neo-local-ssd"
+corpus = ["real-psample"]
+scenario = ["fresh"]
+direction = ["neo>neo-ssd"]
+client = ["receiver"]
+cache = ["cold"]

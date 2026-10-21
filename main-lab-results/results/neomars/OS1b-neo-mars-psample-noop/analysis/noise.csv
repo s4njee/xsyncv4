@@ -1,0 +1,5 @@
+experiment,kind,cell_id,corpus,scenario,sender,receiver,client,link,cache,arm,n_blocks,sigma_d,blocks_for_2pct,blocks_for_3pct,blocks_for_5pct,blocks_for_10pct,blocks_equivalent_2pct,blocks_equivalent_3pct,blocks_equivalent_5pct,blocks_equivalent_10pct
+OS1b-neo-mars-psample-noop,screening,real-psample.noop.mars-neo.receiver.warm,real-psample,noop,mars,neo,receiver,neo-mars-lan,warm,xs,5,0.04143105155792522,37,18,8,8,48,23,10,8
+OS1b-neo-mars-psample-noop,screening,real-psample.noop.mars-neo.receiver.warm,real-psample,noop,mars,neo,receiver,neo-mars-lan,warm,rsync,5,0.056485279241671224,66,31,13,8,88,41,17,8
+OS1b-neo-mars-psample-noop,screening,real-psample.noop.neo-mars.sender.warm,real-psample,noop,neo,mars,sender,neo-mars-lan,warm,xs,6,0.13294730616123748,356,161,61,18,476,215,81,23
+OS1b-neo-mars-psample-noop,screening,real-psample.noop.neo-mars.sender.warm,real-psample,noop,neo,mars,sender,neo-mars-lan,warm,rsync,6,0.17328607639989335,603,272,101,28,807,364,135,37

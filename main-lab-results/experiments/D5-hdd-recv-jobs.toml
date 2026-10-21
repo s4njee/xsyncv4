@@ -1,0 +1,48 @@
+# D5 (tree T2, after P3b): receiving workers on mars's hard drive. On NVMe four
+# workers beat sixteen (N3); on one spinning disk, every extra worker adds seeks between
+# files, so fewer may be faster still. One, two and eight against four, all --no-atomic.
+id = "D5-hdd-recv-jobs"
+kind = "screening"
+hypothesis = "Fewer receiving workers make small and mixed trees land on the hard drive faster."
+primary = "durable_s"
+delta = 0.03
+blocks = 8
+control = "xs-best"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.xs-best]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-a", "--no-atomic"]
+tune = { receiver = "jobs=4" }
+
+[arms.recv1]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-a", "--no-atomic"]
+tune = { receiver = "jobs=1" }
+
+[arms.recv2]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-a", "--no-atomic"]
+tune = { receiver = "jobs=2" }
+
+[arms.recv8]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-a", "--no-atomic"]
+tune = { receiver = "jobs=8" }
+
+[matrix]
+link = "mac-mars-hdd-2g5"
+corpus = ["small-flat", "small-deep", "mixed-bimodal"]
+scenario = ["fresh"]
+direction = ["mac>mars-hdd"]
+client = ["initiator"]
+cache = ["warm"]

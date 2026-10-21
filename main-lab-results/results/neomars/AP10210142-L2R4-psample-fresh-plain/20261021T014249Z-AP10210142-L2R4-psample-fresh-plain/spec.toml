@@ -1,0 +1,28 @@
+# Written by the 6-hourly planner (2026-10-21T01:42Z). Why: Step 1 (reproduce): there is no plain-link fresh real-psample result on neo-mars to set the reproduction against.
+id = "AP10210142-L2R4-psample-fresh-plain"
+kind = "screening"
+hypothesis = "On the plain link, xs -a -j4 copies real-psample fresh no slower than rsync -a, so any loss in L2R3 comes from lab2's conditions."
+primary = "durable_s"
+delta = 0.05
+blocks = 6
+control = "xs-j4"
+verify = "first-last"
+cleanup = "eager"
+sample_timeout_s = 7200
+
+[arms.xs-j4]
+tool = "xs"
+rev = "e51c1df1329a"
+flags = ["-a", "-j4"]
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[matrix]
+link = "neo-mars-lan"
+corpus = ["real-psample"]
+scenario = ["fresh"]
+direction = ["neo>mars"]
+client = ["initiator"]
+cache = ["warm"]

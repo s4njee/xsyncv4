@@ -1,0 +1,91 @@
+{
+ "id": "T13-mac-pull-apfs",
+ "question": "What recovers xs's psample pull onto the Mac, where rsync is faster?",
+ "start": [
+  "A"
+ ],
+ "startedUtc": "2026-10-18T14:48:03Z",
+ "until": null,
+ "fills": 0,
+ "nodes": [
+  {
+   "id": "A",
+   "kind": "experiment",
+   "experiment": "MA7-psample-pull-apfs",
+   "question": "Does skipping directory times, the rename, or more receiver workers or scanners recover the pull?",
+   "estimateHours": 0.3,
+   "hypothesis": "Skipping directory times, the rename, or giving the Mac receiver more workers or scanners recovers xs's psample pull onto APFS.",
+   "design": "screening",
+   "state": "held",
+   "runs": [
+    {
+     "id": "20261018T144803Z-MA7-psample-pull-apfs",
+     "key": "macmars/MA7-psample-pull-apfs/20261018T144803Z-MA7-psample-pull-apfs",
+     "state": "complete"
+    }
+   ],
+   "decision": null,
+   "decidedUtc": null,
+   "start": true,
+   "promote": null
+  },
+  {
+   "id": "A~end1",
+   "kind": "end",
+   "experiment": null,
+   "question": null,
+   "estimateHours": null,
+   "hypothesis": "no setting recovers the pull onto APFS: profile the Mac receiver and build the per-directory candidates (E5b, E5d); decision needed",
+   "design": null,
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "Ac",
+   "kind": "confirm",
+   "experiment": "MA7-pull-confirm",
+   "question": "Does the setting that recovered the psample pull hold up with fresh blocks, in both cells?",
+   "estimateHours": 0.2,
+   "hypothesis": "Confirms the fastest arm of A with 12 fresh blocks, if it had one.",
+   "design": "confirmatory",
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": "A"
+  }
+ ],
+ "edges": [
+  {
+   "from": "A",
+   "to": "Ac",
+   "label": "a setting >= 1.05x xs",
+   "taken": null
+  },
+  {
+   "from": "A",
+   "to": "A~end1",
+   "label": "nothing faster",
+   "taken": null
+  }
+ ],
+ "decisions": [
+  {
+   "utc": "2026-10-19T13:02:32Z",
+   "node": "A",
+   "kind": "held",
+   "text": "decision needed \u2014 A: no setting recovers the pull onto APFS: profile the Mac receiver and build the per-directory candidates (E5b, E5d); decision needed; would queue nothing"
+  },
+  {
+   "utc": "2026-10-18T14:48:04Z",
+   "node": "A",
+   "kind": "queued",
+   "text": "A queued on mac (72 samples): start of the tree"
+  }
+ ]
+}

@@ -1,0 +1,521 @@
+{
+ "id": "T1-neo-freya-small",
+ "question": "What limits xs's small-file copies between the Pi and freya, and is its best setting safe as the default?",
+ "start": [
+  "K2a",
+  "K2b"
+ ],
+ "startedUtc": "2026-10-16T23:54:22Z",
+ "until": "2026-10-18T12:00Z",
+ "fills": 0,
+ "nodes": [
+  {
+   "id": "K2a",
+   "kind": "experiment",
+   "experiment": "K2a-tmpfs-freya",
+   "question": "Does freya's disk slow down copies from the Pi?",
+   "estimateHours": 0.5,
+   "hypothesis": "xs copies small trees into RAM on freya no faster than onto its NVMe: the receiver's disk is not the limit.",
+   "design": "screening",
+   "state": "decided",
+   "runs": [
+    {
+     "id": "20261016T223005Z-K2a-tmpfs-freya",
+     "key": "lab/K2a-tmpfs-freya/20261016T223005Z-K2a-tmpfs-freya",
+     "state": "complete"
+    }
+   ],
+   "decision": "K2a: RAM on freya is not clearly faster than its NVMe: the Pi sending is the limit",
+   "decidedUtc": "2026-10-17T00:27:41Z",
+   "start": true,
+   "promote": null
+  },
+  {
+   "id": "K2b",
+   "kind": "experiment",
+   "experiment": "K2b-tmpfs-neo",
+   "question": "Does the Pi's own disk slow down copies to it?",
+   "estimateHours": 0.3,
+   "hypothesis": "xs copies small trees into RAM on the Pi much faster than onto its NVMe: the Pi's filesystem is the limit.",
+   "design": "screening",
+   "state": "decided",
+   "runs": [
+    {
+     "id": "20261016T222957Z-K2b-tmpfs-neo",
+     "key": "lab/K2b-tmpfs-neo/20261016T222957Z-K2b-tmpfs-neo",
+     "state": "complete"
+    }
+   ],
+   "decision": "K2b: into RAM on the Pi is at least 15% faster than onto its disk: the Pi's write path matters (small-flat freya\u2192neo-shm xs-z-best 1.81\u00d7 vs K1-congress-ceiling xs-z-best)",
+   "decidedUtc": "2026-10-17T00:42:09Z",
+   "start": true,
+   "promote": null
+  },
+  {
+   "id": "D2",
+   "kind": "experiment",
+   "experiment": "D2-freya-receive-path",
+   "question": "Can a receive-side setting on freya make up for its disk?",
+   "estimateHours": 0.9,
+   "hypothesis": "A different receiving worker count or larger writes on freya make small trees from the Pi land faster.",
+   "design": "screening",
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "D2~end1",
+   "kind": "end",
+   "experiment": null,
+   "question": null,
+   "estimateHours": null,
+   "hypothesis": "no receive-path setting on freya beat xs's best",
+   "design": null,
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "D3",
+   "kind": "experiment",
+   "experiment": "D3-pi-send-small",
+   "question": "Can a sending setting get more out of the Pi?",
+   "estimateHours": 0.9,
+   "hypothesis": "Turning compression off, leaving ssh a core, or batching reads makes the Pi send small trees faster.",
+   "design": "screening",
+   "state": "queued",
+   "runs": [
+    {
+     "id": "20261017T002741Z-D3-pi-send-small",
+     "key": "lab/D3-pi-send-small/20261017T002741Z-D3-pi-send-small",
+     "state": null
+    }
+   ],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "D3~end1",
+   "kind": "end",
+   "experiment": null,
+   "question": null,
+   "estimateHours": null,
+   "hypothesis": "no sending setting on the Pi beat xs's best",
+   "design": null,
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "D4",
+   "kind": "experiment",
+   "experiment": "D4-pi-receive-small",
+   "question": "Can fewer workers or larger writes help the Pi's disk?",
+   "estimateHours": 0.9,
+   "hypothesis": "Fewer receiving workers or larger writes make small trees land on the Pi faster.",
+   "design": "screening",
+   "state": "queued",
+   "runs": [
+    {
+     "id": "20261017T004209Z-D4-pi-receive-small",
+     "key": "lab/D4-pi-receive-small/20261017T004209Z-D4-pi-receive-small",
+     "state": null
+    }
+   ],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "D4~end1",
+   "kind": "end",
+   "experiment": null,
+   "question": null,
+   "estimateHours": null,
+   "hypothesis": "no receive-path setting on the Pi beat xs's best",
+   "design": null,
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "D9",
+   "kind": "experiment",
+   "experiment": "D9-lan-best-default",
+   "question": "Is xs's best small-file setting safe as the default for mixed trees?",
+   "estimateHours": 1.1,
+   "hypothesis": "xs's best small-file setting is no slower than its default on mixed trees, either way.",
+   "design": "screening",
+   "state": "queued",
+   "runs": [
+    {
+     "id": "20261017T002751Z-D9-lan-best-default",
+     "key": "lab/D9-lan-best-default/20261017T002751Z-D9-lan-best-default",
+     "state": null
+    }
+   ],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "D9b",
+   "kind": "experiment",
+   "experiment": "D9b-lan-best-split",
+   "question": "Which half of the best setting costs time: four workers or --no-atomic?",
+   "estimateHours": 1.5,
+   "hypothesis": "Only one half of the best small-file setting slows mixed trees on the wired pair.",
+   "design": "screening",
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "D10",
+   "kind": "experiment",
+   "experiment": "D10-lan-noop-best",
+   "question": "Does the best setting also speed up no-op copies of small trees?",
+   "estimateHours": 1.5,
+   "hypothesis": "xs's best small-file setting is faster than its default on no-op copies of small trees.",
+   "design": "screening",
+   "state": "queued",
+   "runs": [
+    {
+     "id": "20261017T004214Z-D10-lan-noop-best",
+     "key": "lab/D10-lan-noop-best/20261017T004214Z-D10-lan-noop-best",
+     "state": null
+    }
+   ],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "D10~end0",
+   "kind": "end",
+   "experiment": null,
+   "question": null,
+   "estimateHours": null,
+   "hypothesis": "xs's best setting was faster on no-op copies too",
+   "design": null,
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "D10~end1",
+   "kind": "end",
+   "experiment": null,
+   "question": null,
+   "estimateHours": null,
+   "hypothesis": "xs's best setting did not speed up no-op copies",
+   "design": null,
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "D8",
+   "kind": "experiment",
+   "experiment": "D8-pi-compress-small",
+   "question": "Is adaptive compression the right choice on the Pi for small text trees?",
+   "estimateHours": 0.8,
+   "hypothesis": "Forcing zstd level 1, or no compression, sends small text trees from the Pi faster than adaptive -z.",
+   "design": "screening",
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "D8~end1",
+   "kind": "end",
+   "experiment": null,
+   "question": null,
+   "estimateHours": null,
+   "hypothesis": "adaptive -z held its own on the Pi",
+   "design": null,
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "D2c",
+   "kind": "confirm",
+   "experiment": "D2c-freya-receive-confirm",
+   "question": "Does freya's winning receive setting hold up with fresh blocks?",
+   "estimateHours": 0.6,
+   "hypothesis": "Confirms the fastest arm of D2 with 12 fresh blocks, if it had one.",
+   "design": "confirmatory",
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": "D2"
+  },
+  {
+   "id": "D3c",
+   "kind": "confirm",
+   "experiment": "D3c-pi-send-confirm",
+   "question": "Does the Pi's winning send setting hold up with fresh blocks?",
+   "estimateHours": 0.6,
+   "hypothesis": "Confirms the fastest arm of D3 with 12 fresh blocks, if it had one.",
+   "design": "confirmatory",
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": "D3"
+  },
+  {
+   "id": "D4c",
+   "kind": "confirm",
+   "experiment": "D4c-pi-receive-confirm",
+   "question": "Does the Pi's winning receive setting hold up with fresh blocks?",
+   "estimateHours": 0.6,
+   "hypothesis": "Confirms the fastest arm of D4 with 12 fresh blocks, if it had one.",
+   "design": "confirmatory",
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": "D4"
+  },
+  {
+   "id": "D8c",
+   "kind": "confirm",
+   "experiment": "D8c-pi-compress-confirm",
+   "question": "Does the winning compression choice hold up with fresh blocks?",
+   "estimateHours": 0.6,
+   "hypothesis": "Confirms the fastest arm of D8 with 12 fresh blocks, if it had one.",
+   "design": "confirmatory",
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": "D8"
+  },
+  {
+   "id": "F1a",
+   "kind": "fill",
+   "experiment": "F1a-lan-replicate",
+   "question": "Do the main results hold steady from run to run over the weekend?",
+   "estimateHours": 0.4,
+   "hypothesis": "xs's best setting with -z stays ahead of rsync -az from run to run.",
+   "design": "screening",
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  }
+ ],
+ "edges": [
+  {
+   "from": "K2a",
+   "to": "D2",
+   "label": "RAM \u226515% faster than NVMe",
+   "taken": false
+  },
+  {
+   "from": "K2a",
+   "to": "D9",
+   "label": "RAM \u226515% faster than NVMe",
+   "taken": false
+  },
+  {
+   "from": "K2a",
+   "to": "D3",
+   "label": "otherwise",
+   "taken": true
+  },
+  {
+   "from": "K2a",
+   "to": "D9",
+   "label": "otherwise",
+   "taken": true
+  },
+  {
+   "from": "K2b",
+   "to": "D4",
+   "label": "RAM \u226515% faster than its disk",
+   "taken": true
+  },
+  {
+   "from": "K2b",
+   "to": "D10",
+   "label": "RAM \u226515% faster than its disk",
+   "taken": true
+  },
+  {
+   "from": "K2b",
+   "to": "D10",
+   "label": "otherwise",
+   "taken": false
+  },
+  {
+   "from": "D2",
+   "to": "D2c",
+   "label": "an arm was faster",
+   "taken": null
+  },
+  {
+   "from": "D2",
+   "to": "D2~end1",
+   "label": "nothing faster",
+   "taken": null
+  },
+  {
+   "from": "D3",
+   "to": "D3c",
+   "label": "an arm was faster",
+   "taken": null
+  },
+  {
+   "from": "D3",
+   "to": "D3~end1",
+   "label": "nothing faster",
+   "taken": null
+  },
+  {
+   "from": "D4",
+   "to": "D4c",
+   "label": "an arm was faster",
+   "taken": null
+  },
+  {
+   "from": "D4",
+   "to": "D4~end1",
+   "label": "nothing faster",
+   "taken": null
+  },
+  {
+   "from": "D9",
+   "to": "D9b",
+   "label": "slower somewhere",
+   "taken": null
+  },
+  {
+   "from": "D9",
+   "to": "D8",
+   "label": "slower somewhere",
+   "taken": null
+  },
+  {
+   "from": "D9",
+   "to": "D8",
+   "label": "never slower",
+   "taken": null
+  },
+  {
+   "from": "D10",
+   "to": "D10~end0",
+   "label": "faster on no-ops",
+   "taken": null
+  },
+  {
+   "from": "D10",
+   "to": "D10~end1",
+   "label": "no gain",
+   "taken": null
+  },
+  {
+   "from": "D8",
+   "to": "D8c",
+   "label": "an arm was faster",
+   "taken": null
+  },
+  {
+   "from": "D8",
+   "to": "D8~end1",
+   "label": "adaptive held",
+   "taken": null
+  }
+ ],
+ "decisions": [
+  {
+   "utc": "2026-10-17T00:42:18Z",
+   "node": "D10",
+   "kind": "queued",
+   "text": "D10 queued on neo (192 samples): after K2b: into RAM on the Pi is at least 15% faster than onto its disk: the Pi's write path matters"
+  },
+  {
+   "utc": "2026-10-17T00:42:14Z",
+   "node": "D4",
+   "kind": "queued",
+   "text": "D4 queued on neo (120 samples): after K2b: into RAM on the Pi is at least 15% faster than onto its disk: the Pi's write path matters"
+  },
+  {
+   "utc": "2026-10-17T00:42:09Z",
+   "node": "K2b",
+   "kind": "decision",
+   "text": "K2b: into RAM on the Pi is at least 15% faster than onto its disk: the Pi's write path matters (small-flat freya\u2192neo-shm xs-z-best 1.81\u00d7 vs K1-congress-ceiling xs-z-best) \u2192 D4, D10"
+  },
+  {
+   "utc": "2026-10-17T00:28:02Z",
+   "node": "D9",
+   "kind": "queued",
+   "text": "D9 queued on neo (144 samples): after K2a: RAM on freya is not clearly faster than its NVMe: the Pi sending is the limit"
+  },
+  {
+   "utc": "2026-10-17T00:27:51Z",
+   "node": "D3",
+   "kind": "queued",
+   "text": "D3 queued on neo (120 samples): after K2a: RAM on freya is not clearly faster than its NVMe: the Pi sending is the limit"
+  },
+  {
+   "utc": "2026-10-17T00:27:41Z",
+   "node": "K2a",
+   "kind": "decision",
+   "text": "K2a: RAM on freya is not clearly faster than its NVMe: the Pi sending is the limit \u2192 D3, D9"
+  },
+  {
+   "utc": "2026-10-16T23:54:22Z",
+   "node": "K2b",
+   "kind": "adopted",
+   "text": "K2b: following 20261016T222957Z-K2b-tmpfs-neo"
+  },
+  {
+   "utc": "2026-10-16T23:54:22Z",
+   "node": "K2a",
+   "kind": "adopted",
+   "text": "K2a: following 20261016T223005Z-K2a-tmpfs-freya"
+  }
+ ]
+}

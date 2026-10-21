@@ -1,0 +1,176 @@
+{
+ "schema": 1,
+ "experiment": "P0-pipe-smoke",
+ "spec_sha256": "597bcf33aeff465ccba63be1bca31c394a4667f072e60707dfdb9d399491ae23",
+ "kind": "screening",
+ "bundle": "f96f33e78bf6",
+ "writes": {
+  "mac": 0,
+  "mars": 1276896308
+ },
+ "hypothesis": "The pipe arms produce valid, verified samples.",
+ "primary": "durable_s",
+ "delta": 0.03,
+ "control": "tar",
+ "seed": 1,
+ "run_id": "20261016T202440Z-P0-pipe-smoke",
+ "driver": "mac",
+ "sample_timeout_s": 3600,
+ "results": "direct",
+ "background": false,
+ "eager_cleanup": true,
+ "hours": null,
+ "hosts": {
+  "mac": {
+   "ssh": "[email]",
+   "name": "[host]",
+   "hostname": "MacBookPro",
+   "root": "~/benchmarks/xsbench.noindex",
+   "interface": "en13",
+   "helper": false,
+   "gates": {},
+   "local": true,
+   "system": "Darwin"
+  },
+  "mars": {
+   "ssh": "[email]",
+   "name": "[host]",
+   "hostname": "mars",
+   "root": "~/benchmarks/xsyncv4/lab",
+   "interface": "enp1s0f0",
+   "helper": true,
+   "gates": {},
+   "local": false,
+   "system": "Linux"
+  }
+ },
+ "links": {
+  "mac-mars-direct": {
+   "hosts": [
+    "mac",
+    "mars"
+   ],
+   "medium": "wired",
+   "min_speed_mbps": 10000,
+   "max_rtt_ms": 2.0,
+   "initiator": "mac",
+   "driver": "mac",
+   "results": "direct",
+   "address": {
+    "mac": "[address]",
+    "mars": "[address]"
+   }
+  }
+ },
+ "arms": [
+  {
+   "name": "tar",
+   "tool": "pipe",
+   "flags": [],
+   "streams": 1,
+   "codec": "none",
+   "local": false,
+   "binary": {
+    "mac": "xspipe.py",
+    "mars": "xspipe.py"
+   },
+   "client": "sender"
+  },
+  {
+   "name": "tar-zstd",
+   "tool": "pipe",
+   "flags": [],
+   "streams": 1,
+   "codec": "zstd1",
+   "local": false,
+   "binary": {
+    "mac": "xspipe.py",
+    "mars": "xspipe.py"
+   },
+   "client": "sender"
+  },
+  {
+   "name": "tar-x4",
+   "tool": "pipe",
+   "flags": [],
+   "streams": 4,
+   "codec": "none",
+   "local": false,
+   "binary": {
+    "mac": "xspipe.py",
+    "mars": "xspipe.py"
+   },
+   "client": "sender"
+  },
+  {
+   "name": "local-x4",
+   "tool": "pipe",
+   "flags": [],
+   "streams": 4,
+   "codec": "none",
+   "local": true,
+   "binary": {
+    "mac": "xspipe.py",
+    "mars": "xspipe.py"
+   },
+   "client": "receiver"
+  }
+ ],
+ "cells": [
+  {
+   "id": "small-flat.fresh.mac-mars.sender.warm",
+   "corpus": "small-flat",
+   "scenario": "fresh",
+   "sender": "mac",
+   "receiver": "mars",
+   "client": "sender",
+   "link": "mac-mars-direct",
+   "cache": "warm"
+  }
+ ],
+ "corpora": {
+  "small-flat": {
+   "files": 100000,
+   "directories": 100,
+   "bytes": 319224077,
+   "digest": "41b628c4337730be4efdfcc6673d517749132ffd50b75b29321640e6f064bbec",
+   "quick_digest": "e8de96251eaca6be3e98b1cb8097405b37ad470fc0d5ffdb7a5a48ea5b9f3805"
+  }
+ },
+ "blocks": [
+  {
+   "cell": "small-flat.fresh.mac-mars.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "local-x4",
+     "tar-zstd",
+     "tar-x4",
+     "tar"
+    ],
+    [
+     "tar",
+     "local-x4",
+     "tar-zstd",
+     "tar-x4"
+    ],
+    [
+     "tar-zstd",
+     "tar",
+     "tar-x4",
+     "local-x4"
+    ]
+   ]
+  }
+ ],
+ "scripts": {
+  "probe.py": "f1c65a4e27657e4622416a43e86041663e6906f685d8f5f6a26b4e8df3d7eecb",
+  "corpus.py": "437a096aebc91b67f66f47803a39ca196cc8eaeaa7877d74588edf847aa2aa0a",
+  "corpora.json": "ebf2b1a93129ade1b3330046c447d2fd5a3080b77e2b0d4454e6b1de512d043e",
+  "agent.py": "99dc98bdd4446e5651b2dcd24346865a2fe1baf2f275e800e2f32f6e058ae7f3",
+  "runner.py": "cce71fee149764ad1a5c913061f19620a8ff44f792d23d55f7a290d59a9e20ff",
+  "xspipe.py": "42786c8800847467571ed691871c2147f30cac4701632b4ff0c302708da8e7a7",
+  "measure.py": "5065310f480ff1cabfa7c645f0db342624a02f9a081b96069d50d52b3d224777"
+ }
+}

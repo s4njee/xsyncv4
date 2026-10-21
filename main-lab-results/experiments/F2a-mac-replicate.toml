@@ -1,0 +1,36 @@
+# F2a (tree T2 fill): a short replicate of the main comparison on NVMe, repeated
+# while the tree has nothing else to run, so drift over the weekend is measured.
+id = "F2a-mac-replicate"
+kind = "screening"
+hypothesis = "xs's best setting stays ahead of rsync and xs's default from run to run."
+primary = "durable_s"
+delta = 0.03
+blocks = 4
+control = "xs"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.xs]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-a"]
+
+[arms.xs-best]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-a", "--no-atomic"]
+tune = { receiver = "jobs=4" }
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[matrix]
+link = "mac-mars-2g5"
+corpus = ["small-flat", "mixed-bimodal", "large-text"]
+scenario = ["fresh"]
+direction = ["mac>mars"]
+client = ["initiator"]
+cache = ["warm"]

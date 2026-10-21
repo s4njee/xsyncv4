@@ -1,0 +1,36 @@
+# E6a: confirm the receiver defaults (98b250569c69: at most four automatic receiving
+# workers, and the peer's exit reaped from 1 ms) against their parent release
+# (21ae6844ed20) over E1's matrix, on neo and freya's USB 2.5 GbE link and freya's
+# new motherboard. Adoption follows section 5.8: faster in a target cell, slower in
+# none. Its rsync arm is also #3's re-baseline of this pair: read it with
+# `report.py --control rsync`.
+id = "E6a-2g5-receiver-defaults"
+kind = "confirmatory"
+hypothesis = "xs with at most four receiving workers and a backed-off peer wait is faster than its parent in at least one small-file cell and slower in none, both ways."
+primary = "durable_s"
+delta = 0.03
+blocks = 12
+control = "xs"
+verify = "first-last"
+
+[arms.xs]
+tool = "xs"
+rev = "21ae6844ed20"
+flags = ["-a"]
+
+[arms.xs-recv4]
+tool = "xs"
+rev = "98b250569c69"
+flags = ["-a"]
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[matrix]
+link = "neo-freya-usb-2g5"
+corpus = ["tiny-one", "small-flat", "small-deep", "small-opaque", "small-real", "mixed-bimodal", "mixed-threshold"]
+scenario = ["fresh", "noop"]
+direction = ["neo>freya", "freya>neo"]
+client = ["sender"]
+cache = ["warm"]

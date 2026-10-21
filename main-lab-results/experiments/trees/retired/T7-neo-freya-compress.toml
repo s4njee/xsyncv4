@@ -1,0 +1,73 @@
+# T7: where compression sits on the gigabit wire between neo (a Raspberry Pi 5) and
+# freya — RQ-Z1's gigabit half. Without -z both tools wait on the wire; with it they
+# can deliver more than the link carries, if the sender's CPU keeps up, and the Pi's
+# four cores are the interesting case. Z3 measures levels against none both ways; the
+# first node branches on whether -z clears line rate in both directions. If it does,
+# only its cost on data that will not compress is left; if it does not, the Pi's
+# sending is the shortfall and a cheaper zstd level or fast level is screened. A winner
+# is confirmed with fresh blocks. Until Sunday 07:00 Central, once its branches end, it
+# repeats a short replicate (F1a).
+id = "T7-neo-freya-compress"
+question = "On the gigabit wire between the Pi and freya, does compression pay, which level, and does it cost on data that will not compress?"
+start = ["W"]
+until = "2026-10-18T12:00Z"
+fill = ["F1a"]
+
+[nodes.W]
+spec = "Z3-1g-compress.toml"
+adopt = "20261016T162239Z-Z3-1g-compress"
+question = "On gigabit, does xs -z beat the wire and beat rsync -z, even from the Pi?"
+
+  [[nodes.W.branch]]
+  when = { arm = "xs-z", corpus = "large-text", gbps_at_least = 1.0, all = true }
+  next = ["C"]
+  note = "xs -z carries more than the wire both ways on text: only its cost on incompressible data is left to settle"
+  label = "beats the wire both ways"
+
+  [[nodes.W.branch]]
+  otherwise = true
+  next = ["P", "C"]
+  note = "xs -z does not beat the wire both ways: the Pi's sending is the likely shortfall, and the cost still matters"
+  label = "not both ways"
+
+[nodes.P]
+spec = "N1g-pi-compress.toml"
+question = "Can a cheaper level or codec let the Pi carry a text tree past the wire?"
+
+  [[nodes.P.branch]]
+  when = { verdict = "faster" }
+  next = ["Pc"]
+  note = "a cheaper level or codec carried more from the Pi: confirm it"
+  label = "an arm was faster"
+
+  [[nodes.P.branch]]
+  otherwise = true
+  next = []
+  note = "no level or codec beat adaptive -z from the Pi: the Pi's cores are the limit, not the level"
+  label = "nothing faster"
+
+[nodes.Pc]
+promote = "P"
+id = "N1g-pi-compress-confirm"
+blocks = 12
+question = "Does the faster level or codec hold up with fresh blocks?"
+
+[nodes.C]
+spec = "N1g-compress-cost.toml"
+question = "Does -z cost time on a tree that will not compress?"
+
+  [[nodes.C.branch]]
+  when = { arm = "xs-z", verdict = "slower" }
+  next = []
+  note = "adaptive -z costs on incompressible data: the sample-and-skip path must stay sharp (a code candidate)"
+  label = "costs on incompressible"
+
+  [[nodes.C.branch]]
+  otherwise = true
+  next = []
+  note = "compression is harmless on incompressible data here"
+  label = "harmless"
+
+[nodes.F1a]
+spec = "F1a-lan-replicate.toml"
+question = "Do the compression results hold steady over the weekend?"

@@ -1,0 +1,22 @@
+{
+ "experiment": "N2-nvme-small-read",
+ "kind": "screening",
+ "hypothesis": "xs -a reads small and mixed trees off a cold NVMe drive faster than rsync -a.",
+ "primary": "durable_s",
+ "control": "rsync",
+ "delta": 0.03,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261015T034426Z-N2-nvme-small-read",
+  "20261015T100232Z-N2-nvme-small-read"
+ ],
+ "spec_sha256": [
+  "c6a560d2ffb242f95e692719bcb16e2efa680d6096f4385ba1c66d5e86e37b7c"
+ ],
+ "valid_blocks": 99,
+ "void_attempts": 1,
+ "void_reasons": [
+  "stopped"
+ ]
+}

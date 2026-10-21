@@ -1,0 +1,25 @@
+{
+ "experiment": "J1a-neo-mars-jobs-small-flat",
+ "kind": "screening",
+ "hypothesis": "-j4 and -j8 differ from each other, and from the default, by more than 5% in time-to-durable on small-file and no-op copies between neo and mars.",
+ "primary": "durable_s",
+ "control": "xs",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261020T170928Z-J1a-neo-mars-jobs-small-flat",
+  "20261020T172300Z-J1a-neo-mars-jobs-small-flat",
+  "20261020T174155Z-J1a-neo-mars-jobs-small-flat"
+ ],
+ "spec_sha256": [
+  "70559dcac0c1398b5380fb908379036f2d6bbc2759267997a377676bd6f39987"
+ ],
+ "valid_blocks": 41,
+ "void_attempts": 4,
+ "void_reasons": [
+  "stopped",
+  "xs-j8: harness error: mars: `rm -rf -- /Volumes/xsbench/lab/work/20261020T172300Z-J1a-neo-mars-jobs-small-flat/small-flat.fresh.neo-mars.sender.warm/xs-j8` exit",
+  "xs: harness error: mars: `rm -rf -- /Volumes/xsbench/lab/work/20261020T172300Z-J1a-neo-mars-jobs-small-flat/small-flat.fresh.neo-mars.sender.warm/xs` exited 255"
+ ]
+}

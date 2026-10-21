@@ -1,0 +1,22 @@
+{
+ "experiment": "E6b-mac-mars-receiver-defaults",
+ "kind": "confirmatory",
+ "hypothesis": "xs with at most four receiving workers and a backed-off peer wait is faster than its parent in at least one cell into mars and slower in none, both ways.",
+ "primary": "wall_s",
+ "control": "xs",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261018T144630Z-E6b-mac-mars-receiver-defaults"
+ ],
+ "spec_sha256": [
+  "c2286e77da1e51384fbcce72a8823a3ba85f6b49a8e5698fd3bd303dfade92be"
+ ],
+ "valid_blocks": 240,
+ "void_attempts": 2,
+ "void_reasons": [
+  "round trip is 2.278 ms, above 2.0",
+  "round trip is 2.369 ms, above 2.0"
+ ]
+}

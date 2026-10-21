@@ -1,0 +1,392 @@
+Analysis of sampling xs (pid 87968) every 1 millisecond
+Process:         xs [87968]
+Path:            ~/*/xs
+Load Address:    0x102b80000
+Identifier:      xs
+Version:         0
+Code Type:       ARM64
+Platform:        macOS
+Parent Process:  Python [87561]
+Target Type:     live task
+
+Date/Time:       2026-10-10 17:57:34.166 -0500
+Launch Time:     2026-10-10 17:57:34.099 -0500
+OS Version:      macOS 26.6.2 (25G83)
+Report Version:  7
+Analysis Tool:   /usr/bin/sample
+----
+
+Call graph:
+    2240 Thread_88924845   DispatchQueue_1: com.apple.main-thread  (serial)
+    + 2240 start  (in dyld) + 6992  [0x1803144e4]
+    +   2240 main  (in xs) + 4860  [0x102be1110]
+    +     2210 run_local(std::vector<std::basic_string<char>> const&, std::basic_string<char> const&)  (in xs) + 6084  [0x102c3f874]
+    +     ! 2210 wait_pool(Pool&)  (in xs) + 140  [0x102c3de98]
+    +     !   2210 std::condition_variable::__do_timed_wait(std::unique_lock<std::mutex>&, std::chrono::time_point<std::chrono::system_clock, std::chrono::duration<long long, std::ratio<1l, 1000000000l>>>)  (in libc++.1.dylib) + 104  [0x1805f58f0]
+    +     !     2210 _pthread_cond_wait  (in libsystem_pthread.dylib) + 980  [0x1806e0128]
+    +     !       2210 __psynch_cvwait  (in libsystem_kernel.dylib) + 8  [0x18069f50c]
+    +     30 run_local(std::vector<std::basic_string<char>> const&, std::basic_string<char> const&)  (in xs) + 6180  [0x102c3f8d4]
+    +       30 finalize_tree()  (in xs) + 6604  [0x102c07994]
+    +         20 std::__introsort<std::_ClassicAlgPolicy, finalize_tree()::$_3&, (anonymous namespace)::FinalDirectory*, false>((anonymous namespace)::FinalDirectory*, (anonymous namespace)::FinalDirectory*, finalize_tree()::$_3&, std::iterator_traits<(anonymous namespace)::FinalDirectory*>::difference_type, bool)  (in xs) + 328  [0x102c198f0]
+    +         : 20 std::__introsort<std::_ClassicAlgPolicy, finalize_tree()::$_3&, (anonymous namespace)::FinalDirectory*, false>((anonymous namespace)::FinalDirectory*, (anonymous namespace)::FinalDirectory*, finalize_tree()::$_3&, std::iterator_traits<(anonymous namespace)::FinalDirectory*>::difference_type, bool)  (in xs) + 10728,11200,...  [0x102c1c190,0x102c1c368,...]
+    +         10 std::__introsort<std::_ClassicAlgPolicy, finalize_tree()::$_3&, (anonymous namespace)::FinalDirectory*, false>((anonymous namespace)::FinalDirectory*, (anonymous namespace)::FinalDirectory*, finalize_tree()::$_3&, std::iterator_traits<(anonymous namespace)::FinalDirectory*>::difference_type, bool)  (in xs) + 11764  [0x102c1c59c]
+    +           10 std::__introsort<std::_ClassicAlgPolicy, finalize_tree()::$_3&, (anonymous namespace)::FinalDirectory*, false>((anonymous namespace)::FinalDirectory*, (anonymous namespace)::FinalDirectory*, finalize_tree()::$_3&, std::iterator_traits<(anonymous namespace)::FinalDirectory*>::difference_type, bool)  (in xs) + 28240,31688,...  [0x102c205f8,0x102c21370,...]
+    2210 Thread_88924848
+      2210 thread_start  (in libsystem_pthread.dylib) + 8  [0x1806dac1c]
+        2210 _pthread_start  (in libsystem_pthread.dylib) + 136  [0x1806dfc58]
+          2210 std::__thread_proxy[abi:nqe210106]<std::tuple<std::unique_ptr<std::__thread_struct>, Pool::start(int, std::function<void (Task&, Worker&)>)::'lambda'()>>(void*)  (in xs) + 56  [0x102c4179c]
+            2208 Pool::run(int)  (in xs) + 1360  [0x102c41d30]
+            ! 1475 (anonymous namespace)::Local::run_task(Task&, Worker&)  (in xs) + 10460  [0x102c46a8c]
+            ! : 903 generate(DirWork&, Worker&)  (in xs) + 140  [0x102bffc80]
+            ! : | 580 destination_open_dir(char const*)  (in xs) + 144  [0x102c8cd5c]
+            ! : | + 576 destination_path(std::basic_string<char> const&)  (in xs) + 1308  [0x102c8cbd8]
+            ! : | + ! 561 (anonymous namespace)::walk(int, std::basic_string_view<char>)  (in xs) + 356  [0x102c8c5d8]
+            ! : | + ! : 561 openat  (in libsystem_kernel.dylib) + 76  [0x1806b8208]
+            ! : | + ! :   561 __openat  (in libsystem_kernel.dylib) + 8  [0x18069d5b0]
+            ! : | + ! 13 (anonymous namespace)::walk(int, std::basic_string_view<char>)  (in xs) + 376  [0x102c8c5ec]
+            ! : | + ! : 13 close  (in libsystem_kernel.dylib) + 8  [0x18069c8f0]
+            ! : | + ! 2 (anonymous namespace)::walk(int, std::basic_string_view<char>)  (in xs) + 100  [0x102c8c4d8]
+            ! : | + !   2 _platform_memchr  (in libsystem_platform.dylib) + 84,104  [0x1806e6e54,0x1806e6e68]
+            ! : | + 3 destination_path(std::basic_string<char> const&)  (in xs) + 1280  [0x102c8cbbc]
+            ! : | + ! 3 dup  (in libsystem_kernel.dylib) + 8  [0x1806a0498]
+            ! : | + 1 destination_path(std::basic_string<char> const&)  (in xs) + 272  [0x102c8c7cc]
+            ! : | +   1 _xzm_free  (in libsystem_malloc.dylib) + 776  [0x1804fc420]
+            ! : | 318 destination_open_dir(char const*)  (in xs) + 196  [0x102c8cd90]
+            ! : | + 318 openat  (in libsystem_kernel.dylib) + 76  [0x1806b8208]
+            ! : | +   318 __openat  (in libsystem_kernel.dylib) + 8  [0x18069d5b0]
+            ! : | 3 destination_open_dir(char const*)  (in xs) + 212  [0x102c8cda0]
+            ! : | + 3 close  (in libsystem_kernel.dylib) + 8  [0x18069c8f0]
+            ! : | 1 destination_open_dir(char const*)  (in xs) + 252  [0x102c8cdc8]
+            ! : | + 1 _xzm_free  (in libsystem_malloc.dylib) + 1048  [0x1804fc530]
+            ! : | +   1 mach_absolute_time  (in libsystem_kernel.dylib) + 112  [0x18069c110]
+            ! : | 1 operator new(unsigned long)  (in libc++abi.dylib) + 76  [0x180696800]
+            ! : 261 generate(DirWork&, Worker&)  (in xs) + 768  [0x102bffef4]
+            ! : | 161 reject_name_collisions(DirWork&)  (in xs) + 748  [0x102c89d38]
+            ! : | + 153 destination_open_dir(char const*)  (in xs) + 196  [0x102c8cd90]
+            ! : | + ! 153 openat  (in libsystem_kernel.dylib) + 76  [0x1806b8208]
+            ! : | + !   153 __openat  (in libsystem_kernel.dylib) + 8  [0x18069d5b0]
+            ! : | + 4 destination_open_dir(char const*)  (in xs) + 144  [0x102c8cd5c]
+            ! : | + ! 3 destination_path(std::basic_string<char> const&)  (in xs) + 1280  [0x102c8cbbc]
+            ! : | + ! : 3 dup  (in libsystem_kernel.dylib) + 8  [0x1806a0498]
+            ! : | + ! 1 destination_path(std::basic_string<char> const&)  (in xs) + 48  [0x102c8c6ec]
+            ! : | + !   1 (anonymous namespace)::absolute(std::basic_string<char> const&)  (in xs) + 776  [0x102c8c3b8]
+            ! : | + 3 destination_open_dir(char const*)  (in xs) + 212  [0x102c8cda0]
+            ! : | + ! 3 close  (in libsystem_kernel.dylib) + 8  [0x18069c8f0]
+            ! : | + 1 destination_open_dir(char const*)  (in xs) + 252  [0x102c8cdc8]
+            ! : | +   1 _xzm_free  (in libsystem_malloc.dylib) + 996  [0x1804fc4fc]
+            ! : | 31 reject_name_collisions(DirWork&)  (in xs) + 260  [0x102c89b50]
+            ! : | + 25 destination_stat(char const*, stat*)  (in xs) + 204  [0x102c8cf6c]
+            ! : | + ! 25 fstatat  (in libsystem_kernel.dylib) + 8,0  [0x1806aa2e0,0x1806aa2d8]
+            ! : | + 5 destination_stat(char const*, stat*)  (in xs) + 152  [0x102c8cf38]
+            ! : | + ! 3 destination_path(std::basic_string<char> const&)  (in xs) + 1280  [0x102c8cbbc]
+            ! : | + ! : 3 dup  (in libsystem_kernel.dylib) + 8  [0x1806a0498]
+            ! : | + ! 2 destination_path(std::basic_string<char> const&)  (in xs) + 272  [0x102c8c7cc]
+            ! : | + !   1 _xzm_free  (in libsystem_malloc.dylib) + 352  [0x1804fc278]
+            ! : | + !   | 1 _platform_memset  (in libsystem_platform.dylib) + 140  [0x1806e911c]
+            ! : | + !   1 _xzm_free  (in libsystem_malloc.dylib) + 1540  [0x1804fc71c]
+            ! : | + 1 destination_stat(char const*, stat*)  (in xs) + 220  [0x102c8cf7c]
+            ! : | +   1 close  (in libsystem_kernel.dylib) + 8  [0x18069c8f0]
+            ! : | 23 reject_name_collisions(DirWork&)  (in xs) + 976  [0x102c89e1c]
+            ! : | + 23 fgetattrlist  (in libsystem_kernel.dylib) + 8  [0x18069f694]
+            ! : | 10 reject_name_collisions(DirWork&)  (in xs) + 2232  [0x102c8a304]
+            ! : | + 4 unorm2_normalize_78  (in libicuuc.78.3.dylib) + 308  [0x1030a8de0]
+            ! : | + ! 4 icu_78::ReorderingBuffer::init(int, UErrorCode&)  (in libicuuc.78.3.dylib) + 56  [0x1030aaad0]
+            ! : | + !   4 icu_78::UnicodeString::getBuffer(int)  (in libicuuc.78.3.dylib) + 44  [0x103123038]
+            ! : | + !     3 icu_78::UnicodeString::cloneArrayIfNeeded(int, int, signed char, int**, signed char)  (in libicuuc.78.3.dylib) + 324  [0x1031224d8]
+            ! : | + !     : 2 icu_78::UnicodeString::allocate(int)  (in libicuuc.78.3.dylib) + 76  [0x103121c84]
+            ! : | + !     : | 1 malloc  (in libsystem_malloc.dylib) + 0  [0x1804d1ce8]
+            ! : | + !     : | 1 uprv_malloc_78  (in libicuuc.78.3.dylib) + 0  [0x1030825cc]
+            ! : | + !     : 1 icu_78::UnicodeString::allocate(int)  (in libicuuc.78.3.dylib) + 56  [0x103121c70]
+            ! : | + !     1 icu_78::UnicodeString::cloneArrayIfNeeded(int, int, signed char, int**, signed char)  (in libicuuc.78.3.dylib) + 164  [0x103122438]
+            ! : | + 2 unorm2_normalize_78  (in libicuuc.78.3.dylib) + 484  [0x1030a8e90]
+            ! : | + ! 1 icu_78::UObject::~UObject()  (in libicuuc.78.3.dylib) + 0  [0x1031286e8]
+            ! : | + ! 1 icu_78::UnicodeString::~UnicodeString()  (in libicuuc.78.3.dylib) + 0  [0x103122e5c]
+            ! : | + 1 DYLD-STUB$$unorm2_normalize_78  (in xs) + 4  [0x102cc87b0]
+            ! : | + 1 __dynamic_cast  (in libc++abi.dylib) + 204  [0x180681584]
+            ! : | + ! 1 __cxxabiv1::(anonymous namespace)::dyn_cast_try_downcast(void const*, void const*, __cxxabiv1::__class_type_info const*, __cxxabiv1::__class_type_info const*, long, bool)  (in libc++abi.dylib) + 140  [0x1806950f8]
+            ! : | + !   1 __cxxabiv1::__si_class_type_info::search_above_dst(__cxxabiv1::__dynamic_cast_info*, void const*, void const*, int, bool) const  (in libc++abi.dylib) + 48  [0x1806817ec]
+            ! : | + 1 is_equal(std::type_info const*, std::type_info const*, bool)  (in libc++abi.dylib) + 64  [0x18069461c]
+            ! : | + 1 unorm2_normalize_78  (in libicuuc.78.3.dylib) + 352  [0x1030a8e0c]
+            ! : | +   1 icu_78::Normalizer2Impl::decompose(char16_t const*, char16_t const*, icu_78::ReorderingBuffer*, UErrorCode&) const  (in libicuuc.78.3.dylib) + 108  [0x1030abb20]
+            ! : | 7 reject_name_collisions(DirWork&)  (in xs) + 772  [0x102c89d50]
+            ! : | + 7 fstatfs  (in libsystem_kernel.dylib) + 8  [0x1806a7980]
+            ! : | 5 reject_name_collisions(DirWork&)  (in xs) + 2352  [0x102c8a37c]
+            ! : | + 2 __dynamic_cast  (in libc++abi.dylib) + 204  [0x180681584]
+            ! : | + ! 1 __cxxabiv1::(anonymous namespace)::dyn_cast_try_downcast(void const*, void const*, __cxxabiv1::__class_type_info const*, __cxxabiv1::__class_type_info const*, long, bool)  (in libc++abi.dylib) + 140  [0x1806950f8]
+            ! : | + ! : 1 __cxxabiv1::__si_class_type_info::search_above_dst(__cxxabiv1::__dynamic_cast_info*, void const*, void const*, int, bool) const  (in libc++abi.dylib) + 172  [0x180681868]
+            ! : | + ! :   1 std::type_info::operator==[abi:nqe210106](std::type_info const&) const  (in libc++abi.dylib) + 32  [0x180695308]
+            ! : | + ! 1 __cxxabiv1::(anonymous namespace)::dyn_cast_try_downcast(void const*, void const*, __cxxabiv1::__class_type_info const*, __cxxabiv1::__class_type_info const*, long, bool)  (in libc++abi.dylib) + 100  [0x1806950d0]
+            ! : | + 1 __dynamic_cast  (in libc++abi.dylib) + 56  [0x1806814f0]
+            ! : | + ! 1 __cxxabiv1::(anonymous namespace)::dyn_cast_get_derived_info(__cxxabiv1::(anonymous namespace)::derived_object_info*, void const*)  (in libc++abi.dylib) + 24  [0x180694efc]
+            ! : | + 1 icu_78::Normalizer2Impl::decompose(char16_t const*, char16_t const*, icu_78::ReorderingBuffer*, UErrorCode&) const  (in libicuuc.78.3.dylib) + 740  [0x1030abd98]
+            ! : | + 1 unorm2_normalize_78  (in libicuuc.78.3.dylib) + 352  [0x1030a8e0c]
+            ! : | +   1 icu_78::Normalizer2Impl::decompose(char16_t const*, char16_t const*, icu_78::ReorderingBuffer*, UErrorCode&) const  (in libicuuc.78.3.dylib) + 364  [0x1030abc20]
+            ! : | +     1 icu_78::ReorderingBuffer::appendZeroCC(char16_t const*, char16_t const*, UErrorCode&)  (in libicuuc.78.3.dylib) + 88  [0x1030ab3b4]
+            ! : | +       1 _platform_memmove  (in libsystem_platform.dylib) + 460  [0x1806e952c]
+            ! : | 4 reject_name_collisions(DirWork&)  (in xs) + 1000  [0x102c89e34]
+            ! : | + 4 close  (in libsystem_kernel.dylib) + 8  [0x18069c8f0]
+            ! : | 3 reject_name_collisions(DirWork&)  (in xs) + 1272  [0x102c89f44]
+            ! : | + 3 u_strFromUTF8WithSub_78  (in libicuuc.78.3.dylib) + 32,276,...  [0x10313cb78,0x10313cc6c,...]
+            ! : | 3 reject_name_collisions(DirWork&)  (in xs) + 2004  [0x102c8a220]
+            ! : | + 3 u_strFoldCase_78  (in libicuuc.78.3.dylib) + 64  [0x103139894]
+            ! : | +   3 ustrcase_mapWithOverlap_78  (in libicuuc.78.3.dylib) + 268  [0x103139770]
+            ! : | +     3 ustrcase_internalFold_78  (in libicuuc.78.3.dylib) + 68  [0x1031394d4]
+            ! : | +       2 icu_78::(anonymous namespace)::toLower(int, unsigned int, char16_t*, int, char16_t const*, UCaseContext*, int, int, icu_78::Edits*, UErrorCode&)  (in libicuuc.78.3.dylib) + 156,448  [0x1031386c4,0x1031387e8]
+            ! : | +       1 icu_78::(anonymous namespace)::toLower(int, unsigned int, char16_t*, int, char16_t const*, UCaseContext*, int, int, icu_78::Edits*, UErrorCode&)  (in libicuuc.78.3.dylib) + 836  [0x10313896c]
+            ! : | +         1 _platform_memmove  (in libsystem_platform.dylib) + 0  [0x1806e9360]
+            ! : | 2 reject_name_collisions(DirWork&)  (in xs) + 2180  [0x102c8a2d0]
+            ! : | + 1 _xzm_free  (in libsystem_malloc.dylib) + 1048  [0x1804fc530]
+            ! : | + ! 1 mach_absolute_time  (in libsystem_kernel.dylib) + 112  [0x18069c110]
+            ! : | + 1 _xzm_free  (in libsystem_malloc.dylib) + 748  [0x1804fc404]
+            ! : | 2 reject_name_collisions(DirWork&)  (in xs) + 3440  [0x102c8a7bc]
+            ! : | + 2 _xzm_free  (in libsystem_malloc.dylib) + 1048  [0x1804fc530]
+            ! : | +   2 mach_absolute_time  (in libsystem_kernel.dylib) + 108  [0x18069c10c]
+            ! : | 2 reject_name_collisions(DirWork&)  (in xs) + 5912  [0x102c8b164]
+            ! : | + 1 _xzm_free  (in libsystem_malloc.dylib) + 1048  [0x1804fc530]
+            ! : | + ! 1 mach_absolute_time  (in libsystem_kernel.dylib) + 108  [0x18069c10c]
+            ! : | + 1 _xzm_free  (in libsystem_malloc.dylib) + 232  [0x1804fc200]
+            ! : | 2 reject_name_collisions(DirWork&)  (in xs) + 2796,2864  [0x102c8a538,0x102c8a57c]
+            ! : | 1 reject_name_collisions(DirWork&)  (in xs) + 1016  [0x102c89e44]
+            ! : | + 1 _xzm_free  (in libsystem_malloc.dylib) + 952  [0x1804fc4d0]
+            ! : | 1 reject_name_collisions(DirWork&)  (in xs) + 1884  [0x102c8a1a8]
+            ! : | + 1 u_strFoldCase_78  (in libicuuc.78.3.dylib) + 64  [0x103139894]
+            ! : | +   1 ustrcase_mapWithOverlap_78  (in libicuuc.78.3.dylib) + 268  [0x103139770]
+            ! : | +     1 ustrcase_internalFold_78  (in libicuuc.78.3.dylib) + 68  [0x1031394d4]
+            ! : | +       1 icu_78::(anonymous namespace)::toLower(int, unsigned int, char16_t*, int, char16_t const*, UCaseContext*, int, int, icu_78::Edits*, UErrorCode&)  (in libicuuc.78.3.dylib) + 156  [0x1031386c4]
+            ! : | 1 reject_name_collisions(DirWork&)  (in xs) + 1948  [0x102c8a1e8]
+            ! : | + 1 operator new(unsigned long)  (in libc++abi.dylib) + 52  [0x1806967e8]
+            ! : | +   1 _xzm_xzone_malloc_tiny  (in libsystem_malloc.dylib) + 284  [0x180501058]
+            ! : | 1 reject_name_collisions(DirWork&)  (in xs) + 2520  [0x102c8a424]
+            ! : | + 1 _xzm_free  (in libsystem_malloc.dylib) + 1048  [0x1804fc530]
+            ! : | +   1 mach_absolute_time  (in libsystem_kernel.dylib) + 108  [0x18069c10c]
+            ! : | 1 reject_name_collisions(DirWork&)  (in xs) + 2592  [0x102c8a46c]
+            ! : | + 1 operator new(unsigned long)  (in libc++abi.dylib) + 52  [0x1806967e8]
+            ! : | +   1 <deduplicated_symbol>  (in libsystem_malloc.dylib) + 136  [0x1804fb1e4]
+            ! : | 1 reject_name_collisions(DirWork&)  (in xs) + 5884  [0x102c8b148]
+            ! : |   1 _xzm_free  (in libsystem_malloc.dylib) + 996  [0x1804fc4fc]
+            ! : 136 generate(DirWork&, Worker&)  (in xs) + 2052  [0x102c003f8]
+            ! : | 131 list_dir_fd(int, DirList&, unsigned int)  (in xs) + 236  [0x102bfc344]
+            ! : | + 131 getattrlistbulk  (in libsystem_kernel.dylib) + 8  [0x18069f4b4]
+            ! : | 4 list_dir_fd(int, DirList&, unsigned int)  (in xs) + 3820  [0x102bfd144]
+            ! : | + 4 close  (in libsystem_kernel.dylib) + 8  [0x18069c8f0]
+            ! : | 1 list_dir_fd(int, DirList&, unsigned int)  (in xs) + 1328  [0x102bfc788]
+            ! : 104 generate(DirWork&, Worker&)  (in xs) + 2040  [0x102c003ec]
+            ! : | 101 destination_open_dir(char const*)  (in xs) + 196  [0x102c8cd90]
+            ! : | + 101 openat  (in libsystem_kernel.dylib) + 76  [0x1806b8208]
+            ! : | +   101 __openat  (in libsystem_kernel.dylib) + 8  [0x18069d5b0]
+            ! : | 2 destination_open_dir(char const*)  (in xs) + 212  [0x102c8cda0]
+            ! : | + 2 close  (in libsystem_kernel.dylib) + 8  [0x18069c8f0]
+            ! : | 1 destination_open_dir(char const*)  (in xs) + 144  [0x102c8cd5c]
+            ! : |   1 destination_path(std::basic_string<char> const&)  (in xs) + 48  [0x102c8c6ec]
+            ! : |     1 (anonymous namespace)::absolute(std::basic_string<char> const&)  (in xs) + 224  [0x102c8c190]
+            ! : |       1 DYLD-STUB$$memchr  (in xs) + 4  [0x102cc84ec]
+            ! : 44 generate(DirWork&, Worker&)  (in xs) + 1328  [0x102c00124]
+            ! : | 38 destination_stat(char const*, stat*)  (in xs) + 204  [0x102c8cf6c]
+            ! : | + 38 fstatat  (in libsystem_kernel.dylib) + 8  [0x1806aa2e0]
+            ! : | 5 destination_stat(char const*, stat*)  (in xs) + 152  [0x102c8cf38]
+            ! : | + 2 destination_path(std::basic_string<char> const&)  (in xs) + 1280  [0x102c8cbbc]
+            ! : | + ! 2 dup  (in libsystem_kernel.dylib) + 8  [0x1806a0498]
+            ! : | + 1 destination_path(std::basic_string<char> const&)  (in xs) + 48  [0x102c8c6ec]
+            ! : | + ! 1 (anonymous namespace)::absolute(std::basic_string<char> const&)  (in xs) + 224  [0x102c8c190]
+            ! : | + !   1 _platform_memchr  (in libsystem_platform.dylib) + 120  [0x1806e6e78]
+            ! : | + 1 destination_path(std::basic_string<char> const&)  (in xs) + 572  [0x102c8c8f8]
+            ! : | + ! 1 _tlv_get_addr  (in libdyld.dylib) + 4  [0x1802dc38c]
+            ! : | + 1 destination_path(std::basic_string<char> const&)  (in xs) + 24  [0x102c8c6d4]
+            ! : | 1 destination_stat(char const*, stat*)  (in xs) + 220  [0x102c8cf7c]
+            ! : |   1 close  (in libsystem_kernel.dylib) + 8  [0x18069c8f0]
+            ! : 10 generate(DirWork&, Worker&)  (in xs) + 14280  [0x102c033bc]
+            ! : | 10 close  (in libsystem_kernel.dylib) + 8  [0x18069c8f0]
+            ! : 7 generate(DirWork&, Worker&)  (in xs) + 5796  [0x102c01298]
+            ! : | 2 generate(DirWork&, Worker&)::$_2::operator()(std::basic_string_view<char>) const  (in xs) + 116  [0x102c03ab0]
+            ! : | + 1 std::basic_string<char>::__assign_no_alias<true>(char const*, unsigned long)  (in xs) + 124  [0x102bead1c]
+            ! : | + ! 1 operator new(unsigned long)  (in libc++abi.dylib) + 52  [0x1806967e8]
+            ! : | + !   1 _xzm_xzone_malloc_tiny  (in libsystem_malloc.dylib) + 816  [0x18050126c]
+            ! : | + 1 std::basic_string<char>::__assign_no_alias<true>(char const*, unsigned long)  (in xs) + 12  [0x102beacac]
+            ! : | 2 generate(DirWork&, Worker&)::$_2::operator()(std::basic_string_view<char>) const  (in xs) + 140  [0x102c03ac8]
+            ! : | + 1 std::basic_string<char>::append(char const*, unsigned long)  (in libc++.1.dylib) + 108  [0x1805f1f18]
+            ! : | + ! 1 std::basic_string<char>::__grow_by_and_replace(unsigned long, unsigned long, unsigned long, unsigned long, unsigned long, unsigned long, char const*)  (in libc++.1.dylib) + 280  [0x1805f30c8]
+            ! : | + !   1 _xzm_free  (in libsystem_malloc.dylib) + 0  [0x1804fc118]
+            ! : | + 1 std::basic_string<char>::append(char const*, unsigned long)  (in libc++.1.dylib) + 12  [0x1805f1eb8]
+            ! : | 1 generate(DirWork&, Worker&)::$_2::operator()(std::basic_string_view<char>) const  (in xs) + 240  [0x102c03b2c]
+            ! : | 1 std::basic_string<char>::append(char const*, unsigned long)  (in libc++.1.dylib) + 108  [0x1805f1f18]
+            ! : | + 1 std::basic_string<char>::__grow_by_and_replace(unsigned long, unsigned long, unsigned long, unsigned long, unsigned long, unsigned long, char const*)  (in libc++.1.dylib) + 280  [0x1805f30c8]
+            ! : | +   1 _xzm_free  (in libsystem_malloc.dylib) + 1048  [0x1804fc530]
+            ! : | +     1 DYLD-STUB$$mach_absolute_time  (in libsystem_malloc.dylib) + 8  [0x180513b98]
+            ! : | 1 std::basic_string<char>::append(char const*, unsigned long)  (in libc++.1.dylib) + 144  [0x1805f1f3c]
+            ! : |   1 _platform_memmove  (in libsystem_platform.dylib) + 452  [0x1806e9524]
+            ! : 2 generate(DirWork&, Worker&)  (in xs) + 80  [0x102bffc44]
+            ! : | 1 (anonymous namespace)::absolute(std::basic_string<char> const&)  (in xs) + 224  [0x102c8c190]
+            ! : | + 1 _platform_memchr  (in libsystem_platform.dylib) + 72  [0x1806e6e48]
+            ! : | 1 (anonymous namespace)::absolute(std::basic_string<char> const&)  (in xs) + 0  [0x102c8c0b0]
+            ! : 2 generate(DirWork&, Worker&)  (in xs) + 3976  [0x102c00b7c]
+            ! : | 2 getegid  (in libsystem_kernel.dylib) + 8  [0x18069d8b0]
+            ! : 2 generate(DirWork&, Worker&)  (in xs) + 14224  [0x102c03384]
+            ! : | 1 _xzm_free  (in libsystem_malloc.dylib) + 1048  [0x1804fc530]
+            ! : | + 1 mach_absolute_time  (in libsystem_kernel.dylib) + 108  [0x18069c10c]
+            ! : | 1 _xzm_free  (in libsystem_malloc.dylib) + 336  [0x1804fc268]
+            ! : 1 generate(DirWork&, Worker&)  (in xs) + 1648  [0x102c00264]
+            ! : | 1 std::basic_string<char>::append(char const*, unsigned long)  (in libc++.1.dylib) + 0  [0x1805f1eac]
+            ! : 1 generate(DirWork&, Worker&)  (in xs) + 13180  [0x102c02f70]
+            ! : | 1 (anonymous namespace)::tweak_attrs(char const*, Entry const&, Entry const&, std::basic_string_view<char>, char, Worker&, DirWork&, unsigned int)  (in xs) + 1188  [0x102c04ef8]
+            ! : |   1 (anonymous namespace)::set_extra_times(char const*, Entry const&, bool)  (in xs) + 224  [0x102c049d8]
+            ! : 1 generate(DirWork&, Worker&)  (in xs) + 14296  [0x102c033cc]
+            ! : | 1 _xzm_free  (in libsystem_malloc.dylib) + 64  [0x1804fc158]
+            ! : 1 generate(DirWork&, Worker&)  (in xs) + 140  [0x102bffc80]
+            ! 263 (anonymous namespace)::Local::run_task(Task&, Worker&)  (in xs) + 248  [0x102c442a8]
+            ! : 263 open  (in libsystem_kernel.dylib) + 64  [0x1806a78f0]
+            ! :   263 __open  (in libsystem_kernel.dylib) + 8  [0x18069c694]
+            ! 243 (anonymous namespace)::Local::run_task(Task&, Worker&)  (in xs) + 6964  [0x102c45ce4]
+            ! : 243 prune_source(DirList&, std::basic_string_view<char>, unsigned int, Worker&, std::vector<std::basic_string<char>>*, SourceGuard const&, std::basic_string_view<char>, FilterList const*)  (in xs) + 776  [0x102c38d44]
+            ! :   157 SourceGuard::excludes(std::basic_string<char> const&) const  (in xs) + 208  [0x102c362a0]
+            ! :   | 145 std::__fs::filesystem::__weakly_canonical(std::__fs::filesystem::path const&, std::error_code*)  (in libc++.1.dylib) + 840  [0x180652c28]
+            ! :   | + 142 std::__fs::filesystem::__canonical(std::__fs::filesystem::path const&, std::error_code*)  (in libc++.1.dylib) + 128  [0x18064f718]
+            ! :   | + ! 138 realpath$DARWIN_EXTSN  (in libsystem_c.dylib) + 1128  [0x18057fd08]
+            ! :   | + ! : 138 __getattrlist  (in libsystem_kernel.dylib) + 8  [0x18069c63c]
+            ! :   | + ! 3 realpath$DARWIN_EXTSN  (in libsystem_c.dylib) + 1728  [0x18057ff60]
+            ! :   | + ! : 2 _platform_strlcat  (in libsystem_platform.dylib) + 60  [0x1806e78c8]
+            ! :   | + ! : | 2 _platform_strnlen  (in libsystem_platform.dylib) + 80,112  [0x1806e6a70,0x1806e6a90]
+            ! :   | + ! : 1 _platform_strlcat  (in libsystem_platform.dylib) + 104  [0x1806e78f4]
+            ! :   | + ! :   1 _platform_memmove  (in libsystem_platform.dylib) + 452  [0x1806e9524]
+            ! :   | + ! 1 _platform_strlcat  (in libsystem_platform.dylib) + 148  [0x1806e7920]
+            ! :   | + 1 std::__fs::filesystem::__canonical(std::__fs::filesystem::path const&, std::error_code*)  (in libc++.1.dylib) + 104  [0x18064f700]
+            ! :   | + ! 1 std::basic_string<char>::__init_copy_ctor_external(char const*, unsigned long)  (in libc++.1.dylib) + 104  [0x18060a3c0]
+            ! :   | + !   1 $_0::operator()() const::'lambda0'(unsigned long, std::__type_descriptor_t)::__invoke(unsigned long, std::__type_descriptor_t)  (in libc++abi.dylib) + 16  [0x1806954a8]
+            ! :   | + !     1 operator_new_impl[abi:nqe210106](unsigned long, std::__type_descriptor_t)  (in libc++abi.dylib) + 36  [0x1806954dc]
+            ! :   | + !       1 _xzm_xzone_malloc_tiny  (in libsystem_malloc.dylib) + 468  [0x180501110]
+            ! :   | + 1 std::__fs::filesystem::__canonical(std::__fs::filesystem::path const&, std::error_code*)  (in libc++.1.dylib) + 164  [0x18064f73c]
+            ! :   | + ! 1 _xzm_free  (in libsystem_malloc.dylib) + 352  [0x1804fc278]
+            ! :   | + !   1 _platform_memset  (in libsystem_platform.dylib) + 140  [0x1806e911c]
+            ! :   | + 1 std::__fs::filesystem::__canonical(std::__fs::filesystem::path const&, std::error_code*)  (in libc++.1.dylib) + 224  [0x18064f778]
+            ! :   | +   1 _xzm_free  (in libsystem_malloc.dylib) + 352  [0x1804fc278]
+            ! :   | +     1 DYLD-STUB$$_platform_bzero  (in libsystem_malloc.dylib) + 8  [0x180513878]
+            ! :   | 10 std::__fs::filesystem::__weakly_canonical(std::__fs::filesystem::path const&, std::error_code*)  (in libc++.1.dylib) + 320  [0x180652a20]
+            ! :   | + 10 std::__fs::filesystem::__status(std::__fs::filesystem::path const&, std::error_code*)  (in libc++.1.dylib) + 72  [0x1806525a8]
+            ! :   | +   10 stat  (in libsystem_kernel.dylib) + 8  [0x1806a788c]
+            ! :   | 2 std::__fs::filesystem::__weakly_canonical(std::__fs::filesystem::path const&, std::error_code*)  (in libc++.1.dylib) + 120  [0x180652958]
+            ! :   |   2 std::basic_string<char>::reserve(unsigned long)  (in libc++.1.dylib) + 132  [0x1805f4674]
+            ! :   |     1 $_0::operator()() const::'lambda0'(unsigned long, std::__type_descriptor_t)::__invoke(unsigned long, std::__type_descriptor_t)  (in libc++abi.dylib) + 16  [0x1806954a8]
+            ! :   |     ! 1 operator_new_impl[abi:nqe210106](unsigned long, std::__type_descriptor_t)  (in libc++abi.dylib) + 36  [0x1806954dc]
+            ! :   |     !   1 _xzm_xzone_malloc  (in libsystem_malloc.dylib) + 184  [0x1804fba08]
+            ! :   |     1 $_0::operator()() const::'lambda0'(unsigned long, std::__type_descriptor_t)::__invoke(unsigned long, std::__type_descriptor_t)  (in libc++abi.dylib) + 4  [0x18069549c]
+            ! :   82 SourceGuard::excludes(std::basic_string<char> const&) const  (in xs) + 76  [0x102c3621c]
+            ! :   | 82 stat  (in libsystem_kernel.dylib) + 8  [0x1806a788c]
+            ! :   2 SourceGuard::excludes(std::basic_string<char> const&) const  (in xs) + 176  [0x102c36280]
+            ! :   | 1 std::basic_string<char>::append[abi:nqe210106]<char const*, 0>(char const*, char const*)  (in xs) + 276  [0x102c358a0]
+            ! :   | + 1 operator new(unsigned long)  (in libc++abi.dylib) + 52  [0x1806967e8]
+            ! :   | +   1 _xzm_xzone_malloc  (in libsystem_malloc.dylib) + 180  [0x1804fba04]
+            ! :   | 1 std::basic_string<char>::append[abi:nqe210106]<char const*, 0>(char const*, char const*)  (in xs) + 160  [0x102c3582c]
+            ! :   1 SourceGuard::excludes(std::basic_string<char> const&) const  (in xs) + 308  [0x102c36304]
+            ! :   | 1 std::basic_string<char>::__init_copy_ctor_external(char const*, unsigned long)  (in xs) + 0  [0x102be5764]
+            ! :   1 SourceGuard::excludes(std::basic_string<char> const&) const  (in xs) + 208  [0x102c362a0]
+            ! 217 (anonymous namespace)::Local::run_task(Task&, Worker&)  (in xs) + 260  [0x102c442b4]
+            ! : 203 list_dir_fd(int, DirList&, unsigned int)  (in xs) + 236  [0x102bfc344]
+            ! : | 203 getattrlistbulk  (in libsystem_kernel.dylib) + 8  [0x18069f4b4]
+            ! : 9 list_dir_fd(int, DirList&, unsigned int)  (in xs) + 3820  [0x102bfd144]
+            ! : | 9 close  (in libsystem_kernel.dylib) + 8  [0x18069c8f0]
+            ! : 2 list_dir_fd(int, DirList&, unsigned int)  (in xs) + 3900  [0x102bfd194]
+            ! : | 1 std::__introsort<std::_ClassicAlgPolicy, DirList::sort()::$_0&, Entry*, false>(Entry*, Entry*, DirList::sort()::$_0&, std::iterator_traits<Entry*>::difference_type, bool)  (in xs) + 2204  [0x102be9638]
+            ! : | + 1 _platform_memcmp  (in libsystem_platform.dylib) + 140  [0x1806e6f9c]
+            ! : | 1 std::__introsort<std::_ClassicAlgPolicy, DirList::sort()::$_0&, Entry*, false>(Entry*, Entry*, DirList::sort()::$_0&, std::iterator_traits<Entry*>::difference_type, bool)  (in xs) + 0  [0x102be8d9c]
+            ! : 1 list_dir_fd(int, DirList&, unsigned int)  (in xs) + 2220  [0x102bfcb04]
+            ! : | 1 operator new(unsigned long)  (in libc++abi.dylib) + 52  [0x1806967e8]
+            ! : |   1 _xzm_xzone_malloc_tiny  (in libsystem_malloc.dylib) + 312  [0x180501074]
+            ! : 1 list_dir_fd(int, DirList&, unsigned int)  (in xs) + 2416  [0x102bfcbc8]
+            ! : | 1 _xzm_free  (in libsystem_malloc.dylib) + 1048  [0x1804fc530]
+            ! : |   1 mach_absolute_time  (in libsystem_kernel.dylib) + 108  [0x18069c10c]
+            ! : 1 list_dir_fd(int, DirList&, unsigned int)  (in xs) + 796  [0x102bfc574]
+            ! 5 (anonymous namespace)::Local::run_task(Task&, Worker&)  (in xs) + 10304  [0x102c469f0]
+            ! : 3 finish_dir(DirWork&)  (in xs) + 424,460,...  [0x102c05b88,0x102c05bac,...]
+            ! : 1 finish_dir(DirWork&)  (in xs) + 76  [0x102c05a2c]
+            ! : | 1 std::mutex::lock()  (in libc++.1.dylib) + 0  [0x1805f2000]
+            ! : 1 finish_dir(DirWork&)  (in xs) + 244  [0x102c05ad4]
+            ! :   1 std::basic_string<char>::__init_copy_ctor_external(char const*, unsigned long)  (in xs) + 100  [0x102be57c8]
+            ! :     1 operator new(unsigned long)  (in libc++abi.dylib) + 52  [0x1806967e8]
+            ! :       1 _xzm_xzone_malloc_freelist_outlined  (in libsystem_malloc.dylib) + 756  [0x180502994]
+            ! 3 (anonymous namespace)::Local::run_task(Task&, Worker&)  (in xs) + 10312  [0x102c469f8]
+            ! : 1 DirWork::~DirWork()  (in xs) + 404  [0x102c0fee8]
+            ! : | 1 _xzm_free  (in libsystem_malloc.dylib) + 1048  [0x1804fc530]
+            ! : |   1 mach_absolute_time  (in libsystem_kernel.dylib) + 108  [0x18069c10c]
+            ! : 1 DirWork::~DirWork()  (in xs) + 356  [0x102c0feb8]
+            ! : 1 std::__tree<std::__value_type<std::basic_string<char>, XattrValue>, std::__map_value_compare<std::basic_string<char>, std::pair<std::basic_string<char> const, XattrValue>, true>>::destroy(std::__tree_node<std::__value_type<std::basic_string<char>, XattrValue>, void*>*)  (in xs) + 140  [0x102c29dec]
+            ! 1 (anonymous namespace)::Local::run_task(Task&, Worker&)  (in xs) + 10324  [0x102c46a04]
+            ! : 1 _xzm_free  (in libsystem_malloc.dylib) + 880  [0x1804fc488]
+            ! 1 (anonymous namespace)::Local::run_task(Task&, Worker&)  (in xs) + 11080  [0x102c46cf8]
+            !   1 std::basic_string<char>::append(char const*, unsigned long)  (in libc++.1.dylib) + 144  [0x1805f1f3c]
+            !     1 DYLD-STUB$$memmove  (in libc++.1.dylib) + 8  [0x1806547c0]
+            1 Pool::run(int)  (in xs) + 1244  [0x102c41cbc]
+            ! 1 std::mutex::unlock()  (in libc++.1.dylib) + 16  [0x1805f2038]
+            !   1 DYLD-STUB$$pthread_mutex_unlock  (in libc++.1.dylib) + 8  [0x180654920]
+            1 Pool::run(int)  (in xs) + 1428  [0x102c41d74]
+
+Total number in stack (recursive counted multiple, when >=5):
+        11       _xzm_free  (in libsystem_malloc.dylib) + 0  [0x1804fc118]
+        10       close  (in libsystem_kernel.dylib) + 0  [0x18069c8e8]
+        9       _xzm_free  (in libsystem_malloc.dylib) + 1048  [0x1804fc530]
+        8       mach_absolute_time  (in libsystem_kernel.dylib) + 0  [0x18069c0a0]
+        6       operator new(unsigned long)  (in libc++abi.dylib) + 52  [0x1806967e8]
+
+Sort by top of stack, same collapsed (when >= 5):
+        __psynch_cvwait  (in libsystem_kernel.dylib)        2210
+        __openat  (in libsystem_kernel.dylib)        1133
+        getattrlistbulk  (in libsystem_kernel.dylib)        334
+        __open  (in libsystem_kernel.dylib)        263
+        __getattrlist  (in libsystem_kernel.dylib)        138
+        stat  (in libsystem_kernel.dylib)        92
+        fstatat  (in libsystem_kernel.dylib)        63
+        close  (in libsystem_kernel.dylib)        50
+        std::__introsort<std::_ClassicAlgPolicy, finalize_tree()::$_3&, (anonymous namespace)::FinalDirectory*, false>((anonymous namespace)::FinalDirectory*, (anonymous namespace)::FinalDirectory*, finalize_tree()::$_3&, std::iterator_traits<(anonymous namespace)::FinalDirectory*>::difference_type, bool)  (in xs)        30
+        fgetattrlist  (in libsystem_kernel.dylib)        23
+        _xzm_free  (in libsystem_malloc.dylib)        11
+        dup  (in libsystem_kernel.dylib)        11
+        mach_absolute_time  (in libsystem_kernel.dylib)        9
+        fstatfs  (in libsystem_kernel.dylib)        7
+
+Binary Images:
+       0x102b80000 -        0x102ce1abf +xs (0) <ECF77E10-13EC-319B-8794-BACE3AA85E39> /Users/*/xs
+       0x103078000 -        0x1031b605f +libicuuc.78.3.dylib (0) <EC934797-EFF8-36BA-BA4D-A1EFD318018A> /opt/homebrew/*/libicuuc.78.3.dylib
+       0x1051f0000 -        0x10718386f +libicudata.78.3.dylib (0) <405A29E4-230E-3E63-8CA7-2F482D507E59> /opt/homebrew/*/libicudata.78.3.dylib
+       0x18026c000 -        0x1802beb4b  libobjc.A.dylib (951.7) <03BD9E32-CF0A-37B0-898A-3CE8DE06D842> /usr/lib/libobjc.A.dylib
+       0x1802bf000 -        0x1802f3d58  libdyld.dylib (1387) <957F93B3-8805-39C7-9C51-EDD1715F550E> /usr/lib/system/libdyld.dylib
+       0x1802f4000 -        0x1803a74ff  dyld (1.0.0 - 1387) <74E52480-C2BD-3C8D-812D-95FE2B74A096> /usr/lib/dyld
+       0x1803a8000 -        0x1803ab228  libsystem_blocks.dylib (96) <E0AC1231-27AA-3A13-8FAC-41D5802B1F3C> /usr/lib/system/libsystem_blocks.dylib
+       0x1803ac000 -        0x18040055f  libxpc.dylib (3102.160.5) <33E44C2D-D65E-37A6-B85F-1A4CF524A050> /usr/lib/system/libxpc.dylib
+       0x180401000 -        0x1804219ff  libsystem_trace.dylib (1861.160.4) <93F1DD8C-6CD9-32B9-B222-D23DA5D161B4> /usr/lib/system/libsystem_trace.dylib
+       0x180422000 -        0x1804d05f7  libcorecrypto.dylib (1922.160.10) <0642DDAD-4771-3C82-805C-E7C6701C1461> /usr/lib/system/libcorecrypto.dylib
+       0x1804d1000 -        0x180521257  libsystem_malloc.dylib (812.160.5) <D969A907-3E43-3951-9365-8C2DB3812E9D> /usr/lib/system/libsystem_malloc.dylib
+       0x180522000 -        0x18056923f  libdispatch.dylib (1542.160.2) <B2000CD5-F580-314A-A141-E036719D854E> /usr/lib/system/libdispatch.dylib
+       0x18056a000 -        0x18056cffb  libsystem_featureflags.dylib (103) <FEE12F9C-344B-33B3-8EDD-283580EF1C67> /usr/lib/system/libsystem_featureflags.dylib
+       0x18056d000 -        0x1805ee1e7  libsystem_c.dylib (1752.160.4) <D77CEB62-AFF6-3CEC-BA9B-4F057FBE2EB5> /usr/lib/system/libsystem_c.dylib
+       0x1805ef000 -        0x18067fae7  libc++.1.dylib (2100.43) <F0FD393C-15BC-3C75-A19D-897F7B225C78> /usr/lib/libc++.1.dylib
+       0x180680000 -        0x18069a75f  libc++abi.dylib (2100.43) <F38A9C58-22AB-3798-BBAE-8DCD9CC0CE27> /usr/lib/libc++abi.dylib
+       0x18069b000 -        0x1806d82e7  libsystem_kernel.dylib (12377.161.14) <C6A4A4CB-92E6-3BAF-AAE0-E8306259209A> /usr/lib/system/libsystem_kernel.dylib
+       0x1806d9000 -        0x1806e5b3b  libsystem_pthread.dylib (539.100.4) <A373F0B0-9880-326A-88B4-DD8BE4E33072> /usr/lib/system/libsystem_pthread.dylib
+       0x1806e6000 -        0x1806ee963  libsystem_platform.dylib (375.120.2) <EDB83A19-EC17-32DE-9350-6145970A85D6> /usr/lib/system/libsystem_platform.dylib
+       0x1806ef000 -        0x18071e6eb  libsystem_info.dylib (600) <9B5FB84B-31AD-3EA7-8F89-8C700D369DC8> /usr/lib/system/libsystem_info.dylib
+       0x1846bc000 -        0x1846c5e5f  libsystem_darwin.dylib (1752.160.4) <8E07D22E-CE5A-38A0-B091-5B0338C326F5> /usr/lib/system/libsystem_darwin.dylib
+       0x184b27000 -        0x184b391b6  libsystem_notify.dylib (348.160.3) <15799128-6CBD-30D6-A2BB-B9D02B4470C0> /usr/lib/system/libsystem_notify.dylib
+       0x186df8000 -        0x186e12f7b  libsystem_networkextension.dylib (2226.161.1) <9C7B1EEB-47BE-3791-93A9-CFC693CB9417> /usr/lib/system/libsystem_networkextension.dylib
+       0x186e95000 -        0x186eacfdf  libsystem_asl.dylib (406) <54439739-33EE-3273-839F-CBA67D7F5CB1> /usr/lib/system/libsystem_asl.dylib
+       0x188a4e000 -        0x188a56387  libsystem_symptoms.dylib (2169.160.3) <229122B9-B8B1-3F2F-870E-8650AE3C4FB5> /usr/lib/system/libsystem_symptoms.dylib
+       0x18ccf3000 -        0x18cd2b5b7  libsystem_containermanager.dylib (725.160.3) <14B2A47F-19C8-392F-8FDB-FE8AE375DD41> /usr/lib/system/libsystem_containermanager.dylib
+       0x18e105000 -        0x18e1095d7  libsystem_configuration.dylib (1405.160.3) <D8D6280B-783D-3550-BDBA-2861AE40604F> /usr/lib/system/libsystem_configuration.dylib
+       0x18e10a000 -        0x18e11099f  libsystem_sandbox.dylib (2680.160.6) <54688162-B50D-3D31-A1E8-7B9766D3530D> /usr/lib/system/libsystem_sandbox.dylib
+       0x18f765000 -        0x18f7681fb  libquarantine.dylib (196.160.2) <EEE5AADB-52E1-3C4C-881A-70405770B1F1> /usr/lib/system/libquarantine.dylib
+       0x18ff04000 -        0x18ff0ad03  libsystem_coreservices.dylib (191.5.1) <D4ACD2AC-5702-3C45-85A0-300B2C2D19E1> /usr/lib/system/libsystem_coreservices.dylib
+       0x190493000 -        0x1904d0a77  libsystem_m.dylib (3312.100.1) <B54FBE99-DB0B-32C7-ABDD-C2206DF606A4> /usr/lib/system/libsystem_m.dylib
+       0x1904d2000 -        0x1904d5527  libmacho.dylib (1387) <949131E5-BDA2-39BA-AA50-62651BB51802> /usr/lib/system/libmacho.dylib
+       0x1904ef000 -        0x1904fc3a7  libcommonCrypto.dylib (600035) <3B110564-5278-3CB0-85F1-2CE8431FF935> /usr/lib/system/libcommonCrypto.dylib
+       0x1904fd000 -        0x190506ca3  libunwind.dylib (2100.2) <05FD0014-55B1-3B8A-A6BA-6C7A389C4123> /usr/lib/system/libunwind.dylib
+       0x19050f000 -        0x190519bef  libcopyfile.dylib ([address].1) <D0009B8A-8ECC-3D56-9206-7E1839707F93> /usr/lib/system/libcopyfile.dylib
+       0x19051a000 -        0x19051d987  libcompiler_rt.dylib (103.3) <6FB345CA-7F5C-3263-A23F-143F7539FD8A> /usr/lib/system/libcompiler_rt.dylib
+       0x19051e000 -        0x19052278b  libsystem_collections.dylib (1752.160.4) <C8160BD2-5941-3DC0-BB40-F8C2B8156EC4> /usr/lib/system/libsystem_collections.dylib
+       0x190523000 -        0x1905264cf  libsystem_secinit.dylib (168.100.7) <ECABC024-8F02-374A-BB7E-29437CEA2ABD> /usr/lib/system/libsystem_secinit.dylib
+       0x190527000 -        0x190529bf7  libremovefile.dylib (85.100.6) <7460B5AE-469A-36A0-A7EC-6C7D69628E86> /usr/lib/system/libremovefile.dylib
+       0x19052a000 -        0x19052af27  libkeymgr.dylib (31) <7E863FCA-F3FF-32C7-8A8C-F983E946AFC3> /usr/lib/system/libkeymgr.dylib
+       0x19052b000 -        0x190533e37  libsystem_dnssd.dylib (2881.160.4) <305F4398-E688-3384-B351-02D865EC8A04> /usr/lib/system/libsystem_dnssd.dylib
+       0x190534000 -        0x19053909b  libcache.dylib (95) <9CD7B1E1-3E47-339C-A193-2392E3E0ED23> /usr/lib/system/libcache.dylib
+       0x19053a000 -        0x19053bce3  libSystem.B.dylib (1356) <4FED5EE2-5D3E-35B1-A170-9859C4B683BB> /usr/lib/libSystem.B.dylib
+       0x2844fd000 -        0x284504349  libRosetta.dylib (367.9) <0C7397C6-D747-31F2-8BC1-4096213BDE5C> /usr/lib/libRosetta.dylib
+       0x286110000 -        0x286113a4b  libsystem_darwindirectory.dylib (122) <971A4F65-493D-39F3-846D-0D33FA2769FD> /usr/lib/system/libsystem_darwindirectory.dylib
+       0x286114000 -        0x28611e39b  libsystem_eligibility.dylib (319.160.17) <750CA446-92EA-3A56-9A7B-CC0841686C50> /usr/lib/system/libsystem_eligibility.dylib
+       0x28611f000 -        0x28612688b  libsystem_sanitizers.dylib (26.1) <D88EC709-9AA8-3083-B22B-D3CB39678D71> /usr/lib/system/libsystem_sanitizers.dylib
+       0x286127000 -        0x286127bb7  libsystem_trial.dylib (474.2.18.2) <7194FF5B-A6C5-3D67-B00A-90209F10D603> /usr/lib/system/libsystem_trial.dylib

@@ -1,0 +1,48 @@
+# LC7 (tree T16): if no worker count alone beats rsync, the settings that keep the same
+# final tree but change how it gets there: eager writeback (the T5 starts writing
+# sooner) and --no-atomic (no temporary file and rename per file, which gives up
+# all-or-nothing replacement of each file). All with two workers, against rsync.
+id = "LC7-local-relaxed"
+kind = "screening"
+hypothesis = "With two workers, eager writeback or --no-atomic lets xs copy psample to the T5 at least as fast as rsync -aH."
+primary = "durable_s"
+delta = 0.03
+blocks = 4
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+sample_timeout_s = 7200
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-aH"]
+
+[arms.xs-j2]
+tool = "xs"
+rev = "dd6f5121d506"
+flags = ["-aH", "-j2"]
+
+[arms.xs-j2-eager]
+tool = "xs"
+rev = "dd6f5121d506"
+flags = ["-aH", "-j2"]
+writeback = "eager"
+
+[arms.xs-j2-noatomic]
+tool = "xs"
+rev = "dd6f5121d506"
+flags = ["-aH", "-j2", "--no-atomic"]
+
+[arms.xs-j2-both]
+tool = "xs"
+rev = "dd6f5121d506"
+flags = ["-aH", "-j2", "--no-atomic"]
+writeback = "eager"
+
+[matrix]
+link = "neo-local-ssd"
+corpus = ["real-psample"]
+scenario = ["fresh"]
+direction = ["neo>neo-ssd"]
+client = ["receiver"]
+cache = ["cold"]

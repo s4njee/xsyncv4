@@ -1,0 +1,60 @@
+# N3b: N3 at 10 Gb/s, with eight receiving workers added. On the old link
+# four receiving workers with --no-atomic took small-flat to 1.01 Gb/s.
+id = "N3b-10g-small-tune"
+kind = "screening"
+hypothesis = "Fewer receiving workers and --no-atomic make small and mixed copies onto NVMe faster at 10 Gb/s."
+primary = "durable_s"
+delta = 0.03
+blocks = 8
+control = "xs"
+verify = "first-last"
+cleanup = "eager"
+hours = [23, 5]  # the Mac sends: run while it is idle overnight
+
+[arms.xs]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a"]
+metrics = true
+
+[arms.recv2]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a"]
+tune = { receiver = "jobs=2" }
+metrics = true
+
+[arms.recv4]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a"]
+tune = { receiver = "jobs=4" }
+metrics = true
+
+[arms.recv8]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a"]
+tune = { receiver = "jobs=8" }
+metrics = true
+
+[arms.no-atomic]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a", "--no-atomic"]
+metrics = true
+
+[arms.recv4-noatomic]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a", "--no-atomic"]
+tune = { receiver = "jobs=4" }
+metrics = true
+
+[matrix]
+link = "mac-mars-direct"
+corpus = ["small-flat", "small-deep", "small-opaque", "mixed-bimodal", "mixed-threshold"]
+scenario = ["fresh"]
+direction = ["mac>mars"]
+client = ["initiator"]
+cache = ["warm"]

@@ -1,0 +1,22 @@
+{
+ "experiment": "AP10210751-AP10210749-L2R8-psample-pull-wan11-cpu2",
+ "kind": "screening",
+ "hypothesis": "With neo receiving under 11 ms and 2 CPUs, xs -a -j4's time-to-durable is at least 5% behind rsync -a, or its per-block times vary far more than rsync's.",
+ "primary": "durable_s",
+ "control": "xs-j4",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261021T075209Z-AP10210751-AP10210749-L2R8-psample-pull-wan11-cpu2"
+ ],
+ "spec_sha256": [
+  "f20d40c08f2da417d744d688f8454266896369f46ec9d34f1af08453a5f01b80"
+ ],
+ "valid_blocks": 0,
+ "void_attempts": 18,
+ "void_reasons": [
+  "rsync: the destination does not match the corpus manifest: DIFFERS github/acritty/target/debug/incremental/alacritty-0apbfib5r6rer/s-hnarn3fo0v-1bemmqn-embc6e4s",
+  "xs-j4: the destination does not match the corpus manifest: DIFFERS github/acritty/target/debug/incremental/alacritty-0apbfib5r6rer/s-hnarn3fo0v-1bemmqn-embc6e4s"
+ ]
+}

@@ -1,0 +1,175 @@
+# T1: where the small-file limit sits between neo (a Raspberry Pi 5) and freya, over
+# gigabit, and whether xs's best small-file setting is safe to make the default there.
+# K1 measured each receiver creating the files locally against xs delivering them; K2a
+# and K2b repeat xs's runs with the receiver writing to RAM. If RAM is clearly faster
+# than the disk for the same sender, that receiver's write path is part of the limit and
+# its knobs are screened next; if not, the limit is upstream. Either way the tree goes on
+# to the default question (D9, D10) and to compression on the Pi (D8). Until Sunday 07:00
+# Central it keeps the runner busy with short replicates (F1a) once its branches end.
+id = "T1-neo-freya-small"
+question = "What limits xs's small-file copies between the Pi and freya, and is its best setting safe as the default?"
+start = ["K2a", "K2b"]
+until = "2026-10-18T12:00Z"
+fill = ["F1a"]
+
+[nodes.K2a]
+spec = "K2a-tmpfs-freya.toml"
+adopt = "20261016T223005Z-K2a-tmpfs-freya"
+question = "Does freya's disk slow down copies from the Pi?"
+
+  [[nodes.K2a.branch]]
+  when = { against = { experiment = "K1-congress-ceiling", arm = "xs-z-best" }, arm = "xs-z-best", corpus = ["small-flat", "small-deep"], speed_at_least = 1.15, all = true }
+  next = ["D2", "D9"]
+  note = "into RAM on freya is at least 15% faster than onto its NVMe: freya's write path matters"
+  label = "RAM ≥15% faster than NVMe"
+
+  [[nodes.K2a.branch]]
+  otherwise = true
+  next = ["D3", "D9"]
+  note = "RAM on freya is not clearly faster than its NVMe: the Pi sending is the limit"
+  label = "otherwise"
+
+[nodes.K2b]
+spec = "K2b-tmpfs-neo.toml"
+adopt = "20261016T222957Z-K2b-tmpfs-neo"
+question = "Does the Pi's own disk slow down copies to it?"
+
+  [[nodes.K2b.branch]]
+  when = { against = { experiment = "K1-congress-ceiling", arm = "xs-z-best" }, arm = "xs-z-best", corpus = ["small-flat", "small-deep"], speed_at_least = 1.15, all = true }
+  next = ["D4", "D10"]
+  note = "into RAM on the Pi is at least 15% faster than onto its disk: the Pi's write path matters"
+  label = "RAM ≥15% faster than its disk"
+
+  [[nodes.K2b.branch]]
+  otherwise = true
+  next = ["D10"]
+  note = "RAM on the Pi is not clearly faster than its disk: its CPU or the protocol is the limit, which no knob has moved (T1g)"
+  label = "otherwise"
+
+[nodes.D2]
+spec = "D2-freya-receive-path.toml"
+question = "Can a receive-side setting on freya make up for its disk?"
+
+  [[nodes.D2.branch]]
+  when = { verdict = "faster" }
+  next = ["D2c"]
+  note = "a receive-path setting on freya was faster"
+  label = "an arm was faster"
+
+  [[nodes.D2.branch]]
+  otherwise = true
+  next = []
+  note = "no receive-path setting on freya beat xs's best"
+  label = "nothing faster"
+
+[nodes.D3]
+spec = "D3-pi-send-small.toml"
+question = "Can a sending setting get more out of the Pi?"
+
+  [[nodes.D3.branch]]
+  when = { verdict = "faster" }
+  next = ["D3c"]
+  note = "a sending setting on the Pi was faster"
+  label = "an arm was faster"
+
+  [[nodes.D3.branch]]
+  otherwise = true
+  next = []
+  note = "no sending setting on the Pi beat xs's best"
+  label = "nothing faster"
+
+[nodes.D4]
+spec = "D4-pi-receive-small.toml"
+question = "Can fewer workers or larger writes help the Pi's disk?"
+
+  [[nodes.D4.branch]]
+  when = { verdict = "faster" }
+  next = ["D4c"]
+  note = "a receive-path setting on the Pi was faster"
+  label = "an arm was faster"
+
+  [[nodes.D4.branch]]
+  otherwise = true
+  next = []
+  note = "no receive-path setting on the Pi beat xs's best"
+  label = "nothing faster"
+
+[nodes.D9]
+spec = "D9-lan-best-default.toml"
+question = "Is xs's best small-file setting safe as the default for mixed trees?"
+
+  [[nodes.D9.branch]]
+  when = { arm = "xs-best", verdict = "slower" }
+  next = ["D9b", "D8"]
+  note = "xs's best setting was slower than its default somewhere"
+  label = "slower somewhere"
+
+  [[nodes.D9.branch]]
+  otherwise = true
+  next = ["D8"]
+  note = "xs's best setting was nowhere slower than its default"
+  label = "never slower"
+
+[nodes.D9b]
+spec = "D9b-lan-best-split.toml"
+question = "Which half of the best setting costs time: four workers or --no-atomic?"
+
+[nodes.D10]
+spec = "D10-lan-noop-best.toml"
+question = "Does the best setting also speed up no-op copies of small trees?"
+
+  [[nodes.D10.branch]]
+  when = { arm = "xs-best", verdict = "faster" }
+  next = []
+  note = "xs's best setting was faster on no-op copies too"
+  label = "faster on no-ops"
+
+  [[nodes.D10.branch]]
+  otherwise = true
+  next = []
+  note = "xs's best setting did not speed up no-op copies"
+  label = "no gain"
+
+[nodes.D8]
+spec = "D8-pi-compress-small.toml"
+question = "Is adaptive compression the right choice on the Pi for small text trees?"
+
+  [[nodes.D8.branch]]
+  when = { verdict = "faster" }
+  next = ["D8c"]
+  note = "a fixed level or no compression beat adaptive -z on the Pi"
+  label = "an arm was faster"
+
+  [[nodes.D8.branch]]
+  otherwise = true
+  next = []
+  note = "adaptive -z held its own on the Pi"
+  label = "adaptive held"
+
+[nodes.D2c]
+promote = "D2"
+id = "D2c-freya-receive-confirm"
+blocks = 12
+question = "Does freya's winning receive setting hold up with fresh blocks?"
+
+[nodes.D3c]
+promote = "D3"
+id = "D3c-pi-send-confirm"
+blocks = 12
+question = "Does the Pi's winning send setting hold up with fresh blocks?"
+
+[nodes.D4c]
+promote = "D4"
+id = "D4c-pi-receive-confirm"
+blocks = 12
+question = "Does the Pi's winning receive setting hold up with fresh blocks?"
+
+[nodes.D8c]
+promote = "D8"
+id = "D8c-pi-compress-confirm"
+blocks = 12
+question = "Does the winning compression choice hold up with fresh blocks?"
+
+[nodes.F1a]
+spec = "F1a-lan-replicate.toml"
+question = "Do the main results hold steady from run to run over the weekend?"

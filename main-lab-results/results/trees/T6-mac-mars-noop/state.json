@@ -1,0 +1,24 @@
+{
+ "tree": "T6-mac-mars-noop",
+ "started_utc": "2026-10-17T15:28:22Z",
+ "nodes": {
+  "A": {
+   "state": "held",
+   "runs": [
+    "20261017T160919Z-MA1-mac-noop",
+    "20261017T163802Z-MA1-mac-noop",
+    "20261017T185617Z-MA1-mac-noop"
+   ],
+   "spec": "MA1-mac-noop.toml",
+   "continued": [
+    "20261017T163802Z-MA1-mac-noop",
+    "20261017T185617Z-MA1-mac-noop"
+   ],
+   "decision": {
+    "utc": "2026-10-18T01:21:04Z",
+    "text": "Paused while mars/freya are offline and the Mac is paired with neo. Historical results and queue snapshots are preserved.",
+    "next": []
+   }
+  }
+ }
+}

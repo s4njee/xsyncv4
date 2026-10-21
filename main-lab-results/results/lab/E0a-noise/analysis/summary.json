@@ -1,0 +1,21 @@
+{
+ "experiment": "E0a-noise",
+ "kind": "screening",
+ "hypothesis": "Two labels on one binary are equivalent within 3% in every cell.",
+ "primary": "wall_s",
+ "control": "xs",
+ "delta": 0.03,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261012T001524Z-E0a-noise"
+ ],
+ "spec_sha256": [
+  "bfc671ca1d4e5650d2bbd70ea7dc540d34c421698fdd40d6710695cceab935ef"
+ ],
+ "valid_blocks": 144,
+ "void_attempts": 3,
+ "void_reasons": [
+  "freya reaches neo by br-039e63f2ae7f, not enp10s0"
+ ]
+}

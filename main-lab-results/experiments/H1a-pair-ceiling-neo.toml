@@ -1,0 +1,37 @@
+# H1a (tree T4): the Pi as receiver. The same small trees created wholly on the Pi from its own
+# copy, with no network (1 and 4 tar streams), against xs delivering them from mars. If the Pi
+# creates them far faster than xs delivers, the Pi's disk is not the limit.
+id = "H1a-pair-ceiling-neo"
+kind = "screening"
+hypothesis = "The Pi creates small files locally much faster than xs delivers them from mars."
+primary = "durable_s"
+delta = 0.03
+blocks = 8
+control = "xs-z-best"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.xs-z-best]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-az", "--no-atomic"]
+tune = { receiver = "jobs=4" }
+
+[arms.local-x1]
+tool = "pipe"
+streams = 1
+local = true
+
+[arms.local-x4]
+tool = "pipe"
+streams = 4
+local = true
+
+[matrix]
+link = "neo-mars-1g"
+corpus = ["small-flat", "small-deep", "real-congress"]
+scenario = ["fresh"]
+direction = ["mars>neo"]
+client = ["initiator"]
+cache = ["warm"]

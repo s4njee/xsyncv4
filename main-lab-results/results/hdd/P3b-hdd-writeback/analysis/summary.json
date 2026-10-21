@@ -1,0 +1,21 @@
+{
+ "experiment": "P3b-hdd-writeback",
+ "kind": "screening",
+ "hypothesis": "On the hard drive, eager writeback shortens xs's time to durable for small and mixed trees.",
+ "primary": "durable_s",
+ "control": "xs-best",
+ "delta": 0.03,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261016T223339Z-P3b-hdd-writeback"
+ ],
+ "spec_sha256": [
+  "5261434a0831cab379fedc7a98767c194f245a2ad60fdf56138c895b39f7d433"
+ ],
+ "valid_blocks": 24,
+ "void_attempts": 1,
+ "void_reasons": [
+  "round trip is 3.075 ms, above 2.0"
+ ]
+}

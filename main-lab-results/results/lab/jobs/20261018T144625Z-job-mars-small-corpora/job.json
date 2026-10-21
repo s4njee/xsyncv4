@@ -1,0 +1,11 @@
+{
+ "name": "mars-small-corpora",
+ "steps": [
+  {
+   "host": "mars",
+   "ssh": "[email]",
+   "local": false,
+   "command": "cd ~/benchmarks/xsyncv4/lab && for c in tiny-one small-flat small-deep mixed-bimodal; do python3 lib/021ae1ff14be/corpus.py generate $c --root corpora || exit 1; done"
+  }
+ ]
+}

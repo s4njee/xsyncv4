@@ -1,0 +1,61 @@
+{
+ "revision": "1f3a912f94ebcf5ee0757b1fe4bcd47b27799550",
+ "source_archive_sha256": "0ac623dfa310b29549a99ab3b33008e4b9d7eb1e30d45ea7aeaae984c12ad616",
+ "products": {
+  "neo": {
+   "version": "xs  version 0.1.0  protocol version 4  git 1f3a912f94eb",
+   "sha256": "bd0ecea86afca6af5ac275d01afe0510b5f109e3026d8f679f19993372347ce9",
+   "build": "Release static musl O3/LTO"
+  },
+  "freya": {
+   "version": "xs  version 0.1.0  protocol version 4  git 1f3a912f94eb",
+   "sha256": "96f18016944630b22f09f35ea12d4f46f9b3d93d3df4dc83ace31fefcc1093a5",
+   "build": "Native GCC O3/DNDEBUG/LTO/pthread, system zstd/ICU",
+   "command": [
+    "g++",
+    "-std=c++20",
+    "-O3",
+    "-DNDEBUG",
+    "-flto",
+    "-pthread",
+    "-DXSYNC_GIT_HASH=\"1f3a912f94eb\"",
+    "-I~/benchmarks/xsyncv4/20261010T144748Z-715fa0/source-1f3a912f94eb/src",
+    "~/benchmarks/xsyncv4/20261010T144748Z-715fa0/source-1f3a912f94eb/src/acls.cpp",
+    "~/benchmarks/xsyncv4/20261010T144748Z-715fa0/source-1f3a912f94eb/src/arguments.cpp",
+    "~/benchmarks/xsyncv4/20261010T144748Z-715fa0/source-1f3a912f94eb/src/compression.cpp",
+    "~/benchmarks/xsyncv4/20261010T144748Z-715fa0/source-1f3a912f94eb/src/delta.cpp",
+    "~/benchmarks/xsyncv4/20261010T144748Z-715fa0/source-1f3a912f94eb/src/destination.cpp",
+    "~/benchmarks/xsyncv4/20261010T144748Z-715fa0/source-1f3a912f94eb/src/fallback.cpp",
+    "~/benchmarks/xsyncv4/20261010T144748Z-715fa0/source-1f3a912f94eb/src/filter.cpp",
+    "~/benchmarks/xsyncv4/20261010T144748Z-715fa0/source-1f3a912f94eb/src/fs.cpp",
+    "~/benchmarks/xsyncv4/20261010T144748Z-715fa0/source-1f3a912f94eb/src/hardlink.cpp",
+    "~/benchmarks/xsyncv4/20261010T144748Z-715fa0/source-1f3a912f94eb/src/install.cpp",
+    "~/benchmarks/xsyncv4/20261010T144748Z-715fa0/source-1f3a912f94eb/src/link_dest.cpp",
+    "~/benchmarks/xsyncv4/20261010T144748Z-715fa0/source-1f3a912f94eb/src/linux_scan.cpp",
+    "~/benchmarks/xsyncv4/20261010T144748Z-715fa0/source-1f3a912f94eb/src/listing.cpp",
+    "~/benchmarks/xsyncv4/20261010T144748Z-715fa0/source-1f3a912f94eb/src/local.cpp",
+    "~/benchmarks/xsyncv4/20261010T144748Z-715fa0/source-1f3a912f94eb/src/main.cpp",
+    "~/benchmarks/xsyncv4/20261010T144748Z-715fa0/source-1f3a912f94eb/src/names.cpp",
+    "~/benchmarks/xsyncv4/20261010T144748Z-715fa0/source-1f3a912f94eb/src/output.cpp",
+    "~/benchmarks/xsyncv4/20261010T144748Z-715fa0/source-1f3a912f94eb/src/ownership.cpp",
+    "~/benchmarks/xsyncv4/20261010T144748Z-715fa0/source-1f3a912f94eb/src/permissions.cpp",
+    "~/benchmarks/xsyncv4/20261010T144748Z-715fa0/source-1f3a912f94eb/src/progress.cpp",
+    "~/benchmarks/xsyncv4/20261010T144748Z-715fa0/source-1f3a912f94eb/src/rate_limit.cpp",
+    "~/benchmarks/xsyncv4/20261010T144748Z-715fa0/source-1f3a912f94eb/src/remote.cpp",
+    "~/benchmarks/xsyncv4/20261010T144748Z-715fa0/source-1f3a912f94eb/src/selection.cpp",
+    "~/benchmarks/xsyncv4/20261010T144748Z-715fa0/source-1f3a912f94eb/src/sparse.cpp",
+    "~/benchmarks/xsyncv4/20261010T144748Z-715fa0/source-1f3a912f94eb/src/transport.cpp",
+    "~/benchmarks/xsyncv4/20261010T144748Z-715fa0/source-1f3a912f94eb/src/util.cpp",
+    "~/benchmarks/xsyncv4/20261010T144748Z-715fa0/source-1f3a912f94eb/src/xattr_value.cpp",
+    "~/benchmarks/xsyncv4/20261010T144748Z-715fa0/source-1f3a912f94eb/src/xattrs.cpp",
+    "-lzstd",
+    "-licuuc",
+    "-o",
+    "~/benchmarks/xsyncv4/20261010T144748Z-715fa0/bin/xs-1f3a912f94eb"
+   ]
+  }
+ },
+ "rss_limit_mib_per_measured_xs_process": 512,
+ "utc": "2026-10-10T23:15:57.658520+00:00",
+ "qualification_complete": false
+}

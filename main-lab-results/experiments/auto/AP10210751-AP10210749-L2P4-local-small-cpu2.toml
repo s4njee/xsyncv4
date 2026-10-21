@@ -1,0 +1,29 @@
+# Written by the 6-hourly planner (2026-10-21T07:51Z). Why: Small-file copies are where four workers on two cores would contend most, and lab2 has not measured these tree shapes.
+id = "AP10210751-AP10210749-L2P4-local-small-cpu2"
+kind = "screening"
+hypothesis = "Under a 2-CPU cap, xs -a -j4's lead over rsync -a shrinks below 5% in at least one of these six cells, from 1.25x to 4.8x on the plain link (J2)."
+primary = "durable_s"
+delta = 0.05
+blocks = 8
+control = "xs-j4"
+verify = "first-last"
+cleanup = "eager"
+sample_timeout_s = 7200
+cpus = { host = "neo", count = 2 }
+
+[arms.xs-j4]
+tool = "xs"
+rev = "e51c1df1329a"
+flags = ["-a", "-j4"]
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[matrix]
+link = "neo-local-ssd"
+corpus = ["small-flat", "small-deep", "mixed-bimodal"]
+scenario = ["fresh", "noop"]
+direction = ["neo>neo-ssd"]
+client = ["receiver"]
+cache = ["warm"]

@@ -1,0 +1,82 @@
+{
+ "tree": "T14-neo-local-psample",
+ "started_utc": "2026-10-18T18:09:24Z",
+ "nodes": {
+  "A": {
+   "state": "decided",
+   "runs": [
+    "20261018T180924Z-LC1-psample-local-baseline",
+    "20261018T184002Z-LC1-psample-local-baseline"
+   ],
+   "spec": "LC1-psample-local-baseline.toml",
+   "continued": [
+    "20261018T184002Z-LC1-psample-local-baseline"
+   ],
+   "decision": {
+    "utc": "2026-10-18T21:54:50Z",
+    "text": "A: xs is not ahead of rsync on a local copy: look for what holds it back (workers, flushing) and still check re-syncs (real-psample neo\u2192neo-ssd xs 0.89\u00d7 [0.81, 0.99])",
+    "next": [
+     "B",
+     "C",
+     "D"
+    ],
+    "branch": 0
+   }
+  },
+  "B": {
+   "state": "decided",
+   "runs": [
+    "20261018T215450Z-LC2-psample-local-workers"
+   ],
+   "spec": "LC2-psample-local-workers.toml",
+   "decision": {
+    "utc": "2026-10-19T01:34:54Z",
+    "text": "B: no worker count beats the default four on this Pi and drive",
+    "next": [],
+    "branch": 1
+   }
+  },
+  "C": {
+   "state": "decided",
+   "runs": [
+    "20261018T215452Z-LC3-psample-local-durable"
+   ],
+   "spec": "LC3-psample-local-durable.toml",
+   "decision": {
+    "utc": "2026-10-19T07:38:02Z",
+    "text": "C: eager writeback or --no-atomic gets the backup onto the drive sooner: confirm it (real-psample neo\u2192neo-ssd xs-eager 1.62\u00d7 [1.47, 1.78])",
+    "next": [
+     "Cc"
+    ],
+    "branch": 0
+   }
+  },
+  "D": {
+   "state": "decided",
+   "runs": [
+    "20261018T215454Z-LC4-psample-local-resync"
+   ],
+   "spec": "LC4-psample-local-resync.toml",
+   "decision": {
+    "utc": "2026-10-19T10:39:51Z",
+    "text": "D: xs re-syncs the local backup at least as fast as rsync",
+    "next": [],
+    "branch": 1
+   }
+  },
+  "Cc": {
+   "state": "decided",
+   "runs": [
+    "20261019T125037Z-LC3-durable-confirm"
+   ],
+   "why": "after C: eager writeback or --no-atomic gets the backup onto the drive sooner: confirm it",
+   "error": "neo: cannot create ~/benchmarks/xsyncv4/lab/lib/736894f6f725.incoming: Connection timed out during banner exchange\nConnection to UNKNOWN port 65535 timed out",
+   "spec": "generated/LC3-durable-confirm.toml",
+   "decision": {
+    "utc": "2026-10-20T06:04:08Z",
+    "text": "Cc: done (1 run)",
+    "next": []
+   }
+  }
+ }
+}

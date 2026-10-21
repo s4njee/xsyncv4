@@ -1,0 +1,46 @@
+# E3f: the SSH cipher. OpenSSH offers chacha20-poly1305 first, but the Pi 5
+# has AES instructions, so AES-GCM may cost it less CPU per byte, and the Pi
+# is where byte-bound copies are short of CPU (T1). Each tool with each
+# cipher, byte-bound corpora, both directions. Answers H12.
+id = "E3f-ciphers"
+kind = "screening"
+hypothesis = "On the Pi, AES-GCM is cheaper than ChaCha20 and makes byte-bound copies faster for both tools."
+primary = "wall_s"
+delta = 0.03
+blocks = 10
+control = "xs"
+verify = "first-last"
+
+[arms.xs]
+tool = "xs"
+rev = "8cc75bbdb801"
+flags = ["-a"]
+
+[arms.xs-aes128]
+tool = "xs"
+rev = "8cc75bbdb801"
+flags = ["-a"]
+ssh_options = ["-c", "[email]"]
+
+[arms.xs-aes256]
+tool = "xs"
+rev = "8cc75bbdb801"
+flags = ["-a"]
+ssh_options = ["-c", "[email]"]
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[arms.rsync-aes128]
+tool = "rsync"
+flags = ["-a"]
+ssh_options = ["-c", "[email]"]
+
+[matrix]
+link = "lan"
+corpus = ["mixed-bimodal", "mixed-threshold"]
+scenario = ["fresh"]
+direction = ["neo>freya", "freya>neo"]
+client = ["sender"]
+cache = ["warm"]

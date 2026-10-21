@@ -1,0 +1,20 @@
+{
+ "tree": "T17-dest-anchors",
+ "started_utc": "2026-10-19T13:28:43Z",
+ "nodes": {
+  "A": {
+   "state": "failed",
+   "runs": [
+    "20261019T132843Z-MA8-psample-pull-anchors"
+   ],
+   "spec": "MA8-psample-pull-anchors.toml"
+  },
+  "B": {
+   "state": "held",
+   "runs": [
+    "20261019T132845Z-LC12-local-anchors"
+   ],
+   "spec": "LC12-local-anchors.toml"
+  }
+ }
+}

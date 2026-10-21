@@ -1,0 +1,13 @@
+experiment,kind,cell_id,corpus,scenario,sender,receiver,client,link,cache,arm,n_blocks,sigma_d,blocks_for_2pct,blocks_for_3pct,blocks_for_5pct,blocks_for_10pct,blocks_equivalent_2pct,blocks_equivalent_3pct,blocks_equivalent_5pct,blocks_equivalent_10pct
+J1a-neo-mars-jobs-small-flat,screening,small-flat.fresh.mars-neo.receiver.warm,small-flat,fresh,mars,neo,receiver,neo-mars-lan,warm,xs-j4,10,0.014547931824234247,8,8,8,8,8,8,8,8
+J1a-neo-mars-jobs-small-flat,screening,small-flat.fresh.mars-neo.receiver.warm,small-flat,fresh,mars,neo,receiver,neo-mars-lan,warm,xs-j8,10,0.015523001490368015,8,8,8,8,9,8,8,8
+J1a-neo-mars-jobs-small-flat,screening,small-flat.fresh.mars-neo.receiver.warm,small-flat,fresh,mars,neo,receiver,neo-mars-lan,warm,rsync,10,0.049593597464285946,52,25,11,8,68,32,13,8
+J1a-neo-mars-jobs-small-flat,screening,small-flat.fresh.neo-mars.sender.warm,small-flat,fresh,neo,mars,sender,neo-mars-lan,warm,xs-j4,11,0.02908255838801719,19,10,8,8,25,13,8,8
+J1a-neo-mars-jobs-small-flat,screening,small-flat.fresh.neo-mars.sender.warm,small-flat,fresh,neo,mars,sender,neo-mars-lan,warm,xs-j8,11,0.016165555462187398,8,8,8,8,10,8,8,8
+J1a-neo-mars-jobs-small-flat,screening,small-flat.fresh.neo-mars.sender.warm,small-flat,fresh,neo,mars,sender,neo-mars-lan,warm,rsync,11,0.035954202233441604,28,14,8,8,37,18,8,8
+J1a-neo-mars-jobs-small-flat,screening,small-flat.noop.mars-neo.receiver.warm,small-flat,noop,mars,neo,receiver,neo-mars-lan,warm,xs-j4,10,0.1286681211340249,333,151,57,17,446,202,76,22
+J1a-neo-mars-jobs-small-flat,screening,small-flat.noop.mars-neo.receiver.warm,small-flat,noop,mars,neo,receiver,neo-mars-lan,warm,xs-j8,10,0.049833796286484947,52,25,11,8,69,32,13,8
+J1a-neo-mars-jobs-small-flat,screening,small-flat.noop.mars-neo.receiver.warm,small-flat,noop,mars,neo,receiver,neo-mars-lan,warm,rsync,10,0.07013684314252969,101,47,19,8,134,62,24,8
+J1a-neo-mars-jobs-small-flat,screening,small-flat.noop.neo-mars.sender.warm,small-flat,noop,neo,mars,sender,neo-mars-lan,warm,xs-j4,10,0.19599889940035914,771,347,129,36,1032,464,172,47
+J1a-neo-mars-jobs-small-flat,screening,small-flat.noop.neo-mars.sender.warm,small-flat,noop,neo,mars,sender,neo-mars-lan,warm,xs-j8,10,0.2310385101119325,1070,481,178,49,1433,644,238,64
+J1a-neo-mars-jobs-small-flat,screening,small-flat.noop.neo-mars.sender.warm,small-flat,noop,neo,mars,sender,neo-mars-lan,warm,rsync,10,0.25195723189768304,1272,572,212,57,1704,766,283,76

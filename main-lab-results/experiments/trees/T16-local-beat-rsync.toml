@@ -1,0 +1,84 @@
+# T16: beating rsync -aH on the Pi's local copy of psample, with the same semantics.
+# strace found xs's four default workers contending; by hand two workers came within
+# 8% of rsync. A screens worker counts with and without the source-guard fix; a clear
+# winner is confirmed, a near-tie gets eight blocks for a verdict, and if xs is still
+# behind, B tries the settings that change how the copy gets there (eager writeback,
+# --no-atomic). Runs ahead of T14's LC3 and LC4 on the T5's runner, and queues nothing
+# after 4 am Central.
+id = "T16-local-beat-rsync"
+question = "Can xs beat rsync -aH at copying psample from the Pi's NVMe to the T5?"
+start = ["A"]
+deadline = "2026-10-19T09:00Z"
+
+[nodes.A]
+spec = "LC6-local-beat-rsync.toml"
+front = true
+question = "With two or three workers, with or without the source-guard fix, is xs -aH at least as fast as rsync -aH?"
+
+  [[nodes.A.branch]]
+  when = { arm = "xs*", speed_lo_at_least = 1.03 }
+  next = ["Ac"]
+  label = "xs clearly ahead"
+  note = "an xs setting beats rsync by more than 3% even at its interval's low end: confirm it"
+
+  [[nodes.A.branch]]
+  when = { arm = "xs*", speed_at_least = 0.97 }
+  next = ["C"]
+  label = "within 3% of rsync"
+  note = "an xs setting is level with rsync but not clearly ahead: eight blocks for a verdict"
+
+  [[nodes.A.branch]]
+  otherwise = true
+  next = ["B"]
+  label = "xs still behind"
+  note = "no worker count closes the gap: try eager writeback and --no-atomic"
+
+[nodes.Ac]
+promote = "A"
+id = "LC6-beat-confirm"
+blocks = 8
+arm = "xs*"
+question = "Does the xs setting that beat rsync do it again on eight fresh blocks?"
+
+[nodes.C]
+spec = "LC8-local-tie-confirm.toml"
+front = true
+question = "Over eight fresh blocks, is xs with two workers and the source-guard fix faster than, level with, or slower than rsync -aH?"
+
+  [[nodes.C.branch]]
+  when = { arm = "xs-guard-j2", verdict = ["faster", "equivalent"] }
+  next = []
+  label = "xs at least level"
+  note = "xs matches or beats rsync on the local copy with two workers: a smaller default for small machines is the change to make"
+
+  [[nodes.C.branch]]
+  otherwise = true
+  next = []
+  hold = true
+  label = "rsync still ahead"
+  note = "rsync stays ahead: narrowing output_mu (E5a) is the next candidate; decision needed"
+
+[nodes.B]
+spec = "LC7-local-relaxed.toml"
+front = true
+question = "With two workers, does eager writeback or --no-atomic let xs match or beat rsync -aH?"
+
+  [[nodes.B.branch]]
+  when = { arm = "xs*", speed_lo_at_least = 1.03 }
+  next = ["Bc"]
+  label = "a setting clearly ahead"
+  note = "a relaxed setting beats rsync: confirm it"
+
+  [[nodes.B.branch]]
+  otherwise = true
+  next = []
+  hold = true
+  label = "rsync still ahead"
+  note = "no setting beats rsync: the next step is code, narrowing output_mu (E5a); decision needed"
+
+[nodes.Bc]
+promote = "B"
+id = "LC7-relaxed-confirm"
+blocks = 8
+arm = "xs*"
+question = "Does the relaxed setting that beat rsync do it again on eight fresh blocks?"

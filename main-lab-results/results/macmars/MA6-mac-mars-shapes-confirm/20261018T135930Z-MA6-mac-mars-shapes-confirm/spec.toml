@@ -1,0 +1,28 @@
+# Made by conduct.py for tree T12-mac-mars-followups, node Cc: confirms xs from MA6-mac-mars-shapes,
+# faster there on large-text, real-congress: large-text mac→mars xs 2.42×; large-text mars→mac xs 3.18×; real-congress mac→mars xs 3.95×; real-congress mars→mac xs 1.69×
+id = "MA6-mac-mars-shapes-confirm"
+kind = "confirmatory"
+hypothesis = "xs is more than 5% faster than rsync on large-text, real-congress (from MA6-mac-mars-shapes, confirmed with fresh blocks)."
+primary = "wall_s"
+delta = 0.05
+blocks = 12
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-aH"]
+
+[arms.xs]
+tool = "xs"
+rev = "8cc75bbdb801"
+flags = ["-aH"]
+
+[matrix]
+link = "mac-mars-10g"
+corpus = ["large-text", "real-congress"]
+scenario = ["fresh"]
+direction = ["mac>mars", "mars>mac"]
+client = ["initiator"]
+cache = ["warm"]

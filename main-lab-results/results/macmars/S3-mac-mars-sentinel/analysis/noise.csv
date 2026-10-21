@@ -1,0 +1,17 @@
+experiment,kind,cell_id,corpus,scenario,sender,receiver,client,link,cache,arm,n_blocks,sigma_d,blocks_for_2pct,blocks_for_3pct,blocks_for_5pct,blocks_for_10pct,blocks_equivalent_2pct,blocks_equivalent_3pct,blocks_equivalent_5pct,blocks_equivalent_10pct
+S3-mac-mars-sentinel,screening,mixed-bimodal.fresh.mac-mars.sender.warm,mixed-bimodal,fresh,mac,mars,sender,mac-mars-10g,warm,again,8,0.04332850460465704,40,19,9,8,53,25,11,8
+S3-mac-mars-sentinel,screening,mixed-bimodal.fresh.mac-mars.sender.warm,mixed-bimodal,fresh,mac,mars,sender,mac-mars-10g,warm,rsync,8,0.1956731795973359,768,346,129,36,1028,463,172,47
+S3-mac-mars-sentinel,screening,mixed-bimodal.fresh.mars-mac.receiver.warm,mixed-bimodal,fresh,mars,mac,receiver,mac-mars-10g,warm,again,8,0.14264711882100273,409,185,70,20,548,247,92,26
+S3-mac-mars-sentinel,screening,mixed-bimodal.fresh.mars-mac.receiver.warm,mixed-bimodal,fresh,mars,mac,receiver,mac-mars-10g,warm,rsync,8,0.08831193446705951,158,72,28,9,211,96,37,12
+S3-mac-mars-sentinel,screening,mixed-bimodal.noop.mac-mars.sender.warm,mixed-bimodal,noop,mac,mars,sender,mac-mars-10g,warm,again,8,0.1423059786779878,407,184,69,20,545,246,92,26
+S3-mac-mars-sentinel,screening,mixed-bimodal.noop.mac-mars.sender.warm,mixed-bimodal,noop,mac,mars,sender,mac-mars-10g,warm,rsync,8,0.08095941226292161,134,61,24,8,178,81,31,10
+S3-mac-mars-sentinel,screening,mixed-bimodal.noop.mars-mac.receiver.warm,mixed-bimodal,noop,mars,mac,receiver,mac-mars-10g,warm,again,8,0.09539308629570283,184,84,32,10,246,112,43,13
+S3-mac-mars-sentinel,screening,mixed-bimodal.noop.mars-mac.receiver.warm,mixed-bimodal,noop,mars,mac,receiver,mac-mars-10g,warm,rsync,8,0.12044273084196906,293,133,50,15,391,177,67,19
+S3-mac-mars-sentinel,screening,small-flat.fresh.mac-mars.sender.warm,small-flat,fresh,mac,mars,sender,mac-mars-10g,warm,again,8,0.05897932364242097,72,34,14,8,96,44,18,8
+S3-mac-mars-sentinel,screening,small-flat.fresh.mac-mars.sender.warm,small-flat,fresh,mac,mars,sender,mac-mars-10g,warm,rsync,8,0.6410908208782848,8219,3690,1356,357,11015,4945,1817,478
+S3-mac-mars-sentinel,screening,small-flat.fresh.mars-mac.receiver.warm,small-flat,fresh,mars,mac,receiver,mac-mars-10g,warm,again,8,0.087149500291753,154,71,28,9,206,94,36,11
+S3-mac-mars-sentinel,screening,small-flat.fresh.mars-mac.receiver.warm,small-flat,fresh,mars,mac,receiver,mac-mars-10g,warm,rsync,8,0.08046398675594316,132,61,24,8,176,80,31,10
+S3-mac-mars-sentinel,screening,small-flat.noop.mac-mars.sender.warm,small-flat,noop,mac,mars,sender,mac-mars-10g,warm,again,8,0.09351673860630544,177,81,31,10,237,108,41,13
+S3-mac-mars-sentinel,screening,small-flat.noop.mac-mars.sender.warm,small-flat,noop,mac,mars,sender,mac-mars-10g,warm,rsync,8,0.11583920036765244,271,123,47,14,362,164,62,18
+S3-mac-mars-sentinel,screening,small-flat.noop.mars-mac.receiver.warm,small-flat,noop,mars,mac,receiver,mac-mars-10g,warm,again,8,0.10597112292914704,227,103,39,12,303,138,52,15
+S3-mac-mars-sentinel,screening,small-flat.noop.mars-mac.receiver.warm,small-flat,noop,mars,mac,receiver,mac-mars-10g,warm,rsync,8,0.17021595053001012,582,262,98,28,779,351,130,36

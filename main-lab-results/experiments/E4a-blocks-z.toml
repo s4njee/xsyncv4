@@ -1,0 +1,62 @@
+# E4a with -z: how small files are grouped before compression. xs compresses
+# each block alone, and from a fast sender it sent 123 to 197 MB of
+# small-real where rsync sent 64 MB and neo sent 84 MB. Arms change the block
+# size, which files share blocks, and how many files one read task takes.
+# The record's wire bytes give the ratio; time is the primary metric.
+id = "E4a-blocks-z"
+kind = "screening"
+hypothesis = "With -z, larger blocks or larger read tasks send fewer bytes for small compressible files, and are no slower."
+primary = "wall_s"
+delta = 0.03
+blocks = 10
+control = "xs"
+verify = "first-last"
+
+[arms.xs]
+tool = "xs"
+rev = "ddefa041364e-tune"
+flags = ["-az"]
+metrics = true
+
+[arms.block256k]
+tool = "xs"
+rev = "ddefa041364e-tune"
+flags = ["-az"]
+tune = "block_target=262144"
+metrics = true
+
+[arms.block4m]
+tool = "xs"
+rev = "ddefa041364e-tune"
+flags = ["-az"]
+tune = "block_target=4194304"
+metrics = true
+
+[arms.small64k]
+tool = "xs"
+rev = "ddefa041364e-tune"
+flags = ["-az"]
+tune = "small_max=65536"
+metrics = true
+
+[arms.small2m]
+tool = "xs"
+rev = "ddefa041364e-tune"
+flags = ["-az"]
+tune = "small_max=2097152"
+metrics = true
+
+[arms.batch512]
+tool = "xs"
+rev = "ddefa041364e-tune"
+flags = ["-az"]
+tune = "read_batch_files=512,read_batch_bytes=67108864"
+metrics = true
+
+[matrix]
+link = "lan"
+corpus = ["small-real", "small-flat"]
+scenario = ["fresh"]
+direction = ["neo>freya", "freya>neo"]
+client = ["sender"]
+cache = ["warm"]

@@ -1,0 +1,188 @@
+{
+ "id": "T6-mac-mars-noop",
+ "question": "Why is xs slower than rsync on a warm no-op push from the Mac to mars, and can a setting recover it?",
+ "start": [
+  "A"
+ ],
+ "startedUtc": "2026-10-17T15:28:22Z",
+ "until": "2026-10-18T12:00Z",
+ "fills": 0,
+ "nodes": [
+  {
+   "id": "A",
+   "kind": "experiment",
+   "experiment": "MA1-mac-noop",
+   "question": "On a warm no-op, is xs slower than rsync pushing from the Mac, and faster pulling?",
+   "estimateHours": 0.7,
+   "hypothesis": "xs is slower than rsync on a warm no-op push from the Mac to mars.",
+   "design": "screening",
+   "state": "held",
+   "runs": [
+    {
+     "id": "20261017T160919Z-MA1-mac-noop",
+     "key": "pipes/MA1-mac-noop/20261017T160919Z-MA1-mac-noop",
+     "state": "stopped"
+    },
+    {
+     "id": "20261017T163802Z-MA1-mac-noop",
+     "key": "pipes/MA1-mac-noop/20261017T163802Z-MA1-mac-noop",
+     "state": null
+    },
+    {
+     "id": "20261017T185617Z-MA1-mac-noop",
+     "key": "pipes/MA1-mac-noop/20261017T185617Z-MA1-mac-noop",
+     "state": null
+    }
+   ],
+   "decision": "Paused while mars/freya are offline and the Mac is paired with neo. Historical results and queue snapshots are preserved.",
+   "decidedUtc": "2026-10-18T01:21:04Z",
+   "start": true,
+   "promote": null
+  },
+  {
+   "id": "A~end1",
+   "kind": "end",
+   "experiment": null,
+   "question": null,
+   "estimateHours": null,
+   "hypothesis": "no push deficit on this link: nothing to explain",
+   "design": null,
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "B",
+   "kind": "experiment",
+   "experiment": "MA2-mac-noop-knobs",
+   "question": "Do the skip or scan settings recover xs's no-op push?",
+   "estimateHours": 1.1,
+   "hypothesis": "Skipping directory finalisation or reducing the sender's scanning and batching recovers xs's warm no-op push.",
+   "design": "screening",
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "B~end1",
+   "kind": "end",
+   "experiment": null,
+   "question": null,
+   "estimateHours": null,
+   "hypothesis": "no setting recovers the no-op push: a code candidate (E5), decision needed",
+   "design": null,
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "Bc",
+   "kind": "confirm",
+   "experiment": "MA2-mac-noop-confirm",
+   "question": "Does the winning skip or scan setting hold up with fresh blocks?",
+   "estimateHours": 0.6,
+   "hypothesis": "Confirms the fastest arm of B with 12 fresh blocks, if it had one.",
+   "design": "confirmatory",
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": "B"
+  },
+  {
+   "id": "F2a",
+   "kind": "fill",
+   "experiment": "F2a-mac-replicate",
+   "question": "Do the Mac/mars results hold steady over the weekend?",
+   "estimateHours": 0.4,
+   "hypothesis": "xs's best setting stays ahead of rsync and xs's default from run to run.",
+   "design": "screening",
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  }
+ ],
+ "edges": [
+  {
+   "from": "A",
+   "to": "B",
+   "label": "xs < 0.90x pushing",
+   "taken": null
+  },
+  {
+   "from": "A",
+   "to": "A~end1",
+   "label": "no deficit",
+   "taken": null
+  },
+  {
+   "from": "B",
+   "to": "Bc",
+   "label": "an arm was faster",
+   "taken": null
+  },
+  {
+   "from": "B",
+   "to": "B~end1",
+   "label": "nothing faster",
+   "taken": null
+  }
+ ],
+ "decisions": [
+  {
+   "utc": "2026-10-17T18:56:17Z",
+   "node": "A",
+   "kind": "recovery",
+   "text": "The previously planned continuation never reached the driver or its backlog; queued a replacement behind the active psample run."
+  },
+  {
+   "utc": "2026-10-17T18:56:17Z",
+   "node": "A",
+   "kind": "queued",
+   "text": "A: its run was cut short with 0 of 8 blocks per cell; continuing with 8 more"
+  },
+  {
+   "utc": "2026-10-17T16:38:04Z",
+   "node": "A",
+   "kind": "queued",
+   "text": "A: its run was cut short with 0 of 8 blocks per cell; continuing with 8 more"
+  },
+  {
+   "utc": "2026-10-17T16:09:20Z",
+   "node": "A",
+   "kind": "queued",
+   "text": "A queued on mac (64 samples): start of the tree"
+  },
+  {
+   "utc": "2026-10-17T15:33:42Z",
+   "node": "A",
+   "kind": "warning",
+   "text": "A: could not queue; will try again"
+  },
+  {
+   "utc": "2026-10-17T15:29:02Z",
+   "node": "A",
+   "kind": "warning",
+   "text": "A: could not queue; will try again"
+  },
+  {
+   "utc": "2026-10-17T15:28:42Z",
+   "node": "A",
+   "kind": "warning",
+   "text": "A: could not queue; will try again"
+  }
+ ]
+}

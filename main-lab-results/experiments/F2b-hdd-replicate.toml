@@ -1,0 +1,35 @@
+# F2b (tree T2 fill): the same replicate onto mars's hard drive.
+id = "F2b-hdd-replicate"
+kind = "screening"
+hypothesis = "xs's best setting stays ahead of rsync on the hard drive from run to run."
+primary = "durable_s"
+delta = 0.03
+blocks = 4
+control = "xs"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.xs]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-a"]
+
+[arms.xs-best]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-a", "--no-atomic"]
+tune = { receiver = "jobs=4" }
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[matrix]
+link = "mac-mars-hdd-2g5"
+corpus = ["small-flat", "mixed-bimodal"]
+scenario = ["fresh"]
+direction = ["mac>mars-hdd"]
+client = ["initiator"]
+cache = ["warm"]

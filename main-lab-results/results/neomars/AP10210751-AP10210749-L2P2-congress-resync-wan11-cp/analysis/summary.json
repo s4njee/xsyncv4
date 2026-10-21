@@ -1,0 +1,19 @@
+{
+ "experiment": "AP10210751-AP10210749-L2P2-congress-resync-wan11-cp",
+ "kind": "screening",
+ "hypothesis": "Under 11 ms and a 2-CPU sender, xs -a -j4 stays at least 5% faster than rsync -a at both the no-op and the 1% update of real-congress.",
+ "primary": "durable_s",
+ "control": "xs-j4",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261021T075213Z-AP10210751-AP10210749-L2P2-congress-resync-wan11-cp"
+ ],
+ "spec_sha256": [
+  "f4f7261e101e0281d24a5a43dccad0e4c98cded01aa7434959e12c1dec4df9da"
+ ],
+ "valid_blocks": 16,
+ "void_attempts": 0,
+ "void_reasons": []
+}

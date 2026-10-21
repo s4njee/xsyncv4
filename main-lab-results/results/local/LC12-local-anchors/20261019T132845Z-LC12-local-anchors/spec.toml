@@ -1,0 +1,36 @@
+# LC12 (tree T17): the same fix on Linux, copying psample from neo's NVMe to the T5. The budget there
+# was 128 parents (Linux's default limit of 1,024 over 8), and strace counted 906,000 opens for xs
+# against rsync's 486,000 on congress. Fresh copies and no-ops, cold, against the parent release and
+# rsync -aH (the control).
+id = "LC12-local-anchors"
+kind = "confirmatory"
+hypothesis = "With a larger parent-descriptor budget, xs -aH copies and re-syncs psample to the T5 faster than its parent, and at least as fast as rsync -aH."
+primary = "durable_s"
+delta = 0.03
+blocks = 6
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+sample_timeout_s = 7200
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-aH"]
+
+[arms.xs]
+tool = "xs"
+rev = "21ae6844ed20"
+flags = ["-aH"]
+
+[arms.xs-anchors]
+tool = "xs"
+rev = "e51c1df1329a"
+flags = ["-aH"]
+
+[matrix]
+link = "neo-local-ssd"
+corpus = ["real-psample"]
+scenario = ["fresh", "noop"]
+direction = ["neo>neo-ssd"]
+client = ["receiver"]
+cache = ["cold"]

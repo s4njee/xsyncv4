@@ -1,0 +1,66 @@
+Traceback (most recent call last):
+  File "~/benchmarks/xsbench.noindex/lib/021ae1ff14be/agent.py", line 681, in <module>
+    sys.exit(Run(sys.argv[1]).execute(limit))
+             ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "~/benchmarks/xsbench.noindex/lib/021ae1ff14be/agent.py", line 655, in execute
+    self.prepare()
+    ~~~~~~~~~~~~^^
+  File "~/benchmarks/xsbench.noindex/lib/021ae1ff14be/agent.py", line 356, in prepare
+    found = json.loads(host.run('python3', host.bin('corpus.py'), 'verify', f'{host.root}/corpora/{name}',
+                       ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                                '--manifest', manifest, '--quick', timeout=1800).stdout)
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "~/benchmarks/xsbench.noindex/lib/021ae1ff14be/agent.py", line 65, in run
+    return self.shell(shlex.join(map(str, argv)), **options)
+           ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "~/benchmarks/xsbench.noindex/lib/021ae1ff14be/agent.py", line 61, in shell
+    raise RuntimeError(f'{self.name}: `{script[:200]}` exited {done.returncode}: {done.stderr.strip()[-400:]}')
+RuntimeError: mars: `python3 ~/benchmarks/xsyncv4/lab/lib/021ae1ff14be/corpus.py verify ~/benchmarks/xsyncv4/lab/corpora/small-flat --manifest ~/benchmarks/xsyncv4/lab/corpora/small-flat.m` exited 1: ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/pathlib/__init__.py", line 771, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '~/benchmarks/xsyncv4/lab/corpora/small-flat.manifest.json'
+Traceback (most recent call last):
+  File "~/benchmarks/xsbench.noindex/lib/021ae1ff14be/agent.py", line 681, in <module>
+    sys.exit(Run(sys.argv[1]).execute(limit))
+             ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "~/benchmarks/xsbench.noindex/lib/021ae1ff14be/agent.py", line 655, in execute
+    self.prepare()
+    ~~~~~~~~~~~~^^
+  File "~/benchmarks/xsbench.noindex/lib/021ae1ff14be/agent.py", line 356, in prepare
+    found = json.loads(host.run('python3', host.bin('corpus.py'), 'verify', f'{host.root}/corpora/{name}',
+                       ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                                '--manifest', manifest, '--quick', timeout=1800).stdout)
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "~/benchmarks/xsbench.noindex/lib/021ae1ff14be/agent.py", line 65, in run
+    return self.shell(shlex.join(map(str, argv)), **options)
+           ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "~/benchmarks/xsbench.noindex/lib/021ae1ff14be/agent.py", line 61, in shell
+    raise RuntimeError(f'{self.name}: `{script[:200]}` exited {done.returncode}: {done.stderr.strip()[-400:]}')
+RuntimeError: mars: `python3 ~/benchmarks/xsyncv4/lab/lib/021ae1ff14be/corpus.py verify ~/benchmarks/xsyncv4/lab/corpora/small-flat --manifest ~/benchmarks/xsyncv4/lab/corpora/small-flat.m` exited 1: ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/pathlib/__init__.py", line 771, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '~/benchmarks/xsyncv4/lab/corpora/small-flat.manifest.json'
+Traceback (most recent call last):
+  File "~/benchmarks/xsbench.noindex/lib/021ae1ff14be/agent.py", line 681, in <module>
+    sys.exit(Run(sys.argv[1]).execute(limit))
+             ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "~/benchmarks/xsbench.noindex/lib/021ae1ff14be/agent.py", line 655, in execute
+    self.prepare()
+    ~~~~~~~~~~~~^^
+  File "~/benchmarks/xsbench.noindex/lib/021ae1ff14be/agent.py", line 356, in prepare
+    found = json.loads(host.run('python3', host.bin('corpus.py'), 'verify', f'{host.root}/corpora/{name}',
+                       ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                                '--manifest', manifest, '--quick', timeout=1800).stdout)
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "~/benchmarks/xsbench.noindex/lib/021ae1ff14be/agent.py", line 65, in run
+    return self.shell(shlex.join(map(str, argv)), **options)
+           ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "~/benchmarks/xsbench.noindex/lib/021ae1ff14be/agent.py", line 61, in shell
+    raise RuntimeError(f'{self.name}: `{script[:200]}` exited {done.returncode}: {done.stderr.strip()[-400:]}')
+RuntimeError: mars: `python3 ~/benchmarks/xsyncv4/lab/lib/021ae1ff14be/corpus.py verify ~/benchmarks/xsyncv4/lab/corpora/small-flat --manifest ~/benchmarks/xsyncv4/lab/corpora/small-flat.m` exited 1: ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/pathlib/__init__.py", line 771, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '~/benchmarks/xsyncv4/lab/corpora/small-flat.manifest.json'

@@ -1,0 +1,256 @@
+{
+ "id": "T16-local-beat-rsync",
+ "question": "Can xs beat rsync -aH at copying psample from the Pi's NVMe to the T5?",
+ "start": [
+  "A"
+ ],
+ "startedUtc": "2026-10-18T22:46:48Z",
+ "until": null,
+ "fills": 0,
+ "nodes": [
+  {
+   "id": "A",
+   "kind": "experiment",
+   "experiment": "LC6-local-beat-rsync",
+   "question": "With two or three workers, with or without the source-guard fix, is xs -aH at least as fast as rsync -aH?",
+   "estimateHours": 2.4,
+   "hypothesis": "With two or three workers, alone or with the source-guard fix, xs -aH copies psample to the T5 at least as fast as rsync -aH.",
+   "design": "screening",
+   "state": "decided",
+   "runs": [
+    {
+     "id": "20261018T224648Z-LC6-local-beat-rsync",
+     "key": "local/LC6-local-beat-rsync/20261018T224648Z-LC6-local-beat-rsync",
+     "state": "complete"
+    }
+   ],
+   "decision": "A: no worker count closes the gap: try eager writeback and --no-atomic",
+   "decidedUtc": "2026-10-19T04:56:14Z",
+   "start": true,
+   "promote": null
+  },
+  {
+   "id": "Ac",
+   "kind": "confirm",
+   "experiment": "LC6-beat-confirm",
+   "question": "Does the xs setting that beat rsync do it again on eight fresh blocks?",
+   "estimateHours": 1.6,
+   "hypothesis": "Confirms the fastest arm of A with 8 fresh blocks, if it had one.",
+   "design": "confirmatory",
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": "A"
+  },
+  {
+   "id": "C",
+   "kind": "experiment",
+   "experiment": "LC8-local-tie-confirm",
+   "question": "Over eight fresh blocks, is xs with two workers and the source-guard fix faster than, level with, or slower than rsync -aH?",
+   "estimateHours": 1.6,
+   "hypothesis": "xs -aH with two workers and the source-guard fix copies psample to the T5 at least as fast as rsync -aH.",
+   "design": "confirmatory",
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "C~end0",
+   "kind": "end",
+   "experiment": null,
+   "question": null,
+   "estimateHours": null,
+   "hypothesis": "xs matches or beats rsync on the local copy with two workers: a smaller default for small machines is the change to make",
+   "design": null,
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "C~end1",
+   "kind": "end",
+   "experiment": null,
+   "question": null,
+   "estimateHours": null,
+   "hypothesis": "rsync stays ahead: narrowing output_mu (E5a) is the next candidate; decision needed",
+   "design": null,
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "B",
+   "kind": "experiment",
+   "experiment": "LC7-local-relaxed",
+   "question": "With two workers, does eager writeback or --no-atomic let xs match or beat rsync -aH?",
+   "estimateHours": 2.0,
+   "hypothesis": "With two workers, eager writeback or --no-atomic lets xs copy psample to the T5 at least as fast as rsync -aH.",
+   "design": "screening",
+   "state": "skipped",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "B~end1",
+   "kind": "end",
+   "experiment": null,
+   "question": null,
+   "estimateHours": null,
+   "hypothesis": "no setting beats rsync: the next step is code, narrowing output_mu (E5a); decision needed",
+   "design": null,
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "Bc",
+   "kind": "confirm",
+   "experiment": "LC7-relaxed-confirm",
+   "question": "Does the relaxed setting that beat rsync do it again on eight fresh blocks?",
+   "estimateHours": 1.6,
+   "hypothesis": "Confirms the fastest arm of B with 8 fresh blocks, if it had one.",
+   "design": "confirmatory",
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": "B"
+  }
+ ],
+ "edges": [
+  {
+   "from": "A",
+   "to": "Ac",
+   "label": "xs clearly ahead",
+   "taken": false
+  },
+  {
+   "from": "A",
+   "to": "C",
+   "label": "within 3% of rsync",
+   "taken": false
+  },
+  {
+   "from": "A",
+   "to": "B",
+   "label": "xs still behind",
+   "taken": true
+  },
+  {
+   "from": "C",
+   "to": "C~end0",
+   "label": "xs at least level",
+   "taken": null
+  },
+  {
+   "from": "C",
+   "to": "C~end1",
+   "label": "rsync still ahead",
+   "taken": null
+  },
+  {
+   "from": "B",
+   "to": "Bc",
+   "label": "a setting clearly ahead",
+   "taken": null
+  },
+  {
+   "from": "B",
+   "to": "B~end1",
+   "label": "rsync still ahead",
+   "taken": null
+  }
+ ],
+ "decisions": [
+  {
+   "utc": "2026-10-19T09:03:32Z",
+   "node": "B",
+   "kind": "skipped",
+   "text": "B: not queued, past the tree's deadline 2026-10-19T09:00Z"
+  },
+  {
+   "utc": "2026-10-19T08:58:52Z",
+   "node": "B",
+   "kind": "warning",
+   "text": "B: could not queue; will try again"
+  },
+  {
+   "utc": "2026-10-19T08:53:52Z",
+   "node": "B",
+   "kind": "warning",
+   "text": "B: could not queue; will try again"
+  },
+  {
+   "utc": "2026-10-19T08:48:52Z",
+   "node": "B",
+   "kind": "warning",
+   "text": "B: could not queue; will try again"
+  },
+  {
+   "utc": "2026-10-19T08:43:52Z",
+   "node": "B",
+   "kind": "warning",
+   "text": "B: could not queue; will try again"
+  },
+  {
+   "utc": "2026-10-19T08:38:52Z",
+   "node": "B",
+   "kind": "warning",
+   "text": "B: could not queue; will try again"
+  },
+  {
+   "utc": "2026-10-19T08:33:52Z",
+   "node": "B",
+   "kind": "warning",
+   "text": "B: could not queue; will try again"
+  },
+  {
+   "utc": "2026-10-19T08:28:52Z",
+   "node": "B",
+   "kind": "warning",
+   "text": "B: could not queue; will try again"
+  },
+  {
+   "utc": "2026-10-19T08:23:52Z",
+   "node": "B",
+   "kind": "warning",
+   "text": "B: could not queue; will try again"
+  },
+  {
+   "utc": "2026-10-19T08:18:52Z",
+   "node": "B",
+   "kind": "warning",
+   "text": "B: could not queue; will try again"
+  },
+  {
+   "utc": "2026-10-19T08:13:52Z",
+   "node": "B",
+   "kind": "warning",
+   "text": "B: could not queue; will try again"
+  },
+  {
+   "utc": "2026-10-19T08:08:52Z",
+   "node": "B",
+   "kind": "warning",
+   "text": "B: could not queue; will try again"
+  }
+ ]
+}

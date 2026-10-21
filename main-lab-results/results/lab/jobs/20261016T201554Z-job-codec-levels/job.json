@@ -1,0 +1,17 @@
+{
+ "name": "codec-levels",
+ "steps": [
+  {
+   "host": "mac",
+   "ssh": "[email]",
+   "local": true,
+   "command": "cd ~/benchmarks/xsbench.noindex/corpora && f=large-text/$(ls large-text | head -1) && PATH=$PATH:/opt/homebrew/bin && echo \"== $(hostname), $(getconf _NPROCESSORS_ONLN) cores, load $(uptime | sed \"s/.*average[s]*: //\"), $f\" && for t in 1 8; do for l in 1 2 3; do printf \"zstd level %s, %s thread(s): \" $l $t; zstd -b$l -i3 -T$t \"$f\" 2>&1 | tr \"\\r\" \"\\n\" | grep \"MB/s\" | tail -1 | sed \"s/^.*: *//\"; done; done"
+  },
+  {
+   "host": "mars",
+   "ssh": "[email]",
+   "local": false,
+   "command": "cd ~/benchmarks/xsyncv4/lab/corpora && f=large-text/$(ls large-text | head -1) && PATH=$PATH:/opt/homebrew/bin && echo \"== $(hostname), $(getconf _NPROCESSORS_ONLN) cores, load $(uptime | sed \"s/.*average[s]*: //\"), $f\" && for t in 1 8; do for l in 1 2 3; do printf \"zstd level %s, %s thread(s): \" $l $t; zstd -b$l -i3 -T$t \"$f\" 2>&1 | tr \"\\r\" \"\\n\" | grep \"MB/s\" | tail -1 | sed \"s/^.*: *//\"; done; done"
+  }
+ ]
+}

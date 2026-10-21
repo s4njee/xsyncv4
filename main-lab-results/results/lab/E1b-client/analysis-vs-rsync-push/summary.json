@@ -1,0 +1,21 @@
+{
+ "experiment": "E1b-client",
+ "kind": "confirmatory",
+ "hypothesis": "A transfer started by the receiver takes the same time, within 3%, as the same transfer started by the sender.",
+ "primary": "wall_s",
+ "control": "rsync-push",
+ "delta": 0.03,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261012T003200Z-E1b-client"
+ ],
+ "spec_sha256": [
+  "e775da33eb064a5c489f3938552a483727d399ba5c5bc00a5e892092b76c6a7e"
+ ],
+ "valid_blocks": 80,
+ "void_attempts": 1,
+ "void_reasons": [
+  "freya reaches neo by br-039e63f2ae7f, not enp10s0"
+ ]
+}

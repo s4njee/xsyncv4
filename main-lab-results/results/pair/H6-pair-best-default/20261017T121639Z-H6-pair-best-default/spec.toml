@@ -1,0 +1,36 @@
+# H6 (tree T4): is xs's best small-file setting safe as the default for mixed and large trees
+# between the Pi and mars, both ways? Against xs's default and rsync.
+id = "H6-pair-best-default"
+kind = "screening"
+hypothesis = "xs's best small-file setting is no slower than its default on mixed and large trees, either way."
+primary = "durable_s"
+delta = 0.03
+blocks = 8
+control = "xs"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.xs]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-a"]
+
+[arms.xs-best]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-a", "--no-atomic"]
+tune = { receiver = "jobs=4" }
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[matrix]
+link = "neo-mars-1g"
+corpus = ["mixed-bimodal", "mixed-threshold", "large-text"]
+scenario = ["fresh"]
+direction = ["neo>mars", "mars>neo"]
+client = ["initiator"]
+cache = ["warm"]

@@ -1,0 +1,726 @@
+{
+ "schema": 1,
+ "run_id": "20261015T030430Z-X4-cipher-rsync",
+ "started_utc": "2026-10-15T04:48:23.328+00:00",
+ "driver": "MacBookPro",
+ "plan": {
+  "schema": 1,
+  "experiment": "X4-cipher-rsync",
+  "spec_sha256": "1f0564eaad36ecb57be29906cef1774fba1a4b2acfbbe08a6fec8af50ffa4e1c",
+  "kind": "screening",
+  "bundle": "92c3b3eeb811",
+  "writes": {
+   "mac": 383731924992,
+   "mars": 383731924992
+  },
+  "hypothesis": "AES-256 costs both tools little; neither rsync variant closes its gap to xs.",
+  "primary": "durable_s",
+  "delta": 0.03,
+  "control": "rsync",
+  "seed": 1,
+  "run_id": "20261015T030430Z-X4-cipher-rsync",
+  "driver": "mac",
+  "sample_timeout_s": 3600,
+  "results": "direct",
+  "background": false,
+  "eager_cleanup": true,
+  "hosts": {
+   "mac": {
+    "ssh": "[email]",
+    "name": "[host]",
+    "hostname": "MacBookPro",
+    "root": "~/benchmarks/xsbench.noindex",
+    "interface": "en11",
+    "helper": false,
+    "gates": {},
+    "local": true,
+    "system": "Darwin"
+   },
+   "mars": {
+    "ssh": "[email]",
+    "name": "[host]",
+    "hostname": "mars",
+    "root": "~/benchmarks/xsyncv4/lab",
+    "interface": "enp7s0f0",
+    "helper": true,
+    "gates": {},
+    "local": false,
+    "system": "Linux"
+   }
+  },
+  "links": {
+   "mac-mars-direct": {
+    "hosts": [
+     "mac",
+     "mars"
+    ],
+    "medium": "wired",
+    "min_speed_mbps": 2500,
+    "max_rtt_ms": 2.0,
+    "initiator": "mac",
+    "driver": "mac",
+    "results": "direct",
+    "address": {
+     "mac": "[address]",
+     "mars": "[address]"
+    }
+   }
+  },
+  "arms": [
+   {
+    "name": "rsync",
+    "tool": "rsync",
+    "flags": [
+     "-a"
+    ],
+    "binary": {
+     "mac": "rsync",
+     "mars": "rsync"
+    }
+   },
+   {
+    "name": "rsync-aes256",
+    "tool": "rsync",
+    "flags": [
+     "-a"
+    ],
+    "ssh_options": [
+     "-c",
+     "[email]"
+    ],
+    "binary": {
+     "mac": "rsync",
+     "mars": "rsync"
+    }
+   },
+   {
+    "name": "rsync-inplace",
+    "tool": "rsync",
+    "flags": [
+     "-a",
+     "--inplace"
+    ],
+    "binary": {
+     "mac": "rsync",
+     "mars": "rsync"
+    }
+   },
+   {
+    "name": "rsync-W",
+    "tool": "rsync",
+    "flags": [
+     "-aW"
+    ],
+    "binary": {
+     "mac": "rsync",
+     "mars": "rsync"
+    }
+   },
+   {
+    "name": "xs",
+    "tool": "xs",
+    "flags": [
+     "-a"
+    ],
+    "rev": "8cc75bbdb801",
+    "binary": {
+     "mac": "~/benchmarks/xsbench.noindex/bin/xs-8cc75bbdb801",
+     "mars": "~/benchmarks/xsyncv4/lab/bin/xs-8cc75bbdb801"
+    },
+    "sha256": {
+     "mac": "80c00669af2a98779492e47bbaeaae5bedb98a27233562353472792e32de25c3",
+     "mars": "2780cc842402d442918883559a01ee48e7d856a3e45c7d60559aa073bff2ac84"
+    },
+    "artifacts": {
+     "xs-darwin-arm64": "80c00669af2a98779492e47bbaeaae5bedb98a27233562353472792e32de25c3",
+     "xs-linux-amd64": "2780cc842402d442918883559a01ee48e7d856a3e45c7d60559aa073bff2ac84",
+     "xs-linux-arm64": "fc88711b3389e12acfd9c62d2ed037560d4d99c07371f81cf2474842afe4550d"
+    }
+   },
+   {
+    "name": "xs-aes256",
+    "tool": "xs",
+    "flags": [
+     "-a"
+    ],
+    "ssh_options": [
+     "-c",
+     "[email]"
+    ],
+    "rev": "8cc75bbdb801",
+    "binary": {
+     "mac": "~/benchmarks/xsbench.noindex/bin/xs-8cc75bbdb801",
+     "mars": "~/benchmarks/xsyncv4/lab/bin/xs-8cc75bbdb801"
+    },
+    "sha256": {
+     "mac": "80c00669af2a98779492e47bbaeaae5bedb98a27233562353472792e32de25c3",
+     "mars": "2780cc842402d442918883559a01ee48e7d856a3e45c7d60559aa073bff2ac84"
+    },
+    "artifacts": {
+     "xs-darwin-arm64": "80c00669af2a98779492e47bbaeaae5bedb98a27233562353472792e32de25c3",
+     "xs-linux-amd64": "2780cc842402d442918883559a01ee48e7d856a3e45c7d60559aa073bff2ac84",
+     "xs-linux-arm64": "fc88711b3389e12acfd9c62d2ed037560d4d99c07371f81cf2474842afe4550d"
+    }
+   }
+  ],
+  "cells": [
+   {
+    "id": "large-one.fresh.mac-mars.sender.warm",
+    "corpus": "large-one",
+    "scenario": "fresh",
+    "sender": "mac",
+    "receiver": "mars",
+    "client": "sender",
+    "link": "mac-mars-direct",
+    "cache": "warm"
+   },
+   {
+    "id": "large-one.fresh.mars-mac.receiver.warm",
+    "corpus": "large-one",
+    "scenario": "fresh",
+    "sender": "mars",
+    "receiver": "mac",
+    "client": "receiver",
+    "link": "mac-mars-direct",
+    "cache": "warm"
+   }
+  ],
+  "corpora": {
+   "large-one": {
+    "files": 1,
+    "directories": 0,
+    "bytes": 7994415104,
+    "digest": "e86245ba1191231af17bf2587f6cd07540b1b4f469c914c3e4572df606d2b9c9",
+    "quick_digest": "b5c225f81cc5828f266b5662d64827470bcbea52379acdd76c656970bcfb5f9a"
+   }
+  },
+  "blocks": [
+   {
+    "cell": "large-one.fresh.mars-mac.receiver.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "rsync-inplace",
+      "xs-aes256",
+      "rsync",
+      "rsync-aes256",
+      "xs",
+      "rsync-W"
+     ],
+     [
+      "rsync",
+      "rsync-inplace",
+      "xs",
+      "xs-aes256",
+      "rsync-aes256",
+      "rsync-W"
+     ],
+     [
+      "rsync-aes256",
+      "xs-aes256",
+      "rsync-W",
+      "rsync-inplace",
+      "xs",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "large-one.fresh.mac-mars.sender.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "rsync",
+      "rsync-aes256",
+      "rsync-W",
+      "rsync-inplace",
+      "xs-aes256",
+      "xs"
+     ],
+     [
+      "rsync-W",
+      "rsync",
+      "rsync-aes256",
+      "rsync-inplace",
+      "xs-aes256",
+      "xs"
+     ],
+     [
+      "xs",
+      "xs-aes256",
+      "rsync",
+      "rsync-W",
+      "rsync-aes256",
+      "rsync-inplace"
+     ]
+    ]
+   },
+   {
+    "cell": "large-one.fresh.mars-mac.receiver.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "rsync-aes256",
+      "rsync-inplace",
+      "rsync-W",
+      "xs-aes256",
+      "xs"
+     ],
+     [
+      "xs",
+      "rsync-inplace",
+      "rsync-W",
+      "rsync-aes256",
+      "xs-aes256",
+      "rsync"
+     ],
+     [
+      "rsync-W",
+      "rsync-aes256",
+      "xs",
+      "rsync",
+      "rsync-inplace",
+      "xs-aes256"
+     ]
+    ]
+   },
+   {
+    "cell": "large-one.fresh.mac-mars.sender.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-aes256",
+      "rsync-aes256",
+      "rsync-inplace",
+      "rsync",
+      "rsync-W",
+      "xs"
+     ],
+     [
+      "rsync-inplace",
+      "xs-aes256",
+      "rsync",
+      "xs",
+      "rsync-W",
+      "rsync-aes256"
+     ],
+     [
+      "xs",
+      "xs-aes256",
+      "rsync",
+      "rsync-W",
+      "rsync-aes256",
+      "rsync-inplace"
+     ]
+    ]
+   },
+   {
+    "cell": "large-one.fresh.mars-mac.receiver.warm",
+    "block": 2,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-aes256",
+      "xs",
+      "rsync",
+      "rsync-aes256",
+      "rsync-W",
+      "rsync-inplace"
+     ],
+     [
+      "xs",
+      "rsync-W",
+      "xs-aes256",
+      "rsync-inplace",
+      "rsync-aes256",
+      "rsync"
+     ],
+     [
+      "rsync-inplace",
+      "rsync-W",
+      "rsync",
+      "xs",
+      "xs-aes256",
+      "rsync-aes256"
+     ]
+    ]
+   },
+   {
+    "cell": "large-one.fresh.mac-mars.sender.warm",
+    "block": 2,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "rsync-W",
+      "xs-aes256",
+      "rsync-aes256",
+      "rsync",
+      "rsync-inplace"
+     ],
+     [
+      "rsync-inplace",
+      "xs",
+      "rsync",
+      "rsync-aes256",
+      "xs-aes256",
+      "rsync-W"
+     ],
+     [
+      "rsync",
+      "xs-aes256",
+      "xs",
+      "rsync-inplace",
+      "rsync-aes256",
+      "rsync-W"
+     ]
+    ]
+   },
+   {
+    "cell": "large-one.fresh.mars-mac.receiver.warm",
+    "block": 3,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "rsync-W",
+      "xs-aes256",
+      "xs",
+      "rsync-aes256",
+      "rsync-inplace"
+     ],
+     [
+      "rsync-W",
+      "xs-aes256",
+      "rsync-inplace",
+      "rsync-aes256",
+      "rsync",
+      "xs"
+     ],
+     [
+      "xs-aes256",
+      "rsync-aes256",
+      "xs",
+      "rsync",
+      "rsync-W",
+      "rsync-inplace"
+     ]
+    ]
+   },
+   {
+    "cell": "large-one.fresh.mac-mars.sender.warm",
+    "block": 3,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "rsync",
+      "rsync-W",
+      "rsync-inplace",
+      "xs-aes256",
+      "rsync-aes256"
+     ],
+     [
+      "rsync",
+      "rsync-aes256",
+      "xs-aes256",
+      "xs",
+      "rsync-inplace",
+      "rsync-W"
+     ],
+     [
+      "rsync",
+      "xs",
+      "xs-aes256",
+      "rsync-aes256",
+      "rsync-W",
+      "rsync-inplace"
+     ]
+    ]
+   },
+   {
+    "cell": "large-one.fresh.mac-mars.sender.warm",
+    "block": 4,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-aes256",
+      "rsync-inplace",
+      "rsync-aes256",
+      "rsync-W",
+      "xs",
+      "rsync"
+     ],
+     [
+      "rsync-aes256",
+      "rsync-W",
+      "xs-aes256",
+      "rsync-inplace",
+      "rsync",
+      "xs"
+     ],
+     [
+      "rsync-W",
+      "xs-aes256",
+      "rsync-inplace",
+      "rsync",
+      "xs",
+      "rsync-aes256"
+     ]
+    ]
+   },
+   {
+    "cell": "large-one.fresh.mars-mac.receiver.warm",
+    "block": 4,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync-W",
+      "rsync-aes256",
+      "rsync-inplace",
+      "rsync",
+      "xs",
+      "xs-aes256"
+     ],
+     [
+      "rsync-inplace",
+      "xs",
+      "rsync",
+      "rsync-aes256",
+      "rsync-W",
+      "xs-aes256"
+     ],
+     [
+      "rsync",
+      "xs",
+      "xs-aes256",
+      "rsync-aes256",
+      "rsync-W",
+      "rsync-inplace"
+     ]
+    ]
+   },
+   {
+    "cell": "large-one.fresh.mac-mars.sender.warm",
+    "block": 5,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-aes256",
+      "rsync",
+      "xs",
+      "rsync-W",
+      "rsync-inplace",
+      "rsync-aes256"
+     ],
+     [
+      "rsync-inplace",
+      "rsync",
+      "xs",
+      "xs-aes256",
+      "rsync-W",
+      "rsync-aes256"
+     ],
+     [
+      "xs-aes256",
+      "rsync-inplace",
+      "rsync",
+      "rsync-aes256",
+      "rsync-W",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "large-one.fresh.mars-mac.receiver.warm",
+    "block": 5,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "rsync-inplace",
+      "rsync-aes256",
+      "xs",
+      "rsync-W",
+      "xs-aes256"
+     ],
+     [
+      "rsync-aes256",
+      "xs-aes256",
+      "rsync-inplace",
+      "rsync-W",
+      "rsync",
+      "xs"
+     ],
+     [
+      "rsync-aes256",
+      "rsync",
+      "xs",
+      "xs-aes256",
+      "rsync-inplace",
+      "rsync-W"
+     ]
+    ]
+   },
+   {
+    "cell": "large-one.fresh.mac-mars.sender.warm",
+    "block": 6,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync-W",
+      "xs-aes256",
+      "xs",
+      "rsync-aes256",
+      "rsync-inplace",
+      "rsync"
+     ],
+     [
+      "xs",
+      "rsync-aes256",
+      "rsync",
+      "xs-aes256",
+      "rsync-W",
+      "rsync-inplace"
+     ],
+     [
+      "xs",
+      "rsync-W",
+      "rsync-aes256",
+      "rsync-inplace",
+      "rsync",
+      "xs-aes256"
+     ]
+    ]
+   },
+   {
+    "cell": "large-one.fresh.mars-mac.receiver.warm",
+    "block": 6,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "xs-aes256",
+      "rsync-W",
+      "rsync-inplace",
+      "rsync",
+      "rsync-aes256"
+     ],
+     [
+      "rsync-aes256",
+      "xs-aes256",
+      "rsync",
+      "rsync-W",
+      "rsync-inplace",
+      "xs"
+     ],
+     [
+      "rsync-aes256",
+      "xs-aes256",
+      "rsync-W",
+      "xs",
+      "rsync-inplace",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "large-one.fresh.mac-mars.sender.warm",
+    "block": 7,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs-aes256",
+      "xs",
+      "rsync-W",
+      "rsync-inplace",
+      "rsync-aes256",
+      "rsync"
+     ],
+     [
+      "xs",
+      "rsync",
+      "rsync-aes256",
+      "xs-aes256",
+      "rsync-inplace",
+      "rsync-W"
+     ],
+     [
+      "xs-aes256",
+      "rsync-aes256",
+      "xs",
+      "rsync-W",
+      "rsync",
+      "rsync-inplace"
+     ]
+    ]
+   },
+   {
+    "cell": "large-one.fresh.mars-mac.receiver.warm",
+    "block": 7,
+    "verify_full": true,
+    "orders": [
+     [
+      "rsync-aes256",
+      "xs",
+      "rsync",
+      "xs-aes256",
+      "rsync-W",
+      "rsync-inplace"
+     ],
+     [
+      "rsync-W",
+      "rsync",
+      "xs",
+      "rsync-aes256",
+      "rsync-inplace",
+      "xs-aes256"
+     ],
+     [
+      "xs",
+      "xs-aes256",
+      "rsync-aes256",
+      "rsync-W",
+      "rsync",
+      "rsync-inplace"
+     ]
+    ]
+   }
+  ],
+  "scripts": {
+   "probe.py": "ef8873ef9ee3b3583e2592f8c88fb32a69bee4337814c8af333f1e6a15a18f23",
+   "corpus.py": "5e971be04ab61be1ef7fd0bce2877a69a4ef64f4f4147063fb6d8953a7ee071f",
+   "corpora.json": "ea0375d355e411974e5f68f203bba6370dc253d6fb277bf2ff81f0b27f023460",
+   "agent.py": "0536e8a9d8bdeff8541edff9d5cf0af9b94df5e0fc40da377133c166ecb32f2b",
+   "runner.py": "0356c31867701629fb0b179293d4da2d6328921efb5f3d601585b1d5d6adc9e0",
+   "measure.py": "5065310f480ff1cabfa7c645f0db342624a02f9a081b96069d50d52b3d224777"
+  },
+  "observed": {
+   "mac": {
+    "rsync": {
+     "path": "/opt/homebrew/bin/rsync",
+     "sha256": "98d3d56b3e7ee67412203236afc6da8f4021527e98eaa72909340d2b40bcf98c",
+     "version": "rsync  version 3.4.4  protocol version 32"
+    },
+    "hostname": "MacBookPro"
+   },
+   "mars": {
+    "rsync": {
+     "path": "/usr/bin/rsync",
+     "sha256": "cae31f86ebfa8ecf2293a809c8f09d8176c8ead7f192de8caebcc6a1f3f14800",
+     "version": "rsync  version 3.5.0-g471e17dc  protocol version 32"
+    },
+    "hostname": "mars",
+    "trim": null
+   },
+   "addresses": {
+    "mac>mars": "[address]"
+   }
+  }
+ }
+}

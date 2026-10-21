@@ -1,0 +1,1514 @@
+{
+ "schema": 1,
+ "experiment": "E4a-blocks-z",
+ "spec_sha256": "ac58e57170c82a624b34c710f9693002f3c15d6a5b9d59ba263302e24ef17c02",
+ "kind": "screening",
+ "hypothesis": "With -z, larger blocks or larger read tasks send fewer bytes for small compressible files, and are no slower.",
+ "primary": "wall_s",
+ "delta": 0.03,
+ "control": "xs",
+ "seed": 1,
+ "run_id": "20261013T213303Z-E4a-blocks-z",
+ "driver": "neo",
+ "sample_timeout_s": 3600,
+ "results": "lab",
+ "background": false,
+ "eager_cleanup": false,
+ "hosts": {
+  "neo": {
+   "ssh": "[email]",
+   "name": "[host]",
+   "hostname": "neo",
+   "root": "~/benchmarks/xsyncv4/lab",
+   "interface": "eth0",
+   "helper": true,
+   "gates": {},
+   "local": false,
+   "system": "Linux"
+  },
+  "freya": {
+   "ssh": "[email]",
+   "name": "[host]",
+   "hostname": "freya",
+   "root": "/mnt/nvme/xsbench",
+   "interface": "enp10s0",
+   "helper": true,
+   "gates": {},
+   "local": false,
+   "system": "Linux"
+  }
+ },
+ "links": {
+  "lan": {
+   "hosts": [
+    "neo",
+    "freya"
+   ],
+   "medium": "wired",
+   "min_speed_mbps": 1000,
+   "max_rtt_ms": 2.0
+  }
+ },
+ "arms": [
+  {
+   "name": "xs",
+   "tool": "xs",
+   "flags": [
+    "-az"
+   ],
+   "rev": "ddefa041364e-tune",
+   "metrics": true,
+   "binary": {
+    "neo": "~/benchmarks/xsyncv4/lab/bin/xs-ddefa041364e-tune",
+    "freya": "/mnt/nvme/xsbench/bin/xs-ddefa041364e-tune"
+   },
+   "sha256": {
+    "neo": "1f5c40a3f4d3ec403abcf30d64d8ade2a74f9fccfa6ba2c98709fb6f83ebebe2",
+    "freya": "fbe88e865b1d5162f6e370804f6b4683a196c272ce004d122311cac3431d05e0"
+   },
+   "artifacts": {
+    "xs-darwin-arm64": "304c6fe87a5235dc30bfc665dfe71ba8a777d8b633b9246b84bba42349c0679e",
+    "xs-linux-amd64": "fbe88e865b1d5162f6e370804f6b4683a196c272ce004d122311cac3431d05e0",
+    "xs-linux-arm64": "1f5c40a3f4d3ec403abcf30d64d8ade2a74f9fccfa6ba2c98709fb6f83ebebe2"
+   }
+  },
+  {
+   "name": "block256k",
+   "tool": "xs",
+   "flags": [
+    "-az"
+   ],
+   "rev": "ddefa041364e-tune",
+   "tune": {
+    "sender": "block_target=262144",
+    "receiver": "block_target=262144"
+   },
+   "metrics": true,
+   "binary": {
+    "neo": "~/benchmarks/xsyncv4/lab/bin/xs-ddefa041364e-tune",
+    "freya": "/mnt/nvme/xsbench/bin/xs-ddefa041364e-tune"
+   },
+   "sha256": {
+    "neo": "1f5c40a3f4d3ec403abcf30d64d8ade2a74f9fccfa6ba2c98709fb6f83ebebe2",
+    "freya": "fbe88e865b1d5162f6e370804f6b4683a196c272ce004d122311cac3431d05e0"
+   },
+   "artifacts": {
+    "xs-darwin-arm64": "304c6fe87a5235dc30bfc665dfe71ba8a777d8b633b9246b84bba42349c0679e",
+    "xs-linux-amd64": "fbe88e865b1d5162f6e370804f6b4683a196c272ce004d122311cac3431d05e0",
+    "xs-linux-arm64": "1f5c40a3f4d3ec403abcf30d64d8ade2a74f9fccfa6ba2c98709fb6f83ebebe2"
+   }
+  },
+  {
+   "name": "block4m",
+   "tool": "xs",
+   "flags": [
+    "-az"
+   ],
+   "rev": "ddefa041364e-tune",
+   "tune": {
+    "sender": "block_target=4194304",
+    "receiver": "block_target=4194304"
+   },
+   "metrics": true,
+   "binary": {
+    "neo": "~/benchmarks/xsyncv4/lab/bin/xs-ddefa041364e-tune",
+    "freya": "/mnt/nvme/xsbench/bin/xs-ddefa041364e-tune"
+   },
+   "sha256": {
+    "neo": "1f5c40a3f4d3ec403abcf30d64d8ade2a74f9fccfa6ba2c98709fb6f83ebebe2",
+    "freya": "fbe88e865b1d5162f6e370804f6b4683a196c272ce004d122311cac3431d05e0"
+   },
+   "artifacts": {
+    "xs-darwin-arm64": "304c6fe87a5235dc30bfc665dfe71ba8a777d8b633b9246b84bba42349c0679e",
+    "xs-linux-amd64": "fbe88e865b1d5162f6e370804f6b4683a196c272ce004d122311cac3431d05e0",
+    "xs-linux-arm64": "1f5c40a3f4d3ec403abcf30d64d8ade2a74f9fccfa6ba2c98709fb6f83ebebe2"
+   }
+  },
+  {
+   "name": "small64k",
+   "tool": "xs",
+   "flags": [
+    "-az"
+   ],
+   "rev": "ddefa041364e-tune",
+   "tune": {
+    "sender": "small_max=65536",
+    "receiver": "small_max=65536"
+   },
+   "metrics": true,
+   "binary": {
+    "neo": "~/benchmarks/xsyncv4/lab/bin/xs-ddefa041364e-tune",
+    "freya": "/mnt/nvme/xsbench/bin/xs-ddefa041364e-tune"
+   },
+   "sha256": {
+    "neo": "1f5c40a3f4d3ec403abcf30d64d8ade2a74f9fccfa6ba2c98709fb6f83ebebe2",
+    "freya": "fbe88e865b1d5162f6e370804f6b4683a196c272ce004d122311cac3431d05e0"
+   },
+   "artifacts": {
+    "xs-darwin-arm64": "304c6fe87a5235dc30bfc665dfe71ba8a777d8b633b9246b84bba42349c0679e",
+    "xs-linux-amd64": "fbe88e865b1d5162f6e370804f6b4683a196c272ce004d122311cac3431d05e0",
+    "xs-linux-arm64": "1f5c40a3f4d3ec403abcf30d64d8ade2a74f9fccfa6ba2c98709fb6f83ebebe2"
+   }
+  },
+  {
+   "name": "small2m",
+   "tool": "xs",
+   "flags": [
+    "-az"
+   ],
+   "rev": "ddefa041364e-tune",
+   "tune": {
+    "sender": "small_max=2097152",
+    "receiver": "small_max=2097152"
+   },
+   "metrics": true,
+   "binary": {
+    "neo": "~/benchmarks/xsyncv4/lab/bin/xs-ddefa041364e-tune",
+    "freya": "/mnt/nvme/xsbench/bin/xs-ddefa041364e-tune"
+   },
+   "sha256": {
+    "neo": "1f5c40a3f4d3ec403abcf30d64d8ade2a74f9fccfa6ba2c98709fb6f83ebebe2",
+    "freya": "fbe88e865b1d5162f6e370804f6b4683a196c272ce004d122311cac3431d05e0"
+   },
+   "artifacts": {
+    "xs-darwin-arm64": "304c6fe87a5235dc30bfc665dfe71ba8a777d8b633b9246b84bba42349c0679e",
+    "xs-linux-amd64": "fbe88e865b1d5162f6e370804f6b4683a196c272ce004d122311cac3431d05e0",
+    "xs-linux-arm64": "1f5c40a3f4d3ec403abcf30d64d8ade2a74f9fccfa6ba2c98709fb6f83ebebe2"
+   }
+  },
+  {
+   "name": "batch512",
+   "tool": "xs",
+   "flags": [
+    "-az"
+   ],
+   "rev": "ddefa041364e-tune",
+   "tune": {
+    "sender": "read_batch_files=512,read_batch_bytes=67108864",
+    "receiver": "read_batch_files=512,read_batch_bytes=67108864"
+   },
+   "metrics": true,
+   "binary": {
+    "neo": "~/benchmarks/xsyncv4/lab/bin/xs-ddefa041364e-tune",
+    "freya": "/mnt/nvme/xsbench/bin/xs-ddefa041364e-tune"
+   },
+   "sha256": {
+    "neo": "1f5c40a3f4d3ec403abcf30d64d8ade2a74f9fccfa6ba2c98709fb6f83ebebe2",
+    "freya": "fbe88e865b1d5162f6e370804f6b4683a196c272ce004d122311cac3431d05e0"
+   },
+   "artifacts": {
+    "xs-darwin-arm64": "304c6fe87a5235dc30bfc665dfe71ba8a777d8b633b9246b84bba42349c0679e",
+    "xs-linux-amd64": "fbe88e865b1d5162f6e370804f6b4683a196c272ce004d122311cac3431d05e0",
+    "xs-linux-arm64": "1f5c40a3f4d3ec403abcf30d64d8ade2a74f9fccfa6ba2c98709fb6f83ebebe2"
+   }
+  }
+ ],
+ "cells": [
+  {
+   "id": "small-real.fresh.neo-freya.sender.warm",
+   "corpus": "small-real",
+   "scenario": "fresh",
+   "sender": "neo",
+   "receiver": "freya",
+   "client": "sender",
+   "link": "lan",
+   "cache": "warm"
+  },
+  {
+   "id": "small-real.fresh.freya-neo.sender.warm",
+   "corpus": "small-real",
+   "scenario": "fresh",
+   "sender": "freya",
+   "receiver": "neo",
+   "client": "sender",
+   "link": "lan",
+   "cache": "warm"
+  },
+  {
+   "id": "small-flat.fresh.neo-freya.sender.warm",
+   "corpus": "small-flat",
+   "scenario": "fresh",
+   "sender": "neo",
+   "receiver": "freya",
+   "client": "sender",
+   "link": "lan",
+   "cache": "warm"
+  },
+  {
+   "id": "small-flat.fresh.freya-neo.sender.warm",
+   "corpus": "small-flat",
+   "scenario": "fresh",
+   "sender": "freya",
+   "receiver": "neo",
+   "client": "sender",
+   "link": "lan",
+   "cache": "warm"
+  }
+ ],
+ "corpora": {
+  "small-real": {
+   "files": 118594,
+   "directories": 59336,
+   "bytes": 1107333872,
+   "digest": "e9c84fab7d1a6dcdaf7c1c8688abe9bcb3cd114f551c27fad5b8624391005cdb",
+   "quick_digest": "65994469699350cde8ad45842d686fe1a01d87e64ed26de283fb0c860fae01e3"
+  },
+  "small-flat": {
+   "files": 100000,
+   "directories": 100,
+   "bytes": 319224077,
+   "digest": "41b628c4337730be4efdfcc6673d517749132ffd50b75b29321640e6f064bbec",
+   "quick_digest": "e8de96251eaca6be3e98b1cb8097405b37ad470fc0d5ffdb7a5a48ea5b9f3805"
+  }
+ },
+ "blocks": [
+  {
+   "cell": "small-flat.fresh.neo-freya.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs",
+     "block4m",
+     "block256k",
+     "small2m",
+     "small64k",
+     "batch512"
+    ],
+    [
+     "batch512",
+     "block4m",
+     "xs",
+     "small2m",
+     "small64k",
+     "block256k"
+    ],
+    [
+     "block256k",
+     "batch512",
+     "block4m",
+     "xs",
+     "small2m",
+     "small64k"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.freya-neo.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "batch512",
+     "small64k",
+     "xs",
+     "block4m",
+     "block256k",
+     "small2m"
+    ],
+    [
+     "block256k",
+     "small64k",
+     "block4m",
+     "xs",
+     "small2m",
+     "batch512"
+    ],
+    [
+     "small64k",
+     "block256k",
+     "block4m",
+     "small2m",
+     "batch512",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-real.fresh.freya-neo.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "small64k",
+     "batch512",
+     "block256k",
+     "small2m",
+     "block4m",
+     "xs"
+    ],
+    [
+     "xs",
+     "small2m",
+     "block4m",
+     "block256k",
+     "small64k",
+     "batch512"
+    ],
+    [
+     "small64k",
+     "block256k",
+     "block4m",
+     "xs",
+     "small2m",
+     "batch512"
+    ]
+   ]
+  },
+  {
+   "cell": "small-real.fresh.neo-freya.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "block256k",
+     "xs",
+     "small2m",
+     "block4m",
+     "small64k",
+     "batch512"
+    ],
+    [
+     "small2m",
+     "block256k",
+     "batch512",
+     "xs",
+     "block4m",
+     "small64k"
+    ],
+    [
+     "small2m",
+     "block4m",
+     "block256k",
+     "batch512",
+     "xs",
+     "small64k"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.freya-neo.sender.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "small2m",
+     "batch512",
+     "block256k",
+     "block4m",
+     "small64k",
+     "xs"
+    ],
+    [
+     "batch512",
+     "small2m",
+     "xs",
+     "block256k",
+     "block4m",
+     "small64k"
+    ],
+    [
+     "small64k",
+     "xs",
+     "batch512",
+     "small2m",
+     "block256k",
+     "block4m"
+    ]
+   ]
+  },
+  {
+   "cell": "small-real.fresh.freya-neo.sender.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "block4m",
+     "small2m",
+     "small64k",
+     "block256k",
+     "batch512",
+     "xs"
+    ],
+    [
+     "batch512",
+     "xs",
+     "block4m",
+     "small2m",
+     "block256k",
+     "small64k"
+    ],
+    [
+     "block256k",
+     "batch512",
+     "xs",
+     "block4m",
+     "small64k",
+     "small2m"
+    ]
+   ]
+  },
+  {
+   "cell": "small-real.fresh.neo-freya.sender.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "small2m",
+     "batch512",
+     "xs",
+     "small64k",
+     "block4m",
+     "block256k"
+    ],
+    [
+     "block4m",
+     "xs",
+     "small64k",
+     "batch512",
+     "small2m",
+     "block256k"
+    ],
+    [
+     "xs",
+     "batch512",
+     "small64k",
+     "block4m",
+     "block256k",
+     "small2m"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.neo-freya.sender.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "small64k",
+     "small2m",
+     "block4m",
+     "xs",
+     "block256k",
+     "batch512"
+    ],
+    [
+     "small64k",
+     "block4m",
+     "xs",
+     "block256k",
+     "batch512",
+     "small2m"
+    ],
+    [
+     "batch512",
+     "block256k",
+     "small64k",
+     "block4m",
+     "small2m",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-real.fresh.neo-freya.sender.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "small2m",
+     "block4m",
+     "batch512",
+     "block256k",
+     "small64k",
+     "xs"
+    ],
+    [
+     "batch512",
+     "small2m",
+     "small64k",
+     "block256k",
+     "block4m",
+     "xs"
+    ],
+    [
+     "block4m",
+     "small64k",
+     "xs",
+     "block256k",
+     "batch512",
+     "small2m"
+    ]
+   ]
+  },
+  {
+   "cell": "small-real.fresh.freya-neo.sender.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "block4m",
+     "small64k",
+     "small2m",
+     "batch512",
+     "block256k"
+    ],
+    [
+     "block256k",
+     "small2m",
+     "block4m",
+     "batch512",
+     "small64k",
+     "xs"
+    ],
+    [
+     "small64k",
+     "batch512",
+     "xs",
+     "block256k",
+     "small2m",
+     "block4m"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.neo-freya.sender.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "small2m",
+     "batch512",
+     "small64k",
+     "block256k",
+     "block4m",
+     "xs"
+    ],
+    [
+     "xs",
+     "small64k",
+     "block4m",
+     "batch512",
+     "small2m",
+     "block256k"
+    ],
+    [
+     "batch512",
+     "small64k",
+     "block4m",
+     "xs",
+     "small2m",
+     "block256k"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.freya-neo.sender.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "small64k",
+     "block4m",
+     "xs",
+     "block256k",
+     "batch512",
+     "small2m"
+    ],
+    [
+     "batch512",
+     "block256k",
+     "block4m",
+     "small2m",
+     "xs",
+     "small64k"
+    ],
+    [
+     "small2m",
+     "block256k",
+     "block4m",
+     "batch512",
+     "small64k",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.neo-freya.sender.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "small64k",
+     "block4m",
+     "block256k",
+     "batch512",
+     "small2m",
+     "xs"
+    ],
+    [
+     "small2m",
+     "block256k",
+     "xs",
+     "batch512",
+     "block4m",
+     "small64k"
+    ],
+    [
+     "small2m",
+     "block256k",
+     "xs",
+     "batch512",
+     "small64k",
+     "block4m"
+    ]
+   ]
+  },
+  {
+   "cell": "small-real.fresh.neo-freya.sender.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "batch512",
+     "xs",
+     "block4m",
+     "small64k",
+     "block256k",
+     "small2m"
+    ],
+    [
+     "block4m",
+     "batch512",
+     "small2m",
+     "xs",
+     "block256k",
+     "small64k"
+    ],
+    [
+     "block256k",
+     "small64k",
+     "xs",
+     "block4m",
+     "small2m",
+     "batch512"
+    ]
+   ]
+  },
+  {
+   "cell": "small-real.fresh.freya-neo.sender.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "block256k",
+     "batch512",
+     "block4m",
+     "small64k",
+     "small2m",
+     "xs"
+    ],
+    [
+     "xs",
+     "batch512",
+     "small2m",
+     "block256k",
+     "block4m",
+     "small64k"
+    ],
+    [
+     "small64k",
+     "batch512",
+     "xs",
+     "block256k",
+     "block4m",
+     "small2m"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.freya-neo.sender.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "batch512",
+     "small64k",
+     "block4m",
+     "xs",
+     "block256k",
+     "small2m"
+    ],
+    [
+     "batch512",
+     "block4m",
+     "small64k",
+     "small2m",
+     "block256k",
+     "xs"
+    ],
+    [
+     "block4m",
+     "xs",
+     "small2m",
+     "batch512",
+     "small64k",
+     "block256k"
+    ]
+   ]
+  },
+  {
+   "cell": "small-real.fresh.freya-neo.sender.warm",
+   "block": 4,
+   "verify_full": false,
+   "orders": [
+    [
+     "block4m",
+     "batch512",
+     "small64k",
+     "xs",
+     "block256k",
+     "small2m"
+    ],
+    [
+     "small2m",
+     "xs",
+     "batch512",
+     "small64k",
+     "block256k",
+     "block4m"
+    ],
+    [
+     "xs",
+     "small2m",
+     "batch512",
+     "block4m",
+     "small64k",
+     "block256k"
+    ]
+   ]
+  },
+  {
+   "cell": "small-real.fresh.neo-freya.sender.warm",
+   "block": 4,
+   "verify_full": false,
+   "orders": [
+    [
+     "small64k",
+     "batch512",
+     "small2m",
+     "block256k",
+     "block4m",
+     "xs"
+    ],
+    [
+     "small2m",
+     "block4m",
+     "small64k",
+     "block256k",
+     "batch512",
+     "xs"
+    ],
+    [
+     "small2m",
+     "small64k",
+     "block256k",
+     "batch512",
+     "block4m",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.freya-neo.sender.warm",
+   "block": 4,
+   "verify_full": false,
+   "orders": [
+    [
+     "small2m",
+     "block256k",
+     "batch512",
+     "small64k",
+     "xs",
+     "block4m"
+    ],
+    [
+     "small64k",
+     "block256k",
+     "block4m",
+     "xs",
+     "batch512",
+     "small2m"
+    ],
+    [
+     "batch512",
+     "block256k",
+     "block4m",
+     "xs",
+     "small64k",
+     "small2m"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.neo-freya.sender.warm",
+   "block": 4,
+   "verify_full": false,
+   "orders": [
+    [
+     "block256k",
+     "xs",
+     "block4m",
+     "batch512",
+     "small2m",
+     "small64k"
+    ],
+    [
+     "small2m",
+     "small64k",
+     "block256k",
+     "block4m",
+     "xs",
+     "batch512"
+    ],
+    [
+     "small2m",
+     "small64k",
+     "block256k",
+     "block4m",
+     "batch512",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.neo-freya.sender.warm",
+   "block": 5,
+   "verify_full": false,
+   "orders": [
+    [
+     "block4m",
+     "small2m",
+     "block256k",
+     "batch512",
+     "small64k",
+     "xs"
+    ],
+    [
+     "small2m",
+     "block4m",
+     "batch512",
+     "xs",
+     "small64k",
+     "block256k"
+    ],
+    [
+     "small64k",
+     "small2m",
+     "batch512",
+     "block256k",
+     "xs",
+     "block4m"
+    ]
+   ]
+  },
+  {
+   "cell": "small-real.fresh.neo-freya.sender.warm",
+   "block": 5,
+   "verify_full": false,
+   "orders": [
+    [
+     "batch512",
+     "block256k",
+     "xs",
+     "small2m",
+     "block4m",
+     "small64k"
+    ],
+    [
+     "small2m",
+     "small64k",
+     "block4m",
+     "block256k",
+     "xs",
+     "batch512"
+    ],
+    [
+     "xs",
+     "small2m",
+     "batch512",
+     "block4m",
+     "small64k",
+     "block256k"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.freya-neo.sender.warm",
+   "block": 5,
+   "verify_full": false,
+   "orders": [
+    [
+     "small2m",
+     "block256k",
+     "block4m",
+     "batch512",
+     "small64k",
+     "xs"
+    ],
+    [
+     "batch512",
+     "small2m",
+     "block4m",
+     "block256k",
+     "xs",
+     "small64k"
+    ],
+    [
+     "small64k",
+     "small2m",
+     "batch512",
+     "xs",
+     "block256k",
+     "block4m"
+    ]
+   ]
+  },
+  {
+   "cell": "small-real.fresh.freya-neo.sender.warm",
+   "block": 5,
+   "verify_full": false,
+   "orders": [
+    [
+     "batch512",
+     "small64k",
+     "block256k",
+     "small2m",
+     "xs",
+     "block4m"
+    ],
+    [
+     "batch512",
+     "small2m",
+     "small64k",
+     "block4m",
+     "xs",
+     "block256k"
+    ],
+    [
+     "batch512",
+     "xs",
+     "block256k",
+     "block4m",
+     "small64k",
+     "small2m"
+    ]
+   ]
+  },
+  {
+   "cell": "small-real.fresh.neo-freya.sender.warm",
+   "block": 6,
+   "verify_full": false,
+   "orders": [
+    [
+     "batch512",
+     "small64k",
+     "block256k",
+     "block4m",
+     "xs",
+     "small2m"
+    ],
+    [
+     "xs",
+     "small2m",
+     "small64k",
+     "batch512",
+     "block4m",
+     "block256k"
+    ],
+    [
+     "block256k",
+     "small2m",
+     "batch512",
+     "xs",
+     "small64k",
+     "block4m"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.freya-neo.sender.warm",
+   "block": 6,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "batch512",
+     "small64k",
+     "block4m",
+     "small2m",
+     "block256k"
+    ],
+    [
+     "block4m",
+     "xs",
+     "batch512",
+     "block256k",
+     "small2m",
+     "small64k"
+    ],
+    [
+     "block256k",
+     "block4m",
+     "small64k",
+     "batch512",
+     "small2m",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.neo-freya.sender.warm",
+   "block": 6,
+   "verify_full": false,
+   "orders": [
+    [
+     "batch512",
+     "xs",
+     "small2m",
+     "block4m",
+     "small64k",
+     "block256k"
+    ],
+    [
+     "small64k",
+     "batch512",
+     "small2m",
+     "xs",
+     "block4m",
+     "block256k"
+    ],
+    [
+     "batch512",
+     "block4m",
+     "small64k",
+     "xs",
+     "small2m",
+     "block256k"
+    ]
+   ]
+  },
+  {
+   "cell": "small-real.fresh.freya-neo.sender.warm",
+   "block": 6,
+   "verify_full": false,
+   "orders": [
+    [
+     "small64k",
+     "xs",
+     "block4m",
+     "batch512",
+     "block256k",
+     "small2m"
+    ],
+    [
+     "small64k",
+     "block256k",
+     "small2m",
+     "batch512",
+     "block4m",
+     "xs"
+    ],
+    [
+     "batch512",
+     "block4m",
+     "xs",
+     "block256k",
+     "small2m",
+     "small64k"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.neo-freya.sender.warm",
+   "block": 7,
+   "verify_full": false,
+   "orders": [
+    [
+     "small64k",
+     "xs",
+     "batch512",
+     "small2m",
+     "block4m",
+     "block256k"
+    ],
+    [
+     "block256k",
+     "block4m",
+     "small64k",
+     "xs",
+     "small2m",
+     "batch512"
+    ],
+    [
+     "xs",
+     "small64k",
+     "small2m",
+     "block256k",
+     "block4m",
+     "batch512"
+    ]
+   ]
+  },
+  {
+   "cell": "small-real.fresh.freya-neo.sender.warm",
+   "block": 7,
+   "verify_full": false,
+   "orders": [
+    [
+     "block256k",
+     "block4m",
+     "small2m",
+     "small64k",
+     "xs",
+     "batch512"
+    ],
+    [
+     "small2m",
+     "block4m",
+     "small64k",
+     "batch512",
+     "block256k",
+     "xs"
+    ],
+    [
+     "batch512",
+     "small64k",
+     "block4m",
+     "block256k",
+     "small2m",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.freya-neo.sender.warm",
+   "block": 7,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "small64k",
+     "block4m",
+     "small2m",
+     "batch512",
+     "block256k"
+    ],
+    [
+     "batch512",
+     "xs",
+     "block256k",
+     "small64k",
+     "small2m",
+     "block4m"
+    ],
+    [
+     "block4m",
+     "block256k",
+     "batch512",
+     "small64k",
+     "small2m",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-real.fresh.neo-freya.sender.warm",
+   "block": 7,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "batch512",
+     "small64k",
+     "block4m",
+     "small2m",
+     "block256k"
+    ],
+    [
+     "batch512",
+     "small2m",
+     "block256k",
+     "small64k",
+     "xs",
+     "block4m"
+    ],
+    [
+     "small64k",
+     "block4m",
+     "block256k",
+     "xs",
+     "batch512",
+     "small2m"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.neo-freya.sender.warm",
+   "block": 8,
+   "verify_full": false,
+   "orders": [
+    [
+     "batch512",
+     "block4m",
+     "small64k",
+     "xs",
+     "small2m",
+     "block256k"
+    ],
+    [
+     "small64k",
+     "block4m",
+     "small2m",
+     "xs",
+     "batch512",
+     "block256k"
+    ],
+    [
+     "batch512",
+     "small2m",
+     "small64k",
+     "block256k",
+     "block4m",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-real.fresh.freya-neo.sender.warm",
+   "block": 8,
+   "verify_full": false,
+   "orders": [
+    [
+     "block256k",
+     "xs",
+     "small2m",
+     "batch512",
+     "block4m",
+     "small64k"
+    ],
+    [
+     "batch512",
+     "small64k",
+     "block256k",
+     "xs",
+     "small2m",
+     "block4m"
+    ],
+    [
+     "block256k",
+     "small2m",
+     "batch512",
+     "small64k",
+     "xs",
+     "block4m"
+    ]
+   ]
+  },
+  {
+   "cell": "small-real.fresh.neo-freya.sender.warm",
+   "block": 8,
+   "verify_full": false,
+   "orders": [
+    [
+     "small64k",
+     "batch512",
+     "small2m",
+     "xs",
+     "block4m",
+     "block256k"
+    ],
+    [
+     "block4m",
+     "small2m",
+     "block256k",
+     "xs",
+     "small64k",
+     "batch512"
+    ],
+    [
+     "small2m",
+     "batch512",
+     "block4m",
+     "block256k",
+     "xs",
+     "small64k"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.freya-neo.sender.warm",
+   "block": 8,
+   "verify_full": false,
+   "orders": [
+    [
+     "block4m",
+     "xs",
+     "block256k",
+     "small64k",
+     "small2m",
+     "batch512"
+    ],
+    [
+     "block4m",
+     "small64k",
+     "small2m",
+     "block256k",
+     "xs",
+     "batch512"
+    ],
+    [
+     "block256k",
+     "small2m",
+     "xs",
+     "small64k",
+     "block4m",
+     "batch512"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.freya-neo.sender.warm",
+   "block": 9,
+   "verify_full": true,
+   "orders": [
+    [
+     "small2m",
+     "batch512",
+     "block256k",
+     "block4m",
+     "small64k",
+     "xs"
+    ],
+    [
+     "small64k",
+     "block4m",
+     "block256k",
+     "batch512",
+     "xs",
+     "small2m"
+    ],
+    [
+     "small64k",
+     "batch512",
+     "small2m",
+     "block256k",
+     "xs",
+     "block4m"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.neo-freya.sender.warm",
+   "block": 9,
+   "verify_full": true,
+   "orders": [
+    [
+     "block4m",
+     "small2m",
+     "xs",
+     "batch512",
+     "small64k",
+     "block256k"
+    ],
+    [
+     "block256k",
+     "small2m",
+     "xs",
+     "small64k",
+     "batch512",
+     "block4m"
+    ],
+    [
+     "small2m",
+     "small64k",
+     "xs",
+     "block256k",
+     "block4m",
+     "batch512"
+    ]
+   ]
+  },
+  {
+   "cell": "small-real.fresh.neo-freya.sender.warm",
+   "block": 9,
+   "verify_full": true,
+   "orders": [
+    [
+     "small64k",
+     "small2m",
+     "batch512",
+     "block4m",
+     "xs",
+     "block256k"
+    ],
+    [
+     "xs",
+     "batch512",
+     "small64k",
+     "small2m",
+     "block4m",
+     "block256k"
+    ],
+    [
+     "batch512",
+     "xs",
+     "small64k",
+     "block256k",
+     "small2m",
+     "block4m"
+    ]
+   ]
+  },
+  {
+   "cell": "small-real.fresh.freya-neo.sender.warm",
+   "block": 9,
+   "verify_full": true,
+   "orders": [
+    [
+     "batch512",
+     "block4m",
+     "small2m",
+     "xs",
+     "block256k",
+     "small64k"
+    ],
+    [
+     "small2m",
+     "batch512",
+     "block4m",
+     "xs",
+     "block256k",
+     "small64k"
+    ],
+    [
+     "block256k",
+     "small64k",
+     "xs",
+     "small2m",
+     "batch512",
+     "block4m"
+    ]
+   ]
+  }
+ ],
+ "scripts": {
+  "probe.py": "79c5d5649359fab936d72a58ccbb0348b8388dd71969a5c56d7915ca6a0c7563",
+  "corpus.py": "d6018d3611cba607a670f3fe554d0d4be5941fb2ef8fd65d57f10bfb582625f6",
+  "corpora.json": "729929e1ba7baf3a0b8413efffab5bc26ae0cbe8514daf1c05bbb53a314bb084",
+  "agent.py": "04d9c596cea456441e99d514a3a819c2f6b3f7dc1e412e00c06ea7a693a423c4",
+  "overnight.py": "c9b81a0bbcda7d1d2431e88060e88e432425e6251e46d6af2b24e7fdd0186072",
+  "measure.py": "5065310f480ff1cabfa7c645f0db342624a02f9a081b96069d50d52b3d224777"
+ }
+}

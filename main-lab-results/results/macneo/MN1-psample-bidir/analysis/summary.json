@@ -1,0 +1,24 @@
+{
+ "experiment": "MN1-psample-bidir",
+ "kind": "screening",
+ "hypothesis": "On the direct Mac/neo link, xs or compression reduces fresh-copy time for the same pinned psample tree compared with rsync -aH; the effect may differ by direction.",
+ "primary": "wall_s",
+ "control": "rsync",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261018T012805Z-MN1-psample-bidir",
+  "20261018T020103Z-MN1-psample-bidir"
+ ],
+ "spec_sha256": [
+  "24fd690e9c82c4a579234c88887ab34a5442ff49f49d668d299acdce7eda0adc",
+  "61c2855cd26aba0a5754201287b2bca30adce8f524ca0ab5e47aa66d6da4e451"
+ ],
+ "valid_blocks": 0,
+ "void_attempts": 2,
+ "void_reasons": [
+  "stopped",
+  "xs: harness error: neo: `python3 ~/benchmarks/xsyncv4/lab/lib/021ae1ff14be/probe.py snapshot --interface eth1` exited 255: ssh: connect to host 10.27"
+ ]
+}

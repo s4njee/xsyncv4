@@ -1,0 +1,176 @@
+{
+ "summary": "The mac runner is unreachable, so all new work goes to the idle neo-ssd runner, which has the full 6 hours. The plan tests whether xs beats rsync on the local psample backup when both use eager writeback, and confirms xs if it wins. It also covers the 1% re-sync cell that LC4 never reported, and checks whether eager writeback combines with --no-atomic. Together these use about 352 of the 360 available minutes, counting the possible confirmation.",
+ "runners": [
+  {
+   "runner": "mac",
+   "rationale": "The mac runner is unreachable and the evidence has no inventory for the mac host, so no experiment can be scheduled on mac-mars-10g this window. The open mac work (xs-recv4 follow-ups and the T13 pull onto the Mac) waits until it reports again.",
+   "experiments": []
+  },
+  {
+   "runner": "neo-ssd",
+   "rationale": "neo-ssd is idle with nothing queued, so it has 360 minutes; real-psample costs 8 minutes per sample. In LC3, rsync with eager writeback beat default xs, while xs-eager was much faster than xs. No experiment has put xs-eager against rsync-eager directly, and that comparison decides whether xs can beat rsync on this local copy. LC4 reported only the no-op cell, so the 1% update re-sync is still open. The eager plus --no-atomic combination has not been tried. The waiting tree confirmation of xs-eager against plain xs (LC3-durable-confirm) is left to the T14 tree, so it is not duplicated here. Budget: 96 minutes of screening plus 128 if the confirmation runs, then 64 and 64, about 352 minutes in total.",
+   "experiments": [
+    {
+     "id": "LC9-local-eager-vs-rsync-eager",
+     "question": "When both tools flush eagerly, does xs -aH get the psample backup safely onto the T5 sooner than rsync -aH?",
+     "hypothesis": "With eager writeback on both sides, xs -aH reaches a durable copy of psample on the T5 at least 5% sooner than rsync -aH. LC3's screening implies a time ratio near 0.77.",
+     "why": "LC3 showed eager writeback helps rsync as well as xs, so the fair test of whether xs beats rsync locally is to compare them with eager writeback on both.",
+     "front": false,
+     "link": "neo-local-ssd",
+     "corpus": [
+      "real-psample"
+     ],
+     "scenario": [
+      "fresh"
+     ],
+     "direction": [
+      "neo>neo-ssd"
+     ],
+     "client": "receiver",
+     "cache": [
+      "cold"
+     ],
+     "primary": "durable_s",
+     "delta": 0.05,
+     "blocks": 6,
+     "control": "rsync-eager",
+     "arms": [
+      {
+       "name": "rsync-eager",
+       "tool": "rsync",
+       "rev": null,
+       "flags": [
+        "-aH"
+       ],
+       "tune": null,
+       "writeback": "eager",
+       "verify": "full",
+       "streams": null
+      },
+      {
+       "name": "xs-eager",
+       "tool": "xs",
+       "rev": "dd6f5121d506",
+       "flags": [
+        "-aH"
+       ],
+       "tune": null,
+       "writeback": "eager",
+       "verify": "full",
+       "streams": null
+      }
+     ],
+     "confirm": {
+      "arm": "xs-eager",
+      "min_speed": 1.05
+     }
+    },
+    {
+     "id": "LC10-local-resync-1pct",
+     "question": "After 1% of the psample files change, does xs -aH re-sync the local T5 backup faster than rsync -aH with cold caches?",
+     "hypothesis": "xs -aH finishes the 1% update re-sync of psample onto the T5 faster than rsync -aH, as it did for the no-op re-sync (time ratio 0.52).",
+     "why": "LC4 planned this cell but reported only the no-op result, so the incremental case that most backups hit is still unmeasured locally.",
+     "front": false,
+     "link": "neo-local-ssd",
+     "corpus": [
+      "real-psample"
+     ],
+     "scenario": [
+      "update-1pct"
+     ],
+     "direction": [
+      "neo>neo-ssd"
+     ],
+     "client": "receiver",
+     "cache": [
+      "cold"
+     ],
+     "primary": "durable_s",
+     "delta": 0.05,
+     "blocks": 4,
+     "control": "rsync",
+     "arms": [
+      {
+       "name": "rsync",
+       "tool": "rsync",
+       "rev": null,
+       "flags": [
+        "-aH"
+       ],
+       "tune": null,
+       "writeback": "default",
+       "verify": "full",
+       "streams": null
+      },
+      {
+       "name": "xs",
+       "tool": "xs",
+       "rev": "dd6f5121d506",
+       "flags": [
+        "-aH"
+       ],
+       "tune": null,
+       "writeback": "default",
+       "verify": "full",
+       "streams": null
+      }
+     ],
+     "confirm": null
+    },
+    {
+     "id": "LC11-local-eager-noatomic",
+     "question": "Does skipping the temp-file rename add any speed on top of eager writeback for the local psample backup?",
+     "hypothesis": "Adding --no-atomic to xs -aH with eager writeback makes the durable psample copy to the T5 at least 5% faster than eager writeback alone.",
+     "why": "--no-atomic was a wide tie on its own in LC3, but it may only help once eager writeback removes the flush bottleneck, and that combination has not been tried.",
+     "front": false,
+     "link": "neo-local-ssd",
+     "corpus": [
+      "real-psample"
+     ],
+     "scenario": [
+      "fresh"
+     ],
+     "direction": [
+      "neo>neo-ssd"
+     ],
+     "client": "receiver",
+     "cache": [
+      "cold"
+     ],
+     "primary": "durable_s",
+     "delta": 0.05,
+     "blocks": 4,
+     "control": "xs-eager",
+     "arms": [
+      {
+       "name": "xs-eager",
+       "tool": "xs",
+       "rev": "dd6f5121d506",
+       "flags": [
+        "-aH"
+       ],
+       "tune": null,
+       "writeback": "eager",
+       "verify": "full",
+       "streams": null
+      },
+      {
+       "name": "xs-eager-noatomic",
+       "tool": "xs",
+       "rev": "dd6f5121d506",
+       "flags": [
+        "-aH",
+        "--no-atomic"
+       ],
+       "tune": null,
+       "writeback": "eager",
+       "verify": "full",
+       "streams": null
+      }
+     ],
+     "confirm": null
+    }
+   ]
+  }
+ ]
+}

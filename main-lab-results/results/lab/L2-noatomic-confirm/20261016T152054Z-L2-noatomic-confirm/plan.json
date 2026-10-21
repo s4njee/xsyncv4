@@ -1,0 +1,2022 @@
+{
+ "schema": 1,
+ "experiment": "L2-noatomic-confirm",
+ "spec_sha256": "cf0ca99a7b418915da009d1cd62f6610cc31627b5e536b81226ba465de63f4ca",
+ "kind": "confirmatory",
+ "bundle": "fb2053825ef1",
+ "writes": {
+  "neo": 55865024832,
+  "freya": 55865024832
+ },
+ "hypothesis": "--no-atomic makes fresh copies of flat small-file trees more than 3% faster.",
+ "primary": "wall_s",
+ "delta": 0.03,
+ "control": "xs",
+ "seed": 1,
+ "run_id": "20261016T152054Z-L2-noatomic-confirm",
+ "driver": "neo",
+ "sample_timeout_s": 3600,
+ "results": "lab",
+ "background": false,
+ "eager_cleanup": false,
+ "hours": null,
+ "hosts": {
+  "neo": {
+   "ssh": "[email]",
+   "name": "[host]",
+   "hostname": "neo",
+   "root": "~/benchmarks/xsyncv4/lab",
+   "interface": "eth0",
+   "helper": true,
+   "gates": {},
+   "local": false,
+   "system": "Linux"
+  },
+  "freya": {
+   "ssh": "[email]",
+   "name": "[host]",
+   "hostname": "freya",
+   "root": "/mnt/nvme/xsbench",
+   "interface": "enp10s0",
+   "helper": true,
+   "gates": {},
+   "local": false,
+   "system": "Linux"
+  }
+ },
+ "links": {
+  "lan": {
+   "hosts": [
+    "neo",
+    "freya"
+   ],
+   "medium": "wired",
+   "min_speed_mbps": 1000,
+   "max_rtt_ms": 2.0
+  }
+ },
+ "arms": [
+  {
+   "name": "xs",
+   "tool": "xs",
+   "flags": [
+    "-a"
+   ],
+   "rev": "453704a64528-tune",
+   "binary": {
+    "neo": "~/benchmarks/xsyncv4/lab/bin/xs-453704a64528-tune",
+    "freya": "/mnt/nvme/xsbench/bin/xs-453704a64528-tune"
+   },
+   "sha256": {
+    "neo": "c2ef264df77b44f64b2bb2b1949e10231814b6ad2e804cc11614ad24d71e7cd2",
+    "freya": "21b844fd6d0f556ad2a01fff0eb979df5854569d8b31bf0bcc15976f53fc47c9"
+   },
+   "artifacts": {
+    "xs-darwin-arm64": "cdd545a62a7721607c23dd7014fc436e0f513d049a939ae1fd28cab34e97fcf2",
+    "xs-linux-amd64": "21b844fd6d0f556ad2a01fff0eb979df5854569d8b31bf0bcc15976f53fc47c9",
+    "xs-linux-arm64": "c2ef264df77b44f64b2bb2b1949e10231814b6ad2e804cc11614ad24d71e7cd2"
+   }
+  },
+  {
+   "name": "no-atomic",
+   "tool": "xs",
+   "flags": [
+    "-a",
+    "--no-atomic"
+   ],
+   "rev": "453704a64528-tune",
+   "binary": {
+    "neo": "~/benchmarks/xsyncv4/lab/bin/xs-453704a64528-tune",
+    "freya": "/mnt/nvme/xsbench/bin/xs-453704a64528-tune"
+   },
+   "sha256": {
+    "neo": "c2ef264df77b44f64b2bb2b1949e10231814b6ad2e804cc11614ad24d71e7cd2",
+    "freya": "21b844fd6d0f556ad2a01fff0eb979df5854569d8b31bf0bcc15976f53fc47c9"
+   },
+   "artifacts": {
+    "xs-darwin-arm64": "cdd545a62a7721607c23dd7014fc436e0f513d049a939ae1fd28cab34e97fcf2",
+    "xs-linux-amd64": "21b844fd6d0f556ad2a01fff0eb979df5854569d8b31bf0bcc15976f53fc47c9",
+    "xs-linux-arm64": "c2ef264df77b44f64b2bb2b1949e10231814b6ad2e804cc11614ad24d71e7cd2"
+   }
+  }
+ ],
+ "cells": [
+  {
+   "id": "small-flat.fresh.neo-freya.sender.warm",
+   "corpus": "small-flat",
+   "scenario": "fresh",
+   "sender": "neo",
+   "receiver": "freya",
+   "client": "sender",
+   "link": "lan",
+   "cache": "warm"
+  },
+  {
+   "id": "small-flat.fresh.freya-neo.sender.warm",
+   "corpus": "small-flat",
+   "scenario": "fresh",
+   "sender": "freya",
+   "receiver": "neo",
+   "client": "sender",
+   "link": "lan",
+   "cache": "warm"
+  },
+  {
+   "id": "small-real.fresh.neo-freya.sender.warm",
+   "corpus": "small-real",
+   "scenario": "fresh",
+   "sender": "neo",
+   "receiver": "freya",
+   "client": "sender",
+   "link": "lan",
+   "cache": "warm"
+  },
+  {
+   "id": "small-real.fresh.freya-neo.sender.warm",
+   "corpus": "small-real",
+   "scenario": "fresh",
+   "sender": "freya",
+   "receiver": "neo",
+   "client": "sender",
+   "link": "lan",
+   "cache": "warm"
+  },
+  {
+   "id": "small-opaque.fresh.neo-freya.sender.warm",
+   "corpus": "small-opaque",
+   "scenario": "fresh",
+   "sender": "neo",
+   "receiver": "freya",
+   "client": "sender",
+   "link": "lan",
+   "cache": "warm"
+  },
+  {
+   "id": "small-opaque.fresh.freya-neo.sender.warm",
+   "corpus": "small-opaque",
+   "scenario": "fresh",
+   "sender": "freya",
+   "receiver": "neo",
+   "client": "sender",
+   "link": "lan",
+   "cache": "warm"
+  }
+ ],
+ "corpora": {
+  "small-flat": {
+   "files": 100000,
+   "directories": 100,
+   "bytes": 319224077,
+   "digest": "41b628c4337730be4efdfcc6673d517749132ffd50b75b29321640e6f064bbec",
+   "quick_digest": "e8de96251eaca6be3e98b1cb8097405b37ad470fc0d5ffdb7a5a48ea5b9f3805"
+  },
+  "small-real": {
+   "files": 118594,
+   "directories": 59336,
+   "bytes": 1107333872,
+   "digest": "e9c84fab7d1a6dcdaf7c1c8688abe9bcb3cd114f551c27fad5b8624391005cdb",
+   "quick_digest": "65994469699350cde8ad45842d686fe1a01d87e64ed26de283fb0c860fae01e3"
+  },
+  "small-opaque": {
+   "files": 100000,
+   "directories": 100,
+   "bytes": 319224077,
+   "digest": "7b291eb520e784dea5a94bfdef3e842c75f2e4e193ab736217566ba1ce28c63e",
+   "quick_digest": "0614d31bdac509e673b100a3adb8d0fa28f2f372c3c5f4eb476e634b54f711b5"
+  }
+ },
+ "blocks": [
+  {
+   "cell": "small-flat.fresh.neo-freya.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-real.fresh.freya-neo.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.freya-neo.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ]
+   ]
+  },
+  {
+   "cell": "small-opaque.fresh.freya-neo.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ]
+   ]
+  },
+  {
+   "cell": "small-opaque.fresh.neo-freya.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ]
+   ]
+  },
+  {
+   "cell": "small-real.fresh.neo-freya.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ]
+   ]
+  },
+  {
+   "cell": "small-opaque.fresh.freya-neo.sender.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-opaque.fresh.neo-freya.sender.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-real.fresh.freya-neo.sender.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.neo-freya.sender.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ]
+   ]
+  },
+  {
+   "cell": "small-real.fresh.neo-freya.sender.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.freya-neo.sender.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-opaque.fresh.neo-freya.sender.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.freya-neo.sender.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ]
+   ]
+  },
+  {
+   "cell": "small-real.fresh.freya-neo.sender.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-opaque.fresh.freya-neo.sender.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ]
+   ]
+  },
+  {
+   "cell": "small-real.fresh.neo-freya.sender.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.neo-freya.sender.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.freya-neo.sender.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-opaque.fresh.freya-neo.sender.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-real.fresh.neo-freya.sender.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.neo-freya.sender.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-opaque.fresh.neo-freya.sender.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-real.fresh.freya-neo.sender.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ]
+   ]
+  },
+  {
+   "cell": "small-opaque.fresh.freya-neo.sender.warm",
+   "block": 4,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ]
+   ]
+  },
+  {
+   "cell": "small-real.fresh.neo-freya.sender.warm",
+   "block": 4,
+   "verify_full": false,
+   "orders": [
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.freya-neo.sender.warm",
+   "block": 4,
+   "verify_full": false,
+   "orders": [
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ]
+   ]
+  },
+  {
+   "cell": "small-opaque.fresh.neo-freya.sender.warm",
+   "block": 4,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-real.fresh.freya-neo.sender.warm",
+   "block": 4,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.neo-freya.sender.warm",
+   "block": 4,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ]
+   ]
+  },
+  {
+   "cell": "small-real.fresh.neo-freya.sender.warm",
+   "block": 5,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.freya-neo.sender.warm",
+   "block": 5,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-real.fresh.freya-neo.sender.warm",
+   "block": 5,
+   "verify_full": false,
+   "orders": [
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.neo-freya.sender.warm",
+   "block": 5,
+   "verify_full": false,
+   "orders": [
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ]
+   ]
+  },
+  {
+   "cell": "small-opaque.fresh.neo-freya.sender.warm",
+   "block": 5,
+   "verify_full": false,
+   "orders": [
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ]
+   ]
+  },
+  {
+   "cell": "small-opaque.fresh.freya-neo.sender.warm",
+   "block": 5,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ]
+   ]
+  },
+  {
+   "cell": "small-real.fresh.freya-neo.sender.warm",
+   "block": 6,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.neo-freya.sender.warm",
+   "block": 6,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ]
+   ]
+  },
+  {
+   "cell": "small-opaque.fresh.freya-neo.sender.warm",
+   "block": 6,
+   "verify_full": false,
+   "orders": [
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-opaque.fresh.neo-freya.sender.warm",
+   "block": 6,
+   "verify_full": false,
+   "orders": [
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.freya-neo.sender.warm",
+   "block": 6,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-real.fresh.neo-freya.sender.warm",
+   "block": 6,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ]
+   ]
+  },
+  {
+   "cell": "small-opaque.fresh.neo-freya.sender.warm",
+   "block": 7,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.freya-neo.sender.warm",
+   "block": 7,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.neo-freya.sender.warm",
+   "block": 7,
+   "verify_full": false,
+   "orders": [
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-opaque.fresh.freya-neo.sender.warm",
+   "block": 7,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-real.fresh.freya-neo.sender.warm",
+   "block": 7,
+   "verify_full": false,
+   "orders": [
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-real.fresh.neo-freya.sender.warm",
+   "block": 7,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.neo-freya.sender.warm",
+   "block": 8,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ]
+   ]
+  },
+  {
+   "cell": "small-opaque.fresh.neo-freya.sender.warm",
+   "block": 8,
+   "verify_full": false,
+   "orders": [
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-real.fresh.freya-neo.sender.warm",
+   "block": 8,
+   "verify_full": false,
+   "orders": [
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-opaque.fresh.freya-neo.sender.warm",
+   "block": 8,
+   "verify_full": false,
+   "orders": [
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.freya-neo.sender.warm",
+   "block": 8,
+   "verify_full": false,
+   "orders": [
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ]
+   ]
+  },
+  {
+   "cell": "small-real.fresh.neo-freya.sender.warm",
+   "block": 8,
+   "verify_full": false,
+   "orders": [
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-opaque.fresh.neo-freya.sender.warm",
+   "block": 9,
+   "verify_full": false,
+   "orders": [
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.freya-neo.sender.warm",
+   "block": 9,
+   "verify_full": false,
+   "orders": [
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ]
+   ]
+  },
+  {
+   "cell": "small-real.fresh.neo-freya.sender.warm",
+   "block": 9,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-opaque.fresh.freya-neo.sender.warm",
+   "block": 9,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.neo-freya.sender.warm",
+   "block": 9,
+   "verify_full": false,
+   "orders": [
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ]
+   ]
+  },
+  {
+   "cell": "small-real.fresh.freya-neo.sender.warm",
+   "block": 9,
+   "verify_full": false,
+   "orders": [
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-real.fresh.freya-neo.sender.warm",
+   "block": 10,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-opaque.fresh.neo-freya.sender.warm",
+   "block": 10,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-real.fresh.neo-freya.sender.warm",
+   "block": 10,
+   "verify_full": false,
+   "orders": [
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.freya-neo.sender.warm",
+   "block": 10,
+   "verify_full": false,
+   "orders": [
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ]
+   ]
+  },
+  {
+   "cell": "small-opaque.fresh.freya-neo.sender.warm",
+   "block": 10,
+   "verify_full": false,
+   "orders": [
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.neo-freya.sender.warm",
+   "block": 10,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ]
+   ]
+  },
+  {
+   "cell": "small-real.fresh.neo-freya.sender.warm",
+   "block": 11,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.neo-freya.sender.warm",
+   "block": 11,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ]
+   ]
+  },
+  {
+   "cell": "small-opaque.fresh.neo-freya.sender.warm",
+   "block": 11,
+   "verify_full": false,
+   "orders": [
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-opaque.fresh.freya-neo.sender.warm",
+   "block": 11,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.freya-neo.sender.warm",
+   "block": 11,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-real.fresh.freya-neo.sender.warm",
+   "block": 11,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-opaque.fresh.neo-freya.sender.warm",
+   "block": 12,
+   "verify_full": false,
+   "orders": [
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.neo-freya.sender.warm",
+   "block": 12,
+   "verify_full": false,
+   "orders": [
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ]
+   ]
+  },
+  {
+   "cell": "small-opaque.fresh.freya-neo.sender.warm",
+   "block": 12,
+   "verify_full": false,
+   "orders": [
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ]
+   ]
+  },
+  {
+   "cell": "small-real.fresh.freya-neo.sender.warm",
+   "block": 12,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.freya-neo.sender.warm",
+   "block": 12,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ]
+   ]
+  },
+  {
+   "cell": "small-real.fresh.neo-freya.sender.warm",
+   "block": 12,
+   "verify_full": false,
+   "orders": [
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.neo-freya.sender.warm",
+   "block": 13,
+   "verify_full": false,
+   "orders": [
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-real.fresh.freya-neo.sender.warm",
+   "block": 13,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-real.fresh.neo-freya.sender.warm",
+   "block": 13,
+   "verify_full": false,
+   "orders": [
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ]
+   ]
+  },
+  {
+   "cell": "small-opaque.fresh.neo-freya.sender.warm",
+   "block": 13,
+   "verify_full": false,
+   "orders": [
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.freya-neo.sender.warm",
+   "block": 13,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ]
+   ]
+  },
+  {
+   "cell": "small-opaque.fresh.freya-neo.sender.warm",
+   "block": 13,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.neo-freya.sender.warm",
+   "block": 14,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-real.fresh.freya-neo.sender.warm",
+   "block": 14,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-opaque.fresh.freya-neo.sender.warm",
+   "block": 14,
+   "verify_full": false,
+   "orders": [
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.freya-neo.sender.warm",
+   "block": 14,
+   "verify_full": false,
+   "orders": [
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-real.fresh.neo-freya.sender.warm",
+   "block": 14,
+   "verify_full": false,
+   "orders": [
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ]
+   ]
+  },
+  {
+   "cell": "small-opaque.fresh.neo-freya.sender.warm",
+   "block": 14,
+   "verify_full": false,
+   "orders": [
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-opaque.fresh.neo-freya.sender.warm",
+   "block": 15,
+   "verify_full": true,
+   "orders": [
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-real.fresh.freya-neo.sender.warm",
+   "block": 15,
+   "verify_full": true,
+   "orders": [
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.freya-neo.sender.warm",
+   "block": 15,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ]
+   ]
+  },
+  {
+   "cell": "small-real.fresh.neo-freya.sender.warm",
+   "block": 15,
+   "verify_full": true,
+   "orders": [
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.neo-freya.sender.warm",
+   "block": 15,
+   "verify_full": true,
+   "orders": [
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-opaque.fresh.freya-neo.sender.warm",
+   "block": 15,
+   "verify_full": true,
+   "orders": [
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "no-atomic",
+     "xs"
+    ]
+   ]
+  }
+ ],
+ "scripts": {
+  "probe.py": "f1c65a4e27657e4622416a43e86041663e6906f685d8f5f6a26b4e8df3d7eecb",
+  "corpus.py": "5e971be04ab61be1ef7fd0bce2877a69a4ef64f4f4147063fb6d8953a7ee071f",
+  "corpora.json": "ea0375d355e411974e5f68f203bba6370dc253d6fb277bf2ff81f0b27f023460",
+  "agent.py": "0536e8a9d8bdeff8541edff9d5cf0af9b94df5e0fc40da377133c166ecb32f2b",
+  "runner.py": "cce71fee149764ad1a5c913061f19620a8ff44f792d23d55f7a290d59a9e20ff",
+  "measure.py": "5065310f480ff1cabfa7c645f0db342624a02f9a081b96069d50d52b3d224777"
+ }
+}

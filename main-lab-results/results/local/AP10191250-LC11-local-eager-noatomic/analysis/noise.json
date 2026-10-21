@@ -1,0 +1,25 @@
+[
+ {
+  "experiment": "AP10191250-LC11-local-eager-noatomic",
+  "kind": "screening",
+  "cell_id": "real-psample.fresh.neo-neo-ssd.receiver.cold",
+  "corpus": "real-psample",
+  "scenario": "fresh",
+  "sender": "neo",
+  "receiver": "neo-ssd",
+  "client": "receiver",
+  "link": "neo-local-ssd",
+  "cache": "cold",
+  "arm": "xs-eager-noatomic",
+  "n_blocks": 4,
+  "sigma_d": 0.02057427713627936,
+  "blocks_for_2pct": 11,
+  "blocks_for_3pct": 8,
+  "blocks_for_5pct": 8,
+  "blocks_for_10pct": 8,
+  "blocks_equivalent_2pct": 14,
+  "blocks_equivalent_3pct": 8,
+  "blocks_equivalent_5pct": 8,
+  "blocks_equivalent_10pct": 8
+ }
+]

@@ -1,0 +1,6 @@
+experiment,kind,cell_id,corpus,scenario,sender,receiver,client,link,cache,arm,n_blocks,sigma_d,blocks_for_2pct,blocks_for_3pct,blocks_for_5pct,blocks_for_10pct,blocks_equivalent_2pct,blocks_equivalent_3pct,blocks_equivalent_5pct,blocks_equivalent_10pct
+P1-pipe-streams,screening,real-congress.fresh.mac-mars.sender.warm,real-congress,fresh,mac,mars,sender,mac-mars-2g5,warm,xs,2,0.1808195820812568,656,296,110,31,879,396,147,40
+P1-pipe-streams,screening,real-congress.fresh.mac-mars.sender.warm,real-congress,fresh,mac,mars,sender,mac-mars-2g5,warm,tar,2,0.4268239235652732,3645,1637,602,160,4884,2193,807,213
+P1-pipe-streams,screening,real-congress.fresh.mac-mars.sender.warm,real-congress,fresh,mac,mars,sender,mac-mars-2g5,warm,tar-zstd,2,0.10679516365529057,231,105,40,12,308,140,53,16
+P1-pipe-streams,screening,real-congress.fresh.mac-mars.sender.warm,real-congress,fresh,mac,mars,sender,mac-mars-2g5,warm,tar-x4,2,0.31008101857835074,1925,865,319,85,2579,1159,427,114
+P1-pipe-streams,screening,real-congress.fresh.mac-mars.sender.warm,real-congress,fresh,mac,mars,sender,mac-mars-2g5,warm,tar-x8,2,0.25993861407772034,1353,609,225,61,1813,815,301,81

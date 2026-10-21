@@ -1,0 +1,38 @@
+cleanup on freya-zfs: freya-zfs: `sudo -n /usr/local/sbin/xsbench-helper governor restore` exited 255: ssh: connect to host [host] port 22: Host is down
+Traceback (most recent call last):
+  File "~/benchmarks/xsbench.noindex/lib/b135cedd700c/agent.py", line 659, in <module>
+    sys.exit(Run(sys.argv[1]).execute(limit))
+             ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "~/benchmarks/xsbench.noindex/lib/b135cedd700c/agent.py", line 633, in execute
+    self.prepare()
+    ~~~~~~~~~~~~^^
+  File "~/benchmarks/xsbench.noindex/lib/b135cedd700c/agent.py", line 317, in prepare
+    report = host.probe('staged', '--root', host.root, *(['--bundle', host.bundle] if host.bundle else []), *names)
+  File "~/benchmarks/xsbench.noindex/lib/b135cedd700c/agent.py", line 72, in probe
+    return json.loads(self.run('python3', self.bin('probe.py'), *arguments, timeout=120).stdout)
+                      ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "~/benchmarks/xsbench.noindex/lib/b135cedd700c/agent.py", line 65, in run
+    return self.shell(shlex.join(map(str, argv)), **options)
+           ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "~/benchmarks/xsbench.noindex/lib/b135cedd700c/agent.py", line 61, in shell
+    raise RuntimeError(f'{self.name}: `{script[:200]}` exited {done.returncode}: {done.stderr.strip()[-400:]}')
+RuntimeError: freya-zfs: `python3 /mnt/raid6/xsbench/lib/b135cedd700c/probe.py staged --root /mnt/raid6/xsbench --bundle b135cedd700c agent.py corpora.json corpus.py measure.py probe.py runner.py xs-453704a64528-tune xspipe.py` exited 255: ssh: connect to host [host] port 22: Host is down
+cleanup on freya-zfs: freya-zfs: `sudo -n /usr/local/sbin/xsbench-helper governor restore` exited 255: ssh: connect to host [host] port 22: Host is down
+Traceback (most recent call last):
+  File "~/benchmarks/xsbench.noindex/lib/b135cedd700c/agent.py", line 659, in <module>
+    sys.exit(Run(sys.argv[1]).execute(limit))
+             ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "~/benchmarks/xsbench.noindex/lib/b135cedd700c/agent.py", line 633, in execute
+    self.prepare()
+    ~~~~~~~~~~~~^^
+  File "~/benchmarks/xsbench.noindex/lib/b135cedd700c/agent.py", line 317, in prepare
+    report = host.probe('staged', '--root', host.root, *(['--bundle', host.bundle] if host.bundle else []), *names)
+  File "~/benchmarks/xsbench.noindex/lib/b135cedd700c/agent.py", line 72, in probe
+    return json.loads(self.run('python3', self.bin('probe.py'), *arguments, timeout=120).stdout)
+                      ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "~/benchmarks/xsbench.noindex/lib/b135cedd700c/agent.py", line 65, in run
+    return self.shell(shlex.join(map(str, argv)), **options)
+           ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "~/benchmarks/xsbench.noindex/lib/b135cedd700c/agent.py", line 61, in shell
+    raise RuntimeError(f'{self.name}: `{script[:200]}` exited {done.returncode}: {done.stderr.strip()[-400:]}')
+RuntimeError: freya-zfs: `python3 /mnt/raid6/xsbench/lib/b135cedd700c/probe.py staged --root /mnt/raid6/xsbench --bundle b135cedd700c agent.py corpora.json corpus.py measure.py probe.py runner.py xs-453704a64528-tune xspipe.py` exited 255: ssh: connect to host [host] port 22: Host is down

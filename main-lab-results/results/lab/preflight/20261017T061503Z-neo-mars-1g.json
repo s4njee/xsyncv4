@@ -1,0 +1,885 @@
+{
+ "utc": "2026-10-17T06:15:03+00:00",
+ "helper_sha256": "9162a1d8a5ed1e6a3171129cfa7d4671e33e1977707d09804b40fe24e00e4a42",
+ "config": {
+  "driver": "neo",
+  "hosts": {
+   "neo": {
+    "ssh": "[email]",
+    "name": "[host]",
+    "hostname": "neo",
+    "root": "~/benchmarks/xsyncv4/lab",
+    "root_fstype": "ext4",
+    "helper": true
+   },
+   "freya": {
+    "ssh": "[host]",
+    "name": "[host]",
+    "hostname": "freya",
+    "root": "/mnt/nvme/xsbench",
+    "root_fstype": "ext4",
+    "helper": true
+   },
+   "mars": {
+    "ssh": "[email]",
+    "name": "[host]",
+    "hostname": "mars",
+    "root": "~/benchmarks/xsyncv4/lab",
+    "root_fstype": "ext4",
+    "helper": true
+   },
+   "mars-hdd": {
+    "ssh": "[email]",
+    "name": "[host]",
+    "hostname": "mars",
+    "root": "/mnt/hdd/xsbench",
+    "root_fstype": "btrfs",
+    "helper": true
+   },
+   "orion": {
+    "ssh": "[email]",
+    "name": "[host]",
+    "hostname": "orion",
+    "root": "~/benchmarks/xsyncv4/lab",
+    "root_fstype": "ext4",
+    "helper": true
+   },
+   "mac": {
+    "local": true,
+    "ssh": "[email]",
+    "name": "[host]",
+    "hostname": "MacBookPro",
+    "root": "~/benchmarks/xsbench.noindex",
+    "helper": false
+   },
+   "neo-shm": {
+    "dashboard": false,
+    "ssh": "[email]",
+    "name": "[host]",
+    "hostname": "neo",
+    "root": "~/benchmarks/xsyncv4/lab-shm",
+    "runner_of": "neo",
+    "root_fstype": "ext4",
+    "helper": true
+   },
+   "freya-shm": {
+    "dashboard": false,
+    "ssh": "[email]",
+    "name": "[host]",
+    "hostname": "freya",
+    "root": "/mnt/nvme/xsbench/shm-root",
+    "runner_of": "freya",
+    "root_fstype": "ext4",
+    "helper": true
+   },
+   "freya-zfs": {
+    "ssh": "[host]",
+    "name": "[host]",
+    "hostname": "freya",
+    "root": "/mnt/raid6/xsbench",
+    "runner_of": "freya",
+    "root_fstype": "zfs",
+    "helper": true
+   }
+  },
+  "links": {
+   "lan-shm-freya": {
+    "retired": true,
+    "hosts": [
+     "neo",
+     "freya-shm"
+    ],
+    "medium": "wired",
+    "min_speed_mbps": 1000,
+    "max_rtt_ms": 2.0,
+    "driver": "neo",
+    "results": "lab",
+    "interface": {
+     "neo": "eth0",
+     "freya-shm": "enp10s0"
+    }
+   },
+   "lan-shm-neo": {
+    "retired": true,
+    "hosts": [
+     "freya",
+     "neo-shm"
+    ],
+    "medium": "wired",
+    "min_speed_mbps": 1000,
+    "max_rtt_ms": 2.0,
+    "driver": "neo-shm",
+    "results": "lab",
+    "interface": {
+     "freya": "enp10s0",
+     "neo-shm": "eth0"
+    }
+   },
+   "lan": {
+    "retired": true,
+    "hosts": [
+     "neo",
+     "freya"
+    ],
+    "medium": "wired",
+    "min_speed_mbps": 1000,
+    "max_rtt_ms": 2.0,
+    "interface": {
+     "neo": "eth0",
+     "freya": "enp10s0"
+    }
+   },
+   "mesh": {
+    "retired": true,
+    "hosts": [
+     "neo",
+     "mars"
+    ],
+    "medium": "mesh",
+    "interface": {
+     "neo": "eth0",
+     "mars": "enp9s0"
+    }
+   },
+   "wifi": {
+    "retired": true,
+    "hosts": [
+     "orion",
+     "mars"
+    ],
+    "medium": "mesh",
+    "driver": "mars",
+    "results": "wifi",
+    "interface": {
+     "orion": "eth0",
+     "mars": "enp9s0"
+    }
+   },
+   "mac-mars": {
+    "retired": true,
+    "hosts": [
+     "mac",
+     "mars"
+    ],
+    "medium": "mesh",
+    "initiator": "mac",
+    "driver": "mac",
+    "results": "supplementary",
+    "background": true,
+    "interface": {
+     "mac": "en8",
+     "mars": "enp9s0"
+    }
+   },
+   "mac-mars-direct": {
+    "retired": true,
+    "hosts": [
+     "mac",
+     "mars"
+    ],
+    "medium": "wired",
+    "min_speed_mbps": 10000,
+    "max_rtt_ms": 2.0,
+    "initiator": "mac",
+    "driver": "mac",
+    "results": "direct",
+    "address": {
+     "mac": "[address]",
+     "mars": "[address]"
+    },
+    "interface": {
+     "mac": "en13",
+     "mars": "enp1s0f0"
+    }
+   },
+   "mac-mars-2g5": {
+    "retired": true,
+    "hosts": [
+     "mac",
+     "mars"
+    ],
+    "medium": "wired",
+    "min_speed_mbps": 2500,
+    "max_rtt_ms": 2.0,
+    "initiator": "mac",
+    "driver": "mac",
+    "results": "pipes",
+    "address": {
+     "mac": "[address]",
+     "mars": "[address]"
+    },
+    "interface": {
+     "mac": "en13",
+     "mars": "enp9s0"
+    }
+   },
+   "mac-mars-hdd-2g5": {
+    "retired": true,
+    "hosts": [
+     "mac",
+     "mars-hdd"
+    ],
+    "medium": "wired",
+    "min_speed_mbps": 2500,
+    "max_rtt_ms": 2.0,
+    "initiator": "mac",
+    "driver": "mac",
+    "results": "hdd",
+    "address": {
+     "mac": "[address]",
+     "mars-hdd": "[address]"
+    },
+    "interface": {
+     "mac": "en13",
+     "mars-hdd": "enp9s0"
+    }
+   },
+   "mac-mars-hdd": {
+    "retired": true,
+    "hosts": [
+     "mac",
+     "mars-hdd"
+    ],
+    "medium": "wired",
+    "min_speed_mbps": 10000,
+    "max_rtt_ms": 2.0,
+    "initiator": "mac",
+    "driver": "mac",
+    "results": "hdd",
+    "address": {
+     "mac": "[address]",
+     "mars-hdd": "[address]"
+    },
+    "interface": {
+     "mac": "en13",
+     "mars-hdd": "enp1s0f0"
+    }
+   },
+   "mac-freya-10g": {
+    "hosts": [
+     "mac",
+     "freya"
+    ],
+    "medium": "wired",
+    "min_speed_mbps": 10000,
+    "max_rtt_ms": 2.0,
+    "initiator": "mac",
+    "driver": "mac",
+    "results": "tengig",
+    "address": {
+     "mac": "[address]",
+     "freya": "[host]"
+    },
+    "interface": {
+     "mac": "en4",
+     "freya": "enp27s0f0"
+    }
+   },
+   "mac-freya-zfs-10g": {
+    "hosts": [
+     "mac",
+     "freya-zfs"
+    ],
+    "medium": "wired",
+    "min_speed_mbps": 10000,
+    "max_rtt_ms": 2.0,
+    "initiator": "mac",
+    "driver": "mac",
+    "results": "tengig",
+    "address": {
+     "mac": "[address]",
+     "freya-zfs": "[host]"
+    },
+    "interface": {
+     "mac": "en4",
+     "freya-zfs": "enp27s0f0"
+    }
+   },
+   "neo-mars-1g": {
+    "hosts": [
+     "neo",
+     "mars"
+    ],
+    "medium": "wired",
+    "min_speed_mbps": 1000,
+    "max_rtt_ms": 2.0,
+    "initiator": "mars",
+    "driver": "mars",
+    "results": "pair",
+    "address": {
+     "neo": "[address]",
+     "mars": "[address]"
+    },
+    "interface": {
+     "neo": "eth0",
+     "mars": "enp9s0"
+    }
+   }
+  }
+ },
+ "inventory": {
+  "mars": {
+   "utc": "2026-10-17T06:15:04.420+00:00",
+   "hostname": "mars",
+   "user": "[user]",
+   "system": "Linux",
+   "kernel": "7.2.3-1-cachyos",
+   "machine": "x86_64",
+   "python": "3.14.7",
+   "cpus": 24,
+   "cpu_model": "AMD Ryzen 9 7900X 12-Core Processor",
+   "tools": {
+    "rsync": "/usr/bin/rsync",
+    "ssh": "/usr/bin/ssh",
+    "ip": "/usr/bin/ip",
+    "tc": "/usr/bin/tc",
+    "iw": "/usr/bin/iw",
+    "ping": "/usr/bin/ping",
+    "strace": null,
+    "perf": null,
+    "vcgencmd": null,
+    "zstd": "/usr/bin/zstd",
+    "findmnt": "/usr/bin/findmnt",
+    "lsblk": "/usr/bin/lsblk",
+    "systemd-run": "/usr/bin/systemd-run",
+    "sudo": "/usr/bin/sudo",
+    "iperf3": null,
+    "rsync_version": "rsync  version 3.5.0-g471e17dc  protocol version 32",
+    "ssh_version": "OpenSSH_10.5p1, OpenSSL 3.6.4 25 Aug 2026"
+   },
+   "open_files_limit": 2048,
+   "paths": [
+    {
+     "target": "/",
+     "source": "/dev/nvme0n1p2",
+     "fstype": "ext4",
+     "options": "rw,noatime",
+     "free_bytes": 639285964800,
+     "total_bytes": 2010874724352,
+     "path": "~/benchmarks/xsyncv4/lab",
+     "exists": true,
+     "writable": true
+    }
+   ],
+   "os": "CachyOS",
+   "board": null,
+   "memory_bytes": 32699965440,
+   "cpufreq": {
+    "driver": "amd-pstate-epp",
+    "governors": [
+     "powersave"
+    ],
+    "available": [
+     "performance",
+     "powersave"
+    ],
+    "max_khz": 5737986,
+    "epp": "balance_performance"
+   },
+   "thermal_zones": [
+    "acpitz"
+   ],
+   "interfaces": [
+    {
+     "name": "enp9s0",
+     "operstate": "up",
+     "speed_mbps": 1000,
+     "mtu": 1500,
+     "duplex": "full",
+     "medium": "wired"
+    },
+    {
+     "name": "wlan0",
+     "operstate": "up",
+     "speed_mbps": null,
+     "mtu": 1500,
+     "duplex": null,
+     "medium": "wireless"
+    }
+   ],
+   "addresses": {
+    "lo": [
+     "[address]",
+     "::1"
+    ],
+    "enp9s0": [
+     "[address]",
+     "[address]",
+     "[address]"
+    ],
+    "wlan0": [
+     "[address]",
+     "[address]"
+    ]
+   },
+   "default_qdisc": "fq_codel",
+   "tcp_congestion_control": "cubic",
+   "block_devices": [
+    {
+     "name": "sda",
+     "type": "disk",
+     "size": 1024209543168,
+     "fstype": null,
+     "mountpoints": [],
+     "model": "Inland SATA SSD",
+     "tran": "sata",
+     "rota": false,
+     "children": [
+      {
+       "name": "sda1",
+       "type": "part",
+       "size": 1024208142336,
+       "fstype": "ntfs",
+       "mountpoints": [],
+       "model": null,
+       "tran": null,
+       "rota": false
+      }
+     ]
+    },
+    {
+     "name": "sdb",
+     "type": "disk",
+     "size": 6001175126016,
+     "fstype": "btrfs",
+     "mountpoints": [
+      "/mnt/hdd"
+     ],
+     "model": "HGST HUS726060ALE610",
+     "tran": "sata",
+     "rota": true
+    },
+    {
+     "name": "nvme1n1",
+     "type": "disk",
+     "size": 1000204886016,
+     "fstype": null,
+     "mountpoints": [],
+     "model": "KINGSTON SNV3S1000G",
+     "tran": "nvme",
+     "rota": false,
+     "children": [
+      {
+       "name": "nvme1n1p1",
+       "type": "part",
+       "size": 16777216,
+       "fstype": null,
+       "mountpoints": [],
+       "model": null,
+       "tran": "nvme",
+       "rota": false
+      },
+      {
+       "name": "nvme1n1p2",
+       "type": "part",
+       "size": 999299219456,
+       "fstype": "ntfs",
+       "mountpoints": [],
+       "model": null,
+       "tran": "nvme",
+       "rota": false
+      },
+      {
+       "name": "nvme1n1p3",
+       "type": "part",
+       "size": 886046720,
+       "fstype": "ntfs",
+       "mountpoints": [],
+       "model": null,
+       "tran": "nvme",
+       "rota": false
+      }
+     ]
+    },
+    {
+     "name": "nvme0n1",
+     "type": "disk",
+     "size": 2048408248320,
+     "fstype": null,
+     "mountpoints": [],
+     "model": "SPCC M.2 PCIe SSD",
+     "tran": "nvme",
+     "rota": false,
+     "children": [
+      {
+       "name": "nvme0n1p1",
+       "type": "part",
+       "size": 4294967296,
+       "fstype": "vfat",
+       "mountpoints": [
+        "/boot"
+       ],
+       "model": null,
+       "tran": "nvme",
+       "rota": false
+      },
+      {
+       "name": "nvme0n1p2",
+       "type": "part",
+       "size": 2044111147008,
+       "fstype": "ext4",
+       "mountpoints": [
+        "/"
+       ],
+       "model": null,
+       "tran": "nvme",
+       "rota": false
+      }
+     ]
+    }
+   ],
+   "zfs": false,
+   "systemd": true,
+   "ext4_lazy_init": false,
+   "helper": {
+    "installed": true,
+    "sha256": "9162a1d8a5ed1e6a3171129cfa7d4671e33e1977707d09804b40fe24e00e4a42",
+    "sudo": true,
+    "status": {
+     "version": "3",
+     "root": "yes",
+     "config": "ok",
+     "interface": "enp9s0",
+     "qdisc": "fq_codel 0:",
+     "netem": "off",
+     "netem_timer": "off",
+     "governor": "powersave",
+     "governor_saved": "no",
+     "writeback_saved": "no",
+     "dirty_background_bytes": "67108864",
+     "scratch": "",
+     "scratch_fstype_wanted": "ext4",
+     "scratch_source_configured": ""
+    }
+   }
+  },
+  "neo": {
+   "utc": "2026-10-17T06:15:04.859+00:00",
+   "hostname": "neo",
+   "user": "[user]",
+   "system": "Linux",
+   "kernel": "6.18.34+rpt-rpi-2712",
+   "machine": "aarch64",
+   "python": "3.13.5",
+   "cpus": 4,
+   "cpu_model": "Raspberry Pi 5 Model B Rev 1.0",
+   "tools": {
+    "rsync": "/usr/bin/rsync",
+    "ssh": "/usr/bin/ssh",
+    "ip": "/usr/bin/ip",
+    "tc": "/usr/sbin/tc",
+    "iw": "/usr/sbin/iw",
+    "ping": "/usr/bin/ping",
+    "strace": "/usr/bin/strace",
+    "perf": null,
+    "vcgencmd": "/usr/bin/vcgencmd",
+    "zstd": "/usr/bin/zstd",
+    "findmnt": "/usr/bin/findmnt",
+    "lsblk": "/usr/bin/lsblk",
+    "systemd-run": "/usr/bin/systemd-run",
+    "sudo": "/usr/bin/sudo",
+    "iperf3": "/usr/bin/iperf3",
+    "rsync_version": "rsync  version 3.4.1  protocol version 32",
+    "ssh_version": "OpenSSH_10.0p2 Debian-7+deb13u4, OpenSSL 3.5.7 9 Jun 2026"
+   },
+   "open_files_limit": 1024,
+   "paths": [
+    {
+     "target": "/",
+     "source": "/dev/nvme0n1p2",
+     "fstype": "ext4",
+     "options": "rw,noatime",
+     "free_bytes": 213069463552,
+     "total_bytes": 491737796608,
+     "path": "~/benchmarks/xsyncv4/lab",
+     "exists": true,
+     "writable": true
+    }
+   ],
+   "os": "Debian GNU/Linux 13 (trixie)",
+   "board": "Raspberry Pi 5 Model B Rev 1.0",
+   "memory_bytes": 4245815296,
+   "cpufreq": {
+    "driver": "cpufreq-dt",
+    "governors": [
+     "ondemand"
+    ],
+    "available": [
+     "conservative",
+     "ondemand",
+     "userspace",
+     "powersave",
+     "performance",
+     "schedutil"
+    ],
+    "max_khz": 2400000,
+    "epp": null
+   },
+   "thermal_zones": [
+    "cpu-thermal"
+   ],
+   "interfaces": [
+    {
+     "name": "eth0",
+     "operstate": "up",
+     "speed_mbps": 1000,
+     "mtu": 1500,
+     "duplex": "full",
+     "medium": "wired"
+    },
+    {
+     "name": "wlan0",
+     "operstate": "down",
+     "speed_mbps": null,
+     "mtu": 1500,
+     "duplex": null,
+     "medium": "wireless"
+    }
+   ],
+   "addresses": {
+    "lo": [
+     "[address]",
+     "::1"
+    ],
+    "eth0": [
+     "[address]",
+     "[address]",
+     "[address]"
+    ],
+    "wlan0": []
+   },
+   "default_qdisc": "fq_codel",
+   "tcp_congestion_control": "cubic",
+   "block_devices": [
+    {
+     "name": "nvme0n1",
+     "type": "disk",
+     "size": 500107862016,
+     "fstype": null,
+     "mountpoints": [],
+     "model": "SHGP31-500GM-2",
+     "tran": "nvme",
+     "rota": false,
+     "children": [
+      {
+       "name": "nvme0n1p1",
+       "type": "part",
+       "size": 536870912,
+       "fstype": "vfat",
+       "mountpoints": [
+        "/boot/firmware"
+       ],
+       "model": null,
+       "tran": "nvme",
+       "rota": false
+      },
+      {
+       "name": "nvme0n1p2",
+       "type": "part",
+       "size": 499562602496,
+       "fstype": "ext4",
+       "mountpoints": [
+        "/"
+       ],
+       "model": null,
+       "tran": "nvme",
+       "rota": false
+      }
+     ]
+    }
+   ],
+   "zfs": false,
+   "systemd": true,
+   "ext4_lazy_init": false,
+   "helper": {
+    "installed": true,
+    "sha256": "9162a1d8a5ed1e6a3171129cfa7d4671e33e1977707d09804b40fe24e00e4a42",
+    "sudo": true,
+    "status": {
+     "version": "3",
+     "root": "yes",
+     "config": "ok",
+     "interface": "eth0",
+     "qdisc": "fq_codel 0:",
+     "netem": "off",
+     "netem_timer": "off",
+     "governor": "ondemand",
+     "governor_saved": "no",
+     "writeback_saved": "no",
+     "dirty_background_bytes": "0",
+     "scratch": "",
+     "scratch_fstype_wanted": "ext4",
+     "scratch_source_configured": ""
+    }
+   }
+  }
+ },
+ "routes": {
+  "neo-mars-1g:neo->mars": {
+   "utc": "2026-10-17T06:15:05.279+00:00",
+   "hostname": "neo",
+   "peer": "[address]",
+   "resolved": [
+    "[address]"
+   ],
+   "address": "[address]",
+   "dev": "eth0",
+   "source": "[address]",
+   "gateway": null,
+   "interface": {
+    "name": "eth0",
+    "operstate": "up",
+    "speed_mbps": 1000,
+    "mtu": 1500,
+    "duplex": "full",
+    "medium": "wired"
+   },
+   "interface_addresses": [
+    "[address]",
+    "[address]",
+    "[address]"
+   ],
+   "qdisc": "qdisc fq_codel 0: root refcnt 2 limit 10240p flows 1024 quantum 1514 target 5ms interval 100ms memory_limit 32Mb ecn drop_batch 64",
+   "ping": {
+    "loss_pct": 0.0,
+    "rtt_min_ms": 0.269,
+    "rtt_avg_ms": 0.527,
+    "rtt_max_ms": 1.576,
+    "rtt_mdev_ms": 0.37
+   }
+  },
+  "neo-mars-1g:mars->neo": {
+   "utc": "2026-10-17T06:15:07.638+00:00",
+   "hostname": "mars",
+   "peer": "[address]",
+   "resolved": [
+    "[address]"
+   ],
+   "ssh": {
+    "target": "[address]",
+    "ok": true,
+    "client_ip": "[address]",
+    "client_port": 41382,
+    "server_ip": "[address]",
+    "server_port": 22,
+    "peer_hostname": "neo"
+   },
+   "address": "[address]",
+   "dev": "enp9s0",
+   "source": "[address]",
+   "gateway": null,
+   "interface": {
+    "name": "enp9s0",
+    "operstate": "up",
+    "speed_mbps": 1000,
+    "mtu": 1500,
+    "duplex": "full",
+    "medium": "wired"
+   },
+   "interface_addresses": [
+    "[address]",
+    "[address]",
+    "[address]"
+   ],
+   "qdisc": "qdisc fq_codel 0: root refcnt 2 limit 10240p flows 1024 quantum 1514 target 5ms interval 100ms memory_limit 32Mb ecn drop_batch 64",
+   "ping": {
+    "loss_pct": 0.0,
+    "rtt_min_ms": 0.292,
+    "rtt_avg_ms": 0.366,
+    "rtt_max_ms": 0.41,
+    "rtt_mdev_ms": 0.033
+   }
+  }
+ },
+ "problems": [
+  "mars: probe.py is not staged",
+  "mars: corpus.py is not staged",
+  "mars: corpora.json is not staged",
+  "mars: agent.py is not staged",
+  "mars: runner.py is not staged",
+  "mars: xspipe.py is not staged",
+  "mars: measure.py is not staged",
+  "neo: probe.py is not staged",
+  "neo: corpus.py is not staged",
+  "neo: corpora.json is not staged",
+  "neo: agent.py is not staged",
+  "neo: runner.py is not staged",
+  "neo: xspipe.py is not staged",
+  "neo: measure.py is not staged"
+ ],
+ "build": {
+  "revision": "453704a64528c8e1bf0446ad494ba76eb1cf4982",
+  "rev12": "453704a64528-tune",
+  "git": "453704a64528",
+  "tunables": true,
+  "artifacts": {
+   "xs-darwin-arm64": {
+    "sha256": "cdd545a62a7721607c23dd7014fc436e0f513d049a939ae1fd28cab34e97fcf2",
+    "bytes": 3014896,
+    "version": "xs  version 0.1.0  protocol version 4  git 453704a64528  tunables"
+   },
+   "xs-linux-amd64": {
+    "sha256": "21b844fd6d0f556ad2a01fff0eb979df5854569d8b31bf0bcc15976f53fc47c9",
+    "bytes": 6708336,
+    "version": "xs  version 0.1.0  protocol version 4  git 453704a64528  tunables"
+   },
+   "xs-linux-arm64": {
+    "sha256": "c2ef264df77b44f64b2bb2b1949e10231814b6ad2e804cc11614ad24d71e7cd2",
+    "bytes": 6296448,
+    "version": "xs  version 0.1.0  protocol version 4  git 453704a64528  tunables"
+   }
+  },
+  "dockerfile_sha256": "cc806834f16bbd4030ce5b54d1922d7990328c158d926e4bd23bae650d679119",
+  "utc": "2026-10-14T11:45:47+00:00"
+ },
+ "staged": {
+  "mars": {
+   "utc": "2026-10-17T06:15:10.829+00:00",
+   "hostname": "mars",
+   "machine": "x86_64",
+   "system": "Linux",
+   "files": {
+    "xs-453704a64528-tune": "21b844fd6d0f556ad2a01fff0eb979df5854569d8b31bf0bcc15976f53fc47c9",
+    "probe.py": null,
+    "corpus.py": null,
+    "corpora.json": null,
+    "agent.py": null,
+    "runner.py": null,
+    "xspipe.py": null,
+    "measure.py": null
+   },
+   "versions": {
+    "xs-453704a64528-tune": "xs  version 0.1.0  protocol version 4  git 453704a64528  tunables"
+   },
+   "rsync": {
+    "path": "/usr/bin/rsync",
+    "sha256": "cae31f86ebfa8ecf2293a809c8f09d8176c8ead7f192de8caebcc6a1f3f14800",
+    "version": "rsync  version 3.5.0-g471e17dc  protocol version 32"
+   }
+  },
+  "neo": {
+   "utc": "2026-10-17T06:15:11.257+00:00",
+   "hostname": "neo",
+   "machine": "aarch64",
+   "system": "Linux",
+   "files": {
+    "xs-453704a64528-tune": "c2ef264df77b44f64b2bb2b1949e10231814b6ad2e804cc11614ad24d71e7cd2",
+    "probe.py": null,
+    "corpus.py": null,
+    "corpora.json": null,
+    "agent.py": null,
+    "runner.py": null,
+    "xspipe.py": null,
+    "measure.py": null
+   },
+   "versions": {
+    "xs-453704a64528-tune": "xs  version 0.1.0  protocol version 4  git 453704a64528  tunables"
+   },
+   "rsync": {
+    "path": "/usr/bin/rsync",
+    "sha256": "3852336282ee66a98c52966a8bebbf3508980a3ec47e7150f40330ada999980e",
+    "version": "rsync  version 3.4.1  protocol version 32"
+   }
+  }
+ }
+}

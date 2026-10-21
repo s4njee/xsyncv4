@@ -1,0 +1,47 @@
+# LC1 (tree T14): the first backup of psample (21 GB: 711,103 files in 547,983
+# directories) on one Pi 5, from its NVMe home to a Samsung T5 on USB 3, with
+# nothing cached, as after a boot. psample is five times neo's 4 GiB of RAM, so a
+# warm cell would mean nothing. xs and rsync with -aH; GNU cp -a, which keeps the
+# same metadata and hard links; cp -r, which keeps none of it, so its copies are
+# checked on names, types, sizes and contents only; and one tar stream, the
+# yardstick for what a plain pipe of the tree does on this machine.
+id = "LC1-psample-local-baseline"
+kind = "screening"
+hypothesis = "Copying psample locally from NVMe to the T5 with cold caches, xs -aH is faster than rsync -aH and cp -a, and near a single tar stream."
+primary = "durable_s"
+delta = 0.05
+blocks = 4
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+sample_timeout_s = 7200
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-aH"]
+
+[arms.xs]
+tool = "xs"
+rev = "21ae6844ed20"
+flags = ["-aH"]
+
+[arms.cp-a]
+tool = "cp"
+flags = ["-a"]
+
+[arms.cp-r]
+tool = "cp"
+flags = ["-r"]
+verify = "content"
+
+[arms.tar]
+tool = "pipe"
+streams = 1
+
+[matrix]
+link = "neo-local-ssd"
+corpus = ["real-psample"]
+scenario = ["fresh"]
+direction = ["neo>neo-ssd"]
+client = ["receiver"]
+cache = ["cold"]

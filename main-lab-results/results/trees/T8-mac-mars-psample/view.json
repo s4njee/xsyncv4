@@ -1,0 +1,145 @@
+{
+ "id": "T8-mac-mars-psample",
+ "question": "How fast can I transfer the psample tree between the Mac and mars, each way, and is xs faster than rsync -aH?",
+ "start": [
+  "A"
+ ],
+ "startedUtc": "2026-10-18T02:30:03Z",
+ "until": null,
+ "fills": 0,
+ "nodes": [
+  {
+   "id": "A",
+   "kind": "experiment",
+   "experiment": "MA3-psample-bidir",
+   "question": "Over four paired blocks, is xs -aH faster than rsync -aH on the psample tree, fresh, in either direction?",
+   "estimateHours": 0.1,
+   "hypothesis": "On the Mac/mars 10GbE link, xs copies the pinned psample tree faster than rsync -aH, fresh, in both directions.",
+   "design": "screening",
+   "state": "decided",
+   "runs": [
+    {
+     "id": "20261018T023003Z-MA3-psample-bidir",
+     "key": "macmars/MA3-psample-bidir/20261018T023003Z-MA3-psample-bidir",
+     "state": "complete"
+    }
+   ],
+   "decision": "A: xs screens at least 5% faster than rsync -aH: confirm the winner with fresh blocks (real-psample mac\u2192mars xs 3.63\u00d7 [2.24, 5.87]; real-psample mars\u2192mac xs 1.28\u00d7 [0.78, 2.13])",
+   "decidedUtc": "2026-10-18T04:54:34Z",
+   "start": true,
+   "promote": null
+  },
+  {
+   "id": "A~end1",
+   "kind": "end",
+   "experiment": null,
+   "question": null,
+   "estimateHours": null,
+   "hypothesis": "no xs gain on psample: rsync -aH is the fastest here, and that answers the question",
+   "design": null,
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "Ac",
+   "kind": "confirm",
+   "experiment": "MA3-psample-confirm",
+   "question": "Does xs repeat its psample gain with 12 fresh blocks, and is the benefit direction-specific?",
+   "estimateHours": 0.2,
+   "hypothesis": "xs is more than 5% faster than rsync on real-psample (from MA3-psample-bidir, confirmed with fresh blocks).",
+   "design": "confirmatory",
+   "state": "decided",
+   "runs": [
+    {
+     "id": "20261018T045434Z-MA3-psample-confirm",
+     "key": "macmars/MA3-psample-confirm/20261018T045434Z-MA3-psample-confirm",
+     "state": "complete"
+    }
+   ],
+   "decision": "Ac: done (1 run)",
+   "decidedUtc": "2026-10-18T13:26:49Z",
+   "start": false,
+   "promote": "A"
+  }
+ ],
+ "edges": [
+  {
+   "from": "A",
+   "to": "Ac",
+   "label": "xs >= 1.05x rsync",
+   "taken": true
+  },
+  {
+   "from": "A",
+   "to": "A~end1",
+   "label": "rsync fastest",
+   "taken": false
+  }
+ ],
+ "decisions": [
+  {
+   "utc": "2026-10-18T13:26:49Z",
+   "node": "Ac",
+   "kind": "decision",
+   "text": "Ac: done (1 run)"
+  },
+  {
+   "utc": "2026-10-18T04:54:35Z",
+   "node": "Ac",
+   "kind": "queued",
+   "text": "Ac queued on mac (48 samples): after A: xs screens at least 5% faster than rsync -aH: confirm the winner with fresh blocks; confirming xs against rsync on real-psample"
+  },
+  {
+   "utc": "2026-10-18T04:54:34Z",
+   "node": "A",
+   "kind": "decision",
+   "text": "A: xs screens at least 5% faster than rsync -aH: confirm the winner with fresh blocks (real-psample mac\u2192mars xs 3.63\u00d7 [2.24, 5.87]; real-psample mars\u2192mac xs 1.28\u00d7 [0.78, 2.13]) \u2192 Ac"
+  },
+  {
+   "utc": "2026-10-18T02:30:04Z",
+   "node": "A",
+   "kind": "queued",
+   "text": "A queued on mac (16 samples): start of the tree"
+  },
+  {
+   "utc": "2026-10-17T18:55:28Z",
+   "node": "A",
+   "kind": "recovery",
+   "text": "Stopped stalled openrsync; GNU rsync is pinned and every arm preserves manifest hard links. Old run has zero valid blocks."
+  },
+  {
+   "utc": "2026-10-17T18:55:28Z",
+   "node": "A",
+   "kind": "queued",
+   "text": "A: its run was cut short with 0 of 6 blocks per cell; continuing with 6 more"
+  },
+  {
+   "utc": "2026-10-17T16:50:20Z",
+   "node": "A",
+   "kind": "queued",
+   "text": "A queued on mac (48 samples): start of the tree"
+  },
+  {
+   "utc": "2026-10-17T16:46:26Z",
+   "node": "A",
+   "kind": "warning",
+   "text": "A: could not queue; will try again"
+  },
+  {
+   "utc": "2026-10-17T16:41:26Z",
+   "node": "A",
+   "kind": "warning",
+   "text": "A: could not queue; will try again"
+  },
+  {
+   "utc": "2026-10-17T16:41:26Z",
+   "node": "A",
+   "kind": "warning",
+   "text": "A: could not queue; will try again"
+  }
+ ]
+}

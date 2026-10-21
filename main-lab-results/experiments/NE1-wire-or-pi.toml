@@ -1,0 +1,33 @@
+# NE1 (tree T5): how much of the gigabit wire between the Pi and freya do xs and
+# rsync use, on large and on mixed trees, in each direction? K1 found each
+# receiver can create small files about three times faster than xs delivers
+# them, so for small files this link's ceiling is the wire, not a disk; the open
+# case is byte-bound, where the Pi's four cores and its ssh share the sender
+# (T1g found the contention). This measures the rate the tree branches on.
+id = "NE1-wire-or-pi"
+kind = "screening"
+hypothesis = "xs fills the gigabit wire on large trees in both directions, and falls short only where the Pi's four-core sender is CPU-bound."
+primary = "durable_s"
+delta = 0.03
+blocks = 6
+control = "xs"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.xs]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-a"]
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[matrix]
+link = "lan"
+corpus = ["large-text", "mixed-bimodal"]
+scenario = ["fresh"]
+direction = ["neo>freya", "freya>neo"]
+client = ["sender"]
+cache = ["warm"]

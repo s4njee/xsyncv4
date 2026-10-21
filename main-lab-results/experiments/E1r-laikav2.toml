@@ -1,0 +1,31 @@
+# E1r, laikav2: the baseline comparison on a real mixed tree: 54,691 files,
+# 42.2 GiB, a fifth of the bytes hard links, so both tools get -H. A fresh
+# copy takes about seven minutes at wire rate, so there are four blocks and
+# no no-op cell: estimates, not verdicts. It is far larger than neo's memory,
+# so "warm" here means only that the source was read once just before.
+id = "E1r-laikav2"
+kind = "screening"
+hypothesis = "On a real 42 GiB mixed tree, xs -aH is within a few percent of rsync -aH, as on the synthetic mixed corpora."
+primary = "durable_s"
+delta = 0.03
+blocks = 4
+control = "rsync"
+verify = "first-last"
+sample_timeout_s = 7200
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-aH"]
+
+[arms.xs]
+tool = "xs"
+rev = "e1f05b518049"
+flags = ["-aH"]
+
+[matrix]
+link = "lan"
+corpus = ["real-laikav2"]
+scenario = ["fresh"]
+direction = ["neo>freya", "freya>neo"]
+client = ["sender"]
+cache = ["warm"]

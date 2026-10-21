@@ -1,0 +1,22 @@
+{
+ "experiment": "AP10210142-L2R6-local-psample-cpu2",
+ "kind": "screening",
+ "hypothesis": "With 2 CPUs, xs -a -j4 is more than 15% slower than rsync -a on a fresh cold local real-psample copy, which would point at CPU contention among its workers.",
+ "primary": "durable_s",
+ "control": "xs-j4",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261021T014239Z-AP10210142-L2R6-local-psample-cpu2"
+ ],
+ "spec_sha256": [
+  "4a906006f8d7966d5f99f0255fc7948c7eea9245d2add5f004bfa1b828df0672"
+ ],
+ "valid_blocks": 0,
+ "void_attempts": 16,
+ "void_reasons": [
+  "rsync: the destination does not match the corpus manifest: DIFFERS github/acritty/target/debug/incremental/alacritty-0apbfib5r6rer/s-hnarn3fo0v-1bemmqn-embc6e4s",
+  "xs-j4: the destination does not match the corpus manifest: DIFFERS github/acritty/target/debug/incremental/alacritty-0apbfib5r6rer/s-hnarn3fo0v-1bemmqn-embc6e4s"
+ ]
+}

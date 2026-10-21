@@ -1,0 +1,93 @@
+# T5: on the gigabit wire between neo (a Raspberry Pi 5) and freya, is xs held
+# back by the link or by the Pi's sending, and what should the small-file
+# default be? K1 found each receiver could create small files about three times
+# faster than xs delivered them, so small files already fill the wire and cannot
+# be sped up; T1g found the four-core sender loses time to contention on
+# byte-bound copies. The first node measures the rate and branches on it: a full
+# wire means only the default policy is left, a short wire means tune the Pi's
+# sender. Winners are confirmed with fresh blocks. Until Sunday 07:00 Central,
+# once its branches end, it repeats a short replicate (F1a).
+id = "T5-neo-freya-wire-or-pi"
+question = "On the gigabit wire between the Pi and freya, is xs limited by the link or by the Pi's sending, and what should the default be?"
+start = ["B"]
+until = "2026-10-18T12:00Z"
+fill = ["F1a"]
+
+[nodes.B]
+spec = "NE1-wire-or-pi.toml"
+front = true
+question = "How much of the gigabit wire do xs and rsync use on large and mixed trees, each way?"
+
+  [[nodes.B.branch]]
+  when = { arm = "xs", corpus = "large-text", gbps_at_least = 0.80, all = true }
+  next = ["S"]
+  note = "xs fills the wire both ways on large files: the link is the limit, and only the small-file default is left"
+  label = "wire ≥ 0.80 Gb/s both ways"
+
+  [[nodes.B.branch]]
+  otherwise = true
+  next = ["C"]
+  note = "xs leaves the wire short on large files: the Pi's four-core sending is CPU-bound, tune it first"
+  label = "wire short"
+
+[nodes.C]
+spec = "T1g-send-cores.toml"
+question = "Do two or three sending workers on the four-core Pi reach the wire without losing small files?"
+
+  [[nodes.C.branch]]
+  when = { verdict = "faster" }
+  next = ["Cc", "S"]
+  note = "a sender worker count was faster: confirm it, then settle the default"
+  label = "an arm was faster"
+
+  [[nodes.C.branch]]
+  otherwise = true
+  next = ["S"]
+  note = "no sender worker count beat the default: the Pi's sender is CPU-bound, a code candidate (E5)"
+  label = "nothing faster"
+
+[nodes.Cc]
+promote = "C"
+id = "T1g-send-cores-confirm"
+blocks = 12
+question = "Does the winning sender worker count hold up with fresh blocks?"
+
+[nodes.S]
+spec = "D9-lan-best-default.toml"
+question = "Is xs's best small-file setting safe as the default for mixed trees?"
+
+  [[nodes.S.branch]]
+  when = { arm = "xs-best", verdict = "slower" }
+  next = ["Sb", "N"]
+  note = "xs's best small-file setting was slower than its default somewhere: split it"
+  label = "slower somewhere"
+
+  [[nodes.S.branch]]
+  otherwise = true
+  next = ["N"]
+  note = "xs's best setting was nowhere slower than its default"
+  label = "never slower"
+
+[nodes.Sb]
+spec = "D9b-lan-best-split.toml"
+question = "Which half of the best setting costs time: four workers or --no-atomic?"
+
+[nodes.N]
+spec = "D10-lan-noop-best.toml"
+question = "Does the best setting also speed up no-op copies of small trees?"
+
+  [[nodes.N.branch]]
+  when = { arm = "xs-best", verdict = "faster" }
+  next = []
+  note = "xs's best setting was faster on no-op copies too"
+  label = "faster on no-ops"
+
+  [[nodes.N.branch]]
+  otherwise = true
+  next = []
+  note = "xs's best setting did not speed up no-op copies"
+  label = "no gain"
+
+[nodes.F1a]
+spec = "F1a-lan-replicate.toml"
+question = "Do the wire and sender results hold steady over the weekend?"

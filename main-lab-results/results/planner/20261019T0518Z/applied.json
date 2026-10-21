@@ -1,0 +1,31 @@
+{
+ "summary": "This plan adds no experiments. Both runners, mac and neo-ssd, are unreachable, and the evidence has no build or corpus inventory for the mac, neo or neo-ssd hosts. No experiment can be shown to meet the gate's build and corpus rules. Open questions remain for when the runners report again: confirming xs-recv4 on mac/mars, the T13 pull onto the Mac, and the T16 local copy against rsync.",
+ "window_end": "2026-10-19T11:19Z",
+ "runners": [
+  {
+   "runner": "mac",
+   "rationale": "No experiments this window. The mac runner is marked unreachable, so neither its current run nor its queued hours are known. Host mac reports no builds or corpora, so no xs build or corpus is confirmed on both hosts of mac-mars-10g. Candidates for when it returns: an 8-block confirmation that xs-recv4 is faster on tiny-one and small-flat no-op cells, rsync's 0.54 ratio on the small-deep no-op pull into the Mac (rsync took about half of xs's time), and T13's MA7 pull work, which is already queued.",
+   "accepted": [],
+   "rejected": [
+    {
+     "id": "*",
+     "reason": "mac is not a running runner"
+    }
+   ],
+   "tree": null
+  },
+  {
+   "runner": "neo-ssd",
+   "rationale": "No experiments this window. The neo-ssd runner is marked unreachable, and hosts neo and neo-ssd report no builds or corpora, so no experiment on neo-local-ssd can pass the build and corpus checks. When it returns, its existing tree work comes first: T16's LC7 test of eager writeback and --no-atomic, and T14's queued LC3 and LC4. Screening so far leaves xs about 5 to 10% behind rsync on this local copy.",
+   "accepted": [],
+   "rejected": [
+    {
+     "id": "*",
+     "reason": "neo-ssd is not a running runner"
+    }
+   ],
+   "tree": null
+  }
+ ],
+ "conductor": "B: could not queue; will try again (neo: cannot create ~/benchmarks/xsyncv4/lab/lib/736894f6f725.incoming: Connection timed out during banner exchange\nConnection to UNKNOWN port 65535 timed out)\n"
+}

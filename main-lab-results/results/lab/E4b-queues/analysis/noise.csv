@@ -1,0 +1,17 @@
+experiment,kind,cell_id,corpus,scenario,sender,receiver,client,link,cache,arm,n_blocks,sigma_d,blocks_for_2pct,blocks_for_3pct,blocks_for_5pct,blocks_for_10pct,blocks_equivalent_2pct,blocks_equivalent_3pct,blocks_equivalent_5pct,blocks_equivalent_10pct
+E4b-queues,screening,mixed-bimodal.fresh.freya-neo.sender.warm,mixed-bimodal,fresh,freya,neo,sender,lan,warm,recvq4m,10,0.004069241546590823,8,8,8,8,8,8,8,8
+E4b-queues,screening,mixed-bimodal.fresh.freya-neo.sender.warm,mixed-bimodal,fresh,freya,neo,sender,lan,warm,recvq64m,10,0.0029233013883126257,8,8,8,8,8,8,8,8
+E4b-queues,screening,mixed-bimodal.fresh.freya-neo.sender.warm,mixed-bimodal,fresh,freya,neo,sender,lan,warm,sendq12m,10,0.002991069698712221,8,8,8,8,8,8,8,8
+E4b-queues,screening,mixed-bimodal.fresh.freya-neo.sender.warm,mixed-bimodal,fresh,freya,neo,sender,lan,warm,sendq192m,10,0.007220330319821667,8,8,8,8,8,8,8,8
+E4b-queues,screening,mixed-bimodal.fresh.neo-freya.sender.warm,mixed-bimodal,fresh,neo,freya,sender,lan,warm,recvq4m,10,0.010800528434703083,8,8,8,8,8,8,8,8
+E4b-queues,screening,mixed-bimodal.fresh.neo-freya.sender.warm,mixed-bimodal,fresh,neo,freya,sender,lan,warm,recvq64m,10,0.010934873474898146,8,8,8,8,8,8,8,8
+E4b-queues,screening,mixed-bimodal.fresh.neo-freya.sender.warm,mixed-bimodal,fresh,neo,freya,sender,lan,warm,sendq12m,10,0.01245382031789185,8,8,8,8,8,8,8,8
+E4b-queues,screening,mixed-bimodal.fresh.neo-freya.sender.warm,mixed-bimodal,fresh,neo,freya,sender,lan,warm,sendq192m,10,0.01973401269234824,10,8,8,8,13,8,8,8
+E4b-queues,screening,small-real.fresh.freya-neo.sender.warm,small-real,fresh,freya,neo,sender,lan,warm,recvq4m,10,0.08780514838934297,157,72,28,9,209,95,37,11
+E4b-queues,screening,small-real.fresh.freya-neo.sender.warm,small-real,fresh,freya,neo,sender,lan,warm,recvq64m,10,0.07830657552259479,125,58,23,8,167,76,30,10
+E4b-queues,screening,small-real.fresh.freya-neo.sender.warm,small-real,fresh,freya,neo,sender,lan,warm,sendq12m,10,0.07758419987844822,123,57,22,8,164,75,29,9
+E4b-queues,screening,small-real.fresh.freya-neo.sender.warm,small-real,fresh,freya,neo,sender,lan,warm,sendq192m,10,0.07253529853767332,108,50,20,8,143,66,26,9
+E4b-queues,screening,small-real.fresh.neo-freya.sender.warm,small-real,fresh,neo,freya,sender,lan,warm,recvq4m,10,0.0414018220405872,37,18,8,8,48,23,10,8
+E4b-queues,screening,small-real.fresh.neo-freya.sender.warm,small-real,fresh,neo,freya,sender,lan,warm,recvq64m,10,0.15559474735116646,487,220,82,23,651,294,109,31
+E4b-queues,screening,small-real.fresh.neo-freya.sender.warm,small-real,fresh,neo,freya,sender,lan,warm,sendq12m,10,0.1751020723422284,615,278,103,29,824,371,138,38
+E4b-queues,screening,small-real.fresh.neo-freya.sender.warm,small-real,fresh,neo,freya,sender,lan,warm,sendq192m,10,0.12346525292089933,307,139,53,16,411,186,70,20

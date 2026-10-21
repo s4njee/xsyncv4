@@ -1,0 +1,21 @@
+{
+ "experiment": "E1r3-laikav2",
+ "kind": "confirmatory",
+ "hypothesis": "Once xs -aH sends linked data once, it is within a few percent of rsync -aH on the real 42 GiB tree.",
+ "primary": "durable_s",
+ "control": "rsync",
+ "delta": 0.03,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261014T220738Z-E1r3-laikav2"
+ ],
+ "spec_sha256": [
+  "82f8d5b0ce8737385153f7060f72bd2faaf92ce398fa14a0b4e56446ca0ffd80"
+ ],
+ "valid_blocks": 5,
+ "void_attempts": 1,
+ "void_reasons": [
+  "stopped"
+ ]
+}

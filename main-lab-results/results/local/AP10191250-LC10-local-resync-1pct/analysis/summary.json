@@ -1,0 +1,22 @@
+{
+ "experiment": "AP10191250-LC10-local-resync-1pct",
+ "kind": "screening",
+ "hypothesis": "xs -aH finishes the 1% update re-sync of psample onto the T5 faster than rsync -aH, as it did for the no-op re-sync (time ratio 0.52).",
+ "primary": "durable_s",
+ "control": "rsync",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261019T125034Z-AP10191250-LC10-local-resync-1pct"
+ ],
+ "spec_sha256": [
+  "87d548f03cc7296b630fd7ccf85d0e85c743a964e9d6d1f7bf123deb9823c138"
+ ],
+ "valid_blocks": 0,
+ "void_attempts": 12,
+ "void_reasons": [
+  "rsync: harness error: neo-ssd: `python3 /mnt/ssd/xsbench/lib/736894f6f725/corpus.py stale /mnt/ssd/xsbench/work/20261019T125034Z-AP10191250-LC10-local-resync-1p",
+  "xs: harness error: neo-ssd: `python3 /mnt/ssd/xsbench/lib/736894f6f725/corpus.py stale /mnt/ssd/xsbench/work/20261019T125034Z-AP10191250-LC10-local-resync-1pct/"
+ ]
+}

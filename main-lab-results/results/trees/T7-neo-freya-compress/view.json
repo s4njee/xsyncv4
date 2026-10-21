@@ -1,0 +1,308 @@
+{
+ "id": "T7-neo-freya-compress",
+ "question": "On the gigabit wire between the Pi and freya, does compression pay, which level, and does it cost on data that will not compress?",
+ "start": [
+  "W"
+ ],
+ "startedUtc": "2026-10-17T16:16:16Z",
+ "until": "2026-10-18T12:00Z",
+ "fills": 6,
+ "nodes": [
+  {
+   "id": "W",
+   "kind": "experiment",
+   "experiment": "Z3-1g-compress",
+   "question": "On gigabit, does xs -z beat the wire and beat rsync -z, even from the Pi?",
+   "estimateHours": 0.6,
+   "hypothesis": "On a gigabit link, xs -z delivers text-like data faster than the link, and faster than rsync -z, even from the Pi.",
+   "design": "screening",
+   "state": "decided",
+   "runs": [
+    {
+     "id": "20261016T162239Z-Z3-1g-compress",
+     "key": "lab/Z3-1g-compress/20261016T162239Z-Z3-1g-compress",
+     "state": "stopped"
+    },
+    {
+     "id": "20261017T161616Z-Z3-1g-compress",
+     "key": "lab/Z3-1g-compress/20261017T161616Z-Z3-1g-compress",
+     "state": "complete"
+    }
+   ],
+   "decision": "W: xs -z carries more than the wire both ways on text: only its cost on incompressible data is left to settle (large-text freya\u2192neo xs-z 2.26 Gb/s; large-text neo\u2192freya xs-z 2.15 Gb/s)",
+   "decidedUtc": "2026-10-17T16:51:08Z",
+   "start": true,
+   "promote": null
+  },
+  {
+   "id": "P",
+   "kind": "experiment",
+   "experiment": "N1g-pi-compress",
+   "question": "Can a cheaper level or codec let the Pi carry a text tree past the wire?",
+   "estimateHours": 0.6,
+   "hypothesis": "A cheaper zstd level or fast level lets the Pi carry a compressible tree past the gigabit wire, where adaptive -z falls short.",
+   "design": "screening",
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "P~end1",
+   "kind": "end",
+   "experiment": null,
+   "question": null,
+   "estimateHours": null,
+   "hypothesis": "no level or codec beat adaptive -z from the Pi: the Pi's cores are the limit, not the level",
+   "design": null,
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "Pc",
+   "kind": "confirm",
+   "experiment": "N1g-pi-compress-confirm",
+   "question": "Does the faster level or codec hold up with fresh blocks?",
+   "estimateHours": 0.4,
+   "hypothesis": "Confirms the fastest arm of P with 12 fresh blocks, if it had one.",
+   "design": "confirmatory",
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": "P"
+  },
+  {
+   "id": "C",
+   "kind": "experiment",
+   "experiment": "N1g-compress-cost",
+   "question": "Does -z cost time on a tree that will not compress?",
+   "estimateHours": 0.4,
+   "hypothesis": "On a tree that will not compress, xs -z costs time against xs -a, and level 1 less than adaptive.",
+   "design": "screening",
+   "state": "decided",
+   "runs": [
+    {
+     "id": "20261017T165108Z-N1g-compress-cost",
+     "key": "lab/N1g-compress-cost/20261017T165108Z-N1g-compress-cost",
+     "state": "failed"
+    },
+    {
+     "id": "20261017T185524Z-N1g-compress-cost",
+     "key": "lab/N1g-compress-cost/20261017T185524Z-N1g-compress-cost",
+     "state": "complete"
+    }
+   ],
+   "decision": "C: compression is harmless on incompressible data here",
+   "decidedUtc": "2026-10-17T19:41:43Z",
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "C~end0",
+   "kind": "end",
+   "experiment": null,
+   "question": null,
+   "estimateHours": null,
+   "hypothesis": "adaptive -z costs on incompressible data: the sample-and-skip path must stay sharp (a code candidate)",
+   "design": null,
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "C~end1",
+   "kind": "end",
+   "experiment": null,
+   "question": null,
+   "estimateHours": null,
+   "hypothesis": "compression is harmless on incompressible data here",
+   "design": null,
+   "state": "decided",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "F1a",
+   "kind": "fill",
+   "experiment": "F1a-lan-replicate",
+   "question": "Do the compression results hold steady over the weekend?",
+   "estimateHours": 0.4,
+   "hypothesis": "xs's best setting with -z stays ahead of rsync -az from run to run.",
+   "design": "screening",
+   "state": "held",
+   "runs": [
+    {
+     "id": "20261017T184701Z-F1a-lan-replicate",
+     "key": "lab/F1a-lan-replicate/20261017T184701Z-F1a-lan-replicate",
+     "state": "complete"
+    },
+    {
+     "id": "20261017T204111Z-F1a-lan-replicate",
+     "key": "lab/F1a-lan-replicate/20261017T204111Z-F1a-lan-replicate",
+     "state": "complete"
+    },
+    {
+     "id": "20261017T211342Z-F1a-lan-replicate",
+     "key": "lab/F1a-lan-replicate/20261017T211342Z-F1a-lan-replicate",
+     "state": "complete"
+    },
+    {
+     "id": "20261017T214431Z-F1a-lan-replicate",
+     "key": "lab/F1a-lan-replicate/20261017T214431Z-F1a-lan-replicate",
+     "state": "complete"
+    },
+    {
+     "id": "20261017T223055Z-F1a-lan-replicate",
+     "key": "lab/F1a-lan-replicate/20261017T223055Z-F1a-lan-replicate",
+     "state": "complete"
+    },
+    {
+     "id": "20261017T230123Z-F1a-lan-replicate",
+     "key": "lab/F1a-lan-replicate/20261017T230123Z-F1a-lan-replicate",
+     "state": "stopped"
+    },
+    {
+     "id": "20261017T230953Z-F1a-lan-replicate",
+     "key": "lab/F1a-lan-replicate/20261017T230953Z-F1a-lan-replicate",
+     "state": null
+    }
+   ],
+   "decision": "Retired after the USB 2.5 Gb/s adapter change; old gigabit samples are preserved separately.",
+   "decidedUtc": "2026-10-17T23:52:25Z",
+   "start": false,
+   "promote": null
+  }
+ ],
+ "edges": [
+  {
+   "from": "W",
+   "to": "C",
+   "label": "beats the wire both ways",
+   "taken": true
+  },
+  {
+   "from": "W",
+   "to": "P",
+   "label": "not both ways",
+   "taken": false
+  },
+  {
+   "from": "W",
+   "to": "C",
+   "label": "not both ways",
+   "taken": false
+  },
+  {
+   "from": "P",
+   "to": "Pc",
+   "label": "an arm was faster",
+   "taken": null
+  },
+  {
+   "from": "P",
+   "to": "P~end1",
+   "label": "nothing faster",
+   "taken": null
+  },
+  {
+   "from": "C",
+   "to": "C~end0",
+   "label": "costs on incompressible",
+   "taken": false
+  },
+  {
+   "from": "C",
+   "to": "C~end1",
+   "label": "harmless",
+   "taken": true
+  }
+ ],
+ "decisions": [
+  {
+   "utc": "2026-10-17T23:09:55Z",
+   "node": "F1a",
+   "kind": "queued",
+   "text": "F1a: its run was cut short with 0 of 3 blocks per cell; continuing with 3 more"
+  },
+  {
+   "utc": "2026-10-17T23:01:25Z",
+   "node": "F1a",
+   "kind": "queued",
+   "text": "F1a queued on neo (54 samples): every branch has ended; filling until 2026-10-18T12:00Z (fill 6)"
+  },
+  {
+   "utc": "2026-10-17T23:01:23Z",
+   "node": "F1a",
+   "kind": "decision",
+   "text": "F1a: done (5 runs)"
+  },
+  {
+   "utc": "2026-10-17T22:30:57Z",
+   "node": "F1a",
+   "kind": "queued",
+   "text": "F1a queued on neo (54 samples): every branch has ended; filling until 2026-10-18T12:00Z (fill 5)"
+  },
+  {
+   "utc": "2026-10-17T22:30:55Z",
+   "node": "F1a",
+   "kind": "decision",
+   "text": "F1a: done (4 runs)"
+  },
+  {
+   "utc": "2026-10-17T21:44:37Z",
+   "node": "F1a",
+   "kind": "queued",
+   "text": "F1a queued on neo (54 samples): every branch has ended; filling until 2026-10-18T12:00Z (fill 4)"
+  },
+  {
+   "utc": "2026-10-17T21:44:31Z",
+   "node": "F1a",
+   "kind": "decision",
+   "text": "F1a: done (3 runs)"
+  },
+  {
+   "utc": "2026-10-17T21:13:45Z",
+   "node": "F1a",
+   "kind": "queued",
+   "text": "F1a queued on neo (54 samples): every branch has ended; filling until 2026-10-18T12:00Z (fill 3)"
+  },
+  {
+   "utc": "2026-10-17T21:13:42Z",
+   "node": "F1a",
+   "kind": "decision",
+   "text": "F1a: done (2 runs)"
+  },
+  {
+   "utc": "2026-10-17T20:41:14Z",
+   "node": "F1a",
+   "kind": "queued",
+   "text": "F1a queued on neo (54 samples): every branch has ended; filling until 2026-10-18T12:00Z (fill 2)"
+  },
+  {
+   "utc": "2026-10-17T20:41:11Z",
+   "node": "F1a",
+   "kind": "decision",
+   "text": "F1a: done (1 run)"
+  },
+  {
+   "utc": "2026-10-17T19:41:43Z",
+   "node": "C",
+   "kind": "decision",
+   "text": "C: compression is harmless on incompressible data here \u2192 end of this branch"
+  }
+ ]
+}

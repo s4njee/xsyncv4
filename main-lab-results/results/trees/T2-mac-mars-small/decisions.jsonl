@@ -1,0 +1,4 @@
+{"utc": "2026-10-16T23:54:23Z", "tree": "T2-mac-mars-small", "node": "P3b", "kind": "adopted", "text": "P3b: following 20261016T223339Z-P3b-hdd-writeback"}
+{"utc": "2026-10-17T00:55:44Z", "tree": "T2-mac-mars-small", "node": "P3b", "kind": "decision", "text": "P3b: eager writeback did not help on the hard drive \u2192 D1, D5", "next": ["D1", "D5"]}
+{"utc": "2026-10-17T00:55:45Z", "tree": "T2-mac-mars-small", "node": "D1", "kind": "queued", "text": "D1 queued on mac (144 samples): after P3b: eager writeback did not help on the hard drive", "run": "20261017T005544Z-D1-mac-sender-knobs"}
+{"utc": "2026-10-17T00:55:46Z", "tree": "T2-mac-mars-small", "node": "D5", "kind": "queued", "text": "D5 queued on mac (96 samples): after P3b: eager writeback did not help on the hard drive", "run": "20261017T005545Z-D5-hdd-recv-jobs"}

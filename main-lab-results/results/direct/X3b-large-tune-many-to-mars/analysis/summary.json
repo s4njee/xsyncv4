@@ -1,0 +1,19 @@
+{
+ "experiment": "X3b-large-tune-many-to-mars",
+ "kind": "screening",
+ "hypothesis": "The settings that help one large file also help several, or matter less there.",
+ "primary": "durable_s",
+ "control": "xs",
+ "delta": 0.03,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261015T131341Z-X3b-large-tune-many-to-mars"
+ ],
+ "spec_sha256": [
+  "48ca49b7dca859f523aeed91a9ac650acc0e55b03521ecccd685c2c20e35f4f3"
+ ],
+ "valid_blocks": 12,
+ "void_attempts": 0,
+ "void_reasons": []
+}

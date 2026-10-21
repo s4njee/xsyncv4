@@ -1,0 +1,59 @@
+# T1b: the transport write path, tuning target T1. The Pi sending bytes is 3
+# to 4% behind rsync, and under strace the sender feeds ssh through a 64 KiB
+# pipe in 64 KiB writes, a third of which fail with EAGAIN. Arms enlarge the
+# pipe, then the writes; one gives only the sender a single worker, which
+# -j1 could not do without also taking the receiver's. Byte-bound cells only.
+id = "T1b-write-path"
+kind = "screening"
+hypothesis = "A larger pipe, larger writes or one sending worker bring xs level with rsync on byte-bound copies from neo, at no cost from freya."
+primary = "wall_s"
+delta = 0.02
+blocks = 10
+control = "xs"
+verify = "first-last"
+
+[arms.xs]
+tool = "xs"
+rev = "ddefa041364e-tune"
+flags = ["-a"]
+metrics = true
+
+[arms.pipe1m]
+tool = "xs"
+rev = "ddefa041364e-tune"
+flags = ["-a"]
+tune = "pipe_size=1048576"
+metrics = true
+
+[arms.chunk256k]
+tool = "xs"
+rev = "ddefa041364e-tune"
+flags = ["-a"]
+tune = "pipe_size=1048576,write_chunk=262144"
+metrics = true
+
+[arms.chunk1m]
+tool = "xs"
+rev = "ddefa041364e-tune"
+flags = ["-a"]
+tune = "pipe_size=1048576,write_chunk=1048576"
+metrics = true
+
+[arms.send1]
+tool = "xs"
+rev = "ddefa041364e-tune"
+flags = ["-a"]
+tune = { sender = "jobs=1" }
+metrics = true
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[matrix]
+link = "lan"
+corpus = ["mixed-bimodal", "mixed-threshold"]
+scenario = ["fresh"]
+direction = ["neo>freya", "freya>neo"]
+client = ["sender"]
+cache = ["warm"]

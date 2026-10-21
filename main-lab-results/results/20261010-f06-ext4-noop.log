@@ -1,0 +1,18 @@
+ext4-f7 push noop rsync 1/4: 99.068s verified
+ext4-f7 push noop xs 1/4: 41.938s verified
+ext4-f7 push noop xs 2/4: 42.195s verified
+ext4-f7 push noop rsync 2/4: 100.701s verified
+ext4-f7 push noop rsync 3/4: 101.856s verified
+ext4-f7 push noop xs 3/4: 43.932s verified
+ext4-f7 push noop xs 4/4: 40.894s verified
+ext4-f7 push noop rsync 4/4: 98.385s verified
+[
+  {
+    "scenario": "noop",
+    "median_seconds": {
+      "rsync": 99.88446748815477,
+      "xs": 42.06649858993478
+    },
+    "xs_speedup": 2.3744421531687463
+  }
+]

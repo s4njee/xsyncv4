@@ -1,0 +1,19 @@
+{
+ "experiment": "W0b-noise",
+ "kind": "screening",
+ "hypothesis": "On the Wi-Fi pair two identical arms are never called different, and sigma_d is within a factor of three of the wired pair's.",
+ "primary": "wall_s",
+ "control": "xs",
+ "delta": 0.03,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261014T112841Z-W0b-noise"
+ ],
+ "spec_sha256": [
+  "390f780d0365a535146291bd603f63e4af229befbf79fd1ce20178b94c339590"
+ ],
+ "valid_blocks": 160,
+ "void_attempts": 0,
+ "void_reasons": []
+}

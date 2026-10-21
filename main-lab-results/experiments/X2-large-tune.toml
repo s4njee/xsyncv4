@@ -1,0 +1,60 @@
+# X2: tuning xs for one large file at about 3 Gb/s (the ISO, both directions).
+# An explicit -j lets the sender read one file in parallel ranges, which the
+# default never does; larger DATA blocks, larger transport writes and pipes,
+# and deeper queues are the other candidates. Tunables build with metrics.
+id = "X2-large-tune"
+kind = "screening"
+hypothesis = "One of these settings brings xs closer to the link rate on a single large file."
+primary = "durable_s"
+delta = 0.03
+blocks = 8
+control = "xs"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.xs]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a"]
+metrics = true
+
+[arms.j4]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a", "-j4"]
+metrics = true
+
+[arms.j8]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a", "-j8"]
+metrics = true
+
+[arms.block4m]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a"]
+tune = "block_target=4194304"
+metrics = true
+
+[arms.chunk1m]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a"]
+tune = "write_chunk=1048576,pipe_size=1048576"
+metrics = true
+
+[arms.queues]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a"]
+tune = "send_queue=201326592,recv_queue=67108864"
+metrics = true
+
+[matrix]
+link = "mac-mars-direct"
+corpus = ["large-one"]
+scenario = ["fresh"]
+direction = ["mac>mars", "mars>mac"]
+client = ["initiator"]
+cache = ["warm"]

@@ -1,0 +1,87 @@
+# T14: local backups of psample on one Pi 5, from its NVMe home to a Samsung T5 on
+# USB 3, cold, as a first backup after a boot. A maps the tools (xs, rsync, cp -a,
+# cp -r and one tar stream); B, C and D then ask what xs can change: its worker
+# count, how soon the copy is on the drive, and re-syncing. Each winner is
+# confirmed with fresh blocks. Runs on neo-ssd's own runner, beside the Mac's.
+id = "T14-neo-local-psample"
+question = "How fast can a Pi 5 back up the 21 GB psample tree from its NVMe drive to a Samsung T5 over USB, and what limits it?"
+start = ["A"]
+
+[nodes.A]
+spec = "LC1-psample-local-baseline.toml"
+question = "On a first backup with nothing cached, how much faster is xs -aH than rsync -aH, cp -a and cp -r, and how close does any tool come to one tar stream?"
+
+  [[nodes.A.branch]]
+  when = { arm = "xs", speed_below = 1.0 }
+  next = ["B", "C", "D"]
+  label = "xs behind rsync"
+  note = "xs is not ahead of rsync on a local copy: look for what holds it back (workers, flushing) and still check re-syncs"
+
+  [[nodes.A.branch]]
+  otherwise = true
+  next = ["B", "C", "D"]
+  label = "xs ahead of rsync"
+  note = "xs leads rsync locally: see whether its workers or flushing take it further, and check re-syncs"
+
+[nodes.B]
+spec = "LC2-psample-local-workers.toml"
+question = "With four cores and one USB drive, does xs copy psample faster with 1, 2, 8 or 16 workers than with its default 4?"
+
+  [[nodes.B.branch]]
+  when = { arm = "xs-j*", speed_at_least = 1.05 }
+  next = ["Bc"]
+  label = "a worker count >= 1.05x"
+  note = "another worker count beats the default: confirm it with fresh blocks"
+
+  [[nodes.B.branch]]
+  otherwise = true
+  next = []
+  label = "default is right"
+  note = "no worker count beats the default four on this Pi and drive"
+
+[nodes.Bc]
+promote = "B"
+id = "LC2-workers-confirm"
+blocks = 12
+arm = "xs-j*"
+question = "Does the faster worker count hold up with 12 fresh blocks?"
+
+[nodes.C]
+spec = "LC3-psample-local-durable.toml"
+question = "How long after the copy exits is psample safely on the T5, and does eager writeback or skipping the temp-file rename shorten it?"
+
+  [[nodes.C.branch]]
+  when = { arm = "xs-*", speed_at_least = 1.05 }
+  next = ["Cc"]
+  label = "xs setting >= 1.05x"
+  note = "eager writeback or --no-atomic gets the backup onto the drive sooner: confirm it"
+
+  [[nodes.C.branch]]
+  otherwise = true
+  next = []
+  label = "no faster setting"
+  note = "neither flushing early nor skipping the rename gets the backup onto the T5 sooner"
+
+[nodes.Cc]
+promote = "C"
+id = "LC3-durable-confirm"
+blocks = 12
+arm = "xs-*"
+question = "Does the setting that got psample onto the T5 sooner hold up with 12 fresh blocks?"
+
+[nodes.D]
+spec = "LC4-psample-local-resync.toml"
+question = "Re-syncing the backup with nothing cached, at a no-op and after 1% of files change, is xs -aH faster than rsync -aH?"
+
+  [[nodes.D.branch]]
+  when = { arm = "xs", speed_below = 0.95 }
+  next = []
+  hold = true
+  label = "xs slower re-syncing"
+  note = "rsync re-syncs the local backup faster than xs: a code candidate, decision needed"
+
+  [[nodes.D.branch]]
+  otherwise = true
+  next = []
+  label = "xs level or faster"
+  note = "xs re-syncs the local backup at least as fast as rsync"

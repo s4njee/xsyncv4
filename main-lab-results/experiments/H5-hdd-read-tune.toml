@@ -1,0 +1,58 @@
+# H5: reading small and mixed trees off mars's cold hard drive. On a spinning
+# disk the order and number of concurrent reads decide the seeks: fewer
+# sending workers, larger read tasks, one scanning worker.
+id = "H5-hdd-read-tune"
+kind = "screening"
+hypothesis = "On a cold hard drive, fewer sending workers or larger read tasks read small trees faster."
+primary = "durable_s"
+delta = 0.03
+blocks = 6
+control = "xs"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.xs]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a"]
+metrics = true
+
+[arms.send1]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a"]
+tune = { sender = "jobs=1" }
+metrics = true
+
+[arms.send4]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a"]
+tune = { sender = "jobs=4" }
+metrics = true
+
+[arms.batch512]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a"]
+tune = { sender = "read_batch_files=512,read_batch_bytes=67108864" }
+metrics = true
+
+[arms.scan1]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a"]
+tune = { sender = "scan_workers=1" }
+metrics = true
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[matrix]
+link = "mac-mars-hdd"
+corpus = ["small-flat", "small-deep", "mixed-bimodal"]
+scenario = ["fresh"]
+direction = ["mars-hdd>mac"]
+client = ["initiator"]
+cache = ["cold"]

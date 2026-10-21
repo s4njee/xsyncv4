@@ -1,0 +1,129 @@
+# T2: small files from the Mac to mars over 2.5GbE. P2b found mars creates them locally
+# 12-14 times faster than xs delivers them, so the receiver is not the limit on NVMe.
+# P3b asks whether eager writeback helps on the hard drive and D5 whether fewer workers
+# do; D1 screens the Mac's sending knobs; D6 asks whether xs's best small-file setting is
+# safe as the default for mixed and large trees, and D7 whether compression pays at
+# 2.5GbE. Winners are confirmed with fresh blocks. Until Sunday 07:00 Central it keeps
+# the runner busy with short replicates (F2a, F2b) once its branches end.
+id = "T2-mac-mars-small"
+question = "What limits xs's copies from the Mac to mars over 2.5GbE, and which settings should be the default?"
+start = ["P3b"]
+until = "2026-10-18T12:00Z"
+fill = ["F2a", "F2b"]
+
+[nodes.P3b]
+spec = "P3b-hdd-writeback.toml"
+adopt = "20261016T223339Z-P3b-hdd-writeback"
+question = "Does flushing as it goes help xs write small files to a hard drive?"
+
+  [[nodes.P3b.branch]]
+  when = { arm = "xs-best-eager", speed_lo_at_least = 1.03 }   # six blocks: no verdict, so the interval itself
+  next = ["P3c", "D1", "D5"]
+  note = "eager writeback was faster on the hard drive"
+  label = "eager writeback faster"
+
+  [[nodes.P3b.branch]]
+  otherwise = true
+  next = ["D1", "D5"]
+  note = "eager writeback did not help on the hard drive"
+  label = "otherwise"
+
+[nodes.P3c]
+promote = "P3b"
+id = "P3c-hdd-confirm"
+blocks = 12
+question = "Does eager writeback's gain hold up with fresh blocks?"
+
+[nodes.D1]
+spec = "D1-mac-sender-knobs.toml"
+question = "Can a sending setting on the Mac deliver small files faster?"
+
+  [[nodes.D1.branch]]
+  when = { verdict = "faster" }
+  next = ["D1c", "D6"]
+  note = "a sending setting on the Mac was faster"
+  label = "an arm was faster"
+
+  [[nodes.D1.branch]]
+  otherwise = true
+  next = ["D6"]
+  note = "no sending setting on the Mac beat xs's best"
+  label = "nothing faster"
+
+[nodes.D5]
+spec = "D5-hdd-recv-jobs.toml"
+question = "Do fewer receiving workers help a hard drive?"
+
+  [[nodes.D5.branch]]
+  when = { verdict = "faster" }
+  next = ["D5c"]
+  note = "a different worker count was faster on the hard drive"
+  label = "an arm was faster"
+
+  [[nodes.D5.branch]]
+  otherwise = true
+  next = []
+  note = "four receiving workers were as fast as any on the hard drive"
+  label = "four is fine"
+
+[nodes.D6]
+spec = "D6-mac-best-default.toml"
+question = "Is xs's best small-file setting safe as the default for mixed and large trees?"
+
+  [[nodes.D6.branch]]
+  when = { arm = "xs-best", verdict = "slower" }
+  next = ["D6b", "D7"]
+  note = "xs's best setting was slower than its default somewhere"
+  label = "slower somewhere"
+
+  [[nodes.D6.branch]]
+  otherwise = true
+  next = ["D7"]
+  note = "xs's best setting was nowhere slower than its default"
+  label = "never slower"
+
+[nodes.D6b]
+spec = "D6b-mac-best-split.toml"
+question = "Which half of the best setting costs time: four workers or --no-atomic?"
+
+[nodes.D7]
+spec = "D7-mac-z-2g5.toml"
+question = "Does compression pay at 2.5GbE, and at which level?"
+
+  [[nodes.D7.branch]]
+  when = { verdict = "faster" }
+  next = ["D7c"]
+  note = "a compression setting was faster at 2.5GbE"
+  label = "an arm was faster"
+
+  [[nodes.D7.branch]]
+  otherwise = true
+  next = []
+  note = "no compression setting beat sending uncompressed at 2.5GbE"
+  label = "nothing faster"
+
+[nodes.D1c]
+promote = "D1"
+id = "D1c-mac-sender-confirm"
+blocks = 12
+question = "Does the Mac's winning send setting hold up with fresh blocks?"
+
+[nodes.D5c]
+promote = "D5"
+id = "D5c-hdd-recv-confirm"
+blocks = 12
+question = "Does the hard drive's winning worker count hold up with fresh blocks?"
+
+[nodes.D7c]
+promote = "D7"
+id = "D7c-mac-z-confirm"
+blocks = 12
+question = "Does the winning compression level hold up with fresh blocks?"
+
+[nodes.F2a]
+spec = "F2a-mac-replicate.toml"
+question = "Do the main results on NVMe hold steady over the weekend?"
+
+[nodes.F2b]
+spec = "F2b-hdd-replicate.toml"
+question = "Do the main results on the hard drive hold steady over the weekend?"

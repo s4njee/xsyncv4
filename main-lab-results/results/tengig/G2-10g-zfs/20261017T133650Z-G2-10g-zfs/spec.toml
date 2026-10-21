@@ -1,0 +1,43 @@
+# G2 (tree T3): can freya's ZFS pool (raidz2 of spinning disks, zstd, recordsize 128K)
+# take 10 Gb/s? The same trees as onto NVMe, onto the pool, with a larger write size.
+id = "G2-10g-zfs"
+kind = "screening"
+hypothesis = "xs lands large files on the raidz2 pool at close to 10 Gb/s."
+primary = "durable_s"
+delta = 0.03
+blocks = 8
+control = "xs"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.xs]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-a"]
+
+[arms.xs-best]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-a", "--no-atomic"]
+tune = { receiver = "jobs=4" }
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[arms.write1m]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-a"]
+tune = { receiver = "write_chunk=1048576" }
+
+[matrix]
+link = "mac-freya-zfs-10g"
+corpus = ["large-four", "large-mixed", "large-text", "mixed-bimodal", "small-flat"]
+scenario = ["fresh"]
+direction = ["mac>freya-zfs"]
+client = ["initiator"]
+cache = ["warm"]

@@ -1,0 +1,84 @@
+{
+ "schema": 1,
+ "utc": "2026-10-10T20:19:12.668334+00:00",
+ "client": "neo",
+ "host": "[email]",
+ "direction": "push",
+ "bytes": 2147483648,
+ "rsh": [
+  "ssh",
+  "-oBatchMode=yes",
+  "-oCompression=no",
+  "-oControlMaster=no",
+  "-oConnectTimeout=10"
+ ],
+ "disk_io": false,
+ "compression": "none",
+ "records": [
+  {
+   "returncode": 0,
+   "wall_seconds": 18.741772518027574,
+   "user_seconds": 5.574171,
+   "system_seconds": 1.4125860000000001,
+   "max_rss_bytes": 16039936,
+   "voluntary_switches": 82071,
+   "involuntary_switches": 40,
+   "run": 1,
+   "remote": {
+    "returncode": 0,
+    "wall_seconds": 18.526812282856554,
+    "user_seconds": 0.219912,
+    "system_seconds": 0.9874299999999999,
+    "max_rss_bytes": 16265216,
+    "voluntary_switches": 65483,
+    "involuntary_switches": 256
+   },
+   "verified_bytes": 2147483648,
+   "bytes_per_second": 114582740.02282074
+  },
+  {
+   "returncode": 0,
+   "wall_seconds": 18.72321195807308,
+   "user_seconds": 5.561627,
+   "system_seconds": 1.422876,
+   "max_rss_bytes": 15843328,
+   "voluntary_switches": 82577,
+   "involuntary_switches": 32,
+   "run": 2,
+   "remote": {
+    "returncode": 0,
+    "wall_seconds": 18.51222884003073,
+    "user_seconds": 0.23244299999999998,
+    "system_seconds": 0.9595279999999999,
+    "max_rss_bytes": 16801792,
+    "voluntary_switches": 65421,
+    "involuntary_switches": 305
+   },
+   "verified_bytes": 2147483648,
+   "bytes_per_second": 114696327.36139844
+  },
+  {
+   "returncode": 0,
+   "wall_seconds": 18.74471572600305,
+   "user_seconds": 5.657103,
+   "system_seconds": 1.197315,
+   "max_rss_bytes": 15843328,
+   "voluntary_switches": 82694,
+   "involuntary_switches": 22,
+   "run": 3,
+   "remote": {
+    "returncode": 0,
+    "wall_seconds": 18.51222881535068,
+    "user_seconds": 0.239729,
+    "system_seconds": 0.9706579999999999,
+    "max_rss_bytes": 15151104,
+    "voluntary_switches": 65461,
+    "involuntary_switches": 254
+   },
+   "verified_bytes": 2147483648,
+   "bytes_per_second": 114564748.77455553
+  }
+ ],
+ "median_bytes_per_second": 114582740.02282074,
+ "complete": true
+}

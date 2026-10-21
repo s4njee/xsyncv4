@@ -1,0 +1,38 @@
+# P0: a smoke test of the pipe tool through the whole harness (timing, final sync,
+# manifest check, merged metrics) on the direct cable before it is taken down.
+# One block; its numbers are not results.
+id = "P0-pipe-smoke"
+kind = "screening"
+hypothesis = "The pipe arms produce valid, verified samples."
+primary = "durable_s"
+delta = 0.03
+blocks = 1
+control = "tar"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.tar]
+tool = "pipe"
+streams = 1
+
+[arms.tar-zstd]
+tool = "pipe"
+streams = 1
+codec = "zstd1"
+
+[arms.tar-x4]
+tool = "pipe"
+streams = 4
+
+[arms.local-x4]
+tool = "pipe"
+streams = 4
+local = true
+
+[matrix]
+link = "mac-mars-direct"
+corpus = ["small-flat"]
+scenario = ["fresh"]
+direction = ["mac>mars"]
+client = ["initiator"]
+cache = ["warm"]

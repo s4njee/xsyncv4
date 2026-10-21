@@ -1,0 +1,62 @@
+# H3: tuning xs's writes onto the hard drive. By default the receiver runs 16
+# workers on mars, which on one spinning disk may only add seeks; fewer
+# workers, and --no-atomic (no temporary name and rename per file), are the
+# first candidates. Tunables build with metrics.
+id = "H3-hdd-write-tune"
+kind = "screening"
+hypothesis = "Fewer receiving workers or --no-atomic make small and mixed copies onto a hard drive faster."
+primary = "durable_s"
+delta = 0.03
+blocks = 8
+control = "xs"
+verify = "first-last"
+cleanup = "eager"
+hours = [23, 5]  # the Mac sends: run while it is idle overnight
+
+[arms.xs]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a"]
+metrics = true
+
+[arms.recv1]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a"]
+tune = { receiver = "jobs=1" }
+metrics = true
+
+[arms.recv2]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a"]
+tune = { receiver = "jobs=2" }
+metrics = true
+
+[arms.recv4]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a"]
+tune = { receiver = "jobs=4" }
+metrics = true
+
+[arms.no-atomic]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a", "--no-atomic"]
+metrics = true
+
+[arms.recv4-noatomic]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a", "--no-atomic"]
+tune = { receiver = "jobs=4" }
+metrics = true
+
+[matrix]
+link = "mac-mars-hdd"
+corpus = ["small-flat", "small-deep", "mixed-bimodal"]
+scenario = ["fresh"]
+direction = ["mac>mars-hdd"]
+client = ["initiator"]
+cache = ["warm"]

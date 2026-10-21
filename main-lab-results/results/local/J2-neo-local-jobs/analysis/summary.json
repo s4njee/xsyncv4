@@ -1,0 +1,21 @@
+{
+ "experiment": "J2-neo-local-jobs",
+ "kind": "screening",
+ "hypothesis": "On a four-core Pi copying locally, -j8 differs from -j4 by more than 5% in time-to-durable on small-file and no-op copies.",
+ "primary": "durable_s",
+ "control": "xs",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261020T170712Z-J2-neo-local-jobs"
+ ],
+ "spec_sha256": [
+  "97c08202f478e9b3ba7d3e57bb48f717da4b6ca7b8aa97b76e5273e2644e2fae"
+ ],
+ "valid_blocks": 64,
+ "void_attempts": 1,
+ "void_reasons": [
+  "xs: did not settle: neo is 21% busy; neo-ssd is 21% busy"
+ ]
+}

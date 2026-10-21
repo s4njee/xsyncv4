@@ -1,0 +1,63 @@
+{
+ "tree": "T7-neo-freya-compress",
+ "started_utc": "2026-10-17T16:16:16Z",
+ "nodes": {
+  "W": {
+   "state": "decided",
+   "runs": [
+    "20261016T162239Z-Z3-1g-compress",
+    "20261017T161616Z-Z3-1g-compress"
+   ],
+   "continued": [
+    "20261017T161616Z-Z3-1g-compress"
+   ],
+   "decision": {
+    "utc": "2026-10-17T16:51:08Z",
+    "text": "W: xs -z carries more than the wire both ways on text: only its cost on incompressible data is left to settle (large-text freya\u2192neo xs-z 2.26 Gb/s; large-text neo\u2192freya xs-z 2.15 Gb/s)",
+    "next": [
+     "C"
+    ],
+    "branch": 0
+   }
+  },
+  "C": {
+   "state": "decided",
+   "runs": [
+    "20261017T165108Z-N1g-compress-cost",
+    "20261017T185524Z-N1g-compress-cost"
+   ],
+   "spec": "N1g-compress-cost.toml",
+   "continued": [
+    "20261017T185524Z-N1g-compress-cost"
+   ],
+   "decision": {
+    "utc": "2026-10-17T19:41:43Z",
+    "text": "C: compression is harmless on incompressible data here",
+    "next": [],
+    "branch": 1
+   }
+  },
+  "F1a": {
+   "state": "held",
+   "runs": [
+    "20261017T184701Z-F1a-lan-replicate",
+    "20261017T204111Z-F1a-lan-replicate",
+    "20261017T211342Z-F1a-lan-replicate",
+    "20261017T214431Z-F1a-lan-replicate",
+    "20261017T223055Z-F1a-lan-replicate",
+    "20261017T230123Z-F1a-lan-replicate",
+    "20261017T230953Z-F1a-lan-replicate"
+   ],
+   "spec": "F1a-lan-replicate.toml",
+   "decision": {
+    "utc": "2026-10-17T23:52:25Z",
+    "text": "Retired after the USB 2.5 Gb/s adapter change; old gigabit samples are preserved separately.",
+    "next": []
+   },
+   "continued": [
+    "20261017T230953Z-F1a-lan-replicate"
+   ]
+  }
+ },
+ "fills": 6
+}

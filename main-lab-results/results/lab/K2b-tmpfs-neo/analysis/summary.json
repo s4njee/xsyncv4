@@ -1,0 +1,45 @@
+{
+ "experiment": "K2b-tmpfs-neo",
+ "kind": "screening",
+ "hypothesis": "xs copies small trees into RAM on the Pi much faster than onto its NVMe: the Pi's filesystem is the limit.",
+ "primary": "durable_s",
+ "control": "xs-z",
+ "delta": 0.03,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261016T222957Z-K2b-tmpfs-neo"
+ ],
+ "spec_sha256": [
+  "551a50e99369051e3c4730dd41d8c0125313bb505c0bca52d3b7e67bfb3d0048"
+ ],
+ "valid_blocks": 6,
+ "void_attempts": 36,
+ "void_reasons": [
+  "xs-best: the transfer exited 11: buffering, encoding, errors, newline)\n           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nOSError: [Errno 28] ",
+  "xs-best: the transfer exited 11: error (showing first 1)\n  file IO (code 11): 1 error\n    open failed on \"~/benchmarks/xsyncv4/lab-shm/work/20261016T",
+  "xs-best: the transfer exited 11: fering, encoding, errors, newline)\n           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nOSError: [Errno 28] No ",
+  "xs-best: the transfer exited 11: mmary: 1 error (showing first 1)\n  file IO (code 11): 1 error\n    open failed on \"~/benchmarks/xsyncv4/lab-shm/work/",
+  "xs-best: the transfer exited 11: summary: 1 error (showing first 1)\n  file IO (code 11): 1 error\n    open failed on \"~/benchmarks/xsyncv4/lab-shm/wor",
+  "xs-best: the transfer exited 11: ummary: 1 error (showing first 1)\n  file IO (code 11): 1 error\n    open failed on \"~/benchmarks/xsyncv4/lab-shm/work",
+  "xs-z-best: the transfer exited 11: ffering, encoding, errors, newline)\n           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nOSError: [Errno 28] ",
+  "xs-z-best: the transfer exited 11: mary: 1 error (showing first 1)\n  file IO (code 11): 1 error\n    open failed on \"~/benchmarks/xsyncv4/lab-shm/work",
+  "xs-z-best: the transfer exited 11: ng first 1)\n  file IO (code 11): 1 error\n    open failed on \"~/benchmarks/xsyncv4/lab-shm/work/20261016T222957Z-K2",
+  "xs-z-best: the transfer exited 11: or (showing first 1)\n  file IO (code 11): 1 error\n    open failed on \"~/benchmarks/xsyncv4/lab-shm/work/20261016T2",
+  "xs-z-best: the transfer exited 11: ry: 1 error (showing first 1)\n  file IO (code 11): 1 error\n    open failed on \"~/benchmarks/xsyncv4/lab-shm/work/2",
+  "xs-z-best: the transfer exited 11: ummary: 1 error (showing first 1)\n  file IO (code 11): 1 error\n    open failed on \"~/benchmarks/xsyncv4/lab-shm/wo",
+  "xs-z-best: the transfer exited 11: wing first 1)\n  file IO (code 11): 1 error\n    open failed on \"~/benchmarks/xsyncv4/lab-shm/work/20261016T222957Z-",
+  "xs-z: the transfer exited 11:  summary: 1 error (showing first 1)\n  file IO (code 11): 1 error\n    mkstemp failed on \"~/benchmarks/xsyncv4/lab-shm/wo",
+  "xs-z: the transfer exited 11: (showing first 1)\n  file IO (code 11): 1 error\n    mkstemp failed on \"~/benchmarks/xsyncv4/lab-shm/work/20261016T222957",
+  "xs-z: the transfer exited 11: buffering, encoding, errors, newline)\n           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nOSError: [Errno 28] No ",
+  "xs-z: the transfer exited 11: e, buffering, encoding, errors, newline)\n           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nOSError: [Errno 28] ",
+  "xs-z: the transfer exited 11: error (showing first 1)\n  file IO (code 11): 1 error\n    mkstemp failed on \"~/benchmarks/xsyncv4/lab-shm/work/20261016T",
+  "xs-z: the transfer exited 11: mary: 1 error (showing first 1)\n  file IO (code 11): 1 error\n    mkstemp failed on \"~/benchmarks/xsyncv4/lab-shm/work/2",
+  "xs-z: the transfer exited 11: mmary: 1 error (showing first 1)\n  file IO (code 11): 1 error\n    mkstemp failed on \"~/benchmarks/xsyncv4/lab-shm/work/",
+  "xs-z: the transfer exited 11: summary: 1 error (showing first 1)\n  file IO (code 11): 1 error\n    mkstemp failed on \"~/benchmarks/xsyncv4/lab-shm/wor",
+  "xs-z: the transfer exited 11: ummary: 1 error (showing first 1)\n  file IO (code 11): 1 error\n    mkstemp failed on \"~/benchmarks/xsyncv4/lab-shm/work",
+  "xs: the transfer exited 11: , buffering, encoding, errors, newline)\n           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nOSError: [Errno 28] No ",
+  "xs: the transfer exited 11: ode, buffering, encoding, errors, newline)\n           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nOSError: [Errno 28] ",
+  "xs: the transfer exited 11: r summary: 1 error (showing first 1)\n  file IO (code 11): 1 error\n    mkstemp failed on \"~/benchmarks/xsyncv4/lab-shm/wor"
+ ]
+}

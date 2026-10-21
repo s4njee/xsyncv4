@@ -1,0 +1,8 @@
+{
+ "state": "failed",
+ "detail": "RuntimeError: mars: `python3 ~/benchmarks/xsyncv4/lab/lib/021ae1ff14be/corpus.py verify ~/benchmarks/xsyncv4/lab/corpora/small-flat --manifest ~/benchmarks/xsyncv4/lab/corpora/small-flat.m` exited 1: ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.14/pathlib/__init__.py\", line 771, in open\n    return io.open(self, mode, buffering, encoding, errors, newline)\n           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: '~/benchmarks/xsyncv4/lab/corpora/small-flat.manifest.json'",
+ "utc": "2026-10-18T15:33:42.169+00:00",
+ "pid": 46231,
+ "samples_done": 0,
+ "samples_planned": 48
+}

@@ -1,0 +1,30 @@
+Traceback (most recent call last):
+  File "~/benchmarks/xsbench.noindex/lib/0a93aa78ad4f/agent.py", line 597, in <module>
+    sys.exit(Run(sys.argv[1]).execute(limit))
+             ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "~/benchmarks/xsbench.noindex/lib/0a93aa78ad4f/agent.py", line 571, in execute
+    self.prepare()
+    ~~~~~~~~~~~~^^
+  File "~/benchmarks/xsbench.noindex/lib/0a93aa78ad4f/agent.py", line 303, in prepare
+    raise RuntimeError(f'{receiver}: no manifest for corpus {name} to check copies against')
+RuntimeError: freya: no manifest for corpus large-four to check copies against
+Traceback (most recent call last):
+  File "~/benchmarks/xsbench.noindex/lib/0a93aa78ad4f/agent.py", line 597, in <module>
+    sys.exit(Run(sys.argv[1]).execute(limit))
+             ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "~/benchmarks/xsbench.noindex/lib/0a93aa78ad4f/agent.py", line 571, in execute
+    self.prepare()
+    ~~~~~~~~~~~~^^
+  File "~/benchmarks/xsbench.noindex/lib/0a93aa78ad4f/agent.py", line 303, in prepare
+    raise RuntimeError(f'{receiver}: no manifest for corpus {name} to check copies against')
+RuntimeError: freya: no manifest for corpus large-four to check copies against
+Traceback (most recent call last):
+  File "~/benchmarks/xsbench.noindex/lib/0a93aa78ad4f/agent.py", line 597, in <module>
+    sys.exit(Run(sys.argv[1]).execute(limit))
+             ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "~/benchmarks/xsbench.noindex/lib/0a93aa78ad4f/agent.py", line 571, in execute
+    self.prepare()
+    ~~~~~~~~~~~~^^
+  File "~/benchmarks/xsbench.noindex/lib/0a93aa78ad4f/agent.py", line 303, in prepare
+    raise RuntimeError(f'{receiver}: no manifest for corpus {name} to check copies against')
+RuntimeError: freya: no manifest for corpus large-four to check copies against

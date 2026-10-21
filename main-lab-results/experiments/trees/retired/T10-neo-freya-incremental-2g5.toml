@@ -1,0 +1,193 @@
+# T10: follow changed-file fractions through scanning, reuse, and compression.
+# Setup stays outside the measurement; the source corpus remains immutable.
+id = "T10-neo-freya-incremental-2g5"
+question = "On the USB 2.5 Gb/s link, what limits incremental backups between neo and freya: scanning unchanged files, reusing existing data, or transferring changes?"
+start = ["A"]
+
+[nodes.A]
+spec = "IB1-incremental-map-2g5.toml"
+front = true
+max_runs = 2
+question = "At 0.1%, 1%, and 10% changed files, does xs benefit from reuse, and does it beat rsync in each direction?"
+
+  [[nodes.A.branch]]
+  when = [{ arm = "xs-z-whole", verdict = "faster" }, { arm = "rsync-z", verdict = "faster" }]
+  next = ["S", "W"]
+  note = "whole-file xs wins somewhere and rsync wins somewhere; confirm reuse policy and investigate scanning"
+  label = "both gaps"
+
+  [[nodes.A.branch]]
+  when = { arm = "xs-z-whole", verdict = "faster" }
+  next = ["W"]
+  note = "whole-file xs beats the default somewhere; confirm where reuse overhead outweighs saved traffic"
+  label = "whole-file faster"
+
+  [[nodes.A.branch]]
+  when = { arm = "rsync-z", verdict = "faster" }
+  next = ["S"]
+  note = "rsync wins an incremental cell; check metadata work before changing transport settings"
+  label = "rsync faster"
+
+  [[nodes.A.branch]]
+  when = [{ arm = "rsync-z", corpus = "real-congress", sender = "neo", scenario = "update-0p1pct", verdict = ["equivalent", "slower"], all = true }, { arm = "rsync-z", corpus = "real-congress", sender = "neo", scenario = "update-1pct", verdict = ["equivalent", "slower"], all = true }, { arm = "rsync-z", corpus = "real-congress", sender = "neo", scenario = "update-10pct", verdict = ["equivalent", "slower"], all = true }, { arm = "rsync-z", corpus = "real-congress", sender = "freya", scenario = "update-0p1pct", verdict = ["equivalent", "slower"], all = true }, { arm = "rsync-z", corpus = "real-congress", sender = "freya", scenario = "update-1pct", verdict = ["equivalent", "slower"], all = true }, { arm = "rsync-z", corpus = "real-congress", sender = "freya", scenario = "update-10pct", verdict = ["equivalent", "slower"], all = true }, { arm = "rsync-z", corpus = "mixed-bimodal", sender = "neo", scenario = "update-0p1pct", verdict = ["equivalent", "slower"], all = true }, { arm = "rsync-z", corpus = "mixed-bimodal", sender = "neo", scenario = "update-1pct", verdict = ["equivalent", "slower"], all = true }, { arm = "rsync-z", corpus = "mixed-bimodal", sender = "neo", scenario = "update-10pct", verdict = ["equivalent", "slower"], all = true }, { arm = "rsync-z", corpus = "mixed-bimodal", sender = "freya", scenario = "update-0p1pct", verdict = ["equivalent", "slower"], all = true }, { arm = "rsync-z", corpus = "mixed-bimodal", sender = "freya", scenario = "update-1pct", verdict = ["equivalent", "slower"], all = true }, { arm = "rsync-z", corpus = "mixed-bimodal", sender = "freya", scenario = "update-10pct", verdict = ["equivalent", "slower"], all = true }, { arm = "xs-z-whole", corpus = "real-congress", sender = "neo", scenario = "update-0p1pct", verdict = ["equivalent", "slower"], all = true }, { arm = "xs-z-whole", corpus = "real-congress", sender = "neo", scenario = "update-1pct", verdict = ["equivalent", "slower"], all = true }, { arm = "xs-z-whole", corpus = "real-congress", sender = "neo", scenario = "update-10pct", verdict = ["equivalent", "slower"], all = true }, { arm = "xs-z-whole", corpus = "real-congress", sender = "freya", scenario = "update-0p1pct", verdict = ["equivalent", "slower"], all = true }, { arm = "xs-z-whole", corpus = "real-congress", sender = "freya", scenario = "update-1pct", verdict = ["equivalent", "slower"], all = true }, { arm = "xs-z-whole", corpus = "real-congress", sender = "freya", scenario = "update-10pct", verdict = ["equivalent", "slower"], all = true }, { arm = "xs-z-whole", corpus = "mixed-bimodal", sender = "neo", scenario = "update-0p1pct", verdict = ["equivalent", "slower"], all = true }, { arm = "xs-z-whole", corpus = "mixed-bimodal", sender = "neo", scenario = "update-1pct", verdict = ["equivalent", "slower"], all = true }, { arm = "xs-z-whole", corpus = "mixed-bimodal", sender = "neo", scenario = "update-10pct", verdict = ["equivalent", "slower"], all = true }, { arm = "xs-z-whole", corpus = "mixed-bimodal", sender = "freya", scenario = "update-0p1pct", verdict = ["equivalent", "slower"], all = true }, { arm = "xs-z-whole", corpus = "mixed-bimodal", sender = "freya", scenario = "update-1pct", verdict = ["equivalent", "slower"], all = true }, { arm = "xs-z-whole", corpus = "mixed-bimodal", sender = "freya", scenario = "update-10pct", verdict = ["equivalent", "slower"], all = true }]
+  next = []
+  note = "neither rsync nor whole-file xs beats compressed default xs in any planned cell"
+  label = "default holds"
+
+  [[nodes.A.branch]]
+  otherwise = true
+  next = ["A"]
+  note = "some planned comparisons are unresolved; add one independent run"
+  label = "unresolved: repeat once"
+
+  [[nodes.A.branch]]
+  otherwise = true
+  next = []
+  note = "evidence remains unresolved after the extra run; inspect missing or noisy cells"
+  label = "unresolved: review"
+  hold = true
+
+[nodes.W]
+promote = "A"
+id = "IB1-whole-confirm-2g5"
+blocks = 12
+front = true
+question = "Does the whole-file gain repeat with independent blocks, without regressions in the tested cells?"
+arm = "xs-z-whole"
+all_corpora = true
+
+  [[nodes.W.branch]]
+  when = { arm = "xs-z-whole", verdict = "slower" }
+  next = []
+  note = "whole-file policy regresses somewhere; record a workload-specific crossover, not a universal default"
+  label = "crossover: review"
+  hold = true
+
+  [[nodes.W.branch]]
+  when = [{ arm = "xs-z-whole", verdict = "faster" }, { arm = "xs-z-whole", corpus = "real-congress", sender = "neo", scenario = "update-0p1pct", verdict = ["faster", "equivalent"], all = true }, { arm = "xs-z-whole", corpus = "real-congress", sender = "neo", scenario = "update-1pct", verdict = ["faster", "equivalent"], all = true }, { arm = "xs-z-whole", corpus = "real-congress", sender = "neo", scenario = "update-10pct", verdict = ["faster", "equivalent"], all = true }, { arm = "xs-z-whole", corpus = "real-congress", sender = "freya", scenario = "update-0p1pct", verdict = ["faster", "equivalent"], all = true }, { arm = "xs-z-whole", corpus = "real-congress", sender = "freya", scenario = "update-1pct", verdict = ["faster", "equivalent"], all = true }, { arm = "xs-z-whole", corpus = "real-congress", sender = "freya", scenario = "update-10pct", verdict = ["faster", "equivalent"], all = true }, { arm = "xs-z-whole", corpus = "mixed-bimodal", sender = "neo", scenario = "update-0p1pct", verdict = ["faster", "equivalent"], all = true }, { arm = "xs-z-whole", corpus = "mixed-bimodal", sender = "neo", scenario = "update-1pct", verdict = ["faster", "equivalent"], all = true }, { arm = "xs-z-whole", corpus = "mixed-bimodal", sender = "neo", scenario = "update-10pct", verdict = ["faster", "equivalent"], all = true }, { arm = "xs-z-whole", corpus = "mixed-bimodal", sender = "freya", scenario = "update-0p1pct", verdict = ["faster", "equivalent"], all = true }, { arm = "xs-z-whole", corpus = "mixed-bimodal", sender = "freya", scenario = "update-1pct", verdict = ["faster", "equivalent"], all = true }, { arm = "xs-z-whole", corpus = "mixed-bimodal", sender = "freya", scenario = "update-10pct", verdict = ["faster", "equivalent"], all = true }]
+  next = []
+  note = "whole-file gains confirmed in the measured cells; use the change fraction and wire bytes to locate the crossover"
+  label = "gain confirmed"
+
+  [[nodes.W.branch]]
+  otherwise = true
+  next = []
+  note = "whole-file gains did not confirm cleanly; inspect the result before changing policy"
+  label = "not confirmed: review"
+  hold = true
+
+[nodes.S]
+spec = "IB2-incremental-scan-2g5.toml"
+front = true
+max_runs = 2
+question = "Do scanner settings help a no-op and a 0.1% update on the same real tree?"
+
+  [[nodes.S.branch]]
+  when = { arm = ["scan1", "window4k"], verdict = "faster" }
+  next = ["Sc"]
+  note = "a scanner setting improves a metadata-heavy cell; confirm the winning setting"
+  label = "scan setting faster"
+
+  [[nodes.S.branch]]
+  when = [{ arm = "scan1", corpus = "real-congress", sender = "neo", scenario = "noop", verdict = ["equivalent", "slower"], all = true }, { arm = "scan1", corpus = "real-congress", sender = "neo", scenario = "update-0p1pct", verdict = ["equivalent", "slower"], all = true }, { arm = "scan1", corpus = "real-congress", sender = "freya", scenario = "noop", verdict = ["equivalent", "slower"], all = true }, { arm = "scan1", corpus = "real-congress", sender = "freya", scenario = "update-0p1pct", verdict = ["equivalent", "slower"], all = true }, { arm = "window4k", corpus = "real-congress", sender = "neo", scenario = "noop", verdict = ["equivalent", "slower"], all = true }, { arm = "window4k", corpus = "real-congress", sender = "neo", scenario = "update-0p1pct", verdict = ["equivalent", "slower"], all = true }, { arm = "window4k", corpus = "real-congress", sender = "freya", scenario = "noop", verdict = ["equivalent", "slower"], all = true }, { arm = "window4k", corpus = "real-congress", sender = "freya", scenario = "update-0p1pct", verdict = ["equivalent", "slower"], all = true }]
+  next = ["Z"]
+  note = "neither scanner setting helps in any planned cell; test compression cost only on the smallest update"
+  label = "scan tuning no gain"
+
+  [[nodes.S.branch]]
+  otherwise = true
+  next = ["S"]
+  note = "some planned comparisons are unresolved; add one independent run"
+  label = "unresolved: repeat once"
+
+  [[nodes.S.branch]]
+  otherwise = true
+  next = []
+  note = "evidence remains unresolved after the extra run; inspect missing or noisy cells"
+  label = "unresolved: review"
+  hold = true
+
+[nodes.Sc]
+promote = "S"
+id = "IB2-scan-confirm-2g5"
+blocks = 12
+front = true
+question = "Does the scanner gain repeat independently across no-op and incremental copies?"
+
+  [[nodes.Sc.branch]]
+  when = { verdict = "slower" }
+  next = []
+  note = "the scanner winner regresses in another tested cell; retain workload-specific settings"
+  label = "regression: review"
+  hold = true
+
+  [[nodes.Sc.branch]]
+  when = [{ verdict = "faster" }, { arm = "*", corpus = "real-congress", sender = "neo", scenario = "noop", verdict = ["faster", "equivalent"], all = true }, { arm = "*", corpus = "real-congress", sender = "neo", scenario = "update-0p1pct", verdict = ["faster", "equivalent"], all = true }, { arm = "*", corpus = "real-congress", sender = "freya", scenario = "noop", verdict = ["faster", "equivalent"], all = true }, { arm = "*", corpus = "real-congress", sender = "freya", scenario = "update-0p1pct", verdict = ["faster", "equivalent"], all = true }]
+  next = []
+  note = "the scanner gain confirmed without a measured regression; propose a scanner policy change"
+  label = "gain confirmed"
+
+  [[nodes.Sc.branch]]
+  otherwise = true
+  next = []
+  note = "the scanner gain remains unresolved; profile metadata work next"
+  label = "profile next"
+  hold = true
+
+[nodes.Z]
+spec = "IB3-incremental-compression-2g5.toml"
+front = true
+max_runs = 2
+question = "After scan tuning fails, does disabling compression help a 0.1% update?"
+
+  [[nodes.Z.branch]]
+  when = { arm = "xs", verdict = "faster" }
+  next = ["Zc"]
+  note = "uncompressed xs improves a tiny update; confirm this specific compression exception"
+  label = "uncompressed faster"
+
+  [[nodes.Z.branch]]
+  when = [{ arm = "xs", corpus = "real-congress", sender = "neo", scenario = "update-0p1pct", verdict = ["equivalent", "slower"], all = true }, { arm = "xs", corpus = "real-congress", sender = "freya", scenario = "update-0p1pct", verdict = ["equivalent", "slower"], all = true }]
+  next = []
+  note = "disabling compression does not help; retain compression and investigate the measured scan/reuse counters"
+  label = "compression retained"
+
+  [[nodes.Z.branch]]
+  otherwise = true
+  next = ["Z"]
+  note = "some planned comparisons are unresolved; add one independent run"
+  label = "unresolved: repeat once"
+
+  [[nodes.Z.branch]]
+  otherwise = true
+  next = []
+  note = "evidence remains unresolved after the extra run; inspect missing or noisy cells"
+  label = "unresolved: review"
+  hold = true
+
+[nodes.Zc]
+promote = "Z"
+id = "IB3-compression-confirm-2g5"
+blocks = 12
+front = true
+question = "Does the small-update compression exception repeat with independent blocks?"
+
+  [[nodes.Zc.branch]]
+  when = { arm = "xs", verdict = "slower" }
+  next = []
+  note = "disabling compression regresses a tested direction; do not generalize the exception"
+  label = "direction dependent"
+  hold = true
+
+  [[nodes.Zc.branch]]
+  when = [{ arm = "xs", verdict = "faster" }, { arm = "xs", corpus = "real-congress", sender = "neo", scenario = "update-0p1pct", verdict = ["faster", "equivalent"], all = true }, { arm = "xs", corpus = "real-congress", sender = "freya", scenario = "update-0p1pct", verdict = ["faster", "equivalent"], all = true }]
+  next = []
+  note = "the narrow small-update compression exception confirmed; keep the T7 default for other workloads"
+  label = "exception confirmed"
+
+  [[nodes.Zc.branch]]
+  otherwise = true
+  next = []
+  note = "the compression exception did not confirm; retain the existing default recommendation"
+  label = "not confirmed: review"
+  hold = true

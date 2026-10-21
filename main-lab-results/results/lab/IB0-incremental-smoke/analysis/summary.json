@@ -1,0 +1,19 @@
+{
+ "experiment": "IB0-incremental-smoke",
+ "kind": "screening",
+ "hypothesis": "The fastest incremental backup policy depends on the changed-file fraction, corpus, and direction.",
+ "primary": "durable_s",
+ "control": "xs-z",
+ "delta": 0.03,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261017T230619Z-IB0-incremental-smoke"
+ ],
+ "spec_sha256": [
+  "8bdfe6763cb93705a3d24ba87c51eb51cdc8eb7b303d91f2acbd791c919b99a3"
+ ],
+ "valid_blocks": 2,
+ "void_attempts": 0,
+ "void_reasons": []
+}

@@ -1,0 +1,46 @@
+# T11: the Mac/neo psample axis. A short screening compares xs -aH with the
+# rsync -aH baseline, both directions, fresh, on the pinned 711k-file tree; the
+# -z arms are gone (the tree is incompressible). If xs screens faster the
+# candidate is confirmed with fresh blocks; otherwise rsync -aH is the fastest
+# here and that answers the question. Independent identities and link; never
+# pool with Mac/mars observations.
+id = "T11-mac-neo-psample"
+question = "How fast can the pinned psample tree move between the Mac and neo, and is xs faster than rsync -aH in each direction?"
+start = ["A"]
+
+[nodes.A]
+spec = "MN1-psample-bidir.toml"
+front = true
+question = "Over four paired blocks, is xs -aH faster than rsync -aH on the psample tree, fresh, in either direction?"
+
+  [[nodes.A.branch]]
+  when = { arm = "xs", speed_at_least = 1.05 }
+  next = ["X"]
+  label = "xs >= 1.05x rsync"
+  note = "xs screens at least 5% faster in a direction: confirm it with fresh blocks"
+
+  [[nodes.A.branch]]
+  otherwise = true
+  next = []
+  label = "rsync fastest"
+  note = "no xs gain on this tree: rsync -aH is the fastest here"
+
+[nodes.X]
+promote = "A"
+id = "MN1-xs-confirm"
+arm = "xs"
+blocks = 12
+question = "Does xs repeat its psample gain with 12 fresh blocks, and is the benefit direction-specific?"
+
+  [[nodes.X.branch]]
+  when = { arm = "xs", verdict = "faster" }
+  next = []
+  label = "gain confirmed"
+  note = "the gain repeats with fresh blocks"
+
+  [[nodes.X.branch]]
+  otherwise = true
+  next = []
+  hold = true
+  label = "review"
+  note = "the screening gain did not repeat; review before recommending xs"

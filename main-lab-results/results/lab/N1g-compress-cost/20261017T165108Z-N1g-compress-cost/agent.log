@@ -1,0 +1,72 @@
+Traceback (most recent call last):
+  File "~/benchmarks/xsyncv4/lab/lib/42871b9ffa17/agent.py", line 659, in <module>
+    sys.exit(Run(sys.argv[1]).execute(limit))
+             ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "~/benchmarks/xsyncv4/lab/lib/42871b9ffa17/agent.py", line 633, in execute
+    self.prepare()
+    ~~~~~~~~~~~~^^
+  File "~/benchmarks/xsyncv4/lab/lib/42871b9ffa17/agent.py", line 352, in prepare
+    found = json.loads(host.run('python3', host.bin('corpus.py'), 'verify', f'{host.root}/corpora/{name}',
+                       ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                                '--manifest', manifest, '--quick', timeout=1800).stdout)
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "~/benchmarks/xsyncv4/lab/lib/42871b9ffa17/agent.py", line 65, in run
+    return self.shell(shlex.join(map(str, argv)), **options)
+           ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "~/benchmarks/xsyncv4/lab/lib/42871b9ffa17/agent.py", line 61, in shell
+    raise RuntimeError(f'{self.name}: `{script[:200]}` exited {done.returncode}: {done.stderr.strip()[-400:]}')
+RuntimeError: freya: `python3 /mnt/nvme/xsbench/lib/42871b9ffa17/corpus.py verify /mnt/nvme/xsbench/corpora/large-mixed --manifest /mnt/nvme/xsbench/corpora/large-mixed.manifest.json --quick` exited 1: /mnt/nvme/xsbench/corpora/large-mixed does not match /mnt/nvme/xsbench/corpora/large-mixed.manifest.json (0 paths differ)
+Traceback (most recent call last):
+  File "~/benchmarks/xsyncv4/lab/lib/42871b9ffa17/agent.py", line 659, in <module>
+    sys.exit(Run(sys.argv[1]).execute(limit))
+             ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "~/benchmarks/xsyncv4/lab/lib/42871b9ffa17/agent.py", line 633, in execute
+    self.prepare()
+    ~~~~~~~~~~~~^^
+  File "~/benchmarks/xsyncv4/lab/lib/42871b9ffa17/agent.py", line 352, in prepare
+    found = json.loads(host.run('python3', host.bin('corpus.py'), 'verify', f'{host.root}/corpora/{name}',
+                       ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                                '--manifest', manifest, '--quick', timeout=1800).stdout)
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "~/benchmarks/xsyncv4/lab/lib/42871b9ffa17/agent.py", line 65, in run
+    return self.shell(shlex.join(map(str, argv)), **options)
+           ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "~/benchmarks/xsyncv4/lab/lib/42871b9ffa17/agent.py", line 61, in shell
+    raise RuntimeError(f'{self.name}: `{script[:200]}` exited {done.returncode}: {done.stderr.strip()[-400:]}')
+RuntimeError: freya: `python3 /mnt/nvme/xsbench/lib/42871b9ffa17/corpus.py verify /mnt/nvme/xsbench/corpora/large-mixed --manifest /mnt/nvme/xsbench/corpora/large-mixed.manifest.json --quick` exited 1: /mnt/nvme/xsbench/corpora/large-mixed does not match /mnt/nvme/xsbench/corpora/large-mixed.manifest.json (0 paths differ)
+Traceback (most recent call last):
+  File "~/benchmarks/xsyncv4/lab/lib/42871b9ffa17/agent.py", line 659, in <module>
+    sys.exit(Run(sys.argv[1]).execute(limit))
+             ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "~/benchmarks/xsyncv4/lab/lib/42871b9ffa17/agent.py", line 633, in execute
+    self.prepare()
+    ~~~~~~~~~~~~^^
+  File "~/benchmarks/xsyncv4/lab/lib/42871b9ffa17/agent.py", line 352, in prepare
+    found = json.loads(host.run('python3', host.bin('corpus.py'), 'verify', f'{host.root}/corpora/{name}',
+                       ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                                '--manifest', manifest, '--quick', timeout=1800).stdout)
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "~/benchmarks/xsyncv4/lab/lib/42871b9ffa17/agent.py", line 65, in run
+    return self.shell(shlex.join(map(str, argv)), **options)
+           ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "~/benchmarks/xsyncv4/lab/lib/42871b9ffa17/agent.py", line 61, in shell
+    raise RuntimeError(f'{self.name}: `{script[:200]}` exited {done.returncode}: {done.stderr.strip()[-400:]}')
+RuntimeError: freya: `python3 /mnt/nvme/xsbench/lib/42871b9ffa17/corpus.py verify /mnt/nvme/xsbench/corpora/large-mixed --manifest /mnt/nvme/xsbench/corpora/large-mixed.manifest.json --quick` exited 1: /mnt/nvme/xsbench/corpora/large-mixed does not match /mnt/nvme/xsbench/corpora/large-mixed.manifest.json (0 paths differ)
+Traceback (most recent call last):
+  File "~/benchmarks/xsyncv4/lab/lib/42871b9ffa17/agent.py", line 659, in <module>
+    sys.exit(Run(sys.argv[1]).execute(limit))
+             ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "~/benchmarks/xsyncv4/lab/lib/42871b9ffa17/agent.py", line 633, in execute
+    self.prepare()
+    ~~~~~~~~~~~~^^
+  File "~/benchmarks/xsyncv4/lab/lib/42871b9ffa17/agent.py", line 352, in prepare
+    found = json.loads(host.run('python3', host.bin('corpus.py'), 'verify', f'{host.root}/corpora/{name}',
+                       ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                                '--manifest', manifest, '--quick', timeout=1800).stdout)
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "~/benchmarks/xsyncv4/lab/lib/42871b9ffa17/agent.py", line 65, in run
+    return self.shell(shlex.join(map(str, argv)), **options)
+           ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "~/benchmarks/xsyncv4/lab/lib/42871b9ffa17/agent.py", line 61, in shell
+    raise RuntimeError(f'{self.name}: `{script[:200]}` exited {done.returncode}: {done.stderr.strip()[-400:]}')
+RuntimeError: freya: `python3 /mnt/nvme/xsbench/lib/42871b9ffa17/corpus.py verify /mnt/nvme/xsbench/corpora/large-mixed --manifest /mnt/nvme/xsbench/corpora/large-mixed.manifest.json --quick` exited 1: /mnt/nvme/xsbench/corpora/large-mixed does not match /mnt/nvme/xsbench/corpora/large-mixed.manifest.json (0 paths differ)

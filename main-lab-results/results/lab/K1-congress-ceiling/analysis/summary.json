@@ -1,0 +1,19 @@
+{
+ "experiment": "K1-congress-ceiling",
+ "kind": "screening",
+ "hypothesis": "Each receiver creates small files locally much faster than xs delivers them over gigabit.",
+ "primary": "durable_s",
+ "control": "xs-z",
+ "delta": 0.03,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261016T223011Z-K1-congress-ceiling"
+ ],
+ "spec_sha256": [
+  "602459dc44d4bd1d8da1ec73fa4266b19cedebf50917bb33669394b09ef0bdbc"
+ ],
+ "valid_blocks": 36,
+ "void_attempts": 0,
+ "void_reasons": []
+}

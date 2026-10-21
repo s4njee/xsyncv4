@@ -1,0 +1,17 @@
+experiment,kind,cell_id,corpus,scenario,sender,receiver,client,link,cache,arm,n_blocks,sigma_d,blocks_for_2pct,blocks_for_3pct,blocks_for_5pct,blocks_for_10pct,blocks_equivalent_2pct,blocks_equivalent_3pct,blocks_equivalent_5pct,blocks_equivalent_10pct
+S1-mac-mars-small,screening,small-deep.fresh.mac-mars.sender.warm,small-deep,fresh,mac,mars,sender,mac-mars,warm,xs,12,0.3216319423194055,2071,931,343,92,2774,1247,459,122
+S1-mac-mars-small,screening,small-deep.fresh.mars-mac.receiver.warm,small-deep,fresh,mars,mac,receiver,mac-mars,warm,xs,12,0.2053842808323916,846,381,141,39,1133,510,189,51
+S1-mac-mars-small,screening,small-deep.noop.mac-mars.sender.warm,small-deep,noop,mac,mars,sender,mac-mars,warm,xs,12,0.3425029086697837,2348,1055,389,104,3146,1413,520,138
+S1-mac-mars-small,screening,small-deep.noop.mars-mac.receiver.warm,small-deep,noop,mars,mac,receiver,mac-mars,warm,xs,12,0.38280407190301813,2932,1317,485,129,3929,1765,649,172
+S1-mac-mars-small,screening,small-flat.fresh.mac-mars.sender.warm,small-flat,fresh,mac,mars,sender,mac-mars,warm,xs,12,0.45491421609675425,4140,1859,684,181,5548,2491,916,242
+S1-mac-mars-small,screening,small-flat.fresh.mars-mac.receiver.warm,small-flat,fresh,mars,mac,receiver,mac-mars,warm,xs,12,0.16269425713128965,532,240,90,25,712,321,119,33
+S1-mac-mars-small,screening,small-flat.noop.mac-mars.sender.warm,small-flat,noop,mac,mars,sender,mac-mars,warm,xs,12,0.2717316790038932,1479,665,246,66,1981,890,328,88
+S1-mac-mars-small,screening,small-flat.noop.mars-mac.receiver.warm,small-flat,noop,mars,mac,receiver,mac-mars,warm,xs,12,0.39715767432167015,3156,1418,522,139,4229,1899,699,185
+S1-mac-mars-small,screening,small-opaque.fresh.mac-mars.sender.warm,small-opaque,fresh,mac,mars,sender,mac-mars,warm,xs,12,0.5462558674797705,5968,2680,985,260,7998,3591,1320,348
+S1-mac-mars-small,screening,small-opaque.fresh.mars-mac.receiver.warm,small-opaque,fresh,mars,mac,receiver,mac-mars,warm,xs,12,0.23219138629259412,1080,486,180,49,1447,651,240,65
+S1-mac-mars-small,screening,small-opaque.noop.mac-mars.sender.warm,small-opaque,noop,mac,mars,sender,mac-mars,warm,xs,12,0.23171523979559516,1076,484,179,49,1441,648,240,65
+S1-mac-mars-small,screening,small-opaque.noop.mars-mac.receiver.warm,small-opaque,noop,mars,mac,receiver,mac-mars,warm,xs,12,0.263926184587747,1395,628,232,63,1869,840,310,83
+S1-mac-mars-small,screening,tiny-one.fresh.mac-mars.sender.warm,tiny-one,fresh,mac,mars,sender,mac-mars,warm,xs,12,0.7547312926670425,11391,5114,1879,494,15266,6853,2517,661
+S1-mac-mars-small,screening,tiny-one.fresh.mars-mac.receiver.warm,tiny-one,fresh,mars,mac,receiver,mac-mars,warm,xs,12,0.6184636752762868,7650,3435,1262,333,10252,4603,1691,445
+S1-mac-mars-small,screening,tiny-one.noop.mac-mars.sender.warm,tiny-one,noop,mac,mars,sender,mac-mars,warm,xs,12,0.7007884433095288,9821,4409,1620,426,13162,5909,2170,571
+S1-mac-mars-small,screening,tiny-one.noop.mars-mac.receiver.warm,tiny-one,noop,mars,mac,receiver,mac-mars,warm,xs,12,0.7762334162329936,12049,5409,1987,523,16148,7249,2662,699

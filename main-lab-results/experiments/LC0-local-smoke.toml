@@ -1,0 +1,40 @@
+# LC0: the local link's own check, on small trees: every tool's copy must verify in full.
+id = "LC0-local-smoke"
+kind = "screening"
+hypothesis = "Every tool's local copy from neo's NVMe to the T5 verifies against the corpus."
+primary = "durable_s"
+delta = 0.05
+blocks = 1
+control = "rsync"
+verify = "full"
+cleanup = "eager"
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-aH"]
+
+[arms.xs]
+tool = "xs"
+rev = "21ae6844ed20"
+flags = ["-aH"]
+
+[arms.cp-a]
+tool = "cp"
+flags = ["-a"]
+
+[arms.cp-r]
+tool = "cp"
+flags = ["-r"]
+verify = "content"
+
+[arms.tar]
+tool = "pipe"
+streams = 1
+
+[matrix]
+link = "neo-local-ssd"
+corpus = ["tiny-one", "small-flat"]
+scenario = ["fresh"]
+direction = ["neo>neo-ssd"]
+client = ["receiver"]
+cache = ["cold"]

@@ -1,0 +1,37 @@
+# D9 (tree T1): is xs's best small-file setting safe as the default on the wired
+# pair? Mixed and opaque trees both ways between the Pi and freya, against xs's default
+# and rsync. If it is slower anywhere, D9b splits it.
+id = "D9-lan-best-default"
+kind = "screening"
+hypothesis = "xs's best small-file setting is no slower than its default on mixed trees, either way."
+primary = "durable_s"
+delta = 0.03
+blocks = 8
+control = "xs"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.xs]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-a"]
+
+[arms.xs-best]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-a", "--no-atomic"]
+tune = { receiver = "jobs=4" }
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[matrix]
+link = "lan"
+corpus = ["mixed-bimodal", "mixed-threshold", "small-opaque"]
+scenario = ["fresh"]
+direction = ["neo>freya", "freya>neo"]
+client = ["sender"]
+cache = ["warm"]

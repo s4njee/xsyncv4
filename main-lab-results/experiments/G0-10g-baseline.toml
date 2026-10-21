@@ -1,0 +1,37 @@
+# G0 (tree T3, start): xs against rsync over the Mac's direct 10GbE cable to freya
+# (Intel X540, MTU 9000; raw TCP 9.1 Gb/s to freya, 9.7 back), both ways, onto NVMe:
+# how much of the link each tool uses on large, mixed, small and real trees.
+id = "G0-10g-baseline"
+kind = "screening"
+hypothesis = "xs uses at least 80% of the 10GbE link for large files both ways, and more of it than rsync on every tree."
+primary = "durable_s"
+delta = 0.03
+blocks = 8
+control = "xs"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.xs]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-a"]
+
+[arms.xs-best]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-a", "--no-atomic"]
+tune = { receiver = "jobs=4" }
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[matrix]
+link = "mac-freya-10g"
+corpus = ["large-text", "mixed-bimodal", "small-flat", "real-congress"]
+scenario = ["fresh"]
+direction = ["mac>freya", "freya>mac"]
+client = ["initiator"]
+cache = ["warm"]

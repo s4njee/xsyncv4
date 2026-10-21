@@ -1,0 +1,28 @@
+# Made by conduct.py for tree T8-mac-mars-psample, node Ac: confirms xs from MA3-psample-bidir,
+# faster there on real-psample: real-psample mac→mars xs 3.63×
+id = "MA3-psample-confirm"
+kind = "confirmatory"
+hypothesis = "xs is more than 5% faster than rsync on real-psample (from MA3-psample-bidir, confirmed with fresh blocks)."
+primary = "wall_s"
+delta = 0.05
+blocks = 12
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-aH"]
+
+[arms.xs]
+tool = "xs"
+rev = "8cc75bbdb801"
+flags = ["-aH"]
+
+[matrix]
+link = "mac-mars-10g"
+corpus = ["real-psample"]
+scenario = ["fresh"]
+direction = ["mac>mars", "mars>mac"]
+client = ["initiator"]
+cache = ["warm"]

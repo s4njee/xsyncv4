@@ -1,0 +1,31 @@
+{
+ "experiment": "F1a-lan-replicate",
+ "kind": "screening",
+ "hypothesis": "xs's best setting with -z stays ahead of rsync -az from run to run.",
+ "primary": "durable_s",
+ "control": "xs-z",
+ "delta": 0.03,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261017T184701Z-F1a-lan-replicate",
+  "20261017T202542Z-F1a-lan-replicate",
+  "20261017T204111Z-F1a-lan-replicate",
+  "20261017T205646Z-F1a-lan-replicate",
+  "20261017T211342Z-F1a-lan-replicate",
+  "20261017T212914Z-F1a-lan-replicate",
+  "20261017T214431Z-F1a-lan-replicate",
+  "20261017T215941Z-F1a-lan-replicate",
+  "20261017T223055Z-F1a-lan-replicate",
+  "20261017T224604Z-F1a-lan-replicate",
+  "20261017T230123Z-F1a-lan-replicate"
+ ],
+ "spec_sha256": [
+  "0ef7c5719a730225548b2dc3235a3eabe65836acaf86702a3d8f65e269d15b5c"
+ ],
+ "valid_blocks": 87,
+ "void_attempts": 252,
+ "void_reasons": [
+  "neo does not answer ping"
+ ]
+}

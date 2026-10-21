@@ -1,0 +1,44 @@
+# Z5: zstd levels 1, 2 and 3 end to end at 10 Gb/s, both directions, with no
+# compression for reference. The codec benchmark (job codec-levels, 2026-10-16)
+# found level 2 compressing large-text 4.07 times against level 1's 2.80, at the
+# same speed per core; in Z4 every level was held to about 5 Gb/s on the wire, so
+# the better ratio should deliver more data. This measures the best case for the
+# 10 GbE page's "max theoretical data transfer rates", and whether level 2 should
+# replace level 1 in xs's adaptive policy.
+id = "Z5-10g-zstd-levels"
+kind = "screening"
+hypothesis = "At 10 Gb/s, xs at zstd level 2 delivers compressible data faster than at levels 1 and 3."
+primary = "durable_s"
+delta = 0.03
+blocks = 6
+control = "xs-z1"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.xs-z1]
+tool = "xs"
+rev = "8cc75bbdb801"
+flags = ["-az", "--compress-level=1"]
+
+[arms.xs-z2]
+tool = "xs"
+rev = "8cc75bbdb801"
+flags = ["-az", "--compress-level=2"]
+
+[arms.xs-z3]
+tool = "xs"
+rev = "8cc75bbdb801"
+flags = ["-az", "--compress-level=3"]
+
+[arms.xs]
+tool = "xs"
+rev = "8cc75bbdb801"
+flags = ["-a"]
+
+[matrix]
+link = "mac-mars-direct"
+corpus = ["large-text"]
+scenario = ["fresh"]
+direction = ["mac>mars", "mars>mac"]
+client = ["initiator"]
+cache = ["warm"]

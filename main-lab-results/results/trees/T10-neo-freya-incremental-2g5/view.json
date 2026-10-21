@@ -1,0 +1,454 @@
+{
+ "id": "T10-neo-freya-incremental-2g5",
+ "question": "On the USB 2.5 Gb/s link, what limits incremental backups between neo and freya: scanning unchanged files, reusing existing data, or transferring changes?",
+ "start": [
+  "A"
+ ],
+ "startedUtc": "2026-10-17T23:53:01Z",
+ "until": null,
+ "fills": 0,
+ "nodes": [
+  {
+   "id": "A",
+   "kind": "experiment",
+   "experiment": "IB1-incremental-map-2g5",
+   "question": "At 0.1%, 1%, and 10% changed files, does xs benefit from reuse, and does it beat rsync in each direction?",
+   "estimateHours": 3.6,
+   "hypothesis": "The fastest incremental backup policy depends on the changed-file fraction, corpus, and direction.",
+   "design": "screening",
+   "state": "held",
+   "runs": [
+    {
+     "id": "20261017T235301Z-IB1-incremental-map-2g5",
+     "key": "lab/IB1-incremental-map-2g5/20261017T235301Z-IB1-incremental-map-2g5",
+     "state": null
+    }
+   ],
+   "decision": "Paused while mars/freya are offline and the Mac is paired with neo. Historical results and queue snapshots are preserved.",
+   "decidedUtc": "2026-10-18T01:21:05Z",
+   "start": true,
+   "promote": null
+  },
+  {
+   "id": "A~end3",
+   "kind": "end",
+   "experiment": null,
+   "question": null,
+   "estimateHours": null,
+   "hypothesis": "neither rsync nor whole-file xs beats compressed default xs in any planned cell",
+   "design": null,
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "A~end5",
+   "kind": "end",
+   "experiment": null,
+   "question": null,
+   "estimateHours": null,
+   "hypothesis": "evidence remains unresolved after the extra run; inspect missing or noisy cells",
+   "design": null,
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "W",
+   "kind": "confirm",
+   "experiment": "IB1-whole-confirm-2g5",
+   "question": "Does the whole-file gain repeat with independent blocks, without regressions in the tested cells?",
+   "estimateHours": 3.6,
+   "hypothesis": "Confirms the fastest arm of A with 12 fresh blocks, if it had one.",
+   "design": "confirmatory",
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": "A"
+  },
+  {
+   "id": "W~end0",
+   "kind": "end",
+   "experiment": null,
+   "question": null,
+   "estimateHours": null,
+   "hypothesis": "whole-file policy regresses somewhere; record a workload-specific crossover, not a universal default",
+   "design": null,
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "W~end1",
+   "kind": "end",
+   "experiment": null,
+   "question": null,
+   "estimateHours": null,
+   "hypothesis": "whole-file gains confirmed in the measured cells; use the change fraction and wire bytes to locate the crossover",
+   "design": null,
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "W~end2",
+   "kind": "end",
+   "experiment": null,
+   "question": null,
+   "estimateHours": null,
+   "hypothesis": "whole-file gains did not confirm cleanly; inspect the result before changing policy",
+   "design": null,
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "S",
+   "kind": "experiment",
+   "experiment": "IB2-incremental-scan-2g5",
+   "question": "Do scanner settings help a no-op and a 0.1% update on the same real tree?",
+   "estimateHours": 1.2,
+   "hypothesis": "Reducing sender scan parallelism or the listing window speeds metadata-heavy incremental backups.",
+   "design": "screening",
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "S~end3",
+   "kind": "end",
+   "experiment": null,
+   "question": null,
+   "estimateHours": null,
+   "hypothesis": "evidence remains unresolved after the extra run; inspect missing or noisy cells",
+   "design": null,
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "Sc",
+   "kind": "confirm",
+   "experiment": "IB2-scan-confirm-2g5",
+   "question": "Does the scanner gain repeat independently across no-op and incremental copies?",
+   "estimateHours": 1.2,
+   "hypothesis": "Confirms the fastest arm of S with 12 fresh blocks, if it had one.",
+   "design": "confirmatory",
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": "S"
+  },
+  {
+   "id": "Sc~end0",
+   "kind": "end",
+   "experiment": null,
+   "question": null,
+   "estimateHours": null,
+   "hypothesis": "the scanner winner regresses in another tested cell; retain workload-specific settings",
+   "design": null,
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "Sc~end1",
+   "kind": "end",
+   "experiment": null,
+   "question": null,
+   "estimateHours": null,
+   "hypothesis": "the scanner gain confirmed without a measured regression; propose a scanner policy change",
+   "design": null,
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "Sc~end2",
+   "kind": "end",
+   "experiment": null,
+   "question": null,
+   "estimateHours": null,
+   "hypothesis": "the scanner gain remains unresolved; profile metadata work next",
+   "design": null,
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "Z",
+   "kind": "experiment",
+   "experiment": "IB3-incremental-compression-2g5",
+   "question": "After scan tuning fails, does disabling compression help a 0.1% update?",
+   "estimateHours": 0.4,
+   "hypothesis": "Compression overhead explains the remaining gap on small incremental backups after scan tuning fails to help.",
+   "design": "screening",
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "Z~end1",
+   "kind": "end",
+   "experiment": null,
+   "question": null,
+   "estimateHours": null,
+   "hypothesis": "disabling compression does not help; retain compression and investigate the measured scan/reuse counters",
+   "design": null,
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "Z~end3",
+   "kind": "end",
+   "experiment": null,
+   "question": null,
+   "estimateHours": null,
+   "hypothesis": "evidence remains unresolved after the extra run; inspect missing or noisy cells",
+   "design": null,
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "Zc",
+   "kind": "confirm",
+   "experiment": "IB3-compression-confirm-2g5",
+   "question": "Does the small-update compression exception repeat with independent blocks?",
+   "estimateHours": 0.6,
+   "hypothesis": "Confirms the fastest arm of Z with 12 fresh blocks, if it had one.",
+   "design": "confirmatory",
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": "Z"
+  },
+  {
+   "id": "Zc~end0",
+   "kind": "end",
+   "experiment": null,
+   "question": null,
+   "estimateHours": null,
+   "hypothesis": "disabling compression regresses a tested direction; do not generalize the exception",
+   "design": null,
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "Zc~end1",
+   "kind": "end",
+   "experiment": null,
+   "question": null,
+   "estimateHours": null,
+   "hypothesis": "the narrow small-update compression exception confirmed; keep the T7 default for other workloads",
+   "design": null,
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "Zc~end2",
+   "kind": "end",
+   "experiment": null,
+   "question": null,
+   "estimateHours": null,
+   "hypothesis": "the compression exception did not confirm; retain the existing default recommendation",
+   "design": null,
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  }
+ ],
+ "edges": [
+  {
+   "from": "A",
+   "to": "S",
+   "label": "both gaps",
+   "taken": null
+  },
+  {
+   "from": "A",
+   "to": "W",
+   "label": "both gaps",
+   "taken": null
+  },
+  {
+   "from": "A",
+   "to": "W",
+   "label": "whole-file faster",
+   "taken": null
+  },
+  {
+   "from": "A",
+   "to": "S",
+   "label": "rsync faster",
+   "taken": null
+  },
+  {
+   "from": "A",
+   "to": "A~end3",
+   "label": "default holds",
+   "taken": null
+  },
+  {
+   "from": "A",
+   "to": "A~end5",
+   "label": "unresolved: review",
+   "taken": null
+  },
+  {
+   "from": "W",
+   "to": "W~end0",
+   "label": "crossover: review",
+   "taken": null
+  },
+  {
+   "from": "W",
+   "to": "W~end1",
+   "label": "gain confirmed",
+   "taken": null
+  },
+  {
+   "from": "W",
+   "to": "W~end2",
+   "label": "not confirmed: review",
+   "taken": null
+  },
+  {
+   "from": "S",
+   "to": "Sc",
+   "label": "scan setting faster",
+   "taken": null
+  },
+  {
+   "from": "S",
+   "to": "Z",
+   "label": "scan tuning no gain",
+   "taken": null
+  },
+  {
+   "from": "S",
+   "to": "S~end3",
+   "label": "unresolved: review",
+   "taken": null
+  },
+  {
+   "from": "Sc",
+   "to": "Sc~end0",
+   "label": "regression: review",
+   "taken": null
+  },
+  {
+   "from": "Sc",
+   "to": "Sc~end1",
+   "label": "gain confirmed",
+   "taken": null
+  },
+  {
+   "from": "Sc",
+   "to": "Sc~end2",
+   "label": "profile next",
+   "taken": null
+  },
+  {
+   "from": "Z",
+   "to": "Zc",
+   "label": "uncompressed faster",
+   "taken": null
+  },
+  {
+   "from": "Z",
+   "to": "Z~end1",
+   "label": "compression retained",
+   "taken": null
+  },
+  {
+   "from": "Z",
+   "to": "Z~end3",
+   "label": "unresolved: review",
+   "taken": null
+  },
+  {
+   "from": "Zc",
+   "to": "Zc~end0",
+   "label": "direction dependent",
+   "taken": null
+  },
+  {
+   "from": "Zc",
+   "to": "Zc~end1",
+   "label": "exception confirmed",
+   "taken": null
+  },
+  {
+   "from": "Zc",
+   "to": "Zc~end2",
+   "label": "not confirmed: review",
+   "taken": null
+  }
+ ],
+ "decisions": [
+  {
+   "utc": "2026-10-17T23:53:03Z",
+   "node": "A",
+   "kind": "queued",
+   "text": "A queued on neo (288 samples): start of the tree"
+  }
+ ]
+}

@@ -1,0 +1,113 @@
+{
+ "page": {
+  "generatedUtc": 1792573243.816,
+  "model": "claude-haiku-5-5",
+  "headline": "Does xs still beat rsync when neo has two CPUs?",
+  "intro": "The lab is checking whether xs -a -j4 keeps its speed advantage over rsync -a when neo is limited to 2 CPUs, and whether the real-projects gap seen in lab2 reproduces. The neo runner handles network pulls to mars over an 11 ms link, while neo-ssd runs local copies to the Samsung T5 with the same CPU cap. Each runner works through its queue in order, starting with the real-psample checks.",
+  "runners": [
+   {
+    "id": "neo",
+    "title": "neo \u2194 mars (macOS)",
+    "items": [
+     {
+      "experiment": "AP10210751-AP10210749-L2R8-psample-pull-wan11-cpu2",
+      "tree": "AUTO-10210751-neo",
+      "running": true,
+      "samples": 12,
+      "when": "now \u2192 ~4:15am",
+      "window": null,
+      "asks": "For lab2's real-projects fresh gap: on a fresh real-psample copy into a 2-CPU arm64 receiver behind 11 ms, is xs -a -j4 slower than rsync -a, or does it show a block-to-block stall like lab2's 8.8 to 98 s spread?",
+      "hypothesis": "With neo receiving under 11 ms and 2 CPUs, xs -a -j4's time-to-durable is at least 5% behind rsync -a, or its per-block times vary far more than rsync's.",
+      "why": "Runs now to test whether lab2's real-psample gap comes from a slower time-to-durable on a fresh copy or from block-to-block stalls behind 11 ms."
+     },
+     {
+      "experiment": "AP10210142-L2R4-psample-fresh-plain",
+      "tree": "AUTO-10210142-neo",
+      "running": false,
+      "samples": 12,
+      "when": "~4:15am \u2192 ~4:30am",
+      "window": null,
+      "asks": "For lab2's real-projects fresh gap: on the plain neo-mars link, with no added latency and no CPU cap, how does xs -a -j4 compare with rsync -a on a fresh real-psample copy?",
+      "hypothesis": "On the plain link, xs -a -j4 copies real-psample fresh no slower than rsync -a, so any loss in L2R3 comes from lab2's conditions.",
+      "why": "Runs next to set a plain-link baseline, so any loss seen under lab2's conditions can be attributed to latency and CPU limits rather than to xs itself."
+     },
+     {
+      "experiment": "AP10210751-AP10210749-L2P1-small-pull-wan11-cpu2",
+      "tree": "AUTO-10210751-neo",
+      "running": false,
+      "samples": 72,
+      "when": "~4:30am \u2192 ~5:45am",
+      "window": null,
+      "asks": "Before lab2 measures them: does xs -a -j4 still beat rsync -a on fresh and no-op copies of small-flat, small-deep and mixed-bimodal into a 2-CPU arm64 receiver behind 11 ms?",
+      "hypothesis": "In at least one of these six cells, rsync -a's time-to-durable comes within 5% of xs -a -j4's or beats it, since its plain-link lead there was 1.1x to 3x.",
+      "why": "Checks whether xs still beats rsync on small and mixed copies under 2 CPUs and 11 ms, where rsync led by 1.1x to 3x on the plain link."
+     },
+     {
+      "experiment": "AP10210751-AP10210749-L2P2-congress-resync-wan11-cp",
+      "tree": "AUTO-10210751-neo",
+      "running": false,
+      "samples": 32,
+      "when": "~5:45am \u2192 ~6:30am",
+      "window": null,
+      "asks": "In lab2's direction (2-CPU sender, 11 ms), does xs -a -j4 still beat rsync -a when re-syncing real-congress at a no-op and after a 1% change?",
+      "hypothesis": "Under 11 ms and a 2-CPU sender, xs -a -j4 stays at least 5% faster than rsync -a at both the no-op and the 1% update of real-congress.",
+      "why": "Tests whether xs stays at least 5% faster than rsync when re-syncing real-congress under 11 ms with a 2-CPU sender, at a no-op and after a 1% change."
+     }
+    ]
+   },
+   {
+    "id": "neo-ssd",
+    "title": "neo: NVMe \u2192 Samsung T5",
+    "items": [
+     {
+      "experiment": "AP10210142-L2R6-local-psample-cpu2",
+      "tree": "AUTO-10210142-neo-ssd",
+      "running": true,
+      "samples": 16,
+      "when": "now \u2192 ~4:30am",
+      "window": null,
+      "asks": "For lab2's real-projects fresh gap: copying real-psample locally to the T5 with cold caches and neo held to 2 CPUs, does xs -a -j4's existing deficit to rsync -a (about 10% in LC1 and LC12) widen?",
+      "hypothesis": "With 2 CPUs, xs -a -j4 is more than 15% slower than rsync -a on a fresh cold local real-psample copy, which would point at CPU contention among its workers.",
+      "why": "Tests whether a 2-CPU cap widens xs's existing local deficit on a cold real-psample copy to the T5, which would point at contention among its workers."
+     },
+     {
+      "experiment": "AP10210751-AP10210749-L2P3-local-congress-resync-cp",
+      "tree": "AUTO-10210751-neo-ssd",
+      "running": false,
+      "samples": 80,
+      "when": "~4:30am \u2192 ~12:30pm",
+      "window": null,
+      "asks": "With neo held to 2 CPUs, as lab2's sender is, does xs -a -j4 keep its local lead over rsync -a on real-congress no-op and update re-syncs?",
+      "hypothesis": "Under a 2-CPU cap, rsync -a's time-to-durable comes within 5% of xs -a -j4's in at least one of the no-op, 0.1%, 1% and 10% update cells, where xs's plain-link no-op lead was 4.7x (J2).",
+      "why": "Checks whether xs keeps its local lead over rsync on real-congress re-syncs with neo capped at 2 CPUs, matching lab2's sender conditions."
+     },
+     {
+      "experiment": "AP10210751-AP10210749-L2P4-local-small-cpu2",
+      "tree": "AUTO-10210751-neo-ssd",
+      "running": false,
+      "samples": 96,
+      "when": "~12:30pm \u2192 ~10pm",
+      "window": null,
+      "asks": "With neo held to 2 CPUs, does xs -a -j4 still beat rsync -a on local fresh and no-op copies of small-flat, small-deep and mixed-bimodal?",
+      "hypothesis": "Under a 2-CPU cap, xs -a -j4's lead over rsync -a shrinks below 5% in at least one of these six cells, from 1.25x to 4.8x on the plain link (J2).",
+      "why": "Tests whether the 2-CPU cap pushes xs's local lead below 5% on small-flat, small-deep and mixed-bimodal copies, where the plain-link lead was 1.25x to 4.8x."
+     },
+     {
+      "experiment": "AP10210751-AP10210749-L2P5-local-psample-resync-cpu",
+      "tree": "AUTO-10210751-neo-ssd",
+      "running": false,
+      "samples": 16,
+      "when": "~10pm \u2192 ~11:30pm",
+      "window": null,
+      "asks": "For the corpus behind lab2's real-projects gap: with neo held to 2 CPUs, does xs -a -j4 still re-sync real-psample faster than rsync -a at a no-op and after a 1% change?",
+      "hypothesis": "Under a 2-CPU cap, xs -a -j4 stays at least 5% faster than rsync -a at the real-psample no-op, as on the plain link (about 0.5x, LC4), but its lead at the 1% update is under 5%.",
+      "why": "Checks the corpus behind lab2's real-projects gap, asking whether xs still re-syncs real-psample at least 5% faster at a no-op and whether its 1% lead has shrunk."
+     }
+    ]
+   }
+  ],
+  "branches": []
+ },
+ "boundary": 1792573200,
+ "lastAttempt": 1792573243.816
+}

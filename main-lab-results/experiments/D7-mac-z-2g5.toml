@@ -1,0 +1,55 @@
+# D7 (tree T2): does compression pay at 2.5GbE? At 10GbE only zstd 1 kept up (Z5);
+# at a quarter of the bandwidth the trade should favour it more. Adaptive -z and levels
+# 1, 2 and 3 against no compression, all on xs's best setting, on compressible trees.
+id = "D7-mac-z-2g5"
+kind = "screening"
+hypothesis = "Compression makes compressible trees reach mars faster over 2.5GbE."
+primary = "durable_s"
+delta = 0.03
+blocks = 8
+control = "xs-best"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.xs-best]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-a", "--no-atomic"]
+tune = { receiver = "jobs=4" }
+
+[arms.xs-z]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-az", "--no-atomic"]
+tune = { receiver = "jobs=4" }
+
+[arms.xs-z1]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-az", "--no-atomic", "--compress-level=1"]
+tune = { receiver = "jobs=4" }
+
+[arms.xs-z2]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-az", "--no-atomic", "--compress-level=2"]
+tune = { receiver = "jobs=4" }
+
+[arms.xs-z3]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-az", "--no-atomic", "--compress-level=3"]
+tune = { receiver = "jobs=4" }
+
+[matrix]
+link = "mac-mars-2g5"
+corpus = ["large-text", "large-half", "mixed-bimodal", "real-congress"]
+scenario = ["fresh"]
+direction = ["mac>mars"]
+client = ["initiator"]
+cache = ["warm"]

@@ -1,0 +1,30 @@
+# R1: the baseline matrix again, a few blocks at a time, as filler at the
+# back of the week's backlog. Many short runs of the same spec, spread over
+# days, give the between-day variation that a single run cannot: whether a
+# ratio measured on Tuesday holds on Saturday. Read as a series, like the
+# sentinel, and pooled for a second, independent estimate of E1v2.
+id = "R1-replicate"
+kind = "screening"
+hypothesis = "The xs to rsync ratios of E1v2 hold from day to day."
+primary = "durable_s"
+delta = 0.03
+blocks = 4
+control = "rsync"
+verify = "first-last"
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[arms.xs]
+tool = "xs"
+rev = "8cc75bbdb801"
+flags = ["-a"]
+
+[matrix]
+link = "lan"
+corpus = ["tiny-one", "small-flat", "small-deep", "small-opaque", "small-real", "mixed-bimodal", "mixed-threshold"]
+scenario = ["fresh", "noop"]
+direction = ["neo>freya", "freya>neo"]
+client = ["sender"]
+cache = ["warm"]

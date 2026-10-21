@@ -1,0 +1,22 @@
+{
+ "experiment": "LC4-psample-local-resync",
+ "kind": "screening",
+ "hypothesis": "Re-syncing the psample backup locally with cold caches, xs -aH is faster than rsync -aH at a no-op and after a 1% change.",
+ "primary": "durable_s",
+ "control": "rsync",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261018T215454Z-LC4-psample-local-resync"
+ ],
+ "spec_sha256": [
+  "34841ee83d5d471975d38961b2032988c8567839f7b802c23e6cf637ee12a04e"
+ ],
+ "valid_blocks": 6,
+ "void_attempts": 18,
+ "void_reasons": [
+  "rsync: harness error: neo-ssd: `python3 /mnt/ssd/xsbench/lib/736894f6f725/corpus.py stale /mnt/ssd/xsbench/work/20261018T215454Z-LC4-psample-local-resync/real-p",
+  "xs: harness error: neo-ssd: `python3 /mnt/ssd/xsbench/lib/736894f6f725/corpus.py stale /mnt/ssd/xsbench/work/20261018T215454Z-LC4-psample-local-resync/real-psam"
+ ]
+}

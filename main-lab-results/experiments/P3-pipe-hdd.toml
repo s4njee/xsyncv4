@@ -1,0 +1,54 @@
+# P3: the same ideas onto mars's hard drive (btrfs, one HGST Ultrastar) over
+# 2.5GbE, where the goal is still to pass 1 Gb/s on small and mixed trees. One
+# drive writes about 200 MB/s at best, so link speed is out of reach for
+# durable copies here; the question is which approach comes closest.
+id = "P3-pipe-hdd"
+kind = "screening"
+hypothesis = "Tar streams and eager writeback copy small and mixed trees onto the hard drive faster than xs's best setting."
+primary = "durable_s"
+delta = 0.03
+blocks = 6
+control = "xs-best"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.xs-best]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-a", "--no-atomic"]
+tune = { receiver = "jobs=4" }
+
+[arms.xs-best-eager]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-a", "--no-atomic"]
+tune = { receiver = "jobs=4" }
+writeback = "eager"
+
+[arms.tar]
+tool = "pipe"
+streams = 1
+
+[arms.tar-zstd]
+tool = "pipe"
+streams = 1
+codec = "zstd1"
+
+[arms.tar-x4]
+tool = "pipe"
+streams = 4
+
+[arms.tar-x4-eager]
+tool = "pipe"
+streams = 4
+writeback = "eager"
+
+[matrix]
+link = "mac-mars-hdd-2g5"
+corpus = ["small-flat", "small-deep", "mixed-bimodal", "real-congress"]
+scenario = ["fresh"]
+direction = ["mac>mars-hdd"]
+client = ["initiator"]
+cache = ["warm"]

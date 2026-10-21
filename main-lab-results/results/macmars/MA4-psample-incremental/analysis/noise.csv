@@ -1,0 +1,5 @@
+experiment,kind,cell_id,corpus,scenario,sender,receiver,client,link,cache,arm,n_blocks,sigma_d,blocks_for_2pct,blocks_for_3pct,blocks_for_5pct,blocks_for_10pct,blocks_equivalent_2pct,blocks_equivalent_3pct,blocks_equivalent_5pct,blocks_equivalent_10pct
+MA4-psample-incremental,screening,real-psample.noop.mac-mars.sender.warm,real-psample,noop,mac,mars,sender,mac-mars-10g,warm,xs,4,0.16653676893686692,557,251,94,26,746,336,125,35
+MA4-psample-incremental,screening,real-psample.noop.mars-mac.receiver.warm,real-psample,noop,mars,mac,receiver,mac-mars-10g,warm,xs,3,0.11194491334698194,253,115,44,13,338,153,58,17
+MA4-psample-incremental,screening,real-psample.update-1pct.mac-mars.sender.warm,real-psample,update-1pct,mac,mars,sender,mac-mars-10g,warm,xs,4,0.10889974309183949,240,109,42,13,320,145,55,16
+MA4-psample-incremental,screening,real-psample.update-1pct.mars-mac.receiver.warm,real-psample,update-1pct,mars,mac,receiver,mac-mars-10g,warm,xs,4,0.07982880436293877,130,60,23,8,173,79,31,10

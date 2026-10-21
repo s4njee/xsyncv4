@@ -1,0 +1,21 @@
+{
+ "experiment": "Z1-10g-compress",
+ "kind": "screening",
+ "hypothesis": "xs -z delivers corpus data faster than xs without it on compressible trees, and faster than rsync -z.",
+ "primary": "durable_s",
+ "control": "xs",
+ "delta": 0.03,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261016T153158Z-Z1-10g-compress"
+ ],
+ "spec_sha256": [
+  "83668c86928e65cd10bbb3935ce782bf434f4f662d9acab7a3dd39f5f6afa9dc"
+ ],
+ "valid_blocks": 6,
+ "void_attempts": 1,
+ "void_reasons": [
+  "stopped"
+ ]
+}

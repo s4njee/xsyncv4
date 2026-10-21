@@ -1,0 +1,19 @@
+{
+ "experiment": "N2b-10g-small-read",
+ "kind": "screening",
+ "hypothesis": "At 10 Gb/s xs reads small and mixed trees off a cold NVMe drive faster than rsync.",
+ "primary": "durable_s",
+ "control": "rsync",
+ "delta": 0.03,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261016T113054Z-N2b-10g-small-read"
+ ],
+ "spec_sha256": [
+  "c73604f6a3d8b8a596f0b446e99bce12ad907be795d6c837cc5934d8c2f929d5"
+ ],
+ "valid_blocks": 96,
+ "void_attempts": 0,
+ "void_reasons": []
+}

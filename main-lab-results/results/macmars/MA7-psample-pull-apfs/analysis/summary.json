@@ -1,0 +1,38 @@
+{
+ "experiment": "MA7-psample-pull-apfs",
+ "kind": "screening",
+ "hypothesis": "Skipping directory times, the rename, or giving the Mac receiver more workers or scanners recovers xs's psample pull onto APFS.",
+ "primary": "wall_s",
+ "control": "xs",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261018T144803Z-MA7-psample-pull-apfs"
+ ],
+ "spec_sha256": [
+  "6f696474946768897400e77dec777efd417cfa0dac260fd3b6cf8774e7f33620"
+ ],
+ "valid_blocks": 6,
+ "void_attempts": 18,
+ "void_reasons": [
+  "xs-O: the destination does not match the corpus manifest: DIFFERS .xsyncv4-carryover/mac-root/runs\nDIFFERS .xsyncv4-carryover/mac-root/runs/20261016T113150Z-R3-",
+  "xs-O: the destination does not match the corpus manifest: DIFFERS .xsyncv4-carryover/mac-root/runs/20261014T225217Z-X1a-large-one\nDIFFERS .xsyncv4-carryover/mac",
+  "xs-O: the destination does not match the corpus manifest: DIFFERS .xsyncv4-carryover/mac-root/runs/20261015T100232Z-N2-nvme-small-read\nDIFFERS blackbird/.git/ob",
+  "xs-O: the destination does not match the corpus manifest: DIFFERS .xsyncv4-carryover/mac-root/runs/20261016T162335Z-Z4-10g-codecs\nDIFFERS audio/release/mac-arm6",
+  "xs-O: the destination does not match the corpus manifest: DIFFERS .xsyncv4-carryover/mac-root/runs/20261017T005544Z-D1-mac-sender-knobs\nDIFFERS audio/release/ma",
+  "xs-O: the destination does not match the corpus manifest: DIFFERS audio/dist/textures\nDIFFERS blackbird/.git/objects/24\nDIFFERS blackbird/.git/objects/b5\nDIFFER",
+  "xs-O: the destination does not match the corpus manifest: DIFFERS audio/public/textures\nDIFFERS blackbird/.git/objects/24\nDIFFERS blackbird/.git/objects/36\nDIFF",
+  "xs-O: the destination does not match the corpus manifest: DIFFERS audio/release\nDIFFERS blackbird/.git/objects/38\nDIFFERS blackbird/.git/objects/58\nDIFFERS blac",
+  "xs-O: the destination does not match the corpus manifest: DIFFERS audio/src/modes\nDIFFERS blackbird/.git/objects/c2\nDIFFERS blackbird/web/src/lib\nDIFFERS blog/.",
+  "xs-O: the destination does not match the corpus manifest: DIFFERS blackbird\nDIFFERS blackbird/.git/objects/22\nDIFFERS blackbird/.git/objects/2b\nDIFFERS blackbir",
+  "xs-O: the destination does not match the corpus manifest: DIFFERS blackbird/.git/hooks\nDIFFERS blackbird/.git/objects/4e\nDIFFERS blackbird/.git/objects/8a\nDIFFE",
+  "xs-O: the destination does not match the corpus manifest: DIFFERS blackbird/.git/objects/07\nDIFFERS blackbird/.git/objects/42\nDIFFERS blackbird/.git/objects/5e\n",
+  "xs-O: the destination does not match the corpus manifest: DIFFERS blackbird/.git/objects/07\nDIFFERS blackbird/.git/objects/42\nDIFFERS blackbird/.git/objects/a7\n",
+  "xs-O: the destination does not match the corpus manifest: DIFFERS blackbird/.git/objects/0e\nDIFFERS blackbird/.git/objects/2b\nDIFFERS blackbird/.git/objects/9b\n",
+  "xs-O: the destination does not match the corpus manifest: DIFFERS blackbird/.git/objects/27\nDIFFERS blackbird/.git/objects/88\nDIFFERS blackbird/.git/objects/e2\n",
+  "xs-O: the destination does not match the corpus manifest: DIFFERS blackbird/.git/objects/34\nDIFFERS blackbird/.git/objects/44\nDIFFERS blackbird/.git/objects/45\n",
+  "xs-O: the destination does not match the corpus manifest: DIFFERS blackbird/.git/objects/45\nDIFFERS blackbird/.git/objects/4d\nDIFFERS blackbird/.git/objects/6b\n",
+  "xs-O: the destination does not match the corpus manifest: DIFFERS blackbird/.git/objects/58\nDIFFERS blackbird/.git/objects/5d\nDIFFERS blackbird/.git/objects/61\n"
+ ]
+}

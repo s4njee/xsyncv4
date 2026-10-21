@@ -1,0 +1,51 @@
+{
+ "tree": "AUTO-10210142-neo",
+ "started_utc": "2026-10-21T01:42:43Z",
+ "nodes": {
+  "N0": {
+   "state": "decided",
+   "runs": [
+    "20261021T014243Z-AP10210142-L2R1-congress-fresh-wan11-cpu2"
+   ],
+   "spec": "auto/AP10210142-L2R1-congress-fresh-wan11-cpu2.toml",
+   "decision": {
+    "utc": "2026-10-21T02:18:40Z",
+    "text": "N0: not clearly faster: the next window's plan reads this",
+    "next": [],
+    "branch": 1
+   }
+  },
+  "N1": {
+   "state": "decided",
+   "runs": [
+    "20261021T014245Z-AP10210142-L2R2-congress-fresh-cpu2-only"
+   ],
+   "spec": "auto/AP10210142-L2R2-congress-fresh-cpu2-only.toml",
+   "decision": {
+    "utc": "2026-10-21T02:42:23Z",
+    "text": "N1: done (1 run)",
+    "next": []
+   }
+  },
+  "N2": {
+   "state": "decided",
+   "runs": [
+    "20261021T014247Z-AP10210142-L2R3-psample-fresh-wan11-cpu2"
+   ],
+   "spec": "auto/AP10210142-L2R3-psample-fresh-wan11-cpu2.toml",
+   "decision": {
+    "utc": "2026-10-21T06:33:26Z",
+    "text": "N2: not clearly faster: the next window's plan reads this",
+    "next": [],
+    "branch": 1
+   }
+  },
+  "N3": {
+   "state": "queued",
+   "runs": [
+    "20261021T014249Z-AP10210142-L2R4-psample-fresh-plain"
+   ],
+   "spec": "auto/AP10210142-L2R4-psample-fresh-plain.toml"
+  }
+ }
+}

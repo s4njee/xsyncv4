@@ -1,0 +1,31 @@
+# Written by the 6-hourly planner (2026-10-19T12:50Z). Why: --no-atomic was a wide tie on its own in LC3, but it may only help once eager writeback removes the flush bottleneck, and that combination has not been tried.
+id = "AP10191250-LC11-local-eager-noatomic"
+kind = "screening"
+hypothesis = "Adding --no-atomic to xs -aH with eager writeback makes the durable psample copy to the T5 at least 5% faster than eager writeback alone."
+primary = "durable_s"
+delta = 0.05
+blocks = 4
+control = "xs-eager"
+verify = "first-last"
+cleanup = "eager"
+sample_timeout_s = 7200
+
+[arms.xs-eager]
+tool = "xs"
+rev = "dd6f5121d506"
+flags = ["-aH"]
+writeback = "eager"
+
+[arms.xs-eager-noatomic]
+tool = "xs"
+rev = "dd6f5121d506"
+flags = ["-aH", "--no-atomic"]
+writeback = "eager"
+
+[matrix]
+link = "neo-local-ssd"
+corpus = ["real-psample"]
+scenario = ["fresh"]
+direction = ["neo>neo-ssd"]
+client = ["receiver"]
+cache = ["cold"]

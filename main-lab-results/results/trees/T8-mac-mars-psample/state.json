@@ -1,0 +1,33 @@
+{
+ "tree": "T8-mac-mars-psample",
+ "started_utc": "2026-10-18T02:30:03Z",
+ "nodes": {
+  "A": {
+   "state": "decided",
+   "runs": [
+    "20261018T023003Z-MA3-psample-bidir"
+   ],
+   "spec": "MA3-psample-bidir.toml",
+   "decision": {
+    "utc": "2026-10-18T04:54:34Z",
+    "text": "A: xs screens at least 5% faster than rsync -aH: confirm the winner with fresh blocks (real-psample mac\u2192mars xs 3.63\u00d7 [2.24, 5.87]; real-psample mars\u2192mac xs 1.28\u00d7 [0.78, 2.13])",
+    "next": [
+     "Ac"
+    ],
+    "branch": 0
+   }
+  },
+  "Ac": {
+   "state": "decided",
+   "runs": [
+    "20261018T045434Z-MA3-psample-confirm"
+   ],
+   "spec": "generated/MA3-psample-confirm.toml",
+   "decision": {
+    "utc": "2026-10-18T13:26:49Z",
+    "text": "Ac: done (1 run)",
+    "next": []
+   }
+  }
+ }
+}

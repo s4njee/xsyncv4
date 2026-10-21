@@ -1,0 +1,30 @@
+# E4g, confirmation. In the screen, polling for the peer's exit every 1 ms
+# instead of 25 made no-ops 4 to 12% faster. Fresh blocks, more corpora,
+# fresh copies as well as no-ops, and Holm over the 12 comparisons.
+id = "E4g-peer-poll-confirm"
+kind = "confirmatory"
+hypothesis = "Polling for the peer's exit every 1 ms instead of 25 makes no-ops more than 3% faster and no transfer slower."
+primary = "wall_s"
+delta = 0.03
+blocks = 16
+control = "xs"
+verify = "first-last"
+
+[arms.xs]
+tool = "xs"
+rev = "ddefa041364e-tune"
+flags = ["-a"]
+
+[arms.poll1]
+tool = "xs"
+rev = "ddefa041364e-tune"
+flags = ["-a"]
+tune = { sender = "wait_peer_poll_ms=1", receiver = "wait_peer_poll_ms=1" }
+
+[matrix]
+link = "lan"
+corpus = ["tiny-one", "small-flat", "small-real"]
+scenario = ["fresh", "noop"]
+direction = ["neo>freya", "freya>neo"]
+client = ["sender"]
+cache = ["warm"]

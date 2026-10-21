@@ -1,0 +1,44 @@
+# J1d (2026-10-20, real-congress; one corpus per run, so that a crash of mars costs one run): -j4 against -j8 and the default, on hosts whose CPU counts are real. On the VPS
+# lab's 2-vCPU container, which reports 80 CPUs, the default over-subscribed workers: a no-op of a
+# 1% sample of ~/projects took 1.45x rsync's time by default, 0.51x at -j4 and 0.75x at -j8, and lab2
+# now defaults to -j4. Here -j sets both ends; the default is each host's core count capped at 16:
+# 4 on neo (Raspberry Pi 5, 4 cores) and 16 on mars (Ryzen 9 7950X, 32 threads, macOS). So -j4 is
+# neo's default with mars cut to 4, and -j8 doubles neo's workers past its cores. E3a (2026-10-13,
+# neo/freya) found no single best count: fewer for bytes from the Pi, the default or more for small
+# files and no-ops, and 16 too many for a freya no-op (-j4 0.62x the default).
+id = "J1d-neo-mars-jobs-real-congress"
+kind = "screening"
+hypothesis = "-j4 and -j8 differ from each other, and from the default, by more than 5% in time-to-durable on small-file and no-op copies between neo and mars."
+primary = "durable_s"
+delta = 0.05
+blocks = 8
+control = "xs"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.xs]
+tool = "xs"
+rev = "e51c1df1329a"
+flags = ["-a"]
+
+[arms.xs-j4]
+tool = "xs"
+rev = "e51c1df1329a"
+flags = ["-a", "-j4"]
+
+[arms.xs-j8]
+tool = "xs"
+rev = "e51c1df1329a"
+flags = ["-a", "-j8"]
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[matrix]
+link = "neo-mars-lan"
+corpus = ["real-congress"]
+scenario = ["fresh", "noop"]
+direction = ["neo>mars", "mars>neo"]
+client = ["initiator"]
+cache = ["warm"]

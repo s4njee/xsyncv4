@@ -1,0 +1,17 @@
+{
+ "name": "congress-and-text",
+ "steps": [
+  {
+   "host": "neo",
+   "ssh": "[email]",
+   "local": true,
+   "command": "cd ~/benchmarks/xsyncv4/lab && if [ -f real-congress.tar.gz ]; then rm -rf corpora/real-congress corpora/real-congress.manifest.json corpora/real-congress.files.jsonl && tar -xzf real-congress.tar.gz -C corpora && rm real-congress.tar.gz; fi && python3 lib/c4b227526aa5/corpus.py verify corpora/real-congress --manifest corpora/real-congress.manifest.json > /dev/null && (test -f corpora/large-text.manifest.json || python3 lib/c4b227526aa5/corpus.py generate large-text --root corpora > /dev/null)"
+  },
+  {
+   "host": "freya",
+   "ssh": "[email]",
+   "local": false,
+   "command": "cd /mnt/nvme/xsbench && if [ -f real-congress.tar.gz ]; then rm -rf corpora/real-congress corpora/real-congress.manifest.json corpora/real-congress.files.jsonl && tar -xzf real-congress.tar.gz -C corpora && rm real-congress.tar.gz; fi && python3 lib/c4b227526aa5/corpus.py verify corpora/real-congress --manifest corpora/real-congress.manifest.json > /dev/null && (test -f corpora/large-text.manifest.json || python3 lib/c4b227526aa5/corpus.py generate large-text --root corpora > /dev/null)"
+  }
+ ]
+}

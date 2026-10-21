@@ -1,0 +1,17 @@
+experiment,kind,cell_id,corpus,scenario,sender,receiver,client,link,cache,arm,n_blocks,sigma_d,blocks_for_2pct,blocks_for_3pct,blocks_for_5pct,blocks_for_10pct,blocks_equivalent_2pct,blocks_equivalent_3pct,blocks_equivalent_5pct,blocks_equivalent_10pct
+E3b-compress-confirm,confirmatory,mixed-bimodal.fresh.freya-neo.sender.warm,mixed-bimodal,fresh,freya,neo,sender,lan,warm,xs-z,12,0.011340672573506433,8,8,8,8,8,8,8,8
+E3b-compress-confirm,confirmatory,mixed-bimodal.fresh.freya-neo.sender.warm,mixed-bimodal,fresh,freya,neo,sender,lan,warm,rsync,12,0.00844271215633598,8,8,8,8,8,8,8,8
+E3b-compress-confirm,confirmatory,mixed-bimodal.fresh.neo-freya.sender.warm,mixed-bimodal,fresh,neo,freya,sender,lan,warm,xs-z,12,0.030104872888843254,21,11,8,8,27,13,8,8
+E3b-compress-confirm,confirmatory,mixed-bimodal.fresh.neo-freya.sender.warm,mixed-bimodal,fresh,neo,freya,sender,lan,warm,rsync,12,0.012142099179300968,8,8,8,8,8,8,8,8
+E3b-compress-confirm,confirmatory,small-flat.fresh.freya-neo.sender.warm,small-flat,fresh,freya,neo,sender,lan,warm,xs-z,12,0.02593897518257665,16,9,8,8,21,11,8,8
+E3b-compress-confirm,confirmatory,small-flat.fresh.freya-neo.sender.warm,small-flat,fresh,freya,neo,sender,lan,warm,rsync,12,0.05722569303784498,68,32,13,8,90,42,17,8
+E3b-compress-confirm,confirmatory,small-flat.fresh.neo-freya.sender.warm,small-flat,fresh,neo,freya,sender,lan,warm,xs-z,12,0.03420390076795144,26,13,8,8,34,17,8,8
+E3b-compress-confirm,confirmatory,small-flat.fresh.neo-freya.sender.warm,small-flat,fresh,neo,freya,sender,lan,warm,rsync,12,0.2628726025634686,1384,623,230,62,1854,834,308,82
+E3b-compress-confirm,confirmatory,small-opaque.fresh.freya-neo.sender.warm,small-opaque,fresh,freya,neo,sender,lan,warm,xs-z,12,0.01663667068458839,8,8,8,8,10,8,8,8
+E3b-compress-confirm,confirmatory,small-opaque.fresh.freya-neo.sender.warm,small-opaque,fresh,freya,neo,sender,lan,warm,rsync,12,0.045504088208138664,44,21,9,8,58,27,12,8
+E3b-compress-confirm,confirmatory,small-opaque.fresh.neo-freya.sender.warm,small-opaque,fresh,neo,freya,sender,lan,warm,xs-z,12,0.016581254563664542,8,8,8,8,10,8,8,8
+E3b-compress-confirm,confirmatory,small-opaque.fresh.neo-freya.sender.warm,small-opaque,fresh,neo,freya,sender,lan,warm,rsync,12,0.2609822474336094,1364,614,227,61,1828,822,303,81
+E3b-compress-confirm,confirmatory,small-real.fresh.freya-neo.sender.warm,small-real,fresh,freya,neo,sender,lan,warm,xs-z,12,0.11251736915481746,256,116,44,13,342,155,58,17
+E3b-compress-confirm,confirmatory,small-real.fresh.freya-neo.sender.warm,small-real,fresh,freya,neo,sender,lan,warm,rsync,12,0.042508268321064184,39,19,8,8,51,24,10,8
+E3b-compress-confirm,confirmatory,small-real.fresh.neo-freya.sender.warm,small-real,fresh,neo,freya,sender,lan,warm,xs-z,12,0.07596949665789324,118,54,22,8,157,72,28,9
+E3b-compress-confirm,confirmatory,small-real.fresh.neo-freya.sender.warm,small-real,fresh,neo,freya,sender,lan,warm,rsync,12,0.1740899379700761,608,274,102,29,815,367,136,38

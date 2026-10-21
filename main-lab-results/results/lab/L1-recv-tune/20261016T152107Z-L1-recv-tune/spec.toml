@@ -1,0 +1,60 @@
+# L1: receiving workers and --no-atomic on small fresh copies, moved here from
+# the 10 Gb/s link (N3b, N4), where these copies ran far below the link. Both
+# ends receive in turn: freya (32 threads, default 16 workers) and neo (a Pi
+# 5, 4). On the direct link, --no-atomic looked like the larger lever.
+id = "L1-recv-tune"
+kind = "screening"
+hypothesis = "Fewer receiving workers on freya, and --no-atomic on either end, make small fresh copies faster."
+primary = "wall_s"
+delta = 0.03
+blocks = 10
+control = "xs"
+verify = "first-last"
+
+[arms.xs]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a"]
+metrics = true
+
+[arms.recv2]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a"]
+tune = { receiver = "jobs=2" }
+metrics = true
+
+[arms.recv4]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a"]
+tune = { receiver = "jobs=4" }
+metrics = true
+
+[arms.recv8]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a"]
+tune = { receiver = "jobs=8" }
+metrics = true
+
+[arms.no-atomic]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a", "--no-atomic"]
+metrics = true
+
+[arms.recv4-noatomic]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a", "--no-atomic"]
+tune = { receiver = "jobs=4" }
+metrics = true
+
+[matrix]
+link = "lan"
+corpus = ["small-flat", "small-deep", "small-opaque", "small-real", "mixed-bimodal"]
+scenario = ["fresh"]
+direction = ["neo>freya", "freya>neo"]
+client = ["sender"]
+cache = ["warm"]

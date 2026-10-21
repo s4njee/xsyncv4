@@ -1,0 +1,10 @@
+experiment,kind,cell_id,corpus,scenario,sender,receiver,client,link,cache,arm,n_blocks,sigma_d,blocks_for_2pct,blocks_for_3pct,blocks_for_5pct,blocks_for_10pct,blocks_equivalent_2pct,blocks_equivalent_3pct,blocks_equivalent_5pct,blocks_equivalent_10pct
+G2-10g-zfs,screening,large-text.fresh.mac-freya-zfs.sender.warm,large-text,fresh,mac,freya-zfs,sender,mac-freya-zfs-10g,warm,xs-best,8,0.0788962696661974,127,58,23,8,169,77,30,10
+G2-10g-zfs,screening,large-text.fresh.mac-freya-zfs.sender.warm,large-text,fresh,mac,freya-zfs,sender,mac-freya-zfs-10g,warm,rsync,8,0.046394120182006865,46,22,10,8,60,28,12,8
+G2-10g-zfs,screening,large-text.fresh.mac-freya-zfs.sender.warm,large-text,fresh,mac,freya-zfs,sender,mac-freya-zfs-10g,warm,write1m,8,0.028126991325354952,18,10,8,8,24,12,8,8
+G2-10g-zfs,screening,mixed-bimodal.fresh.mac-freya-zfs.sender.warm,mixed-bimodal,fresh,mac,freya-zfs,sender,mac-freya-zfs-10g,warm,xs-best,8,0.3288953869007583,2165,973,359,96,2901,1303,480,128
+G2-10g-zfs,screening,mixed-bimodal.fresh.mac-freya-zfs.sender.warm,mixed-bimodal,fresh,mac,freya-zfs,sender,mac-freya-zfs-10g,warm,rsync,8,0.4164068527010394,3469,1558,574,152,4649,2088,768,203
+G2-10g-zfs,screening,mixed-bimodal.fresh.mac-freya-zfs.sender.warm,mixed-bimodal,fresh,mac,freya-zfs,sender,mac-freya-zfs-10g,warm,write1m,8,0.2952657216522568,1745,785,290,78,2339,1051,387,103
+G2-10g-zfs,screening,small-flat.fresh.mac-freya-zfs.sender.warm,small-flat,fresh,mac,freya-zfs,sender,mac-freya-zfs-10g,warm,xs-best,8,0.12689727164113798,324,147,56,16,434,196,74,21
+G2-10g-zfs,screening,small-flat.fresh.mac-freya-zfs.sender.warm,small-flat,fresh,mac,freya-zfs,sender,mac-freya-zfs-10g,warm,rsync,8,0.4325238398205486,3743,1681,619,164,5015,2252,828,219
+G2-10g-zfs,screening,small-flat.fresh.mac-freya-zfs.sender.warm,small-flat,fresh,mac,freya-zfs,sender,mac-freya-zfs-10g,warm,write1m,8,0.09429863068957381,180,82,32,10,241,109,42,13

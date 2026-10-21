@@ -1,0 +1,31 @@
+# N1b: N1 at 10 Gb/s. Small and mixed trees from the Mac onto mars's NVMe,
+# xs against rsync, time to durable. N1 ran when mars's X540 sat in a PCIe x1
+# slot (about 3 Gb/s); this asks whether small files pass 1 Gb/s with the
+# network out of the way.
+id = "N1b-10g-small-write"
+kind = "screening"
+hypothesis = "At 10 Gb/s xs writes small and mixed trees onto NVMe faster than rsync, durably."
+primary = "durable_s"
+delta = 0.03
+blocks = 8
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+hours = [23, 7]  # the Mac sends: run while it is idle overnight
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[arms.xs]
+tool = "xs"
+rev = "8cc75bbdb801"
+flags = ["-a"]
+
+[matrix]
+link = "mac-mars-direct"
+corpus = ["tiny-one", "small-flat", "small-deep", "small-opaque", "mixed-bimodal", "mixed-threshold"]
+scenario = ["fresh", "noop"]
+direction = ["mac>mars"]
+client = ["initiator"]
+cache = ["warm"]

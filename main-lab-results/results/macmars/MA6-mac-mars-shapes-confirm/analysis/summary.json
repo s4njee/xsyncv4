@@ -1,0 +1,19 @@
+{
+ "experiment": "MA6-mac-mars-shapes-confirm",
+ "kind": "confirmatory",
+ "hypothesis": "xs is more than 5% faster than rsync on large-text, real-congress (from MA6-mac-mars-shapes, confirmed with fresh blocks).",
+ "primary": "wall_s",
+ "control": "rsync",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261018T135930Z-MA6-mac-mars-shapes-confirm"
+ ],
+ "spec_sha256": [
+  "63f71d8f97c36274202c07d46a2f627eb09e6bbe327c3e893387444298a8f9c9"
+ ],
+ "valid_blocks": 48,
+ "void_attempts": 0,
+ "void_reasons": []
+}

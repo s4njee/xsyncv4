@@ -1,0 +1,34 @@
+# S3: the Mac and mars sentinel at 10 GbE, since mars was reformatted. Two identical
+# xs arms and rsync, a small and a mixed tree, fresh and no-op, both ways. Read as a
+# control chart: the Mac's A/A ratio at each hour shows when its runs can be trusted.
+id = "S3-mac-mars-sentinel"
+kind = "screening"
+hypothesis = "Hour by hour, the A/A ratio stays within 5% of 1 and the xs to rsync ratio stays where E6b's rsync arm put it."
+primary = "wall_s"
+delta = 0.05
+blocks = 2
+control = "xs"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.xs]
+tool = "xs"
+rev = "21ae6844ed20"
+flags = ["-aH"]
+
+[arms.again]
+tool = "xs"
+rev = "21ae6844ed20"
+flags = ["-aH"]
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-aH"]
+
+[matrix]
+link = "mac-mars-10g"
+corpus = ["small-flat", "mixed-bimodal"]
+scenario = ["fresh", "noop"]
+direction = ["mac>mars", "mars>mac"]
+client = ["initiator"]
+cache = ["warm"]

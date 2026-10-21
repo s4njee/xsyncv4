@@ -1,0 +1,17 @@
+{
+ "name": "scale-corpora",
+ "steps": [
+  {
+   "host": "neo",
+   "ssh": "[email]",
+   "local": true,
+   "command": "cd ~/benchmarks/xsyncv4/lab && for c in scale-size-1024 scale-size-16384 scale-size-65536 scale-size-262144 scale-size-1048576 scale-size-4194304 scale-size-16777216 scale-count-1000 scale-count-3000 scale-count-30000 scale-count-100000 scale-count-300000 scale-count-1000000; do test -f corpora/$c.manifest.json || python3 lib/905db83a4732/corpus.py generate $c --root corpora > /dev/null || exit 1; done"
+  },
+  {
+   "host": "freya",
+   "ssh": "[email]",
+   "local": false,
+   "command": "cd /mnt/nvme/xsbench && for c in scale-size-1024 scale-size-16384 scale-size-65536 scale-size-262144 scale-size-1048576 scale-size-4194304 scale-size-16777216 scale-count-1000 scale-count-3000 scale-count-30000 scale-count-100000 scale-count-300000 scale-count-1000000; do test -f corpora/$c.manifest.json || python3 lib/905db83a4732/corpus.py generate $c --root corpora > /dev/null || exit 1; done"
+  }
+ ]
+}

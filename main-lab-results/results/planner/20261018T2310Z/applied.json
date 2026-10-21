@@ -1,0 +1,21 @@
+{
+ "summary": "Neither runner has room for new work this window, so the plan adds no experiments. The mac runner's MA7 psample pull run has 7.0 hours left, which is more than the 6-hour window. neo-ssd has 2.5 hours left on LC2 plus 10.2 hours of queued work (LC6, LC3, LC4), so its existing tree work fills the window and well beyond.",
+ "window_end": "2026-10-19T05:10Z",
+ "runners": [
+  {
+   "runner": "mac",
+   "rationale": "No room: the current run MA7-psample-pull-apfs has 7.0 hours left, which already exceeds the 6-hour window, so no new experiments are planned. Once it ends, the open questions from E6b deserve follow-up. One is the small-deep no-op pull onto the Mac, where rsync was confirmed faster (0.54x). The other is the recv4 setting, which looked faster on tiny-one and small-flat no-op but is inconclusive almost everywhere else.",
+   "accepted": [],
+   "rejected": [],
+   "tree": null
+  },
+  {
+   "runner": "neo-ssd",
+   "rationale": "No room: LC2-psample-local-workers has 2.5 hours left. Queued behind it are LC6-local-beat-rsync, LC3-psample-local-durable and LC4-psample-local-resync, totalling 10.2 hours. Together that is 12.7 hours against a 6-hour window. These runs are the next nodes of trees T14 and T16, so adding work here would duplicate them or simply never run.",
+   "accepted": [],
+   "rejected": [],
+   "tree": null
+  }
+ ],
+ "conductor": ""
+}

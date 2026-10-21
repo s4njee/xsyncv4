@@ -1,0 +1,43 @@
+# T18: the Mac as the receiver of small files, xs's worst ground against rsync. A asks whether the
+# parent-descriptor budget fix (e51c1df1329a) closes the gap on small trees as it did by hand on psample;
+# B confirms N4's lead that skipping the temporary-name rename is a large part of APFS's per-file cost.
+# Both end in a decision for a person: merging the fix, or opening an engineering case for new-file writes.
+id = "T18-apfs-small-files"
+question = "Can xs stop losing to rsync when it writes small files onto the Mac: through the parent-descriptor fix, or by not renaming new files?"
+start = ["A", "B"]
+
+[nodes.A]
+spec = "MA9-small-pull-anchors.toml"
+question = "Pulling small trees onto the Mac, does xs with the larger parent-descriptor budget beat its parent, and close its gap to rsync, at a no-op and fresh?"
+
+  [[nodes.A.branch]]
+  when = { arm = "xs-anchors", verdict = ["faster", "equivalent"] }
+  next = []
+  hold = true
+  label = "level with or faster than rsync"
+  note = "the fix closes the small-file gap on the Mac: weigh merging engine/dest-anchors with T17; decision needed"
+
+  [[nodes.A.branch]]
+  otherwise = true
+  next = []
+  hold = true
+  label = "rsync still ahead"
+  note = "rsync stays ahead on small files onto the Mac even with the fix: a second cause to profile; decision needed"
+
+[nodes.B]
+spec = "MA10-apfs-no-atomic.toml"
+question = "On fresh copies of small files onto the Mac, is --no-atomic clearly faster than xs's default?"
+
+  [[nodes.B.branch]]
+  when = { arm = "xs-no-atomic", verdict = "faster" }
+  next = []
+  hold = true
+  label = "the rename is the cost"
+  note = "skipping the rename is clearly faster on APFS: consider an engineering case to write new files under their final names; decision needed"
+
+  [[nodes.B.branch]]
+  otherwise = true
+  next = []
+  hold = true
+  label = "no clear gain"
+  note = "--no-atomic is not clearly faster on APFS: the rename is not the cost; decision needed"

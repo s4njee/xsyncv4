@@ -1,0 +1,40 @@
+# OS1a (2026-10-20): do the macOS-specific defects seen on the Mac reproduce on other hardware? neo
+# (Raspberry Pi 5, Linux, ext4) and mars (Ryzen 9 7950X, macOS 26, APFS) on the LAN, both ways, so
+# the same two machines and tools take turns as the receiver: neo>mars writes onto macOS/APFS,
+# mars>neo onto Linux/ext4. On the M1 Max, xs pulling small-deep onto APFS took 1.75x rsync's time
+# fresh and 3.66x no-op (experiments.md), and a receiver on macOS kept only 32 parent directories
+# open (its open-file limit of 256 over 8) against 128 on Linux, walking every path from the root
+# (development.md, e51c1df1329a on engine/dest-anchors). xs-parent is 21ae6844ed20, the commit that
+# fix sits on. If the defects are macOS's and not the M1's, xs/rsync is worse in neo>mars than in
+# mars>neo, and the fix helps neo>mars no-ops but not mars>neo ones.
+id = "OS1a-neo-mars-receiver-os"
+kind = "screening"
+hypothesis = "xs's time-to-durable relative to rsync differs by more than 5% between a macOS and a Linux receiver on small and deep trees, and e51c1df1329a beats its parent only when macOS receives."
+primary = "durable_s"
+delta = 0.05
+blocks = 4
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[arms.xs-parent]
+tool = "xs"
+rev = "21ae6844ed20"
+flags = ["-a"]
+
+[arms.xs]
+tool = "xs"
+rev = "e51c1df1329a"
+flags = ["-a"]
+
+[matrix]
+link = "neo-mars-lan"
+corpus = ["small-deep", "small-flat", "mixed-bimodal"]
+scenario = ["fresh", "noop"]
+direction = ["neo>mars", "mars>neo"]
+client = ["initiator"]
+cache = ["warm"]

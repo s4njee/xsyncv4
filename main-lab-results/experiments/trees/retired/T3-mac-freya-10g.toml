@@ -1,0 +1,144 @@
+# T3: how close xs gets to 10 Gb/s between the Mac and freya, over the direct cable to freya's
+# Intel X540 (MTU 9000; raw TCP 9.1 Gb/s to freya, 9.7 back), and on which trees. Every branch
+# leads to what would use more of the link: tuning large files if xs falls short of 8 Gb/s on
+# them, the ZFS pool as a destination (and its tuning if it holds xs back), small and mixed
+# trees pushed with batching and compression, and compression with freya's 16 cores sending.
+# Winners are confirmed with fresh blocks. Until Sunday 07:00 Central, once its branches end,
+# it repeats short replicates (F3a, F3b).
+id = "T3-mac-freya-10g"
+question = "How close can xs get to 10 Gb/s between the Mac and freya, and what gets it closer?"
+start = ["G0", "G0b"]
+until = "2026-10-18T12:00Z"
+fill = ["F3a", "F3b"]
+
+[nodes.G0]
+spec = "G0-10g-baseline.toml"
+question = "How much of the 10GbE link do xs and rsync use, each way, on each kind of tree?"
+
+  [[nodes.G0.branch]]
+  when = { arm = "xs", corpus = "large-text", gbps_at_least = 8.0, all = true }
+  next = ["G2", "G3"]
+  note = "xs carries large files at 8 Gb/s or more both ways: the link is nearly full for them"
+  label = "large files ≥ 8 Gb/s"
+
+  [[nodes.G0.branch]]
+  otherwise = true
+  next = ["G1"]
+  note = "xs carries large files below 8 Gb/s one way or both: tune them before anything else"
+  label = "large files < 8 Gb/s"
+
+[nodes.G0b]
+spec = "G0b-10g-large-mac.toml"
+question = "How fast do pure large-file trees go from the Mac to freya?"
+
+[nodes.G1]
+spec = "G1-10g-large-tune.toml"
+question = "What holds large files below 10 Gb/s: streams, block size, queues or workers?"
+
+  [[nodes.G1.branch]]
+  when = { verdict = "faster" }
+  next = ["G1c", "G2", "G3"]
+  note = "a setting moved large files closer to the link"
+  label = "an arm was faster"
+
+  [[nodes.G1.branch]]
+  otherwise = true
+  next = ["G2", "G3"]
+  note = "no setting moved large files closer to the link"
+  label = "nothing faster"
+
+[nodes.G2]
+spec = "G2-10g-zfs.toml"
+question = "Can freya's ZFS pool take 10 Gb/s?"
+
+  [[nodes.G2.branch]]
+  when = { arm = "xs", corpus = ["large-four", "large-mixed"], gbps_at_least = 8.0, all = true }
+  next = []
+  note = "the pool takes large files at 8 Gb/s or more"
+  label = "pool ≥ 8 Gb/s"
+
+  [[nodes.G2.branch]]
+  otherwise = true
+  next = ["G2b"]
+  note = "the pool holds large files below 8 Gb/s: tune its writes"
+  label = "pool < 8 Gb/s"
+
+[nodes.G2b]
+spec = "G2b-10g-zfs-tune.toml"
+question = "Do other worker counts or write sizes get more out of the ZFS pool?"
+
+  [[nodes.G2b.branch]]
+  when = { verdict = "faster" }
+  next = ["G2bc"]
+  note = "a worker count or write size was faster onto the pool"
+  label = "an arm was faster"
+
+  [[nodes.G2b.branch]]
+  otherwise = true
+  next = []
+  note = "no worker count or write size beat the default onto the pool"
+  label = "nothing faster"
+
+[nodes.G3]
+spec = "G3-10g-small-push.toml"
+question = "Can batching, scanning, framing or zstd 1 make small and mixed trees use more of the link?"
+
+  [[nodes.G3.branch]]
+  when = { verdict = "faster" }
+  next = ["G3c", "G4"]
+  note = "a setting made small or mixed trees faster at 10 Gb/s"
+  label = "an arm was faster"
+
+  [[nodes.G3.branch]]
+  otherwise = true
+  next = ["G4"]
+  note = "no setting beat xs's best on small and mixed trees"
+  label = "nothing faster"
+
+[nodes.G4]
+spec = "G4-10g-compress-freya.toml"
+question = "With freya's 16 cores sending, does compression beat 10 Gb/s?"
+
+  [[nodes.G4.branch]]
+  when = { verdict = "faster" }
+  next = ["G4c"]
+  note = "a compression level was faster than none from freya"
+  label = "an arm was faster"
+
+  [[nodes.G4.branch]]
+  otherwise = true
+  next = []
+  note = "no compression level beat sending uncompressed from freya"
+  label = "nothing faster"
+
+[nodes.G1c]
+promote = "G1"
+id = "G1c-10g-large-confirm"
+blocks = 12
+question = "Does the large-file winner hold up with fresh blocks?"
+
+[nodes.G2bc]
+promote = "G2b"
+id = "G2bc-10g-zfs-confirm"
+blocks = 12
+question = "Does the pool's winning setting hold up with fresh blocks?"
+
+[nodes.G3c]
+promote = "G3"
+id = "G3c-10g-small-confirm"
+blocks = 12
+question = "Does the small-file winner hold up with fresh blocks?"
+
+[nodes.G4c]
+promote = "G4"
+id = "G4c-10g-compress-confirm"
+blocks = 12
+question = "Does the winning compression level hold up with fresh blocks?"
+
+[nodes.F3a]
+spec = "F3a-10g-replicate.toml"
+question = "Do the 10GbE results hold steady over the weekend?"
+
+[nodes.F3b]
+spec = "F3b-10g-zfs-replicate.toml"
+question = "Do the ZFS results hold steady over the weekend?"

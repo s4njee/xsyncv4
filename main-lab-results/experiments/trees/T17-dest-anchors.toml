@@ -1,0 +1,46 @@
+# T17: confirm the parent-descriptor budget fix (e51c1df1329a, branch engine/dest-anchors). Profiling the
+# Mac as the receiver of a psample pull found xs re-walking every destination directory's path from the
+# root because it kept at most 256 parents open (32 on macOS's default limit, 128 on Linux's). A runs
+# where it was found, B on Linux. A fix that is faster than its parent and slower nowhere is a merge
+# decision for a person; the tree records that rather than acting on it.
+id = "T17-dest-anchors"
+question = "Does keeping more parent directories open make xs's receives faster than its parent, and than rsync, on the Mac and on Linux?"
+start = ["A", "B"]
+
+[nodes.A]
+spec = "MA8-psample-pull-anchors.toml"
+front = true
+question = "Pulling psample onto the Mac, is xs with the larger budget faster than its parent and rsync, at a no-op and a 1% update?"
+
+  [[nodes.A.branch]]
+  when = { arm = "xs-anchors", verdict = "faster" }
+  next = []
+  hold = true
+  label = "faster than rsync"
+  note = "the fix beats rsync on the APFS pull: merge engine/dest-anchors and close T13; decision needed"
+
+  [[nodes.A.branch]]
+  otherwise = true
+  next = []
+  hold = true
+  label = "not clearly faster"
+  note = "the fix does not clearly beat rsync on the APFS pull: compare it with its parent before deciding; decision needed"
+
+[nodes.B]
+spec = "LC12-local-anchors.toml"
+front = true
+question = "Copying psample to the T5, is xs with the larger budget faster than its parent, and at least as fast as rsync?"
+
+  [[nodes.B.branch]]
+  when = { arm = "xs-anchors", verdict = ["faster", "equivalent"] }
+  next = []
+  hold = true
+  label = "level with or faster than rsync"
+  note = "the fix brings xs level with or ahead of rsync on Linux local copies: decision needed on merging"
+
+  [[nodes.B.branch]]
+  otherwise = true
+  next = []
+  hold = true
+  label = "rsync still ahead"
+  note = "rsync stays ahead on Linux local copies even with the fix: decision needed"

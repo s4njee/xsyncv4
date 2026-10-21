@@ -1,0 +1,54 @@
+# Z1b-10g-compress: as Z1-10g-compress without the congress slice, whose copies are bound by per-file
+# work (0.15 to 0.56 Gb/s) and move to neo and freya.
+# Z1: compression at 10 Gb/s, where it can carry more than the link or one ssh
+# connection (about 8 Gb/s): xs compresses in parallel on every worker; rsync
+# -z runs one zstd stream on one thread. Corpora: a real slice of the csearch
+# congress data (216,518 JSON, XML and text files, 1.16 GB, about 17.6x at
+# zstd level 3), 8 GiB of generated text (about 4.2x), and 8.35 GiB half text,
+# half incompressible. Rates are corpus bytes over time to durable, so above
+# the link means compression is paying.
+id = "Z1b-10g-compress"
+kind = "screening"
+hypothesis = "xs -z delivers corpus data faster than xs without it on compressible trees, and faster than rsync -z."
+primary = "durable_s"
+delta = 0.03
+blocks = 6
+control = "xs"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.xs]
+tool = "xs"
+rev = "8cc75bbdb801"
+flags = ["-a"]
+
+[arms.xs-z]
+tool = "xs"
+rev = "8cc75bbdb801"
+flags = ["-az"]
+
+[arms.xs-z1]
+tool = "xs"
+rev = "8cc75bbdb801"
+flags = ["-az", "--compress-level=1"]
+
+[arms.xs-z3]
+tool = "xs"
+rev = "8cc75bbdb801"
+flags = ["-az", "--compress-level=3"]
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[arms.rsync-z]
+tool = "rsync"
+flags = ["-az"]
+
+[matrix]
+link = "mac-mars-direct"
+corpus = ["large-text", "large-half"]
+scenario = ["fresh"]
+direction = ["mac>mars", "mars>mac"]
+client = ["initiator"]
+cache = ["warm"]

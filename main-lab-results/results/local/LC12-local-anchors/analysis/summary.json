@@ -1,0 +1,19 @@
+{
+ "experiment": "LC12-local-anchors",
+ "kind": "confirmatory",
+ "hypothesis": "With a larger parent-descriptor budget, xs -aH copies and re-syncs psample to the T5 faster than its parent, and at least as fast as rsync -aH.",
+ "primary": "durable_s",
+ "control": "rsync",
+ "delta": 0.03,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261019T132845Z-LC12-local-anchors"
+ ],
+ "spec_sha256": [
+  "7648a15f0a7de9b2a63f8fd82a09d5cb25c321500c9407fbeca9a5d1da50277e"
+ ],
+ "valid_blocks": 12,
+ "void_attempts": 0,
+ "void_reasons": []
+}

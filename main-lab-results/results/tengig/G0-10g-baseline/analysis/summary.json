@@ -1,0 +1,23 @@
+{
+ "experiment": "G0-10g-baseline",
+ "kind": "screening",
+ "hypothesis": "xs uses at least 80% of the 10GbE link for large files both ways, and more of it than rsync on every tree.",
+ "primary": "durable_s",
+ "control": "xs",
+ "delta": 0.03,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261017T020249Z-G0-10g-baseline",
+  "20261017T121630Z-G0-10g-baseline"
+ ],
+ "spec_sha256": [
+  "ab85a5c0a0f873022ec6369b54488b990427ffbc452566594aa4b68acb55739c",
+  "e631b2db8e83601e298cb6a9a40d344cd3e8f63f24bc17944fbffb16dcc98def"
+ ],
+ "valid_blocks": 64,
+ "void_attempts": 1,
+ "void_reasons": [
+  "stopped"
+ ]
+}

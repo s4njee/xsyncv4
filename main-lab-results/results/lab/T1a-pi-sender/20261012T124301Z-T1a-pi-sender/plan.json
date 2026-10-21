@@ -1,0 +1,951 @@
+{
+ "schema": 1,
+ "experiment": "T1a-pi-sender",
+ "spec_sha256": "4239b0f7f6afaa93b0d81dee1d021e20f5f6d2603a8df64d0174b346402ec271",
+ "kind": "screening",
+ "hypothesis": "Fewer xs worker threads, or a cheaper SSH cipher, close the gap to rsync when neo sends a mixed tree.",
+ "primary": "wall_s",
+ "delta": 0.02,
+ "control": "xs",
+ "seed": 1,
+ "run_id": "20261012T124301Z-T1a-pi-sender",
+ "driver": "neo",
+ "sample_timeout_s": 3600,
+ "hosts": {
+  "neo": {
+   "ssh": "[email]",
+   "name": "[host]",
+   "hostname": "neo",
+   "root": "~/benchmarks/xsyncv4/lab",
+   "interface": "eth0",
+   "helper": true,
+   "gates": {}
+  },
+  "freya": {
+   "ssh": "[email]",
+   "name": "[host]",
+   "hostname": "freya",
+   "root": "/mnt/nvme/xsbench",
+   "interface": "enp10s0",
+   "helper": true,
+   "gates": {}
+  }
+ },
+ "links": {
+  "lan": {
+   "hosts": [
+    "neo",
+    "freya"
+   ],
+   "medium": "wired",
+   "min_speed_mbps": 1000,
+   "max_rtt_ms": 2.0
+  }
+ },
+ "arms": [
+  {
+   "name": "xs",
+   "tool": "xs",
+   "flags": [
+    "-a"
+   ],
+   "rev": "bf596d28c5c9",
+   "binary": {
+    "neo": "~/benchmarks/xsyncv4/lab/bin/xs-bf596d28c5c9",
+    "freya": "/mnt/nvme/xsbench/bin/xs-bf596d28c5c9"
+   },
+   "sha256": {
+    "neo": "7f61f0acdef53606350f80057bac8d9cb418d7e7af5104315d3de9f8b9b9ac18",
+    "freya": "ce24c1fa00c11ffe8f94ad96a1221970b627d85c4607d19652815b3d5f20996f"
+   },
+   "artifacts": {
+    "xs-linux-amd64": "ce24c1fa00c11ffe8f94ad96a1221970b627d85c4607d19652815b3d5f20996f",
+    "xs-linux-arm64": "7f61f0acdef53606350f80057bac8d9cb418d7e7af5104315d3de9f8b9b9ac18"
+   }
+  },
+  {
+   "name": "xs-j1",
+   "tool": "xs",
+   "flags": [
+    "-a",
+    "-j1"
+   ],
+   "rev": "bf596d28c5c9",
+   "binary": {
+    "neo": "~/benchmarks/xsyncv4/lab/bin/xs-bf596d28c5c9",
+    "freya": "/mnt/nvme/xsbench/bin/xs-bf596d28c5c9"
+   },
+   "sha256": {
+    "neo": "7f61f0acdef53606350f80057bac8d9cb418d7e7af5104315d3de9f8b9b9ac18",
+    "freya": "ce24c1fa00c11ffe8f94ad96a1221970b627d85c4607d19652815b3d5f20996f"
+   },
+   "artifacts": {
+    "xs-linux-amd64": "ce24c1fa00c11ffe8f94ad96a1221970b627d85c4607d19652815b3d5f20996f",
+    "xs-linux-arm64": "7f61f0acdef53606350f80057bac8d9cb418d7e7af5104315d3de9f8b9b9ac18"
+   }
+  },
+  {
+   "name": "xs-j2",
+   "tool": "xs",
+   "flags": [
+    "-a",
+    "-j2"
+   ],
+   "rev": "bf596d28c5c9",
+   "binary": {
+    "neo": "~/benchmarks/xsyncv4/lab/bin/xs-bf596d28c5c9",
+    "freya": "/mnt/nvme/xsbench/bin/xs-bf596d28c5c9"
+   },
+   "sha256": {
+    "neo": "7f61f0acdef53606350f80057bac8d9cb418d7e7af5104315d3de9f8b9b9ac18",
+    "freya": "ce24c1fa00c11ffe8f94ad96a1221970b627d85c4607d19652815b3d5f20996f"
+   },
+   "artifacts": {
+    "xs-linux-amd64": "ce24c1fa00c11ffe8f94ad96a1221970b627d85c4607d19652815b3d5f20996f",
+    "xs-linux-arm64": "7f61f0acdef53606350f80057bac8d9cb418d7e7af5104315d3de9f8b9b9ac18"
+   }
+  },
+  {
+   "name": "xs-aes",
+   "tool": "xs",
+   "flags": [
+    "-a"
+   ],
+   "ssh_options": [
+    "-c",
+    "[email]"
+   ],
+   "rev": "bf596d28c5c9",
+   "binary": {
+    "neo": "~/benchmarks/xsyncv4/lab/bin/xs-bf596d28c5c9",
+    "freya": "/mnt/nvme/xsbench/bin/xs-bf596d28c5c9"
+   },
+   "sha256": {
+    "neo": "7f61f0acdef53606350f80057bac8d9cb418d7e7af5104315d3de9f8b9b9ac18",
+    "freya": "ce24c1fa00c11ffe8f94ad96a1221970b627d85c4607d19652815b3d5f20996f"
+   },
+   "artifacts": {
+    "xs-linux-amd64": "ce24c1fa00c11ffe8f94ad96a1221970b627d85c4607d19652815b3d5f20996f",
+    "xs-linux-arm64": "7f61f0acdef53606350f80057bac8d9cb418d7e7af5104315d3de9f8b9b9ac18"
+   }
+  },
+  {
+   "name": "rsync",
+   "tool": "rsync",
+   "flags": [
+    "-a"
+   ],
+   "binary": {
+    "neo": "rsync",
+    "freya": "rsync"
+   }
+  },
+  {
+   "name": "rsync-aes",
+   "tool": "rsync",
+   "flags": [
+    "-a"
+   ],
+   "ssh_options": [
+    "-c",
+    "[email]"
+   ],
+   "binary": {
+    "neo": "rsync",
+    "freya": "rsync"
+   }
+  }
+ ],
+ "cells": [
+  {
+   "id": "mixed-bimodal.fresh.neo-freya.sender.warm",
+   "corpus": "mixed-bimodal",
+   "scenario": "fresh",
+   "sender": "neo",
+   "receiver": "freya",
+   "client": "sender",
+   "link": "lan",
+   "cache": "warm"
+  },
+  {
+   "id": "mixed-threshold.fresh.neo-freya.sender.warm",
+   "corpus": "mixed-threshold",
+   "scenario": "fresh",
+   "sender": "neo",
+   "receiver": "freya",
+   "client": "sender",
+   "link": "lan",
+   "cache": "warm"
+  }
+ ],
+ "corpora": {
+  "mixed-bimodal": {
+   "files": 20000,
+   "directories": 420,
+   "bytes": 1395127076,
+   "digest": "e9071fb7ad3b0375ffe9fab58f740bfd22d545f7678e163a6c745504cc7aa16b",
+   "quick_digest": "31af6dbe5d38a32f5f0acf560703fa557304d3936e59f7b395d13cf8d0dec7fb"
+  },
+  "mixed-threshold": {
+   "files": 1500,
+   "directories": 72,
+   "bytes": 1502174819,
+   "digest": "d3070e0dc3befde555186110544966357a2c32a1db72c20e30d464e4cea9e048",
+   "quick_digest": "1f974c87ddf6c48409178d39b34889d699e7079283dcd212889a0ea3ac6c38f2"
+  }
+ },
+ "blocks": [
+  {
+   "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs-j2",
+     "xs-aes",
+     "xs",
+     "rsync",
+     "rsync-aes",
+     "xs-j1"
+    ],
+    [
+     "rsync",
+     "xs",
+     "xs-j1",
+     "xs-j2",
+     "xs-aes",
+     "rsync-aes"
+    ],
+    [
+     "rsync-aes",
+     "xs-aes",
+     "xs-j1",
+     "xs",
+     "rsync",
+     "xs-j2"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-threshold.fresh.neo-freya.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs-j1",
+     "rsync-aes",
+     "rsync",
+     "xs-j2",
+     "xs-aes",
+     "xs"
+    ],
+    [
+     "xs-aes",
+     "xs-j2",
+     "rsync",
+     "rsync-aes",
+     "xs-j1",
+     "xs"
+    ],
+    [
+     "xs-j2",
+     "xs-j1",
+     "xs",
+     "xs-aes",
+     "rsync",
+     "rsync-aes"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-aes",
+     "rsync-aes",
+     "xs-j2",
+     "xs-j1",
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs-aes",
+     "xs-j1",
+     "xs-j2",
+     "rsync-aes",
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs-j1",
+     "rsync-aes",
+     "xs",
+     "xs-aes",
+     "rsync",
+     "xs-j2"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-threshold.fresh.neo-freya.sender.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-j1",
+     "rsync-aes",
+     "xs-j2",
+     "xs",
+     "xs-aes",
+     "rsync"
+    ],
+    [
+     "xs",
+     "xs-j2",
+     "rsync",
+     "xs-j1",
+     "rsync-aes",
+     "xs-aes"
+    ],
+    [
+     "rsync",
+     "rsync-aes",
+     "xs-j2",
+     "xs-j1",
+     "xs",
+     "xs-aes"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-threshold.fresh.neo-freya.sender.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-aes",
+     "rsync",
+     "xs-j2",
+     "rsync-aes",
+     "xs",
+     "xs-j1"
+    ],
+    [
+     "xs",
+     "rsync",
+     "xs-j2",
+     "xs-aes",
+     "rsync-aes",
+     "xs-j1"
+    ],
+    [
+     "rsync",
+     "xs-j1",
+     "rsync-aes",
+     "xs",
+     "xs-j2",
+     "xs-aes"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "xs-j2",
+     "xs-j1",
+     "rsync",
+     "xs-aes",
+     "rsync-aes"
+    ],
+    [
+     "xs-aes",
+     "rsync-aes",
+     "rsync",
+     "xs",
+     "xs-j1",
+     "xs-j2"
+    ],
+    [
+     "rsync",
+     "xs-j1",
+     "xs-aes",
+     "xs-j2",
+     "xs",
+     "rsync-aes"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync-aes",
+     "xs-aes",
+     "xs-j2",
+     "xs",
+     "xs-j1",
+     "rsync"
+    ],
+    [
+     "rsync-aes",
+     "rsync",
+     "xs",
+     "xs-j2",
+     "xs-j1",
+     "xs-aes"
+    ],
+    [
+     "xs-j2",
+     "rsync",
+     "xs",
+     "rsync-aes",
+     "xs-j1",
+     "xs-aes"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-threshold.fresh.neo-freya.sender.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync",
+     "xs",
+     "xs-j1",
+     "xs-aes",
+     "xs-j2",
+     "rsync-aes"
+    ],
+    [
+     "xs",
+     "xs-aes",
+     "rsync",
+     "rsync-aes",
+     "xs-j1",
+     "xs-j2"
+    ],
+    [
+     "rsync-aes",
+     "rsync",
+     "xs-aes",
+     "xs",
+     "xs-j2",
+     "xs-j1"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+   "block": 4,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync-aes",
+     "xs-j1",
+     "xs-aes",
+     "xs",
+     "xs-j2",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs-aes",
+     "xs-j2",
+     "xs",
+     "xs-j1",
+     "rsync-aes"
+    ],
+    [
+     "xs",
+     "rsync",
+     "xs-aes",
+     "rsync-aes",
+     "xs-j2",
+     "xs-j1"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-threshold.fresh.neo-freya.sender.warm",
+   "block": 4,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-j1",
+     "xs-aes",
+     "rsync",
+     "xs-j2",
+     "rsync-aes",
+     "xs"
+    ],
+    [
+     "rsync-aes",
+     "xs-j1",
+     "xs-aes",
+     "xs-j2",
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs-j1",
+     "xs",
+     "xs-j2",
+     "xs-aes",
+     "rsync",
+     "rsync-aes"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+   "block": 5,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "xs-aes",
+     "rsync",
+     "xs-j2",
+     "rsync-aes",
+     "xs-j1"
+    ],
+    [
+     "xs",
+     "rsync-aes",
+     "xs-j2",
+     "xs-aes",
+     "rsync",
+     "xs-j1"
+    ],
+    [
+     "rsync-aes",
+     "xs-j1",
+     "rsync",
+     "xs",
+     "xs-aes",
+     "xs-j2"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-threshold.fresh.neo-freya.sender.warm",
+   "block": 5,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-aes",
+     "xs-j1",
+     "xs-j2",
+     "rsync",
+     "rsync-aes",
+     "xs"
+    ],
+    [
+     "xs-j1",
+     "rsync-aes",
+     "xs-j2",
+     "rsync",
+     "xs",
+     "xs-aes"
+    ],
+    [
+     "xs",
+     "xs-j2",
+     "rsync-aes",
+     "rsync",
+     "xs-aes",
+     "xs-j1"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+   "block": 6,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-j2",
+     "xs",
+     "xs-j1",
+     "rsync-aes",
+     "rsync",
+     "xs-aes"
+    ],
+    [
+     "rsync",
+     "xs-aes",
+     "xs",
+     "xs-j2",
+     "xs-j1",
+     "rsync-aes"
+    ],
+    [
+     "rsync-aes",
+     "xs-aes",
+     "xs-j1",
+     "rsync",
+     "xs-j2",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-threshold.fresh.neo-freya.sender.warm",
+   "block": 6,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-aes",
+     "xs-j1",
+     "xs-j2",
+     "rsync-aes",
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs-j1",
+     "xs-j2",
+     "rsync",
+     "rsync-aes",
+     "xs-aes",
+     "xs"
+    ],
+    [
+     "xs-j2",
+     "xs",
+     "xs-aes",
+     "rsync",
+     "rsync-aes",
+     "xs-j1"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-threshold.fresh.neo-freya.sender.warm",
+   "block": 7,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-j2",
+     "xs-j1",
+     "rsync",
+     "xs",
+     "rsync-aes",
+     "xs-aes"
+    ],
+    [
+     "xs-j2",
+     "xs",
+     "rsync-aes",
+     "xs-j1",
+     "rsync",
+     "xs-aes"
+    ],
+    [
+     "rsync",
+     "xs",
+     "xs-j2",
+     "xs-j1",
+     "rsync-aes",
+     "xs-aes"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+   "block": 7,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync-aes",
+     "xs-aes",
+     "rsync",
+     "xs-j1",
+     "xs",
+     "xs-j2"
+    ],
+    [
+     "rsync-aes",
+     "xs-j1",
+     "xs-j2",
+     "xs",
+     "rsync",
+     "xs-aes"
+    ],
+    [
+     "rsync-aes",
+     "xs-aes",
+     "xs-j1",
+     "xs-j2",
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+   "block": 8,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync",
+     "rsync-aes",
+     "xs-j2",
+     "xs",
+     "xs-aes",
+     "xs-j1"
+    ],
+    [
+     "rsync",
+     "xs-j2",
+     "rsync-aes",
+     "xs",
+     "xs-aes",
+     "xs-j1"
+    ],
+    [
+     "rsync",
+     "xs-j1",
+     "xs-aes",
+     "xs",
+     "xs-j2",
+     "rsync-aes"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-threshold.fresh.neo-freya.sender.warm",
+   "block": 8,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync-aes",
+     "xs-aes",
+     "xs-j2",
+     "xs",
+     "xs-j1",
+     "rsync"
+    ],
+    [
+     "xs",
+     "xs-j1",
+     "rsync-aes",
+     "xs-aes",
+     "rsync",
+     "xs-j2"
+    ],
+    [
+     "xs-j1",
+     "xs-aes",
+     "rsync-aes",
+     "xs",
+     "rsync",
+     "xs-j2"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-threshold.fresh.neo-freya.sender.warm",
+   "block": 9,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-j2",
+     "xs",
+     "rsync-aes",
+     "xs-aes",
+     "xs-j1",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs-aes",
+     "xs",
+     "xs-j2",
+     "rsync-aes",
+     "xs-j1"
+    ],
+    [
+     "rsync-aes",
+     "xs",
+     "xs-j2",
+     "xs-aes",
+     "rsync",
+     "xs-j1"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+   "block": 9,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "xs-j1",
+     "rsync-aes",
+     "xs-aes",
+     "rsync",
+     "xs-j2"
+    ],
+    [
+     "xs-aes",
+     "xs",
+     "rsync-aes",
+     "xs-j1",
+     "rsync",
+     "xs-j2"
+    ],
+    [
+     "rsync",
+     "xs-aes",
+     "xs",
+     "rsync-aes",
+     "xs-j1",
+     "xs-j2"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+   "block": 10,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "xs-j1",
+     "rsync",
+     "rsync-aes",
+     "xs-aes",
+     "xs-j2"
+    ],
+    [
+     "rsync",
+     "xs-j2",
+     "xs",
+     "rsync-aes",
+     "xs-aes",
+     "xs-j1"
+    ],
+    [
+     "xs-aes",
+     "rsync",
+     "xs-j1",
+     "xs",
+     "xs-j2",
+     "rsync-aes"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-threshold.fresh.neo-freya.sender.warm",
+   "block": 10,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-j1",
+     "rsync",
+     "xs-aes",
+     "xs-j2",
+     "xs",
+     "rsync-aes"
+    ],
+    [
+     "rsync-aes",
+     "xs-aes",
+     "xs-j2",
+     "rsync",
+     "xs-j1",
+     "xs"
+    ],
+    [
+     "rsync-aes",
+     "xs-j2",
+     "xs-j1",
+     "xs",
+     "rsync",
+     "xs-aes"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-threshold.fresh.neo-freya.sender.warm",
+   "block": 11,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs-aes",
+     "rsync-aes",
+     "rsync",
+     "xs-j1",
+     "xs",
+     "xs-j2"
+    ],
+    [
+     "rsync",
+     "xs-j1",
+     "xs",
+     "xs-aes",
+     "xs-j2",
+     "rsync-aes"
+    ],
+    [
+     "rsync-aes",
+     "xs",
+     "xs-j2",
+     "xs-j1",
+     "xs-aes",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+   "block": 11,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs-j1",
+     "xs-aes",
+     "xs-j2",
+     "rsync-aes",
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "xs-j2",
+     "xs-j1",
+     "rsync",
+     "xs-aes",
+     "rsync-aes"
+    ],
+    [
+     "xs-j1",
+     "xs",
+     "rsync-aes",
+     "rsync",
+     "xs-j2",
+     "xs-aes"
+    ]
+   ]
+  }
+ ],
+ "scripts": {
+  "probe.py": "eda278401de00e2906b27965c3a6297d30e5aa253d0ce1f7446fe2974df8035f",
+  "corpus.py": "d6018d3611cba607a670f3fe554d0d4be5941fb2ef8fd65d57f10bfb582625f6",
+  "corpora.json": "729929e1ba7baf3a0b8413efffab5bc26ae0cbe8514daf1c05bbb53a314bb084",
+  "agent.py": "291daa4da3202e8df913cb13a493cd8e5afc171add2d427071f2add83decf852",
+  "overnight.py": "c9b81a0bbcda7d1d2431e88060e88e432425e6251e46d6af2b24e7fdd0186072",
+  "measure.py": "afd0cf9011adb290a92853b262a57adab76b9910f6d679dd6c647f4bfb6eaf94"
+ }
+}

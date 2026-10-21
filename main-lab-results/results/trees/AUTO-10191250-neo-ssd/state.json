@@ -1,0 +1,27 @@
+{
+ "tree": "AUTO-10191250-neo-ssd",
+ "started_utc": "2026-10-19T12:50:32Z",
+ "nodes": {
+  "N0": {
+   "state": "queued",
+   "runs": [
+    "20261019T125032Z-AP10191250-LC9-local-eager-vs-rsync-eager"
+   ],
+   "spec": "auto/AP10191250-LC9-local-eager-vs-rsync-eager.toml"
+  },
+  "N1": {
+   "state": "queued",
+   "runs": [
+    "20261019T125034Z-AP10191250-LC10-local-resync-1pct"
+   ],
+   "spec": "auto/AP10191250-LC10-local-resync-1pct.toml"
+  },
+  "N2": {
+   "state": "queued",
+   "runs": [
+    "20261019T125035Z-AP10191250-LC11-local-eager-noatomic"
+   ],
+   "spec": "auto/AP10191250-LC11-local-eager-noatomic.toml"
+  }
+ }
+}

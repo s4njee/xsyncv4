@@ -1,0 +1,502 @@
+relay: pushing to https://dashboard.mk7s.dev/ingest
+benchmark dashboard server on http://[address]:8787
+relay: pushing to https://dashboard.mk7s.dev/ingest
+benchmark dashboard server on http://[address]:8787
+relay: push failed (400 {"error":"invalid schema payload"}); retrying with a full snapshot
+relay: pushing to https://dashboard.mk7s.dev/ingest
+benchmark dashboard server on http://[address]:8787
+relay: push failed (fetch failed); retrying with a full snapshot
+relay: pushing again
+relay: pushing to https://dashboard.mk7s.dev/ingest
+benchmark dashboard server on http://[address]:8787
+relay: pushing to https://dashboard.mk7s.dev/ingest
+benchmark dashboard server on http://[address]:8787
+relay: could not push direct/Z5-10g-zstd-levels: fetch failed
+relay: push failed (fetch failed); retrying with a full snapshot
+relay: could not push run lab/L2-noatomic-confirm/20261016T152054Z-L2-noatomic-confirm: fetch failed
+relay: pushing again
+relay: push failed (fetch failed); retrying with a full snapshot
+relay: pushing again
+relay: push failed (fetch failed); retrying with a full snapshot
+relay: sending without the decision trees until a push is accepted
+relay: sending without the decision trees until a push is accepted
+relay: sending without the decision trees until a push is accepted
+relay: pushing again
+relay: push failed (fetch failed); retrying with a full snapshot
+relay: pushing again
+relay: push failed (fetch failed); retrying with a full snapshot
+relay: pushing again
+relay: push failed (fetch failed); retrying with a full snapshot
+relay: sending without the decision trees until a push is accepted
+relay: sending without the decision trees until a push is accepted
+relay: pushing again
+relay: push failed (fetch failed); retrying with a full snapshot
+relay: pushing again
+relay: push failed (fetch failed); retrying with a full snapshot
+relay: pushing again
+relay: push failed (fetch failed); retrying with a full snapshot
+relay: pushing again
+relay: push failed (fetch failed); retrying with a full snapshot
+relay: pushing again
+relay: push failed (fetch failed); retrying with a full snapshot
+relay: pushing again
+relay: push failed (fetch failed); retrying with a full snapshot
+relay: pushing again
+relay: push failed (fetch failed); retrying with a full snapshot
+relay: pushing again
+relay: push failed (fetch failed); retrying with a full snapshot
+relay: pushing again
+relay: could not push run lab/L2-noatomic-confirm/20261016T152054Z-L2-noatomic-confirm: fetch failed
+relay: push failed (fetch failed); retrying with a full snapshot
+relay: pushing again
+relay: push failed (fetch failed); retrying with a full snapshot
+relay: pushing again
+relay: push failed (fetch failed); retrying with a full snapshot
+relay: pushing again
+relay: push failed (fetch failed); retrying with a full snapshot
+relay: pushing again
+relay: push failed (fetch failed); retrying with a full snapshot
+relay: could not push run lab/L2-noatomic-confirm/20261016T152054Z-L2-noatomic-confirm: fetch failed
+relay: could not push direct/Z5-10g-zstd-levels: fetch failed
+relay: pushing again
+relay: push failed (fetch failed); retrying with a full snapshot
+relay: pushing again
+relay: push failed (fetch failed); retrying with a full snapshot
+relay: pushing again
+relay: push failed (fetch failed); retrying with a full snapshot
+relay: could not push run lab/L2-noatomic-confirm/20261016T152054Z-L2-noatomic-confirm: fetch failed
+relay: could not push direct/Z5-10g-zstd-levels: fetch failed
+relay: pushing again
+relay: push failed (fetch failed); retrying with a full snapshot
+relay: pushing again
+relay: push failed (fetch failed); retrying with a full snapshot
+relay: pushing again
+relay: push failed (fetch failed); retrying with a full snapshot
+relay: pushing again
+relay: push failed (fetch failed); retrying with a full snapshot
+relay: pushing again
+relay: push failed (fetch failed); retrying with a full snapshot
+relay: pushing again
+relay: push failed (fetch failed); retrying with a full snapshot
+relay: could not push run lab/L2-noatomic-confirm/20261016T152054Z-L2-noatomic-confirm: fetch failed
+relay: could not push direct/Z5-10g-zstd-levels: fetch failed
+relay: pushing again
+relay: push failed (fetch failed); retrying with a full snapshot
+relay: pushing again
+relay: push failed (fetch failed); retrying with a full snapshot
+relay: pushing again
+relay: push failed (fetch failed); retrying with a full snapshot
+relay: pushing again
+relay: push failed (fetch failed); retrying with a full snapshot
+relay: pushing again
+relay: push failed (fetch failed); retrying with a full snapshot
+relay: pushing again
+relay: push failed (fetch failed); retrying with a full snapshot
+relay: pushing again
+relay: push failed (fetch failed); retrying with a full snapshot
+relay: pushing again
+relay: could not push schema run lab/S0-sentinel/20261014T020714Z-S0-sentinel-s0005: fetch failed
+relay: push failed (fetch failed); retrying with a full snapshot
+relay: sending without the decision trees until a push is accepted
+relay: sending without the decision trees until a push is accepted
+relay: sending without the decision trees until a push is accepted
+relay: pushing again
+relay: push failed (fetch failed); retrying with a full snapshot
+relay: pushing again
+relay: push failed (fetch failed); retrying with a full snapshot
+relay: sending without the decision trees until a push is accepted
+relay: sending without the decision trees until a push is accepted
+relay: sending without the decision trees until a push is accepted
+relay: pushing again
+relay: push failed (fetch failed); retrying with a full snapshot
+relay: pushing again
+relay: push failed (fetch failed); retrying with a full snapshot
+relay: pushing again
+relay: push failed (fetch failed); retrying with a full snapshot
+relay: sending without the decision trees until a push is accepted
+relay: sending without the decision trees until a push is accepted
+relay: pushing again
+relay: push failed (fetch failed); retrying with a full snapshot
+relay: could not push direct/Z5-10g-zstd-levels: fetch failed
+relay: could not push schema run lab/S0-sentinel/20261014T020712Z-S0-sentinel-s0004: fetch failed
+relay: could not push schema run lab/S0-sentinel/20261014T020712Z-S0-sentinel-s0004: fetch failed
+relay: pushing to https://dashboard.mk7s.dev/ingest
+node:events:505
+    throw er; // Unhandled 'error' event
+    ^
+
+Error: listen EADDRINUSE: address already in use [address]:8787
+    at Server.setupListenHandle [as _listen2] (node:net:2328:16)
+    at listenInCluster (node:net:2437:12)
+    at node:net:2666:7
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+Emitted 'error' event on WebSocketServer instance at:
+    at Server.emit (node:events:514:20)
+    at emitErrorNT (node:net:2416:8)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+  code: 'EADDRINUSE',
+  errno: -48,
+  syscall: 'listen',
+  address: '[address]',
+  port: 8787
+}
+
+Node.js v26.8.1
+relay: pushing to https://dashboard.mk7s.dev/ingest
+benchmark dashboard server on http://[address]:8787
+relay: pushing to https://dashboard.mk7s.dev/ingest
+benchmark dashboard server on http://[address]:8787
+relay: pushing to https://dashboard.mk7s.dev/ingest
+benchmark dashboard server on http://[address]:8787
+site config: views[1].id: unknown view; keeping the previous configuration
+relay: pushing to https://dashboard.mk7s.dev/ingest
+benchmark dashboard server on http://[address]:8787
+relay: pushing to https://dashboard.mk7s.dev/ingest
+benchmark dashboard server on http://[address]:8787
+relay: pushing to https://dashboard.mk7s.dev/ingest
+benchmark dashboard server on http://[address]:8787
+relay: pushing to https://dashboard.mk7s.dev/ingest
+benchmark dashboard server on http://[address]:8787
+relay: pushing to https://dashboard.mk7s.dev/ingest
+benchmark dashboard server on http://[address]:8787
+site config: views[1].id: unknown view; keeping the previous configuration
+relay: pushing to https://dashboard.mk7s.dev/ingest
+benchmark dashboard server on http://[address]:8787
+Traceback (most recent call last):
+  File "~/projects/xsyncv4/benchmarks/dashboard/collector.py", line 29, in <module>
+    import preflight  # noqa: E402  (hosts.toml loader)
+  File "~/projects/xsyncv4/benchmarks/lab/preflight.py", line 15, in <module>
+    import tomllib
+ModuleNotFoundError: No module named 'tomllib'
+collector exited 1; restarting in 5 s
+Traceback (most recent call last):
+  File "~/projects/xsyncv4/benchmarks/dashboard/collector.py", line 29, in <module>
+    import preflight  # noqa: E402  (hosts.toml loader)
+  File "~/projects/xsyncv4/benchmarks/lab/preflight.py", line 15, in <module>
+    import tomllib
+ModuleNotFoundError: No module named 'tomllib'
+collector exited 1; restarting in 5 s
+Traceback (most recent call last):
+  File "~/projects/xsyncv4/benchmarks/dashboard/collector.py", line 29, in <module>
+    import preflight  # noqa: E402  (hosts.toml loader)
+  File "~/projects/xsyncv4/benchmarks/lab/preflight.py", line 15, in <module>
+    import tomllib
+ModuleNotFoundError: No module named 'tomllib'
+collector exited 1; restarting in 5 s
+Traceback (most recent call last):
+  File "~/projects/xsyncv4/benchmarks/dashboard/collector.py", line 29, in <module>
+    import preflight  # noqa: E402  (hosts.toml loader)
+  File "~/projects/xsyncv4/benchmarks/lab/preflight.py", line 15, in <module>
+    import tomllib
+ModuleNotFoundError: No module named 'tomllib'
+collector exited 1; restarting in 5 s
+Traceback (most recent call last):
+  File "~/projects/xsyncv4/benchmarks/dashboard/collector.py", line 29, in <module>
+    import preflight  # noqa: E402  (hosts.toml loader)
+  File "~/projects/xsyncv4/benchmarks/lab/preflight.py", line 15, in <module>
+    import tomllib
+ModuleNotFoundError: No module named 'tomllib'
+collector exited 1; restarting in 5 s
+relay: pushing to https://dashboard.mk7s.dev/ingest
+benchmark dashboard server on http://[address]:8787
+collector exited null; restarting in 5 s
+relay: push failed (The operation was aborted due to timeout); retrying with a full snapshot
+relay: sending without the decision trees until a push is accepted
+relay: pushing again
+relay: push failed (The operation was aborted due to timeout); retrying with a full snapshot
+relay: sending without the decision trees until a push is accepted
+relay: pushing again
+relay: push failed (The operation was aborted due to timeout); retrying with a full snapshot
+relay: pushing again
+relay: pushing to https://dashboard.mk7s.dev/ingest
+benchmark dashboard server on http://[address]:8787
+relay: pushing to https://dashboard.mk7s.dev/ingest
+benchmark dashboard server on http://[address]:8787
+collector exited null; restarting in 5 s
+relay: pushing to https://dashboard.mk7s.dev/ingest
+benchmark dashboard server on http://[address]:8787
+collector exited null; restarting in 5 s
+relay: push failed (fetch failed); retrying with a full snapshot
+relay: pushing again
+collector exited null; restarting in 5 s
+relay: pushing to https://dashboard.mk7s.dev/ingest
+benchmark dashboard server on http://[address]:8787
+collector exited null; restarting in 5 s
+relay: pushing to https://dashboard.mk7s.dev/ingest
+benchmark dashboard server on http://[address]:8787
+relay: pushing to https://dashboard.mk7s.dev/ingest
+benchmark dashboard server on http://[address]:8787
+relay: pushing to https://dashboard.mk7s.dev/ingest
+benchmark dashboard server on http://[address]:8787
+relay: pushing to https://dashboard.mk7s.dev/ingest
+benchmark dashboard server on http://[address]:8787
+schema snapshot: state.specs.questions.id: expected non-empty text
+schema socket: state.specs.questions.id: expected non-empty text
+schema socket: state.specs.questions.id: expected non-empty text
+schema socket: state.specs.questions.id: expected non-empty text
+schema socket: state.specs.questions.id: expected non-empty text
+schema socket: state.specs.questions.id: expected non-empty text
+schema socket: state.specs.questions.id: expected non-empty text
+schema socket: state.specs.questions.id: expected non-empty text
+schema socket: state.specs.questions.id: expected non-empty text
+schema socket: state.specs.questions.id: expected non-empty text
+schema socket: state.specs.questions.id: expected non-empty text
+schema socket: state.specs.questions.id: expected non-empty text
+schema socket: state.specs.questions.id: expected non-empty text
+schema socket: state.specs.questions.id: expected non-empty text
+schema socket: state.specs.questions.id: expected non-empty text
+schema socket: state.specs.questions.id: expected non-empty text
+schema socket: state.specs.questions.id: expected non-empty text
+schema socket: state.specs.questions.id: expected non-empty text
+schema socket: state.specs.questions.id: expected non-empty text
+relay: pushing to https://dashboard.mk7s.dev/ingest
+benchmark dashboard server on http://[address]:8787
+relay: pushing to https://dashboard.mk7s.dev/ingest
+benchmark dashboard server on http://[address]:8787
+relay: pushing to https://dashboard.mk7s.dev/ingest
+benchmark dashboard server on http://[address]:8787
+relay: pushing to https://dashboard.mk7s.dev/ingest
+benchmark dashboard server on http://[address]:8787
+relay: pushing to https://dashboard.mk7s.dev/ingest
+benchmark dashboard server on http://[address]:8787
+relay: push failed (The operation was aborted due to timeout); retrying with a full snapshot
+relay: sending without the decision trees until a push is accepted
+relay: pushing again
+site config: views[3].id: unknown view; keeping the previous configuration
+relay: pushing to https://dashboard.mk7s.dev/ingest
+benchmark dashboard server on http://[address]:8787
+relay: push failed (fetch failed); retrying with a full snapshot
+relay: sending without the decision trees until a push is accepted
+relay: pushing again
+relay: push failed (The operation was aborted due to timeout); retrying with a full snapshot
+relay: sending without the decision trees until a push is accepted
+relay: pushing again
+collector exited null; restarting in 5 s
+collector exited null; restarting in 5 s
+relay: pushing to https://dashboard.mk7s.dev/ingest
+benchmark dashboard server on http://[address]:8787
+Traceback (most recent call last):
+  File "~/projects/xsyncv4/benchmarks/dashboard/collector.py", line 29, in <module>
+    import preflight  # noqa: E402  (hosts.toml loader)
+  File "~/projects/xsyncv4/benchmarks/lab/preflight.py", line 15, in <module>
+    import tomllib
+ModuleNotFoundError: No module named 'tomllib'
+collector exited 1; restarting in 5 s
+Traceback (most recent call last):
+  File "~/projects/xsyncv4/benchmarks/dashboard/collector.py", line 29, in <module>
+    import preflight  # noqa: E402  (hosts.toml loader)
+  File "~/projects/xsyncv4/benchmarks/lab/preflight.py", line 15, in <module>
+    import tomllib
+ModuleNotFoundError: No module named 'tomllib'
+collector exited 1; restarting in 5 s
+Traceback (most recent call last):
+  File "~/projects/xsyncv4/benchmarks/dashboard/collector.py", line 29, in <module>
+    import preflight  # noqa: E402  (hosts.toml loader)
+  File "~/projects/xsyncv4/benchmarks/lab/preflight.py", line 15, in <module>
+    import tomllib
+ModuleNotFoundError: No module named 'tomllib'
+collector exited 1; restarting in 5 s
+relay: pushing to https://dashboard.mk7s.dev/ingest
+benchmark dashboard server on http://[address]:8787
+relay: pushing to https://dashboard.mk7s.dev/ingest
+benchmark dashboard server on http://[address]:8787
+site config: views[7].id: unknown view; keeping the previous configuration
+relay: pushing to https://dashboard.mk7s.dev/ingest
+benchmark dashboard server on http://[address]:8787
+relay: pushing to https://dashboard.mk7s.dev/ingest
+benchmark dashboard server on http://[address]:8787
+relay: pushing to https://dashboard.mk7s.dev/ingest
+benchmark dashboard server on http://[address]:8787
+relay: push failed (The operation was aborted due to timeout); retrying with a full snapshot
+relay: sending without the decision trees until a push is accepted
+relay: pushing again
+relay: push failed (The operation was aborted due to timeout); retrying with a full snapshot
+relay: sending without the decision trees until a push is accepted
+relay: pushing again
+block summaries: API error undefined
+relay: push failed (The operation was aborted due to timeout); retrying with a full snapshot
+relay: sending without the decision trees until a push is accepted
+relay: pushing again
+relay: push failed (fetch failed); retrying with a full snapshot
+relay: sending without the decision trees until a push is accepted
+relay: pushing again
+relay: push failed (The operation was aborted due to timeout); retrying with a full snapshot
+relay: sending without the decision trees until a push is accepted
+relay: pushing again
+relay: push failed (The operation was aborted due to timeout); retrying with a full snapshot
+relay: sending without the decision trees until a push is accepted
+block summaries: API error undefined
+relay: pushing again
+relay: push failed (fetch failed); retrying with a full snapshot
+relay: sending without the decision trees until a push is accepted
+relay: pushing again
+relay: push failed (The operation was aborted due to timeout); retrying with a full snapshot
+relay: sending without the decision trees until a push is accepted
+relay: pushing again
+relay: push failed (The operation was aborted due to timeout); retrying with a full snapshot
+relay: sending without the decision trees until a push is accepted
+relay: pushing again
+relay: push failed (The operation was aborted due to timeout); retrying with a full snapshot
+relay: sending without the decision trees until a push is accepted
+relay: pushing again
+relay: push failed (The operation was aborted due to timeout); retrying with a full snapshot
+relay: sending without the decision trees until a push is accepted
+relay: pushing again
+relay: push failed (The operation was aborted due to timeout); retrying with a full snapshot
+relay: sending without the decision trees until a push is accepted
+block summaries: API error undefined
+relay: pushing again
+relay: push failed (The operation was aborted due to timeout); retrying with a full snapshot
+relay: sending without the decision trees until a push is accepted
+relay: pushing again
+relay: push failed (The operation was aborted due to timeout); retrying with a full snapshot
+relay: sending without the decision trees until a push is accepted
+relay: pushing again
+block summaries: API error undefined
+relay: push failed (The operation was aborted due to timeout); retrying with a full snapshot
+relay: sending without the decision trees until a push is accepted
+relay: pushing again
+relay: push failed (The operation was aborted due to timeout); retrying with a full snapshot
+relay: sending without the decision trees until a push is accepted
+relay: pushing again
+relay: push failed (The operation was aborted due to timeout); retrying with a full snapshot
+relay: sending without the decision trees until a push is accepted
+relay: pushing again
+relay: push failed (fetch failed); retrying with a full snapshot
+relay: sending without the decision trees until a push is accepted
+block summaries: API error undefined
+relay: pushing again
+relay: push failed (fetch failed); retrying with a full snapshot
+relay: sending without the decision trees until a push is accepted
+relay: could not push run local/LC4-psample-local-resync/20261018T215454Z-LC4-psample-local-resync: The operation was aborted due to timeout
+card descriptions: API error undefined
+relay: could not push local/LC4-psample-local-resync: The operation was aborted due to timeout
+relay: could not push run local/LC4-psample-local-resync/20261018T215454Z-LC4-psample-local-resync: The operation was aborted due to timeout
+relay: could not push local/LC4-psample-local-resync: The operation was aborted due to timeout
+relay: could not push run local/LC4-psample-local-resync/20261018T215454Z-LC4-psample-local-resync: The operation was aborted due to timeout
+relay: could not push local/LC4-psample-local-resync: The operation was aborted due to timeout
+relay: could not push run local/LC4-psample-local-resync/20261018T215454Z-LC4-psample-local-resync: The operation was aborted due to timeout
+relay: could not push run local/LC4-psample-local-resync/20261018T215454Z-LC4-psample-local-resync: fetch failed
+relay: could not push local/LC4-psample-local-resync: fetch failed
+relay: could not push local/LC4-psample-local-resync: fetch failed
+relay: could not push run local/LC4-psample-local-resync/20261018T215454Z-LC4-psample-local-resync: fetch failed
+relay: could not push local/LC4-psample-local-resync: The operation was aborted due to timeout
+relay: could not push run local/LC4-psample-local-resync/20261018T215454Z-LC4-psample-local-resync: The operation was aborted due to timeout
+relay: could not push local/LC4-psample-local-resync: fetch failed
+relay: could not push run local/LC4-psample-local-resync/20261018T215454Z-LC4-psample-local-resync: fetch failed
+relay: could not push local/LC4-psample-local-resync: fetch failed
+relay: could not push run local/LC4-psample-local-resync/20261018T215454Z-LC4-psample-local-resync: fetch failed
+relay: could not push local/LC4-psample-local-resync: The operation was aborted due to timeout
+relay: could not push run local/LC4-psample-local-resync/20261018T215454Z-LC4-psample-local-resync: The operation was aborted due to timeout
+relay: could not push local/LC4-psample-local-resync: fetch failed
+relay: could not push run local/LC4-psample-local-resync/20261018T215454Z-LC4-psample-local-resync: fetch failed
+relay: could not push local/LC4-psample-local-resync: fetch failed
+relay: could not push run local/LC4-psample-local-resync/20261018T215454Z-LC4-psample-local-resync: fetch failed
+relay: could not push local/LC4-psample-local-resync: The operation was aborted due to timeout
+relay: could not push run local/LC4-psample-local-resync/20261018T215454Z-LC4-psample-local-resync: The operation was aborted due to timeout
+relay: could not push run local/LC4-psample-local-resync/20261018T215454Z-LC4-psample-local-resync: fetch failed
+relay: could not push local/LC4-psample-local-resync: fetch failed
+relay: could not push local/LC4-psample-local-resync: The operation was aborted due to timeout
+relay: could not push run local/LC4-psample-local-resync/20261018T215454Z-LC4-psample-local-resync: The operation was aborted due to timeout
+relay: could not push local/LC4-psample-local-resync: The operation was aborted due to timeout
+relay: could not push run local/LC4-psample-local-resync/20261018T215454Z-LC4-psample-local-resync: The operation was aborted due to timeout
+relay: could not push local/LC4-psample-local-resync: The operation was aborted due to timeout
+relay: could not push run local/LC4-psample-local-resync/20261018T215454Z-LC4-psample-local-resync: The operation was aborted due to timeout
+relay: could not push local/LC4-psample-local-resync: The operation was aborted due to timeout
+relay: could not push run local/LC4-psample-local-resync/20261018T215454Z-LC4-psample-local-resync: The operation was aborted due to timeout
+relay: could not push local/LC4-psample-local-resync: The operation was aborted due to timeout
+relay: could not push run local/LC4-psample-local-resync/20261018T215454Z-LC4-psample-local-resync: The operation was aborted due to timeout
+relay: could not push local/LC4-psample-local-resync: The operation was aborted due to timeout
+relay: could not push run local/LC4-psample-local-resync/20261018T215454Z-LC4-psample-local-resync: The operation was aborted due to timeout
+relay: could not push local/LC4-psample-local-resync: The operation was aborted due to timeout
+relay: could not push run local/LC4-psample-local-resync/20261018T215454Z-LC4-psample-local-resync: The operation was aborted due to timeout
+relay: could not push local/LC4-psample-local-resync: The operation was aborted due to timeout
+relay: could not push run local/LC4-psample-local-resync/20261018T215454Z-LC4-psample-local-resync: The operation was aborted due to timeout
+relay: could not push local/LC4-psample-local-resync: The operation was aborted due to timeout
+relay: could not push run local/LC4-psample-local-resync/20261018T215454Z-LC4-psample-local-resync: The operation was aborted due to timeout
+relay: could not push local/LC4-psample-local-resync: The operation was aborted due to timeout
+relay: could not push run local/LC4-psample-local-resync/20261018T215454Z-LC4-psample-local-resync: The operation was aborted due to timeout
+relay: could not push local/LC4-psample-local-resync: The operation was aborted due to timeout
+relay: could not push run local/LC4-psample-local-resync/20261018T215454Z-LC4-psample-local-resync: The operation was aborted due to timeout
+relay: could not push local/LC4-psample-local-resync: The operation was aborted due to timeout
+relay: could not push run local/LC4-psample-local-resync/20261018T215454Z-LC4-psample-local-resync: The operation was aborted due to timeout
+relay: could not push local/LC4-psample-local-resync: The operation was aborted due to timeout
+relay: could not push run local/LC4-psample-local-resync/20261018T215454Z-LC4-psample-local-resync: The operation was aborted due to timeout
+relay: could not push local/LC4-psample-local-resync: The operation was aborted due to timeout
+relay: could not push run local/LC4-psample-local-resync/20261018T215454Z-LC4-psample-local-resync: The operation was aborted due to timeout
+relay: could not push local/LC4-psample-local-resync: The operation was aborted due to timeout
+relay: could not push run local/LC4-psample-local-resync/20261018T215454Z-LC4-psample-local-resync: The operation was aborted due to timeout
+relay: could not push local/LC4-psample-local-resync: The operation was aborted due to timeout
+relay: could not push run local/LC4-psample-local-resync/20261018T215454Z-LC4-psample-local-resync: The operation was aborted due to timeout
+relay: could not push local/LC4-psample-local-resync: The operation was aborted due to timeout
+relay: could not push run local/LC4-psample-local-resync/20261018T215454Z-LC4-psample-local-resync: The operation was aborted due to timeout
+relay: could not push local/LC4-psample-local-resync: The operation was aborted due to timeout
+relay: could not push run local/LC4-psample-local-resync/20261018T215454Z-LC4-psample-local-resync: The operation was aborted due to timeout
+relay: could not push local/LC4-psample-local-resync: The operation was aborted due to timeout
+relay: could not push schema run local/LC4-psample-local-resync/20261018T215454Z-LC4-psample-local-resync: The operation was aborted due to timeout
+relay: pushing again
+relay: push failed (fetch failed); retrying with a full snapshot
+relay: pushing again
+relay: push failed (The operation was aborted due to timeout); retrying with a full snapshot
+relay: sending without the decision trees until a push is accepted
+planner: APIConnectionError: Connection error.
+    at Anthropic.makeRequest (file://~/xsyncv4/benchmarks/dashboard/server-deps/node_modules/@anthropic-ai/sdk/client.mjs:651:23)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async cycle (file://~/xsyncv4/benchmarks/dashboard/server/planner.mjs:119:24) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  workspaceID: undefined,
+  error: undefined,
+  type: null,
+  cause: [TypeError: fetch failed] {
+    [cause]: Error: getaddrinfo EAI_AGAIN api.anthropic.com
+        at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+      errno: -3001,
+      code: 'EAI_AGAIN',
+      syscall: 'getaddrinfo',
+      hostname: 'api.anthropic.com'
+    }
+  }
+}
+relay: pushing again
+relay: push failed (The operation was aborted due to timeout); retrying with a full snapshot
+relay: sending without the decision trees until a push is accepted
+relay: pushing again
+relay: push failed (The operation was aborted due to timeout); retrying with a full snapshot
+relay: sending without the decision trees until a push is accepted
+relay: pushing again
+relay: push failed (fetch failed); retrying with a full snapshot
+relay: pushing again
+relay: push failed (The operation was aborted due to timeout); retrying with a full snapshot
+relay: sending without the decision trees until a push is accepted
+relay: pushing again
+relay: push failed (The operation was aborted due to timeout); retrying with a full snapshot
+relay: sending without the decision trees until a push is accepted
+relay: pushing again
+relay: push failed (The operation was aborted due to timeout); retrying with a full snapshot
+relay: sending without the decision trees until a push is accepted
+analysis: Request timed out.
+card descriptions: API error undefined
+analysis archive: fetch failed
+analysis archive: fetch failed
+relay: pushing to https://dashboard.mk7s.dev/ingest
+benchmark dashboard server on http://[address]:8787
+relay: no ledger; took the current documents as already pushed
+relay: push failed (The operation was aborted due to timeout); retrying with a full snapshot
+relay: pushing again
+relay: push failed (The operation was aborted due to timeout); retrying with a full snapshot
+card descriptions: API error undefined
+relay: sending without the decision trees until a push is accepted
+card descriptions: API error undefined
+relay: pushing again
+relay: pushing to https://dashboard.mk7s.dev/ingest
+benchmark dashboard server on http://[address]:8787
+relay: pushing to https://dashboard.mk7s.dev/ingest
+benchmark dashboard server on http://[address]:8787
+relay: pushing to https://dashboard.mk7s.dev/ingest
+benchmark dashboard server on http://[address]:8787
+relay: pushing to https://dashboard.mk7s.dev/ingest
+benchmark dashboard server on http://[address]:8787
+relay: pushing to https://dashboard.mk7s.dev/ingest
+benchmark dashboard server on http://[address]:8787

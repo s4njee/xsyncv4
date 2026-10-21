@@ -1,0 +1,19 @@
+{
+ "experiment": "T1c-side-jobs",
+ "kind": "screening",
+ "hypothesis": "The sender's and the receiver's worker counts matter separately: fewer sending workers help only byte-bound copies from neo, and fewer receiving workers help no-ops on freya.",
+ "primary": "wall_s",
+ "control": "xs",
+ "delta": 0.03,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261013T201556Z-T1c-side-jobs"
+ ],
+ "spec_sha256": [
+  "93b925c4680c0f18de6a9492b36adff4d32e7f5f14b261421c253df98c6a2596"
+ ],
+ "valid_blocks": 120,
+ "void_attempts": 0,
+ "void_reasons": []
+}

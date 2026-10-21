@@ -1,0 +1,37 @@
+# MA10 (tree T18): confirm N4's lead on APFS. Copying small files fresh onto the Mac, --no-atomic (write
+# each file under its final name, without a temporary name and a rename) took 0.59x of xs's default time
+# on small-flat and 0.62x on mixed-bimodal, on only 3 to 4 blocks (N4, mac-mars-direct). If the rename is
+# most of APFS's per-file cost, xs could skip it for files that don't yet exist at the destination, where
+# it protects nothing; this measures the size of the prize before any engine change. rsync -a for scale.
+id = "MA10-apfs-no-atomic"
+kind = "confirmatory"
+hypothesis = "On fresh copies of small files onto the Mac, xs -a --no-atomic is faster than xs -a, by about a third."
+primary = "durable_s"
+delta = 0.05
+blocks = 8
+control = "xs"
+verify = "first-last"
+cleanup = "eager"
+sample_timeout_s = 1800
+
+[arms.xs]
+tool = "xs"
+rev = "21ae6844ed20"
+flags = ["-a"]
+
+[arms.xs-no-atomic]
+tool = "xs"
+rev = "21ae6844ed20"
+flags = ["-a", "--no-atomic"]
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[matrix]
+link = "mac-mars-10g"
+corpus = ["small-flat", "mixed-bimodal", "small-deep"]
+scenario = ["fresh"]
+direction = ["mars>mac"]
+client = ["initiator"]
+cache = ["warm"]

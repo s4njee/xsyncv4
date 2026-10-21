@@ -1,0 +1,19 @@
+{
+ "experiment": "E1c-cold",
+ "kind": "confirmatory",
+ "hypothesis": "With cold caches xs -a differs from rsync -a by more than 3% in time-to-durable, per corpus, scenario and direction.",
+ "primary": "durable_s",
+ "control": "rsync",
+ "delta": 0.03,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261014T220717Z-E1c-cold"
+ ],
+ "spec_sha256": [
+  "78acba917087eb2afe12f1346170ff4223612b90cc2e0a92d79141f28f56c9ee"
+ ],
+ "valid_blocks": 280,
+ "void_attempts": 0,
+ "void_reasons": []
+}

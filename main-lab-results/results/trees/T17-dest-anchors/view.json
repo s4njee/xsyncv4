@@ -1,0 +1,167 @@
+{
+ "id": "T17-dest-anchors",
+ "question": "Does keeping more parent directories open make xs's receives faster than its parent, and than rsync, on the Mac and on Linux?",
+ "start": [
+  "A",
+  "B"
+ ],
+ "startedUtc": "2026-10-19T13:28:43Z",
+ "until": null,
+ "fills": 0,
+ "nodes": [
+  {
+   "id": "A",
+   "kind": "experiment",
+   "experiment": "MA8-psample-pull-anchors",
+   "question": "Pulling psample onto the Mac, is xs with the larger budget faster than its parent and rsync, at a no-op and a 1% update?",
+   "estimateHours": 0.2,
+   "hypothesis": "With a larger parent-descriptor budget, xs -aH re-syncs psample onto the Mac faster than its parent and than rsync -aH, at a no-op and after 1% of files change.",
+   "design": "confirmatory",
+   "state": "failed",
+   "runs": [
+    {
+     "id": "20261019T132843Z-MA8-psample-pull-anchors",
+     "key": "macmars/MA8-psample-pull-anchors/20261019T132843Z-MA8-psample-pull-anchors",
+     "state": "failed"
+    }
+   ],
+   "decision": null,
+   "decidedUtc": null,
+   "start": true,
+   "promote": null
+  },
+  {
+   "id": "A~end0",
+   "kind": "end",
+   "experiment": null,
+   "question": null,
+   "estimateHours": null,
+   "hypothesis": "the fix beats rsync on the APFS pull: merge engine/dest-anchors and close T13; decision needed",
+   "design": null,
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "A~end1",
+   "kind": "end",
+   "experiment": null,
+   "question": null,
+   "estimateHours": null,
+   "hypothesis": "the fix does not clearly beat rsync on the APFS pull: compare it with its parent before deciding; decision needed",
+   "design": null,
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "B",
+   "kind": "experiment",
+   "experiment": "LC12-local-anchors",
+   "question": "Copying psample to the T5, is xs with the larger budget faster than its parent, and at least as fast as rsync?",
+   "estimateHours": 3.6,
+   "hypothesis": "With a larger parent-descriptor budget, xs -aH copies and re-syncs psample to the T5 faster than its parent, and at least as fast as rsync -aH.",
+   "design": "confirmatory",
+   "state": "held",
+   "runs": [
+    {
+     "id": "20261019T132845Z-LC12-local-anchors",
+     "key": "local/LC12-local-anchors/20261019T132845Z-LC12-local-anchors",
+     "state": "complete"
+    }
+   ],
+   "decision": null,
+   "decidedUtc": null,
+   "start": true,
+   "promote": null
+  },
+  {
+   "id": "B~end0",
+   "kind": "end",
+   "experiment": null,
+   "question": null,
+   "estimateHours": null,
+   "hypothesis": "the fix brings xs level with or ahead of rsync on Linux local copies: decision needed on merging",
+   "design": null,
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "B~end1",
+   "kind": "end",
+   "experiment": null,
+   "question": null,
+   "estimateHours": null,
+   "hypothesis": "rsync stays ahead on Linux local copies even with the fix: decision needed",
+   "design": null,
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  }
+ ],
+ "edges": [
+  {
+   "from": "A",
+   "to": "A~end0",
+   "label": "faster than rsync",
+   "taken": null
+  },
+  {
+   "from": "A",
+   "to": "A~end1",
+   "label": "not clearly faster",
+   "taken": null
+  },
+  {
+   "from": "B",
+   "to": "B~end0",
+   "label": "level with or faster than rsync",
+   "taken": null
+  },
+  {
+   "from": "B",
+   "to": "B~end1",
+   "label": "rsync still ahead",
+   "taken": null
+  }
+ ],
+ "decisions": [
+  {
+   "utc": "2026-10-20T06:04:08Z",
+   "node": "B",
+   "kind": "held",
+   "text": "decision needed \u2014 B: rsync stays ahead on Linux local copies even with the fix: decision needed; would queue nothing"
+  },
+  {
+   "utc": "2026-10-20T06:04:08Z",
+   "node": "A",
+   "kind": "warning",
+   "text": "A: run 20261019T132843Z-MA8-psample-pull-anchors ended failed; its branch stops here"
+  },
+  {
+   "utc": "2026-10-19T13:28:47Z",
+   "node": "B",
+   "kind": "queued",
+   "text": "B queued on neo-ssd (36 samples): start of the tree"
+  },
+  {
+   "utc": "2026-10-19T13:28:45Z",
+   "node": "A",
+   "kind": "queued",
+   "text": "A queued on mac (48 samples): start of the tree"
+  }
+ ]
+}

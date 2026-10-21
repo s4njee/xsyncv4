@@ -1,0 +1,40 @@
+# E4g: how often the client polls for the peer's exit. Today it sleeps 25 ms
+# between checks, so a transfer that takes 0.17 s can spend a tenth of that
+# waiting for a process that has already gone (H11). No-ops only: that is
+# where a fixed few milliseconds is a visible share.
+id = "E4g-peer-poll"
+kind = "screening"
+hypothesis = "Polling for the peer's exit every 5 or 1 ms instead of 25 shortens a no-op by more than 3% on a one-file tree, and measurably on 100,000 files."
+primary = "wall_s"
+delta = 0.03
+blocks = 40
+control = "xs"
+verify = "first-last"
+
+[arms.xs]
+tool = "xs"
+rev = "ddefa041364e-tune"
+flags = ["-a"]
+metrics = true
+
+[arms.poll5]
+tool = "xs"
+rev = "ddefa041364e-tune"
+flags = ["-a"]
+tune = "wait_peer_poll_ms=5"
+metrics = true
+
+[arms.poll1]
+tool = "xs"
+rev = "ddefa041364e-tune"
+flags = ["-a"]
+tune = "wait_peer_poll_ms=1"
+metrics = true
+
+[matrix]
+link = "lan"
+corpus = ["tiny-one", "small-flat"]
+scenario = ["noop"]
+direction = ["neo>freya", "freya>neo"]
+client = ["sender"]
+cache = ["warm"]

@@ -1,0 +1,39 @@
+# X1d: X1b in the other direction, Mac to mars, now that the Mac has room to
+# hold the two generated corpora as sources.
+id = "X1d-large-many-to-mars"
+kind = "screening"
+hypothesis = "On a ~3 Gb/s direct link, xs -a copies large files at least as fast as rsync -a, and ChaCha20 slows both against AES-GCM."
+primary = "durable_s"
+delta = 0.03
+blocks = 8
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[arms.rsync-chacha]
+tool = "rsync"
+flags = ["-a"]
+ssh_options = ["-c", "[email]"]
+
+[arms.xs]
+tool = "xs"
+rev = "8cc75bbdb801"
+flags = ["-a"]
+
+[arms.xs-chacha]
+tool = "xs"
+rev = "8cc75bbdb801"
+flags = ["-a"]
+ssh_options = ["-c", "[email]"]
+
+[matrix]
+link = "mac-mars-direct"
+corpus = ["large-four", "large-mixed"]
+scenario = ["fresh"]
+direction = ["mac>mars"]
+client = ["initiator"]
+cache = ["warm"]

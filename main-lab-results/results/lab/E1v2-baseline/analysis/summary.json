@@ -1,0 +1,21 @@
+{
+ "experiment": "E1v2-baseline",
+ "kind": "confirmatory",
+ "hypothesis": "xs -a differs from rsync -a by more than 3% in time-to-durable, per corpus, scenario and direction.",
+ "primary": "durable_s",
+ "control": "rsync",
+ "delta": 0.03,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261014T020834Z-E1v2-baseline"
+ ],
+ "spec_sha256": [
+  "1296f4b4095001b4c43a9baa1e7d93adfc6201ac1092f042e4aa954850ee89a2"
+ ],
+ "valid_blocks": 336,
+ "void_attempts": 1,
+ "void_reasons": [
+  "round trip is 2.021 ms, above 2.0"
+ ]
+}

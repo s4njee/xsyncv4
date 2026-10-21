@@ -1,0 +1,1414 @@
+{
+ "schema": 1,
+ "run_id": "20261016T153158Z-Z1-10g-compress",
+ "started_utc": "2026-10-16T15:32:27.317+00:00",
+ "driver": "MacBookPro",
+ "plan": {
+  "schema": 1,
+  "experiment": "Z1-10g-compress",
+  "spec_sha256": "83668c86928e65cd10bbb3935ce782bf434f4f662d9acab7a3dd39f5f6afa9dc",
+  "kind": "screening",
+  "bundle": "c4b227526aa5",
+  "writes": {
+   "mac": 673655337288,
+   "mars": 673655337288
+  },
+  "hypothesis": "xs -z delivers corpus data faster than xs without it on compressible trees, and faster than rsync -z.",
+  "primary": "durable_s",
+  "delta": 0.03,
+  "control": "xs",
+  "seed": 1,
+  "run_id": "20261016T153158Z-Z1-10g-compress",
+  "driver": "mac",
+  "sample_timeout_s": 3600,
+  "results": "direct",
+  "background": false,
+  "eager_cleanup": true,
+  "hours": null,
+  "hosts": {
+   "mac": {
+    "ssh": "[email]",
+    "name": "[host]",
+    "hostname": "MacBookPro",
+    "root": "~/benchmarks/xsbench.noindex",
+    "interface": "en13",
+    "helper": false,
+    "gates": {},
+    "local": true,
+    "system": "Darwin"
+   },
+   "mars": {
+    "ssh": "[email]",
+    "name": "[host]",
+    "hostname": "mars",
+    "root": "~/benchmarks/xsyncv4/lab",
+    "interface": "enp1s0f0",
+    "helper": true,
+    "gates": {},
+    "local": false,
+    "system": "Linux"
+   }
+  },
+  "links": {
+   "mac-mars-direct": {
+    "hosts": [
+     "mac",
+     "mars"
+    ],
+    "medium": "wired",
+    "min_speed_mbps": 10000,
+    "max_rtt_ms": 2.0,
+    "initiator": "mac",
+    "driver": "mac",
+    "results": "direct",
+    "address": {
+     "mac": "[address]",
+     "mars": "[address]"
+    }
+   }
+  },
+  "arms": [
+   {
+    "name": "xs",
+    "tool": "xs",
+    "flags": [
+     "-a"
+    ],
+    "rev": "8cc75bbdb801",
+    "binary": {
+     "mac": "~/benchmarks/xsbench.noindex/bin/xs-8cc75bbdb801",
+     "mars": "~/benchmarks/xsyncv4/lab/bin/xs-8cc75bbdb801"
+    },
+    "sha256": {
+     "mac": "80c00669af2a98779492e47bbaeaae5bedb98a27233562353472792e32de25c3",
+     "mars": "2780cc842402d442918883559a01ee48e7d856a3e45c7d60559aa073bff2ac84"
+    },
+    "artifacts": {
+     "xs-darwin-arm64": "80c00669af2a98779492e47bbaeaae5bedb98a27233562353472792e32de25c3",
+     "xs-linux-amd64": "2780cc842402d442918883559a01ee48e7d856a3e45c7d60559aa073bff2ac84",
+     "xs-linux-arm64": "fc88711b3389e12acfd9c62d2ed037560d4d99c07371f81cf2474842afe4550d"
+    }
+   },
+   {
+    "name": "xs-z",
+    "tool": "xs",
+    "flags": [
+     "-az"
+    ],
+    "rev": "8cc75bbdb801",
+    "binary": {
+     "mac": "~/benchmarks/xsbench.noindex/bin/xs-8cc75bbdb801",
+     "mars": "~/benchmarks/xsyncv4/lab/bin/xs-8cc75bbdb801"
+    },
+    "sha256": {
+     "mac": "80c00669af2a98779492e47bbaeaae5bedb98a27233562353472792e32de25c3",
+     "mars": "2780cc842402d442918883559a01ee48e7d856a3e45c7d60559aa073bff2ac84"
+    },
+    "artifacts": {
+     "xs-darwin-arm64": "80c00669af2a98779492e47bbaeaae5bedb98a27233562353472792e32de25c3",
+     "xs-linux-amd64": "2780cc842402d442918883559a01ee48e7d856a3e45c7d60559aa073bff2ac84",
+     "xs-linux-arm64": "fc88711b3389e12acfd9c62d2ed037560d4d99c07371f81cf2474842afe4550d"
+    }
+   },
+   {
+    "name": "xs-z1",
+    "tool": "xs",
+    "flags": [
+     "-az",
+     "--compress-level=1"
+    ],
+    "rev": "8cc75bbdb801",
+    "binary": {
+     "mac": "~/benchmarks/xsbench.noindex/bin/xs-8cc75bbdb801",
+     "mars": "~/benchmarks/xsyncv4/lab/bin/xs-8cc75bbdb801"
+    },
+    "sha256": {
+     "mac": "80c00669af2a98779492e47bbaeaae5bedb98a27233562353472792e32de25c3",
+     "mars": "2780cc842402d442918883559a01ee48e7d856a3e45c7d60559aa073bff2ac84"
+    },
+    "artifacts": {
+     "xs-darwin-arm64": "80c00669af2a98779492e47bbaeaae5bedb98a27233562353472792e32de25c3",
+     "xs-linux-amd64": "2780cc842402d442918883559a01ee48e7d856a3e45c7d60559aa073bff2ac84",
+     "xs-linux-arm64": "fc88711b3389e12acfd9c62d2ed037560d4d99c07371f81cf2474842afe4550d"
+    }
+   },
+   {
+    "name": "xs-z3",
+    "tool": "xs",
+    "flags": [
+     "-az",
+     "--compress-level=3"
+    ],
+    "rev": "8cc75bbdb801",
+    "binary": {
+     "mac": "~/benchmarks/xsbench.noindex/bin/xs-8cc75bbdb801",
+     "mars": "~/benchmarks/xsyncv4/lab/bin/xs-8cc75bbdb801"
+    },
+    "sha256": {
+     "mac": "80c00669af2a98779492e47bbaeaae5bedb98a27233562353472792e32de25c3",
+     "mars": "2780cc842402d442918883559a01ee48e7d856a3e45c7d60559aa073bff2ac84"
+    },
+    "artifacts": {
+     "xs-darwin-arm64": "80c00669af2a98779492e47bbaeaae5bedb98a27233562353472792e32de25c3",
+     "xs-linux-amd64": "2780cc842402d442918883559a01ee48e7d856a3e45c7d60559aa073bff2ac84",
+     "xs-linux-arm64": "fc88711b3389e12acfd9c62d2ed037560d4d99c07371f81cf2474842afe4550d"
+    }
+   },
+   {
+    "name": "rsync",
+    "tool": "rsync",
+    "flags": [
+     "-a"
+    ],
+    "binary": {
+     "mac": "rsync",
+     "mars": "rsync"
+    }
+   },
+   {
+    "name": "rsync-z",
+    "tool": "rsync",
+    "flags": [
+     "-az"
+    ],
+    "binary": {
+     "mac": "rsync",
+     "mars": "rsync"
+    }
+   }
+  ],
+  "cells": [
+   {
+    "id": "real-congress.fresh.mac-mars.sender.warm",
+    "corpus": "real-congress",
+    "scenario": "fresh",
+    "sender": "mac",
+    "receiver": "mars",
+    "client": "sender",
+    "link": "mac-mars-direct",
+    "cache": "warm"
+   },
+   {
+    "id": "real-congress.fresh.mars-mac.receiver.warm",
+    "corpus": "real-congress",
+    "scenario": "fresh",
+    "sender": "mars",
+    "receiver": "mac",
+    "client": "receiver",
+    "link": "mac-mars-direct",
+    "cache": "warm"
+   },
+   {
+    "id": "large-text.fresh.mac-mars.sender.warm",
+    "corpus": "large-text",
+    "scenario": "fresh",
+    "sender": "mac",
+    "receiver": "mars",
+    "client": "sender",
+    "link": "mac-mars-direct",
+    "cache": "warm"
+   },
+   {
+    "id": "large-text.fresh.mars-mac.receiver.warm",
+    "corpus": "large-text",
+    "scenario": "fresh",
+    "sender": "mars",
+    "receiver": "mac",
+    "client": "receiver",
+    "link": "mac-mars-direct",
+    "cache": "warm"
+   },
+   {
+    "id": "large-half.fresh.mac-mars.sender.warm",
+    "corpus": "large-half",
+    "scenario": "fresh",
+    "sender": "mac",
+    "receiver": "mars",
+    "client": "sender",
+    "link": "mac-mars-direct",
+    "cache": "warm"
+   },
+   {
+    "id": "large-half.fresh.mars-mac.receiver.warm",
+    "corpus": "large-half",
+    "scenario": "fresh",
+    "sender": "mars",
+    "receiver": "mac",
+    "client": "receiver",
+    "link": "mac-mars-direct",
+    "cache": "warm"
+   }
+  ],
+  "corpora": {
+   "real-congress": {
+    "files": 216518,
+    "directories": 52593,
+    "bytes": 1159189826,
+    "digest": "29d93dcc4c117de24dc4f6e1b8d26f0e7bbc9c26cfb4aa03d2d52de078b6a102",
+    "quick_digest": "0f493d25789a420e24c282fb3a4ba40bc690b1a3e65184088bf66e7fa0868a6b"
+   },
+   "large-text": {
+    "files": 8,
+    "directories": 0,
+    "bytes": 8589934592,
+    "digest": "4f11b85fcc6034d648465e257e02fb7fe958c1b88152264d6be0ff5adfc43f1e",
+    "quick_digest": "c2712b8ed9434c4872376b901d4cdcd651d858c9f60d5fcdae16423b4bb3f8f4"
+   },
+   "large-half": {
+    "files": 32,
+    "directories": 0,
+    "bytes": 8963523840,
+    "digest": "2f5d25773a21522ca058845299a18a57cf2db9e4b7b18ebf3564784bef9def0d",
+    "quick_digest": "fcb724477ada212a5b987c306f25429ce118109cdb7da054f4d4eca7c9a944cf"
+   }
+  },
+  "blocks": [
+   {
+    "cell": "real-congress.fresh.mars-mac.receiver.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs-z3",
+      "rsync",
+      "xs",
+      "xs-z1",
+      "xs-z",
+      "rsync-z"
+     ],
+     [
+      "xs-z3",
+      "rsync",
+      "xs-z1",
+      "rsync-z",
+      "xs-z",
+      "xs"
+     ],
+     [
+      "xs-z",
+      "rsync",
+      "xs",
+      "xs-z1",
+      "rsync-z",
+      "xs-z3"
+     ]
+    ]
+   },
+   {
+    "cell": "large-half.fresh.mac-mars.sender.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs-z3",
+      "rsync",
+      "xs-z",
+      "xs",
+      "rsync-z",
+      "xs-z1"
+     ],
+     [
+      "rsync-z",
+      "xs-z1",
+      "xs",
+      "xs-z3",
+      "xs-z",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs-z1",
+      "xs",
+      "xs-z",
+      "xs-z3",
+      "rsync-z"
+     ]
+    ]
+   },
+   {
+    "cell": "large-text.fresh.mars-mac.receiver.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "rsync",
+      "xs-z1",
+      "xs-z",
+      "xs",
+      "xs-z3",
+      "rsync-z"
+     ],
+     [
+      "xs-z3",
+      "xs-z1",
+      "xs",
+      "xs-z",
+      "rsync-z",
+      "rsync"
+     ],
+     [
+      "rsync-z",
+      "xs-z",
+      "xs",
+      "xs-z3",
+      "xs-z1",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "large-half.fresh.mars-mac.receiver.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs-z1",
+      "rsync",
+      "xs-z",
+      "xs-z3",
+      "rsync-z",
+      "xs"
+     ],
+     [
+      "rsync-z",
+      "xs-z1",
+      "xs-z3",
+      "xs-z",
+      "xs",
+      "rsync"
+     ],
+     [
+      "xs-z1",
+      "xs-z",
+      "rsync",
+      "rsync-z",
+      "xs-z3",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "real-congress.fresh.mac-mars.sender.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs-z",
+      "xs",
+      "xs-z3",
+      "rsync-z",
+      "rsync",
+      "xs-z1"
+     ],
+     [
+      "xs-z3",
+      "xs",
+      "rsync-z",
+      "xs-z1",
+      "rsync",
+      "xs-z"
+     ],
+     [
+      "xs",
+      "xs-z1",
+      "xs-z",
+      "xs-z3",
+      "rsync-z",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "large-text.fresh.mac-mars.sender.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs-z",
+      "xs",
+      "xs-z1",
+      "xs-z3",
+      "rsync-z",
+      "rsync"
+     ],
+     [
+      "xs",
+      "rsync",
+      "xs-z1",
+      "xs-z",
+      "xs-z3",
+      "rsync-z"
+     ],
+     [
+      "xs-z",
+      "rsync-z",
+      "xs",
+      "xs-z3",
+      "xs-z1",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "real-congress.fresh.mars-mac.receiver.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "xs-z",
+      "rsync",
+      "xs-z1",
+      "rsync-z",
+      "xs-z3"
+     ],
+     [
+      "rsync",
+      "xs",
+      "xs-z1",
+      "xs-z",
+      "xs-z3",
+      "rsync-z"
+     ],
+     [
+      "xs-z1",
+      "xs",
+      "xs-z3",
+      "xs-z",
+      "rsync-z",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "large-text.fresh.mars-mac.receiver.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs-z",
+      "xs-z1",
+      "rsync-z",
+      "xs-z3",
+      "xs"
+     ],
+     [
+      "xs",
+      "xs-z1",
+      "xs-z3",
+      "rsync",
+      "rsync-z",
+      "xs-z"
+     ],
+     [
+      "xs-z",
+      "xs-z1",
+      "rsync-z",
+      "rsync",
+      "xs-z3",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "large-half.fresh.mac-mars.sender.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync-z",
+      "rsync",
+      "xs",
+      "xs-z3",
+      "xs-z1",
+      "xs-z"
+     ],
+     [
+      "rsync",
+      "rsync-z",
+      "xs",
+      "xs-z1",
+      "xs-z3",
+      "xs-z"
+     ],
+     [
+      "xs-z3",
+      "xs",
+      "rsync-z",
+      "rsync",
+      "xs-z",
+      "xs-z1"
+     ]
+    ]
+   },
+   {
+    "cell": "large-half.fresh.mars-mac.receiver.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync-z",
+      "xs",
+      "xs-z",
+      "rsync",
+      "xs-z3",
+      "xs-z1"
+     ],
+     [
+      "xs-z1",
+      "xs-z",
+      "rsync",
+      "xs",
+      "rsync-z",
+      "xs-z3"
+     ],
+     [
+      "xs-z1",
+      "xs",
+      "xs-z3",
+      "rsync-z",
+      "xs-z",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "large-text.fresh.mac-mars.sender.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-z1",
+      "rsync-z",
+      "xs",
+      "rsync",
+      "xs-z",
+      "xs-z3"
+     ],
+     [
+      "xs-z3",
+      "xs-z",
+      "xs-z1",
+      "rsync",
+      "xs",
+      "rsync-z"
+     ],
+     [
+      "rsync",
+      "xs-z1",
+      "xs",
+      "xs-z3",
+      "rsync-z",
+      "xs-z"
+     ]
+    ]
+   },
+   {
+    "cell": "real-congress.fresh.mac-mars.sender.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-z",
+      "rsync-z",
+      "xs-z3",
+      "xs-z1",
+      "xs",
+      "rsync"
+     ],
+     [
+      "xs",
+      "xs-z1",
+      "rsync",
+      "xs-z",
+      "xs-z3",
+      "rsync-z"
+     ],
+     [
+      "xs-z1",
+      "rsync-z",
+      "rsync",
+      "xs-z3",
+      "xs-z",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "large-text.fresh.mars-mac.receiver.warm",
+    "block": 2,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "rsync-z",
+      "xs-z",
+      "xs-z3",
+      "xs-z1",
+      "xs"
+     ],
+     [
+      "rsync",
+      "xs",
+      "xs-z3",
+      "rsync-z",
+      "xs-z",
+      "xs-z1"
+     ],
+     [
+      "xs",
+      "rsync",
+      "xs-z3",
+      "xs-z",
+      "xs-z1",
+      "rsync-z"
+     ]
+    ]
+   },
+   {
+    "cell": "real-congress.fresh.mars-mac.receiver.warm",
+    "block": 2,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "rsync-z",
+      "xs-z1",
+      "xs-z",
+      "xs-z3",
+      "xs"
+     ],
+     [
+      "rsync",
+      "xs-z",
+      "rsync-z",
+      "xs",
+      "xs-z3",
+      "xs-z1"
+     ],
+     [
+      "xs",
+      "xs-z3",
+      "rsync",
+      "xs-z",
+      "rsync-z",
+      "xs-z1"
+     ]
+    ]
+   },
+   {
+    "cell": "real-congress.fresh.mac-mars.sender.warm",
+    "block": 2,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "rsync-z",
+      "rsync",
+      "xs-z",
+      "xs-z3",
+      "xs-z1"
+     ],
+     [
+      "xs-z",
+      "xs-z1",
+      "rsync",
+      "rsync-z",
+      "xs-z3",
+      "xs"
+     ],
+     [
+      "rsync",
+      "xs",
+      "rsync-z",
+      "xs-z1",
+      "xs-z",
+      "xs-z3"
+     ]
+    ]
+   },
+   {
+    "cell": "large-half.fresh.mars-mac.receiver.warm",
+    "block": 2,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-z1",
+      "xs",
+      "rsync-z",
+      "xs-z3",
+      "xs-z",
+      "rsync"
+     ],
+     [
+      "xs-z1",
+      "rsync",
+      "xs-z",
+      "rsync-z",
+      "xs-z3",
+      "xs"
+     ],
+     [
+      "rsync-z",
+      "xs-z1",
+      "xs-z3",
+      "rsync",
+      "xs-z",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "large-text.fresh.mac-mars.sender.warm",
+    "block": 2,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync-z",
+      "xs",
+      "xs-z3",
+      "rsync",
+      "xs-z",
+      "xs-z1"
+     ],
+     [
+      "xs-z3",
+      "rsync",
+      "rsync-z",
+      "xs-z",
+      "xs",
+      "xs-z1"
+     ],
+     [
+      "xs",
+      "xs-z3",
+      "xs-z1",
+      "rsync-z",
+      "rsync",
+      "xs-z"
+     ]
+    ]
+   },
+   {
+    "cell": "large-half.fresh.mac-mars.sender.warm",
+    "block": 2,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-z1",
+      "xs",
+      "rsync",
+      "rsync-z",
+      "xs-z",
+      "xs-z3"
+     ],
+     [
+      "xs-z",
+      "xs",
+      "xs-z3",
+      "rsync-z",
+      "xs-z1",
+      "rsync"
+     ],
+     [
+      "xs-z",
+      "xs-z1",
+      "rsync",
+      "rsync-z",
+      "xs",
+      "xs-z3"
+     ]
+    ]
+   },
+   {
+    "cell": "large-text.fresh.mars-mac.receiver.warm",
+    "block": 3,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "xs-z3",
+      "xs-z",
+      "rsync",
+      "xs-z1",
+      "rsync-z"
+     ],
+     [
+      "rsync",
+      "xs-z1",
+      "xs",
+      "rsync-z",
+      "xs-z3",
+      "xs-z"
+     ],
+     [
+      "xs-z1",
+      "rsync",
+      "xs-z3",
+      "xs",
+      "xs-z",
+      "rsync-z"
+     ]
+    ]
+   },
+   {
+    "cell": "large-half.fresh.mac-mars.sender.warm",
+    "block": 3,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "xs-z1",
+      "xs-z3",
+      "rsync",
+      "rsync-z",
+      "xs-z"
+     ],
+     [
+      "rsync",
+      "xs-z1",
+      "xs",
+      "rsync-z",
+      "xs-z3",
+      "xs-z"
+     ],
+     [
+      "rsync-z",
+      "xs-z1",
+      "xs-z",
+      "xs-z3",
+      "rsync",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "large-text.fresh.mac-mars.sender.warm",
+    "block": 3,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-z",
+      "xs-z3",
+      "rsync",
+      "xs",
+      "xs-z1",
+      "rsync-z"
+     ],
+     [
+      "xs-z1",
+      "xs-z3",
+      "rsync",
+      "xs-z",
+      "rsync-z",
+      "xs"
+     ],
+     [
+      "rsync-z",
+      "xs-z",
+      "xs-z1",
+      "rsync",
+      "xs",
+      "xs-z3"
+     ]
+    ]
+   },
+   {
+    "cell": "large-half.fresh.mars-mac.receiver.warm",
+    "block": 3,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-z3",
+      "xs-z1",
+      "rsync",
+      "xs-z",
+      "rsync-z",
+      "xs"
+     ],
+     [
+      "xs",
+      "xs-z",
+      "rsync-z",
+      "rsync",
+      "xs-z3",
+      "xs-z1"
+     ],
+     [
+      "xs",
+      "xs-z",
+      "rsync",
+      "xs-z1",
+      "xs-z3",
+      "rsync-z"
+     ]
+    ]
+   },
+   {
+    "cell": "real-congress.fresh.mac-mars.sender.warm",
+    "block": 3,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs",
+      "xs-z1",
+      "rsync-z",
+      "xs-z3",
+      "xs-z"
+     ],
+     [
+      "xs-z1",
+      "xs-z3",
+      "xs-z",
+      "rsync",
+      "xs",
+      "rsync-z"
+     ],
+     [
+      "xs",
+      "xs-z1",
+      "xs-z",
+      "xs-z3",
+      "rsync-z",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "real-congress.fresh.mars-mac.receiver.warm",
+    "block": 3,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "xs-z1",
+      "xs-z",
+      "xs-z3",
+      "rsync",
+      "rsync-z"
+     ],
+     [
+      "rsync",
+      "xs-z1",
+      "rsync-z",
+      "xs-z3",
+      "xs-z",
+      "xs"
+     ],
+     [
+      "rsync-z",
+      "xs",
+      "rsync",
+      "xs-z3",
+      "xs-z",
+      "xs-z1"
+     ]
+    ]
+   },
+   {
+    "cell": "large-half.fresh.mac-mars.sender.warm",
+    "block": 4,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "xs-z3",
+      "xs-z1",
+      "xs-z",
+      "rsync",
+      "rsync-z"
+     ],
+     [
+      "rsync-z",
+      "rsync",
+      "xs",
+      "xs-z1",
+      "xs-z3",
+      "xs-z"
+     ],
+     [
+      "rsync",
+      "xs-z",
+      "rsync-z",
+      "xs-z1",
+      "xs-z3",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "large-text.fresh.mars-mac.receiver.warm",
+    "block": 4,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs-z",
+      "xs",
+      "rsync-z",
+      "xs-z3",
+      "xs-z1"
+     ],
+     [
+      "xs",
+      "rsync-z",
+      "xs-z3",
+      "rsync",
+      "xs-z1",
+      "xs-z"
+     ],
+     [
+      "xs-z3",
+      "xs",
+      "xs-z",
+      "rsync-z",
+      "rsync",
+      "xs-z1"
+     ]
+    ]
+   },
+   {
+    "cell": "large-half.fresh.mars-mac.receiver.warm",
+    "block": 4,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "rsync-z",
+      "xs",
+      "xs-z3",
+      "xs-z1",
+      "xs-z"
+     ],
+     [
+      "xs",
+      "xs-z1",
+      "rsync-z",
+      "xs-z3",
+      "xs-z",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "rsync-z",
+      "xs-z",
+      "xs-z3",
+      "xs",
+      "xs-z1"
+     ]
+    ]
+   },
+   {
+    "cell": "real-congress.fresh.mars-mac.receiver.warm",
+    "block": 4,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync-z",
+      "xs-z",
+      "xs",
+      "xs-z3",
+      "xs-z1",
+      "rsync"
+     ],
+     [
+      "xs",
+      "xs-z1",
+      "xs-z3",
+      "rsync-z",
+      "rsync",
+      "xs-z"
+     ],
+     [
+      "xs-z1",
+      "rsync-z",
+      "xs",
+      "xs-z3",
+      "rsync",
+      "xs-z"
+     ]
+    ]
+   },
+   {
+    "cell": "large-text.fresh.mac-mars.sender.warm",
+    "block": 4,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-z3",
+      "rsync-z",
+      "xs",
+      "xs-z",
+      "xs-z1",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs-z",
+      "rsync-z",
+      "xs-z1",
+      "xs-z3",
+      "xs"
+     ],
+     [
+      "xs-z3",
+      "xs-z",
+      "rsync",
+      "xs",
+      "rsync-z",
+      "xs-z1"
+     ]
+    ]
+   },
+   {
+    "cell": "real-congress.fresh.mac-mars.sender.warm",
+    "block": 4,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-z3",
+      "rsync-z",
+      "xs",
+      "rsync",
+      "xs-z1",
+      "xs-z"
+     ],
+     [
+      "xs-z3",
+      "rsync",
+      "xs-z1",
+      "xs-z",
+      "rsync-z",
+      "xs"
+     ],
+     [
+      "xs",
+      "rsync",
+      "xs-z",
+      "rsync-z",
+      "xs-z3",
+      "xs-z1"
+     ]
+    ]
+   },
+   {
+    "cell": "large-text.fresh.mars-mac.receiver.warm",
+    "block": 5,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs-z1",
+      "rsync",
+      "xs",
+      "xs-z3",
+      "xs-z",
+      "rsync-z"
+     ],
+     [
+      "xs-z1",
+      "rsync-z",
+      "xs",
+      "rsync",
+      "xs-z",
+      "xs-z3"
+     ],
+     [
+      "xs",
+      "xs-z3",
+      "rsync",
+      "xs-z",
+      "xs-z1",
+      "rsync-z"
+     ]
+    ]
+   },
+   {
+    "cell": "large-half.fresh.mars-mac.receiver.warm",
+    "block": 5,
+    "verify_full": true,
+    "orders": [
+     [
+      "rsync",
+      "xs-z1",
+      "xs-z3",
+      "rsync-z",
+      "xs",
+      "xs-z"
+     ],
+     [
+      "rsync",
+      "rsync-z",
+      "xs",
+      "xs-z",
+      "xs-z1",
+      "xs-z3"
+     ],
+     [
+      "xs-z1",
+      "xs-z3",
+      "rsync-z",
+      "xs",
+      "xs-z",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "real-congress.fresh.mac-mars.sender.warm",
+    "block": 5,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs-z",
+      "xs-z1",
+      "rsync",
+      "rsync-z",
+      "xs-z3",
+      "xs"
+     ],
+     [
+      "xs-z1",
+      "rsync-z",
+      "xs",
+      "rsync",
+      "xs-z3",
+      "xs-z"
+     ],
+     [
+      "xs-z",
+      "rsync",
+      "xs-z1",
+      "xs",
+      "rsync-z",
+      "xs-z3"
+     ]
+    ]
+   },
+   {
+    "cell": "real-congress.fresh.mars-mac.receiver.warm",
+    "block": 5,
+    "verify_full": true,
+    "orders": [
+     [
+      "rsync-z",
+      "xs-z1",
+      "rsync",
+      "xs",
+      "xs-z3",
+      "xs-z"
+     ],
+     [
+      "xs-z3",
+      "xs",
+      "xs-z1",
+      "xs-z",
+      "rsync-z",
+      "rsync"
+     ],
+     [
+      "xs",
+      "xs-z3",
+      "rsync-z",
+      "xs-z",
+      "rsync",
+      "xs-z1"
+     ]
+    ]
+   },
+   {
+    "cell": "large-half.fresh.mac-mars.sender.warm",
+    "block": 5,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs-z1",
+      "rsync",
+      "rsync-z",
+      "xs-z",
+      "xs",
+      "xs-z3"
+     ],
+     [
+      "xs-z",
+      "xs-z3",
+      "xs",
+      "xs-z1",
+      "rsync-z",
+      "rsync"
+     ],
+     [
+      "xs",
+      "rsync-z",
+      "xs-z1",
+      "rsync",
+      "xs-z",
+      "xs-z3"
+     ]
+    ]
+   },
+   {
+    "cell": "large-text.fresh.mac-mars.sender.warm",
+    "block": 5,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs-z",
+      "xs",
+      "rsync",
+      "rsync-z",
+      "xs-z1",
+      "xs-z3"
+     ],
+     [
+      "xs-z3",
+      "xs",
+      "rsync",
+      "rsync-z",
+      "xs-z1",
+      "xs-z"
+     ],
+     [
+      "rsync-z",
+      "xs-z3",
+      "xs-z",
+      "xs-z1",
+      "rsync",
+      "xs"
+     ]
+    ]
+   }
+  ],
+  "scripts": {
+   "probe.py": "f1c65a4e27657e4622416a43e86041663e6906f685d8f5f6a26b4e8df3d7eecb",
+   "corpus.py": "437a096aebc91b67f66f47803a39ca196cc8eaeaa7877d74588edf847aa2aa0a",
+   "corpora.json": "ebf2b1a93129ade1b3330046c447d2fd5a3080b77e2b0d4454e6b1de512d043e",
+   "agent.py": "0536e8a9d8bdeff8541edff9d5cf0af9b94df5e0fc40da377133c166ecb32f2b",
+   "runner.py": "cce71fee149764ad1a5c913061f19620a8ff44f792d23d55f7a290d59a9e20ff",
+   "measure.py": "5065310f480ff1cabfa7c645f0db342624a02f9a081b96069d50d52b3d224777"
+  },
+  "observed": {
+   "mac": {
+    "rsync": {
+     "path": "/opt/homebrew/bin/rsync",
+     "sha256": "98d3d56b3e7ee67412203236afc6da8f4021527e98eaa72909340d2b40bcf98c",
+     "version": "rsync  version 3.4.4  protocol version 32"
+    },
+    "hostname": "MacBookPro"
+   },
+   "mars": {
+    "rsync": {
+     "path": "/usr/bin/rsync",
+     "sha256": "cae31f86ebfa8ecf2293a809c8f09d8176c8ead7f192de8caebcc6a1f3f14800",
+     "version": "rsync  version 3.5.0-g471e17dc  protocol version 32"
+    },
+    "hostname": "mars",
+    "trim": null
+   },
+   "addresses": {
+    "mac>mars": "[address]"
+   }
+  }
+ }
+}

@@ -1,0 +1,66 @@
+# D1 (decision tree T2, after P3b): the Mac's sending side for small files onto
+# mars's NVMe over 2.5GbE. P2b found mars creates these files locally 12-14
+# times faster than xs delivers them, so the receiver is not the limit; the
+# sender's batching and scanning are the knobs left. Each arm is xs's best
+# small-file setting (four receiving workers, --no-atomic) plus one sender
+# change: larger read batches, every core scanning, larger coalesced frames,
+# a deeper soft queue, and the first three together.
+id = "D1-mac-sender-knobs"
+kind = "screening"
+hypothesis = "Larger read batches, more scanning workers or larger coalesced frames on the Mac make xs deliver small trees to mars faster."
+primary = "durable_s"
+delta = 0.03
+blocks = 8
+control = "xs-best"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.xs-best]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-a", "--no-atomic"]
+tune = { receiver = "jobs=4" }
+
+[arms.batch256]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-a", "--no-atomic"]
+tune = { receiver = "jobs=4", sender = "read_batch_files=256,read_batch_bytes=33554432" }
+
+[arms.scan-all]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-a", "--no-atomic"]
+tune = { receiver = "jobs=4", sender = "scan_workers=10" }
+
+[arms.coalesce1m]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-a", "--no-atomic"]
+tune = { receiver = "jobs=4", sender = "coalesce_under=65536,coalesce_to=1048576" }
+
+[arms.soft256]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-a", "--no-atomic"]
+tune = { receiver = "jobs=4", sender = "q1_soft_send=256" }
+
+[arms.all-three]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-a", "--no-atomic"]
+tune = { receiver = "jobs=4", sender = "read_batch_files=256,read_batch_bytes=33554432,scan_workers=10,coalesce_under=65536,coalesce_to=1048576" }
+
+[matrix]
+link = "mac-mars-2g5"
+corpus = ["small-flat", "small-deep", "real-congress"]
+scenario = ["fresh"]
+direction = ["mac>mars"]
+client = ["initiator"]
+cache = ["warm"]

@@ -1,0 +1,13 @@
+experiment,kind,cell_id,corpus,scenario,sender,receiver,client,link,cache,arm,n_blocks,sigma_d,blocks_for_2pct,blocks_for_3pct,blocks_for_5pct,blocks_for_10pct,blocks_equivalent_2pct,blocks_equivalent_3pct,blocks_equivalent_5pct,blocks_equivalent_10pct
+D3-pi-send-small,screening,real-congress.fresh.neo-freya.sender.warm,real-congress,fresh,neo,freya,sender,lan,warm,xs-best,2,0.04530015944184232,44,21,9,8,57,27,12,8
+D3-pi-send-small,screening,real-congress.fresh.neo-freya.sender.warm,real-congress,fresh,neo,freya,sender,lan,warm,send3,2,0.06162527723450335,78,37,15,8,104,48,19,8
+D3-pi-send-small,screening,real-congress.fresh.neo-freya.sender.warm,real-congress,fresh,neo,freya,sender,lan,warm,batch256,2,0.046377583398144226,46,22,10,8,60,28,12,8
+D3-pi-send-small,screening,real-congress.fresh.neo-freya.sender.warm,real-congress,fresh,neo,freya,sender,lan,warm,coalesce1m,2,0.027689290550997076,18,9,8,8,23,12,8,8
+D3-pi-send-small,screening,small-deep.fresh.neo-freya.sender.warm,small-deep,fresh,neo,freya,sender,lan,warm,xs-best,3,0.020442019964134178,11,8,8,8,14,8,8,8
+D3-pi-send-small,screening,small-deep.fresh.neo-freya.sender.warm,small-deep,fresh,neo,freya,sender,lan,warm,send3,3,0.017834818502437896,9,8,8,8,11,8,8,8
+D3-pi-send-small,screening,small-deep.fresh.neo-freya.sender.warm,small-deep,fresh,neo,freya,sender,lan,warm,batch256,3,0.029506211378365052,20,10,8,8,26,13,8,8
+D3-pi-send-small,screening,small-deep.fresh.neo-freya.sender.warm,small-deep,fresh,neo,freya,sender,lan,warm,coalesce1m,3,0.02746753285775168,18,9,8,8,23,12,8,8
+D3-pi-send-small,screening,small-flat.fresh.neo-freya.sender.warm,small-flat,fresh,neo,freya,sender,lan,warm,xs-best,3,0.045113987879966386,43,21,9,8,57,27,11,8
+D3-pi-send-small,screening,small-flat.fresh.neo-freya.sender.warm,small-flat,fresh,neo,freya,sender,lan,warm,send3,3,0.030825629151449648,21,11,8,8,28,14,8,8
+D3-pi-send-small,screening,small-flat.fresh.neo-freya.sender.warm,small-flat,fresh,neo,freya,sender,lan,warm,batch256,3,0.028245059775061015,18,10,8,8,24,12,8,8
+D3-pi-send-small,screening,small-flat.fresh.neo-freya.sender.warm,small-flat,fresh,neo,freya,sender,lan,warm,coalesce1m,3,0.021212090844081058,11,8,8,8,15,8,8,8

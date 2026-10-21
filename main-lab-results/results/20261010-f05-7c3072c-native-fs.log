@@ -1,0 +1,254 @@
+debconf: delaying package configuration, since apt-utils is not installed
+Selecting previously unselected package liblzo2-2:arm64.
+(Reading database ... 
+(Reading database ... 5%
+(Reading database ... 10%
+(Reading database ... 15%
+(Reading database ... 20%
+(Reading database ... 25%
+(Reading database ... 30%
+(Reading database ... 35%
+(Reading database ... 40%
+(Reading database ... 45%
+(Reading database ... 50%
+(Reading database ... 55%
+(Reading database ... 60%
+(Reading database ... 65%
+(Reading database ... 70%
+(Reading database ... 75%
+(Reading database ... 80%
+(Reading database ... 85%
+(Reading database ... 90%
+(Reading database ... 95%
+(Reading database ... 100%
+(Reading database ... 19542 files and directories currently installed.)
+Preparing to unpack .../0-liblzo2-2_2.10-2_arm64.deb ...
+Unpacking liblzo2-2:arm64 (2.10-2) ...
+Selecting previously unselected package btrfs-progs.
+Preparing to unpack .../1-btrfs-progs_6.2-1+deb12u2_arm64.deb ...
+Unpacking btrfs-progs (6.2-1+deb12u2) ...
+Selecting previously unselected package libdevmapper1.02.1:arm64.
+Preparing to unpack .../2-libdevmapper1.02.1_2%3a1.02.185-2_arm64.deb ...
+Unpacking libdevmapper1.02.1:arm64 (2:1.02.185-2) ...
+Selecting previously unselected package dmsetup.
+Preparing to unpack .../3-dmsetup_2%3a1.02.185-2_arm64.deb ...
+Unpacking dmsetup (2:1.02.185-2) ...
+Selecting previously unselected package libinih1:arm64.
+Preparing to unpack .../4-libinih1_55-1_arm64.deb ...
+Unpacking libinih1:arm64 (55-1) ...
+Selecting previously unselected package liburcu8:arm64.
+Preparing to unpack .../5-liburcu8_0.13.2-1_arm64.deb ...
+Unpacking liburcu8:arm64 (0.13.2-1) ...
+Selecting previously unselected package strace.
+Preparing to unpack .../6-strace_6.1-0.1_arm64.deb ...
+Unpacking strace (6.1-0.1) ...
+Selecting previously unselected package xfsprogs.
+Preparing to unpack .../7-xfsprogs_6.1.0-1_arm64.deb ...
+Unpacking xfsprogs (6.1.0-1) ...
+Setting up libinih1:arm64 (55-1) ...
+Setting up liblzo2-2:arm64 (2.10-2) ...
+Setting up strace (6.1-0.1) ...
+Setting up liburcu8:arm64 (0.13.2-1) ...
+Setting up btrfs-progs (6.2-1+deb12u2) ...
+Setting up libdevmapper1.02.1:arm64 (2:1.02.185-2) ...
+Setting up dmsetup (2:1.02.185-2) ...
+Setting up xfsprogs (6.1.0-1) ...
+Processing triggers for libc-bin (2.36-9+deb12u14) ...
+btrfs-progs v6.2
+See http://btrfs.wiki.kernel.org for more information.
+
+NOTE: several default settings have changed in version 5.15, please make sure
+      this does not affect your deployments:
+      - DUP for metadata (-m dup)
+      - enabled no-holes (-O no-holes)
+      - enabled free-space-tree (-R free-space-tree)
+
+Label:              (null)
+UUID:               e6432d88-21bb-48e3-aae9-4bbae029ae5d
+Node size:          16384
+Sector size:        4096
+Filesystem size:    2.00GiB
+Block group profiles:
+  Data:             single            8.00MiB
+  Metadata:         DUP             102.38MiB
+  System:           DUP               8.00MiB
+SSD detected:       no
+Zoned device:       no
+Incompat features:  extref, skinny-metadata, no-holes
+Runtime features:   free-space-tree
+Checksum:           crc32c
+Number of devices:  1
+Devices:
+   ID        SIZE  PATH
+    1     2.00GiB  /tmp/xs-btrfs-disk
+
+...
+----------------------------------------------------------------------
+Ran 3 tests in 0.987s
+
+OK
+...
+----------------------------------------------------------------------
+Ran 3 tests in 0.727s
+
+OK
+byte-local rsync warmup: 1.2291s verified
+byte-local reference warmup: 0.2464s verified
+byte-local candidate-j1 warmup: 0.2857s verified
+byte-local candidate-default warmup: 0.1604s verified
+byte-local reference 1: 0.1746s verified
+byte-local candidate-j1 1: 0.2554s verified
+byte-local candidate-default 1: 0.1540s verified
+byte-local rsync 1: 0.9928s verified
+byte-local candidate-j1 2: 0.2401s verified
+byte-local candidate-default 2: 0.1529s verified
+byte-local rsync 2: 0.9520s verified
+byte-local reference 2: 0.1456s verified
+byte-local candidate-default 3: 0.1424s verified
+byte-local rsync 3: 0.9172s verified
+byte-local reference 3: 0.1405s verified
+byte-local candidate-j1 3: 0.2331s verified
+byte-local rsync 4: 0.9295s verified
+byte-local reference 4: 0.1414s verified
+byte-local candidate-j1 4: 0.2437s verified
+byte-local candidate-default 4: 0.1433s verified
+auto-local rsync warmup: 0.9378s verified
+auto-local reference warmup: 0.1408s verified
+auto-local candidate-j1 warmup: 0.0132s verified
+auto-local candidate-default warmup: 0.0101s verified
+auto-local reference 1: 0.1406s verified
+auto-local candidate-j1 1: 0.0261s verified
+auto-local candidate-default 1: 0.0133s verified
+auto-local rsync 1: 0.9447s verified
+auto-local candidate-j1 2: 0.0122s verified
+auto-local candidate-default 2: 0.0120s verified
+auto-local rsync 2: 0.9000s verified
+auto-local reference 2: 0.1429s verified
+auto-local candidate-default 3: 0.0121s verified
+auto-local rsync 3: 0.9181s verified
+auto-local reference 3: 0.1475s verified
+auto-local candidate-j1 3: 0.0143s verified
+auto-local rsync 4: 0.9103s verified
+auto-local reference 4: 0.1430s verified
+auto-local candidate-j1 4: 0.0106s verified
+auto-local candidate-default 4: 0.0125s verified
+pipe rsync warmup: 1.0284s verified
+pipe reference warmup: 0.5352s verified
+pipe candidate-j1 warmup: 0.4972s verified
+pipe candidate-default warmup: 0.7825s verified
+pipe reference 1: 0.5328s verified
+pipe candidate-j1 1: 0.5459s verified
+pipe candidate-default 1: 0.5226s verified
+pipe rsync 1: 0.9888s verified
+pipe candidate-j1 2: 0.5328s verified
+pipe candidate-default 2: 0.5419s verified
+pipe rsync 2: 0.9792s verified
+pipe reference 2: 0.5357s verified
+pipe candidate-default 3: 0.6284s verified
+pipe rsync 3: 0.9765s verified
+pipe reference 3: 0.5799s verified
+pipe candidate-j1 3: 0.5331s verified
+pipe rsync 4: 1.0620s verified
+pipe reference 4: 0.5378s verified
+pipe candidate-j1 4: 0.5452s verified
+pipe candidate-default 4: 0.5239s verified
+pipe-z rsync warmup: 1.1335s verified
+pipe-z reference warmup: 0.3625s verified
+pipe-z candidate-j1 warmup: 0.5581s verified
+pipe-z candidate-default warmup: 0.3958s verified
+pipe-z reference 1: 0.3770s verified
+pipe-z candidate-j1 1: 0.5781s verified
+pipe-z candidate-default 1: 0.3937s verified
+pipe-z rsync 1: 1.1354s verified
+pipe-z candidate-j1 2: 0.5672s verified
+pipe-z candidate-default 2: 0.3985s verified
+pipe-z rsync 2: 1.3389s verified
+pipe-z reference 2: 0.3758s verified
+pipe-z candidate-default 3: 0.7165s verified
+pipe-z rsync 3: 1.2371s verified
+pipe-z reference 3: 0.6232s verified
+pipe-z candidate-j1 3: 0.5683s verified
+pipe-z rsync 4: 1.7314s verified
+pipe-z reference 4: 0.4664s verified
+pipe-z candidate-j1 4: 0.5669s verified
+pipe-z candidate-default 4: 0.4291s verified
+single-byte-local rsync warmup: 0.5240s verified
+single-byte-local reference warmup: 0.1253s verified
+single-byte-local candidate-j1 warmup: 0.1356s verified
+single-byte-local candidate-default warmup: 0.1238s verified
+single-byte-local reference 1: 0.1202s verified
+single-byte-local candidate-j1 1: 0.1226s verified
+single-byte-local candidate-default 1: 0.1372s verified
+single-byte-local rsync 1: 0.4902s verified
+single-byte-local candidate-j1 2: 0.1262s verified
+single-byte-local candidate-default 2: 0.1229s verified
+single-byte-local rsync 2: 0.4998s verified
+single-byte-local reference 2: 0.1224s verified
+single-byte-local candidate-default 3: 0.1260s verified
+single-byte-local rsync 3: 0.5495s verified
+single-byte-local reference 3: 0.1337s verified
+single-byte-local candidate-j1 3: 0.1403s verified
+single-byte-local rsync 4: 0.6039s verified
+single-byte-local reference 4: 0.1270s verified
+single-byte-local candidate-j1 4: 0.1256s verified
+single-byte-local candidate-default 4: 0.1207s verified
+single-pipe rsync warmup: 0.5295s verified
+single-pipe reference warmup: 0.2881s verified
+single-pipe candidate-j1 warmup: 0.2953s verified
+single-pipe candidate-default warmup: 0.3065s verified
+single-pipe reference 1: 0.3009s verified
+single-pipe candidate-j1 1: 0.3455s verified
+single-pipe candidate-default 1: 0.3264s verified
+single-pipe rsync 1: 0.5256s verified
+single-pipe candidate-j1 2: 0.3321s verified
+single-pipe candidate-default 2: 0.3140s verified
+single-pipe rsync 2: 0.5335s verified
+single-pipe reference 2: 0.3020s verified
+single-pipe candidate-default 3: 0.3321s verified
+single-pipe rsync 3: 0.5315s verified
+single-pipe reference 3: 0.2788s verified
+single-pipe candidate-j1 3: 0.2762s verified
+single-pipe rsync 4: 0.5059s verified
+single-pipe reference 4: 0.2949s verified
+single-pipe candidate-j1 4: 0.3005s verified
+single-pipe candidate-default 4: 0.2921s verified
+single-pipe-z rsync warmup: 0.5710s verified
+single-pipe-z reference warmup: 0.3038s verified
+single-pipe-z candidate-j1 warmup: 0.2963s verified
+single-pipe-z candidate-default warmup: 0.3138s verified
+single-pipe-z reference 1: 0.2972s verified
+single-pipe-z candidate-j1 1: 0.2910s verified
+single-pipe-z candidate-default 1: 0.2931s verified
+single-pipe-z rsync 1: 0.5055s verified
+single-pipe-z candidate-j1 2: 0.3145s verified
+single-pipe-z candidate-default 2: 0.2999s verified
+single-pipe-z rsync 2: 0.5036s verified
+single-pipe-z reference 2: 0.2946s verified
+single-pipe-z candidate-default 3: 0.2995s verified
+single-pipe-z rsync 3: 0.5041s verified
+single-pipe-z reference 3: 0.2854s verified
+single-pipe-z candidate-j1 3: 0.3047s verified
+single-pipe-z rsync 4: 0.5114s verified
+single-pipe-z reference 4: 0.3242s verified
+single-pipe-z candidate-j1 4: 0.2950s verified
+single-pipe-z candidate-default 4: 0.3008s verified
+meta-data=/tmp/xs-xfs-disk       isize=512    agcount=4, agsize=131072 blks
+         =                       sectsz=512   attr=2, projid32bit=1
+         =                       crc=1        finobt=1, sparse=1, rmapbt=0
+         =                       reflink=1    bigtime=1 inobtcount=1 nrext64=0
+data     =                       bsize=4096   blocks=524288, imaxpct=25
+         =                       sunit=0      swidth=0 blks
+naming   =version 2              bsize=4096   ascii-ci=0, ftype=1
+log      =internal log           bsize=4096   blocks=16384, version=2
+         =                       sectsz=512   sunit=0 blks, lazy-count=1
+realtime =none                   extsz=4096   blocks=0, rtextents=0
+...
+----------------------------------------------------------------------
+Ran 3 tests in 0.500s
+
+OK
+...
+----------------------------------------------------------------------
+Ran 3 tests in 0.532s
+
+OK

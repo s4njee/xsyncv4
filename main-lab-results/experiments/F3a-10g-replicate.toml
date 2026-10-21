@@ -1,0 +1,29 @@
+# F3a (tree T3 fill): a short replicate of xs against rsync at 10 Gb/s, both ways, repeated
+# while the tree has nothing else to run, so drift over the weekend is measured.
+id = "F3a-10g-replicate"
+kind = "screening"
+hypothesis = "xs stays ahead of rsync at 10 Gb/s from run to run."
+primary = "durable_s"
+delta = 0.03
+blocks = 4
+control = "xs"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.xs]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-a"]
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[matrix]
+link = "mac-freya-10g"
+corpus = ["large-text", "mixed-bimodal", "small-flat"]
+scenario = ["fresh"]
+direction = ["mac>freya", "freya>mac"]
+client = ["initiator"]
+cache = ["warm"]

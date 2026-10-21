@@ -1,0 +1,36 @@
+# E0c: the tunables build, with nothing set, against the release build of the
+# same commit, and again with its metrics file on. A tunables build may be
+# used for an experiment only if both are equivalent. Cells are the four with
+# the lowest noise, so sixteen blocks are enough for the verdict.
+id = "E0c-tunables"
+kind = "confirmatory"
+hypothesis = "At default values the tunables build of ddefa041364e is within 3% of the release build, with and without XSYNC_METRICS."
+primary = "wall_s"
+delta = 0.03
+blocks = 16
+control = "release"
+verify = "first-last"
+
+[arms.release]
+tool = "xs"
+rev = "ddefa041364e"
+flags = ["-a"]
+
+[arms.tunables]
+tool = "xs"
+rev = "ddefa041364e-tune"
+flags = ["-a"]
+
+[arms.metrics]
+tool = "xs"
+rev = "ddefa041364e-tune"
+flags = ["-a"]
+metrics = true
+
+[matrix]
+link = "lan"
+corpus = ["mixed-bimodal", "small-flat"]
+scenario = ["fresh"]
+direction = ["neo>freya", "freya>neo"]
+client = ["sender"]
+cache = ["warm"]

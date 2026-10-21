@@ -1,0 +1,1307 @@
+{
+ "schema": 1,
+ "run_id": "20261017T124214Z-G1-10g-large-tune",
+ "started_utc": "2026-10-17T13:04:14.968+00:00",
+ "driver": "MacBookPro",
+ "plan": {
+  "schema": 1,
+  "experiment": "G1-10g-large-tune",
+  "spec_sha256": "7f90671922d4467a1021927186b4debcff13e89d1d11f20349b31531c68855e7",
+  "kind": "screening",
+  "bundle": "f478f108774f",
+  "writes": {
+   "mac": 479282960064,
+   "freya": 479282960064
+  },
+  "hypothesis": "A larger stream count, block size, queue or worker count brings large files closer to 10 Gb/s.",
+  "primary": "durable_s",
+  "delta": 0.03,
+  "control": "xs",
+  "seed": 41718,
+  "run_id": "20261017T124214Z-G1-10g-large-tune",
+  "driver": "mac",
+  "sample_timeout_s": 3600,
+  "results": "tengig",
+  "background": false,
+  "eager_cleanup": true,
+  "hours": null,
+  "hosts": {
+   "mac": {
+    "ssh": "[email]",
+    "name": "[host]",
+    "hostname": "MacBookPro",
+    "root": "~/benchmarks/xsbench.noindex",
+    "interface": "en4",
+    "helper": false,
+    "gates": {},
+    "local": true,
+    "system": "Darwin"
+   },
+   "freya": {
+    "ssh": "[host]",
+    "name": "[host]",
+    "hostname": "freya",
+    "root": "/mnt/nvme/xsbench",
+    "interface": "enp27s0f0",
+    "helper": true,
+    "gates": {},
+    "local": false,
+    "system": "Linux"
+   }
+  },
+  "links": {
+   "mac-freya-10g": {
+    "hosts": [
+     "mac",
+     "freya"
+    ],
+    "medium": "wired",
+    "min_speed_mbps": 10000,
+    "max_rtt_ms": 2.0,
+    "initiator": "mac",
+    "driver": "mac",
+    "results": "tengig",
+    "address": {
+     "mac": "[address]",
+     "freya": "[host]"
+    }
+   }
+  },
+  "arms": [
+   {
+    "name": "xs",
+    "tool": "xs",
+    "flags": [
+     "-a"
+    ],
+    "rev": "453704a64528-tune",
+    "metrics": true,
+    "binary": {
+     "mac": "~/benchmarks/xsbench.noindex/bin/xs-453704a64528-tune",
+     "freya": "/mnt/nvme/xsbench/bin/xs-453704a64528-tune"
+    },
+    "sha256": {
+     "mac": "cdd545a62a7721607c23dd7014fc436e0f513d049a939ae1fd28cab34e97fcf2",
+     "freya": "21b844fd6d0f556ad2a01fff0eb979df5854569d8b31bf0bcc15976f53fc47c9"
+    },
+    "artifacts": {
+     "xs-darwin-arm64": "cdd545a62a7721607c23dd7014fc436e0f513d049a939ae1fd28cab34e97fcf2",
+     "xs-linux-amd64": "21b844fd6d0f556ad2a01fff0eb979df5854569d8b31bf0bcc15976f53fc47c9",
+     "xs-linux-arm64": "c2ef264df77b44f64b2bb2b1949e10231814b6ad2e804cc11614ad24d71e7cd2"
+    }
+   },
+   {
+    "name": "streams8",
+    "tool": "xs",
+    "flags": [
+     "-a"
+    ],
+    "rev": "453704a64528-tune",
+    "tune": {
+     "sender": "send_streams=8"
+    },
+    "metrics": true,
+    "binary": {
+     "mac": "~/benchmarks/xsbench.noindex/bin/xs-453704a64528-tune",
+     "freya": "/mnt/nvme/xsbench/bin/xs-453704a64528-tune"
+    },
+    "sha256": {
+     "mac": "cdd545a62a7721607c23dd7014fc436e0f513d049a939ae1fd28cab34e97fcf2",
+     "freya": "21b844fd6d0f556ad2a01fff0eb979df5854569d8b31bf0bcc15976f53fc47c9"
+    },
+    "artifacts": {
+     "xs-darwin-arm64": "cdd545a62a7721607c23dd7014fc436e0f513d049a939ae1fd28cab34e97fcf2",
+     "xs-linux-amd64": "21b844fd6d0f556ad2a01fff0eb979df5854569d8b31bf0bcc15976f53fc47c9",
+     "xs-linux-arm64": "c2ef264df77b44f64b2bb2b1949e10231814b6ad2e804cc11614ad24d71e7cd2"
+    }
+   },
+   {
+    "name": "block4m",
+    "tool": "xs",
+    "flags": [
+     "-a"
+    ],
+    "rev": "453704a64528-tune",
+    "tune": {
+     "sender": "block_target=4194304",
+     "receiver": "block_target=4194304"
+    },
+    "metrics": true,
+    "binary": {
+     "mac": "~/benchmarks/xsbench.noindex/bin/xs-453704a64528-tune",
+     "freya": "/mnt/nvme/xsbench/bin/xs-453704a64528-tune"
+    },
+    "sha256": {
+     "mac": "cdd545a62a7721607c23dd7014fc436e0f513d049a939ae1fd28cab34e97fcf2",
+     "freya": "21b844fd6d0f556ad2a01fff0eb979df5854569d8b31bf0bcc15976f53fc47c9"
+    },
+    "artifacts": {
+     "xs-darwin-arm64": "cdd545a62a7721607c23dd7014fc436e0f513d049a939ae1fd28cab34e97fcf2",
+     "xs-linux-amd64": "21b844fd6d0f556ad2a01fff0eb979df5854569d8b31bf0bcc15976f53fc47c9",
+     "xs-linux-arm64": "c2ef264df77b44f64b2bb2b1949e10231814b6ad2e804cc11614ad24d71e7cd2"
+    }
+   },
+   {
+    "name": "queues",
+    "tool": "xs",
+    "flags": [
+     "-a"
+    ],
+    "rev": "453704a64528-tune",
+    "tune": {
+     "sender": "send_queue=268435456",
+     "receiver": "recv_queue=268435456"
+    },
+    "metrics": true,
+    "binary": {
+     "mac": "~/benchmarks/xsbench.noindex/bin/xs-453704a64528-tune",
+     "freya": "/mnt/nvme/xsbench/bin/xs-453704a64528-tune"
+    },
+    "sha256": {
+     "mac": "cdd545a62a7721607c23dd7014fc436e0f513d049a939ae1fd28cab34e97fcf2",
+     "freya": "21b844fd6d0f556ad2a01fff0eb979df5854569d8b31bf0bcc15976f53fc47c9"
+    },
+    "artifacts": {
+     "xs-darwin-arm64": "cdd545a62a7721607c23dd7014fc436e0f513d049a939ae1fd28cab34e97fcf2",
+     "xs-linux-amd64": "21b844fd6d0f556ad2a01fff0eb979df5854569d8b31bf0bcc15976f53fc47c9",
+     "xs-linux-arm64": "c2ef264df77b44f64b2bb2b1949e10231814b6ad2e804cc11614ad24d71e7cd2"
+    }
+   },
+   {
+    "name": "jobs16",
+    "tool": "xs",
+    "flags": [
+     "-a"
+    ],
+    "rev": "453704a64528-tune",
+    "tune": {
+     "sender": "jobs=16",
+     "receiver": "jobs=16"
+    },
+    "metrics": true,
+    "binary": {
+     "mac": "~/benchmarks/xsbench.noindex/bin/xs-453704a64528-tune",
+     "freya": "/mnt/nvme/xsbench/bin/xs-453704a64528-tune"
+    },
+    "sha256": {
+     "mac": "cdd545a62a7721607c23dd7014fc436e0f513d049a939ae1fd28cab34e97fcf2",
+     "freya": "21b844fd6d0f556ad2a01fff0eb979df5854569d8b31bf0bcc15976f53fc47c9"
+    },
+    "artifacts": {
+     "xs-darwin-arm64": "cdd545a62a7721607c23dd7014fc436e0f513d049a939ae1fd28cab34e97fcf2",
+     "xs-linux-amd64": "21b844fd6d0f556ad2a01fff0eb979df5854569d8b31bf0bcc15976f53fc47c9",
+     "xs-linux-arm64": "c2ef264df77b44f64b2bb2b1949e10231814b6ad2e804cc11614ad24d71e7cd2"
+    }
+   },
+   {
+    "name": "all-four",
+    "tool": "xs",
+    "flags": [
+     "-a"
+    ],
+    "rev": "453704a64528-tune",
+    "tune": {
+     "sender": "send_streams=8,block_target=4194304,send_queue=268435456,jobs=16",
+     "receiver": "block_target=4194304,recv_queue=268435456,jobs=16"
+    },
+    "metrics": true,
+    "binary": {
+     "mac": "~/benchmarks/xsbench.noindex/bin/xs-453704a64528-tune",
+     "freya": "/mnt/nvme/xsbench/bin/xs-453704a64528-tune"
+    },
+    "sha256": {
+     "mac": "cdd545a62a7721607c23dd7014fc436e0f513d049a939ae1fd28cab34e97fcf2",
+     "freya": "21b844fd6d0f556ad2a01fff0eb979df5854569d8b31bf0bcc15976f53fc47c9"
+    },
+    "artifacts": {
+     "xs-darwin-arm64": "cdd545a62a7721607c23dd7014fc436e0f513d049a939ae1fd28cab34e97fcf2",
+     "xs-linux-amd64": "21b844fd6d0f556ad2a01fff0eb979df5854569d8b31bf0bcc15976f53fc47c9",
+     "xs-linux-arm64": "c2ef264df77b44f64b2bb2b1949e10231814b6ad2e804cc11614ad24d71e7cd2"
+    }
+   }
+  ],
+  "cells": [
+   {
+    "id": "large-text.fresh.mac-freya.sender.warm",
+    "corpus": "large-text",
+    "scenario": "fresh",
+    "sender": "mac",
+    "receiver": "freya",
+    "client": "sender",
+    "link": "mac-freya-10g",
+    "cache": "warm"
+   },
+   {
+    "id": "large-text.fresh.freya-mac.receiver.warm",
+    "corpus": "large-text",
+    "scenario": "fresh",
+    "sender": "freya",
+    "receiver": "mac",
+    "client": "receiver",
+    "link": "mac-freya-10g",
+    "cache": "warm"
+   },
+   {
+    "id": "mixed-bimodal.fresh.mac-freya.sender.warm",
+    "corpus": "mixed-bimodal",
+    "scenario": "fresh",
+    "sender": "mac",
+    "receiver": "freya",
+    "client": "sender",
+    "link": "mac-freya-10g",
+    "cache": "warm"
+   },
+   {
+    "id": "mixed-bimodal.fresh.freya-mac.receiver.warm",
+    "corpus": "mixed-bimodal",
+    "scenario": "fresh",
+    "sender": "freya",
+    "receiver": "mac",
+    "client": "receiver",
+    "link": "mac-freya-10g",
+    "cache": "warm"
+   }
+  ],
+  "corpora": {
+   "large-text": {
+    "files": 8,
+    "directories": 0,
+    "bytes": 8589934592,
+    "digest": "4f11b85fcc6034d648465e257e02fb7fe958c1b88152264d6be0ff5adfc43f1e",
+    "quick_digest": "c2712b8ed9434c4872376b901d4cdcd651d858c9f60d5fcdae16423b4bb3f8f4"
+   },
+   "mixed-bimodal": {
+    "files": 20000,
+    "directories": 420,
+    "bytes": 1395127076,
+    "digest": "e9071fb7ad3b0375ffe9fab58f740bfd22d545f7678e163a6c745504cc7aa16b",
+    "quick_digest": "31af6dbe5d38a32f5f0acf560703fa557304d3936e59f7b395d13cf8d0dec7fb"
+   }
+  },
+  "blocks": [
+   {
+    "cell": "mixed-bimodal.fresh.mac-freya.sender.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs",
+      "block4m",
+      "jobs16",
+      "all-four",
+      "streams8",
+      "queues"
+     ],
+     [
+      "queues",
+      "streams8",
+      "block4m",
+      "jobs16",
+      "xs",
+      "all-four"
+     ],
+     [
+      "block4m",
+      "jobs16",
+      "queues",
+      "all-four",
+      "xs",
+      "streams8"
+     ]
+    ]
+   },
+   {
+    "cell": "large-text.fresh.mac-freya.sender.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "queues",
+      "all-four",
+      "block4m",
+      "jobs16",
+      "xs",
+      "streams8"
+     ],
+     [
+      "streams8",
+      "all-four",
+      "block4m",
+      "queues",
+      "jobs16",
+      "xs"
+     ],
+     [
+      "jobs16",
+      "all-four",
+      "xs",
+      "block4m",
+      "streams8",
+      "queues"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.freya-mac.receiver.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "streams8",
+      "xs",
+      "queues",
+      "all-four",
+      "jobs16",
+      "block4m"
+     ],
+     [
+      "queues",
+      "xs",
+      "block4m",
+      "streams8",
+      "jobs16",
+      "all-four"
+     ],
+     [
+      "block4m",
+      "xs",
+      "streams8",
+      "queues",
+      "jobs16",
+      "all-four"
+     ]
+    ]
+   },
+   {
+    "cell": "large-text.fresh.freya-mac.receiver.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "queues",
+      "all-four",
+      "xs",
+      "block4m",
+      "jobs16",
+      "streams8"
+     ],
+     [
+      "xs",
+      "queues",
+      "streams8",
+      "all-four",
+      "block4m",
+      "jobs16"
+     ],
+     [
+      "streams8",
+      "all-four",
+      "queues",
+      "xs",
+      "block4m",
+      "jobs16"
+     ]
+    ]
+   },
+   {
+    "cell": "large-text.fresh.freya-mac.receiver.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "block4m",
+      "queues",
+      "streams8",
+      "jobs16",
+      "xs",
+      "all-four"
+     ],
+     [
+      "queues",
+      "all-four",
+      "block4m",
+      "streams8",
+      "jobs16",
+      "xs"
+     ],
+     [
+      "queues",
+      "streams8",
+      "block4m",
+      "jobs16",
+      "all-four",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "large-text.fresh.mac-freya.sender.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "streams8",
+      "jobs16",
+      "queues",
+      "xs",
+      "block4m",
+      "all-four"
+     ],
+     [
+      "streams8",
+      "jobs16",
+      "all-four",
+      "xs",
+      "block4m",
+      "queues"
+     ],
+     [
+      "block4m",
+      "all-four",
+      "queues",
+      "jobs16",
+      "streams8",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.freya-mac.receiver.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "block4m",
+      "streams8",
+      "all-four",
+      "xs",
+      "queues",
+      "jobs16"
+     ],
+     [
+      "xs",
+      "queues",
+      "all-four",
+      "streams8",
+      "block4m",
+      "jobs16"
+     ],
+     [
+      "streams8",
+      "all-four",
+      "block4m",
+      "xs",
+      "queues",
+      "jobs16"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.mac-freya.sender.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "block4m",
+      "streams8",
+      "xs",
+      "queues",
+      "all-four",
+      "jobs16"
+     ],
+     [
+      "xs",
+      "all-four",
+      "jobs16",
+      "queues",
+      "block4m",
+      "streams8"
+     ],
+     [
+      "queues",
+      "xs",
+      "block4m",
+      "all-four",
+      "streams8",
+      "jobs16"
+     ]
+    ]
+   },
+   {
+    "cell": "large-text.fresh.freya-mac.receiver.warm",
+    "block": 2,
+    "verify_full": false,
+    "orders": [
+     [
+      "queues",
+      "block4m",
+      "all-four",
+      "jobs16",
+      "streams8",
+      "xs"
+     ],
+     [
+      "xs",
+      "jobs16",
+      "queues",
+      "all-four",
+      "streams8",
+      "block4m"
+     ],
+     [
+      "jobs16",
+      "block4m",
+      "streams8",
+      "queues",
+      "all-four",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.mac-freya.sender.warm",
+    "block": 2,
+    "verify_full": false,
+    "orders": [
+     [
+      "queues",
+      "streams8",
+      "jobs16",
+      "xs",
+      "all-four",
+      "block4m"
+     ],
+     [
+      "xs",
+      "all-four",
+      "jobs16",
+      "block4m",
+      "queues",
+      "streams8"
+     ],
+     [
+      "all-four",
+      "queues",
+      "xs",
+      "block4m",
+      "streams8",
+      "jobs16"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.freya-mac.receiver.warm",
+    "block": 2,
+    "verify_full": false,
+    "orders": [
+     [
+      "streams8",
+      "xs",
+      "block4m",
+      "queues",
+      "all-four",
+      "jobs16"
+     ],
+     [
+      "all-four",
+      "streams8",
+      "queues",
+      "block4m",
+      "xs",
+      "jobs16"
+     ],
+     [
+      "queues",
+      "all-four",
+      "block4m",
+      "jobs16",
+      "streams8",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "large-text.fresh.mac-freya.sender.warm",
+    "block": 2,
+    "verify_full": false,
+    "orders": [
+     [
+      "queues",
+      "all-four",
+      "jobs16",
+      "xs",
+      "streams8",
+      "block4m"
+     ],
+     [
+      "xs",
+      "queues",
+      "streams8",
+      "block4m",
+      "jobs16",
+      "all-four"
+     ],
+     [
+      "all-four",
+      "queues",
+      "block4m",
+      "streams8",
+      "xs",
+      "jobs16"
+     ]
+    ]
+   },
+   {
+    "cell": "large-text.fresh.mac-freya.sender.warm",
+    "block": 3,
+    "verify_full": false,
+    "orders": [
+     [
+      "streams8",
+      "block4m",
+      "all-four",
+      "jobs16",
+      "xs",
+      "queues"
+     ],
+     [
+      "jobs16",
+      "block4m",
+      "all-four",
+      "queues",
+      "xs",
+      "streams8"
+     ],
+     [
+      "streams8",
+      "xs",
+      "queues",
+      "all-four",
+      "block4m",
+      "jobs16"
+     ]
+    ]
+   },
+   {
+    "cell": "large-text.fresh.freya-mac.receiver.warm",
+    "block": 3,
+    "verify_full": false,
+    "orders": [
+     [
+      "queues",
+      "block4m",
+      "jobs16",
+      "all-four",
+      "streams8",
+      "xs"
+     ],
+     [
+      "jobs16",
+      "xs",
+      "block4m",
+      "streams8",
+      "all-four",
+      "queues"
+     ],
+     [
+      "queues",
+      "all-four",
+      "streams8",
+      "xs",
+      "jobs16",
+      "block4m"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.mac-freya.sender.warm",
+    "block": 3,
+    "verify_full": false,
+    "orders": [
+     [
+      "queues",
+      "block4m",
+      "all-four",
+      "jobs16",
+      "streams8",
+      "xs"
+     ],
+     [
+      "streams8",
+      "jobs16",
+      "block4m",
+      "all-four",
+      "xs",
+      "queues"
+     ],
+     [
+      "streams8",
+      "block4m",
+      "jobs16",
+      "all-four",
+      "xs",
+      "queues"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.freya-mac.receiver.warm",
+    "block": 3,
+    "verify_full": false,
+    "orders": [
+     [
+      "all-four",
+      "block4m",
+      "xs",
+      "streams8",
+      "queues",
+      "jobs16"
+     ],
+     [
+      "xs",
+      "queues",
+      "jobs16",
+      "streams8",
+      "all-four",
+      "block4m"
+     ],
+     [
+      "block4m",
+      "jobs16",
+      "xs",
+      "streams8",
+      "all-four",
+      "queues"
+     ]
+    ]
+   },
+   {
+    "cell": "large-text.fresh.freya-mac.receiver.warm",
+    "block": 4,
+    "verify_full": false,
+    "orders": [
+     [
+      "queues",
+      "block4m",
+      "streams8",
+      "all-four",
+      "xs",
+      "jobs16"
+     ],
+     [
+      "block4m",
+      "xs",
+      "jobs16",
+      "streams8",
+      "all-four",
+      "queues"
+     ],
+     [
+      "all-four",
+      "block4m",
+      "jobs16",
+      "xs",
+      "streams8",
+      "queues"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.freya-mac.receiver.warm",
+    "block": 4,
+    "verify_full": false,
+    "orders": [
+     [
+      "block4m",
+      "all-four",
+      "queues",
+      "xs",
+      "streams8",
+      "jobs16"
+     ],
+     [
+      "queues",
+      "streams8",
+      "block4m",
+      "jobs16",
+      "xs",
+      "all-four"
+     ],
+     [
+      "block4m",
+      "streams8",
+      "all-four",
+      "xs",
+      "queues",
+      "jobs16"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.mac-freya.sender.warm",
+    "block": 4,
+    "verify_full": false,
+    "orders": [
+     [
+      "streams8",
+      "all-four",
+      "block4m",
+      "jobs16",
+      "xs",
+      "queues"
+     ],
+     [
+      "block4m",
+      "xs",
+      "streams8",
+      "all-four",
+      "jobs16",
+      "queues"
+     ],
+     [
+      "all-four",
+      "queues",
+      "streams8",
+      "xs",
+      "block4m",
+      "jobs16"
+     ]
+    ]
+   },
+   {
+    "cell": "large-text.fresh.mac-freya.sender.warm",
+    "block": 4,
+    "verify_full": false,
+    "orders": [
+     [
+      "queues",
+      "xs",
+      "jobs16",
+      "block4m",
+      "streams8",
+      "all-four"
+     ],
+     [
+      "jobs16",
+      "block4m",
+      "streams8",
+      "xs",
+      "queues",
+      "all-four"
+     ],
+     [
+      "block4m",
+      "queues",
+      "all-four",
+      "jobs16",
+      "xs",
+      "streams8"
+     ]
+    ]
+   },
+   {
+    "cell": "large-text.fresh.mac-freya.sender.warm",
+    "block": 5,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "jobs16",
+      "queues",
+      "streams8",
+      "block4m",
+      "all-four"
+     ],
+     [
+      "streams8",
+      "xs",
+      "queues",
+      "block4m",
+      "jobs16",
+      "all-four"
+     ],
+     [
+      "streams8",
+      "block4m",
+      "xs",
+      "queues",
+      "all-four",
+      "jobs16"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.freya-mac.receiver.warm",
+    "block": 5,
+    "verify_full": false,
+    "orders": [
+     [
+      "jobs16",
+      "streams8",
+      "xs",
+      "block4m",
+      "all-four",
+      "queues"
+     ],
+     [
+      "all-four",
+      "xs",
+      "jobs16",
+      "block4m",
+      "queues",
+      "streams8"
+     ],
+     [
+      "queues",
+      "block4m",
+      "xs",
+      "streams8",
+      "all-four",
+      "jobs16"
+     ]
+    ]
+   },
+   {
+    "cell": "large-text.fresh.freya-mac.receiver.warm",
+    "block": 5,
+    "verify_full": false,
+    "orders": [
+     [
+      "all-four",
+      "block4m",
+      "jobs16",
+      "xs",
+      "queues",
+      "streams8"
+     ],
+     [
+      "all-four",
+      "jobs16",
+      "queues",
+      "block4m",
+      "xs",
+      "streams8"
+     ],
+     [
+      "streams8",
+      "all-four",
+      "xs",
+      "block4m",
+      "queues",
+      "jobs16"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.mac-freya.sender.warm",
+    "block": 5,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "all-four",
+      "jobs16",
+      "block4m",
+      "queues",
+      "streams8"
+     ],
+     [
+      "streams8",
+      "all-four",
+      "block4m",
+      "jobs16",
+      "xs",
+      "queues"
+     ],
+     [
+      "block4m",
+      "jobs16",
+      "streams8",
+      "all-four",
+      "xs",
+      "queues"
+     ]
+    ]
+   },
+   {
+    "cell": "large-text.fresh.mac-freya.sender.warm",
+    "block": 6,
+    "verify_full": false,
+    "orders": [
+     [
+      "jobs16",
+      "xs",
+      "queues",
+      "streams8",
+      "block4m",
+      "all-four"
+     ],
+     [
+      "block4m",
+      "streams8",
+      "all-four",
+      "jobs16",
+      "xs",
+      "queues"
+     ],
+     [
+      "block4m",
+      "streams8",
+      "all-four",
+      "queues",
+      "xs",
+      "jobs16"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.mac-freya.sender.warm",
+    "block": 6,
+    "verify_full": false,
+    "orders": [
+     [
+      "jobs16",
+      "queues",
+      "xs",
+      "streams8",
+      "all-four",
+      "block4m"
+     ],
+     [
+      "queues",
+      "all-four",
+      "block4m",
+      "xs",
+      "streams8",
+      "jobs16"
+     ],
+     [
+      "streams8",
+      "block4m",
+      "xs",
+      "all-four",
+      "queues",
+      "jobs16"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.freya-mac.receiver.warm",
+    "block": 6,
+    "verify_full": false,
+    "orders": [
+     [
+      "streams8",
+      "queues",
+      "block4m",
+      "jobs16",
+      "xs",
+      "all-four"
+     ],
+     [
+      "all-four",
+      "streams8",
+      "xs",
+      "queues",
+      "block4m",
+      "jobs16"
+     ],
+     [
+      "all-four",
+      "xs",
+      "streams8",
+      "queues",
+      "block4m",
+      "jobs16"
+     ]
+    ]
+   },
+   {
+    "cell": "large-text.fresh.freya-mac.receiver.warm",
+    "block": 6,
+    "verify_full": false,
+    "orders": [
+     [
+      "all-four",
+      "xs",
+      "jobs16",
+      "streams8",
+      "block4m",
+      "queues"
+     ],
+     [
+      "xs",
+      "block4m",
+      "all-four",
+      "queues",
+      "jobs16",
+      "streams8"
+     ],
+     [
+      "queues",
+      "block4m",
+      "jobs16",
+      "xs",
+      "all-four",
+      "streams8"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.mac-freya.sender.warm",
+    "block": 7,
+    "verify_full": true,
+    "orders": [
+     [
+      "queues",
+      "all-four",
+      "xs",
+      "streams8",
+      "jobs16",
+      "block4m"
+     ],
+     [
+      "block4m",
+      "jobs16",
+      "xs",
+      "all-four",
+      "streams8",
+      "queues"
+     ],
+     [
+      "streams8",
+      "block4m",
+      "xs",
+      "queues",
+      "jobs16",
+      "all-four"
+     ]
+    ]
+   },
+   {
+    "cell": "large-text.fresh.mac-freya.sender.warm",
+    "block": 7,
+    "verify_full": true,
+    "orders": [
+     [
+      "streams8",
+      "queues",
+      "all-four",
+      "xs",
+      "jobs16",
+      "block4m"
+     ],
+     [
+      "xs",
+      "queues",
+      "all-four",
+      "block4m",
+      "streams8",
+      "jobs16"
+     ],
+     [
+      "streams8",
+      "block4m",
+      "all-four",
+      "queues",
+      "jobs16",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.freya-mac.receiver.warm",
+    "block": 7,
+    "verify_full": true,
+    "orders": [
+     [
+      "jobs16",
+      "queues",
+      "block4m",
+      "xs",
+      "streams8",
+      "all-four"
+     ],
+     [
+      "jobs16",
+      "queues",
+      "streams8",
+      "all-four",
+      "block4m",
+      "xs"
+     ],
+     [
+      "all-four",
+      "streams8",
+      "block4m",
+      "queues",
+      "jobs16",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "large-text.fresh.freya-mac.receiver.warm",
+    "block": 7,
+    "verify_full": true,
+    "orders": [
+     [
+      "queues",
+      "xs",
+      "block4m",
+      "jobs16",
+      "streams8",
+      "all-four"
+     ],
+     [
+      "queues",
+      "all-four",
+      "xs",
+      "block4m",
+      "jobs16",
+      "streams8"
+     ],
+     [
+      "block4m",
+      "queues",
+      "streams8",
+      "jobs16",
+      "all-four",
+      "xs"
+     ]
+    ]
+   }
+  ],
+  "scripts": {
+   "probe.py": "f1c65a4e27657e4622416a43e86041663e6906f685d8f5f6a26b4e8df3d7eecb",
+   "corpus.py": "437a096aebc91b67f66f47803a39ca196cc8eaeaa7877d74588edf847aa2aa0a",
+   "corpora.json": "ebf2b1a93129ade1b3330046c447d2fd5a3080b77e2b0d4454e6b1de512d043e",
+   "agent.py": "368a0b2c5e8ac3dd7869a312e09ba73cdc51280922966e1833a4fa16d7194b4b",
+   "runner.py": "cce71fee149764ad1a5c913061f19620a8ff44f792d23d55f7a290d59a9e20ff",
+   "xspipe.py": "94b3fccfc6e994d227077c453f90323ab55337fd8a98231d16a10696e8ebab6b",
+   "measure.py": "5065310f480ff1cabfa7c645f0db342624a02f9a081b96069d50d52b3d224777"
+  },
+  "observed": {
+   "mac": {
+    "rsync": {
+     "path": "/opt/homebrew/bin/rsync",
+     "sha256": "bbd302280bacdd83a6a716ab0556e1c13875a9f222b62924293ecb2d09bbb56f",
+     "version": "rsync  version 3.5.1  protocol version 33"
+    },
+    "hostname": "MacBookPro"
+   },
+   "freya": {
+    "rsync": {
+     "path": "/usr/bin/rsync",
+     "sha256": "cae31f86ebfa8ecf2293a809c8f09d8176c8ead7f192de8caebcc6a1f3f14800",
+     "version": "rsync  version 3.5.0-g471e17dc  protocol version 32"
+    },
+    "hostname": "freya",
+    "trim": "trimmed=yes /mnt/nvme: 0 B (0 bytes) trimmed"
+   },
+   "addresses": {
+    "mac>freya": "[host]"
+   }
+  }
+ }
+}

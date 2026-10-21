@@ -1,0 +1,19 @@
+{
+ "experiment": "X1d-large-many-to-mars",
+ "kind": "screening",
+ "hypothesis": "On a ~3 Gb/s direct link, xs -a copies large files at least as fast as rsync -a, and ChaCha20 slows both against AES-GCM.",
+ "primary": "durable_s",
+ "control": "rsync",
+ "delta": 0.03,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261015T131339Z-X1d-large-many-to-mars"
+ ],
+ "spec_sha256": [
+  "416ed25160ad891902473047acf8fbe85ceaee2176224d96ec0ec828aab1ed99"
+ ],
+ "valid_blocks": 16,
+ "void_attempts": 0,
+ "void_reasons": []
+}

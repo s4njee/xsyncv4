@@ -1,0 +1,39 @@
+# C1: a real tree of the operator's own data: congresses 117 and 118 of
+# csearchv3's congress data (216,518 JSON, XML and text files in 52,594
+# directories, 1.16 GB, about 17.6x at zstd level 3). Copies are bound by
+# per-file work rather than the link, so they run here rather than at 10 Gb/s.
+# xs and rsync, with and without -z, fresh and no-op.
+id = "C1-congress"
+kind = "screening"
+hypothesis = "On a real tree of small JSON and XML files, xs is faster than rsync, and -z helps neither on a gigabit link."
+primary = "durable_s"
+delta = 0.03
+blocks = 8
+control = "rsync"
+verify = "first-last"
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[arms.rsync-z]
+tool = "rsync"
+flags = ["-az"]
+
+[arms.xs]
+tool = "xs"
+rev = "8cc75bbdb801"
+flags = ["-a"]
+
+[arms.xs-z]
+tool = "xs"
+rev = "8cc75bbdb801"
+flags = ["-az"]
+
+[matrix]
+link = "lan"
+corpus = ["real-congress"]
+scenario = ["fresh", "noop"]
+direction = ["neo>freya", "freya>neo"]
+client = ["sender"]
+cache = ["warm"]

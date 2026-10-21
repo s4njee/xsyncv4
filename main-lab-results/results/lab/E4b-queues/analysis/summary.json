@@ -1,0 +1,19 @@
+{
+ "experiment": "E4b-queues",
+ "kind": "screening",
+ "hypothesis": "Neither queue is a bottleneck at its default: a quarter or four times its size changes no copy by more than 3%.",
+ "primary": "wall_s",
+ "control": "xs",
+ "delta": 0.03,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261014T220731Z-E4b-queues"
+ ],
+ "spec_sha256": [
+  "b59fce15179dfa8fcbbbb1ff65821ea5ab57404288ab28224fd5b610a887727c"
+ ],
+ "valid_blocks": 40,
+ "void_attempts": 0,
+ "void_reasons": []
+}

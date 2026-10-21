@@ -1,0 +1,140 @@
+# T4: neo (Raspberry Pi 5) and mars (Ryzen 9 7900X) on wired gigabit, from 2026-10-17. What
+# limits small-file copies between a Pi and a fast desktop, and is xs's best small-file setting
+# safe as the default? H0 sets the baseline both ways. H1a and H1b time each receiver creating
+# the files on its own against xs delivering them: whichever side cannot keep up is where the
+# tree looks next (the Pi receiving, the Pi sending, or mars sending). H6 asks the default
+# question. Winners are confirmed with fresh blocks. Until Sunday 07:00 Central, once its
+# branches end, it repeats a short replicate (F4a).
+id = "T4-neo-mars-1g"
+question = "What limits small-file copies between a Raspberry Pi 5 and a Ryzen desktop, and which settings should be the default?"
+start = ["H0"]
+until = "2026-10-18T12:00Z"
+fill = ["F4a"]
+
+[nodes.H0]
+spec = "H0-pair-baseline.toml"
+question = "Where do xs and rsync stand between the Pi and mars, each way, on each kind of tree?"
+
+  [[nodes.H0.branch]]
+  otherwise = true
+  next = ["H1a", "H1b", "H6"]
+  note = "baseline measured; next, which side limits small files, and the default question"
+  label = "then"
+
+[nodes.H1a]
+spec = "H1a-pair-ceiling-neo.toml"
+question = "When the Pi receives, can it create files faster than xs delivers them?"
+
+  [[nodes.H1a.branch]]
+  when = { arm = "local-x4", speed_at_least = 2.0, all = true }
+  next = ["H3"]
+  note = "the Pi creates small files at least twice as fast as xs delivers them: look at mars's sending side"
+  label = "Pi ≥ 2× faster locally"
+
+  [[nodes.H1a.branch]]
+  otherwise = true
+  next = ["H4"]
+  note = "the Pi creates small files about as fast as xs delivers them: its own receiving is the limit"
+  label = "otherwise"
+
+[nodes.H1b]
+spec = "H1b-pair-ceiling-mars.toml"
+question = "When mars receives, can it create files faster than xs delivers them from the Pi?"
+
+  [[nodes.H1b.branch]]
+  when = { arm = "local-x4", speed_at_least = 2.0, all = true }
+  next = ["H5"]
+  note = "mars creates small files at least twice as fast as xs delivers them: look at the Pi's sending side"
+  label = "mars ≥ 2× faster locally"
+
+  [[nodes.H1b.branch]]
+  otherwise = true
+  next = []
+  note = "mars creates small files about as fast as xs delivers them from the Pi"
+  label = "otherwise"
+
+[nodes.H3]
+spec = "H3-pair-mars-send.toml"
+question = "Can a sending setting on mars get small files to the Pi faster?"
+
+  [[nodes.H3.branch]]
+  when = { verdict = "faster" }
+  next = ["H3c"]
+  note = "a sending setting on mars was faster"
+  label = "an arm was faster"
+
+  [[nodes.H3.branch]]
+  otherwise = true
+  next = []
+  note = "no sending setting on mars beat xs's best"
+  label = "nothing faster"
+
+[nodes.H4]
+spec = "H4-pair-pi-receive.toml"
+question = "Can fewer workers, larger writes or no compression help the Pi receive?"
+
+  [[nodes.H4.branch]]
+  when = { verdict = "faster" }
+  next = ["H4c"]
+  note = "a receiving setting on the Pi was faster"
+  label = "an arm was faster"
+
+  [[nodes.H4.branch]]
+  otherwise = true
+  next = []
+  note = "no receiving setting on the Pi beat xs's best"
+  label = "nothing faster"
+
+[nodes.H5]
+spec = "H5-pair-pi-send.toml"
+question = "Can less compression, fewer workers or bigger batches help the Pi send?"
+
+  [[nodes.H5.branch]]
+  when = { verdict = "faster" }
+  next = ["H5c"]
+  note = "a sending setting on the Pi was faster"
+  label = "an arm was faster"
+
+  [[nodes.H5.branch]]
+  otherwise = true
+  next = []
+  note = "no sending setting on the Pi beat xs's best"
+  label = "nothing faster"
+
+[nodes.H6]
+spec = "H6-pair-best-default.toml"
+question = "Is xs's best small-file setting safe as the default for mixed and large trees?"
+
+  [[nodes.H6.branch]]
+  when = { arm = "xs-best", verdict = "slower" }
+  next = []
+  note = "xs's best setting was slower than its default somewhere: not safe as the default here"
+  label = "slower somewhere"
+
+  [[nodes.H6.branch]]
+  otherwise = true
+  next = []
+  note = "xs's best setting was nowhere slower than its default"
+  label = "never slower"
+
+[nodes.H3c]
+promote = "H3"
+id = "H3c-pair-mars-send-confirm"
+blocks = 12
+question = "Does mars's winning send setting hold up with fresh blocks?"
+
+[nodes.H4c]
+promote = "H4"
+id = "H4c-pair-pi-receive-confirm"
+blocks = 12
+question = "Does the Pi's winning receive setting hold up with fresh blocks?"
+
+[nodes.H5c]
+promote = "H5"
+id = "H5c-pair-pi-send-confirm"
+blocks = 12
+question = "Does the Pi's winning send setting hold up with fresh blocks?"
+
+[nodes.F4a]
+spec = "F4a-pair-replicate.toml"
+question = "Do the Pi and mars results hold steady over the weekend?"

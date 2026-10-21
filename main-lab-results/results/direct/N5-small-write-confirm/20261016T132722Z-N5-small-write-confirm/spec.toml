@@ -1,0 +1,32 @@
+# N5: confirming the small-file write setting at 10 Gb/s: four receiving
+# workers with --no-atomic, against the default, the Mac sending to mars's
+# NVMe. On the 3 Gb/s path it took small-flat from 0.71 to 1.01 Gb/s.
+id = "N5-small-write-confirm"
+kind = "confirmatory"
+hypothesis = "Four receiving workers with --no-atomic write small and mixed trees faster than the default."
+primary = "durable_s"
+delta = 0.03
+blocks = 16
+control = "xs"
+verify = "first-last"
+cleanup = "eager"
+hours = [23, 5]  # the Mac sends: run while it is idle overnight
+
+[arms.xs]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a"]
+
+[arms.recv4-noatomic]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a", "--no-atomic"]
+tune = { receiver = "jobs=4" }
+
+[matrix]
+link = "mac-mars-direct"
+corpus = ["small-flat", "small-opaque", "mixed-bimodal", "mixed-threshold"]
+scenario = ["fresh"]
+direction = ["mac>mars"]
+client = ["initiator"]
+cache = ["warm"]

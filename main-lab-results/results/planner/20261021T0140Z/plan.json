@@ -1,0 +1,354 @@
+{
+ "summary": "Both lab2 gaps, congress-sample fresh and real-projects fresh (rsync ahead and neither proven), are taken to step 1: reproduction at home. neo races xs e51c1df1329a with lab2's flags (-a -j4) against rsync -a over the neo-mars link with 11 ms added and neo held to 2 CPUs. It splits the congress cell into a CPU-only arm and adds a plain-link psample baseline, and an 8-block confirmation of rsync's lead is attached wherever rsync screens at least 5% ahead, so a loss can be shown to repeat. neo-ssd checks whether the 2-CPU cap alone, with no network, erodes xs's lead locally on the same two home corpora; no development case is opened until a gap reproduces.",
+ "runners": [
+  {
+   "runner": "neo",
+   "rationale": "neo drives the only networked link, so it alone can reproduce lab2's latency. It has 5.9 h of room (6 h minus 0.1 h left on the sentinel, nothing queued). The plan uses about 282 min including both possible confirmations, which leaves margin in case netem and the CPU cap stretch sample times. e51c1df1329a is the newest xs build on both neo and mars; no -tune build is staged on mars, so tuning (step 2) waits for a reproduced gap.",
+   "experiments": [
+    {
+     "id": "L2R1-congress-fresh-wan11-cpu2",
+     "question": "For lab2's congress-sample fresh gap, where rsync was 1.10x faster on the a-aws link, does rsync -a also beat xs -a -j4 on real-congress from neo to mars with 11 ms added and neo held to 2 CPUs?",
+     "hypothesis": "Under lab2's latency and a 2-CPU sender, xs -a -j4's lead over rsync on a fresh real-congress copy shrinks from the plain link's 1.39x (J1d) to a loss of at least 5%.",
+     "why": "Step 1 (reproduce): this is lab2's congress cell at home under lab2's conditions, and J1d already gives the plain-link comparison.",
+     "front": false,
+     "link": "neo-mars-lan",
+     "corpus": [
+      "real-congress"
+     ],
+     "scenario": [
+      "fresh"
+     ],
+     "direction": [
+      "neo>mars"
+     ],
+     "client": "initiator",
+     "cache": [
+      "warm"
+     ],
+     "primary": "durable_s",
+     "delta": 0.05,
+     "blocks": 12,
+     "control": "xs-j4",
+     "arms": [
+      {
+       "name": "xs-j4",
+       "tool": "xs",
+       "rev": "e51c1df1329a",
+       "flags": [
+        "-a",
+        "-j4"
+       ],
+       "tune": null,
+       "writeback": "default",
+       "verify": "full",
+       "streams": null
+      },
+      {
+       "name": "rsync",
+       "tool": "rsync",
+       "rev": null,
+       "flags": [
+        "-a"
+       ],
+       "tune": null,
+       "writeback": "default",
+       "verify": "full",
+       "streams": null
+      }
+     ],
+     "confirm": {
+      "arm": "rsync",
+      "min_speed": 1.05
+     },
+     "wan_delay_ms": 11,
+     "cpus": 2
+    },
+    {
+     "id": "L2R2-congress-fresh-cpu2-only",
+     "question": "For lab2's congress-sample fresh gap: does holding neo to 2 CPUs, with no added latency, erase xs -a -j4's lead over rsync -a on real-congress from neo to mars?",
+     "hypothesis": "The 2-CPU cap alone, which leaves four workers competing for two cores, pulls xs's time to within 5% of rsync's or behind it, unlike the plain link where xs led by 1.39x.",
+     "why": "Step 1 (reproduce, split by factor): it separates the CPU cap from the latency, so a reproduced gap points at the right cause.",
+     "front": false,
+     "link": "neo-mars-lan",
+     "corpus": [
+      "real-congress"
+     ],
+     "scenario": [
+      "fresh"
+     ],
+     "direction": [
+      "neo>mars"
+     ],
+     "client": "initiator",
+     "cache": [
+      "warm"
+     ],
+     "primary": "durable_s",
+     "delta": 0.05,
+     "blocks": 10,
+     "control": "xs-j4",
+     "arms": [
+      {
+       "name": "xs-j4",
+       "tool": "xs",
+       "rev": "e51c1df1329a",
+       "flags": [
+        "-a",
+        "-j4"
+       ],
+       "tune": null,
+       "writeback": "default",
+       "verify": "full",
+       "streams": null
+      },
+      {
+       "name": "rsync",
+       "tool": "rsync",
+       "rev": null,
+       "flags": [
+        "-a"
+       ],
+       "tune": null,
+       "writeback": "default",
+       "verify": "full",
+       "streams": null
+      }
+     ],
+     "confirm": null,
+     "wan_delay_ms": 0,
+     "cpus": 2
+    },
+    {
+     "id": "L2R3-psample-fresh-wan11-cpu2",
+     "question": "For lab2's real-projects fresh gap, where rsync was 1.46x faster and xs's times were widely scattered, does rsync -a beat xs -a -j4 on real-psample from neo to mars with 11 ms added and neo held to 2 CPUs?",
+     "hypothesis": "Under lab2's latency and a 2-CPU sender, xs -a -j4 reaches a durable fresh copy of real-psample at least 5% later than rsync -a, with more block-to-block spread than rsync.",
+     "why": "Step 1 (reproduce): real-psample is the only home corpus for this gap that is staged on both hosts and timed on this link (small-real is neither).",
+     "front": false,
+     "link": "neo-mars-lan",
+     "corpus": [
+      "real-psample"
+     ],
+     "scenario": [
+      "fresh"
+     ],
+     "direction": [
+      "neo>mars"
+     ],
+     "client": "initiator",
+     "cache": [
+      "warm"
+     ],
+     "primary": "durable_s",
+     "delta": 0.05,
+     "blocks": 8,
+     "control": "xs-j4",
+     "arms": [
+      {
+       "name": "xs-j4",
+       "tool": "xs",
+       "rev": "e51c1df1329a",
+       "flags": [
+        "-a",
+        "-j4"
+       ],
+       "tune": null,
+       "writeback": "default",
+       "verify": "full",
+       "streams": null
+      },
+      {
+       "name": "rsync",
+       "tool": "rsync",
+       "rev": null,
+       "flags": [
+        "-a"
+       ],
+       "tune": null,
+       "writeback": "default",
+       "verify": "full",
+       "streams": null
+      }
+     ],
+     "confirm": {
+      "arm": "rsync",
+      "min_speed": 1.05
+     },
+     "wan_delay_ms": 11,
+     "cpus": 2
+    },
+    {
+     "id": "L2R4-psample-fresh-plain",
+     "question": "For lab2's real-projects fresh gap: on the plain neo-mars link, with no added latency and no CPU cap, how does xs -a -j4 compare with rsync -a on a fresh real-psample copy?",
+     "hypothesis": "On the plain link, xs -a -j4 copies real-psample fresh no slower than rsync -a, so any loss in L2R3 comes from lab2's conditions.",
+     "why": "Step 1 (reproduce): there is no plain-link fresh real-psample result on neo-mars to set the reproduction against.",
+     "front": false,
+     "link": "neo-mars-lan",
+     "corpus": [
+      "real-psample"
+     ],
+     "scenario": [
+      "fresh"
+     ],
+     "direction": [
+      "neo>mars"
+     ],
+     "client": "initiator",
+     "cache": [
+      "warm"
+     ],
+     "primary": "durable_s",
+     "delta": 0.05,
+     "blocks": 6,
+     "control": "xs-j4",
+     "arms": [
+      {
+       "name": "xs-j4",
+       "tool": "xs",
+       "rev": "e51c1df1329a",
+       "flags": [
+        "-a",
+        "-j4"
+       ],
+       "tune": null,
+       "writeback": "default",
+       "verify": "full",
+       "streams": null
+      },
+      {
+       "name": "rsync",
+       "tool": "rsync",
+       "rev": null,
+       "flags": [
+        "-a"
+       ],
+       "tune": null,
+       "writeback": "default",
+       "verify": "full",
+       "streams": null
+      }
+     ],
+     "confirm": null,
+     "wan_delay_ms": 0,
+     "cpus": 0
+    }
+   ]
+  },
+  {
+   "runner": "neo-ssd",
+   "rationale": "neo-ssd is idle with the full 6 h. Its link is local, so it cannot add latency, but it can hold neo to 2 CPUs. That tests, with no network involved, whether the CPU cap alone erodes xs's lead on the two home corpora behind lab2's gaps. The plain-link baselines are J2 for real-congress (rsync 1.84x slower) and LC1/LC12 for real-psample (xs about 10% behind, cold). The plan uses about 130 min and does not touch the waiting T16 nodes.",
+   "experiments": [
+    {
+     "id": "L2R5-local-congress-cpu2",
+     "question": "For lab2's congress-sample fresh gap: copying real-congress locally from neo to the T5 with neo held to 2 CPUs, does rsync -a close the 1.84x lead xs held without a cap?",
+     "hypothesis": "With 2 CPUs, xs -a -j4's lead over rsync -a on a fresh local real-congress copy falls well below J2's 1.84x, showing that xs's small-file advantage depends on spare cores.",
+     "why": "Step 1 (reproduce, split by factor): it measures the CPU cap's effect where no network latency can contribute.",
+     "front": false,
+     "link": "neo-local-ssd",
+     "corpus": [
+      "real-congress"
+     ],
+     "scenario": [
+      "fresh"
+     ],
+     "direction": [
+      "neo>neo-ssd"
+     ],
+     "client": "receiver",
+     "cache": [
+      "warm"
+     ],
+     "primary": "durable_s",
+     "delta": 0.05,
+     "blocks": 12,
+     "control": "xs-j4",
+     "arms": [
+      {
+       "name": "xs-j4",
+       "tool": "xs",
+       "rev": "e51c1df1329a",
+       "flags": [
+        "-a",
+        "-j4"
+       ],
+       "tune": null,
+       "writeback": "default",
+       "verify": "full",
+       "streams": null
+      },
+      {
+       "name": "rsync",
+       "tool": "rsync",
+       "rev": null,
+       "flags": [
+        "-a"
+       ],
+       "tune": null,
+       "writeback": "default",
+       "verify": "full",
+       "streams": null
+      }
+     ],
+     "confirm": null,
+     "wan_delay_ms": 0,
+     "cpus": 2
+    },
+    {
+     "id": "L2R6-local-psample-cpu2",
+     "question": "For lab2's real-projects fresh gap: copying real-psample locally to the T5 with cold caches and neo held to 2 CPUs, does xs -a -j4's existing deficit to rsync -a (about 10% in LC1 and LC12) widen?",
+     "hypothesis": "With 2 CPUs, xs -a -j4 is more than 15% slower than rsync -a on a fresh cold local real-psample copy, which would point at CPU contention among its workers.",
+     "why": "Step 1 (reproduce, split by factor): this is the one home cell where xs already trails rsync on a real-projects proxy, and it shows whether a 2-CPU cap deepens that loss.",
+     "front": false,
+     "link": "neo-local-ssd",
+     "corpus": [
+      "real-psample"
+     ],
+     "scenario": [
+      "fresh"
+     ],
+     "direction": [
+      "neo>neo-ssd"
+     ],
+     "client": "receiver",
+     "cache": [
+      "cold"
+     ],
+     "primary": "durable_s",
+     "delta": 0.05,
+     "blocks": 8,
+     "control": "xs-j4",
+     "arms": [
+      {
+       "name": "xs-j4",
+       "tool": "xs",
+       "rev": "e51c1df1329a",
+       "flags": [
+        "-a",
+        "-j4"
+       ],
+       "tune": null,
+       "writeback": "default",
+       "verify": "full",
+       "streams": null
+      },
+      {
+       "name": "rsync",
+       "tool": "rsync",
+       "rev": null,
+       "flags": [
+        "-a"
+       ],
+       "tune": null,
+       "writeback": "default",
+       "verify": "full",
+       "streams": null
+      }
+     ],
+     "confirm": null,
+     "wan_delay_ms": 0,
+     "cpus": 2
+    }
+   ]
+  }
+ ],
+ "engineering": null
+}

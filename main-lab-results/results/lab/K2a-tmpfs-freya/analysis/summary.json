@@ -1,0 +1,19 @@
+{
+ "experiment": "K2a-tmpfs-freya",
+ "kind": "screening",
+ "hypothesis": "xs copies small trees into RAM on freya no faster than onto its NVMe: the receiver's disk is not the limit.",
+ "primary": "durable_s",
+ "control": "xs-z",
+ "delta": 0.03,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261016T223005Z-K2a-tmpfs-freya"
+ ],
+ "spec_sha256": [
+  "089cc70488a548111e2d294a0e6410f1f250b0d481ffad250c070f8a06896879"
+ ],
+ "valid_blocks": 18,
+ "void_attempts": 0,
+ "void_reasons": []
+}

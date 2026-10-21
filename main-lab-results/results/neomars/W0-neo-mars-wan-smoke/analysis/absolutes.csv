@@ -1,0 +1,17 @@
+experiment,kind,cell_id,corpus,scenario,sender,receiver,client,link,cache,arm,metric,n_blocks,geomean,lo,hi
+W0-neo-mars-wan-smoke,screening,small-flat.fresh.neo-mars.sender.warm,small-flat,fresh,neo,mars,sender,neo-mars-lan,warm,rsync,durable_s,2,16.04968493397467,15.940478335023215,16.159639696249958
+W0-neo-mars-wan-smoke,screening,small-flat.fresh.neo-mars.sender.warm,small-flat,fresh,neo,mars,sender,neo-mars-lan,warm,xs,durable_s,2,12.520666373684458,10.869355291771166,14.422850503359287
+W0-neo-mars-wan-smoke,screening,small-flat.fresh.neo-mars.sender.warm,small-flat,fresh,neo,mars,sender,neo-mars-lan,warm,rsync,wall_s,2,15.861086459350597,15.737941393585778,15.985195101408083
+W0-neo-mars-wan-smoke,screening,small-flat.fresh.neo-mars.sender.warm,small-flat,fresh,neo,mars,sender,neo-mars-lan,warm,xs,wall_s,2,12.358392196355588,11.046598901781238,13.82596209357392
+W0-neo-mars-wan-smoke,screening,small-flat.fresh.neo-mars.sender.warm,small-flat,fresh,neo,mars,sender,neo-mars-lan,warm,rsync,cpu_s,2,18.199142978514953,17.01860201638898,19.461575329952172
+W0-neo-mars-wan-smoke,screening,small-flat.fresh.neo-mars.sender.warm,small-flat,fresh,neo,mars,sender,neo-mars-lan,warm,xs,cpu_s,2,17.234116825561564,13.293431257361016,22.342973533837412
+W0-neo-mars-wan-smoke,screening,small-flat.fresh.neo-mars.sender.warm,small-flat,fresh,neo,mars,sender,neo-mars-lan,warm,rsync,rss_bytes,2,13024507.14688274,8128893.578180192,20868496.40577727
+W0-neo-mars-wan-smoke,screening,small-flat.fresh.neo-mars.sender.warm,small-flat,fresh,neo,mars,sender,neo-mars-lan,warm,xs,rss_bytes,2,121116594.2723164,119385589.00714834,122872697.8701472
+W0-neo-mars-wan-smoke,screening,small-flat.noop.neo-mars.sender.warm,small-flat,noop,neo,mars,sender,neo-mars-lan,warm,rsync,durable_s,2,2.364488439365694,0.5218134994261453,10.714183489009773
+W0-neo-mars-wan-smoke,screening,small-flat.noop.neo-mars.sender.warm,small-flat,noop,neo,mars,sender,neo-mars-lan,warm,xs,durable_s,2,0.5466967978724804,0.249786256040341,1.1965325616464437
+W0-neo-mars-wan-smoke,screening,small-flat.noop.neo-mars.sender.warm,small-flat,noop,neo,mars,sender,neo-mars-lan,warm,rsync,wall_s,2,2.1195792289413764,1.2924296141970897,3.4761011806052724
+W0-neo-mars-wan-smoke,screening,small-flat.noop.neo-mars.sender.warm,small-flat,noop,neo,mars,sender,neo-mars-lan,warm,xs,wall_s,2,0.4177480833405595,0.31756401076728624,0.5495379048559634
+W0-neo-mars-wan-smoke,screening,small-flat.noop.neo-mars.sender.warm,small-flat,noop,neo,mars,sender,neo-mars-lan,warm,rsync,cpu_s,2,0.6409761764418394,0.11142700795671734,3.6871712370271186
+W0-neo-mars-wan-smoke,screening,small-flat.noop.neo-mars.sender.warm,small-flat,noop,neo,mars,sender,neo-mars-lan,warm,xs,cpu_s,2,0.4471450967437751,0.28044517921194345,0.7129334086035346
+W0-neo-mars-wan-smoke,screening,small-flat.noop.neo-mars.sender.warm,small-flat,noop,neo,mars,sender,neo-mars-lan,warm,rsync,rss_bytes,2,12247037.260200348,12143389.122434903,12351570.071622705
+W0-neo-mars-wan-smoke,screening,small-flat.noop.neo-mars.sender.warm,small-flat,noop,neo,mars,sender,neo-mars-lan,warm,xs,rss_bytes,2,15753222.390014293,10458882.533681367,23727584.17259876

@@ -1,0 +1,38 @@
+# LC5 (tree T15): the source-guard fix (dd6f5121d506) against its parent release
+# (21ae6844ed20) on local copies to the T5. strace found the parent resolving every
+# source directory's path, one failing readlinkat per component: 578,507 calls for
+# congress's 52,593 directories, and psample has 547,983. psample is the cell where xs
+# trailed rsync in LC1; congress, where xs already led, is the guardrail. rsync is the
+# reference both ways.
+id = "LC5-local-source-guard"
+kind = "screening"
+hypothesis = "Skipping per-directory path resolution makes xs's local copies faster where directories are many, and slower nowhere."
+primary = "durable_s"
+delta = 0.03
+blocks = 6
+control = "xs"
+verify = "first-last"
+cleanup = "eager"
+sample_timeout_s = 7200
+
+[arms.xs]
+tool = "xs"
+rev = "21ae6844ed20"
+flags = ["-aH"]
+
+[arms.xs-guard]
+tool = "xs"
+rev = "dd6f5121d506"
+flags = ["-aH"]
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-aH"]
+
+[matrix]
+link = "neo-local-ssd"
+corpus = ["real-psample", "real-congress"]
+scenario = ["fresh"]
+direction = ["neo>neo-ssd"]
+client = ["receiver"]
+cache = ["cold"]

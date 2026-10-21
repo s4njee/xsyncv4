@@ -1,0 +1,38 @@
+# OS1b (2026-10-20): the tree that showed the macOS parent-directory defect, real-psample (711,103
+# files in 547,983 directories, mean depth 7.6, 21 GB), no-op only, both ways between neo (Linux,
+# ext4) and mars (macOS, APFS). On the Mac the no-op pull took 50.5-64.0 s with 21ae6844ed20 and
+# 29.3-36.6 s with e51c1df1329a against rsync's 50-52 s (development.md). Here mars is an x86 Ryzen
+# on a different NVMe: if the defect is macOS's, xs-parent trails rsync onto mars and the fix closes
+# it, while onto neo the two builds match. Each arm seeds its destination once per block (21 GB at
+# 1 GbE, about four minutes).
+id = "OS1b-neo-mars-psample-noop"
+kind = "screening"
+hypothesis = "Onto macOS, e51c1df1329a's no-op is more than 10% faster than its parent's; onto Linux the two differ by less than 10%."
+primary = "durable_s"
+delta = 0.10
+blocks = 3
+control = "xs-parent"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.xs-parent]
+tool = "xs"
+rev = "21ae6844ed20"
+flags = ["-aH"]
+
+[arms.xs]
+tool = "xs"
+rev = "e51c1df1329a"
+flags = ["-aH"]
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-aH"]
+
+[matrix]
+link = "neo-mars-lan"
+corpus = ["real-psample"]
+scenario = ["noop"]
+direction = ["neo>mars", "mars>neo"]
+client = ["initiator"]
+cache = ["warm"]

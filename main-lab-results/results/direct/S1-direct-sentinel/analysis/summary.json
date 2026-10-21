@@ -1,0 +1,19 @@
+{
+ "experiment": "S1-direct-sentinel",
+ "kind": "screening",
+ "hypothesis": "The A/A ratio on the direct link stays within 3% of 1.",
+ "primary": "durable_s",
+ "control": "xs",
+ "delta": 0.03,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261016T113217Z-S1-direct-sentinel-s0001"
+ ],
+ "spec_sha256": [
+  "7e48037d24612a1a6a7464a660ff2e4024eadb13dcf3549d557dda390f010702"
+ ],
+ "valid_blocks": 4,
+ "void_attempts": 0,
+ "void_reasons": []
+}

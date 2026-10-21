@@ -1,0 +1,30 @@
+{
+ "experiment": "S4-neo-mars-sentinel",
+ "kind": "screening",
+ "hypothesis": "Hour by hour, the A/A ratio stays within 5% of 1 and the xs to rsync ratio stays where E1n's put it.",
+ "primary": "wall_s",
+ "control": "xs",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261020T055459Z-S4-neo-mars-sentinel-s0001",
+  "20261020T055501Z-S4-neo-mars-sentinel-s0002",
+  "20261020T055503Z-S4-neo-mars-sentinel-s0003",
+  "20261020T055505Z-S4-neo-mars-sentinel-s0004",
+  "20261020T055506Z-S4-neo-mars-sentinel-s0005"
+ ],
+ "spec_sha256": [
+  "43db295a6682e41627be40bb0bfca953c90c3b1da71f6e67448d13e4dfa940a3"
+ ],
+ "valid_blocks": 80,
+ "void_attempts": 6,
+ "void_reasons": [
+  "again: did not settle: neo is 32% busy",
+  "again: did not settle: neo is 60% busy",
+  "round trip is 2.375 ms, above 2.0",
+  "rsync: did not settle: neo is 44% busy",
+  "xs: did not settle: neo is 22% busy",
+  "xs: did not settle: neo is 38% busy"
+ ]
+}

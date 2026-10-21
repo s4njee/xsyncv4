@@ -1,0 +1,22 @@
+{
+ "experiment": "P1-pipe-streams",
+ "kind": "screening",
+ "hypothesis": "Plain tar streams, compressed or cut into several at once, copy small trees onto NVMe faster than xs.",
+ "primary": "durable_s",
+ "control": "xs-best",
+ "delta": 0.03,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261016T210940Z-P1-pipe-streams"
+ ],
+ "spec_sha256": [
+  "6b094d3221e14b80e6d7986ad2ced52d36e4c137db4a43502c6f160c27d7fa08"
+ ],
+ "valid_blocks": 4,
+ "void_attempts": 2,
+ "void_reasons": [
+  "stopped",
+  "tar: did not settle: mars has 54 MiB dirty"
+ ]
+}

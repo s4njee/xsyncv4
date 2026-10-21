@@ -1,0 +1,45 @@
+{
+ "summary": "The mac runner is unreachable, so all new work goes to the idle neo-ssd runner, which has the full 6 hours. The plan tests whether xs beats rsync on the local psample backup when both use eager writeback, and confirms xs if it wins. It also covers the 1% re-sync cell that LC4 never reported, and checks whether eager writeback combines with --no-atomic. Together these use about 352 of the 360 available minutes, counting the possible confirmation.",
+ "window_end": "2026-10-19T18:50Z",
+ "runners": [
+  {
+   "runner": "mac",
+   "rationale": "The mac runner is unreachable and the evidence has no inventory for the mac host, so no experiment can be scheduled on mac-mars-10g this window. The open mac work (xs-recv4 follow-ups and the T13 pull onto the Mac) waits until it reports again.",
+   "accepted": [],
+   "rejected": [
+    {
+     "id": "*",
+     "reason": "mac is not a running runner"
+    }
+   ],
+   "tree": null
+  },
+  {
+   "runner": "neo-ssd",
+   "rationale": "neo-ssd is idle with nothing queued, so it has 360 minutes; real-psample costs 8 minutes per sample. In LC3, rsync with eager writeback beat default xs, while xs-eager was much faster than xs. No experiment has put xs-eager against rsync-eager directly, and that comparison decides whether xs can beat rsync on this local copy. LC4 reported only the no-op cell, so the 1% update re-sync is still open. The eager plus --no-atomic combination has not been tried. The waiting tree confirmation of xs-eager against plain xs (LC3-durable-confirm) is left to the T14 tree, so it is not duplicated here. Budget: 96 minutes of screening plus 128 if the confirmation runs, then 64 and 64, about 352 minutes in total.",
+   "accepted": [
+    {
+     "id": "AP10191250-LC9-local-eager-vs-rsync-eager",
+     "hours": 1.6,
+     "front": false,
+     "question": "When both tools flush eagerly, does xs -aH get the psample backup safely onto the T5 sooner than rsync -aH?"
+    },
+    {
+     "id": "AP10191250-LC10-local-resync-1pct",
+     "hours": 1.1,
+     "front": false,
+     "question": "After 1% of the psample files change, does xs -aH re-sync the local T5 backup faster than rsync -aH with cold caches?"
+    },
+    {
+     "id": "AP10191250-LC11-local-eager-noatomic",
+     "hours": 1.1,
+     "front": false,
+     "question": "Does skipping the temp-file rename add any speed on top of eager writeback for the local psample backup?"
+    }
+   ],
+   "rejected": [],
+   "tree": "AUTO-10191250-neo-ssd"
+  }
+ ],
+ "conductor": "N0 queued on neo-ssd (12 samples): start of the tree\nN1 queued on neo-ssd (8 samples): start of the tree\nN2 queued on neo-ssd (8 samples): start of the tree\nCc queued on neo-ssd (24 samples): after C: eager writeback or --no-atomic gets the backup onto the drive sooner: confirm it; confirming xs-eager against xs on real-psample\n"
+}

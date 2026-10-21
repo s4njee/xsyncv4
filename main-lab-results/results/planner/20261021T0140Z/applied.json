@@ -1,0 +1,60 @@
+{
+ "summary": "Both lab2 gaps, congress-sample fresh and real-projects fresh (rsync ahead and neither proven), are taken to step 1: reproduction at home. neo races xs e51c1df1329a with lab2's flags (-a -j4) against rsync -a over the neo-mars link with 11 ms added and neo held to 2 CPUs. It splits the congress cell into a CPU-only arm and adds a plain-link psample baseline, and an 8-block confirmation of rsync's lead is attached wherever rsync screens at least 5% ahead, so a loss can be shown to repeat. neo-ssd checks whether the 2-CPU cap alone, with no network, erodes xs's lead locally on the same two home corpora; no development case is opened until a gap reproduces.",
+ "window_end": "2026-10-21T07:42Z",
+ "runners": [
+  {
+   "runner": "neo",
+   "rationale": "neo drives the only networked link, so it alone can reproduce lab2's latency. It has 5.9 h of room (6 h minus 0.1 h left on the sentinel, nothing queued). The plan uses about 282 min including both possible confirmations, which leaves margin in case netem and the CPU cap stretch sample times. e51c1df1329a is the newest xs build on both neo and mars; no -tune build is staged on mars, so tuning (step 2) waits for a reproduced gap.",
+   "accepted": [
+    {
+     "id": "AP10210142-L2R1-congress-fresh-wan11-cpu2",
+     "hours": 0.2,
+     "front": false,
+     "question": "For lab2's congress-sample fresh gap, where rsync was 1.10x faster on the a-aws link, does rsync -a also beat xs -a -j4 on real-congress from neo to mars with 11 ms added and neo held to 2 CPUs?"
+    },
+    {
+     "id": "AP10210142-L2R2-congress-fresh-cpu2-only",
+     "hours": 0.2,
+     "front": false,
+     "question": "For lab2's congress-sample fresh gap: does holding neo to 2 CPUs, with no added latency, erase xs -a -j4's lead over rsync -a on real-congress from neo to mars?"
+    },
+    {
+     "id": "AP10210142-L2R3-psample-fresh-wan11-cpu2",
+     "hours": 1.5,
+     "front": false,
+     "question": "For lab2's real-projects fresh gap, where rsync was 1.46x faster and xs's times were widely scattered, does rsync -a beat xs -a -j4 on real-psample from neo to mars with 11 ms added and neo held to 2 CPUs?"
+    },
+    {
+     "id": "AP10210142-L2R4-psample-fresh-plain",
+     "hours": 1.1,
+     "front": false,
+     "question": "For lab2's real-projects fresh gap: on the plain neo-mars link, with no added latency and no CPU cap, how does xs -a -j4 compare with rsync -a on a fresh real-psample copy?"
+    }
+   ],
+   "rejected": [],
+   "tree": "AUTO-10210142-neo"
+  },
+  {
+   "runner": "neo-ssd",
+   "rationale": "neo-ssd is idle with the full 6 h. Its link is local, so it cannot add latency, but it can hold neo to 2 CPUs. That tests, with no network involved, whether the CPU cap alone erodes xs's lead on the two home corpora behind lab2's gaps. The plain-link baselines are J2 for real-congress (rsync 1.84x slower) and LC1/LC12 for real-psample (xs about 10% behind, cold). The plan uses about 130 min and does not touch the waiting T16 nodes.",
+   "accepted": [
+    {
+     "id": "AP10210142-L2R5-local-congress-cpu2",
+     "hours": 0.2,
+     "front": false,
+     "question": "For lab2's congress-sample fresh gap: copying real-congress locally from neo to the T5 with neo held to 2 CPUs, does rsync -a close the 1.84x lead xs held without a cap?"
+    },
+    {
+     "id": "AP10210142-L2R6-local-psample-cpu2",
+     "hours": 2.0,
+     "front": false,
+     "question": "For lab2's real-projects fresh gap: copying real-psample locally to the T5 with cold caches and neo held to 2 CPUs, does xs -a -j4's existing deficit to rsync -a (about 10% in LC1 and LC12) widen?"
+    }
+   ],
+   "rejected": [],
+   "tree": "AUTO-10210142-neo-ssd"
+  }
+ ],
+ "engineering": null,
+ "conductor": "N0 queued on neo-ssd (24 samples): start of the tree\nN1 queued on neo-ssd (16 samples): start of the tree\nN0 queued on neo (24 samples): start of the tree\nN1 queued on neo (20 samples): start of the tree\nN2 queued on neo (16 samples): start of the tree\nN3 queued on neo (12 samples): start of the tree\n"
+}

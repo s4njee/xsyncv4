@@ -1,0 +1,39 @@
+# T9: incremental backups; scratch destinations are reset before every sample.
+# Fractions count changed files; each edit changes up to 4 KiB, with atomic writes retained.
+id = "IB2-incremental-scan"
+kind = "screening"
+hypothesis = "Reducing sender scan parallelism or the listing window speeds metadata-heavy incremental backups."
+primary = "durable_s"
+delta = 0.03
+blocks = 8
+control = "xs-z"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.xs-z]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-az"]
+
+[arms.scan1]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-az"]
+tune = { sender = "scan_workers=1" }
+
+[arms.window4k]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-az"]
+tune = { sender = "listing_window=4096" }
+
+[matrix]
+link = "lan"
+corpus = ["real-congress"]
+scenario = ["noop", "update-0p1pct"]
+direction = ["neo>freya", "freya>neo"]
+client = ["sender"]
+cache = ["warm"]

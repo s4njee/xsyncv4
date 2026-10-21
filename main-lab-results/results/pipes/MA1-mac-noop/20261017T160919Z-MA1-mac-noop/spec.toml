@@ -1,0 +1,32 @@
+# MA1 (tree T6): the one plainly wrong number in the programme. In E1's baseline,
+# congress no-op was 2.89x rsync pulling but 0.74x pushing, with 408.8 s of CPU
+# against rsync's 18.8 s. This repeats the comparison on the Mac (APFS) to mars
+# (ext4) over 2.5GbE, both directions, warm, to see whether the push deficit is
+# real here before anything is tuned.
+id = "MA1-mac-noop"
+kind = "screening"
+hypothesis = "xs is slower than rsync on a warm no-op push from the Mac to mars."
+primary = "durable_s"
+delta = 0.03
+blocks = 8
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[arms.xs]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-a"]
+
+[matrix]
+link = "mac-mars-2g5"
+corpus = ["real-congress", "small-flat"]
+scenario = ["noop"]
+direction = ["mac>mars", "mars>mac"]
+client = ["initiator"]
+cache = ["warm"]

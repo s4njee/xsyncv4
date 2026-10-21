@@ -1,0 +1,50 @@
+# Made by conduct.py: the 2 blocks per cell that 20261016T162239Z-Z3-1g-compress did not finish.
+# Z3: compression where the link is the limit. 8 GiB of text-like data (about
+# 4.2x at zstd level 3) over gigabit: without -z both tools wait on the
+# wire; with it they can deliver more than the link carries, if the sender's
+# CPU keeps up. The Pi 5 sending is the interesting case. xs adaptive and at
+# levels 1 and 3, against rsync with and without -z.
+id = "Z3-1g-compress"
+kind = "screening"
+hypothesis = "On a gigabit link, xs -z delivers text-like data faster than the link, and faster than rsync -z, even from the Pi."
+primary = "durable_s"
+delta = 0.03
+blocks = 2
+control = "xs"
+verify = "first-last"
+
+[arms.xs]
+tool = "xs"
+rev = "8cc75bbdb801"
+flags = ["-a"]
+
+[arms.xs-z]
+tool = "xs"
+rev = "8cc75bbdb801"
+flags = ["-az"]
+
+[arms.xs-z1]
+tool = "xs"
+rev = "8cc75bbdb801"
+flags = ["-az", "--compress-level=1"]
+
+[arms.xs-z3]
+tool = "xs"
+rev = "8cc75bbdb801"
+flags = ["-az", "--compress-level=3"]
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[arms.rsync-z]
+tool = "rsync"
+flags = ["-az"]
+
+[matrix]
+link = "lan"
+corpus = ["large-text"]
+scenario = ["fresh"]
+direction = ["neo>freya", "freya>neo"]
+client = ["sender"]
+cache = ["warm"]

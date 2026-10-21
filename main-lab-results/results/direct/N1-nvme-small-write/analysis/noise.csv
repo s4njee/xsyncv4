@@ -1,0 +1,13 @@
+experiment,kind,cell_id,corpus,scenario,sender,receiver,client,link,cache,arm,n_blocks,sigma_d,blocks_for_2pct,blocks_for_3pct,blocks_for_5pct,blocks_for_10pct,blocks_equivalent_2pct,blocks_equivalent_3pct,blocks_equivalent_5pct,blocks_equivalent_10pct
+N1-nvme-small-write,screening,mixed-bimodal.fresh.mac-mars.sender.warm,mixed-bimodal,fresh,mac,mars,sender,mac-mars-direct,warm,xs,8,0.4278396942477187,3662,1645,605,160,4907,2204,810,214
+N1-nvme-small-write,screening,mixed-bimodal.noop.mac-mars.sender.warm,mixed-bimodal,noop,mac,mars,sender,mac-mars-direct,warm,xs,8,0.10449486001645425,221,100,38,12,295,134,51,15
+N1-nvme-small-write,screening,mixed-threshold.fresh.mac-mars.sender.warm,mixed-threshold,fresh,mac,mars,sender,mac-mars-direct,warm,xs,8,0.5444657350345414,5929,2663,979,258,7946,3568,1311,345
+N1-nvme-small-write,screening,mixed-threshold.noop.mac-mars.sender.warm,mixed-threshold,noop,mac,mars,sender,mac-mars-direct,warm,xs,8,0.20395975978871192,834,376,140,38,1117,503,186,51
+N1-nvme-small-write,screening,small-deep.fresh.mac-mars.sender.warm,small-deep,fresh,mac,mars,sender,mac-mars-direct,warm,xs,8,0.4154339590829054,3453,1551,571,151,4627,2078,764,202
+N1-nvme-small-write,screening,small-deep.noop.mac-mars.sender.warm,small-deep,noop,mac,mars,sender,mac-mars-direct,warm,xs,8,0.2157438875304142,933,420,156,43,1250,562,208,56
+N1-nvme-small-write,screening,small-flat.fresh.mac-mars.sender.warm,small-flat,fresh,mac,mars,sender,mac-mars-direct,warm,xs,8,0.4732704275478513,4481,2012,740,196,6004,2696,991,262
+N1-nvme-small-write,screening,small-flat.noop.mac-mars.sender.warm,small-flat,noop,mac,mars,sender,mac-mars-direct,warm,xs,8,0.3455141177080517,2389,1074,396,106,3201,1438,529,141
+N1-nvme-small-write,screening,small-opaque.fresh.mac-mars.sender.warm,small-opaque,fresh,mac,mars,sender,mac-mars-direct,warm,xs,8,0.6591586521705648,8689,3901,1433,377,11645,5228,1920,505
+N1-nvme-small-write,screening,small-opaque.noop.mac-mars.sender.warm,small-opaque,noop,mac,mars,sender,mac-mars-direct,warm,xs,8,0.4029504896328094,3249,1459,537,143,4353,1955,719,190
+N1-nvme-small-write,screening,tiny-one.fresh.mac-mars.sender.warm,tiny-one,fresh,mac,mars,sender,mac-mars-direct,warm,xs,8,0.09333618376564942,177,81,31,10,236,107,41,13
+N1-nvme-small-write,screening,tiny-one.noop.mac-mars.sender.warm,tiny-one,noop,mac,mars,sender,mac-mars-direct,warm,xs,8,0.4997503780038341,4996,2244,825,218,6695,3006,1105,291

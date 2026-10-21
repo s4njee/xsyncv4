@@ -1,0 +1,37 @@
+# E0a: the noise floor. Each tool runs twice per block under two labels, so
+# the ratio between the labels is 1 by construction. The spread of that ratio
+# across blocks is sigma_d, which sets how many blocks later experiments need.
+id = "E0a-noise"
+kind = "screening"
+hypothesis = "Two labels on one binary are equivalent within 3% in every cell."
+primary = "wall_s"
+delta = 0.03
+blocks = 12
+control = "xs"
+verify = "first-last"
+
+[arms.xs]
+tool = "xs"
+rev = "bf596d28c5c9"
+flags = ["-a"]
+
+[arms.xs-same]
+tool = "xs"
+rev = "bf596d28c5c9"
+flags = ["-a"]
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[arms.rsync-same]
+tool = "rsync"
+flags = ["-a"]
+
+[matrix]
+link = "lan"
+corpus = ["tiny-one", "small-flat", "mixed-bimodal"]
+scenario = ["fresh", "noop"]
+direction = ["neo>freya", "freya>neo"]
+client = ["sender"]
+cache = ["warm"]

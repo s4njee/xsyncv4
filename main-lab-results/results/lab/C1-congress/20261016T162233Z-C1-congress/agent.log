@@ -1,0 +1,20 @@
+Traceback (most recent call last):
+  File "~/benchmarks/xsyncv4/lab/lib/c4b227526aa5/agent.py", line 531, in <module>
+    sys.exit(Run(sys.argv[1]).execute(limit))
+             ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "~/benchmarks/xsyncv4/lab/lib/c4b227526aa5/agent.py", line 505, in execute
+    self.prepare()
+    ~~~~~~~~~~~~^^
+  File "~/benchmarks/xsyncv4/lab/lib/c4b227526aa5/agent.py", line 266, in prepare
+    raise RuntimeError(f'{receiver}: no manifest for corpus {name} to check copies against')
+RuntimeError: freya: no manifest for corpus real-congress to check copies against
+Traceback (most recent call last):
+  File "~/benchmarks/xsyncv4/lab/lib/c4b227526aa5/agent.py", line 531, in <module>
+    sys.exit(Run(sys.argv[1]).execute(limit))
+             ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "~/benchmarks/xsyncv4/lab/lib/c4b227526aa5/agent.py", line 505, in execute
+    self.prepare()
+    ~~~~~~~~~~~~^^
+  File "~/benchmarks/xsyncv4/lab/lib/c4b227526aa5/agent.py", line 266, in prepare
+    raise RuntimeError(f'{receiver}: no manifest for corpus {name} to check copies against')
+RuntimeError: freya: no manifest for corpus real-congress to check copies against

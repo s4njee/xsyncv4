@@ -1,0 +1,19 @@
+{
+ "experiment": "LC2-psample-local-workers",
+ "kind": "screening",
+ "hypothesis": "On a four-core Pi writing to one USB SSD, a worker count other than the default four copies psample faster.",
+ "primary": "durable_s",
+ "control": "xs",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261018T215450Z-LC2-psample-local-workers"
+ ],
+ "spec_sha256": [
+  "08338f58d23a0e9dfd64d90c6402cbcbb099e6a5dab51462210ce2d559a3b3da"
+ ],
+ "valid_blocks": 4,
+ "void_attempts": 0,
+ "void_reasons": []
+}

@@ -1,0 +1,98 @@
+{
+ "id": "AUTO-10210751-neo-ssd",
+ "question": "neo-ssd has 4.8 h of room: 6 h minus 1.2 h left on L2R6, the running local psample 2-CPU fresh copy, and nothing queued. Its local link cannot add latency, so it probes cells lab2 has not reported under the 2-CPU cap: real-congress no-op and updates, small-tree fresh and no-op copies, and real-psample re-syncs. These are compared with the plain-link baselines from J2 and LC4. The plan uses about 198 min and leaves the waiting T16 nodes alone.",
+ "start": [
+  "N0",
+  "N1",
+  "N2"
+ ],
+ "startedUtc": "2026-10-21T07:51:58Z",
+ "until": null,
+ "fills": 0,
+ "nodes": [
+  {
+   "id": "N0",
+   "kind": "experiment",
+   "experiment": "AP10210751-AP10210749-L2P3-local-congress-resync-cp",
+   "question": "With neo held to 2 CPUs, as lab2's sender is, does xs -a -j4 keep its local lead over rsync -a on real-congress no-op and update re-syncs?",
+   "estimateHours": 8.0,
+   "hypothesis": "Under a 2-CPU cap, rsync -a's time-to-durable comes within 5% of xs -a -j4's in at least one of the no-op, 0.1%, 1% and 10% update cells, where xs's plain-link no-op lead was 4.7x (J2).",
+   "design": "screening",
+   "state": "queued",
+   "runs": [
+    {
+     "id": "20261021T075158Z-AP10210751-AP10210749-L2P3-local-congress-resync-cp",
+     "key": "local/AP10210751-AP10210749-L2P3-local-congress-resync-cp/20261021T075158Z-AP10210751-AP10210749-L2P3-local-congress-resync-cp",
+     "state": null
+    }
+   ],
+   "decision": null,
+   "decidedUtc": null,
+   "start": true,
+   "promote": null
+  },
+  {
+   "id": "N1",
+   "kind": "experiment",
+   "experiment": "AP10210751-AP10210749-L2P4-local-small-cpu2",
+   "question": "With neo held to 2 CPUs, does xs -a -j4 still beat rsync -a on local fresh and no-op copies of small-flat, small-deep and mixed-bimodal?",
+   "estimateHours": 9.6,
+   "hypothesis": "Under a 2-CPU cap, xs -a -j4's lead over rsync -a shrinks below 5% in at least one of these six cells, from 1.25x to 4.8x on the plain link (J2).",
+   "design": "screening",
+   "state": "queued",
+   "runs": [
+    {
+     "id": "20261021T075201Z-AP10210751-AP10210749-L2P4-local-small-cpu2",
+     "key": "local/AP10210751-AP10210749-L2P4-local-small-cpu2/20261021T075201Z-AP10210751-AP10210749-L2P4-local-small-cpu2",
+     "state": null
+    }
+   ],
+   "decision": null,
+   "decidedUtc": null,
+   "start": true,
+   "promote": null
+  },
+  {
+   "id": "N2",
+   "kind": "experiment",
+   "experiment": "AP10210751-AP10210749-L2P5-local-psample-resync-cpu",
+   "question": "For the corpus behind lab2's real-projects gap: with neo held to 2 CPUs, does xs -a -j4 still re-sync real-psample faster than rsync -a at a no-op and after a 1% change?",
+   "estimateHours": 1.6,
+   "hypothesis": "Under a 2-CPU cap, xs -a -j4 stays at least 5% faster than rsync -a at the real-psample no-op, as on the plain link (about 0.5x, LC4), but its lead at the 1% update is under 5%.",
+   "design": "screening",
+   "state": "queued",
+   "runs": [
+    {
+     "id": "20261021T075204Z-AP10210751-AP10210749-L2P5-local-psample-resync-cpu",
+     "key": "local/AP10210751-AP10210749-L2P5-local-psample-resync-cpu/20261021T075204Z-AP10210751-AP10210749-L2P5-local-psample-resync-cpu",
+     "state": null
+    }
+   ],
+   "decision": null,
+   "decidedUtc": null,
+   "start": true,
+   "promote": null
+  }
+ ],
+ "edges": [],
+ "decisions": [
+  {
+   "utc": "2026-10-21T07:52:07Z",
+   "node": "N2",
+   "kind": "queued",
+   "text": "N2 queued on neo-ssd (16 samples): start of the tree"
+  },
+  {
+   "utc": "2026-10-21T07:52:04Z",
+   "node": "N1",
+   "kind": "queued",
+   "text": "N1 queued on neo-ssd (96 samples): start of the tree"
+  },
+  {
+   "utc": "2026-10-21T07:52:01Z",
+   "node": "N0",
+   "kind": "queued",
+   "text": "N0 queued on neo-ssd (80 samples): start of the tree"
+  }
+ ]
+}

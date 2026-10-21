@@ -1,0 +1,34 @@
+# S1: the direct link's sentinel, every four hours: two identical xs arms and
+# rsync, small-flat and the ISO, mars to the Mac. Its A/A ratio shows how
+# noisy the Mac is at each hour.
+id = "S1-direct-sentinel"
+kind = "screening"
+hypothesis = "The A/A ratio on the direct link stays within 3% of 1."
+primary = "durable_s"
+delta = 0.03
+blocks = 2
+control = "xs"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.xs]
+tool = "xs"
+rev = "8cc75bbdb801"
+flags = ["-a"]
+
+[arms.again]
+tool = "xs"
+rev = "8cc75bbdb801"
+flags = ["-a"]
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[matrix]
+link = "mac-mars-direct"
+corpus = ["small-flat", "large-one"]
+scenario = ["fresh"]
+direction = ["mars>mac"]
+client = ["initiator"]
+cache = ["warm"]

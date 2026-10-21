@@ -1,0 +1,54 @@
+# H4 (tree T4, if the Pi's file creation is the limit when it receives): fewer receiving
+# workers on four cores, larger writes, and no compression to leave the Pi's CPU to its disk.
+id = "H4-pair-pi-receive"
+kind = "screening"
+hypothesis = "Fewer receiving workers, larger writes or no compression land small trees on the Pi faster."
+primary = "durable_s"
+delta = 0.03
+blocks = 8
+control = "xs-z-best"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.xs-z-best]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-az", "--no-atomic"]
+tune = { receiver = "jobs=4" }
+
+[arms.recv1]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-az", "--no-atomic"]
+tune = { receiver = "jobs=1" }
+
+[arms.recv2]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-az", "--no-atomic"]
+tune = { receiver = "jobs=2" }
+
+[arms.coalesce1m]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-az", "--no-atomic"]
+tune = { receiver = "jobs=4,coalesce_under=65536,coalesce_to=1048576,write_chunk=1048576" }
+
+[arms.xs-best]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-a", "--no-atomic"]
+tune = { receiver = "jobs=4" }
+
+[matrix]
+link = "neo-mars-1g"
+corpus = ["small-flat", "small-deep", "real-congress"]
+scenario = ["fresh"]
+direction = ["mars>neo"]
+client = ["initiator"]
+cache = ["warm"]

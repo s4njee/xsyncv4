@@ -1,0 +1,41 @@
+# T11: fresh psample copies between the Mac (APFS) and neo (ext4).
+# Independent identities and link; never pool with Mac/mars observations.
+# Both endpoints must pass 10GbE route and adapter checks before launch.
+# All arms retain hard links. wall_s avoids charging a system-wide Mac sync
+# as transfer time; durable_s, wire bytes and resource counters stay secondary.
+id = "MN1-psample-bidir"
+kind = "screening"
+hypothesis = "On the direct Mac/neo link, xs or compression reduces fresh-copy time for the same pinned psample tree compared with rsync -aH; the effect may differ by direction."
+primary = "wall_s"
+delta = 0.05
+blocks = 8
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+sample_timeout_s = 7200
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-aH"]
+
+[arms.rsync-z]
+tool = "rsync"
+flags = ["-aHz"]
+
+[arms.xs]
+tool = "xs"
+rev = "8cc75bbdb801"
+flags = ["-aH"]
+
+[arms.xs-z]
+tool = "xs"
+rev = "8cc75bbdb801"
+flags = ["-aHz"]
+
+[matrix]
+link = "mac-neo-direct"
+corpus = ["real-psample"]
+scenario = ["fresh"]
+direction = ["mac>neo", "neo>mac"]
+client = ["initiator"]
+cache = ["warm"]

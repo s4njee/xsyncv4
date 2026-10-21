@@ -1,0 +1,31 @@
+# W0 (2026-10-21): a smoke test of a VPS-like path at home. lab2's round trip (about 11 ms) is added by netem on
+# neo's eth0 for the whole run, and every tool on neo is pinned to 2 CPUs, as lab2's sender has 2 vCPUs. Checks
+# that the delay is set, renewed and cleared, that the round-trip gate allows for it, and that both tools run.
+id = "W0-neo-mars-wan-smoke"
+kind = "screening"
+hypothesis = "With 11 ms added and neo held to 2 CPUs, both tools complete every block and the link probe passes."
+primary = "durable_s"
+delta = 0.05
+blocks = 2
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+wan = { host = "neo", delay_ms = 11, loss_pct = 0 }
+cpus = { host = "neo", count = 2 }
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[arms.xs]
+tool = "xs"
+rev = "e51c1df1329a"
+flags = ["-a", "-j4"]
+
+[matrix]
+link = "neo-mars-lan"
+corpus = ["small-flat"]
+scenario = ["fresh", "noop"]
+direction = ["neo>mars"]
+client = ["initiator"]
+cache = ["warm"]

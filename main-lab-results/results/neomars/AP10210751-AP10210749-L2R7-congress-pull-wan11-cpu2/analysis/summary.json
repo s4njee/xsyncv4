@@ -1,0 +1,26 @@
+{
+ "experiment": "AP10210751-AP10210749-L2R7-congress-pull-wan11-cpu2",
+ "kind": "screening",
+ "hypothesis": "With neo receiving under an 11 ms round trip and a 2-CPU cap, rsync -a's time-to-durable comes within 5% of xs -a -j4 or beats it, unlike the plain mars>neo cell where rsync was 1.34x slower (J1d).",
+ "primary": "durable_s",
+ "control": "xs-j4",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261021T075208Z-AP10210751-AP10210749-L2R7-congress-pull-wan11-cpu2"
+ ],
+ "spec_sha256": [
+  "57d46263ab07aa06188c43be9f463cc82956f08807ff4cf9fa0a689b6e107a3d"
+ ],
+ "valid_blocks": 12,
+ "void_attempts": 6,
+ "void_reasons": [
+  "rsync: did not settle: neo is 15% busy",
+  "rsync: did not settle: neo is 79% busy",
+  "xs-j4: did not settle: neo is 11% busy",
+  "xs-j4: did not settle: neo is 15% busy",
+  "xs-j4: did not settle: neo is 57% busy",
+  "xs-j4: did not settle: neo is 74% busy"
+ ]
+}

@@ -1,0 +1,21 @@
+{
+ "experiment": "W1-baseline",
+ "kind": "confirmatory",
+ "hypothesis": "xs -a against rsync -a on the Wi-Fi pair gives the ratios it gives on the wired pair, cell by cell.",
+ "primary": "durable_s",
+ "control": "rsync",
+ "delta": 0.03,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261014T112851Z-W1-baseline"
+ ],
+ "spec_sha256": [
+  "7a3fb5116b4609e98305a7e01a176ee7d418daf6376adea99e7beea1c85f1cc2"
+ ],
+ "valid_blocks": 101,
+ "void_attempts": 1,
+ "void_reasons": [
+  "stopped"
+ ]
+}

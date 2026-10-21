@@ -1,0 +1,58 @@
+congress pull fresh rsync 1/3: 191.209s verified
+congress pull fresh xs 1/3: 195.546s verified
+congress pull fresh xs 2/3: 190.456s verified
+congress pull fresh rsync 2/3: 177.172s verified
+congress pull fresh rsync 3/3: 177.625s verified
+congress pull fresh xs 3/3: 186.922s verified
+congress pull fresh-z rsync 1/3: 158.126s verified
+congress pull fresh-z xs 1/3: 166.998s verified
+congress pull fresh-z xs 2/3: 162.664s verified
+congress pull fresh-z rsync 2/3: 158.539s verified
+congress pull fresh-z rsync 3/3: 162.852s verified
+congress pull fresh-z xs 3/3: 170.548s verified
+congress pull noop rsync 1/3: 80.295s verified
+congress pull noop xs 1/3: 27.789s verified
+congress pull noop xs 2/3: 26.306s verified
+congress pull noop rsync 2/3: 84.401s verified
+congress pull noop rsync 3/3: 76.861s verified
+congress pull noop xs 3/3: 29.307s verified
+congress pull checksum rsync 1/3: 145.814s verified
+congress pull checksum xs 1/3: 67.640s verified
+congress pull checksum xs 2/3: 66.427s verified
+congress pull checksum rsync 2/3: 159.429s verified
+congress pull checksum rsync 3/3: 125.324s verified
+congress pull checksum xs 3/3: 69.497s verified
+[
+  {
+    "scenario": "fresh",
+    "median_seconds": {
+      "rsync": 177.6247120089829,
+      "xs": 190.45633000927046
+    },
+    "xs_speedup": 0.932626980685478
+  },
+  {
+    "scenario": "fresh-z",
+    "median_seconds": {
+      "rsync": 158.53853146824986,
+      "xs": 166.9984265738167
+    },
+    "xs_speedup": 0.9493414681854659
+  },
+  {
+    "scenario": "noop",
+    "median_seconds": {
+      "rsync": 80.29524786490947,
+      "xs": 27.788738508243114
+    },
+    "xs_speedup": 2.889488770463297
+  },
+  {
+    "scenario": "checksum",
+    "median_seconds": {
+      "rsync": 145.81373896403238,
+      "xs": 67.63956974633038
+    },
+    "xs_speedup": 2.1557461041056243
+  }
+]

@@ -1,0 +1,332 @@
+{
+ "id": "T5-neo-freya-wire-or-pi",
+ "question": "On the gigabit wire between the Pi and freya, is xs limited by the link or by the Pi's sending, and what should the default be?",
+ "start": [
+  "B"
+ ],
+ "startedUtc": "2026-10-17T15:23:01Z",
+ "until": "2026-10-18T12:00Z",
+ "fills": 5,
+ "nodes": [
+  {
+   "id": "B",
+   "kind": "experiment",
+   "experiment": "NE1-wire-or-pi",
+   "question": "How much of the gigabit wire do xs and rsync use on large and mixed trees, each way?",
+   "estimateHours": 0.4,
+   "hypothesis": "xs fills the gigabit wire on large trees in both directions, and falls short only where the Pi's four-core sender is CPU-bound.",
+   "design": "screening",
+   "state": "decided",
+   "runs": [
+    {
+     "id": "20261017T153637Z-NE1-wire-or-pi",
+     "key": "lab/NE1-wire-or-pi/20261017T153637Z-NE1-wire-or-pi",
+     "state": "complete"
+    }
+   ],
+   "decision": "B: xs fills the wire both ways on large files: the link is the limit, and only the small-file default is left (large-text neo\u2192freya xs 0.93 Gb/s; large-text freya\u2192neo xs 0.92 Gb/s)",
+   "decidedUtc": "2026-10-17T16:26:44Z",
+   "start": true,
+   "promote": null
+  },
+  {
+   "id": "C",
+   "kind": "experiment",
+   "experiment": "T1g-send-cores",
+   "question": "Do two or three sending workers on the four-core Pi reach the wire without losing small files?",
+   "estimateHours": 3.2,
+   "hypothesis": "Three sending workers on a four-core sender keep most of one worker's gain on byte-bound copies and lose nothing on small files or no-ops.",
+   "design": "screening",
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "Cc",
+   "kind": "confirm",
+   "experiment": "T1g-send-cores-confirm",
+   "question": "Does the winning sender worker count hold up with fresh blocks?",
+   "estimateHours": 1.6,
+   "hypothesis": "Confirms the fastest arm of C with 12 fresh blocks, if it had one.",
+   "design": "confirmatory",
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": "C"
+  },
+  {
+   "id": "S",
+   "kind": "experiment",
+   "experiment": "D9-lan-best-default",
+   "question": "Is xs's best small-file setting safe as the default for mixed trees?",
+   "estimateHours": 1.2,
+   "hypothesis": "xs's best small-file setting is no slower than its default on mixed trees, either way.",
+   "design": "screening",
+   "state": "decided",
+   "runs": [
+    {
+     "id": "20261017T162644Z-D9-lan-best-default",
+     "key": "lab/D9-lan-best-default/20261017T162644Z-D9-lan-best-default",
+     "state": "complete"
+    }
+   ],
+   "decision": "S: xs's best setting was nowhere slower than its default",
+   "decidedUtc": "2026-10-17T17:46:42Z",
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "Sb",
+   "kind": "experiment",
+   "experiment": "D9b-lan-best-split",
+   "question": "Which half of the best setting costs time: four workers or --no-atomic?",
+   "estimateHours": 1.6,
+   "hypothesis": "Only one half of the best small-file setting slows mixed trees on the wired pair.",
+   "design": "screening",
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "N",
+   "kind": "experiment",
+   "experiment": "D10-lan-noop-best",
+   "question": "Does the best setting also speed up no-op copies of small trees?",
+   "estimateHours": 1.6,
+   "hypothesis": "xs's best small-file setting is faster than its default on no-op copies of small trees.",
+   "design": "screening",
+   "state": "decided",
+   "runs": [
+    {
+     "id": "20261017T174642Z-D10-lan-noop-best",
+     "key": "lab/D10-lan-noop-best/20261017T174642Z-D10-lan-noop-best",
+     "state": "complete"
+    }
+   ],
+   "decision": "N: xs's best setting was faster on no-op copies too (small-real neo\u2192freya xs-best 1.64\u00d7 [1.47, 1.83] faster; real-congress neo\u2192freya xs-best 1.30\u00d7 [1.17, 1.45] faster)",
+   "decidedUtc": "2026-10-17T20:25:42Z",
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "N~end0",
+   "kind": "end",
+   "experiment": null,
+   "question": null,
+   "estimateHours": null,
+   "hypothesis": "xs's best setting was faster on no-op copies too",
+   "design": null,
+   "state": "decided",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "N~end1",
+   "kind": "end",
+   "experiment": null,
+   "question": null,
+   "estimateHours": null,
+   "hypothesis": "xs's best setting did not speed up no-op copies",
+   "design": null,
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "F1a",
+   "kind": "fill",
+   "experiment": "F1a-lan-replicate",
+   "question": "Do the wire and sender results hold steady over the weekend?",
+   "estimateHours": 0.4,
+   "hypothesis": "xs's best setting with -z stays ahead of rsync -az from run to run.",
+   "design": "screening",
+   "state": "held",
+   "runs": [
+    {
+     "id": "20261017T202542Z-F1a-lan-replicate",
+     "key": "lab/F1a-lan-replicate/20261017T202542Z-F1a-lan-replicate",
+     "state": "complete"
+    },
+    {
+     "id": "20261017T205646Z-F1a-lan-replicate",
+     "key": "lab/F1a-lan-replicate/20261017T205646Z-F1a-lan-replicate",
+     "state": "complete"
+    },
+    {
+     "id": "20261017T212914Z-F1a-lan-replicate",
+     "key": "lab/F1a-lan-replicate/20261017T212914Z-F1a-lan-replicate",
+     "state": "complete"
+    },
+    {
+     "id": "20261017T215941Z-F1a-lan-replicate",
+     "key": "lab/F1a-lan-replicate/20261017T215941Z-F1a-lan-replicate",
+     "state": "complete"
+    },
+    {
+     "id": "20261017T224604Z-F1a-lan-replicate",
+     "key": "lab/F1a-lan-replicate/20261017T224604Z-F1a-lan-replicate",
+     "state": "stopped"
+    },
+    {
+     "id": "20261017T230759Z-F1a-lan-replicate",
+     "key": "lab/F1a-lan-replicate/20261017T230759Z-F1a-lan-replicate",
+     "state": null
+    }
+   ],
+   "decision": "Retired after the USB 2.5 Gb/s adapter change; old gigabit samples are preserved separately.",
+   "decidedUtc": "2026-10-17T23:52:25Z",
+   "start": false,
+   "promote": null
+  }
+ ],
+ "edges": [
+  {
+   "from": "B",
+   "to": "S",
+   "label": "wire \u2265 0.80 Gb/s both ways",
+   "taken": true
+  },
+  {
+   "from": "B",
+   "to": "C",
+   "label": "wire short",
+   "taken": false
+  },
+  {
+   "from": "C",
+   "to": "Cc",
+   "label": "an arm was faster",
+   "taken": null
+  },
+  {
+   "from": "C",
+   "to": "S",
+   "label": "an arm was faster",
+   "taken": null
+  },
+  {
+   "from": "C",
+   "to": "S",
+   "label": "nothing faster",
+   "taken": null
+  },
+  {
+   "from": "S",
+   "to": "Sb",
+   "label": "slower somewhere",
+   "taken": false
+  },
+  {
+   "from": "S",
+   "to": "N",
+   "label": "slower somewhere",
+   "taken": false
+  },
+  {
+   "from": "S",
+   "to": "N",
+   "label": "never slower",
+   "taken": true
+  },
+  {
+   "from": "N",
+   "to": "N~end0",
+   "label": "faster on no-ops",
+   "taken": true
+  },
+  {
+   "from": "N",
+   "to": "N~end1",
+   "label": "no gain",
+   "taken": false
+  }
+ ],
+ "decisions": [
+  {
+   "utc": "2026-10-17T23:08:01Z",
+   "node": "F1a",
+   "kind": "queued",
+   "text": "F1a: its run was cut short with 0 of 3 blocks per cell; continuing with 3 more"
+  },
+  {
+   "utc": "2026-10-17T22:46:06Z",
+   "node": "F1a",
+   "kind": "queued",
+   "text": "F1a queued on neo (54 samples): every branch has ended; filling until 2026-10-18T12:00Z (fill 5)"
+  },
+  {
+   "utc": "2026-10-17T22:46:04Z",
+   "node": "F1a",
+   "kind": "decision",
+   "text": "F1a: done (4 runs)"
+  },
+  {
+   "utc": "2026-10-17T21:59:44Z",
+   "node": "F1a",
+   "kind": "queued",
+   "text": "F1a queued on neo (54 samples): every branch has ended; filling until 2026-10-18T12:00Z (fill 4)"
+  },
+  {
+   "utc": "2026-10-17T21:59:41Z",
+   "node": "F1a",
+   "kind": "decision",
+   "text": "F1a: done (3 runs)"
+  },
+  {
+   "utc": "2026-10-17T21:29:16Z",
+   "node": "F1a",
+   "kind": "queued",
+   "text": "F1a queued on neo (54 samples): every branch has ended; filling until 2026-10-18T12:00Z (fill 3)"
+  },
+  {
+   "utc": "2026-10-17T21:29:14Z",
+   "node": "F1a",
+   "kind": "decision",
+   "text": "F1a: done (2 runs)"
+  },
+  {
+   "utc": "2026-10-17T20:56:48Z",
+   "node": "F1a",
+   "kind": "queued",
+   "text": "F1a queued on neo (54 samples): every branch has ended; filling until 2026-10-18T12:00Z (fill 2)"
+  },
+  {
+   "utc": "2026-10-17T20:56:46Z",
+   "node": "F1a",
+   "kind": "decision",
+   "text": "F1a: done (1 run)"
+  },
+  {
+   "utc": "2026-10-17T20:25:44Z",
+   "node": "F1a",
+   "kind": "queued",
+   "text": "F1a queued on neo (54 samples): every branch has ended; filling until 2026-10-18T12:00Z (fill 1)"
+  },
+  {
+   "utc": "2026-10-17T20:25:42Z",
+   "node": "N",
+   "kind": "decision",
+   "text": "N: xs's best setting was faster on no-op copies too (small-real neo\u2192freya xs-best 1.64\u00d7 [1.47, 1.83] faster; real-congress neo\u2192freya xs-best 1.30\u00d7 [1.17, 1.45] faster) \u2192 end of this branch"
+  },
+  {
+   "utc": "2026-10-17T17:46:45Z",
+   "node": "N",
+   "kind": "queued",
+   "text": "N queued on neo (192 samples): after S: xs's best setting was nowhere slower than its default"
+  }
+ ]
+}

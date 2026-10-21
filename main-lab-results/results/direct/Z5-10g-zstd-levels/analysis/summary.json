@@ -1,0 +1,19 @@
+{
+ "experiment": "Z5-10g-zstd-levels",
+ "kind": "screening",
+ "hypothesis": "At 10 Gb/s, xs at zstd level 2 delivers compressible data faster than at levels 1 and 3.",
+ "primary": "durable_s",
+ "control": "xs-z1",
+ "delta": 0.03,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261016T202205Z-Z5-10g-zstd-levels"
+ ],
+ "spec_sha256": [
+  "1359e80e1a655a2dc0deb2e34f3eeff6da607a1479664604cdd9afc4c764807b"
+ ],
+ "valid_blocks": 12,
+ "void_attempts": 0,
+ "void_reasons": []
+}

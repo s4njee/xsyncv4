@@ -1,0 +1,55 @@
+# T1g: leave the Pi's ssh a core. In T1f the stream cap took back only a
+# third of the one-worker sender's gain on byte-bound copies from neo (0.987
+# against 0.965): with one large-file stream, the other three workers still
+# read small files beside it, and the Pi's sender still took 5,000
+# involuntary context switches a run against 120 with one worker. The
+# contention is between xs's workers and ssh for four cores, not between
+# large-file readers. Three or two sending workers leave ssh room without
+# the one-worker sender's losses on small files.
+id = "T1g-send-cores"
+kind = "screening"
+hypothesis = "Three sending workers on a four-core sender keep most of one worker's gain on byte-bound copies and lose nothing on small files or no-ops."
+primary = "wall_s"
+delta = 0.03
+blocks = 10
+control = "xs"
+verify = "first-last"
+
+[arms.xs]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a"]
+metrics = true
+
+[arms.send3]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a"]
+tune = { sender = "jobs=3" }
+metrics = true
+
+[arms.send2]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a"]
+tune = { sender = "jobs=2" }
+metrics = true
+
+[arms.send3s1]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a"]
+tune = { sender = "jobs=3,send_streams=1" }
+metrics = true
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[matrix]
+link = "lan"
+corpus = ["mixed-bimodal", "mixed-threshold", "small-flat", "small-real"]
+scenario = ["fresh", "noop"]
+direction = ["neo>freya"]
+client = ["sender"]
+cache = ["warm"]

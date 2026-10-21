@@ -1,0 +1,31 @@
+# MA6 (tree T12): does the tool ranking from psample hold on other real trees? A small,
+# compressible tree (congress: 216k JSON/XML files) and a large, compressible one
+# (large-text: 8 GiB of text). Same two arms, fresh, both ways, on mac/mars. The
+# hardlink-heavy tree (real-laikav2) is deferred until freya is reachable again.
+id = "MA6-mac-mars-shapes"
+kind = "screening"
+hypothesis = "The mac/mars tool ranking from psample holds on other real trees: many small compressible files, and a large compressible file."
+primary = "wall_s"
+delta = 0.05
+blocks = 4
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+sample_timeout_s = 7200
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-aH"]
+
+[arms.xs]
+tool = "xs"
+rev = "8cc75bbdb801"
+flags = ["-aH"]
+
+[matrix]
+link = "mac-mars-10g"
+corpus = ["real-congress", "large-text"]
+scenario = ["fresh"]
+direction = ["mac>mars", "mars>mac"]
+client = ["initiator"]
+cache = ["warm"]

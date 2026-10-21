@@ -1,0 +1,24 @@
+{
+ "experiment": "S3-mac-mars-sentinel",
+ "kind": "screening",
+ "hypothesis": "Hour by hour, the A/A ratio stays within 5% of 1 and the xs to rsync ratio stays where E6b's rsync arm put it.",
+ "primary": "wall_s",
+ "control": "xs",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261018T144634Z-S3-mac-mars-sentinel-s0001",
+  "20261018T144634Z-S3-mac-mars-sentinel-s0002",
+  "20261018T144635Z-S3-mac-mars-sentinel-s0003",
+  "20261018T144636Z-S3-mac-mars-sentinel-s0004"
+ ],
+ "spec_sha256": [
+  "56a758cc427b952bd41f4f098261e831a5dc04bb9ec703c33e09f4fe41bccaba"
+ ],
+ "valid_blocks": 64,
+ "void_attempts": 1,
+ "void_reasons": [
+  "round trip is 3.831 ms, above 2.0"
+ ]
+}

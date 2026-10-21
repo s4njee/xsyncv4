@@ -1,0 +1,19 @@
+{
+ "experiment": "LC3-psample-local-durable",
+ "kind": "screening",
+ "hypothesis": "Eager writeback or skipping the temp-file rename gets the psample backup safely onto the T5 sooner.",
+ "primary": "durable_s",
+ "control": "xs",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261018T215452Z-LC3-psample-local-durable"
+ ],
+ "spec_sha256": [
+  "a7c5cc085fa1030653836d87cee3fb2b8b3d5583650e1c1f49df76a3ba5b65d1"
+ ],
+ "valid_blocks": 4,
+ "void_attempts": 0,
+ "void_reasons": []
+}

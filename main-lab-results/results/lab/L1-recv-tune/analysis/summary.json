@@ -1,0 +1,19 @@
+{
+ "experiment": "L1-recv-tune",
+ "kind": "screening",
+ "hypothesis": "Fewer receiving workers on freya, and --no-atomic on either end, make small fresh copies faster.",
+ "primary": "wall_s",
+ "control": "xs",
+ "delta": 0.03,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261016T152107Z-L1-recv-tune"
+ ],
+ "spec_sha256": [
+  "e4842710c9db6ca58eaff752f9c828fccefb4558fc7cef0737a4d4776e3911c6"
+ ],
+ "valid_blocks": 100,
+ "void_attempts": 0,
+ "void_reasons": []
+}

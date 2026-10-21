@@ -1,0 +1,56 @@
+# D4 (decision tree T1, after K2b, if the Pi's storage matters): K2b found xs
+# delivers small trees from freya into RAM on the Pi clearly faster than onto
+# its disk, so the Pi's write path is part of the limit. On four cores: one,
+# two and three receiving workers against four, and larger coalesced writes.
+id = "D4-pi-receive-small"
+kind = "screening"
+hypothesis = "Fewer receiving workers or larger writes make small trees land on the Pi faster."
+primary = "durable_s"
+delta = 0.03
+blocks = 8
+control = "xs-z-best"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.xs-z-best]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-az", "--no-atomic"]
+tune = { receiver = "jobs=4" }
+
+[arms.recv1]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-az", "--no-atomic"]
+tune = { receiver = "jobs=1" }
+
+[arms.recv2]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-az", "--no-atomic"]
+tune = { receiver = "jobs=2" }
+
+[arms.recv3]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-az", "--no-atomic"]
+tune = { receiver = "jobs=3" }
+
+[arms.coalesce1m]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-az", "--no-atomic"]
+tune = { receiver = "jobs=4,coalesce_under=65536,coalesce_to=1048576,write_chunk=1048576" }
+
+[matrix]
+link = "lan"
+corpus = ["real-congress", "small-deep", "small-flat"]
+scenario = ["fresh"]
+direction = ["freya>neo"]
+client = ["sender"]
+cache = ["warm"]

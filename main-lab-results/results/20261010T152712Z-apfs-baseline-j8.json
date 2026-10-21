@@ -1,0 +1,143 @@
+{
+ "schema": 1,
+ "utc": "2026-10-10T15:35:06.428859+00:00",
+ "client": "MacBookPro",
+ "target": null,
+ "direction": "push",
+ "label": "apfs-noop-j8",
+ "cache": "warm",
+ "versions": {
+  "xs": "xs  version 0.1.0  protocol version 4  git 415900091024",
+  "rsync": "rsync  version 3.4.4  protocol version 32"
+ },
+ "argv": [
+  "benchmarks/run.py",
+  "--corpus",
+  "~/projects/xsyncv4/.bench/corpus",
+  "--work",
+  ".bench/p3-local",
+  "--xsync",
+  "build-release/xs",
+  "--rsync",
+  "/opt/homebrew/bin/rsync",
+  "--scenarios",
+  "noop",
+  "--runs",
+  "3",
+  "--threads",
+  "8",
+  "--label",
+  "apfs-noop-j8",
+  "--output",
+  "benchmarks/results/20261010T152712Z-apfs-baseline-j8.json"
+ ],
+ "records": [
+  {
+   "returncode": 0,
+   "wall_seconds": 1.3534953340422362,
+   "user_seconds": 0.200059,
+   "system_seconds": 1.309292,
+   "max_rss_bytes": 25886720,
+   "voluntary_switches": 1033,
+   "involuntary_switches": 5070,
+   "scenario": "noop",
+   "tool": "rsync",
+   "run": 1,
+   "verified": true,
+   "remote": null,
+   "stdout": "\nNumber of files: 95,911 (reg: 76,838, dir: 19,073)\nNumber of created files: 0\nNumber of deleted files: 0\nNumber of regular files transferred: 0\nTotal file size: 517,808,080 bytes\nTotal transferred file size: 0 bytes\nLiteral data: 0 bytes\nMatched data: 0 bytes\nFile list size: 134,039\nFile list generation time: 0.002 seconds\nFile list transfer time: 0.000 seconds\nTotal bytes sent: 2,899,353\nTotal bytes received: 20,808\n\nsent 2,899,353 bytes  received 20,808 bytes  1,946,774.00 bytes/sec\ntotal size is 517,808,080  speedup is 177.32\n",
+   "stderr": ""
+  },
+  {
+   "returncode": 0,
+   "wall_seconds": 3.468914333032444,
+   "user_seconds": 0.685063,
+   "system_seconds": 17.399644,
+   "max_rss_bytes": 41435136,
+   "voluntary_switches": 1,
+   "involuntary_switches": 80572,
+   "scenario": "noop",
+   "tool": "xs",
+   "run": 1,
+   "verified": true,
+   "remote": null,
+   "stdout": "\nNumber of files: 95,910 (reg: 76,838, dir: 19,072)\nNumber of created files: 0 (reg: 0, dir: 0)\nNumber of deleted files: 0\nNumber of regular files transferred: 0\nTotal file size: 517,808,080 bytes\nTotal transferred file size: 0 bytes\nDelta literal data: 0 bytes\nDelta matched data: 0 bytes\nTotal bytes sent: 0\nTotal bytes received: 0\n\nsent 0 bytes  received 0 bytes  0.00 bytes/sec\ntotal size is 517,808,080  speedup is 0.00\n",
+   "stderr": ""
+  },
+  {
+   "returncode": 0,
+   "wall_seconds": 3.9030157499946654,
+   "user_seconds": 0.7177279999999999,
+   "system_seconds": 17.179265,
+   "max_rss_bytes": 46219264,
+   "voluntary_switches": 0,
+   "involuntary_switches": 103750,
+   "scenario": "noop",
+   "tool": "xs",
+   "run": 2,
+   "verified": true,
+   "remote": null,
+   "stdout": "\nNumber of files: 95,910 (reg: 76,838, dir: 19,072)\nNumber of created files: 0 (reg: 0, dir: 0)\nNumber of deleted files: 0\nNumber of regular files transferred: 0\nTotal file size: 517,808,080 bytes\nTotal transferred file size: 0 bytes\nDelta literal data: 0 bytes\nDelta matched data: 0 bytes\nTotal bytes sent: 0\nTotal bytes received: 0\n\nsent 0 bytes  received 0 bytes  0.00 bytes/sec\ntotal size is 517,808,080  speedup is 0.00\n",
+   "stderr": ""
+  },
+  {
+   "returncode": 0,
+   "wall_seconds": 2.6328180839773268,
+   "user_seconds": 0.24343099999999998,
+   "system_seconds": 2.478093,
+   "max_rss_bytes": 25509888,
+   "voluntary_switches": 9555,
+   "involuntary_switches": 16766,
+   "scenario": "noop",
+   "tool": "rsync",
+   "run": 2,
+   "verified": true,
+   "remote": null,
+   "stdout": "\nNumber of files: 95,911 (reg: 76,838, dir: 19,073)\nNumber of created files: 0\nNumber of deleted files: 0\nNumber of regular files transferred: 0\nTotal file size: 517,808,080 bytes\nTotal transferred file size: 0 bytes\nLiteral data: 0 bytes\nMatched data: 0 bytes\nFile list size: 98,302\nFile list generation time: 0.002 seconds\nFile list transfer time: 0.000 seconds\nTotal bytes sent: 2,900,065\nTotal bytes received: 20,428\n\nsent 2,900,065 bytes  received 20,428 bytes  1,168,197.20 bytes/sec\ntotal size is 517,808,080  speedup is 177.30\n",
+   "stderr": ""
+  },
+  {
+   "returncode": 0,
+   "wall_seconds": 1.7402539169415832,
+   "user_seconds": 0.216781,
+   "system_seconds": 2.076725,
+   "max_rss_bytes": 24526848,
+   "voluntary_switches": 931,
+   "involuntary_switches": 10288,
+   "scenario": "noop",
+   "tool": "rsync",
+   "run": 3,
+   "verified": true,
+   "remote": null,
+   "stdout": "\nNumber of files: 95,911 (reg: 76,838, dir: 19,073)\nNumber of created files: 0\nNumber of deleted files: 0\nNumber of regular files transferred: 0\nTotal file size: 517,808,080 bytes\nTotal transferred file size: 0 bytes\nLiteral data: 0 bytes\nMatched data: 0 bytes\nFile list size: 139,264\nFile list generation time: 0.001 seconds\nFile list transfer time: 0.000 seconds\nTotal bytes sent: 2,899,549\nTotal bytes received: 20,712\n\nsent 2,899,549 bytes  received 20,712 bytes  1,168,104.40 bytes/sec\ntotal size is 517,808,080  speedup is 177.32\n",
+   "stderr": ""
+  },
+  {
+   "returncode": 0,
+   "wall_seconds": 3.422156250104308,
+   "user_seconds": 0.707463,
+   "system_seconds": 18.990548,
+   "max_rss_bytes": 43204608,
+   "voluntary_switches": 9,
+   "involuntary_switches": 98927,
+   "scenario": "noop",
+   "tool": "xs",
+   "run": 3,
+   "verified": true,
+   "remote": null,
+   "stdout": "\nNumber of files: 95,910 (reg: 76,838, dir: 19,072)\nNumber of created files: 0 (reg: 0, dir: 0)\nNumber of deleted files: 0\nNumber of regular files transferred: 0\nTotal file size: 517,808,080 bytes\nTotal transferred file size: 0 bytes\nDelta literal data: 0 bytes\nDelta matched data: 0 bytes\nTotal bytes sent: 0\nTotal bytes received: 0\n\nsent 0 bytes  received 0 bytes  0.00 bytes/sec\ntotal size is 517,808,080  speedup is 0.00\n",
+   "stderr": ""
+  }
+ ],
+ "summary": [
+  {
+   "scenario": "noop",
+   "median_seconds": {
+    "rsync": 1.7402539169415832,
+    "xs": 3.468914333032444
+   },
+   "xs_speedup": 0.5016710560909972
+  }
+ ],
+ "complete": true
+}

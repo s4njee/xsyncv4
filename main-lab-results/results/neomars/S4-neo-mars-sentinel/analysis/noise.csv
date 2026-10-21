@@ -1,0 +1,17 @@
+experiment,kind,cell_id,corpus,scenario,sender,receiver,client,link,cache,arm,n_blocks,sigma_d,blocks_for_2pct,blocks_for_3pct,blocks_for_5pct,blocks_for_10pct,blocks_equivalent_2pct,blocks_equivalent_3pct,blocks_equivalent_5pct,blocks_equivalent_10pct
+S4-neo-mars-sentinel,screening,mixed-bimodal.fresh.mars-neo.receiver.warm,mixed-bimodal,fresh,mars,neo,receiver,neo-mars-lan,warm,again,10,0.0053112002148418295,8,8,8,8,8,8,8,8
+S4-neo-mars-sentinel,screening,mixed-bimodal.fresh.mars-neo.receiver.warm,mixed-bimodal,fresh,mars,neo,receiver,neo-mars-lan,warm,rsync,10,0.0036464491664333475,8,8,8,8,8,8,8,8
+S4-neo-mars-sentinel,screening,mixed-bimodal.fresh.neo-mars.sender.warm,mixed-bimodal,fresh,neo,mars,sender,neo-mars-lan,warm,again,10,0.010955706343842088,8,8,8,8,8,8,8,8
+S4-neo-mars-sentinel,screening,mixed-bimodal.fresh.neo-mars.sender.warm,mixed-bimodal,fresh,neo,mars,sender,neo-mars-lan,warm,rsync,10,0.012074895150918755,8,8,8,8,8,8,8,8
+S4-neo-mars-sentinel,screening,mixed-bimodal.noop.mars-neo.receiver.warm,mixed-bimodal,noop,mars,neo,receiver,neo-mars-lan,warm,again,10,0.023318623896228675,13,8,8,8,17,9,8,8
+S4-neo-mars-sentinel,screening,mixed-bimodal.noop.mars-neo.receiver.warm,mixed-bimodal,noop,mars,neo,receiver,neo-mars-lan,warm,rsync,10,0.02907143964265449,19,10,8,8,25,13,8,8
+S4-neo-mars-sentinel,screening,mixed-bimodal.noop.neo-mars.sender.warm,mixed-bimodal,noop,neo,mars,sender,neo-mars-lan,warm,again,10,0.07007387692778491,101,47,19,8,134,62,24,8
+S4-neo-mars-sentinel,screening,mixed-bimodal.noop.neo-mars.sender.warm,mixed-bimodal,noop,neo,mars,sender,neo-mars-lan,warm,rsync,10,0.08820884016247223,158,72,28,9,211,96,37,12
+S4-neo-mars-sentinel,screening,small-flat.fresh.mars-neo.receiver.warm,small-flat,fresh,mars,neo,receiver,neo-mars-lan,warm,again,10,0.03076733459645701,21,11,8,8,28,14,8,8
+S4-neo-mars-sentinel,screening,small-flat.fresh.mars-neo.receiver.warm,small-flat,fresh,mars,neo,receiver,neo-mars-lan,warm,rsync,10,0.03643998928035149,29,14,8,8,38,18,8,8
+S4-neo-mars-sentinel,screening,small-flat.fresh.neo-mars.sender.warm,small-flat,fresh,neo,mars,sender,neo-mars-lan,warm,again,10,0.01921863433934642,10,8,8,8,12,8,8,8
+S4-neo-mars-sentinel,screening,small-flat.fresh.neo-mars.sender.warm,small-flat,fresh,neo,mars,sender,neo-mars-lan,warm,rsync,10,0.055071235686195825,63,30,12,8,84,39,16,8
+S4-neo-mars-sentinel,screening,small-flat.noop.mars-neo.receiver.warm,small-flat,noop,mars,neo,receiver,neo-mars-lan,warm,again,10,0.2329628310118851,1088,489,181,49,1457,655,242,65
+S4-neo-mars-sentinel,screening,small-flat.noop.mars-neo.receiver.warm,small-flat,noop,mars,neo,receiver,neo-mars-lan,warm,rsync,10,0.066873030295378,92,43,17,8,122,56,22,8
+S4-neo-mars-sentinel,screening,small-flat.noop.neo-mars.sender.warm,small-flat,noop,neo,mars,sender,neo-mars-lan,warm,again,10,0.12412668524064625,311,141,53,16,415,188,71,20
+S4-neo-mars-sentinel,screening,small-flat.noop.neo-mars.sender.warm,small-flat,noop,neo,mars,sender,neo-mars-lan,warm,rsync,10,0.23986055165354986,1153,519,192,52,1544,694,256,69

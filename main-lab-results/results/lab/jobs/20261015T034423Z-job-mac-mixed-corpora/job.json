@@ -1,0 +1,11 @@
+{
+ "name": "mac-mixed-corpora",
+ "steps": [
+  {
+   "host": "mac",
+   "ssh": "[email]",
+   "local": true,
+   "command": "cd ~/benchmarks/xsbench.noindex && for c in mixed-bimodal mixed-threshold; do test -f corpora/$c.manifest.json || python3 lib/92c3b3eeb811/corpus.py generate $c --root corpora > /dev/null || exit 1; done"
+  }
+ ]
+}

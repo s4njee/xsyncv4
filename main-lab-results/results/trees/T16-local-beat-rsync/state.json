@@ -1,0 +1,27 @@
+{
+ "tree": "T16-local-beat-rsync",
+ "started_utc": "2026-10-18T22:46:48Z",
+ "nodes": {
+  "A": {
+   "state": "decided",
+   "runs": [
+    "20261018T224648Z-LC6-local-beat-rsync"
+   ],
+   "spec": "LC6-local-beat-rsync.toml",
+   "decision": {
+    "utc": "2026-10-19T04:56:14Z",
+    "text": "A: no worker count closes the gap: try eager writeback and --no-atomic",
+    "next": [
+     "B"
+    ],
+    "branch": 2
+   }
+  },
+  "B": {
+   "state": "skipped",
+   "runs": [],
+   "why": "after A: no worker count closes the gap: try eager writeback and --no-atomic",
+   "error": "neo: cannot create ~/benchmarks/xsyncv4/lab/lib/736894f6f725.incoming: Connection timed out during banner exchange\nConnection to UNKNOWN port 65535 timed out"
+  }
+ }
+}

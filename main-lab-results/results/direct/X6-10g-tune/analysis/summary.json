@@ -1,0 +1,19 @@
+{
+ "experiment": "X6-10g-tune",
+ "kind": "screening",
+ "hypothesis": "At 10 Gb/s, parallel ranges, larger blocks or writes, or deeper queues bring xs closer to the ssh ceiling.",
+ "primary": "durable_s",
+ "control": "xs",
+ "delta": 0.03,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261016T032059Z-X6-10g-tune"
+ ],
+ "spec_sha256": [
+  "5b670da1cb7a4088eabc3201f665c13bce191b9b0f75deb1c77885ebbc78df61"
+ ],
+ "valid_blocks": 24,
+ "void_attempts": 0,
+ "void_reasons": []
+}

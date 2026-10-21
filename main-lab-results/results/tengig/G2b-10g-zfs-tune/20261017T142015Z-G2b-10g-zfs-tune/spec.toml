@@ -1,0 +1,60 @@
+# G2b (tree T3, if the pool held xs well below the link): receiving workers and write size
+# on ZFS. Each worker's writes land in their own records; fewer or more may suit raidz2.
+id = "G2b-10g-zfs-tune"
+kind = "screening"
+hypothesis = "A different receiving worker count or write size lands large files on the pool faster."
+primary = "durable_s"
+delta = 0.03
+blocks = 8
+control = "xs"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.xs]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-a"]
+
+[arms.recv2]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-a"]
+tune = { receiver = "jobs=2" }
+
+[arms.recv8]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-a"]
+tune = { receiver = "jobs=8" }
+
+[arms.recv16]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-a"]
+tune = { receiver = "jobs=16" }
+
+[arms.write4m]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-a"]
+tune = { receiver = "write_chunk=4194304" }
+
+[arms.coalesce]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-a"]
+tune = { receiver = "coalesce_under=65536,coalesce_to=1048576,write_chunk=1048576" }
+
+[matrix]
+link = "mac-freya-zfs-10g"
+corpus = ["large-four", "large-mixed", "mixed-bimodal"]
+scenario = ["fresh"]
+direction = ["mac>freya-zfs"]
+client = ["initiator"]
+cache = ["warm"]

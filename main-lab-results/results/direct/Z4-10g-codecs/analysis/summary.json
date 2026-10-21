@@ -1,0 +1,19 @@
+{
+ "experiment": "Z4-10g-codecs",
+ "kind": "screening",
+ "hypothesis": "At 10 Gb/s a zstd fast level delivers compressible data faster than level 1, and LZ4 is faster than zstd for rsync.",
+ "primary": "durable_s",
+ "control": "xs-z1",
+ "delta": 0.03,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261016T162335Z-Z4-10g-codecs"
+ ],
+ "spec_sha256": [
+  "8841a746249d908b7a073d7c553187a61781eaee259913257a64f65830224556"
+ ],
+ "valid_blocks": 24,
+ "void_attempts": 0,
+ "void_reasons": []
+}

@@ -1,0 +1,45 @@
+# D6b (tree T2, if D6 found xs-best slower somewhere): which half costs it, the four
+# receiving workers or --no-atomic, on the same trees.
+id = "D6b-mac-best-split"
+kind = "screening"
+hypothesis = "Only one half of the best small-file setting slows mixed or large trees."
+primary = "durable_s"
+delta = 0.03
+blocks = 8
+control = "xs"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.xs]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-a"]
+
+[arms.recv4]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-a"]
+tune = { receiver = "jobs=4" }
+
+[arms.no-atomic]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-a", "--no-atomic"]
+
+[arms.xs-best]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-a", "--no-atomic"]
+tune = { receiver = "jobs=4" }
+
+[matrix]
+link = "mac-mars-2g5"
+corpus = ["mixed-bimodal", "mixed-threshold", "large-four", "large-text"]
+scenario = ["fresh"]
+direction = ["mac>mars"]
+client = ["initiator"]
+cache = ["warm"]

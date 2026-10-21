@@ -1,0 +1,19 @@
+{
+ "experiment": "AP10191250-LC11-local-eager-noatomic",
+ "kind": "screening",
+ "hypothesis": "Adding --no-atomic to xs -aH with eager writeback makes the durable psample copy to the T5 at least 5% faster than eager writeback alone.",
+ "primary": "durable_s",
+ "control": "xs-eager",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261019T125035Z-AP10191250-LC11-local-eager-noatomic"
+ ],
+ "spec_sha256": [
+  "229c21777f55d81f782a2d475e1da204fc1cffa98f9eafa18ff983819b12fdef"
+ ],
+ "valid_blocks": 4,
+ "void_attempts": 0,
+ "void_reasons": []
+}

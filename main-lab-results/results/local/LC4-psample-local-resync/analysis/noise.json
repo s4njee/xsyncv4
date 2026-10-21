@@ -1,0 +1,25 @@
+[
+ {
+  "experiment": "LC4-psample-local-resync",
+  "kind": "screening",
+  "cell_id": "real-psample.noop.neo-neo-ssd.receiver.cold",
+  "corpus": "real-psample",
+  "scenario": "noop",
+  "sender": "neo",
+  "receiver": "neo-ssd",
+  "client": "receiver",
+  "link": "neo-local-ssd",
+  "cache": "cold",
+  "arm": "xs",
+  "n_blocks": 6,
+  "sigma_d": 0.0058802627595237016,
+  "blocks_for_2pct": 8,
+  "blocks_for_3pct": 8,
+  "blocks_for_5pct": 8,
+  "blocks_for_10pct": 8,
+  "blocks_equivalent_2pct": 8,
+  "blocks_equivalent_3pct": 8,
+  "blocks_equivalent_5pct": 8,
+  "blocks_equivalent_10pct": 8
+ }
+]

@@ -1,0 +1,76 @@
+{
+ "id": "AUTO-10210142-neo-ssd",
+ "question": "neo-ssd is idle with the full 6 h. Its link is local, so it cannot add latency, but it can hold neo to 2 CPUs. That tests, with no network involved, whether the CPU cap alone erodes xs's lead on the two home corpora behind lab2's gaps. The plain-link baselines are J2 for real-congress (rsync 1.84x slower) and LC1/LC12 for real-psample (xs about 10% behind, cold). The plan uses about 130 min and does not touch the waiting T16 nodes.",
+ "start": [
+  "N0",
+  "N1"
+ ],
+ "startedUtc": "2026-10-21T01:42:35Z",
+ "until": null,
+ "fills": 0,
+ "nodes": [
+  {
+   "id": "N0",
+   "kind": "experiment",
+   "experiment": "AP10210142-L2R5-local-congress-cpu2",
+   "question": "For lab2's congress-sample fresh gap: copying real-congress locally from neo to the T5 with neo held to 2 CPUs, does rsync -a close the 1.84x lead xs held without a cap?",
+   "estimateHours": 2.4,
+   "hypothesis": "With 2 CPUs, xs -a -j4's lead over rsync -a on a fresh local real-congress copy falls well below J2's 1.84x, showing that xs's small-file advantage depends on spare cores.",
+   "design": "screening",
+   "state": "decided",
+   "runs": [
+    {
+     "id": "20261021T014235Z-AP10210142-L2R5-local-congress-cpu2",
+     "key": "local/AP10210142-L2R5-local-congress-cpu2/20261021T014235Z-AP10210142-L2R5-local-congress-cpu2",
+     "state": "complete"
+    }
+   ],
+   "decision": "N0: done (1 run)",
+   "decidedUtc": "2026-10-21T06:54:43Z",
+   "start": true,
+   "promote": null
+  },
+  {
+   "id": "N1",
+   "kind": "experiment",
+   "experiment": "AP10210142-L2R6-local-psample-cpu2",
+   "question": "For lab2's real-projects fresh gap: copying real-psample locally to the T5 with cold caches and neo held to 2 CPUs, does xs -a -j4's existing deficit to rsync -a (about 10% in LC1 and LC12) widen?",
+   "estimateHours": 1.6,
+   "hypothesis": "With 2 CPUs, xs -a -j4 is more than 15% slower than rsync -a on a fresh cold local real-psample copy, which would point at CPU contention among its workers.",
+   "design": "screening",
+   "state": "queued",
+   "runs": [
+    {
+     "id": "20261021T014239Z-AP10210142-L2R6-local-psample-cpu2",
+     "key": "local/AP10210142-L2R6-local-psample-cpu2/20261021T014239Z-AP10210142-L2R6-local-psample-cpu2",
+     "state": "running"
+    }
+   ],
+   "decision": null,
+   "decidedUtc": null,
+   "start": true,
+   "promote": null
+  }
+ ],
+ "edges": [],
+ "decisions": [
+  {
+   "utc": "2026-10-21T06:54:43Z",
+   "node": "N0",
+   "kind": "decision",
+   "text": "N0: done (1 run)"
+  },
+  {
+   "utc": "2026-10-21T01:42:42Z",
+   "node": "N1",
+   "kind": "queued",
+   "text": "N1 queued on neo-ssd (16 samples): start of the tree"
+  },
+  {
+   "utc": "2026-10-21T01:42:39Z",
+   "node": "N0",
+   "kind": "queued",
+   "text": "N0 queued on neo-ssd (24 samples): start of the tree"
+  }
+ ]
+}

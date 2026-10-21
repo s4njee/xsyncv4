@@ -1,0 +1,35 @@
+{
+ "tree": "T2-mac-mars-small",
+ "started_utc": "2026-10-16T23:54:23Z",
+ "nodes": {
+  "P3b": {
+   "state": "decided",
+   "runs": [
+    "20261016T223339Z-P3b-hdd-writeback"
+   ],
+   "decision": {
+    "utc": "2026-10-17T00:55:44Z",
+    "text": "P3b: eager writeback did not help on the hard drive",
+    "next": [
+     "D1",
+     "D5"
+    ],
+    "branch": 1
+   }
+  },
+  "D1": {
+   "state": "queued",
+   "runs": [
+    "20261017T005544Z-D1-mac-sender-knobs"
+   ],
+   "spec": "D1-mac-sender-knobs.toml"
+  },
+  "D5": {
+   "state": "queued",
+   "runs": [
+    "20261017T005545Z-D5-hdd-recv-jobs"
+   ],
+   "spec": "D5-hdd-recv-jobs.toml"
+  }
+ }
+}

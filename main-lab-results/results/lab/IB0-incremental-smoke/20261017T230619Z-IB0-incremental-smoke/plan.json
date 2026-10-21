@@ -1,0 +1,205 @@
+{
+ "schema": 1,
+ "experiment": "IB0-incremental-smoke",
+ "spec_sha256": "8bdfe6763cb93705a3d24ba87c51eb51cdc8eb7b303d91f2acbd791c919b99a3",
+ "kind": "screening",
+ "bundle": "b06ac8b46d7e",
+ "writes": {
+  "neo": 171,
+  "freya": 171
+ },
+ "hypothesis": "The fastest incremental backup policy depends on the changed-file fraction, corpus, and direction.",
+ "primary": "durable_s",
+ "delta": 0.03,
+ "control": "xs-z",
+ "seed": 1,
+ "run_id": "20261017T230619Z-IB0-incremental-smoke",
+ "driver": "neo",
+ "sample_timeout_s": 3600,
+ "results": "lab",
+ "background": false,
+ "eager_cleanup": true,
+ "hours": null,
+ "hosts": {
+  "neo": {
+   "ssh": "[email]",
+   "name": "[host]",
+   "hostname": "neo",
+   "root": "~/benchmarks/xsyncv4/lab",
+   "interface": "eth0",
+   "helper": true,
+   "gates": {},
+   "local": false,
+   "system": "Linux"
+  },
+  "freya": {
+   "ssh": "[email]",
+   "name": "[host]",
+   "hostname": "freya",
+   "root": "/mnt/nvme/xsbench",
+   "interface": "enp10s0",
+   "helper": true,
+   "gates": {},
+   "local": false,
+   "system": "Linux"
+  }
+ },
+ "links": {
+  "lan": {
+   "hosts": [
+    "neo",
+    "freya"
+   ],
+   "medium": "wired",
+   "min_speed_mbps": 1000,
+   "max_rtt_ms": 2.0,
+   "address": {
+    "neo": "[address]",
+    "freya": "[address]"
+   }
+  }
+ },
+ "arms": [
+  {
+   "name": "xs-z",
+   "tool": "xs",
+   "flags": [
+    "-az"
+   ],
+   "rev": "453704a64528-tune",
+   "metrics": true,
+   "binary": {
+    "neo": "~/benchmarks/xsyncv4/lab/bin/xs-453704a64528-tune",
+    "freya": "/mnt/nvme/xsbench/bin/xs-453704a64528-tune"
+   },
+   "sha256": {
+    "neo": "c2ef264df77b44f64b2bb2b1949e10231814b6ad2e804cc11614ad24d71e7cd2",
+    "freya": "21b844fd6d0f556ad2a01fff0eb979df5854569d8b31bf0bcc15976f53fc47c9"
+   },
+   "artifacts": {
+    "xs-darwin-arm64": "cdd545a62a7721607c23dd7014fc436e0f513d049a939ae1fd28cab34e97fcf2",
+    "xs-linux-amd64": "21b844fd6d0f556ad2a01fff0eb979df5854569d8b31bf0bcc15976f53fc47c9",
+    "xs-linux-arm64": "c2ef264df77b44f64b2bb2b1949e10231814b6ad2e804cc11614ad24d71e7cd2"
+   }
+  },
+  {
+   "name": "rsync-z",
+   "tool": "rsync",
+   "flags": [
+    "-az"
+   ],
+   "binary": {
+    "neo": "rsync",
+    "freya": "rsync"
+   }
+  },
+  {
+   "name": "xs-z-whole",
+   "tool": "xs",
+   "flags": [
+    "-azW"
+   ],
+   "rev": "453704a64528-tune",
+   "metrics": true,
+   "binary": {
+    "neo": "~/benchmarks/xsyncv4/lab/bin/xs-453704a64528-tune",
+    "freya": "/mnt/nvme/xsbench/bin/xs-453704a64528-tune"
+   },
+   "sha256": {
+    "neo": "c2ef264df77b44f64b2bb2b1949e10231814b6ad2e804cc11614ad24d71e7cd2",
+    "freya": "21b844fd6d0f556ad2a01fff0eb979df5854569d8b31bf0bcc15976f53fc47c9"
+   },
+   "artifacts": {
+    "xs-darwin-arm64": "cdd545a62a7721607c23dd7014fc436e0f513d049a939ae1fd28cab34e97fcf2",
+    "xs-linux-amd64": "21b844fd6d0f556ad2a01fff0eb979df5854569d8b31bf0bcc15976f53fc47c9",
+    "xs-linux-arm64": "c2ef264df77b44f64b2bb2b1949e10231814b6ad2e804cc11614ad24d71e7cd2"
+   }
+  }
+ ],
+ "cells": [
+  {
+   "id": "tiny-one.update-1pct.neo-freya.sender.warm",
+   "corpus": "tiny-one",
+   "scenario": "update-1pct",
+   "sender": "neo",
+   "receiver": "freya",
+   "client": "sender",
+   "link": "lan",
+   "cache": "warm"
+  },
+  {
+   "id": "tiny-one.update-1pct.freya-neo.sender.warm",
+   "corpus": "tiny-one",
+   "scenario": "update-1pct",
+   "sender": "freya",
+   "receiver": "neo",
+   "client": "sender",
+   "link": "lan",
+   "cache": "warm"
+  }
+ ],
+ "corpora": {
+  "tiny-one": {
+   "files": 1,
+   "directories": 0,
+   "bytes": 19,
+   "digest": "38e12e8a867b32d7d9c7bf9c9a1bf9b731ba1a2a425f0323983ccc535e871dbe",
+   "quick_digest": "fba99983b39b06c131a47d522ecc6fa31d90fa37a84b7cb37ae68904a1ac50e7"
+  }
+ },
+ "blocks": [
+  {
+   "cell": "tiny-one.update-1pct.freya-neo.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs-z",
+     "xs-z-whole",
+     "rsync-z"
+    ],
+    [
+     "xs-z-whole",
+     "xs-z",
+     "rsync-z"
+    ],
+    [
+     "xs-z-whole",
+     "xs-z",
+     "rsync-z"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.update-1pct.neo-freya.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs-z-whole",
+     "xs-z",
+     "rsync-z"
+    ],
+    [
+     "xs-z",
+     "rsync-z",
+     "xs-z-whole"
+    ],
+    [
+     "xs-z",
+     "xs-z-whole",
+     "rsync-z"
+    ]
+   ]
+  }
+ ],
+ "scripts": {
+  "probe.py": "d30171acf706f7fdac8803009e6a8c6ca3b665557bcfaa3ca22fdd1c448c9450",
+  "corpus.py": "5ea8411a18e6ccbc7d04712a6d254175e2f65b69947422b00f8c722fe5ec06d7",
+  "corpora.json": "5c641f561e2bcf8fe5af1c39adb9054ab0e6d479d8ef0e67204ad69cef148a9c",
+  "agent.py": "86e70538176797c3a4ccc9fbe746ab2909bbffa2fb6cf90d915697b9f273d79e",
+  "runner.py": "cce71fee149764ad1a5c913061f19620a8ff44f792d23d55f7a290d59a9e20ff",
+  "xspipe.py": "94b3fccfc6e994d227077c453f90323ab55337fd8a98231d16a10696e8ebab6b",
+  "measure.py": "5065310f480ff1cabfa7c645f0db342624a02f9a081b96069d50d52b3d224777"
+ }
+}

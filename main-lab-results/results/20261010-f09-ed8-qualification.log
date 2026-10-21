@@ -1,0 +1,34 @@
+Waiting for fixture preparation and the prior ext4 work lock
+Starting local memory qualification
+large-tree-ed8 push fresh rsync 1/1: 465.329s verified
+large-tree-ed8 push fresh xs 1/1: 387.733s verified
+[
+  {
+    "scenario": "fresh",
+    "median_seconds": {
+      "rsync": 465.32935720914975,
+      "xs": 387.73291051434353
+    },
+    "xs_speedup": 1.2001286055183487
+  }
+]
+Starting push memory qualification
+large-tree-ed8 push fresh rsync 1/1: 480.154s verified
+large-tree-ed8 push fresh xs 1/1: 233.090s verified
+[
+  {
+    "scenario": "fresh",
+    "median_seconds": {
+      "rsync": 480.1537811458111,
+      "xs": 233.0904074148275
+    },
+    "xs_speedup": 2.0599465523747984
+  }
+]
+Traceback (most recent call last):
+  File "~/benchmarks/xsyncv4/20261010T144748Z-715fa0/bin/large_tree_runs.py", line 115, in <module>
+    if __name__ == '__main__': main()
+                               ~~~~^^
+  File "~/benchmarks/xsyncv4/20261010T144748Z-715fa0/bin/large_tree_runs.py", line 104, in main
+    raise RuntimeError('xs process peak exceeds the stated memory budget')
+RuntimeError: xs process peak exceeds the stated memory budget

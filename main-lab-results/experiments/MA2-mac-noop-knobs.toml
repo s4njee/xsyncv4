@@ -1,0 +1,62 @@
+# MA2 (tree T6, after MA1 shows the no-op push deficit): the CPU signature
+# (408.8 s against rsync's 18.8 s) points at the sender's scan and skip path, not
+# the wire, so each arm keeps xs's best small-file setting and changes one thing
+# there: skip directory finalisation (-O), the write-then-rename step, a single
+# scanning worker, a single read batch, and the default (atomic) write. If none
+# recovers the time it is a code candidate, not a knob.
+id = "MA2-mac-noop-knobs"
+kind = "screening"
+hypothesis = "Skipping directory finalisation or reducing the sender's scanning and batching recovers xs's warm no-op push."
+primary = "durable_s"
+delta = 0.03
+blocks = 8
+control = "xs-best"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.xs-best]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-a", "--no-atomic"]
+tune = { receiver = "jobs=4" }
+
+[arms.xs-O]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-a", "-O", "--no-atomic"]
+tune = { receiver = "jobs=4" }
+
+[arms.xs-atomic]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-a"]
+tune = { receiver = "jobs=4" }
+
+[arms.xs-scan1]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-a", "--no-atomic"]
+tune = { receiver = "jobs=4", sender = "scan_workers=1" }
+
+[arms.xs-batch1]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-a", "--no-atomic"]
+tune = { receiver = "jobs=4", sender = "read_batch_files=1,read_batch_bytes=1048576" }
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[matrix]
+link = "mac-mars-2g5"
+corpus = ["real-congress", "small-flat"]
+scenario = ["noop"]
+direction = ["mac>mars"]
+client = ["initiator"]
+cache = ["warm"]

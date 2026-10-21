@@ -1,0 +1,37 @@
+# MA9 (tree T18): does the parent-descriptor budget fix (e51c1df1329a) close xs's worst gap, pulling small
+# trees onto the Mac? There xs took 3.65x rsync's time on a small-deep no-op (S1, 12 blocks), 1.87x on the
+# 10G cable (E6b), and about 1.8x on fresh copies; one receiving worker made it worse (S2), so the cost is
+# per directory, not too little parallelism. small-deep is the deep tree where walking each destination
+# path from the root costs most. T17's MA8 measures the fix on psample only.
+id = "MA9-small-pull-anchors"
+kind = "confirmatory"
+hypothesis = "With a larger parent-descriptor budget, xs -a pulls small trees onto the Mac faster than its parent, and closes most of its gap to rsync -a, at a no-op and fresh."
+primary = "durable_s"
+delta = 0.05
+blocks = 8
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+sample_timeout_s = 1800
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[arms.xs]
+tool = "xs"
+rev = "21ae6844ed20"
+flags = ["-a"]
+
+[arms.xs-anchors]
+tool = "xs"
+rev = "e51c1df1329a"
+flags = ["-a"]
+
+[matrix]
+link = "mac-mars-10g"
+corpus = ["small-deep", "small-flat", "mixed-bimodal"]
+scenario = ["noop", "fresh"]
+direction = ["mars>mac"]
+client = ["initiator"]
+cache = ["warm"]

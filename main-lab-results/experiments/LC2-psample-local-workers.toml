@@ -1,0 +1,47 @@
+# LC2 (tree T14): xs's worker count for the local psample copy. The Pi has four
+# cores and xs defaults to four workers; one USB drive with a queue depth of 30
+# may want more requests in flight for 711k small creates, or fewer for less
+# contention. -j covers the whole copy, reading and writing.
+id = "LC2-psample-local-workers"
+kind = "screening"
+hypothesis = "On a four-core Pi writing to one USB SSD, a worker count other than the default four copies psample faster."
+primary = "durable_s"
+delta = 0.05
+blocks = 4
+control = "xs"
+verify = "first-last"
+cleanup = "eager"
+sample_timeout_s = 7200
+
+[arms.xs]
+tool = "xs"
+rev = "21ae6844ed20"
+flags = ["-aH"]
+
+[arms.xs-j1]
+tool = "xs"
+rev = "21ae6844ed20"
+flags = ["-aH", "-j1"]
+
+[arms.xs-j2]
+tool = "xs"
+rev = "21ae6844ed20"
+flags = ["-aH", "-j2"]
+
+[arms.xs-j8]
+tool = "xs"
+rev = "21ae6844ed20"
+flags = ["-aH", "-j8"]
+
+[arms.xs-j16]
+tool = "xs"
+rev = "21ae6844ed20"
+flags = ["-aH", "-j16"]
+
+[matrix]
+link = "neo-local-ssd"
+corpus = ["real-psample"]
+scenario = ["fresh"]
+direction = ["neo>neo-ssd"]
+client = ["receiver"]
+cache = ["cold"]

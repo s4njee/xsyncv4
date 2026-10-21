@@ -1,0 +1,30 @@
+# E1r, laikav2 again with the build that sends a hard-linked file's contents
+# once (8cc75bbdb801). In E1r-laikav2 xs -aH sent 45.3 GB against rsync's
+# 36.7 GB and took 19 to 24% longer. Same cells, same four blocks: estimates,
+# not verdicts.
+id = "E1r-laikav2-linked"
+kind = "screening"
+hypothesis = "Once xs -aH sends linked data once, it is within a few percent of rsync -aH on the real 42 GiB tree."
+primary = "durable_s"
+delta = 0.03
+blocks = 4
+control = "rsync"
+verify = "first-last"
+sample_timeout_s = 7200
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-aH"]
+
+[arms.xs]
+tool = "xs"
+rev = "8cc75bbdb801"
+flags = ["-aH"]
+
+[matrix]
+link = "lan"
+corpus = ["real-laikav2"]
+scenario = ["fresh"]
+direction = ["neo>freya", "freya>neo"]
+client = ["sender"]
+cache = ["warm"]

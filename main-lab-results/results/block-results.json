@@ -1,0 +1,4188 @@
+{
+ "experiments": {
+  "P2b-receiver-ceiling": {
+   "run": "20261016T220110Z-P2b-receiver-ceiling",
+   "experiment": "P2b-receiver-ceiling",
+   "key": "small-deep.fresh.mac-mars.sender.warm|5|0",
+   "utc": 1792193635.539,
+   "cell": "small-deep.fresh.mac-mars.sender.warm",
+   "factors": {
+    "corpus": "small-deep",
+    "scenario": "fresh",
+    "sender": "mac",
+    "receiver": "mars",
+    "client": "sender",
+    "link": "mac-mars-2g5",
+    "cache": "warm"
+   },
+   "block": 5,
+   "attempt": 0,
+   "control": "xs-best",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "xs-best",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 20.995,
+     "gbps": 0.122,
+     "files_per_s": 4763,
+     "speed": 1
+    },
+    {
+     "arm": "xs-best-eager",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 12.065,
+     "gbps": 0.212,
+     "files_per_s": 8288,
+     "speed": 1.74
+    },
+    {
+     "arm": "local-x1",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 4.43,
+     "gbps": 0.576,
+     "files_per_s": 22572,
+     "speed": 4.74
+    },
+    {
+     "arm": "local-x4",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 2.697,
+     "gbps": 0.947,
+     "files_per_s": 37074,
+     "speed": 7.78
+    },
+    {
+     "arm": "local-x8",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 2.59,
+     "gbps": 0.986,
+     "files_per_s": 38611,
+     "speed": 8.11
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "local-x1",
+     "speed": 3.35,
+     "blocks": 6
+    },
+    {
+     "arm": "local-x4",
+     "speed": 4.66,
+     "blocks": 6
+    },
+    {
+     "arm": "local-x8",
+     "speed": 3.69,
+     "blocks": 6
+    },
+    {
+     "arm": "xs-best-eager",
+     "speed": 1.15,
+     "blocks": 6
+    }
+   ],
+   "question": "How fast can mars create small files by itself, and how close does xs come to that?",
+   "summary": "In block 5, local-x8 was fastest at 2.59 s, 8.11x the xs-best control (20.995 s), with local-x4 close behind at 7.78x and xs-best-eager at 1.74x. Across six blocks, the cumulative speeds are 4.66x for local-x4, 3.69x for local-x8, 3.35x for local-x1 and 1.15x for xs-best-eager, so this block ran higher than the running picture. For the question, mars creating files locally runs several times faster than xs-best, so xs is well short of that ceiling.",
+   "model": "claude-sonnet-5-5",
+   "driver": "mac"
+  },
+  "K1-congress-ceiling": {
+   "run": "20261016T223011Z-K1-congress-ceiling",
+   "experiment": "K1-congress-ceiling",
+   "key": "real-congress.fresh.neo-freya.sender.warm|5|0",
+   "utc": 1792194892.568,
+   "cell": "real-congress.fresh.neo-freya.sender.warm",
+   "factors": {
+    "corpus": "real-congress",
+    "scenario": "fresh",
+    "sender": "neo",
+    "receiver": "freya",
+    "client": "sender",
+    "link": "lan",
+    "cache": "warm"
+   },
+   "block": 5,
+   "attempt": 0,
+   "control": "xs-z",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "xs-z",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 8.235,
+     "gbps": 1.126,
+     "files_per_s": 26291,
+     "speed": 1
+    },
+    {
+     "arm": "xs-z-best",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 8.34,
+     "gbps": 1.112,
+     "files_per_s": 25961,
+     "speed": 0.99
+    },
+    {
+     "arm": "local-x1",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 5.041,
+     "gbps": 1.84,
+     "files_per_s": 42951,
+     "speed": 1.63
+    },
+    {
+     "arm": "local-x4",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 2.87,
+     "gbps": 3.231,
+     "files_per_s": 75438,
+     "speed": 2.87
+    },
+    {
+     "arm": "local-x8",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 2.79,
+     "gbps": 3.323,
+     "files_per_s": 77592,
+     "speed": 2.95
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "local-x1",
+     "speed": 1.87,
+     "blocks": 6
+    },
+    {
+     "arm": "local-x4",
+     "speed": 3.34,
+     "blocks": 6
+    },
+    {
+     "arm": "local-x8",
+     "speed": 3.38,
+     "blocks": 6
+    },
+    {
+     "arm": "xs-z-best",
+     "speed": 1.12,
+     "blocks": 6
+    }
+   ],
+   "question": "Is the receiver's disk what limits copying small files, or is it something before it?",
+   "summary": "In block 5, local-x8 was fastest at 2.79 seconds against the control's 8.24, a speed of 2.95x, with local-x4 close behind at 2.87x and local-x1 at 1.63x. Across six blocks in this cell, local-x8 averages 3.38x, local-x4 3.34x and local-x1 1.87x, so this block ran somewhat below the running picture. The gain from one to four streams is large while four to eight is negligible, which suggests something other than the receiver's disk limits small-file copying, though this alone doesn't settle the question.",
+   "model": "claude-sonnet-5-5",
+   "driver": "neo"
+  },
+  "P3b-hdd-writeback": {
+   "run": "20261016T223339Z-P3b-hdd-writeback",
+   "experiment": "P3b-hdd-writeback",
+   "key": "small-flat.fresh.mac-mars-hdd.sender.warm|5|0",
+   "utc": 1792198439.23,
+   "cell": "small-flat.fresh.mac-mars-hdd.sender.warm",
+   "factors": {
+    "corpus": "small-flat",
+    "scenario": "fresh",
+    "sender": "mac",
+    "receiver": "mars-hdd",
+    "client": "sender",
+    "link": "mac-mars-hdd-2g5",
+    "cache": "warm"
+   },
+   "block": 5,
+   "attempt": 0,
+   "control": "xs-best",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "xs-best",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 9.13,
+     "gbps": 0.28,
+     "files_per_s": 10953,
+     "speed": 1
+    },
+    {
+     "arm": "xs-best-eager",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 5.987,
+     "gbps": 0.427,
+     "files_per_s": 16703,
+     "speed": 1.52
+    },
+    {
+     "arm": "xs",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 8.016,
+     "gbps": 0.319,
+     "files_per_s": 12474,
+     "speed": 1.14
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "xs",
+     "speed": 1.35,
+     "blocks": 6
+    },
+    {
+     "arm": "xs-best-eager",
+     "speed": 1.18,
+     "blocks": 6
+    }
+   ],
+   "question": "On a hard drive, does flushing while the copy runs (eager writeback) get small and mixed trees safely there sooner?",
+   "summary": "In block 5, xs-best-eager was fastest at 5.99 s to durable versus 9.13 s for the xs-best control, a speed of 1.52x, while xs reached 1.14x. Across 6 blocks in this cell, xs-best-eager averages 1.18x and xs 1.35x, so xs leads overall despite trailing here. For the question, eager writeback helped in this block, but the running ratio is modest and below xs, so it does not yet show a reliable advantage on the hard drive.",
+   "model": "claude-sonnet-5-5",
+   "driver": "mac"
+  },
+  "K2a-tmpfs-freya": {
+   "run": "20261016T223005Z-K2a-tmpfs-freya",
+   "experiment": "K2a-tmpfs-freya",
+   "key": "real-congress.fresh.neo-freya-shm.sender.warm|5|0",
+   "utc": 1792196693.965,
+   "cell": "real-congress.fresh.neo-freya-shm.sender.warm",
+   "factors": {
+    "corpus": "real-congress",
+    "scenario": "fresh",
+    "sender": "neo",
+    "receiver": "freya-shm",
+    "client": "sender",
+    "link": "lan-shm-freya",
+    "cache": "warm"
+   },
+   "block": 5,
+   "attempt": 0,
+   "control": "xs-z",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "xs-z",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 8.143,
+     "gbps": 1.139,
+     "files_per_s": 26591,
+     "speed": 1
+    },
+    {
+     "arm": "xs-z-best",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 7.634,
+     "gbps": 1.215,
+     "files_per_s": 28361,
+     "speed": 1.07
+    },
+    {
+     "arm": "xs",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 11.36,
+     "gbps": 0.816,
+     "files_per_s": 19059,
+     "speed": 0.72
+    },
+    {
+     "arm": "xs-best",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 10.958,
+     "gbps": 0.846,
+     "files_per_s": 19759,
+     "speed": 0.74
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "xs",
+     "speed": 0.7,
+     "blocks": 6
+    },
+    {
+     "arm": "xs-best",
+     "speed": 0.73,
+     "blocks": 6
+    },
+    {
+     "arm": "xs-z-best",
+     "speed": 1,
+     "blocks": 6
+    }
+   ],
+   "question": "Does xs copy small files into freya's RAM any faster than onto its NVMe drive?",
+   "summary": "In block 5, xs-z-best was fastest at 1.07x the control xs-z (7.6 s vs 8.1 s), while xs and xs-best were slower at 0.72x and 0.74x. Across six blocks in this cell, xs-z-best averages 1.00x, so its edge here looks like noise, and xs and xs-best sit near 0.70x and 0.73x. This cell only covers copies into freya's RAM, so it can't say whether RAM beats NVMe without the matching NVMe cell.",
+   "model": "claude-sonnet-5-5",
+   "driver": "neo"
+  },
+  "K2b-tmpfs-neo": {
+   "run": "20261016T222957Z-K2b-tmpfs-neo",
+   "experiment": "K2b-tmpfs-neo",
+   "key": "small-flat.fresh.freya-neo-shm.sender.warm|5|0",
+   "utc": 1792197618.573,
+   "cell": "small-flat.fresh.freya-neo-shm.sender.warm",
+   "factors": {
+    "corpus": "small-flat",
+    "scenario": "fresh",
+    "sender": "freya",
+    "receiver": "neo-shm",
+    "client": "sender",
+    "link": "lan-shm-neo",
+    "cache": "warm"
+   },
+   "block": 5,
+   "attempt": 0,
+   "control": "xs-z",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "xs-z",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 2.407,
+     "gbps": 1.061,
+     "files_per_s": 41554,
+     "speed": 1
+    },
+    {
+     "arm": "xs-z-best",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 1.99,
+     "gbps": 1.283,
+     "files_per_s": 50246,
+     "speed": 1.21
+    },
+    {
+     "arm": "xs",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 2.999,
+     "gbps": 0.851,
+     "files_per_s": 33342,
+     "speed": 0.8
+    },
+    {
+     "arm": "xs-best",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 3.052,
+     "gbps": 0.837,
+     "files_per_s": 32767,
+     "speed": 0.79
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "xs",
+     "speed": 0.8,
+     "blocks": 6
+    },
+    {
+     "arm": "xs-best",
+     "speed": 0.78,
+     "blocks": 6
+    },
+    {
+     "arm": "xs-z-best",
+     "speed": 1.17,
+     "blocks": 6
+    }
+   ],
+   "question": "Does xs copy small files into the Pi's RAM any faster than onto its NVMe drive?",
+   "summary": "In block 5, xs-z-best was fastest at 1.21x the control xs-z (1.99 s against 2.41 s), while xs and xs-best were slower at 0.80x and 0.79x. Across six blocks in this cell, xs-z-best averages 1.17x, xs 0.80x and xs-best 0.78x, so this block matches the pattern. This cell compares tool settings only for the copy into RAM; it has no NVMe comparison, so it does not yet answer the RAM-versus-NVMe question.",
+   "model": "claude-sonnet-5-5",
+   "driver": "neo"
+  },
+  "K3-congress-cold": {
+   "run": "20261016T222943Z-K3-congress-cold",
+   "experiment": "K3-congress-cold",
+   "key": "real-congress.fresh.neo-freya.sender.cold|5|0",
+   "utc": 1792199047.93,
+   "cell": "real-congress.fresh.neo-freya.sender.cold",
+   "factors": {
+    "corpus": "real-congress",
+    "scenario": "fresh",
+    "sender": "neo",
+    "receiver": "freya",
+    "client": "sender",
+    "link": "lan",
+    "cache": "cold"
+   },
+   "block": 5,
+   "attempt": 0,
+   "control": "xs-z",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "xs-z",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 10.372,
+     "gbps": 0.894,
+     "files_per_s": 20875,
+     "speed": 1
+    },
+    {
+     "arm": "xs-z-best",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 10.26,
+     "gbps": 0.904,
+     "files_per_s": 21103,
+     "speed": 1.01
+    },
+    {
+     "arm": "xs",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 11.565,
+     "gbps": 0.802,
+     "files_per_s": 18723,
+     "speed": 0.9
+    },
+    {
+     "arm": "rsync",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 34.316,
+     "gbps": 0.27,
+     "files_per_s": 6310,
+     "speed": 0.3
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "rsync",
+     "speed": 0.32,
+     "blocks": 6
+    },
+    {
+     "arm": "xs",
+     "speed": 0.91,
+     "blocks": 6
+    },
+    {
+     "arm": "xs-z-best",
+     "speed": 1.05,
+     "blocks": 6
+    }
+   ],
+   "question": "When nothing is cached, as on a first backup, how do xs and rsync compare on 216,000 small files?",
+   "summary": "In block 5, the fastest arm was xs-z-best at 1.01x the xs-z control (10.26 s vs 10.37 s), essentially a tie. Plain xs ran at 0.90x and rsync at 0.30x, taking 34.3 s. Across six blocks in this cell, rsync averages 0.32x, xs 0.91x and xs-z-best 1.05x, so on cold 216,000-file copies xs is consistently roughly three times faster than rsync.",
+   "model": "claude-sonnet-5-5",
+   "driver": "neo"
+  },
+  "D1-mac-sender-knobs": {
+   "run": "20261017T005544Z-D1-mac-sender-knobs",
+   "experiment": "D1-mac-sender-knobs",
+   "key": "small-deep.fresh.mac-mars.sender.warm|2|0",
+   "utc": 1792201132.479,
+   "cell": "small-deep.fresh.mac-mars.sender.warm",
+   "factors": {
+    "corpus": "small-deep",
+    "scenario": "fresh",
+    "sender": "mac",
+    "receiver": "mars",
+    "client": "sender",
+    "link": "mac-mars-2g5",
+    "cache": "warm"
+   },
+   "block": 2,
+   "attempt": 0,
+   "control": "xs-best",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "xs-best",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 10.35,
+     "gbps": 0.247,
+     "files_per_s": 9662,
+     "speed": 1
+    },
+    {
+     "arm": "batch256",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 11.749,
+     "gbps": 0.217,
+     "files_per_s": 8511,
+     "speed": 0.88
+    },
+    {
+     "arm": "scan-all",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 10.606,
+     "gbps": 0.241,
+     "files_per_s": 9429,
+     "speed": 0.98
+    },
+    {
+     "arm": "coalesce1m",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 12.163,
+     "gbps": 0.21,
+     "files_per_s": 8222,
+     "speed": 0.85
+    },
+    {
+     "arm": "soft256",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 13.363,
+     "gbps": 0.191,
+     "files_per_s": 7483,
+     "speed": 0.77
+    },
+    {
+     "arm": "all-three",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 9.706,
+     "gbps": 0.263,
+     "files_per_s": 10303,
+     "speed": 1.07
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "all-three",
+     "speed": 1.05,
+     "blocks": 3
+    },
+    {
+     "arm": "batch256",
+     "speed": 0.87,
+     "blocks": 3
+    },
+    {
+     "arm": "coalesce1m",
+     "speed": 0.94,
+     "blocks": 3
+    },
+    {
+     "arm": "scan-all",
+     "speed": 0.98,
+     "blocks": 3
+    },
+    {
+     "arm": "soft256",
+     "speed": 0.72,
+     "blocks": 3
+    }
+   ],
+   "question": null,
+   "summary": "In block 2, all-three was fastest at 1.07x the xs-best control (9.7 s versus 10.35 s), while soft256 was slowest at 0.77x. The other arms also trailed the control: scan-all 0.98x, batch256 0.88x, coalesce1m 0.85x. Across three blocks, all-three is at 1.05x, scan-all 0.98x, coalesce1m 0.94x, batch256 0.87x and soft256 0.72x. That is still only three blocks, so the picture is thin. No question was set for this experiment, so I draw no conclusion beyond the cell.",
+   "model": "claude-sonnet-5-5",
+   "driver": "mac"
+  },
+  "L2-noatomic-confirm": {
+   "run": "20261016T152054Z-L2-noatomic-confirm",
+   "experiment": "L2-noatomic-confirm",
+   "key": "small-opaque.fresh.neo-freya.sender.warm|1|0",
+   "utc": 1792199405.537,
+   "cell": "small-opaque.fresh.neo-freya.sender.warm",
+   "factors": {
+    "corpus": "small-opaque",
+    "scenario": "fresh",
+    "sender": "neo",
+    "receiver": "freya",
+    "client": "sender",
+    "link": "lan",
+    "cache": "warm"
+   },
+   "block": 1,
+   "attempt": 0,
+   "control": "xs",
+   "primary": "wall_s",
+   "arms": [
+    {
+     "arm": "xs",
+     "control": true,
+     "valid": false,
+     "void": "harness error: freya: `sync -f /mnt/nvme/xsbench/work/20261016T152054Z-L2-noatomic-confirm/small-opaque.fresh.neo-freya.sender.warm` exited 1: sync: error opening '/mnt/nvme/xsbench/work/20261016T152054Z-L2-noatomic-confirm/small-opaque.fresh.neo-freya.sender.warm': No such file or directory",
+     "seconds": null,
+     "gbps": null,
+     "files_per_s": null,
+     "speed": null
+    },
+    {
+     "arm": "no-atomic",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 3.032,
+     "gbps": 0.842,
+     "files_per_s": 32982,
+     "speed": null
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "no-atomic",
+     "speed": 1.16,
+     "blocks": 1
+    }
+   ],
+   "question": "Does skipping the write-then-rename step (--no-atomic) make fresh copies of flat small-file trees at least 3% faster?",
+   "summary": "This block did not produce a usable comparison. The control arm (xs) was voided by a harness error, a sync call that failed on a missing path, so no speed ratio could be computed. The no-atomic arm alone finished in 3.032 s (0.842 Gbps, about 32,982 files/s). The cell's running figure for no-atomic is 1.16x, but it rests on a single block, so the evidence is thin and does not yet settle the 3% question.",
+   "model": "claude-sonnet-5-5",
+   "driver": "neo"
+  },
+  "G0-10g-baseline": {
+   "run": "20261017T121630Z-G0-10g-baseline",
+   "experiment": "G0-10g-baseline",
+   "key": "real-congress.fresh.mac-freya.sender.warm|1|0",
+   "utc": 1792240881.568,
+   "cell": "real-congress.fresh.mac-freya.sender.warm",
+   "factors": {
+    "corpus": "real-congress",
+    "scenario": "fresh",
+    "sender": "mac",
+    "receiver": "freya",
+    "client": "sender",
+    "link": "mac-freya-10g",
+    "cache": "warm"
+   },
+   "block": 1,
+   "attempt": 0,
+   "control": "xs",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "xs",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 6.335,
+     "gbps": 1.464,
+     "files_per_s": 34180,
+     "speed": 1
+    },
+    {
+     "arm": "xs-best",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 5.982,
+     "gbps": 1.55,
+     "files_per_s": 36193,
+     "speed": 1.06
+    },
+    {
+     "arm": "rsync",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 25.49,
+     "gbps": 0.364,
+     "files_per_s": 8494,
+     "speed": 0.25
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "rsync",
+     "speed": 0.26,
+     "blocks": 2
+    },
+    {
+     "arm": "xs-best",
+     "speed": 1.06,
+     "blocks": 2
+    }
+   ],
+   "question": null,
+   "summary": "In this block, xs-best was fastest at 1.06x the xs control (5.98 s against 6.34 s), while rsync was far slower at 0.25x (25.5 s). The running picture for this cell is consistent: xs-best is at 1.06x and rsync at 0.26x, but each rests on only two blocks, so the evidence is still thin. No question was set for this experiment, so nothing here bears on it.",
+   "model": "claude-sonnet-5-5",
+   "driver": "mac"
+  },
+  "H0-pair-baseline": {
+   "run": "20261017T021151Z-H0-pair-baseline",
+   "experiment": "H0-pair-baseline",
+   "key": "real-congress.fresh.mars-neo.sender.warm|6|0",
+   "utc": 1792210166.063,
+   "cell": "real-congress.fresh.mars-neo.sender.warm",
+   "factors": {
+    "corpus": "real-congress",
+    "scenario": "fresh",
+    "sender": "mars",
+    "receiver": "neo",
+    "client": "sender",
+    "link": "neo-mars-1g",
+    "cache": "warm"
+   },
+   "block": 6,
+   "attempt": 0,
+   "control": "xs-z",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "xs-z",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 14.686,
+     "gbps": 0.631,
+     "files_per_s": 14743,
+     "speed": 1
+    },
+    {
+     "arm": "xs-z-best",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 10.327,
+     "gbps": 0.898,
+     "files_per_s": 20967,
+     "speed": 1.42
+    },
+    {
+     "arm": "rsync-z",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 16.618,
+     "gbps": 0.558,
+     "files_per_s": 13029,
+     "speed": 0.88
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "rsync-z",
+     "speed": 0.76,
+     "blocks": 7
+    },
+    {
+     "arm": "xs-z-best",
+     "speed": 1.18,
+     "blocks": 7
+    }
+   ],
+   "question": null,
+   "summary": "In block 6, xs-z-best was fastest at 10.3 s versus the xs-z control's 14.7 s, a speed of 1.42x, while rsync-z was slower at 0.88x (16.6 s). Across seven blocks in this cell, xs-z-best averages 1.18x and rsync-z 0.76x, so this block shows a bigger xs-z-best gain than usual but the direction matches. No question is set for this experiment, so this is baseline context only.",
+   "model": "claude-sonnet-5-5",
+   "driver": "mars"
+  },
+  "H1a-pair-ceiling-neo": {
+   "run": "20261017T121633Z-H1a-pair-ceiling-neo",
+   "experiment": "H1a-pair-ceiling-neo",
+   "key": "small-deep.fresh.mars-neo.sender.warm|7|0",
+   "utc": 1792241834.25,
+   "cell": "small-deep.fresh.mars-neo.sender.warm",
+   "factors": {
+    "corpus": "small-deep",
+    "scenario": "fresh",
+    "sender": "mars",
+    "receiver": "neo",
+    "client": "sender",
+    "link": "neo-mars-1g",
+    "cache": "warm"
+   },
+   "block": 7,
+   "attempt": 0,
+   "control": "xs-z-best",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "xs-z-best",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 13.504,
+     "gbps": 0.189,
+     "files_per_s": 7405,
+     "speed": 1
+    },
+    {
+     "arm": "local-x1",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 14.166,
+     "gbps": 0.18,
+     "files_per_s": 7059,
+     "speed": 0.95
+    },
+    {
+     "arm": "local-x4",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 13.552,
+     "gbps": 0.188,
+     "files_per_s": 7379,
+     "speed": 1
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "local-x1",
+     "speed": 0.96,
+     "blocks": 8
+    },
+    {
+     "arm": "local-x4",
+     "speed": 1.02,
+     "blocks": 8
+    }
+   ],
+   "question": null,
+   "summary": "In block 7, no arm beat the control: xs-z-best took 13.5 s, local-x4 was essentially tied at 1.00x (13.55 s), and local-x1 was slower at 0.95x (14.2 s). Across 8 blocks in this cell, local-x4 averages 1.02x and local-x1 0.96x, so local-x4 looks level with the control and local-x1 slightly behind. No question was set for this experiment, so this result is not tied to a specific hypothesis.",
+   "model": "claude-sonnet-5-5",
+   "driver": "mars"
+  },
+  "H1b-pair-ceiling-mars": {
+   "run": "20261017T121636Z-H1b-pair-ceiling-mars",
+   "experiment": "H1b-pair-ceiling-mars",
+   "key": "small-flat.fresh.neo-mars.receiver.warm|7|0",
+   "utc": 1792243162.9,
+   "cell": "small-flat.fresh.neo-mars.receiver.warm",
+   "factors": {
+    "corpus": "small-flat",
+    "scenario": "fresh",
+    "sender": "neo",
+    "receiver": "mars",
+    "client": "receiver",
+    "link": "neo-mars-1g",
+    "cache": "warm"
+   },
+   "block": 7,
+   "attempt": 0,
+   "control": "xs-z-best",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "xs-z-best",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 2.977,
+     "gbps": 0.858,
+     "files_per_s": 33593,
+     "speed": 1
+    },
+    {
+     "arm": "local-x1",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 1.752,
+     "gbps": 1.458,
+     "files_per_s": 57072,
+     "speed": 1.7
+    },
+    {
+     "arm": "local-x4",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.642,
+     "gbps": 3.975,
+     "files_per_s": 155644,
+     "speed": 4.63
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "local-x1",
+     "speed": 1.7,
+     "blocks": 8
+    },
+    {
+     "arm": "local-x4",
+     "speed": 4.55,
+     "blocks": 8
+    }
+   ],
+   "question": null,
+   "summary": "In block 7, local-x4 was fastest at 0.64 s against the control's 2.98 s, a speed of 4.63x, while local-x1 reached 1.70x at 1.75 s. Across 8 blocks in this cell, local-x4 averages 4.55x and local-x1 1.70x, so this block matches the running picture. No question was set for this experiment, so I draw no conclusion beyond the cell itself.",
+   "model": "claude-sonnet-5-5",
+   "driver": "mars"
+  },
+  "G1-10g-large-tune": {
+   "run": "20261017T124214Z-G1-10g-large-tune",
+   "experiment": "G1-10g-large-tune",
+   "key": "mixed-bimodal.fresh.freya-mac.receiver.warm|7|0",
+   "utc": 1792244081.053,
+   "cell": "mixed-bimodal.fresh.freya-mac.receiver.warm",
+   "factors": {
+    "corpus": "mixed-bimodal",
+    "scenario": "fresh",
+    "sender": "freya",
+    "receiver": "mac",
+    "client": "receiver",
+    "link": "mac-freya-10g",
+    "cache": "warm"
+   },
+   "block": 7,
+   "attempt": 0,
+   "control": "xs",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "xs",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 3.924,
+     "gbps": 2.845,
+     "files_per_s": 5097,
+     "speed": 1
+    },
+    {
+     "arm": "streams8",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 4.054,
+     "gbps": 2.753,
+     "files_per_s": 4933,
+     "speed": 0.97
+    },
+    {
+     "arm": "block4m",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 4.012,
+     "gbps": 2.782,
+     "files_per_s": 4985,
+     "speed": 0.98
+    },
+    {
+     "arm": "queues",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 4.43,
+     "gbps": 2.52,
+     "files_per_s": 4515,
+     "speed": 0.89
+    },
+    {
+     "arm": "jobs16",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 4.214,
+     "gbps": 2.648,
+     "files_per_s": 4746,
+     "speed": 0.93
+    },
+    {
+     "arm": "all-four",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 4.214,
+     "gbps": 2.649,
+     "files_per_s": 4746,
+     "speed": 0.93
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "all-four",
+     "speed": 0.95,
+     "blocks": 8
+    },
+    {
+     "arm": "block4m",
+     "speed": 0.98,
+     "blocks": 8
+    },
+    {
+     "arm": "jobs16",
+     "speed": 0.96,
+     "blocks": 8
+    },
+    {
+     "arm": "queues",
+     "speed": 0.97,
+     "blocks": 8
+    },
+    {
+     "arm": "streams8",
+     "speed": 0.95,
+     "blocks": 8
+    }
+   ],
+   "question": null,
+   "summary": "In block 7 the control xs was fastest at 3.92 s (2.85 Gbps), and every tuned arm was slower: block4m reached 0.98x, streams8 0.97x, jobs16 and all-four 0.93x, and queues 0.89x. Across 8 blocks in this cell, no arm has beaten the control, with cumulative speeds between 0.95x and 0.98x. No question was set for this experiment, so this only suggests the tuning does not help here.",
+   "model": "claude-sonnet-5-5",
+   "driver": "mac"
+  },
+  "H6-pair-best-default": {
+   "run": "20261017T121639Z-H6-pair-best-default",
+   "experiment": "H6-pair-best-default",
+   "key": "mixed-threshold.fresh.neo-mars.receiver.warm|7|0",
+   "utc": 1792248971.73,
+   "cell": "mixed-threshold.fresh.neo-mars.receiver.warm",
+   "factors": {
+    "corpus": "mixed-threshold",
+    "scenario": "fresh",
+    "sender": "neo",
+    "receiver": "mars",
+    "client": "receiver",
+    "link": "neo-mars-1g",
+    "cache": "warm"
+   },
+   "block": 7,
+   "attempt": 0,
+   "control": "xs",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "xs",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 13.429,
+     "gbps": 0.895,
+     "files_per_s": 112,
+     "speed": 1
+    },
+    {
+     "arm": "xs-best",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 13.559,
+     "gbps": 0.886,
+     "files_per_s": 111,
+     "speed": 0.99
+    },
+    {
+     "arm": "rsync",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 13.111,
+     "gbps": 0.917,
+     "files_per_s": 114,
+     "speed": 1.02
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "rsync",
+     "speed": 1.02,
+     "blocks": 8
+    },
+    {
+     "arm": "xs-best",
+     "speed": 1,
+     "blocks": 8
+    }
+   ],
+   "question": null,
+   "summary": "In block 7, rsync was fastest at 13.11 seconds against the xs control's 13.43, a speed of 1.02x, while xs-best was slightly slower at 0.99x. Across 8 blocks in this cell, rsync averages 1.02x and xs-best 1.00x, so the arms are essentially tied. No question was set for this experiment, so this bears on nothing beyond the cell's picture.",
+   "model": "claude-sonnet-5-5",
+   "driver": "mars"
+  },
+  "G2-10g-zfs": {
+   "run": "20261017T133650Z-G2-10g-zfs",
+   "experiment": "G2-10g-zfs",
+   "key": "large-text.fresh.mac-freya-zfs.sender.warm|7|0",
+   "utc": 1792246693.749,
+   "cell": "large-text.fresh.mac-freya-zfs.sender.warm",
+   "factors": {
+    "corpus": "large-text",
+    "scenario": "fresh",
+    "sender": "mac",
+    "receiver": "freya-zfs",
+    "client": "sender",
+    "link": "mac-freya-zfs-10g",
+    "cache": "warm"
+   },
+   "block": 7,
+   "attempt": 0,
+   "control": "xs",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "xs",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 10.345,
+     "gbps": 6.643,
+     "files_per_s": 1,
+     "speed": 1
+    },
+    {
+     "arm": "xs-best",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 11.191,
+     "gbps": 6.141,
+     "files_per_s": 1,
+     "speed": 0.92
+    },
+    {
+     "arm": "rsync",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 20.688,
+     "gbps": 3.322,
+     "files_per_s": 0,
+     "speed": 0.5
+    },
+    {
+     "arm": "write1m",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 9.877,
+     "gbps": 6.958,
+     "files_per_s": 1,
+     "speed": 1.05
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "rsync",
+     "speed": 0.51,
+     "blocks": 8
+    },
+    {
+     "arm": "write1m",
+     "speed": 1.02,
+     "blocks": 8
+    },
+    {
+     "arm": "xs-best",
+     "speed": 0.99,
+     "blocks": 8
+    }
+   ],
+   "question": null,
+   "summary": "In block 7, write1m was fastest at 9.88 s versus the xs control's 10.35 s, a speed of 1.05x (5% faster). xs-best came in at 0.92x and rsync at 0.50x, taking about twice as long as the control. Across 8 blocks, write1m averages 1.02x, xs-best 0.99x and rsync 0.51x, so this block fits the pattern. No question is set for this experiment, so there is nothing further to tie it to.",
+   "model": "claude-sonnet-5-5",
+   "driver": "mac"
+  },
+  "G3-10g-small-push": {
+   "run": "20261017T133652Z-G3-10g-small-push",
+   "experiment": "G3-10g-small-push",
+   "key": "small-deep.fresh.freya-mac.receiver.warm|1|0",
+   "utc": 1792249890.977,
+   "cell": "small-deep.fresh.freya-mac.receiver.warm",
+   "factors": {
+    "corpus": "small-deep",
+    "scenario": "fresh",
+    "sender": "freya",
+    "receiver": "mac",
+    "client": "receiver",
+    "link": "mac-freya-10g",
+    "cache": "warm"
+   },
+   "block": 1,
+   "attempt": 0,
+   "control": "xs-best",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "xs-best",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 41.516,
+     "gbps": 0.062,
+     "files_per_s": 2409,
+     "speed": 1
+    },
+    {
+     "arm": "batch256",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 39.653,
+     "gbps": 0.064,
+     "files_per_s": 2522,
+     "speed": 1.05
+    },
+    {
+     "arm": "scan-all",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 39.295,
+     "gbps": 0.065,
+     "files_per_s": 2545,
+     "speed": 1.06
+    },
+    {
+     "arm": "coalesce1m",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 38.39,
+     "gbps": 0.067,
+     "files_per_s": 2605,
+     "speed": 1.08
+    },
+    {
+     "arm": "all-three",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 38.733,
+     "gbps": 0.066,
+     "files_per_s": 2582,
+     "speed": 1.07
+    },
+    {
+     "arm": "z1-best",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 39.658,
+     "gbps": 0.064,
+     "files_per_s": 2522,
+     "speed": 1.05
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "all-three",
+     "speed": 1.04,
+     "blocks": 2
+    },
+    {
+     "arm": "batch256",
+     "speed": 1,
+     "blocks": 2
+    },
+    {
+     "arm": "coalesce1m",
+     "speed": 1.03,
+     "blocks": 2
+    },
+    {
+     "arm": "scan-all",
+     "speed": 0.99,
+     "blocks": 2
+    },
+    {
+     "arm": "z1-best",
+     "speed": 1.03,
+     "blocks": 2
+    }
+   ],
+   "question": null,
+   "summary": "In this block, coalesce1m was fastest at 38.4 s against the control xs-best's 41.5 s, a speed of 1.08x, with all-three close behind at 1.07x and the other arms at 1.05x to 1.06x. The running picture for this cell rests on only two blocks, so it is still thin: coalesce1m is at 1.03x, all-three at 1.04x, batch256 at 1.00x, and scan-all at 0.99x. No question was set for this experiment, and gaps this small, at most 8%, do not yet separate any arm from the control.",
+   "model": "claude-sonnet-5-5",
+   "driver": "mac"
+  },
+  "H4-pair-pi-receive": {
+   "run": "20261017T130118Z-H4-pair-pi-receive",
+   "experiment": "H4-pair-pi-receive",
+   "key": "small-flat.fresh.mars-neo.sender.warm|1|0",
+   "utc": 1792249683.005,
+   "cell": "small-flat.fresh.mars-neo.sender.warm",
+   "factors": {
+    "corpus": "small-flat",
+    "scenario": "fresh",
+    "sender": "mars",
+    "receiver": "neo",
+    "client": "sender",
+    "link": "neo-mars-1g",
+    "cache": "warm"
+   },
+   "block": 1,
+   "attempt": 0,
+   "control": "xs-z-best",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "xs-z-best",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 3.584,
+     "gbps": 0.712,
+     "files_per_s": 27898,
+     "speed": 1
+    },
+    {
+     "arm": "recv1",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 3.723,
+     "gbps": 0.686,
+     "files_per_s": 26862,
+     "speed": 0.96
+    },
+    {
+     "arm": "recv2",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 3.48,
+     "gbps": 0.734,
+     "files_per_s": 28740,
+     "speed": 1.03
+    },
+    {
+     "arm": "coalesce1m",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 3.594,
+     "gbps": 0.711,
+     "files_per_s": 27824,
+     "speed": 1
+    },
+    {
+     "arm": "xs-best",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 3.738,
+     "gbps": 0.683,
+     "files_per_s": 26753,
+     "speed": 0.96
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "coalesce1m",
+     "speed": 0.99,
+     "blocks": 2
+    },
+    {
+     "arm": "recv1",
+     "speed": 0.95,
+     "blocks": 2
+    },
+    {
+     "arm": "recv2",
+     "speed": 1.02,
+     "blocks": 2
+    },
+    {
+     "arm": "xs-best",
+     "speed": 0.97,
+     "blocks": 2
+    }
+   ],
+   "question": null,
+   "summary": "In this block, recv2 was fastest at 3.48 s against the control's 3.58 s, a speed of 1.03x, while recv1 and xs-best were slowest at 0.96x and coalesce1m matched the control at 1.00x. The running picture rests on only two blocks per arm, so it is thin: recv2 is at 1.02x, coalesce1m 0.99x, xs-best 0.97x and recv1 0.95x. No question is specified for this experiment, and recv2's small edge is within the range of ordinary variation at this sample size.",
+   "model": "claude-sonnet-5-5",
+   "driver": "mars"
+  },
+  "NE1-wire-or-pi": {
+   "run": "20261017T153637Z-NE1-wire-or-pi",
+   "experiment": "NE1-wire-or-pi",
+   "key": "mixed-bimodal.fresh.freya-neo.sender.warm|5|0",
+   "utc": 1792254328.158,
+   "cell": "mixed-bimodal.fresh.freya-neo.sender.warm",
+   "factors": {
+    "corpus": "mixed-bimodal",
+    "scenario": "fresh",
+    "sender": "freya",
+    "receiver": "neo",
+    "client": "sender",
+    "link": "lan",
+    "cache": "warm"
+   },
+   "block": 5,
+   "attempt": 0,
+   "control": "xs",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "xs",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 12.789,
+     "gbps": 0.873,
+     "files_per_s": 1564,
+     "speed": 1
+    },
+    {
+     "arm": "rsync",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 12.861,
+     "gbps": 0.868,
+     "files_per_s": 1555,
+     "speed": 0.99
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "rsync",
+     "speed": 0.99,
+     "blocks": 1
+    }
+   ],
+   "question": "On the gigabit wire between the Pi and freya, how much of the link do xs and rsync use on large and mixed trees, each way?",
+   "summary": "In block 5, xs (the control) finished the mixed-bimodal freya\u2192neo copy in 12.79 s at 0.873 Gbps, while rsync took 12.86 s at 0.868 Gbps, a speed of 0.99x, so the two are effectively tied. The running picture for this cell rests on a single block, with rsync at 0.99x, so the evidence is thin. Both tools use roughly 87% of the gigabit link in this direction, but one block cannot settle the question.",
+   "model": "claude-sonnet-5-5",
+   "driver": "neo"
+  },
+  "MA1-mac-noop": {
+   "run": "20261017T160919Z-MA1-mac-noop",
+   "experiment": "MA1-mac-noop",
+   "key": "real-congress.noop.mac-mars.sender.warm|0|0",
+   "utc": 1792253528.602,
+   "cell": "real-congress.noop.mac-mars.sender.warm",
+   "factors": {
+    "corpus": "real-congress",
+    "scenario": "noop",
+    "sender": "mac",
+    "receiver": "mars",
+    "client": "sender",
+    "link": "mac-mars-2g5",
+    "cache": "warm"
+   },
+   "block": 0,
+   "attempt": 0,
+   "control": "rsync",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "rsync",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 9.983,
+     "gbps": 0.929,
+     "files_per_s": 21689,
+     "speed": 1
+    },
+    {
+     "arm": "xs",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 1.441,
+     "gbps": 6.436,
+     "files_per_s": 150276,
+     "speed": 6.93
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "xs",
+     "speed": 6.93,
+     "blocks": 1
+    }
+   ],
+   "question": "On a warm no-op, is xs slower than rsync pushing from the Mac to mars, and faster pulling?",
+   "summary": "In this block, xs finished the warm no-op push from the Mac to mars in 1.44 seconds against rsync's 9.98, which is 6.93x the control's speed. The running picture for this cell is that same 6.93x, resting on only one block, so the evidence is still thin. On the question, xs was not slower than rsync when pushing here, but the pull direction has not been tested in this block.",
+   "model": "claude-sonnet-5-5",
+   "driver": "mac"
+  },
+  "Z3-1g-compress": {
+   "run": "20261017T161616Z-Z3-1g-compress",
+   "experiment": "Z3-1g-compress",
+   "key": "large-text.fresh.neo-freya.sender.warm|0|0",
+   "utc": 1792254858.959,
+   "cell": "large-text.fresh.neo-freya.sender.warm",
+   "factors": {
+    "corpus": "large-text",
+    "scenario": "fresh",
+    "sender": "neo",
+    "receiver": "freya",
+    "client": "sender",
+    "link": "lan",
+    "cache": "warm"
+   },
+   "block": 0,
+   "attempt": 0,
+   "control": "xs",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "xs",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 73.944,
+     "gbps": 0.929,
+     "files_per_s": 0,
+     "speed": 1
+    },
+    {
+     "arm": "xs-z",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 36.397,
+     "gbps": 1.888,
+     "files_per_s": 0,
+     "speed": 2.03
+    },
+    {
+     "arm": "xs-z1",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 37.777,
+     "gbps": 1.819,
+     "files_per_s": 0,
+     "speed": 1.96
+    },
+    {
+     "arm": "xs-z3",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 207.629,
+     "gbps": 0.331,
+     "files_per_s": 0,
+     "speed": 0.36
+    },
+    {
+     "arm": "rsync",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 73.888,
+     "gbps": 0.93,
+     "files_per_s": 0,
+     "speed": 1
+    },
+    {
+     "arm": "rsync-z",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 118.924,
+     "gbps": 0.578,
+     "files_per_s": 0,
+     "speed": 0.62
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "rsync",
+     "speed": 1,
+     "blocks": 1
+    },
+    {
+     "arm": "rsync-z",
+     "speed": 0.62,
+     "blocks": 1
+    },
+    {
+     "arm": "xs-z",
+     "speed": 2.03,
+     "blocks": 1
+    },
+    {
+     "arm": "xs-z1",
+     "speed": 1.96,
+     "blocks": 1
+    },
+    {
+     "arm": "xs-z3",
+     "speed": 0.36,
+     "blocks": 1
+    }
+   ],
+   "question": "On a gigabit link, can xs with compression deliver text-like data faster than the link itself, even when the Pi sends it?",
+   "summary": "In this block, xs-z was fastest at 36.4 s versus 73.9 s for the plain xs control, a speed of 2.03x, with xs-z1 close behind at 1.96x. xs-z3 was much slower at 0.36x, and rsync-z at 0.62x, while plain rsync matched the control at 1.00x. Every ratio rests on a single block, so the evidence is thin; still, xs-z reached 1.89 Gbps on a gigabit link, which hints the answer is yes for this cell, but one block can't confirm it.",
+   "model": "claude-sonnet-5-5",
+   "driver": "neo"
+  },
+  "D3-pi-send-small": {
+   "run": "20261017T002741Z-D3-pi-send-small",
+   "experiment": "D3-pi-send-small",
+   "key": "small-deep.fresh.neo-freya.sender.warm|2|0",
+   "utc": 1792256964.779,
+   "cell": "small-deep.fresh.neo-freya.sender.warm",
+   "factors": {
+    "corpus": "small-deep",
+    "scenario": "fresh",
+    "sender": "neo",
+    "receiver": "freya",
+    "client": "sender",
+    "link": "lan",
+    "cache": "warm"
+   },
+   "block": 2,
+   "attempt": 0,
+   "control": "xs-z-best",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "xs-z-best",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 6.756,
+     "gbps": 0.378,
+     "files_per_s": 14802,
+     "speed": 1
+    },
+    {
+     "arm": "xs-best",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 6.7,
+     "gbps": 0.381,
+     "files_per_s": 14926,
+     "speed": 1.01
+    },
+    {
+     "arm": "send3",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 7.24,
+     "gbps": 0.353,
+     "files_per_s": 13813,
+     "speed": 0.93
+    },
+    {
+     "arm": "batch256",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 7.025,
+     "gbps": 0.364,
+     "files_per_s": 14235,
+     "speed": 0.96
+    },
+    {
+     "arm": "coalesce1m",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 6.746,
+     "gbps": 0.379,
+     "files_per_s": 14825,
+     "speed": 1
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "batch256",
+     "speed": 0.99,
+     "blocks": 3
+    },
+    {
+     "arm": "coalesce1m",
+     "speed": 0.99,
+     "blocks": 3
+    },
+    {
+     "arm": "send3",
+     "speed": 0.95,
+     "blocks": 3
+    },
+    {
+     "arm": "xs-best",
+     "speed": 1.02,
+     "blocks": 3
+    }
+   ],
+   "question": null,
+   "summary": "In block 2, xs-best was fastest at 1.01x the control xs-z-best (6.70s vs 6.76s), effectively a tie, while send3 was slowest at 0.93x and batch256 reached 0.96x. Across three blocks in this cell, xs-best stands at 1.02x, batch256 and coalesce1m at 0.99x, and send3 at 0.95x. No arm shows a clear gain over the control, and no question was set for this experiment, so nothing is tested beyond that.",
+   "model": "claude-sonnet-5-5",
+   "driver": "neo"
+  },
+  "D9-lan-best-default": {
+   "run": "20261017T162644Z-D9-lan-best-default",
+   "experiment": "D9-lan-best-default",
+   "key": "mixed-bimodal.fresh.neo-freya.sender.warm|7|0",
+   "utc": 1792259114.574,
+   "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+   "factors": {
+    "corpus": "mixed-bimodal",
+    "scenario": "fresh",
+    "sender": "neo",
+    "receiver": "freya",
+    "client": "sender",
+    "link": "lan",
+    "cache": "warm"
+   },
+   "block": 7,
+   "attempt": 0,
+   "control": "xs",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "xs",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 12.721,
+     "gbps": 0.877,
+     "files_per_s": 1572,
+     "speed": 1
+    },
+    {
+     "arm": "xs-best",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 12.833,
+     "gbps": 0.87,
+     "files_per_s": 1558,
+     "speed": 0.99
+    },
+    {
+     "arm": "rsync",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 12.237,
+     "gbps": 0.912,
+     "files_per_s": 1634,
+     "speed": 1.04
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "rsync",
+     "speed": 1.04,
+     "blocks": 8
+    },
+    {
+     "arm": "xs-best",
+     "speed": 0.99,
+     "blocks": 8
+    }
+   ],
+   "question": null,
+   "summary": "In block 7, rsync was fastest at 12.24 s against 12.72 s for the xs control, a speed of 1.04x, about 4% faster. xs-best was essentially level at 0.99x. Across 8 blocks in this cell the cumulative ratios match this block: rsync 1.04x and xs-best 0.99x, so the small rsync edge has held up. No question was set for this experiment, so there is nothing further to tie it to.",
+   "model": "claude-sonnet-5-5",
+   "driver": "neo"
+  },
+  "N1g-compress-cost": {
+   "run": "20261017T185524Z-N1g-compress-cost",
+   "experiment": "N1g-compress-cost",
+   "key": "large-mixed.fresh.neo-freya.sender.warm|7|0",
+   "utc": 1792265941.197,
+   "cell": "large-mixed.fresh.neo-freya.sender.warm",
+   "factors": {
+    "corpus": "large-mixed",
+    "scenario": "fresh",
+    "sender": "neo",
+    "receiver": "freya",
+    "client": "sender",
+    "link": "lan",
+    "cache": "warm"
+   },
+   "block": 7,
+   "attempt": 0,
+   "control": "xs",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "xs",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 77.299,
+     "gbps": 0.928,
+     "files_per_s": 0,
+     "speed": 1
+    },
+    {
+     "arm": "xs-z",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 77.309,
+     "gbps": 0.928,
+     "files_per_s": 0,
+     "speed": 1
+    },
+    {
+     "arm": "xs-z1",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 77.367,
+     "gbps": 0.927,
+     "files_per_s": 0,
+     "speed": 1
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "xs-z",
+     "speed": 1,
+     "blocks": 8
+    },
+    {
+     "arm": "xs-z1",
+     "speed": 1,
+     "blocks": 8
+    }
+   ],
+   "question": "On a tree that will not compress, does xs -z cost time against xs -a on gigabit?",
+   "summary": "In block 7 all three arms finished within 0.07 seconds of each other: xs took 77.30 s, xs-z 77.31 s and xs-z1 77.37 s, so none was meaningfully faster than the control (all about 1.00x). The running ratios for xs-z and xs-z1 are also about 1.00x, resting on 8 blocks each. For this tree on gigabit, that suggests compression costs essentially no time, though this is one cell and one direction.",
+   "model": "claude-sonnet-5-5",
+   "driver": "neo"
+  },
+  "MA3-psample-bidir": {
+   "run": "20261018T023003Z-MA3-psample-bidir",
+   "experiment": "MA3-psample-bidir",
+   "key": "real-psample.fresh.mars-mac.receiver.warm|3|0",
+   "utc": 1792298136.4,
+   "cell": "real-psample.fresh.mars-mac.receiver.warm",
+   "factors": {
+    "corpus": "real-psample",
+    "scenario": "fresh",
+    "sender": "mars",
+    "receiver": "mac",
+    "client": "receiver",
+    "link": "mac-mars-10g",
+    "cache": "warm"
+   },
+   "block": 3,
+   "attempt": 0,
+   "control": "rsync",
+   "primary": "wall_s",
+   "arms": [
+    {
+     "arm": "rsync",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 407.294,
+     "gbps": 0.413,
+     "files_per_s": 1746,
+     "speed": 1
+    },
+    {
+     "arm": "xs",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 291.942,
+     "gbps": 0.577,
+     "files_per_s": 2436,
+     "speed": 1.4
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "xs",
+     "speed": 1.28,
+     "blocks": 4
+    }
+   ],
+   "question": "How fast can the 20 GB psample tree be copied between the Mac and mars, each way, and is xs faster than rsync -aH or rsync -aHz?",
+   "summary": "In block 3 of the mars\u2192mac cell, xs finished in 292 s against rsync's 407 s, making it 1.40x as fast (about 0.58 vs 0.41 Gbps). Across four blocks in this cell, xs averages 1.28x the control's speed, which is still a modest sample. This points toward xs being faster than plain rsync -aH in this direction, but the data shown here don't cover rsync -aHz or the Mac-to-mars direction.",
+   "model": "claude-sonnet-5-5",
+   "driver": "mac"
+  },
+  "D10-lan-noop-best": {
+   "run": "20261017T174642Z-D10-lan-noop-best",
+   "experiment": "D10-lan-noop-best",
+   "key": "small-flat.noop.neo-freya.sender.warm|7|0",
+   "utc": 1792268652.48,
+   "cell": "small-flat.noop.neo-freya.sender.warm",
+   "factors": {
+    "corpus": "small-flat",
+    "scenario": "noop",
+    "sender": "neo",
+    "receiver": "freya",
+    "client": "sender",
+    "link": "lan",
+    "cache": "warm"
+   },
+   "block": 7,
+   "attempt": 0,
+   "control": "xs",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "xs",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 0.232,
+     "gbps": 10.988,
+     "files_per_s": 430252,
+     "speed": 1
+    },
+    {
+     "arm": "xs-best",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.257,
+     "gbps": 9.923,
+     "files_per_s": 388546,
+     "speed": 0.9
+    },
+    {
+     "arm": "rsync",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.571,
+     "gbps": 4.475,
+     "files_per_s": 175213,
+     "speed": 0.41
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "rsync",
+     "speed": 0.41,
+     "blocks": 8
+    },
+    {
+     "arm": "xs-best",
+     "speed": 0.93,
+     "blocks": 8
+    }
+   ],
+   "question": null,
+   "summary": "In block 7 the control xs was fastest at 0.232 s; xs-best took 0.257 s (0.90x) and rsync 0.571 s (0.41x). Across 8 blocks in this cell, xs-best averages 0.93x and rsync 0.41x, so the pattern is consistent: neither beat the control. No question was set for this experiment, so this bears on nothing beyond the cell itself.",
+   "model": "claude-sonnet-5-5",
+   "driver": "neo"
+  },
+  "F1a-lan-replicate": {
+   "run": "20261017T224604Z-F1a-lan-replicate",
+   "experiment": "F1a-lan-replicate",
+   "key": "real-congress.fresh.neo-freya.sender.warm|0|0",
+   "utc": 1792278345.946,
+   "cell": "real-congress.fresh.neo-freya.sender.warm",
+   "factors": {
+    "corpus": "real-congress",
+    "scenario": "fresh",
+    "sender": "neo",
+    "receiver": "freya",
+    "client": "sender",
+    "link": "lan",
+    "cache": "warm"
+   },
+   "block": 0,
+   "attempt": 0,
+   "control": "xs-z",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "xs-z",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 8.843,
+     "gbps": 1.049,
+     "files_per_s": 24484,
+     "speed": 1
+    },
+    {
+     "arm": "xs-z-best",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 9.081,
+     "gbps": 1.021,
+     "files_per_s": 23843,
+     "speed": 0.97
+    },
+    {
+     "arm": "rsync-z",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 27.911,
+     "gbps": 0.332,
+     "files_per_s": 7758,
+     "speed": 0.32
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "rsync-z",
+     "speed": 0.32,
+     "blocks": 1
+    },
+    {
+     "arm": "xs-z-best",
+     "speed": 0.97,
+     "blocks": 1
+    }
+   ],
+   "question": null,
+   "summary": "In this block the control xs-z was fastest at 8.84 s; xs-z-best ran at 0.97x (9.08 s) and rsync-z at 0.32x (27.9 s), about three times slower. The running picture for this cell rests on just one block, this one, so the 0.97x and 0.32x ratios are still thin evidence. No question was set for this experiment, so there is nothing further to connect it to.",
+   "model": "claude-sonnet-5-5",
+   "driver": "neo"
+  },
+  "S0-sentinel": {
+   "run": "20261014T020730Z-S0-sentinel-s0012",
+   "experiment": "S0-sentinel",
+   "key": "small-flat.noop.neo-freya.sender.warm|2|0",
+   "utc": 1792275252.419,
+   "cell": "small-flat.noop.neo-freya.sender.warm",
+   "factors": {
+    "corpus": "small-flat",
+    "scenario": "noop",
+    "sender": "neo",
+    "receiver": "freya",
+    "client": "sender",
+    "link": "lan",
+    "cache": "warm"
+   },
+   "block": 2,
+   "attempt": 0,
+   "control": "xs",
+   "primary": "wall_s",
+   "arms": [
+    {
+     "arm": "xs",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 0.249,
+     "gbps": 10.246,
+     "files_per_s": 401203,
+     "speed": 1
+    },
+    {
+     "arm": "again",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.259,
+     "gbps": 9.875,
+     "files_per_s": 386687,
+     "speed": 0.96
+    },
+    {
+     "arm": "rsync",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.614,
+     "gbps": 4.159,
+     "files_per_s": 162850,
+     "speed": 0.41
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "again",
+     "speed": 0.99,
+     "blocks": 3
+    },
+    {
+     "arm": "rsync",
+     "speed": 0.37,
+     "blocks": 3
+    }
+   ],
+   "question": "Has anything drifted? Do xs and rsync still compare as they did in the baseline, and does each still match itself?",
+   "summary": "In block 2, xs was fastest at 0.249 s; the repeat xs run (\"again\") was about 4% slower (0.96x) and rsync was far behind at 0.41x, taking 0.614 s. Across three blocks in this cell, again averages 0.99x and rsync 0.37x, so rsync looks a bit slower than in this block, though three blocks is still a small sample. For the drift question, xs matches itself closely and rsync's gap to xs remains large, with no sign of change yet.",
+   "model": "claude-sonnet-5-5",
+   "driver": "neo"
+  },
+  "IB0-incremental-smoke": {
+   "run": "20261017T230619Z-IB0-incremental-smoke",
+   "experiment": "IB0-incremental-smoke",
+   "key": "tiny-one.update-1pct.freya-neo.sender.warm|0|0",
+   "utc": 1792278463.225,
+   "cell": "tiny-one.update-1pct.freya-neo.sender.warm",
+   "factors": {
+    "corpus": "tiny-one",
+    "scenario": "update-1pct",
+    "sender": "freya",
+    "receiver": "neo",
+    "client": "sender",
+    "link": "lan",
+    "cache": "warm"
+   },
+   "block": 0,
+   "attempt": 0,
+   "control": "xs-z",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "xs-z",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 0.189,
+     "gbps": 0,
+     "files_per_s": 5,
+     "speed": 1
+    },
+    {
+     "arm": "rsync-z",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.209,
+     "gbps": 0,
+     "files_per_s": 5,
+     "speed": 0.91
+    },
+    {
+     "arm": "xs-z-whole",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.198,
+     "gbps": 0,
+     "files_per_s": 5,
+     "speed": 0.95
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "rsync-z",
+     "speed": 0.91,
+     "blocks": 1
+    },
+    {
+     "arm": "xs-z-whole",
+     "speed": 0.95,
+     "blocks": 1
+    }
+   ],
+   "question": "Do all incremental-backup arms restore deliberately stale files correctly in both directions?",
+   "summary": "No arm beat the control in this block: xs-z, the control, was fastest at 0.189 s, while xs-z-whole ran at 0.95x (0.198 s) and rsync-z at 0.91x (0.209 s). The running ratios for this cell match these figures because they rest on only one block, so the evidence is very thin. All three arms were valid, but this timing says nothing yet about whether stale files were restored correctly in both directions.",
+   "model": "claude-sonnet-5-5",
+   "driver": "neo"
+  },
+  "IB1-incremental-map": {
+   "run": "20261017T230819Z-IB1-incremental-map",
+   "experiment": "IB1-incremental-map",
+   "key": "real-congress.update-10pct.neo-freya.sender.warm|1|0",
+   "utc": 1792280492.195,
+   "cell": "real-congress.update-10pct.neo-freya.sender.warm",
+   "factors": {
+    "corpus": "real-congress",
+    "scenario": "update-10pct",
+    "sender": "neo",
+    "receiver": "freya",
+    "client": "sender",
+    "link": "lan",
+    "cache": "warm"
+   },
+   "block": 1,
+   "attempt": 0,
+   "control": "xs-z",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "xs-z",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 1.947,
+     "gbps": 0.476,
+     "files_per_s": 111192,
+     "speed": 1
+    },
+    {
+     "arm": "rsync-z",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 6.731,
+     "gbps": 0.138,
+     "files_per_s": 32165,
+     "speed": 0.29
+    },
+    {
+     "arm": "xs-z-whole",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 2.027,
+     "gbps": 0.457,
+     "files_per_s": 106800,
+     "speed": 0.96
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "rsync-z",
+     "speed": 0.3,
+     "blocks": 2
+    },
+    {
+     "arm": "xs-z-whole",
+     "speed": 1,
+     "blocks": 2
+    }
+   ],
+   "question": "At 0.1%, 1%, and 10% changed files, what limits incremental backups: scanning, reusing old data, or transferring changes?",
+   "summary": "In this block the control xs-z was fastest at 1.95 s; xs-z-whole was slightly slower at 0.96x (2.03 s), and rsync-z was much slower at 0.29x (6.73 s). The running picture for this cell rests on only two blocks, so it is still thin: rsync-z at 0.30x and xs-z-whole at 1.00x against the control. For the 10% changed-files question, this suggests the tool matters more than whole-file versus incremental transfer here, but two blocks cannot settle it.",
+   "model": "claude-sonnet-5-5",
+   "driver": "neo"
+  },
+  "MA4-psample-incremental": {
+   "run": "20261018T032414Z-MA4-psample-incremental",
+   "experiment": "MA4-psample-incremental",
+   "key": "real-psample.update-1pct.mars-mac.receiver.warm|3|0",
+   "utc": 1792309190.836,
+   "cell": "real-psample.update-1pct.mars-mac.receiver.warm",
+   "factors": {
+    "corpus": "real-psample",
+    "scenario": "update-1pct",
+    "sender": "mars",
+    "receiver": "mac",
+    "client": "receiver",
+    "link": "mac-mars-10g",
+    "cache": "warm"
+   },
+   "block": 3,
+   "attempt": 0,
+   "control": "rsync",
+   "primary": "wall_s",
+   "arms": [
+    {
+     "arm": "rsync",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 48.591,
+     "gbps": 0.014,
+     "files_per_s": 14634,
+     "speed": 1
+    },
+    {
+     "arm": "xs",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 57.562,
+     "gbps": 0.012,
+     "files_per_s": 12354,
+     "speed": 0.84
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "xs",
+     "speed": 0.77,
+     "blocks": 4
+    }
+   ],
+   "question": "On the psample tree, does xs re-sync faster than rsync -aH at a warm no-op and after 1% of the files change, each way?",
+   "summary": "In this block, rsync was fastest at 48.6 s, while xs took 57.6 s, giving xs a speed of 0.84x, about 16% slower than the control. Across 4 blocks for this cell, xs averages 0.77x against rsync, so it has been consistently slower here. For the question, this points to xs not re-syncing faster than rsync -aH after a 1% change in the mars\u2192mac direction, though the other direction and the no-op case are not covered by this block.",
+   "model": "claude-sonnet-5-5",
+   "driver": "mac"
+  },
+  "MA3-psample-confirm": {
+   "run": "20261018T045434Z-MA3-psample-confirm",
+   "experiment": "MA3-psample-confirm",
+   "key": "real-psample.fresh.mac-mars.sender.warm|11|0",
+   "utc": 1792328368.527,
+   "cell": "real-psample.fresh.mac-mars.sender.warm",
+   "factors": {
+    "corpus": "real-psample",
+    "scenario": "fresh",
+    "sender": "mac",
+    "receiver": "mars",
+    "client": "sender",
+    "link": "mac-mars-10g",
+    "cache": "warm"
+   },
+   "block": 11,
+   "attempt": 0,
+   "control": "rsync",
+   "primary": "wall_s",
+   "arms": [
+    {
+     "arm": "rsync",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 234.878,
+     "gbps": 0.717,
+     "files_per_s": 3028,
+     "speed": 1
+    },
+    {
+     "arm": "xs",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 109.351,
+     "gbps": 1.54,
+     "files_per_s": 6503,
+     "speed": 2.15
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "xs",
+     "speed": 3.89,
+     "blocks": 12
+    }
+   ],
+   "question": null,
+   "summary": "In block 11, xs finished in 109 seconds against rsync's 235, making it 2.15x as fast, or about 115% faster. That is well below xs's cumulative 3.89x against rsync in this cell, which rests on 12 blocks, so this block pulled toward a smaller edge, though xs still won clearly. No experiment question was given, so I draw no conclusion beyond this cell.",
+   "model": "claude-sonnet-5-5",
+   "driver": "mac"
+  },
+  "MA6-mac-mars-shapes": {
+   "run": "20261018T075636Z-MA6-mac-mars-shapes",
+   "experiment": "MA6-mac-mars-shapes",
+   "key": "large-text.fresh.mac-mars.sender.warm|3|0",
+   "utc": 1792331830.951,
+   "cell": "large-text.fresh.mac-mars.sender.warm",
+   "factors": {
+    "corpus": "large-text",
+    "scenario": "fresh",
+    "sender": "mac",
+    "receiver": "mars",
+    "client": "sender",
+    "link": "mac-mars-10g",
+    "cache": "warm"
+   },
+   "block": 3,
+   "attempt": 0,
+   "control": "rsync",
+   "primary": "wall_s",
+   "arms": [
+    {
+     "arm": "rsync",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 22.349,
+     "gbps": 3.075,
+     "files_per_s": 0,
+     "speed": 1
+    },
+    {
+     "arm": "xs",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 10.244,
+     "gbps": 6.708,
+     "files_per_s": 1,
+     "speed": 2.18
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "xs",
+     "speed": 2.42,
+     "blocks": 4
+    }
+   ],
+   "question": "Does the mac/mars tool ranking hold on a small compressible tree and a large one?",
+   "summary": "In block 3 on large-text (fresh, mac\u2192mars), xs finished in 10.2 s against rsync's 22.3 s, making it 2.18x as fast, or about 118% faster. Across this cell xs averages 2.42x over rsync, resting on 4 blocks, so the lead looks consistent, though the sample is still small. For the question of whether the ranking holds on a large compressible tree, this supports it, but the small-tree result is not shown here.",
+   "model": "claude-sonnet-5-5",
+   "driver": "mac"
+  },
+  "MA6-mac-mars-shapes-confirm": {
+   "run": "20261018T135930Z-MA6-mac-mars-shapes-confirm",
+   "experiment": "MA6-mac-mars-shapes-confirm",
+   "key": "real-congress.fresh.mars-mac.receiver.warm|11|0",
+   "utc": 1792337409.335,
+   "cell": "real-congress.fresh.mars-mac.receiver.warm",
+   "factors": {
+    "corpus": "real-congress",
+    "scenario": "fresh",
+    "sender": "mars",
+    "receiver": "mac",
+    "client": "receiver",
+    "link": "mac-mars-10g",
+    "cache": "warm"
+   },
+   "block": 11,
+   "attempt": 0,
+   "control": "rsync",
+   "primary": "wall_s",
+   "arms": [
+    {
+     "arm": "rsync",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 81.314,
+     "gbps": 0.114,
+     "files_per_s": 2663,
+     "speed": 1
+    },
+    {
+     "arm": "xs",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 49.031,
+     "gbps": 0.189,
+     "files_per_s": 4416,
+     "speed": 1.66
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "xs",
+     "speed": 1.67,
+     "blocks": 12
+    }
+   ],
+   "question": null,
+   "summary": "In block 11 of the real-congress fresh mars\u2192mac cell, xs finished in 49.0 seconds against rsync's 81.3, a speed of 1.66x, so about 66% faster than the control. Across 12 blocks in this cell, xs stands at 1.67x versus rsync, so this block sits right on the running figure. That is a reasonably well-supported picture, though no experiment question was specified to tie it to.",
+   "model": "claude-sonnet-5-5",
+   "driver": "mac"
+  },
+  "S3-mac-mars-sentinel": {
+   "run": "20261018T144634Z-S3-mac-mars-sentinel-s0002",
+   "experiment": "S3-mac-mars-sentinel",
+   "key": "mixed-bimodal.noop.mars-mac.receiver.warm|1|0",
+   "utc": 1792361925.878,
+   "cell": "mixed-bimodal.noop.mars-mac.receiver.warm",
+   "factors": {
+    "corpus": "mixed-bimodal",
+    "scenario": "noop",
+    "sender": "mars",
+    "receiver": "mac",
+    "client": "receiver",
+    "link": "mac-mars-10g",
+    "cache": "warm"
+   },
+   "block": 1,
+   "attempt": 0,
+   "control": "xs",
+   "primary": "wall_s",
+   "arms": [
+    {
+     "arm": "xs",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 0.395,
+     "gbps": 28.254,
+     "files_per_s": 50630,
+     "speed": 1
+    },
+    {
+     "arm": "again",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.415,
+     "gbps": 26.904,
+     "files_per_s": 48211,
+     "speed": 0.95
+    },
+    {
+     "arm": "rsync",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.509,
+     "gbps": 21.947,
+     "files_per_s": 39329,
+     "speed": 0.78
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "again",
+     "speed": 1.05,
+     "blocks": 2
+    },
+    {
+     "arm": "rsync",
+     "speed": 0.88,
+     "blocks": 2
+    }
+   ],
+   "question": "Between the Mac and mars at 10 GbE, has anything drifted? Does xs still match itself, and xs against rsync stay put?",
+   "summary": "In this block the control xs was fastest at 0.395 s; the repeat xs run (\"again\") reached 0.95x and rsync 0.78x, so rsync was about 22% slower. Across the cell so far, again stands at 1.05x and rsync at 0.88x, but each rests on only two blocks, so the evidence is thin. Nothing here suggests drift yet: xs matches itself within about 5% and rsync still trails.",
+   "model": "claude-sonnet-5-5",
+   "driver": "mac"
+  },
+  "E6b-mac-mars-receiver-defaults": {
+   "run": "20261018T144630Z-E6b-mac-mars-receiver-defaults",
+   "experiment": "E6b-mac-mars-receiver-defaults",
+   "key": "small-deep.noop.mars-mac.receiver.warm|11|0",
+   "utc": 1792360856.894,
+   "cell": "small-deep.noop.mars-mac.receiver.warm",
+   "factors": {
+    "corpus": "small-deep",
+    "scenario": "noop",
+    "sender": "mars",
+    "receiver": "mac",
+    "client": "receiver",
+    "link": "mac-mars-10g",
+    "cache": "warm"
+   },
+   "block": 11,
+   "attempt": 0,
+   "control": "xs",
+   "primary": "wall_s",
+   "arms": [
+    {
+     "arm": "xs",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 9.625,
+     "gbps": 0.265,
+     "files_per_s": 10389,
+     "speed": 1
+    },
+    {
+     "arm": "xs-recv4",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 9.542,
+     "gbps": 0.268,
+     "files_per_s": 10480,
+     "speed": 1.01
+    },
+    {
+     "arm": "rsync",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 5.542,
+     "gbps": 0.461,
+     "files_per_s": 18044,
+     "speed": 1.74
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "rsync",
+     "speed": 1.87,
+     "blocks": 12
+    },
+    {
+     "arm": "xs-recv4",
+     "speed": 0.99,
+     "blocks": 12
+    }
+   ],
+   "question": "Does capping the receiver at four workers, and reaping the peer sooner, make xs faster than its parent anywhere and slower nowhere, between the Mac and mars?",
+   "summary": "In block 11 on small-deep, noop, mars\u2192mac, rsync was fastest at 1.74x the xs control (5.5 s against 9.6 s), while xs-recv4 was essentially level at 1.01x. Across 12 blocks, rsync averages 1.87x and xs-recv4 0.99x, so rsync's lead is consistent and recv4 shows no gain here. For the question, recv4 is neither faster nor slower than xs in this cell, which fits \"slower nowhere\" but not \"faster anywhere.\"",
+   "model": "claude-sonnet-5-5",
+   "driver": "mac"
+  },
+  "LC1-psample-local-baseline": {
+   "run": "20261018T184002Z-LC1-psample-local-baseline",
+   "experiment": "LC1-psample-local-baseline",
+   "key": "real-psample.fresh.neo-neo-ssd.receiver.cold|2|0",
+   "utc": 1792357054.83,
+   "cell": "real-psample.fresh.neo-neo-ssd.receiver.cold",
+   "factors": {
+    "corpus": "real-psample",
+    "scenario": "fresh",
+    "sender": "neo",
+    "receiver": "neo-ssd",
+    "client": "receiver",
+    "link": "neo-local-ssd",
+    "cache": "cold"
+   },
+   "block": 2,
+   "attempt": 0,
+   "control": "rsync",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "rsync",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 209.809,
+     "gbps": 0.802,
+     "files_per_s": 3389,
+     "speed": 1
+    },
+    {
+     "arm": "xs",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 233.845,
+     "gbps": 0.72,
+     "files_per_s": 3041,
+     "speed": 0.9
+    },
+    {
+     "arm": "cp-a",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 248.958,
+     "gbps": 0.676,
+     "files_per_s": 2856,
+     "speed": 0.84
+    },
+    {
+     "arm": "cp-r",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 238.569,
+     "gbps": 0.706,
+     "files_per_s": 2981,
+     "speed": 0.88
+    },
+    {
+     "arm": "tar",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 263.711,
+     "gbps": 0.638,
+     "files_per_s": 2697,
+     "speed": 0.8
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "cp-a",
+     "speed": 0.86,
+     "blocks": 3
+    },
+    {
+     "arm": "cp-r",
+     "speed": 0.88,
+     "blocks": 3
+    },
+    {
+     "arm": "tar",
+     "speed": 0.81,
+     "blocks": 3
+    },
+    {
+     "arm": "xs",
+     "speed": 0.88,
+     "blocks": 3
+    }
+   ],
+   "question": "On a first backup of psample from the Pi's NVMe to a Samsung T5, with nothing cached, how much faster is xs -aH than rsync -aH, cp -a and cp -r, and how close does any tool come to one tar stream?",
+   "summary": "In block 2, the control rsync was fastest at 209.8 s; xs ran at 0.90x, cp-r 0.88x, cp-a 0.84x and tar 0.80x, so every other arm was slower. Across three blocks, xs and cp-r sit at 0.88x, cp-a at 0.86x and tar at 0.81x, which is still thin evidence. So far xs is not faster than rsync here, and no tool comes close to tar, which is the slowest.",
+   "model": "claude-sonnet-5-5",
+   "driver": "neo-ssd"
+  },
+  "LC2-psample-local-workers": {
+   "run": "20261018T215450Z-LC2-psample-local-workers",
+   "experiment": "LC2-psample-local-workers",
+   "key": "real-psample.fresh.neo-neo-ssd.receiver.cold|3|0",
+   "utc": 1792373046.237,
+   "cell": "real-psample.fresh.neo-neo-ssd.receiver.cold",
+   "factors": {
+    "corpus": "real-psample",
+    "scenario": "fresh",
+    "sender": "neo",
+    "receiver": "neo-ssd",
+    "client": "receiver",
+    "link": "neo-local-ssd",
+    "cache": "cold"
+   },
+   "block": 3,
+   "attempt": 0,
+   "control": "xs",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "xs",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 232.317,
+     "gbps": 0.725,
+     "files_per_s": 3061,
+     "speed": 1
+    },
+    {
+     "arm": "xs-j1",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 281.223,
+     "gbps": 0.599,
+     "files_per_s": 2529,
+     "speed": 0.83
+    },
+    {
+     "arm": "xs-j2",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 232.402,
+     "gbps": 0.724,
+     "files_per_s": 3060,
+     "speed": 1
+    },
+    {
+     "arm": "xs-j8",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 263.605,
+     "gbps": 0.639,
+     "files_per_s": 2698,
+     "speed": 0.88
+    },
+    {
+     "arm": "xs-j16",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 305.805,
+     "gbps": 0.551,
+     "files_per_s": 2325,
+     "speed": 0.76
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "xs-j1",
+     "speed": 0.82,
+     "blocks": 4
+    },
+    {
+     "arm": "xs-j16",
+     "speed": 0.86,
+     "blocks": 4
+    },
+    {
+     "arm": "xs-j2",
+     "speed": 1.03,
+     "blocks": 4
+    },
+    {
+     "arm": "xs-j8",
+     "speed": 0.95,
+     "blocks": 4
+    }
+   ],
+   "question": "With four cores and one USB drive, does xs copy psample to the T5 faster with 1, 2, 8 or 16 workers than with its default 4?",
+   "summary": "In block 3, no arm beat the default xs (232.3 s); xs-j2 tied it at 1.00x, while xs-j1, xs-j8 and xs-j16 were slower at 0.83x, 0.88x and 0.76x. Across four blocks, xs-j2 averages 1.03x, xs-j8 0.95x, xs-j16 0.86x and xs-j1 0.82x. So far, no worker count clearly beats the default of 4, though four blocks is still a modest sample and j2's small edge is within noise.",
+   "model": "claude-sonnet-5-5",
+   "driver": "neo-ssd"
+  },
+  "LC6-local-beat-rsync": {
+   "run": "20261018T224648Z-LC6-local-beat-rsync",
+   "experiment": "LC6-local-beat-rsync",
+   "key": "real-psample.fresh.neo-neo-ssd.receiver.cold|2|0",
+   "utc": 1792381862.726,
+   "cell": "real-psample.fresh.neo-neo-ssd.receiver.cold",
+   "factors": {
+    "corpus": "real-psample",
+    "scenario": "fresh",
+    "sender": "neo",
+    "receiver": "neo-ssd",
+    "client": "receiver",
+    "link": "neo-local-ssd",
+    "cache": "cold"
+   },
+   "block": 2,
+   "attempt": 0,
+   "control": "rsync",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "rsync",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 214.23,
+     "gbps": 0.786,
+     "files_per_s": 3319,
+     "speed": 1
+    },
+    {
+     "arm": "xs",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 214.478,
+     "gbps": 0.785,
+     "files_per_s": 3316,
+     "speed": 1
+    },
+    {
+     "arm": "xs-j2",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 225.45,
+     "gbps": 0.747,
+     "files_per_s": 3154,
+     "speed": 0.95
+    },
+    {
+     "arm": "xs-j3",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 209.6,
+     "gbps": 0.803,
+     "files_per_s": 3393,
+     "speed": 1.02
+    },
+    {
+     "arm": "xs-guard-j2",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 219.576,
+     "gbps": 0.767,
+     "files_per_s": 3239,
+     "speed": 0.98
+    },
+    {
+     "arm": "xs-guard-j3",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 260.501,
+     "gbps": 0.646,
+     "files_per_s": 2730,
+     "speed": 0.82
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "xs",
+     "speed": 0.97,
+     "blocks": 3
+    },
+    {
+     "arm": "xs-guard-j2",
+     "speed": 0.92,
+     "blocks": 3
+    },
+    {
+     "arm": "xs-guard-j3",
+     "speed": 0.89,
+     "blocks": 3
+    },
+    {
+     "arm": "xs-j2",
+     "speed": 0.93,
+     "blocks": 3
+    },
+    {
+     "arm": "xs-j3",
+     "speed": 0.97,
+     "blocks": 3
+    }
+   ],
+   "question": "With two or three workers, with or without the source-guard fix, is xs -aH at least as fast as rsync -aH at copying psample to the T5?",
+   "summary": "In block 2, xs-j3 was fastest at 209.6 s against rsync's 214.23 s, a speed of 1.02x, while xs-guard-j3 was slowest at 0.82x; plain xs matched rsync at 1.00x. Across three blocks every xs arm is still slightly behind rsync, with xs and xs-j3 at 0.97x and the guard arms at 0.89x to 0.92x. That is still thin evidence, but so far no arm is at least as fast as rsync here, and the guard fix has not helped.",
+   "model": "claude-sonnet-5-5",
+   "driver": "neo-ssd"
+  },
+  "LC3-psample-local-durable": {
+   "run": "20261018T215452Z-LC3-psample-local-durable",
+   "experiment": "LC3-psample-local-durable",
+   "key": "real-psample.fresh.neo-neo-ssd.receiver.cold|2|0",
+   "utc": 1792392145.911,
+   "cell": "real-psample.fresh.neo-neo-ssd.receiver.cold",
+   "factors": {
+    "corpus": "real-psample",
+    "scenario": "fresh",
+    "sender": "neo",
+    "receiver": "neo-ssd",
+    "client": "receiver",
+    "link": "neo-local-ssd",
+    "cache": "cold"
+   },
+   "block": 2,
+   "attempt": 0,
+   "control": "xs",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "xs",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 219.8,
+     "gbps": 0.766,
+     "files_per_s": 3235,
+     "speed": 1
+    },
+    {
+     "arm": "xs-eager",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 140.811,
+     "gbps": 1.196,
+     "files_per_s": 5050,
+     "speed": 1.56
+    },
+    {
+     "arm": "xs-noatomic",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 226.059,
+     "gbps": 0.745,
+     "files_per_s": 3146,
+     "speed": 0.97
+    },
+    {
+     "arm": "rsync",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 213.268,
+     "gbps": 0.789,
+     "files_per_s": 3334,
+     "speed": 1.03
+    },
+    {
+     "arm": "rsync-eager",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 181.251,
+     "gbps": 0.929,
+     "files_per_s": 3923,
+     "speed": 1.21
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "rsync",
+     "speed": 1.09,
+     "blocks": 3
+    },
+    {
+     "arm": "rsync-eager",
+     "speed": 1.26,
+     "blocks": 3
+    },
+    {
+     "arm": "xs-eager",
+     "speed": 1.64,
+     "blocks": 3
+    },
+    {
+     "arm": "xs-noatomic",
+     "speed": 1.07,
+     "blocks": 3
+    }
+   ],
+   "question": "How long after the copy exits is psample safely on the T5, and does eager writeback or skipping the temp-file rename shorten it?",
+   "summary": "In block 2, xs-eager was fastest at 1.56x the xs control (140.8 s versus 219.8 s to durable), while rsync-eager reached 1.21x, rsync 1.03x, and xs-noatomic 0.97x. Across three blocks, xs-eager averages 1.64x, rsync-eager 1.26x, rsync 1.09x, and xs-noatomic 1.07x, so eager writeback consistently shortens the time to safety. Skipping the rename shows little effect, though three blocks is still a modest base.",
+   "model": "claude-sonnet-5-5",
+   "driver": "neo-ssd"
+  },
+  "LC4-psample-local-resync": {
+   "run": "20261018T215454Z-LC4-psample-local-resync",
+   "experiment": "LC4-psample-local-resync",
+   "key": "real-psample.noop.neo-neo-ssd.receiver.cold|5|0",
+   "utc": 1792405547.979,
+   "cell": "real-psample.noop.neo-neo-ssd.receiver.cold",
+   "factors": {
+    "corpus": "real-psample",
+    "scenario": "noop",
+    "sender": "neo",
+    "receiver": "neo-ssd",
+    "client": "receiver",
+    "link": "neo-local-ssd",
+    "cache": "cold"
+   },
+   "block": 5,
+   "attempt": 0,
+   "control": "rsync",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "rsync",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 126.769,
+     "gbps": 1.328,
+     "files_per_s": 5609,
+     "speed": 1
+    },
+    {
+     "arm": "xs",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 65.727,
+     "gbps": 2.562,
+     "files_per_s": 10819,
+     "speed": 1.93
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "xs",
+     "speed": 1.92,
+     "blocks": 6
+    }
+   ],
+   "question": "Re-syncing the psample backup on the T5 with nothing cached, at a no-op and after 1% of files change, is xs -aH faster than rsync -aH?",
+   "summary": null,
+   "model": null,
+   "driver": "neo-ssd"
+  },
+  "AP10191250-LC9-local-eager-vs-rsync-eager": {
+   "run": "20261019T125032Z-AP10191250-LC9-local-eager-vs-rsync-eager",
+   "experiment": "AP10191250-LC9-local-eager-vs-rsync-eager",
+   "key": "real-psample.fresh.neo-neo-ssd.receiver.cold|3|0",
+   "utc": 1792417174.565,
+   "cell": "real-psample.fresh.neo-neo-ssd.receiver.cold",
+   "factors": {
+    "corpus": "real-psample",
+    "scenario": "fresh",
+    "sender": "neo",
+    "receiver": "neo-ssd",
+    "client": "receiver",
+    "link": "neo-local-ssd",
+    "cache": "cold"
+   },
+   "block": 3,
+   "attempt": 0,
+   "control": "rsync-eager",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "rsync-eager",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 181.286,
+     "gbps": 0.929,
+     "files_per_s": 3923,
+     "speed": 1
+    },
+    {
+     "arm": "xs-eager",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 137.733,
+     "gbps": 1.222,
+     "files_per_s": 5163,
+     "speed": 1.32
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "xs-eager",
+     "speed": 1.3,
+     "blocks": 4
+    }
+   ],
+   "question": "When both tools flush eagerly, does xs -aH get the psample backup safely onto the T5 sooner than rsync -aH?",
+   "summary": "In block 3, xs-eager was fastest, reaching durable storage in 137.7 s against 181.3 s for the rsync-eager control, a speed of 1.32x. Across this cell, xs-eager stands at 1.30x versus rsync-eager over 4 blocks, so this result sits close to the running picture, though the evidence is still modest. For the question, xs -aH got the backup safely onto the T5 sooner here, and the repeated gain points the same way.",
+   "model": "claude-sonnet-5-5",
+   "driver": "neo-ssd"
+  },
+  "S4-neo-mars-sentinel": {
+   "run": "20261020T055506Z-S4-neo-mars-sentinel-s0005",
+   "experiment": "S4-neo-mars-sentinel",
+   "key": "mixed-bimodal.noop.neo-mars.sender.warm|1|0",
+   "utc": 1792570942.669,
+   "cell": "mixed-bimodal.noop.neo-mars.sender.warm",
+   "factors": {
+    "corpus": "mixed-bimodal",
+    "scenario": "noop",
+    "sender": "neo",
+    "receiver": "mars",
+    "client": "sender",
+    "link": "neo-mars-lan",
+    "cache": "warm"
+   },
+   "block": 1,
+   "attempt": 0,
+   "control": "xs",
+   "primary": "wall_s",
+   "arms": [
+    {
+     "arm": "xs",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 0.271,
+     "gbps": 41.12,
+     "files_per_s": 73686,
+     "speed": 1
+    },
+    {
+     "arm": "again",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.272,
+     "gbps": 41.096,
+     "files_per_s": 73641,
+     "speed": 1
+    },
+    {
+     "arm": "rsync",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.373,
+     "gbps": 29.889,
+     "files_per_s": 53560,
+     "speed": 0.73
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "again",
+     "speed": 1.02,
+     "blocks": 2
+    },
+    {
+     "arm": "rsync",
+     "speed": 0.71,
+     "blocks": 2
+    }
+   ],
+   "question": null,
+   "summary": "In this block, xs (the control) and again both finished in about 0.27 s, with again at essentially parity (speed 1.00), while rsync took 0.373 s, or 0.73x the control's speed. Across the two blocks so far in this cell, again's cumulative speed is 1.02x and rsync's is 0.71x, though each rests on only two blocks, so the picture is still thin. This block gives some support to the view that rsync is slower than xs on this mixed-bimodal noop neo\u2192mars transfer, but it does not by itself settle the experiment's question, which is not stated in the record.",
+   "model": "claude-haiku-5-5",
+   "summarizedUtc": 1792570983.229,
+   "driver": "neo"
+  },
+  "OS1a-neo-mars-receiver-os": {
+   "run": "20261020T055601Z-OS1a-neo-mars-receiver-os",
+   "experiment": "OS1a-neo-mars-receiver-os",
+   "key": "small-flat.noop.mars-neo.receiver.warm|3|0",
+   "utc": 1792480011.674,
+   "cell": "small-flat.noop.mars-neo.receiver.warm",
+   "factors": {
+    "corpus": "small-flat",
+    "scenario": "noop",
+    "sender": "mars",
+    "receiver": "neo",
+    "client": "receiver",
+    "link": "neo-mars-lan",
+    "cache": "warm"
+   },
+   "block": 3,
+   "attempt": 0,
+   "control": "rsync",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "rsync",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 0.748,
+     "gbps": 3.413,
+     "files_per_s": 133641,
+     "speed": 1
+    },
+    {
+     "arm": "xs-parent",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.252,
+     "gbps": 10.154,
+     "files_per_s": 397607,
+     "speed": 2.98
+    },
+    {
+     "arm": "xs",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.233,
+     "gbps": 10.96,
+     "files_per_s": 429180,
+     "speed": 3.21
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "xs",
+     "speed": 3.12,
+     "blocks": 4
+    },
+    {
+     "arm": "xs-parent",
+     "speed": 3.19,
+     "blocks": 4
+    }
+   ],
+   "question": null,
+   "summary": "In this block on small-flat noop mars\u2192neo, xs was fastest at 3.21x the rsync control (0.233s versus 0.748s), with xs-parent close behind at 2.98x. Cumulatively over 4 blocks, xs-parent sits at 3.19x and xs at 3.12x, so the two arms are nearly tied in this cell. The question field is null, so this cell's result cannot be tied to a stated experimental question.",
+   "model": "claude-haiku-5-5",
+   "summarizedUtc": 1792480030.703,
+   "driver": "neo"
+  },
+  "OS1b-neo-mars-psample-noop": {
+   "run": "20261020T170939Z-OS1b-neo-mars-psample-noop",
+   "experiment": "OS1b-neo-mars-psample-noop",
+   "key": "real-psample.noop.neo-mars.sender.warm|2|0",
+   "utc": 1792537034.495,
+   "cell": "real-psample.noop.neo-mars.sender.warm",
+   "factors": {
+    "corpus": "real-psample",
+    "scenario": "noop",
+    "sender": "neo",
+    "receiver": "mars",
+    "client": "sender",
+    "link": "neo-mars-lan",
+    "cache": "warm"
+   },
+   "block": 2,
+   "attempt": 0,
+   "control": "xs-parent",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "xs-parent",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 21.777,
+     "gbps": 7.731,
+     "files_per_s": 32655,
+     "speed": 1
+    },
+    {
+     "arm": "xs",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 14.579,
+     "gbps": 11.548,
+     "files_per_s": 48775,
+     "speed": 1.49
+    },
+    {
+     "arm": "rsync",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 34.405,
+     "gbps": 4.894,
+     "files_per_s": 20669,
+     "speed": 0.63
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "rsync",
+     "speed": 0.63,
+     "blocks": 3
+    },
+    {
+     "arm": "xs",
+     "speed": 1.59,
+     "blocks": 3
+    }
+   ],
+   "question": null,
+   "summary": null,
+   "model": null,
+   "driver": "neo"
+  },
+  "E1n-neo-mars-baseline": {
+   "run": "20261020T055457Z-E1n-neo-mars-baseline",
+   "experiment": "E1n-neo-mars-baseline",
+   "key": "small-deep.fresh.neo-mars.sender.warm|3|0",
+   "utc": 1792488666.512,
+   "cell": "small-deep.fresh.neo-mars.sender.warm",
+   "factors": {
+    "corpus": "small-deep",
+    "scenario": "fresh",
+    "sender": "neo",
+    "receiver": "mars",
+    "client": "sender",
+    "link": "neo-mars-lan",
+    "cache": "warm"
+   },
+   "block": 3,
+   "attempt": 0,
+   "control": "rsync",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "rsync",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 26.126,
+     "gbps": 0.098,
+     "files_per_s": 3828,
+     "speed": 1
+    },
+    {
+     "arm": "xs",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 25.679,
+     "gbps": 0.099,
+     "files_per_s": 3894,
+     "speed": 1.02
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "xs",
+     "speed": 1.12,
+     "blocks": 4
+    }
+   ],
+   "question": null,
+   "summary": "In block 3, xs finished in 25.7 s against rsync's 26.1 s, a speed of 1.02x over the control. Across 4 blocks in this cell, xs's cumulative speed is 1.12x, so the running picture favors xs, though four blocks is still a thin basis. The question field is empty, so this block does not bear on a stated hypothesis beyond the cell's own timing.",
+   "model": "claude-haiku-5-5",
+   "summarizedUtc": 1792488720.797,
+   "driver": "neo"
+  },
+  "J1a-neo-mars-jobs-small-flat": {
+   "run": "20261020T174155Z-J1a-neo-mars-jobs-small-flat",
+   "experiment": "J1a-neo-mars-jobs-small-flat",
+   "key": "small-flat.fresh.neo-mars.sender.warm|7|0",
+   "utc": 1792519842.902,
+   "cell": "small-flat.fresh.neo-mars.sender.warm",
+   "factors": {
+    "corpus": "small-flat",
+    "scenario": "fresh",
+    "sender": "neo",
+    "receiver": "mars",
+    "client": "sender",
+    "link": "neo-mars-lan",
+    "cache": "warm"
+   },
+   "block": 7,
+   "attempt": 0,
+   "control": "xs",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "xs",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 12.612,
+     "gbps": 0.202,
+     "files_per_s": 7929,
+     "speed": 1
+    },
+    {
+     "arm": "xs-j4",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 12.614,
+     "gbps": 0.202,
+     "files_per_s": 7928,
+     "speed": 1
+    },
+    {
+     "arm": "xs-j8",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 12.58,
+     "gbps": 0.203,
+     "files_per_s": 7949,
+     "speed": 1
+    },
+    {
+     "arm": "rsync",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 15.928,
+     "gbps": 0.16,
+     "files_per_s": 6278,
+     "speed": 0.79
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "rsync",
+     "speed": 0.78,
+     "blocks": 8
+    },
+    {
+     "arm": "xs-j4",
+     "speed": 1,
+     "blocks": 8
+    },
+    {
+     "arm": "xs-j8",
+     "speed": 0.99,
+     "blocks": 8
+    }
+   ],
+   "question": null,
+   "summary": "In this block, xs-j8 was essentially tied with the xs control (12.58s vs 12.61s, about 1.00x), xs-j4 matched it, and rsync was slower at 0.79x (15.93s). Across 8 blocks in this cell, rsync's cumulative speed is 0.78x, xs-j4 is 1.00x, and xs-j8 is 0.99x, so the running picture is fairly stable. This bears on the experiment's question only weakly: it suggests the xs job-count settings made no measurable difference to durable time on this small-flat neo\u2192mars cell, while the rsync gap held steady.",
+   "model": "claude-haiku-5-5",
+   "summarizedUtc": 1792519924.763,
+   "driver": "neo"
+  },
+  "J2-neo-local-jobs": {
+   "run": "20261020T170712Z-J2-neo-local-jobs",
+   "experiment": "J2-neo-local-jobs",
+   "key": "mixed-bimodal.noop.neo-neo-ssd.receiver.warm|7|0",
+   "utc": 1792542978.799,
+   "cell": "mixed-bimodal.noop.neo-neo-ssd.receiver.warm",
+   "factors": {
+    "corpus": "mixed-bimodal",
+    "scenario": "noop",
+    "sender": "neo",
+    "receiver": "neo-ssd",
+    "client": "receiver",
+    "link": "neo-local-ssd",
+    "cache": "warm"
+   },
+   "block": 7,
+   "attempt": 0,
+   "control": "xs",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "xs",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 0.037,
+     "gbps": 299.798,
+     "files_per_s": 537223,
+     "speed": 1
+    },
+    {
+     "arm": "xs-j4",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.036,
+     "gbps": 313.015,
+     "files_per_s": 560907,
+     "speed": 1.04
+    },
+    {
+     "arm": "xs-j8",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.044,
+     "gbps": 252.769,
+     "files_per_s": 452950,
+     "speed": 0.84
+    },
+    {
+     "arm": "rsync",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.182,
+     "gbps": 61.171,
+     "files_per_s": 109615,
+     "speed": 0.2
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "rsync",
+     "speed": 0.23,
+     "blocks": 8
+    },
+    {
+     "arm": "xs-j4",
+     "speed": 1.1,
+     "blocks": 8
+    },
+    {
+     "arm": "xs-j8",
+     "speed": 1,
+     "blocks": 8
+    }
+   ],
+   "question": null,
+   "summary": null,
+   "model": null,
+   "driver": "neo-ssd"
+  },
+  "J1b-neo-mars-jobs-small-deep": {
+   "run": "20261020T170932Z-J1b-neo-mars-jobs-small-deep",
+   "experiment": "J1b-neo-mars-jobs-small-deep",
+   "key": "small-deep.fresh.neo-mars.sender.warm|7|0",
+   "utc": 1792523793.283,
+   "cell": "small-deep.fresh.neo-mars.sender.warm",
+   "factors": {
+    "corpus": "small-deep",
+    "scenario": "fresh",
+    "sender": "neo",
+    "receiver": "mars",
+    "client": "sender",
+    "link": "neo-mars-lan",
+    "cache": "warm"
+   },
+   "block": 7,
+   "attempt": 0,
+   "control": "xs",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "xs",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 21.682,
+     "gbps": 0.118,
+     "files_per_s": 4612,
+     "speed": 1
+    },
+    {
+     "arm": "xs-j4",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 21.909,
+     "gbps": 0.117,
+     "files_per_s": 4564,
+     "speed": 0.99
+    },
+    {
+     "arm": "xs-j8",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 21.922,
+     "gbps": 0.116,
+     "files_per_s": 4562,
+     "speed": 0.99
+    },
+    {
+     "arm": "rsync",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 22.605,
+     "gbps": 0.113,
+     "files_per_s": 4424,
+     "speed": 0.96
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "rsync",
+     "speed": 0.91,
+     "blocks": 8
+    },
+    {
+     "arm": "xs-j4",
+     "speed": 1,
+     "blocks": 8
+    },
+    {
+     "arm": "xs-j8",
+     "speed": 1,
+     "blocks": 8
+    }
+   ],
+   "question": null,
+   "summary": null,
+   "model": null,
+   "driver": "neo"
+  },
+  "J1c-neo-mars-jobs-mixed-bimodal": {
+   "run": "20261020T170934Z-J1c-neo-mars-jobs-mixed-bimodal",
+   "experiment": "J1c-neo-mars-jobs-mixed-bimodal",
+   "key": "mixed-bimodal.noop.neo-mars.sender.warm|7|0",
+   "utc": 1792526329.987,
+   "cell": "mixed-bimodal.noop.neo-mars.sender.warm",
+   "factors": {
+    "corpus": "mixed-bimodal",
+    "scenario": "noop",
+    "sender": "neo",
+    "receiver": "mars",
+    "client": "sender",
+    "link": "neo-mars-lan",
+    "cache": "warm"
+   },
+   "block": 7,
+   "attempt": 0,
+   "control": "xs",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "xs",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 0.286,
+     "gbps": 38.99,
+     "files_per_s": 69868,
+     "speed": 1
+    },
+    {
+     "arm": "xs-j4",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.253,
+     "gbps": 44.051,
+     "files_per_s": 78938,
+     "speed": 1.13
+    },
+    {
+     "arm": "xs-j8",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.247,
+     "gbps": 45.237,
+     "files_per_s": 81062,
+     "speed": 1.16
+    },
+    {
+     "arm": "rsync",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.312,
+     "gbps": 35.818,
+     "files_per_s": 64183,
+     "speed": 0.92
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "rsync",
+     "speed": 0.82,
+     "blocks": 8
+    },
+    {
+     "arm": "xs-j4",
+     "speed": 0.99,
+     "blocks": 8
+    },
+    {
+     "arm": "xs-j8",
+     "speed": 1.01,
+     "blocks": 8
+    }
+   ],
+   "question": null,
+   "summary": null,
+   "model": null,
+   "driver": "neo"
+  },
+  "J1d-neo-mars-jobs-real-congress": {
+   "run": "20261020T170936Z-J1d-neo-mars-jobs-real-congress",
+   "experiment": "J1d-neo-mars-jobs-real-congress",
+   "key": "real-congress.fresh.neo-mars.sender.warm|7|0",
+   "utc": 1792531028.762,
+   "cell": "real-congress.fresh.neo-mars.sender.warm",
+   "factors": {
+    "corpus": "real-congress",
+    "scenario": "fresh",
+    "sender": "neo",
+    "receiver": "mars",
+    "client": "sender",
+    "link": "neo-mars-lan",
+    "cache": "warm"
+   },
+   "block": 7,
+   "attempt": 0,
+   "control": "xs",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "xs",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 30.159,
+     "gbps": 0.307,
+     "files_per_s": 7179,
+     "speed": 1
+    },
+    {
+     "arm": "xs-j4",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 30.031,
+     "gbps": 0.309,
+     "files_per_s": 7210,
+     "speed": 1
+    },
+    {
+     "arm": "xs-j8",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 30.314,
+     "gbps": 0.306,
+     "files_per_s": 7143,
+     "speed": 0.99
+    },
+    {
+     "arm": "rsync",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 41.623,
+     "gbps": 0.223,
+     "files_per_s": 5202,
+     "speed": 0.72
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "rsync",
+     "speed": 0.72,
+     "blocks": 8
+    },
+    {
+     "arm": "xs-j4",
+     "speed": 1,
+     "blocks": 8
+    },
+    {
+     "arm": "xs-j8",
+     "speed": 0.99,
+     "blocks": 8
+    }
+   ],
+   "question": null,
+   "summary": null,
+   "model": null,
+   "driver": "neo"
+  },
+  "W0-neo-mars-wan-smoke": {
+   "run": "20261021T011813Z-W0-neo-mars-wan-smoke",
+   "experiment": "W0-neo-mars-wan-smoke",
+   "key": "small-flat.noop.neo-mars.sender.warm|1|0",
+   "utc": 1792545694.771,
+   "cell": "small-flat.noop.neo-mars.sender.warm",
+   "factors": {
+    "corpus": "small-flat",
+    "scenario": "noop",
+    "sender": "neo",
+    "receiver": "mars",
+    "client": "sender",
+    "link": "neo-mars-lan",
+    "cache": "warm"
+   },
+   "block": 1,
+   "attempt": 0,
+   "control": "rsync",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "rsync",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 2.663,
+     "gbps": 0.959,
+     "files_per_s": 37551,
+     "speed": 1
+    },
+    {
+     "arm": "xs",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.581,
+     "gbps": 4.392,
+     "files_per_s": 171981,
+     "speed": 4.58
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "xs",
+     "speed": 4.33,
+     "blocks": 2
+    }
+   ],
+   "question": null,
+   "summary": null,
+   "model": null,
+   "driver": "neo"
+  },
+  "AP10210142-L2R1-congress-fresh-wan11-cpu2": {
+   "run": "20261021T014243Z-AP10210142-L2R1-congress-fresh-wan11-cpu2",
+   "experiment": "AP10210142-L2R1-congress-fresh-wan11-cpu2",
+   "key": "real-congress.fresh.neo-mars.sender.warm|10|0",
+   "utc": 1792548879.225,
+   "cell": "real-congress.fresh.neo-mars.sender.warm",
+   "factors": {
+    "corpus": "real-congress",
+    "scenario": "fresh",
+    "sender": "neo",
+    "receiver": "mars",
+    "client": "sender",
+    "link": "neo-mars-lan",
+    "cache": "warm"
+   },
+   "block": 10,
+   "attempt": 0,
+   "control": "xs-j4",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "xs-j4",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 30.172,
+     "gbps": 0.307,
+     "files_per_s": 7176,
+     "speed": 1
+    },
+    {
+     "arm": "rsync",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 42.347,
+     "gbps": 0.219,
+     "files_per_s": 5113,
+     "speed": 0.71
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "rsync",
+     "speed": 0.72,
+     "blocks": 11
+    }
+   ],
+   "question": "For lab2's congress-sample fresh gap, where rsync was 1.10x faster on the a-aws link, does rsync -a also beat xs -a -j4 on real-congress from neo to mars with 11 ms added and neo held to 2 CPUs?",
+   "summary": null,
+   "model": null,
+   "driver": "neo"
+  },
+  "AP10210142-L2R2-congress-fresh-cpu2-only": {
+   "run": "20261021T014245Z-AP10210142-L2R2-congress-fresh-cpu2-only",
+   "experiment": "AP10210142-L2R2-congress-fresh-cpu2-only",
+   "key": "real-congress.fresh.neo-mars.sender.warm|8|0",
+   "utc": 1792550315.621,
+   "cell": "real-congress.fresh.neo-mars.sender.warm",
+   "factors": {
+    "corpus": "real-congress",
+    "scenario": "fresh",
+    "sender": "neo",
+    "receiver": "mars",
+    "client": "sender",
+    "link": "neo-mars-lan",
+    "cache": "warm"
+   },
+   "block": 8,
+   "attempt": 0,
+   "control": "xs-j4",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "xs-j4",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 29.985,
+     "gbps": 0.309,
+     "files_per_s": 7221,
+     "speed": 1
+    },
+    {
+     "arm": "rsync",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 41.501,
+     "gbps": 0.223,
+     "files_per_s": 5217,
+     "speed": 0.72
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "rsync",
+     "speed": 0.72,
+     "blocks": 9
+    }
+   ],
+   "question": "For lab2's congress-sample fresh gap: does holding neo to 2 CPUs, with no added latency, erase xs -a -j4's lead over rsync -a on real-congress from neo to mars?",
+   "summary": null,
+   "model": null,
+   "driver": "neo"
+  },
+  "AP10210142-L2R5-local-congress-cpu2": {
+   "run": "20261021T014235Z-AP10210142-L2R5-local-congress-cpu2",
+   "experiment": "AP10210142-L2R5-local-congress-cpu2",
+   "key": "real-congress.fresh.neo-neo-ssd.receiver.warm|10|0",
+   "utc": 1792565524.928,
+   "cell": "real-congress.fresh.neo-neo-ssd.receiver.warm",
+   "factors": {
+    "corpus": "real-congress",
+    "scenario": "fresh",
+    "sender": "neo",
+    "receiver": "neo-ssd",
+    "client": "receiver",
+    "link": "neo-local-ssd",
+    "cache": "warm"
+   },
+   "block": 10,
+   "attempt": 0,
+   "control": "xs-j4",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "xs-j4",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 15.481,
+     "gbps": 0.599,
+     "files_per_s": 13986,
+     "speed": 1
+    },
+    {
+     "arm": "rsync",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 31.868,
+     "gbps": 0.291,
+     "files_per_s": 6794,
+     "speed": 0.49
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "rsync",
+     "speed": 0.51,
+     "blocks": 11
+    }
+   ],
+   "question": "For lab2's congress-sample fresh gap: copying real-congress locally from neo to the T5 with neo held to 2 CPUs, does rsync -a close the 1.84x lead xs held without a cap?",
+   "summary": "In block 10, the control xs-j4 finished in 15.5 s and rsync took 31.9 s, so rsync ran at 0.49x the control's speed, meaning xs-j4 was about 2.06x faster. Across 11 blocks in this cell, rsync's cumulative speed is 0.51x, so the running picture is consistent and reasonably established. This block bears on the question only weakly: it shows rsync -a did not close the lead under this block's conditions, but it does not by itself test the 2-CPU cap that the question asks about.",
+   "model": "claude-haiku-5-5",
+   "summarizedUtc": 1792565556.6,
+   "driver": "neo-ssd"
+  },
+  "AP10210751-AP10210749-L2R7-congress-pull-wan11-cpu2": {
+   "run": "20261021T075208Z-AP10210751-AP10210749-L2R7-congress-pull-wan11-cpu2",
+   "experiment": "AP10210751-AP10210749-L2R7-congress-pull-wan11-cpu2",
+   "key": "real-congress.fresh.mars-neo.receiver.warm|10|0",
+   "utc": 1792573072.112,
+   "cell": "real-congress.fresh.mars-neo.receiver.warm",
+   "factors": {
+    "corpus": "real-congress",
+    "scenario": "fresh",
+    "sender": "mars",
+    "receiver": "neo",
+    "client": "receiver",
+    "link": "neo-mars-lan",
+    "cache": "warm"
+   },
+   "block": 10,
+   "attempt": 0,
+   "control": "xs-j4",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "xs-j4",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 16.565,
+     "gbps": 0.56,
+     "files_per_s": 13071,
+     "speed": 1
+    },
+    {
+     "arm": "rsync",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 21.467,
+     "gbps": 0.432,
+     "files_per_s": 10086,
+     "speed": 0.77
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "rsync",
+     "speed": 0.78,
+     "blocks": 11
+    }
+   ],
+   "question": "For lab2's congress-sample fresh gap: does xs -a -j4 lose its lead over rsync -a on a fresh real-congress copy when the receiver, not the sender, is an arm64 host held to 2 CPUs behind 11 ms?",
+   "summary": "In this block, the control xs -a -j4 finished in 16.57 s, while rsync -a took 21.47 s, so rsync ran at 0.77x the control's speed (xs was about 30% faster). Across 11 blocks in this cell, rsync's cumulative speed against the control is 0.78x, so the running picture is consistent with xs holding its lead on this fresh copy. The question asks whether that lead disappears when the receiver is the constrained arm64 host, and this single block shows the lead persisting under those conditions, though it does not establish the answer on its own.",
+   "model": "claude-haiku-5-5",
+   "summarizedUtc": 1792573110.335,
+   "driver": "neo"
+  },
+  "AP10210751-AP10210749-L2P1-small-pull-wan11-cpu2": {
+   "run": "20261021T075211Z-AP10210751-AP10210749-L2P1-small-pull-wan11-cpu2",
+   "experiment": "AP10210751-AP10210749-L2P1-small-pull-wan11-cpu2",
+   "key": "small-deep.noop.mars-neo.receiver.warm|5|0",
+   "utc": 1792583021.132,
+   "cell": "small-deep.noop.mars-neo.receiver.warm",
+   "factors": {
+    "corpus": "small-deep",
+    "scenario": "noop",
+    "sender": "mars",
+    "receiver": "neo",
+    "client": "receiver",
+    "link": "neo-mars-lan",
+    "cache": "warm"
+   },
+   "block": 5,
+   "attempt": 0,
+   "control": "xs-j4",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "xs-j4",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 2.565,
+     "gbps": 0.995,
+     "files_per_s": 38979,
+     "speed": 1
+    },
+    {
+     "arm": "rsync",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 18.1,
+     "gbps": 0.141,
+     "files_per_s": 5525,
+     "speed": 0.14
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "rsync",
+     "speed": 0.15,
+     "blocks": 6
+    }
+   ],
+   "question": "Before lab2 measures them: does xs -a -j4 still beat rsync -a on fresh and no-op copies of small-flat, small-deep and mixed-bimodal into a 2-CPU arm64 receiver behind 11 ms?",
+   "summary": "This block ran xs -a -j4 as the control at 2.565 s, and rsync took 18.1 s, so xs was about 7.1 times faster (rsync at 0.14x speed). Cumulatively, rsync sits at 0.15x of the control across 6 blocks in this cell, so the ratio is well supported for this cell. The question concerns fresh and no-op copies of small-flat, small-deep and mixed-bimodal, and this block covers only the small-deep no-op case, so it shows nothing yet about the other corpora or fresh copies.",
+   "model": "claude-haiku-5-5",
+   "summarizedUtc": 1792583116.509,
+   "driver": "neo"
+  },
+  "AP10210751-AP10210749-L2P2-congress-resync-wan11-cp": {
+   "run": "20261021T075213Z-AP10210751-AP10210749-L2P2-congress-resync-wan11-cp",
+   "experiment": "AP10210751-AP10210749-L2P2-congress-resync-wan11-cp",
+   "key": "real-congress.noop.neo-mars.sender.warm|7|0",
+   "utc": 1792584600.084,
+   "cell": "real-congress.noop.neo-mars.sender.warm",
+   "factors": {
+    "corpus": "real-congress",
+    "scenario": "noop",
+    "sender": "neo",
+    "receiver": "mars",
+    "client": "sender",
+    "link": "neo-mars-lan",
+    "cache": "warm"
+   },
+   "block": 7,
+   "attempt": 0,
+   "control": "xs-j4",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "xs-j4",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 1.497,
+     "gbps": 6.195,
+     "files_per_s": 144641,
+     "speed": 1
+    },
+    {
+     "arm": "rsync",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 4.786,
+     "gbps": 1.937,
+     "files_per_s": 45235,
+     "speed": 0.31
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "rsync",
+     "speed": 0.33,
+     "blocks": 8
+    }
+   ],
+   "question": "In lab2's direction (2-CPU sender, 11 ms), does xs -a -j4 still beat rsync -a when re-syncing real-congress at a no-op and after a 1% change?",
+   "summary": "In this block, xs -a -j4 finished the real-congress no-op re-sync in 1.50 s against rsync's 4.79 s, so rsync ran at 0.31x the control's speed. Across 8 blocks for this cell, rsync's cumulative speed is 0.33x, so the evidence is consistent and no longer thin. This supports the question's premise for a no-op re-sync in this direction, though it says nothing yet about the 1% change case.",
+   "model": "claude-haiku-5-5",
+   "summarizedUtc": 1792584648.349,
+   "driver": "neo"
+  }
+ }
+}

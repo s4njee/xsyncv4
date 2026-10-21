@@ -1,0 +1,19 @@
+{
+ "experiment": "H1b-pair-ceiling-mars",
+ "kind": "screening",
+ "hypothesis": "mars creates small files locally much faster than xs delivers them from the Pi.",
+ "primary": "durable_s",
+ "control": "xs-z-best",
+ "delta": 0.03,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261017T121636Z-H1b-pair-ceiling-mars"
+ ],
+ "spec_sha256": [
+  "58cbaca53a7fdd420b4f8f098ea2703b70aca32c682e931eb0fc5efddcc4fb7c"
+ ],
+ "valid_blocks": 24,
+ "void_attempts": 0,
+ "void_reasons": []
+}

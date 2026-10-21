@@ -1,0 +1,86 @@
+{
+ "tree": "T4-neo-mars-1g",
+ "started_utc": "2026-10-17T02:11:51Z",
+ "nodes": {
+  "H0": {
+   "state": "decided",
+   "runs": [
+    "20261017T021151Z-H0-pair-baseline"
+   ],
+   "spec": "H0-pair-baseline.toml",
+   "decision": {
+    "utc": "2026-10-17T12:16:33Z",
+    "text": "H0: baseline measured; next, which side limits small files, and the default question",
+    "next": [
+     "H1a",
+     "H1b",
+     "H6"
+    ],
+    "branch": 0
+   }
+  },
+  "H1a": {
+   "state": "decided",
+   "runs": [
+    "20261017T121633Z-H1a-pair-ceiling-neo"
+   ],
+   "spec": "H1a-pair-ceiling-neo.toml",
+   "decision": {
+    "utc": "2026-10-17T13:01:18Z",
+    "text": "H1a: the Pi creates small files about as fast as xs delivers them: its own receiving is the limit",
+    "next": [
+     "H4"
+    ],
+    "branch": 1
+   }
+  },
+  "H1b": {
+   "state": "decided",
+   "runs": [
+    "20261017T121636Z-H1b-pair-ceiling-mars"
+   ],
+   "spec": "H1b-pair-ceiling-mars.toml",
+   "decision": {
+    "utc": "2026-10-17T13:20:43Z",
+    "text": "H1b: mars creates small files at least twice as fast as xs delivers them: look at the Pi's sending side (small-flat neo\u2192mars local-x4 4.55\u00d7 [4.42, 4.68] faster; real-congress neo\u2192mars local-x4 3.78\u00d7 [3.64, 3.93] faster; small-deep neo\u2192mars local-x4 2.08\u00d7 [1.90, 2.28] faster)",
+    "next": [
+     "H5"
+    ],
+    "branch": 0
+   }
+  },
+  "H6": {
+   "state": "decided",
+   "runs": [
+    "20261017T121639Z-H6-pair-best-default"
+   ],
+   "spec": "H6-pair-best-default.toml",
+   "decision": {
+    "utc": "2026-10-17T15:01:48Z",
+    "text": "H6: xs's best setting was nowhere slower than its default",
+    "next": [],
+    "branch": 1
+   }
+  },
+  "H4": {
+   "state": "decided",
+   "runs": [
+    "20261017T130118Z-H4-pair-pi-receive"
+   ],
+   "spec": "H4-pair-pi-receive.toml",
+   "decision": {
+    "utc": "2026-10-17T16:12:00Z",
+    "text": "H4: no receiving setting on the Pi beat xs's best",
+    "next": [],
+    "branch": 1
+   }
+  },
+  "H5": {
+   "state": "queued",
+   "runs": [
+    "20261017T132043Z-H5-pair-pi-send"
+   ],
+   "spec": "H5-pair-pi-send.toml"
+  }
+ }
+}

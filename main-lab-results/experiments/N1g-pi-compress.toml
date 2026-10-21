@@ -1,0 +1,46 @@
+# N1g-pi-compress (tree T7): when adaptive -z cannot carry a text tree past the
+# gigabit wire with the Pi sending, try the cheaper end of zstd. T2a showed level 3
+# starves the Pi's four cores of CPU, so adaptive's choice matters most from the Pi;
+# this screens a fixed level 1, zstd's fast (negative) levels and rsync -z, all on
+# compressible trees, from the Pi to freya.
+id = "N1g-pi-compress"
+kind = "screening"
+hypothesis = "A cheaper zstd level or fast level lets the Pi carry a compressible tree past the gigabit wire, where adaptive -z falls short."
+primary = "durable_s"
+delta = 0.03
+blocks = 8
+control = "xs-z"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.xs-z]
+tool = "xs"
+rev = "8cc75bbdb801"
+flags = ["-az"]
+
+[arms.xs-z1]
+tool = "xs"
+rev = "8cc75bbdb801"
+flags = ["-az", "--compress-level=1"]
+
+[arms.xs-zfast1]
+tool = "xs"
+rev = "8cc75bbdb801"
+flags = ["-az", "--compress-level=-1"]
+
+[arms.xs-zfast5]
+tool = "xs"
+rev = "8cc75bbdb801"
+flags = ["-az", "--compress-level=-5"]
+
+[arms.rsync-z]
+tool = "rsync"
+flags = ["-az"]
+
+[matrix]
+link = "lan"
+corpus = ["large-text", "large-half"]
+scenario = ["fresh"]
+direction = ["neo>freya"]
+client = ["sender"]
+cache = ["warm"]

@@ -1,0 +1,30 @@
+# Written by the 6-hourly planner (2026-10-21T07:51Z). Why: lab2's xs interval on real-projects spans 8.8 to 98 s against rsync's steady 20 s, which suggests a stall; the receive side under a CPU cap is the condition not yet reproduced for this gap.
+id = "AP10210751-AP10210749-L2R8-psample-pull-wan11-cpu2"
+kind = "screening"
+hypothesis = "With neo receiving under 11 ms and 2 CPUs, xs -a -j4's time-to-durable is at least 5% behind rsync -a, or its per-block times vary far more than rsync's."
+primary = "durable_s"
+delta = 0.05
+blocks = 6
+control = "xs-j4"
+verify = "first-last"
+cleanup = "eager"
+sample_timeout_s = 7200
+wan = { host = "neo", delay_ms = 11, loss_pct = 0 }
+cpus = { host = "neo", count = 2 }
+
+[arms.xs-j4]
+tool = "xs"
+rev = "e51c1df1329a"
+flags = ["-a", "-j4"]
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[matrix]
+link = "neo-mars-lan"
+corpus = ["real-psample"]
+scenario = ["fresh"]
+direction = ["mars>neo"]
+client = ["initiator"]
+cache = ["cold"]

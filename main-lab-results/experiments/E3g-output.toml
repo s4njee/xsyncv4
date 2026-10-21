@@ -1,0 +1,37 @@
+# E3g: what output costs. -v prints every file name, -q nothing. On 100,000
+# files the itemized output is real work on both ends (H23).
+id = "E3g-output"
+kind = "screening"
+hypothesis = "Printing every file name with -v costs xs more than 3% on small trees; -q costs nothing."
+primary = "wall_s"
+delta = 0.03
+blocks = 10
+control = "xs"
+verify = "first-last"
+
+[arms.xs]
+tool = "xs"
+rev = "8cc75bbdb801"
+flags = ["-a"]
+
+[arms.verbose]
+tool = "xs"
+rev = "8cc75bbdb801"
+flags = ["-av"]
+
+[arms.quiet]
+tool = "xs"
+rev = "8cc75bbdb801"
+flags = ["-aq"]
+
+[arms.rsync-v]
+tool = "rsync"
+flags = ["-av"]
+
+[matrix]
+link = "lan"
+corpus = ["small-flat", "small-real"]
+scenario = ["fresh", "noop"]
+direction = ["neo>freya", "freya>neo"]
+client = ["sender"]
+cache = ["warm"]

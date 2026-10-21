@@ -1,0 +1,22 @@
+{
+ "experiment": "D1-mac-sender-knobs",
+ "kind": "screening",
+ "hypothesis": "Larger read batches, more scanning workers or larger coalesced frames on the Mac make xs deliver small trees to mars faster.",
+ "primary": "durable_s",
+ "control": "xs-best",
+ "delta": 0.03,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261017T005544Z-D1-mac-sender-knobs"
+ ],
+ "spec_sha256": [
+  "fa2a8ea8d7a9f98f40080ee9d9cacf8f294944fd828e8d3203e641c89b839f9e"
+ ],
+ "valid_blocks": 8,
+ "void_attempts": 48,
+ "void_reasons": [
+  "mac reaches mars by en0, not en13",
+  "xs-best: harness error: mars: `sync -f ~/benchmarks/xsyncv4/lab/work/20261017T005544Z-D1-mac-sender-knobs/small-flat.fresh.mac-mars.sender.warm` exit"
+ ]
+}

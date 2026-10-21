@@ -1,0 +1,1028 @@
+{
+ "schema": 1,
+ "experiment": "H4-hdd-write-tune2",
+ "spec_sha256": "2d9d7362f32c5681e6abd2160ff1276d0cebd25c3135a567d73f6e1bc54ef83c",
+ "kind": "screening",
+ "bundle": "fb2053825ef1",
+ "writes": {
+  "mac": 0,
+  "mars-hdd": 154393246656
+ },
+ "hypothesis": "On a hard drive, --no-atomic with few receiving workers writes small and mixed trees fastest.",
+ "primary": "durable_s",
+ "delta": 0.03,
+ "control": "xs",
+ "seed": 1,
+ "run_id": "20261016T113320Z-H4-hdd-write-tune2",
+ "driver": "mac",
+ "sample_timeout_s": 3600,
+ "results": "hdd",
+ "background": false,
+ "eager_cleanup": true,
+ "hours": [
+  23,
+  5
+ ],
+ "hosts": {
+  "mac": {
+   "ssh": "[email]",
+   "name": "[host]",
+   "hostname": "MacBookPro",
+   "root": "~/benchmarks/xsbench.noindex",
+   "interface": "en13",
+   "helper": false,
+   "gates": {},
+   "local": true,
+   "system": "Darwin"
+  },
+  "mars-hdd": {
+   "ssh": "[email]",
+   "name": "[host]",
+   "hostname": "mars",
+   "root": "/mnt/hdd/xsbench",
+   "interface": "enp1s0f0",
+   "helper": true,
+   "gates": {},
+   "local": false,
+   "system": "Linux"
+  }
+ },
+ "links": {
+  "mac-mars-hdd": {
+   "hosts": [
+    "mac",
+    "mars-hdd"
+   ],
+   "medium": "wired",
+   "min_speed_mbps": 10000,
+   "max_rtt_ms": 2.0,
+   "initiator": "mac",
+   "driver": "mac",
+   "results": "hdd",
+   "address": {
+    "mac": "[address]",
+    "mars-hdd": "[address]"
+   }
+  }
+ },
+ "arms": [
+  {
+   "name": "xs",
+   "tool": "xs",
+   "flags": [
+    "-a"
+   ],
+   "rev": "453704a64528-tune",
+   "metrics": true,
+   "binary": {
+    "mac": "~/benchmarks/xsbench.noindex/bin/xs-453704a64528-tune",
+    "mars-hdd": "/mnt/hdd/xsbench/bin/xs-453704a64528-tune"
+   },
+   "sha256": {
+    "mac": "cdd545a62a7721607c23dd7014fc436e0f513d049a939ae1fd28cab34e97fcf2",
+    "mars-hdd": "21b844fd6d0f556ad2a01fff0eb979df5854569d8b31bf0bcc15976f53fc47c9"
+   },
+   "artifacts": {
+    "xs-darwin-arm64": "cdd545a62a7721607c23dd7014fc436e0f513d049a939ae1fd28cab34e97fcf2",
+    "xs-linux-amd64": "21b844fd6d0f556ad2a01fff0eb979df5854569d8b31bf0bcc15976f53fc47c9",
+    "xs-linux-arm64": "c2ef264df77b44f64b2bb2b1949e10231814b6ad2e804cc11614ad24d71e7cd2"
+   }
+  },
+  {
+   "name": "no-atomic",
+   "tool": "xs",
+   "flags": [
+    "-a",
+    "--no-atomic"
+   ],
+   "rev": "453704a64528-tune",
+   "metrics": true,
+   "binary": {
+    "mac": "~/benchmarks/xsbench.noindex/bin/xs-453704a64528-tune",
+    "mars-hdd": "/mnt/hdd/xsbench/bin/xs-453704a64528-tune"
+   },
+   "sha256": {
+    "mac": "cdd545a62a7721607c23dd7014fc436e0f513d049a939ae1fd28cab34e97fcf2",
+    "mars-hdd": "21b844fd6d0f556ad2a01fff0eb979df5854569d8b31bf0bcc15976f53fc47c9"
+   },
+   "artifacts": {
+    "xs-darwin-arm64": "cdd545a62a7721607c23dd7014fc436e0f513d049a939ae1fd28cab34e97fcf2",
+    "xs-linux-amd64": "21b844fd6d0f556ad2a01fff0eb979df5854569d8b31bf0bcc15976f53fc47c9",
+    "xs-linux-arm64": "c2ef264df77b44f64b2bb2b1949e10231814b6ad2e804cc11614ad24d71e7cd2"
+   }
+  },
+  {
+   "name": "recv1-noatomic",
+   "tool": "xs",
+   "flags": [
+    "-a",
+    "--no-atomic"
+   ],
+   "rev": "453704a64528-tune",
+   "tune": {
+    "receiver": "jobs=1"
+   },
+   "metrics": true,
+   "binary": {
+    "mac": "~/benchmarks/xsbench.noindex/bin/xs-453704a64528-tune",
+    "mars-hdd": "/mnt/hdd/xsbench/bin/xs-453704a64528-tune"
+   },
+   "sha256": {
+    "mac": "cdd545a62a7721607c23dd7014fc436e0f513d049a939ae1fd28cab34e97fcf2",
+    "mars-hdd": "21b844fd6d0f556ad2a01fff0eb979df5854569d8b31bf0bcc15976f53fc47c9"
+   },
+   "artifacts": {
+    "xs-darwin-arm64": "cdd545a62a7721607c23dd7014fc436e0f513d049a939ae1fd28cab34e97fcf2",
+    "xs-linux-amd64": "21b844fd6d0f556ad2a01fff0eb979df5854569d8b31bf0bcc15976f53fc47c9",
+    "xs-linux-arm64": "c2ef264df77b44f64b2bb2b1949e10231814b6ad2e804cc11614ad24d71e7cd2"
+   }
+  },
+  {
+   "name": "recv2-noatomic",
+   "tool": "xs",
+   "flags": [
+    "-a",
+    "--no-atomic"
+   ],
+   "rev": "453704a64528-tune",
+   "tune": {
+    "receiver": "jobs=2"
+   },
+   "metrics": true,
+   "binary": {
+    "mac": "~/benchmarks/xsbench.noindex/bin/xs-453704a64528-tune",
+    "mars-hdd": "/mnt/hdd/xsbench/bin/xs-453704a64528-tune"
+   },
+   "sha256": {
+    "mac": "cdd545a62a7721607c23dd7014fc436e0f513d049a939ae1fd28cab34e97fcf2",
+    "mars-hdd": "21b844fd6d0f556ad2a01fff0eb979df5854569d8b31bf0bcc15976f53fc47c9"
+   },
+   "artifacts": {
+    "xs-darwin-arm64": "cdd545a62a7721607c23dd7014fc436e0f513d049a939ae1fd28cab34e97fcf2",
+    "xs-linux-amd64": "21b844fd6d0f556ad2a01fff0eb979df5854569d8b31bf0bcc15976f53fc47c9",
+    "xs-linux-arm64": "c2ef264df77b44f64b2bb2b1949e10231814b6ad2e804cc11614ad24d71e7cd2"
+   }
+  },
+  {
+   "name": "recv4-noatomic",
+   "tool": "xs",
+   "flags": [
+    "-a",
+    "--no-atomic"
+   ],
+   "rev": "453704a64528-tune",
+   "tune": {
+    "receiver": "jobs=4"
+   },
+   "metrics": true,
+   "binary": {
+    "mac": "~/benchmarks/xsbench.noindex/bin/xs-453704a64528-tune",
+    "mars-hdd": "/mnt/hdd/xsbench/bin/xs-453704a64528-tune"
+   },
+   "sha256": {
+    "mac": "cdd545a62a7721607c23dd7014fc436e0f513d049a939ae1fd28cab34e97fcf2",
+    "mars-hdd": "21b844fd6d0f556ad2a01fff0eb979df5854569d8b31bf0bcc15976f53fc47c9"
+   },
+   "artifacts": {
+    "xs-darwin-arm64": "cdd545a62a7721607c23dd7014fc436e0f513d049a939ae1fd28cab34e97fcf2",
+    "xs-linux-amd64": "21b844fd6d0f556ad2a01fff0eb979df5854569d8b31bf0bcc15976f53fc47c9",
+    "xs-linux-arm64": "c2ef264df77b44f64b2bb2b1949e10231814b6ad2e804cc11614ad24d71e7cd2"
+   }
+  },
+  {
+   "name": "recv8-noatomic",
+   "tool": "xs",
+   "flags": [
+    "-a",
+    "--no-atomic"
+   ],
+   "rev": "453704a64528-tune",
+   "tune": {
+    "receiver": "jobs=8"
+   },
+   "metrics": true,
+   "binary": {
+    "mac": "~/benchmarks/xsbench.noindex/bin/xs-453704a64528-tune",
+    "mars-hdd": "/mnt/hdd/xsbench/bin/xs-453704a64528-tune"
+   },
+   "sha256": {
+    "mac": "cdd545a62a7721607c23dd7014fc436e0f513d049a939ae1fd28cab34e97fcf2",
+    "mars-hdd": "21b844fd6d0f556ad2a01fff0eb979df5854569d8b31bf0bcc15976f53fc47c9"
+   },
+   "artifacts": {
+    "xs-darwin-arm64": "cdd545a62a7721607c23dd7014fc436e0f513d049a939ae1fd28cab34e97fcf2",
+    "xs-linux-amd64": "21b844fd6d0f556ad2a01fff0eb979df5854569d8b31bf0bcc15976f53fc47c9",
+    "xs-linux-arm64": "c2ef264df77b44f64b2bb2b1949e10231814b6ad2e804cc11614ad24d71e7cd2"
+   }
+  }
+ ],
+ "cells": [
+  {
+   "id": "small-flat.fresh.mac-mars-hdd.sender.warm",
+   "corpus": "small-flat",
+   "scenario": "fresh",
+   "sender": "mac",
+   "receiver": "mars-hdd",
+   "client": "sender",
+   "link": "mac-mars-hdd",
+   "cache": "warm"
+  },
+  {
+   "id": "mixed-bimodal.fresh.mac-mars-hdd.sender.warm",
+   "corpus": "mixed-bimodal",
+   "scenario": "fresh",
+   "sender": "mac",
+   "receiver": "mars-hdd",
+   "client": "sender",
+   "link": "mac-mars-hdd",
+   "cache": "warm"
+  },
+  {
+   "id": "mixed-threshold.fresh.mac-mars-hdd.sender.warm",
+   "corpus": "mixed-threshold",
+   "scenario": "fresh",
+   "sender": "mac",
+   "receiver": "mars-hdd",
+   "client": "sender",
+   "link": "mac-mars-hdd",
+   "cache": "warm"
+  }
+ ],
+ "corpora": {
+  "small-flat": {
+   "files": 100000,
+   "directories": 100,
+   "bytes": 319224077,
+   "digest": "41b628c4337730be4efdfcc6673d517749132ffd50b75b29321640e6f064bbec",
+   "quick_digest": "e8de96251eaca6be3e98b1cb8097405b37ad470fc0d5ffdb7a5a48ea5b9f3805"
+  },
+  "mixed-bimodal": {
+   "files": 20000,
+   "directories": 420,
+   "bytes": 1395127076,
+   "digest": "e9071fb7ad3b0375ffe9fab58f740bfd22d545f7678e163a6c745504cc7aa16b",
+   "quick_digest": "31af6dbe5d38a32f5f0acf560703fa557304d3936e59f7b395d13cf8d0dec7fb"
+  },
+  "mixed-threshold": {
+   "files": 1500,
+   "directories": 72,
+   "bytes": 1502174819,
+   "digest": "d3070e0dc3befde555186110544966357a2c32a1db72c20e30d464e4cea9e048",
+   "quick_digest": "1f974c87ddf6c48409178d39b34889d699e7079283dcd212889a0ea3ac6c38f2"
+  }
+ },
+ "blocks": [
+  {
+   "cell": "small-flat.fresh.mac-mars-hdd.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "recv4-noatomic",
+     "recv1-noatomic",
+     "no-atomic",
+     "recv2-noatomic",
+     "recv8-noatomic",
+     "xs"
+    ],
+    [
+     "recv2-noatomic",
+     "xs",
+     "recv4-noatomic",
+     "recv8-noatomic",
+     "no-atomic",
+     "recv1-noatomic"
+    ],
+    [
+     "recv4-noatomic",
+     "no-atomic",
+     "recv2-noatomic",
+     "xs",
+     "recv1-noatomic",
+     "recv8-noatomic"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.mac-mars-hdd.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "recv1-noatomic",
+     "recv4-noatomic",
+     "recv2-noatomic",
+     "xs",
+     "no-atomic",
+     "recv8-noatomic"
+    ],
+    [
+     "recv4-noatomic",
+     "recv8-noatomic",
+     "no-atomic",
+     "recv1-noatomic",
+     "xs",
+     "recv2-noatomic"
+    ],
+    [
+     "recv8-noatomic",
+     "recv4-noatomic",
+     "xs",
+     "recv1-noatomic",
+     "recv2-noatomic",
+     "no-atomic"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-threshold.fresh.mac-mars-hdd.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "no-atomic",
+     "xs",
+     "recv1-noatomic",
+     "recv2-noatomic",
+     "recv8-noatomic",
+     "recv4-noatomic"
+    ],
+    [
+     "recv8-noatomic",
+     "recv4-noatomic",
+     "xs",
+     "recv1-noatomic",
+     "no-atomic",
+     "recv2-noatomic"
+    ],
+    [
+     "recv1-noatomic",
+     "no-atomic",
+     "recv2-noatomic",
+     "recv8-noatomic",
+     "recv4-noatomic",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.mac-mars-hdd.sender.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "no-atomic",
+     "recv2-noatomic",
+     "xs",
+     "recv4-noatomic",
+     "recv8-noatomic",
+     "recv1-noatomic"
+    ],
+    [
+     "recv1-noatomic",
+     "recv8-noatomic",
+     "xs",
+     "recv2-noatomic",
+     "recv4-noatomic",
+     "no-atomic"
+    ],
+    [
+     "no-atomic",
+     "recv1-noatomic",
+     "recv4-noatomic",
+     "recv2-noatomic",
+     "xs",
+     "recv8-noatomic"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.mac-mars-hdd.sender.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv1-noatomic",
+     "recv2-noatomic",
+     "recv8-noatomic",
+     "xs",
+     "no-atomic",
+     "recv4-noatomic"
+    ],
+    [
+     "no-atomic",
+     "recv4-noatomic",
+     "recv8-noatomic",
+     "recv2-noatomic",
+     "recv1-noatomic",
+     "xs"
+    ],
+    [
+     "recv8-noatomic",
+     "xs",
+     "recv2-noatomic",
+     "recv1-noatomic",
+     "recv4-noatomic",
+     "no-atomic"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-threshold.fresh.mac-mars-hdd.sender.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv4-noatomic",
+     "recv1-noatomic",
+     "no-atomic",
+     "recv8-noatomic",
+     "recv2-noatomic",
+     "xs"
+    ],
+    [
+     "recv8-noatomic",
+     "recv1-noatomic",
+     "xs",
+     "recv2-noatomic",
+     "no-atomic",
+     "recv4-noatomic"
+    ],
+    [
+     "recv8-noatomic",
+     "xs",
+     "recv2-noatomic",
+     "recv1-noatomic",
+     "no-atomic",
+     "recv4-noatomic"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.mac-mars-hdd.sender.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv4-noatomic",
+     "recv2-noatomic",
+     "recv1-noatomic",
+     "no-atomic",
+     "recv8-noatomic",
+     "xs"
+    ],
+    [
+     "recv2-noatomic",
+     "recv8-noatomic",
+     "no-atomic",
+     "recv1-noatomic",
+     "xs",
+     "recv4-noatomic"
+    ],
+    [
+     "recv1-noatomic",
+     "recv8-noatomic",
+     "no-atomic",
+     "recv2-noatomic",
+     "recv4-noatomic",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.mac-mars-hdd.sender.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "recv8-noatomic",
+     "recv2-noatomic",
+     "recv1-noatomic",
+     "recv4-noatomic",
+     "no-atomic"
+    ],
+    [
+     "xs",
+     "recv2-noatomic",
+     "no-atomic",
+     "recv1-noatomic",
+     "recv4-noatomic",
+     "recv8-noatomic"
+    ],
+    [
+     "xs",
+     "recv1-noatomic",
+     "no-atomic",
+     "recv8-noatomic",
+     "recv4-noatomic",
+     "recv2-noatomic"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-threshold.fresh.mac-mars-hdd.sender.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv8-noatomic",
+     "recv2-noatomic",
+     "xs",
+     "recv4-noatomic",
+     "recv1-noatomic",
+     "no-atomic"
+    ],
+    [
+     "xs",
+     "recv1-noatomic",
+     "recv4-noatomic",
+     "no-atomic",
+     "recv2-noatomic",
+     "recv8-noatomic"
+    ],
+    [
+     "recv8-noatomic",
+     "no-atomic",
+     "recv1-noatomic",
+     "recv4-noatomic",
+     "recv2-noatomic",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.mac-mars-hdd.sender.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv4-noatomic",
+     "recv2-noatomic",
+     "no-atomic",
+     "recv8-noatomic",
+     "recv1-noatomic",
+     "xs"
+    ],
+    [
+     "xs",
+     "recv2-noatomic",
+     "recv8-noatomic",
+     "recv4-noatomic",
+     "no-atomic",
+     "recv1-noatomic"
+    ],
+    [
+     "recv8-noatomic",
+     "recv4-noatomic",
+     "xs",
+     "recv2-noatomic",
+     "recv1-noatomic",
+     "no-atomic"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-threshold.fresh.mac-mars-hdd.sender.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv8-noatomic",
+     "recv1-noatomic",
+     "recv4-noatomic",
+     "no-atomic",
+     "recv2-noatomic",
+     "xs"
+    ],
+    [
+     "recv2-noatomic",
+     "no-atomic",
+     "recv1-noatomic",
+     "recv4-noatomic",
+     "xs",
+     "recv8-noatomic"
+    ],
+    [
+     "recv2-noatomic",
+     "recv8-noatomic",
+     "recv1-noatomic",
+     "recv4-noatomic",
+     "no-atomic",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.mac-mars-hdd.sender.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv1-noatomic",
+     "xs",
+     "recv4-noatomic",
+     "recv2-noatomic",
+     "recv8-noatomic",
+     "no-atomic"
+    ],
+    [
+     "no-atomic",
+     "recv2-noatomic",
+     "recv8-noatomic",
+     "recv4-noatomic",
+     "xs",
+     "recv1-noatomic"
+    ],
+    [
+     "recv1-noatomic",
+     "xs",
+     "recv2-noatomic",
+     "no-atomic",
+     "recv4-noatomic",
+     "recv8-noatomic"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.mac-mars-hdd.sender.warm",
+   "block": 4,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv4-noatomic",
+     "xs",
+     "no-atomic",
+     "recv1-noatomic",
+     "recv8-noatomic",
+     "recv2-noatomic"
+    ],
+    [
+     "recv8-noatomic",
+     "xs",
+     "recv2-noatomic",
+     "no-atomic",
+     "recv1-noatomic",
+     "recv4-noatomic"
+    ],
+    [
+     "xs",
+     "recv8-noatomic",
+     "recv4-noatomic",
+     "recv2-noatomic",
+     "no-atomic",
+     "recv1-noatomic"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-threshold.fresh.mac-mars-hdd.sender.warm",
+   "block": 4,
+   "verify_full": false,
+   "orders": [
+    [
+     "no-atomic",
+     "recv8-noatomic",
+     "xs",
+     "recv1-noatomic",
+     "recv4-noatomic",
+     "recv2-noatomic"
+    ],
+    [
+     "recv2-noatomic",
+     "no-atomic",
+     "xs",
+     "recv1-noatomic",
+     "recv4-noatomic",
+     "recv8-noatomic"
+    ],
+    [
+     "xs",
+     "recv4-noatomic",
+     "recv1-noatomic",
+     "no-atomic",
+     "recv2-noatomic",
+     "recv8-noatomic"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.mac-mars-hdd.sender.warm",
+   "block": 4,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv2-noatomic",
+     "recv1-noatomic",
+     "recv8-noatomic",
+     "recv4-noatomic",
+     "xs",
+     "no-atomic"
+    ],
+    [
+     "xs",
+     "no-atomic",
+     "recv4-noatomic",
+     "recv8-noatomic",
+     "recv2-noatomic",
+     "recv1-noatomic"
+    ],
+    [
+     "recv2-noatomic",
+     "recv1-noatomic",
+     "xs",
+     "recv4-noatomic",
+     "no-atomic",
+     "recv8-noatomic"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.mac-mars-hdd.sender.warm",
+   "block": 5,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv1-noatomic",
+     "xs",
+     "recv2-noatomic",
+     "recv4-noatomic",
+     "no-atomic",
+     "recv8-noatomic"
+    ],
+    [
+     "recv1-noatomic",
+     "xs",
+     "recv4-noatomic",
+     "recv2-noatomic",
+     "no-atomic",
+     "recv8-noatomic"
+    ],
+    [
+     "recv4-noatomic",
+     "recv1-noatomic",
+     "recv2-noatomic",
+     "recv8-noatomic",
+     "xs",
+     "no-atomic"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-threshold.fresh.mac-mars-hdd.sender.warm",
+   "block": 5,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "recv2-noatomic",
+     "recv8-noatomic",
+     "recv1-noatomic",
+     "recv4-noatomic",
+     "no-atomic"
+    ],
+    [
+     "recv2-noatomic",
+     "xs",
+     "no-atomic",
+     "recv8-noatomic",
+     "recv4-noatomic",
+     "recv1-noatomic"
+    ],
+    [
+     "recv4-noatomic",
+     "recv8-noatomic",
+     "recv2-noatomic",
+     "no-atomic",
+     "xs",
+     "recv1-noatomic"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.mac-mars-hdd.sender.warm",
+   "block": 5,
+   "verify_full": false,
+   "orders": [
+    [
+     "no-atomic",
+     "recv2-noatomic",
+     "recv8-noatomic",
+     "xs",
+     "recv4-noatomic",
+     "recv1-noatomic"
+    ],
+    [
+     "recv4-noatomic",
+     "recv2-noatomic",
+     "recv8-noatomic",
+     "recv1-noatomic",
+     "no-atomic",
+     "xs"
+    ],
+    [
+     "recv4-noatomic",
+     "recv2-noatomic",
+     "recv1-noatomic",
+     "no-atomic",
+     "recv8-noatomic",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.mac-mars-hdd.sender.warm",
+   "block": 6,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv1-noatomic",
+     "xs",
+     "recv4-noatomic",
+     "recv2-noatomic",
+     "no-atomic",
+     "recv8-noatomic"
+    ],
+    [
+     "xs",
+     "recv4-noatomic",
+     "recv2-noatomic",
+     "recv8-noatomic",
+     "no-atomic",
+     "recv1-noatomic"
+    ],
+    [
+     "xs",
+     "recv8-noatomic",
+     "no-atomic",
+     "recv4-noatomic",
+     "recv1-noatomic",
+     "recv2-noatomic"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-threshold.fresh.mac-mars-hdd.sender.warm",
+   "block": 6,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv2-noatomic",
+     "recv4-noatomic",
+     "xs",
+     "no-atomic",
+     "recv1-noatomic",
+     "recv8-noatomic"
+    ],
+    [
+     "recv4-noatomic",
+     "xs",
+     "recv1-noatomic",
+     "recv8-noatomic",
+     "recv2-noatomic",
+     "no-atomic"
+    ],
+    [
+     "recv4-noatomic",
+     "recv1-noatomic",
+     "recv2-noatomic",
+     "no-atomic",
+     "xs",
+     "recv8-noatomic"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.mac-mars-hdd.sender.warm",
+   "block": 6,
+   "verify_full": false,
+   "orders": [
+    [
+     "recv4-noatomic",
+     "xs",
+     "recv2-noatomic",
+     "no-atomic",
+     "recv8-noatomic",
+     "recv1-noatomic"
+    ],
+    [
+     "recv1-noatomic",
+     "no-atomic",
+     "recv4-noatomic",
+     "recv2-noatomic",
+     "xs",
+     "recv8-noatomic"
+    ],
+    [
+     "recv2-noatomic",
+     "recv8-noatomic",
+     "recv4-noatomic",
+     "xs",
+     "recv1-noatomic",
+     "no-atomic"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.mac-mars-hdd.sender.warm",
+   "block": 7,
+   "verify_full": true,
+   "orders": [
+    [
+     "recv2-noatomic",
+     "recv1-noatomic",
+     "xs",
+     "recv4-noatomic",
+     "no-atomic",
+     "recv8-noatomic"
+    ],
+    [
+     "recv1-noatomic",
+     "recv8-noatomic",
+     "recv2-noatomic",
+     "no-atomic",
+     "xs",
+     "recv4-noatomic"
+    ],
+    [
+     "recv1-noatomic",
+     "no-atomic",
+     "recv8-noatomic",
+     "recv4-noatomic",
+     "recv2-noatomic",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.mac-mars-hdd.sender.warm",
+   "block": 7,
+   "verify_full": true,
+   "orders": [
+    [
+     "no-atomic",
+     "recv1-noatomic",
+     "recv2-noatomic",
+     "recv4-noatomic",
+     "recv8-noatomic",
+     "xs"
+    ],
+    [
+     "recv8-noatomic",
+     "recv2-noatomic",
+     "recv1-noatomic",
+     "no-atomic",
+     "recv4-noatomic",
+     "xs"
+    ],
+    [
+     "recv2-noatomic",
+     "recv8-noatomic",
+     "recv4-noatomic",
+     "xs",
+     "no-atomic",
+     "recv1-noatomic"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-threshold.fresh.mac-mars-hdd.sender.warm",
+   "block": 7,
+   "verify_full": true,
+   "orders": [
+    [
+     "recv2-noatomic",
+     "xs",
+     "recv8-noatomic",
+     "recv4-noatomic",
+     "recv1-noatomic",
+     "no-atomic"
+    ],
+    [
+     "recv2-noatomic",
+     "recv1-noatomic",
+     "no-atomic",
+     "xs",
+     "recv4-noatomic",
+     "recv8-noatomic"
+    ],
+    [
+     "xs",
+     "recv4-noatomic",
+     "recv1-noatomic",
+     "recv2-noatomic",
+     "recv8-noatomic",
+     "no-atomic"
+    ]
+   ]
+  }
+ ],
+ "scripts": {
+  "probe.py": "f1c65a4e27657e4622416a43e86041663e6906f685d8f5f6a26b4e8df3d7eecb",
+  "corpus.py": "5e971be04ab61be1ef7fd0bce2877a69a4ef64f4f4147063fb6d8953a7ee071f",
+  "corpora.json": "ea0375d355e411974e5f68f203bba6370dc253d6fb277bf2ff81f0b27f023460",
+  "agent.py": "0536e8a9d8bdeff8541edff9d5cf0af9b94df5e0fc40da377133c166ecb32f2b",
+  "runner.py": "cce71fee149764ad1a5c913061f19620a8ff44f792d23d55f7a290d59a9e20ff",
+  "measure.py": "5065310f480ff1cabfa7c645f0db342624a02f9a081b96069d50d52b3d224777"
+ }
+}

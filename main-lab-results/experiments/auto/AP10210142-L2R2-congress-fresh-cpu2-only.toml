@@ -1,0 +1,29 @@
+# Written by the 6-hourly planner (2026-10-21T01:42Z). Why: Step 1 (reproduce, split by factor): it separates the CPU cap from the latency, so a reproduced gap points at the right cause.
+id = "AP10210142-L2R2-congress-fresh-cpu2-only"
+kind = "screening"
+hypothesis = "The 2-CPU cap alone, which leaves four workers competing for two cores, pulls xs's time to within 5% of rsync's or behind it, unlike the plain link where xs led by 1.39x."
+primary = "durable_s"
+delta = 0.05
+blocks = 10
+control = "xs-j4"
+verify = "first-last"
+cleanup = "eager"
+sample_timeout_s = 7200
+cpus = { host = "neo", count = 2 }
+
+[arms.xs-j4]
+tool = "xs"
+rev = "e51c1df1329a"
+flags = ["-a", "-j4"]
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[matrix]
+link = "neo-mars-lan"
+corpus = ["real-congress"]
+scenario = ["fresh"]
+direction = ["neo>mars"]
+client = ["initiator"]
+cache = ["warm"]

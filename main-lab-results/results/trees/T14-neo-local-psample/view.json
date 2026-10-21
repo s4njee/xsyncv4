@@ -1,0 +1,345 @@
+{
+ "id": "T14-neo-local-psample",
+ "question": "How fast can a Pi 5 back up the 21 GB psample tree from its NVMe drive to a Samsung T5 over USB, and what limits it?",
+ "start": [
+  "A"
+ ],
+ "startedUtc": "2026-10-18T18:09:24Z",
+ "until": null,
+ "fills": 0,
+ "nodes": [
+  {
+   "id": "A",
+   "kind": "experiment",
+   "experiment": "LC1-psample-local-baseline",
+   "question": "On a first backup with nothing cached, how much faster is xs -aH than rsync -aH, cp -a and cp -r, and how close does any tool come to one tar stream?",
+   "estimateHours": 2.0,
+   "hypothesis": "Copying psample locally from NVMe to the T5 with cold caches, xs -aH is faster than rsync -aH and cp -a, and near a single tar stream.",
+   "design": "screening",
+   "state": "decided",
+   "runs": [
+    {
+     "id": "20261018T180924Z-LC1-psample-local-baseline",
+     "key": "local/LC1-psample-local-baseline/20261018T180924Z-LC1-psample-local-baseline",
+     "state": "stopped"
+    },
+    {
+     "id": "20261018T184002Z-LC1-psample-local-baseline",
+     "key": "local/LC1-psample-local-baseline/20261018T184002Z-LC1-psample-local-baseline",
+     "state": "complete"
+    }
+   ],
+   "decision": "A: xs is not ahead of rsync on a local copy: look for what holds it back (workers, flushing) and still check re-syncs (real-psample neo\u2192neo-ssd xs 0.89\u00d7 [0.81, 0.99])",
+   "decidedUtc": "2026-10-18T21:54:50Z",
+   "start": true,
+   "promote": null
+  },
+  {
+   "id": "B",
+   "kind": "experiment",
+   "experiment": "LC2-psample-local-workers",
+   "question": "With four cores and one USB drive, does xs copy psample faster with 1, 2, 8 or 16 workers than with its default 4?",
+   "estimateHours": 2.0,
+   "hypothesis": "On a four-core Pi writing to one USB SSD, a worker count other than the default four copies psample faster.",
+   "design": "screening",
+   "state": "decided",
+   "runs": [
+    {
+     "id": "20261018T215450Z-LC2-psample-local-workers",
+     "key": "local/LC2-psample-local-workers/20261018T215450Z-LC2-psample-local-workers",
+     "state": "complete"
+    }
+   ],
+   "decision": "B: no worker count beats the default four on this Pi and drive",
+   "decidedUtc": "2026-10-19T01:34:54Z",
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "B~end1",
+   "kind": "end",
+   "experiment": null,
+   "question": null,
+   "estimateHours": null,
+   "hypothesis": "no worker count beats the default four on this Pi and drive",
+   "design": null,
+   "state": "decided",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "Bc",
+   "kind": "confirm",
+   "experiment": "LC2-workers-confirm",
+   "question": "Does the faster worker count hold up with 12 fresh blocks?",
+   "estimateHours": 2.4,
+   "hypothesis": "Confirms the fastest arm of B with 12 fresh blocks, if it had one.",
+   "design": "confirmatory",
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": "B"
+  },
+  {
+   "id": "C",
+   "kind": "experiment",
+   "experiment": "LC3-psample-local-durable",
+   "question": "How long after the copy exits is psample safely on the T5, and does eager writeback or skipping the temp-file rename shorten it?",
+   "estimateHours": 2.0,
+   "hypothesis": "Eager writeback or skipping the temp-file rename gets the psample backup safely onto the T5 sooner.",
+   "design": "screening",
+   "state": "decided",
+   "runs": [
+    {
+     "id": "20261018T215452Z-LC3-psample-local-durable",
+     "key": "local/LC3-psample-local-durable/20261018T215452Z-LC3-psample-local-durable",
+     "state": "complete"
+    }
+   ],
+   "decision": "C: eager writeback or --no-atomic gets the backup onto the drive sooner: confirm it (real-psample neo\u2192neo-ssd xs-eager 1.62\u00d7 [1.47, 1.78])",
+   "decidedUtc": "2026-10-19T07:38:02Z",
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "C~end1",
+   "kind": "end",
+   "experiment": null,
+   "question": null,
+   "estimateHours": null,
+   "hypothesis": "neither flushing early nor skipping the rename gets the backup onto the T5 sooner",
+   "design": null,
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "Cc",
+   "kind": "confirm",
+   "experiment": "LC3-durable-confirm",
+   "question": "Does the setting that got psample onto the T5 sooner hold up with 12 fresh blocks?",
+   "estimateHours": 2.4,
+   "hypothesis": "Confirms the fastest arm of C with 12 fresh blocks, if it had one.",
+   "design": "confirmatory",
+   "state": "decided",
+   "runs": [
+    {
+     "id": "20261019T125037Z-LC3-durable-confirm",
+     "key": "local/LC3-durable-confirm/20261019T125037Z-LC3-durable-confirm",
+     "state": "complete"
+    }
+   ],
+   "decision": "Cc: done (1 run)",
+   "decidedUtc": "2026-10-20T06:04:08Z",
+   "start": false,
+   "promote": "C"
+  },
+  {
+   "id": "D",
+   "kind": "experiment",
+   "experiment": "LC4-psample-local-resync",
+   "question": "Re-syncing the backup with nothing cached, at a no-op and after 1% of files change, is xs -aH faster than rsync -aH?",
+   "estimateHours": 2.4,
+   "hypothesis": "Re-syncing the psample backup locally with cold caches, xs -aH is faster than rsync -aH at a no-op and after a 1% change.",
+   "design": "screening",
+   "state": "decided",
+   "runs": [
+    {
+     "id": "20261018T215454Z-LC4-psample-local-resync",
+     "key": "local/LC4-psample-local-resync/20261018T215454Z-LC4-psample-local-resync",
+     "state": "complete"
+    }
+   ],
+   "decision": "D: xs re-syncs the local backup at least as fast as rsync",
+   "decidedUtc": "2026-10-19T10:39:51Z",
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "D~end0",
+   "kind": "end",
+   "experiment": null,
+   "question": null,
+   "estimateHours": null,
+   "hypothesis": "rsync re-syncs the local backup faster than xs: a code candidate, decision needed",
+   "design": null,
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "D~end1",
+   "kind": "end",
+   "experiment": null,
+   "question": null,
+   "estimateHours": null,
+   "hypothesis": "xs re-syncs the local backup at least as fast as rsync",
+   "design": null,
+   "state": "decided",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  }
+ ],
+ "edges": [
+  {
+   "from": "A",
+   "to": "B",
+   "label": "xs behind rsync",
+   "taken": true
+  },
+  {
+   "from": "A",
+   "to": "C",
+   "label": "xs behind rsync",
+   "taken": true
+  },
+  {
+   "from": "A",
+   "to": "D",
+   "label": "xs behind rsync",
+   "taken": true
+  },
+  {
+   "from": "A",
+   "to": "B",
+   "label": "xs ahead of rsync",
+   "taken": false
+  },
+  {
+   "from": "A",
+   "to": "C",
+   "label": "xs ahead of rsync",
+   "taken": false
+  },
+  {
+   "from": "A",
+   "to": "D",
+   "label": "xs ahead of rsync",
+   "taken": false
+  },
+  {
+   "from": "B",
+   "to": "Bc",
+   "label": "a worker count >= 1.05x",
+   "taken": false
+  },
+  {
+   "from": "B",
+   "to": "B~end1",
+   "label": "default is right",
+   "taken": true
+  },
+  {
+   "from": "C",
+   "to": "Cc",
+   "label": "xs setting >= 1.05x",
+   "taken": true
+  },
+  {
+   "from": "C",
+   "to": "C~end1",
+   "label": "no faster setting",
+   "taken": false
+  },
+  {
+   "from": "D",
+   "to": "D~end0",
+   "label": "xs slower re-syncing",
+   "taken": false
+  },
+  {
+   "from": "D",
+   "to": "D~end1",
+   "label": "xs level or faster",
+   "taken": true
+  }
+ ],
+ "decisions": [
+  {
+   "utc": "2026-10-20T06:04:08Z",
+   "node": "Cc",
+   "kind": "decision",
+   "text": "Cc: done (1 run)"
+  },
+  {
+   "utc": "2026-10-19T12:50:38Z",
+   "node": "Cc",
+   "kind": "queued",
+   "text": "Cc queued on neo-ssd (24 samples): after C: eager writeback or --no-atomic gets the backup onto the drive sooner: confirm it; confirming xs-eager against xs on real-psample"
+  },
+  {
+   "utc": "2026-10-19T12:43:24Z",
+   "node": "Cc",
+   "kind": "warning",
+   "text": "Cc: could not queue; will try again"
+  },
+  {
+   "utc": "2026-10-19T12:38:24Z",
+   "node": "Cc",
+   "kind": "warning",
+   "text": "Cc: could not queue; will try again"
+  },
+  {
+   "utc": "2026-10-19T12:33:24Z",
+   "node": "Cc",
+   "kind": "warning",
+   "text": "Cc: could not queue; will try again"
+  },
+  {
+   "utc": "2026-10-19T12:28:24Z",
+   "node": "Cc",
+   "kind": "warning",
+   "text": "Cc: could not queue; will try again"
+  },
+  {
+   "utc": "2026-10-19T12:23:25Z",
+   "node": "Cc",
+   "kind": "warning",
+   "text": "Cc: could not queue; will try again"
+  },
+  {
+   "utc": "2026-10-19T12:18:25Z",
+   "node": "Cc",
+   "kind": "warning",
+   "text": "Cc: could not queue; will try again"
+  },
+  {
+   "utc": "2026-10-19T12:13:24Z",
+   "node": "Cc",
+   "kind": "warning",
+   "text": "Cc: could not queue; will try again"
+  },
+  {
+   "utc": "2026-10-19T12:08:25Z",
+   "node": "Cc",
+   "kind": "warning",
+   "text": "Cc: could not queue; will try again"
+  },
+  {
+   "utc": "2026-10-19T12:03:24Z",
+   "node": "Cc",
+   "kind": "warning",
+   "text": "Cc: could not queue; will try again"
+  },
+  {
+   "utc": "2026-10-19T11:58:24Z",
+   "node": "Cc",
+   "kind": "warning",
+   "text": "Cc: could not queue; will try again"
+  }
+ ]
+}

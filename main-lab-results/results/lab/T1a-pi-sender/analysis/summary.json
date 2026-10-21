@@ -1,0 +1,19 @@
+{
+ "experiment": "T1a-pi-sender",
+ "kind": "screening",
+ "hypothesis": "Fewer xs worker threads, or a cheaper SSH cipher, close the gap to rsync when neo sends a mixed tree.",
+ "primary": "wall_s",
+ "control": "xs",
+ "delta": 0.02,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261012T124301Z-T1a-pi-sender"
+ ],
+ "spec_sha256": [
+  "4239b0f7f6afaa93b0d81dee1d021e20f5f6d2603a8df64d0174b346402ec271"
+ ],
+ "valid_blocks": 24,
+ "void_attempts": 0,
+ "void_reasons": []
+}

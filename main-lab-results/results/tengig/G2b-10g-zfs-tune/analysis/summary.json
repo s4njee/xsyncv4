@@ -1,0 +1,19 @@
+{
+ "experiment": "G2b-10g-zfs-tune",
+ "kind": "screening",
+ "hypothesis": "A different receiving worker count or write size lands large files on the pool faster.",
+ "primary": "durable_s",
+ "control": "xs",
+ "delta": 0.03,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261017T142015Z-G2b-10g-zfs-tune"
+ ],
+ "spec_sha256": [
+  "f20338280d4483c449cbde586a160b0a9cf5761872b747f7babdeba4ca3683fd"
+ ],
+ "valid_blocks": 0,
+ "void_attempts": 0,
+ "void_reasons": []
+}

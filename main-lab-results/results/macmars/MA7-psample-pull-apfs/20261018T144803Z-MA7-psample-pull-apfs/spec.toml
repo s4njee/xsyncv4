@@ -1,0 +1,59 @@
+# MA7 (tree T13): xs loses to rsync pulling psample onto the Mac (MA4: no-op 1.69x,
+# 1% update 1.30x slower), as S1/S2 found pulling small-deep onto APFS. psample has
+# 548k directories for 711k files, so per-directory work on the APFS receiver is the
+# suspect. S2 showed receiver worker counts do not help small-deep; these arms try
+# what it did not: skipping directory times (-O), no temp-file rename, more workers
+# or more scanners on the receiver only. Engine metrics give each end's stage times.
+id = "MA7-psample-pull-apfs"
+kind = "screening"
+hypothesis = "Skipping directory times, the rename, or giving the Mac receiver more workers or scanners recovers xs's psample pull onto APFS."
+primary = "wall_s"
+delta = 0.05
+blocks = 6
+control = "xs"
+verify = "first-last"
+sample_timeout_s = 7200
+
+[arms.xs]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-aH"]
+
+[arms.xs-O]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-aH", "-O"]
+
+[arms.xs-noatomic]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-aH", "--no-atomic"]
+
+[arms.xs-recv8]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-aH"]
+tune = { receiver = "jobs=8" }
+
+[arms.xs-scan4]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-aH"]
+tune = { receiver = "scan_workers=4" }
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-aH"]
+
+[matrix]
+link = "mac-mars-10g"
+corpus = ["real-psample"]
+scenario = ["noop", "update-1pct"]
+direction = ["mars>mac"]
+client = ["initiator"]
+cache = ["warm"]

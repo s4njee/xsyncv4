@@ -1,0 +1,21 @@
+{
+ "experiment": "X5-10g-baseline",
+ "kind": "screening",
+ "hypothesis": "At 10 Gb/s xs copies large files faster than rsync and approaches what one ssh connection carries.",
+ "primary": "durable_s",
+ "control": "rsync",
+ "delta": 0.03,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261016T032058Z-X5-10g-baseline"
+ ],
+ "spec_sha256": [
+  "3ba14b64d997cf57a9f47bfb2f396861911bd3937f41bf8120438e532ac530f2"
+ ],
+ "valid_blocks": 35,
+ "void_attempts": 1,
+ "void_reasons": [
+  "stopped"
+ ]
+}

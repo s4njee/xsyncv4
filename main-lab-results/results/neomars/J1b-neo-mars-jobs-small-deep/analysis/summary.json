@@ -1,0 +1,19 @@
+{
+ "experiment": "J1b-neo-mars-jobs-small-deep",
+ "kind": "screening",
+ "hypothesis": "-j4 and -j8 differ from each other, and from the default, by more than 5% in time-to-durable on small-file and no-op copies between neo and mars.",
+ "primary": "durable_s",
+ "control": "xs",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261020T170932Z-J1b-neo-mars-jobs-small-deep"
+ ],
+ "spec_sha256": [
+  "019a2c553465eadd7392558f8420aad62e10263eb4486095a86f071058c5c6c1"
+ ],
+ "valid_blocks": 32,
+ "void_attempts": 0,
+ "void_reasons": []
+}

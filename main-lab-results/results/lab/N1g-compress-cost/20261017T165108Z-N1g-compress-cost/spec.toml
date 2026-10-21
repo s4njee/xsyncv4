@@ -1,0 +1,36 @@
+# N1g-compress-cost (tree T7): the other half of the crossover. large-mixed is 32
+# large files with no text, so it will not compress: -z only spends CPU. If adaptive
+# or a fixed level 1 costs time against plain -a here, the sample-and-skip path
+# described by H14 must stay sharp on a gigabit link and a slow sender.
+id = "N1g-compress-cost"
+kind = "screening"
+hypothesis = "On a tree that will not compress, xs -z costs time against xs -a, and level 1 less than adaptive."
+primary = "durable_s"
+delta = 0.03
+blocks = 8
+control = "xs"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.xs]
+tool = "xs"
+rev = "8cc75bbdb801"
+flags = ["-a"]
+
+[arms.xs-z]
+tool = "xs"
+rev = "8cc75bbdb801"
+flags = ["-az"]
+
+[arms.xs-z1]
+tool = "xs"
+rev = "8cc75bbdb801"
+flags = ["-az", "--compress-level=1"]
+
+[matrix]
+link = "lan"
+corpus = ["large-mixed"]
+scenario = ["fresh"]
+direction = ["neo>freya", "freya>neo"]
+client = ["sender"]
+cache = ["warm"]

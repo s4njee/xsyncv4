@@ -1,0 +1,25 @@
+{
+ "experiment": "LC1-psample-local-baseline",
+ "kind": "screening",
+ "hypothesis": "Copying psample locally from NVMe to the T5 with cold caches, xs -aH is faster than rsync -aH and cp -a, and near a single tar stream.",
+ "primary": "durable_s",
+ "control": "rsync",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261018T180924Z-LC1-psample-local-baseline",
+  "20261018T184002Z-LC1-psample-local-baseline"
+ ],
+ "spec_sha256": [
+  "c2643cec9e12c5e9c06f618a97b75d0c4891454b1ef5040d030a89c4813f8f7e",
+  "ffd010619ed63e08152ca2b51ad3363d71e78c58501469c5bced29f42fff4031"
+ ],
+ "valid_blocks": 4,
+ "void_attempts": 3,
+ "void_reasons": [
+  "rsync: the destination does not match the corpus manifest: ",
+  "tar: the destination does not match the corpus manifest: ",
+  "xs: the destination does not match the corpus manifest: "
+ ]
+}

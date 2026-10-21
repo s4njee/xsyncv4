@@ -1,0 +1,53 @@
+# E4a without compression: the DATA block size and the small-file cutoff,
+# one at a time around 1 MiB and 512 KiB (H22). With -z they changed nothing
+# for the better; without it the question is framing and syscall overhead.
+id = "E4a2-blocks"
+kind = "screening"
+hypothesis = "The block size and small-file cutoff are near their best: no level moves a copy by more than 3%."
+primary = "wall_s"
+delta = 0.03
+blocks = 10
+control = "xs"
+verify = "first-last"
+
+[arms.xs]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a"]
+metrics = true
+
+[arms.block256k]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a"]
+tune = "block_target=262144"
+metrics = true
+
+[arms.block4m]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a"]
+tune = "block_target=4194304"
+metrics = true
+
+[arms.small64k]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a"]
+tune = "small_max=65536"
+metrics = true
+
+[arms.small2m]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a"]
+tune = "small_max=2097152"
+metrics = true
+
+[matrix]
+link = "lan"
+corpus = ["mixed-bimodal", "mixed-threshold", "small-real"]
+scenario = ["fresh"]
+direction = ["neo>freya", "freya>neo"]
+client = ["sender"]
+cache = ["warm"]

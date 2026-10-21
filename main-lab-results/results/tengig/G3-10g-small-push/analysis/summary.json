@@ -1,0 +1,22 @@
+{
+ "experiment": "G3-10g-small-push",
+ "kind": "screening",
+ "hypothesis": "Batching, scanning or framing settings let small and mixed trees use more of the 10GbE link.",
+ "primary": "durable_s",
+ "control": "xs-best",
+ "delta": 0.03,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261017T133652Z-G3-10g-small-push"
+ ],
+ "spec_sha256": [
+  "59977c19ec6b949f7bb32599565c407ba8ea39dfbb2260ba0973d3aeac1d009c"
+ ],
+ "valid_blocks": 15,
+ "void_attempts": 6,
+ "void_reasons": [
+  "mac reaches freya by en0, not en4",
+  "xs-best: harness error: freya: `python3 /mnt/nvme/xsbench/lib/b135cedd700c/probe.py snapshot --interface enp27s0f0` exited 255: ssh: connect to host [host] p"
+ ]
+}

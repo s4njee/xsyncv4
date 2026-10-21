@@ -1,0 +1,29 @@
+# The same curve with cold caches on both hosts before every sample.
+# E8a, the file-size curve: 256 MiB of text-like data in equal files of 1 KiB
+# up to 16 MiB (262,144 files down to 16). It crosses small_max (512 KiB) and
+# the block size (1 MiB). Each point is a cell with its own interval.
+id = "E8a2-size-cold"
+kind = "screening"
+hypothesis = "Descriptive: the xs to rsync ratio as a smooth function of the swept variable, each point with its interval."
+primary = "durable_s"
+delta = 0.03
+blocks = 4
+control = "rsync"
+verify = "first-last"
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[arms.xs]
+tool = "xs"
+rev = "8cc75bbdb801"
+flags = ["-a"]
+
+[matrix]
+link = "lan"
+corpus = ["scale-size-1024", "scale-size-4096", "scale-size-16384", "scale-size-65536", "scale-size-262144", "scale-size-1048576", "scale-size-4194304", "scale-size-16777216"]
+scenario = ["fresh", "noop"]
+direction = ["neo>freya", "freya>neo"]
+client = ["sender"]
+cache = ["cold"]

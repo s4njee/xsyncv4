@@ -1,0 +1,28 @@
+# F3b (tree T3 fill): the same replicate onto freya's ZFS pool.
+id = "F3b-10g-zfs-replicate"
+kind = "screening"
+hypothesis = "xs stays ahead of rsync onto the ZFS pool from run to run."
+primary = "durable_s"
+delta = 0.03
+blocks = 4
+control = "xs"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.xs]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-a"]
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[matrix]
+link = "mac-freya-zfs-10g"
+corpus = ["large-four", "mixed-bimodal", "small-flat"]
+scenario = ["fresh"]
+direction = ["mac>freya-zfs"]
+client = ["initiator"]
+cache = ["warm"]

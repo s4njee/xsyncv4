@@ -1,0 +1,12 @@
+{"utc": "2026-10-17T02:02:50Z", "tree": "T3-mac-freya-10g", "node": "G0", "kind": "queued", "text": "G0 queued on mac (192 samples): start of the tree", "run": "20261017T020249Z-G0-10g-baseline"}
+{"utc": "2026-10-17T02:02:51Z", "tree": "T3-mac-freya-10g", "node": "G0b", "kind": "queued", "text": "G0b queued on mac (96 samples): start of the tree", "run": "20261017T020250Z-G0b-10g-large-mac"}
+{"utc": "2026-10-17T12:16:31Z", "tree": "T3-mac-freya-10g", "node": "G0", "kind": "queued", "text": "G0: its run was cut short with 6 of 8 blocks per cell; continuing with 2 more", "run": "20261017T121630Z-G0-10g-baseline"}
+{"utc": "2026-10-17T12:42:14Z", "tree": "T3-mac-freya-10g", "node": "G0", "kind": "decision", "text": "G0: xs carries large files below 8 Gb/s one way or both: tune them before anything else \u2192 G1", "next": ["G1"]}
+{"utc": "2026-10-17T12:42:15Z", "tree": "T3-mac-freya-10g", "node": "G1", "kind": "queued", "text": "G1 queued on mac (192 samples): after G0: xs carries large files below 8 Gb/s one way or both: tune them before anything else", "run": "20261017T124214Z-G1-10g-large-tune"}
+{"utc": "2026-10-17T13:04:21Z", "tree": "T3-mac-freya-10g", "node": "G0b", "kind": "decision", "text": "G0b: done (1 run)"}
+{"utc": "2026-10-17T13:36:50Z", "tree": "T3-mac-freya-10g", "node": "G1", "kind": "decision", "text": "G1: no setting moved large files closer to the link \u2192 G2, G3", "next": ["G2", "G3"]}
+{"utc": "2026-10-17T13:36:52Z", "tree": "T3-mac-freya-10g", "node": "G2", "kind": "queued", "text": "G2 queued on mac (160 samples): after G1: no setting moved large files closer to the link", "run": "20261017T133650Z-G2-10g-zfs"}
+{"utc": "2026-10-17T13:36:53Z", "tree": "T3-mac-freya-10g", "node": "G3", "kind": "queued", "text": "G3 queued on mac (384 samples): after G1: no setting moved large files closer to the link", "run": "20261017T133652Z-G3-10g-small-push"}
+{"utc": "2026-10-17T14:20:15Z", "tree": "T3-mac-freya-10g", "node": "G2", "kind": "decision", "text": "G2: the pool holds large files below 8 Gb/s: tune its writes \u2192 G2b", "next": ["G2b"]}
+{"utc": "2026-10-17T14:20:16Z", "tree": "T3-mac-freya-10g", "node": "G2b", "kind": "queued", "text": "G2b queued on mac (144 samples): after G2: the pool holds large files below 8 Gb/s: tune its writes", "run": "20261017T142015Z-G2b-10g-zfs-tune"}
+{"utc": "2026-10-17T15:15:54Z", "tree": "T3-mac-freya-10g", "node": "G3", "kind": "warning", "text": "G3: run 20261017T133652Z-G3-10g-small-push ended failed; its branch stops here"}

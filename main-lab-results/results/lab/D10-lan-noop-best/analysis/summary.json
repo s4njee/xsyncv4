@@ -1,0 +1,21 @@
+{
+ "experiment": "D10-lan-noop-best",
+ "kind": "screening",
+ "hypothesis": "xs's best small-file setting is faster than its default on no-op copies of small trees.",
+ "primary": "durable_s",
+ "control": "xs",
+ "delta": 0.03,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261017T174642Z-D10-lan-noop-best"
+ ],
+ "spec_sha256": [
+  "cae4e77f33dfb6315fd5f0953933d2bd46bbb9c2aba70cc311f9a48750345558"
+ ],
+ "valid_blocks": 37,
+ "void_attempts": 84,
+ "void_reasons": [
+  "neo does not answer ping"
+ ]
+}

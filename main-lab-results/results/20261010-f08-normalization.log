@@ -1,0 +1,129 @@
+Waiting for the existing APFS matrix to complete
+-- The C compiler identification is AppleClang 21.0.0.21000101
+-- The CXX compiler identification is AppleClang 21.0.0.21000101
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /usr/bin/cc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+-- Found Threads: TRUE
+-- Found ICU: /opt/homebrew/opt/icu4c/include (found version "78.3") found components: uc
+-- Found Python3: /opt/homebrew/Frameworks/Python.framework/Versions/3.14/bin/python3.14 (found version "3.14.8") found components: Interpreter
+-- Configuring done (3.5s)
+-- Generating done (0.0s)
+-- Build files have been written to: ~/projects/xsyncv4/.bench/p3-f08-reference-macos
+[1/29] Building CXX object CMakeFiles/xsync.dir/src/util.cpp.o
+[2/29] Building CXX object CMakeFiles/xsync.dir/src/progress.cpp.o
+[3/29] Building CXX object CMakeFiles/xsync.dir/src/main.cpp.o
+[4/29] Building CXX object CMakeFiles/xsync.dir/src/filter.cpp.o
+[5/29] Building CXX object CMakeFiles/xsync.dir/src/local.cpp.o
+[6/29] Building CXX object CMakeFiles/xsync.dir/src/fs.cpp.o
+[7/29] Building CXX object CMakeFiles/xsync.dir/src/names.cpp.o
+[8/29] Building CXX object CMakeFiles/xsync.dir/src/linux_scan.cpp.o
+[9/29] Building CXX object CMakeFiles/xsync.dir/src/destination.cpp.o
+[10/29] Building CXX object CMakeFiles/xsync.dir/src/compression.cpp.o
+[11/29] Building CXX object CMakeFiles/xsync.dir/src/fallback.cpp.o
+[12/29] Building CXX object CMakeFiles/xsync.dir/src/transport.cpp.o
+[13/29] Building CXX object CMakeFiles/xsync.dir/src/install.cpp.o
+[14/29] Building CXX object CMakeFiles/xsync.dir/src/arguments.cpp.o
+[15/29] Building CXX object CMakeFiles/xsync.dir/src/remote.cpp.o
+[16/29] Building CXX object CMakeFiles/xsync.dir/src/output.cpp.o
+[17/29] Building CXX object CMakeFiles/xsync.dir/src/hardlink.cpp.o
+[18/29] Building CXX object CMakeFiles/xsync.dir/src/rate_limit.cpp.o
+[19/29] Building CXX object CMakeFiles/xsync.dir/src/delta.cpp.o
+[20/29] Building CXX object CMakeFiles/xsync.dir/src/listing.cpp.o
+[21/29] Building CXX object CMakeFiles/xsync.dir/src/xattrs.cpp.o
+[22/29] Building CXX object CMakeFiles/xsync.dir/src/xattr_value.cpp.o
+[23/29] Building CXX object CMakeFiles/xsync.dir/src/selection.cpp.o
+[24/29] Building CXX object CMakeFiles/xsync.dir/src/acls.cpp.o
+[25/29] Building CXX object CMakeFiles/xsync.dir/src/permissions.cpp.o
+[26/29] Building CXX object CMakeFiles/xsync.dir/src/ownership.cpp.o
+[27/29] Building CXX object CMakeFiles/xsync.dir/src/sparse.cpp.o
+[28/29] Building CXX object CMakeFiles/xsync.dir/src/link_dest.cpp.o
+[29/29] Linking CXX executable xs
+noop reference-j4 0/6: 1.9804s verified
+noop candidate-j1 0/6: 3.6063s verified
+noop candidate-j2 0/6: 2.5280s verified
+noop candidate-j4 0/6: 1.9988s verified
+noop candidate-j8 0/6: 1.9789s verified
+noop rsync 0/6: 2.0553s verified
+noop candidate-j1 1/6: 4.9006s verified
+noop candidate-j2 1/6: 2.9968s verified
+noop candidate-j4 1/6: 2.5857s verified
+noop candidate-j8 1/6: 2.0911s verified
+noop rsync 1/6: 2.5454s verified
+noop reference-j4 1/6: 2.4581s verified
+noop candidate-j2 2/6: 3.1771s verified
+noop candidate-j4 2/6: 2.4507s verified
+noop candidate-j8 2/6: 2.2277s verified
+noop rsync 2/6: 2.3129s verified
+noop reference-j4 2/6: 2.5204s verified
+noop candidate-j1 2/6: 5.4289s verified
+noop candidate-j4 3/6: 2.3802s verified
+noop candidate-j8 3/6: 2.1843s verified
+noop rsync 3/6: 2.3744s verified
+noop reference-j4 3/6: 2.5666s verified
+noop candidate-j1 3/6: 4.9656s verified
+noop candidate-j2 3/6: 3.2558s verified
+noop candidate-j8 4/6: 2.1826s verified
+noop rsync 4/6: 2.3469s verified
+noop reference-j4 4/6: 2.3873s verified
+noop candidate-j1 4/6: 4.6689s verified
+noop candidate-j2 4/6: 3.0198s verified
+noop candidate-j4 4/6: 2.3035s verified
+noop rsync 5/6: 2.4416s verified
+noop reference-j4 5/6: 2.4715s verified
+noop candidate-j1 5/6: 4.9374s verified
+noop candidate-j2 5/6: 3.0896s verified
+noop candidate-j4 5/6: 2.3421s verified
+noop candidate-j8 5/6: 2.0842s verified
+noop reference-j4 6/6: 2.4335s verified
+noop candidate-j1 6/6: 5.2322s verified
+noop candidate-j2 6/6: 3.0037s verified
+noop candidate-j4 6/6: 2.3234s verified
+noop candidate-j8 6/6: 2.1447s verified
+noop rsync 6/6: 2.2463s verified
+[
+  {
+    "case": "noop",
+    "tools": {
+      "reference-j4": {
+        "wall_seconds": 2.4648263750132173,
+        "cpu_seconds": 7.0782869999999996,
+        "peak_rss_bytes": 39845888
+      },
+      "candidate-j1": {
+        "wall_seconds": 4.95149552100338,
+        "cpu_seconds": 3.8508215,
+        "peak_rss_bytes": 31178752
+      },
+      "candidate-j2": {
+        "wall_seconds": 3.054687791503966,
+        "cpu_seconds": 4.703555,
+        "peak_rss_bytes": 34914304
+      },
+      "candidate-j4": {
+        "wall_seconds": 2.361107020988129,
+        "cpu_seconds": 7.107737,
+        "peak_rss_bytes": 40075264
+      },
+      "candidate-j8": {
+        "wall_seconds": 2.163676646305248,
+        "cpu_seconds": 9.960375500000001,
+        "peak_rss_bytes": 45137920
+      },
+      "rsync": {
+        "wall_seconds": 2.360654104501009,
+        "cpu_seconds": 2.8895695,
+        "peak_rss_bytes": 26247168
+      }
+    }
+  }
+]

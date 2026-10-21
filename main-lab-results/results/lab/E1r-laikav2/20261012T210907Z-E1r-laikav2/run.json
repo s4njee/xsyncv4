@@ -1,0 +1,305 @@
+{
+ "schema": 1,
+ "run_id": "20261012T210907Z-E1r-laikav2",
+ "started_utc": "2026-10-13T04:00:39.307+00:00",
+ "driver": "neo",
+ "plan": {
+  "schema": 1,
+  "experiment": "E1r-laikav2",
+  "spec_sha256": "b8334910da44e557ad72955c629b6d6990539b370a3dd5b040d448b117dc862b",
+  "kind": "screening",
+  "hypothesis": "On a real 42 GiB mixed tree, xs -aH is within a few percent of rsync -aH, as on the synthetic mixed corpora.",
+  "primary": "durable_s",
+  "delta": 0.03,
+  "control": "rsync",
+  "seed": 1,
+  "run_id": "20261012T210907Z-E1r-laikav2",
+  "driver": "neo",
+  "sample_timeout_s": 7200,
+  "results": "lab",
+  "background": false,
+  "eager_cleanup": false,
+  "hosts": {
+   "neo": {
+    "ssh": "[email]",
+    "name": "[host]",
+    "hostname": "neo",
+    "root": "~/benchmarks/xsyncv4/lab",
+    "interface": "eth0",
+    "helper": true,
+    "gates": {},
+    "local": false,
+    "system": "Linux"
+   },
+   "freya": {
+    "ssh": "[email]",
+    "name": "[host]",
+    "hostname": "freya",
+    "root": "/mnt/nvme/xsbench",
+    "interface": "enp10s0",
+    "helper": true,
+    "gates": {},
+    "local": false,
+    "system": "Linux"
+   }
+  },
+  "links": {
+   "lan": {
+    "hosts": [
+     "neo",
+     "freya"
+    ],
+    "medium": "wired",
+    "min_speed_mbps": 1000,
+    "max_rtt_ms": 2.0
+   }
+  },
+  "arms": [
+   {
+    "name": "rsync",
+    "tool": "rsync",
+    "flags": [
+     "-aH"
+    ],
+    "binary": {
+     "neo": "rsync",
+     "freya": "rsync"
+    }
+   },
+   {
+    "name": "xs",
+    "tool": "xs",
+    "flags": [
+     "-aH"
+    ],
+    "rev": "e1f05b518049",
+    "binary": {
+     "neo": "~/benchmarks/xsyncv4/lab/bin/xs-e1f05b518049",
+     "freya": "/mnt/nvme/xsbench/bin/xs-e1f05b518049"
+    },
+    "sha256": {
+     "neo": "38cfc25c012dc834473dbadcf4444b61cbf209785e4dcc064d544cc969637e51",
+     "freya": "4308d7fd5dde7b93b1635c8bef5df46659533d1b88fb31bd4d9b939e8cc9738c"
+    },
+    "artifacts": {
+     "xs-linux-amd64": "4308d7fd5dde7b93b1635c8bef5df46659533d1b88fb31bd4d9b939e8cc9738c",
+     "xs-linux-arm64": "38cfc25c012dc834473dbadcf4444b61cbf209785e4dcc064d544cc969637e51",
+     "xs-darwin-arm64": "f25ff52ed19aa3c8801b0cd586fbbae3bfd6bfa7254ea3bfb6ebc72b2cf7b034"
+    }
+   }
+  ],
+  "cells": [
+   {
+    "id": "real-laikav2.fresh.neo-freya.sender.warm",
+    "corpus": "real-laikav2",
+    "scenario": "fresh",
+    "sender": "neo",
+    "receiver": "freya",
+    "client": "sender",
+    "link": "lan",
+    "cache": "warm"
+   },
+   {
+    "id": "real-laikav2.fresh.freya-neo.sender.warm",
+    "corpus": "real-laikav2",
+    "scenario": "fresh",
+    "sender": "freya",
+    "receiver": "neo",
+    "client": "sender",
+    "link": "lan",
+    "cache": "warm"
+   }
+  ],
+  "corpora": {
+   "real-laikav2": {
+    "files": 54691,
+    "directories": 3106,
+    "bytes": 45316076042,
+    "digest": "e25b0f37618e36c7ec17588806ceeb5a74135bba74f68f21f75c376b6d10148a",
+    "quick_digest": "c545fd94c1e715bfb5abc350082ce30d9bde5857c66275bbaace2dfa0975fcbc"
+   }
+  },
+  "blocks": [
+   {
+    "cell": "real-laikav2.fresh.neo-freya.sender.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "xs",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "real-laikav2.fresh.freya-neo.sender.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "xs",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "real-laikav2.fresh.neo-freya.sender.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "rsync",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "real-laikav2.fresh.freya-neo.sender.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "rsync",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "real-laikav2.fresh.freya-neo.sender.warm",
+    "block": 2,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "xs",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "real-laikav2.fresh.neo-freya.sender.warm",
+    "block": 2,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "real-laikav2.fresh.neo-freya.sender.warm",
+    "block": 3,
+    "verify_full": true,
+    "orders": [
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "xs",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "real-laikav2.fresh.freya-neo.sender.warm",
+    "block": 3,
+    "verify_full": true,
+    "orders": [
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs"
+     ]
+    ]
+   }
+  ],
+  "scripts": {
+   "probe.py": "79c5d5649359fab936d72a58ccbb0348b8388dd71969a5c56d7915ca6a0c7563",
+   "corpus.py": "d6018d3611cba607a670f3fe554d0d4be5941fb2ef8fd65d57f10bfb582625f6",
+   "corpora.json": "729929e1ba7baf3a0b8413efffab5bc26ae0cbe8514daf1c05bbb53a314bb084",
+   "agent.py": "93f08faf14cc3ef3692716e214e5930a3b1574b35a8463f9aa6be69731572219",
+   "overnight.py": "c9b81a0bbcda7d1d2431e88060e88e432425e6251e46d6af2b24e7fdd0186072",
+   "measure.py": "afd0cf9011adb290a92853b262a57adab76b9910f6d679dd6c647f4bfb6eaf94"
+  },
+  "observed": {
+   "neo": {
+    "rsync": {
+     "path": "/usr/bin/rsync",
+     "sha256": "3852336282ee66a98c52966a8bebbf3508980a3ec47e7150f40330ada999980e",
+     "version": "rsync  version 3.4.1  protocol version 32"
+    },
+    "hostname": "neo",
+    "trim": null
+   },
+   "freya": {
+    "rsync": {
+     "path": "/usr/bin/rsync",
+     "sha256": "cae31f86ebfa8ecf2293a809c8f09d8176c8ead7f192de8caebcc6a1f3f14800",
+     "version": "rsync  version 3.5.0-g471e17dc  protocol version 32"
+    },
+    "hostname": "freya",
+    "trim": "trimmed=yes /mnt/nvme: 70.2 GiB (75420680192 bytes) trimmed"
+   }
+  }
+ }
+}

@@ -1,0 +1,16 @@
+experiment,kind,cell_id,corpus,scenario,sender,receiver,client,link,cache,arm,n_blocks,sigma_d,blocks_for_2pct,blocks_for_3pct,blocks_for_5pct,blocks_for_10pct,blocks_equivalent_2pct,blocks_equivalent_3pct,blocks_equivalent_5pct,blocks_equivalent_10pct
+N3-nvme-small-tune,screening,mixed-bimodal.fresh.mac-mars.sender.warm,mixed-bimodal,fresh,mac,mars,sender,mac-mars-direct,warm,recv1,8,0.1704902472700429,584,263,98,28,781,352,131,36
+N3-nvme-small-tune,screening,mixed-bimodal.fresh.mac-mars.sender.warm,mixed-bimodal,fresh,mac,mars,sender,mac-mars-direct,warm,recv2,8,0.1834743808245978,676,305,113,32,905,407,151,41
+N3-nvme-small-tune,screening,mixed-bimodal.fresh.mac-mars.sender.warm,mixed-bimodal,fresh,mac,mars,sender,mac-mars-direct,warm,recv4,8,0.14118186781195888,401,181,68,20,537,242,90,26
+N3-nvme-small-tune,screening,mixed-bimodal.fresh.mac-mars.sender.warm,mixed-bimodal,fresh,mac,mars,sender,mac-mars-direct,warm,no-atomic,8,0.1634452265009978,537,242,90,26,718,324,120,33
+N3-nvme-small-tune,screening,mixed-bimodal.fresh.mac-mars.sender.warm,mixed-bimodal,fresh,mac,mars,sender,mac-mars-direct,warm,recv4-noatomic,8,0.1726446223960797,598,270,101,28,801,361,134,37
+N3-nvme-small-tune,screening,small-deep.fresh.mac-mars.sender.warm,small-deep,fresh,mac,mars,sender,mac-mars-direct,warm,recv1,8,0.5113481723428638,5230,2349,864,228,7009,3147,1157,305
+N3-nvme-small-tune,screening,small-deep.fresh.mac-mars.sender.warm,small-deep,fresh,mac,mars,sender,mac-mars-direct,warm,recv2,8,0.31028077790934744,1927,866,320,86,2582,1160,427,114
+N3-nvme-small-tune,screening,small-deep.fresh.mac-mars.sender.warm,small-deep,fresh,mac,mars,sender,mac-mars-direct,warm,recv4,8,0.3366708545520424,2269,1020,376,100,3040,1366,503,134
+N3-nvme-small-tune,screening,small-deep.fresh.mac-mars.sender.warm,small-deep,fresh,mac,mars,sender,mac-mars-direct,warm,no-atomic,8,0.34339312131390987,2360,1061,391,104,3162,1421,523,139
+N3-nvme-small-tune,screening,small-deep.fresh.mac-mars.sender.warm,small-deep,fresh,mac,mars,sender,mac-mars-direct,warm,recv4-noatomic,8,0.332191776612682,2209,993,366,98,2959,1330,490,130
+N3-nvme-small-tune,screening,small-flat.fresh.mac-mars.sender.warm,small-flat,fresh,mac,mars,sender,mac-mars-direct,warm,recv1,8,0.18849930956670888,713,321,120,33,955,430,159,44
+N3-nvme-small-tune,screening,small-flat.fresh.mac-mars.sender.warm,small-flat,fresh,mac,mars,sender,mac-mars-direct,warm,recv2,8,0.052944187193771794,59,28,12,8,78,36,15,8
+N3-nvme-small-tune,screening,small-flat.fresh.mac-mars.sender.warm,small-flat,fresh,mac,mars,sender,mac-mars-direct,warm,recv4,8,0.2594934302824166,1349,607,224,61,1807,812,300,80
+N3-nvme-small-tune,screening,small-flat.fresh.mac-mars.sender.warm,small-flat,fresh,mac,mars,sender,mac-mars-direct,warm,no-atomic,8,0.2933063951782093,1722,774,286,77,2308,1037,382,102
+N3-nvme-small-tune,screening,small-flat.fresh.mac-mars.sender.warm,small-flat,fresh,mac,mars,sender,mac-mars-direct,warm,recv4-noatomic,8,0.3429220961981027,2354,1058,390,104,3154,1417,522,139

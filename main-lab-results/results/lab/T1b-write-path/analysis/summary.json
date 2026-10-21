@@ -1,0 +1,19 @@
+{
+ "experiment": "T1b-write-path",
+ "kind": "screening",
+ "hypothesis": "A larger pipe, larger writes or one sending worker bring xs level with rsync on byte-bound copies from neo, at no cost from freya.",
+ "primary": "wall_s",
+ "control": "xs",
+ "delta": 0.02,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261013T201554Z-T1b-write-path"
+ ],
+ "spec_sha256": [
+  "c9b324df48a99daf2a39b05488ebaf4e7a97ec167504089e4149f838457e40d8"
+ ],
+ "valid_blocks": 40,
+ "void_attempts": 0,
+ "void_reasons": []
+}

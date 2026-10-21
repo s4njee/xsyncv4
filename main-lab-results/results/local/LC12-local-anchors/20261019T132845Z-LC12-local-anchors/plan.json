@@ -1,0 +1,421 @@
+{
+ "schema": 1,
+ "experiment": "LC12-local-anchors",
+ "spec_sha256": "7648a15f0a7de9b2a63f8fd82a09d5cb25c321500c9407fbeca9a5d1da50277e",
+ "kind": "confirmatory",
+ "bundle": "736894f6f725",
+ "writes": {
+  "neo": 0,
+  "neo-ssd": 441954624783
+ },
+ "hypothesis": "With a larger parent-descriptor budget, xs -aH copies and re-syncs psample to the T5 faster than its parent, and at least as fast as rsync -aH.",
+ "primary": "durable_s",
+ "delta": 0.03,
+ "control": "rsync",
+ "seed": 76436,
+ "run_id": "20261019T132845Z-LC12-local-anchors",
+ "driver": "neo-ssd",
+ "sample_timeout_s": 7200,
+ "results": "local",
+ "background": true,
+ "local_link": true,
+ "eager_cleanup": true,
+ "hours": null,
+ "hosts": {
+  "neo": {
+   "ssh": "[email]",
+   "name": "[host]",
+   "hostname": "neo",
+   "root": "~/benchmarks/xsyncv4/lab",
+   "interface": null,
+   "helper": true,
+   "gates": {},
+   "local": false,
+   "system": "Linux"
+  },
+  "neo-ssd": {
+   "ssh": "[email]",
+   "name": "[host]",
+   "hostname": "neo",
+   "root": "/mnt/ssd/xsbench",
+   "interface": null,
+   "helper": true,
+   "gates": {},
+   "local": false,
+   "system": "Linux"
+  }
+ },
+ "links": {
+  "neo-local-ssd": {
+   "hosts": [
+    "neo",
+    "neo-ssd"
+   ],
+   "medium": "local",
+   "driver": "neo-ssd",
+   "results": "local",
+   "background": true
+  }
+ },
+ "arms": [
+  {
+   "name": "rsync",
+   "tool": "rsync",
+   "flags": [
+    "-aH"
+   ],
+   "binary": {
+    "neo": "rsync",
+    "neo-ssd": "rsync"
+   }
+  },
+  {
+   "name": "xs",
+   "tool": "xs",
+   "flags": [
+    "-aH"
+   ],
+   "rev": "21ae6844ed20",
+   "binary": {
+    "neo": "~/benchmarks/xsyncv4/lab/bin/xs-21ae6844ed20",
+    "neo-ssd": "/mnt/ssd/xsbench/bin/xs-21ae6844ed20"
+   },
+   "sha256": {
+    "neo": "5b8a8640a0e90fc0d698b55eecea925b4d0ee5979e60413f186f9032a3979444",
+    "neo-ssd": "5b8a8640a0e90fc0d698b55eecea925b4d0ee5979e60413f186f9032a3979444"
+   },
+   "artifacts": {
+    "xs-darwin-arm64": "aa558bef25843fe83532f55bf3dc841a8d04b2401e1dbd1db01ec69bd9ce5fcb",
+    "xs-linux-amd64": "c2f3f7275a4f5b311d8170c13876ea1f81a3389360ead8973b3ac6144c198ee3",
+    "xs-linux-arm64": "5b8a8640a0e90fc0d698b55eecea925b4d0ee5979e60413f186f9032a3979444"
+   }
+  },
+  {
+   "name": "xs-anchors",
+   "tool": "xs",
+   "flags": [
+    "-aH"
+   ],
+   "rev": "e51c1df1329a",
+   "binary": {
+    "neo": "~/benchmarks/xsyncv4/lab/bin/xs-e51c1df1329a",
+    "neo-ssd": "/mnt/ssd/xsbench/bin/xs-e51c1df1329a"
+   },
+   "sha256": {
+    "neo": "fe66e5e4217c5bc63c949e328457f4630a3c5f3233303f6b4a5d9a780d4d826a",
+    "neo-ssd": "fe66e5e4217c5bc63c949e328457f4630a3c5f3233303f6b4a5d9a780d4d826a"
+   },
+   "artifacts": {
+    "xs-darwin-arm64": "69f4fccf32d9882eaea678d60f7575fc17489316821b5e901f65c7c624ebc796",
+    "xs-linux-amd64": "c08508a01399b871aed62aa1cd437b16092726e4d9095afb41ee39041202cfeb",
+    "xs-linux-arm64": "fe66e5e4217c5bc63c949e328457f4630a3c5f3233303f6b4a5d9a780d4d826a"
+   }
+  }
+ ],
+ "cells": [
+  {
+   "id": "real-psample.fresh.neo-neo-ssd.receiver.cold",
+   "corpus": "real-psample",
+   "scenario": "fresh",
+   "sender": "neo",
+   "receiver": "neo-ssd",
+   "client": "receiver",
+   "link": "neo-local-ssd",
+   "cache": "cold"
+  },
+  {
+   "id": "real-psample.noop.neo-neo-ssd.receiver.cold",
+   "corpus": "real-psample",
+   "scenario": "noop",
+   "sender": "neo",
+   "receiver": "neo-ssd",
+   "client": "receiver",
+   "link": "neo-local-ssd",
+   "cache": "cold"
+  }
+ ],
+ "corpora": {
+  "real-psample": {
+   "files": 711103,
+   "directories": 547983,
+   "bytes": 21045458323,
+   "digest": "1904660ff1e67214cd5629f447b04910322012598fdfb219052899f909e1ac14",
+   "quick_digest": "1c5858390a71a82667516908224c07faeb5409c916f047f5eaaeaf0c22858afb"
+  }
+ },
+ "blocks": [
+  {
+   "cell": "real-psample.fresh.neo-neo-ssd.receiver.cold",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs",
+     "rsync",
+     "xs-anchors"
+    ],
+    [
+     "xs-anchors",
+     "rsync",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs-anchors",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "real-psample.noop.neo-neo-ssd.receiver.cold",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs",
+     "xs-anchors",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs",
+     "xs-anchors"
+    ],
+    [
+     "xs",
+     "rsync",
+     "xs-anchors"
+    ]
+   ]
+  },
+  {
+   "cell": "real-psample.fresh.neo-neo-ssd.receiver.cold",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync",
+     "xs",
+     "xs-anchors"
+    ],
+    [
+     "xs",
+     "xs-anchors",
+     "rsync"
+    ],
+    [
+     "xs",
+     "xs-anchors",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "real-psample.noop.neo-neo-ssd.receiver.cold",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync",
+     "xs-anchors",
+     "xs"
+    ],
+    [
+     "rsync",
+     "xs",
+     "xs-anchors"
+    ],
+    [
+     "rsync",
+     "xs-anchors",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "real-psample.fresh.neo-neo-ssd.receiver.cold",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync",
+     "xs-anchors",
+     "xs"
+    ],
+    [
+     "xs-anchors",
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs-anchors",
+     "rsync",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "real-psample.noop.neo-neo-ssd.receiver.cold",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync",
+     "xs",
+     "xs-anchors"
+    ],
+    [
+     "xs-anchors",
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync",
+     "xs-anchors"
+    ]
+   ]
+  },
+  {
+   "cell": "real-psample.noop.neo-neo-ssd.receiver.cold",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-anchors",
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "xs-anchors",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs-anchors",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "real-psample.fresh.neo-neo-ssd.receiver.cold",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-anchors",
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync",
+     "xs-anchors"
+    ],
+    [
+     "xs",
+     "rsync",
+     "xs-anchors"
+    ]
+   ]
+  },
+  {
+   "cell": "real-psample.noop.neo-neo-ssd.receiver.cold",
+   "block": 4,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-anchors",
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs-anchors",
+     "rsync",
+     "xs"
+    ],
+    [
+     "xs",
+     "rsync",
+     "xs-anchors"
+    ]
+   ]
+  },
+  {
+   "cell": "real-psample.fresh.neo-neo-ssd.receiver.cold",
+   "block": 4,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync",
+     "xs-anchors",
+     "xs"
+    ],
+    [
+     "xs-anchors",
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "xs-anchors",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "real-psample.noop.neo-neo-ssd.receiver.cold",
+   "block": 5,
+   "verify_full": true,
+   "orders": [
+    [
+     "rsync",
+     "xs",
+     "xs-anchors"
+    ],
+    [
+     "xs-anchors",
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "rsync",
+     "xs-anchors"
+    ]
+   ]
+  },
+  {
+   "cell": "real-psample.fresh.neo-neo-ssd.receiver.cold",
+   "block": 5,
+   "verify_full": true,
+   "orders": [
+    [
+     "rsync",
+     "xs-anchors",
+     "xs"
+    ],
+    [
+     "xs-anchors",
+     "xs",
+     "rsync"
+    ],
+    [
+     "xs",
+     "xs-anchors",
+     "rsync"
+    ]
+   ]
+  }
+ ],
+ "scripts": {
+  "probe.py": "a89b145b8f76fc4d5444cea6af3c124a5b2e5885226998c726ca95fd9d881d36",
+  "corpus.py": "07f178f516657266850ba871032254fd28316928741e3bece1794a094db015ba",
+  "corpora.json": "5c641f561e2bcf8fe5af1c39adb9054ab0e6d479d8ef0e67204ad69cef148a9c",
+  "agent.py": "1f6e50554aa0f424fdb1289041df2e6a8988ed54c295fdba54a02745524c26f7",
+  "runner.py": "cce71fee149764ad1a5c913061f19620a8ff44f792d23d55f7a290d59a9e20ff",
+  "xspipe.py": "94b3fccfc6e994d227077c453f90323ab55337fd8a98231d16a10696e8ebab6b",
+  "measure.py": "5065310f480ff1cabfa7c645f0db342624a02f9a081b96069d50d52b3d224777"
+ }
+}

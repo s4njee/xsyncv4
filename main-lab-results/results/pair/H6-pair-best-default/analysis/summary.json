@@ -1,0 +1,21 @@
+{
+ "experiment": "H6-pair-best-default",
+ "kind": "screening",
+ "hypothesis": "xs's best small-file setting is no slower than its default on mixed and large trees, either way.",
+ "primary": "durable_s",
+ "control": "xs",
+ "delta": 0.03,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261017T121639Z-H6-pair-best-default"
+ ],
+ "spec_sha256": [
+  "73a9de689c52caddad39072153de0facebec04648a68e97bdcce15da2bcd47be"
+ ],
+ "valid_blocks": 48,
+ "void_attempts": 1,
+ "void_reasons": [
+  "xs: the transfer exited 12:  file changed during transfer after retry: \"~/benchmarks/xsyncv4/lab/corpora/mixed-bimodal/d06/d04/f0000486.xml\"\n    read"
+ ]
+}

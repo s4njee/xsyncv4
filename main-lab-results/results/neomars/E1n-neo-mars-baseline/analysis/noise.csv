@@ -1,0 +1,13 @@
+experiment,kind,cell_id,corpus,scenario,sender,receiver,client,link,cache,arm,n_blocks,sigma_d,blocks_for_2pct,blocks_for_3pct,blocks_for_5pct,blocks_for_10pct,blocks_equivalent_2pct,blocks_equivalent_3pct,blocks_equivalent_5pct,blocks_equivalent_10pct
+E1n-neo-mars-baseline,screening,mixed-bimodal.fresh.mars-neo.receiver.warm,mixed-bimodal,fresh,mars,neo,receiver,neo-mars-lan,warm,xs,4,0.004740716420736813,8,8,8,8,8,8,8,8
+E1n-neo-mars-baseline,screening,mixed-bimodal.fresh.neo-mars.sender.warm,mixed-bimodal,fresh,neo,mars,sender,neo-mars-lan,warm,xs,4,0.007127404349307954,8,8,8,8,8,8,8,8
+E1n-neo-mars-baseline,screening,mixed-bimodal.noop.mars-neo.receiver.warm,mixed-bimodal,noop,mars,neo,receiver,neo-mars-lan,warm,xs,4,0.025094522984364057,15,8,8,8,19,10,8,8
+E1n-neo-mars-baseline,screening,mixed-bimodal.noop.neo-mars.sender.warm,mixed-bimodal,noop,neo,mars,sender,neo-mars-lan,warm,xs,4,0.044121812646350525,41,20,9,8,55,26,11,8
+E1n-neo-mars-baseline,screening,small-deep.fresh.mars-neo.receiver.warm,small-deep,fresh,mars,neo,receiver,neo-mars-lan,warm,xs,4,0.027218859046604375,17,9,8,8,22,11,8,8
+E1n-neo-mars-baseline,screening,small-deep.fresh.neo-mars.sender.warm,small-deep,fresh,neo,mars,sender,neo-mars-lan,warm,xs,4,0.09181019200366418,171,78,30,10,228,104,40,12
+E1n-neo-mars-baseline,screening,small-deep.noop.mars-neo.receiver.warm,small-deep,noop,mars,neo,receiver,neo-mars-lan,warm,xs,4,0.03307439005455634,24,12,8,8,32,16,8,8
+E1n-neo-mars-baseline,screening,small-deep.noop.neo-mars.sender.warm,small-deep,noop,neo,mars,sender,neo-mars-lan,warm,xs,4,0.022727353951269205,13,8,8,8,16,9,8,8
+E1n-neo-mars-baseline,screening,small-flat.fresh.mars-neo.receiver.warm,small-flat,fresh,mars,neo,receiver,neo-mars-lan,warm,xs,4,0.06372645134763025,84,39,16,8,111,51,20,8
+E1n-neo-mars-baseline,screening,small-flat.fresh.neo-mars.sender.warm,small-flat,fresh,neo,mars,sender,neo-mars-lan,warm,xs,4,0.006466069037596724,8,8,8,8,8,8,8,8
+E1n-neo-mars-baseline,screening,small-flat.noop.mars-neo.receiver.warm,small-flat,noop,mars,neo,receiver,neo-mars-lan,warm,xs,4,0.02541527323752002,15,8,8,8,20,10,8,8
+E1n-neo-mars-baseline,screening,small-flat.noop.neo-mars.sender.warm,small-flat,noop,neo,mars,sender,neo-mars-lan,warm,xs,4,0.10249687306371047,213,97,37,12,284,129,49,15

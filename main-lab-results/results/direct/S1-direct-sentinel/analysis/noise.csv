@@ -1,0 +1,5 @@
+experiment,kind,cell_id,corpus,scenario,sender,receiver,client,link,cache,arm,n_blocks,sigma_d,blocks_for_2pct,blocks_for_3pct,blocks_for_5pct,blocks_for_10pct,blocks_equivalent_2pct,blocks_equivalent_3pct,blocks_equivalent_5pct,blocks_equivalent_10pct
+S1-direct-sentinel,screening,large-one.fresh.mars-mac.receiver.warm,large-one,fresh,mars,mac,receiver,mac-mars-direct,warm,again,2,0.15673370550503438,494,223,83,24,661,298,111,31
+S1-direct-sentinel,screening,large-one.fresh.mars-mac.receiver.warm,large-one,fresh,mars,mac,receiver,mac-mars-direct,warm,rsync,2,0.009475484247580783,8,8,8,8,8,8,8,8
+S1-direct-sentinel,screening,small-flat.fresh.mars-mac.receiver.warm,small-flat,fresh,mars,mac,receiver,mac-mars-direct,warm,again,2,0.021401303425158925,12,8,8,8,15,8,8,8
+S1-direct-sentinel,screening,small-flat.fresh.mars-mac.receiver.warm,small-flat,fresh,mars,mac,receiver,mac-mars-direct,warm,rsync,2,0.058175874090419334,70,33,14,8,93,43,17,8

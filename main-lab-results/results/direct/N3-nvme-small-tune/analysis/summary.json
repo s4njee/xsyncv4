@@ -1,0 +1,21 @@
+{
+ "experiment": "N3-nvme-small-tune",
+ "kind": "screening",
+ "hypothesis": "Fewer receiving workers or --no-atomic make small and mixed copies onto NVMe faster.",
+ "primary": "durable_s",
+ "control": "xs",
+ "delta": 0.03,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261015T034425Z-N3-nvme-small-tune"
+ ],
+ "spec_sha256": [
+  "b0a3c331d087cefc588cd1975eb07d5ab9967f03c8a4d1f5f197e9a2828f42a4"
+ ],
+ "valid_blocks": 24,
+ "void_attempts": 1,
+ "void_reasons": [
+  "recv4-noatomic: the transfer exited 255: st [address] port 22: Operation timed out\nxs: connection unexpectedly closed (remote shell exited with code 255)\nxs: er"
+ ]
+}

@@ -1,0 +1,60 @@
+# H4: more combinations for writes onto mars's hard drive: --no-atomic with
+# 1, 2, 4 and 8 receiving workers, on the trees most likely to pass 1 Gb/s.
+id = "H4-hdd-write-tune2"
+kind = "screening"
+hypothesis = "On a hard drive, --no-atomic with few receiving workers writes small and mixed trees fastest."
+primary = "durable_s"
+delta = 0.03
+blocks = 8
+control = "xs"
+verify = "first-last"
+cleanup = "eager"
+hours = [23, 5]  # the Mac sends: run while it is idle overnight
+
+[arms.xs]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a"]
+metrics = true
+
+[arms.no-atomic]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a", "--no-atomic"]
+metrics = true
+
+[arms.recv1-noatomic]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a", "--no-atomic"]
+tune = { receiver = "jobs=1" }
+metrics = true
+
+[arms.recv2-noatomic]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a", "--no-atomic"]
+tune = { receiver = "jobs=2" }
+metrics = true
+
+[arms.recv4-noatomic]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a", "--no-atomic"]
+tune = { receiver = "jobs=4" }
+metrics = true
+
+[arms.recv8-noatomic]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a", "--no-atomic"]
+tune = { receiver = "jobs=8" }
+metrics = true
+
+[matrix]
+link = "mac-mars-hdd"
+corpus = ["small-flat", "mixed-bimodal", "mixed-threshold"]
+scenario = ["fresh"]
+direction = ["mac>mars-hdd"]
+client = ["initiator"]
+cache = ["warm"]

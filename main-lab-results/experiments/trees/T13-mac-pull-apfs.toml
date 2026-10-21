@@ -1,0 +1,33 @@
+# T13: xs's psample pull onto the Mac. MA4 found xs slower than rsync pulling
+# psample from mars (no-op 1.69x, 1% update 1.30x); T12 missed it because its rule
+# looked only at pushes. A screens settings that might recover the pull; a winner is
+# confirmed with fresh blocks and the whole parent matrix, otherwise the gap is a
+# code candidate (per-directory receive work on APFS: E5b, E5d). No until/fill:
+# mac/mars runs are started on demand.
+id = "T13-mac-pull-apfs"
+question = "What recovers xs's psample pull onto the Mac, where rsync is faster?"
+start = ["A"]
+
+[nodes.A]
+spec = "MA7-psample-pull-apfs.toml"
+question = "Does skipping directory times, the rename, or more receiver workers or scanners recover the pull?"
+
+  [[nodes.A.branch]]
+  when = { arm = "xs-*", speed_at_least = 1.05 }
+  next = ["Ac"]
+  label = "a setting >= 1.05x xs"
+  note = "a setting recovers part of the pull: confirm it with fresh blocks"
+
+  [[nodes.A.branch]]
+  otherwise = true
+  next = []
+  hold = true
+  label = "nothing faster"
+  note = "no setting recovers the pull onto APFS: profile the Mac receiver and build the per-directory candidates (E5b, E5d); decision needed"
+
+[nodes.Ac]
+promote = "A"
+id = "MA7-pull-confirm"
+blocks = 12
+all_corpora = true
+question = "Does the setting that recovered the psample pull hold up with fresh blocks, in both cells?"

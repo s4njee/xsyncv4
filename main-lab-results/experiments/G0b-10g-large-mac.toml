@@ -1,0 +1,42 @@
+# G0b (tree T3, start): the Mac's large trees to freya's NVMe (freya holds no copy to
+# send back): four 2 GiB files, 32 mixed large files, and with zstd level 1.
+id = "G0b-10g-large-mac"
+kind = "screening"
+hypothesis = "xs carries the large trees to freya at close to 10 Gb/s."
+primary = "durable_s"
+delta = 0.03
+blocks = 8
+control = "xs"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.xs]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-a"]
+
+[arms.xs-best]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-a", "--no-atomic"]
+tune = { receiver = "jobs=4" }
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[arms.xs-z1]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-az", "--compress-level=1"]
+
+[matrix]
+link = "mac-freya-10g"
+corpus = ["large-four", "large-mixed", "large-half"]
+scenario = ["fresh"]
+direction = ["mac>freya"]
+client = ["initiator"]
+cache = ["warm"]

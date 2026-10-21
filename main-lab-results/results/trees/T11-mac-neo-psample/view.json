@@ -1,0 +1,139 @@
+{
+ "id": "T11-mac-neo-psample",
+ "question": "How fast can the pinned psample tree move between the Mac and neo, and is xs faster than rsync -aH in each direction?",
+ "start": [
+  "A"
+ ],
+ "startedUtc": "2026-10-18T02:01:03Z",
+ "until": null,
+ "fills": 0,
+ "nodes": [
+  {
+   "id": "A",
+   "kind": "experiment",
+   "experiment": "MN1-psample-bidir",
+   "question": "Over four paired blocks, is xs -aH faster than rsync -aH on the psample tree, fresh, in either direction?",
+   "estimateHours": 0.2,
+   "hypothesis": "On the direct Mac/neo link, xs copies the pinned psample tree faster than rsync -aH, fresh, in both directions.",
+   "design": "screening",
+   "state": "failed",
+   "runs": [
+    {
+     "id": "20261018T020103Z-MN1-psample-bidir",
+     "key": "macneo/MN1-psample-bidir/20261018T020103Z-MN1-psample-bidir",
+     "state": "failed"
+    }
+   ],
+   "decision": null,
+   "decidedUtc": null,
+   "start": true,
+   "promote": null
+  },
+  {
+   "id": "A~end1",
+   "kind": "end",
+   "experiment": null,
+   "question": null,
+   "estimateHours": null,
+   "hypothesis": "no xs gain on this tree: rsync -aH is the fastest here",
+   "design": null,
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "X",
+   "kind": "confirm",
+   "experiment": "MN1-xs-confirm",
+   "question": "Does xs repeat its psample gain with 12 fresh blocks, and is the benefit direction-specific?",
+   "estimateHours": 0.6,
+   "hypothesis": "Confirms the fastest arm of A with 12 fresh blocks, if it had one.",
+   "design": "confirmatory",
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": "A"
+  },
+  {
+   "id": "X~end0",
+   "kind": "end",
+   "experiment": null,
+   "question": null,
+   "estimateHours": null,
+   "hypothesis": "the gain repeats with fresh blocks",
+   "design": null,
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "X~end1",
+   "kind": "end",
+   "experiment": null,
+   "question": null,
+   "estimateHours": null,
+   "hypothesis": "the screening gain did not repeat; review before recommending xs",
+   "design": null,
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  }
+ ],
+ "edges": [
+  {
+   "from": "A",
+   "to": "X",
+   "label": "xs >= 1.05x rsync",
+   "taken": null
+  },
+  {
+   "from": "A",
+   "to": "A~end1",
+   "label": "rsync fastest",
+   "taken": null
+  },
+  {
+   "from": "X",
+   "to": "X~end0",
+   "label": "gain confirmed",
+   "taken": null
+  },
+  {
+   "from": "X",
+   "to": "X~end1",
+   "label": "review",
+   "taken": null
+  }
+ ],
+ "decisions": [
+  {
+   "utc": "2026-10-18T02:12:37Z",
+   "node": "A",
+   "kind": "warning",
+   "text": "A: run 20261018T020103Z-MN1-psample-bidir ended failed; its branch stops here"
+  },
+  {
+   "utc": "2026-10-18T02:01:04Z",
+   "node": "A",
+   "kind": "queued",
+   "text": "A queued on mac (16 samples): start of the tree"
+  },
+  {
+   "utc": "2026-10-18T01:28:05Z",
+   "node": "A",
+   "kind": "queued",
+   "text": "A queued on mac (64 samples): start of the tree"
+  }
+ ]
+}

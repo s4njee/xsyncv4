@@ -1,0 +1,70 @@
+# T12: the follow-ups after the psample screening (T8). Node A adds the incremental cases
+# (a warm no-op and a 1% update) that a real sync actually pays; if xs loses a mac-to-mars
+# cell, node B screens the sender's skip and scan knobs. Node C checks the ranking on other
+# tree shapes. Each winner is confirmed with fresh blocks. No until/fill: mac/mars runs are
+# started on demand.
+id = "T12-mac-mars-followups"
+question = "After the psample screening: does xs win the incremental cases, what recovers a no-op push deficit, and does the ranking hold on other trees?"
+start = ["A"]
+
+[nodes.A]
+spec = "MA4-psample-incremental.toml"
+front = true
+question = "On the psample tree, is xs -aH faster than rsync -aH at a warm no-op and a 1% update, each way?"
+
+  [[nodes.A.branch]]
+  when = { arm = "xs", sender = "mac", speed_below = 0.95 }
+  next = ["B", "C"]
+  label = "xs < 0.95x pushing"
+  note = "xs loses a mac-to-mars cell: screen the sender's skip and scan knobs, and still check other trees"
+
+  [[nodes.A.branch]]
+  otherwise = true
+  next = ["C"]
+  label = "no push deficit"
+  note = "xs does not lose a mac-to-mars cell here; move on to other tree shapes"
+
+[nodes.B]
+spec = "MA5-psample-noop-knobs.toml"
+question = "Do the sender's skip or scan settings recover xs's warm no-op push on psample?"
+
+  [[nodes.B.branch]]
+  when = { arm = "xs*", speed_at_least = 1.05 }
+  next = ["Bc"]
+  label = "a knob was faster"
+  note = "a skip or scan setting recovered the push: confirm it"
+
+  [[nodes.B.branch]]
+  otherwise = true
+  next = []
+  hold = true
+  label = "nothing faster"
+  note = "no setting recovers the no-op push: a code candidate, decision needed"
+
+[nodes.Bc]
+promote = "B"
+id = "MA5-psample-noop-confirm"
+blocks = 12
+question = "Does the winning skip or scan setting hold up on the psample no-op with fresh blocks?"
+
+[nodes.C]
+spec = "MA6-mac-mars-shapes.toml"
+question = "Does the mac/mars tool ranking hold on a small compressible tree and a large one?"
+
+  [[nodes.C.branch]]
+  when = { arm = "xs", speed_at_least = 1.05 }
+  next = ["Cc"]
+  label = "xs >= 1.05x rsync"
+  note = "xs wins on other trees too: confirm it"
+
+  [[nodes.C.branch]]
+  otherwise = true
+  next = []
+  label = "no xs gain"
+  note = "xs does not clearly win on these trees: the psample result is shape-specific"
+
+[nodes.Cc]
+promote = "C"
+id = "MA6-mac-mars-shapes-confirm"
+blocks = 12
+question = "Does xs repeat its gain on other trees with fresh blocks?"

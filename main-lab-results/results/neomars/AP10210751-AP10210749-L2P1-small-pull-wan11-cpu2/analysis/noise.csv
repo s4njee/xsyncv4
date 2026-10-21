@@ -1,0 +1,7 @@
+experiment,kind,cell_id,corpus,scenario,sender,receiver,client,link,cache,arm,n_blocks,sigma_d,blocks_for_2pct,blocks_for_3pct,blocks_for_5pct,blocks_for_10pct,blocks_equivalent_2pct,blocks_equivalent_3pct,blocks_equivalent_5pct,blocks_equivalent_10pct
+AP10210751-AP10210749-L2P1-small-pull-wan11-cpu2,screening,mixed-bimodal.fresh.mars-neo.receiver.warm,mixed-bimodal,fresh,mars,neo,receiver,neo-mars-lan,warm,rsync,6,0.01595792046742915,8,8,8,8,9,8,8,8
+AP10210751-AP10210749-L2P1-small-pull-wan11-cpu2,screening,mixed-bimodal.noop.mars-neo.receiver.warm,mixed-bimodal,noop,mars,neo,receiver,neo-mars-lan,warm,rsync,6,0.01911430577692195,10,8,8,8,12,8,8,8
+AP10210751-AP10210749-L2P1-small-pull-wan11-cpu2,screening,small-deep.fresh.mars-neo.receiver.warm,small-deep,fresh,mars,neo,receiver,neo-mars-lan,warm,rsync,6,0.08846220838439496,159,73,28,9,212,97,37,12
+AP10210751-AP10210749-L2P1-small-pull-wan11-cpu2,screening,small-deep.noop.mars-neo.receiver.warm,small-deep,noop,mars,neo,receiver,neo-mars-lan,warm,rsync,6,0.0660642130179008,90,42,17,8,119,55,22,8
+AP10210751-AP10210749-L2P1-small-pull-wan11-cpu2,screening,small-flat.fresh.mars-neo.receiver.warm,small-flat,fresh,mars,neo,receiver,neo-mars-lan,warm,rsync,6,0.28647007577197897,1643,739,273,73,2201,989,365,97
+AP10210751-AP10210749-L2P1-small-pull-wan11-cpu2,screening,small-flat.noop.mars-neo.receiver.warm,small-flat,noop,mars,neo,receiver,neo-mars-lan,warm,rsync,6,0.036646328249103424,29,15,8,8,38,19,8,8

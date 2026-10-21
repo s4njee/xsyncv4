@@ -1,0 +1,3716 @@
+{
+ "schema": 1,
+ "experiment": "E4g-peer-poll",
+ "spec_sha256": "f43cea49146091e6351c7a34fa82e0e8b4c82edfc9129706febd7e0fc58108f9",
+ "kind": "screening",
+ "hypothesis": "Polling for the peer's exit every 5 or 1 ms instead of 25 shortens a no-op by more than 3% on a one-file tree, and measurably on 100,000 files.",
+ "primary": "wall_s",
+ "delta": 0.03,
+ "control": "xs",
+ "seed": 1,
+ "run_id": "20261013T205439Z-E4g-peer-poll",
+ "driver": "neo",
+ "sample_timeout_s": 3600,
+ "results": "lab",
+ "background": false,
+ "eager_cleanup": false,
+ "hosts": {
+  "neo": {
+   "ssh": "[email]",
+   "name": "[host]",
+   "hostname": "neo",
+   "root": "~/benchmarks/xsyncv4/lab",
+   "interface": "eth0",
+   "helper": true,
+   "gates": {},
+   "local": false,
+   "system": "Linux"
+  },
+  "freya": {
+   "ssh": "[email]",
+   "name": "[host]",
+   "hostname": "freya",
+   "root": "/mnt/nvme/xsbench",
+   "interface": "enp10s0",
+   "helper": true,
+   "gates": {},
+   "local": false,
+   "system": "Linux"
+  }
+ },
+ "links": {
+  "lan": {
+   "hosts": [
+    "neo",
+    "freya"
+   ],
+   "medium": "wired",
+   "min_speed_mbps": 1000,
+   "max_rtt_ms": 2.0
+  }
+ },
+ "arms": [
+  {
+   "name": "xs",
+   "tool": "xs",
+   "flags": [
+    "-a"
+   ],
+   "rev": "ddefa041364e-tune",
+   "metrics": true,
+   "binary": {
+    "neo": "~/benchmarks/xsyncv4/lab/bin/xs-ddefa041364e-tune",
+    "freya": "/mnt/nvme/xsbench/bin/xs-ddefa041364e-tune"
+   },
+   "sha256": {
+    "neo": "1f5c40a3f4d3ec403abcf30d64d8ade2a74f9fccfa6ba2c98709fb6f83ebebe2",
+    "freya": "fbe88e865b1d5162f6e370804f6b4683a196c272ce004d122311cac3431d05e0"
+   },
+   "artifacts": {
+    "xs-darwin-arm64": "304c6fe87a5235dc30bfc665dfe71ba8a777d8b633b9246b84bba42349c0679e",
+    "xs-linux-amd64": "fbe88e865b1d5162f6e370804f6b4683a196c272ce004d122311cac3431d05e0",
+    "xs-linux-arm64": "1f5c40a3f4d3ec403abcf30d64d8ade2a74f9fccfa6ba2c98709fb6f83ebebe2"
+   }
+  },
+  {
+   "name": "poll5",
+   "tool": "xs",
+   "flags": [
+    "-a"
+   ],
+   "rev": "ddefa041364e-tune",
+   "tune": {
+    "sender": "wait_peer_poll_ms=5",
+    "receiver": "wait_peer_poll_ms=5"
+   },
+   "metrics": true,
+   "binary": {
+    "neo": "~/benchmarks/xsyncv4/lab/bin/xs-ddefa041364e-tune",
+    "freya": "/mnt/nvme/xsbench/bin/xs-ddefa041364e-tune"
+   },
+   "sha256": {
+    "neo": "1f5c40a3f4d3ec403abcf30d64d8ade2a74f9fccfa6ba2c98709fb6f83ebebe2",
+    "freya": "fbe88e865b1d5162f6e370804f6b4683a196c272ce004d122311cac3431d05e0"
+   },
+   "artifacts": {
+    "xs-darwin-arm64": "304c6fe87a5235dc30bfc665dfe71ba8a777d8b633b9246b84bba42349c0679e",
+    "xs-linux-amd64": "fbe88e865b1d5162f6e370804f6b4683a196c272ce004d122311cac3431d05e0",
+    "xs-linux-arm64": "1f5c40a3f4d3ec403abcf30d64d8ade2a74f9fccfa6ba2c98709fb6f83ebebe2"
+   }
+  },
+  {
+   "name": "poll1",
+   "tool": "xs",
+   "flags": [
+    "-a"
+   ],
+   "rev": "ddefa041364e-tune",
+   "tune": {
+    "sender": "wait_peer_poll_ms=1",
+    "receiver": "wait_peer_poll_ms=1"
+   },
+   "metrics": true,
+   "binary": {
+    "neo": "~/benchmarks/xsyncv4/lab/bin/xs-ddefa041364e-tune",
+    "freya": "/mnt/nvme/xsbench/bin/xs-ddefa041364e-tune"
+   },
+   "sha256": {
+    "neo": "1f5c40a3f4d3ec403abcf30d64d8ade2a74f9fccfa6ba2c98709fb6f83ebebe2",
+    "freya": "fbe88e865b1d5162f6e370804f6b4683a196c272ce004d122311cac3431d05e0"
+   },
+   "artifacts": {
+    "xs-darwin-arm64": "304c6fe87a5235dc30bfc665dfe71ba8a777d8b633b9246b84bba42349c0679e",
+    "xs-linux-amd64": "fbe88e865b1d5162f6e370804f6b4683a196c272ce004d122311cac3431d05e0",
+    "xs-linux-arm64": "1f5c40a3f4d3ec403abcf30d64d8ade2a74f9fccfa6ba2c98709fb6f83ebebe2"
+   }
+  }
+ ],
+ "cells": [
+  {
+   "id": "tiny-one.noop.neo-freya.sender.warm",
+   "corpus": "tiny-one",
+   "scenario": "noop",
+   "sender": "neo",
+   "receiver": "freya",
+   "client": "sender",
+   "link": "lan",
+   "cache": "warm"
+  },
+  {
+   "id": "tiny-one.noop.freya-neo.sender.warm",
+   "corpus": "tiny-one",
+   "scenario": "noop",
+   "sender": "freya",
+   "receiver": "neo",
+   "client": "sender",
+   "link": "lan",
+   "cache": "warm"
+  },
+  {
+   "id": "small-flat.noop.neo-freya.sender.warm",
+   "corpus": "small-flat",
+   "scenario": "noop",
+   "sender": "neo",
+   "receiver": "freya",
+   "client": "sender",
+   "link": "lan",
+   "cache": "warm"
+  },
+  {
+   "id": "small-flat.noop.freya-neo.sender.warm",
+   "corpus": "small-flat",
+   "scenario": "noop",
+   "sender": "freya",
+   "receiver": "neo",
+   "client": "sender",
+   "link": "lan",
+   "cache": "warm"
+  }
+ ],
+ "corpora": {
+  "tiny-one": {
+   "files": 1,
+   "directories": 0,
+   "bytes": 19,
+   "digest": "38e12e8a867b32d7d9c7bf9c9a1bf9b731ba1a2a425f0323983ccc535e871dbe",
+   "quick_digest": "fba99983b39b06c131a47d522ecc6fa31d90fa37a84b7cb37ae68904a1ac50e7"
+  },
+  "small-flat": {
+   "files": 100000,
+   "directories": 100,
+   "bytes": 319224077,
+   "digest": "41b628c4337730be4efdfcc6673d517749132ffd50b75b29321640e6f064bbec",
+   "quick_digest": "e8de96251eaca6be3e98b1cb8097405b37ad470fc0d5ffdb7a5a48ea5b9f3805"
+  }
+ },
+ "blocks": [
+  {
+   "cell": "tiny-one.noop.neo-freya.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs",
+     "poll5",
+     "poll1"
+    ],
+    [
+     "xs",
+     "poll5",
+     "poll1"
+    ],
+    [
+     "poll5",
+     "poll1",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.freya-neo.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs",
+     "poll1",
+     "poll5"
+    ],
+    [
+     "poll1",
+     "xs",
+     "poll5"
+    ],
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.freya-neo.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "poll5",
+     "poll1",
+     "xs"
+    ],
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ],
+    [
+     "xs",
+     "poll5",
+     "poll1"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.neo-freya.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs",
+     "poll5",
+     "poll1"
+    ],
+    [
+     "poll1",
+     "xs",
+     "poll5"
+    ],
+    [
+     "xs",
+     "poll5",
+     "poll1"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.freya-neo.sender.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "poll5",
+     "poll1"
+    ],
+    [
+     "xs",
+     "poll5",
+     "poll1"
+    ],
+    [
+     "poll5",
+     "poll1",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.freya-neo.sender.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll1",
+     "xs",
+     "poll5"
+    ],
+    [
+     "poll5",
+     "poll1",
+     "xs"
+    ],
+    [
+     "xs",
+     "poll5",
+     "poll1"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.neo-freya.sender.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "poll5",
+     "poll1"
+    ],
+    [
+     "xs",
+     "poll1",
+     "poll5"
+    ],
+    [
+     "xs",
+     "poll5",
+     "poll1"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.neo-freya.sender.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll1",
+     "xs",
+     "poll5"
+    ],
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ],
+    [
+     "xs",
+     "poll5",
+     "poll1"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.neo-freya.sender.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "poll1",
+     "poll5"
+    ],
+    [
+     "xs",
+     "poll5",
+     "poll1"
+    ],
+    [
+     "poll1",
+     "poll5",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.freya-neo.sender.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "poll1",
+     "poll5"
+    ],
+    [
+     "xs",
+     "poll1",
+     "poll5"
+    ],
+    [
+     "poll1",
+     "xs",
+     "poll5"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.freya-neo.sender.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll5",
+     "poll1",
+     "xs"
+    ],
+    [
+     "xs",
+     "poll1",
+     "poll5"
+    ],
+    [
+     "xs",
+     "poll5",
+     "poll1"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.neo-freya.sender.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll1",
+     "xs",
+     "poll5"
+    ],
+    [
+     "poll1",
+     "xs",
+     "poll5"
+    ],
+    [
+     "xs",
+     "poll1",
+     "poll5"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.freya-neo.sender.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "poll5",
+     "poll1"
+    ],
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ],
+    [
+     "xs",
+     "poll1",
+     "poll5"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.neo-freya.sender.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "poll5",
+     "poll1"
+    ],
+    [
+     "poll5",
+     "poll1",
+     "xs"
+    ],
+    [
+     "poll1",
+     "xs",
+     "poll5"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.freya-neo.sender.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll1",
+     "xs",
+     "poll5"
+    ],
+    [
+     "poll1",
+     "poll5",
+     "xs"
+    ],
+    [
+     "xs",
+     "poll5",
+     "poll1"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.neo-freya.sender.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll5",
+     "poll1",
+     "xs"
+    ],
+    [
+     "poll1",
+     "poll5",
+     "xs"
+    ],
+    [
+     "xs",
+     "poll5",
+     "poll1"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.freya-neo.sender.warm",
+   "block": 4,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "poll1",
+     "poll5"
+    ],
+    [
+     "poll1",
+     "poll5",
+     "xs"
+    ],
+    [
+     "poll5",
+     "poll1",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.neo-freya.sender.warm",
+   "block": 4,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ],
+    [
+     "xs",
+     "poll1",
+     "poll5"
+    ],
+    [
+     "xs",
+     "poll5",
+     "poll1"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.freya-neo.sender.warm",
+   "block": 4,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll1",
+     "poll5",
+     "xs"
+    ],
+    [
+     "xs",
+     "poll5",
+     "poll1"
+    ],
+    [
+     "poll1",
+     "poll5",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.neo-freya.sender.warm",
+   "block": 4,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll1",
+     "xs",
+     "poll5"
+    ],
+    [
+     "poll1",
+     "poll5",
+     "xs"
+    ],
+    [
+     "xs",
+     "poll5",
+     "poll1"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.freya-neo.sender.warm",
+   "block": 5,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ],
+    [
+     "poll1",
+     "xs",
+     "poll5"
+    ],
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.freya-neo.sender.warm",
+   "block": 5,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "poll1",
+     "poll5"
+    ],
+    [
+     "poll5",
+     "poll1",
+     "xs"
+    ],
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.neo-freya.sender.warm",
+   "block": 5,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "poll5",
+     "poll1"
+    ],
+    [
+     "xs",
+     "poll5",
+     "poll1"
+    ],
+    [
+     "poll1",
+     "xs",
+     "poll5"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.neo-freya.sender.warm",
+   "block": 5,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll1",
+     "xs",
+     "poll5"
+    ],
+    [
+     "xs",
+     "poll1",
+     "poll5"
+    ],
+    [
+     "poll5",
+     "poll1",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.freya-neo.sender.warm",
+   "block": 6,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ],
+    [
+     "poll1",
+     "xs",
+     "poll5"
+    ],
+    [
+     "xs",
+     "poll5",
+     "poll1"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.neo-freya.sender.warm",
+   "block": 6,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll5",
+     "poll1",
+     "xs"
+    ],
+    [
+     "xs",
+     "poll1",
+     "poll5"
+    ],
+    [
+     "xs",
+     "poll5",
+     "poll1"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.neo-freya.sender.warm",
+   "block": 6,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ],
+    [
+     "poll5",
+     "poll1",
+     "xs"
+    ],
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.freya-neo.sender.warm",
+   "block": 6,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll1",
+     "poll5",
+     "xs"
+    ],
+    [
+     "poll1",
+     "poll5",
+     "xs"
+    ],
+    [
+     "poll1",
+     "poll5",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.neo-freya.sender.warm",
+   "block": 7,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ],
+    [
+     "poll1",
+     "xs",
+     "poll5"
+    ],
+    [
+     "poll1",
+     "poll5",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.freya-neo.sender.warm",
+   "block": 7,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "poll1",
+     "poll5"
+    ],
+    [
+     "poll5",
+     "poll1",
+     "xs"
+    ],
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.neo-freya.sender.warm",
+   "block": 7,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll5",
+     "poll1",
+     "xs"
+    ],
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ],
+    [
+     "poll5",
+     "poll1",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.freya-neo.sender.warm",
+   "block": 7,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll1",
+     "xs",
+     "poll5"
+    ],
+    [
+     "poll1",
+     "poll5",
+     "xs"
+    ],
+    [
+     "poll5",
+     "poll1",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.freya-neo.sender.warm",
+   "block": 8,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll5",
+     "poll1",
+     "xs"
+    ],
+    [
+     "poll1",
+     "poll5",
+     "xs"
+    ],
+    [
+     "xs",
+     "poll5",
+     "poll1"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.neo-freya.sender.warm",
+   "block": 8,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll1",
+     "xs",
+     "poll5"
+    ],
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ],
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.neo-freya.sender.warm",
+   "block": 8,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "poll5",
+     "poll1"
+    ],
+    [
+     "xs",
+     "poll1",
+     "poll5"
+    ],
+    [
+     "xs",
+     "poll1",
+     "poll5"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.freya-neo.sender.warm",
+   "block": 8,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll1",
+     "xs",
+     "poll5"
+    ],
+    [
+     "poll1",
+     "poll5",
+     "xs"
+    ],
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.freya-neo.sender.warm",
+   "block": 9,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "poll5",
+     "poll1"
+    ],
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ],
+    [
+     "poll1",
+     "xs",
+     "poll5"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.neo-freya.sender.warm",
+   "block": 9,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll1",
+     "xs",
+     "poll5"
+    ],
+    [
+     "poll5",
+     "poll1",
+     "xs"
+    ],
+    [
+     "poll1",
+     "xs",
+     "poll5"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.freya-neo.sender.warm",
+   "block": 9,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ],
+    [
+     "poll5",
+     "poll1",
+     "xs"
+    ],
+    [
+     "xs",
+     "poll5",
+     "poll1"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.neo-freya.sender.warm",
+   "block": 9,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "poll1",
+     "poll5"
+    ],
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ],
+    [
+     "xs",
+     "poll1",
+     "poll5"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.freya-neo.sender.warm",
+   "block": 10,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll1",
+     "poll5",
+     "xs"
+    ],
+    [
+     "xs",
+     "poll5",
+     "poll1"
+    ],
+    [
+     "poll1",
+     "xs",
+     "poll5"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.freya-neo.sender.warm",
+   "block": 10,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll5",
+     "poll1",
+     "xs"
+    ],
+    [
+     "poll1",
+     "xs",
+     "poll5"
+    ],
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.neo-freya.sender.warm",
+   "block": 10,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "poll5",
+     "poll1"
+    ],
+    [
+     "poll1",
+     "xs",
+     "poll5"
+    ],
+    [
+     "poll1",
+     "xs",
+     "poll5"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.neo-freya.sender.warm",
+   "block": 10,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "poll1",
+     "poll5"
+    ],
+    [
+     "poll5",
+     "poll1",
+     "xs"
+    ],
+    [
+     "poll5",
+     "poll1",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.neo-freya.sender.warm",
+   "block": 11,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "poll5",
+     "poll1"
+    ],
+    [
+     "xs",
+     "poll5",
+     "poll1"
+    ],
+    [
+     "xs",
+     "poll5",
+     "poll1"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.neo-freya.sender.warm",
+   "block": 11,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll1",
+     "xs",
+     "poll5"
+    ],
+    [
+     "xs",
+     "poll5",
+     "poll1"
+    ],
+    [
+     "poll1",
+     "poll5",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.freya-neo.sender.warm",
+   "block": 11,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll5",
+     "poll1",
+     "xs"
+    ],
+    [
+     "poll1",
+     "poll5",
+     "xs"
+    ],
+    [
+     "xs",
+     "poll5",
+     "poll1"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.freya-neo.sender.warm",
+   "block": 11,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "poll5",
+     "poll1"
+    ],
+    [
+     "poll5",
+     "poll1",
+     "xs"
+    ],
+    [
+     "xs",
+     "poll5",
+     "poll1"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.neo-freya.sender.warm",
+   "block": 12,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "poll5",
+     "poll1"
+    ],
+    [
+     "poll1",
+     "poll5",
+     "xs"
+    ],
+    [
+     "xs",
+     "poll1",
+     "poll5"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.freya-neo.sender.warm",
+   "block": 12,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll1",
+     "xs",
+     "poll5"
+    ],
+    [
+     "poll5",
+     "poll1",
+     "xs"
+    ],
+    [
+     "poll1",
+     "poll5",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.freya-neo.sender.warm",
+   "block": 12,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll1",
+     "poll5",
+     "xs"
+    ],
+    [
+     "xs",
+     "poll1",
+     "poll5"
+    ],
+    [
+     "poll1",
+     "xs",
+     "poll5"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.neo-freya.sender.warm",
+   "block": 12,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ],
+    [
+     "poll1",
+     "poll5",
+     "xs"
+    ],
+    [
+     "poll1",
+     "poll5",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.neo-freya.sender.warm",
+   "block": 13,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll1",
+     "xs",
+     "poll5"
+    ],
+    [
+     "poll1",
+     "poll5",
+     "xs"
+    ],
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.freya-neo.sender.warm",
+   "block": 13,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll5",
+     "poll1",
+     "xs"
+    ],
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ],
+    [
+     "xs",
+     "poll1",
+     "poll5"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.neo-freya.sender.warm",
+   "block": 13,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "poll5",
+     "poll1"
+    ],
+    [
+     "poll5",
+     "poll1",
+     "xs"
+    ],
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.freya-neo.sender.warm",
+   "block": 13,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "poll1",
+     "poll5"
+    ],
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ],
+    [
+     "xs",
+     "poll5",
+     "poll1"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.freya-neo.sender.warm",
+   "block": 14,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll1",
+     "poll5",
+     "xs"
+    ],
+    [
+     "xs",
+     "poll1",
+     "poll5"
+    ],
+    [
+     "poll1",
+     "xs",
+     "poll5"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.neo-freya.sender.warm",
+   "block": 14,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll1",
+     "poll5",
+     "xs"
+    ],
+    [
+     "poll1",
+     "xs",
+     "poll5"
+    ],
+    [
+     "poll1",
+     "poll5",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.freya-neo.sender.warm",
+   "block": 14,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "poll1",
+     "poll5"
+    ],
+    [
+     "poll1",
+     "poll5",
+     "xs"
+    ],
+    [
+     "poll5",
+     "poll1",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.neo-freya.sender.warm",
+   "block": 14,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll5",
+     "poll1",
+     "xs"
+    ],
+    [
+     "xs",
+     "poll5",
+     "poll1"
+    ],
+    [
+     "xs",
+     "poll5",
+     "poll1"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.neo-freya.sender.warm",
+   "block": 15,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll1",
+     "poll5",
+     "xs"
+    ],
+    [
+     "poll1",
+     "poll5",
+     "xs"
+    ],
+    [
+     "poll1",
+     "poll5",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.freya-neo.sender.warm",
+   "block": 15,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "poll1",
+     "poll5"
+    ],
+    [
+     "xs",
+     "poll1",
+     "poll5"
+    ],
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.neo-freya.sender.warm",
+   "block": 15,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ],
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ],
+    [
+     "poll1",
+     "poll5",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.freya-neo.sender.warm",
+   "block": 15,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll1",
+     "xs",
+     "poll5"
+    ],
+    [
+     "poll5",
+     "poll1",
+     "xs"
+    ],
+    [
+     "poll1",
+     "xs",
+     "poll5"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.neo-freya.sender.warm",
+   "block": 16,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "poll5",
+     "poll1"
+    ],
+    [
+     "poll1",
+     "xs",
+     "poll5"
+    ],
+    [
+     "xs",
+     "poll1",
+     "poll5"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.freya-neo.sender.warm",
+   "block": 16,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "poll1",
+     "poll5"
+    ],
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ],
+    [
+     "poll1",
+     "poll5",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.neo-freya.sender.warm",
+   "block": 16,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "poll5",
+     "poll1"
+    ],
+    [
+     "xs",
+     "poll1",
+     "poll5"
+    ],
+    [
+     "xs",
+     "poll5",
+     "poll1"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.freya-neo.sender.warm",
+   "block": 16,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "poll5",
+     "poll1"
+    ],
+    [
+     "poll1",
+     "poll5",
+     "xs"
+    ],
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.neo-freya.sender.warm",
+   "block": 17,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "poll5",
+     "poll1"
+    ],
+    [
+     "poll1",
+     "poll5",
+     "xs"
+    ],
+    [
+     "poll1",
+     "xs",
+     "poll5"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.neo-freya.sender.warm",
+   "block": 17,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll5",
+     "poll1",
+     "xs"
+    ],
+    [
+     "poll5",
+     "poll1",
+     "xs"
+    ],
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.freya-neo.sender.warm",
+   "block": 17,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "poll1",
+     "poll5"
+    ],
+    [
+     "xs",
+     "poll5",
+     "poll1"
+    ],
+    [
+     "poll5",
+     "poll1",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.freya-neo.sender.warm",
+   "block": 17,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll1",
+     "xs",
+     "poll5"
+    ],
+    [
+     "poll1",
+     "xs",
+     "poll5"
+    ],
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.freya-neo.sender.warm",
+   "block": 18,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "poll5",
+     "poll1"
+    ],
+    [
+     "poll5",
+     "poll1",
+     "xs"
+    ],
+    [
+     "poll1",
+     "xs",
+     "poll5"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.freya-neo.sender.warm",
+   "block": 18,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "poll1",
+     "poll5"
+    ],
+    [
+     "poll1",
+     "xs",
+     "poll5"
+    ],
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.neo-freya.sender.warm",
+   "block": 18,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ],
+    [
+     "xs",
+     "poll5",
+     "poll1"
+    ],
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.neo-freya.sender.warm",
+   "block": 18,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll1",
+     "xs",
+     "poll5"
+    ],
+    [
+     "poll1",
+     "poll5",
+     "xs"
+    ],
+    [
+     "poll1",
+     "xs",
+     "poll5"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.freya-neo.sender.warm",
+   "block": 19,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll5",
+     "poll1",
+     "xs"
+    ],
+    [
+     "xs",
+     "poll1",
+     "poll5"
+    ],
+    [
+     "xs",
+     "poll1",
+     "poll5"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.neo-freya.sender.warm",
+   "block": 19,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll1",
+     "xs",
+     "poll5"
+    ],
+    [
+     "xs",
+     "poll5",
+     "poll1"
+    ],
+    [
+     "poll1",
+     "poll5",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.neo-freya.sender.warm",
+   "block": 19,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll5",
+     "poll1",
+     "xs"
+    ],
+    [
+     "xs",
+     "poll1",
+     "poll5"
+    ],
+    [
+     "xs",
+     "poll5",
+     "poll1"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.freya-neo.sender.warm",
+   "block": 19,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "poll1",
+     "poll5"
+    ],
+    [
+     "xs",
+     "poll5",
+     "poll1"
+    ],
+    [
+     "xs",
+     "poll5",
+     "poll1"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.neo-freya.sender.warm",
+   "block": 20,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll1",
+     "poll5",
+     "xs"
+    ],
+    [
+     "poll5",
+     "poll1",
+     "xs"
+    ],
+    [
+     "poll1",
+     "xs",
+     "poll5"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.freya-neo.sender.warm",
+   "block": 20,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ],
+    [
+     "poll5",
+     "poll1",
+     "xs"
+    ],
+    [
+     "poll1",
+     "poll5",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.freya-neo.sender.warm",
+   "block": 20,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll1",
+     "poll5",
+     "xs"
+    ],
+    [
+     "poll1",
+     "poll5",
+     "xs"
+    ],
+    [
+     "xs",
+     "poll5",
+     "poll1"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.neo-freya.sender.warm",
+   "block": 20,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll1",
+     "xs",
+     "poll5"
+    ],
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ],
+    [
+     "xs",
+     "poll5",
+     "poll1"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.neo-freya.sender.warm",
+   "block": 21,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ],
+    [
+     "xs",
+     "poll1",
+     "poll5"
+    ],
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.neo-freya.sender.warm",
+   "block": 21,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "poll5",
+     "poll1"
+    ],
+    [
+     "poll1",
+     "poll5",
+     "xs"
+    ],
+    [
+     "poll1",
+     "xs",
+     "poll5"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.freya-neo.sender.warm",
+   "block": 21,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ],
+    [
+     "xs",
+     "poll1",
+     "poll5"
+    ],
+    [
+     "poll5",
+     "poll1",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.freya-neo.sender.warm",
+   "block": 21,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "poll5",
+     "poll1"
+    ],
+    [
+     "poll1",
+     "xs",
+     "poll5"
+    ],
+    [
+     "poll1",
+     "xs",
+     "poll5"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.neo-freya.sender.warm",
+   "block": 22,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "poll5",
+     "poll1"
+    ],
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ],
+    [
+     "xs",
+     "poll1",
+     "poll5"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.freya-neo.sender.warm",
+   "block": 22,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "poll5",
+     "poll1"
+    ],
+    [
+     "xs",
+     "poll1",
+     "poll5"
+    ],
+    [
+     "poll5",
+     "poll1",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.neo-freya.sender.warm",
+   "block": 22,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ],
+    [
+     "xs",
+     "poll5",
+     "poll1"
+    ],
+    [
+     "xs",
+     "poll1",
+     "poll5"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.freya-neo.sender.warm",
+   "block": 22,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll1",
+     "poll5",
+     "xs"
+    ],
+    [
+     "poll1",
+     "poll5",
+     "xs"
+    ],
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.neo-freya.sender.warm",
+   "block": 23,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll1",
+     "poll5",
+     "xs"
+    ],
+    [
+     "poll1",
+     "xs",
+     "poll5"
+    ],
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.freya-neo.sender.warm",
+   "block": 23,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "poll1",
+     "poll5"
+    ],
+    [
+     "xs",
+     "poll5",
+     "poll1"
+    ],
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.neo-freya.sender.warm",
+   "block": 23,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ],
+    [
+     "poll1",
+     "xs",
+     "poll5"
+    ],
+    [
+     "xs",
+     "poll1",
+     "poll5"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.freya-neo.sender.warm",
+   "block": 23,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll1",
+     "poll5",
+     "xs"
+    ],
+    [
+     "xs",
+     "poll5",
+     "poll1"
+    ],
+    [
+     "xs",
+     "poll1",
+     "poll5"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.freya-neo.sender.warm",
+   "block": 24,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll5",
+     "poll1",
+     "xs"
+    ],
+    [
+     "poll5",
+     "poll1",
+     "xs"
+    ],
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.freya-neo.sender.warm",
+   "block": 24,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ],
+    [
+     "poll5",
+     "poll1",
+     "xs"
+    ],
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.neo-freya.sender.warm",
+   "block": 24,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "poll1",
+     "poll5"
+    ],
+    [
+     "poll1",
+     "poll5",
+     "xs"
+    ],
+    [
+     "poll1",
+     "xs",
+     "poll5"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.neo-freya.sender.warm",
+   "block": 24,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll5",
+     "poll1",
+     "xs"
+    ],
+    [
+     "poll1",
+     "poll5",
+     "xs"
+    ],
+    [
+     "poll1",
+     "poll5",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.freya-neo.sender.warm",
+   "block": 25,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "poll1",
+     "poll5"
+    ],
+    [
+     "poll1",
+     "xs",
+     "poll5"
+    ],
+    [
+     "poll5",
+     "poll1",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.neo-freya.sender.warm",
+   "block": 25,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll1",
+     "poll5",
+     "xs"
+    ],
+    [
+     "xs",
+     "poll5",
+     "poll1"
+    ],
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.neo-freya.sender.warm",
+   "block": 25,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll1",
+     "poll5",
+     "xs"
+    ],
+    [
+     "poll1",
+     "poll5",
+     "xs"
+    ],
+    [
+     "poll1",
+     "poll5",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.freya-neo.sender.warm",
+   "block": 25,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll1",
+     "poll5",
+     "xs"
+    ],
+    [
+     "xs",
+     "poll5",
+     "poll1"
+    ],
+    [
+     "poll1",
+     "poll5",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.freya-neo.sender.warm",
+   "block": 26,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ],
+    [
+     "xs",
+     "poll1",
+     "poll5"
+    ],
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.neo-freya.sender.warm",
+   "block": 26,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll1",
+     "poll5",
+     "xs"
+    ],
+    [
+     "poll5",
+     "poll1",
+     "xs"
+    ],
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.freya-neo.sender.warm",
+   "block": 26,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll1",
+     "xs",
+     "poll5"
+    ],
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ],
+    [
+     "poll1",
+     "poll5",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.neo-freya.sender.warm",
+   "block": 26,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ],
+    [
+     "poll1",
+     "xs",
+     "poll5"
+    ],
+    [
+     "poll1",
+     "poll5",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.neo-freya.sender.warm",
+   "block": 27,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ],
+    [
+     "poll1",
+     "poll5",
+     "xs"
+    ],
+    [
+     "poll5",
+     "poll1",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.neo-freya.sender.warm",
+   "block": 27,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll1",
+     "xs",
+     "poll5"
+    ],
+    [
+     "poll1",
+     "xs",
+     "poll5"
+    ],
+    [
+     "poll5",
+     "poll1",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.freya-neo.sender.warm",
+   "block": 27,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll1",
+     "xs",
+     "poll5"
+    ],
+    [
+     "poll1",
+     "poll5",
+     "xs"
+    ],
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.freya-neo.sender.warm",
+   "block": 27,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ],
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ],
+    [
+     "xs",
+     "poll1",
+     "poll5"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.freya-neo.sender.warm",
+   "block": 28,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ],
+    [
+     "poll1",
+     "xs",
+     "poll5"
+    ],
+    [
+     "poll1",
+     "xs",
+     "poll5"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.neo-freya.sender.warm",
+   "block": 28,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll1",
+     "poll5",
+     "xs"
+    ],
+    [
+     "xs",
+     "poll1",
+     "poll5"
+    ],
+    [
+     "xs",
+     "poll1",
+     "poll5"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.freya-neo.sender.warm",
+   "block": 28,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll1",
+     "xs",
+     "poll5"
+    ],
+    [
+     "poll1",
+     "poll5",
+     "xs"
+    ],
+    [
+     "poll1",
+     "poll5",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.neo-freya.sender.warm",
+   "block": 28,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll1",
+     "poll5",
+     "xs"
+    ],
+    [
+     "poll1",
+     "xs",
+     "poll5"
+    ],
+    [
+     "poll5",
+     "poll1",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.freya-neo.sender.warm",
+   "block": 29,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "poll5",
+     "poll1"
+    ],
+    [
+     "poll1",
+     "xs",
+     "poll5"
+    ],
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.neo-freya.sender.warm",
+   "block": 29,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll5",
+     "poll1",
+     "xs"
+    ],
+    [
+     "xs",
+     "poll5",
+     "poll1"
+    ],
+    [
+     "xs",
+     "poll1",
+     "poll5"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.freya-neo.sender.warm",
+   "block": 29,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "poll1",
+     "poll5"
+    ],
+    [
+     "xs",
+     "poll5",
+     "poll1"
+    ],
+    [
+     "poll5",
+     "poll1",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.neo-freya.sender.warm",
+   "block": 29,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "poll5",
+     "poll1"
+    ],
+    [
+     "xs",
+     "poll5",
+     "poll1"
+    ],
+    [
+     "poll1",
+     "xs",
+     "poll5"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.neo-freya.sender.warm",
+   "block": 30,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "poll5",
+     "poll1"
+    ],
+    [
+     "poll5",
+     "poll1",
+     "xs"
+    ],
+    [
+     "poll1",
+     "poll5",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.freya-neo.sender.warm",
+   "block": 30,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "poll1",
+     "poll5"
+    ],
+    [
+     "xs",
+     "poll1",
+     "poll5"
+    ],
+    [
+     "poll1",
+     "poll5",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.freya-neo.sender.warm",
+   "block": 30,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll1",
+     "xs",
+     "poll5"
+    ],
+    [
+     "poll1",
+     "xs",
+     "poll5"
+    ],
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.neo-freya.sender.warm",
+   "block": 30,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "poll5",
+     "poll1"
+    ],
+    [
+     "xs",
+     "poll5",
+     "poll1"
+    ],
+    [
+     "poll5",
+     "poll1",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.freya-neo.sender.warm",
+   "block": 31,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll1",
+     "poll5",
+     "xs"
+    ],
+    [
+     "poll1",
+     "poll5",
+     "xs"
+    ],
+    [
+     "xs",
+     "poll1",
+     "poll5"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.neo-freya.sender.warm",
+   "block": 31,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ],
+    [
+     "poll1",
+     "poll5",
+     "xs"
+    ],
+    [
+     "xs",
+     "poll5",
+     "poll1"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.freya-neo.sender.warm",
+   "block": 31,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "poll1",
+     "poll5"
+    ],
+    [
+     "xs",
+     "poll5",
+     "poll1"
+    ],
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.neo-freya.sender.warm",
+   "block": 31,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll1",
+     "xs",
+     "poll5"
+    ],
+    [
+     "poll1",
+     "poll5",
+     "xs"
+    ],
+    [
+     "poll1",
+     "poll5",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.neo-freya.sender.warm",
+   "block": 32,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll1",
+     "xs",
+     "poll5"
+    ],
+    [
+     "xs",
+     "poll5",
+     "poll1"
+    ],
+    [
+     "poll1",
+     "xs",
+     "poll5"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.freya-neo.sender.warm",
+   "block": 32,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll1",
+     "poll5",
+     "xs"
+    ],
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ],
+    [
+     "poll1",
+     "xs",
+     "poll5"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.freya-neo.sender.warm",
+   "block": 32,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "poll1",
+     "poll5"
+    ],
+    [
+     "poll1",
+     "xs",
+     "poll5"
+    ],
+    [
+     "poll1",
+     "poll5",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.neo-freya.sender.warm",
+   "block": 32,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ],
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ],
+    [
+     "xs",
+     "poll1",
+     "poll5"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.freya-neo.sender.warm",
+   "block": 33,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "poll1",
+     "poll5"
+    ],
+    [
+     "xs",
+     "poll1",
+     "poll5"
+    ],
+    [
+     "xs",
+     "poll1",
+     "poll5"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.freya-neo.sender.warm",
+   "block": 33,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ],
+    [
+     "poll5",
+     "poll1",
+     "xs"
+    ],
+    [
+     "poll1",
+     "poll5",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.neo-freya.sender.warm",
+   "block": 33,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ],
+    [
+     "poll5",
+     "poll1",
+     "xs"
+    ],
+    [
+     "poll1",
+     "xs",
+     "poll5"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.neo-freya.sender.warm",
+   "block": 33,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll5",
+     "poll1",
+     "xs"
+    ],
+    [
+     "poll5",
+     "poll1",
+     "xs"
+    ],
+    [
+     "poll1",
+     "xs",
+     "poll5"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.freya-neo.sender.warm",
+   "block": 34,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ],
+    [
+     "poll5",
+     "poll1",
+     "xs"
+    ],
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.neo-freya.sender.warm",
+   "block": 34,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ],
+    [
+     "poll1",
+     "xs",
+     "poll5"
+    ],
+    [
+     "poll5",
+     "poll1",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.neo-freya.sender.warm",
+   "block": 34,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll5",
+     "poll1",
+     "xs"
+    ],
+    [
+     "xs",
+     "poll5",
+     "poll1"
+    ],
+    [
+     "xs",
+     "poll5",
+     "poll1"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.freya-neo.sender.warm",
+   "block": 34,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "poll1",
+     "poll5"
+    ],
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ],
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.freya-neo.sender.warm",
+   "block": 35,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ],
+    [
+     "poll1",
+     "poll5",
+     "xs"
+    ],
+    [
+     "xs",
+     "poll5",
+     "poll1"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.neo-freya.sender.warm",
+   "block": 35,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll5",
+     "poll1",
+     "xs"
+    ],
+    [
+     "poll1",
+     "xs",
+     "poll5"
+    ],
+    [
+     "xs",
+     "poll5",
+     "poll1"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.neo-freya.sender.warm",
+   "block": 35,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll1",
+     "xs",
+     "poll5"
+    ],
+    [
+     "poll5",
+     "poll1",
+     "xs"
+    ],
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.freya-neo.sender.warm",
+   "block": 35,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ],
+    [
+     "poll1",
+     "xs",
+     "poll5"
+    ],
+    [
+     "poll1",
+     "xs",
+     "poll5"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.freya-neo.sender.warm",
+   "block": 36,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll1",
+     "poll5",
+     "xs"
+    ],
+    [
+     "poll5",
+     "poll1",
+     "xs"
+    ],
+    [
+     "poll1",
+     "poll5",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.freya-neo.sender.warm",
+   "block": 36,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll5",
+     "poll1",
+     "xs"
+    ],
+    [
+     "xs",
+     "poll1",
+     "poll5"
+    ],
+    [
+     "poll1",
+     "poll5",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.neo-freya.sender.warm",
+   "block": 36,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ],
+    [
+     "poll5",
+     "poll1",
+     "xs"
+    ],
+    [
+     "xs",
+     "poll1",
+     "poll5"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.neo-freya.sender.warm",
+   "block": 36,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "poll1",
+     "poll5"
+    ],
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ],
+    [
+     "xs",
+     "poll5",
+     "poll1"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.neo-freya.sender.warm",
+   "block": 37,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll5",
+     "poll1",
+     "xs"
+    ],
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ],
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.neo-freya.sender.warm",
+   "block": 37,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll5",
+     "poll1",
+     "xs"
+    ],
+    [
+     "poll1",
+     "xs",
+     "poll5"
+    ],
+    [
+     "poll5",
+     "poll1",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.freya-neo.sender.warm",
+   "block": 37,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "poll1",
+     "poll5"
+    ],
+    [
+     "xs",
+     "poll1",
+     "poll5"
+    ],
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.freya-neo.sender.warm",
+   "block": 37,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ],
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ],
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.freya-neo.sender.warm",
+   "block": 38,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ],
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ],
+    [
+     "xs",
+     "poll1",
+     "poll5"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.neo-freya.sender.warm",
+   "block": 38,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "poll1",
+     "poll5"
+    ],
+    [
+     "xs",
+     "poll1",
+     "poll5"
+    ],
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.neo-freya.sender.warm",
+   "block": 38,
+   "verify_full": false,
+   "orders": [
+    [
+     "poll1",
+     "poll5",
+     "xs"
+    ],
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ],
+    [
+     "poll1",
+     "xs",
+     "poll5"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.freya-neo.sender.warm",
+   "block": 38,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs",
+     "poll5",
+     "poll1"
+    ],
+    [
+     "xs",
+     "poll1",
+     "poll5"
+    ],
+    [
+     "xs",
+     "poll5",
+     "poll1"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.freya-neo.sender.warm",
+   "block": 39,
+   "verify_full": true,
+   "orders": [
+    [
+     "poll1",
+     "xs",
+     "poll5"
+    ],
+    [
+     "xs",
+     "poll5",
+     "poll1"
+    ],
+    [
+     "poll1",
+     "poll5",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.neo-freya.sender.warm",
+   "block": 39,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs",
+     "poll1",
+     "poll5"
+    ],
+    [
+     "xs",
+     "poll1",
+     "poll5"
+    ],
+    [
+     "xs",
+     "poll5",
+     "poll1"
+    ]
+   ]
+  },
+  {
+   "cell": "tiny-one.noop.neo-freya.sender.warm",
+   "block": 39,
+   "verify_full": true,
+   "orders": [
+    [
+     "poll1",
+     "poll5",
+     "xs"
+    ],
+    [
+     "poll5",
+     "poll1",
+     "xs"
+    ],
+    [
+     "poll1",
+     "xs",
+     "poll5"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.freya-neo.sender.warm",
+   "block": 39,
+   "verify_full": true,
+   "orders": [
+    [
+     "poll5",
+     "xs",
+     "poll1"
+    ],
+    [
+     "xs",
+     "poll1",
+     "poll5"
+    ],
+    [
+     "poll1",
+     "poll5",
+     "xs"
+    ]
+   ]
+  }
+ ],
+ "scripts": {
+  "probe.py": "79c5d5649359fab936d72a58ccbb0348b8388dd71969a5c56d7915ca6a0c7563",
+  "corpus.py": "d6018d3611cba607a670f3fe554d0d4be5941fb2ef8fd65d57f10bfb582625f6",
+  "corpora.json": "729929e1ba7baf3a0b8413efffab5bc26ae0cbe8514daf1c05bbb53a314bb084",
+  "agent.py": "04d9c596cea456441e99d514a3a819c2f6b3f7dc1e412e00c06ea7a693a423c4",
+  "overnight.py": "c9b81a0bbcda7d1d2431e88060e88e432425e6251e46d6af2b24e7fdd0186072",
+  "measure.py": "5065310f480ff1cabfa7c645f0db342624a02f9a081b96069d50d52b3d224777"
+ }
+}

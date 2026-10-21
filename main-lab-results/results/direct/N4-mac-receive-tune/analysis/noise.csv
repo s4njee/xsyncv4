@@ -1,0 +1,16 @@
+experiment,kind,cell_id,corpus,scenario,sender,receiver,client,link,cache,arm,n_blocks,sigma_d,blocks_for_2pct,blocks_for_3pct,blocks_for_5pct,blocks_for_10pct,blocks_equivalent_2pct,blocks_equivalent_3pct,blocks_equivalent_5pct,blocks_equivalent_10pct
+N4-mac-receive-tune,screening,mixed-bimodal.fresh.mars-mac.receiver.warm,mixed-bimodal,fresh,mars,mac,receiver,mac-mars-direct,warm,recv1,3,0.07497161402049517,115,53,21,8,153,70,27,9
+N4-mac-receive-tune,screening,mixed-bimodal.fresh.mars-mac.receiver.warm,mixed-bimodal,fresh,mars,mac,receiver,mac-mars-direct,warm,recv2,3,0.27842107386745446,1552,698,258,69,2080,935,345,92
+N4-mac-receive-tune,screening,mixed-bimodal.fresh.mars-mac.receiver.warm,mixed-bimodal,fresh,mars,mac,receiver,mac-mars-direct,warm,recv8,3,0.2591830423065458,1346,605,224,60,1803,810,299,80
+N4-mac-receive-tune,screening,mixed-bimodal.fresh.mars-mac.receiver.warm,mixed-bimodal,fresh,mars,mac,receiver,mac-mars-direct,warm,no-atomic,3,0.2306592650327337,1066,480,178,48,1428,642,237,64
+N4-mac-receive-tune,screening,mixed-bimodal.fresh.mars-mac.receiver.warm,mixed-bimodal,fresh,mars,mac,receiver,mac-mars-direct,warm,rsync,3,0.2370984708906439,1126,507,188,51,1509,679,251,68
+N4-mac-receive-tune,screening,small-deep.fresh.mars-mac.receiver.warm,small-deep,fresh,mars,mac,receiver,mac-mars-direct,warm,recv1,3,0.08091771892521624,133,61,24,8,178,81,31,10
+N4-mac-receive-tune,screening,small-deep.fresh.mars-mac.receiver.warm,small-deep,fresh,mars,mac,receiver,mac-mars-direct,warm,recv2,3,0.15796204802037192,501,226,85,24,671,303,113,31
+N4-mac-receive-tune,screening,small-deep.fresh.mars-mac.receiver.warm,small-deep,fresh,mars,mac,receiver,mac-mars-direct,warm,recv8,3,0.014941994878793885,8,8,8,8,8,8,8,8
+N4-mac-receive-tune,screening,small-deep.fresh.mars-mac.receiver.warm,small-deep,fresh,mars,mac,receiver,mac-mars-direct,warm,no-atomic,3,0.1815024614521593,661,298,111,31,885,399,148,41
+N4-mac-receive-tune,screening,small-deep.fresh.mars-mac.receiver.warm,small-deep,fresh,mars,mac,receiver,mac-mars-direct,warm,rsync,3,0.0626957486022653,81,38,15,8,108,50,20,8
+N4-mac-receive-tune,screening,small-flat.fresh.mars-mac.receiver.warm,small-flat,fresh,mars,mac,receiver,mac-mars-direct,warm,recv1,4,0.09333066782932974,177,81,31,10,236,107,41,13
+N4-mac-receive-tune,screening,small-flat.fresh.mars-mac.receiver.warm,small-flat,fresh,mars,mac,receiver,mac-mars-direct,warm,recv2,4,0.05865500466631444,71,33,14,8,95,44,18,8
+N4-mac-receive-tune,screening,small-flat.fresh.mars-mac.receiver.warm,small-flat,fresh,mars,mac,receiver,mac-mars-direct,warm,recv8,4,0.17061837813583985,584,264,98,28,783,353,131,36
+N4-mac-receive-tune,screening,small-flat.fresh.mars-mac.receiver.warm,small-flat,fresh,mars,mac,receiver,mac-mars-direct,warm,no-atomic,4,0.12644647208598997,322,146,55,16,431,195,73,21
+N4-mac-receive-tune,screening,small-flat.fresh.mars-mac.receiver.warm,small-flat,fresh,mars,mac,receiver,mac-mars-direct,warm,rsync,4,0.07078667244800697,103,47,19,8,137,63,25,8

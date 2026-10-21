@@ -1,0 +1,141 @@
+{
+ "id": "AUTO-10191250-neo-ssd",
+ "question": "neo-ssd is idle with nothing queued, so it has 360 minutes; real-psample costs 8 minutes per sample. In LC3, rsync with eager writeback beat default xs, while xs-eager was much faster than xs. No experiment has put xs-eager against rsync-eager directly, and that comparison decides whether xs can beat rsync on this local copy. LC4 reported only the no-op cell, so the 1% update re-sync is still open. The eager plus --no-atomic combination has not been tried. The waiting tree confirmation of xs-eager against plain xs (LC3-durable-confirm) is left to the T14 tree, so it is not duplicated here. Budget: 96 minutes of screening plus 128 if the confirmation runs, then 64 and 64, about 352 minutes in total.",
+ "start": [
+  "N0",
+  "N1",
+  "N2"
+ ],
+ "startedUtc": "2026-10-19T12:50:32Z",
+ "until": null,
+ "fills": 0,
+ "nodes": [
+  {
+   "id": "N0",
+   "kind": "experiment",
+   "experiment": "AP10191250-LC9-local-eager-vs-rsync-eager",
+   "question": "When both tools flush eagerly, does xs -aH get the psample backup safely onto the T5 sooner than rsync -aH?",
+   "estimateHours": 1.7,
+   "hypothesis": "With eager writeback on both sides, xs -aH reaches a durable copy of psample on the T5 at least 5% sooner than rsync -aH. LC3's screening implies a time ratio near 0.77.",
+   "design": "screening",
+   "state": "queued",
+   "runs": [
+    {
+     "id": "20261019T125032Z-AP10191250-LC9-local-eager-vs-rsync-eager",
+     "key": "local/AP10191250-LC9-local-eager-vs-rsync-eager/20261019T125032Z-AP10191250-LC9-local-eager-vs-rsync-eager",
+     "state": "running"
+    }
+   ],
+   "decision": null,
+   "decidedUtc": null,
+   "start": true,
+   "promote": null
+  },
+  {
+   "id": "N0~end1",
+   "kind": "end",
+   "experiment": null,
+   "question": null,
+   "estimateHours": null,
+   "hypothesis": "not clearly faster: the next window's plan reads this",
+   "design": null,
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "N0c",
+   "kind": "confirm",
+   "experiment": "AP10191250-LC9-local-eager-vs-rsync-eager-confirm",
+   "question": "Does xs-eager hold up on 8 fresh blocks?",
+   "estimateHours": 2.2,
+   "hypothesis": "Confirms the fastest arm of N0 with 8 fresh blocks, if it had one.",
+   "design": "confirmatory",
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": "N0"
+  },
+  {
+   "id": "N1",
+   "kind": "experiment",
+   "experiment": "AP10191250-LC10-local-resync-1pct",
+   "question": "After 1% of the psample files change, does xs -aH re-sync the local T5 backup faster than rsync -aH with cold caches?",
+   "estimateHours": 1.1,
+   "hypothesis": "xs -aH finishes the 1% update re-sync of psample onto the T5 faster than rsync -aH, as it did for the no-op re-sync (time ratio 0.52).",
+   "design": "screening",
+   "state": "queued",
+   "runs": [
+    {
+     "id": "20261019T125034Z-AP10191250-LC10-local-resync-1pct",
+     "key": "local/AP10191250-LC10-local-resync-1pct/20261019T125034Z-AP10191250-LC10-local-resync-1pct",
+     "state": null
+    }
+   ],
+   "decision": null,
+   "decidedUtc": null,
+   "start": true,
+   "promote": null
+  },
+  {
+   "id": "N2",
+   "kind": "experiment",
+   "experiment": "AP10191250-LC11-local-eager-noatomic",
+   "question": "Does skipping the temp-file rename add any speed on top of eager writeback for the local psample backup?",
+   "estimateHours": 1.1,
+   "hypothesis": "Adding --no-atomic to xs -aH with eager writeback makes the durable psample copy to the T5 at least 5% faster than eager writeback alone.",
+   "design": "screening",
+   "state": "queued",
+   "runs": [
+    {
+     "id": "20261019T125035Z-AP10191250-LC11-local-eager-noatomic",
+     "key": "local/AP10191250-LC11-local-eager-noatomic/20261019T125035Z-AP10191250-LC11-local-eager-noatomic",
+     "state": null
+    }
+   ],
+   "decision": null,
+   "decidedUtc": null,
+   "start": true,
+   "promote": null
+  }
+ ],
+ "edges": [
+  {
+   "from": "N0",
+   "to": "N0c",
+   "label": "clearly faster",
+   "taken": null
+  },
+  {
+   "from": "N0",
+   "to": "N0~end1",
+   "label": "no clear gain",
+   "taken": null
+  }
+ ],
+ "decisions": [
+  {
+   "utc": "2026-10-19T12:50:37Z",
+   "node": "N2",
+   "kind": "queued",
+   "text": "N2 queued on neo-ssd (8 samples): start of the tree"
+  },
+  {
+   "utc": "2026-10-19T12:50:35Z",
+   "node": "N1",
+   "kind": "queued",
+   "text": "N1 queued on neo-ssd (8 samples): start of the tree"
+  },
+  {
+   "utc": "2026-10-19T12:50:34Z",
+   "node": "N0",
+   "kind": "queued",
+   "text": "N0 queued on neo-ssd (12 samples): start of the tree"
+  }
+ ]
+}

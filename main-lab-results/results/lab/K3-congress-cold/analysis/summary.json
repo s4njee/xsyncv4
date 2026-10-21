@@ -1,0 +1,19 @@
+{
+ "experiment": "K3-congress-cold",
+ "kind": "screening",
+ "hypothesis": "With cold caches, xs's lead over rsync on congress grows, and the Pi sending cold is the slowest case.",
+ "primary": "durable_s",
+ "control": "xs-z",
+ "delta": 0.03,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261016T222943Z-K3-congress-cold"
+ ],
+ "spec_sha256": [
+  "78f3718f714da4268bff40f72e762fa64e2e34e56778b674166df44b7bd0715c"
+ ],
+ "valid_blocks": 12,
+ "void_attempts": 0,
+ "void_reasons": []
+}

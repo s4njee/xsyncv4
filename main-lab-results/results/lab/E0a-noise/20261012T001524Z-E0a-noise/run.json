@@ -1,0 +1,3887 @@
+{
+ "schema": 1,
+ "run_id": "20261012T001524Z-E0a-noise",
+ "started_utc": "2026-10-12T00:15:36.511+00:00",
+ "driver": "neo",
+ "plan": {
+  "schema": 1,
+  "experiment": "E0a-noise",
+  "spec_sha256": "bfc671ca1d4e5650d2bbd70ea7dc540d34c421698fdd40d6710695cceab935ef",
+  "kind": "screening",
+  "hypothesis": "Two labels on one binary are equivalent within 3% in every cell.",
+  "primary": "wall_s",
+  "delta": 0.03,
+  "control": "xs",
+  "seed": 1,
+  "run_id": "20261012T001524Z-E0a-noise",
+  "driver": "neo",
+  "sample_timeout_s": 3600,
+  "hosts": {
+   "neo": {
+    "ssh": "[email]",
+    "name": "[host]",
+    "hostname": "neo",
+    "root": "~/benchmarks/xsyncv4/lab",
+    "interface": "eth0",
+    "helper": true,
+    "gates": {}
+   },
+   "freya": {
+    "ssh": "[email]",
+    "name": "[host]",
+    "hostname": "freya",
+    "root": "/mnt/nvme/xsbench",
+    "interface": "enp10s0",
+    "helper": true,
+    "gates": {}
+   }
+  },
+  "links": {
+   "lan": {
+    "hosts": [
+     "neo",
+     "freya"
+    ],
+    "medium": "wired",
+    "min_speed_mbps": 1000,
+    "max_rtt_ms": 2.0
+   }
+  },
+  "arms": [
+   {
+    "name": "xs",
+    "tool": "xs",
+    "flags": [
+     "-a"
+    ],
+    "rev": "bf596d28c5c9",
+    "binary": {
+     "neo": "~/benchmarks/xsyncv4/lab/bin/xs-bf596d28c5c9",
+     "freya": "/mnt/nvme/xsbench/bin/xs-bf596d28c5c9"
+    },
+    "sha256": {
+     "neo": "7f61f0acdef53606350f80057bac8d9cb418d7e7af5104315d3de9f8b9b9ac18",
+     "freya": "ce24c1fa00c11ffe8f94ad96a1221970b627d85c4607d19652815b3d5f20996f"
+    },
+    "artifacts": {
+     "xs-linux-amd64": "ce24c1fa00c11ffe8f94ad96a1221970b627d85c4607d19652815b3d5f20996f",
+     "xs-linux-arm64": "7f61f0acdef53606350f80057bac8d9cb418d7e7af5104315d3de9f8b9b9ac18"
+    }
+   },
+   {
+    "name": "xs-same",
+    "tool": "xs",
+    "flags": [
+     "-a"
+    ],
+    "rev": "bf596d28c5c9",
+    "binary": {
+     "neo": "~/benchmarks/xsyncv4/lab/bin/xs-bf596d28c5c9",
+     "freya": "/mnt/nvme/xsbench/bin/xs-bf596d28c5c9"
+    },
+    "sha256": {
+     "neo": "7f61f0acdef53606350f80057bac8d9cb418d7e7af5104315d3de9f8b9b9ac18",
+     "freya": "ce24c1fa00c11ffe8f94ad96a1221970b627d85c4607d19652815b3d5f20996f"
+    },
+    "artifacts": {
+     "xs-linux-amd64": "ce24c1fa00c11ffe8f94ad96a1221970b627d85c4607d19652815b3d5f20996f",
+     "xs-linux-arm64": "7f61f0acdef53606350f80057bac8d9cb418d7e7af5104315d3de9f8b9b9ac18"
+    }
+   },
+   {
+    "name": "rsync",
+    "tool": "rsync",
+    "flags": [
+     "-a"
+    ],
+    "binary": {
+     "neo": "rsync",
+     "freya": "rsync"
+    }
+   },
+   {
+    "name": "rsync-same",
+    "tool": "rsync",
+    "flags": [
+     "-a"
+    ],
+    "binary": {
+     "neo": "rsync",
+     "freya": "rsync"
+    }
+   }
+  ],
+  "cells": [
+   {
+    "id": "tiny-one.fresh.neo-freya.sender.warm",
+    "corpus": "tiny-one",
+    "scenario": "fresh",
+    "sender": "neo",
+    "receiver": "freya",
+    "client": "sender",
+    "link": "lan",
+    "cache": "warm"
+   },
+   {
+    "id": "tiny-one.fresh.freya-neo.sender.warm",
+    "corpus": "tiny-one",
+    "scenario": "fresh",
+    "sender": "freya",
+    "receiver": "neo",
+    "client": "sender",
+    "link": "lan",
+    "cache": "warm"
+   },
+   {
+    "id": "tiny-one.noop.neo-freya.sender.warm",
+    "corpus": "tiny-one",
+    "scenario": "noop",
+    "sender": "neo",
+    "receiver": "freya",
+    "client": "sender",
+    "link": "lan",
+    "cache": "warm"
+   },
+   {
+    "id": "tiny-one.noop.freya-neo.sender.warm",
+    "corpus": "tiny-one",
+    "scenario": "noop",
+    "sender": "freya",
+    "receiver": "neo",
+    "client": "sender",
+    "link": "lan",
+    "cache": "warm"
+   },
+   {
+    "id": "small-flat.fresh.neo-freya.sender.warm",
+    "corpus": "small-flat",
+    "scenario": "fresh",
+    "sender": "neo",
+    "receiver": "freya",
+    "client": "sender",
+    "link": "lan",
+    "cache": "warm"
+   },
+   {
+    "id": "small-flat.fresh.freya-neo.sender.warm",
+    "corpus": "small-flat",
+    "scenario": "fresh",
+    "sender": "freya",
+    "receiver": "neo",
+    "client": "sender",
+    "link": "lan",
+    "cache": "warm"
+   },
+   {
+    "id": "small-flat.noop.neo-freya.sender.warm",
+    "corpus": "small-flat",
+    "scenario": "noop",
+    "sender": "neo",
+    "receiver": "freya",
+    "client": "sender",
+    "link": "lan",
+    "cache": "warm"
+   },
+   {
+    "id": "small-flat.noop.freya-neo.sender.warm",
+    "corpus": "small-flat",
+    "scenario": "noop",
+    "sender": "freya",
+    "receiver": "neo",
+    "client": "sender",
+    "link": "lan",
+    "cache": "warm"
+   },
+   {
+    "id": "mixed-bimodal.fresh.neo-freya.sender.warm",
+    "corpus": "mixed-bimodal",
+    "scenario": "fresh",
+    "sender": "neo",
+    "receiver": "freya",
+    "client": "sender",
+    "link": "lan",
+    "cache": "warm"
+   },
+   {
+    "id": "mixed-bimodal.fresh.freya-neo.sender.warm",
+    "corpus": "mixed-bimodal",
+    "scenario": "fresh",
+    "sender": "freya",
+    "receiver": "neo",
+    "client": "sender",
+    "link": "lan",
+    "cache": "warm"
+   },
+   {
+    "id": "mixed-bimodal.noop.neo-freya.sender.warm",
+    "corpus": "mixed-bimodal",
+    "scenario": "noop",
+    "sender": "neo",
+    "receiver": "freya",
+    "client": "sender",
+    "link": "lan",
+    "cache": "warm"
+   },
+   {
+    "id": "mixed-bimodal.noop.freya-neo.sender.warm",
+    "corpus": "mixed-bimodal",
+    "scenario": "noop",
+    "sender": "freya",
+    "receiver": "neo",
+    "client": "sender",
+    "link": "lan",
+    "cache": "warm"
+   }
+  ],
+  "corpora": {
+   "tiny-one": {
+    "files": 1,
+    "directories": 0,
+    "bytes": 19,
+    "digest": "38e12e8a867b32d7d9c7bf9c9a1bf9b731ba1a2a425f0323983ccc535e871dbe",
+    "quick_digest": "fba99983b39b06c131a47d522ecc6fa31d90fa37a84b7cb37ae68904a1ac50e7"
+   },
+   "small-flat": {
+    "files": 100000,
+    "directories": 100,
+    "bytes": 319224077,
+    "digest": "41b628c4337730be4efdfcc6673d517749132ffd50b75b29321640e6f064bbec",
+    "quick_digest": "e8de96251eaca6be3e98b1cb8097405b37ad470fc0d5ffdb7a5a48ea5b9f3805"
+   },
+   "mixed-bimodal": {
+    "files": 20000,
+    "directories": 420,
+    "bytes": 1395127076,
+    "digest": "e9071fb7ad3b0375ffe9fab58f740bfd22d545f7678e163a6c745504cc7aa16b",
+    "quick_digest": "31af6dbe5d38a32f5f0acf560703fa557304d3936e59f7b395d13cf8d0dec7fb"
+   }
+  },
+  "blocks": [
+   {
+    "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs",
+      "rsync",
+      "xs-same",
+      "rsync-same"
+     ],
+     [
+      "rsync",
+      "xs-same",
+      "xs",
+      "rsync-same"
+     ],
+     [
+      "xs",
+      "xs-same",
+      "rsync-same",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.noop.neo-freya.sender.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "rsync",
+      "xs-same",
+      "rsync-same",
+      "xs"
+     ],
+     [
+      "rsync",
+      "xs-same",
+      "rsync-same",
+      "xs"
+     ],
+     [
+      "xs",
+      "rsync",
+      "rsync-same",
+      "xs-same"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.noop.freya-neo.sender.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs",
+      "rsync",
+      "xs-same",
+      "rsync-same"
+     ],
+     [
+      "xs",
+      "rsync-same",
+      "xs-same",
+      "rsync"
+     ],
+     [
+      "xs",
+      "rsync-same",
+      "rsync",
+      "xs-same"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.freya-neo.sender.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs-same",
+      "xs",
+      "rsync-same",
+      "rsync"
+     ],
+     [
+      "rsync-same",
+      "rsync",
+      "xs",
+      "xs-same"
+     ],
+     [
+      "xs",
+      "rsync",
+      "xs-same",
+      "rsync-same"
+     ]
+    ]
+   },
+   {
+    "cell": "tiny-one.fresh.neo-freya.sender.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs-same",
+      "xs",
+      "rsync-same",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs-same",
+      "rsync-same",
+      "xs"
+     ],
+     [
+      "rsync",
+      "xs-same",
+      "xs",
+      "rsync-same"
+     ]
+    ]
+   },
+   {
+    "cell": "tiny-one.fresh.freya-neo.sender.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "rsync",
+      "rsync-same",
+      "xs",
+      "xs-same"
+     ],
+     [
+      "rsync-same",
+      "xs",
+      "rsync",
+      "xs-same"
+     ],
+     [
+      "xs",
+      "rsync",
+      "rsync-same",
+      "xs-same"
+     ]
+    ]
+   },
+   {
+    "cell": "tiny-one.noop.freya-neo.sender.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "rsync-same",
+      "xs-same",
+      "rsync",
+      "xs"
+     ],
+     [
+      "rsync",
+      "xs",
+      "xs-same",
+      "rsync-same"
+     ],
+     [
+      "xs",
+      "rsync-same",
+      "rsync",
+      "xs-same"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.noop.freya-neo.sender.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs-same",
+      "rsync",
+      "rsync-same",
+      "xs"
+     ],
+     [
+      "rsync",
+      "xs-same",
+      "rsync-same",
+      "xs"
+     ],
+     [
+      "xs-same",
+      "rsync",
+      "rsync-same",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.fresh.neo-freya.sender.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "rsync",
+      "rsync-same",
+      "xs-same",
+      "xs"
+     ],
+     [
+      "xs-same",
+      "rsync",
+      "rsync-same",
+      "xs"
+     ],
+     [
+      "rsync-same",
+      "rsync",
+      "xs",
+      "xs-same"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.fresh.freya-neo.sender.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs-same",
+      "rsync",
+      "xs",
+      "rsync-same"
+     ],
+     [
+      "xs-same",
+      "xs",
+      "rsync-same",
+      "rsync"
+     ],
+     [
+      "rsync-same",
+      "rsync",
+      "xs",
+      "xs-same"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.noop.neo-freya.sender.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "rsync-same",
+      "rsync",
+      "xs",
+      "xs-same"
+     ],
+     [
+      "xs",
+      "rsync",
+      "rsync-same",
+      "xs-same"
+     ],
+     [
+      "xs-same",
+      "xs",
+      "rsync-same",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "tiny-one.noop.neo-freya.sender.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs-same",
+      "rsync-same",
+      "xs",
+      "rsync"
+     ],
+     [
+      "xs",
+      "rsync",
+      "rsync-same",
+      "xs-same"
+     ],
+     [
+      "rsync",
+      "xs",
+      "rsync-same",
+      "xs-same"
+     ]
+    ]
+   },
+   {
+    "cell": "tiny-one.fresh.neo-freya.sender.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "rsync-same",
+      "xs",
+      "xs-same"
+     ],
+     [
+      "xs",
+      "xs-same",
+      "rsync-same",
+      "rsync"
+     ],
+     [
+      "xs-same",
+      "xs",
+      "rsync-same",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "tiny-one.noop.freya-neo.sender.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync-same",
+      "xs",
+      "rsync",
+      "xs-same"
+     ],
+     [
+      "xs",
+      "rsync",
+      "rsync-same",
+      "xs-same"
+     ],
+     [
+      "xs-same",
+      "rsync",
+      "xs",
+      "rsync-same"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.noop.neo-freya.sender.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync-same",
+      "xs-same",
+      "rsync",
+      "xs"
+     ],
+     [
+      "rsync-same",
+      "rsync",
+      "xs-same",
+      "xs"
+     ],
+     [
+      "rsync-same",
+      "rsync",
+      "xs",
+      "xs-same"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-same",
+      "rsync-same",
+      "rsync",
+      "xs"
+     ],
+     [
+      "rsync-same",
+      "xs-same",
+      "rsync",
+      "xs"
+     ],
+     [
+      "rsync",
+      "xs-same",
+      "xs",
+      "rsync-same"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.fresh.freya-neo.sender.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-same",
+      "rsync",
+      "xs",
+      "rsync-same"
+     ],
+     [
+      "rsync-same",
+      "rsync",
+      "xs",
+      "xs-same"
+     ],
+     [
+      "rsync",
+      "xs-same",
+      "xs",
+      "rsync-same"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.freya-neo.sender.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync-same",
+      "rsync",
+      "xs",
+      "xs-same"
+     ],
+     [
+      "xs-same",
+      "rsync-same",
+      "rsync",
+      "xs"
+     ],
+     [
+      "xs",
+      "xs-same",
+      "rsync",
+      "rsync-same"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.noop.neo-freya.sender.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "rsync",
+      "rsync-same",
+      "xs-same"
+     ],
+     [
+      "rsync-same",
+      "rsync",
+      "xs",
+      "xs-same"
+     ],
+     [
+      "rsync",
+      "rsync-same",
+      "xs-same",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.noop.freya-neo.sender.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync-same",
+      "xs",
+      "rsync",
+      "xs-same"
+     ],
+     [
+      "xs-same",
+      "xs",
+      "rsync",
+      "rsync-same"
+     ],
+     [
+      "rsync",
+      "xs",
+      "rsync-same",
+      "xs-same"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.fresh.neo-freya.sender.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync-same",
+      "xs",
+      "xs-same",
+      "rsync"
+     ],
+     [
+      "xs-same",
+      "rsync",
+      "rsync-same",
+      "xs"
+     ],
+     [
+      "rsync",
+      "xs",
+      "rsync-same",
+      "xs-same"
+     ]
+    ]
+   },
+   {
+    "cell": "tiny-one.noop.neo-freya.sender.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-same",
+      "rsync",
+      "rsync-same",
+      "xs"
+     ],
+     [
+      "rsync",
+      "rsync-same",
+      "xs",
+      "xs-same"
+     ],
+     [
+      "rsync-same",
+      "xs",
+      "rsync",
+      "xs-same"
+     ]
+    ]
+   },
+   {
+    "cell": "tiny-one.fresh.freya-neo.sender.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs-same",
+      "rsync-same",
+      "xs"
+     ],
+     [
+      "xs-same",
+      "xs",
+      "rsync-same",
+      "rsync"
+     ],
+     [
+      "xs",
+      "rsync",
+      "rsync-same",
+      "xs-same"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.noop.freya-neo.sender.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs-same",
+      "xs",
+      "rsync-same"
+     ],
+     [
+      "xs-same",
+      "xs",
+      "rsync",
+      "rsync-same"
+     ],
+     [
+      "rsync-same",
+      "rsync",
+      "xs-same",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.noop.freya-neo.sender.warm",
+    "block": 2,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs",
+      "rsync-same",
+      "xs-same"
+     ],
+     [
+      "rsync-same",
+      "xs",
+      "xs-same",
+      "rsync"
+     ],
+     [
+      "xs-same",
+      "xs",
+      "rsync",
+      "rsync-same"
+     ]
+    ]
+   },
+   {
+    "cell": "tiny-one.noop.freya-neo.sender.warm",
+    "block": 2,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-same",
+      "rsync-same",
+      "rsync",
+      "xs"
+     ],
+     [
+      "rsync",
+      "rsync-same",
+      "xs-same",
+      "xs"
+     ],
+     [
+      "xs",
+      "xs-same",
+      "rsync-same",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.noop.neo-freya.sender.warm",
+    "block": 2,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-same",
+      "rsync-same",
+      "xs",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "rsync-same",
+      "xs",
+      "xs-same"
+     ],
+     [
+      "rsync-same",
+      "xs",
+      "xs-same",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.freya-neo.sender.warm",
+    "block": 2,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync-same",
+      "xs",
+      "xs-same",
+      "rsync"
+     ],
+     [
+      "xs-same",
+      "xs",
+      "rsync",
+      "rsync-same"
+     ],
+     [
+      "rsync-same",
+      "xs",
+      "rsync",
+      "xs-same"
+     ]
+    ]
+   },
+   {
+    "cell": "tiny-one.fresh.freya-neo.sender.warm",
+    "block": 2,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "rsync",
+      "xs-same",
+      "rsync-same"
+     ],
+     [
+      "rsync",
+      "rsync-same",
+      "xs",
+      "xs-same"
+     ],
+     [
+      "xs",
+      "rsync",
+      "xs-same",
+      "rsync-same"
+     ]
+    ]
+   },
+   {
+    "cell": "tiny-one.fresh.neo-freya.sender.warm",
+    "block": 2,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "rsync",
+      "xs-same",
+      "rsync-same"
+     ],
+     [
+      "xs-same",
+      "xs",
+      "rsync-same",
+      "rsync"
+     ],
+     [
+      "xs",
+      "rsync-same",
+      "rsync",
+      "xs-same"
+     ]
+    ]
+   },
+   {
+    "cell": "tiny-one.noop.neo-freya.sender.warm",
+    "block": 2,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync-same",
+      "rsync",
+      "xs",
+      "xs-same"
+     ],
+     [
+      "rsync-same",
+      "xs-same",
+      "xs",
+      "rsync"
+     ],
+     [
+      "xs-same",
+      "xs",
+      "rsync",
+      "rsync-same"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+    "block": 2,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-same",
+      "xs",
+      "rsync",
+      "rsync-same"
+     ],
+     [
+      "xs-same",
+      "rsync",
+      "xs",
+      "rsync-same"
+     ],
+     [
+      "rsync",
+      "rsync-same",
+      "xs",
+      "xs-same"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.fresh.neo-freya.sender.warm",
+    "block": 2,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync-same",
+      "xs-same",
+      "xs",
+      "rsync"
+     ],
+     [
+      "xs",
+      "rsync-same",
+      "rsync",
+      "xs-same"
+     ],
+     [
+      "xs",
+      "rsync-same",
+      "rsync",
+      "xs-same"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.noop.freya-neo.sender.warm",
+    "block": 2,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "xs-same",
+      "rsync",
+      "rsync-same"
+     ],
+     [
+      "xs-same",
+      "rsync-same",
+      "rsync",
+      "xs"
+     ],
+     [
+      "rsync",
+      "rsync-same",
+      "xs-same",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.fresh.freya-neo.sender.warm",
+    "block": 2,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "rsync",
+      "rsync-same",
+      "xs-same"
+     ],
+     [
+      "xs",
+      "rsync-same",
+      "xs-same",
+      "rsync"
+     ],
+     [
+      "xs-same",
+      "rsync-same",
+      "rsync",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.noop.neo-freya.sender.warm",
+    "block": 2,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync-same",
+      "rsync",
+      "xs",
+      "xs-same"
+     ],
+     [
+      "xs",
+      "rsync",
+      "rsync-same",
+      "xs-same"
+     ],
+     [
+      "rsync-same",
+      "rsync",
+      "xs",
+      "xs-same"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.noop.freya-neo.sender.warm",
+    "block": 3,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-same",
+      "xs",
+      "rsync-same",
+      "rsync"
+     ],
+     [
+      "xs-same",
+      "xs",
+      "rsync-same",
+      "rsync"
+     ],
+     [
+      "xs",
+      "rsync",
+      "xs-same",
+      "rsync-same"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.fresh.freya-neo.sender.warm",
+    "block": 3,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-same",
+      "rsync-same",
+      "rsync",
+      "xs"
+     ],
+     [
+      "xs",
+      "rsync",
+      "rsync-same",
+      "xs-same"
+     ],
+     [
+      "rsync-same",
+      "xs",
+      "xs-same",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.fresh.neo-freya.sender.warm",
+    "block": 3,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs-same",
+      "rsync-same",
+      "xs"
+     ],
+     [
+      "xs-same",
+      "xs",
+      "rsync",
+      "rsync-same"
+     ],
+     [
+      "xs",
+      "xs-same",
+      "rsync",
+      "rsync-same"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.noop.neo-freya.sender.warm",
+    "block": 3,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-same",
+      "rsync-same",
+      "xs",
+      "rsync"
+     ],
+     [
+      "rsync-same",
+      "rsync",
+      "xs-same",
+      "xs"
+     ],
+     [
+      "rsync",
+      "rsync-same",
+      "xs",
+      "xs-same"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.noop.freya-neo.sender.warm",
+    "block": 3,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "rsync-same",
+      "rsync",
+      "xs-same"
+     ],
+     [
+      "rsync-same",
+      "xs",
+      "rsync",
+      "xs-same"
+     ],
+     [
+      "rsync-same",
+      "rsync",
+      "xs-same",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "tiny-one.fresh.neo-freya.sender.warm",
+    "block": 3,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync-same",
+      "xs-same",
+      "xs",
+      "rsync"
+     ],
+     [
+      "xs-same",
+      "rsync-same",
+      "xs",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "rsync-same",
+      "xs-same",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "tiny-one.fresh.freya-neo.sender.warm",
+    "block": 3,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync-same",
+      "xs",
+      "rsync",
+      "xs-same"
+     ],
+     [
+      "rsync-same",
+      "xs",
+      "rsync",
+      "xs-same"
+     ],
+     [
+      "rsync-same",
+      "xs-same",
+      "rsync",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "tiny-one.noop.freya-neo.sender.warm",
+    "block": 3,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-same",
+      "xs",
+      "rsync-same",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs",
+      "xs-same",
+      "rsync-same"
+     ],
+     [
+      "rsync-same",
+      "xs",
+      "rsync",
+      "xs-same"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.freya-neo.sender.warm",
+    "block": 3,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "rsync-same",
+      "xs",
+      "xs-same"
+     ],
+     [
+      "xs-same",
+      "rsync-same",
+      "xs",
+      "rsync"
+     ],
+     [
+      "xs-same",
+      "xs",
+      "rsync",
+      "rsync-same"
+     ]
+    ]
+   },
+   {
+    "cell": "tiny-one.noop.neo-freya.sender.warm",
+    "block": 3,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync-same",
+      "xs",
+      "xs-same",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs-same",
+      "rsync-same",
+      "xs"
+     ],
+     [
+      "xs-same",
+      "xs",
+      "rsync-same",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.noop.neo-freya.sender.warm",
+    "block": 3,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-same",
+      "rsync",
+      "rsync-same",
+      "xs"
+     ],
+     [
+      "rsync",
+      "xs",
+      "rsync-same",
+      "xs-same"
+     ],
+     [
+      "xs",
+      "rsync-same",
+      "rsync",
+      "xs-same"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+    "block": 3,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync-same",
+      "rsync",
+      "xs-same",
+      "xs"
+     ],
+     [
+      "rsync-same",
+      "rsync",
+      "xs",
+      "xs-same"
+     ],
+     [
+      "rsync",
+      "xs",
+      "xs-same",
+      "rsync-same"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.noop.neo-freya.sender.warm",
+    "block": 4,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync-same",
+      "xs",
+      "rsync",
+      "xs-same"
+     ],
+     [
+      "rsync-same",
+      "xs-same",
+      "xs",
+      "rsync"
+     ],
+     [
+      "xs",
+      "xs-same",
+      "rsync-same",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.freya-neo.sender.warm",
+    "block": 4,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs",
+      "xs-same",
+      "rsync-same"
+     ],
+     [
+      "rsync",
+      "rsync-same",
+      "xs-same",
+      "xs"
+     ],
+     [
+      "xs-same",
+      "rsync",
+      "rsync-same",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.noop.freya-neo.sender.warm",
+    "block": 4,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "rsync-same",
+      "rsync",
+      "xs-same"
+     ],
+     [
+      "rsync-same",
+      "rsync",
+      "xs",
+      "xs-same"
+     ],
+     [
+      "xs-same",
+      "rsync",
+      "rsync-same",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.noop.neo-freya.sender.warm",
+    "block": 4,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "rsync",
+      "rsync-same",
+      "xs-same"
+     ],
+     [
+      "rsync-same",
+      "xs-same",
+      "rsync",
+      "xs"
+     ],
+     [
+      "rsync",
+      "rsync-same",
+      "xs-same",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.noop.freya-neo.sender.warm",
+    "block": 4,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "xs-same",
+      "rsync",
+      "rsync-same"
+     ],
+     [
+      "rsync",
+      "xs-same",
+      "rsync-same",
+      "xs"
+     ],
+     [
+      "xs",
+      "rsync-same",
+      "xs-same",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+    "block": 4,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "rsync-same",
+      "xs",
+      "xs-same"
+     ],
+     [
+      "rsync-same",
+      "xs",
+      "rsync",
+      "xs-same"
+     ],
+     [
+      "rsync-same",
+      "rsync",
+      "xs",
+      "xs-same"
+     ]
+    ]
+   },
+   {
+    "cell": "tiny-one.noop.freya-neo.sender.warm",
+    "block": 4,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-same",
+      "rsync-same",
+      "xs",
+      "rsync"
+     ],
+     [
+      "xs",
+      "rsync",
+      "xs-same",
+      "rsync-same"
+     ],
+     [
+      "rsync",
+      "xs",
+      "rsync-same",
+      "xs-same"
+     ]
+    ]
+   },
+   {
+    "cell": "tiny-one.fresh.neo-freya.sender.warm",
+    "block": 4,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs",
+      "rsync-same",
+      "xs-same"
+     ],
+     [
+      "xs",
+      "rsync",
+      "rsync-same",
+      "xs-same"
+     ],
+     [
+      "rsync",
+      "xs-same",
+      "rsync-same",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "tiny-one.fresh.freya-neo.sender.warm",
+    "block": 4,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-same",
+      "rsync",
+      "xs",
+      "rsync-same"
+     ],
+     [
+      "rsync-same",
+      "xs",
+      "xs-same",
+      "rsync"
+     ],
+     [
+      "rsync-same",
+      "xs-same",
+      "xs",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.fresh.freya-neo.sender.warm",
+    "block": 4,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-same",
+      "rsync",
+      "xs",
+      "rsync-same"
+     ],
+     [
+      "rsync-same",
+      "rsync",
+      "xs-same",
+      "xs"
+     ],
+     [
+      "xs-same",
+      "rsync",
+      "xs",
+      "rsync-same"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.fresh.neo-freya.sender.warm",
+    "block": 4,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "rsync-same",
+      "xs-same",
+      "xs"
+     ],
+     [
+      "xs-same",
+      "xs",
+      "rsync-same",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs",
+      "xs-same",
+      "rsync-same"
+     ]
+    ]
+   },
+   {
+    "cell": "tiny-one.noop.neo-freya.sender.warm",
+    "block": 4,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs-same",
+      "xs",
+      "rsync-same"
+     ],
+     [
+      "rsync-same",
+      "rsync",
+      "xs-same",
+      "xs"
+     ],
+     [
+      "xs",
+      "rsync-same",
+      "xs-same",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.noop.neo-freya.sender.warm",
+    "block": 5,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-same",
+      "rsync-same",
+      "xs",
+      "rsync"
+     ],
+     [
+      "xs",
+      "rsync-same",
+      "rsync",
+      "xs-same"
+     ],
+     [
+      "rsync",
+      "xs",
+      "rsync-same",
+      "xs-same"
+     ]
+    ]
+   },
+   {
+    "cell": "tiny-one.fresh.freya-neo.sender.warm",
+    "block": 5,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync-same",
+      "xs",
+      "rsync",
+      "xs-same"
+     ],
+     [
+      "rsync-same",
+      "rsync",
+      "xs-same",
+      "xs"
+     ],
+     [
+      "xs",
+      "rsync-same",
+      "rsync",
+      "xs-same"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.noop.freya-neo.sender.warm",
+    "block": 5,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-same",
+      "rsync",
+      "xs",
+      "rsync-same"
+     ],
+     [
+      "rsync-same",
+      "rsync",
+      "xs-same",
+      "xs"
+     ],
+     [
+      "xs",
+      "rsync",
+      "xs-same",
+      "rsync-same"
+     ]
+    ]
+   },
+   {
+    "cell": "tiny-one.fresh.neo-freya.sender.warm",
+    "block": 5,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-same",
+      "rsync-same",
+      "rsync",
+      "xs"
+     ],
+     [
+      "rsync",
+      "xs-same",
+      "xs",
+      "rsync-same"
+     ],
+     [
+      "rsync-same",
+      "xs",
+      "xs-same",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "tiny-one.noop.neo-freya.sender.warm",
+    "block": 5,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "rsync-same",
+      "xs-same",
+      "xs"
+     ],
+     [
+      "rsync-same",
+      "xs",
+      "rsync",
+      "xs-same"
+     ],
+     [
+      "xs-same",
+      "xs",
+      "rsync-same",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.fresh.neo-freya.sender.warm",
+    "block": 5,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "rsync",
+      "xs-same",
+      "rsync-same"
+     ],
+     [
+      "xs",
+      "xs-same",
+      "rsync-same",
+      "rsync"
+     ],
+     [
+      "rsync-same",
+      "xs-same",
+      "xs",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+    "block": 5,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-same",
+      "rsync-same",
+      "xs",
+      "rsync"
+     ],
+     [
+      "xs-same",
+      "rsync",
+      "rsync-same",
+      "xs"
+     ],
+     [
+      "xs",
+      "xs-same",
+      "rsync",
+      "rsync-same"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.freya-neo.sender.warm",
+    "block": 5,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "xs-same",
+      "rsync-same",
+      "rsync"
+     ],
+     [
+      "xs-same",
+      "xs",
+      "rsync-same",
+      "rsync"
+     ],
+     [
+      "xs",
+      "rsync",
+      "rsync-same",
+      "xs-same"
+     ]
+    ]
+   },
+   {
+    "cell": "tiny-one.noop.freya-neo.sender.warm",
+    "block": 5,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync-same",
+      "rsync",
+      "xs-same",
+      "xs"
+     ],
+     [
+      "rsync-same",
+      "xs-same",
+      "xs",
+      "rsync"
+     ],
+     [
+      "xs-same",
+      "rsync-same",
+      "rsync",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.noop.neo-freya.sender.warm",
+    "block": 5,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-same",
+      "rsync",
+      "xs",
+      "rsync-same"
+     ],
+     [
+      "xs",
+      "rsync-same",
+      "xs-same",
+      "rsync"
+     ],
+     [
+      "xs",
+      "rsync",
+      "xs-same",
+      "rsync-same"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.noop.freya-neo.sender.warm",
+    "block": 5,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "xs-same",
+      "rsync",
+      "rsync-same"
+     ],
+     [
+      "xs",
+      "rsync-same",
+      "rsync",
+      "xs-same"
+     ],
+     [
+      "rsync",
+      "rsync-same",
+      "xs-same",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.fresh.freya-neo.sender.warm",
+    "block": 5,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-same",
+      "rsync",
+      "rsync-same",
+      "xs"
+     ],
+     [
+      "xs-same",
+      "rsync-same",
+      "xs",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs-same",
+      "rsync-same",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "tiny-one.noop.freya-neo.sender.warm",
+    "block": 6,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "xs-same",
+      "rsync-same",
+      "rsync"
+     ],
+     [
+      "xs-same",
+      "xs",
+      "rsync-same",
+      "rsync"
+     ],
+     [
+      "rsync-same",
+      "xs-same",
+      "rsync",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "tiny-one.fresh.neo-freya.sender.warm",
+    "block": 6,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync-same",
+      "xs",
+      "rsync",
+      "xs-same"
+     ],
+     [
+      "xs-same",
+      "rsync",
+      "xs",
+      "rsync-same"
+     ],
+     [
+      "rsync-same",
+      "rsync",
+      "xs",
+      "xs-same"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.fresh.freya-neo.sender.warm",
+    "block": 6,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs-same",
+      "xs",
+      "rsync-same"
+     ],
+     [
+      "rsync-same",
+      "rsync",
+      "xs-same",
+      "xs"
+     ],
+     [
+      "xs-same",
+      "rsync-same",
+      "rsync",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "tiny-one.noop.neo-freya.sender.warm",
+    "block": 6,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync-same",
+      "rsync",
+      "xs-same",
+      "xs"
+     ],
+     [
+      "xs-same",
+      "xs",
+      "rsync-same",
+      "rsync"
+     ],
+     [
+      "rsync-same",
+      "xs-same",
+      "xs",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.noop.freya-neo.sender.warm",
+    "block": 6,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-same",
+      "rsync",
+      "xs",
+      "rsync-same"
+     ],
+     [
+      "xs-same",
+      "rsync-same",
+      "rsync",
+      "xs"
+     ],
+     [
+      "rsync",
+      "xs",
+      "rsync-same",
+      "xs-same"
+     ]
+    ]
+   },
+   {
+    "cell": "tiny-one.fresh.freya-neo.sender.warm",
+    "block": 6,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-same",
+      "rsync-same",
+      "xs",
+      "rsync"
+     ],
+     [
+      "xs-same",
+      "xs",
+      "rsync-same",
+      "rsync"
+     ],
+     [
+      "xs-same",
+      "rsync",
+      "xs",
+      "rsync-same"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.freya-neo.sender.warm",
+    "block": 6,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "rsync-same",
+      "xs",
+      "xs-same"
+     ],
+     [
+      "xs-same",
+      "rsync-same",
+      "xs",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "rsync-same",
+      "xs-same",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+    "block": 6,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "xs-same",
+      "rsync",
+      "rsync-same"
+     ],
+     [
+      "xs-same",
+      "xs",
+      "rsync-same",
+      "rsync"
+     ],
+     [
+      "xs",
+      "xs-same",
+      "rsync",
+      "rsync-same"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.noop.freya-neo.sender.warm",
+    "block": 6,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync-same",
+      "rsync",
+      "xs-same",
+      "xs"
+     ],
+     [
+      "xs",
+      "rsync-same",
+      "xs-same",
+      "rsync"
+     ],
+     [
+      "xs-same",
+      "rsync-same",
+      "rsync",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.noop.neo-freya.sender.warm",
+    "block": 6,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs-same",
+      "xs",
+      "rsync-same"
+     ],
+     [
+      "rsync-same",
+      "xs",
+      "xs-same",
+      "rsync"
+     ],
+     [
+      "xs",
+      "xs-same",
+      "rsync",
+      "rsync-same"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.noop.neo-freya.sender.warm",
+    "block": 6,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-same",
+      "rsync-same",
+      "rsync",
+      "xs"
+     ],
+     [
+      "xs-same",
+      "rsync",
+      "rsync-same",
+      "xs"
+     ],
+     [
+      "xs-same",
+      "rsync",
+      "rsync-same",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.fresh.neo-freya.sender.warm",
+    "block": 6,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync-same",
+      "xs-same",
+      "xs",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs",
+      "rsync-same",
+      "xs-same"
+     ],
+     [
+      "xs-same",
+      "rsync",
+      "rsync-same",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "tiny-one.fresh.neo-freya.sender.warm",
+    "block": 7,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "rsync-same",
+      "xs-same",
+      "xs"
+     ],
+     [
+      "rsync-same",
+      "rsync",
+      "xs",
+      "xs-same"
+     ],
+     [
+      "rsync",
+      "xs-same",
+      "rsync-same",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "tiny-one.noop.freya-neo.sender.warm",
+    "block": 7,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-same",
+      "xs",
+      "rsync-same",
+      "rsync"
+     ],
+     [
+      "xs",
+      "rsync",
+      "rsync-same",
+      "xs-same"
+     ],
+     [
+      "rsync-same",
+      "xs",
+      "rsync",
+      "xs-same"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.fresh.neo-freya.sender.warm",
+    "block": 7,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs-same",
+      "rsync-same",
+      "xs"
+     ],
+     [
+      "rsync",
+      "xs",
+      "rsync-same",
+      "xs-same"
+     ],
+     [
+      "rsync",
+      "xs",
+      "rsync-same",
+      "xs-same"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.noop.neo-freya.sender.warm",
+    "block": 7,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs-same",
+      "xs",
+      "rsync-same"
+     ],
+     [
+      "rsync",
+      "xs-same",
+      "rsync-same",
+      "xs"
+     ],
+     [
+      "rsync-same",
+      "rsync",
+      "xs-same",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.fresh.freya-neo.sender.warm",
+    "block": 7,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync-same",
+      "rsync",
+      "xs",
+      "xs-same"
+     ],
+     [
+      "xs",
+      "xs-same",
+      "rsync",
+      "rsync-same"
+     ],
+     [
+      "xs-same",
+      "rsync-same",
+      "rsync",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.noop.freya-neo.sender.warm",
+    "block": 7,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "rsync-same",
+      "xs-same",
+      "xs"
+     ],
+     [
+      "xs",
+      "xs-same",
+      "rsync",
+      "rsync-same"
+     ],
+     [
+      "xs",
+      "xs-same",
+      "rsync",
+      "rsync-same"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.noop.freya-neo.sender.warm",
+    "block": 7,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync-same",
+      "rsync",
+      "xs-same",
+      "xs"
+     ],
+     [
+      "xs-same",
+      "rsync",
+      "xs",
+      "rsync-same"
+     ],
+     [
+      "xs-same",
+      "rsync",
+      "xs",
+      "rsync-same"
+     ]
+    ]
+   },
+   {
+    "cell": "tiny-one.noop.neo-freya.sender.warm",
+    "block": 7,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs",
+      "xs-same",
+      "rsync-same"
+     ],
+     [
+      "rsync-same",
+      "xs-same",
+      "xs",
+      "rsync"
+     ],
+     [
+      "rsync-same",
+      "xs-same",
+      "xs",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "tiny-one.fresh.freya-neo.sender.warm",
+    "block": 7,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs-same",
+      "rsync-same",
+      "xs"
+     ],
+     [
+      "xs",
+      "rsync-same",
+      "rsync",
+      "xs-same"
+     ],
+     [
+      "rsync",
+      "xs-same",
+      "xs",
+      "rsync-same"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.freya-neo.sender.warm",
+    "block": 7,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs",
+      "xs-same",
+      "rsync-same"
+     ],
+     [
+      "rsync",
+      "rsync-same",
+      "xs",
+      "xs-same"
+     ],
+     [
+      "rsync",
+      "rsync-same",
+      "xs-same",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+    "block": 7,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "rsync-same",
+      "rsync",
+      "xs-same"
+     ],
+     [
+      "rsync-same",
+      "rsync",
+      "xs",
+      "xs-same"
+     ],
+     [
+      "rsync",
+      "rsync-same",
+      "xs-same",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.noop.neo-freya.sender.warm",
+    "block": 7,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync-same",
+      "rsync",
+      "xs-same",
+      "xs"
+     ],
+     [
+      "rsync",
+      "rsync-same",
+      "xs-same",
+      "xs"
+     ],
+     [
+      "rsync",
+      "rsync-same",
+      "xs-same",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "tiny-one.fresh.freya-neo.sender.warm",
+    "block": 8,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs-same",
+      "xs",
+      "rsync-same"
+     ],
+     [
+      "xs",
+      "rsync",
+      "xs-same",
+      "rsync-same"
+     ],
+     [
+      "rsync",
+      "xs",
+      "rsync-same",
+      "xs-same"
+     ]
+    ]
+   },
+   {
+    "cell": "tiny-one.noop.freya-neo.sender.warm",
+    "block": 8,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "rsync",
+      "xs-same",
+      "rsync-same"
+     ],
+     [
+      "xs-same",
+      "rsync",
+      "rsync-same",
+      "xs"
+     ],
+     [
+      "xs-same",
+      "rsync-same",
+      "rsync",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+    "block": 8,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-same",
+      "xs",
+      "rsync-same",
+      "rsync"
+     ],
+     [
+      "xs-same",
+      "xs",
+      "rsync",
+      "rsync-same"
+     ],
+     [
+      "rsync",
+      "rsync-same",
+      "xs",
+      "xs-same"
+     ]
+    ]
+   },
+   {
+    "cell": "tiny-one.fresh.neo-freya.sender.warm",
+    "block": 8,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "rsync-same",
+      "xs-same",
+      "xs"
+     ],
+     [
+      "rsync",
+      "xs",
+      "rsync-same",
+      "xs-same"
+     ],
+     [
+      "xs-same",
+      "rsync-same",
+      "rsync",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.noop.freya-neo.sender.warm",
+    "block": 8,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs-same",
+      "rsync-same",
+      "xs"
+     ],
+     [
+      "xs",
+      "xs-same",
+      "rsync",
+      "rsync-same"
+     ],
+     [
+      "rsync-same",
+      "rsync",
+      "xs-same",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.freya-neo.sender.warm",
+    "block": 8,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync-same",
+      "xs",
+      "rsync",
+      "xs-same"
+     ],
+     [
+      "rsync",
+      "xs",
+      "xs-same",
+      "rsync-same"
+     ],
+     [
+      "rsync-same",
+      "rsync",
+      "xs-same",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.fresh.freya-neo.sender.warm",
+    "block": 8,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "xs-same",
+      "rsync-same",
+      "rsync"
+     ],
+     [
+      "xs-same",
+      "rsync",
+      "xs",
+      "rsync-same"
+     ],
+     [
+      "xs",
+      "xs-same",
+      "rsync-same",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.noop.freya-neo.sender.warm",
+    "block": 8,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs-same",
+      "rsync-same",
+      "xs"
+     ],
+     [
+      "xs-same",
+      "xs",
+      "rsync-same",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "rsync-same",
+      "xs-same",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.noop.neo-freya.sender.warm",
+    "block": 8,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "rsync-same",
+      "xs",
+      "xs-same"
+     ],
+     [
+      "xs",
+      "rsync-same",
+      "rsync",
+      "xs-same"
+     ],
+     [
+      "xs-same",
+      "rsync",
+      "rsync-same",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "tiny-one.noop.neo-freya.sender.warm",
+    "block": 8,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-same",
+      "rsync",
+      "rsync-same",
+      "xs"
+     ],
+     [
+      "rsync",
+      "rsync-same",
+      "xs-same",
+      "xs"
+     ],
+     [
+      "rsync",
+      "rsync-same",
+      "xs-same",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.fresh.neo-freya.sender.warm",
+    "block": 8,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs-same",
+      "rsync-same",
+      "xs"
+     ],
+     [
+      "xs",
+      "rsync",
+      "rsync-same",
+      "xs-same"
+     ],
+     [
+      "rsync",
+      "xs",
+      "xs-same",
+      "rsync-same"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.noop.neo-freya.sender.warm",
+    "block": 8,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "xs-same",
+      "rsync",
+      "rsync-same"
+     ],
+     [
+      "xs",
+      "rsync",
+      "rsync-same",
+      "xs-same"
+     ],
+     [
+      "rsync-same",
+      "xs",
+      "xs-same",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "tiny-one.noop.neo-freya.sender.warm",
+    "block": 9,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-same",
+      "rsync",
+      "xs",
+      "rsync-same"
+     ],
+     [
+      "xs-same",
+      "xs",
+      "rsync",
+      "rsync-same"
+     ],
+     [
+      "xs",
+      "xs-same",
+      "rsync-same",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.noop.neo-freya.sender.warm",
+    "block": 9,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-same",
+      "rsync",
+      "xs",
+      "rsync-same"
+     ],
+     [
+      "xs",
+      "rsync-same",
+      "xs-same",
+      "rsync"
+     ],
+     [
+      "rsync-same",
+      "xs",
+      "rsync",
+      "xs-same"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.noop.neo-freya.sender.warm",
+    "block": 9,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-same",
+      "rsync",
+      "xs",
+      "rsync-same"
+     ],
+     [
+      "rsync-same",
+      "xs-same",
+      "rsync",
+      "xs"
+     ],
+     [
+      "xs-same",
+      "rsync-same",
+      "xs",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.fresh.neo-freya.sender.warm",
+    "block": 9,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs-same",
+      "rsync-same",
+      "xs"
+     ],
+     [
+      "xs",
+      "xs-same",
+      "rsync",
+      "rsync-same"
+     ],
+     [
+      "xs-same",
+      "rsync-same",
+      "rsync",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+    "block": 9,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-same",
+      "rsync-same",
+      "xs",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs",
+      "xs-same",
+      "rsync-same"
+     ],
+     [
+      "rsync-same",
+      "xs-same",
+      "xs",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.noop.freya-neo.sender.warm",
+    "block": 9,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync-same",
+      "xs",
+      "rsync",
+      "xs-same"
+     ],
+     [
+      "rsync",
+      "rsync-same",
+      "xs",
+      "xs-same"
+     ],
+     [
+      "rsync",
+      "xs",
+      "rsync-same",
+      "xs-same"
+     ]
+    ]
+   },
+   {
+    "cell": "tiny-one.fresh.neo-freya.sender.warm",
+    "block": 9,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "rsync",
+      "xs-same",
+      "rsync-same"
+     ],
+     [
+      "xs",
+      "rsync",
+      "xs-same",
+      "rsync-same"
+     ],
+     [
+      "xs-same",
+      "xs",
+      "rsync-same",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "tiny-one.fresh.freya-neo.sender.warm",
+    "block": 9,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "xs-same",
+      "rsync-same",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs",
+      "xs-same",
+      "rsync-same"
+     ],
+     [
+      "xs-same",
+      "rsync-same",
+      "xs",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "tiny-one.noop.freya-neo.sender.warm",
+    "block": 9,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync-same",
+      "rsync",
+      "xs",
+      "xs-same"
+     ],
+     [
+      "xs-same",
+      "rsync",
+      "rsync-same",
+      "xs"
+     ],
+     [
+      "xs",
+      "rsync-same",
+      "xs-same",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.freya-neo.sender.warm",
+    "block": 9,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "rsync",
+      "rsync-same",
+      "xs-same"
+     ],
+     [
+      "xs",
+      "xs-same",
+      "rsync",
+      "rsync-same"
+     ],
+     [
+      "rsync",
+      "xs-same",
+      "rsync-same",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.fresh.freya-neo.sender.warm",
+    "block": 9,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "rsync",
+      "xs-same",
+      "rsync-same"
+     ],
+     [
+      "rsync-same",
+      "xs",
+      "xs-same",
+      "rsync"
+     ],
+     [
+      "xs",
+      "rsync",
+      "xs-same",
+      "rsync-same"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.noop.freya-neo.sender.warm",
+    "block": 9,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-same",
+      "rsync",
+      "xs",
+      "rsync-same"
+     ],
+     [
+      "rsync-same",
+      "xs-same",
+      "xs",
+      "rsync"
+     ],
+     [
+      "xs",
+      "xs-same",
+      "rsync-same",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "tiny-one.noop.freya-neo.sender.warm",
+    "block": 10,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "rsync-same",
+      "xs-same",
+      "xs"
+     ],
+     [
+      "rsync",
+      "xs-same",
+      "rsync-same",
+      "xs"
+     ],
+     [
+      "xs",
+      "rsync",
+      "xs-same",
+      "rsync-same"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.fresh.neo-freya.sender.warm",
+    "block": 10,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync-same",
+      "xs",
+      "xs-same",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "rsync-same",
+      "xs-same",
+      "xs"
+     ],
+     [
+      "rsync",
+      "xs",
+      "rsync-same",
+      "xs-same"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.noop.neo-freya.sender.warm",
+    "block": 10,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "rsync",
+      "xs-same",
+      "rsync-same"
+     ],
+     [
+      "rsync-same",
+      "rsync",
+      "xs-same",
+      "xs"
+     ],
+     [
+      "xs-same",
+      "rsync",
+      "rsync-same",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.noop.freya-neo.sender.warm",
+    "block": 10,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync-same",
+      "xs",
+      "rsync",
+      "xs-same"
+     ],
+     [
+      "rsync",
+      "rsync-same",
+      "xs-same",
+      "xs"
+     ],
+     [
+      "rsync-same",
+      "xs-same",
+      "xs",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.noop.neo-freya.sender.warm",
+    "block": 10,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "xs-same",
+      "rsync",
+      "rsync-same"
+     ],
+     [
+      "rsync",
+      "rsync-same",
+      "xs",
+      "xs-same"
+     ],
+     [
+      "rsync",
+      "xs-same",
+      "xs",
+      "rsync-same"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.freya-neo.sender.warm",
+    "block": 10,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync-same",
+      "xs-same",
+      "rsync",
+      "xs"
+     ],
+     [
+      "rsync-same",
+      "rsync",
+      "xs-same",
+      "xs"
+     ],
+     [
+      "rsync",
+      "xs",
+      "xs-same",
+      "rsync-same"
+     ]
+    ]
+   },
+   {
+    "cell": "tiny-one.noop.neo-freya.sender.warm",
+    "block": 10,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs",
+      "xs-same",
+      "rsync-same"
+     ],
+     [
+      "xs-same",
+      "rsync-same",
+      "xs",
+      "rsync"
+     ],
+     [
+      "xs-same",
+      "xs",
+      "rsync",
+      "rsync-same"
+     ]
+    ]
+   },
+   {
+    "cell": "tiny-one.fresh.freya-neo.sender.warm",
+    "block": 10,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync-same",
+      "xs",
+      "xs-same",
+      "rsync"
+     ],
+     [
+      "rsync-same",
+      "xs-same",
+      "xs",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs",
+      "rsync-same",
+      "xs-same"
+     ]
+    ]
+   },
+   {
+    "cell": "tiny-one.fresh.neo-freya.sender.warm",
+    "block": 10,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-same",
+      "rsync",
+      "rsync-same",
+      "xs"
+     ],
+     [
+      "rsync",
+      "xs",
+      "xs-same",
+      "rsync-same"
+     ],
+     [
+      "rsync",
+      "rsync-same",
+      "xs",
+      "xs-same"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.fresh.freya-neo.sender.warm",
+    "block": 10,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "rsync-same",
+      "rsync",
+      "xs-same"
+     ],
+     [
+      "xs-same",
+      "rsync",
+      "rsync-same",
+      "xs"
+     ],
+     [
+      "xs-same",
+      "rsync-same",
+      "rsync",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.noop.freya-neo.sender.warm",
+    "block": 10,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-same",
+      "xs",
+      "rsync",
+      "rsync-same"
+     ],
+     [
+      "xs",
+      "rsync",
+      "rsync-same",
+      "xs-same"
+     ],
+     [
+      "xs",
+      "rsync",
+      "xs-same",
+      "rsync-same"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+    "block": 10,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync-same",
+      "xs",
+      "xs-same",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs-same",
+      "xs",
+      "rsync-same"
+     ],
+     [
+      "rsync-same",
+      "xs-same",
+      "rsync",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.noop.freya-neo.sender.warm",
+    "block": 11,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs",
+      "rsync",
+      "xs-same",
+      "rsync-same"
+     ],
+     [
+      "xs-same",
+      "xs",
+      "rsync-same",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "rsync-same",
+      "xs-same",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.freya-neo.sender.warm",
+    "block": 11,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs-same",
+      "rsync",
+      "rsync-same",
+      "xs"
+     ],
+     [
+      "xs-same",
+      "xs",
+      "rsync-same",
+      "rsync"
+     ],
+     [
+      "rsync-same",
+      "xs",
+      "xs-same",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.fresh.neo-freya.sender.warm",
+    "block": 11,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs-same",
+      "rsync",
+      "xs",
+      "rsync-same"
+     ],
+     [
+      "rsync",
+      "xs",
+      "xs-same",
+      "rsync-same"
+     ],
+     [
+      "xs-same",
+      "rsync",
+      "xs",
+      "rsync-same"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+    "block": 11,
+    "verify_full": true,
+    "orders": [
+     [
+      "rsync-same",
+      "xs-same",
+      "xs",
+      "rsync"
+     ],
+     [
+      "xs",
+      "rsync",
+      "xs-same",
+      "rsync-same"
+     ],
+     [
+      "xs-same",
+      "rsync-same",
+      "rsync",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "tiny-one.noop.freya-neo.sender.warm",
+    "block": 11,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs",
+      "xs-same",
+      "rsync-same",
+      "rsync"
+     ],
+     [
+      "xs",
+      "rsync",
+      "rsync-same",
+      "xs-same"
+     ],
+     [
+      "xs-same",
+      "rsync-same",
+      "xs",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.fresh.freya-neo.sender.warm",
+    "block": 11,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs",
+      "xs-same",
+      "rsync-same",
+      "rsync"
+     ],
+     [
+      "xs-same",
+      "rsync",
+      "xs",
+      "rsync-same"
+     ],
+     [
+      "rsync-same",
+      "xs-same",
+      "xs",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.noop.freya-neo.sender.warm",
+    "block": 11,
+    "verify_full": true,
+    "orders": [
+     [
+      "rsync-same",
+      "xs",
+      "rsync",
+      "xs-same"
+     ],
+     [
+      "xs",
+      "xs-same",
+      "rsync-same",
+      "rsync"
+     ],
+     [
+      "xs",
+      "rsync",
+      "xs-same",
+      "rsync-same"
+     ]
+    ]
+   },
+   {
+    "cell": "tiny-one.fresh.neo-freya.sender.warm",
+    "block": 11,
+    "verify_full": true,
+    "orders": [
+     [
+      "rsync",
+      "xs-same",
+      "rsync-same",
+      "xs"
+     ],
+     [
+      "rsync-same",
+      "xs",
+      "xs-same",
+      "rsync"
+     ],
+     [
+      "xs-same",
+      "xs",
+      "rsync-same",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "tiny-one.noop.neo-freya.sender.warm",
+    "block": 11,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs",
+      "xs-same",
+      "rsync-same",
+      "rsync"
+     ],
+     [
+      "xs",
+      "rsync",
+      "rsync-same",
+      "xs-same"
+     ],
+     [
+      "rsync-same",
+      "rsync",
+      "xs",
+      "xs-same"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.noop.neo-freya.sender.warm",
+    "block": 11,
+    "verify_full": true,
+    "orders": [
+     [
+      "rsync-same",
+      "rsync",
+      "xs",
+      "xs-same"
+     ],
+     [
+      "rsync-same",
+      "rsync",
+      "xs",
+      "xs-same"
+     ],
+     [
+      "rsync",
+      "xs",
+      "rsync-same",
+      "xs-same"
+     ]
+    ]
+   },
+   {
+    "cell": "tiny-one.fresh.freya-neo.sender.warm",
+    "block": 11,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs",
+      "rsync",
+      "rsync-same",
+      "xs-same"
+     ],
+     [
+      "xs",
+      "rsync-same",
+      "rsync",
+      "xs-same"
+     ],
+     [
+      "xs-same",
+      "xs",
+      "rsync-same",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.noop.neo-freya.sender.warm",
+    "block": 11,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs",
+      "rsync-same",
+      "rsync",
+      "xs-same"
+     ],
+     [
+      "xs-same",
+      "xs",
+      "rsync-same",
+      "rsync"
+     ],
+     [
+      "rsync-same",
+      "xs",
+      "xs-same",
+      "rsync"
+     ]
+    ]
+   }
+  ],
+  "scripts": {
+   "probe.py": "3d292a0d9b45d37602360ef1b89f6d94f08df42c57553b62f346dbaa3d645dac",
+   "corpus.py": "d6018d3611cba607a670f3fe554d0d4be5941fb2ef8fd65d57f10bfb582625f6",
+   "corpora.json": "729929e1ba7baf3a0b8413efffab5bc26ae0cbe8514daf1c05bbb53a314bb084",
+   "agent.py": "f95fecb648c095430b3d1e83211e4949d34f1fd4bffa6883ab92835c2ffba196",
+   "measure.py": "afd0cf9011adb290a92853b262a57adab76b9910f6d679dd6c647f4bfb6eaf94"
+  },
+  "observed": {
+   "neo": {
+    "rsync": {
+     "path": "/usr/bin/rsync",
+     "sha256": "3852336282ee66a98c52966a8bebbf3508980a3ec47e7150f40330ada999980e",
+     "version": "rsync  version 3.4.1  protocol version 32"
+    },
+    "hostname": "neo"
+   },
+   "freya": {
+    "rsync": {
+     "path": "/usr/bin/rsync",
+     "sha256": "cae31f86ebfa8ecf2293a809c8f09d8176c8ead7f192de8caebcc6a1f3f14800",
+     "version": "rsync  version 3.5.0-g471e17dc  protocol version 32"
+    },
+    "hostname": "freya"
+   }
+  }
+ }
+}

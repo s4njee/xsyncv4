@@ -1,0 +1,26 @@
+{
+ "experiment": "MA3-psample-bidir",
+ "kind": "screening",
+ "hypothesis": "On the Mac/mars 10GbE link, xs copies the psample tree faster than rsync -a fresh, in both directions, and xs -z helps only where the data compresses.",
+ "primary": "wall_s",
+ "control": "rsync",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261017T165019Z-MA3-psample-bidir",
+  "20261017T185527Z-MA3-psample-bidir"
+ ],
+ "spec_sha256": [
+  "a2c994344e4b8eb9f4779c4b38bc2640d71ce3129f8dceb3ff77a7887f47b0d1",
+  "e7b802e546d4474c8443ad56f0bfdb303f1017a0e51b27764ebaf83cce24925e"
+ ],
+ "valid_blocks": 11,
+ "void_attempts": 6,
+ "void_reasons": [
+  "rsync: harness error: Command '['ssh', '-oBatchMode=yes', '-oConnectTimeout=10', '[email]', \"sh -c 'find ~/benchmarks/xsyncv4/lab/corpora/r",
+  "rsync: the destination does not match the corpus manifest: DIFFERS github/acritty/target/debug/incremental/alacritty-0apbfib5r6rer/s-hnarn3fo0v-1bemmqn-embc6e4s",
+  "rsync: the transfer exited 20: ",
+  "xs-z: the destination does not match the corpus manifest: DIFFERS github/acritty/target/debug/incremental/alacritty-0apbfib5r6rer/s-hnarn3fo0v-1bemmqn-embc6e4sc"
+ ]
+}

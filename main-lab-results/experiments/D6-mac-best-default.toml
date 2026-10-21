@@ -1,0 +1,37 @@
+# D6 (tree T2): is xs's best small-file setting (four receiving workers, --no-atomic)
+# safe as the default for every tree? Mixed and large trees from the Mac to mars's NVMe
+# over 2.5GbE, against xs's default and rsync. If it is slower anywhere, D6b splits it.
+id = "D6-mac-best-default"
+kind = "screening"
+hypothesis = "xs's best small-file setting is no slower than its default on mixed and large trees."
+primary = "durable_s"
+delta = 0.03
+blocks = 8
+control = "xs"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.xs]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-a"]
+
+[arms.xs-best]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-a", "--no-atomic"]
+tune = { receiver = "jobs=4" }
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[matrix]
+link = "mac-mars-2g5"
+corpus = ["mixed-bimodal", "mixed-threshold", "large-four", "large-text"]
+scenario = ["fresh"]
+direction = ["mac>mars"]
+client = ["initiator"]
+cache = ["warm"]

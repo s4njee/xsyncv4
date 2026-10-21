@@ -1,0 +1,23 @@
+cleanup on freya: freya: `sudo -n /usr/local/sbin/xsbench-helper governor restore` exited 255: ssh: connect to host [host] port 22: Connection refused
+Traceback (most recent call last):
+  File "~/benchmarks/xsyncv4/lab/lib/fb2053825ef1/agent.py", line 531, in <module>
+    sys.exit(Run(sys.argv[1]).execute(limit))
+             ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "~/benchmarks/xsyncv4/lab/lib/fb2053825ef1/agent.py", line 514, in execute
+    valid += self.block(entry)
+             ~~~~~~~~~~^^^^^^^
+  File "~/benchmarks/xsyncv4/lab/lib/fb2053825ef1/agent.py", line 475, in block
+    summary['link'] = self.link_probe(cell)
+                      ~~~~~~~~~~~~~~~^^^^^^
+  File "~/benchmarks/xsyncv4/lab/lib/fb2053825ef1/agent.py", line 458, in link_probe
+    report = sender.probe('route', '--peer', self.link_address(receiver.name) or self.plan['hosts'][receiver.name]['name'],
+                          '--pings', '10')
+  File "~/benchmarks/xsyncv4/lab/lib/fb2053825ef1/agent.py", line 72, in probe
+    return json.loads(self.run('python3', self.bin('probe.py'), *arguments, timeout=120).stdout)
+                      ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "~/benchmarks/xsyncv4/lab/lib/fb2053825ef1/agent.py", line 65, in run
+    return self.shell(shlex.join(map(str, argv)), **options)
+           ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "~/benchmarks/xsyncv4/lab/lib/fb2053825ef1/agent.py", line 61, in shell
+    raise RuntimeError(f'{self.name}: `{script[:200]}` exited {done.returncode}: {done.stderr.strip()[-400:]}')
+RuntimeError: freya: `python3 /mnt/nvme/xsbench/lib/fb2053825ef1/probe.py route --peer [host] --pings 10` exited 255: ssh: connect to host [host] port 22: Connection refused

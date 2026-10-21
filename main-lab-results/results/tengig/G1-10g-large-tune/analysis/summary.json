@@ -1,0 +1,19 @@
+{
+ "experiment": "G1-10g-large-tune",
+ "kind": "screening",
+ "hypothesis": "A larger stream count, block size, queue or worker count brings large files closer to 10 Gb/s.",
+ "primary": "durable_s",
+ "control": "xs",
+ "delta": 0.03,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261017T124214Z-G1-10g-large-tune"
+ ],
+ "spec_sha256": [
+  "7f90671922d4467a1021927186b4debcff13e89d1d11f20349b31531c68855e7"
+ ],
+ "valid_blocks": 32,
+ "void_attempts": 0,
+ "void_reasons": []
+}

@@ -1,0 +1,57 @@
+# N4: the Mac as receiver of small files, where xs loses its lead (S2, N2):
+# APFS creating files. The Mac's default is four receiving workers; one,
+# two and eight, and --no-atomic, against it.
+id = "N4-mac-receive-tune"
+kind = "screening"
+hypothesis = "Some receiving worker count or --no-atomic makes small-file copies onto APFS faster."
+primary = "durable_s"
+delta = 0.03
+blocks = 8
+control = "xs"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.xs]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a"]
+metrics = true
+
+[arms.recv1]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a"]
+tune = { receiver = "jobs=1" }
+metrics = true
+
+[arms.recv2]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a"]
+tune = { receiver = "jobs=2" }
+metrics = true
+
+[arms.recv8]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a"]
+tune = { receiver = "jobs=8" }
+metrics = true
+
+[arms.no-atomic]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a", "--no-atomic"]
+metrics = true
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[matrix]
+link = "mac-mars-direct"
+corpus = ["small-flat", "small-deep", "mixed-bimodal"]
+scenario = ["fresh"]
+direction = ["mars>mac"]
+client = ["initiator"]
+cache = ["warm"]

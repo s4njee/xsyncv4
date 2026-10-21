@@ -1,0 +1,147 @@
+# The question each experiment answers, in plain words, for the dashboard's runner cards
+# ("What is the question", and "Last experiment"). Kept apart from the specs so that adding
+# or rewording a question does not change a spec's digest. An experiment without an entry
+# here shows its hypothesis instead.
+
+"K1-congress-ceiling" = "Is the receiver's disk what limits copying small files, or is it something before it?"
+"K2a-tmpfs-freya" = "Does xs copy small files into freya's RAM any faster than onto its NVMe drive?"
+"K2b-tmpfs-neo" = "Does xs copy small files into the Pi's RAM any faster than onto its NVMe drive?"
+"K3-congress-cold" = "When nothing is cached, as on a first backup, how do xs and rsync compare on 216,000 small files?"
+"L1-recv-tune" = "Do fewer receiving workers, or skipping the write-then-rename step (--no-atomic), make fresh copies of small files faster?"
+"L2-noatomic-confirm" = "Does skipping the write-then-rename step (--no-atomic) make fresh copies of flat small-file trees at least 3% faster?"
+"C1-congress" = "On a real tree of 216,000 small JSON and XML files, how much faster is xs than rsync, and does compression help on gigabit?"
+"Z3-1g-compress" = "On a gigabit link, can xs with compression deliver text-like data faster than the link itself, even when the Pi sends it?"
+"S0-sentinel" = "Has anything drifted? Do xs and rsync still compare as they did in the baseline, and does each still match itself?"
+"S1-direct-sentinel" = "On the direct cable, does xs still match itself from run to run?"
+"R1-replicate" = "Do xs's and rsync's relative speeds hold from day to day?"
+"R2-real-replicate" = "On real trees, do xs's and rsync's relative speeds hold from day to day?"
+"P0-pipe-smoke" = "Does the new pipe tool give valid, verified samples?"
+"P1-pipe-streams" = "Is a plain tar pipe, compressed or split into several streams, faster than xs at copying small files?"
+"P2b-receiver-ceiling" = "How fast can mars create small files by itself, and how close does xs come to that?"
+"P3b-hdd-writeback" = "On a hard drive, does flushing while the copy runs (eager writeback) get small and mixed trees safely there sooner?"
+"Z1b-10g-compress" = "On a 10 GbE link, does compression get compressible data across faster, and is xs -z faster than rsync -z?"
+"Z4-10g-codecs" = "At 10 Gb/s, do zstd's fast levels or LZ4 beat zstd level 1?"
+"Z5-10g-zstd-levels" = "At 10 Gb/s, which zstd level (1, 2 or 3) gets the most data across, in each direction?"
+"NE1-wire-or-pi" = "On the gigabit wire between the Pi and freya, how much of the link do xs and rsync use on large and mixed trees, each way?"
+"MA1-mac-noop" = "On a warm no-op, is xs slower than rsync pushing from the Mac to mars, and faster pulling?"
+"MA2-mac-noop-knobs" = "Do the sender's skip or scan settings recover xs's warm no-op push?"
+"MA3-psample-bidir" = "How fast can the 20 GB psample tree be copied between the Mac and mars, each way, and is xs faster than rsync -aH or rsync -aHz?"
+"MA4-psample-incremental" = "On the psample tree, does xs re-sync faster than rsync -aH at a warm no-op and after 1% of the files change, each way?"
+"MA5-psample-noop-knobs" = "Do the sender's skip or scan settings recover xs's warm no-op push on the psample tree?"
+"MA6-mac-mars-shapes" = "Does the mac/mars tool ranking hold on a small compressible tree and a large one?"
+"N1g-pi-compress" = "Can a cheaper zstd level or fast level let the Pi carry a compressible tree past the gigabit wire?"
+"N1g-compress-cost" = "On a tree that will not compress, does xs -z cost time against xs -a on gigabit?"
+"NC2-cold-real-compression" = "Does compression speed up cold copies of real project trees while preserving atomic writes?"
+"NC3-cold-noop-compression" = "Does enabling compression add overhead when a cold project tree is already up to date?"
+
+"IB0-incremental-smoke" = "Do all incremental-backup arms restore deliberately stale files correctly in both directions?"
+
+"IB1-incremental-map" = "At 0.1%, 1%, and 10% changed files, what limits incremental backups: scanning, reusing old data, or transferring changes?"
+
+"IB1-whole-confirm" = "Does sending changed files whole beat default xs reuse again with independent blocks?"
+
+"IB2-incremental-scan" = "Do sender scan workers or the listing window speed up no-op and 0.1% updates?"
+
+"IB2-scan-confirm" = "Does the best incremental-backup scanner setting repeat its gain with independent blocks?"
+
+"IB3-incremental-compression" = "After scan tuning fails, does compression cost time on a 0.1% update?"
+
+"IB3-compression-confirm" = "Does the narrow small-update exception to compression repeat with independent blocks?"
+
+"IB1-incremental-map-2g5" = "On USB 2.5 GbE: At 0.1%, 1%, and 10% changed files, what limits incremental backups: scanning, reusing old data, or transferring changes?"
+
+"IB1-whole-confirm-2g5" = "On USB 2.5 GbE: Does sending changed files whole beat default xs reuse again with independent blocks?"
+
+"IB2-incremental-scan-2g5" = "On USB 2.5 GbE: Do sender scan workers or the listing window speed up no-op and 0.1% updates?"
+
+"IB2-scan-confirm-2g5" = "On USB 2.5 GbE: Does the best incremental-backup scanner setting repeat its gain with independent blocks?"
+
+"IB3-incremental-compression-2g5" = "On USB 2.5 GbE: After scan tuning fails, does compression cost time on a 0.1% update?"
+
+"IB3-compression-confirm-2g5" = "On USB 2.5 GbE: Does the narrow small-update exception to compression repeat with independent blocks?"
+
+"MN1-psample-bidir" = "How fast can the pinned psample tree move between the Mac and neo, and which tool and compression setting wins in each direction?"
+
+"MN1-xs-confirm" = "Does uncompressed xs repeat its psample gain between the Mac and neo?"
+
+"MN1-xs-z-confirm" = "Does compressed xs repeat its psample gain between the Mac and neo?"
+
+"MN1-rsync-z-confirm" = "Does compressed rsync repeat its psample gain between the Mac and neo?"
+
+"E6a-2g5-receiver-defaults" = "Does capping the receiver at four workers, and reaping the peer sooner, make xs faster than its parent anywhere and slower nowhere, between the Pi and freya?"
+
+"E6b-mac-mars-receiver-defaults" = "Does capping the receiver at four workers, and reaping the peer sooner, make xs faster than its parent anywhere and slower nowhere, between the Mac and mars?"
+
+"S2-2g5-sentinel" = "On the USB 2.5 GbE link, has anything drifted? Does xs still match itself, and xs against rsync stay put?"
+
+"S3-mac-mars-sentinel" = "Between the Mac and mars at 10 GbE, has anything drifted? Does xs still match itself, and xs against rsync stay put?"
+
+"MA7-psample-pull-apfs" = "Does skipping directory times, the rename, or more receiver workers or scanners recover xs's psample pull onto the Mac?"
+
+"MA7-pull-confirm" = "Does the setting that recovered the psample pull onto the Mac hold up with fresh blocks?"
+
+"LC1-psample-local-baseline" = "On a first backup of psample from the Pi's NVMe to a Samsung T5, with nothing cached, how much faster is xs -aH than rsync -aH, cp -a and cp -r, and how close does any tool come to one tar stream?"
+
+"LC2-psample-local-workers" = "With four cores and one USB drive, does xs copy psample to the T5 faster with 1, 2, 8 or 16 workers than with its default 4?"
+
+"LC2-workers-confirm" = "Does the faster worker count for the T5 backup hold up with 12 fresh blocks?"
+
+"LC3-psample-local-durable" = "How long after the copy exits is psample safely on the T5, and does eager writeback or skipping the temp-file rename shorten it?"
+
+"LC3-durable-confirm" = "Does the setting that got psample onto the T5 sooner hold up with 12 fresh blocks?"
+
+"LC4-psample-local-resync" = "Re-syncing the psample backup on the T5 with nothing cached, at a no-op and after 1% of files change, is xs -aH faster than rsync -aH?"
+
+"LC5-local-source-guard" = "Does skipping per-directory path resolution make xs's local copies to the T5 faster than its parent, on psample and congress?"
+
+"LC5-guard-confirm" = "Does the source-guard fix hold up on 12 fresh blocks, on psample and congress?"
+
+"LC6-local-beat-rsync" = "With two or three workers, with or without the source-guard fix, is xs -aH at least as fast as rsync -aH at copying psample to the T5?"
+
+"LC6-beat-confirm" = "Does the xs setting that beat rsync on the local psample copy do it again on eight fresh blocks?"
+
+"LC7-local-relaxed" = "With two workers, does eager writeback or --no-atomic let xs match or beat rsync -aH on the local psample copy?"
+
+"LC7-relaxed-confirm" = "Does the relaxed setting that beat rsync on the local psample copy do it again on eight fresh blocks?"
+
+"LC8-local-tie-confirm" = "Over eight fresh blocks, is xs with two workers and the source-guard fix faster than, level with, or slower than rsync -aH on the local psample copy?"
+
+"MA8-psample-pull-anchors" = "Pulling psample onto the Mac, is xs with a larger parent-descriptor budget faster than its parent and than rsync -aH, at a no-op and a 1% update?"
+
+"LC12-local-anchors" = "Copying psample from neo's NVMe to the T5, is xs with a larger parent-descriptor budget faster than its parent, and at least as fast as rsync -aH?"
+
+"MA9-small-pull-anchors" = "Pulling small trees onto the Mac, does xs with a larger parent-descriptor budget beat its parent and close its gap to rsync -a, at a no-op and fresh?"
+
+"MA10-apfs-no-atomic" = "On fresh copies of small files onto the Mac, is xs -a --no-atomic clearly faster than xs -a?"
+
+"AP10210142-L2R1-congress-fresh-wan11-cpu2" = "For lab2's congress-sample fresh gap, where rsync was 1.10x faster on the a-aws link, does rsync -a also beat xs -a -j4 on real-congress from neo to mars with 11 ms added and neo held to 2 CPUs?"
+
+"AP10210142-L2R1-congress-fresh-wan11-cpu2-confirm" = "Does rsync hold up on 8 fresh blocks?"
+
+"AP10210142-L2R2-congress-fresh-cpu2-only" = "For lab2's congress-sample fresh gap: does holding neo to 2 CPUs, with no added latency, erase xs -a -j4's lead over rsync -a on real-congress from neo to mars?"
+
+"AP10210142-L2R3-psample-fresh-wan11-cpu2" = "For lab2's real-projects fresh gap, where rsync was 1.46x faster and xs's times were widely scattered, does rsync -a beat xs -a -j4 on real-psample from neo to mars with 11 ms added and neo held to 2 CPUs?"
+
+"AP10210142-L2R3-psample-fresh-wan11-cpu2-confirm" = "Does rsync hold up on 8 fresh blocks?"
+
+"AP10210142-L2R4-psample-fresh-plain" = "For lab2's real-projects fresh gap: on the plain neo-mars link, with no added latency and no CPU cap, how does xs -a -j4 compare with rsync -a on a fresh real-psample copy?"
+
+"AP10210142-L2R5-local-congress-cpu2" = "For lab2's congress-sample fresh gap: copying real-congress locally from neo to the T5 with neo held to 2 CPUs, does rsync -a close the 1.84x lead xs held without a cap?"
+
+"AP10210142-L2R6-local-psample-cpu2" = "For lab2's real-projects fresh gap: copying real-psample locally to the T5 with cold caches and neo held to 2 CPUs, does xs -a -j4's existing deficit to rsync -a (about 10% in LC1 and LC12) widen?"
+
+"AP10210751-AP10210749-L2R7-congress-pull-wan11-cpu2" = "For lab2's congress-sample fresh gap: does xs -a -j4 lose its lead over rsync -a on a fresh real-congress copy when the receiver, not the sender, is an arm64 host held to 2 CPUs behind 11 ms?"
+
+"AP10210751-AP10210749-L2R7-congress-pull-wan11-cpu2-confirm" = "Does rsync hold up on 8 fresh blocks?"
+
+"AP10210751-AP10210749-L2R8-psample-pull-wan11-cpu2" = "For lab2's real-projects fresh gap: on a fresh real-psample copy into a 2-CPU arm64 receiver behind 11 ms, is xs -a -j4 slower than rsync -a, or does it show a block-to-block stall like lab2's 8.8 to 98 s spread?"
+
+"AP10210751-AP10210749-L2P1-small-pull-wan11-cpu2" = "Before lab2 measures them: does xs -a -j4 still beat rsync -a on fresh and no-op copies of small-flat, small-deep and mixed-bimodal into a 2-CPU arm64 receiver behind 11 ms?"
+
+"AP10210751-AP10210749-L2P2-congress-resync-wan11-cp" = "In lab2's direction (2-CPU sender, 11 ms), does xs -a -j4 still beat rsync -a when re-syncing real-congress at a no-op and after a 1% change?"
+
+"AP10210751-AP10210749-L2P3-local-congress-resync-cp" = "With neo held to 2 CPUs, as lab2's sender is, does xs -a -j4 keep its local lead over rsync -a on real-congress no-op and update re-syncs?"
+
+"AP10210751-AP10210749-L2P4-local-small-cpu2" = "With neo held to 2 CPUs, does xs -a -j4 still beat rsync -a on local fresh and no-op copies of small-flat, small-deep and mixed-bimodal?"
+
+"AP10210751-AP10210749-L2P5-local-psample-resync-cpu" = "For the corpus behind lab2's real-projects gap: with neo held to 2 CPUs, does xs -a -j4 still re-sync real-psample faster than rsync -a at a no-op and after a 1% change?"

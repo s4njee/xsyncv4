@@ -1,0 +1,499 @@
+{
+ "utc": "2026-10-13T20:55:18+00:00",
+ "helper_sha256": "e3ba2eedf97c31557e883128d0e61adc4d568fc2573d9f31dc5ecbdae3be0755",
+ "config": {
+  "driver": "neo",
+  "hosts": {
+   "neo": {
+    "ssh": "[email]",
+    "name": "[host]",
+    "hostname": "neo",
+    "root": "~/benchmarks/xsyncv4/lab",
+    "root_fstype": "ext4",
+    "helper": true
+   },
+   "freya": {
+    "ssh": "[email]",
+    "name": "[host]",
+    "hostname": "freya",
+    "root": "/mnt/nvme/xsbench",
+    "root_fstype": "ext4",
+    "helper": true
+   },
+   "mars": {
+    "ssh": "[email]",
+    "name": "[host]",
+    "hostname": "mars",
+    "root": "~/benchmarks/xsyncv4/lab",
+    "root_fstype": "ext4",
+    "helper": false
+   },
+   "mac": {
+    "local": true,
+    "ssh": "[email]",
+    "name": "[host]",
+    "hostname": "[host]",
+    "root": "~/benchmarks/xsbench.noindex",
+    "helper": false
+   }
+  },
+  "links": {
+   "lan": {
+    "hosts": [
+     "neo",
+     "freya"
+    ],
+    "medium": "wired",
+    "min_speed_mbps": 1000,
+    "max_rtt_ms": 2.0,
+    "interface": {
+     "neo": "eth0",
+     "freya": "enp10s0"
+    }
+   },
+   "mesh": {
+    "hosts": [
+     "neo",
+     "mars"
+    ],
+    "medium": "mesh",
+    "interface": {
+     "neo": "eth0",
+     "mars": "enp9s0"
+    }
+   },
+   "mac-mars": {
+    "hosts": [
+     "mac",
+     "mars"
+    ],
+    "medium": "mesh",
+    "initiator": "mac",
+    "driver": "mac",
+    "results": "supplementary",
+    "background": true,
+    "interface": {
+     "mac": "en8",
+     "mars": "enp9s0"
+    }
+   }
+  }
+ },
+ "inventory": {
+  "mac": {
+   "utc": "2026-10-13T20:55:18.426+00:00",
+   "hostname": "[host]",
+   "user": "[user]",
+   "system": "Darwin",
+   "kernel": "25.6.0",
+   "machine": "arm64",
+   "python": "3.14.8",
+   "cpus": 10,
+   "cpu_model": "Apple M1 Max",
+   "tools": {
+    "rsync": "/opt/homebrew/bin/rsync",
+    "ssh": "/usr/bin/ssh",
+    "ip": null,
+    "tc": null,
+    "iw": null,
+    "ping": "/sbin/ping",
+    "strace": null,
+    "perf": null,
+    "vcgencmd": null,
+    "zstd": "/opt/homebrew/bin/zstd",
+    "findmnt": null,
+    "lsblk": null,
+    "systemd-run": null,
+    "sudo": "/usr/bin/sudo",
+    "iperf3": null,
+    "rsync_version": "rsync  version 3.4.4  protocol version 32",
+    "ssh_version": "OpenSSH_10.3p1, LibreSSL 3.3.6"
+   },
+   "open_files_limit": 1048576,
+   "paths": [
+    {
+     "target": "/",
+     "source": "/dev/disk3s1s1",
+     "fstype": "apfs",
+     "free_bytes": 19603230720,
+     "total_bytes": 3996329328640,
+     "path": "~/benchmarks/xsbench.noindex",
+     "exists": true,
+     "writable": true
+    }
+   ],
+   "memory_bytes": 68719476736,
+   "os": "macOS 26.6.2",
+   "helper": {
+    "installed": false
+   },
+   "note": "only Linux endpoints are inventoried in full"
+  },
+  "mars": {
+   "utc": "2026-10-13T20:55:19.215+00:00",
+   "hostname": "mars",
+   "user": "[user]",
+   "system": "Linux",
+   "kernel": "7.2.3-1-cachyos",
+   "machine": "x86_64",
+   "python": "3.14.7",
+   "cpus": 24,
+   "cpu_model": "AMD Ryzen 9 7900X 12-Core Processor",
+   "tools": {
+    "rsync": "/usr/bin/rsync",
+    "ssh": "/usr/bin/ssh",
+    "ip": "/usr/bin/ip",
+    "tc": "/usr/bin/tc",
+    "iw": "/usr/bin/iw",
+    "ping": "/usr/bin/ping",
+    "strace": null,
+    "perf": null,
+    "vcgencmd": null,
+    "zstd": "/usr/bin/zstd",
+    "findmnt": "/usr/bin/findmnt",
+    "lsblk": "/usr/bin/lsblk",
+    "systemd-run": "/usr/bin/systemd-run",
+    "sudo": "/usr/bin/sudo",
+    "iperf3": null,
+    "rsync_version": "rsync  version 3.5.0-g471e17dc  protocol version 32",
+    "ssh_version": "OpenSSH_10.5p1, OpenSSL 3.6.4 25 Aug 2026"
+   },
+   "open_files_limit": 2048,
+   "paths": [
+    {
+     "target": "/",
+     "source": "/dev/nvme0n1p2",
+     "fstype": "ext4",
+     "options": "rw,noatime",
+     "free_bytes": 701524910080,
+     "total_bytes": 2010874724352,
+     "path": "~/benchmarks/xsyncv4/lab",
+     "exists": true,
+     "writable": true
+    }
+   ],
+   "os": "CachyOS",
+   "board": null,
+   "memory_bytes": 32699957248,
+   "cpufreq": {
+    "driver": "amd-pstate-epp",
+    "governors": [
+     "powersave"
+    ],
+    "available": [
+     "performance",
+     "powersave"
+    ],
+    "max_khz": 5737986,
+    "epp": "balance_performance"
+   },
+   "thermal_zones": [
+    "acpitz"
+   ],
+   "interfaces": [
+    {
+     "name": "enp9s0",
+     "operstate": "up",
+     "speed_mbps": 1000,
+     "mtu": 1500,
+     "duplex": "full",
+     "medium": "wired"
+    },
+    {
+     "name": "wlan0",
+     "operstate": "down",
+     "speed_mbps": null,
+     "mtu": 1500,
+     "duplex": null,
+     "medium": "wireless"
+    }
+   ],
+   "addresses": {
+    "lo": [
+     "[address]",
+     "::1"
+    ],
+    "enp9s0": [
+     "[address]",
+     "[address]"
+    ],
+    "wlan0": []
+   },
+   "default_qdisc": "fq_codel",
+   "tcp_congestion_control": "cubic",
+   "block_devices": [
+    {
+     "name": "sda",
+     "type": "disk",
+     "size": 1024209543168,
+     "fstype": null,
+     "mountpoints": [],
+     "model": "Inland SATA SSD",
+     "tran": "sata",
+     "rota": false,
+     "children": [
+      {
+       "name": "sda1",
+       "type": "part",
+       "size": 1024208142336,
+       "fstype": "ntfs",
+       "mountpoints": [],
+       "model": null,
+       "tran": null,
+       "rota": false
+      }
+     ]
+    },
+    {
+     "name": "sdb",
+     "type": "disk",
+     "size": 6001175126016,
+     "fstype": "btrfs",
+     "mountpoints": [],
+     "model": "HGST HUS726060ALE610",
+     "tran": "sata",
+     "rota": true
+    },
+    {
+     "name": "nvme1n1",
+     "type": "disk",
+     "size": 1000204886016,
+     "fstype": null,
+     "mountpoints": [],
+     "model": "KINGSTON SNV3S1000G",
+     "tran": "nvme",
+     "rota": false,
+     "children": [
+      {
+       "name": "nvme1n1p1",
+       "type": "part",
+       "size": 16777216,
+       "fstype": null,
+       "mountpoints": [],
+       "model": null,
+       "tran": "nvme",
+       "rota": false
+      },
+      {
+       "name": "nvme1n1p2",
+       "type": "part",
+       "size": 999299219456,
+       "fstype": "ntfs",
+       "mountpoints": [],
+       "model": null,
+       "tran": "nvme",
+       "rota": false
+      },
+      {
+       "name": "nvme1n1p3",
+       "type": "part",
+       "size": 886046720,
+       "fstype": "ntfs",
+       "mountpoints": [],
+       "model": null,
+       "tran": "nvme",
+       "rota": false
+      }
+     ]
+    },
+    {
+     "name": "nvme0n1",
+     "type": "disk",
+     "size": 2048408248320,
+     "fstype": null,
+     "mountpoints": [],
+     "model": "SPCC M.2 PCIe SSD",
+     "tran": "nvme",
+     "rota": false,
+     "children": [
+      {
+       "name": "nvme0n1p1",
+       "type": "part",
+       "size": 4294967296,
+       "fstype": "vfat",
+       "mountpoints": [
+        "/boot"
+       ],
+       "model": null,
+       "tran": "nvme",
+       "rota": false
+      },
+      {
+       "name": "nvme0n1p2",
+       "type": "part",
+       "size": 2044111147008,
+       "fstype": "ext4",
+       "mountpoints": [
+        "/"
+       ],
+       "model": null,
+       "tran": "nvme",
+       "rota": false
+      }
+     ]
+    }
+   ],
+   "zfs": false,
+   "systemd": true,
+   "ext4_lazy_init": false,
+   "helper": {
+    "installed": false
+   }
+  }
+ },
+ "routes": {
+  "mac-mars:mac->mars": {
+   "utc": "2026-10-13T20:55:19.334+00:00",
+   "hostname": "[host]",
+   "peer": "[host]",
+   "resolved": [
+    "[address]",
+    "[address]%en0",
+    "[address]%en8"
+   ],
+   "ssh": {
+    "target": "[email]",
+    "ok": true,
+    "client_ip": "[address]",
+    "client_port": 52550,
+    "server_ip": "[address]",
+    "server_port": 22,
+    "peer_hostname": "mars"
+   },
+   "address": "[address]",
+   "dev": "en8",
+   "source": null,
+   "gateway": null,
+   "interface": {
+    "name": "en8",
+    "operstate": "up",
+    "speed_mbps": 1000,
+    "mtu": 1500,
+    "duplex": "full",
+    "medium": "wired",
+    "addresses": [
+     "[address]",
+     "[address]"
+    ]
+   },
+   "interface_addresses": [
+    "[address]",
+    "[address]"
+   ],
+   "qdisc": null,
+   "ping": {
+    "loss_pct": 0.0,
+    "rtt_min_ms": 0.781,
+    "rtt_avg_ms": 1.124,
+    "rtt_max_ms": 2.643,
+    "rtt_mdev_ms": 0.543
+   }
+  },
+  "mac-mars:mars->mac": {
+   "utc": "2026-10-13T20:55:21.622+00:00",
+   "hostname": "mars",
+   "peer": "[host]",
+   "resolved": [
+    "[address]%enp9s0"
+   ],
+   "address": "[address]%enp9s0",
+   "dev": "enp9s0",
+   "source": "[address]",
+   "gateway": null,
+   "interface": {
+    "name": "enp9s0",
+    "operstate": "up",
+    "speed_mbps": 1000,
+    "mtu": 1500,
+    "duplex": "full",
+    "medium": "wired"
+   },
+   "interface_addresses": [
+    "[address]",
+    "[address]"
+   ],
+   "qdisc": "qdisc fq_codel 0: root refcnt 2 limit 10240p flows 1024 quantum 1514 target 5ms interval 100ms memory_limit 32Mb ecn drop_batch 64",
+   "ping": {
+    "loss_pct": 0.0,
+    "rtt_min_ms": 0.638,
+    "rtt_avg_ms": 0.769,
+    "rtt_max_ms": 0.948,
+    "rtt_mdev_ms": 0.098
+   }
+  }
+ },
+ "problems": [],
+ "build": {
+  "revision": "ddefa041364ec02000904f1f25d871b02867a9f6",
+  "rev12": "ddefa041364e-tune",
+  "git": "ddefa041364e",
+  "tunables": true,
+  "artifacts": {
+   "xs-darwin-arm64": {
+    "sha256": "304c6fe87a5235dc30bfc665dfe71ba8a777d8b633b9246b84bba42349c0679e",
+    "bytes": 3014784,
+    "version": "xs  version 0.1.0  protocol version 4  git ddefa041364e  tunables"
+   },
+   "xs-linux-amd64": {
+    "sha256": "fbe88e865b1d5162f6e370804f6b4683a196c272ce004d122311cac3431d05e0",
+    "bytes": 6708592,
+    "version": "xs  version 0.1.0  protocol version 4  git ddefa041364e  tunables"
+   },
+   "xs-linux-arm64": {
+    "sha256": "1f5c40a3f4d3ec403abcf30d64d8ade2a74f9fccfa6ba2c98709fb6f83ebebe2",
+    "bytes": 6296328,
+    "version": "xs  version 0.1.0  protocol version 4  git ddefa041364e  tunables"
+   }
+  },
+  "dockerfile_sha256": "cc806834f16bbd4030ce5b54d1922d7990328c158d926e4bd23bae650d679119",
+  "utc": "2026-10-13T19:18:41+00:00"
+ },
+ "staged": {
+  "mac": {
+   "utc": "2026-10-13T20:55:23.582+00:00",
+   "hostname": "[host]",
+   "machine": "arm64",
+   "system": "Darwin",
+   "files": {
+    "xs-ddefa041364e-tune": "304c6fe87a5235dc30bfc665dfe71ba8a777d8b633b9246b84bba42349c0679e",
+    "probe.py": "79c5d5649359fab936d72a58ccbb0348b8388dd71969a5c56d7915ca6a0c7563",
+    "corpus.py": "d6018d3611cba607a670f3fe554d0d4be5941fb2ef8fd65d57f10bfb582625f6",
+    "corpora.json": "729929e1ba7baf3a0b8413efffab5bc26ae0cbe8514daf1c05bbb53a314bb084",
+    "agent.py": "04d9c596cea456441e99d514a3a819c2f6b3f7dc1e412e00c06ea7a693a423c4",
+    "overnight.py": "c9b81a0bbcda7d1d2431e88060e88e432425e6251e46d6af2b24e7fdd0186072",
+    "measure.py": "5065310f480ff1cabfa7c645f0db342624a02f9a081b96069d50d52b3d224777"
+   },
+   "versions": {
+    "xs-ddefa041364e-tune": "xs  version 0.1.0  protocol version 4  git ddefa041364e  tunables"
+   },
+   "rsync": {
+    "path": "/opt/homebrew/bin/rsync",
+    "sha256": "98d3d56b3e7ee67412203236afc6da8f4021527e98eaa72909340d2b40bcf98c",
+    "version": "rsync  version 3.4.4  protocol version 32"
+   }
+  },
+  "mars": {
+   "utc": "2026-10-13T20:55:23.818+00:00",
+   "hostname": "mars",
+   "machine": "x86_64",
+   "system": "Linux",
+   "files": {
+    "xs-ddefa041364e-tune": "fbe88e865b1d5162f6e370804f6b4683a196c272ce004d122311cac3431d05e0",
+    "probe.py": "79c5d5649359fab936d72a58ccbb0348b8388dd71969a5c56d7915ca6a0c7563",
+    "corpus.py": "d6018d3611cba607a670f3fe554d0d4be5941fb2ef8fd65d57f10bfb582625f6",
+    "corpora.json": "729929e1ba7baf3a0b8413efffab5bc26ae0cbe8514daf1c05bbb53a314bb084",
+    "agent.py": "04d9c596cea456441e99d514a3a819c2f6b3f7dc1e412e00c06ea7a693a423c4",
+    "overnight.py": "c9b81a0bbcda7d1d2431e88060e88e432425e6251e46d6af2b24e7fdd0186072",
+    "measure.py": "5065310f480ff1cabfa7c645f0db342624a02f9a081b96069d50d52b3d224777"
+   },
+   "versions": {
+    "xs-ddefa041364e-tune": "xs  version 0.1.0  protocol version 4  git ddefa041364e  tunables"
+   },
+   "rsync": {
+    "path": "/usr/bin/rsync",
+    "sha256": "cae31f86ebfa8ecf2293a809c8f09d8176c8ead7f192de8caebcc6a1f3f14800",
+    "version": "rsync  version 3.5.0-g471e17dc  protocol version 32"
+   }
+  }
+ }
+}

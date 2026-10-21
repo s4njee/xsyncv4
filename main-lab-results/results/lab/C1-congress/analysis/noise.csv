@@ -1,0 +1,13 @@
+experiment,kind,cell_id,corpus,scenario,sender,receiver,client,link,cache,arm,n_blocks,sigma_d,blocks_for_2pct,blocks_for_3pct,blocks_for_5pct,blocks_for_10pct,blocks_equivalent_2pct,blocks_equivalent_3pct,blocks_equivalent_5pct,blocks_equivalent_10pct
+C1-congress,screening,real-congress.fresh.freya-neo.sender.warm,real-congress,fresh,freya,neo,sender,lan,warm,rsync-z,8,0.03358663619144194,25,13,8,8,33,16,8,8
+C1-congress,screening,real-congress.fresh.freya-neo.sender.warm,real-congress,fresh,freya,neo,sender,lan,warm,xs,8,0.05534741269471578,64,30,13,8,85,39,16,8
+C1-congress,screening,real-congress.fresh.freya-neo.sender.warm,real-congress,fresh,freya,neo,sender,lan,warm,xs-z,8,0.06995721320306995,100,46,19,8,134,61,24,8
+C1-congress,screening,real-congress.fresh.neo-freya.sender.warm,real-congress,fresh,neo,freya,sender,lan,warm,rsync-z,8,0.03715018325282622,30,15,8,8,39,19,9,8
+C1-congress,screening,real-congress.fresh.neo-freya.sender.warm,real-congress,fresh,neo,freya,sender,lan,warm,xs,8,0.05688746487448572,67,32,13,8,89,41,17,8
+C1-congress,screening,real-congress.fresh.neo-freya.sender.warm,real-congress,fresh,neo,freya,sender,lan,warm,xs-z,8,0.06573751781661835,89,41,17,8,118,54,22,8
+C1-congress,screening,real-congress.noop.freya-neo.sender.warm,real-congress,noop,freya,neo,sender,lan,warm,rsync-z,8,0.05141829740181753,55,26,11,8,73,34,14,8
+C1-congress,screening,real-congress.noop.freya-neo.sender.warm,real-congress,noop,freya,neo,sender,lan,warm,xs,8,0.12496078088819873,315,143,54,16,421,190,71,21
+C1-congress,screening,real-congress.noop.freya-neo.sender.warm,real-congress,noop,freya,neo,sender,lan,warm,xs-z,8,0.08153699422907891,135,62,24,8,181,82,32,10
+C1-congress,screening,real-congress.noop.neo-freya.sender.warm,real-congress,noop,neo,freya,sender,lan,warm,rsync-z,8,0.052333595608129994,57,27,12,8,76,35,15,8
+C1-congress,screening,real-congress.noop.neo-freya.sender.warm,real-congress,noop,neo,freya,sender,lan,warm,xs,8,0.1931545527143355,748,337,125,35,1002,451,167,46
+C1-congress,screening,real-congress.noop.neo-freya.sender.warm,real-congress,noop,neo,freya,sender,lan,warm,xs-z,8,0.1326294999407563,354,160,60,18,474,214,80,23

@@ -1,0 +1,19 @@
+{
+ "experiment": "T2a-adaptive-level",
+ "kind": "confirmatory",
+ "hypothesis": "With -z, the new adaptive policy is faster than the old one when neo sends over gigabit, and no slower when freya sends.",
+ "primary": "wall_s",
+ "control": "xs-z-old",
+ "delta": 0.03,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261012T164504Z-T2a-adaptive-level"
+ ],
+ "spec_sha256": [
+  "f48e71569ab68f2af7880e3f5ac60cca27d48fad7158c54a3f7b9fc68f344833"
+ ],
+ "valid_blocks": 72,
+ "void_attempts": 0,
+ "void_reasons": []
+}

@@ -1,0 +1,11 @@
+{
+ "name": "t5-write-test",
+ "steps": [
+  {
+   "host": "neo-ssd",
+   "ssh": "[email]",
+   "local": true,
+   "command": "mkdir -p /mnt/ssd/xsbench/work && python3 /mnt/ssd/xsbench/lib/a550f134a121/probe.py storage --path /mnt/ssd/xsbench/work"
+  }
+ ]
+}

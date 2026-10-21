@@ -1,0 +1,14 @@
+{
+ "validated_source_revision": "1f3a912f94ebcf5ee0757b1fe4bcd47b27799550",
+ "native_product_revision": "027e14d8b03f9531be5b80571357cb21e0050070",
+ "production_tree_sha256": "7562fbf2830b9c17df50a63ecea93caa07fb4863dbd3af444c72ab309020923b",
+ "matching_production_paths": [
+  "src",
+  "cmake",
+  "tools",
+  "CMakeLists.txt",
+  "CMakePresets.json"
+ ],
+ "native_product_sha256": "e0a41fac2a470803c932f59dc01ab8c1c23c6f07ce95c916aab75af125fcfa6e",
+ "note": "Only test fixtures and documentation changed between these revisions; configured Git version strings differ. Mac native regressions reused, changed fixture rerun; Linux build and regressions run from the corrected clean export."
+}

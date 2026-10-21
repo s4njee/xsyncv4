@@ -1,0 +1,126 @@
+{
+ "utc": "2026-10-21T01:50:40+00:00",
+ "source": "github",
+ "ref": "rust-ds@1b5462438ea3",
+ "directory": "benchmarks/results/lab2/2026-10-21",
+ "contest_updated": "2026-10-21T01:03:11+00:00",
+ "cpp_rev": "0c94b3d70b9d",
+ "rs": {
+  "commit": "8428aac9a2108cd10c2afdb2badab76f90ddd1a1",
+  "step": "filters"
+ },
+ "score": {
+  "xs-rs": 0,
+  "xs-cpp": 4,
+  "tie": 1,
+  "pending": 0
+ },
+ "link": {
+  "rtt_ms": 11,
+  "mbit_s": 569,
+  "sender_cpus": 2,
+  "id": "a-aws",
+  "direction": "a>aws",
+  "about": "the internet over IPv6, one way from A to AWS; about 11 ms round trip"
+ },
+ "machines": {
+  "a": {
+   "role": "sender",
+   "system": "Linux amd64",
+   "about": "an LXC container with 2 vCPUs of a Xeon Gold 6138, 2 GB of memory and 30 GB of disk, IPv6 only"
+  },
+  "aws": {
+   "role": "receiver",
+   "system": "Linux arm64",
+   "about": "an AWS t4g.small in us-west-1: 2 Graviton2 vCPUs, 2 GB of memory and a 16 GB disk, IPv6 only"
+  }
+ },
+ "reproduce_with": {
+  "wan": {
+   "host": "neo",
+   "delay_ms": 11
+  },
+  "cpus": {
+   "host": "neo",
+   "count": 2
+  }
+ },
+ "cells": 5,
+ "gaps": [
+  {
+   "id": "real-projects.fresh.rsync",
+   "cell": "real-projects.fresh.a-aws.sender.warm",
+   "corpus": "real-projects",
+   "scenario": "fresh",
+   "link": "a-aws",
+   "metric": "durable_s",
+   "rival": "rsync",
+   "cpp_over_rival": 1.461,
+   "proven": false,
+   "cpp": {
+    "seconds": 29.298,
+    "lo": 8.762,
+    "hi": 97.963,
+    "flags": [
+     "-a",
+     "-j4"
+    ],
+    "rev": "0c94b3d70b9d",
+    "blocks": 2
+   },
+   "rival_tool": {
+    "seconds": 20.055,
+    "lo": 20.036,
+    "hi": 20.074,
+    "flags": [
+     "-a"
+    ],
+    "rev": null,
+    "blocks": 2
+   },
+   "experiment": "BL2-real-projects",
+   "run": "20261021T003556Z-BL2-real-projects",
+   "home_corpora": [
+    "small-real",
+    "real-psample"
+   ]
+  },
+  {
+   "id": "congress-sample.fresh.rsync",
+   "cell": "congress-sample.fresh.a-aws.sender.warm",
+   "corpus": "congress-sample",
+   "scenario": "fresh",
+   "link": "a-aws",
+   "metric": "durable_s",
+   "rival": "rsync",
+   "cpp_over_rival": 1.104,
+   "proven": false,
+   "cpp": {
+    "seconds": 3.569,
+    "lo": 3.309,
+    "hi": 3.848,
+    "flags": [
+     "-a",
+     "-j4"
+    ],
+    "rev": "0c94b3d70b9d",
+    "blocks": 3
+   },
+   "rival_tool": {
+    "seconds": 3.232,
+    "lo": 3.055,
+    "hi": 3.419,
+    "flags": [
+     "-a"
+    ],
+    "rev": null,
+    "blocks": 3
+   },
+   "experiment": "PS-8428aac9a210-fresh",
+   "run": "20261021T005447Z-PS-8428aac9a210-fresh",
+   "home_corpora": [
+    "real-congress"
+   ]
+  }
+ ]
+}

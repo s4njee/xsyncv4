@@ -1,0 +1,19 @@
+{
+ "experiment": "LC6-local-beat-rsync",
+ "kind": "screening",
+ "hypothesis": "With two or three workers, alone or with the source-guard fix, xs -aH copies psample to the T5 at least as fast as rsync -aH.",
+ "primary": "durable_s",
+ "control": "rsync",
+ "delta": 0.03,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261018T224648Z-LC6-local-beat-rsync"
+ ],
+ "spec_sha256": [
+  "a117b18f36b54d17d13bf6b3e96eaac2cf121dae0b49938f926199b52d03ebe3"
+ ],
+ "valid_blocks": 4,
+ "void_attempts": 0,
+ "void_reasons": []
+}

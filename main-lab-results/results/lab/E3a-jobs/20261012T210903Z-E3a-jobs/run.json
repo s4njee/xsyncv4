@@ -1,0 +1,3704 @@
+{
+ "schema": 1,
+ "run_id": "20261012T210903Z-E3a-jobs",
+ "started_utc": "2026-10-12T22:07:32.272+00:00",
+ "driver": "neo",
+ "plan": {
+  "schema": 1,
+  "experiment": "E3a-jobs",
+  "spec_sha256": "dee4b0214e80d910739d08149aa56e6d54c4a7f6c1c07593b2b97d99faebd064",
+  "kind": "screening",
+  "hypothesis": "The best worker count differs by workload: fewer than the default for byte-bound copies from neo, no fewer for small files and no-ops.",
+  "primary": "wall_s",
+  "delta": 0.03,
+  "control": "xs",
+  "seed": 1,
+  "run_id": "20261012T210903Z-E3a-jobs",
+  "driver": "neo",
+  "sample_timeout_s": 3600,
+  "results": "lab",
+  "background": false,
+  "eager_cleanup": false,
+  "hosts": {
+   "neo": {
+    "ssh": "[email]",
+    "name": "[host]",
+    "hostname": "neo",
+    "root": "~/benchmarks/xsyncv4/lab",
+    "interface": "eth0",
+    "helper": true,
+    "gates": {},
+    "local": false,
+    "system": "Linux"
+   },
+   "freya": {
+    "ssh": "[email]",
+    "name": "[host]",
+    "hostname": "freya",
+    "root": "/mnt/nvme/xsbench",
+    "interface": "enp10s0",
+    "helper": true,
+    "gates": {},
+    "local": false,
+    "system": "Linux"
+   }
+  },
+  "links": {
+   "lan": {
+    "hosts": [
+     "neo",
+     "freya"
+    ],
+    "medium": "wired",
+    "min_speed_mbps": 1000,
+    "max_rtt_ms": 2.0
+   }
+  },
+  "arms": [
+   {
+    "name": "xs",
+    "tool": "xs",
+    "flags": [
+     "-a"
+    ],
+    "rev": "e1f05b518049",
+    "binary": {
+     "neo": "~/benchmarks/xsyncv4/lab/bin/xs-e1f05b518049",
+     "freya": "/mnt/nvme/xsbench/bin/xs-e1f05b518049"
+    },
+    "sha256": {
+     "neo": "38cfc25c012dc834473dbadcf4444b61cbf209785e4dcc064d544cc969637e51",
+     "freya": "4308d7fd5dde7b93b1635c8bef5df46659533d1b88fb31bd4d9b939e8cc9738c"
+    },
+    "artifacts": {
+     "xs-linux-amd64": "4308d7fd5dde7b93b1635c8bef5df46659533d1b88fb31bd4d9b939e8cc9738c",
+     "xs-linux-arm64": "38cfc25c012dc834473dbadcf4444b61cbf209785e4dcc064d544cc969637e51",
+     "xs-darwin-arm64": "f25ff52ed19aa3c8801b0cd586fbbae3bfd6bfa7254ea3bfb6ebc72b2cf7b034"
+    }
+   },
+   {
+    "name": "xs-j1",
+    "tool": "xs",
+    "flags": [
+     "-a",
+     "-j1"
+    ],
+    "rev": "e1f05b518049",
+    "binary": {
+     "neo": "~/benchmarks/xsyncv4/lab/bin/xs-e1f05b518049",
+     "freya": "/mnt/nvme/xsbench/bin/xs-e1f05b518049"
+    },
+    "sha256": {
+     "neo": "38cfc25c012dc834473dbadcf4444b61cbf209785e4dcc064d544cc969637e51",
+     "freya": "4308d7fd5dde7b93b1635c8bef5df46659533d1b88fb31bd4d9b939e8cc9738c"
+    },
+    "artifacts": {
+     "xs-linux-amd64": "4308d7fd5dde7b93b1635c8bef5df46659533d1b88fb31bd4d9b939e8cc9738c",
+     "xs-linux-arm64": "38cfc25c012dc834473dbadcf4444b61cbf209785e4dcc064d544cc969637e51",
+     "xs-darwin-arm64": "f25ff52ed19aa3c8801b0cd586fbbae3bfd6bfa7254ea3bfb6ebc72b2cf7b034"
+    }
+   },
+   {
+    "name": "xs-j2",
+    "tool": "xs",
+    "flags": [
+     "-a",
+     "-j2"
+    ],
+    "rev": "e1f05b518049",
+    "binary": {
+     "neo": "~/benchmarks/xsyncv4/lab/bin/xs-e1f05b518049",
+     "freya": "/mnt/nvme/xsbench/bin/xs-e1f05b518049"
+    },
+    "sha256": {
+     "neo": "38cfc25c012dc834473dbadcf4444b61cbf209785e4dcc064d544cc969637e51",
+     "freya": "4308d7fd5dde7b93b1635c8bef5df46659533d1b88fb31bd4d9b939e8cc9738c"
+    },
+    "artifacts": {
+     "xs-linux-amd64": "4308d7fd5dde7b93b1635c8bef5df46659533d1b88fb31bd4d9b939e8cc9738c",
+     "xs-linux-arm64": "38cfc25c012dc834473dbadcf4444b61cbf209785e4dcc064d544cc969637e51",
+     "xs-darwin-arm64": "f25ff52ed19aa3c8801b0cd586fbbae3bfd6bfa7254ea3bfb6ebc72b2cf7b034"
+    }
+   },
+   {
+    "name": "xs-j4",
+    "tool": "xs",
+    "flags": [
+     "-a",
+     "-j4"
+    ],
+    "rev": "e1f05b518049",
+    "binary": {
+     "neo": "~/benchmarks/xsyncv4/lab/bin/xs-e1f05b518049",
+     "freya": "/mnt/nvme/xsbench/bin/xs-e1f05b518049"
+    },
+    "sha256": {
+     "neo": "38cfc25c012dc834473dbadcf4444b61cbf209785e4dcc064d544cc969637e51",
+     "freya": "4308d7fd5dde7b93b1635c8bef5df46659533d1b88fb31bd4d9b939e8cc9738c"
+    },
+    "artifacts": {
+     "xs-linux-amd64": "4308d7fd5dde7b93b1635c8bef5df46659533d1b88fb31bd4d9b939e8cc9738c",
+     "xs-linux-arm64": "38cfc25c012dc834473dbadcf4444b61cbf209785e4dcc064d544cc969637e51",
+     "xs-darwin-arm64": "f25ff52ed19aa3c8801b0cd586fbbae3bfd6bfa7254ea3bfb6ebc72b2cf7b034"
+    }
+   },
+   {
+    "name": "xs-j8",
+    "tool": "xs",
+    "flags": [
+     "-a",
+     "-j8"
+    ],
+    "rev": "e1f05b518049",
+    "binary": {
+     "neo": "~/benchmarks/xsyncv4/lab/bin/xs-e1f05b518049",
+     "freya": "/mnt/nvme/xsbench/bin/xs-e1f05b518049"
+    },
+    "sha256": {
+     "neo": "38cfc25c012dc834473dbadcf4444b61cbf209785e4dcc064d544cc969637e51",
+     "freya": "4308d7fd5dde7b93b1635c8bef5df46659533d1b88fb31bd4d9b939e8cc9738c"
+    },
+    "artifacts": {
+     "xs-linux-amd64": "4308d7fd5dde7b93b1635c8bef5df46659533d1b88fb31bd4d9b939e8cc9738c",
+     "xs-linux-arm64": "38cfc25c012dc834473dbadcf4444b61cbf209785e4dcc064d544cc969637e51",
+     "xs-darwin-arm64": "f25ff52ed19aa3c8801b0cd586fbbae3bfd6bfa7254ea3bfb6ebc72b2cf7b034"
+    }
+   }
+  ],
+  "cells": [
+   {
+    "id": "small-flat.fresh.neo-freya.sender.warm",
+    "corpus": "small-flat",
+    "scenario": "fresh",
+    "sender": "neo",
+    "receiver": "freya",
+    "client": "sender",
+    "link": "lan",
+    "cache": "warm"
+   },
+   {
+    "id": "small-flat.fresh.freya-neo.sender.warm",
+    "corpus": "small-flat",
+    "scenario": "fresh",
+    "sender": "freya",
+    "receiver": "neo",
+    "client": "sender",
+    "link": "lan",
+    "cache": "warm"
+   },
+   {
+    "id": "small-flat.noop.neo-freya.sender.warm",
+    "corpus": "small-flat",
+    "scenario": "noop",
+    "sender": "neo",
+    "receiver": "freya",
+    "client": "sender",
+    "link": "lan",
+    "cache": "warm"
+   },
+   {
+    "id": "small-flat.noop.freya-neo.sender.warm",
+    "corpus": "small-flat",
+    "scenario": "noop",
+    "sender": "freya",
+    "receiver": "neo",
+    "client": "sender",
+    "link": "lan",
+    "cache": "warm"
+   },
+   {
+    "id": "small-real.fresh.neo-freya.sender.warm",
+    "corpus": "small-real",
+    "scenario": "fresh",
+    "sender": "neo",
+    "receiver": "freya",
+    "client": "sender",
+    "link": "lan",
+    "cache": "warm"
+   },
+   {
+    "id": "small-real.fresh.freya-neo.sender.warm",
+    "corpus": "small-real",
+    "scenario": "fresh",
+    "sender": "freya",
+    "receiver": "neo",
+    "client": "sender",
+    "link": "lan",
+    "cache": "warm"
+   },
+   {
+    "id": "small-real.noop.neo-freya.sender.warm",
+    "corpus": "small-real",
+    "scenario": "noop",
+    "sender": "neo",
+    "receiver": "freya",
+    "client": "sender",
+    "link": "lan",
+    "cache": "warm"
+   },
+   {
+    "id": "small-real.noop.freya-neo.sender.warm",
+    "corpus": "small-real",
+    "scenario": "noop",
+    "sender": "freya",
+    "receiver": "neo",
+    "client": "sender",
+    "link": "lan",
+    "cache": "warm"
+   },
+   {
+    "id": "mixed-bimodal.fresh.neo-freya.sender.warm",
+    "corpus": "mixed-bimodal",
+    "scenario": "fresh",
+    "sender": "neo",
+    "receiver": "freya",
+    "client": "sender",
+    "link": "lan",
+    "cache": "warm"
+   },
+   {
+    "id": "mixed-bimodal.fresh.freya-neo.sender.warm",
+    "corpus": "mixed-bimodal",
+    "scenario": "fresh",
+    "sender": "freya",
+    "receiver": "neo",
+    "client": "sender",
+    "link": "lan",
+    "cache": "warm"
+   },
+   {
+    "id": "mixed-bimodal.noop.neo-freya.sender.warm",
+    "corpus": "mixed-bimodal",
+    "scenario": "noop",
+    "sender": "neo",
+    "receiver": "freya",
+    "client": "sender",
+    "link": "lan",
+    "cache": "warm"
+   },
+   {
+    "id": "mixed-bimodal.noop.freya-neo.sender.warm",
+    "corpus": "mixed-bimodal",
+    "scenario": "noop",
+    "sender": "freya",
+    "receiver": "neo",
+    "client": "sender",
+    "link": "lan",
+    "cache": "warm"
+   }
+  ],
+  "corpora": {
+   "small-flat": {
+    "files": 100000,
+    "directories": 100,
+    "bytes": 319224077,
+    "digest": "41b628c4337730be4efdfcc6673d517749132ffd50b75b29321640e6f064bbec",
+    "quick_digest": "e8de96251eaca6be3e98b1cb8097405b37ad470fc0d5ffdb7a5a48ea5b9f3805"
+   },
+   "small-real": {
+    "files": 118594,
+    "directories": 59336,
+    "bytes": 1107333872,
+    "digest": "e9c84fab7d1a6dcdaf7c1c8688abe9bcb3cd114f551c27fad5b8624391005cdb",
+    "quick_digest": "65994469699350cde8ad45842d686fe1a01d87e64ed26de283fb0c860fae01e3"
+   },
+   "mixed-bimodal": {
+    "files": 20000,
+    "directories": 420,
+    "bytes": 1395127076,
+    "digest": "e9071fb7ad3b0375ffe9fab58f740bfd22d545f7678e163a6c745504cc7aa16b",
+    "quick_digest": "31af6dbe5d38a32f5f0acf560703fa557304d3936e59f7b395d13cf8d0dec7fb"
+   }
+  },
+  "blocks": [
+   {
+    "cell": "mixed-bimodal.noop.neo-freya.sender.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs-j2",
+      "xs-j4",
+      "xs",
+      "xs-j1",
+      "xs-j8"
+     ],
+     [
+      "xs-j8",
+      "xs-j2",
+      "xs-j1",
+      "xs",
+      "xs-j4"
+     ],
+     [
+      "xs-j8",
+      "xs-j2",
+      "xs-j4",
+      "xs-j1",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.noop.neo-freya.sender.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs-j1",
+      "xs-j4",
+      "xs-j2",
+      "xs-j8",
+      "xs"
+     ],
+     [
+      "xs",
+      "xs-j2",
+      "xs-j8",
+      "xs-j4",
+      "xs-j1"
+     ],
+     [
+      "xs-j8",
+      "xs-j4",
+      "xs",
+      "xs-j1",
+      "xs-j2"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.noop.freya-neo.sender.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs-j4",
+      "xs-j1",
+      "xs",
+      "xs-j8",
+      "xs-j2"
+     ],
+     [
+      "xs-j4",
+      "xs",
+      "xs-j1",
+      "xs-j2",
+      "xs-j8"
+     ],
+     [
+      "xs-j4",
+      "xs",
+      "xs-j1",
+      "xs-j2",
+      "xs-j8"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.noop.neo-freya.sender.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs-j8",
+      "xs-j2",
+      "xs",
+      "xs-j4",
+      "xs-j1"
+     ],
+     [
+      "xs-j4",
+      "xs-j8",
+      "xs",
+      "xs-j1",
+      "xs-j2"
+     ],
+     [
+      "xs-j1",
+      "xs-j2",
+      "xs-j8",
+      "xs-j4",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.fresh.neo-freya.sender.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs",
+      "xs-j1",
+      "xs-j2",
+      "xs-j8",
+      "xs-j4"
+     ],
+     [
+      "xs-j8",
+      "xs-j2",
+      "xs-j4",
+      "xs-j1",
+      "xs"
+     ],
+     [
+      "xs-j8",
+      "xs",
+      "xs-j2",
+      "xs-j4",
+      "xs-j1"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs-j4",
+      "xs",
+      "xs-j2",
+      "xs-j8",
+      "xs-j1"
+     ],
+     [
+      "xs-j2",
+      "xs",
+      "xs-j4",
+      "xs-j8",
+      "xs-j1"
+     ],
+     [
+      "xs-j8",
+      "xs-j4",
+      "xs",
+      "xs-j1",
+      "xs-j2"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.fresh.freya-neo.sender.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs-j1",
+      "xs",
+      "xs-j2",
+      "xs-j8",
+      "xs-j4"
+     ],
+     [
+      "xs-j1",
+      "xs-j4",
+      "xs",
+      "xs-j2",
+      "xs-j8"
+     ],
+     [
+      "xs",
+      "xs-j4",
+      "xs-j2",
+      "xs-j8",
+      "xs-j1"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.fresh.neo-freya.sender.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs-j8",
+      "xs-j1",
+      "xs-j2",
+      "xs-j4",
+      "xs"
+     ],
+     [
+      "xs",
+      "xs-j4",
+      "xs-j1",
+      "xs-j8",
+      "xs-j2"
+     ],
+     [
+      "xs-j2",
+      "xs-j4",
+      "xs-j1",
+      "xs",
+      "xs-j8"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.freya-neo.sender.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs-j8",
+      "xs-j2",
+      "xs",
+      "xs-j1",
+      "xs-j4"
+     ],
+     [
+      "xs-j8",
+      "xs-j1",
+      "xs-j4",
+      "xs",
+      "xs-j2"
+     ],
+     [
+      "xs-j1",
+      "xs",
+      "xs-j4",
+      "xs-j2",
+      "xs-j8"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.noop.freya-neo.sender.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs",
+      "xs-j2",
+      "xs-j8",
+      "xs-j1",
+      "xs-j4"
+     ],
+     [
+      "xs-j1",
+      "xs-j8",
+      "xs",
+      "xs-j2",
+      "xs-j4"
+     ],
+     [
+      "xs-j8",
+      "xs-j1",
+      "xs-j4",
+      "xs",
+      "xs-j2"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.noop.freya-neo.sender.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs",
+      "xs-j4",
+      "xs-j2",
+      "xs-j8",
+      "xs-j1"
+     ],
+     [
+      "xs-j1",
+      "xs-j4",
+      "xs",
+      "xs-j2",
+      "xs-j8"
+     ],
+     [
+      "xs",
+      "xs-j8",
+      "xs-j2",
+      "xs-j4",
+      "xs-j1"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.fresh.freya-neo.sender.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs-j4",
+      "xs",
+      "xs-j1",
+      "xs-j8",
+      "xs-j2"
+     ],
+     [
+      "xs-j1",
+      "xs-j8",
+      "xs",
+      "xs-j4",
+      "xs-j2"
+     ],
+     [
+      "xs-j2",
+      "xs-j1",
+      "xs-j8",
+      "xs",
+      "xs-j4"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.noop.neo-freya.sender.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "xs-j4",
+      "xs-j8",
+      "xs-j1",
+      "xs-j2"
+     ],
+     [
+      "xs-j1",
+      "xs-j8",
+      "xs-j4",
+      "xs",
+      "xs-j2"
+     ],
+     [
+      "xs-j4",
+      "xs-j8",
+      "xs-j2",
+      "xs-j1",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-j8",
+      "xs-j1",
+      "xs-j4",
+      "xs",
+      "xs-j2"
+     ],
+     [
+      "xs-j4",
+      "xs-j2",
+      "xs",
+      "xs-j1",
+      "xs-j8"
+     ],
+     [
+      "xs-j1",
+      "xs-j2",
+      "xs-j4",
+      "xs-j8",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.noop.neo-freya.sender.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-j8",
+      "xs-j1",
+      "xs-j2",
+      "xs",
+      "xs-j4"
+     ],
+     [
+      "xs-j4",
+      "xs-j8",
+      "xs-j1",
+      "xs",
+      "xs-j2"
+     ],
+     [
+      "xs",
+      "xs-j4",
+      "xs-j2",
+      "xs-j8",
+      "xs-j1"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.noop.neo-freya.sender.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "xs-j4",
+      "xs-j8",
+      "xs-j2",
+      "xs-j1"
+     ],
+     [
+      "xs-j4",
+      "xs-j2",
+      "xs-j8",
+      "xs-j1",
+      "xs"
+     ],
+     [
+      "xs-j2",
+      "xs-j1",
+      "xs-j4",
+      "xs",
+      "xs-j8"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.fresh.neo-freya.sender.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-j8",
+      "xs-j4",
+      "xs-j2",
+      "xs",
+      "xs-j1"
+     ],
+     [
+      "xs-j8",
+      "xs-j4",
+      "xs-j2",
+      "xs-j1",
+      "xs"
+     ],
+     [
+      "xs-j8",
+      "xs-j2",
+      "xs-j4",
+      "xs",
+      "xs-j1"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.freya-neo.sender.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-j8",
+      "xs-j1",
+      "xs-j4",
+      "xs",
+      "xs-j2"
+     ],
+     [
+      "xs-j2",
+      "xs",
+      "xs-j8",
+      "xs-j4",
+      "xs-j1"
+     ],
+     [
+      "xs",
+      "xs-j1",
+      "xs-j4",
+      "xs-j2",
+      "xs-j8"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.noop.freya-neo.sender.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-j1",
+      "xs",
+      "xs-j4",
+      "xs-j2",
+      "xs-j8"
+     ],
+     [
+      "xs-j8",
+      "xs",
+      "xs-j2",
+      "xs-j4",
+      "xs-j1"
+     ],
+     [
+      "xs-j8",
+      "xs",
+      "xs-j4",
+      "xs-j1",
+      "xs-j2"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.noop.freya-neo.sender.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-j4",
+      "xs-j1",
+      "xs",
+      "xs-j2",
+      "xs-j8"
+     ],
+     [
+      "xs-j2",
+      "xs-j4",
+      "xs-j8",
+      "xs-j1",
+      "xs"
+     ],
+     [
+      "xs-j8",
+      "xs-j1",
+      "xs",
+      "xs-j4",
+      "xs-j2"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.noop.freya-neo.sender.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-j4",
+      "xs",
+      "xs-j2",
+      "xs-j8",
+      "xs-j1"
+     ],
+     [
+      "xs",
+      "xs-j8",
+      "xs-j2",
+      "xs-j1",
+      "xs-j4"
+     ],
+     [
+      "xs-j4",
+      "xs-j2",
+      "xs-j1",
+      "xs",
+      "xs-j8"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.fresh.neo-freya.sender.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-j1",
+      "xs-j2",
+      "xs",
+      "xs-j8",
+      "xs-j4"
+     ],
+     [
+      "xs",
+      "xs-j8",
+      "xs-j1",
+      "xs-j2",
+      "xs-j4"
+     ],
+     [
+      "xs-j2",
+      "xs-j1",
+      "xs",
+      "xs-j4",
+      "xs-j8"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.fresh.freya-neo.sender.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "xs-j2",
+      "xs-j1",
+      "xs-j8",
+      "xs-j4"
+     ],
+     [
+      "xs-j4",
+      "xs",
+      "xs-j1",
+      "xs-j2",
+      "xs-j8"
+     ],
+     [
+      "xs-j2",
+      "xs-j1",
+      "xs",
+      "xs-j4",
+      "xs-j8"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.fresh.freya-neo.sender.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "xs-j2",
+      "xs-j8",
+      "xs-j1",
+      "xs-j4"
+     ],
+     [
+      "xs-j2",
+      "xs-j8",
+      "xs-j1",
+      "xs-j4",
+      "xs"
+     ],
+     [
+      "xs-j4",
+      "xs-j1",
+      "xs-j8",
+      "xs-j2",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.noop.neo-freya.sender.warm",
+    "block": 2,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-j2",
+      "xs-j4",
+      "xs-j8",
+      "xs",
+      "xs-j1"
+     ],
+     [
+      "xs-j1",
+      "xs-j8",
+      "xs-j2",
+      "xs",
+      "xs-j4"
+     ],
+     [
+      "xs-j8",
+      "xs",
+      "xs-j2",
+      "xs-j4",
+      "xs-j1"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.fresh.freya-neo.sender.warm",
+    "block": 2,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "xs-j2",
+      "xs-j4",
+      "xs-j8",
+      "xs-j1"
+     ],
+     [
+      "xs-j1",
+      "xs-j8",
+      "xs",
+      "xs-j4",
+      "xs-j2"
+     ],
+     [
+      "xs",
+      "xs-j4",
+      "xs-j8",
+      "xs-j2",
+      "xs-j1"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.noop.freya-neo.sender.warm",
+    "block": 2,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-j1",
+      "xs-j2",
+      "xs",
+      "xs-j8",
+      "xs-j4"
+     ],
+     [
+      "xs-j1",
+      "xs-j2",
+      "xs",
+      "xs-j8",
+      "xs-j4"
+     ],
+     [
+      "xs-j4",
+      "xs-j1",
+      "xs-j2",
+      "xs-j8",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.freya-neo.sender.warm",
+    "block": 2,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-j8",
+      "xs-j1",
+      "xs-j2",
+      "xs",
+      "xs-j4"
+     ],
+     [
+      "xs-j1",
+      "xs-j2",
+      "xs",
+      "xs-j8",
+      "xs-j4"
+     ],
+     [
+      "xs-j1",
+      "xs-j8",
+      "xs-j2",
+      "xs",
+      "xs-j4"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+    "block": 2,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "xs-j1",
+      "xs-j4",
+      "xs-j8",
+      "xs-j2"
+     ],
+     [
+      "xs-j4",
+      "xs-j1",
+      "xs-j2",
+      "xs-j8",
+      "xs"
+     ],
+     [
+      "xs-j4",
+      "xs-j1",
+      "xs-j8",
+      "xs-j2",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.noop.freya-neo.sender.warm",
+    "block": 2,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-j1",
+      "xs-j8",
+      "xs-j4",
+      "xs-j2",
+      "xs"
+     ],
+     [
+      "xs-j8",
+      "xs-j2",
+      "xs",
+      "xs-j4",
+      "xs-j1"
+     ],
+     [
+      "xs-j2",
+      "xs-j1",
+      "xs",
+      "xs-j4",
+      "xs-j8"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.fresh.neo-freya.sender.warm",
+    "block": 2,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-j1",
+      "xs-j2",
+      "xs-j8",
+      "xs",
+      "xs-j4"
+     ],
+     [
+      "xs-j4",
+      "xs-j8",
+      "xs-j2",
+      "xs",
+      "xs-j1"
+     ],
+     [
+      "xs-j8",
+      "xs-j1",
+      "xs-j2",
+      "xs",
+      "xs-j4"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.fresh.neo-freya.sender.warm",
+    "block": 2,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-j4",
+      "xs-j1",
+      "xs-j8",
+      "xs",
+      "xs-j2"
+     ],
+     [
+      "xs",
+      "xs-j4",
+      "xs-j8",
+      "xs-j2",
+      "xs-j1"
+     ],
+     [
+      "xs-j2",
+      "xs-j1",
+      "xs-j8",
+      "xs-j4",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.noop.freya-neo.sender.warm",
+    "block": 2,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "xs-j4",
+      "xs-j2",
+      "xs-j1",
+      "xs-j8"
+     ],
+     [
+      "xs-j4",
+      "xs-j8",
+      "xs",
+      "xs-j1",
+      "xs-j2"
+     ],
+     [
+      "xs-j8",
+      "xs",
+      "xs-j4",
+      "xs-j2",
+      "xs-j1"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.noop.neo-freya.sender.warm",
+    "block": 2,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-j2",
+      "xs",
+      "xs-j8",
+      "xs-j1",
+      "xs-j4"
+     ],
+     [
+      "xs-j8",
+      "xs-j4",
+      "xs-j2",
+      "xs",
+      "xs-j1"
+     ],
+     [
+      "xs-j8",
+      "xs-j4",
+      "xs-j2",
+      "xs-j1",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.fresh.freya-neo.sender.warm",
+    "block": 2,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-j2",
+      "xs",
+      "xs-j4",
+      "xs-j8",
+      "xs-j1"
+     ],
+     [
+      "xs-j1",
+      "xs-j8",
+      "xs-j2",
+      "xs",
+      "xs-j4"
+     ],
+     [
+      "xs",
+      "xs-j1",
+      "xs-j4",
+      "xs-j2",
+      "xs-j8"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.noop.neo-freya.sender.warm",
+    "block": 2,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-j4",
+      "xs",
+      "xs-j2",
+      "xs-j1",
+      "xs-j8"
+     ],
+     [
+      "xs",
+      "xs-j1",
+      "xs-j8",
+      "xs-j2",
+      "xs-j4"
+     ],
+     [
+      "xs-j8",
+      "xs-j4",
+      "xs",
+      "xs-j1",
+      "xs-j2"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.noop.neo-freya.sender.warm",
+    "block": 3,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "xs-j2",
+      "xs-j1",
+      "xs-j8",
+      "xs-j4"
+     ],
+     [
+      "xs-j1",
+      "xs",
+      "xs-j8",
+      "xs-j2",
+      "xs-j4"
+     ],
+     [
+      "xs-j4",
+      "xs-j2",
+      "xs-j8",
+      "xs-j1",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.noop.neo-freya.sender.warm",
+    "block": 3,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "xs-j1",
+      "xs-j2",
+      "xs-j8",
+      "xs-j4"
+     ],
+     [
+      "xs-j4",
+      "xs-j2",
+      "xs-j1",
+      "xs-j8",
+      "xs"
+     ],
+     [
+      "xs",
+      "xs-j4",
+      "xs-j2",
+      "xs-j8",
+      "xs-j1"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.fresh.freya-neo.sender.warm",
+    "block": 3,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-j8",
+      "xs-j1",
+      "xs-j4",
+      "xs",
+      "xs-j2"
+     ],
+     [
+      "xs-j8",
+      "xs",
+      "xs-j4",
+      "xs-j2",
+      "xs-j1"
+     ],
+     [
+      "xs",
+      "xs-j2",
+      "xs-j1",
+      "xs-j4",
+      "xs-j8"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+    "block": 3,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-j2",
+      "xs-j1",
+      "xs",
+      "xs-j4",
+      "xs-j8"
+     ],
+     [
+      "xs-j8",
+      "xs-j2",
+      "xs-j4",
+      "xs-j1",
+      "xs"
+     ],
+     [
+      "xs-j8",
+      "xs-j4",
+      "xs-j2",
+      "xs",
+      "xs-j1"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.fresh.neo-freya.sender.warm",
+    "block": 3,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "xs-j8",
+      "xs-j1",
+      "xs-j2",
+      "xs-j4"
+     ],
+     [
+      "xs",
+      "xs-j2",
+      "xs-j8",
+      "xs-j1",
+      "xs-j4"
+     ],
+     [
+      "xs",
+      "xs-j4",
+      "xs-j1",
+      "xs-j8",
+      "xs-j2"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.noop.freya-neo.sender.warm",
+    "block": 3,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-j2",
+      "xs",
+      "xs-j4",
+      "xs-j1",
+      "xs-j8"
+     ],
+     [
+      "xs-j2",
+      "xs-j4",
+      "xs-j1",
+      "xs",
+      "xs-j8"
+     ],
+     [
+      "xs-j8",
+      "xs-j1",
+      "xs-j2",
+      "xs",
+      "xs-j4"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.noop.freya-neo.sender.warm",
+    "block": 3,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "xs-j8",
+      "xs-j1",
+      "xs-j2",
+      "xs-j4"
+     ],
+     [
+      "xs",
+      "xs-j8",
+      "xs-j4",
+      "xs-j1",
+      "xs-j2"
+     ],
+     [
+      "xs-j4",
+      "xs",
+      "xs-j8",
+      "xs-j1",
+      "xs-j2"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.freya-neo.sender.warm",
+    "block": 3,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-j1",
+      "xs-j2",
+      "xs-j8",
+      "xs",
+      "xs-j4"
+     ],
+     [
+      "xs-j8",
+      "xs-j1",
+      "xs-j2",
+      "xs-j4",
+      "xs"
+     ],
+     [
+      "xs-j2",
+      "xs-j4",
+      "xs-j1",
+      "xs-j8",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.fresh.freya-neo.sender.warm",
+    "block": 3,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "xs-j8",
+      "xs-j2",
+      "xs-j4",
+      "xs-j1"
+     ],
+     [
+      "xs-j2",
+      "xs-j8",
+      "xs",
+      "xs-j1",
+      "xs-j4"
+     ],
+     [
+      "xs-j2",
+      "xs-j1",
+      "xs",
+      "xs-j4",
+      "xs-j8"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.noop.freya-neo.sender.warm",
+    "block": 3,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-j1",
+      "xs",
+      "xs-j4",
+      "xs-j8",
+      "xs-j2"
+     ],
+     [
+      "xs-j4",
+      "xs-j8",
+      "xs-j2",
+      "xs",
+      "xs-j1"
+     ],
+     [
+      "xs",
+      "xs-j8",
+      "xs-j1",
+      "xs-j4",
+      "xs-j2"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.noop.neo-freya.sender.warm",
+    "block": 3,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-j8",
+      "xs-j1",
+      "xs-j2",
+      "xs",
+      "xs-j4"
+     ],
+     [
+      "xs-j8",
+      "xs-j2",
+      "xs-j1",
+      "xs-j4",
+      "xs"
+     ],
+     [
+      "xs-j4",
+      "xs",
+      "xs-j1",
+      "xs-j8",
+      "xs-j2"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.fresh.neo-freya.sender.warm",
+    "block": 3,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-j4",
+      "xs-j1",
+      "xs-j8",
+      "xs-j2",
+      "xs"
+     ],
+     [
+      "xs",
+      "xs-j2",
+      "xs-j4",
+      "xs-j1",
+      "xs-j8"
+     ],
+     [
+      "xs-j1",
+      "xs-j2",
+      "xs-j8",
+      "xs-j4",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.freya-neo.sender.warm",
+    "block": 4,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-j4",
+      "xs-j8",
+      "xs-j1",
+      "xs",
+      "xs-j2"
+     ],
+     [
+      "xs",
+      "xs-j8",
+      "xs-j4",
+      "xs-j2",
+      "xs-j1"
+     ],
+     [
+      "xs-j8",
+      "xs-j4",
+      "xs-j2",
+      "xs",
+      "xs-j1"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+    "block": 4,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-j2",
+      "xs",
+      "xs-j8",
+      "xs-j4",
+      "xs-j1"
+     ],
+     [
+      "xs-j2",
+      "xs-j1",
+      "xs",
+      "xs-j4",
+      "xs-j8"
+     ],
+     [
+      "xs-j8",
+      "xs-j2",
+      "xs",
+      "xs-j1",
+      "xs-j4"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.noop.freya-neo.sender.warm",
+    "block": 4,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-j1",
+      "xs-j4",
+      "xs-j2",
+      "xs",
+      "xs-j8"
+     ],
+     [
+      "xs-j8",
+      "xs-j1",
+      "xs",
+      "xs-j4",
+      "xs-j2"
+     ],
+     [
+      "xs-j2",
+      "xs",
+      "xs-j4",
+      "xs-j8",
+      "xs-j1"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.fresh.neo-freya.sender.warm",
+    "block": 4,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-j4",
+      "xs-j8",
+      "xs",
+      "xs-j1",
+      "xs-j2"
+     ],
+     [
+      "xs-j8",
+      "xs-j4",
+      "xs",
+      "xs-j2",
+      "xs-j1"
+     ],
+     [
+      "xs-j4",
+      "xs-j1",
+      "xs-j8",
+      "xs",
+      "xs-j2"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.fresh.freya-neo.sender.warm",
+    "block": 4,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-j4",
+      "xs-j1",
+      "xs",
+      "xs-j2",
+      "xs-j8"
+     ],
+     [
+      "xs-j4",
+      "xs-j1",
+      "xs",
+      "xs-j8",
+      "xs-j2"
+     ],
+     [
+      "xs-j8",
+      "xs-j2",
+      "xs-j1",
+      "xs",
+      "xs-j4"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.noop.freya-neo.sender.warm",
+    "block": 4,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "xs-j4",
+      "xs-j2",
+      "xs-j1",
+      "xs-j8"
+     ],
+     [
+      "xs-j2",
+      "xs-j1",
+      "xs-j8",
+      "xs-j4",
+      "xs"
+     ],
+     [
+      "xs-j4",
+      "xs-j1",
+      "xs-j8",
+      "xs",
+      "xs-j2"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.noop.neo-freya.sender.warm",
+    "block": 4,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-j1",
+      "xs",
+      "xs-j4",
+      "xs-j8",
+      "xs-j2"
+     ],
+     [
+      "xs-j8",
+      "xs-j2",
+      "xs-j4",
+      "xs",
+      "xs-j1"
+     ],
+     [
+      "xs-j1",
+      "xs-j2",
+      "xs-j4",
+      "xs-j8",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.noop.neo-freya.sender.warm",
+    "block": 4,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "xs-j8",
+      "xs-j1",
+      "xs-j4",
+      "xs-j2"
+     ],
+     [
+      "xs",
+      "xs-j8",
+      "xs-j2",
+      "xs-j4",
+      "xs-j1"
+     ],
+     [
+      "xs-j1",
+      "xs-j4",
+      "xs-j2",
+      "xs",
+      "xs-j8"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.noop.freya-neo.sender.warm",
+    "block": 4,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-j8",
+      "xs-j1",
+      "xs-j2",
+      "xs-j4",
+      "xs"
+     ],
+     [
+      "xs-j1",
+      "xs",
+      "xs-j8",
+      "xs-j2",
+      "xs-j4"
+     ],
+     [
+      "xs-j4",
+      "xs-j2",
+      "xs-j1",
+      "xs-j8",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.noop.neo-freya.sender.warm",
+    "block": 4,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "xs-j1",
+      "xs-j4",
+      "xs-j2",
+      "xs-j8"
+     ],
+     [
+      "xs-j8",
+      "xs",
+      "xs-j4",
+      "xs-j1",
+      "xs-j2"
+     ],
+     [
+      "xs-j2",
+      "xs-j1",
+      "xs",
+      "xs-j4",
+      "xs-j8"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.fresh.neo-freya.sender.warm",
+    "block": 4,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-j1",
+      "xs",
+      "xs-j8",
+      "xs-j2",
+      "xs-j4"
+     ],
+     [
+      "xs",
+      "xs-j2",
+      "xs-j8",
+      "xs-j4",
+      "xs-j1"
+     ],
+     [
+      "xs-j4",
+      "xs-j1",
+      "xs",
+      "xs-j8",
+      "xs-j2"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.fresh.freya-neo.sender.warm",
+    "block": 4,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-j8",
+      "xs-j1",
+      "xs",
+      "xs-j4",
+      "xs-j2"
+     ],
+     [
+      "xs-j2",
+      "xs-j4",
+      "xs-j8",
+      "xs-j1",
+      "xs"
+     ],
+     [
+      "xs",
+      "xs-j2",
+      "xs-j4",
+      "xs-j8",
+      "xs-j1"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.fresh.freya-neo.sender.warm",
+    "block": 5,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-j2",
+      "xs",
+      "xs-j4",
+      "xs-j1",
+      "xs-j8"
+     ],
+     [
+      "xs",
+      "xs-j8",
+      "xs-j1",
+      "xs-j2",
+      "xs-j4"
+     ],
+     [
+      "xs-j4",
+      "xs",
+      "xs-j1",
+      "xs-j2",
+      "xs-j8"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.noop.freya-neo.sender.warm",
+    "block": 5,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-j8",
+      "xs-j1",
+      "xs",
+      "xs-j2",
+      "xs-j4"
+     ],
+     [
+      "xs-j2",
+      "xs-j8",
+      "xs",
+      "xs-j4",
+      "xs-j1"
+     ],
+     [
+      "xs-j1",
+      "xs",
+      "xs-j4",
+      "xs-j8",
+      "xs-j2"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.noop.freya-neo.sender.warm",
+    "block": 5,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "xs-j8",
+      "xs-j2",
+      "xs-j4",
+      "xs-j1"
+     ],
+     [
+      "xs-j8",
+      "xs-j1",
+      "xs-j2",
+      "xs-j4",
+      "xs"
+     ],
+     [
+      "xs-j2",
+      "xs-j4",
+      "xs-j8",
+      "xs-j1",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.fresh.neo-freya.sender.warm",
+    "block": 5,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-j8",
+      "xs-j4",
+      "xs-j2",
+      "xs-j1",
+      "xs"
+     ],
+     [
+      "xs-j4",
+      "xs-j2",
+      "xs",
+      "xs-j8",
+      "xs-j1"
+     ],
+     [
+      "xs-j1",
+      "xs-j8",
+      "xs",
+      "xs-j4",
+      "xs-j2"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.fresh.neo-freya.sender.warm",
+    "block": 5,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-j4",
+      "xs",
+      "xs-j1",
+      "xs-j8",
+      "xs-j2"
+     ],
+     [
+      "xs-j2",
+      "xs",
+      "xs-j1",
+      "xs-j4",
+      "xs-j8"
+     ],
+     [
+      "xs-j1",
+      "xs-j2",
+      "xs",
+      "xs-j8",
+      "xs-j4"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.noop.neo-freya.sender.warm",
+    "block": 5,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-j1",
+      "xs",
+      "xs-j4",
+      "xs-j8",
+      "xs-j2"
+     ],
+     [
+      "xs-j1",
+      "xs",
+      "xs-j8",
+      "xs-j2",
+      "xs-j4"
+     ],
+     [
+      "xs-j8",
+      "xs-j1",
+      "xs",
+      "xs-j2",
+      "xs-j4"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.noop.neo-freya.sender.warm",
+    "block": 5,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-j2",
+      "xs-j4",
+      "xs-j8",
+      "xs-j1",
+      "xs"
+     ],
+     [
+      "xs",
+      "xs-j4",
+      "xs-j8",
+      "xs-j2",
+      "xs-j1"
+     ],
+     [
+      "xs-j2",
+      "xs",
+      "xs-j4",
+      "xs-j8",
+      "xs-j1"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.noop.neo-freya.sender.warm",
+    "block": 5,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-j1",
+      "xs-j8",
+      "xs-j4",
+      "xs",
+      "xs-j2"
+     ],
+     [
+      "xs",
+      "xs-j1",
+      "xs-j8",
+      "xs-j4",
+      "xs-j2"
+     ],
+     [
+      "xs-j8",
+      "xs-j1",
+      "xs",
+      "xs-j4",
+      "xs-j2"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.noop.freya-neo.sender.warm",
+    "block": 5,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-j1",
+      "xs-j4",
+      "xs-j2",
+      "xs-j8",
+      "xs"
+     ],
+     [
+      "xs-j2",
+      "xs-j4",
+      "xs-j8",
+      "xs",
+      "xs-j1"
+     ],
+     [
+      "xs",
+      "xs-j1",
+      "xs-j4",
+      "xs-j2",
+      "xs-j8"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.fresh.freya-neo.sender.warm",
+    "block": 5,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-j1",
+      "xs-j8",
+      "xs-j2",
+      "xs-j4",
+      "xs"
+     ],
+     [
+      "xs-j4",
+      "xs",
+      "xs-j8",
+      "xs-j1",
+      "xs-j2"
+     ],
+     [
+      "xs-j4",
+      "xs-j8",
+      "xs-j1",
+      "xs-j2",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.freya-neo.sender.warm",
+    "block": 5,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-j4",
+      "xs-j8",
+      "xs-j1",
+      "xs-j2",
+      "xs"
+     ],
+     [
+      "xs-j8",
+      "xs",
+      "xs-j2",
+      "xs-j4",
+      "xs-j1"
+     ],
+     [
+      "xs-j1",
+      "xs-j8",
+      "xs-j2",
+      "xs-j4",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+    "block": 5,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-j4",
+      "xs",
+      "xs-j8",
+      "xs-j1",
+      "xs-j2"
+     ],
+     [
+      "xs-j4",
+      "xs-j1",
+      "xs",
+      "xs-j8",
+      "xs-j2"
+     ],
+     [
+      "xs-j1",
+      "xs-j4",
+      "xs",
+      "xs-j8",
+      "xs-j2"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.fresh.neo-freya.sender.warm",
+    "block": 6,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "xs-j4",
+      "xs-j1",
+      "xs-j2",
+      "xs-j8"
+     ],
+     [
+      "xs-j8",
+      "xs",
+      "xs-j4",
+      "xs-j1",
+      "xs-j2"
+     ],
+     [
+      "xs",
+      "xs-j1",
+      "xs-j2",
+      "xs-j8",
+      "xs-j4"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.noop.neo-freya.sender.warm",
+    "block": 6,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-j2",
+      "xs-j1",
+      "xs-j8",
+      "xs",
+      "xs-j4"
+     ],
+     [
+      "xs",
+      "xs-j8",
+      "xs-j1",
+      "xs-j2",
+      "xs-j4"
+     ],
+     [
+      "xs-j1",
+      "xs-j8",
+      "xs",
+      "xs-j4",
+      "xs-j2"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.freya-neo.sender.warm",
+    "block": 6,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-j1",
+      "xs",
+      "xs-j4",
+      "xs-j2",
+      "xs-j8"
+     ],
+     [
+      "xs-j1",
+      "xs-j4",
+      "xs-j8",
+      "xs",
+      "xs-j2"
+     ],
+     [
+      "xs",
+      "xs-j1",
+      "xs-j8",
+      "xs-j4",
+      "xs-j2"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.noop.neo-freya.sender.warm",
+    "block": 6,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-j4",
+      "xs-j8",
+      "xs",
+      "xs-j1",
+      "xs-j2"
+     ],
+     [
+      "xs",
+      "xs-j4",
+      "xs-j8",
+      "xs-j1",
+      "xs-j2"
+     ],
+     [
+      "xs-j1",
+      "xs",
+      "xs-j2",
+      "xs-j4",
+      "xs-j8"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.noop.freya-neo.sender.warm",
+    "block": 6,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "xs-j8",
+      "xs-j2",
+      "xs-j1",
+      "xs-j4"
+     ],
+     [
+      "xs",
+      "xs-j4",
+      "xs-j2",
+      "xs-j8",
+      "xs-j1"
+     ],
+     [
+      "xs",
+      "xs-j2",
+      "xs-j1",
+      "xs-j8",
+      "xs-j4"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.noop.freya-neo.sender.warm",
+    "block": 6,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-j2",
+      "xs-j1",
+      "xs-j8",
+      "xs-j4",
+      "xs"
+     ],
+     [
+      "xs-j2",
+      "xs-j4",
+      "xs-j1",
+      "xs-j8",
+      "xs"
+     ],
+     [
+      "xs-j1",
+      "xs",
+      "xs-j4",
+      "xs-j2",
+      "xs-j8"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+    "block": 6,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-j8",
+      "xs-j2",
+      "xs",
+      "xs-j1",
+      "xs-j4"
+     ],
+     [
+      "xs",
+      "xs-j4",
+      "xs-j2",
+      "xs-j8",
+      "xs-j1"
+     ],
+     [
+      "xs-j2",
+      "xs-j8",
+      "xs-j1",
+      "xs",
+      "xs-j4"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.fresh.neo-freya.sender.warm",
+    "block": 6,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-j4",
+      "xs",
+      "xs-j1",
+      "xs-j8",
+      "xs-j2"
+     ],
+     [
+      "xs-j8",
+      "xs-j1",
+      "xs",
+      "xs-j2",
+      "xs-j4"
+     ],
+     [
+      "xs",
+      "xs-j2",
+      "xs-j1",
+      "xs-j4",
+      "xs-j8"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.fresh.freya-neo.sender.warm",
+    "block": 6,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-j2",
+      "xs-j1",
+      "xs",
+      "xs-j8",
+      "xs-j4"
+     ],
+     [
+      "xs-j2",
+      "xs",
+      "xs-j4",
+      "xs-j8",
+      "xs-j1"
+     ],
+     [
+      "xs-j8",
+      "xs-j4",
+      "xs-j1",
+      "xs",
+      "xs-j2"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.noop.neo-freya.sender.warm",
+    "block": 6,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-j1",
+      "xs-j8",
+      "xs-j2",
+      "xs-j4",
+      "xs"
+     ],
+     [
+      "xs",
+      "xs-j2",
+      "xs-j4",
+      "xs-j8",
+      "xs-j1"
+     ],
+     [
+      "xs-j8",
+      "xs-j1",
+      "xs-j2",
+      "xs",
+      "xs-j4"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.noop.freya-neo.sender.warm",
+    "block": 6,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-j2",
+      "xs-j8",
+      "xs",
+      "xs-j1",
+      "xs-j4"
+     ],
+     [
+      "xs-j1",
+      "xs-j8",
+      "xs-j4",
+      "xs",
+      "xs-j2"
+     ],
+     [
+      "xs-j2",
+      "xs-j1",
+      "xs-j4",
+      "xs-j8",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.fresh.freya-neo.sender.warm",
+    "block": 6,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-j1",
+      "xs-j8",
+      "xs-j4",
+      "xs",
+      "xs-j2"
+     ],
+     [
+      "xs-j1",
+      "xs-j2",
+      "xs-j4",
+      "xs",
+      "xs-j8"
+     ],
+     [
+      "xs-j1",
+      "xs-j2",
+      "xs-j8",
+      "xs-j4",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.fresh.freya-neo.sender.warm",
+    "block": 7,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-j2",
+      "xs-j8",
+      "xs",
+      "xs-j4",
+      "xs-j1"
+     ],
+     [
+      "xs-j2",
+      "xs",
+      "xs-j4",
+      "xs-j1",
+      "xs-j8"
+     ],
+     [
+      "xs-j2",
+      "xs-j8",
+      "xs-j1",
+      "xs",
+      "xs-j4"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.fresh.neo-freya.sender.warm",
+    "block": 7,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-j2",
+      "xs",
+      "xs-j8",
+      "xs-j4",
+      "xs-j1"
+     ],
+     [
+      "xs-j2",
+      "xs",
+      "xs-j4",
+      "xs-j8",
+      "xs-j1"
+     ],
+     [
+      "xs-j4",
+      "xs-j8",
+      "xs-j2",
+      "xs",
+      "xs-j1"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.freya-neo.sender.warm",
+    "block": 7,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "xs-j8",
+      "xs-j4",
+      "xs-j2",
+      "xs-j1"
+     ],
+     [
+      "xs-j1",
+      "xs",
+      "xs-j8",
+      "xs-j2",
+      "xs-j4"
+     ],
+     [
+      "xs-j4",
+      "xs",
+      "xs-j2",
+      "xs-j1",
+      "xs-j8"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.noop.neo-freya.sender.warm",
+    "block": 7,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-j4",
+      "xs",
+      "xs-j2",
+      "xs-j1",
+      "xs-j8"
+     ],
+     [
+      "xs-j4",
+      "xs-j2",
+      "xs",
+      "xs-j8",
+      "xs-j1"
+     ],
+     [
+      "xs-j2",
+      "xs-j1",
+      "xs",
+      "xs-j8",
+      "xs-j4"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.fresh.neo-freya.sender.warm",
+    "block": 7,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-j8",
+      "xs-j1",
+      "xs-j4",
+      "xs",
+      "xs-j2"
+     ],
+     [
+      "xs-j2",
+      "xs-j1",
+      "xs-j4",
+      "xs",
+      "xs-j8"
+     ],
+     [
+      "xs",
+      "xs-j1",
+      "xs-j4",
+      "xs-j2",
+      "xs-j8"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+    "block": 7,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "xs-j2",
+      "xs-j1",
+      "xs-j8",
+      "xs-j4"
+     ],
+     [
+      "xs-j2",
+      "xs-j1",
+      "xs",
+      "xs-j8",
+      "xs-j4"
+     ],
+     [
+      "xs-j8",
+      "xs-j1",
+      "xs-j4",
+      "xs-j2",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.noop.freya-neo.sender.warm",
+    "block": 7,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-j8",
+      "xs",
+      "xs-j4",
+      "xs-j2",
+      "xs-j1"
+     ],
+     [
+      "xs-j1",
+      "xs-j8",
+      "xs-j2",
+      "xs",
+      "xs-j4"
+     ],
+     [
+      "xs-j8",
+      "xs-j4",
+      "xs-j1",
+      "xs",
+      "xs-j2"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.noop.freya-neo.sender.warm",
+    "block": 7,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "xs-j4",
+      "xs-j1",
+      "xs-j2",
+      "xs-j8"
+     ],
+     [
+      "xs",
+      "xs-j2",
+      "xs-j4",
+      "xs-j8",
+      "xs-j1"
+     ],
+     [
+      "xs",
+      "xs-j8",
+      "xs-j2",
+      "xs-j1",
+      "xs-j4"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.noop.freya-neo.sender.warm",
+    "block": 7,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-j2",
+      "xs-j1",
+      "xs",
+      "xs-j4",
+      "xs-j8"
+     ],
+     [
+      "xs-j1",
+      "xs",
+      "xs-j8",
+      "xs-j4",
+      "xs-j2"
+     ],
+     [
+      "xs-j4",
+      "xs",
+      "xs-j2",
+      "xs-j1",
+      "xs-j8"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.noop.neo-freya.sender.warm",
+    "block": 7,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-j2",
+      "xs-j8",
+      "xs-j1",
+      "xs-j4",
+      "xs"
+     ],
+     [
+      "xs-j4",
+      "xs-j2",
+      "xs-j1",
+      "xs-j8",
+      "xs"
+     ],
+     [
+      "xs",
+      "xs-j1",
+      "xs-j8",
+      "xs-j4",
+      "xs-j2"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.fresh.freya-neo.sender.warm",
+    "block": 7,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-j8",
+      "xs-j4",
+      "xs",
+      "xs-j1",
+      "xs-j2"
+     ],
+     [
+      "xs-j8",
+      "xs-j4",
+      "xs-j2",
+      "xs",
+      "xs-j1"
+     ],
+     [
+      "xs",
+      "xs-j4",
+      "xs-j8",
+      "xs-j1",
+      "xs-j2"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.noop.neo-freya.sender.warm",
+    "block": 7,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-j8",
+      "xs",
+      "xs-j1",
+      "xs-j2",
+      "xs-j4"
+     ],
+     [
+      "xs-j2",
+      "xs-j1",
+      "xs-j4",
+      "xs",
+      "xs-j8"
+     ],
+     [
+      "xs-j4",
+      "xs-j1",
+      "xs",
+      "xs-j8",
+      "xs-j2"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.noop.neo-freya.sender.warm",
+    "block": 8,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-j4",
+      "xs-j1",
+      "xs-j2",
+      "xs",
+      "xs-j8"
+     ],
+     [
+      "xs",
+      "xs-j1",
+      "xs-j4",
+      "xs-j2",
+      "xs-j8"
+     ],
+     [
+      "xs-j8",
+      "xs",
+      "xs-j1",
+      "xs-j4",
+      "xs-j2"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.fresh.neo-freya.sender.warm",
+    "block": 8,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-j2",
+      "xs",
+      "xs-j8",
+      "xs-j4",
+      "xs-j1"
+     ],
+     [
+      "xs-j8",
+      "xs-j4",
+      "xs",
+      "xs-j2",
+      "xs-j1"
+     ],
+     [
+      "xs-j4",
+      "xs-j1",
+      "xs-j2",
+      "xs-j8",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.fresh.freya-neo.sender.warm",
+    "block": 8,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-j4",
+      "xs",
+      "xs-j8",
+      "xs-j1",
+      "xs-j2"
+     ],
+     [
+      "xs",
+      "xs-j2",
+      "xs-j8",
+      "xs-j1",
+      "xs-j4"
+     ],
+     [
+      "xs-j4",
+      "xs-j1",
+      "xs-j2",
+      "xs-j8",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.noop.freya-neo.sender.warm",
+    "block": 8,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-j2",
+      "xs",
+      "xs-j8",
+      "xs-j1",
+      "xs-j4"
+     ],
+     [
+      "xs-j1",
+      "xs-j2",
+      "xs-j8",
+      "xs-j4",
+      "xs"
+     ],
+     [
+      "xs",
+      "xs-j8",
+      "xs-j4",
+      "xs-j2",
+      "xs-j1"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.fresh.freya-neo.sender.warm",
+    "block": 8,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-j2",
+      "xs-j1",
+      "xs-j4",
+      "xs",
+      "xs-j8"
+     ],
+     [
+      "xs-j1",
+      "xs-j4",
+      "xs-j2",
+      "xs",
+      "xs-j8"
+     ],
+     [
+      "xs",
+      "xs-j8",
+      "xs-j1",
+      "xs-j2",
+      "xs-j4"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.noop.neo-freya.sender.warm",
+    "block": 8,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-j8",
+      "xs-j1",
+      "xs-j2",
+      "xs",
+      "xs-j4"
+     ],
+     [
+      "xs-j8",
+      "xs-j2",
+      "xs-j4",
+      "xs-j1",
+      "xs"
+     ],
+     [
+      "xs-j1",
+      "xs-j2",
+      "xs-j8",
+      "xs-j4",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.noop.freya-neo.sender.warm",
+    "block": 8,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-j2",
+      "xs-j1",
+      "xs-j4",
+      "xs-j8",
+      "xs"
+     ],
+     [
+      "xs-j4",
+      "xs-j2",
+      "xs",
+      "xs-j8",
+      "xs-j1"
+     ],
+     [
+      "xs",
+      "xs-j2",
+      "xs-j4",
+      "xs-j1",
+      "xs-j8"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.noop.freya-neo.sender.warm",
+    "block": 8,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-j8",
+      "xs-j2",
+      "xs-j4",
+      "xs-j1",
+      "xs"
+     ],
+     [
+      "xs-j4",
+      "xs-j8",
+      "xs-j2",
+      "xs",
+      "xs-j1"
+     ],
+     [
+      "xs-j8",
+      "xs-j4",
+      "xs",
+      "xs-j1",
+      "xs-j2"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.fresh.neo-freya.sender.warm",
+    "block": 8,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-j1",
+      "xs-j4",
+      "xs-j2",
+      "xs-j8",
+      "xs"
+     ],
+     [
+      "xs-j4",
+      "xs-j1",
+      "xs-j2",
+      "xs-j8",
+      "xs"
+     ],
+     [
+      "xs-j1",
+      "xs-j8",
+      "xs-j4",
+      "xs",
+      "xs-j2"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.noop.neo-freya.sender.warm",
+    "block": 8,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-j2",
+      "xs-j8",
+      "xs-j1",
+      "xs-j4",
+      "xs"
+     ],
+     [
+      "xs-j1",
+      "xs-j2",
+      "xs",
+      "xs-j8",
+      "xs-j4"
+     ],
+     [
+      "xs-j8",
+      "xs-j4",
+      "xs-j2",
+      "xs-j1",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+    "block": 8,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-j2",
+      "xs-j4",
+      "xs-j1",
+      "xs-j8",
+      "xs"
+     ],
+     [
+      "xs",
+      "xs-j2",
+      "xs-j1",
+      "xs-j8",
+      "xs-j4"
+     ],
+     [
+      "xs-j2",
+      "xs",
+      "xs-j4",
+      "xs-j1",
+      "xs-j8"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.freya-neo.sender.warm",
+    "block": 8,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-j2",
+      "xs",
+      "xs-j1",
+      "xs-j4",
+      "xs-j8"
+     ],
+     [
+      "xs",
+      "xs-j8",
+      "xs-j1",
+      "xs-j2",
+      "xs-j4"
+     ],
+     [
+      "xs-j4",
+      "xs-j8",
+      "xs",
+      "xs-j2",
+      "xs-j1"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.fresh.neo-freya.sender.warm",
+    "block": 9,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs-j4",
+      "xs-j1",
+      "xs-j8",
+      "xs",
+      "xs-j2"
+     ],
+     [
+      "xs-j4",
+      "xs",
+      "xs-j8",
+      "xs-j2",
+      "xs-j1"
+     ],
+     [
+      "xs",
+      "xs-j8",
+      "xs-j4",
+      "xs-j2",
+      "xs-j1"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.fresh.freya-neo.sender.warm",
+    "block": 9,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs-j1",
+      "xs-j4",
+      "xs-j2",
+      "xs",
+      "xs-j8"
+     ],
+     [
+      "xs-j1",
+      "xs-j8",
+      "xs-j4",
+      "xs",
+      "xs-j2"
+     ],
+     [
+      "xs-j1",
+      "xs-j4",
+      "xs-j8",
+      "xs-j2",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.noop.neo-freya.sender.warm",
+    "block": 9,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs",
+      "xs-j2",
+      "xs-j4",
+      "xs-j1",
+      "xs-j8"
+     ],
+     [
+      "xs",
+      "xs-j8",
+      "xs-j1",
+      "xs-j4",
+      "xs-j2"
+     ],
+     [
+      "xs-j2",
+      "xs-j8",
+      "xs-j4",
+      "xs",
+      "xs-j1"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.freya-neo.sender.warm",
+    "block": 9,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs-j8",
+      "xs-j2",
+      "xs-j4",
+      "xs-j1",
+      "xs"
+     ],
+     [
+      "xs-j4",
+      "xs-j8",
+      "xs-j2",
+      "xs",
+      "xs-j1"
+     ],
+     [
+      "xs",
+      "xs-j1",
+      "xs-j2",
+      "xs-j8",
+      "xs-j4"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.noop.freya-neo.sender.warm",
+    "block": 9,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs-j2",
+      "xs-j8",
+      "xs-j4",
+      "xs-j1",
+      "xs"
+     ],
+     [
+      "xs-j2",
+      "xs",
+      "xs-j8",
+      "xs-j4",
+      "xs-j1"
+     ],
+     [
+      "xs-j1",
+      "xs",
+      "xs-j8",
+      "xs-j2",
+      "xs-j4"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.fresh.neo-freya.sender.warm",
+    "block": 9,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs-j4",
+      "xs-j1",
+      "xs",
+      "xs-j2",
+      "xs-j8"
+     ],
+     [
+      "xs-j1",
+      "xs-j4",
+      "xs",
+      "xs-j8",
+      "xs-j2"
+     ],
+     [
+      "xs-j1",
+      "xs-j4",
+      "xs-j8",
+      "xs",
+      "xs-j2"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.noop.freya-neo.sender.warm",
+    "block": 9,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs-j8",
+      "xs",
+      "xs-j1",
+      "xs-j2",
+      "xs-j4"
+     ],
+     [
+      "xs-j1",
+      "xs-j8",
+      "xs-j2",
+      "xs",
+      "xs-j4"
+     ],
+     [
+      "xs",
+      "xs-j8",
+      "xs-j1",
+      "xs-j4",
+      "xs-j2"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.noop.neo-freya.sender.warm",
+    "block": 9,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs-j1",
+      "xs",
+      "xs-j2",
+      "xs-j8",
+      "xs-j4"
+     ],
+     [
+      "xs-j8",
+      "xs",
+      "xs-j4",
+      "xs-j1",
+      "xs-j2"
+     ],
+     [
+      "xs-j1",
+      "xs",
+      "xs-j4",
+      "xs-j2",
+      "xs-j8"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.fresh.freya-neo.sender.warm",
+    "block": 9,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs-j4",
+      "xs-j1",
+      "xs-j8",
+      "xs-j2",
+      "xs"
+     ],
+     [
+      "xs-j1",
+      "xs",
+      "xs-j8",
+      "xs-j4",
+      "xs-j2"
+     ],
+     [
+      "xs",
+      "xs-j1",
+      "xs-j2",
+      "xs-j4",
+      "xs-j8"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.noop.neo-freya.sender.warm",
+    "block": 9,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs-j1",
+      "xs",
+      "xs-j8",
+      "xs-j2",
+      "xs-j4"
+     ],
+     [
+      "xs-j1",
+      "xs-j2",
+      "xs",
+      "xs-j4",
+      "xs-j8"
+     ],
+     [
+      "xs-j1",
+      "xs-j8",
+      "xs-j2",
+      "xs-j4",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+    "block": 9,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs-j8",
+      "xs-j1",
+      "xs-j2",
+      "xs-j4",
+      "xs"
+     ],
+     [
+      "xs-j2",
+      "xs",
+      "xs-j8",
+      "xs-j1",
+      "xs-j4"
+     ],
+     [
+      "xs-j4",
+      "xs",
+      "xs-j1",
+      "xs-j2",
+      "xs-j8"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.noop.freya-neo.sender.warm",
+    "block": 9,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs-j1",
+      "xs-j8",
+      "xs-j2",
+      "xs",
+      "xs-j4"
+     ],
+     [
+      "xs-j2",
+      "xs-j1",
+      "xs-j4",
+      "xs-j8",
+      "xs"
+     ],
+     [
+      "xs-j2",
+      "xs-j1",
+      "xs-j8",
+      "xs-j4",
+      "xs"
+     ]
+    ]
+   }
+  ],
+  "scripts": {
+   "probe.py": "79c5d5649359fab936d72a58ccbb0348b8388dd71969a5c56d7915ca6a0c7563",
+   "corpus.py": "d6018d3611cba607a670f3fe554d0d4be5941fb2ef8fd65d57f10bfb582625f6",
+   "corpora.json": "729929e1ba7baf3a0b8413efffab5bc26ae0cbe8514daf1c05bbb53a314bb084",
+   "agent.py": "93f08faf14cc3ef3692716e214e5930a3b1574b35a8463f9aa6be69731572219",
+   "overnight.py": "c9b81a0bbcda7d1d2431e88060e88e432425e6251e46d6af2b24e7fdd0186072",
+   "measure.py": "afd0cf9011adb290a92853b262a57adab76b9910f6d679dd6c647f4bfb6eaf94"
+  },
+  "observed": {
+   "neo": {
+    "rsync": {
+     "path": "/usr/bin/rsync",
+     "sha256": "3852336282ee66a98c52966a8bebbf3508980a3ec47e7150f40330ada999980e",
+     "version": "rsync  version 3.4.1  protocol version 32"
+    },
+    "hostname": "neo",
+    "trim": null
+   },
+   "freya": {
+    "rsync": {
+     "path": "/usr/bin/rsync",
+     "sha256": "cae31f86ebfa8ecf2293a809c8f09d8176c8ead7f192de8caebcc6a1f3f14800",
+     "version": "rsync  version 3.5.0-g471e17dc  protocol version 32"
+    },
+    "hostname": "freya",
+    "trim": "trimmed=yes /mnt/nvme: 59.8 GiB (64239370240 bytes) trimmed"
+   }
+  }
+ }
+}

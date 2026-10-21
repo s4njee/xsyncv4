@@ -1,0 +1,348 @@
+Waiting for .bench/p3-f07-free-volume.py
+Waiting for .bench/p3-f08-wait-and-measure.py
+-- The C compiler identification is AppleClang 21.0.0.21000101
+-- The CXX compiler identification is AppleClang 21.0.0.21000101
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /usr/bin/cc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+-- Found Threads: TRUE
+-- Found ICU: /opt/homebrew/opt/icu4c/include (found version "78.3") found components: uc
+-- Found Python3: /opt/homebrew/Frameworks/Python.framework/Versions/3.14/bin/python3.14 (found version "3.14.8") found components: Interpreter
+-- Configuring done (2.9s)
+-- Generating done (0.0s)
+-- Build files have been written to: ~/projects/xsyncv4/.bench/p3-f10-reference-macos
+[1/29] Building CXX object CMakeFiles/xsync.dir/src/progress.cpp.o
+[2/29] Building CXX object CMakeFiles/xsync.dir/src/util.cpp.o
+[3/29] Building CXX object CMakeFiles/xsync.dir/src/main.cpp.o
+[4/29] Building CXX object CMakeFiles/xsync.dir/src/filter.cpp.o
+[5/29] Building CXX object CMakeFiles/xsync.dir/src/local.cpp.o
+[6/29] Building CXX object CMakeFiles/xsync.dir/src/fs.cpp.o
+[7/29] Building CXX object CMakeFiles/xsync.dir/src/names.cpp.o
+[8/29] Building CXX object CMakeFiles/xsync.dir/src/linux_scan.cpp.o
+[9/29] Building CXX object CMakeFiles/xsync.dir/src/destination.cpp.o
+[10/29] Building CXX object CMakeFiles/xsync.dir/src/compression.cpp.o
+[11/29] Building CXX object CMakeFiles/xsync.dir/src/fallback.cpp.o
+[12/29] Building CXX object CMakeFiles/xsync.dir/src/transport.cpp.o
+[13/29] Building CXX object CMakeFiles/xsync.dir/src/install.cpp.o
+[14/29] Building CXX object CMakeFiles/xsync.dir/src/arguments.cpp.o
+[15/29] Building CXX object CMakeFiles/xsync.dir/src/remote.cpp.o
+[16/29] Building CXX object CMakeFiles/xsync.dir/src/output.cpp.o
+[17/29] Building CXX object CMakeFiles/xsync.dir/src/hardlink.cpp.o
+[18/29] Building CXX object CMakeFiles/xsync.dir/src/rate_limit.cpp.o
+[19/29] Building CXX object CMakeFiles/xsync.dir/src/delta.cpp.o
+[20/29] Building CXX object CMakeFiles/xsync.dir/src/listing.cpp.o
+[21/29] Building CXX object CMakeFiles/xsync.dir/src/xattrs.cpp.o
+[22/29] Building CXX object CMakeFiles/xsync.dir/src/xattr_value.cpp.o
+[23/29] Building CXX object CMakeFiles/xsync.dir/src/selection.cpp.o
+[24/29] Building CXX object CMakeFiles/xsync.dir/src/acls.cpp.o
+[25/29] Building CXX object CMakeFiles/xsync.dir/src/permissions.cpp.o
+[26/29] Building CXX object CMakeFiles/xsync.dir/src/sparse.cpp.o
+[27/29] Building CXX object CMakeFiles/xsync.dir/src/ownership.cpp.o
+[28/29] Building CXX object CMakeFiles/xsync.dir/src/link_dest.cpp.o
+[29/29] Linking CXX executable xs
+-- The C compiler identification is AppleClang 21.0.0.21000101
+-- The CXX compiler identification is AppleClang 21.0.0.21000101
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /usr/bin/cc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+-- Found Threads: TRUE
+-- Found ICU: /opt/homebrew/opt/icu4c/include (found version "78.3") found components: uc
+-- Found Python3: /opt/homebrew/Frameworks/Python.framework/Versions/3.14/bin/python3.14 (found version "3.14.8") found components: Interpreter
+-- Configuring done (2.3s)
+-- Generating done (0.0s)
+-- Build files have been written to: ~/projects/xsyncv4/.bench/p3-f10-candidate-macos
+[1/29] Building CXX object CMakeFiles/xsync.dir/src/progress.cpp.o
+[2/29] Building CXX object CMakeFiles/xsync.dir/src/util.cpp.o
+[3/29] Building CXX object CMakeFiles/xsync.dir/src/main.cpp.o
+[4/29] Building CXX object CMakeFiles/xsync.dir/src/filter.cpp.o
+[5/29] Building CXX object CMakeFiles/xsync.dir/src/local.cpp.o
+[6/29] Building CXX object CMakeFiles/xsync.dir/src/fs.cpp.o
+[7/29] Building CXX object CMakeFiles/xsync.dir/src/names.cpp.o
+[8/29] Building CXX object CMakeFiles/xsync.dir/src/linux_scan.cpp.o
+[9/29] Building CXX object CMakeFiles/xsync.dir/src/destination.cpp.o
+[10/29] Building CXX object CMakeFiles/xsync.dir/src/compression.cpp.o
+[11/29] Building CXX object CMakeFiles/xsync.dir/src/fallback.cpp.o
+[12/29] Building CXX object CMakeFiles/xsync.dir/src/transport.cpp.o
+[13/29] Building CXX object CMakeFiles/xsync.dir/src/install.cpp.o
+[14/29] Building CXX object CMakeFiles/xsync.dir/src/remote.cpp.o
+[15/29] Building CXX object CMakeFiles/xsync.dir/src/arguments.cpp.o
+[16/29] Building CXX object CMakeFiles/xsync.dir/src/output.cpp.o
+[17/29] Building CXX object CMakeFiles/xsync.dir/src/hardlink.cpp.o
+[18/29] Building CXX object CMakeFiles/xsync.dir/src/rate_limit.cpp.o
+[19/29] Building CXX object CMakeFiles/xsync.dir/src/delta.cpp.o
+[20/29] Building CXX object CMakeFiles/xsync.dir/src/listing.cpp.o
+[21/29] Building CXX object CMakeFiles/xsync.dir/src/xattrs.cpp.o
+[22/29] Building CXX object CMakeFiles/xsync.dir/src/xattr_value.cpp.o
+[23/29] Building CXX object CMakeFiles/xsync.dir/src/selection.cpp.o
+[24/29] Building CXX object CMakeFiles/xsync.dir/src/acls.cpp.o
+[25/29] Building CXX object CMakeFiles/xsync.dir/src/sparse.cpp.o
+[26/29] Building CXX object CMakeFiles/xsync.dir/src/permissions.cpp.o
+[27/29] Building CXX object CMakeFiles/xsync.dir/src/ownership.cpp.o
+[28/29] Building CXX object CMakeFiles/xsync.dir/src/link_dest.cpp.o
+[29/29] Linking CXX executable xs
+bounded-a reference 0/6: 0.0398s verified
+bounded-a candidate 0/6: 0.0260s verified
+bounded-a rsync 0/6: 0.2370s verified
+bounded-a reference 1/6: 0.0263s verified
+bounded-a candidate 1/6: 0.0259s verified
+bounded-a rsync 1/6: 0.2569s verified
+bounded-a reference 2/6: 0.0281s verified
+bounded-a rsync 2/6: 0.2591s verified
+bounded-a candidate 2/6: 0.0309s verified
+bounded-a candidate 3/6: 0.0302s verified
+bounded-a reference 3/6: 0.0240s verified
+bounded-a rsync 3/6: 0.2571s verified
+bounded-a candidate 4/6: 0.0309s verified
+bounded-a rsync 4/6: 0.2687s verified
+bounded-a reference 4/6: 0.0288s verified
+bounded-a rsync 5/6: 0.2230s verified
+bounded-a reference 5/6: 0.0297s verified
+bounded-a candidate 5/6: 0.0261s verified
+bounded-a rsync 6/6: 0.2382s verified
+bounded-a candidate 6/6: 0.0288s verified
+bounded-a reference 6/6: 0.0220s verified
+bounded-rlt reference 0/6: 0.0382s verified
+bounded-rlt candidate 0/6: 0.0579s verified
+bounded-rlt rsync 0/6: 0.2298s verified
+bounded-rlt reference 1/6: 0.0414s verified
+bounded-rlt candidate 1/6: 0.0526s verified
+bounded-rlt rsync 1/6: 0.2254s verified
+bounded-rlt reference 2/6: 0.0453s verified
+bounded-rlt rsync 2/6: 0.2534s verified
+bounded-rlt candidate 2/6: 0.0609s verified
+bounded-rlt candidate 3/6: 0.0577s verified
+bounded-rlt reference 3/6: 0.0411s verified
+bounded-rlt rsync 3/6: 0.2143s verified
+bounded-rlt candidate 4/6: 0.0555s verified
+bounded-rlt rsync 4/6: 0.2236s verified
+bounded-rlt reference 4/6: 0.0413s verified
+bounded-rlt rsync 5/6: 0.2638s verified
+bounded-rlt reference 5/6: 0.0417s verified
+bounded-rlt candidate 5/6: 0.0572s verified
+bounded-rlt rsync 6/6: 0.2196s verified
+bounded-rlt candidate 6/6: 0.0578s verified
+bounded-rlt reference 6/6: 0.0406s verified
+near-limit-a reference 0/6: 0.0838s verified
+near-limit-a candidate 0/6: 0.0757s verified
+near-limit-a rsync 0/6: 0.7827s verified
+near-limit-a reference 1/6: 0.0666s verified
+near-limit-a candidate 1/6: 0.0745s verified
+near-limit-a rsync 1/6: 0.7335s verified
+near-limit-a reference 2/6: 0.0578s verified
+near-limit-a rsync 2/6: 0.7394s verified
+near-limit-a candidate 2/6: 0.0736s verified
+near-limit-a candidate 3/6: 0.0787s verified
+near-limit-a reference 3/6: 0.0684s verified
+near-limit-a rsync 3/6: 0.7582s verified
+near-limit-a candidate 4/6: 0.0752s verified
+near-limit-a rsync 4/6: 0.7499s verified
+near-limit-a reference 4/6: 0.0605s verified
+near-limit-a rsync 5/6: 0.7435s verified
+near-limit-a reference 5/6: 0.0589s verified
+near-limit-a candidate 5/6: 0.0788s verified
+near-limit-a rsync 6/6: 0.7875s verified
+near-limit-a candidate 6/6: 0.1889s verified
+near-limit-a reference 6/6: 0.0786s verified
+near-limit-rlt reference 0/6: 0.1322s verified
+near-limit-rlt candidate 0/6: 0.1753s verified
+near-limit-rlt rsync 0/6: 0.7175s verified
+near-limit-rlt reference 1/6: 0.1018s verified
+near-limit-rlt candidate 1/6: 0.1695s verified
+near-limit-rlt rsync 1/6: 0.7394s verified
+near-limit-rlt reference 2/6: 0.1224s verified
+near-limit-rlt rsync 2/6: 0.7623s verified
+near-limit-rlt candidate 2/6: 0.1664s verified
+near-limit-rlt candidate 3/6: 0.1807s verified
+near-limit-rlt reference 3/6: 0.1095s verified
+near-limit-rlt rsync 3/6: 0.7306s verified
+near-limit-rlt candidate 4/6: 0.1753s verified
+near-limit-rlt rsync 4/6: 0.7368s verified
+near-limit-rlt reference 4/6: 0.1141s verified
+near-limit-rlt rsync 5/6: 0.7216s verified
+near-limit-rlt reference 5/6: 0.1167s verified
+near-limit-rlt candidate 5/6: 0.1892s verified
+near-limit-rlt rsync 6/6: 0.7432s verified
+near-limit-rlt candidate 6/6: 0.1759s verified
+near-limit-rlt reference 6/6: 0.1182s verified
+over-limit-a reference 0/6: 0.1546s verified
+over-limit-a candidate 0/6: 0.1797s verified
+over-limit-a rsync 0/6: 1.6518s verified
+over-limit-a reference 1/6: 0.1739s verified
+over-limit-a candidate 1/6: 0.1835s verified
+over-limit-a rsync 1/6: 1.6792s verified
+over-limit-a reference 2/6: 0.1594s verified
+over-limit-a rsync 2/6: 1.6291s verified
+over-limit-a candidate 2/6: 0.1764s verified
+over-limit-a candidate 3/6: 0.1782s verified
+over-limit-a reference 3/6: 0.2527s verified
+over-limit-a rsync 3/6: 1.6880s verified
+over-limit-a candidate 4/6: 0.3214s verified
+over-limit-a rsync 4/6: 1.7296s verified
+over-limit-a reference 4/6: 0.1486s verified
+over-limit-a rsync 5/6: 1.6335s verified
+over-limit-a reference 5/6: 0.1793s verified
+over-limit-a candidate 5/6: 0.1999s verified
+over-limit-a rsync 6/6: 1.6618s verified
+over-limit-a candidate 6/6: 0.1701s verified
+over-limit-a reference 6/6: 0.1786s verified
+over-limit-rlt reference 0/6: 0.3030s verified
+over-limit-rlt candidate 0/6: 0.2859s verified
+over-limit-rlt rsync 0/6: 1.6845s verified
+over-limit-rlt reference 1/6: 0.2898s verified
+over-limit-rlt candidate 1/6: 0.3055s verified
+over-limit-rlt rsync 1/6: 1.7280s verified
+over-limit-rlt reference 2/6: 0.2545s verified
+over-limit-rlt rsync 2/6: 1.6644s verified
+over-limit-rlt candidate 2/6: 0.2771s verified
+over-limit-rlt candidate 3/6: 0.3033s verified
+over-limit-rlt reference 3/6: 0.2899s verified
+over-limit-rlt rsync 3/6: 1.6666s verified
+over-limit-rlt candidate 4/6: 0.3090s verified
+over-limit-rlt rsync 4/6: 1.7025s verified
+over-limit-rlt reference 4/6: 0.2858s verified
+over-limit-rlt rsync 5/6: 1.6125s verified
+over-limit-rlt reference 5/6: 0.3374s verified
+over-limit-rlt candidate 5/6: 0.2863s verified
+over-limit-rlt rsync 6/6: 1.6680s verified
+over-limit-rlt candidate 6/6: 0.3213s verified
+over-limit-rlt reference 6/6: 0.3984s verified
+[
+  {
+    "case": "bounded-a",
+    "tools": {
+      "reference": {
+        "wall_seconds": 0.027165270992554724,
+        "cpu_seconds": 0.043275,
+        "peak_rss_bytes": 8011776
+      },
+      "candidate": {
+        "wall_seconds": 0.029468916007317603,
+        "cpu_seconds": 0.026657,
+        "peak_rss_bytes": 7733248
+      },
+      "rsync": {
+        "wall_seconds": 0.25700431247241795,
+        "cpu_seconds": 0.24959499999999996,
+        "peak_rss_bytes": 5242880
+      }
+    }
+  },
+  {
+    "case": "bounded-rlt",
+    "tools": {
+      "reference": {
+        "wall_seconds": 0.04133425001055002,
+        "cpu_seconds": 0.0986155,
+        "peak_rss_bytes": 8011776
+      },
+      "candidate": {
+        "wall_seconds": 0.05742527102120221,
+        "cpu_seconds": 0.051463999999999996,
+        "peak_rss_bytes": 7716864
+      },
+      "rsync": {
+        "wall_seconds": 0.2244978955714032,
+        "cpu_seconds": 0.230759,
+        "peak_rss_bytes": 5062656
+      }
+    }
+  },
+  {
+    "case": "near-limit-a",
+    "tools": {
+      "reference": {
+        "wall_seconds": 0.06353852094616741,
+        "cpu_seconds": 0.11319199999999999,
+        "peak_rss_bytes": 8192000
+      },
+      "candidate": {
+        "wall_seconds": 0.07692177093122154,
+        "cpu_seconds": 0.07236100000000001,
+        "peak_rss_bytes": 8683520
+      },
+      "rsync": {
+        "wall_seconds": 0.7467008959501982,
+        "cpu_seconds": 0.8414805000000001,
+        "peak_rss_bytes": 5472256
+      }
+    }
+  },
+  {
+    "case": "near-limit-rlt",
+    "tools": {
+      "reference": {
+        "wall_seconds": 0.11540320853237063,
+        "cpu_seconds": 0.32205399999999995,
+        "peak_rss_bytes": 8224768
+      },
+      "candidate": {
+        "wall_seconds": 0.1756073960568756,
+        "cpu_seconds": 0.1656015,
+        "peak_rss_bytes": 8667136
+      },
+      "rsync": {
+        "wall_seconds": 0.7381068125832826,
+        "cpu_seconds": 0.8292035,
+        "peak_rss_bytes": 5406720
+      }
+    }
+  },
+  {
+    "case": "over-limit-a",
+    "tools": {
+      "reference": {
+        "wall_seconds": 0.17625824990682304,
+        "cpu_seconds": 0.27392949999999994,
+        "peak_rss_bytes": 8486912
+      },
+      "candidate": {
+        "wall_seconds": 0.18088804150465876,
+        "cpu_seconds": 0.2212,
+        "peak_rss_bytes": 9158656
+      },
+      "rsync": {
+        "wall_seconds": 1.6705411871662363,
+        "cpu_seconds": 1.9845505,
+        "peak_rss_bytes": 6389760
+      }
+    }
+  },
+  {
+    "case": "over-limit-rlt",
+    "tools": {
+      "reference": {
+        "wall_seconds": 0.2898252710001543,
+        "cpu_seconds": 0.73657,
+        "peak_rss_bytes": 8536064
+      },
+      "candidate": {
+        "wall_seconds": 0.30438112502451986,
+        "cpu_seconds": 0.6792375,
+        "peak_rss_bytes": 9289728
+      },
+      "rsync": {
+        "wall_seconds": 1.6673203750979155,
+        "cpu_seconds": 1.9935975,
+        "peak_rss_bytes": 6209536
+      }
+    }
+  }
+]

@@ -1,0 +1,26 @@
+{
+ "run_id": "20261010T152712Z-apfs-baseline",
+ "source": "~/projects/xsyncv4/.bench/corpus",
+ "corpus": {
+  "files": 76838,
+  "directories": 19072,
+  "bytes": 517808080
+ },
+ "cache": "retained OS caches",
+ "loadavg": [
+  14.763671875,
+  19.9814453125,
+  19.708984375
+ ],
+ "binary_version": "xs  version 0.1.0  protocol version 4  git 415900091024",
+ "binary_sha256": "477f6090d5453d6850bdc5efe59bd57b30ddb9ac24e585f39ff00902060763bd",
+ "filesystem": "Filesystem      Size    Used   Avail Capacity iused ifree %iused  Mounted on\n/dev/disk3s5   3.6Ti   3.5Ti    99Gi    98%     24M  1.0G    2%   /System/Volumes/Data\n",
+ "memory_bytes": "68719476736",
+ "threads": [
+  1,
+  2,
+  4,
+  8
+ ],
+ "runs_per_tool": 3
+}

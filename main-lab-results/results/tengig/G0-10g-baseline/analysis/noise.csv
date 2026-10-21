@@ -1,0 +1,17 @@
+experiment,kind,cell_id,corpus,scenario,sender,receiver,client,link,cache,arm,n_blocks,sigma_d,blocks_for_2pct,blocks_for_3pct,blocks_for_5pct,blocks_for_10pct,blocks_equivalent_2pct,blocks_equivalent_3pct,blocks_equivalent_5pct,blocks_equivalent_10pct
+G0-10g-baseline,screening,large-text.fresh.freya-mac.receiver.warm,large-text,fresh,freya,mac,receiver,mac-freya-10g,warm,xs-best,8,0.11550914990774061,269,122,46,14,360,163,61,18
+G0-10g-baseline,screening,large-text.fresh.freya-mac.receiver.warm,large-text,fresh,freya,mac,receiver,mac-freya-10g,warm,rsync,8,0.24353265872852597,1188,535,198,54,1592,716,264,71
+G0-10g-baseline,screening,large-text.fresh.mac-freya.sender.warm,large-text,fresh,mac,freya,sender,mac-freya-10g,warm,xs-best,8,0.05295511813184145,59,28,12,8,78,36,15,8
+G0-10g-baseline,screening,large-text.fresh.mac-freya.sender.warm,large-text,fresh,mac,freya,sender,mac-freya-10g,warm,rsync,8,0.13482236996125885,366,166,62,18,490,221,83,24
+G0-10g-baseline,screening,mixed-bimodal.fresh.freya-mac.receiver.warm,mixed-bimodal,fresh,freya,mac,receiver,mac-freya-10g,warm,xs-best,8,0.16644152432943154,556,251,94,26,745,336,125,35
+G0-10g-baseline,screening,mixed-bimodal.fresh.freya-mac.receiver.warm,mixed-bimodal,fresh,freya,mac,receiver,mac-freya-10g,warm,rsync,8,0.09550225668156957,185,84,33,10,247,112,43,13
+G0-10g-baseline,screening,mixed-bimodal.fresh.mac-freya.sender.warm,mixed-bimodal,fresh,mac,freya,sender,mac-freya-10g,warm,xs-best,8,0.11142959577020571,251,114,43,13,335,152,57,17
+G0-10g-baseline,screening,mixed-bimodal.fresh.mac-freya.sender.warm,mixed-bimodal,fresh,mac,freya,sender,mac-freya-10g,warm,rsync,8,0.2646647181066167,1403,631,233,63,1879,845,312,84
+G0-10g-baseline,screening,real-congress.fresh.freya-mac.receiver.warm,real-congress,fresh,freya,mac,receiver,mac-freya-10g,warm,xs-best,8,0.10831189862824067,237,108,41,13,317,144,54,16
+G0-10g-baseline,screening,real-congress.fresh.freya-mac.receiver.warm,real-congress,fresh,freya,mac,receiver,mac-freya-10g,warm,rsync,8,0.27339676905736066,1497,673,249,67,2005,901,332,89
+G0-10g-baseline,screening,real-congress.fresh.mac-freya.sender.warm,real-congress,fresh,mac,freya,sender,mac-freya-10g,warm,xs-best,8,0.17065347423935856,585,264,98,28,783,353,131,36
+G0-10g-baseline,screening,real-congress.fresh.mac-freya.sender.warm,real-congress,fresh,mac,freya,sender,mac-freya-10g,warm,rsync,8,0.18972329713934222,722,325,121,34,967,435,161,44
+G0-10g-baseline,screening,small-flat.fresh.freya-mac.receiver.warm,small-flat,fresh,freya,mac,receiver,mac-freya-10g,warm,xs-best,8,0.136522551594774,375,170,64,19,502,227,85,24
+G0-10g-baseline,screening,small-flat.fresh.freya-mac.receiver.warm,small-flat,fresh,freya,mac,receiver,mac-freya-10g,warm,rsync,8,0.18683361146664604,700,316,117,33,938,422,157,43
+G0-10g-baseline,screening,small-flat.fresh.mac-freya.sender.warm,small-flat,fresh,mac,freya,sender,mac-freya-10g,warm,xs-best,8,0.2104680362927872,888,400,148,41,1189,535,198,54
+G0-10g-baseline,screening,small-flat.fresh.mac-freya.sender.warm,small-flat,fresh,mac,freya,sender,mac-freya-10g,warm,rsync,8,0.6071831582143219,7373,3311,1217,321,9881,4436,1630,429

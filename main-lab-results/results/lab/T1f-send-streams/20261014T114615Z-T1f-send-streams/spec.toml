@@ -1,0 +1,53 @@
+# T1f: the sending-worker cap. One sending worker made byte-bound copies
+# from neo 5% faster, level with rsync, but small files up to 39% slower
+# (T1b, T1c). send_streams caps only the workers reading large files at once
+# and leaves the rest to small files and scanning. The cap should keep the
+# first effect and lose the second. send1 is the one-worker sender again,
+# for comparison in the same blocks.
+id = "T1f-send-streams"
+kind = "screening"
+hypothesis = "Capping the sender at one or two large-file streams makes byte-bound copies from neo as fast as one sending worker does, without slowing small files or no-ops."
+primary = "wall_s"
+delta = 0.03
+blocks = 10
+control = "xs"
+verify = "first-last"
+
+[arms.xs]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a"]
+metrics = true
+
+[arms.streams1]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a"]
+tune = { sender = "send_streams=1" }
+metrics = true
+
+[arms.streams2]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a"]
+tune = { sender = "send_streams=2" }
+metrics = true
+
+[arms.send1]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-a"]
+tune = { sender = "jobs=1" }
+metrics = true
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[matrix]
+link = "lan"
+corpus = ["mixed-bimodal", "small-flat", "small-real"]
+scenario = ["fresh", "noop"]
+direction = ["neo>freya", "freya>neo"]
+client = ["sender"]
+cache = ["warm"]

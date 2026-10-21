@@ -1,0 +1,11 @@
+experiment,kind,cell_id,corpus,scenario,sender,receiver,client,link,cache,arm,metric,n_blocks,geomean,lo,hi
+LC3-psample-local-durable,screening,real-psample.fresh.neo-neo-ssd.receiver.cold,real-psample,fresh,neo,neo-ssd,receiver,neo-local-ssd,cold,xs,durable_s,4,226.77646102234436,208.14784759149083,247.0722799629913
+LC3-psample-local-durable,screening,real-psample.fresh.neo-neo-ssd.receiver.cold,real-psample,fresh,neo,neo-ssd,receiver,neo-local-ssd,cold,xs-eager,durable_s,4,140.1999210844323,137.47766123776853,142.97608567900957
+LC3-psample-local-durable,screening,real-psample.fresh.neo-neo-ssd.receiver.cold,real-psample,fresh,neo,neo-ssd,receiver,neo-local-ssd,cold,xs-noatomic,durable_s,4,219.41095481796572,198.68590369653685,242.29784900925765
+LC3-psample-local-durable,screening,real-psample.fresh.neo-neo-ssd.receiver.cold,real-psample,fresh,neo,neo-ssd,receiver,neo-local-ssd,cold,rsync,durable_s,4,212.326138892974,207.65570271771787,217.10161901251703
+LC3-psample-local-durable,screening,real-psample.fresh.neo-neo-ssd.receiver.cold,real-psample,fresh,neo,neo-ssd,receiver,neo-local-ssd,cold,rsync-eager,durable_s,4,182.26955012027162,180.46683349166008,184.09027441921347
+LC3-psample-local-durable,screening,real-psample.fresh.neo-neo-ssd.receiver.cold,real-psample,fresh,neo,neo-ssd,receiver,neo-local-ssd,cold,xs,wall_s,4,226.04457122637612,207.45840744954808,246.29586628511225
+LC3-psample-local-durable,screening,real-psample.fresh.neo-neo-ssd.receiver.cold,real-psample,fresh,neo,neo-ssd,receiver,neo-local-ssd,cold,xs-eager,wall_s,4,139.92602598489913,137.13717724513148,142.77158930381697
+LC3-psample-local-durable,screening,real-psample.fresh.neo-neo-ssd.receiver.cold,real-psample,fresh,neo,neo-ssd,receiver,neo-local-ssd,cold,xs-noatomic,wall_s,4,219.13288909528964,198.5529079996002,241.84598234816687
+LC3-psample-local-durable,screening,real-psample.fresh.neo-neo-ssd.receiver.cold,real-psample,fresh,neo,neo-ssd,receiver,neo-local-ssd,cold,rsync,wall_s,4,211.68963993387385,207.04308651720905,216.44047337754705
+LC3-psample-local-durable,screening,real-psample.fresh.neo-neo-ssd.receiver.cold,real-psample,fresh,neo,neo-ssd,receiver,neo-local-ssd,cold,rsync-eager,wall_s,4,182.14500961945237,180.38144794962815,183.92581336044645

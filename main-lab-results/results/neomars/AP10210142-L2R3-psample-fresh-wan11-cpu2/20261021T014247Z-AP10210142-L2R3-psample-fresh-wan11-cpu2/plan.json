@@ -1,0 +1,295 @@
+{
+ "schema": 1,
+ "experiment": "AP10210142-L2R3-psample-fresh-wan11-cpu2",
+ "spec_sha256": "03846f1c4633091da8e36d9349368005c39c836b46f3dfd09ab0d3900654874a",
+ "kind": "screening",
+ "bundle": "e5c746542de7",
+ "writes": {
+  "neo": 0,
+  "mars": 336727333168
+ },
+ "hypothesis": "Under lab2's latency and a 2-CPU sender, xs -a -j4 reaches a durable fresh copy of real-psample at least 5% later than rsync -a, with more block-to-block spread than rsync.",
+ "primary": "durable_s",
+ "delta": 0.05,
+ "control": "xs-j4",
+ "seed": 74707,
+ "run_id": "20261021T014247Z-AP10210142-L2R3-psample-fresh-wan11-cpu2",
+ "driver": "neo",
+ "sample_timeout_s": 7200,
+ "results": "neomars",
+ "background": false,
+ "local_link": false,
+ "eager_cleanup": true,
+ "hours": null,
+ "hosts": {
+  "neo": {
+   "ssh": "[email]",
+   "name": "[host]",
+   "hostname": "neo",
+   "root": "~/benchmarks/xsyncv4/lab",
+   "interface": "eth0",
+   "helper": true,
+   "gates": {},
+   "local": false,
+   "system": "Linux"
+  },
+  "mars": {
+   "ssh": "[host]",
+   "name": "[host]",
+   "hostname": "[host]",
+   "root": "/Volumes/xsbench/lab",
+   "interface": "en0",
+   "helper": false,
+   "gates": {},
+   "local": false,
+   "system": "Darwin"
+  }
+ },
+ "links": {
+  "neo-mars-lan": {
+   "hosts": [
+    "neo",
+    "mars"
+   ],
+   "medium": "wired",
+   "min_speed_mbps": 1000,
+   "max_rtt_ms": 2.0,
+   "initiator": "neo",
+   "driver": "neo",
+   "results": "neomars",
+   "address": {
+    "neo": "[address]",
+    "mars": "[host]"
+   }
+  }
+ },
+ "arms": [
+  {
+   "name": "xs-j4",
+   "tool": "xs",
+   "flags": [
+    "-a",
+    "-j4"
+   ],
+   "rev": "e51c1df1329a",
+   "binary": {
+    "neo": "~/benchmarks/xsyncv4/lab/bin/xs-e51c1df1329a",
+    "mars": "/Volumes/xsbench/lab/bin/xs-e51c1df1329a"
+   },
+   "sha256": {
+    "neo": "fe66e5e4217c5bc63c949e328457f4630a3c5f3233303f6b4a5d9a780d4d826a",
+    "mars": "f7a3ed9a6fbfd455dba0471ef647db50f272669a0f5822d9244dd3a54ad3f98b"
+   },
+   "artifacts": {
+    "xs-darwin-arm64": "69f4fccf32d9882eaea678d60f7575fc17489316821b5e901f65c7c624ebc796",
+    "xs-linux-amd64": "c08508a01399b871aed62aa1cd437b16092726e4d9095afb41ee39041202cfeb",
+    "xs-linux-arm64": "fe66e5e4217c5bc63c949e328457f4630a3c5f3233303f6b4a5d9a780d4d826a",
+    "xs-darwin-amd64": "f7a3ed9a6fbfd455dba0471ef647db50f272669a0f5822d9244dd3a54ad3f98b"
+   }
+  },
+  {
+   "name": "rsync",
+   "tool": "rsync",
+   "flags": [
+    "-a"
+   ],
+   "binary": {
+    "neo": "rsync",
+    "mars": "/opt/local/bin/rsync"
+   }
+  }
+ ],
+ "cells": [
+  {
+   "id": "real-psample.fresh.neo-mars.sender.warm",
+   "corpus": "real-psample",
+   "scenario": "fresh",
+   "sender": "neo",
+   "receiver": "mars",
+   "client": "sender",
+   "link": "neo-mars-lan",
+   "cache": "warm"
+  }
+ ],
+ "corpora": {
+  "real-psample": {
+   "files": 711103,
+   "directories": 547983,
+   "bytes": 21045458323,
+   "digest": "1904660ff1e67214cd5629f447b04910322012598fdfb219052899f909e1ac14",
+   "quick_digest": "1c5858390a71a82667516908224c07faeb5409c916f047f5eaaeaf0c22858afb"
+  }
+ },
+ "blocks": [
+  {
+   "cell": "real-psample.fresh.neo-mars.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "rsync",
+     "xs-j4"
+    ],
+    [
+     "rsync",
+     "xs-j4"
+    ],
+    [
+     "xs-j4",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "real-psample.fresh.neo-mars.sender.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync",
+     "xs-j4"
+    ],
+    [
+     "xs-j4",
+     "rsync"
+    ],
+    [
+     "xs-j4",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "real-psample.fresh.neo-mars.sender.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-j4",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs-j4"
+    ],
+    [
+     "rsync",
+     "xs-j4"
+    ]
+   ]
+  },
+  {
+   "cell": "real-psample.fresh.neo-mars.sender.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-j4",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs-j4"
+    ],
+    [
+     "xs-j4",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "real-psample.fresh.neo-mars.sender.warm",
+   "block": 4,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync",
+     "xs-j4"
+    ],
+    [
+     "rsync",
+     "xs-j4"
+    ],
+    [
+     "xs-j4",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "real-psample.fresh.neo-mars.sender.warm",
+   "block": 5,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync",
+     "xs-j4"
+    ],
+    [
+     "rsync",
+     "xs-j4"
+    ],
+    [
+     "rsync",
+     "xs-j4"
+    ]
+   ]
+  },
+  {
+   "cell": "real-psample.fresh.neo-mars.sender.warm",
+   "block": 6,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync",
+     "xs-j4"
+    ],
+    [
+     "rsync",
+     "xs-j4"
+    ],
+    [
+     "rsync",
+     "xs-j4"
+    ]
+   ]
+  },
+  {
+   "cell": "real-psample.fresh.neo-mars.sender.warm",
+   "block": 7,
+   "verify_full": true,
+   "orders": [
+    [
+     "rsync",
+     "xs-j4"
+    ],
+    [
+     "rsync",
+     "xs-j4"
+    ],
+    [
+     "xs-j4",
+     "rsync"
+    ]
+   ]
+  }
+ ],
+ "wan": {
+  "host": "neo",
+  "delay_ms": 11,
+  "loss_pct": 0
+ },
+ "cpus": {
+  "host": "neo",
+  "count": 2
+ },
+ "scripts": {
+  "probe.py": "a89b145b8f76fc4d5444cea6af3c124a5b2e5885226998c726ca95fd9d881d36",
+  "corpus.py": "07f178f516657266850ba871032254fd28316928741e3bece1794a094db015ba",
+  "corpora.json": "5c641f561e2bcf8fe5af1c39adb9054ab0e6d479d8ef0e67204ad69cef148a9c",
+  "agent.py": "c65fadc9983678c6aaf66ea763c7c8a7cce871c67a96ff728da06725f892b6d4",
+  "runner.py": "cce71fee149764ad1a5c913061f19620a8ff44f792d23d55f7a290d59a9e20ff",
+  "xspipe.py": "94b3fccfc6e994d227077c453f90323ab55337fd8a98231d16a10696e8ebab6b",
+  "measure.py": "5065310f480ff1cabfa7c645f0db342624a02f9a081b96069d50d52b3d224777"
+ }
+}

@@ -1,0 +1,5 @@
+experiment,kind,cell_id,corpus,scenario,sender,receiver,client,link,cache,arm,control,metric,primary,n_blocks,ratio,level,delta,lo,hi,hl_ratio,hl_lo,hl_hi,p,sd_log,verdict,err_minus,err_plus,p_holm
+MA1-mac-noop,screening,real-congress.noop.mac-mars.sender.warm,real-congress,noop,mac,mars,sender,mac-mars-2g5,warm,xs,rsync,durable_s,True,1,0.14432759458143218,0.95,0.03,,,,,,,,too few blocks,,,
+MA1-mac-noop,screening,real-congress.noop.mac-mars.sender.warm,real-congress,noop,mac,mars,sender,mac-mars-2g5,warm,xs,rsync,wall_s,False,1,0.14370062169348713,0.95,0.03,,,,,,,,too few blocks,,,
+MA1-mac-noop,screening,real-congress.noop.mac-mars.sender.warm,real-congress,noop,mac,mars,sender,mac-mars-2g5,warm,xs,rsync,cpu_s,False,1,0.9528852991328802,0.95,0.03,,,,,,,,too few blocks,,,
+MA1-mac-noop,screening,real-congress.noop.mac-mars.sender.warm,real-congress,noop,mac,mars,sender,mac-mars-2g5,warm,xs,rsync,rss_bytes,False,1,0.7949717404014807,0.95,0.03,,,,,,,,too few blocks,,,

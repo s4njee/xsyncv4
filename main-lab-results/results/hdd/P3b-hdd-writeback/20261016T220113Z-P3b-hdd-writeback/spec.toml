@@ -1,0 +1,43 @@
+# P3b: small and mixed trees onto mars's hard drive (btrfs, one HGST Ultrastar)
+# over 2.5GbE: xs's default, its best small-file setting (four receiving workers,
+# --no-atomic), and that setting with eager writeback, so the drive is written
+# while the copy runs instead of all at the final sync. The goal is still to pass
+# 1 Gb/s on small and mixed trees. Tar streams were dropped after P1.
+id = "P3b-hdd-writeback"
+kind = "screening"
+hypothesis = "On the hard drive, eager writeback shortens xs's time to durable for small and mixed trees."
+primary = "durable_s"
+delta = 0.03
+blocks = 6
+control = "xs-best"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.xs-best]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-a", "--no-atomic"]
+tune = { receiver = "jobs=4" }
+
+[arms.xs-best-eager]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-a", "--no-atomic"]
+tune = { receiver = "jobs=4" }
+writeback = "eager"
+
+[arms.xs]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-a"]
+
+[matrix]
+link = "mac-mars-hdd-2g5"
+corpus = ["small-flat", "small-deep", "mixed-bimodal", "real-congress"]
+scenario = ["fresh"]
+direction = ["mac>mars-hdd"]
+client = ["initiator"]
+cache = ["warm"]

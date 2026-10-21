@@ -1,0 +1,29 @@
+# R3: filler for daytime. xs against rsync on small and mixed trees, mars to
+# the Mac, repeated through the two days: whether the ratios hold from run to
+# run on this link.
+id = "R3-direct-receive-replicate"
+kind = "screening"
+hypothesis = "The xs to rsync ratios on small and mixed trees into the Mac hold from run to run."
+primary = "durable_s"
+delta = 0.03
+blocks = 4
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[arms.xs]
+tool = "xs"
+rev = "8cc75bbdb801"
+flags = ["-a"]
+
+[matrix]
+link = "mac-mars-direct"
+corpus = ["tiny-one", "small-flat", "small-deep", "small-opaque", "mixed-bimodal", "mixed-threshold"]
+scenario = ["fresh", "noop"]
+direction = ["mars>mac"]
+client = ["initiator"]
+cache = ["warm"]

@@ -1,0 +1,58 @@
+# T6: why is xs slower than rsync on a warm no-op push from the Mac, and can a
+# setting recover it? E1's baseline found the one plainly wrong number in the
+# programme: congress no-op 2.89x rsync pulling but 0.74x pushing, 408.8 s of CPU
+# against 18.8. The first node repeats the comparison on the Mac/mars 2.5GbE
+# link; if the deficit shows, the second screens the skip and scan path. If no
+# setting recovers it the branch holds for a code decision (E5) instead of
+# queueing more. A winner is confirmed with fresh blocks. Until Sunday 07:00
+# Central, once its branches end, it repeats a short replicate (F2a).
+id = "T6-mac-mars-noop"
+question = "Why is xs slower than rsync on a warm no-op push from the Mac to mars, and can a setting recover it?"
+start = ["A"]
+until = "2026-10-18T12:00Z"
+fill = ["F2a"]
+deadline = "2026-10-17T16:00Z"   # paused by hand: the psample run (T8) holds the Mac/mars axis; remove to resume queueing
+
+[nodes.A]
+spec = "MA1-mac-noop.toml"
+front = true
+question = "On a warm no-op, is xs slower than rsync pushing from the Mac, and faster pulling?"
+
+  [[nodes.A.branch]]
+  when = { arm = "xs", corpus = "real-congress", direction = "mac>mars", speed_below = 0.9, all = true }
+  next = ["B"]
+  note = "xs loses to rsync on the warm no-op push: isolate the cause"
+  label = "xs < 0.90x pushing"
+
+  [[nodes.A.branch]]
+  otherwise = true
+  next = []
+  note = "no push deficit on this link: nothing to explain"
+  label = "no deficit"
+
+[nodes.B]
+spec = "MA2-mac-noop-knobs.toml"
+question = "Do the skip or scan settings recover xs's no-op push?"
+
+  [[nodes.B.branch]]
+  when = { verdict = "faster" }
+  next = ["Bc"]
+  note = "a skip or scan setting was faster: confirm it"
+  label = "an arm was faster"
+
+  [[nodes.B.branch]]
+  otherwise = true
+  hold = true
+  next = []
+  note = "no setting recovers the no-op push: a code candidate (E5), decision needed"
+  label = "nothing faster"
+
+[nodes.Bc]
+promote = "B"
+id = "MA2-mac-noop-confirm"
+blocks = 12
+question = "Does the winning skip or scan setting hold up with fresh blocks?"
+
+[nodes.F2a]
+spec = "F2a-mac-replicate.toml"
+question = "Do the Mac/mars results hold steady over the weekend?"

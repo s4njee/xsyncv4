@@ -1,0 +1,25 @@
+{
+ "tree": "AUTO-10210142-neo-ssd",
+ "started_utc": "2026-10-21T01:42:35Z",
+ "nodes": {
+  "N0": {
+   "state": "decided",
+   "runs": [
+    "20261021T014235Z-AP10210142-L2R5-local-congress-cpu2"
+   ],
+   "spec": "auto/AP10210142-L2R5-local-congress-cpu2.toml",
+   "decision": {
+    "utc": "2026-10-21T06:54:43Z",
+    "text": "N0: done (1 run)",
+    "next": []
+   }
+  },
+  "N1": {
+   "state": "queued",
+   "runs": [
+    "20261021T014239Z-AP10210142-L2R6-local-psample-cpu2"
+   ],
+   "spec": "auto/AP10210142-L2R6-local-psample-cpu2.toml"
+  }
+ }
+}

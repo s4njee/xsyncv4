@@ -1,0 +1,24 @@
+{
+ "experiment": "G2-10g-zfs",
+ "kind": "screening",
+ "hypothesis": "xs lands large files on the raidz2 pool at close to 10 Gb/s.",
+ "primary": "durable_s",
+ "control": "xs",
+ "delta": 0.03,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261017T133650Z-G2-10g-zfs"
+ ],
+ "spec_sha256": [
+  "740a67d0c09559fd2e335e86cabb5d2f1de3d1f21465e02d2f7906a74b858540"
+ ],
+ "valid_blocks": 24,
+ "void_attempts": 48,
+ "void_reasons": [
+  "rsync: the destination does not match the corpus manifest: ",
+  "write1m: the destination does not match the corpus manifest: ",
+  "xs-best: the destination does not match the corpus manifest: ",
+  "xs: the destination does not match the corpus manifest: "
+ ]
+}

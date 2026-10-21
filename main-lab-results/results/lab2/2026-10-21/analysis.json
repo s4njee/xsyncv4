@@ -1,0 +1,1555 @@
+{
+ "id": "2026-10-20T19:25:42.151Z",
+ "start": 1792437942.151,
+ "end": 1792524342.151,
+ "generatedAt": 1792524373.619,
+ "model": "opencode/deepseek-v4.1-flash",
+ "samples": 164,
+ "invalid": 12,
+ "runCount": 10,
+ "runKeys": [
+  "vps/FC-5a45360-noop/20261020T190640Z-FC-5a45360-noop",
+  "vps/FC-5a45360-noop/20261020T190426Z-FC-5a45360-noop",
+  "vps/FC-02bd268-noop/20261020T184215Z-FC-02bd268-noop",
+  "vps/FC-02bd268-noop/20261020T184016Z-FC-02bd268-noop",
+  "vps/FC-02bd268-noop/20261020T183246Z-FC-02bd268-noopf2",
+  "vps/FC-02bd268-noop/20261020T181617Z-FC-02bd268-noopf1",
+  "vps/AP10200112-A1-noop-jobs/20261020T011248Z-AP10200112-A1-noop-jobs",
+  "vps/S0-vps-sentinel/20261020T030134Z-S0-vps-sentinel-s0002",
+  "vps/E1-vps-baseline/20261020T000819Z-E1-vps-baseline",
+  "vps/S0-vps-sentinel/20261020T000739Z-S0-vps-sentinel-s0001"
+ ],
+ "evidenceRuns": [
+  {
+   "key": "vps/FC-5a45360-noop/20261020T190640Z-FC-5a45360-noop",
+   "experiment": "FC-5a45360-noop",
+   "question": "On congress-sample, noop copies: how do rsync, the C++ xs and xs-rs at 5a4536053183 compare?",
+   "state": "complete",
+   "hypothesis": "On congress-sample, noop, the three tools differ by more than 5% in time to durable.",
+   "primary": "durable_s",
+   "control": "rsync",
+   "revisions": [
+    "a3e52c2c61de",
+    "5a4536053183-rs"
+   ],
+   "arms": [
+    {
+     "name": "rsync",
+     "tool": "rsync",
+     "client": null,
+     "scales": [],
+     "tuningFlags": []
+    },
+    {
+     "name": "xs-cpp",
+     "tool": "xs",
+     "client": null,
+     "scales": [
+      {
+       "dimension": "workers",
+       "count": 4,
+       "group": "25be34e79948a0b2417407f3"
+      }
+     ],
+     "tuningFlags": [
+      "-j4"
+     ]
+    },
+    {
+     "name": "xs-rs",
+     "tool": "xs",
+     "client": null,
+     "scales": [],
+     "tuningFlags": []
+    }
+   ],
+   "samples": 12,
+   "invalid": 0,
+   "cells": [
+    {
+     "factors": {
+      "id": "congress-sample.noop.a-aws.sender.warm",
+      "corpus": "congress-sample",
+      "scenario": "noop",
+      "sender": "a",
+      "receiver": "aws",
+      "client": "sender",
+      "link": "a-aws",
+      "cache": "warm",
+      "files": 25246,
+      "bytes": 218210440
+     },
+     "arm": "xs-cpp",
+     "validSamples": 4,
+     "blocks": 4,
+     "medianSeconds": 0.8574999999999999,
+     "medianGbps": 2.037473039739312,
+     "medianClientCpuSeconds": 1.0015,
+     "pairedBlocks": 4,
+     "medianPairedSpeedVsControl": 1.759292467242513
+    },
+    {
+     "factors": {
+      "id": "congress-sample.noop.a-aws.sender.warm",
+      "corpus": "congress-sample",
+      "scenario": "noop",
+      "sender": "a",
+      "receiver": "aws",
+      "client": "sender",
+      "link": "a-aws",
+      "cache": "warm",
+      "files": 25246,
+      "bytes": 218210440
+     },
+     "arm": "xs-rs",
+     "validSamples": 4,
+     "blocks": 4,
+     "medianSeconds": 1.5384,
+     "medianGbps": 1.1350714162896707,
+     "medianClientCpuSeconds": 0.973,
+     "pairedBlocks": 4,
+     "medianPairedSpeedVsControl": 0.9605886537969737
+    },
+    {
+     "factors": {
+      "id": "congress-sample.noop.a-aws.sender.warm",
+      "corpus": "congress-sample",
+      "scenario": "noop",
+      "sender": "a",
+      "receiver": "aws",
+      "client": "sender",
+      "link": "a-aws",
+      "cache": "warm",
+      "files": 25246,
+      "bytes": 218210440
+     },
+     "arm": "rsync",
+     "validSamples": 4,
+     "blocks": 4,
+     "medianSeconds": 1.4969999999999999,
+     "medianGbps": 1.1661453175777003,
+     "medianClientCpuSeconds": 0.601,
+     "pairedBlocks": 4,
+     "medianPairedSpeedVsControl": 1
+    }
+   ]
+  },
+  {
+   "key": "vps/FC-5a45360-noop/20261020T190426Z-FC-5a45360-noop",
+   "experiment": "FC-5a45360-noop",
+   "question": "On congress-sample, noop copies: how do rsync, the C++ xs and xs-rs at 5a4536053183 compare?",
+   "state": "complete",
+   "hypothesis": "On congress-sample, noop, the three tools differ by more than 5% in time to durable.",
+   "primary": "durable_s",
+   "control": "rsync",
+   "revisions": [
+    "a3e52c2c61de",
+    "5a4536053183-rs"
+   ],
+   "arms": [
+    {
+     "name": "rsync",
+     "tool": "rsync",
+     "client": null,
+     "scales": [],
+     "tuningFlags": []
+    },
+    {
+     "name": "xs-cpp",
+     "tool": "xs",
+     "client": null,
+     "scales": [
+      {
+       "dimension": "workers",
+       "count": 4,
+       "group": "25be34e79948a0b2417407f3"
+      }
+     ],
+     "tuningFlags": [
+      "-j4"
+     ]
+    },
+    {
+     "name": "xs-rs",
+     "tool": "xs",
+     "client": null,
+     "scales": [],
+     "tuningFlags": []
+    }
+   ],
+   "samples": 12,
+   "invalid": 0,
+   "cells": [
+    {
+     "factors": {
+      "id": "congress-sample.noop.a-aws.sender.warm",
+      "corpus": "congress-sample",
+      "scenario": "noop",
+      "sender": "a",
+      "receiver": "aws",
+      "client": "sender",
+      "link": "a-aws",
+      "cache": "warm",
+      "files": 25246,
+      "bytes": 218210440
+     },
+     "arm": "rsync",
+     "validSamples": 4,
+     "blocks": 4,
+     "medianSeconds": 1.5607,
+     "medianGbps": 1.1187839854587431,
+     "medianClientCpuSeconds": 0.637,
+     "pairedBlocks": 4,
+     "medianPairedSpeedVsControl": 1
+    },
+    {
+     "factors": {
+      "id": "congress-sample.noop.a-aws.sender.warm",
+      "corpus": "congress-sample",
+      "scenario": "noop",
+      "sender": "a",
+      "receiver": "aws",
+      "client": "sender",
+      "link": "a-aws",
+      "cache": "warm",
+      "files": 25246,
+      "bytes": 218210440
+     },
+     "arm": "xs-cpp",
+     "validSamples": 4,
+     "blocks": 4,
+     "medianSeconds": 0.8009999999999999,
+     "medianGbps": 2.1801447193533905,
+     "medianClientCpuSeconds": 0.9225000000000001,
+     "pairedBlocks": 4,
+     "medianPairedSpeedVsControl": 1.9959475656530077
+    },
+    {
+     "factors": {
+      "id": "congress-sample.noop.a-aws.sender.warm",
+      "corpus": "congress-sample",
+      "scenario": "noop",
+      "sender": "a",
+      "receiver": "aws",
+      "client": "sender",
+      "link": "a-aws",
+      "cache": "warm",
+      "files": 25246,
+      "bytes": 218210440
+     },
+     "arm": "xs-rs",
+     "validSamples": 4,
+     "blocks": 4,
+     "medianSeconds": 1.5618500000000002,
+     "medianGbps": 1.117704159283447,
+     "medianClientCpuSeconds": 0.919,
+     "pairedBlocks": 4,
+     "medianPairedSpeedVsControl": 0.969199728135876
+    }
+   ]
+  },
+  {
+   "key": "vps/FC-02bd268-noop/20261020T184215Z-FC-02bd268-noop",
+   "experiment": "FC-02bd268-noop",
+   "question": "On congress-sample, noop copies: how do rsync, the C++ xs and xs-rs at 02bd26868504 compare?",
+   "state": "complete",
+   "hypothesis": "On congress-sample, noop, the three tools differ by more than 5% in time to durable.",
+   "primary": "durable_s",
+   "control": "rsync",
+   "revisions": [
+    "a3e52c2c61de",
+    "02bd26868504-rs"
+   ],
+   "arms": [
+    {
+     "name": "rsync",
+     "tool": "rsync",
+     "client": null,
+     "scales": [],
+     "tuningFlags": []
+    },
+    {
+     "name": "xs-cpp",
+     "tool": "xs",
+     "client": null,
+     "scales": [
+      {
+       "dimension": "workers",
+       "count": 4,
+       "group": "25be34e79948a0b2417407f3"
+      }
+     ],
+     "tuningFlags": [
+      "-j4"
+     ]
+    },
+    {
+     "name": "xs-rs",
+     "tool": "xs",
+     "client": null,
+     "scales": [],
+     "tuningFlags": []
+    }
+   ],
+   "samples": 12,
+   "invalid": 0,
+   "cells": [
+    {
+     "factors": {
+      "id": "congress-sample.noop.a-aws.sender.warm",
+      "corpus": "congress-sample",
+      "scenario": "noop",
+      "sender": "a",
+      "receiver": "aws",
+      "client": "sender",
+      "link": "a-aws",
+      "cache": "warm",
+      "files": 25246,
+      "bytes": 218210440
+     },
+     "arm": "xs-cpp",
+     "validSamples": 4,
+     "blocks": 4,
+     "medianSeconds": 0.75395,
+     "medianGbps": 2.3162344837159763,
+     "medianClientCpuSeconds": 0.8855,
+     "pairedBlocks": 4,
+     "medianPairedSpeedVsControl": 2.083868842784547
+    },
+    {
+     "factors": {
+      "id": "congress-sample.noop.a-aws.sender.warm",
+      "corpus": "congress-sample",
+      "scenario": "noop",
+      "sender": "a",
+      "receiver": "aws",
+      "client": "sender",
+      "link": "a-aws",
+      "cache": "warm",
+      "files": 25246,
+      "bytes": 218210440
+     },
+     "arm": "rsync",
+     "validSamples": 4,
+     "blocks": 4,
+     "medianSeconds": 1.556,
+     "medianGbps": 1.1220564041088772,
+     "medianClientCpuSeconds": 0.6285000000000001,
+     "pairedBlocks": 4,
+     "medianPairedSpeedVsControl": 1
+    },
+    {
+     "factors": {
+      "id": "congress-sample.noop.a-aws.sender.warm",
+      "corpus": "congress-sample",
+      "scenario": "noop",
+      "sender": "a",
+      "receiver": "aws",
+      "client": "sender",
+      "link": "a-aws",
+      "cache": "warm",
+      "files": 25246,
+      "bytes": 218210440
+     },
+     "arm": "xs-rs",
+     "validSamples": 4,
+     "blocks": 4,
+     "medianSeconds": 1.39265,
+     "medianGbps": 1.2632478407444618,
+     "medianClientCpuSeconds": 0.8514999999999999,
+     "pairedBlocks": 4,
+     "medianPairedSpeedVsControl": 1.1512848450081568
+    }
+   ]
+  },
+  {
+   "key": "vps/FC-02bd268-noop/20261020T184016Z-FC-02bd268-noop",
+   "experiment": "FC-02bd268-noop",
+   "question": "On congress-sample, noop copies: how do rsync, the C++ xs and xs-rs at 02bd26868504 compare?",
+   "state": "complete",
+   "hypothesis": "On congress-sample, noop, the three tools differ by more than 5% in time to durable.",
+   "primary": "durable_s",
+   "control": "rsync",
+   "revisions": [
+    "a3e52c2c61de",
+    "02bd26868504-rs"
+   ],
+   "arms": [
+    {
+     "name": "rsync",
+     "tool": "rsync",
+     "client": null,
+     "scales": [],
+     "tuningFlags": []
+    },
+    {
+     "name": "xs-cpp",
+     "tool": "xs",
+     "client": null,
+     "scales": [
+      {
+       "dimension": "workers",
+       "count": 4,
+       "group": "25be34e79948a0b2417407f3"
+      }
+     ],
+     "tuningFlags": [
+      "-j4"
+     ]
+    },
+    {
+     "name": "xs-rs",
+     "tool": "xs",
+     "client": null,
+     "scales": [],
+     "tuningFlags": []
+    }
+   ],
+   "samples": 12,
+   "invalid": 0,
+   "cells": [
+    {
+     "factors": {
+      "id": "congress-sample.noop.a-aws.sender.warm",
+      "corpus": "congress-sample",
+      "scenario": "noop",
+      "sender": "a",
+      "receiver": "aws",
+      "client": "sender",
+      "link": "a-aws",
+      "cache": "warm",
+      "files": 25246,
+      "bytes": 218210440
+     },
+     "arm": "rsync",
+     "validSamples": 4,
+     "blocks": 4,
+     "medianSeconds": 1.54355,
+     "medianGbps": 1.1310116216887462,
+     "medianClientCpuSeconds": 0.6285000000000001,
+     "pairedBlocks": 4,
+     "medianPairedSpeedVsControl": 1
+    },
+    {
+     "factors": {
+      "id": "congress-sample.noop.a-aws.sender.warm",
+      "corpus": "congress-sample",
+      "scenario": "noop",
+      "sender": "a",
+      "receiver": "aws",
+      "client": "sender",
+      "link": "a-aws",
+      "cache": "warm",
+      "files": 25246,
+      "bytes": 218210440
+     },
+     "arm": "xs-cpp",
+     "validSamples": 4,
+     "blocks": 4,
+     "medianSeconds": 0.8279000000000001,
+     "medianGbps": 2.1113035294664866,
+     "medianClientCpuSeconds": 0.908,
+     "pairedBlocks": 4,
+     "medianPairedSpeedVsControl": 1.827878659350059
+    },
+    {
+     "factors": {
+      "id": "congress-sample.noop.a-aws.sender.warm",
+      "corpus": "congress-sample",
+      "scenario": "noop",
+      "sender": "a",
+      "receiver": "aws",
+      "client": "sender",
+      "link": "a-aws",
+      "cache": "warm",
+      "files": 25246,
+      "bytes": 218210440
+     },
+     "arm": "xs-rs",
+     "validSamples": 4,
+     "blocks": 4,
+     "medianSeconds": 1.32855,
+     "medianGbps": 1.31448969931035,
+     "medianClientCpuSeconds": 0.8825000000000001,
+     "pairedBlocks": 4,
+     "medianPairedSpeedVsControl": 1.146247063602877
+    }
+   ]
+  },
+  {
+   "key": "vps/FC-02bd268-noop/20261020T183246Z-FC-02bd268-noopf2",
+   "experiment": "FC-02bd268-noop",
+   "question": "On congress-sample, noop copies: how do rsync, the C++ xs and xs-rs at 02bd26868504 compare?",
+   "state": "complete",
+   "hypothesis": "On congress-sample, noop, the three tools differ by more than 5% in time to durable.",
+   "primary": "durable_s",
+   "control": "rsync",
+   "revisions": [
+    "02bd26868504-rs",
+    "a3e52c2c61de"
+   ],
+   "arms": [
+    {
+     "name": "rsync",
+     "tool": "rsync",
+     "client": null,
+     "scales": [],
+     "tuningFlags": []
+    },
+    {
+     "name": "xs-cpp",
+     "tool": "xs",
+     "client": null,
+     "scales": [
+      {
+       "dimension": "workers",
+       "count": 4,
+       "group": "25be34e79948a0b2417407f3"
+      }
+     ],
+     "tuningFlags": [
+      "-j4"
+     ]
+    },
+    {
+     "name": "xs-rs",
+     "tool": "xs",
+     "client": null,
+     "scales": [],
+     "tuningFlags": []
+    }
+   ],
+   "samples": 12,
+   "invalid": 0,
+   "cells": [
+    {
+     "factors": {
+      "id": "congress-sample.noop.a-aws.sender.warm",
+      "corpus": "congress-sample",
+      "scenario": "noop",
+      "sender": "a",
+      "receiver": "aws",
+      "client": "sender",
+      "link": "a-aws",
+      "cache": "warm",
+      "files": 25246,
+      "bytes": 218210440
+     },
+     "arm": "xs-rs",
+     "validSamples": 4,
+     "blocks": 4,
+     "medianSeconds": 1.1756,
+     "medianGbps": 1.495949804672806,
+     "medianClientCpuSeconds": 0.9405,
+     "pairedBlocks": 4,
+     "medianPairedSpeedVsControl": 1.3545467520591012
+    },
+    {
+     "factors": {
+      "id": "congress-sample.noop.a-aws.sender.warm",
+      "corpus": "congress-sample",
+      "scenario": "noop",
+      "sender": "a",
+      "receiver": "aws",
+      "client": "sender",
+      "link": "a-aws",
+      "cache": "warm",
+      "files": 25246,
+      "bytes": 218210440
+     },
+     "arm": "rsync",
+     "validSamples": 4,
+     "blocks": 4,
+     "medianSeconds": 1.5782500000000002,
+     "medianGbps": 1.1064425832314289,
+     "medianClientCpuSeconds": 0.633,
+     "pairedBlocks": 4,
+     "medianPairedSpeedVsControl": 1
+    },
+    {
+     "factors": {
+      "id": "congress-sample.noop.a-aws.sender.warm",
+      "corpus": "congress-sample",
+      "scenario": "noop",
+      "sender": "a",
+      "receiver": "aws",
+      "client": "sender",
+      "link": "a-aws",
+      "cache": "warm",
+      "files": 25246,
+      "bytes": 218210440
+     },
+     "arm": "xs-cpp",
+     "validSamples": 4,
+     "blocks": 4,
+     "medianSeconds": 0.8894500000000001,
+     "medianGbps": 1.9626699254381756,
+     "medianClientCpuSeconds": 0.9570000000000001,
+     "pairedBlocks": 4,
+     "medianPairedSpeedVsControl": 1.7206876165838279
+    }
+   ]
+  },
+  {
+   "key": "vps/FC-02bd268-noop/20261020T181617Z-FC-02bd268-noopf1",
+   "experiment": "FC-02bd268-noop",
+   "question": "On congress-sample, noop copies: how do rsync, the C++ xs and xs-rs at 02bd26868504 compare?",
+   "state": "complete",
+   "hypothesis": "On congress-sample, noop, the three tools differ by more than 5% in time to durable.",
+   "primary": "durable_s",
+   "control": "rsync",
+   "revisions": [
+    "02bd26868504-rs",
+    "a3e52c2c61de"
+   ],
+   "arms": [
+    {
+     "name": "rsync",
+     "tool": "rsync",
+     "client": null,
+     "scales": [],
+     "tuningFlags": []
+    },
+    {
+     "name": "xs-cpp",
+     "tool": "xs",
+     "client": null,
+     "scales": [
+      {
+       "dimension": "workers",
+       "count": 4,
+       "group": "25be34e79948a0b2417407f3"
+      }
+     ],
+     "tuningFlags": [
+      "-j4"
+     ]
+    },
+    {
+     "name": "xs-rs",
+     "tool": "xs",
+     "client": null,
+     "scales": [],
+     "tuningFlags": []
+    }
+   ],
+   "samples": 22,
+   "invalid": 12,
+   "cells": [
+    {
+     "factors": {
+      "id": "congress-sample.noop.a-aws.sender.warm",
+      "corpus": "congress-sample",
+      "scenario": "noop",
+      "sender": "a",
+      "receiver": "aws",
+      "client": "sender",
+      "link": "a-aws",
+      "cache": "warm",
+      "files": 25246,
+      "bytes": 218210440
+     },
+     "arm": "rsync",
+     "validSamples": 6,
+     "blocks": 3,
+     "medianSeconds": 1.54245,
+     "medianGbps": 1.1317635402883266,
+     "medianClientCpuSeconds": 0.6305000000000001,
+     "pairedBlocks": 6,
+     "medianPairedSpeedVsControl": 1
+    },
+    {
+     "factors": {
+      "id": "congress-sample.noop.a-aws.sender.warm",
+      "corpus": "congress-sample",
+      "scenario": "noop",
+      "sender": "a",
+      "receiver": "aws",
+      "client": "sender",
+      "link": "a-aws",
+      "cache": "warm",
+      "files": 25246,
+      "bytes": 218210440
+     },
+     "arm": "xs-cpp",
+     "validSamples": 4,
+     "blocks": 3,
+     "medianSeconds": 0.78175,
+     "medianGbps": 2.2332652428760555,
+     "medianClientCpuSeconds": 0.909,
+     "pairedBlocks": 4,
+     "medianPairedSpeedVsControl": 1.9395648064252715
+    }
+   ]
+  },
+  {
+   "key": "vps/AP10200112-A1-noop-jobs/20261020T011248Z-AP10200112-A1-noop-jobs",
+   "experiment": "AP10200112-A1-noop-jobs",
+   "question": "Does raising xs's parallelism close the no-op deficit against rsync -a on real-projects from a to aws?",
+   "state": "complete",
+   "hypothesis": "The E1 no-op ratio of 1.495 [1.305,1.712] is dominated by serial per-file/metadata work; xs -a -j8 will bring the ratio below 1.10, with -j4 intermediate, while failure of both would show the deficit is not job-count-fixable.",
+   "primary": "wall_s",
+   "control": "rsync",
+   "revisions": [
+    "a3e52c2c61de"
+   ],
+   "arms": [
+    {
+     "name": "rsync",
+     "tool": "rsync",
+     "client": null,
+     "scales": [],
+     "tuningFlags": []
+    },
+    {
+     "name": "xs",
+     "tool": "xs",
+     "client": null,
+     "scales": [],
+     "tuningFlags": []
+    },
+    {
+     "name": "xs-j4",
+     "tool": "xs",
+     "client": null,
+     "scales": [
+      {
+       "dimension": "workers",
+       "count": 4,
+       "group": "25be34e79948a0b2417407f3"
+      }
+     ],
+     "tuningFlags": [
+      "-j4"
+     ]
+    },
+    {
+     "name": "xs-j8",
+     "tool": "xs",
+     "client": null,
+     "scales": [
+      {
+       "dimension": "workers",
+       "count": 8,
+       "group": "25be34e79948a0b2417407f3"
+      }
+     ],
+     "tuningFlags": [
+      "-j8"
+     ]
+    }
+   ],
+   "samples": 48,
+   "invalid": 0,
+   "cells": [
+    {
+     "factors": {
+      "id": "real-projects.noop.a-aws.sender.warm",
+      "corpus": "real-projects",
+      "scenario": "noop",
+      "sender": "a",
+      "receiver": "aws",
+      "client": "sender",
+      "link": "a-aws",
+      "cache": "warm",
+      "files": 69316,
+      "bytes": 2134981089
+     },
+     "arm": "rsync",
+     "validSamples": 12,
+     "blocks": 12,
+     "medianSeconds": 3.5809499999999996,
+     "medianGbps": 4.76967090693557,
+     "medianClientCpuSeconds": 1.8835,
+     "pairedBlocks": 12,
+     "medianPairedSpeedVsControl": 1
+    },
+    {
+     "factors": {
+      "id": "real-projects.noop.a-aws.sender.warm",
+      "corpus": "real-projects",
+      "scenario": "noop",
+      "sender": "a",
+      "receiver": "aws",
+      "client": "sender",
+      "link": "a-aws",
+      "cache": "warm",
+      "files": 69316,
+      "bytes": 2134981089
+     },
+     "arm": "xs",
+     "validSamples": 12,
+     "blocks": 12,
+     "medianSeconds": 5.4304,
+     "medianGbps": 3.145572613341368,
+     "medianClientCpuSeconds": 9.6585,
+     "pairedBlocks": 12,
+     "medianPairedSpeedVsControl": 0.6614387710225087
+    },
+    {
+     "factors": {
+      "id": "real-projects.noop.a-aws.sender.warm",
+      "corpus": "real-projects",
+      "scenario": "noop",
+      "sender": "a",
+      "receiver": "aws",
+      "client": "sender",
+      "link": "a-aws",
+      "cache": "warm",
+      "files": 69316,
+      "bytes": 2134981089
+     },
+     "arm": "xs-j4",
+     "validSamples": 12,
+     "blocks": 12,
+     "medianSeconds": 1.8831,
+     "medianGbps": 9.070071581222946,
+     "medianClientCpuSeconds": 2.9055,
+     "pairedBlocks": 12,
+     "medianPairedSpeedVsControl": 1.9296495652006205
+    },
+    {
+     "factors": {
+      "id": "real-projects.noop.a-aws.sender.warm",
+      "corpus": "real-projects",
+      "scenario": "noop",
+      "sender": "a",
+      "receiver": "aws",
+      "client": "sender",
+      "link": "a-aws",
+      "cache": "warm",
+      "files": 69316,
+      "bytes": 2134981089
+     },
+     "arm": "xs-j8",
+     "validSamples": 12,
+     "blocks": 12,
+     "medianSeconds": 2.7308,
+     "medianGbps": 6.254529066196957,
+     "medianClientCpuSeconds": 4.661,
+     "pairedBlocks": 12,
+     "medianPairedSpeedVsControl": 1.3131804056492347
+    }
+   ]
+  },
+  {
+   "key": "vps/S0-vps-sentinel/20261020T030134Z-S0-vps-sentinel-s0002",
+   "experiment": "S0-vps-sentinel",
+   "question": null,
+   "state": "complete",
+   "hypothesis": "Hour by hour, the A/A ratio stays within 3% of 1 and the xs to rsync ratio stays where the baseline put it.",
+   "primary": "wall_s",
+   "control": "xs",
+   "revisions": [
+    "a3e52c2c61de"
+   ],
+   "arms": [
+    {
+     "name": "xs",
+     "tool": "xs",
+     "client": null,
+     "scales": [],
+     "tuningFlags": []
+    },
+    {
+     "name": "again",
+     "tool": "xs",
+     "client": null,
+     "scales": [],
+     "tuningFlags": []
+    },
+    {
+     "name": "rsync",
+     "tool": "rsync",
+     "client": null,
+     "scales": [],
+     "tuningFlags": []
+    }
+   ],
+   "samples": 9,
+   "invalid": 0,
+   "cells": [
+    {
+     "factors": {
+      "id": "real-projects.noop.a-aws.sender.warm",
+      "corpus": "real-projects",
+      "scenario": "noop",
+      "sender": "a",
+      "receiver": "aws",
+      "client": "sender",
+      "link": "a-aws",
+      "cache": "warm",
+      "files": 69316,
+      "bytes": 2134981089
+     },
+     "arm": "rsync",
+     "validSamples": 3,
+     "blocks": 3,
+     "medianSeconds": 3.4336,
+     "medianGbps": 4.974326861602981,
+     "medianClientCpuSeconds": 1.831,
+     "pairedBlocks": 3,
+     "medianPairedSpeedVsControl": 1.321334958854008
+    },
+    {
+     "factors": {
+      "id": "real-projects.noop.a-aws.sender.warm",
+      "corpus": "real-projects",
+      "scenario": "noop",
+      "sender": "a",
+      "receiver": "aws",
+      "client": "sender",
+      "link": "a-aws",
+      "cache": "warm",
+      "files": 69316,
+      "bytes": 2134981089
+     },
+     "arm": "xs",
+     "validSamples": 3,
+     "blocks": 3,
+     "medianSeconds": 4.3353,
+     "medianGbps": 3.939715524185177,
+     "medianClientCpuSeconds": 7.615,
+     "pairedBlocks": 3,
+     "medianPairedSpeedVsControl": 1
+    },
+    {
+     "factors": {
+      "id": "real-projects.noop.a-aws.sender.warm",
+      "corpus": "real-projects",
+      "scenario": "noop",
+      "sender": "a",
+      "receiver": "aws",
+      "client": "sender",
+      "link": "a-aws",
+      "cache": "warm",
+      "files": 69316,
+      "bytes": 2134981089
+     },
+     "arm": "again",
+     "validSamples": 3,
+     "blocks": 3,
+     "medianSeconds": 4.3287,
+     "medianGbps": 3.945722436759304,
+     "medianClientCpuSeconds": 7.624,
+     "pairedBlocks": 3,
+     "medianPairedSpeedVsControl": 1.0246954701180055
+    }
+   ]
+  },
+  {
+   "key": "vps/E1-vps-baseline/20261020T000819Z-E1-vps-baseline",
+   "experiment": "E1-vps-baseline",
+   "question": null,
+   "state": "complete",
+   "hypothesis": "xs -a differs from rsync -a by more than 3% in time-to-durable on real-projects, fresh and no-op, A to AWS.",
+   "primary": "durable_s",
+   "control": "rsync",
+   "revisions": [
+    "a3e52c2c61de"
+   ],
+   "arms": [
+    {
+     "name": "rsync",
+     "tool": "rsync",
+     "client": null,
+     "scales": [],
+     "tuningFlags": []
+    },
+    {
+     "name": "xs",
+     "tool": "xs",
+     "client": null,
+     "scales": [],
+     "tuningFlags": []
+    }
+   ],
+   "samples": 16,
+   "invalid": 0,
+   "cells": [
+    {
+     "factors": {
+      "id": "real-projects.noop.a-aws.sender.warm",
+      "corpus": "real-projects",
+      "scenario": "noop",
+      "sender": "a",
+      "receiver": "aws",
+      "client": "sender",
+      "link": "a-aws",
+      "cache": "warm",
+      "files": 69316,
+      "bytes": 2134981089
+     },
+     "arm": "xs",
+     "validSamples": 4,
+     "blocks": 4,
+     "medianSeconds": 5.2443,
+     "medianGbps": 3.258184207040377,
+     "medianClientCpuSeconds": 9.335,
+     "pairedBlocks": 4,
+     "medianPairedSpeedVsControl": 0.6806031218069126
+    },
+    {
+     "factors": {
+      "id": "real-projects.noop.a-aws.sender.warm",
+      "corpus": "real-projects",
+      "scenario": "noop",
+      "sender": "a",
+      "receiver": "aws",
+      "client": "sender",
+      "link": "a-aws",
+      "cache": "warm",
+      "files": 69316,
+      "bytes": 2134981089
+     },
+     "arm": "rsync",
+     "validSamples": 4,
+     "blocks": 4,
+     "medianSeconds": 3.6053499999999996,
+     "medianGbps": 4.737362327418165,
+     "medianClientCpuSeconds": 1.8925,
+     "pairedBlocks": 4,
+     "medianPairedSpeedVsControl": 1
+    },
+    {
+     "factors": {
+      "id": "real-projects.fresh.a-aws.sender.warm",
+      "corpus": "real-projects",
+      "scenario": "fresh",
+      "sender": "a",
+      "receiver": "aws",
+      "client": "sender",
+      "link": "a-aws",
+      "cache": "warm",
+      "files": 69316,
+      "bytes": 2134981089
+     },
+     "arm": "rsync",
+     "validSamples": 4,
+     "blocks": 4,
+     "medianSeconds": 20.2138,
+     "medianGbps": 0.8449715719684777,
+     "medianClientCpuSeconds": 16.633,
+     "pairedBlocks": 4,
+     "medianPairedSpeedVsControl": 1
+    },
+    {
+     "factors": {
+      "id": "real-projects.fresh.a-aws.sender.warm",
+      "corpus": "real-projects",
+      "scenario": "fresh",
+      "sender": "a",
+      "receiver": "aws",
+      "client": "sender",
+      "link": "a-aws",
+      "cache": "warm",
+      "files": 69316,
+      "bytes": 2134981089
+     },
+     "arm": "xs",
+     "validSamples": 4,
+     "blocks": 4,
+     "medianSeconds": 25.16185,
+     "medianGbps": 0.6792484410716181,
+     "medianClientCpuSeconds": 33.2775,
+     "pairedBlocks": 4,
+     "medianPairedSpeedVsControl": 0.8021831107461488
+    }
+   ]
+  },
+  {
+   "key": "vps/S0-vps-sentinel/20261020T000739Z-S0-vps-sentinel-s0001",
+   "experiment": "S0-vps-sentinel",
+   "question": null,
+   "state": "complete",
+   "hypothesis": "Hour by hour, the A/A ratio stays within 3% of 1 and the xs to rsync ratio stays where the baseline put it.",
+   "primary": "wall_s",
+   "control": "xs",
+   "revisions": [
+    "a3e52c2c61de"
+   ],
+   "arms": [
+    {
+     "name": "xs",
+     "tool": "xs",
+     "client": null,
+     "scales": [],
+     "tuningFlags": []
+    },
+    {
+     "name": "again",
+     "tool": "xs",
+     "client": null,
+     "scales": [],
+     "tuningFlags": []
+    },
+    {
+     "name": "rsync",
+     "tool": "rsync",
+     "client": null,
+     "scales": [],
+     "tuningFlags": []
+    }
+   ],
+   "samples": 9,
+   "invalid": 0,
+   "cells": [
+    {
+     "factors": {
+      "id": "real-projects.noop.a-aws.sender.warm",
+      "corpus": "real-projects",
+      "scenario": "noop",
+      "sender": "a",
+      "receiver": "aws",
+      "client": "sender",
+      "link": "a-aws",
+      "cache": "warm",
+      "files": 69316,
+      "bytes": 2134981089
+     },
+     "arm": "rsync",
+     "validSamples": 3,
+     "blocks": 3,
+     "medianSeconds": 3.6231,
+     "medianGbps": 4.714153269851785,
+     "medianClientCpuSeconds": 2.006,
+     "pairedBlocks": 3,
+     "medianPairedSpeedVsControl": 1.4955566459491876
+    },
+    {
+     "factors": {
+      "id": "real-projects.noop.a-aws.sender.warm",
+      "corpus": "real-projects",
+      "scenario": "noop",
+      "sender": "a",
+      "receiver": "aws",
+      "client": "sender",
+      "link": "a-aws",
+      "cache": "warm",
+      "files": 69316,
+      "bytes": 2134981089
+     },
+     "arm": "again",
+     "validSamples": 3,
+     "blocks": 3,
+     "medianSeconds": 5.3134,
+     "medianGbps": 3.2144857740806265,
+     "medianClientCpuSeconds": 9.481,
+     "pairedBlocks": 3,
+     "medianPairedSpeedVsControl": 1.016126584199742
+    },
+    {
+     "factors": {
+      "id": "real-projects.noop.a-aws.sender.warm",
+      "corpus": "real-projects",
+      "scenario": "noop",
+      "sender": "a",
+      "receiver": "aws",
+      "client": "sender",
+      "link": "a-aws",
+      "cache": "warm",
+      "files": 69316,
+      "bytes": 2134981089
+     },
+     "arm": "xs",
+     "validSamples": 3,
+     "blocks": 3,
+     "medianSeconds": 5.4543,
+     "medianGbps": 3.1314465122930533,
+     "medianClientCpuSeconds": 9.723,
+     "pairedBlocks": 3,
+     "medianPairedSpeedVsControl": 1
+    }
+   ]
+  }
+ ],
+ "commentary": {
+  "headline": "xs -j4 reliably halves no-op time, but more workers and fresh copies do not follow",
+  "paragraphs": [
+   "The clearest result of the day is that xs with -j4 was about twice as fast as rsync on congress-sample no-op copies (25,246 files, 218 MB, a to aws, warm cache). Across five runs with four matched blocks each, xs-cpp medians landed at 0.75, 0.78, 0.80, 0.83 and 0.89 s against rsync's 1.54\u20131.58 s, a paired speed of 1.72\u00d7 to 2.08\u00d7, and it held across two xs revisions. That is the most reproducible signal in the window and it supports treating worker count as the main tuning lever rather than a detail.",
+   "The bigger real-projects no-op corpus (69,316 files, 2.13 GB) fills in the mechanism. Serial xs was slower than rsync, 5.43 s against 3.58 s (0.66\u00d7), while burning 9.66 s of client CPU against rsync's 1.88 s. With -j4 it flipped to 1.88 s, or 1.93\u00d7 rsync; with -j8 it only reached 2.73 s, or 1.31\u00d7. The day's earlier assumption that -j8 would push xs under 1.10\u00d7 is therefore not supported, and more workers actually made it worse. That looks like contention or per-file overhead above four workers, though a single run cannot separate the two.",
+   "The fresh-transfer arm is the regression to watch. xs took 25.16 s against rsync's 20.21 s (0.80\u00d7) and used roughly twice the client CPU, 33.3 s versus 16.6 s, with both tools stuck below 0.85 Gb/s. Confidence is moderate: these are four-block medians without confidence intervals, and the sentinel's A/A repeat agreed within 1.6\u20132.5% while its rsync-to-xs ratio drifted from 1.32 to 1.50 between hours."
+  ]
+ },
+ "overview": "These experiments provided useful tuning insights. Here are the insights: xs with four workers was consistently about twice as fast as rsync on small-file no-op copies, and the same setting turned a 34% deficit on a larger corpus into a 93% gain, which points to worker count as the lever that matters. More workers did not help: eight workers gave back most of that gain. Fresh copies were slower than rsync and both tools ran under 0.9 Gb/s. The main open question is whether four workers is the real sweet spot or just the best point tested so far.",
+ "insights": [
+  {
+   "caveat": "Medians of four blocks per arm, no confidence intervals; a single corpus, one direction and a warm cache. Revisions differ between the two experiments, so this is replication, not a controlled version comparison.",
+   "evidence": "vps/FC-5a45360-noop/20261020T190640Z: 0.8575 s vs rsync 1.497 s (1.759\u00d7, 4 blocks). vps/FC-5a45360-noop/20261020T190426Z: 0.801 s vs 1.5607 s (1.996\u00d7). vps/FC-02bd268-noop/20261020T184215Z: 0.754 s vs 1.556 s (2.084\u00d7). 184016Z: 0.8279 s vs 1.5436 s (1.828\u00d7). 183246Z: 0.8895 s vs 1.5783 s (1.721\u00d7). 181617Z: 0.7818 s vs 1.5425 s (1.940\u00d7, 3 blocks each, 12 of 22 samples invalid).",
+   "finding": "On congress-sample no-op, xs with -j4 beat rsync in every complete run of the day, by 1.72\u00d7 to 2.08\u00d7 in paired time to durable, with medians of roughly 0.75\u20130.89 s against rsync's 1.54\u20131.58 s.",
+   "runKeys": [
+    "vps/FC-5a45360-noop/20261020T190640Z-FC-5a45360-noop",
+    "vps/FC-5a45360-noop/20261020T190426Z-FC-5a45360-noop",
+    "vps/FC-02bd268-noop/20261020T184215Z-FC-02bd268-noop",
+    "vps/FC-02bd268-noop/20261020T184016Z-FC-02bd268-noop",
+    "vps/FC-02bd268-noop/20261020T183246Z-FC-02bd268-noopf2",
+    "vps/FC-02bd268-noop/20261020T181617Z-FC-02bd268-noopf1"
+   ],
+   "title": "xs -j4 is consistently about twice rsync on congress-sample no-op"
+  },
+  {
+   "caveat": "One run, 12 blocks per arm, one corpus and direction; the -j8 deficit may be contention, memory pressure or a per-file cost that scales with worker count. Not established as a general ceiling.",
+   "evidence": "AP10200112-A1-noop-jobs, 69316 files / 2.134 GB, 12 blocks per arm: rsync 3.581 s (1\u00d7), serial xs 5.430 s (0.661\u00d7), xs-j4 1.883 s (1.930\u00d7), xs-j8 2.731 s (1.313\u00d7). The run's own hypothesis expected -j8 to bring the ratio below 1.10.",
+   "finding": "Parallelism, not the tool choice alone, explains the real-projects no-op result: serial xs was 34% slower than rsync, -j4 was 93% faster, and -j8 gave back most of that gain at 1.31\u00d7. The stated hypothesis that -j8 would reach below 1.10\u00d7 rsync is overturned; four workers outperformed eight.",
+   "runKeys": [
+    "vps/AP10200112-A1-noop-jobs/20261020T011248Z-AP10200112-A1-noop-jobs"
+   ],
+   "title": "Four workers beat eight on the larger corpus; the -j8 hypothesis failed"
+  },
+  {
+   "caveat": "Client CPU only, not total system cost; single run, 12 blocks, no profiling of where the CPU goes. Offered as a hypothesis about per-file overhead, not a measured cause.",
+   "evidence": "AP10200112-A1-noop-jobs, 69316 files / 2.134 GB: serial xs 9.659 s client CPU for 5.430 s wall, rsync 1.884 s for 3.581 s, xs-j4 2.906 s for 1.883 s, xs-j8 4.661 s for 2.731 s. E1 baseline serial xs 9.335 s CPU for 5.244 s against rsync 1.893 s for 3.605 s.",
+   "finding": "Serial xs spends about five times rsync's client CPU while delivering less throughput, and CPU rises further with worker count while time falls only up to -j4. The default single-worker path looks dominated by per-file or metadata work rather than bandwidth.",
+   "runKeys": [
+    "vps/AP10200112-A1-noop-jobs/20261020T011248Z-AP10200112-A1-noop-jobs",
+    "vps/E1-vps-baseline/20261020T000819Z-E1-vps-baseline"
+   ],
+   "title": "Serial xs burns CPU without buying speed"
+  },
+  {
+   "caveat": "Four blocks per arm in one run, one corpus and one link; the fresh path may be dominated by receiver-side or wire limits that tuning the sender will not move.",
+   "evidence": "E1-vps-baseline fresh, 69316 files / 2.134 GB: rsync 20.214 s at 0.845 Gb/s and 16.633 s CPU versus xs 25.162 s at 0.679 Gb/s and 33.278 s CPU, paired speed 0.802\u00d7, 4 blocks per arm.",
+   "finding": "On fresh copies of real-projects, xs remained 20% slower than rsync, 25.16 s versus 20.21 s, with double the client CPU, and both tools stayed under 0.85 Gb/s. The no-op advantage does not carry into the fresh path.",
+   "runKeys": [
+    "vps/E1-vps-baseline/20261020T000819Z-E1-vps-baseline"
+   ],
+   "title": "Fresh transfers are a regression and a throughput ceiling"
+  },
+  {
+   "caveat": "Only -j4 is tested in these two experiments; -j8 was fixed in the other run's configuration, and no single run compared workers head to head on this corpus. Different corpora sizes also confound any cross-run parallel-worker reading.",
+   "evidence": "AP10200112-A1-noop-jobs is the only run with a controlled worker sweep: -j4 1.883 s (1.930\u00d7) and 2.906 s CPU; -j8 2.731 s (1.313\u00d7) and 4.661 s CPU.",
+   "finding": "The worker-count effect on real-projects argues for four as the working candidate rather than eight: -j4 delivered 1.93\u00d7 rsync at 2.91 s CPU, while -j8 delivered only 1.31\u00d7 and consumed 4.66 s CPU, so extra parallelism cost CPU without buying time.",
+   "runKeys": [
+    "vps/AP10200112-A1-noop-jobs/20261020T011248Z-AP10200112-A1-noop-jobs"
+   ],
+   "title": "Worker scaling on real-projects: four is the working candidate, not eight"
+  },
+  {
+   "caveat": "Small sample, four blocks per run, and the spread may reflect ordering, cache state or host noise rather than a real bimodality; no routing exploration was done.",
+   "evidence": "FC-02bd268 runs: xs-rs 1.151\u00d7 (1.393 s), 1.146\u00d7 (1.329 s), 1.355\u00d7 (1.176 s). FC-5a45360 runs: xs-rs 0.961\u00d7 (1.538 s), 0.969\u00d7 (1.562 s), with another arm absent in 181617Z.",
+   "finding": "The xs-rs arm on congress-sample no-op is unstable: paired speed versus rsync ranged from 0.96\u00d7 to 1.36\u00d7 across five runs at four blocks each, straddling parity, while the -j4 C++ arm stayed between 1.72\u00d7 and 2.08\u00d7.",
+   "runKeys": [
+    "vps/FC-5a45360-noop/20261020T190640Z-FC-5a45360-noop",
+    "vps/FC-5a45360-noop/20261020T190426Z-FC-5a45360-noop",
+    "vps/FC-02bd268-noop/20261020T183246Z-FC-02bd268-noopf2",
+    "vps/FC-02bd268-noop/20261020T184016Z-FC-02bd268-noop",
+    "vps/FC-02bd268-noop/20261020T184215Z-FC-02bd268-noop"
+   ],
+   "title": "xs-rs on congress-sample is directionally unstable, not a parity result"
+  },
+  {
+   "caveat": "Three blocks per arm and wall_s rather than durable_s, so this cannot be compared directly with the E1 durable-time ratio; only the A/A agreement and the drift are informative.",
+   "evidence": "S0-vps-sentinel s0001: xs 5.4543 s, repeat 5.3134 s (1.016\u00d7), rsync 3.6231 s (1.496\u00d7). s0002: xs 4.3353 s, repeat 4.3287 s (1.025\u00d7), rsync 3.4336 s (1.321\u00d7).",
+   "finding": "The hourly A/A control reproduced within 1.6% and 2.5%, staying inside the 3% band, but the rsync-to-xs ratio moved from 1.50 to 1.32 between the two sentinel windows. Repeats are tight; cross-hour comparisons are not.",
+   "runKeys": [
+    "vps/S0-vps-sentinel/20261020T000739Z-S0-vps-sentinel-s0001",
+    "vps/S0-vps-sentinel/20261020T030134Z-S0-vps-sentinel-s0002"
+   ],
+   "title": "Sentinel repeats are tight, but the rsync-to-xs ratio drifts between hours"
+  },
+  {
+   "caveat": "One run out of eight contributed the invalid samples, and it is the only witness for the 1.94\u00d7 figure, so that specific number is the least trustworthy of the day's xs -j4 results.",
+   "evidence": "FC-02bd268-noop 181617Z: 22 samples with 12 invalid, rsync 6 valid samples over 3 blocks (1.5425 s), xs-cpp 4 valid samples over 3 blocks (0.7818 s); comparable arms absent. The other FC-02bd268 runs reported 12 samples with 0 invalid and blocks of 4.",
+   "finding": "Data quality was mostly clean, with 12 invalid samples out of 164 recorded and all of them concentrated in a single FC-02bd268 run that also produced unequal block counts (3 blocks in the Gbps cell against 4 samples).",
+   "runKeys": [
+    "vps/FC-02bd268-noop/20261020T181617Z-FC-02bd268-noopf1",
+    "vps/FC-02bd268-noop/20261020T184215Z-FC-02bd268-noop",
+    "vps/FC-5a45360-noop/20261020T190640Z-FC-5a45360-noop"
+   ],
+   "title": "Invalid samples clustered in one run and skewed its block counts"
+  }
+ ],
+ "limitations": [
+  "All figures are window-only medians with no confidence intervals and no significance testing; differences are described, not established.",
+  "Most arms rest on four blocks and a handful of valid samples, so run-to-run spread (as with xs-rs) can exceed the apparent arm difference.",
+  "Only one corpus per size class is covered, only the a-to-aws link is exercised, the client is the sender throughout, and the cache is warm in every cell.",
+  "Compression, storage target and reverse direction are absent from this window, so none of their interactions can be assessed.",
+  "Runs with different worker counts, corpora or scenarios are not controlled comparisons; cross-run readings of the worker effect remain hypotheses.",
+  "The AP10200112 and FC-* experiments use different corpora and primaries (wall_s versus durable_s), so their speed ratios are not directly interchangeable.",
+  "The sentinel uses wall_s and three blocks, which limits comparison with the E1 durable-time baseline."
+ ],
+ "nextSteps": [
+  "Repeat the real-projects no-op worker sweep (-j2, -j4, -j6, -j8, -j16) with more blocks and randomized ordering so the four-versus-eight question is answered as a controlled comparison.",
+  "Add a cold-cache and a fresh-path variant of the congress-sample cell to see whether the 2\u00d7 no-op win survives when the receiver must write full file contents.",
+  "Second run of the real-projects fresh cell, with receiver CPU and disk-write time captured, to test whether the 0.80\u00d7 regression is sender work or a receiver-side ceiling.",
+  "Profile serial xs's per-file client CPU (9.66 s against rsync's 1.88 s) to identify which metadata step dominates before the default worker count is changed.",
+  "Repeat the xs-rs arm on congress-sample with at least 12 blocks to decide whether 0.96\u20131.36\u00d7 is real bimodality or noise.",
+  "Add reverse direction (aws to a) and a compression variant before any recommendation is described as a default."
+ ],
+ "tuningImplications": [
+  {
+   "evidenceStrength": "Moderate to strong for direction: five complete four-block runs across two revisions, all in the same direction, though with no confidence intervals and one corpus only.",
+   "experiment": "FC-5a45360-noop",
+   "nextTest": "Repeat with 12 or more blocks and add a cold-cache and a fresh-scenario cell so the win is tested beyond warm no-op on one corpus.",
+   "recommendation": "Keep xs -j4 as the leading candidate for small-file no-op work and treat xs-rs as unproven rather than as a peer; do not switch defaults on this evidence alone.",
+   "runKeys": [
+    "vps/FC-5a45360-noop/20261020T190640Z-FC-5a45360-noop",
+    "vps/FC-5a45360-noop/20261020T190426Z-FC-5a45360-noop"
+   ],
+   "settings": [
+    "-j4"
+   ],
+   "tradeoffs": "The -j4 arm used about 0.89\u20131.00 s of client CPU against rsync's 0.60\u20130.64 s for a roughly 2\u00d7 time saving, so it is a favourable but not free trade. xs-rs moved between 0.96\u00d7 and 0.97\u00d7 rsync here, i.e. approximate parity, and cannot be ranked on this sample."
+  },
+  {
+   "evidenceStrength": "Moderate: four complete four-block runs in the same direction plus one run with 12 of 22 samples invalid.",
+   "experiment": "FC-02bd268-noop",
+   "nextTest": "A controlled re-run of the same cell with matched block counts and a 12-block xs-rs arm, to fix the 0.96\u20131.36\u00d7 spread.",
+   "recommendation": "Keep xs -j4, whose advantage reproduced on this revision; avoid drawing any conclusion about the xs-rs arm until its variance is resolved.",
+   "runKeys": [
+    "vps/FC-02bd268-noop/20261020T184215Z-FC-02bd268-noop",
+    "vps/FC-02bd268-noop/20261020T184016Z-FC-02bd268-noop",
+    "vps/FC-02bd268-noop/20261020T183246Z-FC-02bd268-noopf2",
+    "vps/FC-02bd268-noop/20261020T181617Z-FC-02bd268-noopf1"
+   ],
+   "settings": [
+    "-j4"
+   ],
+   "tradeoffs": "xs-rs ranged from parity to 1.36\u00d7 rsync across runs at four blocks each, so promoting it would be premature; the invalid-sample run also produced three-block medians that should not be compared with four-block medians."
+  },
+  {
+   "evidenceStrength": "Moderate for -j4 over rsync and for -j4 over -j8: one run, but 12 blocks per arm with zero invalid samples. Weak as a general rule on worker count.",
+   "experiment": "AP10200112-A1-noop-jobs",
+   "nextTest": "Rerun with -j2, -j4, -j6, -j8 and -j16 under randomized ordering and more blocks to locate the actual optimum rather than assuming four.",
+   "recommendation": "Support parallel workers as a candidate setting and prefer four over eight; avoid the serial default for large no-op syncs, and do not adopt eight workers.",
+   "runKeys": [
+    "vps/AP10200112-A1-noop-jobs/20261020T011248Z-AP10200112-A1-noop-jobs"
+   ],
+   "settings": [
+    "-j4",
+    "-j8"
+   ],
+   "tradeoffs": "-j4 reached 1.883 s at 2.906 s client CPU; -j8 reached 2.731 s at 4.661 s CPU, so extra workers cost CPU without gaining time. Serial xs was slower than rsync at 9.659 s CPU, the worst CPU-per-byte of any arm here."
+  },
+  {
+   "evidenceStrength": "Provisional: two hourly windows of three blocks each, wall-clock primary, A/A agreement strong but the cross-tool ratio drifted.",
+   "experiment": "S0-vps-sentinel",
+   "nextTest": "Keep the hourly A/A sentinel running and record it alongside durable_s so its ratio can be compared directly with the E1 baseline rather than only within an hour.",
+   "recommendation": "Keep the sentinel as a stability check and use it to bound noise; avoid attributing the 1.32 to 1.50 ratio shift to a code or configuration change without a paired check.",
+   "runKeys": [
+    "vps/S0-vps-sentinel/20261020T000739Z-S0-vps-sentinel-s0001",
+    "vps/S0-vps-sentinel/20261020T030134Z-S0-vps-sentinel-s0002"
+   ],
+   "settings": [],
+   "tradeoffs": "Repeat runs agreed within 1.6\u20132.5%, which supports small block-level noise but not cross-hour inference; three blocks per arm and a wall-clock primary limit how far these ratios can be pushed."
+  },
+  {
+   "evidenceStrength": "Weak for a recommendation and moderate as a caution: four blocks per arm in one run, no profile of where the extra CPU goes.",
+   "experiment": "E1-vps-baseline",
+   "nextTest": "Re-run the fresh cell with receiver-side timing and disk-write accounting, and add a fresh cell at a second corpus size, before changing any fresh-path default.",
+   "recommendation": "Avoid presenting xs as a general-purpose replacement for rsync; it is a supported candidate for no-op small-file work only, and the serial default should be treated as an open problem rather than a baseline.",
+   "runKeys": [
+    "vps/E1-vps-baseline/20261020T000819Z-E1-vps-baseline"
+   ],
+   "settings": [],
+   "tradeoffs": "On no-op, serial xs was 0.68\u00d7 rsync (5.244 s against 3.605 s) at roughly five times the client CPU; on fresh, 0.80\u00d7 (25.162 s against 20.214 s) at double the CPU. Evidence is insufficient to claim any general default, and the fresh ceiling near 0.7\u20130.85 Gb/s may be a link or receiver limit that sender tuning will not move."
+  }
+ ],
+ "charts": [
+  {
+   "id": "6-0-medianPairedSpeedVsControl",
+   "title": "Speed vs rsync: real-projects (a \u2192 aws)",
+   "runKey": "vps/AP10200112-A1-noop-jobs/20261020T011248Z-AP10200112-A1-noop-jobs",
+   "metric": "medianPairedSpeedVsControl",
+   "unit": "\u00d7 rsync",
+   "primary": "wall_s",
+   "factors": {
+    "id": "real-projects.noop.a-aws.sender.warm",
+    "corpus": "real-projects",
+    "scenario": "noop",
+    "sender": "a",
+    "receiver": "aws",
+    "client": "sender",
+    "link": "a-aws",
+    "cache": "warm",
+    "files": 69316,
+    "bytes": 2134981089
+   },
+   "values": [
+    {
+     "arm": "rsync",
+     "value": 1,
+     "samples": 12,
+     "blocks": 12
+    },
+    {
+     "arm": "xs",
+     "value": 0.6614387710225087,
+     "samples": 12,
+     "blocks": 12
+    },
+    {
+     "arm": "xs-j4",
+     "value": 1.9296495652006205,
+     "samples": 12,
+     "blocks": 12
+    },
+    {
+     "arm": "xs-j8",
+     "value": 1.3131804056492347,
+     "samples": 12,
+     "blocks": 12
+    }
+   ],
+   "note": "Window-only medians; no confidence intervals. Compare arms within this cell. "
+  },
+  {
+   "id": "2-0-medianPairedSpeedVsControl",
+   "title": "Speed vs rsync: congress-sample (a \u2192 aws)",
+   "runKey": "vps/FC-02bd268-noop/20261020T184215Z-FC-02bd268-noop",
+   "metric": "medianPairedSpeedVsControl",
+   "unit": "\u00d7 rsync",
+   "primary": "durable_s",
+   "factors": {
+    "id": "congress-sample.noop.a-aws.sender.warm",
+    "corpus": "congress-sample",
+    "scenario": "noop",
+    "sender": "a",
+    "receiver": "aws",
+    "client": "sender",
+    "link": "a-aws",
+    "cache": "warm",
+    "files": 25246,
+    "bytes": 218210440
+   },
+   "values": [
+    {
+     "arm": "xs-cpp",
+     "value": 2.083868842784547,
+     "samples": 4,
+     "blocks": 4
+    },
+    {
+     "arm": "rsync",
+     "value": 1,
+     "samples": 4,
+     "blocks": 4
+    },
+    {
+     "arm": "xs-rs",
+     "value": 1.1512848450081568,
+     "samples": 4,
+     "blocks": 4
+    }
+   ],
+   "note": "Window-only medians; no confidence intervals. Compare arms within this cell. "
+  },
+  {
+   "id": "8-1-medianSeconds",
+   "title": "Transfer duration: real-projects (a \u2192 aws)",
+   "runKey": "vps/E1-vps-baseline/20261020T000819Z-E1-vps-baseline",
+   "metric": "medianSeconds",
+   "unit": "s",
+   "primary": "durable_s",
+   "factors": {
+    "id": "real-projects.fresh.a-aws.sender.warm",
+    "corpus": "real-projects",
+    "scenario": "fresh",
+    "sender": "a",
+    "receiver": "aws",
+    "client": "sender",
+    "link": "a-aws",
+    "cache": "warm",
+    "files": 69316,
+    "bytes": 2134981089
+   },
+   "values": [
+    {
+     "arm": "rsync",
+     "value": 20.2138,
+     "samples": 4,
+     "blocks": 4
+    },
+    {
+     "arm": "xs",
+     "value": 25.16185,
+     "samples": 4,
+     "blocks": 4
+    }
+   ],
+   "note": "Window-only medians; no confidence intervals. Compare arms within this cell. "
+  },
+  {
+   "id": "4-0-medianPairedSpeedVsControl",
+   "title": "Speed vs rsync: congress-sample (a \u2192 aws)",
+   "runKey": "vps/FC-02bd268-noop/20261020T183246Z-FC-02bd268-noopf2",
+   "metric": "medianPairedSpeedVsControl",
+   "unit": "\u00d7 rsync",
+   "primary": "durable_s",
+   "factors": {
+    "id": "congress-sample.noop.a-aws.sender.warm",
+    "corpus": "congress-sample",
+    "scenario": "noop",
+    "sender": "a",
+    "receiver": "aws",
+    "client": "sender",
+    "link": "a-aws",
+    "cache": "warm",
+    "files": 25246,
+    "bytes": 218210440
+   },
+   "values": [
+    {
+     "arm": "xs-rs",
+     "value": 1.3545467520591012,
+     "samples": 4,
+     "blocks": 4
+    },
+    {
+     "arm": "rsync",
+     "value": 1,
+     "samples": 4,
+     "blocks": 4
+    },
+    {
+     "arm": "xs-cpp",
+     "value": 1.7206876165838279,
+     "samples": 4,
+     "blocks": 4
+    }
+   ],
+   "note": "Window-only medians; no confidence intervals. Compare arms within this cell. "
+  },
+  {
+   "id": "7-0-medianPairedSpeedVsControl",
+   "title": "Speed vs xs: real-projects (a \u2192 aws)",
+   "runKey": "vps/S0-vps-sentinel/20261020T030134Z-S0-vps-sentinel-s0002",
+   "metric": "medianPairedSpeedVsControl",
+   "unit": "\u00d7 xs",
+   "primary": "wall_s",
+   "factors": {
+    "id": "real-projects.noop.a-aws.sender.warm",
+    "corpus": "real-projects",
+    "scenario": "noop",
+    "sender": "a",
+    "receiver": "aws",
+    "client": "sender",
+    "link": "a-aws",
+    "cache": "warm",
+    "files": 69316,
+    "bytes": 2134981089
+   },
+   "values": [
+    {
+     "arm": "rsync",
+     "value": 1.321334958854008,
+     "samples": 3,
+     "blocks": 3
+    },
+    {
+     "arm": "xs",
+     "value": 1,
+     "samples": 3,
+     "blocks": 3
+    },
+    {
+     "arm": "again",
+     "value": 1.0246954701180055,
+     "samples": 3,
+     "blocks": 3
+    }
+   ],
+   "note": "Window-only medians; no confidence intervals. Compare arms within this cell. "
+  }
+ ]
+}

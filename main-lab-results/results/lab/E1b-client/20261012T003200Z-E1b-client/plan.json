@@ -1,0 +1,2221 @@
+{
+ "schema": 1,
+ "experiment": "E1b-client",
+ "spec_sha256": "e775da33eb064a5c489f3938552a483727d399ba5c5bc00a5e892092b76c6a7e",
+ "kind": "confirmatory",
+ "hypothesis": "A transfer started by the receiver takes the same time, within 3%, as the same transfer started by the sender.",
+ "primary": "wall_s",
+ "delta": 0.03,
+ "control": "xs-push",
+ "seed": 1,
+ "run_id": "20261012T003200Z-E1b-client",
+ "driver": "neo",
+ "sample_timeout_s": 3600,
+ "hosts": {
+  "neo": {
+   "ssh": "[email]",
+   "name": "[host]",
+   "hostname": "neo",
+   "root": "~/benchmarks/xsyncv4/lab",
+   "interface": "eth0",
+   "helper": true,
+   "gates": {}
+  },
+  "freya": {
+   "ssh": "[email]",
+   "name": "[host]",
+   "hostname": "freya",
+   "root": "/mnt/nvme/xsbench",
+   "interface": "enp10s0",
+   "helper": true,
+   "gates": {}
+  }
+ },
+ "links": {
+  "lan": {
+   "hosts": [
+    "neo",
+    "freya"
+   ],
+   "medium": "wired",
+   "min_speed_mbps": 1000,
+   "max_rtt_ms": 2.0
+  }
+ },
+ "arms": [
+  {
+   "name": "xs-push",
+   "tool": "xs",
+   "flags": [
+    "-a"
+   ],
+   "client": "sender",
+   "rev": "bf596d28c5c9",
+   "binary": {
+    "neo": "~/benchmarks/xsyncv4/lab/bin/xs-bf596d28c5c9",
+    "freya": "/mnt/nvme/xsbench/bin/xs-bf596d28c5c9"
+   },
+   "sha256": {
+    "neo": "7f61f0acdef53606350f80057bac8d9cb418d7e7af5104315d3de9f8b9b9ac18",
+    "freya": "ce24c1fa00c11ffe8f94ad96a1221970b627d85c4607d19652815b3d5f20996f"
+   },
+   "artifacts": {
+    "xs-linux-amd64": "ce24c1fa00c11ffe8f94ad96a1221970b627d85c4607d19652815b3d5f20996f",
+    "xs-linux-arm64": "7f61f0acdef53606350f80057bac8d9cb418d7e7af5104315d3de9f8b9b9ac18"
+   }
+  },
+  {
+   "name": "xs-pull",
+   "tool": "xs",
+   "flags": [
+    "-a"
+   ],
+   "client": "receiver",
+   "rev": "bf596d28c5c9",
+   "binary": {
+    "neo": "~/benchmarks/xsyncv4/lab/bin/xs-bf596d28c5c9",
+    "freya": "/mnt/nvme/xsbench/bin/xs-bf596d28c5c9"
+   },
+   "sha256": {
+    "neo": "7f61f0acdef53606350f80057bac8d9cb418d7e7af5104315d3de9f8b9b9ac18",
+    "freya": "ce24c1fa00c11ffe8f94ad96a1221970b627d85c4607d19652815b3d5f20996f"
+   },
+   "artifacts": {
+    "xs-linux-amd64": "ce24c1fa00c11ffe8f94ad96a1221970b627d85c4607d19652815b3d5f20996f",
+    "xs-linux-arm64": "7f61f0acdef53606350f80057bac8d9cb418d7e7af5104315d3de9f8b9b9ac18"
+   }
+  },
+  {
+   "name": "rsync-push",
+   "tool": "rsync",
+   "flags": [
+    "-a"
+   ],
+   "client": "sender",
+   "binary": {
+    "neo": "rsync",
+    "freya": "rsync"
+   }
+  },
+  {
+   "name": "rsync-pull",
+   "tool": "rsync",
+   "flags": [
+    "-a"
+   ],
+   "client": "receiver",
+   "binary": {
+    "neo": "rsync",
+    "freya": "rsync"
+   }
+  }
+ ],
+ "cells": [
+  {
+   "id": "small-flat.fresh.neo-freya.arm.warm",
+   "corpus": "small-flat",
+   "scenario": "fresh",
+   "sender": "neo",
+   "receiver": "freya",
+   "client": "arm",
+   "link": "lan",
+   "cache": "warm"
+  },
+  {
+   "id": "small-flat.fresh.freya-neo.arm.warm",
+   "corpus": "small-flat",
+   "scenario": "fresh",
+   "sender": "freya",
+   "receiver": "neo",
+   "client": "arm",
+   "link": "lan",
+   "cache": "warm"
+  },
+  {
+   "id": "small-flat.noop.neo-freya.arm.warm",
+   "corpus": "small-flat",
+   "scenario": "noop",
+   "sender": "neo",
+   "receiver": "freya",
+   "client": "arm",
+   "link": "lan",
+   "cache": "warm"
+  },
+  {
+   "id": "small-flat.noop.freya-neo.arm.warm",
+   "corpus": "small-flat",
+   "scenario": "noop",
+   "sender": "freya",
+   "receiver": "neo",
+   "client": "arm",
+   "link": "lan",
+   "cache": "warm"
+  },
+  {
+   "id": "mixed-bimodal.fresh.neo-freya.arm.warm",
+   "corpus": "mixed-bimodal",
+   "scenario": "fresh",
+   "sender": "neo",
+   "receiver": "freya",
+   "client": "arm",
+   "link": "lan",
+   "cache": "warm"
+  },
+  {
+   "id": "mixed-bimodal.fresh.freya-neo.arm.warm",
+   "corpus": "mixed-bimodal",
+   "scenario": "fresh",
+   "sender": "freya",
+   "receiver": "neo",
+   "client": "arm",
+   "link": "lan",
+   "cache": "warm"
+  },
+  {
+   "id": "mixed-bimodal.noop.neo-freya.arm.warm",
+   "corpus": "mixed-bimodal",
+   "scenario": "noop",
+   "sender": "neo",
+   "receiver": "freya",
+   "client": "arm",
+   "link": "lan",
+   "cache": "warm"
+  },
+  {
+   "id": "mixed-bimodal.noop.freya-neo.arm.warm",
+   "corpus": "mixed-bimodal",
+   "scenario": "noop",
+   "sender": "freya",
+   "receiver": "neo",
+   "client": "arm",
+   "link": "lan",
+   "cache": "warm"
+  }
+ ],
+ "corpora": {
+  "small-flat": {
+   "files": 100000,
+   "directories": 100,
+   "bytes": 319224077,
+   "digest": "41b628c4337730be4efdfcc6673d517749132ffd50b75b29321640e6f064bbec",
+   "quick_digest": "e8de96251eaca6be3e98b1cb8097405b37ad470fc0d5ffdb7a5a48ea5b9f3805"
+  },
+  "mixed-bimodal": {
+   "files": 20000,
+   "directories": 420,
+   "bytes": 1395127076,
+   "digest": "e9071fb7ad3b0375ffe9fab58f740bfd22d545f7678e163a6c745504cc7aa16b",
+   "quick_digest": "31af6dbe5d38a32f5f0acf560703fa557304d3936e59f7b395d13cf8d0dec7fb"
+  }
+ },
+ "blocks": [
+  {
+   "cell": "small-flat.noop.neo-freya.arm.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs-pull",
+     "rsync-push",
+     "rsync-pull",
+     "xs-push"
+    ],
+    [
+     "xs-push",
+     "rsync-push",
+     "xs-pull",
+     "rsync-pull"
+    ],
+    [
+     "rsync-pull",
+     "xs-push",
+     "xs-pull",
+     "rsync-push"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.noop.neo-freya.arm.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "rsync-pull",
+     "rsync-push",
+     "xs-pull",
+     "xs-push"
+    ],
+    [
+     "xs-push",
+     "xs-pull",
+     "rsync-push",
+     "rsync-pull"
+    ],
+    [
+     "rsync-push",
+     "rsync-pull",
+     "xs-push",
+     "xs-pull"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.neo-freya.arm.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs-pull",
+     "rsync-pull",
+     "xs-push",
+     "rsync-push"
+    ],
+    [
+     "rsync-pull",
+     "xs-pull",
+     "rsync-push",
+     "xs-push"
+    ],
+    [
+     "rsync-pull",
+     "rsync-push",
+     "xs-pull",
+     "xs-push"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.noop.freya-neo.arm.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs-push",
+     "rsync-pull",
+     "rsync-push",
+     "xs-pull"
+    ],
+    [
+     "rsync-pull",
+     "xs-pull",
+     "xs-push",
+     "rsync-push"
+    ],
+    [
+     "rsync-push",
+     "xs-push",
+     "rsync-pull",
+     "xs-pull"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.freya-neo.arm.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs-pull",
+     "rsync-push",
+     "xs-push",
+     "rsync-pull"
+    ],
+    [
+     "xs-pull",
+     "xs-push",
+     "rsync-push",
+     "rsync-pull"
+    ],
+    [
+     "xs-push",
+     "xs-pull",
+     "rsync-push",
+     "rsync-pull"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.freya-neo.arm.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs-pull",
+     "rsync-pull",
+     "xs-push",
+     "rsync-push"
+    ],
+    [
+     "rsync-push",
+     "xs-push",
+     "rsync-pull",
+     "xs-pull"
+    ],
+    [
+     "xs-pull",
+     "xs-push",
+     "rsync-pull",
+     "rsync-push"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.neo-freya.arm.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "rsync-pull",
+     "rsync-push",
+     "xs-pull",
+     "xs-push"
+    ],
+    [
+     "rsync-pull",
+     "rsync-push",
+     "xs-push",
+     "xs-pull"
+    ],
+    [
+     "rsync-push",
+     "rsync-pull",
+     "xs-push",
+     "xs-pull"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.freya-neo.arm.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "rsync-pull",
+     "xs-push",
+     "xs-pull",
+     "rsync-push"
+    ],
+    [
+     "rsync-push",
+     "rsync-pull",
+     "xs-push",
+     "xs-pull"
+    ],
+    [
+     "rsync-push",
+     "rsync-pull",
+     "xs-push",
+     "xs-pull"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.freya-neo.arm.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-push",
+     "xs-pull",
+     "rsync-pull",
+     "rsync-push"
+    ],
+    [
+     "rsync-push",
+     "rsync-pull",
+     "xs-pull",
+     "xs-push"
+    ],
+    [
+     "xs-pull",
+     "rsync-push",
+     "xs-push",
+     "rsync-pull"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.neo-freya.arm.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync-push",
+     "rsync-pull",
+     "xs-push",
+     "xs-pull"
+    ],
+    [
+     "xs-pull",
+     "rsync-push",
+     "rsync-pull",
+     "xs-push"
+    ],
+    [
+     "rsync-pull",
+     "xs-pull",
+     "rsync-push",
+     "xs-push"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.neo-freya.arm.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-push",
+     "rsync-push",
+     "rsync-pull",
+     "xs-pull"
+    ],
+    [
+     "xs-push",
+     "rsync-pull",
+     "xs-pull",
+     "rsync-push"
+    ],
+    [
+     "rsync-pull",
+     "rsync-push",
+     "xs-pull",
+     "xs-push"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.freya-neo.arm.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync-pull",
+     "rsync-push",
+     "xs-pull",
+     "xs-push"
+    ],
+    [
+     "rsync-pull",
+     "xs-pull",
+     "xs-push",
+     "rsync-push"
+    ],
+    [
+     "rsync-push",
+     "xs-pull",
+     "xs-push",
+     "rsync-pull"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.neo-freya.arm.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync-push",
+     "xs-pull",
+     "rsync-pull",
+     "xs-push"
+    ],
+    [
+     "rsync-push",
+     "xs-pull",
+     "rsync-pull",
+     "xs-push"
+    ],
+    [
+     "xs-push",
+     "rsync-pull",
+     "rsync-push",
+     "xs-pull"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.freya-neo.arm.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync-pull",
+     "rsync-push",
+     "xs-push",
+     "xs-pull"
+    ],
+    [
+     "rsync-pull",
+     "xs-push",
+     "rsync-push",
+     "xs-pull"
+    ],
+    [
+     "rsync-pull",
+     "rsync-push",
+     "xs-pull",
+     "xs-push"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.noop.freya-neo.arm.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-pull",
+     "rsync-push",
+     "rsync-pull",
+     "xs-push"
+    ],
+    [
+     "rsync-pull",
+     "xs-pull",
+     "xs-push",
+     "rsync-push"
+    ],
+    [
+     "xs-pull",
+     "rsync-push",
+     "rsync-pull",
+     "xs-push"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.noop.neo-freya.arm.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-push",
+     "rsync-pull",
+     "xs-pull",
+     "rsync-push"
+    ],
+    [
+     "xs-pull",
+     "rsync-push",
+     "xs-push",
+     "rsync-pull"
+    ],
+    [
+     "xs-push",
+     "xs-pull",
+     "rsync-push",
+     "rsync-pull"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.freya-neo.arm.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-push",
+     "rsync-pull",
+     "rsync-push",
+     "xs-pull"
+    ],
+    [
+     "xs-push",
+     "rsync-push",
+     "rsync-pull",
+     "xs-pull"
+    ],
+    [
+     "xs-pull",
+     "xs-push",
+     "rsync-push",
+     "rsync-pull"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.neo-freya.arm.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-pull",
+     "rsync-push",
+     "xs-push",
+     "rsync-pull"
+    ],
+    [
+     "xs-pull",
+     "rsync-push",
+     "rsync-pull",
+     "xs-push"
+    ],
+    [
+     "xs-pull",
+     "xs-push",
+     "rsync-pull",
+     "rsync-push"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.neo-freya.arm.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync-pull",
+     "rsync-push",
+     "xs-pull",
+     "xs-push"
+    ],
+    [
+     "rsync-push",
+     "xs-pull",
+     "rsync-pull",
+     "xs-push"
+    ],
+    [
+     "xs-push",
+     "rsync-pull",
+     "xs-pull",
+     "rsync-push"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.freya-neo.arm.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync-pull",
+     "rsync-push",
+     "xs-pull",
+     "xs-push"
+    ],
+    [
+     "rsync-pull",
+     "xs-push",
+     "rsync-push",
+     "xs-pull"
+    ],
+    [
+     "rsync-pull",
+     "rsync-push",
+     "xs-pull",
+     "xs-push"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.freya-neo.arm.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync-pull",
+     "rsync-push",
+     "xs-pull",
+     "xs-push"
+    ],
+    [
+     "xs-pull",
+     "rsync-pull",
+     "xs-push",
+     "rsync-push"
+    ],
+    [
+     "xs-push",
+     "rsync-pull",
+     "rsync-push",
+     "xs-pull"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.noop.freya-neo.arm.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-push",
+     "rsync-pull",
+     "rsync-push",
+     "xs-pull"
+    ],
+    [
+     "rsync-pull",
+     "rsync-push",
+     "xs-pull",
+     "xs-push"
+    ],
+    [
+     "rsync-pull",
+     "xs-push",
+     "xs-pull",
+     "rsync-push"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.noop.neo-freya.arm.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync-pull",
+     "xs-push",
+     "xs-pull",
+     "rsync-push"
+    ],
+    [
+     "rsync-pull",
+     "xs-push",
+     "xs-pull",
+     "rsync-push"
+    ],
+    [
+     "rsync-push",
+     "xs-pull",
+     "xs-push",
+     "rsync-pull"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.neo-freya.arm.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-pull",
+     "xs-push",
+     "rsync-push",
+     "rsync-pull"
+    ],
+    [
+     "rsync-push",
+     "xs-push",
+     "xs-pull",
+     "rsync-pull"
+    ],
+    [
+     "rsync-push",
+     "xs-pull",
+     "rsync-pull",
+     "xs-push"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.noop.freya-neo.arm.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync-pull",
+     "xs-pull",
+     "rsync-push",
+     "xs-push"
+    ],
+    [
+     "rsync-pull",
+     "xs-pull",
+     "xs-push",
+     "rsync-push"
+    ],
+    [
+     "xs-pull",
+     "xs-push",
+     "rsync-pull",
+     "rsync-push"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.noop.neo-freya.arm.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-push",
+     "rsync-push",
+     "rsync-pull",
+     "xs-pull"
+    ],
+    [
+     "rsync-pull",
+     "rsync-push",
+     "xs-pull",
+     "xs-push"
+    ],
+    [
+     "xs-push",
+     "xs-pull",
+     "rsync-push",
+     "rsync-pull"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.neo-freya.arm.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync-push",
+     "xs-push",
+     "xs-pull",
+     "rsync-pull"
+    ],
+    [
+     "xs-push",
+     "rsync-pull",
+     "rsync-push",
+     "xs-pull"
+    ],
+    [
+     "rsync-push",
+     "xs-pull",
+     "xs-push",
+     "rsync-pull"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.freya-neo.arm.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync-pull",
+     "xs-push",
+     "xs-pull",
+     "rsync-push"
+    ],
+    [
+     "rsync-pull",
+     "rsync-push",
+     "xs-pull",
+     "xs-push"
+    ],
+    [
+     "xs-pull",
+     "xs-push",
+     "rsync-push",
+     "rsync-pull"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.freya-neo.arm.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync-pull",
+     "xs-pull",
+     "xs-push",
+     "rsync-push"
+    ],
+    [
+     "rsync-pull",
+     "xs-push",
+     "xs-pull",
+     "rsync-push"
+    ],
+    [
+     "rsync-pull",
+     "rsync-push",
+     "xs-pull",
+     "xs-push"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.freya-neo.arm.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-push",
+     "xs-pull",
+     "rsync-push",
+     "rsync-pull"
+    ],
+    [
+     "xs-push",
+     "xs-pull",
+     "rsync-pull",
+     "rsync-push"
+    ],
+    [
+     "xs-pull",
+     "rsync-pull",
+     "xs-push",
+     "rsync-push"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.neo-freya.arm.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-pull",
+     "rsync-push",
+     "xs-push",
+     "rsync-pull"
+    ],
+    [
+     "xs-push",
+     "rsync-push",
+     "rsync-pull",
+     "xs-pull"
+    ],
+    [
+     "xs-pull",
+     "xs-push",
+     "rsync-pull",
+     "rsync-push"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.neo-freya.arm.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-push",
+     "xs-pull",
+     "rsync-pull",
+     "rsync-push"
+    ],
+    [
+     "xs-pull",
+     "rsync-push",
+     "rsync-pull",
+     "xs-push"
+    ],
+    [
+     "rsync-pull",
+     "xs-push",
+     "rsync-push",
+     "xs-pull"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.freya-neo.arm.warm",
+   "block": 4,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync-pull",
+     "xs-pull",
+     "xs-push",
+     "rsync-push"
+    ],
+    [
+     "xs-push",
+     "rsync-pull",
+     "rsync-push",
+     "xs-pull"
+    ],
+    [
+     "rsync-push",
+     "xs-pull",
+     "rsync-pull",
+     "xs-push"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.neo-freya.arm.warm",
+   "block": 4,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync-pull",
+     "xs-pull",
+     "xs-push",
+     "rsync-push"
+    ],
+    [
+     "xs-pull",
+     "xs-push",
+     "rsync-pull",
+     "rsync-push"
+    ],
+    [
+     "rsync-push",
+     "xs-pull",
+     "rsync-pull",
+     "xs-push"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.freya-neo.arm.warm",
+   "block": 4,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-pull",
+     "xs-push",
+     "rsync-push",
+     "rsync-pull"
+    ],
+    [
+     "xs-push",
+     "xs-pull",
+     "rsync-push",
+     "rsync-pull"
+    ],
+    [
+     "xs-push",
+     "xs-pull",
+     "rsync-pull",
+     "rsync-push"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.neo-freya.arm.warm",
+   "block": 4,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-push",
+     "rsync-push",
+     "rsync-pull",
+     "xs-pull"
+    ],
+    [
+     "rsync-pull",
+     "xs-push",
+     "rsync-push",
+     "xs-pull"
+    ],
+    [
+     "xs-push",
+     "rsync-pull",
+     "xs-pull",
+     "rsync-push"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.freya-neo.arm.warm",
+   "block": 4,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync-push",
+     "xs-pull",
+     "rsync-pull",
+     "xs-push"
+    ],
+    [
+     "xs-pull",
+     "xs-push",
+     "rsync-pull",
+     "rsync-push"
+    ],
+    [
+     "rsync-pull",
+     "rsync-push",
+     "xs-pull",
+     "xs-push"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.noop.freya-neo.arm.warm",
+   "block": 4,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-pull",
+     "xs-push",
+     "rsync-push",
+     "rsync-pull"
+    ],
+    [
+     "rsync-pull",
+     "rsync-push",
+     "xs-pull",
+     "xs-push"
+    ],
+    [
+     "xs-push",
+     "rsync-pull",
+     "rsync-push",
+     "xs-pull"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.neo-freya.arm.warm",
+   "block": 4,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync-pull",
+     "xs-pull",
+     "xs-push",
+     "rsync-push"
+    ],
+    [
+     "rsync-pull",
+     "xs-push",
+     "xs-pull",
+     "rsync-push"
+    ],
+    [
+     "rsync-push",
+     "rsync-pull",
+     "xs-push",
+     "xs-pull"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.noop.neo-freya.arm.warm",
+   "block": 4,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-pull",
+     "xs-push",
+     "rsync-push",
+     "rsync-pull"
+    ],
+    [
+     "xs-pull",
+     "xs-push",
+     "rsync-pull",
+     "rsync-push"
+    ],
+    [
+     "xs-pull",
+     "xs-push",
+     "rsync-pull",
+     "rsync-push"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.noop.freya-neo.arm.warm",
+   "block": 5,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-pull",
+     "rsync-pull",
+     "rsync-push",
+     "xs-push"
+    ],
+    [
+     "rsync-push",
+     "rsync-pull",
+     "xs-push",
+     "xs-pull"
+    ],
+    [
+     "xs-pull",
+     "rsync-push",
+     "rsync-pull",
+     "xs-push"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.freya-neo.arm.warm",
+   "block": 5,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync-push",
+     "rsync-pull",
+     "xs-push",
+     "xs-pull"
+    ],
+    [
+     "xs-push",
+     "rsync-pull",
+     "xs-pull",
+     "rsync-push"
+    ],
+    [
+     "rsync-pull",
+     "xs-push",
+     "xs-pull",
+     "rsync-push"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.neo-freya.arm.warm",
+   "block": 5,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-push",
+     "rsync-pull",
+     "xs-pull",
+     "rsync-push"
+    ],
+    [
+     "rsync-pull",
+     "xs-push",
+     "rsync-push",
+     "xs-pull"
+    ],
+    [
+     "rsync-push",
+     "xs-push",
+     "rsync-pull",
+     "xs-pull"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.neo-freya.arm.warm",
+   "block": 5,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync-pull",
+     "xs-pull",
+     "xs-push",
+     "rsync-push"
+    ],
+    [
+     "rsync-pull",
+     "rsync-push",
+     "xs-push",
+     "xs-pull"
+    ],
+    [
+     "xs-pull",
+     "xs-push",
+     "rsync-pull",
+     "rsync-push"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.noop.neo-freya.arm.warm",
+   "block": 5,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-pull",
+     "rsync-push",
+     "rsync-pull",
+     "xs-push"
+    ],
+    [
+     "xs-pull",
+     "xs-push",
+     "rsync-pull",
+     "rsync-push"
+    ],
+    [
+     "xs-pull",
+     "rsync-pull",
+     "xs-push",
+     "rsync-push"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.freya-neo.arm.warm",
+   "block": 5,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-push",
+     "rsync-push",
+     "xs-pull",
+     "rsync-pull"
+    ],
+    [
+     "xs-push",
+     "rsync-push",
+     "xs-pull",
+     "rsync-pull"
+    ],
+    [
+     "xs-push",
+     "rsync-pull",
+     "xs-pull",
+     "rsync-push"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.neo-freya.arm.warm",
+   "block": 5,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync-pull",
+     "rsync-push",
+     "xs-push",
+     "xs-pull"
+    ],
+    [
+     "rsync-push",
+     "xs-pull",
+     "rsync-pull",
+     "xs-push"
+    ],
+    [
+     "rsync-pull",
+     "rsync-push",
+     "xs-push",
+     "xs-pull"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.freya-neo.arm.warm",
+   "block": 5,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync-pull",
+     "xs-push",
+     "xs-pull",
+     "rsync-push"
+    ],
+    [
+     "rsync-pull",
+     "xs-pull",
+     "xs-push",
+     "rsync-push"
+    ],
+    [
+     "rsync-push",
+     "rsync-pull",
+     "xs-pull",
+     "xs-push"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.neo-freya.arm.warm",
+   "block": 6,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync-pull",
+     "rsync-push",
+     "xs-push",
+     "xs-pull"
+    ],
+    [
+     "rsync-pull",
+     "xs-pull",
+     "rsync-push",
+     "xs-push"
+    ],
+    [
+     "rsync-pull",
+     "rsync-push",
+     "xs-push",
+     "xs-pull"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.neo-freya.arm.warm",
+   "block": 6,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-pull",
+     "rsync-push",
+     "rsync-pull",
+     "xs-push"
+    ],
+    [
+     "rsync-push",
+     "xs-pull",
+     "xs-push",
+     "rsync-pull"
+    ],
+    [
+     "rsync-pull",
+     "xs-pull",
+     "xs-push",
+     "rsync-push"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.noop.freya-neo.arm.warm",
+   "block": 6,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-pull",
+     "rsync-pull",
+     "xs-push",
+     "rsync-push"
+    ],
+    [
+     "xs-push",
+     "xs-pull",
+     "rsync-pull",
+     "rsync-push"
+    ],
+    [
+     "rsync-pull",
+     "xs-pull",
+     "xs-push",
+     "rsync-push"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.freya-neo.arm.warm",
+   "block": 6,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-push",
+     "xs-pull",
+     "rsync-pull",
+     "rsync-push"
+    ],
+    [
+     "xs-pull",
+     "rsync-pull",
+     "xs-push",
+     "rsync-push"
+    ],
+    [
+     "rsync-pull",
+     "xs-push",
+     "rsync-push",
+     "xs-pull"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.noop.neo-freya.arm.warm",
+   "block": 6,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync-pull",
+     "xs-push",
+     "rsync-push",
+     "xs-pull"
+    ],
+    [
+     "xs-pull",
+     "rsync-pull",
+     "xs-push",
+     "rsync-push"
+    ],
+    [
+     "rsync-pull",
+     "xs-push",
+     "xs-pull",
+     "rsync-push"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.freya-neo.arm.warm",
+   "block": 6,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-push",
+     "xs-pull",
+     "rsync-push",
+     "rsync-pull"
+    ],
+    [
+     "rsync-pull",
+     "xs-push",
+     "xs-pull",
+     "rsync-push"
+    ],
+    [
+     "rsync-push",
+     "xs-pull",
+     "rsync-pull",
+     "xs-push"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.freya-neo.arm.warm",
+   "block": 6,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-pull",
+     "rsync-push",
+     "xs-push",
+     "rsync-pull"
+    ],
+    [
+     "rsync-pull",
+     "xs-push",
+     "xs-pull",
+     "rsync-push"
+    ],
+    [
+     "rsync-push",
+     "rsync-pull",
+     "xs-push",
+     "xs-pull"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.neo-freya.arm.warm",
+   "block": 6,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-push",
+     "xs-pull",
+     "rsync-pull",
+     "rsync-push"
+    ],
+    [
+     "rsync-pull",
+     "xs-push",
+     "rsync-push",
+     "xs-pull"
+    ],
+    [
+     "xs-push",
+     "rsync-pull",
+     "rsync-push",
+     "xs-pull"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.freya-neo.arm.warm",
+   "block": 7,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-push",
+     "xs-pull",
+     "rsync-push",
+     "rsync-pull"
+    ],
+    [
+     "xs-pull",
+     "rsync-push",
+     "rsync-pull",
+     "xs-push"
+    ],
+    [
+     "rsync-pull",
+     "xs-push",
+     "xs-pull",
+     "rsync-push"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.neo-freya.arm.warm",
+   "block": 7,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync-pull",
+     "xs-pull",
+     "rsync-push",
+     "xs-push"
+    ],
+    [
+     "xs-pull",
+     "xs-push",
+     "rsync-pull",
+     "rsync-push"
+    ],
+    [
+     "rsync-push",
+     "xs-pull",
+     "xs-push",
+     "rsync-pull"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.freya-neo.arm.warm",
+   "block": 7,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync-push",
+     "xs-pull",
+     "rsync-pull",
+     "xs-push"
+    ],
+    [
+     "xs-push",
+     "rsync-pull",
+     "rsync-push",
+     "xs-pull"
+    ],
+    [
+     "xs-push",
+     "rsync-push",
+     "xs-pull",
+     "rsync-pull"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.neo-freya.arm.warm",
+   "block": 7,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-push",
+     "xs-pull",
+     "rsync-pull",
+     "rsync-push"
+    ],
+    [
+     "xs-push",
+     "xs-pull",
+     "rsync-push",
+     "rsync-pull"
+    ],
+    [
+     "xs-push",
+     "xs-pull",
+     "rsync-push",
+     "rsync-pull"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.freya-neo.arm.warm",
+   "block": 7,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-pull",
+     "xs-push",
+     "rsync-push",
+     "rsync-pull"
+    ],
+    [
+     "xs-pull",
+     "xs-push",
+     "rsync-push",
+     "rsync-pull"
+    ],
+    [
+     "xs-push",
+     "rsync-push",
+     "xs-pull",
+     "rsync-pull"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.neo-freya.arm.warm",
+   "block": 7,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-pull",
+     "rsync-push",
+     "xs-push",
+     "rsync-pull"
+    ],
+    [
+     "rsync-pull",
+     "xs-push",
+     "xs-pull",
+     "rsync-push"
+    ],
+    [
+     "xs-pull",
+     "rsync-push",
+     "xs-push",
+     "rsync-pull"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.noop.neo-freya.arm.warm",
+   "block": 7,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-pull",
+     "xs-push",
+     "rsync-pull",
+     "rsync-push"
+    ],
+    [
+     "rsync-pull",
+     "rsync-push",
+     "xs-pull",
+     "xs-push"
+    ],
+    [
+     "rsync-push",
+     "xs-pull",
+     "rsync-pull",
+     "xs-push"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.noop.freya-neo.arm.warm",
+   "block": 7,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync-push",
+     "xs-push",
+     "rsync-pull",
+     "xs-pull"
+    ],
+    [
+     "rsync-push",
+     "rsync-pull",
+     "xs-push",
+     "xs-pull"
+    ],
+    [
+     "rsync-push",
+     "rsync-pull",
+     "xs-push",
+     "xs-pull"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.freya-neo.arm.warm",
+   "block": 8,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-pull",
+     "xs-push",
+     "rsync-pull",
+     "rsync-push"
+    ],
+    [
+     "xs-push",
+     "rsync-push",
+     "rsync-pull",
+     "xs-pull"
+    ],
+    [
+     "xs-push",
+     "xs-pull",
+     "rsync-push",
+     "rsync-pull"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.neo-freya.arm.warm",
+   "block": 8,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync-pull",
+     "rsync-push",
+     "xs-push",
+     "xs-pull"
+    ],
+    [
+     "rsync-push",
+     "rsync-pull",
+     "xs-pull",
+     "xs-push"
+    ],
+    [
+     "rsync-push",
+     "xs-pull",
+     "rsync-pull",
+     "xs-push"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.neo-freya.arm.warm",
+   "block": 8,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-push",
+     "rsync-push",
+     "rsync-pull",
+     "xs-pull"
+    ],
+    [
+     "xs-pull",
+     "rsync-pull",
+     "xs-push",
+     "rsync-push"
+    ],
+    [
+     "xs-push",
+     "xs-pull",
+     "rsync-push",
+     "rsync-pull"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.noop.freya-neo.arm.warm",
+   "block": 8,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-push",
+     "rsync-pull",
+     "xs-pull",
+     "rsync-push"
+    ],
+    [
+     "rsync-push",
+     "rsync-pull",
+     "xs-push",
+     "xs-pull"
+    ],
+    [
+     "rsync-pull",
+     "xs-pull",
+     "xs-push",
+     "rsync-push"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.neo-freya.arm.warm",
+   "block": 8,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-push",
+     "xs-pull",
+     "rsync-push",
+     "rsync-pull"
+    ],
+    [
+     "rsync-pull",
+     "rsync-push",
+     "xs-push",
+     "xs-pull"
+    ],
+    [
+     "xs-pull",
+     "xs-push",
+     "rsync-push",
+     "rsync-pull"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.freya-neo.arm.warm",
+   "block": 8,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-push",
+     "rsync-push",
+     "xs-pull",
+     "rsync-pull"
+    ],
+    [
+     "rsync-pull",
+     "xs-push",
+     "xs-pull",
+     "rsync-push"
+    ],
+    [
+     "rsync-pull",
+     "rsync-push",
+     "xs-pull",
+     "xs-push"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.noop.neo-freya.arm.warm",
+   "block": 8,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync-push",
+     "xs-push",
+     "rsync-pull",
+     "xs-pull"
+    ],
+    [
+     "xs-push",
+     "xs-pull",
+     "rsync-push",
+     "rsync-pull"
+    ],
+    [
+     "rsync-pull",
+     "xs-pull",
+     "rsync-push",
+     "xs-push"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.freya-neo.arm.warm",
+   "block": 8,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync-pull",
+     "rsync-push",
+     "xs-push",
+     "xs-pull"
+    ],
+    [
+     "rsync-pull",
+     "xs-pull",
+     "xs-push",
+     "rsync-push"
+    ],
+    [
+     "rsync-push",
+     "rsync-pull",
+     "xs-pull",
+     "xs-push"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.neo-freya.arm.warm",
+   "block": 9,
+   "verify_full": true,
+   "orders": [
+    [
+     "rsync-push",
+     "rsync-pull",
+     "xs-push",
+     "xs-pull"
+    ],
+    [
+     "rsync-push",
+     "xs-push",
+     "rsync-pull",
+     "xs-pull"
+    ],
+    [
+     "xs-pull",
+     "rsync-pull",
+     "xs-push",
+     "rsync-push"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.freya-neo.arm.warm",
+   "block": 9,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs-push",
+     "rsync-pull",
+     "xs-pull",
+     "rsync-push"
+    ],
+    [
+     "xs-pull",
+     "xs-push",
+     "rsync-pull",
+     "rsync-push"
+    ],
+    [
+     "rsync-push",
+     "rsync-pull",
+     "xs-push",
+     "xs-pull"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.freya-neo.arm.warm",
+   "block": 9,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs-push",
+     "rsync-pull",
+     "xs-pull",
+     "rsync-push"
+    ],
+    [
+     "rsync-push",
+     "xs-pull",
+     "xs-push",
+     "rsync-pull"
+    ],
+    [
+     "xs-push",
+     "rsync-push",
+     "xs-pull",
+     "rsync-pull"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.noop.neo-freya.arm.warm",
+   "block": 9,
+   "verify_full": true,
+   "orders": [
+    [
+     "rsync-push",
+     "rsync-pull",
+     "xs-push",
+     "xs-pull"
+    ],
+    [
+     "rsync-push",
+     "rsync-pull",
+     "xs-push",
+     "xs-pull"
+    ],
+    [
+     "rsync-push",
+     "xs-push",
+     "xs-pull",
+     "rsync-pull"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.noop.neo-freya.arm.warm",
+   "block": 9,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs-pull",
+     "rsync-push",
+     "xs-push",
+     "rsync-pull"
+    ],
+    [
+     "xs-push",
+     "rsync-push",
+     "rsync-pull",
+     "xs-pull"
+    ],
+    [
+     "xs-push",
+     "rsync-push",
+     "xs-pull",
+     "rsync-pull"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.neo-freya.arm.warm",
+   "block": 9,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs-push",
+     "xs-pull",
+     "rsync-push",
+     "rsync-pull"
+    ],
+    [
+     "xs-pull",
+     "rsync-push",
+     "xs-push",
+     "rsync-pull"
+    ],
+    [
+     "rsync-push",
+     "xs-push",
+     "xs-pull",
+     "rsync-pull"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.noop.freya-neo.arm.warm",
+   "block": 9,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs-push",
+     "rsync-push",
+     "xs-pull",
+     "rsync-pull"
+    ],
+    [
+     "xs-push",
+     "rsync-push",
+     "xs-pull",
+     "rsync-pull"
+    ],
+    [
+     "xs-pull",
+     "rsync-push",
+     "rsync-pull",
+     "xs-push"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.freya-neo.arm.warm",
+   "block": 9,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs-push",
+     "rsync-pull",
+     "xs-pull",
+     "rsync-push"
+    ],
+    [
+     "xs-push",
+     "rsync-pull",
+     "rsync-push",
+     "xs-pull"
+    ],
+    [
+     "rsync-push",
+     "xs-push",
+     "xs-pull",
+     "rsync-pull"
+    ]
+   ]
+  }
+ ],
+ "scripts": {
+  "probe.py": "3d292a0d9b45d37602360ef1b89f6d94f08df42c57553b62f346dbaa3d645dac",
+  "corpus.py": "d6018d3611cba607a670f3fe554d0d4be5941fb2ef8fd65d57f10bfb582625f6",
+  "corpora.json": "729929e1ba7baf3a0b8413efffab5bc26ae0cbe8514daf1c05bbb53a314bb084",
+  "agent.py": "7694fb6a42ae29b324d7bfdc56fe50272eccaaf86c9db852974ca49d4a0e75f2",
+  "overnight.py": "c9b81a0bbcda7d1d2431e88060e88e432425e6251e46d6af2b24e7fdd0186072",
+  "measure.py": "afd0cf9011adb290a92853b262a57adab76b9910f6d679dd6c647f4bfb6eaf94"
+ }
+}

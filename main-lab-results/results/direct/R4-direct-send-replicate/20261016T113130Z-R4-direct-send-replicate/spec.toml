@@ -1,0 +1,29 @@
+# R4: filler for the nights, the Mac sending small and mixed trees to mars's
+# NVMe, repeated so that night-to-night variation can be read.
+id = "R4-direct-send-replicate"
+kind = "screening"
+hypothesis = "The xs to rsync ratios on small and mixed trees from the Mac hold from night to night."
+primary = "durable_s"
+delta = 0.03
+blocks = 4
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+hours = [23, 7]  # the Mac sends: run while it is idle overnight
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[arms.xs]
+tool = "xs"
+rev = "8cc75bbdb801"
+flags = ["-a"]
+
+[matrix]
+link = "mac-mars-direct"
+corpus = ["tiny-one", "small-flat", "small-deep", "small-opaque", "mixed-bimodal", "mixed-threshold"]
+scenario = ["fresh", "noop"]
+direction = ["mac>mars"]
+client = ["initiator"]
+cache = ["warm"]

@@ -1,0 +1,11 @@
+{
+ "name": "copy-congress-to-mars",
+ "steps": [
+  {
+   "host": "neo",
+   "ssh": "[email]",
+   "local": true,
+   "command": "cd ~/benchmarks/xsyncv4/lab/corpora && rsync -aH --rsync-path=/opt/local/bin/rsync real-congress real-congress.files.jsonl real-congress.manifest.json [host]:/Volumes/xsbench/lab/corpora/"
+  }
+ ]
+}

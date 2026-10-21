@@ -1,0 +1,20 @@
+{
+ "tree": "T18-apfs-small-files",
+ "started_utc": "2026-10-20T06:04:08Z",
+ "nodes": {
+  "A": {
+   "state": "queued",
+   "runs": [
+    "20261020T060408Z-MA9-small-pull-anchors"
+   ],
+   "spec": "MA9-small-pull-anchors.toml"
+  },
+  "B": {
+   "state": "queued",
+   "runs": [
+    "20261020T060409Z-MA10-apfs-no-atomic"
+   ],
+   "spec": "MA10-apfs-no-atomic.toml"
+  }
+ }
+}

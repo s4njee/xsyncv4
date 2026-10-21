@@ -1,0 +1,463 @@
+{
+ "id": "T4-neo-mars-1g",
+ "question": "What limits small-file copies between a Raspberry Pi 5 and a Ryzen desktop, and which settings should be the default?",
+ "start": [
+  "H0"
+ ],
+ "startedUtc": "2026-10-17T02:11:51Z",
+ "until": "2026-10-18T12:00Z",
+ "fills": 0,
+ "nodes": [
+  {
+   "id": "H0",
+   "kind": "experiment",
+   "experiment": "H0-pair-baseline",
+   "question": "Where do xs and rsync stand between the Pi and mars, each way, on each kind of tree?",
+   "estimateHours": 1.4,
+   "hypothesis": "xs with its best small-file setting is faster than rsync -az both ways on every tree.",
+   "design": "screening",
+   "state": "decided",
+   "runs": [
+    {
+     "id": "20261017T021151Z-H0-pair-baseline",
+     "key": "pair/H0-pair-baseline/20261017T021151Z-H0-pair-baseline",
+     "state": "complete"
+    }
+   ],
+   "decision": "H0: baseline measured; next, which side limits small files, and the default question",
+   "decidedUtc": "2026-10-17T12:16:33Z",
+   "start": true,
+   "promote": null
+  },
+  {
+   "id": "H1a",
+   "kind": "experiment",
+   "experiment": "H1a-pair-ceiling-neo",
+   "question": "When the Pi receives, can it create files faster than xs delivers them?",
+   "estimateHours": 0.4,
+   "hypothesis": "The Pi creates small files locally much faster than xs delivers them from mars.",
+   "design": "screening",
+   "state": "decided",
+   "runs": [
+    {
+     "id": "20261017T121633Z-H1a-pair-ceiling-neo",
+     "key": "pair/H1a-pair-ceiling-neo/20261017T121633Z-H1a-pair-ceiling-neo",
+     "state": "complete"
+    }
+   ],
+   "decision": "H1a: the Pi creates small files about as fast as xs delivers them: its own receiving is the limit",
+   "decidedUtc": "2026-10-17T13:01:18Z",
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "H1b",
+   "kind": "experiment",
+   "experiment": "H1b-pair-ceiling-mars",
+   "question": "When mars receives, can it create files faster than xs delivers them from the Pi?",
+   "estimateHours": 0.4,
+   "hypothesis": "mars creates small files locally much faster than xs delivers them from the Pi.",
+   "design": "screening",
+   "state": "decided",
+   "runs": [
+    {
+     "id": "20261017T121636Z-H1b-pair-ceiling-mars",
+     "key": "pair/H1b-pair-ceiling-mars/20261017T121636Z-H1b-pair-ceiling-mars",
+     "state": "complete"
+    }
+   ],
+   "decision": "H1b: mars creates small files at least twice as fast as xs delivers them: look at the Pi's sending side (small-flat neo\u2192mars local-x4 4.55\u00d7 [4.42, 4.68] faster; real-congress neo\u2192mars local-x4 3.78\u00d7 [3.64, 3.93] faster; small-deep neo\u2192mars local-x4 2.08\u00d7 [1.90, 2.28] faster)",
+   "decidedUtc": "2026-10-17T13:20:43Z",
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "H1b~end1",
+   "kind": "end",
+   "experiment": null,
+   "question": null,
+   "estimateHours": null,
+   "hypothesis": "mars creates small files about as fast as xs delivers them from the Pi",
+   "design": null,
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "H3",
+   "kind": "experiment",
+   "experiment": "H3-pair-mars-send",
+   "question": "Can a sending setting on mars get small files to the Pi faster?",
+   "estimateHours": 0.7,
+   "hypothesis": "A sending setting on mars delivers small trees to the Pi faster.",
+   "design": "screening",
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "H3~end1",
+   "kind": "end",
+   "experiment": null,
+   "question": null,
+   "estimateHours": null,
+   "hypothesis": "no sending setting on mars beat xs's best",
+   "design": null,
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "H4",
+   "kind": "experiment",
+   "experiment": "H4-pair-pi-receive",
+   "question": "Can fewer workers, larger writes or no compression help the Pi receive?",
+   "estimateHours": 0.7,
+   "hypothesis": "Fewer receiving workers, larger writes or no compression land small trees on the Pi faster.",
+   "design": "screening",
+   "state": "decided",
+   "runs": [
+    {
+     "id": "20261017T130118Z-H4-pair-pi-receive",
+     "key": "pair/H4-pair-pi-receive/20261017T130118Z-H4-pair-pi-receive",
+     "state": "complete"
+    }
+   ],
+   "decision": "H4: no receiving setting on the Pi beat xs's best",
+   "decidedUtc": "2026-10-17T16:12:00Z",
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "H4~end1",
+   "kind": "end",
+   "experiment": null,
+   "question": null,
+   "estimateHours": null,
+   "hypothesis": "no receiving setting on the Pi beat xs's best",
+   "design": null,
+   "state": "decided",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "H5",
+   "kind": "experiment",
+   "experiment": "H5-pair-pi-send",
+   "question": "Can less compression, fewer workers or bigger batches help the Pi send?",
+   "estimateHours": 0.7,
+   "hypothesis": "Turning compression off or down, leaving ssh a core, or batching reads sends small trees from the Pi faster.",
+   "design": "screening",
+   "state": "queued",
+   "runs": [
+    {
+     "id": "20261017T132043Z-H5-pair-pi-send",
+     "key": "pair/H5-pair-pi-send/20261017T132043Z-H5-pair-pi-send",
+     "state": null
+    }
+   ],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "H5~end1",
+   "kind": "end",
+   "experiment": null,
+   "question": null,
+   "estimateHours": null,
+   "hypothesis": "no sending setting on the Pi beat xs's best",
+   "design": null,
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "H6",
+   "kind": "experiment",
+   "experiment": "H6-pair-best-default",
+   "question": "Is xs's best small-file setting safe as the default for mixed and large trees?",
+   "estimateHours": 0.8,
+   "hypothesis": "xs's best small-file setting is no slower than its default on mixed and large trees, either way.",
+   "design": "screening",
+   "state": "decided",
+   "runs": [
+    {
+     "id": "20261017T121639Z-H6-pair-best-default",
+     "key": "pair/H6-pair-best-default/20261017T121639Z-H6-pair-best-default",
+     "state": "complete"
+    }
+   ],
+   "decision": "H6: xs's best setting was nowhere slower than its default",
+   "decidedUtc": "2026-10-17T15:01:48Z",
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "H6~end0",
+   "kind": "end",
+   "experiment": null,
+   "question": null,
+   "estimateHours": null,
+   "hypothesis": "xs's best setting was slower than its default somewhere: not safe as the default here",
+   "design": null,
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "H6~end1",
+   "kind": "end",
+   "experiment": null,
+   "question": null,
+   "estimateHours": null,
+   "hypothesis": "xs's best setting was nowhere slower than its default",
+   "design": null,
+   "state": "decided",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "H3c",
+   "kind": "confirm",
+   "experiment": "H3c-pair-mars-send-confirm",
+   "question": "Does mars's winning send setting hold up with fresh blocks?",
+   "estimateHours": 0.4,
+   "hypothesis": "Confirms the fastest arm of H3 with 12 fresh blocks, if it had one.",
+   "design": "confirmatory",
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": "H3"
+  },
+  {
+   "id": "H4c",
+   "kind": "confirm",
+   "experiment": "H4c-pair-pi-receive-confirm",
+   "question": "Does the Pi's winning receive setting hold up with fresh blocks?",
+   "estimateHours": 0.4,
+   "hypothesis": "Confirms the fastest arm of H4 with 12 fresh blocks, if it had one.",
+   "design": "confirmatory",
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": "H4"
+  },
+  {
+   "id": "H5c",
+   "kind": "confirm",
+   "experiment": "H5c-pair-pi-send-confirm",
+   "question": "Does the Pi's winning send setting hold up with fresh blocks?",
+   "estimateHours": 0.4,
+   "hypothesis": "Confirms the fastest arm of H5 with 12 fresh blocks, if it had one.",
+   "design": "confirmatory",
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": "H5"
+  },
+  {
+   "id": "F4a",
+   "kind": "fill",
+   "experiment": "F4a-pair-replicate",
+   "question": "Do the Pi and mars results hold steady over the weekend?",
+   "estimateHours": 0.3,
+   "hypothesis": "xs's best setting with -z stays ahead of rsync -az from run to run.",
+   "design": "screening",
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  }
+ ],
+ "edges": [
+  {
+   "from": "H0",
+   "to": "H1a",
+   "label": "then",
+   "taken": true
+  },
+  {
+   "from": "H0",
+   "to": "H1b",
+   "label": "then",
+   "taken": true
+  },
+  {
+   "from": "H0",
+   "to": "H6",
+   "label": "then",
+   "taken": true
+  },
+  {
+   "from": "H1a",
+   "to": "H3",
+   "label": "Pi \u2265 2\u00d7 faster locally",
+   "taken": false
+  },
+  {
+   "from": "H1a",
+   "to": "H4",
+   "label": "otherwise",
+   "taken": true
+  },
+  {
+   "from": "H1b",
+   "to": "H5",
+   "label": "mars \u2265 2\u00d7 faster locally",
+   "taken": true
+  },
+  {
+   "from": "H1b",
+   "to": "H1b~end1",
+   "label": "otherwise",
+   "taken": false
+  },
+  {
+   "from": "H3",
+   "to": "H3c",
+   "label": "an arm was faster",
+   "taken": null
+  },
+  {
+   "from": "H3",
+   "to": "H3~end1",
+   "label": "nothing faster",
+   "taken": null
+  },
+  {
+   "from": "H4",
+   "to": "H4c",
+   "label": "an arm was faster",
+   "taken": false
+  },
+  {
+   "from": "H4",
+   "to": "H4~end1",
+   "label": "nothing faster",
+   "taken": true
+  },
+  {
+   "from": "H5",
+   "to": "H5c",
+   "label": "an arm was faster",
+   "taken": null
+  },
+  {
+   "from": "H5",
+   "to": "H5~end1",
+   "label": "nothing faster",
+   "taken": null
+  },
+  {
+   "from": "H6",
+   "to": "H6~end0",
+   "label": "slower somewhere",
+   "taken": false
+  },
+  {
+   "from": "H6",
+   "to": "H6~end1",
+   "label": "never slower",
+   "taken": true
+  }
+ ],
+ "decisions": [
+  {
+   "utc": "2026-10-17T16:12:00Z",
+   "node": "H4",
+   "kind": "decision",
+   "text": "H4: no receiving setting on the Pi beat xs's best \u2192 end of this branch"
+  },
+  {
+   "utc": "2026-10-17T15:01:48Z",
+   "node": "H6",
+   "kind": "decision",
+   "text": "H6: xs's best setting was nowhere slower than its default \u2192 end of this branch"
+  },
+  {
+   "utc": "2026-10-17T13:20:47Z",
+   "node": "H5",
+   "kind": "queued",
+   "text": "H5 queued on mars (120 samples): after H1b: mars creates small files at least twice as fast as xs delivers them: look at the Pi's sending side"
+  },
+  {
+   "utc": "2026-10-17T13:20:43Z",
+   "node": "H1b",
+   "kind": "decision",
+   "text": "H1b: mars creates small files at least twice as fast as xs delivers them: look at the Pi's sending side (small-flat neo\u2192mars local-x4 4.55\u00d7 [4.42, 4.68] faster; real-congress neo\u2192mars local-x4 3.78\u00d7 [3.64, 3.93] faster; small-deep neo\u2192mars local-x4 2.08\u00d7 [1.90, 2.28] faster) \u2192 H5"
+  },
+  {
+   "utc": "2026-10-17T13:01:27Z",
+   "node": "H4",
+   "kind": "queued",
+   "text": "H4 queued on mars (120 samples): after H1a: the Pi creates small files about as fast as xs delivers them: its own receiving is the limit"
+  },
+  {
+   "utc": "2026-10-17T13:01:18Z",
+   "node": "H1a",
+   "kind": "decision",
+   "text": "H1a: the Pi creates small files about as fast as xs delivers them: its own receiving is the limit \u2192 H4"
+  },
+  {
+   "utc": "2026-10-17T12:16:43Z",
+   "node": "H6",
+   "kind": "queued",
+   "text": "H6 queued on mars (144 samples): after H0: baseline measured; next, which side limits small files, and the default question"
+  },
+  {
+   "utc": "2026-10-17T12:16:39Z",
+   "node": "H1b",
+   "kind": "queued",
+   "text": "H1b queued on mars (72 samples): after H0: baseline measured; next, which side limits small files, and the default question"
+  },
+  {
+   "utc": "2026-10-17T12:16:36Z",
+   "node": "H1a",
+   "kind": "queued",
+   "text": "H1a queued on mars (72 samples): after H0: baseline measured; next, which side limits small files, and the default question"
+  },
+  {
+   "utc": "2026-10-17T12:16:33Z",
+   "node": "H0",
+   "kind": "decision",
+   "text": "H0: baseline measured; next, which side limits small files, and the default question \u2192 H1a, H1b, H6"
+  },
+  {
+   "utc": "2026-10-17T02:11:57Z",
+   "node": "H0",
+   "kind": "queued",
+   "text": "H0 queued on mars (240 samples): start of the tree"
+  }
+ ]
+}

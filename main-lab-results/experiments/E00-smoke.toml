@@ -1,0 +1,27 @@
+# Harness smoke test: exercises every path of the agent on small corpora.
+# Not a measurement; two blocks per cell prove nothing about either tool.
+id = "E00-smoke"
+kind = "screening"
+hypothesis = "The agent records valid, verified samples for both tools, both directions, either SSH client and both scenarios."
+primary = "wall_s"
+delta = 0.03
+blocks = 2
+control = "rsync"
+verify = "full"
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[arms.xs]
+tool = "xs"
+rev = "bf596d28c5c9"
+flags = ["-a"]
+
+[matrix]
+link = "lan"
+corpus = ["tiny-one", "scale-count-10000"]
+scenario = ["fresh", "noop"]
+direction = ["neo>freya", "freya>neo"]
+client = ["sender", "receiver"]
+cache = ["warm"]

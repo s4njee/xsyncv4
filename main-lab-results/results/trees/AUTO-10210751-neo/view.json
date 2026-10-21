@@ -1,0 +1,193 @@
+{
+ "id": "AUTO-10210751-neo",
+ "question": "neo has 4.0 h of room: 6 h minus 0.2 h left on the sentinel and 1.8 h for the queued L2R4 plain psample baseline, which runs first as planned. The plan uses about 190 min, including rsync's possible confirmation on real-congress, which leaves margin for netem and the CPU cap stretching sample times. Every earlier reproduction capped neo as the sender. Here neo, an arm64 Linux Pi like lab2's Graviton receiver, receives from mars with 11 ms added and is held to 2 CPUs. This tests whether a starved receiver explains the congress-sample and real-projects losses. It does not duplicate L2R3/L2R4 (psample neo>mars) or the waiting confirmations, which only run if rsync screened ahead.",
+ "start": [
+  "N0",
+  "N1",
+  "N2",
+  "N3"
+ ],
+ "startedUtc": "2026-10-21T07:52:08Z",
+ "until": null,
+ "fills": 0,
+ "nodes": [
+  {
+   "id": "N0",
+   "kind": "experiment",
+   "experiment": "AP10210751-AP10210749-L2R7-congress-pull-wan11-cpu2",
+   "question": "For lab2's congress-sample fresh gap: does xs -a -j4 lose its lead over rsync -a on a fresh real-congress copy when the receiver, not the sender, is an arm64 host held to 2 CPUs behind 11 ms?",
+   "estimateHours": 0.3,
+   "hypothesis": "With neo receiving under an 11 ms round trip and a 2-CPU cap, rsync -a's time-to-durable comes within 5% of xs -a -j4 or beats it, unlike the plain mars>neo cell where rsync was 1.34x slower (J1d).",
+   "design": "screening",
+   "state": "decided",
+   "runs": [
+    {
+     "id": "20261021T075208Z-AP10210751-AP10210749-L2R7-congress-pull-wan11-cpu2",
+     "key": "neomars/AP10210751-AP10210749-L2R7-congress-pull-wan11-cpu2/20261021T075208Z-AP10210751-AP10210749-L2R7-congress-pull-wan11-cpu2",
+     "state": "complete"
+    }
+   ],
+   "decision": "N0: not clearly faster: the next window's plan reads this",
+   "decidedUtc": "2026-10-21T09:00:28Z",
+   "start": true,
+   "promote": null
+  },
+  {
+   "id": "N0~end1",
+   "kind": "end",
+   "experiment": null,
+   "question": null,
+   "estimateHours": null,
+   "hypothesis": "not clearly faster: the next window's plan reads this",
+   "design": null,
+   "state": "decided",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "N0c",
+   "kind": "confirm",
+   "experiment": "AP10210751-AP10210749-L2R7-congress-pull-wan11-cpu2-confirm",
+   "question": "Does rsync hold up on 8 fresh blocks?",
+   "estimateHours": 0.2,
+   "hypothesis": "Confirms the fastest arm of N0 with 8 fresh blocks, if it had one.",
+   "design": "confirmatory",
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": "N0"
+  },
+  {
+   "id": "N1",
+   "kind": "experiment",
+   "experiment": "AP10210751-AP10210749-L2R8-psample-pull-wan11-cpu2",
+   "question": "For lab2's real-projects fresh gap: on a fresh real-psample copy into a 2-CPU arm64 receiver behind 11 ms, is xs -a -j4 slower than rsync -a, or does it show a block-to-block stall like lab2's 8.8 to 98 s spread?",
+   "estimateHours": 0.2,
+   "hypothesis": "With neo receiving under 11 ms and 2 CPUs, xs -a -j4's time-to-durable is at least 5% behind rsync -a, or its per-block times vary far more than rsync's.",
+   "design": "screening",
+   "state": "decided",
+   "runs": [
+    {
+     "id": "20261021T075209Z-AP10210751-AP10210749-L2R8-psample-pull-wan11-cpu2",
+     "key": "neomars/AP10210751-AP10210749-L2R8-psample-pull-wan11-cpu2/20261021T075209Z-AP10210751-AP10210749-L2R8-psample-pull-wan11-cpu2",
+     "state": "complete"
+    }
+   ],
+   "decision": "N1: done (1 run)",
+   "decidedUtc": "2026-10-21T11:18:25Z",
+   "start": true,
+   "promote": null
+  },
+  {
+   "id": "N2",
+   "kind": "experiment",
+   "experiment": "AP10210751-AP10210749-L2P1-small-pull-wan11-cpu2",
+   "question": "Before lab2 measures them: does xs -a -j4 still beat rsync -a on fresh and no-op copies of small-flat, small-deep and mixed-bimodal into a 2-CPU arm64 receiver behind 11 ms?",
+   "estimateHours": 0.9,
+   "hypothesis": "In at least one of these six cells, rsync -a's time-to-durable comes within 5% of xs -a -j4's or beats it, since its plain-link lead there was 1.1x to 3x.",
+   "design": "screening",
+   "state": "decided",
+   "runs": [
+    {
+     "id": "20261021T075211Z-AP10210751-AP10210749-L2P1-small-pull-wan11-cpu2",
+     "key": "neomars/AP10210751-AP10210749-L2P1-small-pull-wan11-cpu2/20261021T075211Z-AP10210751-AP10210749-L2P1-small-pull-wan11-cpu2",
+     "state": "complete"
+    }
+   ],
+   "decision": "N2: done (1 run)",
+   "decidedUtc": "2026-10-21T11:44:43Z",
+   "start": true,
+   "promote": null
+  },
+  {
+   "id": "N3",
+   "kind": "experiment",
+   "experiment": "AP10210751-AP10210749-L2P2-congress-resync-wan11-cp",
+   "question": "In lab2's direction (2-CPU sender, 11 ms), does xs -a -j4 still beat rsync -a when re-syncing real-congress at a no-op and after a 1% change?",
+   "estimateHours": 0.4,
+   "hypothesis": "Under 11 ms and a 2-CPU sender, xs -a -j4 stays at least 5% faster than rsync -a at both the no-op and the 1% update of real-congress.",
+   "design": "screening",
+   "state": "decided",
+   "runs": [
+    {
+     "id": "20261021T075213Z-AP10210751-AP10210749-L2P2-congress-resync-wan11-cp",
+     "key": "neomars/AP10210751-AP10210749-L2P2-congress-resync-wan11-cp/20261021T075213Z-AP10210751-AP10210749-L2P2-congress-resync-wan11-cp",
+     "state": "complete"
+    }
+   ],
+   "decision": "N3: done (1 run)",
+   "decidedUtc": "2026-10-21T12:11:49Z",
+   "start": true,
+   "promote": null
+  }
+ ],
+ "edges": [
+  {
+   "from": "N0",
+   "to": "N0c",
+   "label": "clearly faster",
+   "taken": false
+  },
+  {
+   "from": "N0",
+   "to": "N0~end1",
+   "label": "no clear gain",
+   "taken": true
+  }
+ ],
+ "decisions": [
+  {
+   "utc": "2026-10-21T12:11:49Z",
+   "node": "N3",
+   "kind": "decision",
+   "text": "N3: done (1 run)"
+  },
+  {
+   "utc": "2026-10-21T11:44:43Z",
+   "node": "N2",
+   "kind": "decision",
+   "text": "N2: done (1 run)"
+  },
+  {
+   "utc": "2026-10-21T11:18:25Z",
+   "node": "N1",
+   "kind": "decision",
+   "text": "N1: done (1 run)"
+  },
+  {
+   "utc": "2026-10-21T09:00:28Z",
+   "node": "N0",
+   "kind": "decision",
+   "text": "N0: not clearly faster: the next window's plan reads this \u2192 end of this branch"
+  },
+  {
+   "utc": "2026-10-21T07:52:16Z",
+   "node": "N3",
+   "kind": "queued",
+   "text": "N3 queued on neo (32 samples): start of the tree"
+  },
+  {
+   "utc": "2026-10-21T07:52:13Z",
+   "node": "N2",
+   "kind": "queued",
+   "text": "N2 queued on neo (72 samples): start of the tree"
+  },
+  {
+   "utc": "2026-10-21T07:52:11Z",
+   "node": "N1",
+   "kind": "queued",
+   "text": "N1 queued on neo (12 samples): start of the tree"
+  },
+  {
+   "utc": "2026-10-21T07:52:09Z",
+   "node": "N0",
+   "kind": "queued",
+   "text": "N0 queued on neo (24 samples): start of the tree"
+  }
+ ]
+}

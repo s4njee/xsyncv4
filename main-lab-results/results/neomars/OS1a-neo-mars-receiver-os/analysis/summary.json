@@ -1,0 +1,19 @@
+{
+ "experiment": "OS1a-neo-mars-receiver-os",
+ "kind": "screening",
+ "hypothesis": "xs's time-to-durable relative to rsync differs by more than 5% between a macOS and a Linux receiver on small and deep trees, and e51c1df1329a beats its parent only when macOS receives.",
+ "primary": "durable_s",
+ "control": "rsync",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261020T055601Z-OS1a-neo-mars-receiver-os"
+ ],
+ "spec_sha256": [
+  "94e78dce7128e104689c61bf0d4d31d1e56c24de5bbd94d0f841f7d1bf6548ef"
+ ],
+ "valid_blocks": 48,
+ "void_attempts": 0,
+ "void_reasons": []
+}

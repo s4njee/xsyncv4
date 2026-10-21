@@ -1,0 +1,19 @@
+{
+ "experiment": "T1g-send-cores",
+ "kind": "screening",
+ "hypothesis": "Three sending workers on a four-core sender keep most of one worker's gain on byte-bound copies and lose nothing on small files or no-ops.",
+ "primary": "wall_s",
+ "control": "xs",
+ "delta": 0.03,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261014T175325Z-T1g-send-cores"
+ ],
+ "spec_sha256": [
+  "6ddbf80f002c5020ee8bbe9ac09854cdbaa3556cbeccc939b029e468b5246ec7"
+ ],
+ "valid_blocks": 80,
+ "void_attempts": 0,
+ "void_reasons": []
+}

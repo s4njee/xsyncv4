@@ -1,0 +1,22 @@
+{
+ "experiment": "AP10210142-L2R3-psample-fresh-wan11-cpu2",
+ "kind": "screening",
+ "hypothesis": "Under lab2's latency and a 2-CPU sender, xs -a -j4 reaches a durable fresh copy of real-psample at least 5% later than rsync -a, with more block-to-block spread than rsync.",
+ "primary": "durable_s",
+ "control": "xs-j4",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261021T014247Z-AP10210142-L2R3-psample-fresh-wan11-cpu2"
+ ],
+ "spec_sha256": [
+  "03846f1c4633091da8e36d9349368005c39c836b46f3dfd09ab0d3900654874a"
+ ],
+ "valid_blocks": 0,
+ "void_attempts": 24,
+ "void_reasons": [
+  "rsync: the destination does not match the corpus manifest: DIFFERS github/acritty/target/debug/incremental/alacritty-0apbfib5r6rer/s-hnarn3fo0v-1bemmqn-embc6e4s",
+  "xs-j4: the destination does not match the corpus manifest: DIFFERS github/acritty/target/debug/incremental/alacritty-0apbfib5r6rer/s-hnarn3fo0v-1bemmqn-embc6e4s"
+ ]
+}

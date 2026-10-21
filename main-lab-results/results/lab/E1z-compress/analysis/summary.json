@@ -1,0 +1,19 @@
+{
+ "experiment": "E1z-compress",
+ "kind": "confirmatory",
+ "hypothesis": "xs -az differs from rsync -az by more than 3% in time-to-durable on fresh copies.",
+ "primary": "durable_s",
+ "control": "rsync",
+ "delta": 0.03,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261014T220939Z-E1z-compress"
+ ],
+ "spec_sha256": [
+  "26fa56239eaa15ceb760112afb85c9f564750556ea40f6f109de8c9661b79e36"
+ ],
+ "valid_blocks": 60,
+ "void_attempts": 0,
+ "void_reasons": []
+}

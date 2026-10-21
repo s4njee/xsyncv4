@@ -1,0 +1,274 @@
+{
+ "schema": 1,
+ "experiment": "LC1-psample-local-baseline",
+ "spec_sha256": "c2643cec9e12c5e9c06f618a97b75d0c4891454b1ef5040d030a89c4813f8f7e",
+ "kind": "screening",
+ "bundle": "0a84cbfa7a1d",
+ "writes": {
+  "neo": 0,
+  "neo-ssd": 420909166460
+ },
+ "hypothesis": "Copying psample locally from NVMe to the T5 with cold caches, xs -aH is faster than rsync -aH and cp -a, and near a single tar stream.",
+ "primary": "durable_s",
+ "delta": 0.05,
+ "control": "rsync",
+ "seed": 91431,
+ "run_id": "20261018T184002Z-LC1-psample-local-baseline",
+ "driver": "neo-ssd",
+ "sample_timeout_s": 7200,
+ "results": "local",
+ "background": true,
+ "local_link": true,
+ "eager_cleanup": true,
+ "hours": null,
+ "hosts": {
+  "neo": {
+   "ssh": "[email]",
+   "name": "[host]",
+   "hostname": "neo",
+   "root": "~/benchmarks/xsyncv4/lab",
+   "interface": null,
+   "helper": true,
+   "gates": {},
+   "local": false,
+   "system": "Linux"
+  },
+  "neo-ssd": {
+   "ssh": "[email]",
+   "name": "[host]",
+   "hostname": "neo",
+   "root": "/mnt/ssd/xsbench",
+   "interface": null,
+   "helper": true,
+   "gates": {},
+   "local": false,
+   "system": "Linux"
+  }
+ },
+ "links": {
+  "neo-local-ssd": {
+   "hosts": [
+    "neo",
+    "neo-ssd"
+   ],
+   "medium": "local",
+   "driver": "neo-ssd",
+   "results": "local",
+   "background": true
+  }
+ },
+ "arms": [
+  {
+   "name": "rsync",
+   "tool": "rsync",
+   "flags": [
+    "-aH"
+   ],
+   "binary": {
+    "neo": "rsync",
+    "neo-ssd": "rsync"
+   }
+  },
+  {
+   "name": "xs",
+   "tool": "xs",
+   "flags": [
+    "-aH"
+   ],
+   "rev": "21ae6844ed20",
+   "binary": {
+    "neo": "~/benchmarks/xsyncv4/lab/bin/xs-21ae6844ed20",
+    "neo-ssd": "/mnt/ssd/xsbench/bin/xs-21ae6844ed20"
+   },
+   "sha256": {
+    "neo": "5b8a8640a0e90fc0d698b55eecea925b4d0ee5979e60413f186f9032a3979444",
+    "neo-ssd": "5b8a8640a0e90fc0d698b55eecea925b4d0ee5979e60413f186f9032a3979444"
+   },
+   "artifacts": {
+    "xs-darwin-arm64": "aa558bef25843fe83532f55bf3dc841a8d04b2401e1dbd1db01ec69bd9ce5fcb",
+    "xs-linux-amd64": "c2f3f7275a4f5b311d8170c13876ea1f81a3389360ead8973b3ac6144c198ee3",
+    "xs-linux-arm64": "5b8a8640a0e90fc0d698b55eecea925b4d0ee5979e60413f186f9032a3979444"
+   }
+  },
+  {
+   "name": "cp-a",
+   "tool": "cp",
+   "flags": [
+    "-a"
+   ],
+   "binary": {
+    "neo": "cp",
+    "neo-ssd": "cp"
+   }
+  },
+  {
+   "name": "cp-r",
+   "tool": "cp",
+   "flags": [
+    "-r"
+   ],
+   "binary": {
+    "neo": "cp",
+    "neo-ssd": "cp"
+   },
+   "verify": "content"
+  },
+  {
+   "name": "tar",
+   "tool": "pipe",
+   "flags": [],
+   "streams": 1,
+   "codec": "none",
+   "local": false,
+   "binary": {
+    "neo": "xspipe.py",
+    "neo-ssd": "xspipe.py"
+   },
+   "client": "sender"
+  }
+ ],
+ "cells": [
+  {
+   "id": "real-psample.fresh.neo-neo-ssd.receiver.cold",
+   "corpus": "real-psample",
+   "scenario": "fresh",
+   "sender": "neo",
+   "receiver": "neo-ssd",
+   "client": "receiver",
+   "link": "neo-local-ssd",
+   "cache": "cold"
+  }
+ ],
+ "corpora": {
+  "real-psample": {
+   "files": 711103,
+   "directories": 547983,
+   "bytes": 21045458323,
+   "digest": "1904660ff1e67214cd5629f447b04910322012598fdfb219052899f909e1ac14",
+   "quick_digest": "1c5858390a71a82667516908224c07faeb5409c916f047f5eaaeaf0c22858afb"
+  }
+ },
+ "blocks": [
+  {
+   "cell": "real-psample.fresh.neo-neo-ssd.receiver.cold",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "cp-a",
+     "rsync",
+     "cp-r",
+     "tar",
+     "xs"
+    ],
+    [
+     "cp-r",
+     "tar",
+     "cp-a",
+     "rsync",
+     "xs"
+    ],
+    [
+     "cp-r",
+     "rsync",
+     "xs",
+     "tar",
+     "cp-a"
+    ]
+   ]
+  },
+  {
+   "cell": "real-psample.fresh.neo-neo-ssd.receiver.cold",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "cp-r",
+     "rsync",
+     "xs",
+     "cp-a",
+     "tar"
+    ],
+    [
+     "xs",
+     "tar",
+     "cp-r",
+     "rsync",
+     "cp-a"
+    ],
+    [
+     "cp-r",
+     "rsync",
+     "tar",
+     "cp-a",
+     "xs"
+    ]
+   ]
+  },
+  {
+   "cell": "real-psample.fresh.neo-neo-ssd.receiver.cold",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync",
+     "tar",
+     "xs",
+     "cp-a",
+     "cp-r"
+    ],
+    [
+     "cp-a",
+     "xs",
+     "tar",
+     "cp-r",
+     "rsync"
+    ],
+    [
+     "tar",
+     "xs",
+     "cp-r",
+     "cp-a",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "real-psample.fresh.neo-neo-ssd.receiver.cold",
+   "block": 3,
+   "verify_full": true,
+   "orders": [
+    [
+     "tar",
+     "cp-r",
+     "xs",
+     "cp-a",
+     "rsync"
+    ],
+    [
+     "xs",
+     "tar",
+     "cp-a",
+     "rsync",
+     "cp-r"
+    ],
+    [
+     "cp-a",
+     "rsync",
+     "tar",
+     "cp-r",
+     "xs"
+    ]
+   ]
+  }
+ ],
+ "scripts": {
+  "probe.py": "a89b145b8f76fc4d5444cea6af3c124a5b2e5885226998c726ca95fd9d881d36",
+  "corpus.py": "07f178f516657266850ba871032254fd28316928741e3bece1794a094db015ba",
+  "corpora.json": "5c641f561e2bcf8fe5af1c39adb9054ab0e6d479d8ef0e67204ad69cef148a9c",
+  "agent.py": "a5e6b3f7fb712faf582d06a7014cdd5706498ad8d690be081f59082941a4a69d",
+  "runner.py": "cce71fee149764ad1a5c913061f19620a8ff44f792d23d55f7a290d59a9e20ff",
+  "xspipe.py": "94b3fccfc6e994d227077c453f90323ab55337fd8a98231d16a10696e8ebab6b",
+  "measure.py": "5065310f480ff1cabfa7c645f0db342624a02f9a081b96069d50d52b3d224777"
+ }
+}

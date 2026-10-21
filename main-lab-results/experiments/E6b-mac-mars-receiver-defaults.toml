@@ -1,0 +1,37 @@
+# E6b: the same confirmation on the Mac and mars at 10 GbE. Only mars receiving
+# changes workers (the Mac's APFS receiver was already capped at four); the
+# other direction checks the peer wait and guards against a regression. Its rsync
+# arm is also #3's re-baseline of this pair since mars was reformatted. Needs
+# small-flat, small-deep, mixed-bimodal and tiny-one generated on mars first.
+id = "E6b-mac-mars-receiver-defaults"
+kind = "confirmatory"
+hypothesis = "xs with at most four receiving workers and a backed-off peer wait is faster than its parent in at least one cell into mars and slower in none, both ways."
+primary = "wall_s"
+delta = 0.05
+blocks = 12
+control = "xs"
+verify = "first-last"
+cleanup = "eager"
+sample_timeout_s = 3600
+
+[arms.xs]
+tool = "xs"
+rev = "21ae6844ed20"
+flags = ["-aH"]
+
+[arms.xs-recv4]
+tool = "xs"
+rev = "98b250569c69"
+flags = ["-aH"]
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-aH"]
+
+[matrix]
+link = "mac-mars-10g"
+corpus = ["tiny-one", "small-flat", "small-deep", "mixed-bimodal", "real-congress"]
+scenario = ["fresh", "noop"]
+direction = ["mac>mars", "mars>mac"]
+client = ["initiator"]
+cache = ["warm"]

@@ -1,0 +1,41 @@
+# J2 (2026-10-20): -j4 against -j8 on one machine, the Pi 5 copying from its NVMe home to its Samsung
+# T5 (link neo-local-ssd). neo's default is 4 workers, so the default arm and -j4 are the same
+# setting twice (their ratio is the noise floor) and -j8 runs twice as many workers as cores. LC2
+# measured only a cold fresh psample copy (-j8 1.055 [0.880, 1.265] of the default, 4 blocks); this
+# asks the VPS lab's question, no-ops and small trees, warm.
+id = "J2-neo-local-jobs"
+kind = "screening"
+hypothesis = "On a four-core Pi copying locally, -j8 differs from -j4 by more than 5% in time-to-durable on small-file and no-op copies."
+primary = "durable_s"
+delta = 0.05
+blocks = 8
+control = "xs"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.xs]
+tool = "xs"
+rev = "e51c1df1329a"
+flags = ["-a"]
+
+[arms.xs-j4]
+tool = "xs"
+rev = "e51c1df1329a"
+flags = ["-a", "-j4"]
+
+[arms.xs-j8]
+tool = "xs"
+rev = "e51c1df1329a"
+flags = ["-a", "-j8"]
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[matrix]
+link = "neo-local-ssd"
+corpus = ["small-flat", "small-deep", "mixed-bimodal", "real-congress"]
+scenario = ["fresh", "noop"]
+direction = ["neo>neo-ssd"]
+client = ["receiver"]
+cache = ["warm"]

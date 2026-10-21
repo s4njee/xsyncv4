@@ -1,0 +1,34 @@
+# E3b, confirmation: -z with the fixed adaptive level (e1f05b518049), on
+# fresh blocks against plain xs alone, as section 5.7 requires of a screened
+# candidate. rsync is in each block for reference, not for a verdict:
+# analyse it with report.py --control rsync.
+id = "E3b-compress-confirm"
+kind = "confirmatory"
+hypothesis = "xs -z is more than 3% faster than xs on compressible corpora over gigabit, and not more than 3% slower on random data."
+primary = "wall_s"
+delta = 0.03
+blocks = 12
+control = "xs"
+verify = "first-last"
+
+[arms.xs]
+tool = "xs"
+rev = "e1f05b518049"
+flags = ["-a"]
+
+[arms.xs-z]
+tool = "xs"
+rev = "e1f05b518049"
+flags = ["-a", "-z"]
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[matrix]
+link = "lan"
+corpus = ["mixed-bimodal", "small-real", "small-flat", "small-opaque"]
+scenario = ["fresh"]
+direction = ["neo>freya", "freya>neo"]
+client = ["sender"]
+cache = ["warm"]

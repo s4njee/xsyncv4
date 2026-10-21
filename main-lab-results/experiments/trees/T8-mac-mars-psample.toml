@@ -1,0 +1,34 @@
+# T8: the Mac/mars axis, the primary question "what is the fastest I can
+# transfer the psample dataset bidirectionally". One short screening copies the
+# 20 GB real-psample tree fresh each way with rsync -aH as the baseline and
+# xs -aH as the candidate; if xs clearly beats rsync -aH the winner is confirmed
+# with fresh blocks, else rsync -aH is the fastest here and that answers the
+# question. The -z arms are gone (the tree is incompressible). Resumed 2026-10-18
+# once mars was reformatted and the Mac was paired with its X540 again
+# (mac-mars-10g); no `until`/`fill`, mac/mars runs are started on demand.
+id = "T8-mac-mars-psample"
+question = "How fast can I transfer the psample tree between the Mac and mars, each way, and is xs faster than rsync -aH?"
+start = ["A"]
+
+[nodes.A]
+spec = "MA3-psample-bidir.toml"
+front = true
+question = "Over four paired blocks, is xs -aH faster than rsync -aH on the psample tree, fresh, in either direction?"
+
+  [[nodes.A.branch]]
+  when = { arm = "xs", speed_at_least = 1.05 }
+  next = ["Ac"]
+  note = "xs screens at least 5% faster than rsync -aH: confirm the winner with fresh blocks"
+  label = "xs >= 1.05x rsync"
+
+  [[nodes.A.branch]]
+  otherwise = true
+  next = []
+  note = "no xs gain on psample: rsync -aH is the fastest here, and that answers the question"
+  label = "rsync fastest"
+
+[nodes.Ac]
+promote = "A"
+id = "MA3-psample-confirm"
+blocks = 12
+question = "Does xs repeat its psample gain with 12 fresh blocks, and is the benefit direction-specific?"

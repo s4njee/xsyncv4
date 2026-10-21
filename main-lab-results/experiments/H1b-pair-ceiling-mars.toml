@@ -1,0 +1,36 @@
+# H1b (tree T4): mars as receiver. The same check the other way: mars creating the files
+# locally against xs delivering them from the Pi.
+id = "H1b-pair-ceiling-mars"
+kind = "screening"
+hypothesis = "mars creates small files locally much faster than xs delivers them from the Pi."
+primary = "durable_s"
+delta = 0.03
+blocks = 8
+control = "xs-z-best"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.xs-z-best]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-az", "--no-atomic"]
+tune = { receiver = "jobs=4" }
+
+[arms.local-x1]
+tool = "pipe"
+streams = 1
+local = true
+
+[arms.local-x4]
+tool = "pipe"
+streams = 4
+local = true
+
+[matrix]
+link = "neo-mars-1g"
+corpus = ["small-flat", "small-deep", "real-congress"]
+scenario = ["fresh"]
+direction = ["neo>mars"]
+client = ["initiator"]
+cache = ["warm"]

@@ -1,0 +1,54 @@
+# H5 (tree T4, if mars can take files faster than the Pi sends them): the Pi's sending side.
+# Compression off, forced zstd level 1, three sending workers, larger read batches.
+id = "H5-pair-pi-send"
+kind = "screening"
+hypothesis = "Turning compression off or down, leaving ssh a core, or batching reads sends small trees from the Pi faster."
+primary = "durable_s"
+delta = 0.03
+blocks = 8
+control = "xs-z-best"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.xs-z-best]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-az", "--no-atomic"]
+tune = { receiver = "jobs=4" }
+
+[arms.xs-best]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-a", "--no-atomic"]
+tune = { receiver = "jobs=4" }
+
+[arms.xs-z1-best]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-az", "--no-atomic", "--compress-level=1"]
+tune = { receiver = "jobs=4" }
+
+[arms.send3]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-az", "--no-atomic"]
+tune = { receiver = "jobs=4", sender = "jobs=3" }
+
+[arms.batch256]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-az", "--no-atomic"]
+tune = { receiver = "jobs=4", sender = "read_batch_files=256,read_batch_bytes=33554432" }
+
+[matrix]
+link = "neo-mars-1g"
+corpus = ["small-flat", "small-deep", "real-congress"]
+scenario = ["fresh"]
+direction = ["neo>mars"]
+client = ["initiator"]
+cache = ["warm"]

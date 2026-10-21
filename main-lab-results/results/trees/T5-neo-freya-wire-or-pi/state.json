@@ -1,0 +1,72 @@
+{
+ "tree": "T5-neo-freya-wire-or-pi",
+ "started_utc": "2026-10-17T15:23:01Z",
+ "nodes": {
+  "B": {
+   "state": "decided",
+   "runs": [
+    "20261017T153637Z-NE1-wire-or-pi"
+   ],
+   "why": "start of the tree",
+   "error": "neo: cannot create ~/benchmarks/xsyncv4/lab/lib/b135cedd700c.incoming: Connection timed out during banner exchange\nConnection to UNKNOWN port 65535 timed out",
+   "spec": "NE1-wire-or-pi.toml",
+   "decision": {
+    "utc": "2026-10-17T16:26:44Z",
+    "text": "B: xs fills the wire both ways on large files: the link is the limit, and only the small-file default is left (large-text neo\u2192freya xs 0.93 Gb/s; large-text freya\u2192neo xs 0.92 Gb/s)",
+    "next": [
+     "S"
+    ],
+    "branch": 0
+   }
+  },
+  "S": {
+   "state": "decided",
+   "runs": [
+    "20261017T162644Z-D9-lan-best-default"
+   ],
+   "spec": "D9-lan-best-default.toml",
+   "decision": {
+    "utc": "2026-10-17T17:46:42Z",
+    "text": "S: xs's best setting was nowhere slower than its default",
+    "next": [
+     "N"
+    ],
+    "branch": 1
+   }
+  },
+  "N": {
+   "state": "decided",
+   "runs": [
+    "20261017T174642Z-D10-lan-noop-best"
+   ],
+   "spec": "D10-lan-noop-best.toml",
+   "decision": {
+    "utc": "2026-10-17T20:25:42Z",
+    "text": "N: xs's best setting was faster on no-op copies too (small-real neo\u2192freya xs-best 1.64\u00d7 [1.47, 1.83] faster; real-congress neo\u2192freya xs-best 1.30\u00d7 [1.17, 1.45] faster)",
+    "next": [],
+    "branch": 0
+   }
+  },
+  "F1a": {
+   "state": "held",
+   "runs": [
+    "20261017T202542Z-F1a-lan-replicate",
+    "20261017T205646Z-F1a-lan-replicate",
+    "20261017T212914Z-F1a-lan-replicate",
+    "20261017T215941Z-F1a-lan-replicate",
+    "20261017T224604Z-F1a-lan-replicate",
+    "20261017T230759Z-F1a-lan-replicate"
+   ],
+   "spec": "F1a-lan-replicate.toml",
+   "decision": {
+    "utc": "2026-10-17T23:52:25Z",
+    "text": "Retired after the USB 2.5 Gb/s adapter change; old gigabit samples are preserved separately.",
+    "next": []
+   },
+   "continued": [
+    "20261017T230759Z-F1a-lan-replicate"
+   ]
+  }
+ },
+ "fills": 5
+}

@@ -1,0 +1,266 @@
+{
+ "schema": 1,
+ "utc": "2026-10-10T17:43:44.564599+00:00",
+ "platform": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
+ "host": "MacBookPro",
+ "cpus": 10,
+ "initial_loadavg": [
+  37.185546875,
+  32.5732421875,
+  31.13818359375
+ ],
+ "cache": "retained OS caches",
+ "disk": "Filesystem   1024-blocks       Used Available Capacity  iused      ifree %iused  Mounted on\n/dev/disk3s5  3902665360 3772432580 100767848    98% 24061040 1007678480    2%   /System/Volumes/Data\n",
+ "files_per_case": 65536,
+ "runs": 4,
+ "records": [
+  {
+   "returncode": 0,
+   "wall_seconds": 5.004220125032589,
+   "user_seconds": 0.192747,
+   "system_seconds": 4.573071,
+   "max_rss_bytes": 7290880,
+   "voluntary_switches": 1,
+   "involuntary_switches": 7067,
+   "case": "many-subtrees",
+   "tool": "reference",
+   "run": 1,
+   "command": [
+    "~/projects/xsyncv4/.bench/p3-f12-reference-build/xs",
+    "-a",
+    "--delete",
+    "--stats",
+    "--no-fallback",
+    "--no-progress",
+    "-j4",
+    "~/projects/xsyncv4/.bench/p3-f12-delete-65536/source/",
+    "~/projects/xsyncv4/.bench/p3-f12-delete-65536/destination/"
+   ],
+   "verified": true,
+   "stdout": "\nNumber of files: 0 (reg: 0, dir: 0)\nNumber of created files: 0 (reg: 0, dir: 0)\nNumber of deleted files: 66,624\nNumber of regular files transferred: 0\nTotal file size: 0 bytes\nTotal transferred file size: 0 bytes\nDelta literal data: 0 bytes\nDelta matched data: 0 bytes\nTotal bytes sent: 0\nTotal bytes received: 0\n\nsent 0 bytes  received 0 bytes  0.00 bytes/sec\ntotal size is 0  speedup is 0.00\n",
+   "stderr": ""
+  },
+  {
+   "returncode": 0,
+   "wall_seconds": 5.496507040923461,
+   "user_seconds": 0.201956,
+   "system_seconds": 4.743127,
+   "max_rss_bytes": 4128768,
+   "voluntary_switches": 1,
+   "involuntary_switches": 9125,
+   "case": "many-subtrees",
+   "tool": "candidate-j1",
+   "run": 1,
+   "command": [
+    "~/projects/xsyncv4/.bench/p3-f12-frozen/xs",
+    "-a",
+    "--delete",
+    "--stats",
+    "--no-fallback",
+    "--no-progress",
+    "-j1",
+    "~/projects/xsyncv4/.bench/p3-f12-delete-65536/source/",
+    "~/projects/xsyncv4/.bench/p3-f12-delete-65536/destination/"
+   ],
+   "verified": true,
+   "stdout": "\nNumber of files: 0 (reg: 0, dir: 0)\nNumber of created files: 0 (reg: 0, dir: 0)\nNumber of deleted files: 66,624\nNumber of regular files transferred: 0\nTotal file size: 0 bytes\nTotal transferred file size: 0 bytes\nDelta literal data: 0 bytes\nDelta matched data: 0 bytes\nTotal bytes sent: 0\nTotal bytes received: 0\n\nsent 0 bytes  received 0 bytes  0.00 bytes/sec\ntotal size is 0  speedup is 0.00\n",
+   "stderr": ""
+  },
+  {
+   "returncode": 0,
+   "wall_seconds": 3.126380375120789,
+   "user_seconds": 0.347975,
+   "system_seconds": 9.627323,
+   "max_rss_bytes": 7323648,
+   "voluntary_switches": 1,
+   "involuntary_switches": 126765,
+   "case": "many-subtrees",
+   "tool": "candidate-j4",
+   "run": 1,
+   "command": [
+    "~/projects/xsyncv4/.bench/p3-f12-frozen/xs",
+    "-a",
+    "--delete",
+    "--stats",
+    "--no-fallback",
+    "--no-progress",
+    "-j4",
+    "~/projects/xsyncv4/.bench/p3-f12-delete-65536/source/",
+    "~/projects/xsyncv4/.bench/p3-f12-delete-65536/destination/"
+   ],
+   "verified": true,
+   "stdout": "\nNumber of files: 0 (reg: 0, dir: 0)\nNumber of created files: 0 (reg: 0, dir: 0)\nNumber of deleted files: 66,624\nNumber of regular files transferred: 0\nTotal file size: 0 bytes\nTotal transferred file size: 0 bytes\nDelta literal data: 0 bytes\nDelta matched data: 0 bytes\nTotal bytes sent: 0\nTotal bytes received: 0\n\nsent 0 bytes  received 0 bytes  0.00 bytes/sec\ntotal size is 0  speedup is 0.00\n",
+   "stderr": ""
+  },
+  {
+   "returncode": 0,
+   "wall_seconds": 3.1334122500848025,
+   "user_seconds": 0.051934999999999995,
+   "system_seconds": 2.932482,
+   "max_rss_bytes": 6782976,
+   "voluntary_switches": 445,
+   "involuntary_switches": 4125,
+   "case": "many-subtrees",
+   "tool": "rsync",
+   "run": 1,
+   "command": [
+    "/opt/homebrew/bin/rsync",
+    "-a",
+    "--delete",
+    "--stats",
+    "~/projects/xsyncv4/.bench/p3-f12-delete-65536/source/",
+    "~/projects/xsyncv4/.bench/p3-f12-delete-65536/destination/"
+   ],
+   "verified": true,
+   "stdout": "\nNumber of files: 1 (dir: 1)\nNumber of created files: 0\nNumber of deleted files: 66,624 (reg: 65,536, dir: 1,088)\nNumber of regular files transferred: 0\nTotal file size: 0 bytes\nTotal transferred file size: 0 bytes\nLiteral data: 0 bytes\nMatched data: 0 bytes\nFile list size: 0\nFile list generation time: 0.002 seconds\nFile list transfer time: 0.000 seconds\nTotal bytes sent: 57\nTotal bytes received: 2,057,117\n\nsent 57 bytes  received 2,057,117 bytes  587,764.00 bytes/sec\ntotal size is 0  speedup is 0.00\n",
+   "stderr": ""
+  },
+  {
+   "returncode": 0,
+   "wall_seconds": 5.3922424169722944,
+   "user_seconds": 0.209801,
+   "system_seconds": 4.8273209999999995,
+   "max_rss_bytes": 4128768,
+   "voluntary_switches": 1,
+   "involuntary_switches": 10298,
+   "case": "many-subtrees",
+   "tool": "candidate-j1",
+   "run": 2,
+   "command": [
+    "~/projects/xsyncv4/.bench/p3-f12-frozen/xs",
+    "-a",
+    "--delete",
+    "--stats",
+    "--no-fallback",
+    "--no-progress",
+    "-j1",
+    "~/projects/xsyncv4/.bench/p3-f12-delete-65536/source/",
+    "~/projects/xsyncv4/.bench/p3-f12-delete-65536/destination/"
+   ],
+   "verified": true,
+   "stdout": "\nNumber of files: 0 (reg: 0, dir: 0)\nNumber of created files: 0 (reg: 0, dir: 0)\nNumber of deleted files: 66,624\nNumber of regular files transferred: 0\nTotal file size: 0 bytes\nTotal transferred file size: 0 bytes\nDelta literal data: 0 bytes\nDelta matched data: 0 bytes\nTotal bytes sent: 0\nTotal bytes received: 0\n\nsent 0 bytes  received 0 bytes  0.00 bytes/sec\ntotal size is 0  speedup is 0.00\n",
+   "stderr": ""
+  },
+  {
+   "returncode": 0,
+   "wall_seconds": 3.3698381669819355,
+   "user_seconds": 0.36089099999999996,
+   "system_seconds": 9.935375,
+   "max_rss_bytes": 7356416,
+   "voluntary_switches": 3,
+   "involuntary_switches": 132850,
+   "case": "many-subtrees",
+   "tool": "candidate-j4",
+   "run": 2,
+   "command": [
+    "~/projects/xsyncv4/.bench/p3-f12-frozen/xs",
+    "-a",
+    "--delete",
+    "--stats",
+    "--no-fallback",
+    "--no-progress",
+    "-j4",
+    "~/projects/xsyncv4/.bench/p3-f12-delete-65536/source/",
+    "~/projects/xsyncv4/.bench/p3-f12-delete-65536/destination/"
+   ],
+   "verified": true,
+   "stdout": "\nNumber of files: 0 (reg: 0, dir: 0)\nNumber of created files: 0 (reg: 0, dir: 0)\nNumber of deleted files: 66,624\nNumber of regular files transferred: 0\nTotal file size: 0 bytes\nTotal transferred file size: 0 bytes\nDelta literal data: 0 bytes\nDelta matched data: 0 bytes\nTotal bytes sent: 0\nTotal bytes received: 0\n\nsent 0 bytes  received 0 bytes  0.00 bytes/sec\ntotal size is 0  speedup is 0.00\n",
+   "stderr": ""
+  },
+  {
+   "returncode": 0,
+   "wall_seconds": 3.7257940829731524,
+   "user_seconds": 0.062391999999999996,
+   "system_seconds": 3.28106,
+   "max_rss_bytes": 6881280,
+   "voluntary_switches": 453,
+   "involuntary_switches": 9405,
+   "case": "many-subtrees",
+   "tool": "rsync",
+   "run": 2,
+   "command": [
+    "/opt/homebrew/bin/rsync",
+    "-a",
+    "--delete",
+    "--stats",
+    "~/projects/xsyncv4/.bench/p3-f12-delete-65536/source/",
+    "~/projects/xsyncv4/.bench/p3-f12-delete-65536/destination/"
+   ],
+   "verified": true,
+   "stdout": "\nNumber of files: 1 (dir: 1)\nNumber of created files: 0\nNumber of deleted files: 66,624 (reg: 65,536, dir: 1,088)\nNumber of regular files transferred: 0\nTotal file size: 0 bytes\nTotal transferred file size: 0 bytes\nLiteral data: 0 bytes\nMatched data: 0 bytes\nFile list size: 0\nFile list generation time: 0.005 seconds\nFile list transfer time: 0.000 seconds\nTotal bytes sent: 57\nTotal bytes received: 2,057,117\n\nsent 57 bytes  received 2,057,117 bytes  587,764.00 bytes/sec\ntotal size is 0  speedup is 0.00\n",
+   "stderr": ""
+  },
+  {
+   "returncode": 0,
+   "wall_seconds": 5.357597375055775,
+   "user_seconds": 0.207983,
+   "system_seconds": 4.755736,
+   "max_rss_bytes": 7290880,
+   "voluntary_switches": 0,
+   "involuntary_switches": 9200,
+   "case": "many-subtrees",
+   "tool": "reference",
+   "run": 2,
+   "command": [
+    "~/projects/xsyncv4/.bench/p3-f12-reference-build/xs",
+    "-a",
+    "--delete",
+    "--stats",
+    "--no-fallback",
+    "--no-progress",
+    "-j4",
+    "~/projects/xsyncv4/.bench/p3-f12-delete-65536/source/",
+    "~/projects/xsyncv4/.bench/p3-f12-delete-65536/destination/"
+   ],
+   "verified": true,
+   "stdout": "\nNumber of files: 0 (reg: 0, dir: 0)\nNumber of created files: 0 (reg: 0, dir: 0)\nNumber of deleted files: 66,624\nNumber of regular files transferred: 0\nTotal file size: 0 bytes\nTotal transferred file size: 0 bytes\nDelta literal data: 0 bytes\nDelta matched data: 0 bytes\nTotal bytes sent: 0\nTotal bytes received: 0\n\nsent 0 bytes  received 0 bytes  0.00 bytes/sec\ntotal size is 0  speedup is 0.00\n",
+   "stderr": ""
+  },
+  {
+   "returncode": 0,
+   "wall_seconds": 3.734258583979681,
+   "user_seconds": 0.36374799999999996,
+   "system_seconds": 9.778945,
+   "max_rss_bytes": 7290880,
+   "voluntary_switches": 0,
+   "involuntary_switches": 132043,
+   "case": "many-subtrees",
+   "tool": "candidate-j4",
+   "run": 3,
+   "command": [
+    "~/projects/xsyncv4/.bench/p3-f12-frozen/xs",
+    "-a",
+    "--delete",
+    "--stats",
+    "--no-fallback",
+    "--no-progress",
+    "-j4",
+    "~/projects/xsyncv4/.bench/p3-f12-delete-65536/source/",
+    "~/projects/xsyncv4/.bench/p3-f12-delete-65536/destination/"
+   ],
+   "verified": true,
+   "stdout": "\nNumber of files: 0 (reg: 0, dir: 0)\nNumber of created files: 0 (reg: 0, dir: 0)\nNumber of deleted files: 66,624\nNumber of regular files transferred: 0\nTotal file size: 0 bytes\nTotal transferred file size: 0 bytes\nDelta literal data: 0 bytes\nDelta matched data: 0 bytes\nTotal bytes sent: 0\nTotal bytes received: 0\n\nsent 0 bytes  received 0 bytes  0.00 bytes/sec\ntotal size is 0  speedup is 0.00\n",
+   "stderr": ""
+  }
+ ],
+ "harness_sha256": "2283a86a92cb71a7e9f830be9282539e90f571dbe3ab6aeded91dbdb16d2f4ff",
+ "binaries": {
+  "reference": {
+   "sha256": "4a1b2fa6c9092ef7e7a43c482ff37aa5626cc7da88c3251a05e31b04eca620d3",
+   "version": "xs  version 0.1.0  protocol version 4  git 738bab04d758"
+  },
+  "candidate-j1": {
+   "sha256": "4f1532a898fb2939a753f4e50327fc6727343174c445e7e8fdf7fa4b24ff8040",
+   "version": "xs  version 0.1.0  protocol version 4  git 165e7cf3b1ea"
+  },
+  "candidate-j4": {
+   "sha256": "4f1532a898fb2939a753f4e50327fc6727343174c445e7e8fdf7fa4b24ff8040",
+   "version": "xs  version 0.1.0  protocol version 4  git 165e7cf3b1ea"
+  },
+  "rsync": {
+   "sha256": "98d3d56b3e7ee67412203236afc6da8f4021527e98eaa72909340d2b40bcf98c",
+   "version": "rsync  version 3.4.4  protocol version 32"
+  }
+ },
+ "aborted_reason": "Intermediate implementation superseded to parallelize a single stale root; this partial run does not establish F-12 completion."
+}

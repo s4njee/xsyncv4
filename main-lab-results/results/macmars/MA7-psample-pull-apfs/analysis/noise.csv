@@ -1,0 +1,6 @@
+experiment,kind,cell_id,corpus,scenario,sender,receiver,client,link,cache,arm,n_blocks,sigma_d,blocks_for_2pct,blocks_for_3pct,blocks_for_5pct,blocks_for_10pct,blocks_equivalent_2pct,blocks_equivalent_3pct,blocks_equivalent_5pct,blocks_equivalent_10pct
+MA7-psample-pull-apfs,screening,real-psample.noop.mars-mac.receiver.warm,real-psample,noop,mars,mac,receiver,mac-mars-10g,warm,xs-O,6,0.021087313164791628,11,8,8,8,14,8,8,8
+MA7-psample-pull-apfs,screening,real-psample.noop.mars-mac.receiver.warm,real-psample,noop,mars,mac,receiver,mac-mars-10g,warm,xs-noatomic,6,0.025147892522170662,15,8,8,8,19,10,8,8
+MA7-psample-pull-apfs,screening,real-psample.noop.mars-mac.receiver.warm,real-psample,noop,mars,mac,receiver,mac-mars-10g,warm,xs-recv8,6,0.014873639518127516,8,8,8,8,8,8,8,8
+MA7-psample-pull-apfs,screening,real-psample.noop.mars-mac.receiver.warm,real-psample,noop,mars,mac,receiver,mac-mars-10g,warm,xs-scan4,6,0.0200728208509772,11,8,8,8,13,8,8,8
+MA7-psample-pull-apfs,screening,real-psample.noop.mars-mac.receiver.warm,real-psample,noop,mars,mac,receiver,mac-mars-10g,warm,rsync,6,0.026020772636744915,16,9,8,8,21,11,8,8

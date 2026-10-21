@@ -1,0 +1,324 @@
+{
+ "schema": 1,
+ "run_id": "20261018T020103Z-MN1-psample-bidir",
+ "started_utc": "2026-10-18T02:03:03.077+00:00",
+ "driver": "[host]",
+ "plan": {
+  "schema": 1,
+  "experiment": "MN1-psample-bidir",
+  "spec_sha256": "61c2855cd26aba0a5754201287b2bca30adce8f524ca0ab5e47aa66d6da4e451",
+  "kind": "screening",
+  "bundle": "021ae1ff14be",
+  "writes": {
+   "mac": 168363666584,
+   "neo": 168363666584
+  },
+  "hypothesis": "On the direct Mac/neo link, xs copies the pinned psample tree faster than rsync -aH, fresh, in both directions.",
+  "primary": "wall_s",
+  "delta": 0.05,
+  "control": "rsync",
+  "seed": 48022,
+  "run_id": "20261018T020103Z-MN1-psample-bidir",
+  "driver": "mac",
+  "sample_timeout_s": 7200,
+  "results": "macneo",
+  "background": false,
+  "eager_cleanup": true,
+  "hours": null,
+  "hosts": {
+   "mac": {
+    "ssh": "[email]",
+    "name": "[host]",
+    "hostname": "[host]",
+    "root": "~/benchmarks/xsbench.noindex",
+    "interface": "en4",
+    "helper": false,
+    "gates": {},
+    "local": true,
+    "system": "Darwin"
+   },
+   "neo": {
+    "ssh": "[email]",
+    "name": "[host]",
+    "hostname": "neo",
+    "root": "~/benchmarks/xsyncv4/lab",
+    "interface": "eth1",
+    "helper": true,
+    "gates": {},
+    "local": false,
+    "system": "Linux"
+   }
+  },
+  "links": {
+   "mac-neo-direct": {
+    "hosts": [
+     "mac",
+     "neo"
+    ],
+    "medium": "wired",
+    "min_speed_mbps": 10000,
+    "min_speed_mbps_by_host": {
+     "neo": 4000
+    },
+    "max_rtt_ms": 5.0,
+    "initiator": "mac",
+    "driver": "mac",
+    "results": "macneo",
+    "address": {
+     "mac": "[host]",
+     "neo": "[address]"
+    }
+   }
+  },
+  "arms": [
+   {
+    "name": "rsync",
+    "tool": "rsync",
+    "flags": [
+     "-aH"
+    ],
+    "binary": {
+     "mac": "/opt/homebrew/bin/rsync",
+     "neo": "rsync"
+    }
+   },
+   {
+    "name": "xs",
+    "tool": "xs",
+    "flags": [
+     "-aH"
+    ],
+    "rev": "8cc75bbdb801",
+    "binary": {
+     "mac": "~/benchmarks/xsbench.noindex/bin/xs-8cc75bbdb801",
+     "neo": "~/benchmarks/xsyncv4/lab/bin/xs-8cc75bbdb801"
+    },
+    "sha256": {
+     "mac": "80c00669af2a98779492e47bbaeaae5bedb98a27233562353472792e32de25c3",
+     "neo": "fc88711b3389e12acfd9c62d2ed037560d4d99c07371f81cf2474842afe4550d"
+    },
+    "artifacts": {
+     "xs-darwin-arm64": "80c00669af2a98779492e47bbaeaae5bedb98a27233562353472792e32de25c3",
+     "xs-linux-amd64": "2780cc842402d442918883559a01ee48e7d856a3e45c7d60559aa073bff2ac84",
+     "xs-linux-arm64": "fc88711b3389e12acfd9c62d2ed037560d4d99c07371f81cf2474842afe4550d"
+    }
+   }
+  ],
+  "cells": [
+   {
+    "id": "real-psample.fresh.mac-neo.sender.warm",
+    "corpus": "real-psample",
+    "scenario": "fresh",
+    "sender": "mac",
+    "receiver": "neo",
+    "client": "sender",
+    "link": "mac-neo-direct",
+    "cache": "warm"
+   },
+   {
+    "id": "real-psample.fresh.neo-mac.receiver.warm",
+    "corpus": "real-psample",
+    "scenario": "fresh",
+    "sender": "neo",
+    "receiver": "mac",
+    "client": "receiver",
+    "link": "mac-neo-direct",
+    "cache": "warm"
+   }
+  ],
+  "corpora": {
+   "real-psample": {
+    "files": 711103,
+    "directories": 547983,
+    "bytes": 21045458323,
+    "digest": "1904660ff1e67214cd5629f447b04910322012598fdfb219052899f909e1ac14",
+    "quick_digest": "1c5858390a71a82667516908224c07faeb5409c916f047f5eaaeaf0c22858afb"
+   }
+  },
+  "blocks": [
+   {
+    "cell": "real-psample.fresh.neo-mac.receiver.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "real-psample.fresh.mac-neo.sender.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "xs",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "real-psample.fresh.mac-neo.sender.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "real-psample.fresh.neo-mac.receiver.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "xs",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "real-psample.fresh.neo-mac.receiver.warm",
+    "block": 2,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "real-psample.fresh.mac-neo.sender.warm",
+    "block": 2,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "real-psample.fresh.mac-neo.sender.warm",
+    "block": 3,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "xs",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "real-psample.fresh.neo-mac.receiver.warm",
+    "block": 3,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs"
+     ],
+     [
+      "rsync",
+      "xs"
+     ]
+    ]
+   }
+  ],
+  "scripts": {
+   "probe.py": "a89b145b8f76fc4d5444cea6af3c124a5b2e5885226998c726ca95fd9d881d36",
+   "corpus.py": "5ea8411a18e6ccbc7d04712a6d254175e2f65b69947422b00f8c722fe5ec06d7",
+   "corpora.json": "5c641f561e2bcf8fe5af1c39adb9054ab0e6d479d8ef0e67204ad69cef148a9c",
+   "agent.py": "86e70538176797c3a4ccc9fbe746ab2909bbffa2fb6cf90d915697b9f273d79e",
+   "runner.py": "cce71fee149764ad1a5c913061f19620a8ff44f792d23d55f7a290d59a9e20ff",
+   "xspipe.py": "94b3fccfc6e994d227077c453f90323ab55337fd8a98231d16a10696e8ebab6b",
+   "measure.py": "5065310f480ff1cabfa7c645f0db342624a02f9a081b96069d50d52b3d224777"
+  },
+  "observed": {
+   "mac": {
+    "rsync": {
+     "path": "/opt/homebrew/bin/rsync",
+     "sha256": "bbd302280bacdd83a6a716ab0556e1c13875a9f222b62924293ecb2d09bbb56f",
+     "version": "rsync  version 3.5.1  protocol version 33"
+    },
+    "hostname": "[host]"
+   },
+   "neo": {
+    "rsync": {
+     "path": "/usr/bin/rsync",
+     "sha256": "3852336282ee66a98c52966a8bebbf3508980a3ec47e7150f40330ada999980e",
+     "version": "rsync  version 3.4.1  protocol version 32"
+    },
+    "hostname": "neo",
+    "trim": null
+   },
+   "addresses": {
+    "mac>neo": "[address]"
+   }
+  }
+ }
+}

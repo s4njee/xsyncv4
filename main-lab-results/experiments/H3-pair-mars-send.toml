@@ -1,0 +1,54 @@
+# H3 (tree T4, if the Pi can take files faster than xs delivers them): mars's sending side.
+# Against xs's best setting with -z: larger read batches, more scanning, larger frames.
+id = "H3-pair-mars-send"
+kind = "screening"
+hypothesis = "A sending setting on mars delivers small trees to the Pi faster."
+primary = "durable_s"
+delta = 0.03
+blocks = 8
+control = "xs-z-best"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.xs-z-best]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-az", "--no-atomic"]
+tune = { receiver = "jobs=4" }
+
+[arms.batch256]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-az", "--no-atomic"]
+tune = { receiver = "jobs=4", sender = "read_batch_files=256,read_batch_bytes=33554432" }
+
+[arms.scan-all]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-az", "--no-atomic"]
+tune = { receiver = "jobs=4", sender = "scan_workers=12" }
+
+[arms.coalesce1m]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-az", "--no-atomic"]
+tune = { receiver = "jobs=4", sender = "coalesce_under=65536,coalesce_to=1048576" }
+
+[arms.xs-best]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-a", "--no-atomic"]
+tune = { receiver = "jobs=4" }
+
+[matrix]
+link = "neo-mars-1g"
+corpus = ["small-flat", "small-deep", "real-congress"]
+scenario = ["fresh"]
+direction = ["mars>neo"]
+client = ["initiator"]
+cache = ["warm"]

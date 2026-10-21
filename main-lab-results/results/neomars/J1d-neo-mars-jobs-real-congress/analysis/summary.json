@@ -1,0 +1,19 @@
+{
+ "experiment": "J1d-neo-mars-jobs-real-congress",
+ "kind": "screening",
+ "hypothesis": "-j4 and -j8 differ from each other, and from the default, by more than 5% in time-to-durable on small-file and no-op copies between neo and mars.",
+ "primary": "durable_s",
+ "control": "xs",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261020T170936Z-J1d-neo-mars-jobs-real-congress"
+ ],
+ "spec_sha256": [
+  "9b1614021b31afa2457f763ebe1fcb336f632763a5d7199b7f3a9dae67a3cd8f"
+ ],
+ "valid_blocks": 32,
+ "void_attempts": 0,
+ "void_reasons": []
+}

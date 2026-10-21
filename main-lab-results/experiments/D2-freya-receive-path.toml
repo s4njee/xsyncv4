@@ -1,0 +1,57 @@
+# D2 (decision tree T1, after K2a, if freya's filesystem matters): K2a found xs
+# delivers small trees from the Pi into RAM on freya clearly faster than onto
+# its NVMe, so freya's write path is part of the limit. Against xs's best
+# small-file setting with -z (four receiving workers, --no-atomic): two and
+# eight receiving workers, larger coalesced writes, and a deeper receive queue.
+id = "D2-freya-receive-path"
+kind = "screening"
+hypothesis = "A different receiving worker count or larger writes on freya make small trees from the Pi land faster."
+primary = "durable_s"
+delta = 0.03
+blocks = 8
+control = "xs-z-best"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.xs-z-best]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-az", "--no-atomic"]
+tune = { receiver = "jobs=4" }
+
+[arms.recv2]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-az", "--no-atomic"]
+tune = { receiver = "jobs=2" }
+
+[arms.recv8]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-az", "--no-atomic"]
+tune = { receiver = "jobs=8" }
+
+[arms.coalesce1m]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-az", "--no-atomic"]
+tune = { receiver = "jobs=4,coalesce_under=65536,coalesce_to=1048576,write_chunk=1048576" }
+
+[arms.soft64]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-az", "--no-atomic"]
+tune = { receiver = "jobs=4,q1_soft_recv=64" }
+
+[matrix]
+link = "lan"
+corpus = ["real-congress", "small-deep", "small-flat"]
+scenario = ["fresh"]
+direction = ["neo>freya"]
+client = ["sender"]
+cache = ["warm"]

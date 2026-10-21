@@ -1,0 +1,13 @@
+experiment,kind,cell_id,corpus,scenario,sender,receiver,client,link,cache,arm,n_blocks,sigma_d,blocks_for_2pct,blocks_for_3pct,blocks_for_5pct,blocks_for_10pct,blocks_equivalent_2pct,blocks_equivalent_3pct,blocks_equivalent_5pct,blocks_equivalent_10pct
+N1b-10g-small-write,screening,mixed-bimodal.fresh.mac-mars.sender.warm,mixed-bimodal,fresh,mac,mars,sender,mac-mars-direct,warm,xs,4,0.1591136227944149,509,230,86,24,681,307,114,32
+N1b-10g-small-write,screening,mixed-bimodal.noop.mac-mars.sender.warm,mixed-bimodal,noop,mac,mars,sender,mac-mars-direct,warm,xs,5,0.4211007007363097,3548,1594,587,156,4754,2135,785,208
+N1b-10g-small-write,screening,mixed-threshold.fresh.mac-mars.sender.warm,mixed-threshold,fresh,mac,mars,sender,mac-mars-direct,warm,xs,5,0.1296914784364981,339,153,58,17,453,205,77,22
+N1b-10g-small-write,screening,mixed-threshold.noop.mac-mars.sender.warm,mixed-threshold,noop,mac,mars,sender,mac-mars-direct,warm,xs,4,0.15102075871282028,458,207,78,22,614,277,103,29
+N1b-10g-small-write,screening,small-deep.fresh.mac-mars.sender.warm,small-deep,fresh,mac,mars,sender,mac-mars-direct,warm,xs,4,0.41559730522785043,3456,1552,571,152,4631,2080,765,202
+N1b-10g-small-write,screening,small-deep.noop.mac-mars.sender.warm,small-deep,noop,mac,mars,sender,mac-mars-direct,warm,xs,6,0.04495771996817282,43,21,9,8,57,27,11,8
+N1b-10g-small-write,screening,small-flat.fresh.mac-mars.sender.warm,small-flat,fresh,mac,mars,sender,mac-mars-direct,warm,xs,4,0.6748800579434816,9108,4089,1503,396,12207,5480,2013,529
+N1b-10g-small-write,screening,small-flat.noop.mac-mars.sender.warm,small-flat,noop,mac,mars,sender,mac-mars-direct,warm,xs,4,0.24599521144056966,1212,545,202,55,1624,730,270,72
+N1b-10g-small-write,screening,small-opaque.fresh.mac-mars.sender.warm,small-opaque,fresh,mac,mars,sender,mac-mars-direct,warm,xs,5,0.058325877166448374,71,33,14,8,94,43,18,8
+N1b-10g-small-write,screening,small-opaque.noop.mac-mars.sender.warm,small-opaque,noop,mac,mars,sender,mac-mars-direct,warm,xs,4,0.10859686682967189,238,108,41,13,319,144,55,16
+N1b-10g-small-write,screening,tiny-one.fresh.mac-mars.sender.warm,tiny-one,fresh,mac,mars,sender,mac-mars-direct,warm,xs,4,0.023712974295235598,14,8,8,8,18,9,8,8
+N1b-10g-small-write,screening,tiny-one.noop.mac-mars.sender.warm,tiny-one,noop,mac,mars,sender,mac-mars-direct,warm,xs,4,0.10036303837764173,204,93,36,11,272,124,47,14

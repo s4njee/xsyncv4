@@ -1,0 +1,24 @@
+{
+ "experiment": "Z3-1g-compress",
+ "kind": "screening",
+ "hypothesis": "On a gigabit link, xs -z delivers text-like data faster than the link, and faster than rsync -z, even from the Pi.",
+ "primary": "durable_s",
+ "control": "xs",
+ "delta": 0.03,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261016T162239Z-Z3-1g-compress",
+  "20261017T161616Z-Z3-1g-compress"
+ ],
+ "spec_sha256": [
+  "6d481088c959c03b40f65d151b36d3050e971f60e4840c72180a642cfbaec1ed",
+  "97d37500135da1ab72008b075129803b28dcd6292bdc64df39bcace09ab226a8"
+ ],
+ "valid_blocks": 10,
+ "void_attempts": 7,
+ "void_reasons": [
+  "neo does not answer ping",
+  "rsync: harness error: freya: `python3 /mnt/nvme/xsbench/lib/c4b227526aa5/probe.py snapshot --interface enp10s0` exited 255: ssh: Could not resolve hostname frey"
+ ]
+}

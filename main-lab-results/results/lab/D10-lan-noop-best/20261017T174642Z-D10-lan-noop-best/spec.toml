@@ -1,0 +1,37 @@
+# D10 (tree T1): no-op copies, where xs is already 1.1 to 6.7 times rsync (E1v2).
+# T1e found four receiving workers faster on a small-real no-op; this asks it of every
+# small tree, both ways, with --no-atomic as in xs's best setting.
+id = "D10-lan-noop-best"
+kind = "screening"
+hypothesis = "xs's best small-file setting is faster than its default on no-op copies of small trees."
+primary = "durable_s"
+delta = 0.03
+blocks = 8
+control = "xs"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.xs]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-a"]
+
+[arms.xs-best]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-a", "--no-atomic"]
+tune = { receiver = "jobs=4" }
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[matrix]
+link = "lan"
+corpus = ["small-flat", "small-deep", "small-real", "real-congress"]
+scenario = ["noop"]
+direction = ["neo>freya", "freya>neo"]
+client = ["sender"]
+cache = ["warm"]

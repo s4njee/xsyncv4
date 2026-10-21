@@ -1,0 +1,49 @@
+# Made by conduct.py: the 6 blocks per cell that 20261017T165019Z-MA3-psample-bidir did not finish.
+# MA3 (tree T8, the Mac/mars axis): how fast can the 20 GB, 711k-file psample
+# tree be copied between this Mac (APFS) and mars (ext4) over the 10GbE direct
+# cable, each way, and is xs faster than the two rsync baselines? psample is a
+# byte-faithful stratified sample of ~/projects pinned as the real-psample
+# corpus. This is a first look: a six-block screening, fresh copies only, warm
+# caches (the Mac has no cold cache). rsync -aH and rsync -aHz are the baselines,
+# so the control is rsync -aH and the fastest xs arm is confirmed with fresh
+# blocks by T8. wall_s is the primary: durable_s on the Mac folds in a
+# system-wide sync and would read the pull direction harshly.
+# Recovery 2026-10-17: all arms preserve hard links (-H), as required by the
+# pinned psample manifest. Earlier -a/-az-only runs had no valid samples and
+# remain archived. Mac baselines use the explicitly configured GNU rsync.
+id = "MA3-psample-bidir"
+kind = "screening"
+hypothesis = "On the Mac/mars 10GbE link, xs copies the psample tree faster than rsync -aH fresh, in both directions, and xs -z helps only where the data compresses."
+primary = "wall_s"
+delta = 0.05
+blocks = 6
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+sample_timeout_s = 7200
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-aH"]
+
+[arms.rsync-z]
+tool = "rsync"
+flags = ["-aHz"]
+
+[arms.xs]
+tool = "xs"
+rev = "8cc75bbdb801"
+flags = ["-aH"]
+
+[arms.xs-z]
+tool = "xs"
+rev = "8cc75bbdb801"
+flags = ["-aHz"]
+
+[matrix]
+link = "mac-mars-2g5"
+corpus = ["real-psample"]
+scenario = ["fresh"]
+direction = ["mac>mars", "mars>mac"]
+client = ["initiator"]
+cache = ["warm"]

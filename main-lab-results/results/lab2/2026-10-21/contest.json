@@ -1,0 +1,263 @@
+{
+ "updated": "2026-10-21T01:03:11+00:00",
+ "enabled": true,
+ "cpp_rev": "0c94b3d70b9d",
+ "rs": {
+  "commit": "8428aac9a2108cd10c2afdb2badab76f90ddd1a1",
+  "step": "filters"
+ },
+ "margin": 0.05,
+ "score": {
+  "xs-rs": 0,
+  "xs-cpp": 4,
+  "tie": 1,
+  "pending": 0
+ },
+ "cells": [
+  {
+   "cell": "congress-sample.fresh.a-aws.sender.warm",
+   "corpus": "congress-sample",
+   "scenario": "fresh",
+   "link": "a-aws",
+   "metric": "durable_s",
+   "experiment": "PS-8428aac9a210-fresh",
+   "run": "20261021T005447Z-PS-8428aac9a210-fresh",
+   "tools": {
+    "xs-cpp": {
+     "arm": "xs-cpp",
+     "flags": [
+      "-a",
+      "-j4"
+     ],
+     "rev": "0c94b3d70b9d",
+     "seconds": 3.569,
+     "lo": 3.309,
+     "hi": 3.848,
+     "blocks": 3
+    },
+    "xs-rs": {
+     "arm": "xs-rs",
+     "flags": [
+      "-a",
+      "-j4"
+     ],
+     "rev": "8428aac9a210-rs",
+     "seconds": 4.329,
+     "lo": 1.824,
+     "hi": 10.277,
+     "blocks": 3
+    },
+    "rsync": {
+     "arm": "rsync",
+     "flags": [
+      "-a"
+     ],
+     "rev": null,
+     "seconds": 3.232,
+     "lo": 3.055,
+     "hi": 3.419,
+     "blocks": 3
+    }
+   },
+   "verdict": "xs-cpp",
+   "rs_vs_cpp": 1.213,
+   "fastest": "rsync"
+  },
+  {
+   "cell": "congress-sample.noop.a-aws.sender.warm",
+   "corpus": "congress-sample",
+   "scenario": "noop",
+   "link": "a-aws",
+   "metric": "durable_s",
+   "experiment": "BL1-congress-sample",
+   "run": "20261021T003554Z-BL1-congress-sample",
+   "tools": {
+    "rsync": {
+     "arm": "rsync",
+     "flags": [
+      "-a"
+     ],
+     "rev": null,
+     "seconds": 1.81,
+     "lo": 0.957,
+     "hi": 3.424,
+     "blocks": 3
+    },
+    "xs-cpp": {
+     "arm": "xs-cpp",
+     "flags": [
+      "-a",
+      "-j4"
+     ],
+     "rev": "0c94b3d70b9d",
+     "seconds": 0.797,
+     "lo": 0.757,
+     "hi": 0.838,
+     "blocks": 3
+    },
+    "xs-rs": {
+     "arm": "xs-rs",
+     "flags": [
+      "-a",
+      "-j4"
+     ],
+     "rev": "3b891bf5e8fb-rs",
+     "seconds": 0.852,
+     "lo": 0.793,
+     "hi": 0.915,
+     "blocks": 3
+    }
+   },
+   "verdict": "xs-cpp",
+   "rs_vs_cpp": 1.069,
+   "fastest": "xs-cpp"
+  },
+  {
+   "cell": "congress-sample.update-10pct.a-aws.sender.warm",
+   "corpus": "congress-sample",
+   "scenario": "update-10pct",
+   "link": "a-aws",
+   "metric": "durable_s",
+   "experiment": "PS-8428aac9a210-update-10pct",
+   "run": "20261021T005449Z-PS-8428aac9a210-update-10pct",
+   "tools": {
+    "xs-cpp": {
+     "arm": "xs-cpp",
+     "flags": [
+      "-a",
+      "-j4"
+     ],
+     "rev": "0c94b3d70b9d",
+     "seconds": 1.573,
+     "lo": 0.05,
+     "hi": 49.048,
+     "blocks": 2
+    },
+    "xs-rs": {
+     "arm": "xs-rs",
+     "flags": [
+      "-a",
+      "-j4"
+     ],
+     "rev": "8428aac9a210-rs",
+     "seconds": 1.613,
+     "lo": 1.472,
+     "hi": 1.767,
+     "blocks": 2
+    },
+    "rsync": {
+     "arm": "rsync",
+     "flags": [
+      "-a"
+     ],
+     "rev": null,
+     "seconds": 1.647,
+     "lo": 0.197,
+     "hi": 13.787,
+     "blocks": 2
+    }
+   },
+   "verdict": "tie",
+   "rs_vs_cpp": 1.025,
+   "fastest": "xs-cpp"
+  },
+  {
+   "cell": "real-projects.fresh.a-aws.sender.warm",
+   "corpus": "real-projects",
+   "scenario": "fresh",
+   "link": "a-aws",
+   "metric": "durable_s",
+   "experiment": "BL2-real-projects",
+   "run": "20261021T003556Z-BL2-real-projects",
+   "tools": {
+    "rsync": {
+     "arm": "rsync",
+     "flags": [
+      "-a"
+     ],
+     "rev": null,
+     "seconds": 20.055,
+     "lo": 20.036,
+     "hi": 20.074,
+     "blocks": 2
+    },
+    "xs-cpp": {
+     "arm": "xs-cpp",
+     "flags": [
+      "-a",
+      "-j4"
+     ],
+     "rev": "0c94b3d70b9d",
+     "seconds": 29.298,
+     "lo": 8.762,
+     "hi": 97.963,
+     "blocks": 2
+    },
+    "xs-rs": {
+     "arm": "xs-rs",
+     "flags": [
+      "-a",
+      "-j4"
+     ],
+     "rev": "3b891bf5e8fb-rs",
+     "seconds": 42.805,
+     "lo": 16.068,
+     "hi": 114.028,
+     "blocks": 2
+    }
+   },
+   "verdict": "xs-cpp",
+   "rs_vs_cpp": 1.461,
+   "fastest": "rsync"
+  },
+  {
+   "cell": "real-projects.noop.a-aws.sender.warm",
+   "corpus": "real-projects",
+   "scenario": "noop",
+   "link": "a-aws",
+   "metric": "durable_s",
+   "experiment": "BL2-real-projects",
+   "run": "20261021T003556Z-BL2-real-projects",
+   "tools": {
+    "rsync": {
+     "arm": "rsync",
+     "flags": [
+      "-a"
+     ],
+     "rev": null,
+     "seconds": 3.77,
+     "lo": 2.297,
+     "hi": 6.187,
+     "blocks": 2
+    },
+    "xs-cpp": {
+     "arm": "xs-cpp",
+     "flags": [
+      "-a",
+      "-j4"
+     ],
+     "rev": "0c94b3d70b9d",
+     "seconds": 1.793,
+     "lo": 0.635,
+     "hi": 5.063,
+     "blocks": 2
+    },
+    "xs-rs": {
+     "arm": "xs-rs",
+     "flags": [
+      "-a",
+      "-j4"
+     ],
+     "rev": "3b891bf5e8fb-rs",
+     "seconds": 2.983,
+     "lo": 0.557,
+     "hi": 15.988,
+     "blocks": 2
+    }
+   },
+   "verdict": "xs-cpp",
+   "rs_vs_cpp": 1.664,
+   "fastest": "xs-cpp"
+  }
+ ]
+}

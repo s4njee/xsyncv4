@@ -1,0 +1,45 @@
+# D9b (tree T1, if D9 found xs-best slower somewhere): which half costs it, four
+# receiving workers or --no-atomic.
+id = "D9b-lan-best-split"
+kind = "screening"
+hypothesis = "Only one half of the best small-file setting slows mixed trees on the wired pair."
+primary = "durable_s"
+delta = 0.03
+blocks = 8
+control = "xs"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.xs]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-a"]
+
+[arms.recv4]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-a"]
+tune = { receiver = "jobs=4" }
+
+[arms.no-atomic]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-a", "--no-atomic"]
+
+[arms.xs-best]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-a", "--no-atomic"]
+tune = { receiver = "jobs=4" }
+
+[matrix]
+link = "lan"
+corpus = ["mixed-bimodal", "mixed-threshold", "small-opaque"]
+scenario = ["fresh"]
+direction = ["neo>freya", "freya>neo"]
+client = ["sender"]
+cache = ["warm"]

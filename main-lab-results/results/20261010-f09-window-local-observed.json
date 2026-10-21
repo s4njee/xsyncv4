@@ -1,0 +1,75 @@
+{
+ "schema": 1,
+ "utc": "2026-10-10T23:14:26.851750+00:00",
+ "client": "neo",
+ "target": null,
+ "direction": "push",
+ "label": "large-tree-1f3",
+ "cache": "warm",
+ "versions": {
+  "xs": "xs  version 0.1.0  protocol version 4  git 1f3a912f94eb",
+  "rsync": "rsync  version 3.4.1  protocol version 32"
+ },
+ "argv": [
+  "~/benchmarks/xsyncv4/20261010T144748Z-715fa0/bin/run.py",
+  "--corpus",
+  "~/benchmarks/xsyncv4/20261010T144748Z-715fa0/data/large-tree",
+  "--work",
+  "~/benchmarks/xsyncv4/20261010T144748Z-715fa0/work-large-tree-local",
+  "--xsync",
+  "~/benchmarks/xsyncv4/20261010T144748Z-715fa0/bin/xs-1f3a912f94eb",
+  "--runs",
+  "1",
+  "--scenarios",
+  "fresh",
+  "--label",
+  "large-tree-1f3",
+  "--output",
+  "~/benchmarks/xsyncv4/20261010T144748Z-715fa0/logs/large-tree-1f3-local.json"
+ ],
+ "records": [
+  {
+   "returncode": 0,
+   "wall_seconds": 463.9110282622278,
+   "user_seconds": 42.904926,
+   "system_seconds": 316.966489,
+   "max_rss_bytes": 14303232,
+   "voluntary_switches": 5068121,
+   "involuntary_switches": 15885,
+   "scenario": "fresh",
+   "tool": "rsync",
+   "run": 1,
+   "verified": true,
+   "remote": null,
+   "stdout": "\nNumber of files: 5,005,001 (reg: 5,000,000, dir: 5,001)\nNumber of created files: 5,005,001 (reg: 5,000,000, dir: 5,001)\nNumber of deleted files: 0\nNumber of regular files transferred: 5,000,000\nTotal file size: 80,000,000 bytes\nTotal transferred file size: 80,000,000 bytes\nLiteral data: 80,000,000 bytes\nMatched data: 0 bytes\nFile list size: 0\nFile list generation time: 0.039 seconds\nFile list transfer time: 0.000 seconds\nTotal bytes sent: 364,665,467\nTotal bytes received: 95,043,825\n\nsent 364,665,467 bytes  received 95,043,825 bytes  989,686.31 bytes/sec\ntotal size is 80,000,000  speedup is 0.17\n",
+   "stderr": ""
+  },
+  {
+   "returncode": 0,
+   "wall_seconds": 341.01921236887574,
+   "user_seconds": 43.903797,
+   "system_seconds": 433.172871,
+   "max_rss_bytes": 19431424,
+   "voluntary_switches": 13127303,
+   "involuntary_switches": 266641,
+   "scenario": "fresh",
+   "tool": "xs",
+   "run": 1,
+   "verified": true,
+   "remote": null,
+   "stdout": "\nNumber of files: 5,005,000 (reg: 5,000,000, dir: 5,000)\nNumber of created files: 5,005,000 (reg: 5,000,000, dir: 5,000)\nNumber of deleted files: 0\nNumber of regular files transferred: 5,000,000\nTotal file size: 80,000,000 bytes\nTotal transferred file size: 80,000,000 bytes\nDelta literal data: 0 bytes\nDelta matched data: 0 bytes\nTotal bytes sent: 80,000,000\nTotal bytes received: 0\n\nsent 80,000,000 bytes  received 0 bytes  234,604.00 bytes/sec\ntotal size is 80,000,000  speedup is 1.00\n",
+   "stderr": ""
+  }
+ ],
+ "summary": [
+  {
+   "scenario": "fresh",
+   "median_seconds": {
+    "rsync": 463.9110282622278,
+    "xs": 341.01921236887574
+   },
+   "xs_speedup": 1.3603662533840517
+  }
+ ],
+ "complete": true
+}

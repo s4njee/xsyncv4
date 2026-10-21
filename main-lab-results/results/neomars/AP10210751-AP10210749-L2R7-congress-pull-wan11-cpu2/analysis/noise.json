@@ -1,0 +1,25 @@
+[
+ {
+  "experiment": "AP10210751-AP10210749-L2R7-congress-pull-wan11-cpu2",
+  "kind": "screening",
+  "cell_id": "real-congress.fresh.mars-neo.receiver.warm",
+  "corpus": "real-congress",
+  "scenario": "fresh",
+  "sender": "mars",
+  "receiver": "neo",
+  "client": "receiver",
+  "link": "neo-mars-lan",
+  "cache": "warm",
+  "arm": "rsync",
+  "n_blocks": 12,
+  "sigma_d": 0.12699464603630994,
+  "blocks_for_2pct": 325,
+  "blocks_for_3pct": 147,
+  "blocks_for_5pct": 56,
+  "blocks_for_10pct": 16,
+  "blocks_equivalent_2pct": 435,
+  "blocks_equivalent_3pct": 196,
+  "blocks_equivalent_5pct": 74,
+  "blocks_equivalent_10pct": 21
+ }
+]

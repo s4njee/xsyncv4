@@ -1,0 +1,49 @@
+# LC3 (tree T14): how much of a local backup is spent after the tool exits,
+# flushing to the T5. A 21 GB copy on a 4 GiB Pi is throttled by dirty-page
+# writeback throughout; eager writeback (flush after 64 MiB, every 0.5 s) starts
+# the drive sooner, and --no-atomic skips xs's temp-file and rename per file.
+# Time to durable is the primary metric; wall time and the final sync are in the
+# records beside it.
+id = "LC3-psample-local-durable"
+kind = "screening"
+hypothesis = "Eager writeback or skipping the temp-file rename gets the psample backup safely onto the T5 sooner."
+primary = "durable_s"
+delta = 0.05
+blocks = 4
+control = "xs"
+verify = "first-last"
+cleanup = "eager"
+sample_timeout_s = 7200
+
+[arms.xs]
+tool = "xs"
+rev = "21ae6844ed20"
+flags = ["-aH"]
+
+[arms.xs-eager]
+tool = "xs"
+rev = "21ae6844ed20"
+flags = ["-aH"]
+writeback = "eager"
+
+[arms.xs-noatomic]
+tool = "xs"
+rev = "21ae6844ed20"
+flags = ["-aH", "--no-atomic"]
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-aH"]
+
+[arms.rsync-eager]
+tool = "rsync"
+flags = ["-aH"]
+writeback = "eager"
+
+[matrix]
+link = "neo-local-ssd"
+corpus = ["real-psample"]
+scenario = ["fresh"]
+direction = ["neo>neo-ssd"]
+client = ["receiver"]
+cache = ["cold"]

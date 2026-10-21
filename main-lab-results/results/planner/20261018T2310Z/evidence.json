@@ -1,0 +1,1600 @@
+{
+ "now": "2026-10-18T23:10Z",
+ "window_hours": 6.0,
+ "window_end": "2026-10-19T05:10Z",
+ "limits": {
+  "experiments_per_runner": 4,
+  "arms": [
+   2,
+   6
+  ],
+  "blocks": [
+   2,
+   12
+  ],
+  "xs_flags": [
+   "--compress-level=-1",
+   "--compress-level=-10",
+   "--compress-level=-11",
+   "--compress-level=-12",
+   "--compress-level=-13",
+   "--compress-level=-14",
+   "--compress-level=-15",
+   "--compress-level=-16",
+   "--compress-level=-17",
+   "--compress-level=-18",
+   "--compress-level=-19",
+   "--compress-level=-2",
+   "--compress-level=-20",
+   "--compress-level=-3",
+   "--compress-level=-4",
+   "--compress-level=-5",
+   "--compress-level=-6",
+   "--compress-level=-7",
+   "--compress-level=-8",
+   "--compress-level=-9",
+   "--compress-level=0",
+   "--compress-level=1",
+   "--compress-level=2",
+   "--compress-level=3",
+   "--compress-level=4",
+   "--compress-level=5",
+   "--compress-level=6",
+   "--compress-level=7",
+   "--compress-level=8",
+   "--compress-level=9",
+   "--inplace",
+   "--no-atomic",
+   "--whole-file",
+   "-H",
+   "-O",
+   "-W",
+   "-a",
+   "-aH",
+   "-aHz",
+   "-az",
+   "-azH",
+   "-j1",
+   "-j10",
+   "-j11",
+   "-j12",
+   "-j13",
+   "-j14",
+   "-j15",
+   "-j16",
+   "-j2",
+   "-j3",
+   "-j4",
+   "-j5",
+   "-j6",
+   "-j7",
+   "-j8",
+   "-j9",
+   "-z"
+  ],
+  "cp_flags": [
+   "-R",
+   "-a",
+   "-p",
+   "-r"
+  ],
+  "tune_keys": [
+   "block_target",
+   "coalesce_to",
+   "coalesce_under",
+   "jobs",
+   "listing_window",
+   "pipe_size",
+   "q1_soft_recv",
+   "q1_soft_send",
+   "read_batch_bytes",
+   "read_batch_files",
+   "recv_queue",
+   "scan_workers",
+   "send_queue",
+   "send_streams",
+   "small_max",
+   "wait_peer_poll_ms",
+   "write_chunk",
+   "zstd_fast_at",
+   "zstd_slow_at"
+  ],
+  "scenarios": [
+   "fresh",
+   "noop",
+   "update-0p1pct",
+   "update-1pct",
+   "update-10pct"
+  ],
+  "confirm_blocks": 8
+ },
+ "runners": [
+  {
+   "runner": "mac",
+   "links": [
+    "mac-mars-10g"
+   ],
+   "reachable": true,
+   "alive": true,
+   "state": "running",
+   "current": {
+    "run": "20261018T144803Z-MA7-psample-pull-apfs",
+    "experiment": "MA7-psample-pull-apfs",
+    "samples_done": 2,
+    "samples_planned": 72,
+    "hours_left": 7.0
+   },
+   "backlog": [],
+   "queued_hours": 0.0
+  },
+  {
+   "runner": "neo-ssd",
+   "links": [
+    "neo-local-ssd"
+   ],
+   "reachable": true,
+   "alive": true,
+   "state": "running",
+   "current": {
+    "run": "20261018T215450Z-LC2-psample-local-workers",
+    "experiment": "LC2-psample-local-workers",
+    "samples_done": 3,
+    "samples_planned": 20,
+    "hours_left": 2.5
+   },
+   "backlog": [
+    {
+     "run": "20261018T224648Z-LC6-local-beat-rsync",
+     "experiment": "LC6-local-beat-rsync",
+     "samples": 24,
+     "hours": 3.6
+    },
+    {
+     "run": "20261018T215452Z-LC3-psample-local-durable",
+     "experiment": "LC3-psample-local-durable",
+     "samples": 20,
+     "hours": 3.0
+    },
+    {
+     "run": "20261018T215454Z-LC4-psample-local-resync",
+     "experiment": "LC4-psample-local-resync",
+     "samples": 24,
+     "hours": 3.6
+    }
+   ],
+   "queued_hours": 10.2
+  }
+ ],
+ "links": {
+  "mac-mars-10g": {
+   "hosts": [
+    "mac",
+    "mars"
+   ],
+   "medium": "wired",
+   "driver": "mac",
+   "initiator": "mac",
+   "minutes_per_sample_by_corpus": {
+    "large-text": 0.5,
+    "mixed-bimodal": 0.1,
+    "real-congress": 0.6,
+    "real-psample": 6.0,
+    "small-deep": 0.5,
+    "small-flat": 0.2,
+    "tiny-one": 0.1
+   }
+  },
+  "neo-local-ssd": {
+   "hosts": [
+    "neo",
+    "neo-ssd"
+   ],
+   "medium": "local",
+   "driver": "neo-ssd",
+   "initiator": null,
+   "minutes_per_sample_by_corpus": {
+    "real-psample": 8.9
+   }
+  }
+ },
+ "hosts": {
+  "mac": {
+   "builds": [
+    "21ae6844ed20",
+    "453704a64528-tune",
+    "8cc75bbdb801",
+    "98b250569c69",
+    "ddefa041364e-tune",
+    "e1f05b518049"
+   ],
+   "corpora": [
+    "large-four",
+    "large-half",
+    "large-mixed",
+    "large-one",
+    "large-text",
+    "mixed-bimodal",
+    "mixed-threshold",
+    "real-congress",
+    "real-psample",
+    "scale-count-10000",
+    "small-deep",
+    "small-flat",
+    "small-opaque",
+    "tiny-one"
+   ]
+  },
+  "mars": {
+   "builds": [
+    "21ae6844ed20",
+    "453704a64528-tune",
+    "8cc75bbdb801",
+    "98b250569c69"
+   ],
+   "corpora": [
+    "large-text",
+    "mixed-bimodal",
+    "real-congress",
+    "real-psample",
+    "small-deep",
+    "small-flat",
+    "tiny-one"
+   ]
+  },
+  "neo": {
+   "builds": [
+    "21ae6844ed20",
+    "453704a64528-tune",
+    "54aa72e3bf33",
+    "5aa5555ec8dd",
+    "8cc75bbdb801",
+    "98a03b844a0e",
+    "9d02bc47a8ae",
+    "b674ca2f6c76",
+    "bf596d28c5c9",
+    "dd6f5121d506",
+    "ddefa041364e",
+    "ddefa041364e-tune",
+    "e1f05b518049"
+   ],
+   "corpora": [
+    "large-mixed",
+    "large-text",
+    "mixed-bimodal",
+    "mixed-threshold",
+    "real-congress",
+    "real-holochart",
+    "real-laikav2",
+    "real-psample",
+    "scale-count-1000",
+    "scale-count-10000",
+    "scale-count-100000",
+    "scale-count-1000000",
+    "scale-count-3000",
+    "scale-count-30000",
+    "scale-count-300000",
+    "scale-size-1024",
+    "scale-size-1048576",
+    "scale-size-16384",
+    "scale-size-16777216",
+    "scale-size-262144",
+    "scale-size-4096",
+    "scale-size-4194304",
+    "scale-size-65536",
+    "small-deep",
+    "small-flat",
+    "small-opaque",
+    "small-real",
+    "tiny-one"
+   ]
+  },
+  "neo-ssd": {
+   "builds": [
+    "21ae6844ed20",
+    "453704a64528-tune",
+    "dd6f5121d506"
+   ],
+   "corpora": [
+    "real-psample",
+    "small-flat",
+    "tiny-one"
+   ]
+  }
+ },
+ "corpora": {
+  "large-four": {
+   "files": 4,
+   "directories": 0,
+   "bytes": 8589934592
+  },
+  "large-half": {
+   "files": 32,
+   "directories": 0,
+   "bytes": 8963523840
+  },
+  "large-mixed": {
+   "files": 32,
+   "directories": 0,
+   "bytes": 8963523840
+  },
+  "large-one": {
+   "files": 1,
+   "directories": 0,
+   "bytes": 7994415104
+  },
+  "large-text": {
+   "files": 8,
+   "directories": 0,
+   "bytes": 8589934592
+  },
+  "mixed-bimodal": {
+   "files": 20000,
+   "directories": 420,
+   "bytes": 1395127076
+  },
+  "mixed-threshold": {
+   "files": 1500,
+   "directories": 72,
+   "bytes": 1502174819
+  },
+  "real-congress": {
+   "files": 216518,
+   "directories": 52593,
+   "bytes": 1159189826
+  },
+  "real-holochart": {
+   "files": 249602,
+   "directories": 33012,
+   "bytes": 7825180850
+  },
+  "real-laikav2": {
+   "files": 54691,
+   "directories": 3106,
+   "bytes": 45316076042
+  },
+  "real-psample": {
+   "files": 711103,
+   "directories": 547983,
+   "bytes": 21045458323
+  },
+  "scale-count-1000000": {
+   "files": 1000000,
+   "directories": 1000,
+   "bytes": 3217443963
+  },
+  "scale-count-100000": {
+   "files": 100000,
+   "directories": 100,
+   "bytes": 319224077
+  },
+  "scale-count-10000": {
+   "files": 10000,
+   "directories": 10,
+   "bytes": 32675195
+  },
+  "scale-count-1000": {
+   "files": 1000,
+   "directories": 1,
+   "bytes": 3415428
+  },
+  "scale-count-300000": {
+   "files": 300000,
+   "directories": 300,
+   "bytes": 964346919
+  },
+  "scale-count-30000": {
+   "files": 30000,
+   "directories": 30,
+   "bytes": 95332607
+  },
+  "scale-count-3000": {
+   "files": 3000,
+   "directories": 3,
+   "bytes": 9764652
+  },
+  "scale-size-1024": {
+   "files": 262144,
+   "directories": 262,
+   "bytes": 268435456
+  },
+  "scale-size-1048576": {
+   "files": 256,
+   "directories": 1,
+   "bytes": 268435456
+  },
+  "scale-size-16384": {
+   "files": 16384,
+   "directories": 16,
+   "bytes": 268435456
+  },
+  "scale-size-16777216": {
+   "files": 16,
+   "directories": 1,
+   "bytes": 268435456
+  },
+  "scale-size-262144": {
+   "files": 1024,
+   "directories": 1,
+   "bytes": 268435456
+  },
+  "scale-size-4096": {
+   "files": 65536,
+   "directories": 65,
+   "bytes": 268435456
+  },
+  "scale-size-4194304": {
+   "files": 64,
+   "directories": 1,
+   "bytes": 268435456
+  },
+  "scale-size-65536": {
+   "files": 4096,
+   "directories": 4,
+   "bytes": 268435456
+  },
+  "small-deep": {
+   "files": 100000,
+   "directories": 116667,
+   "bytes": 319224077
+  },
+  "small-flat": {
+   "files": 100000,
+   "directories": 100,
+   "bytes": 319224077
+  },
+  "small-opaque": {
+   "files": 100000,
+   "directories": 100,
+   "bytes": 319224077
+  },
+  "small-real": {
+   "files": 118594,
+   "directories": 59336,
+   "bytes": 1107333872
+  },
+  "tiny-one": {
+   "files": 1,
+   "directories": 0,
+   "bytes": 19
+  }
+ },
+ "findings": [
+  {
+   "experiment": "E6b-mac-mars-receiver-defaults",
+   "kind": "confirmatory",
+   "link": "mac-mars-10g",
+   "analysed": "2026-10-18T22:53Z",
+   "hypothesis": "xs with at most four receiving workers and a backed-off peer wait is faster than its parent in at least one cell into mars and slower in none, both ways.",
+   "rows": [
+    {
+     "cell": "mixed-bimodal.fresh.mac-mars.sender.warm",
+     "arm": "xs-recv4",
+     "control": "xs",
+     "blocks": 12,
+     "time_ratio": 1.006,
+     "interval": [
+      0.944,
+      1.073
+     ],
+     "verdict": "inconclusive"
+    },
+    {
+     "cell": "mixed-bimodal.fresh.mac-mars.sender.warm",
+     "arm": "rsync",
+     "control": "xs",
+     "blocks": 12,
+     "time_ratio": 3.008,
+     "interval": [
+      2.595,
+      3.487
+     ],
+     "verdict": "slower"
+    },
+    {
+     "cell": "mixed-bimodal.fresh.mars-mac.receiver.warm",
+     "arm": "xs-recv4",
+     "control": "xs",
+     "blocks": 12,
+     "time_ratio": 0.98,
+     "interval": [
+      0.854,
+      1.126
+     ],
+     "verdict": "inconclusive"
+    },
+    {
+     "cell": "mixed-bimodal.fresh.mars-mac.receiver.warm",
+     "arm": "rsync",
+     "control": "xs",
+     "blocks": 12,
+     "time_ratio": 2.074,
+     "interval": [
+      1.906,
+      2.256
+     ],
+     "verdict": "slower"
+    },
+    {
+     "cell": "mixed-bimodal.noop.mac-mars.sender.warm",
+     "arm": "xs-recv4",
+     "control": "xs",
+     "blocks": 12,
+     "time_ratio": 0.927,
+     "interval": [
+      0.853,
+      1.007
+     ],
+     "verdict": "inconclusive"
+    },
+    {
+     "cell": "mixed-bimodal.noop.mac-mars.sender.warm",
+     "arm": "rsync",
+     "control": "xs",
+     "blocks": 12,
+     "time_ratio": 1.377,
+     "interval": [
+      1.289,
+      1.47
+     ],
+     "verdict": "slower"
+    },
+    {
+     "cell": "mixed-bimodal.noop.mars-mac.receiver.warm",
+     "arm": "xs-recv4",
+     "control": "xs",
+     "blocks": 12,
+     "time_ratio": 0.951,
+     "interval": [
+      0.866,
+      1.044
+     ],
+     "verdict": "inconclusive"
+    },
+    {
+     "cell": "mixed-bimodal.noop.mars-mac.receiver.warm",
+     "arm": "rsync",
+     "control": "xs",
+     "blocks": 12,
+     "time_ratio": 1.141,
+     "interval": [
+      1.007,
+      1.293
+     ],
+     "verdict": "inconclusive"
+    },
+    {
+     "cell": "real-congress.fresh.mac-mars.sender.warm",
+     "arm": "xs-recv4",
+     "control": "xs",
+     "blocks": 12,
+     "time_ratio": 0.997,
+     "interval": [
+      0.947,
+      1.049
+     ],
+     "verdict": "inconclusive"
+    },
+    {
+     "cell": "real-congress.fresh.mac-mars.sender.warm",
+     "arm": "rsync",
+     "control": "xs",
+     "blocks": 12,
+     "time_ratio": 4.753,
+     "interval": [
+      4.33,
+      5.218
+     ],
+     "verdict": "slower"
+    },
+    {
+     "cell": "real-congress.fresh.mars-mac.receiver.warm",
+     "arm": "xs-recv4",
+     "control": "xs",
+     "blocks": 12,
+     "time_ratio": 0.91,
+     "interval": [
+      0.773,
+      1.071
+     ],
+     "verdict": "inconclusive"
+    },
+    {
+     "cell": "real-congress.fresh.mars-mac.receiver.warm",
+     "arm": "rsync",
+     "control": "xs",
+     "blocks": 12,
+     "time_ratio": 1.384,
+     "interval": [
+      1.099,
+      1.744
+     ],
+     "verdict": "slower"
+    },
+    {
+     "cell": "real-congress.noop.mac-mars.sender.warm",
+     "arm": "xs-recv4",
+     "control": "xs",
+     "blocks": 12,
+     "time_ratio": 0.959,
+     "interval": [
+      0.88,
+      1.045
+     ],
+     "verdict": "inconclusive"
+    },
+    {
+     "cell": "real-congress.noop.mac-mars.sender.warm",
+     "arm": "rsync",
+     "control": "xs",
+     "blocks": 12,
+     "time_ratio": 3.993,
+     "interval": [
+      3.537,
+      4.509
+     ],
+     "verdict": "slower"
+    },
+    {
+     "cell": "real-congress.noop.mars-mac.receiver.warm",
+     "arm": "xs-recv4",
+     "control": "xs",
+     "blocks": 12,
+     "time_ratio": 1.026,
+     "interval": [
+      0.916,
+      1.15
+     ],
+     "verdict": "inconclusive"
+    },
+    {
+     "cell": "real-congress.noop.mars-mac.receiver.warm",
+     "arm": "rsync",
+     "control": "xs",
+     "blocks": 12,
+     "time_ratio": 1.402,
+     "interval": [
+      1.216,
+      1.616
+     ],
+     "verdict": "slower"
+    },
+    {
+     "cell": "small-deep.fresh.mac-mars.sender.warm",
+     "arm": "xs-recv4",
+     "control": "xs",
+     "blocks": 12,
+     "time_ratio": 0.938,
+     "interval": [
+      0.855,
+      1.029
+     ],
+     "verdict": "inconclusive"
+    },
+    {
+     "cell": "small-deep.fresh.mac-mars.sender.warm",
+     "arm": "rsync",
+     "control": "xs",
+     "blocks": 12,
+     "time_ratio": 3.926,
+     "interval": [
+      3.492,
+      4.414
+     ],
+     "verdict": "slower"
+    },
+    {
+     "cell": "small-deep.fresh.mars-mac.receiver.warm",
+     "arm": "xs-recv4",
+     "control": "xs",
+     "blocks": 12,
+     "time_ratio": 0.961,
+     "interval": [
+      0.81,
+      1.14
+     ],
+     "verdict": "inconclusive"
+    },
+    {
+     "cell": "small-deep.fresh.mars-mac.receiver.warm",
+     "arm": "rsync",
+     "control": "xs",
+     "blocks": 12,
+     "time_ratio": 1.164,
+     "interval": [
+      1.047,
+      1.294
+     ],
+     "verdict": "inconclusive"
+    },
+    {
+     "cell": "small-deep.noop.mac-mars.sender.warm",
+     "arm": "xs-recv4",
+     "control": "xs",
+     "blocks": 12,
+     "time_ratio": 0.96,
+     "interval": [
+      0.906,
+      1.016
+     ],
+     "verdict": "inconclusive"
+    },
+    {
+     "cell": "small-deep.noop.mac-mars.sender.warm",
+     "arm": "rsync",
+     "control": "xs",
+     "blocks": 12,
+     "time_ratio": 4.519,
+     "interval": [
+      4.104,
+      4.975
+     ],
+     "verdict": "slower"
+    },
+    {
+     "cell": "small-deep.noop.mars-mac.receiver.warm",
+     "arm": "xs-recv4",
+     "control": "xs",
+     "blocks": 12,
+     "time_ratio": 1.013,
+     "interval": [
+      0.955,
+      1.075
+     ],
+     "verdict": "inconclusive"
+    },
+    {
+     "cell": "small-deep.noop.mars-mac.receiver.warm",
+     "arm": "rsync",
+     "control": "xs",
+     "blocks": 12,
+     "time_ratio": 0.536,
+     "interval": [
+      0.495,
+      0.58
+     ],
+     "verdict": "faster"
+    },
+    {
+     "cell": "small-flat.fresh.mac-mars.sender.warm",
+     "arm": "xs-recv4",
+     "control": "xs",
+     "blocks": 12,
+     "time_ratio": 0.986,
+     "interval": [
+      0.954,
+      1.02
+     ],
+     "verdict": "equivalent"
+    },
+    {
+     "cell": "small-flat.fresh.mac-mars.sender.warm",
+     "arm": "rsync",
+     "control": "xs",
+     "blocks": 12,
+     "time_ratio": 2.692,
+     "interval": [
+      1.95,
+      3.716
+     ],
+     "verdict": "slower"
+    },
+    {
+     "cell": "small-flat.fresh.mars-mac.receiver.warm",
+     "arm": "xs-recv4",
+     "control": "xs",
+     "blocks": 12,
+     "time_ratio": 0.887,
+     "interval": [
+      0.69,
+      1.139
+     ],
+     "verdict": "inconclusive"
+    },
+    {
+     "cell": "small-flat.fresh.mars-mac.receiver.warm",
+     "arm": "rsync",
+     "control": "xs",
+     "blocks": 12,
+     "time_ratio": 1.46,
+     "interval": [
+      1.159,
+      1.84
+     ],
+     "verdict": "slower"
+    },
+    {
+     "cell": "small-flat.noop.mac-mars.sender.warm",
+     "arm": "xs-recv4",
+     "control": "xs",
+     "blocks": 12,
+     "time_ratio": 0.862,
+     "interval": [
+      0.812,
+      0.915
+     ],
+     "verdict": "faster"
+    },
+    {
+     "cell": "small-flat.noop.mac-mars.sender.warm",
+     "arm": "rsync",
+     "control": "xs",
+     "blocks": 12,
+     "time_ratio": 2.291,
+     "interval": [
+      2.036,
+      2.579
+     ],
+     "verdict": "slower"
+    },
+    {
+     "cell": "small-flat.noop.mars-mac.receiver.warm",
+     "arm": "xs-recv4",
+     "control": "xs",
+     "blocks": 12,
+     "time_ratio": 0.96,
+     "interval": [
+      0.905,
+      1.018
+     ],
+     "verdict": "inconclusive"
+    },
+    {
+     "cell": "small-flat.noop.mars-mac.receiver.warm",
+     "arm": "rsync",
+     "control": "xs",
+     "blocks": 12,
+     "time_ratio": 1.546,
+     "interval": [
+      1.399,
+      1.708
+     ],
+     "verdict": "slower"
+    },
+    {
+     "cell": "tiny-one.fresh.mac-mars.sender.warm",
+     "arm": "xs-recv4",
+     "control": "xs",
+     "blocks": 12,
+     "time_ratio": 0.913,
+     "interval": [
+      0.857,
+      0.973
+     ],
+     "verdict": "inconclusive"
+    },
+    {
+     "cell": "tiny-one.fresh.mac-mars.sender.warm",
+     "arm": "rsync",
+     "control": "xs",
+     "blocks": 12,
+     "time_ratio": 1.106,
+     "interval": [
+      1.046,
+      1.171
+     ],
+     "verdict": "inconclusive"
+    },
+    {
+     "cell": "tiny-one.fresh.mars-mac.receiver.warm",
+     "arm": "xs-recv4",
+     "control": "xs",
+     "blocks": 12,
+     "time_ratio": 0.846,
+     "interval": [
+      0.797,
+      0.899
+     ],
+     "verdict": "faster"
+    },
+    {
+     "cell": "tiny-one.fresh.mars-mac.receiver.warm",
+     "arm": "rsync",
+     "control": "xs",
+     "blocks": 12,
+     "time_ratio": 1.011,
+     "interval": [
+      0.94,
+      1.087
+     ],
+     "verdict": "inconclusive"
+    },
+    {
+     "cell": "tiny-one.noop.mac-mars.sender.warm",
+     "arm": "xs-recv4",
+     "control": "xs",
+     "blocks": 12,
+     "time_ratio": 0.864,
+     "interval": [
+      0.794,
+      0.94
+     ],
+     "verdict": "faster"
+    },
+    {
+     "cell": "tiny-one.noop.mac-mars.sender.warm",
+     "arm": "rsync",
+     "control": "xs",
+     "blocks": 12,
+     "time_ratio": 1.149,
+     "interval": [
+      1.023,
+      1.291
+     ],
+     "verdict": "inconclusive"
+    },
+    {
+     "cell": "tiny-one.noop.mars-mac.receiver.warm",
+     "arm": "xs-recv4",
+     "control": "xs",
+     "blocks": 12,
+     "time_ratio": 0.878,
+     "interval": [
+      0.816,
+      0.944
+     ],
+     "verdict": "inconclusive"
+    },
+    {
+     "cell": "tiny-one.noop.mars-mac.receiver.warm",
+     "arm": "rsync",
+     "control": "xs",
+     "blocks": 12,
+     "time_ratio": 0.994,
+     "interval": [
+      0.912,
+      1.083
+     ],
+     "verdict": "inconclusive"
+    }
+   ]
+  },
+  {
+   "experiment": "S3-mac-mars-sentinel",
+   "kind": "screening",
+   "link": "mac-mars-10g",
+   "analysed": "2026-10-18T22:19Z",
+   "hypothesis": "Hour by hour, the A/A ratio stays within 5% of 1 and the xs to rsync ratio stays where E6b's rsync arm put it.",
+   "rows": [
+    {
+     "cell": "mixed-bimodal.fresh.mac-mars.sender.warm",
+     "arm": "again",
+     "control": "xs",
+     "blocks": 4,
+     "time_ratio": 1.041,
+     "interval": [
+      0.987,
+      1.098
+     ],
+     "verdict": "too few blocks"
+    },
+    {
+     "cell": "mixed-bimodal.fresh.mac-mars.sender.warm",
+     "arm": "rsync",
+     "control": "xs",
+     "blocks": 4,
+     "time_ratio": 3.127,
+     "interval": [
+      2.16,
+      4.526
+     ],
+     "verdict": "too few blocks"
+    },
+    {
+     "cell": "mixed-bimodal.fresh.mars-mac.receiver.warm",
+     "arm": "again",
+     "control": "xs",
+     "blocks": 4,
+     "time_ratio": 1.06,
+     "interval": [
+      0.868,
+      1.295
+     ],
+     "verdict": "too few blocks"
+    },
+    {
+     "cell": "mixed-bimodal.fresh.mars-mac.receiver.warm",
+     "arm": "rsync",
+     "control": "xs",
+     "blocks": 4,
+     "time_ratio": 2.338,
+     "interval": [
+      2.02,
+      2.707
+     ],
+     "verdict": "too few blocks"
+    },
+    {
+     "cell": "mixed-bimodal.noop.mac-mars.sender.warm",
+     "arm": "again",
+     "control": "xs",
+     "blocks": 4,
+     "time_ratio": 1.006,
+     "interval": [
+      0.976,
+      1.036
+     ],
+     "verdict": "too few blocks"
+    },
+    {
+     "cell": "mixed-bimodal.noop.mac-mars.sender.warm",
+     "arm": "rsync",
+     "control": "xs",
+     "blocks": 4,
+     "time_ratio": 1.381,
+     "interval": [
+      1.201,
+      1.589
+     ],
+     "verdict": "too few blocks"
+    },
+    {
+     "cell": "mixed-bimodal.noop.mars-mac.receiver.warm",
+     "arm": "again",
+     "control": "xs",
+     "blocks": 4,
+     "time_ratio": 0.978,
+     "interval": [
+      0.786,
+      1.217
+     ],
+     "verdict": "too few blocks"
+    },
+    {
+     "cell": "mixed-bimodal.noop.mars-mac.receiver.warm",
+     "arm": "rsync",
+     "control": "xs",
+     "blocks": 4,
+     "time_ratio": 1.164,
+     "interval": [
+      0.901,
+      1.502
+     ],
+     "verdict": "too few blocks"
+    },
+    {
+     "cell": "small-flat.fresh.mac-mars.sender.warm",
+     "arm": "again",
+     "control": "xs",
+     "blocks": 4,
+     "time_ratio": 0.978,
+     "interval": [
+      0.854,
+      1.119
+     ],
+     "verdict": "too few blocks"
+    },
+    {
+     "cell": "small-flat.fresh.mac-mars.sender.warm",
+     "arm": "rsync",
+     "control": "xs",
+     "blocks": 4,
+     "time_ratio": 1.746,
+     "interval": [
+      0.653,
+      4.672
+     ],
+     "verdict": "too few blocks"
+    },
+    {
+     "cell": "small-flat.fresh.mars-mac.receiver.warm",
+     "arm": "again",
+     "control": "xs",
+     "blocks": 4,
+     "time_ratio": 0.979,
+     "interval": [
+      0.847,
+      1.13
+     ],
+     "verdict": "too few blocks"
+    },
+    {
+     "cell": "small-flat.fresh.mars-mac.receiver.warm",
+     "arm": "rsync",
+     "control": "xs",
+     "blocks": 4,
+     "time_ratio": 1.529,
+     "interval": [
+      1.32,
+      1.771
+     ],
+     "verdict": "too few blocks"
+    },
+    {
+     "cell": "small-flat.noop.mac-mars.sender.warm",
+     "arm": "again",
+     "control": "xs",
+     "blocks": 4,
+     "time_ratio": 1.142,
+     "interval": [
+      1.021,
+      1.277
+     ],
+     "verdict": "too few blocks"
+    },
+    {
+     "cell": "small-flat.noop.mac-mars.sender.warm",
+     "arm": "rsync",
+     "control": "xs",
+     "blocks": 4,
+     "time_ratio": 2.15,
+     "interval": [
+      1.692,
+      2.731
+     ],
+     "verdict": "too few blocks"
+    },
+    {
+     "cell": "small-flat.noop.mars-mac.receiver.warm",
+     "arm": "again",
+     "control": "xs",
+     "blocks": 4,
+     "time_ratio": 0.922,
+     "interval": [
+      0.824,
+      1.03
+     ],
+     "verdict": "too few blocks"
+    },
+    {
+     "cell": "small-flat.noop.mars-mac.receiver.warm",
+     "arm": "rsync",
+     "control": "xs",
+     "blocks": 4,
+     "time_ratio": 1.677,
+     "interval": [
+      1.425,
+      1.973
+     ],
+     "verdict": "too few blocks"
+    }
+   ]
+  },
+  {
+   "experiment": "LC1-psample-local-baseline",
+   "kind": "screening",
+   "link": "neo-local-ssd",
+   "analysed": "2026-10-18T21:54Z",
+   "hypothesis": "Copying psample locally from NVMe to the T5 with cold caches, xs -aH is faster than rsync -aH and cp -a, and near a single tar stream.",
+   "rows": [
+    {
+     "cell": "real-psample.fresh.neo-neo-ssd.receiver.cold",
+     "arm": "xs",
+     "control": "rsync",
+     "blocks": 4,
+     "time_ratio": 1.121,
+     "interval": [
+      1.014,
+      1.239
+     ],
+     "verdict": "too few blocks"
+    },
+    {
+     "cell": "real-psample.fresh.neo-neo-ssd.receiver.cold",
+     "arm": "cp-a",
+     "control": "rsync",
+     "blocks": 4,
+     "time_ratio": 1.155,
+     "interval": [
+      1.111,
+      1.202
+     ],
+     "verdict": "too few blocks"
+    },
+    {
+     "cell": "real-psample.fresh.neo-neo-ssd.receiver.cold",
+     "arm": "cp-r",
+     "control": "rsync",
+     "blocks": 4,
+     "time_ratio": 1.146,
+     "interval": [
+      1.098,
+      1.196
+     ],
+     "verdict": "too few blocks"
+    },
+    {
+     "cell": "real-psample.fresh.neo-neo-ssd.receiver.cold",
+     "arm": "tar",
+     "control": "rsync",
+     "blocks": 4,
+     "time_ratio": 1.251,
+     "interval": [
+      1.173,
+      1.334
+     ],
+     "verdict": "too few blocks"
+    }
+   ]
+  },
+  {
+   "experiment": "MA6-mac-mars-shapes-confirm",
+   "kind": "confirmatory",
+   "link": "mac-mars-10g",
+   "analysed": "2026-10-18T15:33Z",
+   "hypothesis": "xs is more than 5% faster than rsync on large-text, real-congress (from MA6-mac-mars-shapes, confirmed with fresh blocks).",
+   "rows": [
+    {
+     "cell": "large-text.fresh.mac-mars.sender.warm",
+     "arm": "xs",
+     "control": "rsync",
+     "blocks": 12,
+     "time_ratio": 0.393,
+     "interval": [
+      0.358,
+      0.431
+     ],
+     "verdict": "faster"
+    },
+    {
+     "cell": "large-text.fresh.mars-mac.receiver.warm",
+     "arm": "xs",
+     "control": "rsync",
+     "blocks": 12,
+     "time_ratio": 0.314,
+     "interval": [
+      0.258,
+      0.382
+     ],
+     "verdict": "faster"
+    },
+    {
+     "cell": "real-congress.fresh.mac-mars.sender.warm",
+     "arm": "xs",
+     "control": "rsync",
+     "blocks": 12,
+     "time_ratio": 0.244,
+     "interval": [
+      0.231,
+      0.258
+     ],
+     "verdict": "faster"
+    },
+    {
+     "cell": "real-congress.fresh.mars-mac.receiver.warm",
+     "arm": "xs",
+     "control": "rsync",
+     "blocks": 12,
+     "time_ratio": 0.599,
+     "interval": [
+      0.505,
+      0.711
+     ],
+     "verdict": "faster"
+    }
+   ]
+  },
+  {
+   "experiment": "MA6-mac-mars-shapes",
+   "kind": "screening",
+   "link": "mac-mars-10g",
+   "analysed": "2026-10-18T13:59Z",
+   "hypothesis": "The mac/mars tool ranking from psample holds on other real trees: many small compressible files, and a large compressible file.",
+   "rows": [
+    {
+     "cell": "large-text.fresh.mac-mars.sender.warm",
+     "arm": "xs",
+     "control": "rsync",
+     "blocks": 4,
+     "time_ratio": 0.413,
+     "interval": [
+      0.368,
+      0.462
+     ],
+     "verdict": "too few blocks"
+    },
+    {
+     "cell": "large-text.fresh.mars-mac.receiver.warm",
+     "arm": "xs",
+     "control": "rsync",
+     "blocks": 4,
+     "time_ratio": 0.315,
+     "interval": [
+      0.202,
+      0.491
+     ],
+     "verdict": "too few blocks"
+    },
+    {
+     "cell": "real-congress.fresh.mac-mars.sender.warm",
+     "arm": "xs",
+     "control": "rsync",
+     "blocks": 4,
+     "time_ratio": 0.253,
+     "interval": [
+      0.184,
+      0.348
+     ],
+     "verdict": "too few blocks"
+    },
+    {
+     "cell": "real-congress.fresh.mars-mac.receiver.warm",
+     "arm": "xs",
+     "control": "rsync",
+     "blocks": 4,
+     "time_ratio": 0.591,
+     "interval": [
+      0.445,
+      0.783
+     ],
+     "verdict": "too few blocks"
+    }
+   ]
+  },
+  {
+   "experiment": "MA3-psample-confirm",
+   "kind": "confirmatory",
+   "link": "mac-mars-10g",
+   "analysed": "2026-10-18T13:26Z",
+   "hypothesis": "xs is more than 5% faster than rsync on real-psample (from MA3-psample-bidir, confirmed with fresh blocks).",
+   "rows": [
+    {
+     "cell": "real-psample.fresh.mac-mars.sender.warm",
+     "arm": "xs",
+     "control": "rsync",
+     "blocks": 12,
+     "time_ratio": 0.257,
+     "interval": [
+      0.232,
+      0.284
+     ],
+     "verdict": "faster"
+    },
+    {
+     "cell": "real-psample.fresh.mars-mac.receiver.warm",
+     "arm": "xs",
+     "control": "rsync",
+     "blocks": 12,
+     "time_ratio": 0.658,
+     "interval": [
+      0.578,
+      0.749
+     ],
+     "verdict": "faster"
+    }
+   ]
+  },
+  {
+   "experiment": "MA4-psample-incremental",
+   "kind": "screening",
+   "link": "mac-mars-10g",
+   "analysed": "2026-10-18T07:56Z",
+   "hypothesis": "On mac/mars, xs re-syncs the psample tree faster than rsync -aH, warm: a no-op, and after 1% of the files change.",
+   "rows": [
+    {
+     "cell": "real-psample.noop.mac-mars.sender.warm",
+     "arm": "xs",
+     "control": "rsync",
+     "blocks": 4,
+     "time_ratio": 0.272,
+     "interval": [
+      0.209,
+      0.355
+     ],
+     "verdict": "too few blocks"
+    },
+    {
+     "cell": "real-psample.noop.mars-mac.receiver.warm",
+     "arm": "xs",
+     "control": "rsync",
+     "blocks": 3,
+     "time_ratio": 1.69,
+     "interval": [
+      1.28,
+      2.232
+     ],
+     "verdict": "too few blocks"
+    },
+    {
+     "cell": "real-psample.update-1pct.mac-mars.sender.warm",
+     "arm": "xs",
+     "control": "rsync",
+     "blocks": 4,
+     "time_ratio": 0.268,
+     "interval": [
+      0.225,
+      0.319
+     ],
+     "verdict": "too few blocks"
+    },
+    {
+     "cell": "real-psample.update-1pct.mars-mac.receiver.warm",
+     "arm": "xs",
+     "control": "rsync",
+     "blocks": 4,
+     "time_ratio": 1.301,
+     "interval": [
+      1.146,
+      1.477
+     ],
+     "verdict": "too few blocks"
+    }
+   ]
+  },
+  {
+   "experiment": "MA3-psample-bidir",
+   "kind": "screening",
+   "link": "mac-mars-10g",
+   "analysed": "2026-10-18T04:54Z",
+   "hypothesis": "On the Mac/mars 10GbE link, xs copies the pinned psample tree faster than rsync -aH, fresh, in both directions.",
+   "rows": [
+    {
+     "cell": "real-psample.fresh.mac-mars.sender.warm",
+     "arm": "xs",
+     "control": "rsync",
+     "blocks": 4,
+     "time_ratio": 0.276,
+     "interval": [
+      0.17,
+      0.447
+     ],
+     "verdict": "too few blocks"
+    },
+    {
+     "cell": "real-psample.fresh.mars-mac.receiver.warm",
+     "arm": "xs",
+     "control": "rsync",
+     "blocks": 4,
+     "time_ratio": 0.778,
+     "interval": [
+      0.47,
+      1.289
+     ],
+     "verdict": "too few blocks"
+    }
+   ]
+  }
+ ],
+ "trees": [
+  {
+   "id": "T16-local-beat-rsync",
+   "question": "Can xs beat rsync -aH at copying psample from the Pi's NVMe to the T5?",
+   "nodes": [
+    {
+     "id": "A",
+     "experiment": "LC6-local-beat-rsync",
+     "state": "queued",
+     "decision": null
+    },
+    {
+     "id": "Ac",
+     "experiment": "LC6-beat-confirm",
+     "state": "waiting",
+     "decision": null
+    },
+    {
+     "id": "C",
+     "experiment": "LC8-local-tie-confirm",
+     "state": "waiting",
+     "decision": null
+    },
+    {
+     "id": "B",
+     "experiment": "LC7-local-relaxed",
+     "state": "waiting",
+     "decision": null
+    },
+    {
+     "id": "Bc",
+     "experiment": "LC7-relaxed-confirm",
+     "state": "waiting",
+     "decision": null
+    }
+   ]
+  },
+  {
+   "id": "T8-mac-mars-psample",
+   "question": "How fast can I transfer the psample tree between the Mac and mars, each way, and is xs faster than rsync -aH?",
+   "nodes": [
+    {
+     "id": "A",
+     "experiment": "MA3-psample-bidir",
+     "state": "decided",
+     "decision": "A: xs screens at least 5% faster than rsync -aH: confirm the winner with fresh blocks (real-psample mac\u2192mars xs 3.63\u00d7 [2.24, 5.87]; real-psample mars\u2192mac xs 1.28\u00d7 [0.78, 2.13])"
+    },
+    {
+     "id": "Ac",
+     "experiment": "MA3-psample-confirm",
+     "state": "decided",
+     "decision": "Ac: done (1 run)"
+    }
+   ]
+  },
+  {
+   "id": "T14-neo-local-psample",
+   "question": "How fast can a Pi 5 back up the 21 GB psample tree from its NVMe drive to a Samsung T5 over USB, and what limits it?",
+   "nodes": [
+    {
+     "id": "A",
+     "experiment": "LC1-psample-local-baseline",
+     "state": "decided",
+     "decision": "A: xs is not ahead of rsync on a local copy: look for what holds it back (workers, flushing) and still check re-syncs (real-psample neo\u2192neo-ssd xs 0.89\u00d7 [0.81, 0.99])"
+    },
+    {
+     "id": "B",
+     "experiment": "LC2-psample-local-workers",
+     "state": "queued",
+     "decision": null
+    },
+    {
+     "id": "Bc",
+     "experiment": "LC2-workers-confirm",
+     "state": "waiting",
+     "decision": null
+    },
+    {
+     "id": "C",
+     "experiment": "LC3-psample-local-durable",
+     "state": "queued",
+     "decision": null
+    },
+    {
+     "id": "Cc",
+     "experiment": "LC3-durable-confirm",
+     "state": "waiting",
+     "decision": null
+    },
+    {
+     "id": "D",
+     "experiment": "LC4-psample-local-resync",
+     "state": "queued",
+     "decision": null
+    }
+   ]
+  },
+  {
+   "id": "T12-mac-mars-followups",
+   "question": "After the psample screening: does xs win the incremental cases, what recovers a no-op push deficit, and does the ranking hold on other trees?",
+   "nodes": [
+    {
+     "id": "A",
+     "experiment": "MA4-psample-incremental",
+     "state": "decided",
+     "decision": "A: xs does not lose a mac-to-mars cell here; move on to other tree shapes"
+    },
+    {
+     "id": "B",
+     "experiment": "MA5-psample-noop-knobs",
+     "state": "waiting",
+     "decision": null
+    },
+    {
+     "id": "Bc",
+     "experiment": "MA5-psample-noop-confirm",
+     "state": "waiting",
+     "decision": null
+    },
+    {
+     "id": "C",
+     "experiment": "MA6-mac-mars-shapes",
+     "state": "decided",
+     "decision": "C: xs wins on other trees too: confirm it (real-congress mac\u2192mars xs 3.95\u00d7 [2.87, 5.44]; large-text mars\u2192mac xs 3.18\u00d7 [2.04, 4.95]; large-text mac\u2192mars xs 2.42\u00d7 [2.16, 2.72]; real-congress mars\u2192mac xs 1.69\u00d7 [1.28, 2.24])"
+    },
+    {
+     "id": "Cc",
+     "experiment": "MA6-mac-mars-shapes-confirm",
+     "state": "decided",
+     "decision": "Cc: done (1 run)"
+    }
+   ]
+  },
+  {
+   "id": "T13-mac-pull-apfs",
+   "question": "What recovers xs's psample pull onto the Mac, where rsync is faster?",
+   "nodes": [
+    {
+     "id": "A",
+     "experiment": "MA7-psample-pull-apfs",
+     "state": "queued",
+     "decision": null
+    },
+    {
+     "id": "Ac",
+     "experiment": "MA7-pull-confirm",
+     "state": "waiting",
+     "decision": null
+    }
+   ]
+  }
+ ],
+ "earlier_plans": []
+}

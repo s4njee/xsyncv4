@@ -1,0 +1,29 @@
+# E1r, holochart: the baseline comparison on a real small-file-dominated
+# working tree: 249,602 files, 10,607 symlinks, 7.3 GiB. Each sample takes
+# minutes, so there are few blocks: estimates, not verdicts.
+id = "E1r-holochart"
+kind = "screening"
+hypothesis = "On a real JavaScript working tree, xs -aH differs from rsync -aH as it does on the small synthetic corpora."
+primary = "durable_s"
+delta = 0.03
+blocks = 6
+control = "rsync"
+verify = "first-last"
+sample_timeout_s = 7200
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-aH"]
+
+[arms.xs]
+tool = "xs"
+rev = "e1f05b518049"
+flags = ["-aH"]
+
+[matrix]
+link = "lan"
+corpus = ["real-holochart"]
+scenario = ["fresh", "noop"]
+direction = ["neo>freya", "freya>neo"]
+client = ["sender"]
+cache = ["warm"]

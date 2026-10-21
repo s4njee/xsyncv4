@@ -1,0 +1,24 @@
+{
+ "cards": {
+  "mac": {
+   "key": "[\"running\",\"Mac \u2194 mars (10 GbE, X540)\",\"MA8-psample-pull-anchors\"]",
+   "text": "A MacBook Pro (M1 Max) and a Ryzen 9 desktop called mars are joined by a wired 10 gigabit Ethernet link. Right now it tests whether xs, given a larger parent-descriptor budget, pulls psample onto the Mac faster than its parent version and rsync.",
+   "model": "claude-sonnet-5-5"
+  },
+  "mars": {
+   "key": "[\"idle\",\"neo \u2194 mars (wired gigabit)\",null]",
+   "text": "This pair links neo, a Raspberry Pi 5 with 4 GB of memory and an NVMe drive, to mars, a 12-core Ryzen 9 desktop with 32 GB of memory, over a wired gigabit connection. It is idle right now, with no experiment running.",
+   "model": "claude-sonnet-5-5"
+  },
+  "neo": {
+   "key": "[\"idle\",\"neo \u2194 mars (macOS, LAN gigabit)\",null]",
+   "text": "Neo, a Raspberry Pi 5, is connected to mars, a macOS desktop, over a wired gigabit LAN link. The experiment is idle, so no transfer test is running right now.",
+   "model": "claude-haiku-5-5"
+  },
+  "neo-ssd": {
+   "key": "[\"running\",\"neo-local-ssd\",\"AP10210142-L2R6-local-psample-cpu2\"]",
+   "text": "Neo, a Raspberry Pi 5 with an NVMe drive, copies over a local SSD link to a T5. It is testing whether limiting neo to 2 CPUs widens the gap between xs -a -j4 and rsync -a on a fresh cold copy of real-psample.",
+   "model": "claude-haiku-5-5"
+  }
+ }
+}

@@ -1,0 +1,13 @@
+experiment,kind,cell_id,corpus,scenario,sender,receiver,client,link,cache,arm,n_blocks,sigma_d,blocks_for_2pct,blocks_for_3pct,blocks_for_5pct,blocks_for_10pct,blocks_equivalent_2pct,blocks_equivalent_3pct,blocks_equivalent_5pct,blocks_equivalent_10pct
+J1c-neo-mars-jobs-mixed-bimodal,screening,mixed-bimodal.fresh.mars-neo.receiver.warm,mixed-bimodal,fresh,mars,neo,receiver,neo-mars-lan,warm,xs-j4,8,0.01555753115254798,8,8,8,8,9,8,8,8
+J1c-neo-mars-jobs-mixed-bimodal,screening,mixed-bimodal.fresh.mars-neo.receiver.warm,mixed-bimodal,fresh,mars,neo,receiver,neo-mars-lan,warm,xs-j8,8,0.01994513409652139,10,8,8,8,13,8,8,8
+J1c-neo-mars-jobs-mixed-bimodal,screening,mixed-bimodal.fresh.mars-neo.receiver.warm,mixed-bimodal,fresh,mars,neo,receiver,neo-mars-lan,warm,rsync,8,0.016207555858196696,8,8,8,8,10,8,8,8
+J1c-neo-mars-jobs-mixed-bimodal,screening,mixed-bimodal.fresh.neo-mars.sender.warm,mixed-bimodal,fresh,neo,mars,sender,neo-mars-lan,warm,xs-j4,8,0.007898408908951967,8,8,8,8,8,8,8,8
+J1c-neo-mars-jobs-mixed-bimodal,screening,mixed-bimodal.fresh.neo-mars.sender.warm,mixed-bimodal,fresh,neo,mars,sender,neo-mars-lan,warm,xs-j8,8,0.012478390594851087,8,8,8,8,8,8,8,8
+J1c-neo-mars-jobs-mixed-bimodal,screening,mixed-bimodal.fresh.neo-mars.sender.warm,mixed-bimodal,fresh,neo,mars,sender,neo-mars-lan,warm,rsync,8,0.011325546799695852,8,8,8,8,8,8,8,8
+J1c-neo-mars-jobs-mixed-bimodal,screening,mixed-bimodal.noop.mars-neo.receiver.warm,mixed-bimodal,noop,mars,neo,receiver,neo-mars-lan,warm,xs-j4,8,0.00704336949342402,8,8,8,8,8,8,8,8
+J1c-neo-mars-jobs-mixed-bimodal,screening,mixed-bimodal.noop.mars-neo.receiver.warm,mixed-bimodal,noop,mars,neo,receiver,neo-mars-lan,warm,xs-j8,8,0.015353646716631787,8,8,8,8,9,8,8,8
+J1c-neo-mars-jobs-mixed-bimodal,screening,mixed-bimodal.noop.mars-neo.receiver.warm,mixed-bimodal,noop,mars,neo,receiver,neo-mars-lan,warm,rsync,8,0.017265693991092887,8,8,8,8,10,8,8,8
+J1c-neo-mars-jobs-mixed-bimodal,screening,mixed-bimodal.noop.neo-mars.sender.warm,mixed-bimodal,noop,neo,mars,sender,neo-mars-lan,warm,xs-j4,8,0.0651594270892684,87,41,16,8,116,54,21,8
+J1c-neo-mars-jobs-mixed-bimodal,screening,mixed-bimodal.noop.neo-mars.sender.warm,mixed-bimodal,noop,neo,mars,sender,neo-mars-lan,warm,xs-j8,8,0.059582103624328975,73,34,14,8,98,45,18,8
+J1c-neo-mars-jobs-mixed-bimodal,screening,mixed-bimodal.noop.neo-mars.sender.warm,mixed-bimodal,noop,neo,mars,sender,neo-mars-lan,warm,rsync,8,0.054198778243923953,61,29,12,8,81,38,15,8

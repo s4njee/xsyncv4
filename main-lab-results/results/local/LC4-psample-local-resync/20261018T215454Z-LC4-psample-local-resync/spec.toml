@@ -1,0 +1,29 @@
+# LC4 (tree T14): re-syncing the psample backup on the T5 with nothing cached:
+# a no-op, and after 1% of the files (7,111) have up to 4 KiB changed. Both
+# tools must scan 547,983 directories on each drive; cp has no way to re-sync.
+id = "LC4-psample-local-resync"
+kind = "screening"
+hypothesis = "Re-syncing the psample backup locally with cold caches, xs -aH is faster than rsync -aH at a no-op and after a 1% change."
+primary = "durable_s"
+delta = 0.05
+blocks = 6
+control = "rsync"
+verify = "first-last"
+sample_timeout_s = 7200
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-aH"]
+
+[arms.xs]
+tool = "xs"
+rev = "21ae6844ed20"
+flags = ["-aH"]
+
+[matrix]
+link = "neo-local-ssd"
+corpus = ["real-psample"]
+scenario = ["noop", "update-1pct"]
+direction = ["neo>neo-ssd"]
+client = ["receiver"]
+cache = ["cold"]

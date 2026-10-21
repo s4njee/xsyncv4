@@ -1,0 +1,45 @@
+# D8 (tree T1): compression on the Pi's side. Adaptive -z picks a level from the
+# measured rate; on a four-core Pi the cost of compressing may outweigh gigabit's limit
+# for small text trees. Adaptive, forced level 1, and none, from neo, with rsync -az.
+id = "D8-pi-compress-small"
+kind = "screening"
+hypothesis = "Forcing zstd level 1, or no compression, sends small text trees from the Pi faster than adaptive -z."
+primary = "durable_s"
+delta = 0.03
+blocks = 8
+control = "xs-z-best"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.xs-z-best]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-az", "--no-atomic"]
+tune = { receiver = "jobs=4" }
+
+[arms.xs-z1-best]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-az", "--no-atomic", "--compress-level=1"]
+tune = { receiver = "jobs=4" }
+
+[arms.xs-best]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-a", "--no-atomic"]
+tune = { receiver = "jobs=4" }
+
+[arms.rsync-z]
+tool = "rsync"
+flags = ["-az"]
+
+[matrix]
+link = "lan"
+corpus = ["real-congress", "small-real", "mixed-bimodal"]
+scenario = ["fresh"]
+direction = ["neo>freya"]
+client = ["sender"]
+cache = ["warm"]

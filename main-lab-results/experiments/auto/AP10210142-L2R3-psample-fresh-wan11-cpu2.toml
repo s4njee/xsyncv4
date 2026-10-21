@@ -1,0 +1,30 @@
+# Written by the 6-hourly planner (2026-10-21T01:42Z). Why: Step 1 (reproduce): real-psample is the only home corpus for this gap that is staged on both hosts and timed on this link (small-real is neither).
+id = "AP10210142-L2R3-psample-fresh-wan11-cpu2"
+kind = "screening"
+hypothesis = "Under lab2's latency and a 2-CPU sender, xs -a -j4 reaches a durable fresh copy of real-psample at least 5% later than rsync -a, with more block-to-block spread than rsync."
+primary = "durable_s"
+delta = 0.05
+blocks = 8
+control = "xs-j4"
+verify = "first-last"
+cleanup = "eager"
+sample_timeout_s = 7200
+wan = { host = "neo", delay_ms = 11, loss_pct = 0 }
+cpus = { host = "neo", count = 2 }
+
+[arms.xs-j4]
+tool = "xs"
+rev = "e51c1df1329a"
+flags = ["-a", "-j4"]
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[matrix]
+link = "neo-mars-lan"
+corpus = ["real-psample"]
+scenario = ["fresh"]
+direction = ["neo>mars"]
+client = ["initiator"]
+cache = ["warm"]

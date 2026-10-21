@@ -1,0 +1,4102 @@
+{
+ "schema": 1,
+ "run_id": "20261013T201556Z-T1c-side-jobs",
+ "started_utc": "2026-10-14T03:45:08.284+00:00",
+ "driver": "neo",
+ "plan": {
+  "schema": 1,
+  "experiment": "T1c-side-jobs",
+  "spec_sha256": "93b925c4680c0f18de6a9492b36adff4d32e7f5f14b261421c253df98c6a2596",
+  "kind": "screening",
+  "hypothesis": "The sender's and the receiver's worker counts matter separately: fewer sending workers help only byte-bound copies from neo, and fewer receiving workers help no-ops on freya.",
+  "primary": "wall_s",
+  "delta": 0.03,
+  "control": "xs",
+  "seed": 1,
+  "run_id": "20261013T201556Z-T1c-side-jobs",
+  "driver": "neo",
+  "sample_timeout_s": 3600,
+  "results": "lab",
+  "background": false,
+  "eager_cleanup": false,
+  "hosts": {
+   "neo": {
+    "ssh": "[email]",
+    "name": "[host]",
+    "hostname": "neo",
+    "root": "~/benchmarks/xsyncv4/lab",
+    "interface": "eth0",
+    "helper": true,
+    "gates": {},
+    "local": false,
+    "system": "Linux"
+   },
+   "freya": {
+    "ssh": "[email]",
+    "name": "[host]",
+    "hostname": "freya",
+    "root": "/mnt/nvme/xsbench",
+    "interface": "enp10s0",
+    "helper": true,
+    "gates": {},
+    "local": false,
+    "system": "Linux"
+   }
+  },
+  "links": {
+   "lan": {
+    "hosts": [
+     "neo",
+     "freya"
+    ],
+    "medium": "wired",
+    "min_speed_mbps": 1000,
+    "max_rtt_ms": 2.0
+   }
+  },
+  "arms": [
+   {
+    "name": "xs",
+    "tool": "xs",
+    "flags": [
+     "-a"
+    ],
+    "rev": "ddefa041364e-tune",
+    "metrics": true,
+    "binary": {
+     "neo": "~/benchmarks/xsyncv4/lab/bin/xs-ddefa041364e-tune",
+     "freya": "/mnt/nvme/xsbench/bin/xs-ddefa041364e-tune"
+    },
+    "sha256": {
+     "neo": "1f5c40a3f4d3ec403abcf30d64d8ade2a74f9fccfa6ba2c98709fb6f83ebebe2",
+     "freya": "fbe88e865b1d5162f6e370804f6b4683a196c272ce004d122311cac3431d05e0"
+    },
+    "artifacts": {
+     "xs-darwin-arm64": "304c6fe87a5235dc30bfc665dfe71ba8a777d8b633b9246b84bba42349c0679e",
+     "xs-linux-amd64": "fbe88e865b1d5162f6e370804f6b4683a196c272ce004d122311cac3431d05e0",
+     "xs-linux-arm64": "1f5c40a3f4d3ec403abcf30d64d8ade2a74f9fccfa6ba2c98709fb6f83ebebe2"
+    }
+   },
+   {
+    "name": "send1",
+    "tool": "xs",
+    "flags": [
+     "-a"
+    ],
+    "rev": "ddefa041364e-tune",
+    "tune": {
+     "sender": "jobs=1"
+    },
+    "metrics": true,
+    "binary": {
+     "neo": "~/benchmarks/xsyncv4/lab/bin/xs-ddefa041364e-tune",
+     "freya": "/mnt/nvme/xsbench/bin/xs-ddefa041364e-tune"
+    },
+    "sha256": {
+     "neo": "1f5c40a3f4d3ec403abcf30d64d8ade2a74f9fccfa6ba2c98709fb6f83ebebe2",
+     "freya": "fbe88e865b1d5162f6e370804f6b4683a196c272ce004d122311cac3431d05e0"
+    },
+    "artifacts": {
+     "xs-darwin-arm64": "304c6fe87a5235dc30bfc665dfe71ba8a777d8b633b9246b84bba42349c0679e",
+     "xs-linux-amd64": "fbe88e865b1d5162f6e370804f6b4683a196c272ce004d122311cac3431d05e0",
+     "xs-linux-arm64": "1f5c40a3f4d3ec403abcf30d64d8ade2a74f9fccfa6ba2c98709fb6f83ebebe2"
+    }
+   },
+   {
+    "name": "send2",
+    "tool": "xs",
+    "flags": [
+     "-a"
+    ],
+    "rev": "ddefa041364e-tune",
+    "tune": {
+     "sender": "jobs=2"
+    },
+    "metrics": true,
+    "binary": {
+     "neo": "~/benchmarks/xsyncv4/lab/bin/xs-ddefa041364e-tune",
+     "freya": "/mnt/nvme/xsbench/bin/xs-ddefa041364e-tune"
+    },
+    "sha256": {
+     "neo": "1f5c40a3f4d3ec403abcf30d64d8ade2a74f9fccfa6ba2c98709fb6f83ebebe2",
+     "freya": "fbe88e865b1d5162f6e370804f6b4683a196c272ce004d122311cac3431d05e0"
+    },
+    "artifacts": {
+     "xs-darwin-arm64": "304c6fe87a5235dc30bfc665dfe71ba8a777d8b633b9246b84bba42349c0679e",
+     "xs-linux-amd64": "fbe88e865b1d5162f6e370804f6b4683a196c272ce004d122311cac3431d05e0",
+     "xs-linux-arm64": "1f5c40a3f4d3ec403abcf30d64d8ade2a74f9fccfa6ba2c98709fb6f83ebebe2"
+    }
+   },
+   {
+    "name": "recv2",
+    "tool": "xs",
+    "flags": [
+     "-a"
+    ],
+    "rev": "ddefa041364e-tune",
+    "tune": {
+     "receiver": "jobs=2"
+    },
+    "metrics": true,
+    "binary": {
+     "neo": "~/benchmarks/xsyncv4/lab/bin/xs-ddefa041364e-tune",
+     "freya": "/mnt/nvme/xsbench/bin/xs-ddefa041364e-tune"
+    },
+    "sha256": {
+     "neo": "1f5c40a3f4d3ec403abcf30d64d8ade2a74f9fccfa6ba2c98709fb6f83ebebe2",
+     "freya": "fbe88e865b1d5162f6e370804f6b4683a196c272ce004d122311cac3431d05e0"
+    },
+    "artifacts": {
+     "xs-darwin-arm64": "304c6fe87a5235dc30bfc665dfe71ba8a777d8b633b9246b84bba42349c0679e",
+     "xs-linux-amd64": "fbe88e865b1d5162f6e370804f6b4683a196c272ce004d122311cac3431d05e0",
+     "xs-linux-arm64": "1f5c40a3f4d3ec403abcf30d64d8ade2a74f9fccfa6ba2c98709fb6f83ebebe2"
+    }
+   },
+   {
+    "name": "recv4",
+    "tool": "xs",
+    "flags": [
+     "-a"
+    ],
+    "rev": "ddefa041364e-tune",
+    "tune": {
+     "receiver": "jobs=4"
+    },
+    "metrics": true,
+    "binary": {
+     "neo": "~/benchmarks/xsyncv4/lab/bin/xs-ddefa041364e-tune",
+     "freya": "/mnt/nvme/xsbench/bin/xs-ddefa041364e-tune"
+    },
+    "sha256": {
+     "neo": "1f5c40a3f4d3ec403abcf30d64d8ade2a74f9fccfa6ba2c98709fb6f83ebebe2",
+     "freya": "fbe88e865b1d5162f6e370804f6b4683a196c272ce004d122311cac3431d05e0"
+    },
+    "artifacts": {
+     "xs-darwin-arm64": "304c6fe87a5235dc30bfc665dfe71ba8a777d8b633b9246b84bba42349c0679e",
+     "xs-linux-amd64": "fbe88e865b1d5162f6e370804f6b4683a196c272ce004d122311cac3431d05e0",
+     "xs-linux-arm64": "1f5c40a3f4d3ec403abcf30d64d8ade2a74f9fccfa6ba2c98709fb6f83ebebe2"
+    }
+   },
+   {
+    "name": "recv8",
+    "tool": "xs",
+    "flags": [
+     "-a"
+    ],
+    "rev": "ddefa041364e-tune",
+    "tune": {
+     "receiver": "jobs=8"
+    },
+    "metrics": true,
+    "binary": {
+     "neo": "~/benchmarks/xsyncv4/lab/bin/xs-ddefa041364e-tune",
+     "freya": "/mnt/nvme/xsbench/bin/xs-ddefa041364e-tune"
+    },
+    "sha256": {
+     "neo": "1f5c40a3f4d3ec403abcf30d64d8ade2a74f9fccfa6ba2c98709fb6f83ebebe2",
+     "freya": "fbe88e865b1d5162f6e370804f6b4683a196c272ce004d122311cac3431d05e0"
+    },
+    "artifacts": {
+     "xs-darwin-arm64": "304c6fe87a5235dc30bfc665dfe71ba8a777d8b633b9246b84bba42349c0679e",
+     "xs-linux-amd64": "fbe88e865b1d5162f6e370804f6b4683a196c272ce004d122311cac3431d05e0",
+     "xs-linux-arm64": "1f5c40a3f4d3ec403abcf30d64d8ade2a74f9fccfa6ba2c98709fb6f83ebebe2"
+    }
+   }
+  ],
+  "cells": [
+   {
+    "id": "small-flat.fresh.neo-freya.sender.warm",
+    "corpus": "small-flat",
+    "scenario": "fresh",
+    "sender": "neo",
+    "receiver": "freya",
+    "client": "sender",
+    "link": "lan",
+    "cache": "warm"
+   },
+   {
+    "id": "small-flat.fresh.freya-neo.sender.warm",
+    "corpus": "small-flat",
+    "scenario": "fresh",
+    "sender": "freya",
+    "receiver": "neo",
+    "client": "sender",
+    "link": "lan",
+    "cache": "warm"
+   },
+   {
+    "id": "small-flat.noop.neo-freya.sender.warm",
+    "corpus": "small-flat",
+    "scenario": "noop",
+    "sender": "neo",
+    "receiver": "freya",
+    "client": "sender",
+    "link": "lan",
+    "cache": "warm"
+   },
+   {
+    "id": "small-flat.noop.freya-neo.sender.warm",
+    "corpus": "small-flat",
+    "scenario": "noop",
+    "sender": "freya",
+    "receiver": "neo",
+    "client": "sender",
+    "link": "lan",
+    "cache": "warm"
+   },
+   {
+    "id": "small-real.fresh.neo-freya.sender.warm",
+    "corpus": "small-real",
+    "scenario": "fresh",
+    "sender": "neo",
+    "receiver": "freya",
+    "client": "sender",
+    "link": "lan",
+    "cache": "warm"
+   },
+   {
+    "id": "small-real.fresh.freya-neo.sender.warm",
+    "corpus": "small-real",
+    "scenario": "fresh",
+    "sender": "freya",
+    "receiver": "neo",
+    "client": "sender",
+    "link": "lan",
+    "cache": "warm"
+   },
+   {
+    "id": "small-real.noop.neo-freya.sender.warm",
+    "corpus": "small-real",
+    "scenario": "noop",
+    "sender": "neo",
+    "receiver": "freya",
+    "client": "sender",
+    "link": "lan",
+    "cache": "warm"
+   },
+   {
+    "id": "small-real.noop.freya-neo.sender.warm",
+    "corpus": "small-real",
+    "scenario": "noop",
+    "sender": "freya",
+    "receiver": "neo",
+    "client": "sender",
+    "link": "lan",
+    "cache": "warm"
+   },
+   {
+    "id": "mixed-bimodal.fresh.neo-freya.sender.warm",
+    "corpus": "mixed-bimodal",
+    "scenario": "fresh",
+    "sender": "neo",
+    "receiver": "freya",
+    "client": "sender",
+    "link": "lan",
+    "cache": "warm"
+   },
+   {
+    "id": "mixed-bimodal.fresh.freya-neo.sender.warm",
+    "corpus": "mixed-bimodal",
+    "scenario": "fresh",
+    "sender": "freya",
+    "receiver": "neo",
+    "client": "sender",
+    "link": "lan",
+    "cache": "warm"
+   },
+   {
+    "id": "mixed-bimodal.noop.neo-freya.sender.warm",
+    "corpus": "mixed-bimodal",
+    "scenario": "noop",
+    "sender": "neo",
+    "receiver": "freya",
+    "client": "sender",
+    "link": "lan",
+    "cache": "warm"
+   },
+   {
+    "id": "mixed-bimodal.noop.freya-neo.sender.warm",
+    "corpus": "mixed-bimodal",
+    "scenario": "noop",
+    "sender": "freya",
+    "receiver": "neo",
+    "client": "sender",
+    "link": "lan",
+    "cache": "warm"
+   }
+  ],
+  "corpora": {
+   "small-flat": {
+    "files": 100000,
+    "directories": 100,
+    "bytes": 319224077,
+    "digest": "41b628c4337730be4efdfcc6673d517749132ffd50b75b29321640e6f064bbec",
+    "quick_digest": "e8de96251eaca6be3e98b1cb8097405b37ad470fc0d5ffdb7a5a48ea5b9f3805"
+   },
+   "small-real": {
+    "files": 118594,
+    "directories": 59336,
+    "bytes": 1107333872,
+    "digest": "e9c84fab7d1a6dcdaf7c1c8688abe9bcb3cd114f551c27fad5b8624391005cdb",
+    "quick_digest": "65994469699350cde8ad45842d686fe1a01d87e64ed26de283fb0c860fae01e3"
+   },
+   "mixed-bimodal": {
+    "files": 20000,
+    "directories": 420,
+    "bytes": 1395127076,
+    "digest": "e9071fb7ad3b0375ffe9fab58f740bfd22d545f7678e163a6c745504cc7aa16b",
+    "quick_digest": "31af6dbe5d38a32f5f0acf560703fa557304d3936e59f7b395d13cf8d0dec7fb"
+   }
+  },
+  "blocks": [
+   {
+    "cell": "mixed-bimodal.noop.neo-freya.sender.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "send1",
+      "send2",
+      "recv4",
+      "xs",
+      "recv2",
+      "recv8"
+     ],
+     [
+      "recv8",
+      "recv2",
+      "recv4",
+      "send1",
+      "send2",
+      "xs"
+     ],
+     [
+      "send1",
+      "send2",
+      "xs",
+      "recv8",
+      "recv2",
+      "recv4"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.noop.neo-freya.sender.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "send2",
+      "send1",
+      "recv4",
+      "recv2",
+      "recv8",
+      "xs"
+     ],
+     [
+      "xs",
+      "recv8",
+      "send1",
+      "recv2",
+      "send2",
+      "recv4"
+     ],
+     [
+      "send1",
+      "recv8",
+      "recv4",
+      "xs",
+      "send2",
+      "recv2"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "send2",
+      "recv4",
+      "recv8",
+      "send1",
+      "xs",
+      "recv2"
+     ],
+     [
+      "send2",
+      "xs",
+      "recv4",
+      "recv8",
+      "send1",
+      "recv2"
+     ],
+     [
+      "recv4",
+      "send1",
+      "xs",
+      "recv8",
+      "recv2",
+      "send2"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.fresh.neo-freya.sender.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "send2",
+      "recv4",
+      "send1",
+      "recv2",
+      "recv8",
+      "xs"
+     ],
+     [
+      "send1",
+      "recv2",
+      "xs",
+      "recv8",
+      "recv4",
+      "send2"
+     ],
+     [
+      "send1",
+      "xs",
+      "recv4",
+      "recv2",
+      "recv8",
+      "send2"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.fresh.neo-freya.sender.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "recv2",
+      "recv4",
+      "xs",
+      "recv8",
+      "send2",
+      "send1"
+     ],
+     [
+      "recv8",
+      "send1",
+      "recv4",
+      "recv2",
+      "xs",
+      "send2"
+     ],
+     [
+      "recv4",
+      "send1",
+      "recv8",
+      "send2",
+      "recv2",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.noop.neo-freya.sender.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "send2",
+      "xs",
+      "recv2",
+      "recv4",
+      "send1",
+      "recv8"
+     ],
+     [
+      "recv2",
+      "send2",
+      "recv8",
+      "recv4",
+      "send1",
+      "xs"
+     ],
+     [
+      "send1",
+      "recv4",
+      "recv2",
+      "recv8",
+      "send2",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.noop.freya-neo.sender.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "send1",
+      "recv8",
+      "send2",
+      "recv2",
+      "recv4",
+      "xs"
+     ],
+     [
+      "recv2",
+      "send1",
+      "send2",
+      "xs",
+      "recv8",
+      "recv4"
+     ],
+     [
+      "recv8",
+      "recv4",
+      "xs",
+      "send1",
+      "send2",
+      "recv2"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.noop.freya-neo.sender.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "recv8",
+      "recv2",
+      "send2",
+      "send1",
+      "xs",
+      "recv4"
+     ],
+     [
+      "recv4",
+      "recv8",
+      "send1",
+      "recv2",
+      "send2",
+      "xs"
+     ],
+     [
+      "send1",
+      "send2",
+      "recv8",
+      "xs",
+      "recv4",
+      "recv2"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.noop.freya-neo.sender.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs",
+      "recv8",
+      "recv2",
+      "send1",
+      "send2",
+      "recv4"
+     ],
+     [
+      "recv4",
+      "send1",
+      "recv8",
+      "send2",
+      "xs",
+      "recv2"
+     ],
+     [
+      "send1",
+      "recv8",
+      "send2",
+      "recv2",
+      "recv4",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.fresh.freya-neo.sender.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "recv4",
+      "xs",
+      "recv8",
+      "send1",
+      "recv2",
+      "send2"
+     ],
+     [
+      "recv4",
+      "recv8",
+      "send1",
+      "xs",
+      "send2",
+      "recv2"
+     ],
+     [
+      "recv4",
+      "xs",
+      "recv2",
+      "recv8",
+      "send2",
+      "send1"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.fresh.freya-neo.sender.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "send1",
+      "recv2",
+      "recv4",
+      "send2",
+      "recv8",
+      "xs"
+     ],
+     [
+      "send1",
+      "recv2",
+      "recv4",
+      "xs",
+      "send2",
+      "recv8"
+     ],
+     [
+      "xs",
+      "recv8",
+      "send1",
+      "send2",
+      "recv4",
+      "recv2"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.freya-neo.sender.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "recv8",
+      "xs",
+      "send2",
+      "send1",
+      "recv2",
+      "recv4"
+     ],
+     [
+      "recv8",
+      "recv4",
+      "xs",
+      "recv2",
+      "send2",
+      "send1"
+     ],
+     [
+      "send1",
+      "recv8",
+      "recv4",
+      "recv2",
+      "xs",
+      "send2"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.fresh.neo-freya.sender.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "send2",
+      "send1",
+      "recv4",
+      "xs",
+      "recv8",
+      "recv2"
+     ],
+     [
+      "send2",
+      "send1",
+      "recv4",
+      "xs",
+      "recv8",
+      "recv2"
+     ],
+     [
+      "recv2",
+      "recv4",
+      "recv8",
+      "xs",
+      "send2",
+      "send1"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.noop.neo-freya.sender.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "send1",
+      "recv2",
+      "recv4",
+      "send2",
+      "xs",
+      "recv8"
+     ],
+     [
+      "xs",
+      "send2",
+      "recv4",
+      "send1",
+      "recv8",
+      "recv2"
+     ],
+     [
+      "send2",
+      "recv8",
+      "recv2",
+      "xs",
+      "send1",
+      "recv4"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.noop.freya-neo.sender.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "recv8",
+      "send2",
+      "recv2",
+      "recv4",
+      "send1",
+      "xs"
+     ],
+     [
+      "xs",
+      "recv2",
+      "recv4",
+      "send2",
+      "recv8",
+      "send1"
+     ],
+     [
+      "xs",
+      "send1",
+      "send2",
+      "recv4",
+      "recv2",
+      "recv8"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.fresh.neo-freya.sender.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "send2",
+      "recv4",
+      "recv8",
+      "send1",
+      "xs",
+      "recv2"
+     ],
+     [
+      "xs",
+      "send2",
+      "recv8",
+      "send1",
+      "recv2",
+      "recv4"
+     ],
+     [
+      "send1",
+      "send2",
+      "recv4",
+      "recv2",
+      "recv8",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.fresh.freya-neo.sender.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "recv4",
+      "recv2",
+      "send2",
+      "xs",
+      "recv8",
+      "send1"
+     ],
+     [
+      "recv2",
+      "send2",
+      "xs",
+      "send1",
+      "recv8",
+      "recv4"
+     ],
+     [
+      "recv4",
+      "xs",
+      "recv2",
+      "send2",
+      "recv8",
+      "send1"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.noop.freya-neo.sender.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "recv8",
+      "recv2",
+      "recv4",
+      "send2",
+      "send1"
+     ],
+     [
+      "recv4",
+      "send1",
+      "send2",
+      "xs",
+      "recv2",
+      "recv8"
+     ],
+     [
+      "recv8",
+      "recv4",
+      "send2",
+      "xs",
+      "send1",
+      "recv2"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.freya-neo.sender.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "recv4",
+      "send2",
+      "send1",
+      "recv2",
+      "xs",
+      "recv8"
+     ],
+     [
+      "send2",
+      "send1",
+      "recv4",
+      "recv8",
+      "recv2",
+      "xs"
+     ],
+     [
+      "recv8",
+      "recv2",
+      "recv4",
+      "send2",
+      "send1",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "recv2",
+      "recv8",
+      "send1",
+      "recv4",
+      "send2"
+     ],
+     [
+      "recv2",
+      "send1",
+      "xs",
+      "send2",
+      "recv8",
+      "recv4"
+     ],
+     [
+      "send1",
+      "recv4",
+      "recv8",
+      "xs",
+      "send2",
+      "recv2"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.noop.neo-freya.sender.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "recv2",
+      "recv8",
+      "xs",
+      "send2",
+      "send1",
+      "recv4"
+     ],
+     [
+      "xs",
+      "send2",
+      "send1",
+      "recv4",
+      "recv8",
+      "recv2"
+     ],
+     [
+      "send1",
+      "recv2",
+      "xs",
+      "recv8",
+      "send2",
+      "recv4"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.noop.neo-freya.sender.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "send2",
+      "recv8",
+      "send1",
+      "recv2",
+      "xs",
+      "recv4"
+     ],
+     [
+      "recv8",
+      "send2",
+      "send1",
+      "recv4",
+      "recv2",
+      "xs"
+     ],
+     [
+      "recv2",
+      "send1",
+      "recv4",
+      "recv8",
+      "xs",
+      "send2"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.noop.freya-neo.sender.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "recv2",
+      "xs",
+      "send1",
+      "recv4",
+      "send2",
+      "recv8"
+     ],
+     [
+      "xs",
+      "recv8",
+      "recv2",
+      "send2",
+      "recv4",
+      "send1"
+     ],
+     [
+      "xs",
+      "send1",
+      "recv2",
+      "send2",
+      "recv8",
+      "recv4"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.fresh.freya-neo.sender.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "send2",
+      "recv8",
+      "recv2",
+      "send1",
+      "recv4"
+     ],
+     [
+      "recv2",
+      "xs",
+      "send2",
+      "send1",
+      "recv8",
+      "recv4"
+     ],
+     [
+      "recv4",
+      "recv8",
+      "recv2",
+      "send1",
+      "xs",
+      "send2"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.noop.neo-freya.sender.warm",
+    "block": 2,
+    "verify_full": false,
+    "orders": [
+     [
+      "send2",
+      "send1",
+      "xs",
+      "recv8",
+      "recv2",
+      "recv4"
+     ],
+     [
+      "xs",
+      "recv8",
+      "send1",
+      "send2",
+      "recv2",
+      "recv4"
+     ],
+     [
+      "recv8",
+      "recv2",
+      "xs",
+      "recv4",
+      "send1",
+      "send2"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.fresh.freya-neo.sender.warm",
+    "block": 2,
+    "verify_full": false,
+    "orders": [
+     [
+      "send1",
+      "send2",
+      "recv2",
+      "xs",
+      "recv4",
+      "recv8"
+     ],
+     [
+      "xs",
+      "recv4",
+      "send1",
+      "send2",
+      "recv2",
+      "recv8"
+     ],
+     [
+      "recv2",
+      "send1",
+      "recv8",
+      "xs",
+      "send2",
+      "recv4"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.noop.freya-neo.sender.warm",
+    "block": 2,
+    "verify_full": false,
+    "orders": [
+     [
+      "send1",
+      "recv4",
+      "recv8",
+      "send2",
+      "xs",
+      "recv2"
+     ],
+     [
+      "xs",
+      "recv8",
+      "recv4",
+      "send1",
+      "recv2",
+      "send2"
+     ],
+     [
+      "recv2",
+      "recv4",
+      "send1",
+      "send2",
+      "recv8",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.noop.neo-freya.sender.warm",
+    "block": 2,
+    "verify_full": false,
+    "orders": [
+     [
+      "recv4",
+      "recv2",
+      "send1",
+      "send2",
+      "xs",
+      "recv8"
+     ],
+     [
+      "recv2",
+      "send2",
+      "xs",
+      "send1",
+      "recv4",
+      "recv8"
+     ],
+     [
+      "recv4",
+      "recv8",
+      "xs",
+      "recv2",
+      "send2",
+      "send1"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.noop.neo-freya.sender.warm",
+    "block": 2,
+    "verify_full": false,
+    "orders": [
+     [
+      "recv4",
+      "recv2",
+      "recv8",
+      "xs",
+      "send2",
+      "send1"
+     ],
+     [
+      "recv4",
+      "recv2",
+      "recv8",
+      "send1",
+      "xs",
+      "send2"
+     ],
+     [
+      "recv4",
+      "xs",
+      "recv2",
+      "send2",
+      "send1",
+      "recv8"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.freya-neo.sender.warm",
+    "block": 2,
+    "verify_full": false,
+    "orders": [
+     [
+      "recv4",
+      "xs",
+      "send1",
+      "send2",
+      "recv8",
+      "recv2"
+     ],
+     [
+      "recv4",
+      "send2",
+      "recv8",
+      "recv2",
+      "xs",
+      "send1"
+     ],
+     [
+      "send2",
+      "recv8",
+      "xs",
+      "recv2",
+      "send1",
+      "recv4"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.noop.freya-neo.sender.warm",
+    "block": 2,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "recv4",
+      "recv2",
+      "recv8",
+      "send2",
+      "send1"
+     ],
+     [
+      "send1",
+      "send2",
+      "recv4",
+      "recv8",
+      "recv2",
+      "xs"
+     ],
+     [
+      "send1",
+      "recv8",
+      "send2",
+      "xs",
+      "recv4",
+      "recv2"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.noop.freya-neo.sender.warm",
+    "block": 2,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "send2",
+      "recv4",
+      "recv2",
+      "recv8",
+      "send1"
+     ],
+     [
+      "recv8",
+      "xs",
+      "recv4",
+      "send1",
+      "recv2",
+      "send2"
+     ],
+     [
+      "recv4",
+      "recv2",
+      "send1",
+      "xs",
+      "recv8",
+      "send2"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.fresh.neo-freya.sender.warm",
+    "block": 2,
+    "verify_full": false,
+    "orders": [
+     [
+      "send2",
+      "recv8",
+      "send1",
+      "recv4",
+      "recv2",
+      "xs"
+     ],
+     [
+      "xs",
+      "recv8",
+      "recv2",
+      "send1",
+      "send2",
+      "recv4"
+     ],
+     [
+      "recv8",
+      "send1",
+      "send2",
+      "xs",
+      "recv2",
+      "recv4"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.fresh.neo-freya.sender.warm",
+    "block": 2,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "send1",
+      "send2",
+      "recv2",
+      "recv4",
+      "recv8"
+     ],
+     [
+      "send1",
+      "xs",
+      "send2",
+      "recv2",
+      "recv8",
+      "recv4"
+     ],
+     [
+      "xs",
+      "recv4",
+      "recv8",
+      "recv2",
+      "send2",
+      "send1"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.fresh.freya-neo.sender.warm",
+    "block": 2,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "send1",
+      "send2",
+      "recv2",
+      "recv8",
+      "recv4"
+     ],
+     [
+      "send2",
+      "xs",
+      "recv8",
+      "recv2",
+      "recv4",
+      "send1"
+     ],
+     [
+      "send1",
+      "xs",
+      "recv4",
+      "recv2",
+      "send2",
+      "recv8"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+    "block": 2,
+    "verify_full": false,
+    "orders": [
+     [
+      "recv8",
+      "send2",
+      "send1",
+      "xs",
+      "recv4",
+      "recv2"
+     ],
+     [
+      "send2",
+      "send1",
+      "recv4",
+      "recv2",
+      "xs",
+      "recv8"
+     ],
+     [
+      "send2",
+      "recv8",
+      "recv2",
+      "xs",
+      "send1",
+      "recv4"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.noop.freya-neo.sender.warm",
+    "block": 3,
+    "verify_full": false,
+    "orders": [
+     [
+      "recv8",
+      "send2",
+      "send1",
+      "recv2",
+      "xs",
+      "recv4"
+     ],
+     [
+      "send1",
+      "send2",
+      "recv4",
+      "recv2",
+      "xs",
+      "recv8"
+     ],
+     [
+      "send1",
+      "recv2",
+      "recv4",
+      "send2",
+      "recv8",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.fresh.freya-neo.sender.warm",
+    "block": 3,
+    "verify_full": false,
+    "orders": [
+     [
+      "recv2",
+      "send2",
+      "send1",
+      "recv4",
+      "xs",
+      "recv8"
+     ],
+     [
+      "recv8",
+      "send1",
+      "recv4",
+      "xs",
+      "send2",
+      "recv2"
+     ],
+     [
+      "recv4",
+      "send1",
+      "recv2",
+      "send2",
+      "recv8",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.freya-neo.sender.warm",
+    "block": 3,
+    "verify_full": false,
+    "orders": [
+     [
+      "send2",
+      "recv8",
+      "xs",
+      "recv4",
+      "send1",
+      "recv2"
+     ],
+     [
+      "xs",
+      "recv8",
+      "send1",
+      "recv4",
+      "send2",
+      "recv2"
+     ],
+     [
+      "xs",
+      "recv8",
+      "send1",
+      "recv2",
+      "send2",
+      "recv4"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.fresh.neo-freya.sender.warm",
+    "block": 3,
+    "verify_full": false,
+    "orders": [
+     [
+      "send1",
+      "recv4",
+      "send2",
+      "recv8",
+      "recv2",
+      "xs"
+     ],
+     [
+      "recv8",
+      "send1",
+      "recv2",
+      "xs",
+      "recv4",
+      "send2"
+     ],
+     [
+      "recv2",
+      "recv4",
+      "send2",
+      "xs",
+      "recv8",
+      "send1"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.noop.neo-freya.sender.warm",
+    "block": 3,
+    "verify_full": false,
+    "orders": [
+     [
+      "recv2",
+      "recv8",
+      "xs",
+      "recv4",
+      "send2",
+      "send1"
+     ],
+     [
+      "send1",
+      "recv4",
+      "recv2",
+      "xs",
+      "send2",
+      "recv8"
+     ],
+     [
+      "recv8",
+      "xs",
+      "send2",
+      "send1",
+      "recv2",
+      "recv4"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+    "block": 3,
+    "verify_full": false,
+    "orders": [
+     [
+      "send1",
+      "recv2",
+      "send2",
+      "recv8",
+      "recv4",
+      "xs"
+     ],
+     [
+      "recv2",
+      "send1",
+      "recv8",
+      "recv4",
+      "send2",
+      "xs"
+     ],
+     [
+      "send1",
+      "send2",
+      "recv8",
+      "recv2",
+      "xs",
+      "recv4"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.noop.neo-freya.sender.warm",
+    "block": 3,
+    "verify_full": false,
+    "orders": [
+     [
+      "send1",
+      "recv8",
+      "xs",
+      "recv2",
+      "recv4",
+      "send2"
+     ],
+     [
+      "xs",
+      "send1",
+      "send2",
+      "recv8",
+      "recv4",
+      "recv2"
+     ],
+     [
+      "recv4",
+      "send2",
+      "recv8",
+      "xs",
+      "recv2",
+      "send1"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.fresh.freya-neo.sender.warm",
+    "block": 3,
+    "verify_full": false,
+    "orders": [
+     [
+      "recv8",
+      "recv4",
+      "xs",
+      "send2",
+      "send1",
+      "recv2"
+     ],
+     [
+      "recv2",
+      "recv4",
+      "xs",
+      "send1",
+      "send2",
+      "recv8"
+     ],
+     [
+      "xs",
+      "send2",
+      "recv8",
+      "recv4",
+      "recv2",
+      "send1"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.fresh.neo-freya.sender.warm",
+    "block": 3,
+    "verify_full": false,
+    "orders": [
+     [
+      "recv8",
+      "xs",
+      "recv4",
+      "send1",
+      "recv2",
+      "send2"
+     ],
+     [
+      "send1",
+      "recv4",
+      "xs",
+      "recv2",
+      "send2",
+      "recv8"
+     ],
+     [
+      "recv8",
+      "send1",
+      "recv4",
+      "xs",
+      "recv2",
+      "send2"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.noop.freya-neo.sender.warm",
+    "block": 3,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "recv8",
+      "send1",
+      "send2",
+      "recv4",
+      "recv2"
+     ],
+     [
+      "recv4",
+      "recv2",
+      "send2",
+      "send1",
+      "recv8",
+      "xs"
+     ],
+     [
+      "recv8",
+      "xs",
+      "send1",
+      "send2",
+      "recv2",
+      "recv4"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.noop.neo-freya.sender.warm",
+    "block": 3,
+    "verify_full": false,
+    "orders": [
+     [
+      "recv4",
+      "send1",
+      "recv2",
+      "send2",
+      "xs",
+      "recv8"
+     ],
+     [
+      "recv8",
+      "send2",
+      "recv4",
+      "xs",
+      "send1",
+      "recv2"
+     ],
+     [
+      "recv8",
+      "recv4",
+      "recv2",
+      "send1",
+      "xs",
+      "send2"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.noop.freya-neo.sender.warm",
+    "block": 3,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "send2",
+      "recv8",
+      "send1",
+      "recv4",
+      "recv2"
+     ],
+     [
+      "recv4",
+      "send2",
+      "xs",
+      "recv2",
+      "recv8",
+      "send1"
+     ],
+     [
+      "xs",
+      "recv4",
+      "send2",
+      "send1",
+      "recv2",
+      "recv8"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.noop.freya-neo.sender.warm",
+    "block": 4,
+    "verify_full": false,
+    "orders": [
+     [
+      "recv4",
+      "send1",
+      "recv2",
+      "recv8",
+      "xs",
+      "send2"
+     ],
+     [
+      "send2",
+      "send1",
+      "xs",
+      "recv2",
+      "recv8",
+      "recv4"
+     ],
+     [
+      "recv2",
+      "send1",
+      "recv8",
+      "send2",
+      "recv4",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.noop.neo-freya.sender.warm",
+    "block": 4,
+    "verify_full": false,
+    "orders": [
+     [
+      "recv4",
+      "recv8",
+      "send2",
+      "xs",
+      "recv2",
+      "send1"
+     ],
+     [
+      "send1",
+      "xs",
+      "recv4",
+      "recv8",
+      "send2",
+      "recv2"
+     ],
+     [
+      "recv4",
+      "xs",
+      "send2",
+      "send1",
+      "recv8",
+      "recv2"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.noop.freya-neo.sender.warm",
+    "block": 4,
+    "verify_full": false,
+    "orders": [
+     [
+      "recv8",
+      "xs",
+      "send1",
+      "recv4",
+      "send2",
+      "recv2"
+     ],
+     [
+      "recv4",
+      "send1",
+      "send2",
+      "recv8",
+      "recv2",
+      "xs"
+     ],
+     [
+      "send2",
+      "recv4",
+      "xs",
+      "send1",
+      "recv2",
+      "recv8"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.noop.neo-freya.sender.warm",
+    "block": 4,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "recv8",
+      "recv4",
+      "recv2",
+      "send1",
+      "send2"
+     ],
+     [
+      "send2",
+      "recv4",
+      "recv8",
+      "xs",
+      "recv2",
+      "send1"
+     ],
+     [
+      "recv4",
+      "send2",
+      "xs",
+      "recv2",
+      "recv8",
+      "send1"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.fresh.neo-freya.sender.warm",
+    "block": 4,
+    "verify_full": false,
+    "orders": [
+     [
+      "recv4",
+      "send2",
+      "send1",
+      "xs",
+      "recv8",
+      "recv2"
+     ],
+     [
+      "recv2",
+      "recv8",
+      "send1",
+      "xs",
+      "recv4",
+      "send2"
+     ],
+     [
+      "send2",
+      "recv4",
+      "recv8",
+      "recv2",
+      "xs",
+      "send1"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.fresh.neo-freya.sender.warm",
+    "block": 4,
+    "verify_full": false,
+    "orders": [
+     [
+      "recv8",
+      "recv2",
+      "send2",
+      "xs",
+      "send1",
+      "recv4"
+     ],
+     [
+      "recv8",
+      "send2",
+      "xs",
+      "send1",
+      "recv2",
+      "recv4"
+     ],
+     [
+      "recv4",
+      "recv2",
+      "send2",
+      "xs",
+      "recv8",
+      "send1"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.fresh.freya-neo.sender.warm",
+    "block": 4,
+    "verify_full": false,
+    "orders": [
+     [
+      "recv4",
+      "send1",
+      "send2",
+      "recv8",
+      "recv2",
+      "xs"
+     ],
+     [
+      "xs",
+      "send2",
+      "recv4",
+      "recv2",
+      "recv8",
+      "send1"
+     ],
+     [
+      "send2",
+      "recv4",
+      "send1",
+      "recv8",
+      "recv2",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+    "block": 4,
+    "verify_full": false,
+    "orders": [
+     [
+      "send2",
+      "recv4",
+      "xs",
+      "recv8",
+      "recv2",
+      "send1"
+     ],
+     [
+      "xs",
+      "recv2",
+      "recv4",
+      "send1",
+      "send2",
+      "recv8"
+     ],
+     [
+      "send2",
+      "xs",
+      "recv2",
+      "send1",
+      "recv4",
+      "recv8"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.noop.freya-neo.sender.warm",
+    "block": 4,
+    "verify_full": false,
+    "orders": [
+     [
+      "recv8",
+      "recv2",
+      "xs",
+      "recv4",
+      "send1",
+      "send2"
+     ],
+     [
+      "send1",
+      "recv4",
+      "send2",
+      "recv2",
+      "xs",
+      "recv8"
+     ],
+     [
+      "xs",
+      "recv8",
+      "recv2",
+      "send2",
+      "send1",
+      "recv4"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.freya-neo.sender.warm",
+    "block": 4,
+    "verify_full": false,
+    "orders": [
+     [
+      "recv2",
+      "recv4",
+      "send2",
+      "send1",
+      "xs",
+      "recv8"
+     ],
+     [
+      "recv8",
+      "recv4",
+      "xs",
+      "send1",
+      "send2",
+      "recv2"
+     ],
+     [
+      "xs",
+      "recv8",
+      "recv4",
+      "send2",
+      "send1",
+      "recv2"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.fresh.freya-neo.sender.warm",
+    "block": 4,
+    "verify_full": false,
+    "orders": [
+     [
+      "send1",
+      "recv4",
+      "xs",
+      "send2",
+      "recv2",
+      "recv8"
+     ],
+     [
+      "recv4",
+      "send1",
+      "send2",
+      "recv8",
+      "xs",
+      "recv2"
+     ],
+     [
+      "recv2",
+      "send1",
+      "send2",
+      "recv8",
+      "xs",
+      "recv4"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.noop.neo-freya.sender.warm",
+    "block": 4,
+    "verify_full": false,
+    "orders": [
+     [
+      "recv2",
+      "recv8",
+      "recv4",
+      "send1",
+      "xs",
+      "send2"
+     ],
+     [
+      "recv8",
+      "recv2",
+      "recv4",
+      "send1",
+      "xs",
+      "send2"
+     ],
+     [
+      "recv2",
+      "send2",
+      "xs",
+      "send1",
+      "recv4",
+      "recv8"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.fresh.freya-neo.sender.warm",
+    "block": 5,
+    "verify_full": false,
+    "orders": [
+     [
+      "send2",
+      "recv8",
+      "send1",
+      "recv4",
+      "recv2",
+      "xs"
+     ],
+     [
+      "send1",
+      "recv2",
+      "recv4",
+      "xs",
+      "recv8",
+      "send2"
+     ],
+     [
+      "send2",
+      "recv8",
+      "recv4",
+      "xs",
+      "recv2",
+      "send1"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.noop.freya-neo.sender.warm",
+    "block": 5,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "recv4",
+      "send2",
+      "recv2",
+      "recv8",
+      "send1"
+     ],
+     [
+      "send1",
+      "recv8",
+      "xs",
+      "recv4",
+      "recv2",
+      "send2"
+     ],
+     [
+      "recv2",
+      "send2",
+      "recv4",
+      "xs",
+      "recv8",
+      "send1"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.noop.freya-neo.sender.warm",
+    "block": 5,
+    "verify_full": false,
+    "orders": [
+     [
+      "send1",
+      "xs",
+      "send2",
+      "recv4",
+      "recv8",
+      "recv2"
+     ],
+     [
+      "recv8",
+      "recv4",
+      "send2",
+      "send1",
+      "xs",
+      "recv2"
+     ],
+     [
+      "xs",
+      "send2",
+      "send1",
+      "recv2",
+      "recv4",
+      "recv8"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.fresh.neo-freya.sender.warm",
+    "block": 5,
+    "verify_full": false,
+    "orders": [
+     [
+      "send1",
+      "send2",
+      "recv2",
+      "recv8",
+      "recv4",
+      "xs"
+     ],
+     [
+      "recv8",
+      "recv4",
+      "send1",
+      "send2",
+      "recv2",
+      "xs"
+     ],
+     [
+      "send1",
+      "send2",
+      "recv8",
+      "recv2",
+      "recv4",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.noop.neo-freya.sender.warm",
+    "block": 5,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "recv4",
+      "recv8",
+      "recv2",
+      "send2",
+      "send1"
+     ],
+     [
+      "send2",
+      "send1",
+      "recv2",
+      "xs",
+      "recv4",
+      "recv8"
+     ],
+     [
+      "recv2",
+      "send1",
+      "xs",
+      "recv8",
+      "recv4",
+      "send2"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.fresh.neo-freya.sender.warm",
+    "block": 5,
+    "verify_full": false,
+    "orders": [
+     [
+      "recv4",
+      "recv2",
+      "xs",
+      "send2",
+      "send1",
+      "recv8"
+     ],
+     [
+      "recv8",
+      "send2",
+      "send1",
+      "recv2",
+      "recv4",
+      "xs"
+     ],
+     [
+      "xs",
+      "recv2",
+      "send2",
+      "recv8",
+      "send1",
+      "recv4"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.noop.neo-freya.sender.warm",
+    "block": 5,
+    "verify_full": false,
+    "orders": [
+     [
+      "recv2",
+      "recv8",
+      "send1",
+      "xs",
+      "send2",
+      "recv4"
+     ],
+     [
+      "xs",
+      "recv4",
+      "send2",
+      "recv2",
+      "send1",
+      "recv8"
+     ],
+     [
+      "send1",
+      "recv8",
+      "xs",
+      "recv4",
+      "recv2",
+      "send2"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.noop.freya-neo.sender.warm",
+    "block": 5,
+    "verify_full": false,
+    "orders": [
+     [
+      "recv4",
+      "recv2",
+      "send2",
+      "xs",
+      "recv8",
+      "send1"
+     ],
+     [
+      "send2",
+      "send1",
+      "recv2",
+      "xs",
+      "recv4",
+      "recv8"
+     ],
+     [
+      "recv4",
+      "recv8",
+      "send1",
+      "xs",
+      "send2",
+      "recv2"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.fresh.freya-neo.sender.warm",
+    "block": 5,
+    "verify_full": false,
+    "orders": [
+     [
+      "recv8",
+      "recv2",
+      "send2",
+      "send1",
+      "xs",
+      "recv4"
+     ],
+     [
+      "send1",
+      "recv8",
+      "send2",
+      "recv4",
+      "xs",
+      "recv2"
+     ],
+     [
+      "recv8",
+      "recv2",
+      "send1",
+      "send2",
+      "xs",
+      "recv4"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.freya-neo.sender.warm",
+    "block": 5,
+    "verify_full": false,
+    "orders": [
+     [
+      "recv4",
+      "recv8",
+      "send1",
+      "recv2",
+      "xs",
+      "send2"
+     ],
+     [
+      "recv2",
+      "recv8",
+      "send1",
+      "send2",
+      "xs",
+      "recv4"
+     ],
+     [
+      "send1",
+      "xs",
+      "recv2",
+      "send2",
+      "recv8",
+      "recv4"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+    "block": 5,
+    "verify_full": false,
+    "orders": [
+     [
+      "recv8",
+      "recv4",
+      "xs",
+      "send2",
+      "recv2",
+      "send1"
+     ],
+     [
+      "recv4",
+      "recv8",
+      "recv2",
+      "xs",
+      "send1",
+      "send2"
+     ],
+     [
+      "xs",
+      "send2",
+      "recv2",
+      "send1",
+      "recv8",
+      "recv4"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.noop.neo-freya.sender.warm",
+    "block": 5,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "recv8",
+      "send1",
+      "recv2",
+      "recv4",
+      "send2"
+     ],
+     [
+      "send2",
+      "recv8",
+      "send1",
+      "xs",
+      "recv2",
+      "recv4"
+     ],
+     [
+      "recv2",
+      "xs",
+      "send1",
+      "recv8",
+      "recv4",
+      "send2"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.fresh.neo-freya.sender.warm",
+    "block": 6,
+    "verify_full": false,
+    "orders": [
+     [
+      "send2",
+      "xs",
+      "recv8",
+      "recv4",
+      "recv2",
+      "send1"
+     ],
+     [
+      "recv8",
+      "recv4",
+      "xs",
+      "send1",
+      "send2",
+      "recv2"
+     ],
+     [
+      "recv2",
+      "send1",
+      "recv4",
+      "xs",
+      "send2",
+      "recv8"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.noop.neo-freya.sender.warm",
+    "block": 6,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "send2",
+      "recv2",
+      "send1",
+      "recv8",
+      "recv4"
+     ],
+     [
+      "xs",
+      "recv2",
+      "recv8",
+      "recv4",
+      "send1",
+      "send2"
+     ],
+     [
+      "xs",
+      "recv4",
+      "send2",
+      "send1",
+      "recv2",
+      "recv8"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.fresh.neo-freya.sender.warm",
+    "block": 6,
+    "verify_full": false,
+    "orders": [
+     [
+      "recv2",
+      "send2",
+      "recv8",
+      "xs",
+      "send1",
+      "recv4"
+     ],
+     [
+      "recv2",
+      "send1",
+      "recv8",
+      "send2",
+      "xs",
+      "recv4"
+     ],
+     [
+      "xs",
+      "send1",
+      "recv4",
+      "recv2",
+      "send2",
+      "recv8"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.noop.freya-neo.sender.warm",
+    "block": 6,
+    "verify_full": false,
+    "orders": [
+     [
+      "recv8",
+      "send1",
+      "send2",
+      "recv4",
+      "recv2",
+      "xs"
+     ],
+     [
+      "xs",
+      "recv8",
+      "recv2",
+      "send2",
+      "send1",
+      "recv4"
+     ],
+     [
+      "recv2",
+      "send1",
+      "recv4",
+      "recv8",
+      "send2",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.freya-neo.sender.warm",
+    "block": 6,
+    "verify_full": false,
+    "orders": [
+     [
+      "recv4",
+      "send1",
+      "recv8",
+      "send2",
+      "xs",
+      "recv2"
+     ],
+     [
+      "recv8",
+      "xs",
+      "send1",
+      "recv2",
+      "send2",
+      "recv4"
+     ],
+     [
+      "recv4",
+      "send1",
+      "recv2",
+      "send2",
+      "recv8",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.noop.neo-freya.sender.warm",
+    "block": 6,
+    "verify_full": false,
+    "orders": [
+     [
+      "recv4",
+      "recv8",
+      "recv2",
+      "send1",
+      "xs",
+      "send2"
+     ],
+     [
+      "recv4",
+      "recv2",
+      "recv8",
+      "xs",
+      "send1",
+      "send2"
+     ],
+     [
+      "xs",
+      "recv2",
+      "send2",
+      "recv8",
+      "send1",
+      "recv4"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.noop.neo-freya.sender.warm",
+    "block": 6,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "recv2",
+      "recv8",
+      "send2",
+      "recv4",
+      "send1"
+     ],
+     [
+      "send1",
+      "recv4",
+      "xs",
+      "recv2",
+      "send2",
+      "recv8"
+     ],
+     [
+      "send2",
+      "send1",
+      "recv2",
+      "recv8",
+      "recv4",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.noop.freya-neo.sender.warm",
+    "block": 6,
+    "verify_full": false,
+    "orders": [
+     [
+      "send1",
+      "xs",
+      "recv4",
+      "recv2",
+      "recv8",
+      "send2"
+     ],
+     [
+      "recv4",
+      "recv8",
+      "send1",
+      "send2",
+      "xs",
+      "recv2"
+     ],
+     [
+      "send1",
+      "send2",
+      "recv8",
+      "recv4",
+      "recv2",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+    "block": 6,
+    "verify_full": false,
+    "orders": [
+     [
+      "send2",
+      "xs",
+      "recv8",
+      "recv4",
+      "send1",
+      "recv2"
+     ],
+     [
+      "recv2",
+      "send1",
+      "recv4",
+      "recv8",
+      "send2",
+      "xs"
+     ],
+     [
+      "xs",
+      "send1",
+      "recv2",
+      "recv4",
+      "recv8",
+      "send2"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.fresh.freya-neo.sender.warm",
+    "block": 6,
+    "verify_full": false,
+    "orders": [
+     [
+      "recv8",
+      "recv4",
+      "send1",
+      "recv2",
+      "send2",
+      "xs"
+     ],
+     [
+      "recv2",
+      "xs",
+      "send2",
+      "send1",
+      "recv4",
+      "recv8"
+     ],
+     [
+      "send1",
+      "xs",
+      "send2",
+      "recv2",
+      "recv8",
+      "recv4"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.noop.freya-neo.sender.warm",
+    "block": 6,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "recv4",
+      "send1",
+      "send2",
+      "recv2",
+      "recv8"
+     ],
+     [
+      "xs",
+      "recv8",
+      "recv2",
+      "send2",
+      "recv4",
+      "send1"
+     ],
+     [
+      "send1",
+      "recv2",
+      "send2",
+      "recv4",
+      "xs",
+      "recv8"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.fresh.freya-neo.sender.warm",
+    "block": 6,
+    "verify_full": false,
+    "orders": [
+     [
+      "send2",
+      "recv8",
+      "send1",
+      "recv4",
+      "xs",
+      "recv2"
+     ],
+     [
+      "recv2",
+      "recv8",
+      "recv4",
+      "send1",
+      "send2",
+      "xs"
+     ],
+     [
+      "recv2",
+      "xs",
+      "recv8",
+      "recv4",
+      "send2",
+      "send1"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.noop.freya-neo.sender.warm",
+    "block": 7,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "send1",
+      "recv2",
+      "send2",
+      "recv4",
+      "recv8"
+     ],
+     [
+      "recv4",
+      "xs",
+      "send1",
+      "recv8",
+      "send2",
+      "recv2"
+     ],
+     [
+      "recv2",
+      "send2",
+      "recv8",
+      "send1",
+      "xs",
+      "recv4"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.fresh.neo-freya.sender.warm",
+    "block": 7,
+    "verify_full": false,
+    "orders": [
+     [
+      "recv4",
+      "send1",
+      "recv8",
+      "recv2",
+      "xs",
+      "send2"
+     ],
+     [
+      "send2",
+      "xs",
+      "send1",
+      "recv4",
+      "recv8",
+      "recv2"
+     ],
+     [
+      "send1",
+      "recv4",
+      "recv8",
+      "recv2",
+      "send2",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.noop.freya-neo.sender.warm",
+    "block": 7,
+    "verify_full": false,
+    "orders": [
+     [
+      "recv2",
+      "send1",
+      "recv8",
+      "xs",
+      "recv4",
+      "send2"
+     ],
+     [
+      "send2",
+      "xs",
+      "recv4",
+      "send1",
+      "recv8",
+      "recv2"
+     ],
+     [
+      "recv8",
+      "recv2",
+      "send1",
+      "send2",
+      "recv4",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.noop.neo-freya.sender.warm",
+    "block": 7,
+    "verify_full": false,
+    "orders": [
+     [
+      "recv4",
+      "send1",
+      "xs",
+      "recv8",
+      "send2",
+      "recv2"
+     ],
+     [
+      "recv8",
+      "recv4",
+      "send1",
+      "xs",
+      "recv2",
+      "send2"
+     ],
+     [
+      "send1",
+      "send2",
+      "recv8",
+      "xs",
+      "recv2",
+      "recv4"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+    "block": 7,
+    "verify_full": false,
+    "orders": [
+     [
+      "recv4",
+      "send1",
+      "recv2",
+      "send2",
+      "recv8",
+      "xs"
+     ],
+     [
+      "recv4",
+      "send2",
+      "send1",
+      "recv2",
+      "xs",
+      "recv8"
+     ],
+     [
+      "send1",
+      "recv2",
+      "recv4",
+      "send2",
+      "recv8",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.fresh.freya-neo.sender.warm",
+    "block": 7,
+    "verify_full": false,
+    "orders": [
+     [
+      "recv8",
+      "send2",
+      "recv2",
+      "send1",
+      "recv4",
+      "xs"
+     ],
+     [
+      "recv2",
+      "recv8",
+      "xs",
+      "send1",
+      "recv4",
+      "send2"
+     ],
+     [
+      "send2",
+      "xs",
+      "send1",
+      "recv2",
+      "recv4",
+      "recv8"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.freya-neo.sender.warm",
+    "block": 7,
+    "verify_full": false,
+    "orders": [
+     [
+      "send1",
+      "send2",
+      "xs",
+      "recv4",
+      "recv8",
+      "recv2"
+     ],
+     [
+      "send2",
+      "xs",
+      "recv2",
+      "recv8",
+      "send1",
+      "recv4"
+     ],
+     [
+      "recv4",
+      "send1",
+      "xs",
+      "recv2",
+      "send2",
+      "recv8"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.noop.freya-neo.sender.warm",
+    "block": 7,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "recv8",
+      "send1",
+      "recv2",
+      "send2",
+      "recv4"
+     ],
+     [
+      "send2",
+      "recv2",
+      "send1",
+      "xs",
+      "recv4",
+      "recv8"
+     ],
+     [
+      "recv4",
+      "send2",
+      "recv8",
+      "xs",
+      "send1",
+      "recv2"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.fresh.neo-freya.sender.warm",
+    "block": 7,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "send1",
+      "send2",
+      "recv2",
+      "recv8",
+      "recv4"
+     ],
+     [
+      "send1",
+      "xs",
+      "recv4",
+      "send2",
+      "recv8",
+      "recv2"
+     ],
+     [
+      "recv4",
+      "send2",
+      "send1",
+      "recv8",
+      "recv2",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.noop.neo-freya.sender.warm",
+    "block": 7,
+    "verify_full": false,
+    "orders": [
+     [
+      "send2",
+      "send1",
+      "recv8",
+      "recv2",
+      "xs",
+      "recv4"
+     ],
+     [
+      "send1",
+      "send2",
+      "recv2",
+      "recv4",
+      "recv8",
+      "xs"
+     ],
+     [
+      "recv4",
+      "xs",
+      "recv2",
+      "recv8",
+      "send2",
+      "send1"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.fresh.freya-neo.sender.warm",
+    "block": 7,
+    "verify_full": false,
+    "orders": [
+     [
+      "recv8",
+      "send1",
+      "xs",
+      "send2",
+      "recv4",
+      "recv2"
+     ],
+     [
+      "xs",
+      "recv2",
+      "send1",
+      "recv4",
+      "recv8",
+      "send2"
+     ],
+     [
+      "send2",
+      "recv2",
+      "send1",
+      "xs",
+      "recv8",
+      "recv4"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.noop.neo-freya.sender.warm",
+    "block": 7,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "recv8",
+      "recv2",
+      "send2",
+      "recv4",
+      "send1"
+     ],
+     [
+      "recv4",
+      "xs",
+      "recv8",
+      "recv2",
+      "send2",
+      "send1"
+     ],
+     [
+      "recv4",
+      "send1",
+      "recv2",
+      "xs",
+      "send2",
+      "recv8"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.noop.freya-neo.sender.warm",
+    "block": 8,
+    "verify_full": false,
+    "orders": [
+     [
+      "recv2",
+      "send1",
+      "xs",
+      "recv4",
+      "send2",
+      "recv8"
+     ],
+     [
+      "recv2",
+      "xs",
+      "recv8",
+      "recv4",
+      "send2",
+      "send1"
+     ],
+     [
+      "recv4",
+      "recv8",
+      "xs",
+      "recv2",
+      "send1",
+      "send2"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.fresh.freya-neo.sender.warm",
+    "block": 8,
+    "verify_full": false,
+    "orders": [
+     [
+      "send1",
+      "recv4",
+      "xs",
+      "recv2",
+      "send2",
+      "recv8"
+     ],
+     [
+      "xs",
+      "recv4",
+      "recv2",
+      "recv8",
+      "send1",
+      "send2"
+     ],
+     [
+      "recv2",
+      "send1",
+      "recv8",
+      "recv4",
+      "xs",
+      "send2"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.fresh.neo-freya.sender.warm",
+    "block": 8,
+    "verify_full": false,
+    "orders": [
+     [
+      "send1",
+      "recv8",
+      "xs",
+      "recv4",
+      "recv2",
+      "send2"
+     ],
+     [
+      "xs",
+      "send1",
+      "recv2",
+      "send2",
+      "recv8",
+      "recv4"
+     ],
+     [
+      "xs",
+      "recv2",
+      "send1",
+      "recv4",
+      "send2",
+      "recv8"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+    "block": 8,
+    "verify_full": false,
+    "orders": [
+     [
+      "recv2",
+      "xs",
+      "recv4",
+      "send1",
+      "send2",
+      "recv8"
+     ],
+     [
+      "recv8",
+      "send1",
+      "recv2",
+      "xs",
+      "recv4",
+      "send2"
+     ],
+     [
+      "send2",
+      "recv2",
+      "xs",
+      "send1",
+      "recv4",
+      "recv8"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.noop.freya-neo.sender.warm",
+    "block": 8,
+    "verify_full": false,
+    "orders": [
+     [
+      "recv8",
+      "send2",
+      "recv2",
+      "xs",
+      "send1",
+      "recv4"
+     ],
+     [
+      "send1",
+      "recv8",
+      "recv2",
+      "xs",
+      "recv4",
+      "send2"
+     ],
+     [
+      "recv2",
+      "send2",
+      "recv8",
+      "recv4",
+      "xs",
+      "send1"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.noop.neo-freya.sender.warm",
+    "block": 8,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "recv8",
+      "send1",
+      "recv4",
+      "send2",
+      "recv2"
+     ],
+     [
+      "send1",
+      "recv2",
+      "xs",
+      "recv4",
+      "recv8",
+      "send2"
+     ],
+     [
+      "recv2",
+      "recv8",
+      "xs",
+      "send1",
+      "send2",
+      "recv4"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.noop.neo-freya.sender.warm",
+    "block": 8,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "recv2",
+      "send2",
+      "recv4",
+      "send1",
+      "recv8"
+     ],
+     [
+      "xs",
+      "recv2",
+      "send2",
+      "recv4",
+      "send1",
+      "recv8"
+     ],
+     [
+      "recv8",
+      "send1",
+      "recv4",
+      "send2",
+      "xs",
+      "recv2"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.fresh.freya-neo.sender.warm",
+    "block": 8,
+    "verify_full": false,
+    "orders": [
+     [
+      "send2",
+      "send1",
+      "recv4",
+      "recv2",
+      "recv8",
+      "xs"
+     ],
+     [
+      "recv2",
+      "recv8",
+      "send1",
+      "xs",
+      "send2",
+      "recv4"
+     ],
+     [
+      "recv2",
+      "recv8",
+      "xs",
+      "recv4",
+      "send1",
+      "send2"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.fresh.neo-freya.sender.warm",
+    "block": 8,
+    "verify_full": false,
+    "orders": [
+     [
+      "recv8",
+      "send2",
+      "xs",
+      "recv4",
+      "recv2",
+      "send1"
+     ],
+     [
+      "recv8",
+      "send2",
+      "send1",
+      "xs",
+      "recv2",
+      "recv4"
+     ],
+     [
+      "xs",
+      "recv4",
+      "send2",
+      "recv2",
+      "send1",
+      "recv8"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.freya-neo.sender.warm",
+    "block": 8,
+    "verify_full": false,
+    "orders": [
+     [
+      "recv2",
+      "send1",
+      "send2",
+      "xs",
+      "recv8",
+      "recv4"
+     ],
+     [
+      "recv4",
+      "recv8",
+      "send2",
+      "recv2",
+      "send1",
+      "xs"
+     ],
+     [
+      "recv8",
+      "send2",
+      "send1",
+      "recv2",
+      "recv4",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.noop.freya-neo.sender.warm",
+    "block": 8,
+    "verify_full": false,
+    "orders": [
+     [
+      "recv2",
+      "xs",
+      "recv4",
+      "send1",
+      "send2",
+      "recv8"
+     ],
+     [
+      "recv2",
+      "send2",
+      "xs",
+      "recv4",
+      "send1",
+      "recv8"
+     ],
+     [
+      "recv2",
+      "send1",
+      "recv4",
+      "send2",
+      "xs",
+      "recv8"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.noop.neo-freya.sender.warm",
+    "block": 8,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "send1",
+      "recv8",
+      "send2",
+      "recv2",
+      "recv4"
+     ],
+     [
+      "recv2",
+      "recv4",
+      "send1",
+      "send2",
+      "recv8",
+      "xs"
+     ],
+     [
+      "recv4",
+      "recv2",
+      "send1",
+      "recv8",
+      "xs",
+      "send2"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.noop.freya-neo.sender.warm",
+    "block": 9,
+    "verify_full": true,
+    "orders": [
+     [
+      "send1",
+      "recv8",
+      "recv4",
+      "xs",
+      "send2",
+      "recv2"
+     ],
+     [
+      "send2",
+      "recv2",
+      "recv8",
+      "recv4",
+      "xs",
+      "send1"
+     ],
+     [
+      "send2",
+      "recv2",
+      "recv8",
+      "xs",
+      "send1",
+      "recv4"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.noop.neo-freya.sender.warm",
+    "block": 9,
+    "verify_full": true,
+    "orders": [
+     [
+      "send1",
+      "send2",
+      "recv4",
+      "xs",
+      "recv2",
+      "recv8"
+     ],
+     [
+      "send1",
+      "recv2",
+      "send2",
+      "recv8",
+      "xs",
+      "recv4"
+     ],
+     [
+      "xs",
+      "send1",
+      "recv4",
+      "recv8",
+      "send2",
+      "recv2"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.noop.neo-freya.sender.warm",
+    "block": 9,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs",
+      "send2",
+      "recv4",
+      "recv8",
+      "recv2",
+      "send1"
+     ],
+     [
+      "xs",
+      "recv4",
+      "recv2",
+      "send2",
+      "recv8",
+      "send1"
+     ],
+     [
+      "send1",
+      "recv2",
+      "send2",
+      "recv8",
+      "xs",
+      "recv4"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.fresh.neo-freya.sender.warm",
+    "block": 9,
+    "verify_full": true,
+    "orders": [
+     [
+      "send1",
+      "send2",
+      "xs",
+      "recv2",
+      "recv4",
+      "recv8"
+     ],
+     [
+      "send2",
+      "send1",
+      "recv8",
+      "recv4",
+      "xs",
+      "recv2"
+     ],
+     [
+      "send1",
+      "recv8",
+      "recv2",
+      "xs",
+      "recv4",
+      "send2"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.freya-neo.sender.warm",
+    "block": 9,
+    "verify_full": true,
+    "orders": [
+     [
+      "send2",
+      "recv8",
+      "send1",
+      "recv2",
+      "recv4",
+      "xs"
+     ],
+     [
+      "recv4",
+      "send2",
+      "send1",
+      "recv8",
+      "xs",
+      "recv2"
+     ],
+     [
+      "send1",
+      "send2",
+      "recv8",
+      "xs",
+      "recv4",
+      "recv2"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.noop.freya-neo.sender.warm",
+    "block": 9,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs",
+      "recv2",
+      "recv8",
+      "recv4",
+      "send2",
+      "send1"
+     ],
+     [
+      "xs",
+      "recv8",
+      "recv4",
+      "recv2",
+      "send2",
+      "send1"
+     ],
+     [
+      "recv8",
+      "recv4",
+      "xs",
+      "send2",
+      "recv2",
+      "send1"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.noop.freya-neo.sender.warm",
+    "block": 9,
+    "verify_full": true,
+    "orders": [
+     [
+      "recv2",
+      "send2",
+      "xs",
+      "recv4",
+      "send1",
+      "recv8"
+     ],
+     [
+      "recv8",
+      "recv4",
+      "send1",
+      "send2",
+      "xs",
+      "recv2"
+     ],
+     [
+      "recv4",
+      "xs",
+      "send1",
+      "send2",
+      "recv8",
+      "recv2"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.fresh.freya-neo.sender.warm",
+    "block": 9,
+    "verify_full": true,
+    "orders": [
+     [
+      "send2",
+      "recv8",
+      "xs",
+      "send1",
+      "recv2",
+      "recv4"
+     ],
+     [
+      "recv8",
+      "xs",
+      "recv4",
+      "send1",
+      "recv2",
+      "send2"
+     ],
+     [
+      "xs",
+      "recv2",
+      "recv4",
+      "send2",
+      "send1",
+      "recv8"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.noop.neo-freya.sender.warm",
+    "block": 9,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs",
+      "recv8",
+      "send1",
+      "recv2",
+      "send2",
+      "recv4"
+     ],
+     [
+      "send2",
+      "recv4",
+      "recv2",
+      "xs",
+      "send1",
+      "recv8"
+     ],
+     [
+      "send1",
+      "xs",
+      "recv2",
+      "recv4",
+      "recv8",
+      "send2"
+     ]
+    ]
+   },
+   {
+    "cell": "small-flat.fresh.neo-freya.sender.warm",
+    "block": 9,
+    "verify_full": true,
+    "orders": [
+     [
+      "send1",
+      "send2",
+      "recv2",
+      "recv4",
+      "xs",
+      "recv8"
+     ],
+     [
+      "recv4",
+      "send1",
+      "xs",
+      "send2",
+      "recv2",
+      "recv8"
+     ],
+     [
+      "xs",
+      "send2",
+      "recv4",
+      "send1",
+      "recv2",
+      "recv8"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+    "block": 9,
+    "verify_full": true,
+    "orders": [
+     [
+      "recv2",
+      "recv8",
+      "send2",
+      "xs",
+      "send1",
+      "recv4"
+     ],
+     [
+      "send1",
+      "send2",
+      "recv8",
+      "recv4",
+      "recv2",
+      "xs"
+     ],
+     [
+      "recv2",
+      "xs",
+      "send1",
+      "send2",
+      "recv8",
+      "recv4"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.fresh.freya-neo.sender.warm",
+    "block": 9,
+    "verify_full": true,
+    "orders": [
+     [
+      "recv2",
+      "recv8",
+      "xs",
+      "send1",
+      "send2",
+      "recv4"
+     ],
+     [
+      "send1",
+      "recv2",
+      "recv8",
+      "xs",
+      "send2",
+      "recv4"
+     ],
+     [
+      "recv4",
+      "send2",
+      "send1",
+      "xs",
+      "recv8",
+      "recv2"
+     ]
+    ]
+   }
+  ],
+  "scripts": {
+   "probe.py": "79c5d5649359fab936d72a58ccbb0348b8388dd71969a5c56d7915ca6a0c7563",
+   "corpus.py": "d6018d3611cba607a670f3fe554d0d4be5941fb2ef8fd65d57f10bfb582625f6",
+   "corpora.json": "729929e1ba7baf3a0b8413efffab5bc26ae0cbe8514daf1c05bbb53a314bb084",
+   "agent.py": "04d9c596cea456441e99d514a3a819c2f6b3f7dc1e412e00c06ea7a693a423c4",
+   "overnight.py": "c9b81a0bbcda7d1d2431e88060e88e432425e6251e46d6af2b24e7fdd0186072",
+   "measure.py": "5065310f480ff1cabfa7c645f0db342624a02f9a081b96069d50d52b3d224777"
+  },
+  "observed": {
+   "neo": {
+    "rsync": {
+     "path": "/usr/bin/rsync",
+     "sha256": "3852336282ee66a98c52966a8bebbf3508980a3ec47e7150f40330ada999980e",
+     "version": "rsync  version 3.4.1  protocol version 32"
+    },
+    "hostname": "neo",
+    "trim": null
+   },
+   "freya": {
+    "rsync": {
+     "path": "/usr/bin/rsync",
+     "sha256": "cae31f86ebfa8ecf2293a809c8f09d8176c8ead7f192de8caebcc6a1f3f14800",
+     "version": "rsync  version 3.5.0-g471e17dc  protocol version 32"
+    },
+    "hostname": "freya",
+    "trim": "trimmed=yes /mnt/nvme: 28.5 GiB (30622257152 bytes) trimmed"
+   }
+  }
+ }
+}

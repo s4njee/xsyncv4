@@ -1,0 +1,43 @@
+# E3d: what preserving metadata costs. Plain times, the default -a, hard
+# links and extended attributes, against rsync -a. On small files the per-file
+# work of each flag is a visible share of the time.
+id = "E3d-metadata"
+kind = "screening"
+hypothesis = "Each metadata flag costs xs less than 5% on small files, and xs -aH and -aX stay faster than rsync -a."
+primary = "wall_s"
+delta = 0.03
+blocks = 10
+control = "xs-a"
+verify = "first-last"
+
+[arms.xs-a]
+tool = "xs"
+rev = "8cc75bbdb801"
+flags = ["-a"]
+
+[arms.xs-rt]
+tool = "xs"
+rev = "8cc75bbdb801"
+flags = ["-rt"]
+
+[arms.xs-aH]
+tool = "xs"
+rev = "8cc75bbdb801"
+flags = ["-aH"]
+
+[arms.xs-aX]
+tool = "xs"
+rev = "8cc75bbdb801"
+flags = ["-aX"]
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[matrix]
+link = "lan"
+corpus = ["small-flat", "small-deep", "small-real"]
+scenario = ["fresh", "noop"]
+direction = ["neo>freya", "freya>neo"]
+client = ["sender"]
+cache = ["warm"]

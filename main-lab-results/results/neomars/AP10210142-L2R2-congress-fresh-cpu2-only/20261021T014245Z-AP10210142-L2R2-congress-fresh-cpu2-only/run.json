@@ -1,0 +1,356 @@
+{
+ "schema": 1,
+ "run_id": "20261021T014245Z-AP10210142-L2R2-congress-fresh-cpu2-only",
+ "started_utc": "2026-10-21T02:18:23.017+00:00",
+ "driver": "neo",
+ "plan": {
+  "schema": 1,
+  "experiment": "AP10210142-L2R2-congress-fresh-cpu2-only",
+  "spec_sha256": "804cbaef9886921e926d0142814adb97b21545f49ae67b7b7c1c42b6fea84386",
+  "kind": "screening",
+  "bundle": "e5c746542de7",
+  "writes": {
+   "neo": 0,
+   "mars": 23183796520
+  },
+  "hypothesis": "The 2-CPU cap alone, which leaves four workers competing for two cores, pulls xs's time to within 5% of rsync's or behind it, unlike the plain link where xs led by 1.39x.",
+  "primary": "durable_s",
+  "delta": 0.05,
+  "control": "xs-j4",
+  "seed": 47445,
+  "run_id": "20261021T014245Z-AP10210142-L2R2-congress-fresh-cpu2-only",
+  "driver": "neo",
+  "sample_timeout_s": 7200,
+  "results": "neomars",
+  "background": false,
+  "local_link": false,
+  "eager_cleanup": true,
+  "hours": null,
+  "hosts": {
+   "neo": {
+    "ssh": "[email]",
+    "name": "[host]",
+    "hostname": "neo",
+    "root": "~/benchmarks/xsyncv4/lab",
+    "interface": "eth0",
+    "helper": true,
+    "gates": {},
+    "local": false,
+    "system": "Linux"
+   },
+   "mars": {
+    "ssh": "[host]",
+    "name": "[host]",
+    "hostname": "[host]",
+    "root": "/Volumes/xsbench/lab",
+    "interface": "en0",
+    "helper": false,
+    "gates": {},
+    "local": false,
+    "system": "Darwin"
+   }
+  },
+  "links": {
+   "neo-mars-lan": {
+    "hosts": [
+     "neo",
+     "mars"
+    ],
+    "medium": "wired",
+    "min_speed_mbps": 1000,
+    "max_rtt_ms": 2.0,
+    "initiator": "neo",
+    "driver": "neo",
+    "results": "neomars",
+    "address": {
+     "neo": "[address]",
+     "mars": "[host]"
+    }
+   }
+  },
+  "arms": [
+   {
+    "name": "xs-j4",
+    "tool": "xs",
+    "flags": [
+     "-a",
+     "-j4"
+    ],
+    "rev": "e51c1df1329a",
+    "binary": {
+     "neo": "~/benchmarks/xsyncv4/lab/bin/xs-e51c1df1329a",
+     "mars": "/Volumes/xsbench/lab/bin/xs-e51c1df1329a"
+    },
+    "sha256": {
+     "neo": "fe66e5e4217c5bc63c949e328457f4630a3c5f3233303f6b4a5d9a780d4d826a",
+     "mars": "f7a3ed9a6fbfd455dba0471ef647db50f272669a0f5822d9244dd3a54ad3f98b"
+    },
+    "artifacts": {
+     "xs-darwin-arm64": "69f4fccf32d9882eaea678d60f7575fc17489316821b5e901f65c7c624ebc796",
+     "xs-linux-amd64": "c08508a01399b871aed62aa1cd437b16092726e4d9095afb41ee39041202cfeb",
+     "xs-linux-arm64": "fe66e5e4217c5bc63c949e328457f4630a3c5f3233303f6b4a5d9a780d4d826a",
+     "xs-darwin-amd64": "f7a3ed9a6fbfd455dba0471ef647db50f272669a0f5822d9244dd3a54ad3f98b"
+    }
+   },
+   {
+    "name": "rsync",
+    "tool": "rsync",
+    "flags": [
+     "-a"
+    ],
+    "binary": {
+     "neo": "rsync",
+     "mars": "/opt/local/bin/rsync"
+    }
+   }
+  ],
+  "cells": [
+   {
+    "id": "real-congress.fresh.neo-mars.sender.warm",
+    "corpus": "real-congress",
+    "scenario": "fresh",
+    "sender": "neo",
+    "receiver": "mars",
+    "client": "sender",
+    "link": "neo-mars-lan",
+    "cache": "warm"
+   }
+  ],
+  "corpora": {
+   "real-congress": {
+    "files": 216518,
+    "directories": 52593,
+    "bytes": 1159189826,
+    "digest": "29d93dcc4c117de24dc4f6e1b8d26f0e7bbc9c26cfb4aa03d2d52de078b6a102",
+    "quick_digest": "0f493d25789a420e24c282fb3a4ba40bc690b1a3e65184088bf66e7fa0868a6b"
+   }
+  },
+  "blocks": [
+   {
+    "cell": "real-congress.fresh.neo-mars.sender.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "rsync",
+      "xs-j4"
+     ],
+     [
+      "xs-j4",
+      "rsync"
+     ],
+     [
+      "xs-j4",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "real-congress.fresh.neo-mars.sender.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-j4",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs-j4"
+     ],
+     [
+      "xs-j4",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "real-congress.fresh.neo-mars.sender.warm",
+    "block": 2,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-j4",
+      "rsync"
+     ],
+     [
+      "xs-j4",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs-j4"
+     ]
+    ]
+   },
+   {
+    "cell": "real-congress.fresh.neo-mars.sender.warm",
+    "block": 3,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs-j4"
+     ],
+     [
+      "xs-j4",
+      "rsync"
+     ],
+     [
+      "xs-j4",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "real-congress.fresh.neo-mars.sender.warm",
+    "block": 4,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-j4",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs-j4"
+     ],
+     [
+      "rsync",
+      "xs-j4"
+     ]
+    ]
+   },
+   {
+    "cell": "real-congress.fresh.neo-mars.sender.warm",
+    "block": 5,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-j4",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs-j4"
+     ],
+     [
+      "xs-j4",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "real-congress.fresh.neo-mars.sender.warm",
+    "block": 6,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs-j4"
+     ],
+     [
+      "rsync",
+      "xs-j4"
+     ],
+     [
+      "rsync",
+      "xs-j4"
+     ]
+    ]
+   },
+   {
+    "cell": "real-congress.fresh.neo-mars.sender.warm",
+    "block": 7,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-j4",
+      "rsync"
+     ],
+     [
+      "xs-j4",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs-j4"
+     ]
+    ]
+   },
+   {
+    "cell": "real-congress.fresh.neo-mars.sender.warm",
+    "block": 8,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs-j4"
+     ],
+     [
+      "xs-j4",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs-j4"
+     ]
+    ]
+   },
+   {
+    "cell": "real-congress.fresh.neo-mars.sender.warm",
+    "block": 9,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs-j4",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs-j4"
+     ],
+     [
+      "rsync",
+      "xs-j4"
+     ]
+    ]
+   }
+  ],
+  "cpus": {
+   "host": "neo",
+   "count": 2
+  },
+  "scripts": {
+   "probe.py": "a89b145b8f76fc4d5444cea6af3c124a5b2e5885226998c726ca95fd9d881d36",
+   "corpus.py": "07f178f516657266850ba871032254fd28316928741e3bece1794a094db015ba",
+   "corpora.json": "5c641f561e2bcf8fe5af1c39adb9054ab0e6d479d8ef0e67204ad69cef148a9c",
+   "agent.py": "c65fadc9983678c6aaf66ea763c7c8a7cce871c67a96ff728da06725f892b6d4",
+   "runner.py": "cce71fee149764ad1a5c913061f19620a8ff44f792d23d55f7a290d59a9e20ff",
+   "xspipe.py": "94b3fccfc6e994d227077c453f90323ab55337fd8a98231d16a10696e8ebab6b",
+   "measure.py": "5065310f480ff1cabfa7c645f0db342624a02f9a081b96069d50d52b3d224777"
+  },
+  "observed": {
+   "neo": {
+    "rsync": {
+     "path": "/usr/bin/rsync",
+     "sha256": "3852336282ee66a98c52966a8bebbf3508980a3ec47e7150f40330ada999980e",
+     "version": "rsync  version 3.4.1  protocol version 32"
+    },
+    "hostname": "neo",
+    "trim": "trimmed=yes /mnt/ssd: 306.6 MiB (321466368 bytes) trimmed"
+   },
+   "mars": {
+    "rsync": {
+     "path": "/opt/local/bin/rsync",
+     "sha256": "e054defbf756dd17a0f29b05fcb541f481ce1be2b99f8d4a4548929f5aeb8d12",
+     "version": "rsync  version 3.5.1  protocol version 33"
+    },
+    "hostname": "[host]"
+   },
+   "addresses": {
+    "neo>mars": "[host]"
+   }
+  }
+ }
+}

@@ -1,0 +1,5 @@
+experiment,kind,cell_id,corpus,scenario,sender,receiver,client,link,cache,arm,n_blocks,sigma_d,blocks_for_2pct,blocks_for_3pct,blocks_for_5pct,blocks_for_10pct,blocks_equivalent_2pct,blocks_equivalent_3pct,blocks_equivalent_5pct,blocks_equivalent_10pct
+LC3-psample-local-durable,screening,real-psample.fresh.neo-neo-ssd.receiver.cold,real-psample,fresh,neo,neo-ssd,receiver,neo-local-ssd,cold,xs-eager,4,0.05896724537624835,72,34,14,8,96,44,18,8
+LC3-psample-local-durable,screening,real-psample.fresh.neo-neo-ssd.receiver.cold,real-psample,fresh,neo,neo-ssd,receiver,neo-local-ssd,cold,xs-noatomic,4,0.11547716619457624,269,122,46,14,360,163,61,18
+LC3-psample-local-durable,screening,real-psample.fresh.neo-neo-ssd.receiver.cold,real-psample,fresh,neo,neo-ssd,receiver,neo-local-ssd,cold,rsync,4,0.0595950751667373,74,34,14,8,98,45,18,8
+LC3-psample-local-durable,screening,real-psample.fresh.neo-neo-ssd.receiver.cold,real-psample,fresh,neo,neo-ssd,receiver,neo-local-ssd,cold,rsync-eager,4,0.05320784647103078,59,28,12,8,78,37,15,8

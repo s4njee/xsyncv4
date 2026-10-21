@@ -1,0 +1,59 @@
+# Written by the 6-hourly planner at 2026-10-21T01:42Z for neo; nothing is queued after the deadline.
+id = "AUTO-10210142-neo"
+question = "neo drives the only networked link, so it alone can reproduce lab2's latency. It has 5.9 h of room (6 h minus 0.1 h left on the sentinel, nothing queued). The plan uses about 282 min including both possible confirmations, which leaves margin in case netem and the CPU cap stretch sample times. e51c1df1329a is the newest xs build on both neo and mars; no -tune build is staged on mars, so tuning (step 2) waits for a reproduced gap."
+deadline = "2026-10-21T07:42Z"
+start = ["N0", "N1", "N2", "N3"]
+
+[nodes.N0]
+spec = "auto/AP10210142-L2R1-congress-fresh-wan11-cpu2.toml"
+question = "For lab2's congress-sample fresh gap, where rsync was 1.10x faster on the a-aws link, does rsync -a also beat xs -a -j4 on real-congress from neo to mars with 11 ms added and neo held to 2 CPUs?"
+
+  [[nodes.N0.branch]]
+  when = { arm = "rsync", speed_lo_at_least = 1.05 }
+  next = ["N0c"]
+  label = "clearly faster"
+  note = "rsync beats xs-j4 even at its interval's low end: confirm it"
+
+  [[nodes.N0.branch]]
+  otherwise = true
+  next = []
+  label = "no clear gain"
+  note = "not clearly faster: the next window's plan reads this"
+
+[nodes.N0c]
+promote = "N0"
+id = "AP10210142-L2R1-congress-fresh-wan11-cpu2-confirm"
+blocks = 8
+arm = "rsync"
+question = "Does rsync hold up on 8 fresh blocks?"
+
+[nodes.N1]
+spec = "auto/AP10210142-L2R2-congress-fresh-cpu2-only.toml"
+question = "For lab2's congress-sample fresh gap: does holding neo to 2 CPUs, with no added latency, erase xs -a -j4's lead over rsync -a on real-congress from neo to mars?"
+
+[nodes.N2]
+spec = "auto/AP10210142-L2R3-psample-fresh-wan11-cpu2.toml"
+question = "For lab2's real-projects fresh gap, where rsync was 1.46x faster and xs's times were widely scattered, does rsync -a beat xs -a -j4 on real-psample from neo to mars with 11 ms added and neo held to 2 CPUs?"
+
+  [[nodes.N2.branch]]
+  when = { arm = "rsync", speed_lo_at_least = 1.05 }
+  next = ["N2c"]
+  label = "clearly faster"
+  note = "rsync beats xs-j4 even at its interval's low end: confirm it"
+
+  [[nodes.N2.branch]]
+  otherwise = true
+  next = []
+  label = "no clear gain"
+  note = "not clearly faster: the next window's plan reads this"
+
+[nodes.N2c]
+promote = "N2"
+id = "AP10210142-L2R3-psample-fresh-wan11-cpu2-confirm"
+blocks = 8
+arm = "rsync"
+question = "Does rsync hold up on 8 fresh blocks?"
+
+[nodes.N3]
+spec = "auto/AP10210142-L2R4-psample-fresh-plain.toml"
+question = "For lab2's real-projects fresh gap: on the plain neo-mars link, with no added latency and no CPU cap, how does xs -a -j4 compare with rsync -a on a fresh real-psample copy?"

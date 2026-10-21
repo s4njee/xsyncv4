@@ -1,0 +1,58 @@
+# X9: how much of rsync's better ratio is xs's per-block compression. Larger
+# DATA blocks and a larger small-file cutoff let each zstd frame see more
+# data, at some cost to parallelism; level 3 matches rsync's zstd default.
+# Wire bytes are in each record's wire counters.
+id = "X9-10g-z-blocks"
+kind = "screening"
+hypothesis = "Larger blocks narrow the ratio gap to rsync -z without slowing xs -z."
+primary = "durable_s"
+delta = 0.03
+blocks = 6
+control = "z"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.z]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-az"]
+metrics = true
+
+[arms.z-block4m]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-az"]
+tune = "block_target=4194304"
+metrics = true
+
+[arms.z-block16m]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-az"]
+tune = "block_target=16777216,small_max=2097152"
+metrics = true
+
+[arms.z3]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-az", "--compress-level=3"]
+metrics = true
+
+[arms.z3-block16m]
+tool = "xs"
+rev = "453704a64528-tune"
+flags = ["-az", "--compress-level=3"]
+tune = "block_target=16777216,small_max=2097152"
+metrics = true
+
+[arms.rsync-z]
+tool = "rsync"
+flags = ["-az"]
+
+[matrix]
+link = "mac-mars-direct"
+corpus = ["mixed-bimodal", "small-flat"]
+scenario = ["fresh"]
+direction = ["mars>mac"]
+client = ["initiator"]
+cache = ["warm"]

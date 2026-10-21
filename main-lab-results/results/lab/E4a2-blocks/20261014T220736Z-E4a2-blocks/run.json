@@ -1,0 +1,1989 @@
+{
+ "schema": 1,
+ "run_id": "20261014T220736Z-E4a2-blocks",
+ "started_utc": "2026-10-15T20:35:02.754+00:00",
+ "driver": "neo",
+ "plan": {
+  "schema": 1,
+  "experiment": "E4a2-blocks",
+  "spec_sha256": "cc6442214f3ae2e957cdc42d05a7b40df62df14a6f9b2c183efa014111d45294",
+  "kind": "screening",
+  "bundle": "905db83a4732",
+  "writes": {
+   "neo": 200231788350,
+   "freya": 200231788350
+  },
+  "hypothesis": "The block size and small-file cutoff are near their best: no level moves a copy by more than 3%.",
+  "primary": "wall_s",
+  "delta": 0.03,
+  "control": "xs",
+  "seed": 1,
+  "run_id": "20261014T220736Z-E4a2-blocks",
+  "driver": "neo",
+  "sample_timeout_s": 3600,
+  "results": "lab",
+  "background": false,
+  "eager_cleanup": false,
+  "hosts": {
+   "neo": {
+    "ssh": "[email]",
+    "name": "[host]",
+    "hostname": "neo",
+    "root": "~/benchmarks/xsyncv4/lab",
+    "interface": "eth0",
+    "helper": true,
+    "gates": {},
+    "local": false,
+    "system": "Linux"
+   },
+   "freya": {
+    "ssh": "[email]",
+    "name": "[host]",
+    "hostname": "freya",
+    "root": "/mnt/nvme/xsbench",
+    "interface": "enp10s0",
+    "helper": true,
+    "gates": {},
+    "local": false,
+    "system": "Linux"
+   }
+  },
+  "links": {
+   "lan": {
+    "hosts": [
+     "neo",
+     "freya"
+    ],
+    "medium": "wired",
+    "min_speed_mbps": 1000,
+    "max_rtt_ms": 2.0
+   }
+  },
+  "arms": [
+   {
+    "name": "xs",
+    "tool": "xs",
+    "flags": [
+     "-a"
+    ],
+    "rev": "453704a64528-tune",
+    "metrics": true,
+    "binary": {
+     "neo": "~/benchmarks/xsyncv4/lab/bin/xs-453704a64528-tune",
+     "freya": "/mnt/nvme/xsbench/bin/xs-453704a64528-tune"
+    },
+    "sha256": {
+     "neo": "c2ef264df77b44f64b2bb2b1949e10231814b6ad2e804cc11614ad24d71e7cd2",
+     "freya": "21b844fd6d0f556ad2a01fff0eb979df5854569d8b31bf0bcc15976f53fc47c9"
+    },
+    "artifacts": {
+     "xs-darwin-arm64": "cdd545a62a7721607c23dd7014fc436e0f513d049a939ae1fd28cab34e97fcf2",
+     "xs-linux-amd64": "21b844fd6d0f556ad2a01fff0eb979df5854569d8b31bf0bcc15976f53fc47c9",
+     "xs-linux-arm64": "c2ef264df77b44f64b2bb2b1949e10231814b6ad2e804cc11614ad24d71e7cd2"
+    }
+   },
+   {
+    "name": "block256k",
+    "tool": "xs",
+    "flags": [
+     "-a"
+    ],
+    "rev": "453704a64528-tune",
+    "tune": {
+     "sender": "block_target=262144",
+     "receiver": "block_target=262144"
+    },
+    "metrics": true,
+    "binary": {
+     "neo": "~/benchmarks/xsyncv4/lab/bin/xs-453704a64528-tune",
+     "freya": "/mnt/nvme/xsbench/bin/xs-453704a64528-tune"
+    },
+    "sha256": {
+     "neo": "c2ef264df77b44f64b2bb2b1949e10231814b6ad2e804cc11614ad24d71e7cd2",
+     "freya": "21b844fd6d0f556ad2a01fff0eb979df5854569d8b31bf0bcc15976f53fc47c9"
+    },
+    "artifacts": {
+     "xs-darwin-arm64": "cdd545a62a7721607c23dd7014fc436e0f513d049a939ae1fd28cab34e97fcf2",
+     "xs-linux-amd64": "21b844fd6d0f556ad2a01fff0eb979df5854569d8b31bf0bcc15976f53fc47c9",
+     "xs-linux-arm64": "c2ef264df77b44f64b2bb2b1949e10231814b6ad2e804cc11614ad24d71e7cd2"
+    }
+   },
+   {
+    "name": "block4m",
+    "tool": "xs",
+    "flags": [
+     "-a"
+    ],
+    "rev": "453704a64528-tune",
+    "tune": {
+     "sender": "block_target=4194304",
+     "receiver": "block_target=4194304"
+    },
+    "metrics": true,
+    "binary": {
+     "neo": "~/benchmarks/xsyncv4/lab/bin/xs-453704a64528-tune",
+     "freya": "/mnt/nvme/xsbench/bin/xs-453704a64528-tune"
+    },
+    "sha256": {
+     "neo": "c2ef264df77b44f64b2bb2b1949e10231814b6ad2e804cc11614ad24d71e7cd2",
+     "freya": "21b844fd6d0f556ad2a01fff0eb979df5854569d8b31bf0bcc15976f53fc47c9"
+    },
+    "artifacts": {
+     "xs-darwin-arm64": "cdd545a62a7721607c23dd7014fc436e0f513d049a939ae1fd28cab34e97fcf2",
+     "xs-linux-amd64": "21b844fd6d0f556ad2a01fff0eb979df5854569d8b31bf0bcc15976f53fc47c9",
+     "xs-linux-arm64": "c2ef264df77b44f64b2bb2b1949e10231814b6ad2e804cc11614ad24d71e7cd2"
+    }
+   },
+   {
+    "name": "small64k",
+    "tool": "xs",
+    "flags": [
+     "-a"
+    ],
+    "rev": "453704a64528-tune",
+    "tune": {
+     "sender": "small_max=65536",
+     "receiver": "small_max=65536"
+    },
+    "metrics": true,
+    "binary": {
+     "neo": "~/benchmarks/xsyncv4/lab/bin/xs-453704a64528-tune",
+     "freya": "/mnt/nvme/xsbench/bin/xs-453704a64528-tune"
+    },
+    "sha256": {
+     "neo": "c2ef264df77b44f64b2bb2b1949e10231814b6ad2e804cc11614ad24d71e7cd2",
+     "freya": "21b844fd6d0f556ad2a01fff0eb979df5854569d8b31bf0bcc15976f53fc47c9"
+    },
+    "artifacts": {
+     "xs-darwin-arm64": "cdd545a62a7721607c23dd7014fc436e0f513d049a939ae1fd28cab34e97fcf2",
+     "xs-linux-amd64": "21b844fd6d0f556ad2a01fff0eb979df5854569d8b31bf0bcc15976f53fc47c9",
+     "xs-linux-arm64": "c2ef264df77b44f64b2bb2b1949e10231814b6ad2e804cc11614ad24d71e7cd2"
+    }
+   },
+   {
+    "name": "small2m",
+    "tool": "xs",
+    "flags": [
+     "-a"
+    ],
+    "rev": "453704a64528-tune",
+    "tune": {
+     "sender": "small_max=2097152",
+     "receiver": "small_max=2097152"
+    },
+    "metrics": true,
+    "binary": {
+     "neo": "~/benchmarks/xsyncv4/lab/bin/xs-453704a64528-tune",
+     "freya": "/mnt/nvme/xsbench/bin/xs-453704a64528-tune"
+    },
+    "sha256": {
+     "neo": "c2ef264df77b44f64b2bb2b1949e10231814b6ad2e804cc11614ad24d71e7cd2",
+     "freya": "21b844fd6d0f556ad2a01fff0eb979df5854569d8b31bf0bcc15976f53fc47c9"
+    },
+    "artifacts": {
+     "xs-darwin-arm64": "cdd545a62a7721607c23dd7014fc436e0f513d049a939ae1fd28cab34e97fcf2",
+     "xs-linux-amd64": "21b844fd6d0f556ad2a01fff0eb979df5854569d8b31bf0bcc15976f53fc47c9",
+     "xs-linux-arm64": "c2ef264df77b44f64b2bb2b1949e10231814b6ad2e804cc11614ad24d71e7cd2"
+    }
+   }
+  ],
+  "cells": [
+   {
+    "id": "mixed-bimodal.fresh.neo-freya.sender.warm",
+    "corpus": "mixed-bimodal",
+    "scenario": "fresh",
+    "sender": "neo",
+    "receiver": "freya",
+    "client": "sender",
+    "link": "lan",
+    "cache": "warm"
+   },
+   {
+    "id": "mixed-bimodal.fresh.freya-neo.sender.warm",
+    "corpus": "mixed-bimodal",
+    "scenario": "fresh",
+    "sender": "freya",
+    "receiver": "neo",
+    "client": "sender",
+    "link": "lan",
+    "cache": "warm"
+   },
+   {
+    "id": "mixed-threshold.fresh.neo-freya.sender.warm",
+    "corpus": "mixed-threshold",
+    "scenario": "fresh",
+    "sender": "neo",
+    "receiver": "freya",
+    "client": "sender",
+    "link": "lan",
+    "cache": "warm"
+   },
+   {
+    "id": "mixed-threshold.fresh.freya-neo.sender.warm",
+    "corpus": "mixed-threshold",
+    "scenario": "fresh",
+    "sender": "freya",
+    "receiver": "neo",
+    "client": "sender",
+    "link": "lan",
+    "cache": "warm"
+   },
+   {
+    "id": "small-real.fresh.neo-freya.sender.warm",
+    "corpus": "small-real",
+    "scenario": "fresh",
+    "sender": "neo",
+    "receiver": "freya",
+    "client": "sender",
+    "link": "lan",
+    "cache": "warm"
+   },
+   {
+    "id": "small-real.fresh.freya-neo.sender.warm",
+    "corpus": "small-real",
+    "scenario": "fresh",
+    "sender": "freya",
+    "receiver": "neo",
+    "client": "sender",
+    "link": "lan",
+    "cache": "warm"
+   }
+  ],
+  "corpora": {
+   "mixed-bimodal": {
+    "files": 20000,
+    "directories": 420,
+    "bytes": 1395127076,
+    "digest": "e9071fb7ad3b0375ffe9fab58f740bfd22d545f7678e163a6c745504cc7aa16b",
+    "quick_digest": "31af6dbe5d38a32f5f0acf560703fa557304d3936e59f7b395d13cf8d0dec7fb"
+   },
+   "mixed-threshold": {
+    "files": 1500,
+    "directories": 72,
+    "bytes": 1502174819,
+    "digest": "d3070e0dc3befde555186110544966357a2c32a1db72c20e30d464e4cea9e048",
+    "quick_digest": "1f974c87ddf6c48409178d39b34889d699e7079283dcd212889a0ea3ac6c38f2"
+   },
+   "small-real": {
+    "files": 118594,
+    "directories": 59336,
+    "bytes": 1107333872,
+    "digest": "e9c84fab7d1a6dcdaf7c1c8688abe9bcb3cd114f551c27fad5b8624391005cdb",
+    "quick_digest": "65994469699350cde8ad45842d686fe1a01d87e64ed26de283fb0c860fae01e3"
+   }
+  },
+  "blocks": [
+   {
+    "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "small64k",
+      "small2m",
+      "xs",
+      "block256k",
+      "block4m"
+     ],
+     [
+      "xs",
+      "small2m",
+      "small64k",
+      "block256k",
+      "block4m"
+     ],
+     [
+      "block4m",
+      "block256k",
+      "small64k",
+      "xs",
+      "small2m"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-threshold.fresh.neo-freya.sender.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "block4m",
+      "block256k",
+      "small64k",
+      "small2m",
+      "xs"
+     ],
+     [
+      "block256k",
+      "block4m",
+      "xs",
+      "small64k",
+      "small2m"
+     ],
+     [
+      "block4m",
+      "block256k",
+      "small2m",
+      "xs",
+      "small64k"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.freya-neo.sender.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "block256k",
+      "block4m",
+      "small2m",
+      "xs",
+      "small64k"
+     ],
+     [
+      "block256k",
+      "xs",
+      "small64k",
+      "block4m",
+      "small2m"
+     ],
+     [
+      "xs",
+      "small64k",
+      "block256k",
+      "block4m",
+      "small2m"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.fresh.neo-freya.sender.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "small64k",
+      "block256k",
+      "block4m",
+      "xs",
+      "small2m"
+     ],
+     [
+      "block256k",
+      "small64k",
+      "xs",
+      "block4m",
+      "small2m"
+     ],
+     [
+      "block4m",
+      "small2m",
+      "small64k",
+      "block256k",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-threshold.fresh.freya-neo.sender.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "block256k",
+      "small2m",
+      "small64k",
+      "xs",
+      "block4m"
+     ],
+     [
+      "block4m",
+      "small64k",
+      "xs",
+      "small2m",
+      "block256k"
+     ],
+     [
+      "block256k",
+      "block4m",
+      "small2m",
+      "small64k",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.fresh.freya-neo.sender.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "small2m",
+      "block256k",
+      "small64k",
+      "block4m",
+      "xs"
+     ],
+     [
+      "block256k",
+      "xs",
+      "small2m",
+      "block4m",
+      "small64k"
+     ],
+     [
+      "small2m",
+      "xs",
+      "block4m",
+      "small64k",
+      "block256k"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-threshold.fresh.neo-freya.sender.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "block256k",
+      "small2m",
+      "block4m",
+      "xs",
+      "small64k"
+     ],
+     [
+      "xs",
+      "small2m",
+      "block256k",
+      "small64k",
+      "block4m"
+     ],
+     [
+      "block256k",
+      "block4m",
+      "xs",
+      "small64k",
+      "small2m"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.freya-neo.sender.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "block256k",
+      "xs",
+      "small64k",
+      "block4m",
+      "small2m"
+     ],
+     [
+      "xs",
+      "small2m",
+      "small64k",
+      "block4m",
+      "block256k"
+     ],
+     [
+      "small64k",
+      "block4m",
+      "block256k",
+      "xs",
+      "small2m"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.fresh.freya-neo.sender.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "small2m",
+      "block4m",
+      "block256k",
+      "xs",
+      "small64k"
+     ],
+     [
+      "small2m",
+      "block256k",
+      "xs",
+      "block4m",
+      "small64k"
+     ],
+     [
+      "small2m",
+      "block4m",
+      "block256k",
+      "small64k",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.fresh.neo-freya.sender.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "block4m",
+      "small64k",
+      "block256k",
+      "small2m",
+      "xs"
+     ],
+     [
+      "small2m",
+      "xs",
+      "block4m",
+      "block256k",
+      "small64k"
+     ],
+     [
+      "block256k",
+      "xs",
+      "small64k",
+      "block4m",
+      "small2m"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "small64k",
+      "small2m",
+      "xs",
+      "block256k",
+      "block4m"
+     ],
+     [
+      "small64k",
+      "xs",
+      "block256k",
+      "small2m",
+      "block4m"
+     ],
+     [
+      "xs",
+      "small2m",
+      "block256k",
+      "small64k",
+      "block4m"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-threshold.fresh.freya-neo.sender.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "block256k",
+      "xs",
+      "small64k",
+      "small2m",
+      "block4m"
+     ],
+     [
+      "small64k",
+      "block4m",
+      "small2m",
+      "xs",
+      "block256k"
+     ],
+     [
+      "small2m",
+      "xs",
+      "small64k",
+      "block256k",
+      "block4m"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-threshold.fresh.neo-freya.sender.warm",
+    "block": 2,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "small2m",
+      "small64k",
+      "block256k",
+      "block4m"
+     ],
+     [
+      "small2m",
+      "xs",
+      "block4m",
+      "block256k",
+      "small64k"
+     ],
+     [
+      "block256k",
+      "small2m",
+      "xs",
+      "small64k",
+      "block4m"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+    "block": 2,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "block256k",
+      "small64k",
+      "small2m",
+      "block4m"
+     ],
+     [
+      "small2m",
+      "small64k",
+      "xs",
+      "block256k",
+      "block4m"
+     ],
+     [
+      "small64k",
+      "block256k",
+      "block4m",
+      "xs",
+      "small2m"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.fresh.neo-freya.sender.warm",
+    "block": 2,
+    "verify_full": false,
+    "orders": [
+     [
+      "small2m",
+      "small64k",
+      "block256k",
+      "xs",
+      "block4m"
+     ],
+     [
+      "block4m",
+      "small64k",
+      "block256k",
+      "xs",
+      "small2m"
+     ],
+     [
+      "block4m",
+      "xs",
+      "small64k",
+      "small2m",
+      "block256k"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.fresh.freya-neo.sender.warm",
+    "block": 2,
+    "verify_full": false,
+    "orders": [
+     [
+      "small64k",
+      "xs",
+      "block4m",
+      "block256k",
+      "small2m"
+     ],
+     [
+      "xs",
+      "block256k",
+      "small2m",
+      "small64k",
+      "block4m"
+     ],
+     [
+      "xs",
+      "small2m",
+      "small64k",
+      "block4m",
+      "block256k"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.freya-neo.sender.warm",
+    "block": 2,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "small64k",
+      "block256k",
+      "small2m",
+      "block4m"
+     ],
+     [
+      "xs",
+      "block256k",
+      "small64k",
+      "block4m",
+      "small2m"
+     ],
+     [
+      "small2m",
+      "block256k",
+      "small64k",
+      "xs",
+      "block4m"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-threshold.fresh.freya-neo.sender.warm",
+    "block": 2,
+    "verify_full": false,
+    "orders": [
+     [
+      "small2m",
+      "block4m",
+      "small64k",
+      "block256k",
+      "xs"
+     ],
+     [
+      "small2m",
+      "block4m",
+      "xs",
+      "small64k",
+      "block256k"
+     ],
+     [
+      "block4m",
+      "small64k",
+      "block256k",
+      "xs",
+      "small2m"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+    "block": 3,
+    "verify_full": false,
+    "orders": [
+     [
+      "small2m",
+      "block4m",
+      "block256k",
+      "xs",
+      "small64k"
+     ],
+     [
+      "small2m",
+      "block256k",
+      "block4m",
+      "xs",
+      "small64k"
+     ],
+     [
+      "xs",
+      "small64k",
+      "small2m",
+      "block256k",
+      "block4m"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.freya-neo.sender.warm",
+    "block": 3,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "small64k",
+      "block4m",
+      "block256k",
+      "small2m"
+     ],
+     [
+      "block4m",
+      "small64k",
+      "xs",
+      "small2m",
+      "block256k"
+     ],
+     [
+      "block256k",
+      "small2m",
+      "xs",
+      "block4m",
+      "small64k"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.fresh.neo-freya.sender.warm",
+    "block": 3,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "small64k",
+      "small2m",
+      "block256k",
+      "block4m"
+     ],
+     [
+      "small2m",
+      "xs",
+      "small64k",
+      "block4m",
+      "block256k"
+     ],
+     [
+      "block4m",
+      "small2m",
+      "block256k",
+      "small64k",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-threshold.fresh.freya-neo.sender.warm",
+    "block": 3,
+    "verify_full": false,
+    "orders": [
+     [
+      "block4m",
+      "small64k",
+      "block256k",
+      "xs",
+      "small2m"
+     ],
+     [
+      "block4m",
+      "xs",
+      "block256k",
+      "small64k",
+      "small2m"
+     ],
+     [
+      "xs",
+      "block256k",
+      "small2m",
+      "block4m",
+      "small64k"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-threshold.fresh.neo-freya.sender.warm",
+    "block": 3,
+    "verify_full": false,
+    "orders": [
+     [
+      "small2m",
+      "small64k",
+      "block256k",
+      "block4m",
+      "xs"
+     ],
+     [
+      "small64k",
+      "small2m",
+      "block4m",
+      "block256k",
+      "xs"
+     ],
+     [
+      "xs",
+      "block256k",
+      "small64k",
+      "small2m",
+      "block4m"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.fresh.freya-neo.sender.warm",
+    "block": 3,
+    "verify_full": false,
+    "orders": [
+     [
+      "block256k",
+      "xs",
+      "block4m",
+      "small64k",
+      "small2m"
+     ],
+     [
+      "block4m",
+      "block256k",
+      "xs",
+      "small2m",
+      "small64k"
+     ],
+     [
+      "small64k",
+      "xs",
+      "small2m",
+      "block256k",
+      "block4m"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.fresh.freya-neo.sender.warm",
+    "block": 4,
+    "verify_full": false,
+    "orders": [
+     [
+      "block4m",
+      "block256k",
+      "xs",
+      "small2m",
+      "small64k"
+     ],
+     [
+      "small64k",
+      "small2m",
+      "block4m",
+      "xs",
+      "block256k"
+     ],
+     [
+      "xs",
+      "block256k",
+      "small2m",
+      "block4m",
+      "small64k"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.fresh.neo-freya.sender.warm",
+    "block": 4,
+    "verify_full": false,
+    "orders": [
+     [
+      "small2m",
+      "small64k",
+      "xs",
+      "block4m",
+      "block256k"
+     ],
+     [
+      "small64k",
+      "xs",
+      "block256k",
+      "block4m",
+      "small2m"
+     ],
+     [
+      "block4m",
+      "xs",
+      "block256k",
+      "small2m",
+      "small64k"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.freya-neo.sender.warm",
+    "block": 4,
+    "verify_full": false,
+    "orders": [
+     [
+      "small64k",
+      "xs",
+      "small2m",
+      "block256k",
+      "block4m"
+     ],
+     [
+      "xs",
+      "small2m",
+      "small64k",
+      "block256k",
+      "block4m"
+     ],
+     [
+      "block256k",
+      "small2m",
+      "small64k",
+      "xs",
+      "block4m"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+    "block": 4,
+    "verify_full": false,
+    "orders": [
+     [
+      "small2m",
+      "block4m",
+      "block256k",
+      "small64k",
+      "xs"
+     ],
+     [
+      "block256k",
+      "block4m",
+      "small2m",
+      "small64k",
+      "xs"
+     ],
+     [
+      "xs",
+      "small2m",
+      "block256k",
+      "block4m",
+      "small64k"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-threshold.fresh.freya-neo.sender.warm",
+    "block": 4,
+    "verify_full": false,
+    "orders": [
+     [
+      "block4m",
+      "small2m",
+      "block256k",
+      "small64k",
+      "xs"
+     ],
+     [
+      "xs",
+      "small64k",
+      "block256k",
+      "small2m",
+      "block4m"
+     ],
+     [
+      "xs",
+      "small64k",
+      "block256k",
+      "block4m",
+      "small2m"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-threshold.fresh.neo-freya.sender.warm",
+    "block": 4,
+    "verify_full": false,
+    "orders": [
+     [
+      "small64k",
+      "block4m",
+      "small2m",
+      "block256k",
+      "xs"
+     ],
+     [
+      "xs",
+      "block4m",
+      "small64k",
+      "block256k",
+      "small2m"
+     ],
+     [
+      "small64k",
+      "xs",
+      "small2m",
+      "block256k",
+      "block4m"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+    "block": 5,
+    "verify_full": false,
+    "orders": [
+     [
+      "small2m",
+      "small64k",
+      "block256k",
+      "block4m",
+      "xs"
+     ],
+     [
+      "xs",
+      "small64k",
+      "block4m",
+      "small2m",
+      "block256k"
+     ],
+     [
+      "xs",
+      "block4m",
+      "small2m",
+      "block256k",
+      "small64k"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.fresh.neo-freya.sender.warm",
+    "block": 5,
+    "verify_full": false,
+    "orders": [
+     [
+      "block256k",
+      "small2m",
+      "xs",
+      "small64k",
+      "block4m"
+     ],
+     [
+      "block4m",
+      "block256k",
+      "small2m",
+      "xs",
+      "small64k"
+     ],
+     [
+      "xs",
+      "block4m",
+      "small2m",
+      "small64k",
+      "block256k"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-threshold.fresh.neo-freya.sender.warm",
+    "block": 5,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "small64k",
+      "block4m",
+      "small2m",
+      "block256k"
+     ],
+     [
+      "small64k",
+      "block256k",
+      "block4m",
+      "small2m",
+      "xs"
+     ],
+     [
+      "small64k",
+      "small2m",
+      "block4m",
+      "block256k",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.fresh.freya-neo.sender.warm",
+    "block": 5,
+    "verify_full": false,
+    "orders": [
+     [
+      "block256k",
+      "xs",
+      "small2m",
+      "small64k",
+      "block4m"
+     ],
+     [
+      "small64k",
+      "block4m",
+      "block256k",
+      "small2m",
+      "xs"
+     ],
+     [
+      "small64k",
+      "block4m",
+      "block256k",
+      "small2m",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-threshold.fresh.freya-neo.sender.warm",
+    "block": 5,
+    "verify_full": false,
+    "orders": [
+     [
+      "block4m",
+      "small64k",
+      "xs",
+      "block256k",
+      "small2m"
+     ],
+     [
+      "xs",
+      "small2m",
+      "block4m",
+      "small64k",
+      "block256k"
+     ],
+     [
+      "block4m",
+      "small2m",
+      "block256k",
+      "small64k",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.freya-neo.sender.warm",
+    "block": 5,
+    "verify_full": false,
+    "orders": [
+     [
+      "block256k",
+      "small2m",
+      "block4m",
+      "xs",
+      "small64k"
+     ],
+     [
+      "small2m",
+      "small64k",
+      "block256k",
+      "xs",
+      "block4m"
+     ],
+     [
+      "small2m",
+      "block4m",
+      "xs",
+      "small64k",
+      "block256k"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-threshold.fresh.neo-freya.sender.warm",
+    "block": 6,
+    "verify_full": false,
+    "orders": [
+     [
+      "small64k",
+      "block4m",
+      "block256k",
+      "xs",
+      "small2m"
+     ],
+     [
+      "small64k",
+      "block4m",
+      "small2m",
+      "block256k",
+      "xs"
+     ],
+     [
+      "small64k",
+      "small2m",
+      "xs",
+      "block256k",
+      "block4m"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.freya-neo.sender.warm",
+    "block": 6,
+    "verify_full": false,
+    "orders": [
+     [
+      "small64k",
+      "block4m",
+      "block256k",
+      "xs",
+      "small2m"
+     ],
+     [
+      "small2m",
+      "block4m",
+      "block256k",
+      "xs",
+      "small64k"
+     ],
+     [
+      "block256k",
+      "small64k",
+      "small2m",
+      "xs",
+      "block4m"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.fresh.neo-freya.sender.warm",
+    "block": 6,
+    "verify_full": false,
+    "orders": [
+     [
+      "small2m",
+      "block256k",
+      "small64k",
+      "block4m",
+      "xs"
+     ],
+     [
+      "block256k",
+      "xs",
+      "small64k",
+      "block4m",
+      "small2m"
+     ],
+     [
+      "block4m",
+      "block256k",
+      "small64k",
+      "xs",
+      "small2m"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+    "block": 6,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "block256k",
+      "block4m",
+      "small2m",
+      "small64k"
+     ],
+     [
+      "xs",
+      "small64k",
+      "small2m",
+      "block4m",
+      "block256k"
+     ],
+     [
+      "block256k",
+      "block4m",
+      "small2m",
+      "small64k",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.fresh.freya-neo.sender.warm",
+    "block": 6,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "block256k",
+      "block4m",
+      "small64k",
+      "small2m"
+     ],
+     [
+      "block256k",
+      "xs",
+      "block4m",
+      "small64k",
+      "small2m"
+     ],
+     [
+      "block4m",
+      "block256k",
+      "xs",
+      "small64k",
+      "small2m"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-threshold.fresh.freya-neo.sender.warm",
+    "block": 6,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs",
+      "block4m",
+      "small2m",
+      "small64k",
+      "block256k"
+     ],
+     [
+      "block256k",
+      "small2m",
+      "small64k",
+      "xs",
+      "block4m"
+     ],
+     [
+      "block4m",
+      "small64k",
+      "block256k",
+      "small2m",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-threshold.fresh.neo-freya.sender.warm",
+    "block": 7,
+    "verify_full": false,
+    "orders": [
+     [
+      "block256k",
+      "small2m",
+      "block4m",
+      "xs",
+      "small64k"
+     ],
+     [
+      "xs",
+      "small2m",
+      "block4m",
+      "block256k",
+      "small64k"
+     ],
+     [
+      "block256k",
+      "xs",
+      "small2m",
+      "small64k",
+      "block4m"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.fresh.freya-neo.sender.warm",
+    "block": 7,
+    "verify_full": false,
+    "orders": [
+     [
+      "block4m",
+      "block256k",
+      "small64k",
+      "small2m",
+      "xs"
+     ],
+     [
+      "xs",
+      "small64k",
+      "block256k",
+      "block4m",
+      "small2m"
+     ],
+     [
+      "block256k",
+      "small2m",
+      "block4m",
+      "xs",
+      "small64k"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+    "block": 7,
+    "verify_full": false,
+    "orders": [
+     [
+      "block4m",
+      "xs",
+      "block256k",
+      "small64k",
+      "small2m"
+     ],
+     [
+      "block4m",
+      "small64k",
+      "small2m",
+      "block256k",
+      "xs"
+     ],
+     [
+      "block256k",
+      "block4m",
+      "small64k",
+      "xs",
+      "small2m"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.freya-neo.sender.warm",
+    "block": 7,
+    "verify_full": false,
+    "orders": [
+     [
+      "small64k",
+      "block4m",
+      "block256k",
+      "small2m",
+      "xs"
+     ],
+     [
+      "block256k",
+      "block4m",
+      "xs",
+      "small2m",
+      "small64k"
+     ],
+     [
+      "small2m",
+      "small64k",
+      "block256k",
+      "block4m",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-threshold.fresh.freya-neo.sender.warm",
+    "block": 7,
+    "verify_full": false,
+    "orders": [
+     [
+      "small2m",
+      "block4m",
+      "small64k",
+      "block256k",
+      "xs"
+     ],
+     [
+      "small64k",
+      "small2m",
+      "block256k",
+      "block4m",
+      "xs"
+     ],
+     [
+      "xs",
+      "block4m",
+      "small2m",
+      "small64k",
+      "block256k"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.fresh.neo-freya.sender.warm",
+    "block": 7,
+    "verify_full": false,
+    "orders": [
+     [
+      "block256k",
+      "small2m",
+      "xs",
+      "block4m",
+      "small64k"
+     ],
+     [
+      "xs",
+      "block256k",
+      "small64k",
+      "block4m",
+      "small2m"
+     ],
+     [
+      "xs",
+      "small2m",
+      "block256k",
+      "small64k",
+      "block4m"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-threshold.fresh.neo-freya.sender.warm",
+    "block": 8,
+    "verify_full": false,
+    "orders": [
+     [
+      "small2m",
+      "block4m",
+      "xs",
+      "small64k",
+      "block256k"
+     ],
+     [
+      "block4m",
+      "small2m",
+      "block256k",
+      "small64k",
+      "xs"
+     ],
+     [
+      "small64k",
+      "block4m",
+      "small2m",
+      "block256k",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.fresh.freya-neo.sender.warm",
+    "block": 8,
+    "verify_full": false,
+    "orders": [
+     [
+      "small64k",
+      "block4m",
+      "small2m",
+      "block256k",
+      "xs"
+     ],
+     [
+      "small64k",
+      "small2m",
+      "block4m",
+      "xs",
+      "block256k"
+     ],
+     [
+      "block4m",
+      "small2m",
+      "block256k",
+      "xs",
+      "small64k"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.fresh.neo-freya.sender.warm",
+    "block": 8,
+    "verify_full": false,
+    "orders": [
+     [
+      "block256k",
+      "small2m",
+      "small64k",
+      "block4m",
+      "xs"
+     ],
+     [
+      "small64k",
+      "block256k",
+      "small2m",
+      "block4m",
+      "xs"
+     ],
+     [
+      "block256k",
+      "small64k",
+      "small2m",
+      "xs",
+      "block4m"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-threshold.fresh.freya-neo.sender.warm",
+    "block": 8,
+    "verify_full": false,
+    "orders": [
+     [
+      "block256k",
+      "small64k",
+      "xs",
+      "block4m",
+      "small2m"
+     ],
+     [
+      "block256k",
+      "xs",
+      "small2m",
+      "small64k",
+      "block4m"
+     ],
+     [
+      "xs",
+      "block4m",
+      "small64k",
+      "small2m",
+      "block256k"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.freya-neo.sender.warm",
+    "block": 8,
+    "verify_full": false,
+    "orders": [
+     [
+      "small2m",
+      "block256k",
+      "xs",
+      "small64k",
+      "block4m"
+     ],
+     [
+      "block4m",
+      "xs",
+      "block256k",
+      "small64k",
+      "small2m"
+     ],
+     [
+      "small2m",
+      "block4m",
+      "small64k",
+      "block256k",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+    "block": 8,
+    "verify_full": false,
+    "orders": [
+     [
+      "block256k",
+      "block4m",
+      "xs",
+      "small64k",
+      "small2m"
+     ],
+     [
+      "small2m",
+      "xs",
+      "small64k",
+      "block4m",
+      "block256k"
+     ],
+     [
+      "block256k",
+      "block4m",
+      "xs",
+      "small2m",
+      "small64k"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.freya-neo.sender.warm",
+    "block": 9,
+    "verify_full": true,
+    "orders": [
+     [
+      "block256k",
+      "xs",
+      "block4m",
+      "small2m",
+      "small64k"
+     ],
+     [
+      "small64k",
+      "xs",
+      "block256k",
+      "block4m",
+      "small2m"
+     ],
+     [
+      "block256k",
+      "small2m",
+      "small64k",
+      "xs",
+      "block4m"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.fresh.freya-neo.sender.warm",
+    "block": 9,
+    "verify_full": true,
+    "orders": [
+     [
+      "small64k",
+      "small2m",
+      "block4m",
+      "xs",
+      "block256k"
+     ],
+     [
+      "xs",
+      "block256k",
+      "small64k",
+      "small2m",
+      "block4m"
+     ],
+     [
+      "small2m",
+      "xs",
+      "block256k",
+      "block4m",
+      "small64k"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-threshold.fresh.freya-neo.sender.warm",
+    "block": 9,
+    "verify_full": true,
+    "orders": [
+     [
+      "small2m",
+      "block4m",
+      "xs",
+      "small64k",
+      "block256k"
+     ],
+     [
+      "block256k",
+      "small64k",
+      "block4m",
+      "xs",
+      "small2m"
+     ],
+     [
+      "small64k",
+      "block256k",
+      "block4m",
+      "small2m",
+      "xs"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-bimodal.fresh.neo-freya.sender.warm",
+    "block": 9,
+    "verify_full": true,
+    "orders": [
+     [
+      "block256k",
+      "small2m",
+      "xs",
+      "small64k",
+      "block4m"
+     ],
+     [
+      "block4m",
+      "block256k",
+      "xs",
+      "small2m",
+      "small64k"
+     ],
+     [
+      "block256k",
+      "block4m",
+      "small2m",
+      "xs",
+      "small64k"
+     ]
+    ]
+   },
+   {
+    "cell": "mixed-threshold.fresh.neo-freya.sender.warm",
+    "block": 9,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs",
+      "block4m",
+      "small64k",
+      "block256k",
+      "small2m"
+     ],
+     [
+      "xs",
+      "block256k",
+      "small64k",
+      "small2m",
+      "block4m"
+     ],
+     [
+      "block256k",
+      "small2m",
+      "block4m",
+      "xs",
+      "small64k"
+     ]
+    ]
+   },
+   {
+    "cell": "small-real.fresh.neo-freya.sender.warm",
+    "block": 9,
+    "verify_full": true,
+    "orders": [
+     [
+      "small2m",
+      "block256k",
+      "small64k",
+      "xs",
+      "block4m"
+     ],
+     [
+      "block256k",
+      "xs",
+      "small2m",
+      "small64k",
+      "block4m"
+     ],
+     [
+      "block4m",
+      "small64k",
+      "block256k",
+      "small2m",
+      "xs"
+     ]
+    ]
+   }
+  ],
+  "scripts": {
+   "probe.py": "52e78e2063c5cce8393789c90ed49c4f9c18921fd823837f5f653956f7169777",
+   "corpus.py": "d6018d3611cba607a670f3fe554d0d4be5941fb2ef8fd65d57f10bfb582625f6",
+   "corpora.json": "984149a5d4487950b49310a884fe4f32ced3a09b1396be290a1841646629ac96",
+   "agent.py": "ebc8c2ad5e79af9c9ec4da02e9f6ddd3b1e9fb6b82f5baffdf28c2ff0f053a51",
+   "runner.py": "0356c31867701629fb0b179293d4da2d6328921efb5f3d601585b1d5d6adc9e0",
+   "measure.py": "5065310f480ff1cabfa7c645f0db342624a02f9a081b96069d50d52b3d224777"
+  },
+  "observed": {
+   "neo": {
+    "rsync": {
+     "path": "/usr/bin/rsync",
+     "sha256": "3852336282ee66a98c52966a8bebbf3508980a3ec47e7150f40330ada999980e",
+     "version": "rsync  version 3.4.1  protocol version 32"
+    },
+    "hostname": "neo",
+    "trim": null
+   },
+   "freya": {
+    "rsync": {
+     "path": "/usr/bin/rsync",
+     "sha256": "cae31f86ebfa8ecf2293a809c8f09d8176c8ead7f192de8caebcc6a1f3f14800",
+     "version": "rsync  version 3.5.0-g471e17dc  protocol version 32"
+    },
+    "hostname": "freya",
+    "trim": "trimmed=yes /mnt/nvme: 21.3 GiB (22841954304 bytes) trimmed"
+   },
+   "addresses": {
+    "neo>freya": "[address]"
+   }
+  }
+ }
+}

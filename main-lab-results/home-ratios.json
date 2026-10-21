@@ -1,0 +1,2635 @@
+{
+ "utc": "2026-10-21T12:51:23+00:00",
+ "about": "For each cell lab2 measures, the home lab's measurements of the same scenario on the closest home trees: each tool's geometric-mean durable_s over its blocks, with the conditions (wan_delay_ms added on the home link, cpus the sender was held to; 0 = none). cpp_over_rsync below 1 means the C++ xs was faster.",
+ "lab2_snapshot": {
+  "utc": "2026-10-21T01:50:40+00:00",
+  "ref": "rust-ds@1b5462438ea3",
+  "cpp_rev": "0c94b3d70b9d"
+ },
+ "cells": [
+  {
+   "lab2_cell": "congress-sample.fresh.a-aws.sender.warm",
+   "corpus": "congress-sample",
+   "scenario": "fresh",
+   "lab2_cpp_over_rsync": 1.104,
+   "home_corpora": [
+    "real-congress"
+   ],
+   "home": [
+    {
+     "home_corpus": "real-congress",
+     "experiment": "AP10210751-AP10210749-L2R7-congress-pull-wan11-cpu2",
+     "run": "20261021T075208Z-AP10210751-AP10210749-L2R7-congress-pull-wan11-cpu2",
+     "cell": "real-congress.fresh.mars-neo.receiver.warm",
+     "link": "neo-mars-lan",
+     "direction": "mars>neo",
+     "cache": "warm",
+     "conditions": {
+      "wan_delay_ms": 11,
+      "cpus": 2
+     },
+     "tools": {
+      "rsync": {
+       "arm": "rsync",
+       "rev": null,
+       "flags": [
+        "-a"
+       ],
+       "seconds": 23.3222,
+       "lo": 22.167216009192416,
+       "hi": 24.53739951084235,
+       "blocks": 12
+      },
+      "xs-cpp": {
+       "arm": "xs-j4",
+       "rev": "e51c1df1329a",
+       "flags": [
+        "-a",
+        "-j4"
+       ],
+       "seconds": 18.0863,
+       "lo": 16.96352518181331,
+       "hi": 19.283337440752884,
+       "blocks": 12
+      }
+     },
+     "arms": [
+      {
+       "tool": "xs",
+       "arm": "xs-j4",
+       "rev": "e51c1df1329a",
+       "flags": [
+        "-a",
+        "-j4"
+       ],
+       "seconds": 18.0863,
+       "lo": 16.96352518181331,
+       "hi": 19.283337440752884,
+       "blocks": 12
+      },
+      {
+       "tool": "rsync",
+       "arm": "rsync",
+       "rev": null,
+       "flags": [
+        "-a"
+       ],
+       "seconds": 23.3222,
+       "lo": 22.167216009192416,
+       "hi": 24.53739951084235,
+       "blocks": 12
+      }
+     ],
+     "cpp_over_rsync": 0.775
+    },
+    {
+     "home_corpus": "real-congress",
+     "experiment": "AP10210142-L2R2-congress-fresh-cpu2-only",
+     "run": "20261021T014245Z-AP10210142-L2R2-congress-fresh-cpu2-only",
+     "cell": "real-congress.fresh.neo-mars.sender.warm",
+     "link": "neo-mars-lan",
+     "direction": "neo>mars",
+     "cache": "warm",
+     "conditions": {
+      "wan_delay_ms": 0,
+      "cpus": 2
+     },
+     "tools": {
+      "rsync": {
+       "arm": "rsync",
+       "rev": null,
+       "flags": [
+        "-a"
+       ],
+       "seconds": 41.9106,
+       "lo": 41.73708601214015,
+       "hi": 42.08492370509638,
+       "blocks": 10
+      },
+      "xs-cpp": {
+       "arm": "xs-j4",
+       "rev": "e51c1df1329a",
+       "flags": [
+        "-a",
+        "-j4"
+       ],
+       "seconds": 30.1558,
+       "lo": 29.955967759132026,
+       "hi": 30.35688213487675,
+       "blocks": 10
+      }
+     },
+     "arms": [
+      {
+       "tool": "xs",
+       "arm": "xs-j4",
+       "rev": "e51c1df1329a",
+       "flags": [
+        "-a",
+        "-j4"
+       ],
+       "seconds": 30.1558,
+       "lo": 29.955967759132026,
+       "hi": 30.35688213487675,
+       "blocks": 10
+      },
+      {
+       "tool": "rsync",
+       "arm": "rsync",
+       "rev": null,
+       "flags": [
+        "-a"
+       ],
+       "seconds": 41.9106,
+       "lo": 41.73708601214015,
+       "hi": 42.08492370509638,
+       "blocks": 10
+      }
+     ],
+     "cpp_over_rsync": 0.72
+    },
+    {
+     "home_corpus": "real-congress",
+     "experiment": "AP10210142-L2R1-congress-fresh-wan11-cpu2",
+     "run": "20261021T014243Z-AP10210142-L2R1-congress-fresh-wan11-cpu2",
+     "cell": "real-congress.fresh.neo-mars.sender.warm",
+     "link": "neo-mars-lan",
+     "direction": "neo>mars",
+     "cache": "warm",
+     "conditions": {
+      "wan_delay_ms": 11,
+      "cpus": 2
+     },
+     "tools": {
+      "rsync": {
+       "arm": "rsync",
+       "rev": null,
+       "flags": [
+        "-a"
+       ],
+       "seconds": 42.364,
+       "lo": 42.185618409921844,
+       "hi": 42.54306289312329,
+       "blocks": 12
+      },
+      "xs-cpp": {
+       "arm": "xs-j4",
+       "rev": "e51c1df1329a",
+       "flags": [
+        "-a",
+        "-j4"
+       ],
+       "seconds": 30.317,
+       "lo": 30.11113231185312,
+       "hi": 30.524179884210305,
+       "blocks": 12
+      }
+     },
+     "arms": [
+      {
+       "tool": "xs",
+       "arm": "xs-j4",
+       "rev": "e51c1df1329a",
+       "flags": [
+        "-a",
+        "-j4"
+       ],
+       "seconds": 30.317,
+       "lo": 30.11113231185312,
+       "hi": 30.524179884210305,
+       "blocks": 12
+      },
+      {
+       "tool": "rsync",
+       "arm": "rsync",
+       "rev": null,
+       "flags": [
+        "-a"
+       ],
+       "seconds": 42.364,
+       "lo": 42.185618409921844,
+       "hi": 42.54306289312329,
+       "blocks": 12
+      }
+     ],
+     "cpp_over_rsync": 0.716
+    },
+    {
+     "home_corpus": "real-congress",
+     "experiment": "AP10210142-L2R5-local-congress-cpu2",
+     "run": "20261021T014235Z-AP10210142-L2R5-local-congress-cpu2",
+     "cell": "real-congress.fresh.neo-neo-ssd.receiver.warm",
+     "link": "neo-local-ssd",
+     "direction": "neo>neo-ssd",
+     "cache": "warm",
+     "conditions": {
+      "wan_delay_ms": 0,
+      "cpus": 2
+     },
+     "tools": {
+      "rsync": {
+       "arm": "rsync",
+       "rev": null,
+       "flags": [
+        "-a"
+       ],
+       "seconds": 33.6843,
+       "lo": 32.56286789640449,
+       "hi": 34.844255043071364,
+       "blocks": 12
+      },
+      "xs-cpp": {
+       "arm": "xs-j4",
+       "rev": "e51c1df1329a",
+       "flags": [
+        "-a",
+        "-j4"
+       ],
+       "seconds": 17.1584,
+       "lo": 16.376631724969897,
+       "hi": 17.977563985719,
+       "blocks": 12
+      }
+     },
+     "arms": [
+      {
+       "tool": "xs",
+       "arm": "xs-j4",
+       "rev": "e51c1df1329a",
+       "flags": [
+        "-a",
+        "-j4"
+       ],
+       "seconds": 17.1584,
+       "lo": 16.376631724969897,
+       "hi": 17.977563985719,
+       "blocks": 12
+      },
+      {
+       "tool": "rsync",
+       "arm": "rsync",
+       "rev": null,
+       "flags": [
+        "-a"
+       ],
+       "seconds": 33.6843,
+       "lo": 32.56286789640449,
+       "hi": 34.844255043071364,
+       "blocks": 12
+      }
+     ],
+     "cpp_over_rsync": 0.509
+    },
+    {
+     "home_corpus": "real-congress",
+     "experiment": "J1d-neo-mars-jobs-real-congress",
+     "run": "20261020T170936Z-J1d-neo-mars-jobs-real-congress",
+     "cell": "real-congress.fresh.mars-neo.receiver.warm",
+     "link": "neo-mars-lan",
+     "direction": "mars>neo",
+     "cache": "warm",
+     "conditions": {
+      "wan_delay_ms": 0,
+      "cpus": 0
+     },
+     "tools": {
+      "rsync": {
+       "arm": "rsync",
+       "rev": null,
+       "flags": [
+        "-a"
+       ],
+       "seconds": 20.6141,
+       "lo": 19.994827638960537,
+       "hi": 21.252561817100794,
+       "blocks": 8
+      },
+      "xs-cpp": {
+       "arm": "xs-j4",
+       "rev": "e51c1df1329a",
+       "flags": [
+        "-a",
+        "-j4"
+       ],
+       "seconds": 15.5781,
+       "lo": 14.852475906938766,
+       "hi": 16.339134936925763,
+       "blocks": 8
+      }
+     },
+     "arms": [
+      {
+       "tool": "xs",
+       "arm": "xs",
+       "rev": "e51c1df1329a",
+       "flags": [
+        "-a"
+       ],
+       "seconds": 15.3978,
+       "lo": 14.333900433368509,
+       "hi": 16.54069016678455,
+       "blocks": 8
+      },
+      {
+       "tool": "xs",
+       "arm": "xs-j4",
+       "rev": "e51c1df1329a",
+       "flags": [
+        "-a",
+        "-j4"
+       ],
+       "seconds": 15.5781,
+       "lo": 14.852475906938766,
+       "hi": 16.339134936925763,
+       "blocks": 8
+      },
+      {
+       "tool": "xs",
+       "arm": "xs-j8",
+       "rev": "e51c1df1329a",
+       "flags": [
+        "-a",
+        "-j8"
+       ],
+       "seconds": 15.6285,
+       "lo": 14.865786594697711,
+       "hi": 16.430318185613473,
+       "blocks": 8
+      },
+      {
+       "tool": "rsync",
+       "arm": "rsync",
+       "rev": null,
+       "flags": [
+        "-a"
+       ],
+       "seconds": 20.6141,
+       "lo": 19.994827638960537,
+       "hi": 21.252561817100794,
+       "blocks": 8
+      }
+     ],
+     "cpp_over_rsync": 0.756
+    },
+    {
+     "home_corpus": "real-congress",
+     "experiment": "J1d-neo-mars-jobs-real-congress",
+     "run": "20261020T170936Z-J1d-neo-mars-jobs-real-congress",
+     "cell": "real-congress.fresh.neo-mars.sender.warm",
+     "link": "neo-mars-lan",
+     "direction": "neo>mars",
+     "cache": "warm",
+     "conditions": {
+      "wan_delay_ms": 0,
+      "cpus": 0
+     },
+     "tools": {
+      "rsync": {
+       "arm": "rsync",
+       "rev": null,
+       "flags": [
+        "-a"
+       ],
+       "seconds": 41.7277,
+       "lo": 41.5857790039851,
+       "hi": 41.87001130973628,
+       "blocks": 8
+      },
+      "xs-cpp": {
+       "arm": "xs-j4",
+       "rev": "e51c1df1329a",
+       "flags": [
+        "-a",
+        "-j4"
+       ],
+       "seconds": 30.2022,
+       "lo": 30.05573367955214,
+       "hi": 30.349397760393607,
+       "blocks": 8
+      }
+     },
+     "arms": [
+      {
+       "tool": "xs",
+       "arm": "xs",
+       "rev": "e51c1df1329a",
+       "flags": [
+        "-a"
+       ],
+       "seconds": 30.1071,
+       "lo": 29.8397588055775,
+       "hi": 30.37675955667757,
+       "blocks": 8
+      },
+      {
+       "tool": "xs",
+       "arm": "xs-j4",
+       "rev": "e51c1df1329a",
+       "flags": [
+        "-a",
+        "-j4"
+       ],
+       "seconds": 30.2022,
+       "lo": 30.05573367955214,
+       "hi": 30.349397760393607,
+       "blocks": 8
+      },
+      {
+       "tool": "xs",
+       "arm": "xs-j8",
+       "rev": "e51c1df1329a",
+       "flags": [
+        "-a",
+        "-j8"
+       ],
+       "seconds": 30.3733,
+       "lo": 30.192983857233337,
+       "hi": 30.554739502807557,
+       "blocks": 8
+      },
+      {
+       "tool": "rsync",
+       "arm": "rsync",
+       "rev": null,
+       "flags": [
+        "-a"
+       ],
+       "seconds": 41.7277,
+       "lo": 41.5857790039851,
+       "hi": 41.87001130973628,
+       "blocks": 8
+      }
+     ],
+     "cpp_over_rsync": 0.724
+    },
+    {
+     "home_corpus": "real-congress",
+     "experiment": "J2-neo-local-jobs",
+     "run": "20261020T170712Z-J2-neo-local-jobs",
+     "cell": "real-congress.fresh.neo-neo-ssd.receiver.warm",
+     "link": "neo-local-ssd",
+     "direction": "neo>neo-ssd",
+     "cache": "warm",
+     "conditions": {
+      "wan_delay_ms": 0,
+      "cpus": 0
+     },
+     "tools": {
+      "rsync": {
+       "arm": "rsync",
+       "rev": null,
+       "flags": [
+        "-a"
+       ],
+       "seconds": 35.93,
+       "lo": 35.13528175069486,
+       "hi": 36.74272192227835,
+       "blocks": 8
+      },
+      "xs-cpp": {
+       "arm": "xs-j4",
+       "rev": "e51c1df1329a",
+       "flags": [
+        "-a",
+        "-j4"
+       ],
+       "seconds": 20.4605,
+       "lo": 19.09444070317072,
+       "hi": 21.924192582160643,
+       "blocks": 8
+      }
+     },
+     "arms": [
+      {
+       "tool": "xs",
+       "arm": "xs",
+       "rev": "e51c1df1329a",
+       "flags": [
+        "-a"
+       ],
+       "seconds": 19.5275,
+       "lo": 18.212811403012633,
+       "hi": 20.936988060166115,
+       "blocks": 8
+      },
+      {
+       "tool": "xs",
+       "arm": "xs-j4",
+       "rev": "e51c1df1329a",
+       "flags": [
+        "-a",
+        "-j4"
+       ],
+       "seconds": 20.4605,
+       "lo": 19.09444070317072,
+       "hi": 21.924192582160643,
+       "blocks": 8
+      },
+      {
+       "tool": "xs",
+       "arm": "xs-j8",
+       "rev": "e51c1df1329a",
+       "flags": [
+        "-a",
+        "-j8"
+       ],
+       "seconds": 19.0737,
+       "lo": 17.974570774421686,
+       "hi": 20.239938823352457,
+       "blocks": 8
+      },
+      {
+       "tool": "rsync",
+       "arm": "rsync",
+       "rev": null,
+       "flags": [
+        "-a"
+       ],
+       "seconds": 35.93,
+       "lo": 35.13528175069486,
+       "hi": 36.74272192227835,
+       "blocks": 8
+      }
+     ],
+     "cpp_over_rsync": 0.569
+    },
+    {
+     "home_corpus": "real-congress",
+     "experiment": "E6b-mac-mars-receiver-defaults",
+     "run": "20261018T144630Z-E6b-mac-mars-receiver-defaults",
+     "cell": "real-congress.fresh.mac-mars.sender.warm",
+     "link": "mac-mars-10g",
+     "direction": "mac>mars",
+     "cache": "warm",
+     "conditions": {
+      "wan_delay_ms": 0,
+      "cpus": 0
+     },
+     "tools": {
+      "rsync": {
+       "arm": "rsync",
+       "rev": null,
+       "flags": [
+        "-aH"
+       ],
+       "seconds": 42.0227,
+       "lo": 32.418573328933505,
+       "hi": 54.47212378459976,
+       "blocks": 12
+      },
+      "xs-cpp": {
+       "arm": "xs-recv4",
+       "rev": "98b250569c69",
+       "flags": [
+        "-aH"
+       ],
+       "seconds": 9.8437,
+       "lo": 8.605372707630291,
+       "hi": 11.260334411387415,
+       "blocks": 12
+      }
+     },
+     "arms": [
+      {
+       "tool": "xs",
+       "arm": "xs",
+       "rev": "21ae6844ed20",
+       "flags": [
+        "-aH"
+       ],
+       "seconds": 9.8689,
+       "lo": 8.376531685296953,
+       "hi": 11.62706730512956,
+       "blocks": 12
+      },
+      {
+       "tool": "xs",
+       "arm": "xs-recv4",
+       "rev": "98b250569c69",
+       "flags": [
+        "-aH"
+       ],
+       "seconds": 9.8437,
+       "lo": 8.605372707630291,
+       "hi": 11.260334411387415,
+       "blocks": 12
+      },
+      {
+       "tool": "rsync",
+       "arm": "rsync",
+       "rev": null,
+       "flags": [
+        "-aH"
+       ],
+       "seconds": 42.0227,
+       "lo": 32.418573328933505,
+       "hi": 54.47212378459976,
+       "blocks": 12
+      }
+     ],
+     "cpp_over_rsync": 0.234
+    }
+   ]
+  },
+  {
+   "lab2_cell": "congress-sample.noop.a-aws.sender.warm",
+   "corpus": "congress-sample",
+   "scenario": "noop",
+   "lab2_cpp_over_rsync": 0.44,
+   "home_corpora": [
+    "real-congress"
+   ],
+   "home": [
+    {
+     "home_corpus": "real-congress",
+     "experiment": "AP10210751-AP10210749-L2P2-congress-resync-wan11-cp",
+     "run": "20261021T075213Z-AP10210751-AP10210749-L2P2-congress-resync-wan11-cp",
+     "cell": "real-congress.noop.neo-mars.sender.warm",
+     "link": "neo-mars-lan",
+     "direction": "neo>mars",
+     "cache": "warm",
+     "conditions": {
+      "wan_delay_ms": 11,
+      "cpus": 2
+     },
+     "tools": {
+      "rsync": {
+       "arm": "rsync",
+       "rev": null,
+       "flags": [
+        "-a"
+       ],
+       "seconds": 4.7558,
+       "lo": 4.647289897356641,
+       "hi": 4.866871601180177,
+       "blocks": 8
+      },
+      "xs-cpp": {
+       "arm": "xs-j4",
+       "rev": "e51c1df1329a",
+       "flags": [
+        "-a",
+        "-j4"
+       ],
+       "seconds": 1.5768,
+       "lo": 1.5114868553644605,
+       "hi": 1.6449884154314292,
+       "blocks": 8
+      }
+     },
+     "arms": [
+      {
+       "tool": "xs",
+       "arm": "xs-j4",
+       "rev": "e51c1df1329a",
+       "flags": [
+        "-a",
+        "-j4"
+       ],
+       "seconds": 1.5768,
+       "lo": 1.5114868553644605,
+       "hi": 1.6449884154314292,
+       "blocks": 8
+      },
+      {
+       "tool": "rsync",
+       "arm": "rsync",
+       "rev": null,
+       "flags": [
+        "-a"
+       ],
+       "seconds": 4.7558,
+       "lo": 4.647289897356641,
+       "hi": 4.866871601180177,
+       "blocks": 8
+      }
+     ],
+     "cpp_over_rsync": 0.332
+    },
+    {
+     "home_corpus": "real-congress",
+     "experiment": "J1d-neo-mars-jobs-real-congress",
+     "run": "20261020T170936Z-J1d-neo-mars-jobs-real-congress",
+     "cell": "real-congress.noop.mars-neo.receiver.warm",
+     "link": "neo-mars-lan",
+     "direction": "mars>neo",
+     "cache": "warm",
+     "conditions": {
+      "wan_delay_ms": 0,
+      "cpus": 0
+     },
+     "tools": {
+      "rsync": {
+       "arm": "rsync",
+       "rev": null,
+       "flags": [
+        "-a"
+       ],
+       "seconds": 8.0973,
+       "lo": 7.885280615064874,
+       "hi": 8.314986488710987,
+       "blocks": 8
+      },
+      "xs-cpp": {
+       "arm": "xs-j4",
+       "rev": "e51c1df1329a",
+       "flags": [
+        "-a",
+        "-j4"
+       ],
+       "seconds": 1.1305,
+       "lo": 1.0712575357671799,
+       "hi": 1.1929659453830392,
+       "blocks": 8
+      }
+     },
+     "arms": [
+      {
+       "tool": "xs",
+       "arm": "xs",
+       "rev": "e51c1df1329a",
+       "flags": [
+        "-a"
+       ],
+       "seconds": 1.3034,
+       "lo": 1.241938267242793,
+       "hi": 1.3678601012979976,
+       "blocks": 8
+      },
+      {
+       "tool": "xs",
+       "arm": "xs-j4",
+       "rev": "e51c1df1329a",
+       "flags": [
+        "-a",
+        "-j4"
+       ],
+       "seconds": 1.1305,
+       "lo": 1.0712575357671799,
+       "hi": 1.1929659453830392,
+       "blocks": 8
+      },
+      {
+       "tool": "xs",
+       "arm": "xs-j8",
+       "rev": "e51c1df1329a",
+       "flags": [
+        "-a",
+        "-j8"
+       ],
+       "seconds": 1.3627,
+       "lo": 1.124584788192257,
+       "hi": 1.6511988038876544,
+       "blocks": 8
+      },
+      {
+       "tool": "rsync",
+       "arm": "rsync",
+       "rev": null,
+       "flags": [
+        "-a"
+       ],
+       "seconds": 8.0973,
+       "lo": 7.885280615064874,
+       "hi": 8.314986488710987,
+       "blocks": 8
+      }
+     ],
+     "cpp_over_rsync": 0.14
+    },
+    {
+     "home_corpus": "real-congress",
+     "experiment": "J1d-neo-mars-jobs-real-congress",
+     "run": "20261020T170936Z-J1d-neo-mars-jobs-real-congress",
+     "cell": "real-congress.noop.neo-mars.sender.warm",
+     "link": "neo-mars-lan",
+     "direction": "neo>mars",
+     "cache": "warm",
+     "conditions": {
+      "wan_delay_ms": 0,
+      "cpus": 0
+     },
+     "tools": {
+      "rsync": {
+       "arm": "rsync",
+       "rev": null,
+       "flags": [
+        "-a"
+       ],
+       "seconds": 3.022,
+       "lo": 2.924061437857502,
+       "hi": 3.1231892820738545,
+       "blocks": 8
+      },
+      "xs-cpp": {
+       "arm": "xs-j4",
+       "rev": "e51c1df1329a",
+       "flags": [
+        "-a",
+        "-j4"
+       ],
+       "seconds": 1.2936,
+       "lo": 1.2599675750736177,
+       "hi": 1.3280634154787478,
+       "blocks": 8
+      }
+     },
+     "arms": [
+      {
+       "tool": "xs",
+       "arm": "xs",
+       "rev": "e51c1df1329a",
+       "flags": [
+        "-a"
+       ],
+       "seconds": 1.334,
+       "lo": 1.1989604081183298,
+       "hi": 1.4842678183315172,
+       "blocks": 8
+      },
+      {
+       "tool": "xs",
+       "arm": "xs-j4",
+       "rev": "e51c1df1329a",
+       "flags": [
+        "-a",
+        "-j4"
+       ],
+       "seconds": 1.2936,
+       "lo": 1.2599675750736177,
+       "hi": 1.3280634154787478,
+       "blocks": 8
+      },
+      {
+       "tool": "xs",
+       "arm": "xs-j8",
+       "rev": "e51c1df1329a",
+       "flags": [
+        "-a",
+        "-j8"
+       ],
+       "seconds": 1.0417,
+       "lo": 0.9973576692401829,
+       "hi": 1.0881075424788398,
+       "blocks": 8
+      },
+      {
+       "tool": "rsync",
+       "arm": "rsync",
+       "rev": null,
+       "flags": [
+        "-a"
+       ],
+       "seconds": 3.022,
+       "lo": 2.924061437857502,
+       "hi": 3.1231892820738545,
+       "blocks": 8
+      }
+     ],
+     "cpp_over_rsync": 0.428
+    },
+    {
+     "home_corpus": "real-congress",
+     "experiment": "J2-neo-local-jobs",
+     "run": "20261020T170712Z-J2-neo-local-jobs",
+     "cell": "real-congress.noop.neo-neo-ssd.receiver.warm",
+     "link": "neo-local-ssd",
+     "direction": "neo>neo-ssd",
+     "cache": "warm",
+     "conditions": {
+      "wan_delay_ms": 0,
+      "cpus": 0
+     },
+     "tools": {
+      "rsync": {
+       "arm": "rsync",
+       "rev": null,
+       "flags": [
+        "-a"
+       ],
+       "seconds": 7.5024,
+       "lo": 7.006936849491774,
+       "hi": 8.032907607102379,
+       "blocks": 8
+      },
+      "xs-cpp": {
+       "arm": "xs-j4",
+       "rev": "e51c1df1329a",
+       "flags": [
+        "-a",
+        "-j4"
+       ],
+       "seconds": 1.5517,
+       "lo": 1.4565683057103382,
+       "hi": 1.6530733217359144,
+       "blocks": 8
+      }
+     },
+     "arms": [
+      {
+       "tool": "xs",
+       "arm": "xs",
+       "rev": "e51c1df1329a",
+       "flags": [
+        "-a"
+       ],
+       "seconds": 1.6119,
+       "lo": 1.482908308660538,
+       "hi": 1.7522181413745346,
+       "blocks": 8
+      },
+      {
+       "tool": "xs",
+       "arm": "xs-j4",
+       "rev": "e51c1df1329a",
+       "flags": [
+        "-a",
+        "-j4"
+       ],
+       "seconds": 1.5517,
+       "lo": 1.4565683057103382,
+       "hi": 1.6530733217359144,
+       "blocks": 8
+      },
+      {
+       "tool": "xs",
+       "arm": "xs-j8",
+       "rev": "e51c1df1329a",
+       "flags": [
+        "-a",
+        "-j8"
+       ],
+       "seconds": 1.5714,
+       "lo": 1.464940770964262,
+       "hi": 1.6855776406415972,
+       "blocks": 8
+      },
+      {
+       "tool": "rsync",
+       "arm": "rsync",
+       "rev": null,
+       "flags": [
+        "-a"
+       ],
+       "seconds": 7.5024,
+       "lo": 7.006936849491774,
+       "hi": 8.032907607102379,
+       "blocks": 8
+      }
+     ],
+     "cpp_over_rsync": 0.207
+    },
+    {
+     "home_corpus": "real-congress",
+     "experiment": "E6b-mac-mars-receiver-defaults",
+     "run": "20261018T144630Z-E6b-mac-mars-receiver-defaults",
+     "cell": "real-congress.noop.mac-mars.sender.warm",
+     "link": "mac-mars-10g",
+     "direction": "mac>mars",
+     "cache": "warm",
+     "conditions": {
+      "wan_delay_ms": 0,
+      "cpus": 0
+     },
+     "tools": {
+      "rsync": {
+       "arm": "rsync",
+       "rev": null,
+       "flags": [
+        "-aH"
+       ],
+       "seconds": 7.6228,
+       "lo": 5.786786847495563,
+       "hi": 10.041226858492355,
+       "blocks": 12
+      },
+      "xs-cpp": {
+       "arm": "xs-recv4",
+       "rev": "98b250569c69",
+       "flags": [
+        "-aH"
+       ],
+       "seconds": 1.8347,
+       "lo": 1.526199765422898,
+       "hi": 2.2055005974923856,
+       "blocks": 12
+      }
+     },
+     "arms": [
+      {
+       "tool": "xs",
+       "arm": "xs",
+       "rev": "21ae6844ed20",
+       "flags": [
+        "-aH"
+       ],
+       "seconds": 1.9128,
+       "lo": 1.58255420757756,
+       "hi": 2.311929685010378,
+       "blocks": 12
+      },
+      {
+       "tool": "xs",
+       "arm": "xs-recv4",
+       "rev": "98b250569c69",
+       "flags": [
+        "-aH"
+       ],
+       "seconds": 1.8347,
+       "lo": 1.526199765422898,
+       "hi": 2.2055005974923856,
+       "blocks": 12
+      },
+      {
+       "tool": "rsync",
+       "arm": "rsync",
+       "rev": null,
+       "flags": [
+        "-aH"
+       ],
+       "seconds": 7.6228,
+       "lo": 5.786786847495563,
+       "hi": 10.041226858492355,
+       "blocks": 12
+      }
+     ],
+     "cpp_over_rsync": 0.241
+    },
+    {
+     "home_corpus": "real-congress",
+     "experiment": "E6b-mac-mars-receiver-defaults",
+     "run": "20261018T144630Z-E6b-mac-mars-receiver-defaults",
+     "cell": "real-congress.noop.mars-mac.receiver.warm",
+     "link": "mac-mars-10g",
+     "direction": "mars>mac",
+     "cache": "warm",
+     "conditions": {
+      "wan_delay_ms": 0,
+      "cpus": 0
+     },
+     "tools": {
+      "rsync": {
+       "arm": "rsync",
+       "rev": null,
+       "flags": [
+        "-aH"
+       ],
+       "seconds": 5.6727,
+       "lo": 4.586912466816595,
+       "hi": 7.015537106793871,
+       "blocks": 12
+      },
+      "xs-cpp": {
+       "arm": "xs",
+       "rev": "21ae6844ed20",
+       "flags": [
+        "-aH"
+       ],
+       "seconds": 4.0689,
+       "lo": 3.4658296165986484,
+       "hi": 4.776974124357548,
+       "blocks": 12
+      }
+     },
+     "arms": [
+      {
+       "tool": "xs",
+       "arm": "xs",
+       "rev": "21ae6844ed20",
+       "flags": [
+        "-aH"
+       ],
+       "seconds": 4.0689,
+       "lo": 3.4658296165986484,
+       "hi": 4.776974124357548,
+       "blocks": 12
+      },
+      {
+       "tool": "xs",
+       "arm": "xs-recv4",
+       "rev": "98b250569c69",
+       "flags": [
+        "-aH"
+       ],
+       "seconds": 4.171,
+       "lo": 3.355393351360054,
+       "hi": 5.184896844258986,
+       "blocks": 12
+      },
+      {
+       "tool": "rsync",
+       "arm": "rsync",
+       "rev": null,
+       "flags": [
+        "-aH"
+       ],
+       "seconds": 5.6727,
+       "lo": 4.586912466816595,
+       "hi": 7.015537106793871,
+       "blocks": 12
+      }
+     ],
+     "cpp_over_rsync": 0.717
+    },
+    {
+     "home_corpus": "real-congress",
+     "experiment": "D10-lan-noop-best",
+     "run": "20261017T174642Z-D10-lan-noop-best",
+     "cell": "real-congress.noop.freya-neo.sender.warm",
+     "link": "lan",
+     "direction": "freya>neo",
+     "cache": "warm",
+     "conditions": {
+      "wan_delay_ms": 0,
+      "cpus": 0
+     },
+     "tools": {
+      "rsync": {
+       "arm": "rsync",
+       "rev": null,
+       "flags": [
+        "-a"
+       ],
+       "seconds": 5.4209,
+       "lo": null,
+       "hi": null,
+       "blocks": 1
+      },
+      "xs-cpp": {
+       "arm": "xs",
+       "rev": "453704a64528-tune",
+       "flags": [
+        "-a"
+       ],
+       "seconds": 1.0638,
+       "lo": null,
+       "hi": null,
+       "blocks": 1
+      }
+     },
+     "arms": [
+      {
+       "tool": "xs",
+       "arm": "xs",
+       "rev": "453704a64528-tune",
+       "flags": [
+        "-a"
+       ],
+       "seconds": 1.0638,
+       "lo": null,
+       "hi": null,
+       "blocks": 1
+      },
+      {
+       "tool": "xs",
+       "arm": "xs-best",
+       "rev": "453704a64528-tune",
+       "flags": [
+        "-a",
+        "--no-atomic"
+       ],
+       "seconds": 1.0981,
+       "lo": null,
+       "hi": null,
+       "blocks": 1
+      },
+      {
+       "tool": "rsync",
+       "arm": "rsync",
+       "rev": null,
+       "flags": [
+        "-a"
+       ],
+       "seconds": 5.4209,
+       "lo": null,
+       "hi": null,
+       "blocks": 1
+      }
+     ],
+     "cpp_over_rsync": 0.196
+    },
+    {
+     "home_corpus": "real-congress",
+     "experiment": "D10-lan-noop-best",
+     "run": "20261017T174642Z-D10-lan-noop-best",
+     "cell": "real-congress.noop.neo-freya.sender.warm",
+     "link": "lan",
+     "direction": "neo>freya",
+     "cache": "warm",
+     "conditions": {
+      "wan_delay_ms": 0,
+      "cpus": 0
+     },
+     "tools": {
+      "rsync": {
+       "arm": "rsync",
+       "rev": null,
+       "flags": [
+        "-a"
+       ],
+       "seconds": 2.2866,
+       "lo": 2.065868204018596,
+       "hi": 2.531009715862773,
+       "blocks": 8
+      },
+      "xs-cpp": {
+       "arm": "xs-best",
+       "rev": "453704a64528-tune",
+       "flags": [
+        "-a",
+        "--no-atomic"
+       ],
+       "seconds": 0.8544,
+       "lo": 0.8050067767730971,
+       "hi": 0.9067871919682697,
+       "blocks": 8
+      }
+     },
+     "arms": [
+      {
+       "tool": "xs",
+       "arm": "xs",
+       "rev": "453704a64528-tune",
+       "flags": [
+        "-a"
+       ],
+       "seconds": 1.1114,
+       "lo": 1.001441365817406,
+       "hi": 1.233542171849717,
+       "blocks": 8
+      },
+      {
+       "tool": "xs",
+       "arm": "xs-best",
+       "rev": "453704a64528-tune",
+       "flags": [
+        "-a",
+        "--no-atomic"
+       ],
+       "seconds": 0.8544,
+       "lo": 0.8050067767730971,
+       "hi": 0.9067871919682697,
+       "blocks": 8
+      },
+      {
+       "tool": "rsync",
+       "arm": "rsync",
+       "rev": null,
+       "flags": [
+        "-a"
+       ],
+       "seconds": 2.2866,
+       "lo": 2.065868204018596,
+       "hi": 2.531009715862773,
+       "blocks": 8
+      }
+     ],
+     "cpp_over_rsync": 0.374
+    }
+   ]
+  },
+  {
+   "lab2_cell": "congress-sample.update-10pct.a-aws.sender.warm",
+   "corpus": "congress-sample",
+   "scenario": "update-10pct",
+   "lab2_cpp_over_rsync": 0.955,
+   "home_corpora": [
+    "real-congress"
+   ],
+   "home": []
+  },
+  {
+   "lab2_cell": "real-projects.fresh.a-aws.sender.warm",
+   "corpus": "real-projects",
+   "scenario": "fresh",
+   "lab2_cpp_over_rsync": 1.461,
+   "home_corpora": [
+    "small-real",
+    "real-psample"
+   ],
+   "home": [
+    {
+     "home_corpus": "real-psample",
+     "experiment": "LC12-local-anchors",
+     "run": "20261019T132845Z-LC12-local-anchors",
+     "cell": "real-psample.fresh.neo-neo-ssd.receiver.cold",
+     "link": "neo-local-ssd",
+     "direction": "neo>neo-ssd",
+     "cache": "cold",
+     "conditions": {
+      "wan_delay_ms": 0,
+      "cpus": 0
+     },
+     "tools": {
+      "rsync": {
+       "arm": "rsync",
+       "rev": null,
+       "flags": [
+        "-aH"
+       ],
+       "seconds": 209.2881,
+       "lo": 206.01127613518625,
+       "hi": 212.61702052394554,
+       "blocks": 6
+      },
+      "xs-cpp": {
+       "arm": "xs",
+       "rev": "21ae6844ed20",
+       "flags": [
+        "-aH"
+       ],
+       "seconds": 232.0919,
+       "lo": 222.68994530131172,
+       "hi": 241.89090355187312,
+       "blocks": 6
+      }
+     },
+     "arms": [
+      {
+       "tool": "rsync",
+       "arm": "rsync",
+       "rev": null,
+       "flags": [
+        "-aH"
+       ],
+       "seconds": 209.2881,
+       "lo": 206.01127613518625,
+       "hi": 212.61702052394554,
+       "blocks": 6
+      },
+      {
+       "tool": "xs",
+       "arm": "xs",
+       "rev": "21ae6844ed20",
+       "flags": [
+        "-aH"
+       ],
+       "seconds": 232.0919,
+       "lo": 222.68994530131172,
+       "hi": 241.89090355187312,
+       "blocks": 6
+      },
+      {
+       "tool": "xs",
+       "arm": "xs-anchors",
+       "rev": "e51c1df1329a",
+       "flags": [
+        "-aH"
+       ],
+       "seconds": 243.897,
+       "lo": 219.28477534347823,
+       "hi": 271.27167800930255,
+       "blocks": 6
+      }
+     ],
+     "cpp_over_rsync": 1.109
+    },
+    {
+     "home_corpus": "real-psample",
+     "experiment": "AP10191250-LC9-local-eager-vs-rsync-eager",
+     "run": "20261019T125032Z-AP10191250-LC9-local-eager-vs-rsync-eager",
+     "cell": "real-psample.fresh.neo-neo-ssd.receiver.cold",
+     "link": "neo-local-ssd",
+     "direction": "neo>neo-ssd",
+     "cache": "cold",
+     "conditions": {
+      "wan_delay_ms": 0,
+      "cpus": 0
+     },
+     "tools": {
+      "rsync": {
+       "arm": "rsync-eager",
+       "rev": null,
+       "flags": [
+        "-aH"
+       ],
+       "seconds": 180.4961,
+       "lo": 178.52677137270126,
+       "hi": 182.48709694373073,
+       "blocks": 6
+      },
+      "xs-cpp": {
+       "arm": "xs-eager",
+       "rev": "dd6f5121d506",
+       "flags": [
+        "-aH"
+       ],
+       "seconds": 139.1952,
+       "lo": 137.47051703974873,
+       "hi": 140.94148778219667,
+       "blocks": 6
+      }
+     },
+     "arms": [
+      {
+       "tool": "rsync",
+       "arm": "rsync-eager",
+       "rev": null,
+       "flags": [
+        "-aH"
+       ],
+       "seconds": 180.4961,
+       "lo": 178.52677137270126,
+       "hi": 182.48709694373073,
+       "blocks": 6
+      },
+      {
+       "tool": "xs",
+       "arm": "xs-eager",
+       "rev": "dd6f5121d506",
+       "flags": [
+        "-aH"
+       ],
+       "seconds": 139.1952,
+       "lo": 137.47051703974873,
+       "hi": 140.94148778219667,
+       "blocks": 6
+      }
+     ],
+     "cpp_over_rsync": 0.771
+    },
+    {
+     "home_corpus": "real-psample",
+     "experiment": "LC6-local-beat-rsync",
+     "run": "20261018T224648Z-LC6-local-beat-rsync",
+     "cell": "real-psample.fresh.neo-neo-ssd.receiver.cold",
+     "link": "neo-local-ssd",
+     "direction": "neo>neo-ssd",
+     "cache": "cold",
+     "conditions": {
+      "wan_delay_ms": 0,
+      "cpus": 0
+     },
+     "tools": {
+      "rsync": {
+       "arm": "rsync",
+       "rev": null,
+       "flags": [
+        "-aH"
+       ],
+       "seconds": 210.6037,
+       "lo": 206.57956091713191,
+       "hi": 214.70614055567523,
+       "blocks": 4
+      },
+      "xs-cpp": {
+       "arm": "xs-j3",
+       "rev": "21ae6844ed20",
+       "flags": [
+        "-aH",
+        "-j3"
+       ],
+       "seconds": 220.8221,
+       "lo": 202.5291982813316,
+       "hi": 240.76723952301768,
+       "blocks": 4
+      }
+     },
+     "arms": [
+      {
+       "tool": "rsync",
+       "arm": "rsync",
+       "rev": null,
+       "flags": [
+        "-aH"
+       ],
+       "seconds": 210.6037,
+       "lo": 206.57956091713191,
+       "hi": 214.70614055567523,
+       "blocks": 4
+      },
+      {
+       "tool": "xs",
+       "arm": "xs",
+       "rev": "21ae6844ed20",
+       "flags": [
+        "-aH"
+       ],
+       "seconds": 226.8777,
+       "lo": 194.40288939009423,
+       "hi": 264.7774734399921,
+       "blocks": 4
+      },
+      {
+       "tool": "xs",
+       "arm": "xs-j2",
+       "rev": "21ae6844ed20",
+       "flags": [
+        "-aH",
+        "-j2"
+       ],
+       "seconds": 228.5858,
+       "lo": 219.10814906320067,
+       "hi": 238.473351538991,
+       "blocks": 4
+      },
+      {
+       "tool": "xs",
+       "arm": "xs-j3",
+       "rev": "21ae6844ed20",
+       "flags": [
+        "-aH",
+        "-j3"
+       ],
+       "seconds": 220.8221,
+       "lo": 202.5291982813316,
+       "hi": 240.76723952301768,
+       "blocks": 4
+      },
+      {
+       "tool": "xs",
+       "arm": "xs-guard-j2",
+       "rev": "dd6f5121d506",
+       "flags": [
+        "-aH",
+        "-j2"
+       ],
+       "seconds": 227.2554,
+       "lo": 213.19116421099469,
+       "hi": 242.2475101385125,
+       "blocks": 4
+      },
+      {
+       "tool": "xs",
+       "arm": "xs-guard-j3",
+       "rev": "dd6f5121d506",
+       "flags": [
+        "-aH",
+        "-j3"
+       ],
+       "seconds": 232.1804,
+       "lo": 195.71985388147883,
+       "hi": 275.43312859912606,
+       "blocks": 4
+      }
+     ],
+     "cpp_over_rsync": 1.049
+    },
+    {
+     "home_corpus": "real-psample",
+     "experiment": "LC3-psample-local-durable",
+     "run": "20261018T215452Z-LC3-psample-local-durable",
+     "cell": "real-psample.fresh.neo-neo-ssd.receiver.cold",
+     "link": "neo-local-ssd",
+     "direction": "neo>neo-ssd",
+     "cache": "cold",
+     "conditions": {
+      "wan_delay_ms": 0,
+      "cpus": 0
+     },
+     "tools": {
+      "rsync": {
+       "arm": "rsync",
+       "rev": null,
+       "flags": [
+        "-aH"
+       ],
+       "seconds": 212.3261,
+       "lo": 207.65570271771787,
+       "hi": 217.10161901251703,
+       "blocks": 4
+      },
+      "xs-cpp": {
+       "arm": "xs-eager",
+       "rev": "21ae6844ed20",
+       "flags": [
+        "-aH"
+       ],
+       "seconds": 140.1999,
+       "lo": 137.47766123776853,
+       "hi": 142.97608567900957,
+       "blocks": 4
+      }
+     },
+     "arms": [
+      {
+       "tool": "xs",
+       "arm": "xs",
+       "rev": "21ae6844ed20",
+       "flags": [
+        "-aH"
+       ],
+       "seconds": 226.7765,
+       "lo": 208.14784759149083,
+       "hi": 247.0722799629913,
+       "blocks": 4
+      },
+      {
+       "tool": "xs",
+       "arm": "xs-eager",
+       "rev": "21ae6844ed20",
+       "flags": [
+        "-aH"
+       ],
+       "seconds": 140.1999,
+       "lo": 137.47766123776853,
+       "hi": 142.97608567900957,
+       "blocks": 4
+      },
+      {
+       "tool": "xs",
+       "arm": "xs-noatomic",
+       "rev": "21ae6844ed20",
+       "flags": [
+        "-aH",
+        "--no-atomic"
+       ],
+       "seconds": 219.411,
+       "lo": 198.68590369653685,
+       "hi": 242.29784900925765,
+       "blocks": 4
+      },
+      {
+       "tool": "rsync",
+       "arm": "rsync",
+       "rev": null,
+       "flags": [
+        "-aH"
+       ],
+       "seconds": 212.3261,
+       "lo": 207.65570271771787,
+       "hi": 217.10161901251703,
+       "blocks": 4
+      },
+      {
+       "tool": "rsync",
+       "arm": "rsync-eager",
+       "rev": null,
+       "flags": [
+        "-aH"
+       ],
+       "seconds": 182.2696,
+       "lo": 180.46683349166008,
+       "hi": 184.09027441921347,
+       "blocks": 4
+      }
+     ],
+     "cpp_over_rsync": 0.66
+    },
+    {
+     "home_corpus": "real-psample",
+     "experiment": "LC1-psample-local-baseline",
+     "run": "20261018T184002Z-LC1-psample-local-baseline",
+     "cell": "real-psample.fresh.neo-neo-ssd.receiver.cold",
+     "link": "neo-local-ssd",
+     "direction": "neo>neo-ssd",
+     "cache": "cold",
+     "conditions": {
+      "wan_delay_ms": 0,
+      "cpus": 0
+     },
+     "tools": {
+      "rsync": {
+       "arm": "rsync",
+       "rev": null,
+       "flags": [
+        "-aH"
+       ],
+       "seconds": 212.1793,
+       "lo": 209.0080870231628,
+       "hi": 215.39858536835402,
+       "blocks": 4
+      },
+      "xs-cpp": {
+       "arm": "xs",
+       "rev": "21ae6844ed20",
+       "flags": [
+        "-aH"
+       ],
+       "seconds": 237.914,
+       "lo": 214.5544745359616,
+       "hi": 263.81684135955845,
+       "blocks": 4
+      }
+     },
+     "arms": [
+      {
+       "tool": "rsync",
+       "arm": "rsync",
+       "rev": null,
+       "flags": [
+        "-aH"
+       ],
+       "seconds": 212.1793,
+       "lo": 209.0080870231628,
+       "hi": 215.39858536835402,
+       "blocks": 4
+      },
+      {
+       "tool": "xs",
+       "arm": "xs",
+       "rev": "21ae6844ed20",
+       "flags": [
+        "-aH"
+       ],
+       "seconds": 237.914,
+       "lo": 214.5544745359616,
+       "hi": 263.81684135955845,
+       "blocks": 4
+      },
+      {
+       "tool": "cp",
+       "arm": "cp-a",
+       "rev": null,
+       "flags": [
+        "-a"
+       ],
+       "seconds": 245.1392,
+       "lo": 238.11370361956145,
+       "hi": 252.37198272406556,
+       "blocks": 4
+      },
+      {
+       "tool": "cp",
+       "arm": "cp-r",
+       "rev": null,
+       "flags": [
+        "-r"
+       ],
+       "seconds": 243.1924,
+       "lo": 233.99420032660367,
+       "hi": 252.75221513172,
+       "blocks": 4
+      },
+      {
+       "tool": "pipe",
+       "arm": "tar",
+       "rev": null,
+       "flags": [],
+       "seconds": 265.4283,
+       "lo": 250.37569296958148,
+       "hi": 281.3859643076896,
+       "blocks": 4
+      }
+     ],
+     "cpp_over_rsync": 1.121
+    },
+    {
+     "home_corpus": "real-psample",
+     "experiment": "MA3-psample-confirm",
+     "run": "20261018T045434Z-MA3-psample-confirm",
+     "cell": "real-psample.fresh.mac-mars.sender.warm",
+     "link": "mac-mars-10g",
+     "direction": "mac>mars",
+     "cache": "warm",
+     "conditions": {
+      "wan_delay_ms": 0,
+      "cpus": 0
+     },
+     "tools": {
+      "rsync": {
+       "arm": "rsync",
+       "rev": null,
+       "flags": [
+        "-aH"
+       ],
+       "seconds": 230.5733,
+       "lo": 218.9441440206545,
+       "hi": 242.82010227006262,
+       "blocks": 12
+      },
+      "xs-cpp": {
+       "arm": "xs",
+       "rev": "8cc75bbdb801",
+       "flags": [
+        "-aH"
+       ],
+       "seconds": 62.44,
+       "lo": 54.56581300942217,
+       "hi": 71.4503966500775,
+       "blocks": 12
+      }
+     },
+     "arms": [
+      {
+       "tool": "rsync",
+       "arm": "rsync",
+       "rev": null,
+       "flags": [
+        "-aH"
+       ],
+       "seconds": 230.5733,
+       "lo": 218.9441440206545,
+       "hi": 242.82010227006262,
+       "blocks": 12
+      },
+      {
+       "tool": "xs",
+       "arm": "xs",
+       "rev": "8cc75bbdb801",
+       "flags": [
+        "-aH"
+       ],
+       "seconds": 62.44,
+       "lo": 54.56581300942217,
+       "hi": 71.4503966500775,
+       "blocks": 12
+      }
+     ],
+     "cpp_over_rsync": 0.271
+    },
+    {
+     "home_corpus": "real-psample",
+     "experiment": "MA3-psample-confirm",
+     "run": "20261018T045434Z-MA3-psample-confirm",
+     "cell": "real-psample.fresh.mars-mac.receiver.warm",
+     "link": "mac-mars-10g",
+     "direction": "mars>mac",
+     "cache": "warm",
+     "conditions": {
+      "wan_delay_ms": 0,
+      "cpus": 0
+     },
+     "tools": {
+      "rsync": {
+       "arm": "rsync",
+       "rev": null,
+       "flags": [
+        "-aH"
+       ],
+       "seconds": 405.2016,
+       "lo": 345.4003478671722,
+       "hi": 475.3566510377824,
+       "blocks": 12
+      },
+      "xs-cpp": {
+       "arm": "xs",
+       "rev": "8cc75bbdb801",
+       "flags": [
+        "-aH"
+       ],
+       "seconds": 266.7265,
+       "lo": 254.8811011813936,
+       "hi": 279.12235208894964,
+       "blocks": 12
+      }
+     },
+     "arms": [
+      {
+       "tool": "rsync",
+       "arm": "rsync",
+       "rev": null,
+       "flags": [
+        "-aH"
+       ],
+       "seconds": 405.2016,
+       "lo": 345.4003478671722,
+       "hi": 475.3566510377824,
+       "blocks": 12
+      },
+      {
+       "tool": "xs",
+       "arm": "xs",
+       "rev": "8cc75bbdb801",
+       "flags": [
+        "-aH"
+       ],
+       "seconds": 266.7265,
+       "lo": 254.8811011813936,
+       "hi": 279.12235208894964,
+       "blocks": 12
+      }
+     ],
+     "cpp_over_rsync": 0.658
+    },
+    {
+     "home_corpus": "real-psample",
+     "experiment": "MA3-psample-bidir",
+     "run": "20261017T185527Z-MA3-psample-bidir",
+     "cell": "real-psample.fresh.mac-mars.sender.warm",
+     "link": "mac-mars-2g5",
+     "direction": "mac>mars",
+     "cache": "warm",
+     "conditions": {
+      "wan_delay_ms": 0,
+      "cpus": 0
+     },
+     "tools": {
+      "rsync": {
+       "arm": "rsync",
+       "rev": null,
+       "flags": [
+        "-aH"
+       ],
+       "seconds": 224.07,
+       "lo": 209.58243157256197,
+       "hi": 239.55909765276084,
+       "blocks": 6
+      },
+      "xs-cpp": {
+       "arm": "xs-z",
+       "rev": "8cc75bbdb801",
+       "flags": [
+        "-aHz"
+       ],
+       "seconds": 66.8884,
+       "lo": 48.174803603056056,
+       "hi": 92.87143642319751,
+       "blocks": 6
+      }
+     },
+     "arms": [
+      {
+       "tool": "rsync",
+       "arm": "rsync",
+       "rev": null,
+       "flags": [
+        "-aH"
+       ],
+       "seconds": 224.07,
+       "lo": 209.58243157256197,
+       "hi": 239.55909765276084,
+       "blocks": 6
+      },
+      {
+       "tool": "rsync",
+       "arm": "rsync-z",
+       "rev": null,
+       "flags": [
+        "-aHz"
+       ],
+       "seconds": 245.1854,
+       "lo": 230.17363985570145,
+       "hi": 261.1762764028073,
+       "blocks": 6
+      },
+      {
+       "tool": "xs",
+       "arm": "xs",
+       "rev": "8cc75bbdb801",
+       "flags": [
+        "-aH"
+       ],
+       "seconds": 75.1955,
+       "lo": 55.36501906279875,
+       "hi": 102.12876182178263,
+       "blocks": 6
+      },
+      {
+       "tool": "xs",
+       "arm": "xs-z",
+       "rev": "8cc75bbdb801",
+       "flags": [
+        "-aHz"
+       ],
+       "seconds": 66.8884,
+       "lo": 48.174803603056056,
+       "hi": 92.87143642319751,
+       "blocks": 6
+      },
+      {
+       "tool": "rsync",
+       "arm": "rsync",
+       "rev": null,
+       "flags": [
+        "-aH"
+       ],
+       "seconds": 308.6534,
+       "lo": 212.10329860727862,
+       "hi": 449.153317316636,
+       "blocks": 4
+      },
+      {
+       "tool": "xs",
+       "arm": "xs",
+       "rev": "8cc75bbdb801",
+       "flags": [
+        "-aH"
+       ],
+       "seconds": 84.7604,
+       "lo": 54.22306343301227,
+       "hi": 132.49566316052565,
+       "blocks": 4
+      }
+     ],
+     "cpp_over_rsync": 0.299
+    }
+   ]
+  },
+  {
+   "lab2_cell": "real-projects.noop.a-aws.sender.warm",
+   "corpus": "real-projects",
+   "scenario": "noop",
+   "lab2_cpp_over_rsync": 0.476,
+   "home_corpora": [
+    "small-real",
+    "real-psample"
+   ],
+   "home": [
+    {
+     "home_corpus": "real-psample",
+     "experiment": "OS1b-neo-mars-psample-noop",
+     "run": "20261020T170939Z-OS1b-neo-mars-psample-noop",
+     "cell": "real-psample.noop.mars-neo.receiver.warm",
+     "link": "neo-mars-lan",
+     "direction": "mars>neo",
+     "cache": "warm",
+     "conditions": {
+      "wan_delay_ms": 0,
+      "cpus": 0
+     },
+     "tools": {
+      "rsync": {
+       "arm": "rsync",
+       "rev": null,
+       "flags": [
+        "-aH"
+       ],
+       "seconds": 106.4319,
+       "lo": 102.68986241093786,
+       "hi": 110.31023560739452,
+       "blocks": 5
+      },
+      "xs-cpp": {
+       "arm": "xs",
+       "rev": "e51c1df1329a",
+       "flags": [
+        "-aH"
+       ],
+       "seconds": 18.5369,
+       "lo": 16.854259756842506,
+       "hi": 20.38749235226369,
+       "blocks": 5
+      }
+     },
+     "arms": [
+      {
+       "tool": "xs",
+       "arm": "xs-parent",
+       "rev": "21ae6844ed20",
+       "flags": [
+        "-aH"
+       ],
+       "seconds": 19.6806,
+       "lo": 18.342535690848486,
+       "hi": 21.116374650672558,
+       "blocks": 5
+      },
+      {
+       "tool": "xs",
+       "arm": "xs",
+       "rev": "e51c1df1329a",
+       "flags": [
+        "-aH"
+       ],
+       "seconds": 18.5369,
+       "lo": 16.854259756842506,
+       "hi": 20.38749235226369,
+       "blocks": 5
+      },
+      {
+       "tool": "rsync",
+       "arm": "rsync",
+       "rev": null,
+       "flags": [
+        "-aH"
+       ],
+       "seconds": 106.4319,
+       "lo": 102.68986241093786,
+       "hi": 110.31023560739452,
+       "blocks": 5
+      }
+     ],
+     "cpp_over_rsync": 0.174
+    },
+    {
+     "home_corpus": "real-psample",
+     "experiment": "OS1b-neo-mars-psample-noop",
+     "run": "20261020T170939Z-OS1b-neo-mars-psample-noop",
+     "cell": "real-psample.noop.neo-mars.sender.warm",
+     "link": "neo-mars-lan",
+     "direction": "neo>mars",
+     "cache": "warm",
+     "conditions": {
+      "wan_delay_ms": 0,
+      "cpus": 0
+     },
+     "tools": {
+      "rsync": {
+       "arm": "rsync",
+       "rev": null,
+       "flags": [
+        "-aH"
+       ],
+       "seconds": 34.3234,
+       "lo": 33.22194676131323,
+       "hi": 35.46145825213638,
+       "blocks": 6
+      },
+      "xs-cpp": {
+       "arm": "xs",
+       "rev": "e51c1df1329a",
+       "flags": [
+        "-aH"
+       ],
+       "seconds": 14.1328,
+       "lo": 13.287600403285683,
+       "hi": 15.031832897972738,
+       "blocks": 6
+      }
+     },
+     "arms": [
+      {
+       "tool": "xs",
+       "arm": "xs-parent",
+       "rev": "21ae6844ed20",
+       "flags": [
+        "-aH"
+       ],
+       "seconds": 25.1574,
+       "lo": 21.121872741719343,
+       "hi": 29.96393156204426,
+       "blocks": 6
+      },
+      {
+       "tool": "xs",
+       "arm": "xs",
+       "rev": "e51c1df1329a",
+       "flags": [
+        "-aH"
+       ],
+       "seconds": 14.1328,
+       "lo": 13.287600403285683,
+       "hi": 15.031832897972738,
+       "blocks": 6
+      },
+      {
+       "tool": "rsync",
+       "arm": "rsync",
+       "rev": null,
+       "flags": [
+        "-aH"
+       ],
+       "seconds": 34.3234,
+       "lo": 33.22194676131323,
+       "hi": 35.46145825213638,
+       "blocks": 6
+      }
+     ],
+     "cpp_over_rsync": 0.412
+    },
+    {
+     "home_corpus": "real-psample",
+     "experiment": "LC12-local-anchors",
+     "run": "20261019T132845Z-LC12-local-anchors",
+     "cell": "real-psample.noop.neo-neo-ssd.receiver.cold",
+     "link": "neo-local-ssd",
+     "direction": "neo>neo-ssd",
+     "cache": "cold",
+     "conditions": {
+      "wan_delay_ms": 0,
+      "cpus": 0
+     },
+     "tools": {
+      "rsync": {
+       "arm": "rsync",
+       "rev": null,
+       "flags": [
+        "-aH"
+       ],
+       "seconds": 124.4509,
+       "lo": 123.85974327575659,
+       "hi": 125.04494078187892,
+       "blocks": 6
+      },
+      "xs-cpp": {
+       "arm": "xs",
+       "rev": "21ae6844ed20",
+       "flags": [
+        "-aH"
+       ],
+       "seconds": 63.1458,
+       "lo": 61.66026937956223,
+       "hi": 64.66703439581771,
+       "blocks": 6
+      }
+     },
+     "arms": [
+      {
+       "tool": "rsync",
+       "arm": "rsync",
+       "rev": null,
+       "flags": [
+        "-aH"
+       ],
+       "seconds": 124.4509,
+       "lo": 123.85974327575659,
+       "hi": 125.04494078187892,
+       "blocks": 6
+      },
+      {
+       "tool": "xs",
+       "arm": "xs",
+       "rev": "21ae6844ed20",
+       "flags": [
+        "-aH"
+       ],
+       "seconds": 63.1458,
+       "lo": 61.66026937956223,
+       "hi": 64.66703439581771,
+       "blocks": 6
+      },
+      {
+       "tool": "xs",
+       "arm": "xs-anchors",
+       "rev": "e51c1df1329a",
+       "flags": [
+        "-aH"
+       ],
+       "seconds": 63.6038,
+       "lo": 62.31896947622581,
+       "hi": 64.91519873114233,
+       "blocks": 6
+      }
+     ],
+     "cpp_over_rsync": 0.507
+    },
+    {
+     "home_corpus": "real-psample",
+     "experiment": "LC4-psample-local-resync",
+     "run": "20261018T215454Z-LC4-psample-local-resync",
+     "cell": "real-psample.noop.neo-neo-ssd.receiver.cold",
+     "link": "neo-local-ssd",
+     "direction": "neo>neo-ssd",
+     "cache": "cold",
+     "conditions": {
+      "wan_delay_ms": 0,
+      "cpus": 0
+     },
+     "tools": {
+      "rsync": {
+       "arm": "rsync",
+       "rev": null,
+       "flags": [
+        "-aH"
+       ],
+       "seconds": 126.1676,
+       "lo": 125.37558633697455,
+       "hi": 126.96454872957553,
+       "blocks": 6
+      },
+      "xs-cpp": {
+       "arm": "xs",
+       "rev": "21ae6844ed20",
+       "flags": [
+        "-aH"
+       ],
+       "seconds": 65.6607,
+       "lo": 65.32228360855213,
+       "hi": 66.00085380016614,
+       "blocks": 6
+      }
+     },
+     "arms": [
+      {
+       "tool": "rsync",
+       "arm": "rsync",
+       "rev": null,
+       "flags": [
+        "-aH"
+       ],
+       "seconds": 126.1676,
+       "lo": 125.37558633697455,
+       "hi": 126.96454872957553,
+       "blocks": 6
+      },
+      {
+       "tool": "xs",
+       "arm": "xs",
+       "rev": "21ae6844ed20",
+       "flags": [
+        "-aH"
+       ],
+       "seconds": 65.6607,
+       "lo": 65.32228360855213,
+       "hi": 66.00085380016614,
+       "blocks": 6
+      }
+     ],
+     "cpp_over_rsync": 0.52
+    },
+    {
+     "home_corpus": "real-psample",
+     "experiment": "MA7-psample-pull-apfs",
+     "run": "20261018T144803Z-MA7-psample-pull-apfs",
+     "cell": "real-psample.noop.mars-mac.receiver.warm",
+     "link": "mac-mars-10g",
+     "direction": "mars>mac",
+     "cache": "warm",
+     "conditions": {
+      "wan_delay_ms": 0,
+      "cpus": 0
+     },
+     "tools": {
+      "rsync": {
+       "arm": "rsync",
+       "rev": null,
+       "flags": [
+        "-aH"
+       ],
+       "seconds": 36.9724,
+       "lo": 35.92092316613038,
+       "hi": 38.05473838361579,
+       "blocks": 6
+      },
+      "xs-cpp": {
+       "arm": "xs-noatomic",
+       "rev": "453704a64528-tune",
+       "flags": [
+        "-aH",
+        "--no-atomic"
+       ],
+       "seconds": 54.1354,
+       "lo": 53.72616088217909,
+       "hi": 54.547833931465334,
+       "blocks": 6
+      }
+     },
+     "arms": [
+      {
+       "tool": "xs",
+       "arm": "xs",
+       "rev": "453704a64528-tune",
+       "flags": [
+        "-aH"
+       ],
+       "seconds": 54.4978,
+       "lo": 53.477883510594054,
+       "hi": 55.537168989591606,
+       "blocks": 6
+      },
+      {
+       "tool": "xs",
+       "arm": "xs-O",
+       "rev": "453704a64528-tune",
+       "flags": [
+        "-aH",
+        "-O"
+       ],
+       "seconds": 54.2853,
+       "lo": 53.464626029167434,
+       "hi": 55.118650332646524,
+       "blocks": 6
+      },
+      {
+       "tool": "xs",
+       "arm": "xs-noatomic",
+       "rev": "453704a64528-tune",
+       "flags": [
+        "-aH",
+        "--no-atomic"
+       ],
+       "seconds": 54.1354,
+       "lo": 53.72616088217909,
+       "hi": 54.547833931465334,
+       "blocks": 6
+      },
+      {
+       "tool": "xs",
+       "arm": "xs-recv8",
+       "rev": "453704a64528-tune",
+       "flags": [
+        "-aH"
+       ],
+       "seconds": 54.9945,
+       "lo": 54.29962343906531,
+       "hi": 55.69818834635635,
+       "blocks": 6
+      },
+      {
+       "tool": "xs",
+       "arm": "xs-scan4",
+       "rev": "453704a64528-tune",
+       "flags": [
+        "-aH"
+       ],
+       "seconds": 54.9306,
+       "lo": 53.716776754889054,
+       "hi": 56.171936008466716,
+       "blocks": 6
+      },
+      {
+       "tool": "rsync",
+       "arm": "rsync",
+       "rev": null,
+       "flags": [
+        "-aH"
+       ],
+       "seconds": 36.9724,
+       "lo": 35.92092316613038,
+       "hi": 38.05473838361579,
+       "blocks": 6
+      }
+     ],
+     "cpp_over_rsync": 1.464
+    },
+    {
+     "home_corpus": "real-psample",
+     "experiment": "MA4-psample-incremental",
+     "run": "20261018T032414Z-MA4-psample-incremental",
+     "cell": "real-psample.noop.mac-mars.sender.warm",
+     "link": "mac-mars-10g",
+     "direction": "mac>mars",
+     "cache": "warm",
+     "conditions": {
+      "wan_delay_ms": 0,
+      "cpus": 0
+     },
+     "tools": {
+      "rsync": {
+       "arm": "rsync",
+       "rev": null,
+       "flags": [
+        "-aH"
+       ],
+       "seconds": 96.7466,
+       "lo": 55.53817262864334,
+       "hi": 168.53091867575145,
+       "blocks": 4
+      },
+      "xs-cpp": {
+       "arm": "xs",
+       "rev": "8cc75bbdb801",
+       "flags": [
+        "-aH"
+       ],
+       "seconds": 26.3502,
+       "lo": 19.405625249670607,
+       "hi": 35.780063220390126,
+       "blocks": 4
+      }
+     },
+     "arms": [
+      {
+       "tool": "rsync",
+       "arm": "rsync",
+       "rev": null,
+       "flags": [
+        "-aH"
+       ],
+       "seconds": 96.7466,
+       "lo": 55.53817262864334,
+       "hi": 168.53091867575145,
+       "blocks": 4
+      },
+      {
+       "tool": "xs",
+       "arm": "xs",
+       "rev": "8cc75bbdb801",
+       "flags": [
+        "-aH"
+       ],
+       "seconds": 26.3502,
+       "lo": 19.405625249670607,
+       "hi": 35.780063220390126,
+       "blocks": 4
+      }
+     ],
+     "cpp_over_rsync": 0.272
+    },
+    {
+     "home_corpus": "real-psample",
+     "experiment": "MA4-psample-incremental",
+     "run": "20261018T032414Z-MA4-psample-incremental",
+     "cell": "real-psample.noop.mars-mac.receiver.warm",
+     "link": "mac-mars-10g",
+     "direction": "mars>mac",
+     "cache": "warm",
+     "conditions": {
+      "wan_delay_ms": 0,
+      "cpus": 0
+     },
+     "tools": {
+      "rsync": {
+       "arm": "rsync",
+       "rev": null,
+       "flags": [
+        "-aH"
+       ],
+       "seconds": 38.616,
+       "lo": 32.57405930145344,
+       "hi": 45.77856487797961,
+       "blocks": 3
+      },
+      "xs-cpp": {
+       "arm": "xs",
+       "rev": "8cc75bbdb801",
+       "flags": [
+        "-aH"
+       ],
+       "seconds": 65.2251,
+       "lo": 41.94084469950681,
+       "hi": 101.43600827432982,
+       "blocks": 3
+      }
+     },
+     "arms": [
+      {
+       "tool": "rsync",
+       "arm": "rsync",
+       "rev": null,
+       "flags": [
+        "-aH"
+       ],
+       "seconds": 38.616,
+       "lo": 32.57405930145344,
+       "hi": 45.77856487797961,
+       "blocks": 3
+      },
+      {
+       "tool": "xs",
+       "arm": "xs",
+       "rev": "8cc75bbdb801",
+       "flags": [
+        "-aH"
+       ],
+       "seconds": 65.2251,
+       "lo": 41.94084469950681,
+       "hi": 101.43600827432982,
+       "blocks": 3
+      }
+     ],
+     "cpp_over_rsync": 1.689
+    },
+    {
+     "home_corpus": "small-real",
+     "experiment": "D10-lan-noop-best",
+     "run": "20261017T174642Z-D10-lan-noop-best",
+     "cell": "small-real.noop.neo-freya.sender.warm",
+     "link": "lan",
+     "direction": "neo>freya",
+     "cache": "warm",
+     "conditions": {
+      "wan_delay_ms": 0,
+      "cpus": 0
+     },
+     "tools": {
+      "rsync": {
+       "arm": "rsync",
+       "rev": null,
+       "flags": [
+        "-a"
+       ],
+       "seconds": 1.6472,
+       "lo": 1.5440469456506314,
+       "hi": 1.7571740190542584,
+       "blocks": 8
+      },
+      "xs-cpp": {
+       "arm": "xs-best",
+       "rev": "453704a64528-tune",
+       "flags": [
+        "-a",
+        "--no-atomic"
+       ],
+       "seconds": 0.8834,
+       "lo": 0.8040087305560687,
+       "hi": 0.9706134286318651,
+       "blocks": 8
+      }
+     },
+     "arms": [
+      {
+       "tool": "xs",
+       "arm": "xs",
+       "rev": "453704a64528-tune",
+       "flags": [
+        "-a"
+       ],
+       "seconds": 1.4503,
+       "lo": 1.3897040522506596,
+       "hi": 1.5135459969224976,
+       "blocks": 8
+      },
+      {
+       "tool": "xs",
+       "arm": "xs-best",
+       "rev": "453704a64528-tune",
+       "flags": [
+        "-a",
+        "--no-atomic"
+       ],
+       "seconds": 0.8834,
+       "lo": 0.8040087305560687,
+       "hi": 0.9706134286318651,
+       "blocks": 8
+      },
+      {
+       "tool": "rsync",
+       "arm": "rsync",
+       "rev": null,
+       "flags": [
+        "-a"
+       ],
+       "seconds": 1.6472,
+       "lo": 1.5440469456506314,
+       "hi": 1.7571740190542584,
+       "blocks": 8
+      }
+     ],
+     "cpp_over_rsync": 0.536
+    }
+   ]
+  }
+ ]
+}

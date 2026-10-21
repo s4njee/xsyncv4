@@ -1,0 +1,472 @@
+{
+ "id": "T3-mac-freya-10g",
+ "question": "How close can xs get to 10 Gb/s between the Mac and freya, and what gets it closer?",
+ "start": [
+  "G0",
+  "G0b"
+ ],
+ "startedUtc": "2026-10-17T02:02:49Z",
+ "until": "2026-10-18T12:00Z",
+ "fills": 0,
+ "nodes": [
+  {
+   "id": "G0",
+   "kind": "experiment",
+   "experiment": "G0-10g-baseline",
+   "question": "How much of the 10GbE link do xs and rsync use, each way, on each kind of tree?",
+   "estimateHours": 1.6,
+   "hypothesis": "xs uses at least 80% of the 10GbE link for large files both ways, and more of it than rsync on every tree.",
+   "design": "screening",
+   "state": "decided",
+   "runs": [
+    {
+     "id": "20261017T020249Z-G0-10g-baseline",
+     "key": "tengig/G0-10g-baseline/20261017T020249Z-G0-10g-baseline",
+     "state": "stopped"
+    },
+    {
+     "id": "20261017T121630Z-G0-10g-baseline",
+     "key": "tengig/G0-10g-baseline/20261017T121630Z-G0-10g-baseline",
+     "state": "complete"
+    }
+   ],
+   "decision": "G0: xs carries large files below 8 Gb/s one way or both: tune them before anything else",
+   "decidedUtc": "2026-10-17T12:42:14Z",
+   "start": true,
+   "promote": null
+  },
+  {
+   "id": "G0b",
+   "kind": "experiment",
+   "experiment": "G0b-10g-large-mac",
+   "question": "How fast do pure large-file trees go from the Mac to freya?",
+   "estimateHours": 0.8,
+   "hypothesis": "xs carries the large trees to freya at close to 10 Gb/s.",
+   "design": "screening",
+   "state": "decided",
+   "runs": [
+    {
+     "id": "20261017T020250Z-G0b-10g-large-mac",
+     "key": "tengig/G0b-10g-large-mac/20261017T020250Z-G0b-10g-large-mac",
+     "state": "complete"
+    }
+   ],
+   "decision": "G0b: done (1 run)",
+   "decidedUtc": "2026-10-17T13:04:21Z",
+   "start": true,
+   "promote": null
+  },
+  {
+   "id": "G1",
+   "kind": "experiment",
+   "experiment": "G1-10g-large-tune",
+   "question": "What holds large files below 10 Gb/s: streams, block size, queues or workers?",
+   "estimateHours": 1.6,
+   "hypothesis": "A larger stream count, block size, queue or worker count brings large files closer to 10 Gb/s.",
+   "design": "screening",
+   "state": "decided",
+   "runs": [
+    {
+     "id": "20261017T124214Z-G1-10g-large-tune",
+     "key": "tengig/G1-10g-large-tune/20261017T124214Z-G1-10g-large-tune",
+     "state": "complete"
+    }
+   ],
+   "decision": "G1: no setting moved large files closer to the link",
+   "decidedUtc": "2026-10-17T13:36:50Z",
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "G2",
+   "kind": "experiment",
+   "experiment": "G2-10g-zfs",
+   "question": "Can freya's ZFS pool take 10 Gb/s?",
+   "estimateHours": 0.8,
+   "hypothesis": "xs lands large files on the raidz2 pool at close to 10 Gb/s.",
+   "design": "screening",
+   "state": "decided",
+   "runs": [
+    {
+     "id": "20261017T133650Z-G2-10g-zfs",
+     "key": "tengig/G2-10g-zfs/20261017T133650Z-G2-10g-zfs",
+     "state": "complete"
+    }
+   ],
+   "decision": "G2: the pool holds large files below 8 Gb/s: tune its writes",
+   "decidedUtc": "2026-10-17T14:20:15Z",
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "G2~end0",
+   "kind": "end",
+   "experiment": null,
+   "question": null,
+   "estimateHours": null,
+   "hypothesis": "the pool takes large files at 8 Gb/s or more",
+   "design": null,
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "G2b",
+   "kind": "experiment",
+   "experiment": "G2b-10g-zfs-tune",
+   "question": "Do other worker counts or write sizes get more out of the ZFS pool?",
+   "estimateHours": 0.7,
+   "hypothesis": "A different receiving worker count or write size lands large files on the pool faster.",
+   "design": "screening",
+   "state": "queued",
+   "runs": [
+    {
+     "id": "20261017T142015Z-G2b-10g-zfs-tune",
+     "key": "tengig/G2b-10g-zfs-tune/20261017T142015Z-G2b-10g-zfs-tune",
+     "state": null
+    }
+   ],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "G2b~end1",
+   "kind": "end",
+   "experiment": null,
+   "question": null,
+   "estimateHours": null,
+   "hypothesis": "no worker count or write size beat the default onto the pool",
+   "design": null,
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "G3",
+   "kind": "experiment",
+   "experiment": "G3-10g-small-push",
+   "question": "Can batching, scanning, framing or zstd 1 make small and mixed trees use more of the link?",
+   "estimateHours": 3.1,
+   "hypothesis": "Batching, scanning or framing settings let small and mixed trees use more of the 10GbE link.",
+   "design": "screening",
+   "state": "failed",
+   "runs": [
+    {
+     "id": "20261017T133652Z-G3-10g-small-push",
+     "key": "tengig/G3-10g-small-push/20261017T133652Z-G3-10g-small-push",
+     "state": "failed"
+    }
+   ],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "G4",
+   "kind": "experiment",
+   "experiment": "G4-10g-compress-freya",
+   "question": "With freya's 16 cores sending, does compression beat 10 Gb/s?",
+   "estimateHours": 1.0,
+   "hypothesis": "With freya sending, compression beats sending uncompressed at 10 Gb/s.",
+   "design": "screening",
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "G4~end1",
+   "kind": "end",
+   "experiment": null,
+   "question": null,
+   "estimateHours": null,
+   "hypothesis": "no compression level beat sending uncompressed from freya",
+   "design": null,
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "G1c",
+   "kind": "confirm",
+   "experiment": "G1c-10g-large-confirm",
+   "question": "Does the large-file winner hold up with fresh blocks?",
+   "estimateHours": 0.8,
+   "hypothesis": "Confirms the fastest arm of G1 with 12 fresh blocks, if it had one.",
+   "design": "confirmatory",
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": "G1"
+  },
+  {
+   "id": "G2bc",
+   "kind": "confirm",
+   "experiment": "G2bc-10g-zfs-confirm",
+   "question": "Does the pool's winning setting hold up with fresh blocks?",
+   "estimateHours": 0.4,
+   "hypothesis": "Confirms the fastest arm of G2b with 12 fresh blocks, if it had one.",
+   "design": "confirmatory",
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": "G2b"
+  },
+  {
+   "id": "G3c",
+   "kind": "confirm",
+   "experiment": "G3c-10g-small-confirm",
+   "question": "Does the small-file winner hold up with fresh blocks?",
+   "estimateHours": 1.6,
+   "hypothesis": "Confirms the fastest arm of G3 with 12 fresh blocks, if it had one.",
+   "design": "confirmatory",
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": "G3"
+  },
+  {
+   "id": "G4c",
+   "kind": "confirm",
+   "experiment": "G4c-10g-compress-confirm",
+   "question": "Does the winning compression level hold up with fresh blocks?",
+   "estimateHours": 0.6,
+   "hypothesis": "Confirms the fastest arm of G4 with 12 fresh blocks, if it had one.",
+   "design": "confirmatory",
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": "G4"
+  },
+  {
+   "id": "F3a",
+   "kind": "fill",
+   "experiment": "F3a-10g-replicate",
+   "question": "Do the 10GbE results hold steady over the weekend?",
+   "estimateHours": 0.4,
+   "hypothesis": "xs stays ahead of rsync at 10 Gb/s from run to run.",
+   "design": "screening",
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "F3b",
+   "kind": "fill",
+   "experiment": "F3b-10g-zfs-replicate",
+   "question": "Do the ZFS results hold steady over the weekend?",
+   "estimateHours": 0.1,
+   "hypothesis": "xs stays ahead of rsync onto the ZFS pool from run to run.",
+   "design": "screening",
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  }
+ ],
+ "edges": [
+  {
+   "from": "G0",
+   "to": "G2",
+   "label": "large files \u2265 8 Gb/s",
+   "taken": false
+  },
+  {
+   "from": "G0",
+   "to": "G3",
+   "label": "large files \u2265 8 Gb/s",
+   "taken": false
+  },
+  {
+   "from": "G0",
+   "to": "G1",
+   "label": "large files < 8 Gb/s",
+   "taken": true
+  },
+  {
+   "from": "G1",
+   "to": "G1c",
+   "label": "an arm was faster",
+   "taken": false
+  },
+  {
+   "from": "G1",
+   "to": "G2",
+   "label": "an arm was faster",
+   "taken": false
+  },
+  {
+   "from": "G1",
+   "to": "G3",
+   "label": "an arm was faster",
+   "taken": false
+  },
+  {
+   "from": "G1",
+   "to": "G2",
+   "label": "nothing faster",
+   "taken": true
+  },
+  {
+   "from": "G1",
+   "to": "G3",
+   "label": "nothing faster",
+   "taken": true
+  },
+  {
+   "from": "G2",
+   "to": "G2~end0",
+   "label": "pool \u2265 8 Gb/s",
+   "taken": false
+  },
+  {
+   "from": "G2",
+   "to": "G2b",
+   "label": "pool < 8 Gb/s",
+   "taken": true
+  },
+  {
+   "from": "G2b",
+   "to": "G2bc",
+   "label": "an arm was faster",
+   "taken": null
+  },
+  {
+   "from": "G2b",
+   "to": "G2b~end1",
+   "label": "nothing faster",
+   "taken": null
+  },
+  {
+   "from": "G3",
+   "to": "G3c",
+   "label": "an arm was faster",
+   "taken": null
+  },
+  {
+   "from": "G3",
+   "to": "G4",
+   "label": "an arm was faster",
+   "taken": null
+  },
+  {
+   "from": "G3",
+   "to": "G4",
+   "label": "nothing faster",
+   "taken": null
+  },
+  {
+   "from": "G4",
+   "to": "G4c",
+   "label": "an arm was faster",
+   "taken": null
+  },
+  {
+   "from": "G4",
+   "to": "G4~end1",
+   "label": "nothing faster",
+   "taken": null
+  }
+ ],
+ "decisions": [
+  {
+   "utc": "2026-10-17T15:15:54Z",
+   "node": "G3",
+   "kind": "warning",
+   "text": "G3: run 20261017T133652Z-G3-10g-small-push ended failed; its branch stops here"
+  },
+  {
+   "utc": "2026-10-17T14:20:16Z",
+   "node": "G2b",
+   "kind": "queued",
+   "text": "G2b queued on mac (144 samples): after G2: the pool holds large files below 8 Gb/s: tune its writes"
+  },
+  {
+   "utc": "2026-10-17T14:20:15Z",
+   "node": "G2",
+   "kind": "decision",
+   "text": "G2: the pool holds large files below 8 Gb/s: tune its writes \u2192 G2b"
+  },
+  {
+   "utc": "2026-10-17T13:36:53Z",
+   "node": "G3",
+   "kind": "queued",
+   "text": "G3 queued on mac (384 samples): after G1: no setting moved large files closer to the link"
+  },
+  {
+   "utc": "2026-10-17T13:36:52Z",
+   "node": "G2",
+   "kind": "queued",
+   "text": "G2 queued on mac (160 samples): after G1: no setting moved large files closer to the link"
+  },
+  {
+   "utc": "2026-10-17T13:36:50Z",
+   "node": "G1",
+   "kind": "decision",
+   "text": "G1: no setting moved large files closer to the link \u2192 G2, G3"
+  },
+  {
+   "utc": "2026-10-17T13:04:21Z",
+   "node": "G0b",
+   "kind": "decision",
+   "text": "G0b: done (1 run)"
+  },
+  {
+   "utc": "2026-10-17T12:42:15Z",
+   "node": "G1",
+   "kind": "queued",
+   "text": "G1 queued on mac (192 samples): after G0: xs carries large files below 8 Gb/s one way or both: tune them before anything else"
+  },
+  {
+   "utc": "2026-10-17T12:42:14Z",
+   "node": "G0",
+   "kind": "decision",
+   "text": "G0: xs carries large files below 8 Gb/s one way or both: tune them before anything else \u2192 G1"
+  },
+  {
+   "utc": "2026-10-17T12:16:31Z",
+   "node": "G0",
+   "kind": "queued",
+   "text": "G0: its run was cut short with 6 of 8 blocks per cell; continuing with 2 more"
+  },
+  {
+   "utc": "2026-10-17T02:02:51Z",
+   "node": "G0b",
+   "kind": "queued",
+   "text": "G0b queued on mac (96 samples): start of the tree"
+  },
+  {
+   "utc": "2026-10-17T02:02:50Z",
+   "node": "G0",
+   "kind": "queued",
+   "text": "G0 queued on mac (192 samples): start of the tree"
+  }
+ ]
+}

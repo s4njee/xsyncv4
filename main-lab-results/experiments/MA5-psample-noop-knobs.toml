@@ -1,0 +1,62 @@
+# MA5 (tree T12, after MA4 shows the no-op push deficit): the sender's skip and scan path.
+# Each arm keeps xs's best small-file setting and changes one thing: skip directory
+# finalisation (-O), the write-then-rename step (--no-atomic), and a single scanning worker
+# or read batch. If none recovers the time it is a code candidate, not a knob. Needs the
+# tunables build (453704a64528-tune) staged on the Mac and mars.
+id = "MA5-psample-noop-knobs"
+kind = "screening"
+hypothesis = "Skipping directory finalisation or reducing the sender's scanning and batching recovers xs's warm no-op push on the psample tree."
+primary = "wall_s"
+delta = 0.05
+blocks = 4
+control = "xs-best"
+verify = "first-last"
+cleanup = "eager"
+sample_timeout_s = 7200
+
+[arms.xs-best]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-aH", "--no-atomic"]
+tune = { receiver = "jobs=4" }
+
+[arms.xs-O]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-aH", "-O", "--no-atomic"]
+tune = { receiver = "jobs=4" }
+
+[arms.xs-atomic]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-aH"]
+tune = { receiver = "jobs=4" }
+
+[arms.xs-scan1]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-aH", "--no-atomic"]
+tune = { receiver = "jobs=4", sender = "scan_workers=1" }
+
+[arms.xs-batch1]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-aH", "--no-atomic"]
+tune = { receiver = "jobs=4", sender = "read_batch_files=1,read_batch_bytes=1048576" }
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-aH"]
+
+[matrix]
+link = "mac-mars-10g"
+corpus = ["real-psample"]
+scenario = ["noop"]
+direction = ["mac>mars"]
+client = ["initiator"]
+cache = ["warm"]

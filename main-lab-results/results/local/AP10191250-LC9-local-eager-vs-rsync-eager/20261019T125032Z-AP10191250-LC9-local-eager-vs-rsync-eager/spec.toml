@@ -1,0 +1,30 @@
+# Written by the 6-hourly planner (2026-10-19T12:50Z). Why: LC3 showed eager writeback helps rsync as well as xs, so the fair test of whether xs beats rsync locally is to compare them with eager writeback on both.
+id = "AP10191250-LC9-local-eager-vs-rsync-eager"
+kind = "screening"
+hypothesis = "With eager writeback on both sides, xs -aH reaches a durable copy of psample on the T5 at least 5% sooner than rsync -aH. LC3's screening implies a time ratio near 0.77."
+primary = "durable_s"
+delta = 0.05
+blocks = 6
+control = "rsync-eager"
+verify = "first-last"
+cleanup = "eager"
+sample_timeout_s = 7200
+
+[arms.rsync-eager]
+tool = "rsync"
+flags = ["-aH"]
+writeback = "eager"
+
+[arms.xs-eager]
+tool = "xs"
+rev = "dd6f5121d506"
+flags = ["-aH"]
+writeback = "eager"
+
+[matrix]
+link = "neo-local-ssd"
+corpus = ["real-psample"]
+scenario = ["fresh"]
+direction = ["neo>neo-ssd"]
+client = ["receiver"]
+cache = ["cold"]

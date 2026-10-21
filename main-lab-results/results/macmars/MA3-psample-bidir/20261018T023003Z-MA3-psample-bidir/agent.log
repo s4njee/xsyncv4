@@ -1,0 +1,36 @@
+Traceback (most recent call last):
+  File "~/benchmarks/xsbench.noindex/lib/021ae1ff14be/agent.py", line 681, in <module>
+    sys.exit(Run(sys.argv[1]).execute(limit))
+             ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "~/benchmarks/xsbench.noindex/lib/021ae1ff14be/agent.py", line 655, in execute
+    self.prepare()
+    ~~~~~~~~~~~~^^
+  File "~/benchmarks/xsbench.noindex/lib/021ae1ff14be/agent.py", line 356, in prepare
+    found = json.loads(host.run('python3', host.bin('corpus.py'), 'verify', f'{host.root}/corpora/{name}',
+                       ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                                '--manifest', manifest, '--quick', timeout=1800).stdout)
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "~/benchmarks/xsbench.noindex/lib/021ae1ff14be/agent.py", line 65, in run
+    return self.shell(shlex.join(map(str, argv)), **options)
+           ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "~/benchmarks/xsbench.noindex/lib/021ae1ff14be/agent.py", line 61, in shell
+    raise RuntimeError(f'{self.name}: `{script[:200]}` exited {done.returncode}: {done.stderr.strip()[-400:]}')
+RuntimeError: mars: `python3 ~/benchmarks/xsyncv4/lab/lib/021ae1ff14be/corpus.py verify ~/benchmarks/xsyncv4/lab/corpora/real-psample --manifest ~/benchmarks/xsyncv4/lab/corpora/real-psamp` exited 1: ~/benchmarks/xsyncv4/lab/corpora/real-psample does not match ~/benchmarks/xsyncv4/lab/corpora/real-psample.manifest.json (616039 paths differ)
+Traceback (most recent call last):
+  File "~/benchmarks/xsbench.noindex/lib/021ae1ff14be/agent.py", line 681, in <module>
+    sys.exit(Run(sys.argv[1]).execute(limit))
+             ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "~/benchmarks/xsbench.noindex/lib/021ae1ff14be/agent.py", line 655, in execute
+    self.prepare()
+    ~~~~~~~~~~~~^^
+  File "~/benchmarks/xsbench.noindex/lib/021ae1ff14be/agent.py", line 356, in prepare
+    found = json.loads(host.run('python3', host.bin('corpus.py'), 'verify', f'{host.root}/corpora/{name}',
+                       ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                                '--manifest', manifest, '--quick', timeout=1800).stdout)
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "~/benchmarks/xsbench.noindex/lib/021ae1ff14be/agent.py", line 65, in run
+    return self.shell(shlex.join(map(str, argv)), **options)
+           ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "~/benchmarks/xsbench.noindex/lib/021ae1ff14be/agent.py", line 61, in shell
+    raise RuntimeError(f'{self.name}: `{script[:200]}` exited {done.returncode}: {done.stderr.strip()[-400:]}')
+RuntimeError: mars: `python3 ~/benchmarks/xsyncv4/lab/lib/021ae1ff14be/corpus.py verify ~/benchmarks/xsyncv4/lab/corpora/real-psample --manifest ~/benchmarks/xsyncv4/lab/corpora/real-psamp` exited 1: ~/benchmarks/xsyncv4/lab/corpora/real-psample does not match ~/benchmarks/xsyncv4/lab/corpora/real-psample.manifest.json (272626 paths differ)

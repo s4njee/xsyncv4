@@ -1,0 +1,84 @@
+{
+ "schema": 1,
+ "utc": "2026-10-10T20:20:09.506138+00:00",
+ "client": "neo",
+ "host": "[email]",
+ "direction": "pull",
+ "bytes": 2147483648,
+ "rsh": [
+  "ssh",
+  "-oBatchMode=yes",
+  "-oCompression=no",
+  "-oControlMaster=no",
+  "-oConnectTimeout=10"
+ ],
+ "disk_io": false,
+ "compression": "none",
+ "records": [
+  {
+   "returncode": 0,
+   "wall_seconds": 18.847855494823307,
+   "user_seconds": 5.465473,
+   "system_seconds": 3.330218,
+   "max_rss_bytes": 14352384,
+   "voluntary_switches": 74864,
+   "involuntary_switches": 78,
+   "run": 1,
+   "remote": {
+    "returncode": 0,
+    "wall_seconds": 18.61922701029107,
+    "user_seconds": 0.077585,
+    "system_seconds": 0.279146,
+    "max_rss_bytes": 15826944,
+    "voluntary_switches": 64409,
+    "involuntary_switches": 58
+   },
+   "verified_bytes": 2147483648,
+   "bytes_per_second": 113937824.31055996
+  },
+  {
+   "returncode": 0,
+   "wall_seconds": 19.05657493788749,
+   "user_seconds": 5.346471,
+   "system_seconds": 3.470543,
+   "max_rss_bytes": 14860288,
+   "voluntary_switches": 75054,
+   "involuntary_switches": 56,
+   "run": 2,
+   "remote": {
+    "returncode": 0,
+    "wall_seconds": 18.815492054913193,
+    "user_seconds": 0.093953,
+    "system_seconds": 0.271233,
+    "max_rss_bytes": 15777792,
+    "voluntary_switches": 65364,
+    "involuntary_switches": 70
+   },
+   "verified_bytes": 2147483648,
+   "bytes_per_second": 112689906.50205785
+  },
+  {
+   "returncode": 0,
+   "wall_seconds": 19.053933477029204,
+   "user_seconds": 5.545408,
+   "system_seconds": 4.101662,
+   "max_rss_bytes": 14352384,
+   "voluntary_switches": 74702,
+   "involuntary_switches": 237,
+   "run": 3,
+   "remote": {
+    "returncode": 0,
+    "wall_seconds": 18.825278255157173,
+    "user_seconds": 0.07493,
+    "system_seconds": 0.285331,
+    "max_rss_bytes": 15589376,
+    "voluntary_switches": 63988,
+    "involuntary_switches": 73
+   },
+   "verified_bytes": 2147483648,
+   "bytes_per_second": 112705528.78695287
+  }
+ ],
+ "median_bytes_per_second": 112705528.78695287,
+ "complete": true
+}

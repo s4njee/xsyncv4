@@ -1,0 +1,25 @@
+[
+ {
+  "experiment": "LC3-durable-confirm",
+  "kind": "confirmatory",
+  "cell_id": "real-psample.fresh.neo-neo-ssd.receiver.cold",
+  "corpus": "real-psample",
+  "scenario": "fresh",
+  "sender": "neo",
+  "receiver": "neo-ssd",
+  "client": "receiver",
+  "link": "neo-local-ssd",
+  "cache": "cold",
+  "arm": "xs-eager",
+  "n_blocks": 12,
+  "sigma_d": 0.12401116897338832,
+  "blocks_for_2pct": 310,
+  "blocks_for_3pct": 140,
+  "blocks_for_5pct": 53,
+  "blocks_for_10pct": 16,
+  "blocks_equivalent_2pct": 415,
+  "blocks_equivalent_3pct": 187,
+  "blocks_equivalent_5pct": 70,
+  "blocks_equivalent_10pct": 20
+ }
+]

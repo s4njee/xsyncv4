@@ -1,0 +1,68 @@
+tiny-f7 push tiny rsync 1/12: 0.190s verified
+tiny-f7 push tiny xs 1/12: 0.159s verified
+tiny-f7 push tiny xs 2/12: 0.169s verified
+tiny-f7 push tiny rsync 2/12: 0.176s verified
+tiny-f7 push tiny rsync 3/12: 0.177s verified
+tiny-f7 push tiny xs 3/12: 0.163s verified
+tiny-f7 push tiny xs 4/12: 0.161s verified
+tiny-f7 push tiny rsync 4/12: 0.188s verified
+tiny-f7 push tiny rsync 5/12: 0.192s verified
+tiny-f7 push tiny xs 5/12: 0.169s verified
+tiny-f7 push tiny xs 6/12: 0.180s verified
+tiny-f7 push tiny rsync 6/12: 0.184s verified
+tiny-f7 push tiny rsync 7/12: 0.191s verified
+tiny-f7 push tiny xs 7/12: 0.172s verified
+tiny-f7 push tiny xs 8/12: 0.171s verified
+tiny-f7 push tiny rsync 8/12: 0.194s verified
+tiny-f7 push tiny rsync 9/12: 0.192s verified
+tiny-f7 push tiny xs 9/12: 0.173s verified
+tiny-f7 push tiny xs 10/12: 0.167s verified
+tiny-f7 push tiny rsync 10/12: 0.181s verified
+tiny-f7 push tiny rsync 11/12: 0.191s verified
+tiny-f7 push tiny xs 11/12: 0.164s verified
+tiny-f7 push tiny xs 12/12: 0.169s verified
+tiny-f7 push tiny rsync 12/12: 0.188s verified
+[
+  {
+    "scenario": "tiny",
+    "median_seconds": {
+      "rsync": 0.18913549557328224,
+      "xs": 0.16881325305439532
+    },
+    "xs_speedup": 1.1203829803122072
+  }
+]
+tiny-f7 pull tiny rsync 1/12: 0.174s verified
+tiny-f7 pull tiny xs 1/12: 0.172s verified
+tiny-f7 pull tiny xs 2/12: 0.178s verified
+tiny-f7 pull tiny rsync 2/12: 0.169s verified
+tiny-f7 pull tiny rsync 3/12: 0.174s verified
+tiny-f7 pull tiny xs 3/12: 0.184s verified
+tiny-f7 pull tiny xs 4/12: 0.174s verified
+tiny-f7 pull tiny rsync 4/12: 0.169s verified
+tiny-f7 pull tiny rsync 5/12: 0.168s verified
+tiny-f7 pull tiny xs 5/12: 0.172s verified
+tiny-f7 pull tiny xs 6/12: 0.178s verified
+tiny-f7 pull tiny rsync 6/12: 0.176s verified
+tiny-f7 pull tiny rsync 7/12: 0.167s verified
+tiny-f7 pull tiny xs 7/12: 0.182s verified
+tiny-f7 pull tiny xs 8/12: 0.181s verified
+tiny-f7 pull tiny rsync 8/12: 0.163s verified
+tiny-f7 pull tiny rsync 9/12: 0.167s verified
+tiny-f7 pull tiny xs 9/12: 0.173s verified
+tiny-f7 pull tiny xs 10/12: 0.176s verified
+tiny-f7 pull tiny rsync 10/12: 0.166s verified
+tiny-f7 pull tiny rsync 11/12: 0.174s verified
+tiny-f7 pull tiny xs 11/12: 0.175s verified
+tiny-f7 pull tiny xs 12/12: 0.178s verified
+tiny-f7 pull tiny rsync 12/12: 0.165s verified
+[
+  {
+    "scenario": "tiny",
+    "median_seconds": {
+      "rsync": 0.168058296199888,
+      "xs": 0.17700503091327846
+    },
+    "xs_speedup": 0.9494549128506193
+  }
+]

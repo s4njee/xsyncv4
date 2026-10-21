@@ -1,0 +1,57 @@
+cleanup on freya: freya: `sudo -n /usr/local/sbin/xsbench-helper governor restore` exited 255: ssh: Could not resolve hostname [host]: Name or service not known
+Traceback (most recent call last):
+  File "~/benchmarks/xsyncv4/lab/lib/905db83a4732/agent.py", line 517, in <module>
+    sys.exit(Run(sys.argv[1]).execute(limit))
+             ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "~/benchmarks/xsyncv4/lab/lib/905db83a4732/agent.py", line 491, in execute
+    self.prepare()
+    ~~~~~~~~~~~~^^
+  File "~/benchmarks/xsyncv4/lab/lib/905db83a4732/agent.py", line 234, in prepare
+    report = host.probe('staged', '--root', host.root, *(['--bundle', host.bundle] if host.bundle else []), *names)
+  File "~/benchmarks/xsyncv4/lab/lib/905db83a4732/agent.py", line 72, in probe
+    return json.loads(self.run('python3', self.bin('probe.py'), *arguments, timeout=120).stdout)
+                      ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "~/benchmarks/xsyncv4/lab/lib/905db83a4732/agent.py", line 65, in run
+    return self.shell(shlex.join(map(str, argv)), **options)
+           ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "~/benchmarks/xsyncv4/lab/lib/905db83a4732/agent.py", line 61, in shell
+    raise RuntimeError(f'{self.name}: `{script[:200]}` exited {done.returncode}: {done.stderr.strip()[-400:]}')
+RuntimeError: freya: `python3 /mnt/nvme/xsbench/lib/905db83a4732/probe.py staged --root /mnt/nvme/xsbench --bundle 905db83a4732 agent.py corpora.json corpus.py measure.py probe.py runner.py xs-453704a64528-tune` exited 255: ssh: Could not resolve hostname [host]: Name or service not known
+cleanup on freya: freya: `sudo -n /usr/local/sbin/xsbench-helper governor restore` exited 255: ssh: Could not resolve hostname [host]: Name or service not known
+Traceback (most recent call last):
+  File "~/benchmarks/xsyncv4/lab/lib/905db83a4732/agent.py", line 517, in <module>
+    sys.exit(Run(sys.argv[1]).execute(limit))
+             ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "~/benchmarks/xsyncv4/lab/lib/905db83a4732/agent.py", line 491, in execute
+    self.prepare()
+    ~~~~~~~~~~~~^^
+  File "~/benchmarks/xsyncv4/lab/lib/905db83a4732/agent.py", line 234, in prepare
+    report = host.probe('staged', '--root', host.root, *(['--bundle', host.bundle] if host.bundle else []), *names)
+  File "~/benchmarks/xsyncv4/lab/lib/905db83a4732/agent.py", line 72, in probe
+    return json.loads(self.run('python3', self.bin('probe.py'), *arguments, timeout=120).stdout)
+                      ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "~/benchmarks/xsyncv4/lab/lib/905db83a4732/agent.py", line 65, in run
+    return self.shell(shlex.join(map(str, argv)), **options)
+           ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "~/benchmarks/xsyncv4/lab/lib/905db83a4732/agent.py", line 61, in shell
+    raise RuntimeError(f'{self.name}: `{script[:200]}` exited {done.returncode}: {done.stderr.strip()[-400:]}')
+RuntimeError: freya: `python3 /mnt/nvme/xsbench/lib/905db83a4732/probe.py staged --root /mnt/nvme/xsbench --bundle 905db83a4732 agent.py corpora.json corpus.py measure.py probe.py runner.py xs-453704a64528-tune` exited 255: ssh: Could not resolve hostname [host]: Name or service not known
+cleanup on freya: freya: `sudo -n /usr/local/sbin/xsbench-helper governor restore` exited 255: ssh: Could not resolve hostname [host]: Name or service not known
+Traceback (most recent call last):
+  File "~/benchmarks/xsyncv4/lab/lib/905db83a4732/agent.py", line 517, in <module>
+    sys.exit(Run(sys.argv[1]).execute(limit))
+             ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "~/benchmarks/xsyncv4/lab/lib/905db83a4732/agent.py", line 491, in execute
+    self.prepare()
+    ~~~~~~~~~~~~^^
+  File "~/benchmarks/xsyncv4/lab/lib/905db83a4732/agent.py", line 234, in prepare
+    report = host.probe('staged', '--root', host.root, *(['--bundle', host.bundle] if host.bundle else []), *names)
+  File "~/benchmarks/xsyncv4/lab/lib/905db83a4732/agent.py", line 72, in probe
+    return json.loads(self.run('python3', self.bin('probe.py'), *arguments, timeout=120).stdout)
+                      ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "~/benchmarks/xsyncv4/lab/lib/905db83a4732/agent.py", line 65, in run
+    return self.shell(shlex.join(map(str, argv)), **options)
+           ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "~/benchmarks/xsyncv4/lab/lib/905db83a4732/agent.py", line 61, in shell
+    raise RuntimeError(f'{self.name}: `{script[:200]}` exited {done.returncode}: {done.stderr.strip()[-400:]}')
+RuntimeError: freya: `python3 /mnt/nvme/xsbench/lib/905db83a4732/probe.py staged --root /mnt/nvme/xsbench --bundle 905db83a4732 agent.py corpora.json corpus.py measure.py probe.py runner.py xs-453704a64528-tune` exited 255: ssh: Could not resolve hostname [host]: Name or service not known

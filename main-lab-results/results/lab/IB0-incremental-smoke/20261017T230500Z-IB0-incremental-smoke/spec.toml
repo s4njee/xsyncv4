@@ -1,0 +1,35 @@
+# T9: incremental backups; scratch destinations are reset before every sample.
+# Fractions count changed files; each edit changes up to 4 KiB, with atomic writes retained.
+id = "IB0-incremental-smoke"
+kind = "screening"
+hypothesis = "The fastest incremental backup policy depends on the changed-file fraction, corpus, and direction."
+primary = "durable_s"
+delta = 0.03
+blocks = 1
+control = "xs-z"
+verify = "full"
+cleanup = "eager"
+
+[arms.xs-z]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-az"]
+
+[arms.rsync-z]
+tool = "rsync"
+flags = ["-az"]
+
+[arms.xs-z-whole]
+tool = "xs"
+rev = "453704a64528-tune"
+metrics = true
+flags = ["-azW"]
+
+[matrix]
+link = "lan"
+corpus = ["tiny-one"]
+scenario = ["update-1pct"]
+direction = ["neo>freya", "freya>neo"]
+client = ["sender"]
+cache = ["warm"]

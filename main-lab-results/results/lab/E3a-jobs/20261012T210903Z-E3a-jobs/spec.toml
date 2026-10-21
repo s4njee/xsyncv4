@@ -1,0 +1,47 @@
+# E3a: worker threads. T1a showed that with neo sending a mixed tree, one or
+# two workers instead of the default four bring xs level with rsync at the
+# link's limit. -j sets both ends, and small-file and no-op transfers may
+# want more workers, not fewer; the receiver's create lock (H5) may cap what
+# more can do. This sweep asks what -j suits each kind of workload, in both
+# directions, against the default (neo picks 4, freya 16).
+id = "E3a-jobs"
+kind = "screening"
+hypothesis = "The best worker count differs by workload: fewer than the default for byte-bound copies from neo, no fewer for small files and no-ops."
+primary = "wall_s"
+delta = 0.03
+blocks = 10
+control = "xs"
+verify = "first-last"
+
+[arms.xs]
+tool = "xs"
+rev = "e1f05b518049"
+flags = ["-a"]
+
+[arms.xs-j1]
+tool = "xs"
+rev = "e1f05b518049"
+flags = ["-a", "-j1"]
+
+[arms.xs-j2]
+tool = "xs"
+rev = "e1f05b518049"
+flags = ["-a", "-j2"]
+
+[arms.xs-j4]
+tool = "xs"
+rev = "e1f05b518049"
+flags = ["-a", "-j4"]
+
+[arms.xs-j8]
+tool = "xs"
+rev = "e1f05b518049"
+flags = ["-a", "-j8"]
+
+[matrix]
+link = "lan"
+corpus = ["small-flat", "small-real", "mixed-bimodal"]
+scenario = ["fresh", "noop"]
+direction = ["neo>freya", "freya>neo"]
+client = ["sender"]
+cache = ["warm"]

@@ -1,0 +1,43 @@
+noop reference-j1 0/6: 3.0622s verified
+noop candidate-j1 0/6: 2.4656s verified
+noop rsync 0/6: 1.8470s verified
+noop candidate-j1 1/6: 3.2206s verified
+noop rsync 1/6: 1.7749s verified
+noop reference-j1 1/6: 4.0626s verified
+noop rsync 2/6: 1.7277s verified
+noop reference-j1 2/6: 3.5697s verified
+noop candidate-j1 2/6: 3.3984s verified
+noop reference-j1 3/6: 4.5688s verified
+noop candidate-j1 3/6: 3.9026s verified
+noop rsync 3/6: 3.5116s verified
+noop candidate-j1 4/6: 4.7114s verified
+noop rsync 4/6: 2.2789s verified
+noop reference-j1 4/6: 4.8782s verified
+noop rsync 5/6: 3.3305s verified
+noop reference-j1 5/6: 4.3549s verified
+noop candidate-j1 5/6: 3.8712s verified
+noop reference-j1 6/6: 6.7930s verified
+noop candidate-j1 6/6: 3.7728s verified
+noop rsync 6/6: 2.0851s verified
+[
+  {
+    "case": "noop",
+    "tools": {
+      "reference-j1": {
+        "wall_seconds": 4.461870062048547,
+        "cpu_seconds": 3.6464575,
+        "peak_rss_bytes": 31555584
+      },
+      "candidate-j1": {
+        "wall_seconds": 3.822004687972367,
+        "cpu_seconds": 2.8219355,
+        "peak_rss_bytes": 31080448
+      },
+      "rsync": {
+        "wall_seconds": 2.1820164795499295,
+        "cpu_seconds": 2.9115975,
+        "peak_rss_bytes": 27344896
+      }
+    }
+  }
+]

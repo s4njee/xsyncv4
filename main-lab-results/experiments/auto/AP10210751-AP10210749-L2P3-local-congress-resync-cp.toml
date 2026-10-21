@@ -1,0 +1,29 @@
+# Written by the 6-hourly planner (2026-10-21T07:51Z). Why: L2R5 showed the CPU cap leaves xs's fresh lead intact, but re-syncs, which lab2 has not reported, lean on parallel scanning that two cores may starve.
+id = "AP10210751-AP10210749-L2P3-local-congress-resync-cp"
+kind = "screening"
+hypothesis = "Under a 2-CPU cap, rsync -a's time-to-durable comes within 5% of xs -a -j4's in at least one of the no-op, 0.1%, 1% and 10% update cells, where xs's plain-link no-op lead was 4.7x (J2)."
+primary = "durable_s"
+delta = 0.05
+blocks = 10
+control = "xs-j4"
+verify = "first-last"
+cleanup = "eager"
+sample_timeout_s = 7200
+cpus = { host = "neo", count = 2 }
+
+[arms.xs-j4]
+tool = "xs"
+rev = "e51c1df1329a"
+flags = ["-a", "-j4"]
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[matrix]
+link = "neo-local-ssd"
+corpus = ["real-congress"]
+scenario = ["noop", "update-0p1pct", "update-1pct", "update-10pct"]
+direction = ["neo>neo-ssd"]
+client = ["receiver"]
+cache = ["warm"]

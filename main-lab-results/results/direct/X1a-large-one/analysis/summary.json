@@ -1,0 +1,25 @@
+{
+ "experiment": "X1a-large-one",
+ "kind": "screening",
+ "hypothesis": "On a ~3 Gb/s direct link, xs -a copies large files at least as fast as rsync -a, and ChaCha20 slows both against AES-GCM.",
+ "primary": "durable_s",
+ "control": "rsync",
+ "delta": 0.03,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261014T225217Z-X1a-large-one"
+ ],
+ "spec_sha256": [
+  "bc448a58ae906bf7bd42b4a33cdc6d418397b3900c41fd623535d1637e553431"
+ ],
+ "valid_blocks": 11,
+ "void_attempts": 15,
+ "void_reasons": [
+  "rsync-chacha: the transfer exited 11: ync: [receiver] write failed on \"~/benchmarks/xsbench.noindex/work/20261014T225217Z-X1a-large-one/large-one.fr",
+  "rsync-chacha: the transfer exited 13: rsync error: errors with program diagnostics (code 13) at log.c(245) [receiver=3.4.4]",
+  "rsync: the transfer exited 13: rsync error: errors with program diagnostics (code 13) at log.c(245) [receiver=3.4.4]",
+  "xs-chacha: the transfer exited 11: ummary: 1 error (showing first 1)\n  file IO (code 11): 1 error\n    write failed on \"~/benchmarks/xsbench.noindex/",
+  "xs: the transfer exited 11: error summary: 1 error (showing first 1)\n  file IO (code 11): 1 error\n    write failed on \"~/benchmarks/xsbench.noindex/"
+ ]
+}

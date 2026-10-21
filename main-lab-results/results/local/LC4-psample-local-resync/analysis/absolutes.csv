@@ -1,0 +1,5 @@
+experiment,kind,cell_id,corpus,scenario,sender,receiver,client,link,cache,arm,metric,n_blocks,geomean,lo,hi
+LC4-psample-local-resync,screening,real-psample.noop.neo-neo-ssd.receiver.cold,real-psample,noop,neo,neo-ssd,receiver,neo-local-ssd,cold,rsync,durable_s,6,126.16756612132893,125.37558633697455,126.96454872957553
+LC4-psample-local-resync,screening,real-psample.noop.neo-neo-ssd.receiver.cold,real-psample,noop,neo,neo-ssd,receiver,neo-local-ssd,cold,xs,durable_s,6,65.6606921250533,65.32228360855213,66.00085380016614
+LC4-psample-local-resync,screening,real-psample.noop.neo-neo-ssd.receiver.cold,real-psample,noop,neo,neo-ssd,receiver,neo-local-ssd,cold,rsync,wall_s,6,126.16158470040452,125.36958705555774,126.95858563420019
+LC4-psample-local-resync,screening,real-psample.noop.neo-neo-ssd.receiver.cold,real-psample,noop,neo,neo-ssd,receiver,neo-local-ssd,cold,xs,wall_s,6,65.65459166623911,65.31607987367747,65.9948578542563

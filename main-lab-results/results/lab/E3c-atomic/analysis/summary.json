@@ -1,0 +1,19 @@
+{
+ "experiment": "E3c-atomic",
+ "kind": "screening",
+ "hypothesis": "--no-atomic makes small fresh copies more than 3% faster and is no slower elsewhere.",
+ "primary": "wall_s",
+ "control": "xs",
+ "delta": 0.03,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261014T220725Z-E3c-atomic"
+ ],
+ "spec_sha256": [
+  "b7ef922c16b4fc2110782b54acf7cb5d666b1437d6661cd8be6e749526673171"
+ ],
+ "valid_blocks": 96,
+ "void_attempts": 0,
+ "void_reasons": []
+}

@@ -1,0 +1,21 @@
+{
+ "experiment": "MA8-psample-pull-anchors",
+ "kind": "confirmatory",
+ "hypothesis": "With a larger parent-descriptor budget, xs -aH re-syncs psample onto the Mac faster than its parent and than rsync -aH, at a no-op and after 1% of files change.",
+ "primary": "wall_s",
+ "control": "rsync",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261019T132843Z-MA8-psample-pull-anchors"
+ ],
+ "spec_sha256": [
+  "364c012d2bd0af2408fafce7503f1e92a7c8b7fedcb31ebb01663cbf0a49b764"
+ ],
+ "valid_blocks": 0,
+ "void_attempts": 1,
+ "void_reasons": [
+  "rsync: harness error: mac: `rsync -aH -e 'ssh -oBatchMode=yes -oCompression=no -oControlMaster=no -oConnectTimeout=10 -oHostKeyAlias=[host]' [user]@10.27.0."
+ ]
+}

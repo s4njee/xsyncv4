@@ -1,0 +1,358 @@
+{
+ "id": "T2-mac-mars-small",
+ "question": "What limits xs's copies from the Mac to mars over 2.5GbE, and which settings should be the default?",
+ "start": [
+  "P3b"
+ ],
+ "startedUtc": "2026-10-16T23:54:23Z",
+ "until": "2026-10-18T12:00Z",
+ "fills": 0,
+ "nodes": [
+  {
+   "id": "P3b",
+   "kind": "experiment",
+   "experiment": "P3b-hdd-writeback",
+   "question": "Does flushing as it goes help xs write small files to a hard drive?",
+   "estimateHours": 1.3,
+   "hypothesis": "On the hard drive, eager writeback shortens xs's time to durable for small and mixed trees.",
+   "design": "screening",
+   "state": "decided",
+   "runs": [
+    {
+     "id": "20261016T223339Z-P3b-hdd-writeback",
+     "key": "hdd/P3b-hdd-writeback/20261016T223339Z-P3b-hdd-writeback",
+     "state": "complete"
+    }
+   ],
+   "decision": "P3b: eager writeback did not help on the hard drive",
+   "decidedUtc": "2026-10-17T00:55:44Z",
+   "start": true,
+   "promote": null
+  },
+  {
+   "id": "P3c",
+   "kind": "confirm",
+   "experiment": "P3c-hdd-confirm",
+   "question": "Does eager writeback's gain hold up with fresh blocks?",
+   "estimateHours": 1.7,
+   "hypothesis": "Confirms the fastest arm of P3b with 12 fresh blocks, if it had one.",
+   "design": "confirmatory",
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": "P3b"
+  },
+  {
+   "id": "D1",
+   "kind": "experiment",
+   "experiment": "D1-mac-sender-knobs",
+   "question": "Can a sending setting on the Mac deliver small files faster?",
+   "estimateHours": 1.7,
+   "hypothesis": "Larger read batches, more scanning workers or larger coalesced frames on the Mac make xs deliver small trees to mars faster.",
+   "design": "screening",
+   "state": "queued",
+   "runs": [
+    {
+     "id": "20261017T005544Z-D1-mac-sender-knobs",
+     "key": "pipes/D1-mac-sender-knobs/20261017T005544Z-D1-mac-sender-knobs",
+     "state": null
+    }
+   ],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "D5",
+   "kind": "experiment",
+   "experiment": "D5-hdd-recv-jobs",
+   "question": "Do fewer receiving workers help a hard drive?",
+   "estimateHours": 1.7,
+   "hypothesis": "Fewer receiving workers make small and mixed trees land on the hard drive faster.",
+   "design": "screening",
+   "state": "queued",
+   "runs": [
+    {
+     "id": "20261017T005545Z-D5-hdd-recv-jobs",
+     "key": "hdd/D5-hdd-recv-jobs/20261017T005545Z-D5-hdd-recv-jobs",
+     "state": null
+    }
+   ],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "D5~end1",
+   "kind": "end",
+   "experiment": null,
+   "question": null,
+   "estimateHours": null,
+   "hypothesis": "four receiving workers were as fast as any on the hard drive",
+   "design": null,
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "D6",
+   "kind": "experiment",
+   "experiment": "D6-mac-best-default",
+   "question": "Is xs's best small-file setting safe as the default for mixed and large trees?",
+   "estimateHours": 1.1,
+   "hypothesis": "xs's best small-file setting is no slower than its default on mixed and large trees.",
+   "design": "screening",
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "D6b",
+   "kind": "experiment",
+   "experiment": "D6b-mac-best-split",
+   "question": "Which half of the best setting costs time: four workers or --no-atomic?",
+   "estimateHours": 1.5,
+   "hypothesis": "Only one half of the best small-file setting slows mixed or large trees.",
+   "design": "screening",
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "D7",
+   "kind": "experiment",
+   "experiment": "D7-mac-z-2g5",
+   "question": "Does compression pay at 2.5GbE, and at which level?",
+   "estimateHours": 1.9,
+   "hypothesis": "Compression makes compressible trees reach mars faster over 2.5GbE.",
+   "design": "screening",
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "D7~end1",
+   "kind": "end",
+   "experiment": null,
+   "question": null,
+   "estimateHours": null,
+   "hypothesis": "no compression setting beat sending uncompressed at 2.5GbE",
+   "design": null,
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "D1c",
+   "kind": "confirm",
+   "experiment": "D1c-mac-sender-confirm",
+   "question": "Does the Mac's winning send setting hold up with fresh blocks?",
+   "estimateHours": 0.8,
+   "hypothesis": "Confirms the fastest arm of D1 with 12 fresh blocks, if it had one.",
+   "design": "confirmatory",
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": "D1"
+  },
+  {
+   "id": "D5c",
+   "kind": "confirm",
+   "experiment": "D5c-hdd-recv-confirm",
+   "question": "Does the hard drive's winning worker count hold up with fresh blocks?",
+   "estimateHours": 1.3,
+   "hypothesis": "Confirms the fastest arm of D5 with 12 fresh blocks, if it had one.",
+   "design": "confirmatory",
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": "D5"
+  },
+  {
+   "id": "D7c",
+   "kind": "confirm",
+   "experiment": "D7c-mac-z-confirm",
+   "question": "Does the winning compression level hold up with fresh blocks?",
+   "estimateHours": 1.1,
+   "hypothesis": "Confirms the fastest arm of D7 with 12 fresh blocks, if it had one.",
+   "design": "confirmatory",
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": "D7"
+  },
+  {
+   "id": "F2a",
+   "kind": "fill",
+   "experiment": "F2a-mac-replicate",
+   "question": "Do the main results on NVMe hold steady over the weekend?",
+   "estimateHours": 0.4,
+   "hypothesis": "xs's best setting stays ahead of rsync and xs's default from run to run.",
+   "design": "screening",
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "F2b",
+   "kind": "fill",
+   "experiment": "F2b-hdd-replicate",
+   "question": "Do the main results on the hard drive hold steady over the weekend?",
+   "estimateHours": 0.4,
+   "hypothesis": "xs's best setting stays ahead of rsync on the hard drive from run to run.",
+   "design": "screening",
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  }
+ ],
+ "edges": [
+  {
+   "from": "P3b",
+   "to": "P3c",
+   "label": "eager writeback faster",
+   "taken": false
+  },
+  {
+   "from": "P3b",
+   "to": "D1",
+   "label": "eager writeback faster",
+   "taken": false
+  },
+  {
+   "from": "P3b",
+   "to": "D5",
+   "label": "eager writeback faster",
+   "taken": false
+  },
+  {
+   "from": "P3b",
+   "to": "D1",
+   "label": "otherwise",
+   "taken": true
+  },
+  {
+   "from": "P3b",
+   "to": "D5",
+   "label": "otherwise",
+   "taken": true
+  },
+  {
+   "from": "D1",
+   "to": "D1c",
+   "label": "an arm was faster",
+   "taken": null
+  },
+  {
+   "from": "D1",
+   "to": "D6",
+   "label": "an arm was faster",
+   "taken": null
+  },
+  {
+   "from": "D1",
+   "to": "D6",
+   "label": "nothing faster",
+   "taken": null
+  },
+  {
+   "from": "D5",
+   "to": "D5c",
+   "label": "an arm was faster",
+   "taken": null
+  },
+  {
+   "from": "D5",
+   "to": "D5~end1",
+   "label": "four is fine",
+   "taken": null
+  },
+  {
+   "from": "D6",
+   "to": "D6b",
+   "label": "slower somewhere",
+   "taken": null
+  },
+  {
+   "from": "D6",
+   "to": "D7",
+   "label": "slower somewhere",
+   "taken": null
+  },
+  {
+   "from": "D6",
+   "to": "D7",
+   "label": "never slower",
+   "taken": null
+  },
+  {
+   "from": "D7",
+   "to": "D7c",
+   "label": "an arm was faster",
+   "taken": null
+  },
+  {
+   "from": "D7",
+   "to": "D7~end1",
+   "label": "nothing faster",
+   "taken": null
+  }
+ ],
+ "decisions": [
+  {
+   "utc": "2026-10-17T00:55:46Z",
+   "node": "D5",
+   "kind": "queued",
+   "text": "D5 queued on mac (96 samples): after P3b: eager writeback did not help on the hard drive"
+  },
+  {
+   "utc": "2026-10-17T00:55:45Z",
+   "node": "D1",
+   "kind": "queued",
+   "text": "D1 queued on mac (144 samples): after P3b: eager writeback did not help on the hard drive"
+  },
+  {
+   "utc": "2026-10-17T00:55:44Z",
+   "node": "P3b",
+   "kind": "decision",
+   "text": "P3b: eager writeback did not help on the hard drive \u2192 D1, D5"
+  },
+  {
+   "utc": "2026-10-16T23:54:23Z",
+   "node": "P3b",
+   "kind": "adopted",
+   "text": "P3b: following 20261016T223339Z-P3b-hdd-writeback"
+  }
+ ]
+}

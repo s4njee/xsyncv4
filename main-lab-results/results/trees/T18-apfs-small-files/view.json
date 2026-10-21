@@ -1,0 +1,155 @@
+{
+ "id": "T18-apfs-small-files",
+ "question": "Can xs stop losing to rsync when it writes small files onto the Mac: through the parent-descriptor fix, or by not renaming new files?",
+ "start": [
+  "A",
+  "B"
+ ],
+ "startedUtc": "2026-10-20T06:04:08Z",
+ "until": null,
+ "fills": 0,
+ "nodes": [
+  {
+   "id": "A",
+   "kind": "experiment",
+   "experiment": "MA9-small-pull-anchors",
+   "question": "Pulling small trees onto the Mac, does xs with the larger parent-descriptor budget beat its parent, and close its gap to rsync, at a no-op and fresh?",
+   "estimateHours": 0.7,
+   "hypothesis": "With a larger parent-descriptor budget, xs -a pulls small trees onto the Mac faster than its parent, and closes most of its gap to rsync -a, at a no-op and fresh.",
+   "design": "confirmatory",
+   "state": "queued",
+   "runs": [
+    {
+     "id": "20261020T060408Z-MA9-small-pull-anchors",
+     "key": "macmars/MA9-small-pull-anchors/20261020T060408Z-MA9-small-pull-anchors",
+     "state": null
+    }
+   ],
+   "decision": null,
+   "decidedUtc": null,
+   "start": true,
+   "promote": null
+  },
+  {
+   "id": "A~end0",
+   "kind": "end",
+   "experiment": null,
+   "question": null,
+   "estimateHours": null,
+   "hypothesis": "the fix closes the small-file gap on the Mac: weigh merging engine/dest-anchors with T17; decision needed",
+   "design": null,
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "A~end1",
+   "kind": "end",
+   "experiment": null,
+   "question": null,
+   "estimateHours": null,
+   "hypothesis": "rsync stays ahead on small files onto the Mac even with the fix: a second cause to profile; decision needed",
+   "design": null,
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "B",
+   "kind": "experiment",
+   "experiment": "MA10-apfs-no-atomic",
+   "question": "On fresh copies of small files onto the Mac, is --no-atomic clearly faster than xs's default?",
+   "estimateHours": 0.3,
+   "hypothesis": "On fresh copies of small files onto the Mac, xs -a --no-atomic is faster than xs -a, by about a third.",
+   "design": "confirmatory",
+   "state": "queued",
+   "runs": [
+    {
+     "id": "20261020T060409Z-MA10-apfs-no-atomic",
+     "key": "macmars/MA10-apfs-no-atomic/20261020T060409Z-MA10-apfs-no-atomic",
+     "state": null
+    }
+   ],
+   "decision": null,
+   "decidedUtc": null,
+   "start": true,
+   "promote": null
+  },
+  {
+   "id": "B~end0",
+   "kind": "end",
+   "experiment": null,
+   "question": null,
+   "estimateHours": null,
+   "hypothesis": "skipping the rename is clearly faster on APFS: consider an engineering case to write new files under their final names; decision needed",
+   "design": null,
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "B~end1",
+   "kind": "end",
+   "experiment": null,
+   "question": null,
+   "estimateHours": null,
+   "hypothesis": "--no-atomic is not clearly faster on APFS: the rename is not the cost; decision needed",
+   "design": null,
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  }
+ ],
+ "edges": [
+  {
+   "from": "A",
+   "to": "A~end0",
+   "label": "level with or faster than rsync",
+   "taken": null
+  },
+  {
+   "from": "A",
+   "to": "A~end1",
+   "label": "rsync still ahead",
+   "taken": null
+  },
+  {
+   "from": "B",
+   "to": "B~end0",
+   "label": "the rename is the cost",
+   "taken": null
+  },
+  {
+   "from": "B",
+   "to": "B~end1",
+   "label": "no clear gain",
+   "taken": null
+  }
+ ],
+ "decisions": [
+  {
+   "utc": "2026-10-20T06:04:10Z",
+   "node": "B",
+   "kind": "queued",
+   "text": "B queued on mac (72 samples): start of the tree"
+  },
+  {
+   "utc": "2026-10-20T06:04:09Z",
+   "node": "A",
+   "kind": "queued",
+   "text": "A queued on mac (144 samples): start of the tree"
+  }
+ ]
+}

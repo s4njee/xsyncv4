@@ -1,0 +1,21 @@
+{
+ "experiment": "NE1-wire-or-pi",
+ "kind": "screening",
+ "hypothesis": "xs fills the gigabit wire on large trees in both directions, and falls short only where the Pi's four-core sender is CPU-bound.",
+ "primary": "durable_s",
+ "control": "xs",
+ "delta": 0.03,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261017T153637Z-NE1-wire-or-pi"
+ ],
+ "spec_sha256": [
+  "915cdfe85850b14953c58b13ff71d8054bdf0cd33ec5b157bdad648af038a8eb"
+ ],
+ "valid_blocks": 14,
+ "void_attempts": 30,
+ "void_reasons": [
+  "neo does not answer ping"
+ ]
+}
