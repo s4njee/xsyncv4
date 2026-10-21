@@ -57,7 +57,7 @@
   },
   {
    "id": "xattrs",
-   "state": "open",
+   "state": "review",
    "attempts": 0
   },
   {
@@ -372,14 +372,14 @@
    "kind": "port",
    "step": "xattrs",
    "question": "extended attributes (PF_XATTRS, PF_XATTR_STREAM)",
-   "state": "prepared",
+   "state": "review",
    "opened": "2026-10-21T00:54:52Z",
-   "ended": "2026-10-21T00:57:56Z",
-   "last": "parent built; xs-rs checks passing on it: test, clippy, fmt, arm64",
+   "ended": "2026-10-21T02:32:32Z",
+   "last": "pull request https://github.com/s4njee/xsyncv4/pull/14",
    "outcome": "patched",
-   "summary": "xs-rs now negotiates PF_XATTRS with PF_XATTR_STREAM, carries extended attributes in DIR entries and DATA records in the C++ field order, applies them on both sides, and validates XATTR_START/CHUNK/END before any destination work. It interoperates with the parent C++ xs in both directions, including -X filtering and -XX internal names.",
-   "cost_usd": 0.27,
-   "pull_request": null,
+   "summary": "Added PF_XATTRS and PF_XATTR_STREAM to xs-rs: xattr configuration negotiation, per-entry and per-file xattr lists, streamed large values with XXH3-64 verification, xattr filtering, and receiver-side set/remove. C++ clients and servers exchange user and rsync-internal attributes in both directions, including a second -XX pass.",
+   "cost_usd": 0.21,
+   "pull_request": "https://github.com/s4njee/xsyncv4/pull/14",
    "merged": null
   }
  ]
