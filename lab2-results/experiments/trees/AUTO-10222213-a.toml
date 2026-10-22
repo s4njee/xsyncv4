@@ -1,0 +1,21 @@
+# Written by the 6-hourly planner at 2026-10-22T22:13Z for a; nothing is queued after the deadline.
+id = "AUTO-10222213-a"
+question = "Runner a has no current run and a zero-hour backlog, so it has its full 6.0 h window; these four screens take about 11 minutes of measurement at the listed sample rates, and the real constraint is A's 32 GiB/day traffic, which the plan holds to roughly 31 GiB. Queued tree work already races the newest xs-rs on congress-sample fresh, update-1pct and update-10pct (PS-beabaee992b6-fresh, FC-beabaee-update-1pct, PS-beabaee992b6-update-10pct), so those are not repeated. Instead the plan re-measures the one remaining non-noop cell xs-c++ wins (real-projects fresh, 4 blocks, ~25.6 GB, the most the traffic cap allows), pins down the 0.945 laikav2 fresh near-tie at 8 blocks, and opens the two untouched scenario-corpus pairs (laikav2 update-1pct, congress update-0p1pct). No xs-rs flag variants and no confirm arms: the current rev is only now entering the board, an extra 8-block confirmation would break the traffic cap on real-projects, and no absolute speed floor is known to set as a confirm target. Engineering and port are null by the lab's rules (engineering is closed for this lab and every port step is merged)."
+deadline = "2026-10-23T04:13Z"
+start = ["N0", "N1", "N2", "N3"]
+
+[nodes.N0]
+spec = "auto/AP10222213-PS-beabaee-projects-fresh-4b.toml"
+question = "On real-projects fresh copies over a-aws, how far is the newest xs-rs (beabaee992b6, -a -j4) from xs-c++ and rsync, now that a new xs-rs has landed since the two-block BL2 run?"
+
+[nodes.N1]
+spec = "auto/AP10222213-PS-beabaee-laikav2-fresh.toml"
+question = "On laikav2-sample fresh copies, is xs-rs at beabaee992b6 faster than xs-c++ by more than the 5% margin, or was the five-block 0.945 ratio a tie?"
+
+[nodes.N2]
+spec = "auto/AP10222213-PS-beabaee-laikav2-update-1pct.toml"
+question = "On laikav2-sample with 1% of files changed, does xs-rs at beabaee992b6 beat xs-c++ and rsync, in a scenario-corpus pair no experiment has run?"
+
+[nodes.N3]
+spec = "auto/AP10222213-PS-beabaee-update-0p1pct.toml"
+question = "On congress-sample with 0.1% of files changed, does xs-rs at beabaee992b6 hold its small-file advantage over xs-c++ and rsync when almost nothing has changed?"

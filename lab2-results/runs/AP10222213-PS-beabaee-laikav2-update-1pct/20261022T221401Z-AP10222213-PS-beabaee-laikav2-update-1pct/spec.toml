@@ -1,0 +1,33 @@
+# Written by the 6-hourly planner (2026-10-22T22:13Z). Why: Every update measurement so far is on congress-sample, so a laikav2 update-1pct cell is a new scoreboard entry that tests whether the update advantage generalizes beyond small files, for about 2.9 GB of traffic.
+id = "AP10222213-PS-beabaee-laikav2-update-1pct"
+kind = "screening"
+hypothesis = "Update-1pct on laikav2-sample is scan- and metadata-dominated like congress-sample update-1pct, so xs-rs at beabaee992b6 finishes at or below 0.95 of xs-c++'s durable time while both stay well ahead of rsync."
+primary = "durable_s"
+delta = 0.05
+blocks = 8
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+sample_timeout_s = 7200
+
+[arms.xs-rs]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j4"]
+
+[arms.xs-cpp]
+tool = "xs"
+rev = "e104bde552f2"
+flags = ["-a", "-j4"]
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[matrix]
+link = "a-aws"
+corpus = ["laikav2-sample"]
+scenario = ["update-1pct"]
+direction = ["a>aws"]
+client = ["initiator"]
+cache = ["warm"]

@@ -1,0 +1,33 @@
+# Written by the 6-hourly planner (2026-10-22T22:13Z). Why: Laikav2-sample fresh is the closest standing call (0.945 on five blocks, interval [0.75,1.19]) and the current rev has not raced it; eight blocks cost under three minutes and 2.3 GB and settle whether it is a real win.
+id = "AP10222213-PS-beabaee-laikav2-fresh"
+kind = "screening"
+hypothesis = "The 0.945 ratio from five blocks at an older rev converges to below 0.95 with an eight-block interval that excludes 1 at the current rev; if the interval instead straddles 1, laikav2-sample fresh is an honest tie and should not be claimed as a win."
+primary = "durable_s"
+delta = 0.05
+blocks = 8
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+sample_timeout_s = 7200
+
+[arms.xs-rs]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j4"]
+
+[arms.xs-cpp]
+tool = "xs"
+rev = "e104bde552f2"
+flags = ["-a", "-j4"]
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[matrix]
+link = "a-aws"
+corpus = ["laikav2-sample"]
+scenario = ["fresh"]
+direction = ["a>aws"]
+client = ["initiator"]
+cache = ["warm"]
