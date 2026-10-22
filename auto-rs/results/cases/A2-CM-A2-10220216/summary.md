@@ -1,0 +1,3 @@
+# A2: Find the next limit
+
+A measurement designed by Claude Opus 5.5 for this node, run 20261022T071651Z-CM-A2-10220216 (stopped): After the receiver-lock change, small-file fresh copies are limited by per-file work on the receiving Mac. If so, -j8 and -j16 give little over -j4 while peer CPU rises, and the effect is stronger on pull (mars>mac), where small-deep takes about twice as long as push. --no-atomic at -j8 beats -j8 if temp-file rename costs matter. A large gap between durable_s and wall_s would point at writeback. This run leaves out the local tar-extraction baseline on the receiver and any sample/perf profile, so it bounds the limit by scaling and CPU, not by an absolute ceiling or a per-function breakdown.
