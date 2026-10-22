@@ -120,6 +120,13 @@ impl CompressionLink {
         chosen.min(self.cap())
     }
 
+    /// The level for compression this end chose (not the peer's `-z`). A transient stall
+    /// in the writer must not push it to a level whose CPU then keeps the writer slow:
+    /// automatic compression stays at level 3 or below. `-z` keeps the adaptive rule.
+    pub fn automatic_level(&self, rate_limit: u64) -> i32 {
+        self.level(false, 3, rate_limit).min(3)
+    }
+
     /// Without `-z`, whether compressing still pays: from the start, and then while the
     /// writer moves less than `AUTO_COMPRESS_BELOW`. Over an internet link the writer waits
     /// on ssh, so its rate is the link's, and fewer bytes on the wire are worth level 1-3
@@ -249,6 +256,10 @@ mod tests {
         assert_eq!(medium.level(false, 3, 0), 3);
         assert_eq!(slow.level(false, 3, 0), 6);
         assert_eq!(fast.level(false, 3, MIB), 6);
+        // Compression this end chose never escalates into the CPU-heavy levels.
+        assert_eq!(slow.automatic_level(0), 3);
+        assert_eq!(medium.automatic_level(0), 3);
+        assert_eq!(fast.automatic_level(0), 1);
         for level in [-1000, -5, 0, 1, 9, 22] {
             assert_eq!(fast.level(true, level, 0), level as i32);
             assert_eq!(slow.level(true, level, 0), level as i32);

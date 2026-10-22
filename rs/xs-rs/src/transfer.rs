@@ -614,6 +614,16 @@ impl Sending<'_> {
         self.compress && (self.opts.compress || self.link.auto_worthwhile())
     }
 
+    /// `-z` follows the peer's adaptive rule; compression we chose stays cheap.
+    fn level(&self) -> i32 {
+        let opts = self.opts;
+        if opts.compress {
+            self.link.level(opts.compress_level_explicit, opts.compress_level, opts.bwlimit)
+        } else {
+            self.link.automatic_level(opts.bwlimit)
+        }
+    }
+
     fn has_failed(&self) -> bool {
         *self.failed.lock().unwrap()
     }
@@ -703,7 +713,7 @@ fn walk_dir(s: &Sending, task: WalkTask) -> io::Result<()> {
     frame.var(id as u64).var(parent_plus1 as u64).var(pidx as u64);
     let flag_at = frame.bytes.len();
     frame.byte(flags);
-    let level = s.link.level(opts.compress_level_explicit, opts.compress_level, opts.bwlimit);
+    let level = s.level();
     // Automatic compression is our choice, not the peer's `-z`: a listing is usually a
     // kilobyte or two, where a zstd frame costs more CPU than it saves on the wire.
     // With `-z`, every listing is compressed as the C++ does.
@@ -773,7 +783,7 @@ fn flush_data(s: &Sending, block: &mut Vec<u8>, compress: bool) -> io::Result<()
     let opts = s.opts;
     let records = &block[DATA_HEADER..];
     let digest = ffi::xxh3_64(records);
-    let level = s.link.level(opts.compress_level_explicit, opts.compress_level, opts.bwlimit);
+    let level = s.level();
     if let Some(compressed) = (compress && s.compressing()).then(|| protocol::compress_body(records, level)).flatten() {
         let mut payload = Encoder { bytes: Vec::with_capacity(DATA_HEADER + 10 + compressed.len()) };
         payload.byte(1).raw(&digest.to_le_bytes()).var(records.len() as u64).raw(&compressed);
@@ -1066,6 +1076,7 @@ fn send_worker(s: &Sending, prefers_walk: bool) {
     let mut block = Vec::new();
     let mut contents = Vec::new();
     loop {
+        let mut idle = false;
         let job = {
             let mut state = s.work.lock().unwrap();
             loop {
@@ -1087,9 +1098,22 @@ fn send_worker(s: &Sending, prefers_walk: bool) {
                 if state.ended {
                     break None;
                 }
+                // As the C++ pool's `on_idle`: a worker with a partial DATA block and
+                // nothing to do puts it on the wire instead of letting the receiver wait.
+                if !block.is_empty() {
+                    idle = true;
+                    break None;
+                }
                 state = s.work_changed.wait(state).unwrap();
             }
         };
+        if idle {
+            if let Err(error) = flush_data(s, &mut block, s.compress) {
+                s.fail(&error);
+                return;
+            }
+            continue;
+        }
         let Some(job) = job else {
             // No more reads: put this worker's partial block on the wire before the
             // last worker sends DATA_END, so DATA never follows the end marker.
