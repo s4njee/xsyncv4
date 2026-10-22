@@ -1837,6 +1837,153 @@
    "model": "opencode/deepseek-v4.1-flash",
    "summarizedUtc": 1792637317.126,
    "driver": "a"
+  },
+  "PS-e671c84aa680-fresh": {
+   "run": "20261022T041438Z-PS-e671c84aa680-fresh",
+   "experiment": "PS-e671c84aa680-fresh",
+   "key": "congress-sample.fresh.a-aws.sender.warm|1|0",
+   "utc": 1792642549.55,
+   "cell": "congress-sample.fresh.a-aws.sender.warm",
+   "factors": {
+    "corpus": "congress-sample",
+    "scenario": "fresh",
+    "sender": "a",
+    "receiver": "aws",
+    "client": "sender",
+    "link": "a-aws",
+    "cache": "warm"
+   },
+   "block": 1,
+   "attempt": 0,
+   "control": "xs-cpp",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 3.579,
+     "gbps": 0.488,
+     "files_per_s": 7055,
+     "speed": 1
+    },
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 3.172,
+     "gbps": 0.55,
+     "files_per_s": 7959,
+     "speed": 1.13
+    },
+    {
+     "arm": "rsync",
+     "label": "rsync",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 3.226,
+     "gbps": 0.541,
+     "files_per_s": 7825,
+     "speed": 1.11
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "rsync",
+     "label": "rsync",
+     "speed": 1.1,
+     "blocks": 2
+    },
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "speed": 1.19,
+     "blocks": 2
+    }
+   ],
+   "question": "Is xs-rs at e671c84aa680 (after port step acls) as fast as xs-c++, and than rsync?",
+   "summary": "xs-rs was fastest at 3.172 s, 1.13x the xs-c++ control, with rsync close behind at 3.226 s (1.11x). So far this cell shows xs-rs at 1.19x and rsync at 1.10x across two blocks, which is still thin evidence. On the question, xs-rs is marginally ahead of both xs-c++ and rsync here, but one block and two cumulative blocks cannot establish that firmly.",
+   "model": "opencode/deepseek-v4.1-flash",
+   "summarizedUtc": 1792642628.011,
+   "driver": "a"
+  },
+  "PS-e671c84aa680-update-10pct": {
+   "run": "20261022T041440Z-PS-e671c84aa680-update-10pct",
+   "experiment": "PS-e671c84aa680-update-10pct",
+   "key": "congress-sample.update-10pct.a-aws.sender.warm|0|0",
+   "utc": 1792642624.384,
+   "cell": "congress-sample.update-10pct.a-aws.sender.warm",
+   "factors": {
+    "corpus": "congress-sample",
+    "scenario": "update-10pct",
+    "sender": "a",
+    "receiver": "aws",
+    "client": "sender",
+    "link": "a-aws",
+    "cache": "warm"
+   },
+   "block": 0,
+   "attempt": 0,
+   "control": "xs-cpp",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 1.28,
+     "gbps": 0.155,
+     "files_per_s": 19722,
+     "speed": 1
+    },
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 1.341,
+     "gbps": 0.148,
+     "files_per_s": 18832,
+     "speed": 0.95
+    },
+    {
+     "arm": "rsync",
+     "label": "rsync",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 1.491,
+     "gbps": 0.133,
+     "files_per_s": 16933,
+     "speed": 0.86
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "rsync",
+     "label": "rsync",
+     "speed": 0.86,
+     "blocks": 1
+    },
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "speed": 0.95,
+     "blocks": 1
+    }
+   ],
+   "question": "Is xs-rs at e671c84aa680 (after port step acls) as fast as xs-c++, and than rsync?",
+   "summary": null,
+   "model": null,
+   "driver": "a"
   }
  }
 }

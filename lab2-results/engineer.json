@@ -432,15 +432,15 @@
    "kind": "tuning",
    "step": "tune-update-10pct-congress-sample-d113a6",
    "question": "xs-rs performance: beat xs-c++ on congress-sample update-10pct",
-   "state": "prepared",
+   "state": "review",
    "opened": "2026-10-22T02:54:17Z",
-   "ended": "2026-10-22T02:57:42Z",
-   "last": "parent built; xs-rs checks passing on it: test, clippy, fmt, arm64",
-   "outcome": null,
-   "summary": null,
-   "cost_usd": null,
-   "pull_request": null,
-   "merged": null
+   "ended": "2026-10-22T04:04:34Z",
+   "last": "pull request https://github.com/s4njee/xsyncv4/pull/32",
+   "outcome": "patched",
+   "summary": "The change makes the xs-rs sender behave like xs-c++ at two points on the update path: it flushes a partial DATA block when its worker goes idle, and automatic compression can no longer escalate to zstd level 6 after a transient writer stall. Local update-10pct races were already ahead of xs-c++ and stayed within noise, but the change targets the lab's slow block, where xs-rs sent 5.75 MB instead of 7.54 MB and burned more CPU, consistent with a level-6 feedback stall.",
+   "cost_usd": 0.34,
+   "pull_request": "https://github.com/s4njee/xsyncv4/pull/32",
+   "merged": "e671c84aa680602121714ea7e8bf9ec38f07aa51"
   }
  ]
 }
