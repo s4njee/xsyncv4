@@ -26,7 +26,9 @@ use crate::parallel::WritePool;
 
 use super::file::DestDir;
 use super::hardlink::{finalize_hardlinks, HardLinks};
-use super::{msg_code, progress_ack, send_fatal, FrameOut, FrameTx};
+use super::event::progress_ack;
+use super::msg_code;
+use super::outbox::{send_fatal, FrameOut, FrameTx};
 
 mod data;
 mod dir;

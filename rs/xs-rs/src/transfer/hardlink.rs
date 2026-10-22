@@ -13,7 +13,8 @@ use xs_wire::OutputEvent;
 use crate::output::Output;
 use crate::protocol::{feature, Attrs, EntryMeta, HardlinkKey, Options, T_BLK, T_CHR, T_LNK, T_REG};
 
-use super::{report_event, FrameOut};
+use super::event::report_event;
+use super::outbox::FrameOut;
 
 #[derive(Clone, Debug)]
 pub(super) struct HLinkMember {

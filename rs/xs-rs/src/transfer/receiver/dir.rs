@@ -27,7 +27,7 @@ use crate::xattr;
 
 use crate::transfer::file::{destination_listing, make_dir, remove_any, set_dir_working_mode_with, DestDir, Stat};
 use crate::transfer::hardlink::{hardlink_member, HardLinks};
-use crate::transfer::{directory_event, metadata_code, taken_event};
+use crate::transfer::event::{directory_event, metadata_code, taken_event};
 use super::Receiving;
 
 /// A DIR frame as the reader decodes it, in wire order, so xattr values and id maps apply

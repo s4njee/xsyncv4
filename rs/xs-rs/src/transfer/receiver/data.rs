@@ -30,7 +30,8 @@ use crate::transfer::file::{
     add_range, contiguous, covered_from, create_temp, finish_infile, reserve_chunk, write_whole, DestDir, InFile, Stat,
 };
 use crate::transfer::hardlink::HardLinks;
-use crate::transfer::{taken_event, transferred_code, FrameTx};
+use crate::transfer::event::{taken_event, transferred_code};
+use crate::transfer::outbox::FrameTx;
 
 use super::dir::RecvDir;
 use super::{Receiving, WholeJob};

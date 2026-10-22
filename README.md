@@ -975,6 +975,13 @@ including IDs present on only one machine and real sudo elevation on both ends.
 
 ## Changelog
 
+### 2026-10-22
+
+- Packed small DATA records across directory NEEDs instead of one tiny DATA frame per NEED, and stopped automatic compression from spending zstd on listings below 16 KiB; explicit `-z` still compresses every listing.
+- Flushed a worker's partial DATA block when it goes idle, and capped automatic compression at level 3 so a transient writer stall cannot escalate to level 6; explicit `-z` keeps the adaptive rule.
+- Split `transfer.rs` into `transfer/sender.rs` for the sender engine, `transfer/outbox.rs` for the writer thread and frame queue, and `transfer/event.rs` for receiver output events and progress acknowledgments.
+- Shared the CHUNK record encoding between the ranged and sequential read paths.
+
 ### 2026-10-21
 
 - Added parallel workers: `-j/--jobs` with a default of 4, explicit `-jN` splitting one large file into 4 MiB ranges, and refusal of unknown or unsupported options.
