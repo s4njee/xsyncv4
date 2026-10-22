@@ -1,0 +1,13 @@
+experiment,kind,cell_id,corpus,scenario,sender,receiver,client,link,cache,arm,metric,n_blocks,geomean,lo,hi
+PS-61d1dd83a530-update-10pct,screening,congress-sample.update-10pct.a-aws.sender.warm,congress-sample,update-10pct,a,aws,sender,a-aws,warm,xs-cpp,durable_s,2,1.2321853113574235,0.7600737356358047,1.9975438833640828
+PS-61d1dd83a530-update-10pct,screening,congress-sample.update-10pct.a-aws.sender.warm,congress-sample,update-10pct,a,aws,sender,a-aws,warm,xs-rs,durable_s,2,1.4682706404357857,0.0356734810763593,60.43196818811063
+PS-61d1dd83a530-update-10pct,screening,congress-sample.update-10pct.a-aws.sender.warm,congress-sample,update-10pct,a,aws,sender,a-aws,warm,rsync,durable_s,2,1.471123790348941,0.6532453094665953,3.3130053521514102
+PS-61d1dd83a530-update-10pct,screening,congress-sample.update-10pct.a-aws.sender.warm,congress-sample,update-10pct,a,aws,sender,a-aws,warm,xs-cpp,wall_s,2,1.1067791347024403,0.5752053427487557,2.129604789758939
+PS-61d1dd83a530-update-10pct,screening,congress-sample.update-10pct.a-aws.sender.warm,congress-sample,update-10pct,a,aws,sender,a-aws,warm,xs-rs,wall_s,2,1.3260487242932155,0.02167754257421473,81.11644634900979
+PS-61d1dd83a530-update-10pct,screening,congress-sample.update-10pct.a-aws.sender.warm,congress-sample,update-10pct,a,aws,sender,a-aws,warm,rsync,wall_s,2,1.3169651513213598,0.5895808664486134,2.9417460920028997
+PS-61d1dd83a530-update-10pct,screening,congress-sample.update-10pct.a-aws.sender.warm,congress-sample,update-10pct,a,aws,sender,a-aws,warm,xs-cpp,cpu_s,2,2.1728821403412564,2.0511726911144987,2.301813404725387
+PS-61d1dd83a530-update-10pct,screening,congress-sample.update-10pct.a-aws.sender.warm,congress-sample,update-10pct,a,aws,sender,a-aws,warm,xs-rs,cpu_s,2,1.5955550447665539,0.7613885515430183,3.3436225114243303
+PS-61d1dd83a530-update-10pct,screening,congress-sample.update-10pct.a-aws.sender.warm,congress-sample,update-10pct,a,aws,sender,a-aws,warm,rsync,cpu_s,2,1.3416227048466345,0.912373236387262,1.972823632231141
+PS-61d1dd83a530-update-10pct,screening,congress-sample.update-10pct.a-aws.sender.warm,congress-sample,update-10pct,a,aws,sender,a-aws,warm,xs-cpp,rss_bytes,2,25702961.03164583,22419509.273823407,29467291.08677046
+PS-61d1dd83a530-update-10pct,screening,congress-sample.update-10pct.a-aws.sender.warm,congress-sample,update-10pct,a,aws,sender,a-aws,warm,xs-rs,rss_bytes,2,35464601.66563844,9489102.865659101,132545509.21290323
+PS-61d1dd83a530-update-10pct,screening,congress-sample.update-10pct.a-aws.sender.warm,congress-sample,update-10pct,a,aws,sender,a-aws,warm,rsync,rss_bytes,2,15176318.43191489,12763127.84113663,18045783.448516198

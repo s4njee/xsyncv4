@@ -1,0 +1,5 @@
+{
+ "text": "This case is a performance-tuning pass for the update-10pct scenario on the congress sample: xs-rs takes 1.468 seconds versus 1.232 seconds for xs-c++, a ratio of 1.192, so it fixes a measured speed gap rather than adding a new capability. It matters now because that makes it one of the remaining scenarios where the Rust port is still slower, even though xs-rs already beats xs-c++ on the same corpus for fresh (0.846) and noop (0.935). The goal is to bring the update path up to or past the C++ original\u2019s speed while keeping the byte-for-byte behavior.",
+ "model": "opencode/deepseek-v4.1-flash",
+ "utc": "2026-10-22T00:43:51.574Z"
+}

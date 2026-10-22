@@ -1541,6 +1541,154 @@
    "model": "opencode/deepseek-v4.1-flash",
    "summarizedUtc": 1792608140.478,
    "driver": "a"
+  },
+  "PS-61d1dd83a530-fresh": {
+   "run": "20261021T195357Z-PS-61d1dd83a530-fresh",
+   "experiment": "PS-61d1dd83a530-fresh",
+   "key": "congress-sample.fresh.a-aws.sender.warm|1|0",
+   "utc": 1792629435.366,
+   "cell": "congress-sample.fresh.a-aws.sender.warm",
+   "factors": {
+    "corpus": "congress-sample",
+    "scenario": "fresh",
+    "sender": "a",
+    "receiver": "aws",
+    "client": "sender",
+    "link": "a-aws",
+    "cache": "warm"
+   },
+   "block": 1,
+   "attempt": 0,
+   "control": "xs-cpp",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 3.396,
+     "gbps": 0.514,
+     "files_per_s": 7433,
+     "speed": 1
+    },
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 2.951,
+     "gbps": 0.591,
+     "files_per_s": 8554,
+     "speed": 1.15
+    },
+    {
+     "arm": "rsync",
+     "label": "rsync",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 3.189,
+     "gbps": 0.547,
+     "files_per_s": 7917,
+     "speed": 1.07
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "rsync",
+     "label": "rsync",
+     "speed": 1.1,
+     "blocks": 2
+    },
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "speed": 1.16,
+     "blocks": 2
+    }
+   ],
+   "question": "Is xs-rs at 61d1dd83a530 (after port step acls) as fast as xs-c++, and than rsync?",
+   "summary": "In block 1, xs-rs was fastest at 2.951 s, 1.15x the xs-c++ control (about 15% faster); rsync was 1.07x. Cumulatively xs-rs is at 1.16x and rsync at 1.1x, each based on only two blocks, so the evidence remains thin. That is consistent with xs-rs being as fast as or faster than both, but does not settle the question.",
+   "model": "opencode/deepseek-v4.1-flash",
+   "summarizedUtc": 1792629509.571,
+   "driver": "a"
+  },
+  "PS-61d1dd83a530-update-10pct": {
+   "run": "20261021T195358Z-PS-61d1dd83a530-update-10pct",
+   "experiment": "PS-61d1dd83a530-update-10pct",
+   "key": "congress-sample.update-10pct.a-aws.sender.warm|1|0",
+   "utc": 1792629663.583,
+   "cell": "congress-sample.update-10pct.a-aws.sender.warm",
+   "factors": {
+    "corpus": "congress-sample",
+    "scenario": "update-10pct",
+    "sender": "a",
+    "receiver": "aws",
+    "client": "sender",
+    "link": "a-aws",
+    "cache": "warm"
+   },
+   "block": 1,
+   "attempt": 0,
+   "control": "xs-cpp",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 1.28,
+     "gbps": 0.108,
+     "files_per_s": 19724,
+     "speed": 1
+    },
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 1.967,
+     "gbps": 0.07,
+     "files_per_s": 12833,
+     "speed": 0.65
+    },
+    {
+     "arm": "rsync",
+     "label": "rsync",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 1.568,
+     "gbps": 0.088,
+     "files_per_s": 16099,
+     "speed": 0.82
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "rsync",
+     "label": "rsync",
+     "speed": 0.84,
+     "blocks": 2
+    },
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "speed": 0.84,
+     "blocks": 2
+    }
+   ],
+   "question": "Is xs-rs at 61d1dd83a530 (after port step acls) as fast as xs-c++, and than rsync?",
+   "summary": "In this first block, control xs-c++ was fastest at 1.28 s; xs-rs ran at 0.65x (about 54% slower) and rsync at 0.82x (about 22% slower). Cumulatively, xs-rs and rsync each sit at 0.84x over only two blocks, so the evidence is still thin. For the question, xs-rs is not shown to match xs-c++ here, and its 0.84x running ratio is only preliminary.",
+   "model": "opencode/deepseek-v4.1-flash",
+   "summarizedUtc": 1792629689.926,
+   "driver": "a"
   }
  }
 }
