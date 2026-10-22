@@ -1,0 +1,19 @@
+{
+ "experiment": "FC-e671c84-update-1pct",
+ "kind": "screening",
+ "hypothesis": "On congress-sample, update-1pct, the three tools differ by more than 5% in time to durable.",
+ "primary": "durable_s",
+ "control": "rsync",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261022T062411Z-FC-e671c84-update-1pct"
+ ],
+ "spec_sha256": [
+  "5547b19703a1c0ae0b52c21d12e9a37de6b89e6a8f52939056aef7749b11c998"
+ ],
+ "valid_blocks": 4,
+ "void_attempts": 0,
+ "void_reasons": []
+}

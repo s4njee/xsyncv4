@@ -1,5 +1,5 @@
 {
- "updated": "2026-10-22T12:14:14+00:00",
+ "updated": "2026-10-22T13:14:14+00:00",
  "enabled": true,
  "cpp_rev": "fe012667764a",
  "rs": {
@@ -8,7 +8,7 @@
  },
  "margin": 0.05,
  "score": {
-  "xs-rs": 5,
+  "xs-rs": 6,
   "xs-cpp": 2,
   "tie": 0,
   "pending": 0
@@ -159,6 +159,55 @@
    },
    "verdict": "xs-rs",
    "rs_vs_cpp": 0.871,
+   "fastest": "xs-rs"
+  },
+  {
+   "cell": "congress-sample.update-1pct.a-aws.sender.warm",
+   "corpus": "congress-sample",
+   "scenario": "update-1pct",
+   "link": "a-aws",
+   "metric": "durable_s",
+   "experiment": "FC-e671c84-update-1pct",
+   "run": "20261022T062411Z-FC-e671c84-update-1pct",
+   "tools": {
+    "rsync": {
+     "arm": "rsync",
+     "flags": [
+      "-a"
+     ],
+     "rev": null,
+     "seconds": 1.805,
+     "lo": 1.7,
+     "hi": 1.916,
+     "blocks": 4
+    },
+    "xs-cpp": {
+     "arm": "xs-cpp",
+     "flags": [
+      "-a",
+      "-j4"
+     ],
+     "rev": "fe012667764a",
+     "seconds": 0.87,
+     "lo": 0.809,
+     "hi": 0.935,
+     "blocks": 4
+    },
+    "xs-rs": {
+     "arm": "xs-rs",
+     "flags": [
+      "-a",
+      "-j4"
+     ],
+     "rev": "e671c84aa680-rs",
+     "seconds": 0.75,
+     "lo": 0.664,
+     "hi": 0.847,
+     "blocks": 4
+    }
+   },
+   "verdict": "xs-rs",
+   "rs_vs_cpp": 0.862,
    "fastest": "xs-rs"
   },
   {

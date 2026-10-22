@@ -1,0 +1,33 @@
+# Written by the engineer to keep the runner busy: xs-rs at e671c84aa680 against xs-c++ and rsync,
+# update-10pct copies of congress-sample. Every run of it pools into one analysis.
+id = "FC-e671c84-update-10pct"
+kind = "screening"
+hypothesis = "On congress-sample, update-10pct, the three tools differ by more than 5% in time to durable."
+primary = "durable_s"
+delta = 0.05
+blocks = 4
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[arms.xs-cpp]
+tool = "xs"
+rev = "fe012667764a"
+flags = ["-a", "-j4"]
+
+[arms.xs-rs]
+tool = "xs"
+rev = "e671c84aa680602121714ea7e8bf9ec38f07aa51-rs"
+flags = ["-a", "-j4"]
+
+[matrix]
+link = "a-aws"
+corpus = ["congress-sample"]
+scenario = ["update-10pct"]
+direction = ["a>aws"]
+client = ["sender"]
+cache = ["warm"]
