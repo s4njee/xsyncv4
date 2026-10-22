@@ -1,0 +1,33 @@
+# Written by hand (the user asked to tune where rsync beats xs-rs): real-projects re-screened for xs-rs at e671c84aa680 (port_base after step acls merged) against
+# xs-c++ and rsync. Each port screen is queued once per commit of port_base, one spec per scenario.
+id = "PS-e671c84aa680-projects-fresh"
+kind = "screening"
+hypothesis = "xs-rs at e671c84aa680 differs from xs-c++ (-a -j4) by more than 5% in time-to-durable on real-projects, fresh, a>aws."
+primary = "durable_s"
+delta = 0.05
+blocks = 2
+control = "xs-cpp"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.xs-cpp]
+tool = "xs"
+rev = "fe012667764a"
+flags = ["-a", "-j4"]
+
+[arms.xs-rs]
+tool = "xs"
+rev = "e671c84aa680602121714ea7e8bf9ec38f07aa51-rs"
+flags = ["-a", "-j4"]
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[matrix]
+link = "a-aws"
+corpus = ["real-projects"]
+scenario = ["fresh"]
+direction = ["a>aws"]
+client = ["sender"]
+cache = ["warm"]
