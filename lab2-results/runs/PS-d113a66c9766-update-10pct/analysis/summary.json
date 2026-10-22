@@ -1,0 +1,19 @@
+{
+ "experiment": "PS-d113a66c9766-update-10pct",
+ "kind": "screening",
+ "hypothesis": "xs-rs at d113a66c9766 differs from xs-c++ (-a -j4) by more than 5% in time-to-durable on congress-sample, update-10pct, a>aws.",
+ "primary": "durable_s",
+ "control": "xs-cpp",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261022T024435Z-PS-d113a66c9766-update-10pct"
+ ],
+ "spec_sha256": [
+  "0d3003dcb728afafe8f277a14aae3536594d873679e1b2ab8c4fd18da5047227"
+ ],
+ "valid_blocks": 2,
+ "void_attempts": 0,
+ "void_reasons": []
+}

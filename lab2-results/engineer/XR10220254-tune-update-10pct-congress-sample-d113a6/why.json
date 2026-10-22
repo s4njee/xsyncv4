@@ -1,0 +1,5 @@
+{
+ "text": "This case tunes xs-rs for a common update workload: on the Congress sample where 10% of files change, xs-rs currently takes 1.4 seconds against 1.251 seconds for xs-c++, making it about 12% slower. It matters because xs-rs already beats xs-c++ on fresh and no-change runs of the same sample, so closing this gap would carry the speed lead into incremental updates instead of leaving one frequent scenario behind the original. The reference rsync finishes close by at 1.395 seconds, which shows the gap is worth closing.",
+ "model": "opencode/deepseek-v4.1-flash",
+ "utc": "2026-10-22T02:54:25.398Z"
+}

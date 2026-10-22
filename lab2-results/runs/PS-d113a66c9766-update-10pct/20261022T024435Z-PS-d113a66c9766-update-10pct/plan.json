@@ -1,0 +1,178 @@
+{
+ "schema": 1,
+ "experiment": "PS-d113a66c9766-update-10pct",
+ "spec_sha256": "0d3003dcb728afafe8f277a14aae3536594d873679e1b2ab8c4fd18da5047227",
+ "kind": "screening",
+ "bundle": "02209f28b2c7",
+ "writes": {
+  "a": 0,
+  "aws": 3273156600
+ },
+ "hypothesis": "xs-rs at d113a66c9766 differs from xs-c++ (-a -j4) by more than 5% in time-to-durable on congress-sample, update-10pct, a>aws.",
+ "primary": "durable_s",
+ "delta": 0.05,
+ "control": "xs-cpp",
+ "seed": 88692,
+ "run_id": "20261022T024435Z-PS-d113a66c9766-update-10pct",
+ "driver": "a",
+ "sample_timeout_s": 3600,
+ "results": "vps",
+ "background": false,
+ "local_link": false,
+ "eager_cleanup": true,
+ "hours": null,
+ "hosts": {
+  "a": {
+   "system": "Linux"
+  },
+  "aws": {
+   "system": "Linux"
+  }
+ },
+ "links": {
+  "a-aws": {
+   "hosts": [
+    "a",
+    "aws"
+   ],
+   "medium": "internet",
+   "initiator": "a",
+   "driver": "a",
+   "results": "vps",
+   "directions": [
+    "a>aws"
+   ]
+  }
+ },
+ "arms": [
+  {
+   "name": "xs-cpp",
+   "tool": "xs",
+   "flags": [
+    "-a",
+    "-j4"
+   ],
+   "rev": "fe012667764a",
+   "binary": {
+    "a": "~/benchmarks/lab/bin/xs-fe012667764a",
+    "aws": "~/benchmarks/lab/bin/xs-fe012667764a"
+   },
+   "sha256": {
+    "a": "b2ddbd5b430d89bfd4622f7044008ac84bdcb3e1e67fff43866405d946aa94b8",
+    "aws": "564cdd8e3bd6658152d5f5952724996b7058ba4d09df709d6e0baef2631d4d76"
+   },
+   "artifacts": {
+    "xs-linux-amd64": "b2ddbd5b430d89bfd4622f7044008ac84bdcb3e1e67fff43866405d946aa94b8",
+    "xs-linux-arm64": "564cdd8e3bd6658152d5f5952724996b7058ba4d09df709d6e0baef2631d4d76"
+   }
+  },
+  {
+   "name": "xs-rs",
+   "tool": "xs",
+   "flags": [
+    "-a",
+    "-j4"
+   ],
+   "rev": "d113a66c9766-rs",
+   "binary": {
+    "a": "~/benchmarks/lab/bin/xs-d113a66c9766-rs",
+    "aws": "~/benchmarks/lab/bin/xs-d113a66c9766-rs"
+   },
+   "sha256": {
+    "a": "7909b08a725927d2c113609e2764a90d718d92bb0510ce650353d30f67802b91",
+    "aws": "b1d238d7aec475c1e7b041562e951a2a2b66d06b326a46daec955589d08f4e03"
+   },
+   "artifacts": {
+    "xs-linux-amd64": "7909b08a725927d2c113609e2764a90d718d92bb0510ce650353d30f67802b91",
+    "xs-linux-arm64": "b1d238d7aec475c1e7b041562e951a2a2b66d06b326a46daec955589d08f4e03"
+   }
+  },
+  {
+   "name": "rsync",
+   "tool": "rsync",
+   "flags": [
+    "-a"
+   ],
+   "binary": {
+    "a": "rsync",
+    "aws": "rsync"
+   }
+  }
+ ],
+ "cells": [
+  {
+   "id": "congress-sample.update-10pct.a-aws.sender.warm",
+   "corpus": "congress-sample",
+   "scenario": "update-10pct",
+   "sender": "a",
+   "receiver": "aws",
+   "client": "sender",
+   "link": "a-aws",
+   "cache": "warm"
+  }
+ ],
+ "corpora": {
+  "congress-sample": {
+   "files": 25246,
+   "directories": 9797,
+   "bytes": 218210440,
+   "digest": "62261d78f7e2c2d273d371f02cb5479fdb9f2df1a3880315949e8aabfa6e6911",
+   "quick_digest": "4194ff0bf17861c9104b8d8dd641587f279ce58bd698624dce6572a21ce6a1ad"
+  }
+ },
+ "blocks": [
+  {
+   "cell": "congress-sample.update-10pct.a-aws.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "rsync",
+     "xs-rs",
+     "xs-cpp"
+    ],
+    [
+     "xs-rs",
+     "xs-cpp",
+     "rsync"
+    ],
+    [
+     "xs-cpp",
+     "xs-rs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "congress-sample.update-10pct.a-aws.sender.warm",
+   "block": 1,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs-cpp",
+     "xs-rs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs-cpp",
+     "xs-rs"
+    ],
+    [
+     "xs-cpp",
+     "xs-rs",
+     "rsync"
+    ]
+   ]
+  }
+ ],
+ "scripts": {
+  "probe.py": "a89b145b8f76fc4d5444cea6af3c124a5b2e5885226998c726ca95fd9d881d36",
+  "corpus.py": "410aa282e29466cbe0b4134c6c520a1eeaded966b1710941382730f89f27125c",
+  "corpora.json": "ea2e4dbcb956564354ed3c254ec38563f44612cf21f4d9b1234822894bfc99bc",
+  "agent.py": "d8e49fdc54233a7a5397e0a87689451ee02cb9225472178044a7e60df3f38120",
+  "runner.py": "21b474a24377a2f177b3f611172a912408fb0f1fb068ac298605fac634b3132e",
+  "xspipe.py": "94b3fccfc6e994d227077c453f90323ab55337fd8a98231d16a10696e8ebab6b",
+  "measure.py": "5065310f480ff1cabfa7c645f0db342624a02f9a081b96069d50d52b3d224777"
+ }
+}

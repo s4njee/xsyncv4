@@ -1,0 +1,88 @@
+{
+ "id": "XR10220254-tune-update-10pct-congress-sample-d113a6",
+ "kind": "port",
+ "step": "tune-update-10pct-congress-sample-d113a6",
+ "opened_utc": "2026-10-22T02:54:17Z",
+ "origin": "the engineer, after the previous step merged",
+ "state": "prepared",
+ "question": "xs-rs performance: beat xs-c++ on congress-sample update-10pct",
+ "why": "",
+ "hypothesis": "",
+ "evidence": [],
+ "link": null,
+ "runner": null,
+ "base_rev": "d113a66c97665b66dfa44b6ef3504512530968f6",
+ "base_build": "d113a66c9766",
+ "branch": "auto/XR10220254-tune-update-10pct-congress-sample-d113a6",
+ "commit": null,
+ "history": [
+  {
+   "utc": "2026-10-22T02:54:17Z",
+   "state": "opened",
+   "text": "opened by the engineer, after the previous step merged: port step tune-update-10pct-congress-sample-d113a6, xs-rs performance: beat xs-c++ on congress-sample update-10pct"
+  },
+  {
+   "utc": "2026-10-22T02:57:42Z",
+   "state": "prepared",
+   "text": "parent built; xs-rs checks passing on it: test, clippy, fmt, arm64"
+  }
+ ],
+ "max_lines": 1200,
+ "tune": {
+  "cell": "congress-sample.update-10pct.a-aws.sender.warm",
+  "corpus": "congress-sample",
+  "scenario": "update-10pct",
+  "link": "a-aws",
+  "metric": "durable_s",
+  "experiment": "PS-d113a66c9766-update-10pct",
+  "run": "20261022T024435Z-PS-d113a66c9766-update-10pct",
+  "tools": {
+   "xs-cpp": {
+    "arm": "xs-cpp",
+    "flags": [
+     "-a",
+     "-j4"
+    ],
+    "rev": "fe012667764a",
+    "seconds": 1.251,
+    "lo": 0.975,
+    "hi": 1.606,
+    "blocks": 2
+   },
+   "xs-rs": {
+    "arm": "xs-rs",
+    "flags": [
+     "-a",
+     "-j4"
+    ],
+    "rev": "d113a66c9766-rs",
+    "seconds": 1.4,
+    "lo": 0.659,
+    "hi": 2.974,
+    "blocks": 2
+   },
+   "rsync": {
+    "arm": "rsync",
+    "flags": [
+     "-a"
+    ],
+    "rev": null,
+    "seconds": 1.395,
+    "lo": 1.386,
+    "hi": 1.404,
+    "blocks": 2
+   }
+  },
+  "verdict": "xs-cpp",
+  "rs_vs_cpp": 1.119,
+  "fastest": "xs-cpp"
+ },
+ "tests": {
+  "parent": {
+   "test": true,
+   "clippy": true,
+   "fmt": true,
+   "arm64": true
+  }
+ }
+}

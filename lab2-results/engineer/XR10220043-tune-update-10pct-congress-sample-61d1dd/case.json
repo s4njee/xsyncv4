@@ -4,7 +4,7 @@
  "step": "tune-update-10pct-congress-sample-61d1dd",
  "opened_utc": "2026-10-22T00:43:44Z",
  "origin": "the engineer, after the previous step merged",
- "state": "prepared",
+ "state": "review",
  "question": "xs-rs performance: beat xs-c++ on congress-sample update-10pct",
  "why": "",
  "hypothesis": "",
@@ -14,7 +14,7 @@
  "base_rev": "d0f8be111781a7893463247079dd5bd90f5e24d5",
  "base_build": "d0f8be111781",
  "branch": "auto/XR10220043-tune-update-10pct-congress-sample-61d1dd",
- "commit": null,
+ "commit": "cbc40dc63215b4c652bf3e1b421c640728b8fbd1",
  "history": [
   {
    "utc": "2026-10-22T00:43:44Z",
@@ -25,6 +25,16 @@
    "utc": "2026-10-22T00:47:09Z",
    "state": "prepared",
    "text": "parent built; xs-rs checks passing on it: test, clippy, fmt, arm64"
+  },
+  {
+   "utc": "2026-10-22T02:38:21Z",
+   "state": "review",
+   "text": "cbc40dc63215 on auto/XR10220043-tune-update-10pct-congress-sample-61d1dd: 2 file(s), 54 lines and 29 of tests; xs-rs's tests, clippy and rustfmt pass against xs-c++; waiting for it to be merged"
+  },
+  {
+   "utc": "2026-10-22T02:38:32Z",
+   "state": "review",
+   "text": "pull request https://github.com/s4njee/xsyncv4/pull/31"
   }
  ],
  "max_lines": 1200,
@@ -83,6 +93,48 @@
    "clippy": true,
    "fmt": true,
    "arm64": true
+  },
+  "candidate": {
+   "test": true,
+   "clippy": true,
+   "fmt": true,
+   "arm64": true
   }
+ },
+ "agent": {
+  "summary": "xs-rs now packs small DATA records across directory NEEDs instead of flushing one tiny DATA frame per NEED, and automatic compression no longer spends zstd on kilobyte-sized listings. On a 2-CPU, 11 ms-RTT race of the congress-sample update-10pct shape it improved from 1.61 s to 1.43 s against the parent binary, with CPU down about 13%. Explicit -z still compresses every listing as before.",
+  "diagnosis": "On a local fakessh pipe xs-rs was already faster, so I reproduced the lab shape with two-CPU affinity and an 11 ms relay. The update path was sending roughly one DATA frame per NEED (about 2,500 DATA frames for ~20 MiB of changed data) because each worker flushed its block at the end of every read task, even when the task held one small file. Under the same latency, auto-compression also spent zstd frames on nearly 10,000 small DIR listings. The parent measured 1.61 s wall / 0.63 s CPU with the lab update shape; the candidate 1.43 s / 0.55 s.",
+  "change": "In rs/xs-rs/src/transfer.rs, workers now keep a partial DATA block across NEEDs and flush it at 256 KiB, at a skip-compress boundary, or when the worker has no more reads. DATA_END is emitted by the last worker after every worker has flushed, so no DATA can follow it. Automatic compression now compresses a DIR body only when it is at least 16 KiB; explicit -z still compresses all listings as xs-c++ does. Added a workers.rs regression test for 300 one-file directories plus a changed second pass.",
+  "expected_effect": "Fewer DATA frames and fewer per-frame checksums, queue operations and writes on update-heavy trees, plus less CPU on small listings. In the local lab-shaped A/B this was 0.88x-0.91x the parent wall time and about 13% less CPU.",
+  "risks": "Batching can delay a partial DATA block by up to 256 KiB per worker, and DATA_END now depends on all workers reporting their flush; this ordering is covered by the new test and the existing interop suite. Skipping automatic compression of small listings trades a little wire size for CPU; -z and explicitly requested compression are unchanged, and frames remain wire-compatible.",
+  "tests": "Added a_worker_batches_small_one_file_directories_and_still_ends_cleanly. Ran XS_BIN=parent/build/xs cargo test --manifest-path rs/Cargo.toml (all unit, interop, delta, resume, xattr, ACL, workers tests pass), cargo clippy --all-targets -D warnings, cargo fmt --check, and cargo clippy --all-targets --target aarch64-unknown-linux-gnu -D warnings; all pass.",
+  "cpp_lesson": "",
+  "cost_usd": 0.28,
+  "turns": 181,
+  "session": "ses_e9ee674e6ffeljZvMC4682TYCP",
+  "model": "opencode-go/deepseek-v4.1-flash"
+ },
+ "diff": [
+  {
+   "path": "rs/xs-rs/src/transfer.rs",
+   "added": "43",
+   "deleted": "11"
+  },
+  {
+   "path": "rs/xs-rs/tests/workers.rs",
+   "added": "29",
+   "deleted": "0"
+  }
+ ],
+ "pr": {
+  "number": 31,
+  "url": "https://github.com/s4njee/xsyncv4/pull/31",
+  "branch": "engineer/XR10220043-tune-update-10pct-congress-sample-61d1dd",
+  "commit": "719212e7b4f1c2c6e18f329306702df6b895e1af",
+  "base": "c7a11ed23376a330b663f56fc64c14462c0520a9"
+ },
+ "merged": {
+  "commit": "d113a66c97665b66dfa44b6ef3504512530968f6",
+  "utc": "2026-10-22T02:40:06Z"
  }
 }

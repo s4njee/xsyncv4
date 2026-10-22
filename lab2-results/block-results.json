@@ -1689,6 +1689,154 @@
    "model": "opencode/deepseek-v4.1-flash",
    "summarizedUtc": 1792629689.926,
    "driver": "a"
+  },
+  "PS-d113a66c9766-fresh": {
+   "run": "20261022T024434Z-PS-d113a66c9766-fresh",
+   "experiment": "PS-d113a66c9766-fresh",
+   "key": "congress-sample.fresh.a-aws.sender.warm|1|0",
+   "utc": 1792637142.547,
+   "cell": "congress-sample.fresh.a-aws.sender.warm",
+   "factors": {
+    "corpus": "congress-sample",
+    "scenario": "fresh",
+    "sender": "a",
+    "receiver": "aws",
+    "client": "sender",
+    "link": "a-aws",
+    "cache": "warm"
+   },
+   "block": 1,
+   "attempt": 0,
+   "control": "xs-cpp",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 3.436,
+     "gbps": 0.508,
+     "files_per_s": 7347,
+     "speed": 1
+    },
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 2.975,
+     "gbps": 0.587,
+     "files_per_s": 8486,
+     "speed": 1.16
+    },
+    {
+     "arm": "rsync",
+     "label": "rsync",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 3.21,
+     "gbps": 0.544,
+     "files_per_s": 7865,
+     "speed": 1.07
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "rsync",
+     "label": "rsync",
+     "speed": 0.96,
+     "blocks": 2
+    },
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "speed": 1.24,
+     "blocks": 2
+    }
+   ],
+   "question": "Is xs-rs at d113a66c9766 (after port step acls) as fast as xs-c++, and than rsync?",
+   "summary": "In block 1, xs-rs was fastest at 2.975 s, 1.16x the xs-c++ control's 3.436 s, while rsync took 3.21 s (1.07x). So far this cell, xs-rs stands at 1.24x and rsync at 0.96x, each from only two blocks, so the evidence is still thin. That points toward xs-rs being faster than both xs-c++ and rsync here, but the two-block base is not yet strong.",
+   "model": "opencode/deepseek-v4.1-flash",
+   "summarizedUtc": 1792637221.236,
+   "driver": "a"
+  },
+  "PS-d113a66c9766-update-10pct": {
+   "run": "20261022T024435Z-PS-d113a66c9766-update-10pct",
+   "experiment": "PS-d113a66c9766-update-10pct",
+   "key": "congress-sample.update-10pct.a-aws.sender.warm|1|0",
+   "utc": 1792637295.887,
+   "cell": "congress-sample.update-10pct.a-aws.sender.warm",
+   "factors": {
+    "corpus": "congress-sample",
+    "scenario": "update-10pct",
+    "sender": "a",
+    "receiver": "aws",
+    "client": "sender",
+    "link": "a-aws",
+    "cache": "warm"
+   },
+   "block": 1,
+   "attempt": 0,
+   "control": "xs-cpp",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 1.276,
+     "gbps": 0.108,
+     "files_per_s": 19788,
+     "speed": 1
+    },
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 1.319,
+     "gbps": 0.104,
+     "files_per_s": 19136,
+     "speed": 0.97
+    },
+    {
+     "arm": "rsync",
+     "label": "rsync",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 1.394,
+     "gbps": 0.099,
+     "files_per_s": 18110,
+     "speed": 0.92
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "rsync",
+     "label": "rsync",
+     "speed": 0.9,
+     "blocks": 2
+    },
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "speed": 0.89,
+     "blocks": 2
+    }
+   ],
+   "question": "Is xs-rs at d113a66c9766 (after port step acls) as fast as xs-c++, and than rsync?",
+   "summary": "The control xs-c++ was fastest (1.276s); xs-rs was closest at 0.97x (1.319s, about 3% slower), with rsync at 0.92x. For this cell, cumulative ratios are rsync 0.90x and xs-rs 0.89x over two blocks each, so evidence remains thin (fewer than three blocks). It bears on the question only preliminarily: xs-rs trails xs-c++ and is slightly ahead of rsync in this block, but the two-block cumulative ratios do not establish parity.",
+   "model": "opencode/deepseek-v4.1-flash",
+   "summarizedUtc": 1792637317.126,
+   "driver": "a"
   }
  }
 }

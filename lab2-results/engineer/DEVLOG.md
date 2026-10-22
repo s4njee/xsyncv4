@@ -204,7 +204,7 @@ Written by benchmarks/lab/engineer.py whenever a case moves: every case that has
 
 **The change.** Added rs/xs-rs/src/acls.rs with POSIX ACL read/write, record export/import, the C++ validation rules, and exact put_acls/get_acls codecs. Wired -A/--acls through cli, Options and HELLO advertisement; added ACL style refusals and ACL_CONFIG send/read in the C++ frame order; encoded ACLs after xattrs in DIR and DATA records; applied ACLs to files, FIFOs, specials and directories; and marked incomplete ACL metadata so existing destination files are preserved and the transfer exits 23. (pull request #15)
 
-**Since.** Measured by the lab (PS-61d1dd83a530-fresh, PS-61d1dd83a530-update-10pct, time to durable): xs-rs 0.846x xs-c++ [0.780, 0.918], too few blocks, on congress-sample fresh (3 blocks); rsync 0.908x xs-c++ [0.840, 0.982], too few blocks, on congress-sample fresh (3 blocks); xs-rs 1.192x xs-c++ [0.047, 30.253], too few blocks, on congress-sample update-10pct (2 blocks); rsync 1.194x xs-c++ [0.859, 1.659], too few blocks, on congress-sample update-10pct (2 blocks). API cost $0.20.
+**Since.** Measured by the lab (PS-d113a66c9766-fresh, PS-d113a66c9766-update-10pct, time to durable): xs-rs 0.813x xs-c++ [0.681, 0.971], too few blocks, on congress-sample fresh (3 blocks); rsync 0.996x xs-c++ [0.716, 1.386], too few blocks, on congress-sample fresh (3 blocks); xs-rs 1.119x xs-c++ [0.410, 3.052], too few blocks, on congress-sample update-10pct (2 blocks); rsync 1.115x xs-c++ [0.863, 1.440], too few blocks, on congress-sample update-10pct (2 blocks). API cost $0.20.
 
 ### 2026-10-21 19:44 · xs-rs maintenance: simplifications and the changelog (`61d1dd83a530`, merged)
 
@@ -213,3 +213,13 @@ Written by benchmarks/lab/engineer.py whenever a case moves: every case that has
 **The change.** Moved directory decoding/comparison/generation into `transfer/receiver/dir.rs` and DATA decoding/assembly/publication into `transfer/receiver/data.rs`, leaving `receiver.rs` as coordination and worker scheduling. Removed the unused `FileRequests.dirs` field and its dead-code suppression. README gained only the dated changelog section.
 
 **Since.** Merged; the lab has not screened xs-rs since. API cost $0.15.
+
+### 2026-10-22 02:40 · xs-rs, tuning to beat xs-c++ on congress-sample update-10pct (`d113a66c9766`, merged)
+
+**Commit.** https://github.com/s4njee/xsyncv4/commit/d113a66c97665b66dfa44b6ef3504512530968f6
+
+**The data.** xs-rs performance: beat xs-c++ on congress-sample update-10pct. Diagnosis: On a local fakessh pipe xs-rs was already faster, so I reproduced the lab shape with two-CPU affinity and an 11 ms relay. The update path was sending roughly one DATA frame per NEED (about 2,500 DATA frames for ~20 MiB of changed data) because each worker flushed its block at the end of every read task, even when the task held one small file. Under the same latency, auto-compression also spent zstd frames on nearly 10,000 small DIR listings. The parent measured 1.61 s wall / 0.63 s CPU with the lab update shape; the candidate 1.43 s / 0.55 s.
+
+**The change.** In rs/xs-rs/src/transfer.rs, workers now keep a partial DATA block across NEEDs and flush it at 256 KiB, at a skip-compress boundary, or when the worker has no more reads. DATA_END is emitted by the last worker after every worker has flushed, so no DATA can follow it. Automatic compression now compresses a DIR body only when it is at least 16 KiB; explicit -z still compresses all listings as xs-c++ does. Added a workers.rs regression test for 300 one-file directories plus a changed second pass. (pull request #31)
+
+**Since.** Merged; the lab has not screened xs-rs since. API cost $0.28.
