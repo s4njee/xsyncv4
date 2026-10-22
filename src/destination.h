@@ -29,6 +29,8 @@ struct DestPath {
 bool anchor_destination(const std::string& path);
 DestPath destination_path(const std::string& path);
 int destination_open_dir(const char* path);
+// How many parent directory descriptors may be retained at once (after raising a default open-file limit).
+unsigned destination_parent_budget();
 // Retained parent capability, independent of the worker that opened it. Only
 // 256 of these descriptors may be retained, fewer with low descriptor limits;
 // active scopes remain additional. Limits below 512 disable this cache.
