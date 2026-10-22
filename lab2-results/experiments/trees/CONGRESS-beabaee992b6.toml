@@ -1,0 +1,18 @@
+# Written by the engineer: keeps the runner busy with xs-rs at beabaee992b6 until a newer one retires it.
+id = "CONGRESS-beabaee992b6"
+question = "How does xs-rs at beabaee992b6 (after port step acls) compare with xs-c++ and rsync on small files?"
+start = ["fresh"]
+until = "2026-11-05T19:52Z"
+fill = ["fresh", "u1pct", "u10pct"]
+
+[nodes.fresh]
+spec = "auto/FC-beabaee-fresh.toml"
+question = "On congress-sample, fresh copies: how do rsync, xs-c++ and xs-rs at beabaee992b6 compare?"
+
+[nodes.u1pct]
+spec = "auto/FC-beabaee-update-1pct.toml"
+question = "On congress-sample, update-1pct copies: how do rsync, xs-c++ and xs-rs at beabaee992b6 compare?"
+
+[nodes.u10pct]
+spec = "auto/FC-beabaee-update-10pct.toml"
+question = "On congress-sample, update-10pct copies: how do rsync, xs-c++ and xs-rs at beabaee992b6 compare?"

@@ -1,0 +1,20 @@
+{
+ "experiment": "FC-beabaee-fresh",
+ "kind": "screening",
+ "hypothesis": "On congress-sample, fresh, the three tools differ by more than 5% in time to durable.",
+ "primary": "durable_s",
+ "control": "rsync",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261022T195254Z-FC-beabaee-fresh",
+  "20261022T195548Z-FC-beabaee-fresh"
+ ],
+ "spec_sha256": [
+  "969719e47f0ece18ee381d745c1bc36a6e42f03dda115f45b36f1602e07a5cfb"
+ ],
+ "valid_blocks": 8,
+ "void_attempts": 0,
+ "void_reasons": []
+}

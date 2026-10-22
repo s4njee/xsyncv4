@@ -441,6 +441,21 @@
    "cost_usd": 0.34,
    "pull_request": "https://github.com/s4njee/xsyncv4/pull/32",
    "merged": "e671c84aa680602121714ea7e8bf9ec38f07aa51"
+  },
+  {
+   "id": "XR10221922-maintain-20261022",
+   "kind": "maintenance",
+   "step": "maintain-20261022",
+   "question": "Maintenance: simplify xs-rs, and log what merged in README.md",
+   "state": "review",
+   "opened": "2026-10-22T19:22:22Z",
+   "ended": "2026-10-22T19:46:24Z",
+   "last": "beabaee992b6 pushed to rust-ds: 9 file(s), 2802 lines; xs-rs's checks pass",
+   "outcome": "patched",
+   "summary": "Split the 1,396-line `transfer.rs` into responsibility-based modules: `sender.rs` (walk/read/DATA engine), `outbox.rs` (writer thread and frame queue), and `event.rs` (receiver output events and progress acknowledgments), leaving `transfer.rs` as the shared root. Also shared the duplicated CHUNK record encoder between the ranged and sequential read paths, and logged the two merged performance steps plus these cleanups in README.md. No behavior or wire bytes changed.",
+   "cost_usd": 0.08,
+   "pull_request": null,
+   "merged": "beabaee992b61177571178bdb77d2070661c5d70"
   }
  ]
 }

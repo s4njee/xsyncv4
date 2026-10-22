@@ -204,7 +204,7 @@ Written by benchmarks/lab/engineer.py whenever a case moves: every case that has
 
 **The change.** Added rs/xs-rs/src/acls.rs with POSIX ACL read/write, record export/import, the C++ validation rules, and exact put_acls/get_acls codecs. Wired -A/--acls through cli, Options and HELLO advertisement; added ACL style refusals and ACL_CONFIG send/read in the C++ frame order; encoded ACLs after xattrs in DIR and DATA records; applied ACLs to files, FIFOs, specials and directories; and marked incomplete ACL metadata so existing destination files are preserved and the transfer exits 23. (pull request #15)
 
-**Since.** Measured by the lab (PS-e671c84aa680-fresh, PS-e671c84aa680-update-10pct, time to durable): xs-rs 0.902x xs-c++ [0.648, 1.257], too few blocks, on congress-sample fresh (3 blocks); rsync 0.915x xs-c++ [0.886, 0.946], too few blocks, on congress-sample fresh (3 blocks); xs-rs 0.871x xs-c++ [0.084, 9.018], too few blocks, on congress-sample update-10pct (2 blocks); rsync 1.113x xs-c++ [0.627, 1.977], too few blocks, on congress-sample update-10pct (2 blocks). API cost $0.20.
+**Since.** The lab's screen of xs-rs after this step (PS-beabaee992b6-fresh, PS-beabaee992b6-update-10pct) is queued against xs-c++ and rsync. API cost $0.20.
 
 ### 2026-10-21 19:44 · xs-rs maintenance: simplifications and the changelog (`61d1dd83a530`, merged)
 
@@ -233,3 +233,11 @@ Written by benchmarks/lab/engineer.py whenever a case moves: every case that has
 **The change.** In rs/xs-rs/src/transfer.rs, send_worker now flushes its partial DATA block when it has no queued work, mirroring the C++ pool's on_idle. In rs/xs-rs/src/compression.rs, automatic compression (compression xs-rs chose, not explicit -z) is capped at level 3 so a transient writer stall cannot push it to level 6; explicit -z keeps the C++ adaptive rule. A unit assertion covers the cap. (pull request #32)
 
 **Since.** Merged; the lab has not screened xs-rs since. API cost $0.34. For xs-c++: xs-c++ already has the on_idle flush this change copies, but it only compresses with -z. Its adaptive zstd machinery in src/compression.cpp and the write-rate observation in src/remote.cpp could enable automatic level 1-3 compression when the writer is slower than ~256 MiB/s, which cut xs-rs's update wire from about 19 MB to 7.5 MB; that would also speed up xs-c++.
+
+### 2026-10-22 19:46 · xs-rs maintenance: simplifications and the changelog (`beabaee992b6`, merged)
+
+**The data.** Maintenance: simplify xs-rs, and log what merged in README.md. Diagnosis: This was structural debt rather than a runtime hot path: the recent batching and idle-flush steps had grown `transfer.rs` to 1,396 lines mixing three jobs (sender engine, writer/queue, receiver event helpers). Baseline and post-change measurements were the four gates: 144 tests pass (31 xs-rs unit, 74 xs-rs integration, 31 xs-wire unit, 8 xs-wire integration), clippy `-D warnings` clean, rustfmt clean, and the aarch64 cross-check clean. Diffing each moved section against the original shows only visibility keywords changed, plus the CHUNK helper dedup.
+
+**The change.** - `transfer/sender.rs`: sender engine, `AUTO_LISTING_MIN`, `DATA_BATCH`, walk/read workers, `run_sender`, `read_replies`, and a single `chunk_record` helper used by both read paths. - `transfer/outbox.rs`: `Queue`/`Outbox`, `FrameOut`, `FrameTx`, `write_observed`, `link_now`, `send_fatal`, and `MAX_QUEUED`. - `transfer/event.rs`: `report_event`, `progress_ack`, `taken_event`, `directory_event`, `transferred_code`, `metadata_code`. - `transfer.rs`: now only `msg_code`, module declarations and the `run_sender`/`run_receiver` re-exports. - Updated imports in `receiver.rs`, `receiver/data.rs`, `receiver/dir.rs`, `hardlink.rs`. - Added the 2026-10-22 changelog entry with the two merged steps and two cleanup lines.
+
+**Since.** Merged; the lab has not screened xs-rs since. API cost $0.08.

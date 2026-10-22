@@ -1,9 +1,9 @@
 {
- "updated": "2026-10-22T19:12:18+00:00",
+ "updated": "2026-10-22T20:12:17+00:00",
  "enabled": true,
- "cpp_rev": "fe012667764a",
+ "cpp_rev": "e104bde552f2",
  "rs": {
-  "commit": "e671c84aa680602121714ea7e8bf9ec38f07aa51",
+  "commit": "beabaee992b61177571178bdb77d2070661c5d70",
   "step": "acls"
  },
  "margin": 0.05,
@@ -20,8 +20,8 @@
    "scenario": "fresh",
    "link": "a-aws",
    "metric": "durable_s",
-   "experiment": "FC-e671c84-fresh",
-   "run": "20261022T062149Z-FC-e671c84-fresh",
+   "experiment": "FC-beabaee-fresh",
+   "run": "20261022T195548Z-FC-beabaee-fresh",
    "tools": {
     "rsync": {
      "arm": "rsync",
@@ -29,9 +29,9 @@
       "-a"
      ],
      "rev": null,
-     "seconds": 3.241,
-     "lo": 3.061,
-     "hi": 3.431,
+     "seconds": 3.285,
+     "lo": 3.2,
+     "hi": 3.372,
      "blocks": 8
     },
     "xs-cpp": {
@@ -40,10 +40,10 @@
       "-a",
       "-j4"
      ],
-     "rev": "fe012667764a",
-     "seconds": 3.579,
-     "lo": 3.273,
-     "hi": 3.914,
+     "rev": "e104bde552f2",
+     "seconds": 3.4,
+     "lo": 3.242,
+     "hi": 3.565,
      "blocks": 8
     },
     "xs-rs": {
@@ -52,16 +52,16 @@
       "-a",
       "-j4"
      ],
-     "rev": "e671c84aa680-rs",
-     "seconds": 3.171,
-     "lo": 2.86,
-     "hi": 3.515,
+     "rev": "beabaee992b6-rs",
+     "seconds": 2.857,
+     "lo": 2.748,
+     "hi": 2.971,
      "blocks": 8
     }
    },
    "verdict": "xs-rs",
-   "rs_vs_cpp": 0.886,
-   "rs_vs_rsync": 0.978,
+   "rs_vs_cpp": 0.84,
+   "rs_vs_rsync": 0.87,
    "fastest": "xs-rs"
   },
   {

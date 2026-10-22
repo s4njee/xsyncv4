@@ -2133,6 +2133,80 @@
    "model": "opencode/deepseek-v4.1-flash",
    "summarizedUtc": 1792674777.469,
    "driver": "a"
+  },
+  "FC-beabaee-fresh": {
+   "run": "20261022T195548Z-FC-beabaee-fresh",
+   "experiment": "FC-beabaee-fresh",
+   "key": "congress-sample.fresh.a-aws.sender.warm|2|0",
+   "utc": 1792699048.313,
+   "cell": "congress-sample.fresh.a-aws.sender.warm",
+   "factors": {
+    "corpus": "congress-sample",
+    "scenario": "fresh",
+    "sender": "a",
+    "receiver": "aws",
+    "client": "sender",
+    "link": "a-aws",
+    "cache": "warm"
+   },
+   "block": 2,
+   "attempt": 0,
+   "control": "rsync",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "rsync",
+     "label": "rsync",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 3.215,
+     "gbps": 0.543,
+     "files_per_s": 7852,
+     "speed": 1
+    },
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 3.758,
+     "gbps": 0.464,
+     "files_per_s": 6717,
+     "speed": 0.86
+    },
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 2.735,
+     "gbps": 0.638,
+     "files_per_s": 9230,
+     "speed": 1.18
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "speed": 0.93,
+     "blocks": 3
+    },
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "speed": 1.14,
+     "blocks": 3
+    }
+   ],
+   "question": "On congress-sample, fresh copies: how do rsync, xs-c++ and xs-rs at beabaee992b6 compare?",
+   "summary": "In block 2, xs-rs was fastest at 1.18x the control (2.735 s vs 3.215 s), while xs-c++ ran at 0.86x (3.758 s). Cumulatively for this cell, xs-rs stands at 1.14x and xs-c++ at 0.93x, each across three blocks, so the evidence is not thin. For the question, this block and the cumulative ratios put xs-rs ahead of rsync and xs-c++, without proving a larger pattern.",
+   "model": "opencode/deepseek-v4.1-flash",
+   "summarizedUtc": 1792699103.25,
+   "driver": "a"
   }
  }
 }
