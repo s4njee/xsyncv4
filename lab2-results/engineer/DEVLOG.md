@@ -204,7 +204,7 @@ Written by benchmarks/lab/engineer.py whenever a case moves: every case that has
 
 **The change.** Added rs/xs-rs/src/acls.rs with POSIX ACL read/write, record export/import, the C++ validation rules, and exact put_acls/get_acls codecs. Wired -A/--acls through cli, Options and HELLO advertisement; added ACL style refusals and ACL_CONFIG send/read in the C++ frame order; encoded ACLs after xattrs in DIR and DATA records; applied ACLs to files, FIFOs, specials and directories; and marked incomplete ACL metadata so existing destination files are preserved and the transfer exits 23. (pull request #15)
 
-**Since.** The lab's screen of xs-rs after this step (PS-e671c84aa680-fresh, PS-e671c84aa680-update-10pct) is queued against xs-c++ and rsync. API cost $0.20.
+**Since.** Measured by the lab (PS-e671c84aa680-fresh, PS-e671c84aa680-update-10pct, time to durable): xs-rs 0.902x xs-c++ [0.648, 1.257], too few blocks, on congress-sample fresh (3 blocks); rsync 0.915x xs-c++ [0.886, 0.946], too few blocks, on congress-sample fresh (3 blocks); xs-rs 0.871x xs-c++ [0.084, 9.018], too few blocks, on congress-sample update-10pct (2 blocks); rsync 1.113x xs-c++ [0.627, 1.977], too few blocks, on congress-sample update-10pct (2 blocks). API cost $0.20.
 
 ### 2026-10-21 19:44 · xs-rs maintenance: simplifications and the changelog (`61d1dd83a530`, merged)
 

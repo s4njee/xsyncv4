@@ -1,15 +1,15 @@
 {
- "updated": "2026-10-22T04:14:22+00:00",
+ "updated": "2026-10-22T05:14:13+00:00",
  "enabled": true,
  "cpp_rev": "fe012667764a",
  "rs": {
-  "commit": "d113a66c97665b66dfa44b6ef3504512530968f6",
+  "commit": "e671c84aa680602121714ea7e8bf9ec38f07aa51",
   "step": "acls"
  },
  "margin": 0.05,
  "score": {
-  "xs-rs": 4,
-  "xs-cpp": 3,
+  "xs-rs": 5,
+  "xs-cpp": 2,
   "tie": 0,
   "pending": 0
  },
@@ -20,8 +20,8 @@
    "scenario": "fresh",
    "link": "a-aws",
    "metric": "durable_s",
-   "experiment": "PS-d113a66c9766-fresh",
-   "run": "20261022T024434Z-PS-d113a66c9766-fresh",
+   "experiment": "PS-e671c84aa680-fresh",
+   "run": "20261022T041438Z-PS-e671c84aa680-fresh",
    "tools": {
     "xs-cpp": {
      "arm": "xs-cpp",
@@ -30,9 +30,9 @@
       "-j4"
      ],
      "rev": "fe012667764a",
-     "seconds": 3.562,
-     "lo": 3.182,
-     "hi": 3.986,
+     "seconds": 3.513,
+     "lo": 3.257,
+     "hi": 3.789,
      "blocks": 3
     },
     "xs-rs": {
@@ -41,10 +41,10 @@
       "-a",
       "-j4"
      ],
-     "rev": "d113a66c9766-rs",
-     "seconds": 2.896,
-     "lo": 2.709,
-     "hi": 3.095,
+     "rev": "e671c84aa680-rs",
+     "seconds": 3.169,
+     "lo": 2.431,
+     "hi": 4.131,
      "blocks": 3
     },
     "rsync": {
@@ -53,14 +53,14 @@
       "-a"
      ],
      "rev": null,
-     "seconds": 3.549,
-     "lo": 2.289,
-     "hi": 5.502,
+     "seconds": 3.215,
+     "lo": 3.001,
+     "hi": 3.444,
      "blocks": 3
     }
    },
    "verdict": "xs-rs",
-   "rs_vs_cpp": 0.813,
+   "rs_vs_cpp": 0.902,
    "fastest": "xs-rs"
   },
   {
@@ -118,8 +118,8 @@
    "scenario": "update-10pct",
    "link": "a-aws",
    "metric": "durable_s",
-   "experiment": "PS-d113a66c9766-update-10pct",
-   "run": "20261022T024435Z-PS-d113a66c9766-update-10pct",
+   "experiment": "PS-e671c84aa680-update-10pct",
+   "run": "20261022T041440Z-PS-e671c84aa680-update-10pct",
    "tools": {
     "xs-cpp": {
      "arm": "xs-cpp",
@@ -128,9 +128,9 @@
       "-j4"
      ],
      "rev": "fe012667764a",
-     "seconds": 1.251,
-     "lo": 0.975,
-     "hi": 1.606,
+     "seconds": 1.33,
+     "lo": 0.819,
+     "hi": 2.158,
      "blocks": 2
     },
     "xs-rs": {
@@ -139,10 +139,10 @@
       "-a",
       "-j4"
      ],
-     "rev": "d113a66c9766-rs",
-     "seconds": 1.4,
-     "lo": 0.659,
-     "hi": 2.974,
+     "rev": "e671c84aa680-rs",
+     "seconds": 1.159,
+     "lo": 0.182,
+     "hi": 7.389,
      "blocks": 2
     },
     "rsync": {
@@ -151,15 +151,15 @@
       "-a"
      ],
      "rev": null,
-     "seconds": 1.395,
-     "lo": 1.386,
-     "hi": 1.404,
+     "seconds": 1.48,
+     "lo": 1.353,
+     "hi": 1.62,
      "blocks": 2
     }
    },
-   "verdict": "xs-cpp",
-   "rs_vs_cpp": 1.119,
-   "fastest": "xs-cpp"
+   "verdict": "xs-rs",
+   "rs_vs_cpp": 0.871,
+   "fastest": "xs-rs"
   },
   {
    "cell": "laikav2-sample.fresh.a-aws.sender.warm",

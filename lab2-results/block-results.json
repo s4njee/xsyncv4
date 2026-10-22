@@ -1915,8 +1915,8 @@
   "PS-e671c84aa680-update-10pct": {
    "run": "20261022T041440Z-PS-e671c84aa680-update-10pct",
    "experiment": "PS-e671c84aa680-update-10pct",
-   "key": "congress-sample.update-10pct.a-aws.sender.warm|0|0",
-   "utc": 1792642624.384,
+   "key": "congress-sample.update-10pct.a-aws.sender.warm|1|0",
+   "utc": 1792642699.773,
    "cell": "congress-sample.update-10pct.a-aws.sender.warm",
    "factors": {
     "corpus": "congress-sample",
@@ -1927,7 +1927,7 @@
     "link": "a-aws",
     "cache": "warm"
    },
-   "block": 0,
+   "block": 1,
    "attempt": 0,
    "control": "xs-cpp",
    "primary": "durable_s",
@@ -1938,9 +1938,9 @@
      "control": true,
      "valid": true,
      "void": null,
-     "seconds": 1.28,
-     "gbps": 0.155,
-     "files_per_s": 19722,
+     "seconds": 1.381,
+     "gbps": 0.192,
+     "files_per_s": 18274,
      "speed": 1
     },
     {
@@ -1949,10 +1949,10 @@
      "control": false,
      "valid": true,
      "void": null,
-     "seconds": 1.341,
-     "gbps": 0.148,
-     "files_per_s": 18832,
-     "speed": 0.95
+     "seconds": 1.001,
+     "gbps": 0.264,
+     "files_per_s": 25209,
+     "speed": 1.38
     },
     {
      "arm": "rsync",
@@ -1960,29 +1960,30 @@
      "control": false,
      "valid": true,
      "void": null,
-     "seconds": 1.491,
-     "gbps": 0.133,
-     "files_per_s": 16933,
-     "speed": 0.86
+     "seconds": 1.47,
+     "gbps": 0.18,
+     "files_per_s": 17174,
+     "speed": 0.94
     }
    ],
    "soFar": [
     {
      "arm": "rsync",
      "label": "rsync",
-     "speed": 0.86,
-     "blocks": 1
+     "speed": 0.9,
+     "blocks": 2
     },
     {
      "arm": "xs-rs",
      "label": "xs-rs",
-     "speed": 0.95,
-     "blocks": 1
+     "speed": 1.15,
+     "blocks": 2
     }
    ],
    "question": "Is xs-rs at e671c84aa680 (after port step acls) as fast as xs-c++, and than rsync?",
-   "summary": null,
-   "model": null,
+   "summary": "In block 1, xs-rs was fastest at 1.001 s, 1.38x the xs-c++ control, while rsync was 0.94x. So far this cell, xs-rs is 1.15x over 2 blocks and rsync 0.9x over 2 blocks, so the evidence is still thin (under three blocks). This supports xs-rs being faster than both here, but the cumulative data are not yet enough to settle the question.",
+   "model": "opencode/deepseek-v4.1-flash",
+   "summarizedUtc": 1792642717.964,
    "driver": "a"
   }
  }
