@@ -1,5 +1,5 @@
 {
- "utc": "2026-10-22T05:17:25+00:00",
+ "utc": "2026-10-22T06:17:08+00:00",
  "vps_lab_commit": "f348d76fc47353226935630a3e2e027cf31653a0",
  "goal": "xs-rs tries to beat xs-c++; rsync runs beside them as the reference (contest.py)",
  "xs_cpp": {
@@ -47,15 +47,5 @@
   "direction": "a>aws",
   "about": "the internet over IPv6, one way from A to AWS; about 11 ms round trip"
  },
- "sprint": {
-  "start": "2026-10-20T19:40:49Z",
-  "until": "2026-10-22T06:10:49Z",
-  "engineer_usd": 20,
-  "why": "the next 24 hours go to DeepSeek engineering xs-rs toward performance and feature parity with xs-c++",
-  "extended": {
-   "utc": "2026-10-21T13:16:00Z",
-   "hours": 10.5,
-   "why": "the engineer waited 10.5 hours on a pull request that failed GitHub arm64 checks"
-  }
- }
+ "sprint": null
 }
