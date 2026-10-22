@@ -34,14 +34,14 @@ class CompressionTests(unittest.TestCase):
         self.source = self.root / 'source'; self.source.mkdir()
         self.env = dict(os.environ, XSYNC_CONFIG='', XSYNC_OPTS='')
 
-    def copy(self, direction, flags=(), name='file.bin', data=None, compress=True, policy=True):
+    def copy(self, direction, flags=(), name='file.bin', data=None, compress=True, policy=True, rate=0):
         if data is None: data = b'repeated payload\n' * 131072
         (self.source / name).write_bytes(data)
         destination = self.root / ('destination-' + direction)
         if destination.exists(): shutil.rmtree(destination)
         log = self.root / ('frames-' + direction + '.json')
         helper = [sys.executable, str(transfer.REPO / 'tests/compression_proxy.py'),
-                  '--log', str(log), str(transfer.BINARY)]
+                  '--log', str(log), *(['--rate', str(rate)] if rate else []), str(transfer.BINARY)]
         command = [str(transfer.BINARY), '-az' if compress else '-a', '--whole-file', '--no-progress', '--no-fallback', '-j1',
                    *flags, '-e', shlex.quote(str(transfer.REPO / 'tests/fakessh.sh')), '--rsync-path=' + shlex.join(helper)]
         source, target = str(self.source) + '/', str(destination) + '/'
@@ -109,6 +109,18 @@ class CompressionTests(unittest.TestCase):
     def test_compression_choice_implies_compression(self):
         for direction in ('push', 'pull'):
             self.copy(direction, ['--compress-choice=zstd'], compress=False)
+
+    def test_a_slow_push_compresses_without_z_unless_turned_off(self):
+        # The proxy passes 16 MiB/s, far below 256 MiB/s, as an internet link does.
+        slow = 16 << 20
+        frames = self.copy('push', compress=False, policy=False, rate=slow)
+        self.assertTrue(any(frame['flag'] == 1 for frame in frames), 'a slow push compresses without -z')
+        for off in (['--no-auto-compress'], ['--compress-choice=none'], ['--bwlimit=65536']):
+            with self.subTest(off=off):
+                frames = self.copy('push', off, compress=False, policy=False, rate=slow)
+                self.assertTrue(all(frame['flag'] == 0 for frame in frames))
+        frames = self.copy('pull', compress=False, policy=False, rate=slow)
+        self.assertTrue(all(frame['flag'] == 0 for frame in frames), 'a server does not compress without -z')
 
     def test_none_choice_remains_raw_after_z_or_explicit_level(self):
         for direction in ('push', 'pull'):
