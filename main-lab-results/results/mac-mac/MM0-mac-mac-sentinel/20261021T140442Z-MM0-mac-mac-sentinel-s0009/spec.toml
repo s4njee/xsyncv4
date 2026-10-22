@@ -1,0 +1,34 @@
+# MM0 (mac-mac): S3, the Mac-mars sentinel, exactly as it ran 30 times while mars ran Linux, now with both ends on
+# macOS: two identical xs arms (the noise floor at that hour) and rsync, small-flat and mixed-bimodal, fresh and
+# no-op, both ways. Read as a series beside S3's (os_compare.py).
+id = "MM0-mac-mac-sentinel"
+kind = "screening"
+hypothesis = "Hour by hour, the A/A ratio stays within 5% of 1 and the xs to rsync ratio stays where MM1 put it."
+primary = "wall_s"
+delta = 0.05
+blocks = 2
+control = "xs"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.xs]
+tool = "xs"
+rev = "21ae6844ed20"
+flags = ["-aH"]
+
+[arms.again]
+tool = "xs"
+rev = "21ae6844ed20"
+flags = ["-aH"]
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-aH"]
+
+[matrix]
+link = "mac-mars-usb10g"
+corpus = ["small-flat", "mixed-bimodal"]
+scenario = ["fresh", "noop"]
+direction = ["mac>mars", "mars>mac"]
+client = ["initiator"]
+cache = ["warm"]

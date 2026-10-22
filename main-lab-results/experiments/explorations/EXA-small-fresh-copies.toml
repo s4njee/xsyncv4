@@ -1,0 +1,115 @@
+# EXA: small-file fresh copies, where the receiver is the limit and the link is mostly idle.
+# An exploration, not a conducted tree: most nodes need code before they can be measured, so
+# lab/explore.py records each outcome by hand and the Tree view draws it. Nothing here is queued.
+# Every branch leads one level down: A2 finds the next limit, and each limit has its own fix.
+# (A4, "profile both ends", became part of A2.)
+id = "EXA-small-fresh-copies"
+question = "What limits xs's small-file fresh copies once the receiver's global lock and serial final pass are gone, and what removes the next limit?"
+start = ["A1"]
+
+[nodes.A1]
+title = "Race the receiver-lock branch"
+kind = "measure"
+written = "4c5c425c2434"   # engine/receiver-locks, cherry-picked onto the chain
+question = "Do the lock split and the parallel final pass make small fresh copies faster, and do extra receiving workers now help?"
+measure = "LK1 on the Mac-mars link: parent 21ae6844 against 4c5c425c (engine/receiver-locks), default, --no-atomic and -j8; small-flat, small-deep, real-congress; fresh and no-op; time to durable, 8 blocks."
+evidence = "N3 small-flat: the transfer phase stayed at 2.96-3.23 s from 1 to 16 receiving workers while their summed write time rose from 2.9 to 47 s. The serial final pass took 1.31-1.45 s of every small-deep run."
+
+  [[nodes.A1.branch]]
+  label = "faster: merge it"
+  next = ["A2"]
+
+  [[nodes.A1.branch]]
+  label = "no faster"
+  next = ["A2"]
+
+[nodes.A2]
+title = "Find the next limit"
+kind = "analysis"
+question = "How far is xs from the receiver creating the same files by itself, and what is it doing with the difference?"
+measure = "The best arm so far against local tar extraction on the receiver (P2b's local arms; mars now runs macOS, so measured again there), and a profile of both ends during a small-deep fresh copy: sample on macOS, perf on Linux. A quiet sender first: P2b lost runs to its load."
+evidence = "P2b, with mars on Linux: 4 local tar processes took 2.70 s on small-deep (about 37k files/s) against 5.26 s for xs in N3."
+
+  [[nodes.A2.branch]]
+  label = "path walks: opening directories from the root"
+  next = ["A3"]
+
+  [[nodes.A2.branch]]
+  label = "per-directory requests and wakeups"
+  next = ["A5"]
+
+  [[nodes.A2.branch]]
+  label = "one receiver process saturated"
+  next = ["A6"]
+
+  [[nodes.A2.branch]]
+  label = "writeback stalls"
+  next = ["A7"]
+
+  [[nodes.A2.branch]]
+  label = "within 1.3x of the local ceiling"
+  end = "The receiver is close to its disk; small fresh copies are done."
+
+[nodes.A3]
+title = "Cheaper destination path walks"
+kind = "measure"
+written = "e51c1df1329a"   # engine/dest-anchors; openat2 is Linux-only and not part of it
+question = "Do retained parent descriptors, and single-call opens on Linux, remove the path-walk cost?"
+measure = "engine/dest-anchors (e51c1df1) on every receiver, and openat2 with RESOLVE_BENEATH on Linux receivers only; opens per file and time to durable."
+evidence = "MA7, the Mac receiving a psample pull: most of 187 s of kernel time was openat from the destination path walk. dest-anchors cut those samples by 68%."
+
+  [[nodes.A3.branch]]
+  label = "fewer opens and faster"
+  end = "Adopt, then find the next limit again (A2)."
+
+  [[nodes.A3.branch]]
+  label = "fewer opens, same time"
+  end = "Not the limit: drop the change."
+
+[nodes.A5]
+title = "Fast path for fresh subtrees"
+question = "Can directories the receiver lacks skip the directory-by-directory request round trip, and the rename per file?"
+measure = "A new feature bit: listing and data stream together for new directories, NEED frames batched across directories, and optionally one staging directory renamed into place. small-deep and real-congress fresh: time to durable and receiver context switches."
+evidence = "About 200k voluntary context switches on the receiver per small-deep run; the temporary-file rename cost about 12 us of serialized time per file in N3."
+
+  [[nodes.A5.branch]]
+  label = "10% or more faster"
+  end = "Adopt behind the feature bit, then find the next limit again (A2)."
+
+  [[nodes.A5.branch]]
+  label = "under 3%"
+  end = "Drop."
+
+[nodes.A6]
+title = "Several receiver processes"
+question = "Once one process is the limit, do lanes split by top-level subtree scale?"
+measure = "N TCP streams, each feeding its own receiver process: 1, 2, 4 and 8 lanes into mars (macOS), freya (ZFS) and the Pi (ext4); small-flat, small-deep, real-congress."
+evidence = "The old xsync gained 1.12-2.18x with streams on Linux receivers and lost 1.12-1.17x on NTFS, where siblings were split across processes."
+needs = ["EXC-transport.C1"]
+
+  [[nodes.A6.branch]]
+  label = "scales on every receiver"
+  end = "Adopt lanes, chosen from the core count."
+
+  [[nodes.A6.branch]]
+  label = "scales on some receivers"
+  end = "Adopt per platform."
+
+  [[nodes.A6.branch]]
+  label = "no gain"
+  end = "Stop the multi-stream line."
+
+[nodes.A7]
+title = "Writeback control"
+requires = "linux"
+question = "Does starting writeback early shorten the time to durable?"
+measure = "Linux receivers only: sync_file_range as each file closes, then one syncfs. mars runs macOS, so on the Mac-mars link this node is dropped, not measured."
+evidence = "P2b's eager-writeback arm was about 1.15x overall; it removed dirty-page throttling stalls such as one block's 56.6 s of receiver write time."
+
+  [[nodes.A7.branch]]
+  label = "faster to durable"
+  end = "Adopt on Linux receivers."
+
+  [[nodes.A7.branch]]
+  label = "no change"
+  end = "Drop."

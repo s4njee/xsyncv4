@@ -1,0 +1,98 @@
+{
+ "id": "NIGHT-1021",
+ "question": "What did the night of 2026-10-21 change for xs-c++ and xs-rs?",
+ "start": [
+  "N2",
+  "N1",
+  "N0"
+ ],
+ "startedUtc": "2026-10-21T16:56:34Z",
+ "until": null,
+ "fills": 0,
+ "nodes": [
+  {
+   "id": "N0",
+   "kind": "experiment",
+   "experiment": "NT1021-fresh",
+   "question": "Tonight's builds, fresh copies: how do rsync, xs-c++ and xs-rs compare?",
+   "estimateHours": 1.4,
+   "hypothesis": "xs-rs at aa7aee150987 differs from xs-c++ at fe012667764a by more than 5% in time-to-durable.",
+   "design": "screening",
+   "state": "queued",
+   "runs": [
+    {
+     "id": "20261021T165635Z-NT1021-fresh",
+     "key": "mac-mac/NT1021-fresh/20261021T165635Z-NT1021-fresh",
+     "state": "running"
+    }
+   ],
+   "decision": null,
+   "decidedUtc": null,
+   "start": true,
+   "promote": null
+  },
+  {
+   "id": "N1",
+   "kind": "experiment",
+   "experiment": "NT1021-noop",
+   "question": "Tonight's builds, noop copies: how do rsync, xs-c++ and xs-rs compare?",
+   "estimateHours": 1.4,
+   "hypothesis": "xs-rs at aa7aee150987 differs from xs-c++ at fe012667764a by more than 5% in time-to-durable.",
+   "design": "screening",
+   "state": "queued",
+   "runs": [
+    {
+     "id": "20261021T165635Z-NT1021-noop",
+     "key": "mac-mac/NT1021-noop/20261021T165635Z-NT1021-noop",
+     "state": null
+    }
+   ],
+   "decision": null,
+   "decidedUtc": null,
+   "start": true,
+   "promote": null
+  },
+  {
+   "id": "N2",
+   "kind": "experiment",
+   "experiment": "NT1021-update-10pct",
+   "question": "Tonight's builds, update-10pct copies: how do rsync, xs-c++ and xs-rs compare?",
+   "estimateHours": 1.4,
+   "hypothesis": "xs-rs at aa7aee150987 differs from xs-c++ at fe012667764a by more than 5% in time-to-durable.",
+   "design": "screening",
+   "state": "queued",
+   "runs": [
+    {
+     "id": "20261021T165634Z-NT1021-update-10pct",
+     "key": "mac-mac/NT1021-update-10pct/20261021T165634Z-NT1021-update-10pct",
+     "state": null
+    }
+   ],
+   "decision": null,
+   "decidedUtc": null,
+   "start": true,
+   "promote": null
+  }
+ ],
+ "edges": [],
+ "decisions": [
+  {
+   "utc": "2026-10-21T16:56:36Z",
+   "node": "N0",
+   "kind": "queued",
+   "text": "N0 queued on mac (120 samples): start of the tree"
+  },
+  {
+   "utc": "2026-10-21T16:56:35Z",
+   "node": "N1",
+   "kind": "queued",
+   "text": "N1 queued on mac (120 samples): start of the tree"
+  },
+  {
+   "utc": "2026-10-21T16:56:35Z",
+   "node": "N2",
+   "kind": "queued",
+   "text": "N2 queued on mac (120 samples): start of the tree"
+  }
+ ]
+}

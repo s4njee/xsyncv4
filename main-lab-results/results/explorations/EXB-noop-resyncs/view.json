@@ -1,0 +1,200 @@
+{
+ "id": "EXB-noop-resyncs",
+ "manual": true,
+ "question": "Where does a re-sync that changes nothing spend its time, and can it skip unchanged subtrees?",
+ "start": [
+  "B1"
+ ],
+ "startedUtc": "2026-10-21T22:11:45Z",
+ "until": null,
+ "fills": 0,
+ "nodes": [
+  {
+   "id": "B1",
+   "kind": "experiment",
+   "experiment": null,
+   "title": "Re-measure no-op syncs",
+   "question": "Where does a no-op re-sync spend its time once the receiver fixes land?",
+   "measure": "real-congress and real-psample no-op, push and pull, against rsync; user and kernel time on each end.",
+   "hypothesis": "H21: congress no-op push ran at 0.74x rsync's speed, with 408.8 s of CPU against 18.8 s. MA7's pull deficit came from destination path walks.",
+   "needs": [],
+   "estimateHours": null,
+   "design": null,
+   "state": "decided",
+   "runs": [],
+   "decision": "B1: at or ahead of rsync both ways. no verdict. The run's status is 'failed' and it carries no lab verdicts, so this branch rests on the arm-vs-control effects alone. Some cells kept only 8 or 9 of 10 blocks. Even so, the hypothesis that xs-rs still trails rsync on no-op re-syncs is refuted. At the default -j4, xs-rs against rsync was 0.269 (0.235 to 0.309, 10 blocks) on congress push and 0.308 (0.262 to 0.361, 10 blocks) on congress pull. It was 0.231 (0.219 to 0.245, 8 blocks) on psample push. The one weak cell is psample pull at -j4: 0.6 with a 95% interval of 0.213 to 1.689 over 9 blocks, too wide to call, at 45.418 s against 75.716 s. At -j8 xs-rs is clearly ahead in all four cells: 0.249, 0.268, 0.185, and 0.191 (0.147 to 0.249) on psample pull. -j1 is also ahead everywhere it is decided: 0.519, 0.584 and 0.421, with psample pull at 0.82 (0.317 to 2.121), inconclusive. Going from -j1 to -j8 roughly halves time on every cell, so no serial bottleneck dominates. xs-rs CPU seconds are close to rsync's at -j4 (7.747 vs 8.098 on congress push), not far above. The lab records only total CPU, not a user/kernel split, so branches 0 and 1 could not be told apart anyway, and neither is needed: xs-rs is at or ahead of rsync both ways. The remaining oddity is the high variance of psample pull at -j4 (and xs-cpp-j4 there at 2.002, 0.912 to 4.393). That is noise worth watching, not a deficit against rsync. A measurement changes no code, so keep is false.",
+   "decidedUtc": "2026-10-22T07:16:32Z",
+   "start": true,
+   "promote": null
+  },
+  {
+   "id": "B1~end2",
+   "kind": "end",
+   "experiment": null,
+   "question": null,
+   "estimateHours": null,
+   "hypothesis": "Solved; leave it.",
+   "design": null,
+   "state": "decided",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "B2",
+   "kind": "experiment",
+   "experiment": null,
+   "title": "Confirm dest-anchors",
+   "question": "Do retained parent descriptors, and single-call opens on Linux, close the gap?",
+   "measure": "T17's MA8 (a psample pull onto the Mac, no-op and 1% update) and LC12 (Linux local copies), then openat2 on Linux receivers.",
+   "hypothesis": "By hand, the same no-op pull took 29.3 and 36.6 s with dest-anchors, against its parent's 50.5 and 64.0 s and rsync's 50.0 and 51.6 s.",
+   "needs": [],
+   "estimateHours": null,
+   "design": null,
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "B2~end0",
+   "kind": "end",
+   "experiment": null,
+   "question": null,
+   "estimateHours": null,
+   "hypothesis": "Adopt.",
+   "design": null,
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "B2~end1",
+   "kind": "end",
+   "experiment": null,
+   "question": null,
+   "estimateHours": null,
+   "hypothesis": "Adopt what helped; the rest of the gap is B3's to close.",
+   "design": null,
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "B3",
+   "kind": "experiment",
+   "experiment": null,
+   "title": "Persistent index",
+   "question": "Can a no-op skip unchanged subtrees without visiting them?",
+   "measure": "Prototype a per-directory hash tree keyed by inode, mtime, ctime and size on both ends, compared root first; later FSEvents and zfs diff. No-op time in milliseconds.",
+   "hypothesis": "Most real re-syncs change nothing, yet every name is listed and compared on both ends.",
+   "needs": [],
+   "estimateHours": null,
+   "design": null,
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "B3~end0",
+   "kind": "end",
+   "experiment": null,
+   "question": null,
+   "estimateHours": null,
+   "hypothesis": "Build it behind a feature bit.",
+   "design": null,
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "B3~end1",
+   "kind": "end",
+   "experiment": null,
+   "question": null,
+   "estimateHours": null,
+   "hypothesis": "Drop.",
+   "design": null,
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  }
+ ],
+ "edges": [
+  {
+   "from": "B1",
+   "to": "B2",
+   "label": "kernel time in path walks",
+   "taken": false
+  },
+  {
+   "from": "B1",
+   "to": "B3",
+   "label": "user time comparing listings",
+   "taken": false
+  },
+  {
+   "from": "B1",
+   "to": "B1~end2",
+   "label": "at or ahead of rsync both ways",
+   "taken": true
+  },
+  {
+   "from": "B2",
+   "to": "B2~end0",
+   "label": "ahead of rsync",
+   "taken": null
+  },
+  {
+   "from": "B2",
+   "to": "B2~end1",
+   "label": "still behind",
+   "taken": null
+  },
+  {
+   "from": "B3",
+   "to": "B3~end0",
+   "label": "milliseconds instead of seconds",
+   "taken": null
+  },
+  {
+   "from": "B3",
+   "to": "B3~end1",
+   "label": "upkeep costs more than it saves",
+   "taken": null
+  }
+ ],
+ "decisions": [
+  {
+   "utc": "2026-10-22T07:16:32Z",
+   "node": "B1",
+   "kind": "decision",
+   "text": "B1: at or ahead of rsync both ways. no verdict. The run's status is 'failed' and it carries no lab verdicts, so this branch rests on the arm-vs-control effects alone. Some cells kept only 8 or 9 of 10 blocks. Even so, the hypothesis that xs-rs still trails rsync on no-op re-syncs is refuted. At the default -j4, xs-rs against rsync was 0.269 (0.235 to 0.309, 10 blocks) on congress push and 0.308 (0.262 to 0.361, 10 blocks) on congress pull. It was 0.231 (0.219 to 0.245, 8 blocks) on psample push. The one weak cell is psample pull at -j4: 0.6 with a 95% interval of 0.213 to 1.689 over 9 blocks, too wide to call, at 45.418 s against 75.716 s. At -j8 xs-rs is clearly ahead in all four cells: 0.249, 0.268, 0.185, and 0.191 (0.147 to 0.249) on psample pull. -j1 is also ahead everywhere it is decided: 0.519, 0.584 and 0.421, with psample pull at 0.82 (0.317 to 2.121), inconclusive. Going from -j1 to -j8 roughly halves time on every cell, so no serial bottleneck dominates. xs-rs CPU seconds are close to rsync's at -j4 (7.747 vs 8.098 on congress push), not far above. The lab records only total CPU, not a user/kernel split, so branches 0 and 1 could not be told apart anyway, and neither is needed: xs-rs is at or ahead of rsync both ways. The remaining oddity is the high variance of psample pull at -j4 (and xs-cpp-j4 there at 2.002, 0.912 to 4.393). That is noise worth watching, not a deficit against rsync. A measurement changes no code, so keep is false."
+  },
+  {
+   "utc": "2026-10-21T22:11:45Z",
+   "node": "B1",
+   "kind": "note",
+   "text": "B1: running. measuring: xs-rs still takes longer than rsync on congress no-op, especially on pull, and its CPU seconds far exceed rsync's on one end. Receiver-side CPU dominating, mostly on pull, would point at destination p (CM-B1-10211710)"
+  }
+ ]
+}

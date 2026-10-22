@@ -4183,6 +4183,499 @@
    "model": "claude-haiku-5-5",
    "summarizedUtc": 1792584648.349,
    "driver": "neo"
+  },
+  "MM0-mac-mac-sentinel": {
+   "run": "20261021T140437Z-MM0-mac-mac-sentinel-s0001",
+   "experiment": "MM0-mac-mac-sentinel",
+   "key": "mixed-bimodal.noop.mars-mac.receiver.warm|1|0",
+   "utc": 1792592993.308,
+   "cell": "mixed-bimodal.noop.mars-mac.receiver.warm",
+   "factors": {
+    "corpus": "mixed-bimodal",
+    "scenario": "noop",
+    "sender": "mars",
+    "receiver": "mac",
+    "client": "receiver",
+    "link": "mac-mars-usb10g",
+    "cache": "warm"
+   },
+   "block": 1,
+   "attempt": 0,
+   "control": "xs",
+   "primary": "wall_s",
+   "arms": [
+    {
+     "arm": "xs",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 0.372,
+     "gbps": 29.966,
+     "files_per_s": 53698,
+     "speed": 1
+    },
+    {
+     "arm": "again",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.389,
+     "gbps": 28.703,
+     "files_per_s": 51434,
+     "speed": 0.96
+    },
+    {
+     "arm": "rsync",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.43,
+     "gbps": 25.961,
+     "files_per_s": 46520,
+     "speed": 0.87
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "again",
+     "speed": 1,
+     "blocks": 2
+    },
+    {
+     "arm": "rsync",
+     "speed": 0.85,
+     "blocks": 2
+    }
+   ],
+   "question": null,
+   "summary": null,
+   "model": null,
+   "driver": "mac"
+  },
+  "MM1-mac-mac-baseline": {
+   "run": "20261021T140436Z-MM1-mac-mac-baseline",
+   "experiment": "MM1-mac-mac-baseline",
+   "key": "small-flat.fresh.mac-mars.sender.warm|5|0",
+   "utc": 1792606838.752,
+   "cell": "small-flat.fresh.mac-mars.sender.warm",
+   "factors": {
+    "corpus": "small-flat",
+    "scenario": "fresh",
+    "sender": "mac",
+    "receiver": "mars",
+    "client": "sender",
+    "link": "mac-mars-usb10g",
+    "cache": "warm"
+   },
+   "block": 5,
+   "attempt": 0,
+   "control": "rsync",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "rsync",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 17.76,
+     "gbps": 0.144,
+     "files_per_s": 5631,
+     "speed": 1
+    },
+    {
+     "arm": "xs-e6b",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 15.145,
+     "gbps": 0.169,
+     "files_per_s": 6603,
+     "speed": 1.17
+    },
+    {
+     "arm": "xs-cpp",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 16.885,
+     "gbps": 0.151,
+     "files_per_s": 5922,
+     "speed": 1.05
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "xs-cpp",
+     "speed": 1.26,
+     "blocks": 6
+    },
+    {
+     "arm": "xs-e6b",
+     "speed": 1.27,
+     "blocks": 6
+    }
+   ],
+   "question": null,
+   "summary": "In this block for small-flat, fresh, mac\u2192mars, xs-e6b was fastest at 1.17x the rsync control (15.1 s vs 17.8 s), with xs-cpp at 1.05x. Cumulatively over six blocks, xs-e6b stands at 1.27x and xs-cpp at 1.26x against rsync, so the two are effectively tied in this cell. Since the question field is empty, this block bears on no stated hypothesis beyond the cell-level comparison.",
+   "model": "claude-haiku-5-5",
+   "summarizedUtc": 1792606882.92,
+   "driver": "mac"
+  },
+  "AP10211357-L2B1-lab2-build-small-fresh": {
+   "run": "20261021T135748Z-AP10211357-L2B1-lab2-build-small-fresh",
+   "experiment": "AP10211357-L2B1-lab2-build-small-fresh",
+   "key": "mixed-bimodal.fresh.mac-mars.sender.warm|9|0",
+   "utc": 1792594626.075,
+   "cell": "mixed-bimodal.fresh.mac-mars.sender.warm",
+   "factors": {
+    "corpus": "mixed-bimodal",
+    "scenario": "fresh",
+    "sender": "mac",
+    "receiver": "mars",
+    "client": "sender",
+    "link": "mac-mars-usb10g",
+    "cache": "warm"
+   },
+   "block": 9,
+   "attempt": 0,
+   "control": "xs-lab2",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "xs-lab2",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 4.81,
+     "gbps": 2.32,
+     "files_per_s": 4158,
+     "speed": 1
+    },
+    {
+     "arm": "xs-home",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 4.273,
+     "gbps": 2.612,
+     "files_per_s": 4681,
+     "speed": 1.13
+    },
+    {
+     "arm": "xs-lab2-j2",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 4.711,
+     "gbps": 2.369,
+     "files_per_s": 4245,
+     "speed": 1.02
+    },
+    {
+     "arm": "rsync",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 7.101,
+     "gbps": 1.572,
+     "files_per_s": 2816,
+     "speed": 0.68
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "rsync",
+     "speed": 0.61,
+     "blocks": 10
+    },
+    {
+     "arm": "xs-home",
+     "speed": 1.06,
+     "blocks": 10
+    },
+    {
+     "arm": "xs-lab2-j2",
+     "speed": 0.97,
+     "blocks": 10
+    }
+   ],
+   "question": "For lab2's real-projects and congress-sample fresh gaps: is lab2's C++ xs build 0c94b3d70b9d (-a -j4) slower than e51c1df1329a, the build all home reproductions used, on fresh small-tree copies, and does -j2 change its standing against rsync -a?",
+   "summary": null,
+   "model": null,
+   "driver": "mac"
+  },
+  "NT1021-fresh": {
+   "run": "20261021T165635Z-NT1021-fresh",
+   "experiment": "NT1021-fresh",
+   "key": "real-congress.fresh.mars-mac.receiver.warm|4|0",
+   "utc": 1792613122.647,
+   "cell": "real-congress.fresh.mars-mac.receiver.warm",
+   "factors": {
+    "corpus": "real-congress",
+    "scenario": "fresh",
+    "sender": "mars",
+    "receiver": "mac",
+    "client": "receiver",
+    "link": "mac-mars-usb10g",
+    "cache": "warm"
+   },
+   "block": 4,
+   "attempt": 0,
+   "control": "xs-cpp",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "rsync",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 75.594,
+     "gbps": 0.123,
+     "files_per_s": 2864,
+     "speed": 0.58
+    },
+    {
+     "arm": "xs-cpp",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 43.555,
+     "gbps": 0.213,
+     "files_per_s": 4971,
+     "speed": 1
+    },
+    {
+     "arm": "xs-rs",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 23.824,
+     "gbps": 0.389,
+     "files_per_s": 9088,
+     "speed": 1.83
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "rsync",
+     "speed": 0.54,
+     "blocks": 5
+    },
+    {
+     "arm": "xs-rs",
+     "speed": 1.72,
+     "blocks": 5
+    }
+   ],
+   "question": "Tonight's builds, fresh copies: how do rsync, xs-c++ and xs-rs compare?",
+   "summary": null,
+   "model": null,
+   "driver": "mac"
+  },
+  "CL-A1-c5b765eb54fc": {
+   "run": "20261021T211140Z-CL-A1-c5b765eb54fc",
+   "experiment": "CL-A1-c5b765eb54fc",
+   "key": "real-congress.fresh.mac-mars.sender.warm|7|0",
+   "utc": 1792618530.108,
+   "cell": "real-congress.fresh.mac-mars.sender.warm",
+   "factors": {
+    "corpus": "real-congress",
+    "scenario": "fresh",
+    "sender": "mac",
+    "receiver": "mars",
+    "client": "sender",
+    "link": "mac-mars-usb10g",
+    "cache": "warm"
+   },
+   "block": 7,
+   "attempt": 0,
+   "control": "parent",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "parent",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 30.232,
+     "gbps": 0.307,
+     "files_per_s": 7162,
+     "speed": 1
+    },
+    {
+     "arm": "candidate",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 12.506,
+     "gbps": 0.741,
+     "files_per_s": 17312,
+     "speed": 2.42
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "candidate",
+     "speed": 2.43,
+     "blocks": 8
+    }
+   ],
+   "question": null,
+   "summary": null,
+   "model": null,
+   "driver": "mac"
+  },
+  "CL-C5-c9e8d5d5f87d": {
+   "run": "20261021T214317Z-CL-C5-c9e8d5d5f87d",
+   "experiment": "CL-C5-c9e8d5d5f87d",
+   "key": "real-congress.noop.mac-mars.sender.warm|7|0",
+   "utc": 1792620179.485,
+   "cell": "real-congress.noop.mac-mars.sender.warm",
+   "factors": {
+    "corpus": "real-congress",
+    "scenario": "noop",
+    "sender": "mac",
+    "receiver": "mars",
+    "client": "sender",
+    "link": "mac-mars-usb10g",
+    "cache": "warm"
+   },
+   "block": 7,
+   "attempt": 0,
+   "control": "parent",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "parent",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 1.829,
+     "gbps": 5.07,
+     "files_per_s": 118372,
+     "speed": 1
+    },
+    {
+     "arm": "candidate",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 1.634,
+     "gbps": 5.676,
+     "files_per_s": 132519,
+     "speed": 1.12
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "candidate",
+     "speed": 1.01,
+     "blocks": 8
+    }
+   ],
+   "question": null,
+   "summary": null,
+   "model": null,
+   "driver": "mac"
+  },
+  "CM-B1-10211710": {
+   "run": "20261021T221144Z-CM-B1-10211710",
+   "experiment": "CM-B1-10211710",
+   "key": "real-psample.noop.mac-mars.sender.warm|9|0",
+   "utc": 1792651651.451,
+   "cell": "real-psample.noop.mac-mars.sender.warm",
+   "factors": {
+    "corpus": "real-psample",
+    "scenario": "noop",
+    "sender": "mac",
+    "receiver": "mars",
+    "client": "sender",
+    "link": "mac-mars-usb10g",
+    "cache": "warm"
+   },
+   "block": 9,
+   "attempt": 0,
+   "control": "rsync",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "rsync",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 104.053,
+     "gbps": 1.618,
+     "files_per_s": 6834,
+     "speed": 1
+    },
+    {
+     "arm": "xs-rs-j4",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 22.319,
+     "gbps": 7.544,
+     "files_per_s": 31861,
+     "speed": 4.66
+    },
+    {
+     "arm": "xs-rs-j1",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 44.456,
+     "gbps": 3.787,
+     "files_per_s": 15996,
+     "speed": 2.34
+    },
+    {
+     "arm": "xs-rs-j8",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 17.627,
+     "gbps": 9.552,
+     "files_per_s": 40343,
+     "speed": 5.9
+    },
+    {
+     "arm": "xs-cpp-j4",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 33.592,
+     "gbps": 5.012,
+     "files_per_s": 21169,
+     "speed": 3.1
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "xs-cpp-j4",
+     "speed": 3.34,
+     "blocks": 10
+    },
+    {
+     "arm": "xs-rs-j1",
+     "speed": 2.3,
+     "blocks": 10
+    },
+    {
+     "arm": "xs-rs-j4",
+     "speed": 4.31,
+     "blocks": 10
+    },
+    {
+     "arm": "xs-rs-j8",
+     "speed": 5.31,
+     "blocks": 9
+    }
+   ],
+   "question": null,
+   "summary": "In this block, xs-rs-j8 was fastest at 5.9x the rsync control (17.6 s against 104.1 s). Cumulative ratios in this cell put xs-rs-j8 at 5.31x over 9 blocks, xs-rs-j4 at 4.31x and xs-cpp-j4 at 3.34x over 10 blocks each, and xs-rs-j1 at 2.3x over 10 blocks, so the ordering is consistent across blocks. The question field is null, so this block does not bear on a stated hypothesis beyond the cell's relative throughput ranking.",
+   "model": "claude-haiku-5-5",
+   "summarizedUtc": 1792651737.453,
+   "driver": "mac"
   }
  }
 }

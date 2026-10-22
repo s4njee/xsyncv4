@@ -1,0 +1,119 @@
+{
+ "ok": true,
+ "analysis": {
+  "decision": {
+   "node": "B1",
+   "branch": 2,
+   "keep": false,
+   "reason": "The run's status is 'failed' and it carries no lab verdicts, so this branch rests on the arm-vs-control effects alone. Some cells kept only 8 or 9 of 10 blocks. Even so, the hypothesis that xs-rs still trails rsync on no-op re-syncs is refuted. At the default -j4, xs-rs against rsync was 0.269 (0.235 to 0.309, 10 blocks) on congress push and 0.308 (0.262 to 0.361, 10 blocks) on congress pull. It was 0.231 (0.219 to 0.245, 8 blocks) on psample push. The one weak cell is psample pull at -j4: 0.6 with a 95% interval of 0.213 to 1.689 over 9 blocks, too wide to call, at 45.418 s against 75.716 s. At -j8 xs-rs is clearly ahead in all four cells: 0.249, 0.268, 0.185, and 0.191 (0.147 to 0.249) on psample pull. -j1 is also ahead everywhere it is decided: 0.519, 0.584 and 0.421, with psample pull at 0.82 (0.317 to 2.121), inconclusive. Going from -j1 to -j8 roughly halves time on every cell, so no serial bottleneck dominates. xs-rs CPU seconds are close to rsync's at -j4 (7.747 vs 8.098 on congress push), not far above. The lab records only total CPU, not a user/kernel split, so branches 0 and 1 could not be told apart anyway, and neither is needed: xs-rs is at or ahead of rsync both ways. The remaining oddity is the high variance of psample pull at -j4 (and xs-cpp-j4 there at 2.002, 0.912 to 4.393). That is noise worth watching, not a deficit against rsync. A measurement changes no code, so keep is false."
+  },
+  "priorities": [
+   {
+    "node": "A2",
+    "brief": "No code. Race small-deep and small-flat fresh copies, push and pull, with xs-rs at -j1, -j4 (control), -j8 and -j16, plus -j8 with --no-atomic, and rsync -a for reference. The run shows four things. First, whether more receiving workers still help after the receiver-lock change (A1: 'fresh 0.411 (faster)'), which A1's pooled verdicts did not separate. Second, whether atomic temp-file-and-rename costs measurable time per file on the macOS receiver. Third, whether the push/pull asymmetry seen in lab races persists across job counts (small-deep 9.84 s push vs 19.878 s pull). Fourth, how client and peer CPU and RSS scale with -j, to show which end saturates. If -j8 and -j16 stop improving while peer CPU keeps rising, the limit is receiver-side per-file work; that points at A3, A5 or A6. If --no-atomic helps clearly, the rename/fsync path is the limit (A7). Compare durable_s with wall_s to see how much time is spent after the copy reaching durability, which bears on writeback (A7). The lab cannot run local tar extraction or sample/perf, so the 'distance from local creation' baseline and the in-process profile are left out.",
+    "why": "It is the only buildable node. It decides which of A3, A5, A6 or A7 to build next on the small-file fresh copies, where xs-rs spends the most per-file time on this link. Pull (mars>mac) is twice as slow as push on small-deep, and rsync takes 26.643 s and 48.05 s there. With B1 showing no-op re-syncs already ahead of rsync, small fresh copies are where the next gain is.",
+    "measure": {
+     "arms": [
+      {
+       "name": "xs-rs-j4",
+       "tool": "xs-rs",
+       "flags": [
+        "-a",
+        "-j4"
+       ]
+      },
+      {
+       "name": "xs-rs-j1",
+       "tool": "xs-rs",
+       "flags": [
+        "-a",
+        "-j1"
+       ]
+      },
+      {
+       "name": "xs-rs-j8",
+       "tool": "xs-rs",
+       "flags": [
+        "-a",
+        "-j8"
+       ]
+      },
+      {
+       "name": "xs-rs-j16",
+       "tool": "xs-rs",
+       "flags": [
+        "-a",
+        "-j16"
+       ]
+      },
+      {
+       "name": "xs-rs-j8-noatomic",
+       "tool": "xs-rs",
+       "flags": [
+        "-a",
+        "-j8",
+        "--no-atomic"
+       ]
+      },
+      {
+       "name": "rsync",
+       "tool": "rsync",
+       "flags": [
+        "-a"
+       ]
+      }
+     ],
+     "control": "xs-rs-j4",
+     "corpus": [
+      "small-deep",
+      "small-flat"
+     ],
+     "scenario": [
+      "fresh"
+     ],
+     "direction": [
+      "mac>mars",
+      "mars>mac"
+     ],
+     "blocks": 10,
+     "hypothesis": "After the receiver-lock change, small-file fresh copies are limited by per-file work on the receiving Mac. If so, -j8 and -j16 give little over -j4 while peer CPU rises, and the effect is stronger on pull (mars>mac), where small-deep takes about twice as long as push. --no-atomic at -j8 beats -j8 if temp-file rename costs matter. A large gap between durable_s and wall_s would point at writeback. This run leaves out the local tar-extraction baseline on the receiver and any sample/perf profile, so it bounds the limit by scaling and CPU, not by an absolute ceiling or a per-function breakdown."
+    }
+   }
+  ],
+  "resolutions": [],
+  "drops": [],
+  "summary": "Re-measuring no-op re-syncs (B1) showed xs-rs ahead of rsync both ways. At -j4 it took 0.269 to 0.308 of rsync's time on real-congress and 0.231 on real-psample push. At -j8 it was ahead in every cell, though psample pull at -j4 was too noisy to call (0.6, interval 0.213 to 1.689). The no-op question is closed, and next the lab races small-file fresh copies across -j1 to -j16 and --no-atomic (A2) to find which receiver-side limit to build against."
+ },
+ "usage": {
+  "input_tokens": 8422,
+  "cache_creation_input_tokens": 2626,
+  "cache_read_input_tokens": 0,
+  "cache_creation": {
+   "ephemeral_5m_input_tokens": 2626,
+   "ephemeral_1h_input_tokens": 0
+  },
+  "iterations": [
+   {
+    "input_tokens": 8422,
+    "output_tokens": 2920,
+    "cache_read_input_tokens": 0,
+    "cache_creation_input_tokens": 2626,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 2626,
+     "ephemeral_1h_input_tokens": 0
+    },
+    "type": "message",
+    "model": null
+   }
+  ],
+  "output_tokens": 2920,
+  "output_tokens_details": {
+   "thinking_tokens": 944
+  },
+  "service_tier": "standard",
+  "inference_geo": "global",
+  "speed": "standard"
+ },
+ "cost_usd": 0.105218,
+ "model": "claude-opus-5-5"
+}

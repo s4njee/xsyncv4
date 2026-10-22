@@ -1,0 +1,28 @@
+{
+ "experiment": "PB1-neo-vpsb-cpp-vs-rsync",
+ "kind": "screening",
+ "hypothesis": "Over a 122 ms internet path, rsync -a beats xs -a -j4 on fresh copies of real trees, as on lab2, while xs wins no-ops.",
+ "primary": "durable_s",
+ "control": "rsync",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261021T141745Z-PB1-neo-vpsb-cpp-vs-rsync",
+  "20261021T144636Z-PB1-neo-vpsb-cpp-vs-rsync",
+  "20261022T000326Z-PB1-neo-vpsb-cpp-vs-rsync"
+ ],
+ "spec_sha256": [
+  "298a5725fefd5b238fdb52c986850681a9ddce14772ded56fec85693f309d2ec"
+ ],
+ "valid_blocks": 0,
+ "void_attempts": 54,
+ "void_reasons": [
+  "rsync: did not settle: vpsb is 15% busy",
+  "rsync: harness error: vpsb: `python3 ~/mainlab/lib/a3dbc824d281/probe.py snapshot --interface ens3` exited 255: ssh: connect to host [host] po",
+  "rsync: the destination does not match the corpus manifest: 58cde6f2ac0/corpus.py\", line 580, in <module>\n    main()\n    ~~~~^^\n  File \"~/lab/lib/f58",
+  "rsync: the transfer exited 255: ssh: connect to host [host] port 22: Connection timed out\nrsync: connection unexpectedly closed (0 bytes received so far) ",
+  "xs-cpp: did not settle: vpsb is 15% busy",
+  "xs-cpp: the destination does not match the corpus manifest: 58cde6f2ac0/corpus.py\", line 580, in <module>\n    main()\n    ~~~~^^\n  File \"~/lab/lib/f5"
+ ]
+}

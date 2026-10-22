@@ -1,0 +1,31 @@
+# PB1 (2026-10-21): xs-c++ against rsync over the real internet, neo (Pi 5, home network, Linux) sending to lab2's
+# VPS B (1 vCPU EPYC, Ubuntu) about 122 ms away: the cells where the home lab has xs ahead of rsync and lab2 has rsync
+# ahead (fresh copies of real trees; real-congress for lab2's congress-sample, small-real for its real-projects).
+# xs-cpp is lab2's current xs-c++ at lab2's flags. Warm only. A syscall profile of the same copies follows (PB1-profile).
+id = "PB1-neo-vpsb-cpp-vs-rsync"
+kind = "screening"
+hypothesis = "Over a 122 ms internet path, rsync -a beats xs -a -j4 on fresh copies of real trees, as on lab2, while xs wins no-ops."
+primary = "durable_s"
+delta = 0.05
+blocks = 4
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+sample_timeout_s = 7200
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[arms.xs-cpp]
+tool = "xs"
+rev = "0c94b3d70b9d"
+flags = ["-a", "-j4"]
+
+[matrix]
+link = "neo-vpsb"
+corpus = ["real-congress", "small-real"]
+scenario = ["fresh", "noop"]
+direction = ["neo>vpsb"]
+client = ["initiator"]
+cache = ["warm"]

@@ -1,0 +1,698 @@
+{
+ "schema": 1,
+ "experiment": "AP10211357-L2B1-lab2-build-small-fresh",
+ "spec_sha256": "f495046bd26b6dc045b1048cc62e7a6e773152ef8ed59c54e3f2ecd3abde1bf1",
+ "kind": "screening",
+ "bundle": "a3dbc824d281",
+ "writes": {
+  "mac": 0,
+  "mars": 68574046120
+ },
+ "hypothesis": "0c94b3d70b9d is within 5% of e51c1df1329a and still well ahead of rsync -a on small-flat and mixed-bimodal fresh copies, so the build difference does not explain lab2's losses; -j2 is no faster than -j4.",
+ "primary": "durable_s",
+ "delta": 0.05,
+ "control": "xs-lab2",
+ "seed": 45086,
+ "run_id": "20261021T135748Z-AP10211357-L2B1-lab2-build-small-fresh",
+ "driver": "mac",
+ "sample_timeout_s": 7200,
+ "results": "mac-mac",
+ "background": false,
+ "local_link": false,
+ "eager_cleanup": true,
+ "hours": null,
+ "hosts": {
+  "mac": {
+   "ssh": "[host]",
+   "name": "[host]",
+   "hostname": "[host]",
+   "root": "~/benchmarks/xsbench.noindex",
+   "interface": "bridge100",
+   "helper": false,
+   "gates": {},
+   "local": true,
+   "system": "Darwin"
+  },
+  "mars": {
+   "ssh": "[host]",
+   "name": "[host]",
+   "hostname": "[host]",
+   "root": "/Volumes/xsbench/lab",
+   "interface": "en0",
+   "helper": false,
+   "gates": {},
+   "local": false,
+   "system": "Darwin"
+  }
+ },
+ "links": {
+  "mac-mars-usb10g": {
+   "hosts": [
+    "mac",
+    "mars"
+   ],
+   "medium": "wired",
+   "min_speed_mbps": 10000,
+   "min_speed_mbps_by_host": {
+    "mars": 2500
+   },
+   "max_rtt_ms": 2.0,
+   "initiator": "mac",
+   "driver": "mac",
+   "results": "mac-mac",
+   "address": {
+    "mac": "[address]",
+    "mars": "[host]"
+   }
+  }
+ },
+ "arms": [
+  {
+   "name": "xs-lab2",
+   "tool": "xs",
+   "flags": [
+    "-a",
+    "-j4"
+   ],
+   "rev": "0c94b3d70b9d",
+   "binary": {
+    "mac": "~/benchmarks/xsbench.noindex/bin/xs-0c94b3d70b9d",
+    "mars": "/Volumes/xsbench/lab/bin/xs-0c94b3d70b9d"
+   },
+   "sha256": {
+    "mac": "434683ec1d9b756769271757f15cbc95b9d0a461a03b680437d44610d7bc9954",
+    "mars": "fb1d14a81d5ba7840c5f77fea211b7f3ccd163357102e4a91628d7ab70ba8a7f"
+   },
+   "artifacts": {
+    "xs-darwin-arm64": "434683ec1d9b756769271757f15cbc95b9d0a461a03b680437d44610d7bc9954",
+    "xs-linux-arm64": "4298546afdcc6eff645f8b5a6d7d0baad5b5b4c362ee6b0c5879f52cddf0c99b",
+    "xs-darwin-amd64": "fb1d14a81d5ba7840c5f77fea211b7f3ccd163357102e4a91628d7ab70ba8a7f"
+   }
+  },
+  {
+   "name": "xs-home",
+   "tool": "xs",
+   "flags": [
+    "-a",
+    "-j4"
+   ],
+   "rev": "e51c1df1329a",
+   "binary": {
+    "mac": "~/benchmarks/xsbench.noindex/bin/xs-e51c1df1329a",
+    "mars": "/Volumes/xsbench/lab/bin/xs-e51c1df1329a"
+   },
+   "sha256": {
+    "mac": "69f4fccf32d9882eaea678d60f7575fc17489316821b5e901f65c7c624ebc796",
+    "mars": "f7a3ed9a6fbfd455dba0471ef647db50f272669a0f5822d9244dd3a54ad3f98b"
+   },
+   "artifacts": {
+    "xs-darwin-arm64": "69f4fccf32d9882eaea678d60f7575fc17489316821b5e901f65c7c624ebc796",
+    "xs-linux-amd64": "c08508a01399b871aed62aa1cd437b16092726e4d9095afb41ee39041202cfeb",
+    "xs-linux-arm64": "fe66e5e4217c5bc63c949e328457f4630a3c5f3233303f6b4a5d9a780d4d826a",
+    "xs-darwin-amd64": "f7a3ed9a6fbfd455dba0471ef647db50f272669a0f5822d9244dd3a54ad3f98b"
+   }
+  },
+  {
+   "name": "xs-lab2-j2",
+   "tool": "xs",
+   "flags": [
+    "-a",
+    "-j2"
+   ],
+   "rev": "0c94b3d70b9d",
+   "binary": {
+    "mac": "~/benchmarks/xsbench.noindex/bin/xs-0c94b3d70b9d",
+    "mars": "/Volumes/xsbench/lab/bin/xs-0c94b3d70b9d"
+   },
+   "sha256": {
+    "mac": "434683ec1d9b756769271757f15cbc95b9d0a461a03b680437d44610d7bc9954",
+    "mars": "fb1d14a81d5ba7840c5f77fea211b7f3ccd163357102e4a91628d7ab70ba8a7f"
+   },
+   "artifacts": {
+    "xs-darwin-arm64": "434683ec1d9b756769271757f15cbc95b9d0a461a03b680437d44610d7bc9954",
+    "xs-linux-arm64": "4298546afdcc6eff645f8b5a6d7d0baad5b5b4c362ee6b0c5879f52cddf0c99b",
+    "xs-darwin-amd64": "fb1d14a81d5ba7840c5f77fea211b7f3ccd163357102e4a91628d7ab70ba8a7f"
+   }
+  },
+  {
+   "name": "rsync",
+   "tool": "rsync",
+   "flags": [
+    "-a"
+   ],
+   "binary": {
+    "mac": "/opt/homebrew/bin/rsync",
+    "mars": "/opt/local/bin/rsync"
+   }
+  }
+ ],
+ "cells": [
+  {
+   "id": "small-flat.fresh.mac-mars.sender.warm",
+   "corpus": "small-flat",
+   "scenario": "fresh",
+   "sender": "mac",
+   "receiver": "mars",
+   "client": "sender",
+   "link": "mac-mars-usb10g",
+   "cache": "warm"
+  },
+  {
+   "id": "mixed-bimodal.fresh.mac-mars.sender.warm",
+   "corpus": "mixed-bimodal",
+   "scenario": "fresh",
+   "sender": "mac",
+   "receiver": "mars",
+   "client": "sender",
+   "link": "mac-mars-usb10g",
+   "cache": "warm"
+  }
+ ],
+ "corpora": {
+  "small-flat": {
+   "files": 100000,
+   "directories": 100,
+   "bytes": 319224077,
+   "digest": "41b628c4337730be4efdfcc6673d517749132ffd50b75b29321640e6f064bbec",
+   "quick_digest": "e8de96251eaca6be3e98b1cb8097405b37ad470fc0d5ffdb7a5a48ea5b9f3805"
+  },
+  "mixed-bimodal": {
+   "files": 20000,
+   "directories": 420,
+   "bytes": 1395127076,
+   "digest": "e9071fb7ad3b0375ffe9fab58f740bfd22d545f7678e163a6c745504cc7aa16b",
+   "quick_digest": "31af6dbe5d38a32f5f0acf560703fa557304d3936e59f7b395d13cf8d0dec7fb"
+  }
+ },
+ "blocks": [
+  {
+   "cell": "small-flat.fresh.mac-mars.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs-lab2",
+     "xs-home",
+     "rsync",
+     "xs-lab2-j2"
+    ],
+    [
+     "xs-home",
+     "xs-lab2-j2",
+     "xs-lab2",
+     "rsync"
+    ],
+    [
+     "xs-lab2",
+     "xs-lab2-j2",
+     "xs-home",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.mac-mars.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs-lab2-j2",
+     "rsync",
+     "xs-home",
+     "xs-lab2"
+    ],
+    [
+     "xs-home",
+     "xs-lab2-j2",
+     "rsync",
+     "xs-lab2"
+    ],
+    [
+     "xs-lab2-j2",
+     "xs-home",
+     "xs-lab2",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.mac-mars.sender.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-lab2-j2",
+     "xs-lab2",
+     "rsync",
+     "xs-home"
+    ],
+    [
+     "xs-lab2-j2",
+     "xs-lab2",
+     "rsync",
+     "xs-home"
+    ],
+    [
+     "rsync",
+     "xs-home",
+     "xs-lab2",
+     "xs-lab2-j2"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.mac-mars.sender.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-home",
+     "xs-lab2",
+     "xs-lab2-j2",
+     "rsync"
+    ],
+    [
+     "xs-lab2-j2",
+     "rsync",
+     "xs-lab2",
+     "xs-home"
+    ],
+    [
+     "xs-home",
+     "rsync",
+     "xs-lab2",
+     "xs-lab2-j2"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.mac-mars.sender.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync",
+     "xs-lab2-j2",
+     "xs-home",
+     "xs-lab2"
+    ],
+    [
+     "xs-lab2",
+     "xs-home",
+     "xs-lab2-j2",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs-lab2",
+     "xs-lab2-j2",
+     "xs-home"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.mac-mars.sender.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-lab2",
+     "rsync",
+     "xs-home",
+     "xs-lab2-j2"
+    ],
+    [
+     "xs-lab2-j2",
+     "rsync",
+     "xs-home",
+     "xs-lab2"
+    ],
+    [
+     "xs-lab2",
+     "xs-home",
+     "xs-lab2-j2",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.mac-mars.sender.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-lab2-j2",
+     "xs-home",
+     "rsync",
+     "xs-lab2"
+    ],
+    [
+     "rsync",
+     "xs-home",
+     "xs-lab2-j2",
+     "xs-lab2"
+    ],
+    [
+     "xs-lab2-j2",
+     "xs-home",
+     "rsync",
+     "xs-lab2"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.mac-mars.sender.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-lab2-j2",
+     "xs-home",
+     "rsync",
+     "xs-lab2"
+    ],
+    [
+     "rsync",
+     "xs-lab2",
+     "xs-home",
+     "xs-lab2-j2"
+    ],
+    [
+     "xs-home",
+     "rsync",
+     "xs-lab2",
+     "xs-lab2-j2"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.mac-mars.sender.warm",
+   "block": 4,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-lab2-j2",
+     "rsync",
+     "xs-lab2",
+     "xs-home"
+    ],
+    [
+     "xs-lab2-j2",
+     "rsync",
+     "xs-home",
+     "xs-lab2"
+    ],
+    [
+     "xs-lab2",
+     "xs-home",
+     "rsync",
+     "xs-lab2-j2"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.mac-mars.sender.warm",
+   "block": 4,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-home",
+     "xs-lab2",
+     "xs-lab2-j2",
+     "rsync"
+    ],
+    [
+     "xs-lab2",
+     "xs-lab2-j2",
+     "rsync",
+     "xs-home"
+    ],
+    [
+     "rsync",
+     "xs-lab2-j2",
+     "xs-lab2",
+     "xs-home"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.mac-mars.sender.warm",
+   "block": 5,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-lab2",
+     "rsync",
+     "xs-lab2-j2",
+     "xs-home"
+    ],
+    [
+     "rsync",
+     "xs-lab2-j2",
+     "xs-lab2",
+     "xs-home"
+    ],
+    [
+     "xs-lab2-j2",
+     "rsync",
+     "xs-lab2",
+     "xs-home"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.mac-mars.sender.warm",
+   "block": 5,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync",
+     "xs-home",
+     "xs-lab2-j2",
+     "xs-lab2"
+    ],
+    [
+     "rsync",
+     "xs-lab2",
+     "xs-home",
+     "xs-lab2-j2"
+    ],
+    [
+     "rsync",
+     "xs-lab2-j2",
+     "xs-lab2",
+     "xs-home"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.mac-mars.sender.warm",
+   "block": 6,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-lab2-j2",
+     "rsync",
+     "xs-home",
+     "xs-lab2"
+    ],
+    [
+     "xs-lab2-j2",
+     "rsync",
+     "xs-lab2",
+     "xs-home"
+    ],
+    [
+     "xs-lab2",
+     "xs-home",
+     "rsync",
+     "xs-lab2-j2"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.mac-mars.sender.warm",
+   "block": 6,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-lab2",
+     "xs-lab2-j2",
+     "xs-home",
+     "rsync"
+    ],
+    [
+     "xs-lab2",
+     "xs-lab2-j2",
+     "xs-home",
+     "rsync"
+    ],
+    [
+     "xs-lab2-j2",
+     "xs-home",
+     "rsync",
+     "xs-lab2"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.mac-mars.sender.warm",
+   "block": 7,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync",
+     "xs-lab2-j2",
+     "xs-home",
+     "xs-lab2"
+    ],
+    [
+     "xs-lab2-j2",
+     "xs-lab2",
+     "rsync",
+     "xs-home"
+    ],
+    [
+     "xs-lab2",
+     "xs-lab2-j2",
+     "xs-home",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.mac-mars.sender.warm",
+   "block": 7,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-lab2-j2",
+     "xs-home",
+     "xs-lab2",
+     "rsync"
+    ],
+    [
+     "xs-lab2-j2",
+     "xs-home",
+     "xs-lab2",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs-lab2",
+     "xs-lab2-j2",
+     "xs-home"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.mac-mars.sender.warm",
+   "block": 8,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-lab2-j2",
+     "xs-lab2",
+     "xs-home",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs-lab2",
+     "xs-lab2-j2",
+     "xs-home"
+    ],
+    [
+     "xs-lab2",
+     "xs-home",
+     "rsync",
+     "xs-lab2-j2"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.mac-mars.sender.warm",
+   "block": 8,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-lab2",
+     "rsync",
+     "xs-home",
+     "xs-lab2-j2"
+    ],
+    [
+     "rsync",
+     "xs-lab2-j2",
+     "xs-home",
+     "xs-lab2"
+    ],
+    [
+     "xs-lab2",
+     "rsync",
+     "xs-home",
+     "xs-lab2-j2"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.fresh.mac-mars.sender.warm",
+   "block": 9,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs-lab2",
+     "rsync",
+     "xs-home",
+     "xs-lab2-j2"
+    ],
+    [
+     "xs-home",
+     "xs-lab2",
+     "xs-lab2-j2",
+     "rsync"
+    ],
+    [
+     "xs-home",
+     "xs-lab2-j2",
+     "xs-lab2",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.fresh.mac-mars.sender.warm",
+   "block": 9,
+   "verify_full": true,
+   "orders": [
+    [
+     "rsync",
+     "xs-lab2-j2",
+     "xs-lab2",
+     "xs-home"
+    ],
+    [
+     "xs-lab2-j2",
+     "xs-home",
+     "rsync",
+     "xs-lab2"
+    ],
+    [
+     "xs-home",
+     "rsync",
+     "xs-lab2",
+     "xs-lab2-j2"
+    ]
+   ]
+  }
+ ],
+ "scripts": {
+  "probe.py": "31498266d245cc6e8c7a1cd788652da3015bc80d5f454841d90254a74e85cf94",
+  "corpus.py": "07f178f516657266850ba871032254fd28316928741e3bece1794a094db015ba",
+  "corpora.json": "5c641f561e2bcf8fe5af1c39adb9054ab0e6d479d8ef0e67204ad69cef148a9c",
+  "agent.py": "c65fadc9983678c6aaf66ea763c7c8a7cce871c67a96ff728da06725f892b6d4",
+  "runner.py": "cce71fee149764ad1a5c913061f19620a8ff44f792d23d55f7a290d59a9e20ff",
+  "xspipe.py": "94b3fccfc6e994d227077c453f90323ab55337fd8a98231d16a10696e8ebab6b",
+  "measure.py": "5065310f480ff1cabfa7c645f0db342624a02f9a081b96069d50d52b3d224777"
+ }
+}

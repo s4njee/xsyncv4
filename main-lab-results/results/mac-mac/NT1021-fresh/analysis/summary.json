@@ -1,0 +1,19 @@
+{
+ "experiment": "NT1021-fresh",
+ "kind": "screening",
+ "hypothesis": "xs-rs at aa7aee150987 differs from xs-c++ at fe012667764a by more than 5% in time-to-durable.",
+ "primary": "durable_s",
+ "control": "xs-cpp",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261021T165635Z-NT1021-fresh"
+ ],
+ "spec_sha256": [
+  "1add0b5ec43d8347b8977d73075dd895fe5cca290d1dedbb0249683af80de5a5"
+ ],
+ "valid_blocks": 40,
+ "void_attempts": 0,
+ "void_reasons": []
+}

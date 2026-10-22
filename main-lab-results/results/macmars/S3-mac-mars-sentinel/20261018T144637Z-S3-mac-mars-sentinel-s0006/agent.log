@@ -1,0 +1,80 @@
+cleanup on mars: mars: `sudo -n /usr/local/sbin/xsbench-helper governor restore` exited 255: ssh: connect to host [address] port 22: Operation timed out
+Traceback (most recent call last):
+  File "~/benchmarks/xsbench.noindex/lib/021ae1ff14be/agent.py", line 681, in <module>
+    sys.exit(Run(sys.argv[1]).execute(limit))
+             ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "~/benchmarks/xsbench.noindex/lib/021ae1ff14be/agent.py", line 655, in execute
+    self.prepare()
+    ~~~~~~~~~~~~^^
+  File "~/benchmarks/xsbench.noindex/lib/021ae1ff14be/agent.py", line 320, in prepare
+    report = host.probe('staged', '--root', host.root, *(['--bundle', host.bundle] if host.bundle else []),
+                        *(['--rsync', next(iter(rsync_programs))] if rsync_programs else []), *names)
+  File "~/benchmarks/xsbench.noindex/lib/021ae1ff14be/agent.py", line 72, in probe
+    return json.loads(self.run('python3', self.bin('probe.py'), *arguments, timeout=120).stdout)
+                      ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "~/benchmarks/xsbench.noindex/lib/021ae1ff14be/agent.py", line 65, in run
+    return self.shell(shlex.join(map(str, argv)), **options)
+           ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "~/benchmarks/xsbench.noindex/lib/021ae1ff14be/agent.py", line 61, in shell
+    raise RuntimeError(f'{self.name}: `{script[:200]}` exited {done.returncode}: {done.stderr.strip()[-400:]}')
+RuntimeError: mars: `python3 ~/benchmarks/xsyncv4/lab/lib/021ae1ff14be/probe.py staged --root ~/benchmarks/xsyncv4/lab --bundle 021ae1ff14be --rsync rsync agent.py corpora.json corpus.py measure.py p` exited 255: ssh: connect to host [address] port 22: Operation timed out
+cleanup on mars: mars: `sudo -n /usr/local/sbin/xsbench-helper governor restore` exited 255: ssh: connect to host [address] port 22: Operation timed out
+Traceback (most recent call last):
+  File "~/benchmarks/xsbench.noindex/lib/021ae1ff14be/agent.py", line 681, in <module>
+    sys.exit(Run(sys.argv[1]).execute(limit))
+             ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "~/benchmarks/xsbench.noindex/lib/021ae1ff14be/agent.py", line 655, in execute
+    self.prepare()
+    ~~~~~~~~~~~~^^
+  File "~/benchmarks/xsbench.noindex/lib/021ae1ff14be/agent.py", line 320, in prepare
+    report = host.probe('staged', '--root', host.root, *(['--bundle', host.bundle] if host.bundle else []),
+                        *(['--rsync', next(iter(rsync_programs))] if rsync_programs else []), *names)
+  File "~/benchmarks/xsbench.noindex/lib/021ae1ff14be/agent.py", line 72, in probe
+    return json.loads(self.run('python3', self.bin('probe.py'), *arguments, timeout=120).stdout)
+                      ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "~/benchmarks/xsbench.noindex/lib/021ae1ff14be/agent.py", line 65, in run
+    return self.shell(shlex.join(map(str, argv)), **options)
+           ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "~/benchmarks/xsbench.noindex/lib/021ae1ff14be/agent.py", line 61, in shell
+    raise RuntimeError(f'{self.name}: `{script[:200]}` exited {done.returncode}: {done.stderr.strip()[-400:]}')
+RuntimeError: mars: `python3 ~/benchmarks/xsyncv4/lab/lib/021ae1ff14be/probe.py staged --root ~/benchmarks/xsyncv4/lab --bundle 021ae1ff14be --rsync rsync agent.py corpora.json corpus.py measure.py p` exited 255: ssh: connect to host [address] port 22: Operation timed out
+cleanup on mars: mars: `sudo -n /usr/local/sbin/xsbench-helper governor restore` exited 255: ssh: connect to host [address] port 22: Operation timed out
+Traceback (most recent call last):
+  File "~/benchmarks/xsbench.noindex/lib/021ae1ff14be/agent.py", line 681, in <module>
+    sys.exit(Run(sys.argv[1]).execute(limit))
+             ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "~/benchmarks/xsbench.noindex/lib/021ae1ff14be/agent.py", line 655, in execute
+    self.prepare()
+    ~~~~~~~~~~~~^^
+  File "~/benchmarks/xsbench.noindex/lib/021ae1ff14be/agent.py", line 320, in prepare
+    report = host.probe('staged', '--root', host.root, *(['--bundle', host.bundle] if host.bundle else []),
+                        *(['--rsync', next(iter(rsync_programs))] if rsync_programs else []), *names)
+  File "~/benchmarks/xsbench.noindex/lib/021ae1ff14be/agent.py", line 72, in probe
+    return json.loads(self.run('python3', self.bin('probe.py'), *arguments, timeout=120).stdout)
+                      ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "~/benchmarks/xsbench.noindex/lib/021ae1ff14be/agent.py", line 65, in run
+    return self.shell(shlex.join(map(str, argv)), **options)
+           ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "~/benchmarks/xsbench.noindex/lib/021ae1ff14be/agent.py", line 61, in shell
+    raise RuntimeError(f'{self.name}: `{script[:200]}` exited {done.returncode}: {done.stderr.strip()[-400:]}')
+RuntimeError: mars: `python3 ~/benchmarks/xsyncv4/lab/lib/021ae1ff14be/probe.py staged --root ~/benchmarks/xsyncv4/lab --bundle 021ae1ff14be --rsync rsync agent.py corpora.json corpus.py measure.py p` exited 255: ssh: connect to host [address] port 22: Operation timed out
+cleanup on mars: mars: `sudo -n /usr/local/sbin/xsbench-helper governor restore` exited 255: ssh: connect to host [address] port 22: Operation timed out
+Traceback (most recent call last):
+  File "~/benchmarks/xsbench.noindex/lib/021ae1ff14be/agent.py", line 681, in <module>
+    sys.exit(Run(sys.argv[1]).execute(limit))
+             ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "~/benchmarks/xsbench.noindex/lib/021ae1ff14be/agent.py", line 655, in execute
+    self.prepare()
+    ~~~~~~~~~~~~^^
+  File "~/benchmarks/xsbench.noindex/lib/021ae1ff14be/agent.py", line 320, in prepare
+    report = host.probe('staged', '--root', host.root, *(['--bundle', host.bundle] if host.bundle else []),
+                        *(['--rsync', next(iter(rsync_programs))] if rsync_programs else []), *names)
+  File "~/benchmarks/xsbench.noindex/lib/021ae1ff14be/agent.py", line 72, in probe
+    return json.loads(self.run('python3', self.bin('probe.py'), *arguments, timeout=120).stdout)
+                      ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "~/benchmarks/xsbench.noindex/lib/021ae1ff14be/agent.py", line 65, in run
+    return self.shell(shlex.join(map(str, argv)), **options)
+           ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "~/benchmarks/xsbench.noindex/lib/021ae1ff14be/agent.py", line 61, in shell
+    raise RuntimeError(f'{self.name}: `{script[:200]}` exited {done.returncode}: {done.stderr.strip()[-400:]}')
+RuntimeError: mars: `python3 ~/benchmarks/xsyncv4/lab/lib/021ae1ff14be/probe.py staged --root ~/benchmarks/xsyncv4/lab --bundle 021ae1ff14be --rsync rsync agent.py corpora.json corpus.py measure.py p` exited 255: ssh: connect to host [address] port 22: Operation timed out

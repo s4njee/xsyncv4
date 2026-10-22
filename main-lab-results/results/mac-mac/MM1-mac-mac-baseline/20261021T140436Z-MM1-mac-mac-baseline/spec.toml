@@ -1,0 +1,35 @@
+# MM1 (mac-mac, 2026-10-21): E6b again with both ends on macOS. E6b (2026-10-18) measured the Mac and mars on a direct
+# 10 GbE cable while mars ran Linux (its X540, ext4); mars now runs macOS (its USB 10G adapter, APFS), so the same
+# matrix, build and flags on mac-mars-usb10g say what changes when no Linux is in the mix. xs-e6b is E6b's xs arm
+# exactly (21ae6844ed20 -aH); xs-cpp is lab2's current xs-c++ at lab2's flags. os_compare.py reads the two side by side.
+id = "MM1-mac-mac-baseline"
+kind = "screening"
+hypothesis = "With both ends on macOS, xs's time relative to rsync differs by more than 10% from E6b's, with mars on Linux, in some cell."
+primary = "durable_s"
+delta = 0.05
+blocks = 6
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-aH"]
+
+[arms.xs-e6b]
+tool = "xs"
+rev = "21ae6844ed20"
+flags = ["-aH"]
+
+[arms.xs-cpp]
+tool = "xs"
+rev = "0c94b3d70b9d"
+flags = ["-a", "-j4"]
+
+[matrix]
+link = "mac-mars-usb10g"
+corpus = ["small-flat", "small-deep", "mixed-bimodal", "real-congress"]
+scenario = ["fresh", "noop"]
+direction = ["mac>mars", "mars>mac"]
+client = ["initiator"]
+cache = ["warm"]

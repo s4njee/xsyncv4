@@ -1,9 +1,9 @@
 {
  "cards": {
   "mac": {
-   "key": "[\"running\",\"Mac \u2194 mars (10 GbE, X540)\",\"MA8-psample-pull-anchors\"]",
-   "text": "A MacBook Pro (M1 Max) and a Ryzen 9 desktop called mars are joined by a wired 10 gigabit Ethernet link. Right now it tests whether xs, given a larger parent-descriptor budget, pulls psample onto the Mac faster than its parent version and rsync.",
-   "model": "claude-sonnet-5-5"
+   "key": "[\"paused\",\"mac-mac: Mac \u2194 mars, both macOS (direct 10 GbE, USB adapter)\",null]",
+   "text": "A MacBook Pro named Mac and a desktop named mars are joined by a direct wired link rated at 10 GbE, though mars's USB adapter is running at gigabit. The card is paused, with no experiment currently set up on this pair.",
+   "model": "claude-haiku-5-5"
   },
   "mars": {
    "key": "[\"idle\",\"neo \u2194 mars (wired gigabit)\",null]",
@@ -11,13 +11,13 @@
    "model": "claude-sonnet-5-5"
   },
   "neo": {
-   "key": "[\"idle\",\"neo \u2194 mars (macOS, LAN gigabit)\",null]",
-   "text": "Neo, a Raspberry Pi 5, is connected to mars, a macOS desktop, over a wired gigabit LAN link. The experiment is idle, so no transfer test is running right now.",
+   "key": "[\"no runner\",\"neo-vpsb\",null]",
+   "text": "The pair neo and vpsb are joined by a wired link. No experiment is running on this link right now, so the card is idle.",
    "model": "claude-haiku-5-5"
   },
   "neo-ssd": {
-   "key": "[\"running\",\"neo-local-ssd\",\"AP10210142-L2R6-local-psample-cpu2\"]",
-   "text": "Neo, a Raspberry Pi 5 with an NVMe drive, copies over a local SSD link to a T5. It is testing whether limiting neo to 2 CPUs widens the gap between xs -a -j4 and rsync -a on a fresh cold copy of real-psample.",
+   "key": "[\"paused\",\"neo-local-ssd\",\"AP10210142-L2R6-local-psample-cpu2\"]",
+   "text": "neo, a Raspberry Pi 5 with 4 GB of memory and an NVMe drive, is linked to its partner over a local SSD connection. Paused, it asks whether capping neo at 2 CPUs widens xs -a -j4's deficit to rsync -a on cold local copies of real-psample.",
    "model": "claude-haiku-5-5"
   }
  }

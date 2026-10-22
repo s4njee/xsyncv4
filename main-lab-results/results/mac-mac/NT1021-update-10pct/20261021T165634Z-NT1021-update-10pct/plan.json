@@ -1,0 +1,1128 @@
+{
+ "schema": 1,
+ "experiment": "NT1021-update-10pct",
+ "spec_sha256": "3fca9c634567ece2e2d1b88a88fa402a7a30fb2aef1fd2185ade696e1d514944",
+ "kind": "screening",
+ "bundle": "f58cde6f2ac0",
+ "writes": {
+  "mac": 105361246848,
+  "mars": 105361246848
+ },
+ "hypothesis": "xs-rs at aa7aee150987 differs from xs-c++ at fe012667764a by more than 5% in time-to-durable.",
+ "primary": "durable_s",
+ "delta": 0.05,
+ "control": "xs-cpp",
+ "seed": 68461,
+ "run_id": "20261021T165634Z-NT1021-update-10pct",
+ "driver": "mac",
+ "sample_timeout_s": 7200,
+ "results": "mac-mac",
+ "background": true,
+ "local_link": false,
+ "eager_cleanup": true,
+ "hours": null,
+ "hosts": {
+  "mac": {
+   "ssh": "[host]",
+   "name": "[host]",
+   "hostname": "[host]",
+   "root": "~/benchmarks/xsbench.noindex",
+   "interface": "bridge100",
+   "helper": false,
+   "gates": {},
+   "local": true,
+   "system": "Darwin"
+  },
+  "mars": {
+   "ssh": "[host]",
+   "name": "[host]",
+   "hostname": "[host]",
+   "root": "/Volumes/xsbench/lab",
+   "interface": "en0",
+   "helper": false,
+   "gates": {},
+   "local": false,
+   "system": "Darwin"
+  }
+ },
+ "links": {
+  "mac-mars-usb10g": {
+   "hosts": [
+    "mac",
+    "mars"
+   ],
+   "medium": "wired",
+   "min_speed_mbps": 10000,
+   "min_speed_mbps_by_host": {
+    "mars": 2500
+   },
+   "max_rtt_ms": 2.0,
+   "initiator": "mac",
+   "driver": "mac",
+   "results": "mac-mac",
+   "background": true,
+   "address": {
+    "mac": "[address]",
+    "mars": "[host]"
+   }
+  }
+ },
+ "arms": [
+  {
+   "name": "rsync",
+   "tool": "rsync",
+   "flags": [
+    "-a"
+   ],
+   "binary": {
+    "mac": "/opt/homebrew/bin/rsync",
+    "mars": "/opt/local/bin/rsync"
+   }
+  },
+  {
+   "name": "xs-cpp",
+   "tool": "xs",
+   "flags": [
+    "-a",
+    "-j4"
+   ],
+   "rev": "fe012667764a",
+   "binary": {
+    "mac": "~/benchmarks/xsbench.noindex/bin/xs-fe012667764a",
+    "mars": "/Volumes/xsbench/lab/bin/xs-fe012667764a"
+   },
+   "sha256": {
+    "mac": "feed5f909c0da93384f7a8689d5a3825a299a9f9eb2b161271cba045e89db13c",
+    "mars": "83602cdaf63511cb144eb629c36b13e4a30adf8e8ac705ac13c5fa11f118ecae"
+   },
+   "artifacts": {
+    "xs-darwin-arm64": "feed5f909c0da93384f7a8689d5a3825a299a9f9eb2b161271cba045e89db13c",
+    "xs-darwin-amd64": "83602cdaf63511cb144eb629c36b13e4a30adf8e8ac705ac13c5fa11f118ecae"
+   }
+  },
+  {
+   "name": "xs-rs",
+   "tool": "xs",
+   "flags": [
+    "-a",
+    "-j4"
+   ],
+   "rev": "aa7aee150987-rs",
+   "binary": {
+    "mac": "~/benchmarks/xsbench.noindex/bin/xs-aa7aee150987-rs",
+    "mars": "/Volumes/xsbench/lab/bin/xs-aa7aee150987-rs"
+   },
+   "sha256": {
+    "mac": "5526ef766f79cc1a557a7598f6a9cf15f29e08f0b808cc920ad8ae791101ba37",
+    "mars": "97aa02091667aa54b3424fb418f5a2598a85531f68fb103efba0241f2912b129"
+   },
+   "artifacts": {
+    "xs-darwin-arm64": "5526ef766f79cc1a557a7598f6a9cf15f29e08f0b808cc920ad8ae791101ba37",
+    "xs-darwin-amd64": "97aa02091667aa54b3424fb418f5a2598a85531f68fb103efba0241f2912b129"
+   }
+  }
+ ],
+ "cells": [
+  {
+   "id": "small-flat.update-10pct.mac-mars.sender.warm",
+   "corpus": "small-flat",
+   "scenario": "update-10pct",
+   "sender": "mac",
+   "receiver": "mars",
+   "client": "sender",
+   "link": "mac-mars-usb10g",
+   "cache": "warm"
+  },
+  {
+   "id": "small-flat.update-10pct.mars-mac.receiver.warm",
+   "corpus": "small-flat",
+   "scenario": "update-10pct",
+   "sender": "mars",
+   "receiver": "mac",
+   "client": "receiver",
+   "link": "mac-mars-usb10g",
+   "cache": "warm"
+  },
+  {
+   "id": "small-deep.update-10pct.mac-mars.sender.warm",
+   "corpus": "small-deep",
+   "scenario": "update-10pct",
+   "sender": "mac",
+   "receiver": "mars",
+   "client": "sender",
+   "link": "mac-mars-usb10g",
+   "cache": "warm"
+  },
+  {
+   "id": "small-deep.update-10pct.mars-mac.receiver.warm",
+   "corpus": "small-deep",
+   "scenario": "update-10pct",
+   "sender": "mars",
+   "receiver": "mac",
+   "client": "receiver",
+   "link": "mac-mars-usb10g",
+   "cache": "warm"
+  },
+  {
+   "id": "mixed-bimodal.update-10pct.mac-mars.sender.warm",
+   "corpus": "mixed-bimodal",
+   "scenario": "update-10pct",
+   "sender": "mac",
+   "receiver": "mars",
+   "client": "sender",
+   "link": "mac-mars-usb10g",
+   "cache": "warm"
+  },
+  {
+   "id": "mixed-bimodal.update-10pct.mars-mac.receiver.warm",
+   "corpus": "mixed-bimodal",
+   "scenario": "update-10pct",
+   "sender": "mars",
+   "receiver": "mac",
+   "client": "receiver",
+   "link": "mac-mars-usb10g",
+   "cache": "warm"
+  },
+  {
+   "id": "real-congress.update-10pct.mac-mars.sender.warm",
+   "corpus": "real-congress",
+   "scenario": "update-10pct",
+   "sender": "mac",
+   "receiver": "mars",
+   "client": "sender",
+   "link": "mac-mars-usb10g",
+   "cache": "warm"
+  },
+  {
+   "id": "real-congress.update-10pct.mars-mac.receiver.warm",
+   "corpus": "real-congress",
+   "scenario": "update-10pct",
+   "sender": "mars",
+   "receiver": "mac",
+   "client": "receiver",
+   "link": "mac-mars-usb10g",
+   "cache": "warm"
+  }
+ ],
+ "corpora": {
+  "small-flat": {
+   "files": 100000,
+   "directories": 100,
+   "bytes": 319224077,
+   "digest": "41b628c4337730be4efdfcc6673d517749132ffd50b75b29321640e6f064bbec",
+   "quick_digest": "e8de96251eaca6be3e98b1cb8097405b37ad470fc0d5ffdb7a5a48ea5b9f3805"
+  },
+  "small-deep": {
+   "files": 100000,
+   "directories": 116667,
+   "bytes": 319224077,
+   "digest": "8faf23b36caef1b8cf4a8b5419b8d0a27a5bc32ad0799798be2fd0b3fe79be3a",
+   "quick_digest": "be0b7fbe218fd5ac477df18245e63d6bd851d2e50dabd8cb556f04c98e3cf902"
+  },
+  "mixed-bimodal": {
+   "files": 20000,
+   "directories": 420,
+   "bytes": 1395127076,
+   "digest": "e9071fb7ad3b0375ffe9fab58f740bfd22d545f7678e163a6c745504cc7aa16b",
+   "quick_digest": "31af6dbe5d38a32f5f0acf560703fa557304d3936e59f7b395d13cf8d0dec7fb"
+  },
+  "real-congress": {
+   "files": 216518,
+   "directories": 52593,
+   "bytes": 1159189826,
+   "digest": "29d93dcc4c117de24dc4f6e1b8d26f0e7bbc9c26cfb4aa03d2d52de078b6a102",
+   "quick_digest": "0f493d25789a420e24c282fb3a4ba40bc690b1a3e65184088bf66e7fa0868a6b"
+  }
+ },
+ "blocks": [
+  {
+   "cell": "small-flat.update-10pct.mac-mars.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "rsync",
+     "xs-cpp",
+     "xs-rs"
+    ],
+    [
+     "xs-cpp",
+     "rsync",
+     "xs-rs"
+    ],
+    [
+     "xs-rs",
+     "xs-cpp",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "real-congress.update-10pct.mars-mac.receiver.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs-cpp",
+     "xs-rs",
+     "rsync"
+    ],
+    [
+     "xs-rs",
+     "xs-cpp",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs-rs",
+     "xs-cpp"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.update-10pct.mars-mac.receiver.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs-cpp",
+     "rsync",
+     "xs-rs"
+    ],
+    [
+     "rsync",
+     "xs-cpp",
+     "xs-rs"
+    ],
+    [
+     "xs-rs",
+     "xs-cpp",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "real-congress.update-10pct.mac-mars.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "rsync",
+     "xs-rs",
+     "xs-cpp"
+    ],
+    [
+     "xs-cpp",
+     "xs-rs",
+     "rsync"
+    ],
+    [
+     "xs-rs",
+     "xs-cpp",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "small-deep.update-10pct.mac-mars.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs-rs",
+     "rsync",
+     "xs-cpp"
+    ],
+    [
+     "rsync",
+     "xs-cpp",
+     "xs-rs"
+    ],
+    [
+     "rsync",
+     "xs-cpp",
+     "xs-rs"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.update-10pct.mac-mars.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "rsync",
+     "xs-rs",
+     "xs-cpp"
+    ],
+    [
+     "xs-cpp",
+     "rsync",
+     "xs-rs"
+    ],
+    [
+     "xs-cpp",
+     "rsync",
+     "xs-rs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-deep.update-10pct.mars-mac.receiver.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs-rs",
+     "rsync",
+     "xs-cpp"
+    ],
+    [
+     "xs-rs",
+     "xs-cpp",
+     "rsync"
+    ],
+    [
+     "xs-cpp",
+     "xs-rs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.update-10pct.mars-mac.receiver.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "rsync",
+     "xs-rs",
+     "xs-cpp"
+    ],
+    [
+     "xs-cpp",
+     "rsync",
+     "xs-rs"
+    ],
+    [
+     "xs-rs",
+     "xs-cpp",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "small-deep.update-10pct.mac-mars.sender.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-rs",
+     "rsync",
+     "xs-cpp"
+    ],
+    [
+     "xs-rs",
+     "xs-cpp",
+     "rsync"
+    ],
+    [
+     "xs-rs",
+     "rsync",
+     "xs-cpp"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.update-10pct.mars-mac.receiver.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-rs",
+     "rsync",
+     "xs-cpp"
+    ],
+    [
+     "xs-cpp",
+     "xs-rs",
+     "rsync"
+    ],
+    [
+     "xs-cpp",
+     "rsync",
+     "xs-rs"
+    ]
+   ]
+  },
+  {
+   "cell": "real-congress.update-10pct.mac-mars.sender.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-rs",
+     "xs-cpp",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs-rs",
+     "xs-cpp"
+    ],
+    [
+     "xs-cpp",
+     "rsync",
+     "xs-rs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.update-10pct.mars-mac.receiver.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-rs",
+     "rsync",
+     "xs-cpp"
+    ],
+    [
+     "rsync",
+     "xs-rs",
+     "xs-cpp"
+    ],
+    [
+     "xs-rs",
+     "rsync",
+     "xs-cpp"
+    ]
+   ]
+  },
+  {
+   "cell": "real-congress.update-10pct.mars-mac.receiver.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync",
+     "xs-rs",
+     "xs-cpp"
+    ],
+    [
+     "xs-rs",
+     "xs-cpp",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs-rs",
+     "xs-cpp"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.update-10pct.mac-mars.sender.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-cpp",
+     "rsync",
+     "xs-rs"
+    ],
+    [
+     "rsync",
+     "xs-cpp",
+     "xs-rs"
+    ],
+    [
+     "xs-cpp",
+     "xs-rs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "small-deep.update-10pct.mars-mac.receiver.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-rs",
+     "xs-cpp",
+     "rsync"
+    ],
+    [
+     "xs-rs",
+     "xs-cpp",
+     "rsync"
+    ],
+    [
+     "xs-cpp",
+     "xs-rs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.update-10pct.mac-mars.sender.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync",
+     "xs-rs",
+     "xs-cpp"
+    ],
+    [
+     "xs-cpp",
+     "rsync",
+     "xs-rs"
+    ],
+    [
+     "xs-cpp",
+     "rsync",
+     "xs-rs"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.update-10pct.mac-mars.sender.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-cpp",
+     "xs-rs",
+     "rsync"
+    ],
+    [
+     "xs-rs",
+     "xs-cpp",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs-rs",
+     "xs-cpp"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.update-10pct.mars-mac.receiver.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-cpp",
+     "xs-rs",
+     "rsync"
+    ],
+    [
+     "xs-rs",
+     "rsync",
+     "xs-cpp"
+    ],
+    [
+     "xs-rs",
+     "xs-cpp",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "small-deep.update-10pct.mars-mac.receiver.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-rs",
+     "rsync",
+     "xs-cpp"
+    ],
+    [
+     "xs-rs",
+     "rsync",
+     "xs-cpp"
+    ],
+    [
+     "xs-rs",
+     "xs-cpp",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "real-congress.update-10pct.mars-mac.receiver.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-rs",
+     "rsync",
+     "xs-cpp"
+    ],
+    [
+     "xs-rs",
+     "rsync",
+     "xs-cpp"
+    ],
+    [
+     "rsync",
+     "xs-cpp",
+     "xs-rs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.update-10pct.mac-mars.sender.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-cpp",
+     "xs-rs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs-cpp",
+     "xs-rs"
+    ],
+    [
+     "xs-rs",
+     "xs-cpp",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "small-deep.update-10pct.mac-mars.sender.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync",
+     "xs-rs",
+     "xs-cpp"
+    ],
+    [
+     "xs-rs",
+     "xs-cpp",
+     "rsync"
+    ],
+    [
+     "xs-cpp",
+     "xs-rs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "real-congress.update-10pct.mac-mars.sender.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-rs",
+     "rsync",
+     "xs-cpp"
+    ],
+    [
+     "xs-cpp",
+     "rsync",
+     "xs-rs"
+    ],
+    [
+     "xs-rs",
+     "rsync",
+     "xs-cpp"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.update-10pct.mars-mac.receiver.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-cpp",
+     "rsync",
+     "xs-rs"
+    ],
+    [
+     "xs-cpp",
+     "xs-rs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs-rs",
+     "xs-cpp"
+    ]
+   ]
+  },
+  {
+   "cell": "real-congress.update-10pct.mars-mac.receiver.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-cpp",
+     "xs-rs",
+     "rsync"
+    ],
+    [
+     "xs-rs",
+     "rsync",
+     "xs-cpp"
+    ],
+    [
+     "rsync",
+     "xs-cpp",
+     "xs-rs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-deep.update-10pct.mac-mars.sender.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-cpp",
+     "xs-rs",
+     "rsync"
+    ],
+    [
+     "xs-rs",
+     "rsync",
+     "xs-cpp"
+    ],
+    [
+     "xs-cpp",
+     "rsync",
+     "xs-rs"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.update-10pct.mac-mars.sender.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-rs",
+     "rsync",
+     "xs-cpp"
+    ],
+    [
+     "xs-cpp",
+     "xs-rs",
+     "rsync"
+    ],
+    [
+     "xs-rs",
+     "xs-cpp",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.update-10pct.mars-mac.receiver.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-rs",
+     "rsync",
+     "xs-cpp"
+    ],
+    [
+     "xs-cpp",
+     "xs-rs",
+     "rsync"
+    ],
+    [
+     "xs-rs",
+     "rsync",
+     "xs-cpp"
+    ]
+   ]
+  },
+  {
+   "cell": "small-deep.update-10pct.mars-mac.receiver.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-rs",
+     "xs-cpp",
+     "rsync"
+    ],
+    [
+     "xs-cpp",
+     "xs-rs",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs-cpp",
+     "xs-rs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.update-10pct.mac-mars.sender.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-rs",
+     "xs-cpp",
+     "rsync"
+    ],
+    [
+     "xs-cpp",
+     "xs-rs",
+     "rsync"
+    ],
+    [
+     "xs-rs",
+     "xs-cpp",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.update-10pct.mars-mac.receiver.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync",
+     "xs-rs",
+     "xs-cpp"
+    ],
+    [
+     "xs-rs",
+     "rsync",
+     "xs-cpp"
+    ],
+    [
+     "xs-cpp",
+     "rsync",
+     "xs-rs"
+    ]
+   ]
+  },
+  {
+   "cell": "real-congress.update-10pct.mac-mars.sender.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-cpp",
+     "rsync",
+     "xs-rs"
+    ],
+    [
+     "xs-cpp",
+     "rsync",
+     "xs-rs"
+    ],
+    [
+     "xs-rs",
+     "xs-cpp",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.update-10pct.mac-mars.sender.warm",
+   "block": 4,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs-rs",
+     "xs-cpp",
+     "rsync"
+    ],
+    [
+     "xs-rs",
+     "xs-cpp",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs-cpp",
+     "xs-rs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-deep.update-10pct.mars-mac.receiver.warm",
+   "block": 4,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs-rs",
+     "xs-cpp",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs-rs",
+     "xs-cpp"
+    ],
+    [
+     "xs-cpp",
+     "rsync",
+     "xs-rs"
+    ]
+   ]
+  },
+  {
+   "cell": "small-deep.update-10pct.mac-mars.sender.warm",
+   "block": 4,
+   "verify_full": true,
+   "orders": [
+    [
+     "rsync",
+     "xs-rs",
+     "xs-cpp"
+    ],
+    [
+     "rsync",
+     "xs-rs",
+     "xs-cpp"
+    ],
+    [
+     "rsync",
+     "xs-rs",
+     "xs-cpp"
+    ]
+   ]
+  },
+  {
+   "cell": "real-congress.update-10pct.mac-mars.sender.warm",
+   "block": 4,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs-cpp",
+     "rsync",
+     "xs-rs"
+    ],
+    [
+     "xs-cpp",
+     "rsync",
+     "xs-rs"
+    ],
+    [
+     "xs-cpp",
+     "xs-rs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.update-10pct.mac-mars.sender.warm",
+   "block": 4,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs-cpp",
+     "xs-rs",
+     "rsync"
+    ],
+    [
+     "xs-rs",
+     "rsync",
+     "xs-cpp"
+    ],
+    [
+     "xs-rs",
+     "rsync",
+     "xs-cpp"
+    ]
+   ]
+  },
+  {
+   "cell": "small-flat.update-10pct.mars-mac.receiver.warm",
+   "block": 4,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs-rs",
+     "xs-cpp",
+     "rsync"
+    ],
+    [
+     "xs-rs",
+     "xs-cpp",
+     "rsync"
+    ],
+    [
+     "xs-rs",
+     "rsync",
+     "xs-cpp"
+    ]
+   ]
+  },
+  {
+   "cell": "mixed-bimodal.update-10pct.mars-mac.receiver.warm",
+   "block": 4,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs-cpp",
+     "rsync",
+     "xs-rs"
+    ],
+    [
+     "xs-cpp",
+     "rsync",
+     "xs-rs"
+    ],
+    [
+     "xs-rs",
+     "xs-cpp",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "real-congress.update-10pct.mars-mac.receiver.warm",
+   "block": 4,
+   "verify_full": true,
+   "orders": [
+    [
+     "rsync",
+     "xs-rs",
+     "xs-cpp"
+    ],
+    [
+     "xs-cpp",
+     "xs-rs",
+     "rsync"
+    ],
+    [
+     "xs-rs",
+     "xs-cpp",
+     "rsync"
+    ]
+   ]
+  }
+ ],
+ "scripts": {
+  "probe.py": "31498266d245cc6e8c7a1cd788652da3015bc80d5f454841d90254a74e85cf94",
+  "corpus.py": "07f178f516657266850ba871032254fd28316928741e3bece1794a094db015ba",
+  "corpora.json": "5c641f561e2bcf8fe5af1c39adb9054ab0e6d479d8ef0e67204ad69cef148a9c",
+  "agent.py": "97cb3c7e4a929e65b94c318a559b5a781a81726a2af82335846517eae696e1ec",
+  "runner.py": "cce71fee149764ad1a5c913061f19620a8ff44f792d23d55f7a290d59a9e20ff",
+  "xspipe.py": "94b3fccfc6e994d227077c453f90323ab55337fd8a98231d16a10696e8ebab6b",
+  "measure.py": "5065310f480ff1cabfa7c645f0db342624a02f9a081b96069d50d52b3d224777"
+ }
+}

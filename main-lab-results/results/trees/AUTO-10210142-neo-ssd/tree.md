@@ -7,4 +7,4 @@ Started 2026-10-21T01:42:35Z; nothing new is queued after 2026-10-21T07:42Z.
 | Node | State | Runs | Decision |
 |---|---|---|---|
 | N0 | decided | 20261021T014235Z | N0: done (1 run) |
-| N1 | queued | 20261021T014239Z |  |
+| N1 | decided | 20261021T014239Z | N1: done (1 run) |

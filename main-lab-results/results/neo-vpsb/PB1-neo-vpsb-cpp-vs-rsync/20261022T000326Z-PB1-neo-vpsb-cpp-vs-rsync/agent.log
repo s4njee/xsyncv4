@@ -1,0 +1,30 @@
+Traceback (most recent call last):
+  File "~/benchmarks/xsyncv4/lab/lib/1e4d3705600f/agent.py", line 757, in <module>
+    sys.exit(Run(sys.argv[1]).execute(limit))
+             ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "~/benchmarks/xsyncv4/lab/lib/1e4d3705600f/agent.py", line 731, in execute
+    self.prepare()
+    ~~~~~~~~~~~~^^
+  File "~/benchmarks/xsyncv4/lab/lib/1e4d3705600f/agent.py", line 378, in prepare
+    raise RuntimeError(f'{host.name}: {verb}: {done.stderr.strip()}')
+RuntimeError: neo: mount-scratch: xsbench-helper: /mnt/ssd is mounted as nothing, expected ext4
+Traceback (most recent call last):
+  File "~/benchmarks/xsyncv4/lab/lib/1e4d3705600f/agent.py", line 757, in <module>
+    sys.exit(Run(sys.argv[1]).execute(limit))
+             ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "~/benchmarks/xsyncv4/lab/lib/1e4d3705600f/agent.py", line 731, in execute
+    self.prepare()
+    ~~~~~~~~~~~~^^
+  File "~/benchmarks/xsyncv4/lab/lib/1e4d3705600f/agent.py", line 378, in prepare
+    raise RuntimeError(f'{host.name}: {verb}: {done.stderr.strip()}')
+RuntimeError: neo: mount-scratch: xsbench-helper: /mnt/ssd is mounted as nothing, expected ext4
+Traceback (most recent call last):
+  File "~/benchmarks/xsyncv4/lab/lib/1e4d3705600f/agent.py", line 757, in <module>
+    sys.exit(Run(sys.argv[1]).execute(limit))
+             ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "~/benchmarks/xsyncv4/lab/lib/1e4d3705600f/agent.py", line 731, in execute
+    self.prepare()
+    ~~~~~~~~~~~~^^
+  File "~/benchmarks/xsyncv4/lab/lib/1e4d3705600f/agent.py", line 378, in prepare
+    raise RuntimeError(f'{host.name}: {verb}: {done.stderr.strip()}')
+RuntimeError: neo: mount-scratch: xsbench-helper: /mnt/ssd is mounted as nothing, expected ext4

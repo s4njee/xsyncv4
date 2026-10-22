@@ -3,7 +3,7 @@
  "steps": [
   {
    "host": "mars",
-   "ssh": "[host]",
+   "ssh": "[address]",
    "local": false,
    "command": "cd /Volumes/xsbench/lab && python3 lib/736894f6f725/corpus.py verify corpora/real-congress --manifest corpora/real-congress.manifest.json --quick > /dev/null"
   }

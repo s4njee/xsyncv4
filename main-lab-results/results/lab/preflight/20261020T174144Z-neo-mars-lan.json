@@ -21,8 +21,8 @@
     "helper": true
    },
    "mars": {
-    "ssh": "[host]",
-    "name": "[host]",
+    "ssh": "[address]",
+    "name": "[address]",
     "hostname": "[host]",
     "root": "/Volumes/xsbench/lab",
     "root_fstype": "apfs",
@@ -30,8 +30,8 @@
     "helper": false
    },
    "mars-hdd": {
-    "ssh": "[host]",
-    "name": "[host]",
+    "ssh": "[address]",
+    "name": "[address]",
     "hostname": "[host]",
     "root": "/mnt/hdd/xsbench",
     "root_fstype": "btrfs",
@@ -367,7 +367,7 @@
     "results": "neomars",
     "address": {
      "neo": "[address]",
-     "mars": "[host]"
+     "mars": "[address]"
     },
     "interface": {
      "neo": "eth0",
@@ -661,20 +661,20 @@
   "neo-mars-lan:neo->mars": {
    "utc": "2026-10-20T17:41:46.410+00:00",
    "hostname": "neo",
-   "peer": "[host]",
+   "peer": "[address]",
    "resolved": [
-    "[host]"
+    "[address]"
    ],
    "ssh": {
-    "target": "[host]",
+    "target": "[address]",
     "ok": true,
     "client_ip": "[address]",
     "client_port": 41458,
-    "server_ip": "[host]",
+    "server_ip": "[address]",
     "server_port": 22,
     "peer_hostname": "[host]"
    },
-   "address": "[host]",
+   "address": "[address]",
    "dev": "eth0",
    "source": "[address]",
    "gateway": null,
@@ -720,12 +720,12 @@
     "medium": "wired",
     "addresses": [
      "[address]",
-     "[host]"
+     "[address]"
     ]
    },
    "interface_addresses": [
     "[address]",
-    "[host]"
+    "[address]"
    ],
    "qdisc": null,
    "ping": {

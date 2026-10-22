@@ -1,0 +1,20 @@
+{
+ "experiment": "MM0-mac-mac-sentinel",
+ "kind": "screening",
+ "hypothesis": "Hour by hour, the A/A ratio stays within 5% of 1 and the xs to rsync ratio stays where MM1 put it.",
+ "primary": "wall_s",
+ "control": "xs",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261021T133437Z-MM0-mac-mac-sentinel-s0001",
+  "20261021T140437Z-MM0-mac-mac-sentinel-s0001"
+ ],
+ "spec_sha256": [
+  "91ead07a1445b47d9b01a2a06918ecfe696c4d4fcab1fbba0824a0e2f5a5ab37"
+ ],
+ "valid_blocks": 32,
+ "void_attempts": 0,
+ "void_reasons": []
+}

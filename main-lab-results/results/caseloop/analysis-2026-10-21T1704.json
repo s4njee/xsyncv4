@@ -1,0 +1,58 @@
+{
+ "ok": true,
+ "analysis": {
+  "decision": {
+   "node": "C5",
+   "branch": 1,
+   "keep": false,
+   "reason": "The compression change (c9e8d5d5f87d against 0a4953bec5d8) did not make copies faster on this link. Fresh copies were 'fresh 1.001 (equivalent)', 95% interval 0.974 to 1.030 over 8 blocks, at 12.42 s against 12.402 s. No-op re-syncs were 'noop 0.991 (inconclusive)', interval 0.942 to 1.043 over 8 blocks, at 1.714 s against 1.73 s. Eight blocks is the minimum. The fresh interval is reasonably tight around 1, but the no-op interval is wide, so this is weak evidence in both directions. The race also ran on mac-mars-usb10g, not on lab2's internet link, so it says nothing for or against the 'faster on lab2' branch. On the 10 GbE cable, where negative levels were meant to help, it bought no time. No later node depends on it. Drop it from the chain; the dictionary and long-range ideas would need a separate slow-link race."
+  },
+  "priorities": [
+   {
+    "node": "B1",
+    "brief": "No code change: this is a measurement and profile of the current xs-rs chain head, which now includes the receiver-lock merge from A1, on the Mac-to-Mac link.\n\n1. Build the release binary from the cargo workspace in rs/ (cargo build --release).\n2. Run no-op re-syncs on real-congress and real-psample, both push (mac to mars) and pull (mars to mac), with flags -a -j4. Pre-populate the destination with an identical tree first, so the run transfers nothing.\n3. For each case, race xs-rs against rsync with the same -a flags, at least 8 blocks each, recording time to durable.\n4. On each end, record user and system CPU separately: wrap the process with /usr/bin/time -l on both the sender and the remote side.\n5. Take one macOS `sample <pid> 10` (or a short xctrace Time Profiler run) of each xs-rs process during a congress no-op push and a congress no-op pull.\n\nReport:\n- wall time and the xs-rs/rsync ratio per cell;\n- user and system seconds per end, set against H21's 408.8 s CPU vs 18.8 s;\n- the top 10 functions by self time on each end, mapped back to rs/ modules (file-list build, stat and compare, destination path walks, hashing, protocol framing);\n- whether MA7's destination path-walk cost still dominates pull.\n\nEdge cases:\n- Make sure no file actually differs: verify with a second no-op run that reports 0 transferred.\n- Keep caches warm and equal for both tools.\n- Note any run where the sender was loaded.\n\nThe output should name one or two hot spots that a follow-up node (A3 cheaper path walks, B2 dest-anchors, B3 persistent index) can attack.",
+    "why": "No-op re-syncs are the clearest remaining loss to rsync: H21 had congress no-op push at 0.74x rsync's speed with 408.8 s of CPU against 18.8 s. Fresh copies already beat rsync in every lab race cell. This needs only race and profile time, and it decides which of A3, B2 or B3 to build next."
+   },
+   {
+    "node": "A2",
+    "brief": "No code change: this is a measurement and profile on the current xs-rs chain head after the A1 receiver-lock merge.\n\n1. Keep the sender quiet first: no other jobs, and check load with uptime. P2b lost runs to sender load.\n2. Baseline on mars, which now runs macOS: time 4 parallel local tar extractions of small-deep, from a tarball already on mars's disk into an empty directory, through a durable sync. This replaces P2b's Linux figure of 2.70 s, about 37k files/s.\n3. Run xs-rs small-deep fresh push mac to mars with -a -j4 in three configurations, reported separately and not pooled: default, --no-atomic, and -j8. Use at least 8 blocks each.\n4. During one fresh copy per configuration, take macOS `sample` profiles of the sender and every receiver process, plus /usr/bin/time -l user and system time per end.\n\nReport:\n- xs-rs time to durable per configuration against the local tar baseline (the ratio);\n- whether -j8 beats -j4 now that the global lock is gone;\n- the top functions by self time on the receiver, mapped to rs/ modules: file create/open, fsync and durability handling, atomic rename, directory creation, and the remaining locks or queues;\n- whether the sender or the transport is idle-waiting.\n\nEdge cases:\n- Empty the destination between runs.\n- Count durability the same way for tar and xs-rs, with fsync or F_FULLFSYNC as xs does.\n- Make sure tar runs on mars, not over the link.\n\nThe output should say which of A3, A5, A6 or A7 addresses the largest share of the gap.",
+    "why": "Small-deep fresh push is still 9.84 s for xs-rs in the lab races. P2b's local tar baseline suggests a large gap remains, but it was measured on Linux and must be re-measured on macOS. The result also answers A1's open question of whether -j8 now helps, and it picks the next fresh-copy change."
+   }
+  ],
+  "resolutions": [],
+  "drops": [],
+  "summary": "The compression change (C5) gave no speed on the 10 GbE Mac link: 'fresh 1.001 (equivalent)' and 'noop 0.991 (inconclusive)' over 8 blocks, so it is dropped. Its slow-link question was not tested here. Next we profile no-op re-syncs against rsync on real-congress and real-psample (B1), where xs last used far more CPU than rsync. Then we measure fresh small-file copies against local tar extraction on the now-macOS receiver (A2), reporting default, --no-atomic and -j8 separately."
+ },
+ "usage": {
+  "input_tokens": 4778,
+  "cache_creation_input_tokens": 1582,
+  "cache_read_input_tokens": 0,
+  "cache_creation": {
+   "ephemeral_5m_input_tokens": 1582,
+   "ephemeral_1h_input_tokens": 0
+  },
+  "iterations": [
+   {
+    "input_tokens": 4778,
+    "output_tokens": 2787,
+    "cache_read_input_tokens": 0,
+    "cache_creation_input_tokens": 1582,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 1582,
+     "ephemeral_1h_input_tokens": 0
+    },
+    "type": "message",
+    "model": null
+   }
+  ],
+  "output_tokens": 2787,
+  "output_tokens_details": {
+   "thinking_tokens": 786
+  },
+  "service_tier": "standard",
+  "inference_geo": "global",
+  "speed": "standard"
+ },
+ "cost_usd": 0.082762,
+ "model": "claude-opus-5-5"
+}

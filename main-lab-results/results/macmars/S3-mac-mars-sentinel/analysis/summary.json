@@ -11,14 +11,17 @@
   "20261018T144634Z-S3-mac-mars-sentinel-s0001",
   "20261018T144634Z-S3-mac-mars-sentinel-s0002",
   "20261018T144635Z-S3-mac-mars-sentinel-s0003",
-  "20261018T144636Z-S3-mac-mars-sentinel-s0004"
+  "20261018T144636Z-S3-mac-mars-sentinel-s0004",
+  "20261018T144637Z-S3-mac-mars-sentinel-s0005",
+  "20261018T144637Z-S3-mac-mars-sentinel-s0006"
  ],
  "spec_sha256": [
   "56a758cc427b952bd41f4f098261e831a5dc04bb9ec703c33e09f4fe41bccaba"
  ],
- "valid_blocks": 64,
- "void_attempts": 1,
+ "valid_blocks": 72,
+ "void_attempts": 25,
  "void_reasons": [
+  "mars reaches mac by enp24s0f0, not enp25s0f0",
   "round trip is 3.831 ms, above 2.0"
  ]
 }

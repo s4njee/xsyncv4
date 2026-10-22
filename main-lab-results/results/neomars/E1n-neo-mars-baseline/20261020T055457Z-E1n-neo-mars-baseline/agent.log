@@ -16,7 +16,7 @@ Traceback (most recent call last):
            ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   File "~/benchmarks/xsyncv4/lab/lib/736894f6f725/agent.py", line 61, in shell
     raise RuntimeError(f'{self.name}: `{script[:200]}` exited {done.returncode}: {done.stderr.strip()[-400:]}')
-RuntimeError: mars: `python3 /Volumes/xsbench/lab/lib/736894f6f725/probe.py staged --root /Volumes/xsbench/lab --bundle 736894f6f725 --rsync /opt/local/bin/rsync agent.py corpora.json corpus.py measure.py probe.py runner.` exited 255: ssh: connect to host [host] port 22: No route to host
+RuntimeError: mars: `python3 /Volumes/xsbench/lab/lib/736894f6f725/probe.py staged --root /Volumes/xsbench/lab --bundle 736894f6f725 --rsync /opt/local/bin/rsync agent.py corpora.json corpus.py measure.py probe.py runner.` exited 255: ssh: connect to host [address] port 22: No route to host
 Traceback (most recent call last):
   File "~/benchmarks/xsyncv4/lab/lib/736894f6f725/agent.py", line 725, in <module>
     sys.exit(Run(sys.argv[1]).execute(limit))
@@ -35,4 +35,4 @@ Traceback (most recent call last):
            ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   File "~/benchmarks/xsyncv4/lab/lib/736894f6f725/agent.py", line 61, in shell
     raise RuntimeError(f'{self.name}: `{script[:200]}` exited {done.returncode}: {done.stderr.strip()[-400:]}')
-RuntimeError: mars: `python3 /Volumes/xsbench/lab/lib/736894f6f725/probe.py staged --root /Volumes/xsbench/lab --bundle 736894f6f725 --rsync /opt/local/bin/rsync agent.py corpora.json corpus.py measure.py probe.py runner.` exited 255: ssh: connect to host [host] port 22: No route to host
+RuntimeError: mars: `python3 /Volumes/xsbench/lab/lib/736894f6f725/probe.py staged --root /Volumes/xsbench/lab --bundle 736894f6f725 --rsync /opt/local/bin/rsync agent.py corpora.json corpus.py measure.py probe.py runner.` exited 255: ssh: connect to host [address] port 22: No route to host

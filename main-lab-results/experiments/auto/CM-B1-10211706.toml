@@ -1,0 +1,43 @@
+# Written by the 6-hourly planner (2026-10-21T22:06:29+00:00). Why: a measurement for exploration node B1, designed by Claude Opus 5.5 for the case loop
+id = "CM-B1-10211706"
+kind = "screening"
+hypothesis = "xs-rs still takes longer than rsync on congress no-op, especially on pull, and its CPU seconds far exceed rsync's on one end. Receiver-side CPU dominating, mostly on pull, would point at destination path walks (A3). Sender-side CPU dominating would point at file-list and stat cost (B2/B3). Little change from -j1 to -j8 would mean a serial bottleneck. The lab records total CPU per end, not the user"
+primary = "durable_s"
+delta = 0.05
+blocks = 10
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+sample_timeout_s = 7200
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[arms.xs-rs-j4]
+tool = "xs"
+rev = "61d1dd83a530-rs"
+flags = ["-a", "-j4"]
+
+[arms.xs-rs-j1]
+tool = "xs"
+rev = "61d1dd83a530-rs"
+flags = ["-a", "-j1"]
+
+[arms.xs-rs-j8]
+tool = "xs"
+rev = "61d1dd83a530-rs"
+flags = ["-a", "-j8"]
+
+[arms.xs-cpp-j4]
+tool = "xs"
+rev = "52d76dbca2b2"
+flags = ["-a", "-j4"]
+
+[matrix]
+link = "mac-mars-usb10g"
+corpus = ["real-congress", "real-psample"]
+scenario = ["noop"]
+direction = ["mac>mars", "mars>mac"]
+client = ["initiator"]
+cache = ["warm"]

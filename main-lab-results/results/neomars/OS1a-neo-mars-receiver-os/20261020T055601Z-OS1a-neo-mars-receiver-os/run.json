@@ -39,8 +39,8 @@
     "system": "Linux"
    },
    "mars": {
-    "ssh": "[host]",
-    "name": "[host]",
+    "ssh": "[address]",
+    "name": "[address]",
     "hostname": "[host]",
     "root": "/Volumes/xsbench/lab",
     "interface": "en0",
@@ -64,7 +64,7 @@
     "results": "neomars",
     "address": {
      "neo": "[address]",
-     "mars": "[host]"
+     "mars": "[address]"
     }
    }
   },
@@ -1356,7 +1356,7 @@
     "hostname": "[host]"
    },
    "addresses": {
-    "neo>mars": "[host]"
+    "neo>mars": "[address]"
    }
   }
  }

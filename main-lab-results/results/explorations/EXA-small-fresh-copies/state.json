@@ -1,0 +1,17 @@
+{
+ "tree": "EXA-small-fresh-copies",
+ "started_utc": "2026-10-21T19:31:04Z",
+ "nodes": {
+  "A1": {
+   "status": "done",
+   "utc": "2026-10-21T21:42:16Z",
+   "branch": 0,
+   "result": "fresh 0.411 (faster) / noop 1.007 (inconclusive). The receiver-lock branch (c5b765eb54fc against b02ae2394a86) is clearly faster on fresh copies: 'fresh 0.411 (faster)' with a 95% interval of 0.406 to 0.415 over 8 blocks. That is the minimum block count, but the interval is narrow and far below 1. No-op re-syncs are unchanged within noise: 'noop 1.007 (inconclusive)', interval 0.962 to 1.055. Keep it and merge. The pooled verdicts do not separate the default, --no-atomic and -j8 configurations, so whether extra receiving workers now help is not answered by these facts; A2 should look at that split."
+  },
+  "A2": {
+   "status": "running",
+   "utc": "2026-10-22T07:16:52Z",
+   "result": "measuring: After the receiver-lock change, small-file fresh copies are limited by per-file work on the receiving Mac. If so, -j8 and -j16 give little over -j4 while peer CPU rises, and the effect is stronger on  (CM-A2-10220216)"
+  }
+ }
+}

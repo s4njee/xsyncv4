@@ -54,5 +54,5 @@ Standard deviation of the block log-ratios, and the blocks that would give 80% p
 
 ## Voided attempts
 
-- rsync: harness error: neo: `rsync -aH -e 'ssh -oBatchMode=yes -oCompression=no -oControlMaster=no -oConnectTimeout=10 -oHostKeyAlias=[host]' [user]@192.16
-- xs: harness error: mars: `python3 /Volumes/xsbench/lab/lib/736894f6f725/probe.py snapshot --interface en0` exited 255: ssh: connect to host [host] port 22
+- rsync: harness error: neo: `rsync -aH -e 'ssh -oBatchMode=yes -oCompression=no -oControlMaster=no -oConnectTimeout=10 -oHostKeyAlias=[address]' [user]@192.16
+- xs: harness error: mars: `python3 /Volumes/xsbench/lab/lib/736894f6f725/probe.py snapshot --interface en0` exited 255: ssh: connect to host [address] port 22

@@ -1,0 +1,1208 @@
+{
+ "now": "2026-10-21T13:57Z",
+ "window_hours": 6.0,
+ "window_end": "2026-10-21T19:57Z",
+ "limits": {
+  "experiments_per_runner": 4,
+  "arms": [
+   2,
+   6
+  ],
+  "blocks": [
+   2,
+   12
+  ],
+  "xs_flags": [
+   "--compress-level=-1",
+   "--compress-level=-10",
+   "--compress-level=-11",
+   "--compress-level=-12",
+   "--compress-level=-13",
+   "--compress-level=-14",
+   "--compress-level=-15",
+   "--compress-level=-16",
+   "--compress-level=-17",
+   "--compress-level=-18",
+   "--compress-level=-19",
+   "--compress-level=-2",
+   "--compress-level=-20",
+   "--compress-level=-3",
+   "--compress-level=-4",
+   "--compress-level=-5",
+   "--compress-level=-6",
+   "--compress-level=-7",
+   "--compress-level=-8",
+   "--compress-level=-9",
+   "--compress-level=0",
+   "--compress-level=1",
+   "--compress-level=2",
+   "--compress-level=3",
+   "--compress-level=4",
+   "--compress-level=5",
+   "--compress-level=6",
+   "--compress-level=7",
+   "--compress-level=8",
+   "--compress-level=9",
+   "--inplace",
+   "--no-atomic",
+   "--whole-file",
+   "-H",
+   "-O",
+   "-W",
+   "-a",
+   "-aH",
+   "-aHz",
+   "-az",
+   "-azH",
+   "-j1",
+   "-j10",
+   "-j11",
+   "-j12",
+   "-j13",
+   "-j14",
+   "-j15",
+   "-j16",
+   "-j2",
+   "-j3",
+   "-j4",
+   "-j5",
+   "-j6",
+   "-j7",
+   "-j8",
+   "-j9",
+   "-z"
+  ],
+  "cp_flags": [
+   "-R",
+   "-a",
+   "-p",
+   "-r"
+  ],
+  "tune_keys": [
+   "block_target",
+   "coalesce_to",
+   "coalesce_under",
+   "jobs",
+   "listing_window",
+   "pipe_size",
+   "q1_soft_recv",
+   "q1_soft_send",
+   "read_batch_bytes",
+   "read_batch_files",
+   "recv_queue",
+   "scan_workers",
+   "send_queue",
+   "send_streams",
+   "small_max",
+   "wait_peer_poll_ms",
+   "write_chunk",
+   "zstd_fast_at",
+   "zstd_slow_at"
+  ],
+  "scenarios": [
+   "fresh",
+   "noop",
+   "update-0p1pct",
+   "update-1pct",
+   "update-10pct"
+  ],
+  "confirm_blocks": 8,
+  "wan": {
+   "delay_ms": [
+    1,
+    200
+   ],
+   "loss_pct": [
+    0,
+    5
+   ],
+   "hosts": []
+  },
+  "cpus": {
+   "counts": [
+    1,
+    2,
+    4
+   ],
+   "hosts": []
+  }
+ },
+ "runners": [
+  {
+   "runner": "mac",
+   "links": [
+    "mac-mars-usb10g"
+   ],
+   "reachable": true,
+   "alive": true,
+   "state": "running",
+   "current": {
+    "run": "20261021T133436Z-MM1-mac-mac-baseline",
+    "experiment": "MM1-mac-mac-baseline",
+    "samples_done": 9,
+    "samples_planned": 288,
+    "hours_left": 1.5
+   },
+   "backlog": [],
+   "queued_hours": 0.0
+  }
+ ],
+ "links": {
+  "mac-mars-usb10g": {
+   "hosts": [
+    "mac",
+    "mars"
+   ],
+   "medium": "wired",
+   "driver": "mac",
+   "initiator": "mac",
+   "minutes_per_sample_by_corpus": {
+    "mixed-bimodal": 0.2,
+    "small-flat": 0.4
+   }
+  }
+ },
+ "hosts": {
+  "mac": {
+   "builds": [
+    "0c94b3d70b9d",
+    "21ae6844ed20",
+    "453704a64528-tune",
+    "8cc75bbdb801",
+    "98b250569c69",
+    "ddefa041364e-tune",
+    "e1f05b518049",
+    "e51c1df1329a"
+   ],
+   "corpora": [
+    "large-four",
+    "large-half",
+    "large-mixed",
+    "large-one",
+    "large-text",
+    "mixed-bimodal",
+    "mixed-threshold",
+    "real-congress",
+    "real-psample",
+    "scale-count-10000",
+    "small-deep",
+    "small-flat",
+    "small-opaque",
+    "tiny-one"
+   ]
+  },
+  "mars": {
+   "builds": [
+    "0c94b3d70b9d",
+    "21ae6844ed20",
+    "e51c1df1329a"
+   ],
+   "corpora": [
+    "mixed-bimodal",
+    "real-congress",
+    "real-psample",
+    "small-deep",
+    "small-flat"
+   ]
+  }
+ },
+ "corpora": {
+  "large-four": {
+   "files": 4,
+   "directories": 0,
+   "bytes": 8589934592
+  },
+  "large-half": {
+   "files": 32,
+   "directories": 0,
+   "bytes": 8963523840
+  },
+  "large-mixed": {
+   "files": 32,
+   "directories": 0,
+   "bytes": 8963523840
+  },
+  "large-one": {
+   "files": 1,
+   "directories": 0,
+   "bytes": 7994415104
+  },
+  "large-text": {
+   "files": 8,
+   "directories": 0,
+   "bytes": 8589934592
+  },
+  "mixed-bimodal": {
+   "files": 20000,
+   "directories": 420,
+   "bytes": 1395127076
+  },
+  "mixed-threshold": {
+   "files": 1500,
+   "directories": 72,
+   "bytes": 1502174819
+  },
+  "real-congress": {
+   "files": 216518,
+   "directories": 52593,
+   "bytes": 1159189826
+  },
+  "real-holochart": {
+   "files": 249602,
+   "directories": 33012,
+   "bytes": 7825180850
+  },
+  "real-laikav2": {
+   "files": 54691,
+   "directories": 3106,
+   "bytes": 45316076042
+  },
+  "real-psample": {
+   "files": 711103,
+   "directories": 547983,
+   "bytes": 21045458323
+  },
+  "scale-count-1000000": {
+   "files": 1000000,
+   "directories": 1000,
+   "bytes": 3217443963
+  },
+  "scale-count-100000": {
+   "files": 100000,
+   "directories": 100,
+   "bytes": 319224077
+  },
+  "scale-count-10000": {
+   "files": 10000,
+   "directories": 10,
+   "bytes": 32675195
+  },
+  "scale-count-1000": {
+   "files": 1000,
+   "directories": 1,
+   "bytes": 3415428
+  },
+  "scale-count-300000": {
+   "files": 300000,
+   "directories": 300,
+   "bytes": 964346919
+  },
+  "scale-count-30000": {
+   "files": 30000,
+   "directories": 30,
+   "bytes": 95332607
+  },
+  "scale-count-3000": {
+   "files": 3000,
+   "directories": 3,
+   "bytes": 9764652
+  },
+  "scale-size-1024": {
+   "files": 262144,
+   "directories": 262,
+   "bytes": 268435456
+  },
+  "scale-size-1048576": {
+   "files": 256,
+   "directories": 1,
+   "bytes": 268435456
+  },
+  "scale-size-16384": {
+   "files": 16384,
+   "directories": 16,
+   "bytes": 268435456
+  },
+  "scale-size-16777216": {
+   "files": 16,
+   "directories": 1,
+   "bytes": 268435456
+  },
+  "scale-size-262144": {
+   "files": 1024,
+   "directories": 1,
+   "bytes": 268435456
+  },
+  "scale-size-4096": {
+   "files": 65536,
+   "directories": 65,
+   "bytes": 268435456
+  },
+  "scale-size-4194304": {
+   "files": 64,
+   "directories": 1,
+   "bytes": 268435456
+  },
+  "scale-size-65536": {
+   "files": 4096,
+   "directories": 4,
+   "bytes": 268435456
+  },
+  "small-deep": {
+   "files": 100000,
+   "directories": 116667,
+   "bytes": 319224077
+  },
+  "small-flat": {
+   "files": 100000,
+   "directories": 100,
+   "bytes": 319224077
+  },
+  "small-opaque": {
+   "files": 100000,
+   "directories": 100,
+   "bytes": 319224077
+  },
+  "small-real": {
+   "files": 118594,
+   "directories": 59336,
+   "bytes": 1107333872
+  },
+  "tiny-one": {
+   "files": 1,
+   "directories": 0,
+   "bytes": 19
+  }
+ },
+ "findings": [
+  {
+   "experiment": "MM0-mac-mac-sentinel",
+   "kind": "screening",
+   "link": "mac-mars-usb10g",
+   "analysed": "2026-10-21T13:53Z",
+   "hypothesis": "Hour by hour, the A/A ratio stays within 5% of 1 and the xs to rsync ratio stays where MM1 put it.",
+   "rows": [
+    {
+     "cell": "mixed-bimodal.fresh.mac-mars.sender.warm",
+     "arm": "again",
+     "control": "xs",
+     "blocks": 2,
+     "time_ratio": 1.826,
+     "interval": [
+      0.373,
+      8.942
+     ],
+     "verdict": "too few blocks"
+    },
+    {
+     "cell": "mixed-bimodal.fresh.mac-mars.sender.warm",
+     "arm": "rsync",
+     "control": "xs",
+     "blocks": 2,
+     "time_ratio": 2.437,
+     "interval": [
+      0.937,
+      6.334
+     ],
+     "verdict": "too few blocks"
+    },
+    {
+     "cell": "mixed-bimodal.fresh.mars-mac.receiver.warm",
+     "arm": "again",
+     "control": "xs",
+     "blocks": 2,
+     "time_ratio": 1.0,
+     "interval": [
+      0.952,
+      1.051
+     ],
+     "verdict": "too few blocks"
+    },
+    {
+     "cell": "mixed-bimodal.fresh.mars-mac.receiver.warm",
+     "arm": "rsync",
+     "control": "xs",
+     "blocks": 2,
+     "time_ratio": 2.536,
+     "interval": [
+      1.856,
+      3.465
+     ],
+     "verdict": "too few blocks"
+    },
+    {
+     "cell": "mixed-bimodal.noop.mac-mars.sender.warm",
+     "arm": "again",
+     "control": "xs",
+     "blocks": 2,
+     "time_ratio": 1.1,
+     "interval": [
+      0.544,
+      2.223
+     ],
+     "verdict": "too few blocks"
+    },
+    {
+     "cell": "mixed-bimodal.noop.mac-mars.sender.warm",
+     "arm": "rsync",
+     "control": "xs",
+     "blocks": 2,
+     "time_ratio": 1.628,
+     "interval": [
+      0.76,
+      3.488
+     ],
+     "verdict": "too few blocks"
+    },
+    {
+     "cell": "mixed-bimodal.noop.mars-mac.receiver.warm",
+     "arm": "again",
+     "control": "xs",
+     "blocks": 2,
+     "time_ratio": 1.016,
+     "interval": [
+      0.921,
+      1.12
+     ],
+     "verdict": "too few blocks"
+    },
+    {
+     "cell": "mixed-bimodal.noop.mars-mac.receiver.warm",
+     "arm": "rsync",
+     "control": "xs",
+     "blocks": 2,
+     "time_ratio": 1.323,
+     "interval": [
+      0.808,
+      2.166
+     ],
+     "verdict": "too few blocks"
+    },
+    {
+     "cell": "small-flat.fresh.mac-mars.sender.warm",
+     "arm": "again",
+     "control": "xs",
+     "blocks": 2,
+     "time_ratio": 0.967,
+     "interval": [
+      0.458,
+      2.043
+     ],
+     "verdict": "too few blocks"
+    },
+    {
+     "cell": "small-flat.fresh.mac-mars.sender.warm",
+     "arm": "rsync",
+     "control": "xs",
+     "blocks": 2,
+     "time_ratio": 1.321,
+     "interval": [
+      0.834,
+      2.093
+     ],
+     "verdict": "too few blocks"
+    },
+    {
+     "cell": "small-flat.fresh.mars-mac.receiver.warm",
+     "arm": "again",
+     "control": "xs",
+     "blocks": 2,
+     "time_ratio": 0.969,
+     "interval": [
+      0.107,
+      8.771
+     ],
+     "verdict": "too few blocks"
+    },
+    {
+     "cell": "small-flat.fresh.mars-mac.receiver.warm",
+     "arm": "rsync",
+     "control": "xs",
+     "blocks": 2,
+     "time_ratio": 1.341,
+     "interval": [
+      0.179,
+      10.059
+     ],
+     "verdict": "too few blocks"
+    },
+    {
+     "cell": "small-flat.noop.mac-mars.sender.warm",
+     "arm": "again",
+     "control": "xs",
+     "blocks": 2,
+     "time_ratio": 1.258,
+     "interval": [
+      0.016,
+      96.353
+     ],
+     "verdict": "too few blocks"
+    },
+    {
+     "cell": "small-flat.noop.mac-mars.sender.warm",
+     "arm": "rsync",
+     "control": "xs",
+     "blocks": 2,
+     "time_ratio": 2.229,
+     "interval": [
+      0.075,
+      66.414
+     ],
+     "verdict": "too few blocks"
+    },
+    {
+     "cell": "small-flat.noop.mars-mac.receiver.warm",
+     "arm": "again",
+     "control": "xs",
+     "blocks": 2,
+     "time_ratio": 1.09,
+     "interval": [
+      0.03,
+      40.132
+     ],
+     "verdict": "too few blocks"
+    },
+    {
+     "cell": "small-flat.noop.mars-mac.receiver.warm",
+     "arm": "rsync",
+     "control": "xs",
+     "blocks": 2,
+     "time_ratio": 1.931,
+     "interval": [
+      0.221,
+      16.893
+     ],
+     "verdict": "too few blocks"
+    }
+   ]
+  }
+ ],
+ "trees": [
+  {
+   "id": "T17-dest-anchors",
+   "question": "Does keeping more parent directories open make xs's receives faster than its parent, and than rsync, on the Mac and on Linux?",
+   "nodes": [
+    {
+     "id": "A",
+     "experiment": "MA8-psample-pull-anchors",
+     "state": "failed",
+     "decision": null
+    },
+    {
+     "id": "B",
+     "experiment": "LC12-local-anchors",
+     "state": "held",
+     "decision": null
+    }
+   ]
+  },
+  {
+   "id": "AUTO-10210142-neo-ssd",
+   "question": "neo-ssd is idle with the full 6 h. Its link is local, so it cannot add latency, but it can hold neo to 2 CPUs. That tests, with no network involved, whether the CPU cap alone erodes xs's lead on the two home corpora behind lab2's gaps. The plain-link baselines are J2 for real-congress (rsync 1.84x slower) and LC1/LC12 for real-psample (xs about 10% behind, cold). The plan uses about 130 min and does not touch the waiting T16 nodes.",
+   "nodes": [
+    {
+     "id": "N0",
+     "experiment": "AP10210142-L2R5-local-congress-cpu2",
+     "state": "decided",
+     "decision": "N0: done (1 run)"
+    },
+    {
+     "id": "N1",
+     "experiment": "AP10210142-L2R6-local-psample-cpu2",
+     "state": "decided",
+     "decision": "N1: done (1 run)"
+    }
+   ]
+  },
+  {
+   "id": "T16-local-beat-rsync",
+   "question": "Can xs beat rsync -aH at copying psample from the Pi's NVMe to the T5?",
+   "nodes": [
+    {
+     "id": "A",
+     "experiment": "LC6-local-beat-rsync",
+     "state": "decided",
+     "decision": "A: no worker count closes the gap: try eager writeback and --no-atomic"
+    },
+    {
+     "id": "Ac",
+     "experiment": "LC6-beat-confirm",
+     "state": "waiting",
+     "decision": null
+    },
+    {
+     "id": "C",
+     "experiment": "LC8-local-tie-confirm",
+     "state": "waiting",
+     "decision": null
+    },
+    {
+     "id": "B",
+     "experiment": "LC7-local-relaxed",
+     "state": "skipped",
+     "decision": null
+    },
+    {
+     "id": "Bc",
+     "experiment": "LC7-relaxed-confirm",
+     "state": "waiting",
+     "decision": null
+    }
+   ]
+  },
+  {
+   "id": "T18-apfs-small-files",
+   "question": "Can xs stop losing to rsync when it writes small files onto the Mac: through the parent-descriptor fix, or by not renaming new files?",
+   "nodes": [
+    {
+     "id": "A",
+     "experiment": "MA9-small-pull-anchors",
+     "state": "queued",
+     "decision": null
+    },
+    {
+     "id": "B",
+     "experiment": "MA10-apfs-no-atomic",
+     "state": "queued",
+     "decision": null
+    }
+   ]
+  },
+  {
+   "id": "AUTO-10210751-neo",
+   "question": "neo has 4.0 h of room: 6 h minus 0.2 h left on the sentinel and 1.8 h for the queued L2R4 plain psample baseline, which runs first as planned. The plan uses about 190 min, including rsync's possible confirmation on real-congress, which leaves margin for netem and the CPU cap stretching sample times. Every earlier reproduction capped neo as the sender. Here neo, an arm64 Linux Pi like lab2's Graviton receiver, receives from mars with 11 ms added and is held to 2 CPUs. This tests whether a starved receiver explains the congress-sample and real-projects losses. It does not duplicate L2R3/L2R4 (psample neo>mars) or the waiting confirmations, which only run if rsync screened ahead.",
+   "nodes": [
+    {
+     "id": "N0",
+     "experiment": "AP10210751-AP10210749-L2R7-congress-pull-wan11-cpu2",
+     "state": "decided",
+     "decision": "N0: not clearly faster: the next window's plan reads this"
+    },
+    {
+     "id": "N0c",
+     "experiment": "AP10210751-AP10210749-L2R7-congress-pull-wan11-cpu2-confirm",
+     "state": "waiting",
+     "decision": null
+    },
+    {
+     "id": "N1",
+     "experiment": "AP10210751-AP10210749-L2R8-psample-pull-wan11-cpu2",
+     "state": "decided",
+     "decision": "N1: done (1 run)"
+    },
+    {
+     "id": "N2",
+     "experiment": "AP10210751-AP10210749-L2P1-small-pull-wan11-cpu2",
+     "state": "decided",
+     "decision": "N2: done (1 run)"
+    },
+    {
+     "id": "N3",
+     "experiment": "AP10210751-AP10210749-L2P2-congress-resync-wan11-cp",
+     "state": "decided",
+     "decision": "N3: done (1 run)"
+    }
+   ]
+  },
+  {
+   "id": "AUTO-10210142-neo",
+   "question": "neo drives the only networked link, so it alone can reproduce lab2's latency. It has 5.9 h of room (6 h minus 0.1 h left on the sentinel, nothing queued). The plan uses about 282 min including both possible confirmations, which leaves margin in case netem and the CPU cap stretch sample times. e51c1df1329a is the newest xs build on both neo and mars; no -tune build is staged on mars, so tuning (step 2) waits for a reproduced gap.",
+   "nodes": [
+    {
+     "id": "N0",
+     "experiment": "AP10210142-L2R1-congress-fresh-wan11-cpu2",
+     "state": "decided",
+     "decision": "N0: not clearly faster: the next window's plan reads this"
+    },
+    {
+     "id": "N0c",
+     "experiment": "AP10210142-L2R1-congress-fresh-wan11-cpu2-confirm",
+     "state": "waiting",
+     "decision": null
+    },
+    {
+     "id": "N1",
+     "experiment": "AP10210142-L2R2-congress-fresh-cpu2-only",
+     "state": "decided",
+     "decision": "N1: done (1 run)"
+    },
+    {
+     "id": "N2",
+     "experiment": "AP10210142-L2R3-psample-fresh-wan11-cpu2",
+     "state": "decided",
+     "decision": "N2: not clearly faster: the next window's plan reads this"
+    },
+    {
+     "id": "N2c",
+     "experiment": "AP10210142-L2R3-psample-fresh-wan11-cpu2-confirm",
+     "state": "waiting",
+     "decision": null
+    },
+    {
+     "id": "N3",
+     "experiment": "AP10210142-L2R4-psample-fresh-plain",
+     "state": "queued",
+     "decision": null
+    }
+   ]
+  },
+  {
+   "id": "T8-mac-mars-psample",
+   "question": "How fast can I transfer the psample tree between the Mac and mars, each way, and is xs faster than rsync -aH?",
+   "nodes": [
+    {
+     "id": "A",
+     "experiment": "MA3-psample-bidir",
+     "state": "decided",
+     "decision": "A: xs screens at least 5% faster than rsync -aH: confirm the winner with fresh blocks (real-psample mac\u2192mars xs 3.63\u00d7 [2.24, 5.87]; real-psample mars\u2192mac xs 1.28\u00d7 [0.78, 2.13])"
+    },
+    {
+     "id": "Ac",
+     "experiment": "MA3-psample-confirm",
+     "state": "decided",
+     "decision": "Ac: done (1 run)"
+    }
+   ]
+  },
+  {
+   "id": "T14-neo-local-psample",
+   "question": "How fast can a Pi 5 back up the 21 GB psample tree from its NVMe drive to a Samsung T5 over USB, and what limits it?",
+   "nodes": [
+    {
+     "id": "A",
+     "experiment": "LC1-psample-local-baseline",
+     "state": "decided",
+     "decision": "A: xs is not ahead of rsync on a local copy: look for what holds it back (workers, flushing) and still check re-syncs (real-psample neo\u2192neo-ssd xs 0.89\u00d7 [0.81, 0.99])"
+    },
+    {
+     "id": "B",
+     "experiment": "LC2-psample-local-workers",
+     "state": "decided",
+     "decision": "B: no worker count beats the default four on this Pi and drive"
+    },
+    {
+     "id": "Bc",
+     "experiment": "LC2-workers-confirm",
+     "state": "waiting",
+     "decision": null
+    },
+    {
+     "id": "C",
+     "experiment": "LC3-psample-local-durable",
+     "state": "decided",
+     "decision": "C: eager writeback or --no-atomic gets the backup onto the drive sooner: confirm it (real-psample neo\u2192neo-ssd xs-eager 1.62\u00d7 [1.47, 1.78])"
+    },
+    {
+     "id": "Cc",
+     "experiment": "LC3-durable-confirm",
+     "state": "decided",
+     "decision": "Cc: done (1 run)"
+    },
+    {
+     "id": "D",
+     "experiment": "LC4-psample-local-resync",
+     "state": "decided",
+     "decision": "D: xs re-syncs the local backup at least as fast as rsync"
+    }
+   ]
+  },
+  {
+   "id": "AUTO-10210751-neo-ssd",
+   "question": "neo-ssd has 4.8 h of room: 6 h minus 1.2 h left on L2R6, the running local psample 2-CPU fresh copy, and nothing queued. Its local link cannot add latency, so it probes cells lab2 has not reported under the 2-CPU cap: real-congress no-op and updates, small-tree fresh and no-op copies, and real-psample re-syncs. These are compared with the plain-link baselines from J2 and LC4. The plan uses about 198 min and leaves the waiting T16 nodes alone.",
+   "nodes": [
+    {
+     "id": "N0",
+     "experiment": "AP10210751-AP10210749-L2P3-local-congress-resync-cp",
+     "state": "queued",
+     "decision": null
+    },
+    {
+     "id": "N1",
+     "experiment": "AP10210751-AP10210749-L2P4-local-small-cpu2",
+     "state": "queued",
+     "decision": null
+    },
+    {
+     "id": "N2",
+     "experiment": "AP10210751-AP10210749-L2P5-local-psample-resync-cpu",
+     "state": "queued",
+     "decision": null
+    }
+   ]
+  },
+  {
+   "id": "T12-mac-mars-followups",
+   "question": "After the psample screening: does xs win the incremental cases, what recovers a no-op push deficit, and does the ranking hold on other trees?",
+   "nodes": [
+    {
+     "id": "A",
+     "experiment": "MA4-psample-incremental",
+     "state": "decided",
+     "decision": "A: xs does not lose a mac-to-mars cell here; move on to other tree shapes"
+    },
+    {
+     "id": "B",
+     "experiment": "MA5-psample-noop-knobs",
+     "state": "waiting",
+     "decision": null
+    },
+    {
+     "id": "Bc",
+     "experiment": "MA5-psample-noop-confirm",
+     "state": "waiting",
+     "decision": null
+    },
+    {
+     "id": "C",
+     "experiment": "MA6-mac-mars-shapes",
+     "state": "decided",
+     "decision": "C: xs wins on other trees too: confirm it (real-congress mac\u2192mars xs 3.95\u00d7 [2.87, 5.44]; large-text mars\u2192mac xs 3.18\u00d7 [2.04, 4.95]; large-text mac\u2192mars xs 2.42\u00d7 [2.16, 2.72]; real-congress mars\u2192mac xs 1.69\u00d7 [1.28, 2.24])"
+    },
+    {
+     "id": "Cc",
+     "experiment": "MA6-mac-mars-shapes-confirm",
+     "state": "decided",
+     "decision": "Cc: done (1 run)"
+    }
+   ]
+  },
+  {
+   "id": "T13-mac-pull-apfs",
+   "question": "What recovers xs's psample pull onto the Mac, where rsync is faster?",
+   "nodes": [
+    {
+     "id": "A",
+     "experiment": "MA7-psample-pull-apfs",
+     "state": "held",
+     "decision": null
+    },
+    {
+     "id": "Ac",
+     "experiment": "MA7-pull-confirm",
+     "state": "waiting",
+     "decision": null
+    }
+   ]
+  }
+ ],
+ "earlier_plans": [
+  "Both lab2 gaps, congress-sample fresh and real-projects fresh (rsync ahead and neither proven), are taken to step 1: reproduction at home. neo races xs e51c1df1329a with lab2's flags (-a -j4) against rsync -a over the neo-mars link with 11 ms added and neo held to 2 CPUs. It splits the congress cell into a CPU-only arm and adds a plain-link psample baseline, and an 8-block confirmation of rsync's lead is attached wherever rsync screens at least 5% ahead, so a loss can be shown to repeat. neo-ssd checks whether the 2-CPU cap alone, with no network, erodes xs's lead locally on the same two home corpora; no development case is opened until a gap reproduces.",
+  "Neither lab2 gap has reproduced at home yet. Under lab2's 11 ms and a 2-CPU sender, rsync was still 1.40x slower than xs on fresh real-congress (L2R1), 1.39x slower with the CPU cap alone (L2R2) and 1.96x slower locally (L2R5), so no development case is opened. neo now tries the one lab2 condition not yet reproduced for both gaps (step 1): an arm64 receiver held to 2 CPUs behind 11 ms, as AWS's 2-vCPU Graviton is, on real-congress and real-psample. Both runners also probe cells lab2 has not reported (small trees, no-ops and updates) under 2 CPUs, so a loss is found at home before lab2 finds it."
+ ],
+ "engineering": {
+  "can_open": false,
+  "why_not": "the API budget has $11.90 for engineering now; a case needs $12.00",
+  "max_diff_lines": 400,
+  "budget_usd": {
+   "available": 11.9,
+   "per_case": 12
+  },
+  "cases": []
+ },
+ "lab2": {
+  "utc": "2026-10-21T01:50:40+00:00",
+  "source": "github",
+  "ref": "rust-ds@1b5462438ea3",
+  "directory": "benchmarks/results/lab2/2026-10-21",
+  "contest_updated": "2026-10-21T01:03:11+00:00",
+  "cpp_rev": "0c94b3d70b9d",
+  "rs": {
+   "commit": "8428aac9a2108cd10c2afdb2badab76f90ddd1a1",
+   "step": "filters"
+  },
+  "score": {
+   "xs-rs": 0,
+   "xs-cpp": 4,
+   "tie": 1,
+   "pending": 0
+  },
+  "link": {
+   "rtt_ms": 11,
+   "mbit_s": 569,
+   "sender_cpus": 2,
+   "id": "a-aws",
+   "direction": "a>aws",
+   "about": "the internet over IPv6, one way from A to AWS; about 11 ms round trip"
+  },
+  "machines": {
+   "a": {
+    "role": "sender",
+    "system": "Linux amd64",
+    "about": "an LXC container with 2 vCPUs of a Xeon Gold 6138, 2 GB of memory and 30 GB of disk, IPv6 only"
+   },
+   "aws": {
+    "role": "receiver",
+    "system": "Linux arm64",
+    "about": "an AWS t4g.small in us-west-1: 2 Graviton2 vCPUs, 2 GB of memory and a 16 GB disk, IPv6 only"
+   }
+  },
+  "reproduce_with": {
+   "wan": {
+    "host": "neo",
+    "delay_ms": 11
+   },
+   "cpus": {
+    "host": "neo",
+    "count": 2
+   }
+  },
+  "cells": 5,
+  "gaps": [
+   {
+    "id": "real-projects.fresh.rsync",
+    "cell": "real-projects.fresh.a-aws.sender.warm",
+    "corpus": "real-projects",
+    "scenario": "fresh",
+    "link": "a-aws",
+    "metric": "durable_s",
+    "rival": "rsync",
+    "cpp_over_rival": 1.461,
+    "proven": false,
+    "cpp": {
+     "seconds": 29.298,
+     "lo": 8.762,
+     "hi": 97.963,
+     "flags": [
+      "-a",
+      "-j4"
+     ],
+     "rev": "0c94b3d70b9d",
+     "blocks": 2
+    },
+    "rival_tool": {
+     "seconds": 20.055,
+     "lo": 20.036,
+     "hi": 20.074,
+     "flags": [
+      "-a"
+     ],
+     "rev": null,
+     "blocks": 2
+    },
+    "experiment": "BL2-real-projects",
+    "run": "20261021T003556Z-BL2-real-projects",
+    "home_corpora": [
+     "small-real",
+     "real-psample"
+    ]
+   },
+   {
+    "id": "congress-sample.fresh.rsync",
+    "cell": "congress-sample.fresh.a-aws.sender.warm",
+    "corpus": "congress-sample",
+    "scenario": "fresh",
+    "link": "a-aws",
+    "metric": "durable_s",
+    "rival": "rsync",
+    "cpp_over_rival": 1.104,
+    "proven": false,
+    "cpp": {
+     "seconds": 3.569,
+     "lo": 3.309,
+     "hi": 3.848,
+     "flags": [
+      "-a",
+      "-j4"
+     ],
+     "rev": "0c94b3d70b9d",
+     "blocks": 3
+    },
+    "rival_tool": {
+     "seconds": 3.232,
+     "lo": 3.055,
+     "hi": 3.419,
+     "flags": [
+      "-a"
+     ],
+     "rev": null,
+     "blocks": 3
+    },
+    "experiment": "PS-8428aac9a210-fresh",
+    "run": "20261021T005447Z-PS-8428aac9a210-fresh",
+    "home_corpora": [
+     "real-congress"
+    ]
+   }
+  ]
+ },
+ "mac_mac_vs_linux": {
+  "sources": [
+   {
+    "label": "mac-mac MM1 (xs-e6b)",
+    "experiment": "mac-mac/MM1-mac-mac-baseline",
+    "xs_arm": "xs-e6b",
+    "other_end": "macOS",
+    "cells": 0
+   },
+   {
+    "label": "mac-mac MM1 (xs-cpp -j4)",
+    "experiment": "mac-mac/MM1-mac-mac-baseline",
+    "xs_arm": "xs-cpp",
+    "other_end": "macOS",
+    "cells": 0
+   },
+   {
+    "label": "mac-mac MM0 sentinel",
+    "experiment": "mac-mac/MM0-mac-mac-sentinel",
+    "xs_arm": "xs",
+    "other_end": "macOS",
+    "cells": 8
+   },
+   {
+    "label": "mars on Linux E6b",
+    "experiment": "macmars/E6b-mac-mars-receiver-defaults",
+    "xs_arm": "xs",
+    "other_end": "Linux",
+    "cells": 20
+   },
+   {
+    "label": "mars on Linux S3 sentinel",
+    "experiment": "macmars/S3-mac-mars-sentinel",
+    "xs_arm": "xs",
+    "other_end": "Linux",
+    "cells": 8
+   },
+   {
+    "label": "freya on Linux G0",
+    "experiment": "tengig/G0-10g-baseline",
+    "xs_arm": "xs",
+    "other_end": "Linux",
+    "cells": 8
+   }
+  ],
+  "discrepancies": [
+   {
+    "corpus": "mixed-bimodal",
+    "scenario": "fresh",
+    "role": "Mac receives",
+    "mac_mac": "mac-mac MM0 sentinel",
+    "linux": "mars on Linux E6b",
+    "mac_mac_ratio": 0.4,
+    "linux_ratio": 0.488,
+    "change": -0.18,
+    "winner_changed": false
+   },
+   {
+    "corpus": "mixed-bimodal",
+    "scenario": "fresh",
+    "role": "Mac receives",
+    "mac_mac": "mac-mac MM0 sentinel",
+    "linux": "freya on Linux G0",
+    "mac_mac_ratio": 0.4,
+    "linux_ratio": 0.496,
+    "change": -0.194,
+    "winner_changed": false
+   },
+   {
+    "corpus": "mixed-bimodal",
+    "scenario": "fresh",
+    "role": "Mac sends",
+    "mac_mac": "mac-mac MM0 sentinel",
+    "linux": "mars on Linux E6b",
+    "mac_mac_ratio": 0.418,
+    "linux_ratio": 0.362,
+    "change": 0.155,
+    "winner_changed": false
+   },
+   {
+    "corpus": "mixed-bimodal",
+    "scenario": "fresh",
+    "role": "Mac sends",
+    "mac_mac": "mac-mac MM0 sentinel",
+    "linux": "mars on Linux S3 sentinel",
+    "mac_mac_ratio": 0.418,
+    "linux_ratio": 0.342,
+    "change": 0.222,
+    "winner_changed": false
+   },
+   {
+    "corpus": "mixed-bimodal",
+    "scenario": "fresh",
+    "role": "Mac sends",
+    "mac_mac": "mac-mac MM0 sentinel",
+    "linux": "freya on Linux G0",
+    "mac_mac_ratio": 0.418,
+    "linux_ratio": 0.304,
+    "change": 0.375,
+    "winner_changed": false
+   },
+   {
+    "corpus": "mixed-bimodal",
+    "scenario": "noop",
+    "role": "Mac receives",
+    "mac_mac": "mac-mac MM0 sentinel",
+    "linux": "mars on Linux E6b",
+    "mac_mac_ratio": 0.784,
+    "linux_ratio": 0.888,
+    "change": -0.117,
+    "winner_changed": false
+   },
+   {
+    "corpus": "mixed-bimodal",
+    "scenario": "noop",
+    "role": "Mac receives",
+    "mac_mac": "mac-mac MM0 sentinel",
+    "linux": "mars on Linux S3 sentinel",
+    "mac_mac_ratio": 0.784,
+    "linux_ratio": 0.894,
+    "change": -0.123,
+    "winner_changed": false
+   },
+   {
+    "corpus": "mixed-bimodal",
+    "scenario": "noop",
+    "role": "Mac sends",
+    "mac_mac": "mac-mac MM0 sentinel",
+    "linux": "mars on Linux S3 sentinel",
+    "mac_mac_ratio": 0.672,
+    "linux_ratio": 0.792,
+    "change": -0.152,
+    "winner_changed": false
+   },
+   {
+    "corpus": "small-flat",
+    "scenario": "fresh",
+    "role": "Mac receives",
+    "mac_mac": "mac-mac MM0 sentinel",
+    "linux": "mars on Linux S3 sentinel",
+    "mac_mac_ratio": 0.748,
+    "linux_ratio": 0.632,
+    "change": 0.184,
+    "winner_changed": false
+   },
+   {
+    "corpus": "small-flat",
+    "scenario": "fresh",
+    "role": "Mac sends",
+    "mac_mac": "mac-mac MM0 sentinel",
+    "linux": "mars on Linux E6b",
+    "mac_mac_ratio": 0.763,
+    "linux_ratio": 0.404,
+    "change": 0.889,
+    "winner_changed": false
+   },
+   {
+    "corpus": "small-flat",
+    "scenario": "fresh",
+    "role": "Mac sends",
+    "mac_mac": "mac-mac MM0 sentinel",
+    "linux": "mars on Linux S3 sentinel",
+    "mac_mac_ratio": 0.763,
+    "linux_ratio": 0.408,
+    "change": 0.87,
+    "winner_changed": false
+   },
+   {
+    "corpus": "small-flat",
+    "scenario": "fresh",
+    "role": "Mac sends",
+    "mac_mac": "mac-mac MM0 sentinel",
+    "linux": "freya on Linux G0",
+    "mac_mac_ratio": 0.763,
+    "linux_ratio": 0.584,
+    "change": 0.307,
+    "winner_changed": false
+   },
+   {
+    "corpus": "small-flat",
+    "scenario": "noop",
+    "role": "Mac receives",
+    "mac_mac": "mac-mac MM0 sentinel",
+    "linux": "mars on Linux E6b",
+    "mac_mac_ratio": 0.55,
+    "linux_ratio": 0.664,
+    "change": -0.172,
+    "winner_changed": false
+   }
+  ]
+ }
+}

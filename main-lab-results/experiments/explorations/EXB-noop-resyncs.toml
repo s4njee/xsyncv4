@@ -1,0 +1,55 @@
+# EXB: no-op and small-update re-syncs, where nothing needs sending but every name is checked.
+# Recorded by hand with lab/explore.py; nothing here is queued.
+id = "EXB-noop-resyncs"
+question = "Where does a re-sync that changes nothing spend its time, and can it skip unchanged subtrees?"
+start = ["B1"]
+
+[nodes.B1]
+title = "Re-measure no-op syncs"
+kind = "analysis"
+question = "Where does a no-op re-sync spend its time once the receiver fixes land?"
+measure = "real-congress and real-psample no-op, push and pull, against rsync; user and kernel time on each end."
+evidence = "H21: congress no-op push ran at 0.74x rsync's speed, with 408.8 s of CPU against 18.8 s. MA7's pull deficit came from destination path walks."
+
+  [[nodes.B1.branch]]
+  label = "kernel time in path walks"
+  next = ["B2"]
+
+  [[nodes.B1.branch]]
+  label = "user time comparing listings"
+  next = ["B3"]
+
+  [[nodes.B1.branch]]
+  label = "at or ahead of rsync both ways"
+  end = "Solved; leave it."
+
+[nodes.B2]
+title = "Confirm dest-anchors"
+kind = "measure"
+written = "e51c1df1329a"   # engine/dest-anchors
+race = { scenario = ["noop", "update-1pct"] }
+question = "Do retained parent descriptors, and single-call opens on Linux, close the gap?"
+measure = "T17's MA8 (a psample pull onto the Mac, no-op and 1% update) and LC12 (Linux local copies), then openat2 on Linux receivers."
+evidence = "By hand, the same no-op pull took 29.3 and 36.6 s with dest-anchors, against its parent's 50.5 and 64.0 s and rsync's 50.0 and 51.6 s."
+
+  [[nodes.B2.branch]]
+  label = "ahead of rsync"
+  end = "Adopt."
+
+  [[nodes.B2.branch]]
+  label = "still behind"
+  end = "Adopt what helped; the rest of the gap is B3's to close."
+
+[nodes.B3]
+title = "Persistent index"
+question = "Can a no-op skip unchanged subtrees without visiting them?"
+measure = "Prototype a per-directory hash tree keyed by inode, mtime, ctime and size on both ends, compared root first; later FSEvents and zfs diff. No-op time in milliseconds."
+evidence = "Most real re-syncs change nothing, yet every name is listed and compared on both ends."
+
+  [[nodes.B3.branch]]
+  label = "milliseconds instead of seconds"
+  end = "Build it behind a feature bit."
+
+  [[nodes.B3.branch]]
+  label = "upkeep costs more than it saves"
+  end = "Drop."

@@ -1,0 +1,22 @@
+{
+ "experiment": "MM1-mac-mac-baseline",
+ "kind": "screening",
+ "hypothesis": "With both ends on macOS, xs's time relative to rsync differs by more than 10% from E6b's, with mars on Linux, in some cell.",
+ "primary": "durable_s",
+ "control": "rsync",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261021T133436Z-MM1-mac-mac-baseline",
+  "20261021T140436Z-MM1-mac-mac-baseline"
+ ],
+ "spec_sha256": [
+  "f86b0614dc8055493a5b36de4f88584fbab4d9abed44946075578ad5647881b4"
+ ],
+ "valid_blocks": 100,
+ "void_attempts": 1,
+ "void_reasons": [
+  "stopped"
+ ]
+}

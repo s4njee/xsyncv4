@@ -1,0 +1,82 @@
+{
+ "generatedUtc": 1792663206.901,
+ "nextUtc": 1792666800,
+ "runners": [
+  {
+   "id": "mac",
+   "state": "paused",
+   "reachable": true,
+   "current": null,
+   "next": [
+    {
+     "experiment": "CM-A2-10220216",
+     "kind": "screening"
+    }
+   ],
+   "waiting": 1
+  }
+ ],
+ "loop": null,
+ "cases": {
+  "generatedUtc": 1792663206.901,
+  "slot": "2026-10-22T0216",
+  "nextUtc": 1792674992,
+  "weekUsd": 83,
+  "spentUsd": 0.55,
+  "analysis": {
+   "utc": 1792653392,
+   "summary": "Re-measuring no-op re-syncs (B1) showed xs-rs ahead of rsync both ways. At -j4 it took 0.269 to 0.308 of rsync's time on real-congress and 0.231 on real-psample push. At -j8 it was ahead in every cell, though psample pull at -j4 was too noisy to call (0.6, interval 0.213 to 1.689). The no-op question is closed, and next the lab races small-file fresh copies across -j1 to -j16 and --no-atomic (A2) to find which receiver-side limit to build against.",
+   "priorities": [
+    {
+     "node": "A2",
+     "why": "It is the only buildable node. It decides which of A3, A5, A6 or A7 to build next on the small-file fresh copies, where xs-rs spends the most per-file time on this link. Pull (mars>mac) is twice as slow as push on small-deep, and rsync takes 26.643 s and 48.05 s there. With B1 showing no-op re-syncs already ahead of rsync, small fresh copies are where the next gain is."
+    }
+   ]
+  },
+  "building": null,
+  "built": null,
+  "racing": {
+   "node": "A2",
+   "tree": "EXA-small-fresh-copies",
+   "title": "Find the next limit",
+   "impl": "xs-rs",
+   "kind": "measure",
+   "commit": null,
+   "experiment": "CM-A2-10220216",
+   "since": 1792653412
+  },
+  "recent": [
+   {
+    "utc": 1792653412,
+    "kind": "measure",
+    "node": "A2",
+    "text": "measuring xs-rs-j4, xs-rs-j1, xs-rs-j8, xs-rs-j16, xs-rs-j8-noatomic, rsync on small-deep, small-flat: 20261022T071651Z-CM-A2-10220216"
+   },
+   {
+    "utc": 1792653392,
+    "kind": "decision",
+    "node": "B1",
+    "text": "at or ahead of rsync both ways: The run's status is 'failed' and it carries no lab verdicts, so this branch rests on the arm-vs-control effects alone. Some cells kept only 8 or 9 of 10 blocks. Even so, the hypothesis that xs-rs still trails rsync on no-op re-syncs is refuted. At the default -j4, xs-rs against rsync was 0.269 (0.235 to 0.309, 10 blocks) on congress push and 0.308 (0.262 to 0.361, 10 blocks) on congress pull. It was 0.231 (0.219 to 0.245, 8 blocks) on psample push. The one weak cell is psample pull at -j4: 0.6 with a 95% interval of 0.213 to 1.689 over 9 blocks, too wide to call, at 45.418 s against 75.716 s. At -j8 xs-rs is clearly ahead in all four cells: 0.249, 0.268, 0.185, and 0.191 (0.147 to 0.249) on psample pull. -j1 is also ahead everywhere it is decided: 0.519, 0.584 and 0.421, with psample pull at 0.82 (0.317 to 2.121), inconclusive. Going from -j1 to -j8 roughly halves time on every cell, so no serial bottleneck dominates. xs-rs CPU seconds are close to rsync's at -j4 (7.747 vs 8.098 on congress push), not far above. The lab records only total CPU, not a user/kernel split, so branches 0 and 1 could not be told apart anyway, and neither is needed: xs-rs is at or ahead of rsync both ways. The remaining oddity is the high variance of psample pull at -j4 (and xs-cpp-j4 there at 2.002, 0.912 to 4.393). That is noise worth watching, not a deficit against rsync. A measurement changes no code, so keep is false."
+   },
+   {
+    "utc": 1792653392,
+    "kind": "analysis",
+    "node": null,
+    "text": "$0.11: Re-measuring no-op re-syncs (B1) showed xs-rs ahead of rsync both ways. At -j4 it took 0.269 to 0.308 of rsync's time on real-congress and 0.231 on real-psample push. At -j8 it was ahead in every cell, though psample pull at -j4 was too noisy to call (0.6, interval 0.213 to 1.689). The no-op question is closed, and next the lab races small-file fresh copies across -j1 to -j16 and --no-atomic (A2) to find which receiver-side limit to build against."
+   },
+   {
+    "utc": 1792620705,
+    "kind": "measure",
+    "node": "B1",
+    "text": "measuring rsync, xs-rs-j4, xs-rs-j1, xs-rs-j8, xs-cpp-j4 on real-congress, real-psample: 20261021T221144Z-CM-B1-10211710"
+   }
+  ]
+ },
+ "lastChange": {
+  "utc": 1792618937,
+  "source": "cases",
+  "title": "A1: faster",
+  "commit": null,
+  "detail": "merge it (kept): The receiver-lock branch (c5b765eb54fc against b02ae2394a86) is clearly faster on fresh copies: 'fresh 0.411 (faster)' with a 95% interval of 0.406 to 0.415 over 8 blocks. That is the minimum block count, but the interval is narrow and far below 1. No-op re-syncs are unchanged within noise: 'noop 1.007 (inconclusive)', interval 0.962 to 1.055. Keep it and merge. The pooled verdicts do not separate the default, --no-atomic and -j8 configurations, so whether extra receiving workers now help is not answered by these facts; A2 should look at that split."
+ }
+}

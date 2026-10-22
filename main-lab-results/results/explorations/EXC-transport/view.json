@@ -1,0 +1,309 @@
+{
+ "id": "EXC-transport",
+ "manual": true,
+ "question": "How much speed does a transport other than one ssh connection give, and what keeps it encrypted?",
+ "start": [
+  "C1",
+  "C5"
+ ],
+ "startedUtc": "2026-10-21T19:31:04Z",
+ "until": null,
+ "fills": 0,
+ "nodes": [
+  {
+   "id": "C1",
+   "kind": "experiment",
+   "experiment": null,
+   "title": "Race the TCP transport",
+   "question": "How much of the large-file ceiling is the ssh connection?",
+   "measure": "--transport=tcp (branch transport) against ssh: Mac-mars at 10 GbE, with the X540 back in an x8 slot, on the large corpora; the Pi sending over 2.5 GbE. Gb/s and sender CPU.",
+   "hypothesis": "Raw TCP carried 9.41 Gb/s on one stream; one ssh connection 7.7-8.6 Gb/s with AES-GCM and 2.2 with ChaCha20. In X6 nothing moved more than 2% under ssh.",
+   "needs": [],
+   "estimateHours": null,
+   "design": null,
+   "state": "next",
+   "runs": [],
+   "decision": "C1: --transport=tcp is built on branch transport (dd867d7a, 6fb1e19b). Not raced: it needs the 10 GbE path and a Pi-sender run.",
+   "decidedUtc": "2026-10-21T19:31:04Z",
+   "start": true,
+   "promote": null
+  },
+  {
+   "id": "C2",
+   "kind": "experiment",
+   "experiment": null,
+   "title": "Encryption at TCP speed",
+   "question": "Can an encrypted TCP connection keep that rate?",
+   "measure": "TLS 1.3 per connection, its key pinned through the ssh start-up; AES-GCM where the CPU has AES, ChaCha20 elsewhere; kTLS on Linux. Target: within 5% of plain TCP.",
+   "hypothesis": null,
+   "needs": [],
+   "estimateHours": null,
+   "design": null,
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "C2~end0",
+   "kind": "end",
+   "experiment": null,
+   "question": null,
+   "estimateHours": null,
+   "hypothesis": "Offer encrypted TCP as the TCP default.",
+   "design": null,
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "C3",
+   "kind": "experiment",
+   "experiment": null,
+   "title": "Rewrite the transport writer",
+   "question": "Do large blocking writes remove the overhead on a weak sender?",
+   "measure": "Write about 1 MiB per blocking call; TCP_NOTSENT_LOWAT; larger socket buffers on macOS. On the Pi: write, EAGAIN and ppoll counts, and time.",
+   "hypothesis": "H25: 135k writes for 1.33 GiB, 31% failing with EAGAIN, plus 98k ppoll calls; 8.3 s of kernel time against rsync's 2.5 s.",
+   "needs": [],
+   "estimateHours": null,
+   "design": null,
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "C3~end0",
+   "kind": "end",
+   "experiment": null,
+   "question": null,
+   "estimateHours": null,
+   "hypothesis": "Adopt.",
+   "design": null,
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "C3~end1",
+   "kind": "end",
+   "experiment": null,
+   "question": null,
+   "estimateHours": null,
+   "hypothesis": "Drop.",
+   "design": null,
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "C4",
+   "kind": "experiment",
+   "experiment": null,
+   "title": "Control stream and data streams",
+   "question": "Do parallel data streams help on long or crypto-bound paths?",
+   "measure": "One control stream and N data streams; lab2's internet link, and added round-trip times of 1, 5, 20 and 40 ms.",
+   "hypothesis": "Control frames stop queueing behind 1 MiB data blocks, and each stream encrypts on its own core.",
+   "needs": [],
+   "estimateHours": null,
+   "design": null,
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "C4~end0",
+   "kind": "end",
+   "experiment": null,
+   "question": null,
+   "estimateHours": null,
+   "hypothesis": "Choose the stream count from the measured round-trip time.",
+   "design": null,
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "C4~end1",
+   "kind": "end",
+   "experiment": null,
+   "question": null,
+   "estimateHours": null,
+   "hypothesis": "Keep one stream.",
+   "design": null,
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "C5",
+   "kind": "experiment",
+   "experiment": null,
+   "title": "Compression for slow links",
+   "question": "Where bytes are the limit, does better compression pay for its CPU?",
+   "measure": "A zstd dictionary trained on a corpus sample, and long-range mode, on lab2's internet link; negative levels on the 10 GbE cable (RQ-Z2).",
+   "hypothesis": "The old solid tar plus zstd had about 2x the ratio but ran 1.5x slower. In Z1, level 3 slowed the 10 GbE copy below no compression.",
+   "needs": [],
+   "estimateHours": null,
+   "design": null,
+   "state": "decided",
+   "runs": [],
+   "decision": "C5: only fewer bytes. fresh 1.001 (equivalent) / noop 0.991 (inconclusive). The compression change (c9e8d5d5f87d against 0a4953bec5d8) did not make copies faster on this link. Fresh copies were 'fresh 1.001 (equivalent)', 95% interval 0.974 to 1.030 over 8 blocks, at 12.42 s against 12.402 s. No-op re-syncs were 'noop 0.991 (inconclusive)', interval 0.942 to 1.043 over 8 blocks, at 1.714 s against 1.73 s. Eight blocks is the minimum. The fresh interval is reasonably tight around 1, but the no-op interval is wide, so this is weak evidence in both directions. The race also ran on mac-mars-usb10g, not on lab2's internet link, so it says nothing for or against the 'faster on lab2' branch. On the 10 GbE cable, where negative levels were meant to help, it bought no time. No later node depends on it. Drop it from the chain; the dictionary and long-range ideas would need a separate slow-link race.",
+   "decidedUtc": "2026-10-21T22:04:45Z",
+   "start": true,
+   "promote": null
+  },
+  {
+   "id": "C5~end0",
+   "kind": "end",
+   "experiment": null,
+   "question": null,
+   "estimateHours": null,
+   "hypothesis": "Adopt for slow links.",
+   "design": null,
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "C5~end1",
+   "kind": "end",
+   "experiment": null,
+   "question": null,
+   "estimateHours": null,
+   "hypothesis": "Drop.",
+   "design": null,
+   "state": "decided",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  }
+ ],
+ "edges": [
+  {
+   "from": "C1",
+   "to": "C2",
+   "label": "9 Gb/s or more where ssh gave 8.6 at most",
+   "taken": null
+  },
+  {
+   "from": "C1",
+   "to": "C3",
+   "label": "the Pi faster, or less kernel time",
+   "taken": null
+  },
+  {
+   "from": "C1",
+   "to": "C3",
+   "label": "no gain: the sender is the limit",
+   "taken": null
+  },
+  {
+   "from": "C2",
+   "to": "C2~end0",
+   "label": "within 5% of plain TCP",
+   "taken": null
+  },
+  {
+   "from": "C2",
+   "to": "C4",
+   "label": "one stream is crypto-bound",
+   "taken": null
+  },
+  {
+   "from": "C3",
+   "to": "C3~end0",
+   "label": "fewer syscalls and faster",
+   "taken": null
+  },
+  {
+   "from": "C3",
+   "to": "C3~end1",
+   "label": "no change",
+   "taken": null
+  },
+  {
+   "from": "C4",
+   "to": "C4~end0",
+   "label": "helps above some round-trip time",
+   "taken": null
+  },
+  {
+   "from": "C4",
+   "to": "C4~end1",
+   "label": "no gain",
+   "taken": null
+  },
+  {
+   "from": "C5",
+   "to": "C5~end0",
+   "label": "faster on lab2",
+   "taken": false
+  },
+  {
+   "from": "C5",
+   "to": "C5~end1",
+   "label": "only fewer bytes",
+   "taken": true
+  }
+ ],
+ "decisions": [
+  {
+   "utc": "2026-10-21T22:04:45Z",
+   "node": "C5",
+   "kind": "decision",
+   "text": "C5: only fewer bytes. fresh 1.001 (equivalent) / noop 0.991 (inconclusive). The compression change (c9e8d5d5f87d against 0a4953bec5d8) did not make copies faster on this link. Fresh copies were 'fresh 1.001 (equivalent)', 95% interval 0.974 to 1.030 over 8 blocks, at 12.42 s against 12.402 s. No-op re-syncs were 'noop 0.991 (inconclusive)', interval 0.942 to 1.043 over 8 blocks, at 1.714 s against 1.73 s. Eight blocks is the minimum. The fresh interval is reasonably tight around 1, but the no-op interval is wide, so this is weak evidence in both directions. The race also ran on mac-mars-usb10g, not on lab2's internet link, so it says nothing for or against the 'faster on lab2' branch. On the 10 GbE cable, where negative levels were meant to help, it bought no time. No later node depends on it. Drop it from the chain; the dictionary and long-range ideas would need a separate slow-link race."
+  },
+  {
+   "utc": "2026-10-21T21:43:18Z",
+   "node": "C5",
+   "kind": "note",
+   "text": "C5: running. racing c9e8d5d5f87d against 0a4953bec5d8 (CL-C5-c9e8d5d5f87d)"
+  },
+  {
+   "utc": "2026-10-21T21:35:40Z",
+   "node": "C5",
+   "kind": "note",
+   "text": "C5: running. built as c9e8d5d5f87d on 0a4953bec5d8; races next slot"
+  },
+  {
+   "utc": "2026-10-21T21:11:40Z",
+   "node": "C5",
+   "kind": "note",
+   "text": "C5: running. building: This is lower expected gain on the lab's current workloads. The races are fresh copies on a 10G link where xs-cpp is CPU-bound and trails xs-rs (e.g. small-deep push 24.037 s vs 9.84 s), and Z1 showed"
+  },
+  {
+   "utc": "2026-10-21T19:31:04Z",
+   "node": "C1",
+   "kind": "note",
+   "text": "C1: open. --transport=tcp is built on branch transport (dd867d7a, 6fb1e19b). Not raced: it needs the 10 GbE path and a Pi-sender run."
+  }
+ ]
+}

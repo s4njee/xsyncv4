@@ -1,0 +1,760 @@
+{
+ "now": "2026-10-22T07:16:00+00:00",
+ "ceiling_hours": 6,
+ "target": "xs-rs",
+ "link": "mac-mars-usb10g",
+ "flags": [
+  "-a",
+  "-j4"
+ ],
+ "lab": {
+  "tools": [
+   "rsync",
+   "xs-rs",
+   "xs-cpp"
+  ],
+  "flags": "-a -aH -H -z -az -W -O --no-atomic --inplace --whole-file, -j1 to -j16, --compress-level=-20 to 9",
+  "corpora": [
+   "large-four",
+   "large-half",
+   "large-mixed",
+   "large-one",
+   "large-text",
+   "mixed-bimodal",
+   "mixed-threshold",
+   "real-congress",
+   "real-holochart",
+   "real-laikav2",
+   "real-psample",
+   "scale-count-1000",
+   "scale-count-10000",
+   "scale-count-100000",
+   "scale-count-1000000",
+   "scale-count-3000",
+   "scale-count-30000",
+   "scale-count-300000",
+   "scale-size-1024",
+   "scale-size-1048576",
+   "scale-size-16384",
+   "scale-size-16777216",
+   "scale-size-262144",
+   "scale-size-4096",
+   "scale-size-4194304",
+   "scale-size-65536",
+   "small-deep",
+   "small-flat",
+   "small-opaque",
+   "small-real",
+   "tiny-one"
+  ],
+  "scenarios": [
+   "fresh",
+   "noop",
+   "update-0p1pct",
+   "update-1pct",
+   "update-10pct"
+  ],
+  "directions": [
+   "mac>mars",
+   "mars>mac"
+  ],
+  "max_arms": 6,
+  "blocks": [
+   2,
+   12
+  ],
+  "records": [
+   "durable_s",
+   "wall_s",
+   "cpu_s",
+   "rss_bytes"
+  ]
+ },
+ "tested": {
+  "node": "B1",
+  "tree": "EXB-noop-resyncs",
+  "commit": null,
+  "parent": null,
+  "run": "20261021T221144Z-CM-B1-10211710",
+  "experiment": "CM-B1-10211710",
+  "kind": "measure",
+  "design": {
+   "arms": [
+    {
+     "name": "rsync",
+     "tool": "rsync",
+     "flags": [
+      "-a"
+     ]
+    },
+    {
+     "name": "xs-rs-j4",
+     "tool": "xs-rs",
+     "flags": [
+      "-a",
+      "-j4"
+     ]
+    },
+    {
+     "name": "xs-rs-j1",
+     "tool": "xs-rs",
+     "flags": [
+      "-a",
+      "-j1"
+     ]
+    },
+    {
+     "name": "xs-rs-j8",
+     "tool": "xs-rs",
+     "flags": [
+      "-a",
+      "-j8"
+     ]
+    },
+    {
+     "name": "xs-cpp-j4",
+     "tool": "xs-cpp",
+     "flags": [
+      "-a",
+      "-j4"
+     ]
+    }
+   ],
+   "control": "rsync",
+   "corpus": [
+    "real-congress",
+    "real-psample"
+   ],
+   "scenario": [
+    "noop"
+   ],
+   "direction": [
+    "mac>mars",
+    "mars>mac"
+   ],
+   "blocks": 10,
+   "hypothesis": "xs-rs still takes longer than rsync on congress no-op, especially on pull, and its CPU seconds far exceed rsync's on one end. Receiver-side CPU dominating, mostly on pull, would point at destination path walks (A3). Sender-side CPU dominating would point at file-list and stat cost (B2/B3). Little change from -j1 to -j8 would mean a serial bottleneck. The lab records total CPU per end, not the user/kernel split the node asks for, and cannot profile, so syscall-heavy and compute-heavy costs are not separated."
+  },
+  "impl": "rs",
+  "title": "Re-measure no-op syncs",
+  "question": "Where does a no-op re-sync spend its time once the receiver fixes land?",
+  "measure": "real-congress and real-psample no-op, push and pull, against rsync; user and kernel time on each end.",
+  "branches": [
+   {
+    "index": 0,
+    "label": "kernel time in path walks",
+    "next": [
+     "B2"
+    ]
+   },
+   {
+    "index": 1,
+    "label": "user time comparing listings",
+    "next": [
+     "B3"
+    ]
+   },
+   {
+    "index": 2,
+    "label": "at or ahead of rsync both ways",
+    "end": "Solved; leave it."
+   }
+  ],
+  "status": "failed",
+  "verdicts": {},
+  "verdict_text": null,
+  "times": {
+   "real-congress.noop.mac>mars": {
+    "rsync": {
+     "blocks": 10,
+     "durable_s": 6.482,
+     "cpu_s": 8.098
+    },
+    "xs-rs-j4": {
+     "blocks": 10,
+     "durable_s": 1.747,
+     "cpu_s": 7.747
+    },
+    "xs-rs-j1": {
+     "blocks": 10,
+     "durable_s": 3.363,
+     "cpu_s": 5.592
+    },
+    "xs-rs-j8": {
+     "blocks": 10,
+     "durable_s": 1.612,
+     "cpu_s": 10.366
+    },
+    "xs-cpp-j4": {
+     "blocks": 10,
+     "durable_s": 2.289,
+     "cpu_s": 11.484
+    }
+   },
+   "real-congress.noop.mars>mac": {
+    "rsync": {
+     "blocks": 10,
+     "durable_s": 4.775,
+     "cpu_s": 7.123
+    },
+    "xs-rs-j4": {
+     "blocks": 10,
+     "durable_s": 1.468,
+     "cpu_s": 7.136
+    },
+    "xs-rs-j1": {
+     "blocks": 10,
+     "durable_s": 2.787,
+     "cpu_s": 5.688
+    },
+    "xs-rs-j8": {
+     "blocks": 10,
+     "durable_s": 1.281,
+     "cpu_s": 9.378
+    },
+    "xs-cpp-j4": {
+     "blocks": 10,
+     "durable_s": 2.685,
+     "cpu_s": 12.826
+    }
+   },
+   "real-psample.noop.mac>mars": {
+    "rsync": {
+     "blocks": 8,
+     "durable_s": 88.126,
+     "cpu_s": 87.663
+    },
+    "xs-rs-j4": {
+     "blocks": 8,
+     "durable_s": 20.395,
+     "cpu_s": 84.133
+    },
+    "xs-rs-j1": {
+     "blocks": 8,
+     "durable_s": 37.087,
+     "cpu_s": 52.696
+    },
+    "xs-rs-j8": {
+     "blocks": 8,
+     "durable_s": 16.281,
+     "cpu_s": 113.517
+    },
+    "xs-cpp-j4": {
+     "blocks": 8,
+     "durable_s": 26.981,
+     "cpu_s": 141.091
+    }
+   },
+   "real-psample.noop.mars>mac": {
+    "rsync": {
+     "blocks": 9,
+     "durable_s": 75.716,
+     "cpu_s": 73.638
+    },
+    "xs-rs-j4": {
+     "blocks": 9,
+     "durable_s": 45.418,
+     "cpu_s": 97.009
+    },
+    "xs-rs-j1": {
+     "blocks": 9,
+     "durable_s": 62.081,
+     "cpu_s": 74.023
+    },
+    "xs-rs-j8": {
+     "blocks": 9,
+     "durable_s": 14.469,
+     "cpu_s": 116.681
+    },
+    "xs-cpp-j4": {
+     "blocks": 9,
+     "durable_s": 151.588,
+     "cpu_s": 273.342
+    }
+   }
+  },
+  "effects": [
+   {
+    "cell": "real-congress.noop.mac>mars",
+    "arm": "xs-rs-j4",
+    "control": "rsync",
+    "ratio": 0.269,
+    "lo": 0.235,
+    "hi": 0.309,
+    "blocks": 10
+   },
+   {
+    "cell": "real-congress.noop.mac>mars",
+    "arm": "xs-rs-j1",
+    "control": "rsync",
+    "ratio": 0.519,
+    "lo": 0.47,
+    "hi": 0.573,
+    "blocks": 10
+   },
+   {
+    "cell": "real-congress.noop.mac>mars",
+    "arm": "xs-rs-j8",
+    "control": "rsync",
+    "ratio": 0.249,
+    "lo": 0.229,
+    "hi": 0.27,
+    "blocks": 10
+   },
+   {
+    "cell": "real-congress.noop.mac>mars",
+    "arm": "xs-cpp-j4",
+    "control": "rsync",
+    "ratio": 0.353,
+    "lo": 0.32,
+    "hi": 0.39,
+    "blocks": 10
+   },
+   {
+    "cell": "real-congress.noop.mars>mac",
+    "arm": "xs-rs-j4",
+    "control": "rsync",
+    "ratio": 0.308,
+    "lo": 0.262,
+    "hi": 0.361,
+    "blocks": 10
+   },
+   {
+    "cell": "real-congress.noop.mars>mac",
+    "arm": "xs-rs-j1",
+    "control": "rsync",
+    "ratio": 0.584,
+    "lo": 0.466,
+    "hi": 0.731,
+    "blocks": 10
+   },
+   {
+    "cell": "real-congress.noop.mars>mac",
+    "arm": "xs-rs-j8",
+    "control": "rsync",
+    "ratio": 0.268,
+    "lo": 0.246,
+    "hi": 0.293,
+    "blocks": 10
+   },
+   {
+    "cell": "real-congress.noop.mars>mac",
+    "arm": "xs-cpp-j4",
+    "control": "rsync",
+    "ratio": 0.562,
+    "lo": 0.496,
+    "hi": 0.638,
+    "blocks": 10
+   },
+   {
+    "cell": "real-psample.noop.mac>mars",
+    "arm": "xs-rs-j4",
+    "control": "rsync",
+    "ratio": 0.231,
+    "lo": 0.219,
+    "hi": 0.245,
+    "blocks": 8
+   },
+   {
+    "cell": "real-psample.noop.mac>mars",
+    "arm": "xs-rs-j1",
+    "control": "rsync",
+    "ratio": 0.421,
+    "lo": 0.396,
+    "hi": 0.447,
+    "blocks": 8
+   },
+   {
+    "cell": "real-psample.noop.mac>mars",
+    "arm": "xs-rs-j8",
+    "control": "rsync",
+    "ratio": 0.185,
+    "lo": 0.174,
+    "hi": 0.196,
+    "blocks": 8
+   },
+   {
+    "cell": "real-psample.noop.mac>mars",
+    "arm": "xs-cpp-j4",
+    "control": "rsync",
+    "ratio": 0.306,
+    "lo": 0.284,
+    "hi": 0.329,
+    "blocks": 8
+   },
+   {
+    "cell": "real-psample.noop.mars>mac",
+    "arm": "xs-rs-j4",
+    "control": "rsync",
+    "ratio": 0.6,
+    "lo": 0.213,
+    "hi": 1.689,
+    "blocks": 9
+   },
+   {
+    "cell": "real-psample.noop.mars>mac",
+    "arm": "xs-rs-j1",
+    "control": "rsync",
+    "ratio": 0.82,
+    "lo": 0.317,
+    "hi": 2.121,
+    "blocks": 9
+   },
+   {
+    "cell": "real-psample.noop.mars>mac",
+    "arm": "xs-rs-j8",
+    "control": "rsync",
+    "ratio": 0.191,
+    "lo": 0.147,
+    "hi": 0.249,
+    "blocks": 9
+   },
+   {
+    "cell": "real-psample.noop.mars>mac",
+    "arm": "xs-cpp-j4",
+    "control": "rsync",
+    "ratio": 2.002,
+    "lo": 0.912,
+    "hi": 4.393,
+    "blocks": 9
+   }
+  ]
+ },
+ "buildable": [
+  {
+   "tree": "EXA-small-fresh-copies",
+   "node": "A2",
+   "kind": "analysis",
+   "title": "Find the next limit",
+   "question": "How far is xs from the receiver creating the same files by itself, and what is it doing with the difference?",
+   "measure": "The best arm so far against local tar extraction on the receiver (P2b's local arms; mars now runs macOS, so measured again there), and a profile of both ends during a small-deep fresh copy: sample on macOS, perf on Linux. A quiet sender first: P2b lost runs to its load.",
+   "evidence": "P2b, with mars on Linux: 4 local tar processes took 2.70 s on small-deep (about 37k files/s) against 5.26 s for xs in N3.",
+   "needs": [],
+   "tries": 0,
+   "last_problem": null
+  }
+ ],
+ "unavailable": [
+  {
+   "tree": "EXC-transport",
+   "node": "C1",
+   "kind": "measure",
+   "title": "Race the TCP transport",
+   "question": "How much of the large-file ceiling is the ssh connection?",
+   "measure": "--transport=tcp (branch transport) against ssh: Mac-mars at 10 GbE, with the X540 back in an x8 slot, on the large corpora; the Pi sending over 2.5 GbE. Gb/s and sender CPU.",
+   "evidence": "Raw TCP carried 9.41 Gb/s on one stream; one ssh connection 7.7-8.6 Gb/s with AES-GCM and 2.2 with ChaCha20. In X6 nothing moved more than 2% under ssh.",
+   "needs": [],
+   "tries": 0,
+   "last_problem": "--transport=tcp is built on branch transport (dd867d7a, 6fb1e19b). Not raced: it needs the 10 GbE path and a Pi-sender run.",
+   "why": "it measures a commit the node does not name"
+  }
+ ],
+ "trees": [
+  {
+   "tree": "EXA-small-fresh-copies",
+   "question": "What limits xs's small-file fresh copies once the receiver's global lock and serial final pass are gone, and what removes the next limit?",
+   "nodes": [
+    {
+     "node": "A1",
+     "title": "Race the receiver-lock branch",
+     "status": "done",
+     "result": "fresh 0.411 (faster) / noop 1.007 (inconclusive). The receiver-lock branch (c5b765eb54fc against b02ae2394a86) is clearly faster on fresh copies: 'fresh 0.411 (faster)' with a 95% interval of 0.406 to 0.415 over 8 blocks. That is the minimum block count, but the interval is narrow and far below 1. No-op re-syncs are unchanged within noise: 'noop 1.007 (inconclusive)', interval 0.962 to 1.055. Keep it and merge. The pooled verdicts do not separate the default, --no-atomic and -j8 configurations, so whether extra receiving workers now help is not answered by these facts; A2 should look at that split."
+    },
+    {
+     "node": "A2",
+     "title": "Find the next limit",
+     "status": "open",
+     "result": null
+    },
+    {
+     "node": "A3",
+     "title": "Cheaper destination path walks",
+     "status": "open",
+     "result": null
+    },
+    {
+     "node": "A5",
+     "title": "Fast path for fresh subtrees",
+     "status": "open",
+     "result": null
+    },
+    {
+     "node": "A6",
+     "title": "Several receiver processes",
+     "status": "open",
+     "result": null
+    },
+    {
+     "node": "A7",
+     "title": "Writeback control",
+     "status": "open",
+     "result": null
+    }
+   ]
+  },
+  {
+   "tree": "EXB-noop-resyncs",
+   "question": "Where does a re-sync that changes nothing spend its time, and can it skip unchanged subtrees?",
+   "nodes": [
+    {
+     "node": "B1",
+     "title": "Re-measure no-op syncs",
+     "status": "running",
+     "result": "measuring: xs-rs still takes longer than rsync on congress no-op, especially on pull, and its CPU seconds far exceed rsync's on one end. Receiver-side CPU dominating, mostly on pull, would point at destination p (CM-B1-10211710)"
+    },
+    {
+     "node": "B2",
+     "title": "Confirm dest-anchors",
+     "status": "open",
+     "result": null
+    },
+    {
+     "node": "B3",
+     "title": "Persistent index",
+     "status": "open",
+     "result": null
+    }
+   ]
+  },
+  {
+   "tree": "EXC-transport",
+   "question": "How much speed does a transport other than one ssh connection give, and what keeps it encrypted?",
+   "nodes": [
+    {
+     "node": "C1",
+     "title": "Race the TCP transport",
+     "status": "open",
+     "result": "--transport=tcp is built on branch transport (dd867d7a, 6fb1e19b). Not raced: it needs the 10 GbE path and a Pi-sender run."
+    },
+    {
+     "node": "C2",
+     "title": "Encryption at TCP speed",
+     "status": "open",
+     "result": null
+    },
+    {
+     "node": "C3",
+     "title": "Rewrite the transport writer",
+     "status": "open",
+     "result": null
+    },
+    {
+     "node": "C4",
+     "title": "Control stream and data streams",
+     "status": "open",
+     "result": null
+    },
+    {
+     "node": "C5",
+     "title": "Compression for slow links",
+     "status": "done",
+     "result": "fresh 1.001 (equivalent) / noop 0.991 (inconclusive). The compression change (c9e8d5d5f87d against 0a4953bec5d8) did not make copies faster on this link. Fresh copies were 'fresh 1.001 (equivalent)', 95% interval 0.974 to 1.030 over 8 blocks, at 12.42 s against 12.402 s. No-op re-syncs were 'noop 0.991 (inconclusive)', interval 0.942 to 1.043 over 8 blocks, at 1.714 s against 1.73 s. Eight blocks is the minimum. The fresh interval is reasonably tight around 1, but the no-op interval is wide, so this is weak evidence in both directions. The race also ran on mac-mars-usb10g, not on lab2's internet link, so it says nothing for or against the 'faster on lab2' branch. On the 10 GbE cable, where negative levels were meant to help, it bought no time. No later node depends on it. Drop it from the chain; the dictionary and long-range ideas would need a separate slow-link race."
+    }
+   ]
+  }
+ ],
+ "history": [
+  {
+   "utc": "2026-10-21T21:11:40+00:00",
+   "kind": "build",
+   "node": "C5",
+   "text": "started: This is lower expected gain on the lab's current workloads. The races are fresh copies on a 10G link where xs-cpp is CPU-bound and trails xs-rs (e.g. small-deep push 24.037 s vs 9.84 s), and Z1 showed level 3 slowing the 10 GbE copy below no compression. Still, it is small, self-contained, and the only buildable change."
+  },
+  {
+   "utc": "2026-10-21T21:35:40+00:00",
+   "kind": "build",
+   "node": "C5",
+   "text": "built as c9e8d5d5f87d on 0a4953bec5d8"
+  },
+  {
+   "utc": "2026-10-21T21:42:16+00:00",
+   "kind": "analysis",
+   "node": null,
+   "text": "$0.05: Splitting the receiver's lock and parallelising its final pass made small fresh copies clearly faster: time to durable fell to 0.411 of the parent's (95% interval 0.406 to 0.415, 8 blocks), while no-op re-syncs were unchanged (1.007, inconclusive). The change stays in the chain, though these results do not yet show whether -j8 helps on its own. Next we profile no-op re-syncs (B1) on real-congress and real-psample, push and pull, against rsync, to find where xs still burns far more CPU than rsync.",
+   "cost_usd": 0.054741
+  },
+  {
+   "utc": "2026-10-21T21:42:17+00:00",
+   "kind": "decision",
+   "node": "A1",
+   "text": "faster: merge it (kept): The receiver-lock branch (c5b765eb54fc against b02ae2394a86) is clearly faster on fresh copies: 'fresh 0.411 (faster)' with a 95% interval of 0.406 to 0.415 over 8 blocks. That is the minimum block count, but the interval is narrow and far below 1. No-op re-syncs are unchanged within noise: 'noop 1.007 (inconclusive)', interval 0.962 to 1.055. Keep it and merge. The pooled verdicts do not separate the default, --no-atomic and -j8 configurations, so whether extra receiving workers now help is not answered by these facts; A2 should look at that split."
+  },
+  {
+   "utc": "2026-10-21T21:43:18+00:00",
+   "kind": "test",
+   "node": "C5",
+   "text": "racing c9e8d5d5f87d against its parent: 20261021T214317Z-CL-C5-c9e8d5d5f87d"
+  },
+  {
+   "utc": "2026-10-21T21:43:18+00:00",
+   "kind": "build",
+   "node": null,
+   "text": "nothing to build until the next analysis"
+  },
+  {
+   "utc": "2026-10-21T21:59:10+00:00",
+   "kind": "analysis",
+   "node": null,
+   "text": "$0.07: No race finished this slot. The compression change (C5) is still racing, and the receiver-lock change stays in the chain after 'fresh 0.411 (faster)'. Next we profile no-op re-syncs against rsync (B1), where xs last used far more CPU than rsync. Then we measure how far fresh small-file copies are from local tar extraction on the now-macOS receiver (A2), with the default, --no-atomic and -j8 settings reported separately.",
+   "cost_usd": 0.069442
+  },
+  {
+   "utc": "2026-10-21T22:04:45+00:00",
+   "kind": "analysis",
+   "node": null,
+   "text": "$0.08: The compression change (C5) gave no speed on the 10 GbE Mac link: 'fresh 1.001 (equivalent)' and 'noop 0.991 (inconclusive)' over 8 blocks, so it is dropped. Its slow-link question was not tested here. Next we profile no-op re-syncs against rsync on real-congress and real-psample (B1), where xs last used far more CPU than rsync. Then we measure fresh small-file copies against local tar extraction on the now-macOS receiver (A2), reporting default, --no-atomic and -j8 separately.",
+   "cost_usd": 0.082762
+  },
+  {
+   "utc": "2026-10-21T22:04:45+00:00",
+   "kind": "decision",
+   "node": "C5",
+   "text": "only fewer bytes: The compression change (c9e8d5d5f87d against 0a4953bec5d8) did not make copies faster on this link. Fresh copies were 'fresh 1.001 (equivalent)', 95% interval 0.974 to 1.030 over 8 blocks, at 12.42 s against 12.402 s. No-op re-syncs were 'noop 0.991 (inconclusive)', interval 0.942 to 1.043 over 8 blocks, at 1.714 s against 1.73 s. Eight blocks is the minimum. The fresh interval is reasonably tight around 1, but the no-op interval is wide, so this is weak evidence in both directions. The race also ran on mac-mars-usb10g, not on lab2's internet link, so it says nothing for or against the 'faster on lab2' branch. On the 10 GbE cable, where negative levels were meant to help, it bought no time. No later node depends on it. Drop it from the chain; the dictionary and long-range ideas would need a separate slow-link race."
+  },
+  {
+   "utc": "2026-10-21T22:06:28+00:00",
+   "kind": "analysis",
+   "node": null,
+   "text": "$0.09: No race finished this slot; the compression change (C5) was dropped after 'fresh 1.001 (equivalent)', and the receiver-lock change stays after 'fresh 0.411 (faster)'. Next the lab races no-op re-syncs against rsync on real-congress and real-psample, push and pull, to see which end still burns the CPU (B1). After that it races small-deep fresh copies across -j1 to -j16 and --no-atomic to find the next small-file limit (A2).",
+   "cost_usd": 0.090906
+  },
+  {
+   "utc": "2026-10-21T22:06:29+00:00",
+   "kind": "measure",
+   "node": "B1",
+   "text": "could not run the design: 61d1dd83a530-rs has not been built: run stage.py build --rev 61d1dd83a530-rs"
+  },
+  {
+   "utc": "2026-10-21T22:11:45+00:00",
+   "kind": "measure",
+   "node": "B1",
+   "text": "measuring rsync, xs-rs-j4, xs-rs-j1, xs-rs-j8, xs-cpp-j4 on real-congress, real-psample: 20261021T221144Z-CM-B1-10211710"
+  }
+ ],
+ "lab_races": [
+  {
+   "cell": "mixed-bimodal.fresh.mac-mars.sender.warm",
+   "verdict": "xs-rs",
+   "rs_vs_cpp": 0.822,
+   "seconds": {
+    "xs-cpp": 5.266,
+    "rsync": 7.306,
+    "xs-rs": 4.33
+   }
+  },
+  {
+   "cell": "mixed-bimodal.fresh.mars-mac.receiver.warm",
+   "verdict": "xs-rs",
+   "rs_vs_cpp": 0.664,
+   "seconds": {
+    "xs-cpp": 4.13,
+    "rsync": 9.391,
+    "xs-rs": 2.744
+   }
+  },
+  {
+   "cell": "real-congress.fresh.mac-mars.sender.warm",
+   "verdict": "xs-rs",
+   "rs_vs_cpp": 0.452,
+   "seconds": {
+    "xs-cpp": 32.594,
+    "rsync": 43.938,
+    "xs-rs": 14.723
+   }
+  },
+  {
+   "cell": "real-congress.fresh.mars-mac.receiver.warm",
+   "verdict": "xs-rs",
+   "rs_vs_cpp": 0.58,
+   "seconds": {
+    "xs-cpp": 43.675,
+    "rsync": 81.499,
+    "xs-rs": 25.333
+   }
+  },
+  {
+   "cell": "real-congress.noop.mac-mars.sender.warm",
+   "verdict": "xs-rs",
+   "rs_vs_cpp": 0.763,
+   "seconds": {
+    "rsync": 6.482,
+    "xs-rs": 1.747,
+    "xs-cpp": 2.289
+   }
+  },
+  {
+   "cell": "real-congress.noop.mars-mac.receiver.warm",
+   "verdict": "xs-rs",
+   "rs_vs_cpp": 0.547,
+   "seconds": {
+    "rsync": 4.775,
+    "xs-rs": 1.468,
+    "xs-cpp": 2.685
+   }
+  },
+  {
+   "cell": "real-psample.noop.mac-mars.sender.warm",
+   "verdict": "xs-rs",
+   "rs_vs_cpp": 0.756,
+   "seconds": {
+    "rsync": 88.126,
+    "xs-rs": 20.395,
+    "xs-cpp": 26.981
+   }
+  },
+  {
+   "cell": "real-psample.noop.mars-mac.receiver.warm",
+   "verdict": "xs-rs",
+   "rs_vs_cpp": 0.3,
+   "seconds": {
+    "rsync": 75.716,
+    "xs-rs": 45.418,
+    "xs-cpp": 151.588
+   }
+  },
+  {
+   "cell": "small-deep.fresh.mac-mars.sender.warm",
+   "verdict": "xs-rs",
+   "rs_vs_cpp": 0.409,
+   "seconds": {
+    "xs-cpp": 24.037,
+    "rsync": 26.643,
+    "xs-rs": 9.84
+   }
+  },
+  {
+   "cell": "small-deep.fresh.mars-mac.receiver.warm",
+   "verdict": "xs-rs",
+   "rs_vs_cpp": 0.46,
+   "seconds": {
+    "xs-cpp": 43.172,
+    "rsync": 48.05,
+    "xs-rs": 19.878
+   }
+  },
+  {
+   "cell": "small-flat.fresh.mac-mars.sender.warm",
+   "verdict": "xs-rs",
+   "rs_vs_cpp": 0.491,
+   "seconds": {
+    "xs-cpp": 13.302,
+    "rsync": 16.877,
+    "xs-rs": 6.528
+   }
+  },
+  {
+   "cell": "small-flat.fresh.mars-mac.receiver.warm",
+   "verdict": "xs-rs",
+   "rs_vs_cpp": 0.535,
+   "seconds": {
+    "xs-cpp": 17.087,
+    "rsync": 25.826,
+    "xs-rs": 9.141
+   }
+  }
+ ],
+ "budget": {
+  "week_usd": 83.0,
+  "spent_last_7_days": 0.44
+ }
+}

@@ -1,0 +1,847 @@
+
+== suite of b02ae2394a86
+
+$ cmake -S ~/xsyncv4-auto/gate/b02ae2394a86 -B ~/xsyncv4-auto/gate/b02ae2394a86/build -G Ninja -DCMAKE_BUILD_TYPE=Release -DXSYNC_GIT_HASH=b02ae2394a86
+-- The C compiler identification is AppleClang 21.0.0.21000334
+-- The CXX compiler identification is AppleClang 21.0.0.21000334
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /usr/bin/cc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+-- Found Threads: TRUE
+-- Found ICU: /opt/homebrew/opt/icu4c/include (found version "78.3") found components: uc
+-- Found Python3: /opt/homebrew/Frameworks/Python.framework/Versions/3.15/bin/python3.15 (found version "3.15.0") found components: Interpreter
+-- Configuring done (76.3s)
+-- Generating done (4.7s)
+-- Build files have been written to: ~/xsyncv4-auto/gate/b02ae2394a86/build
+
+$ cmake --build ~/xsyncv4-auto/gate/b02ae2394a86/build --target xsync -j 16
+[1/43] Building CXX object CMakeFiles/xsync.dir/src/app_actor.cpp.o
+[2/43] Building CXX object CMakeFiles/xsync.dir/src/app_preview_guard.cpp.o
+[3/43] Building CXX object CMakeFiles/xsync.dir/src/app_json.cpp.o
+[4/43] Building CXX object CMakeFiles/xsync.dir/src/app_preview_manifest.cpp.o
+[5/43] Building CXX object CMakeFiles/xsync.dir/src/item.cpp.o
+[6/43] Building CXX object CMakeFiles/xsync.dir/src/app_preflight.cpp.o
+[7/43] Building CXX object CMakeFiles/xsync.dir/src/app_actions.cpp.o
+[8/43] Building CXX object CMakeFiles/xsync.dir/src/util.cpp.o
+[9/43] Building CXX object CMakeFiles/xsync.dir/src/main.cpp.o
+[10/43] Building CXX object CMakeFiles/xsync.dir/src/app_conflict.cpp.o
+[11/43] Building CXX object CMakeFiles/xsync.dir/src/app_move.cpp.o
+[12/43] Building CXX object CMakeFiles/xsync.dir/src/app_mirror.cpp.o
+[13/43] Building CXX object CMakeFiles/xsync.dir/src/linux_scan.cpp.o
+[14/43] Building CXX object CMakeFiles/xsync.dir/src/app_preview.cpp.o
+[15/43] Building CXX object CMakeFiles/xsync.dir/src/app_ssh.cpp.o
+[16/43] Building CXX object CMakeFiles/xsync.dir/src/destination.cpp.o
+[17/43] Building CXX object CMakeFiles/xsync.dir/src/compression.cpp.o
+[18/43] Building CXX object CMakeFiles/xsync.dir/src/progress.cpp.o
+[19/43] Building CXX object CMakeFiles/xsync.dir/src/filter.cpp.o
+[20/43] Building CXX object CMakeFiles/xsync.dir/src/names.cpp.o
+[21/43] Building CXX object CMakeFiles/xsync.dir/src/app_partials.cpp.o
+[22/43] Building CXX object CMakeFiles/xsync.dir/src/transport.cpp.o
+[23/43] Building CXX object CMakeFiles/xsync.dir/src/fallback.cpp.o
+[24/43] Building CXX object CMakeFiles/xsync.dir/src/rate_limit.cpp.o
+[25/43] Building CXX object CMakeFiles/xsync.dir/src/install.cpp.o
+[26/43] Building CXX object CMakeFiles/xsync.dir/src/arguments.cpp.o
+[27/43] Building CXX object CMakeFiles/xsync.dir/src/local.cpp.o
+[28/43] Building CXX object CMakeFiles/xsync.dir/src/permissions.cpp.o
+[29/43] Building CXX object CMakeFiles/xsync.dir/src/hardlink.cpp.o
+[30/43] Building CXX object CMakeFiles/xsync.dir/src/xattr_value.cpp.o
+[31/43] Building CXX object CMakeFiles/xsync.dir/src/delta.cpp.o
+[32/43] Building CXX object CMakeFiles/xsync.dir/src/output.cpp.o
+[33/43] Building CXX object CMakeFiles/xsync.dir/src/sparse.cpp.o
+[34/43] Building CXX object CMakeFiles/xsync.dir/src/xattrs.cpp.o
+[35/43] Building CXX object CMakeFiles/xsync.dir/src/ownership.cpp.o
+[36/43] Building CXX object CMakeFiles/xsync.dir/src/listing.cpp.o
+[37/43] Building CXX object CMakeFiles/xsync.dir/src/app.cpp.o
+~/xsyncv4-auto/gate/b02ae2394a86/src/app.cpp:1221:177: warning: missing field 'preview_inventory' initializer [-Wmissing-field-initializers]
+ 1221 |     app_ssh::Copy copy{j.push, !j.selection_names.empty(), j.policy == "ask", j.sources, j.path + '/', [] { copy_progress_enabled.store(true); }, nullptr, false, {}, {}, {}, {}};
+      |                                                                                                                                                                                 ^
+1 warning generated.
+[38/43] Building CXX object CMakeFiles/xsync.dir/src/acls.cpp.o
+[39/43] Building CXX object CMakeFiles/xsync.dir/src/selection.cpp.o
+[40/43] Building CXX object CMakeFiles/xsync.dir/src/link_dest.cpp.o
+[41/43] Building CXX object CMakeFiles/xsync.dir/src/fs.cpp.o
+[42/43] Building CXX object CMakeFiles/xsync.dir/src/remote.cpp.o
+[43/43] Linking CXX executable xs
+
+$ cmake --build ~/xsyncv4-auto/gate/b02ae2394a86/build --target filter_test -j 16
+[1/3] Building CXX object CMakeFiles/filter_test.dir/src/filter.cpp.o
+[2/3] Building CXX object CMakeFiles/filter_test.dir/tests/filter_test.cpp.o
+[3/3] Linking CXX executable filter_test
+
+$ ~/xsyncv4-auto/gate/b02ae2394a86/build/filter_test
+32940 checks, 0 failures
+
+$ cmake --build ~/xsyncv4-auto/gate/b02ae2394a86/build --target xattr_value_test -j 16
+[1/3] Building CXX object CMakeFiles/xattr_value_test.dir/tests/xattr_value_test.cpp.o
+[2/3] Building CXX object CMakeFiles/xattr_value_test.dir/src/xattr_value.cpp.o
+[3/3] Linking CXX executable xattr_value_test
+
+$ ~/xsyncv4-auto/gate/b02ae2394a86/build/xattr_value_test
+small-stack xattr comparison, allocation and streaming passed
+
+$ cmake --build ~/xsyncv4-auto/gate/b02ae2394a86/build --target sparse_test -j 16
+[1/3] Building CXX object CMakeFiles/sparse_test.dir/src/sparse.cpp.o
+[2/3] Building CXX object CMakeFiles/sparse_test.dir/tests/sparse_test.cpp.o
+[3/3] Linking CXX executable sparse_test
+
+$ ~/xsyncv4-auto/gate/b02ae2394a86/build/sparse_test
+
+$ cmake --build ~/xsyncv4-auto/gate/b02ae2394a86/build --target scan_admission_test -j 16
+[1/2] Building CXX object CMakeFiles/scan_admission_test.dir/tests/scan_admission_test.cpp.o
+[2/2] Linking CXX executable scan_admission_test
+
+$ ~/xsyncv4-auto/gate/b02ae2394a86/build/scan_admission_test
+
+$ /opt/homebrew/opt/python@3.15/bin/python3.15 tests/broken_stdout_test.py
+..FFFFs....
+======================================================================
+FAIL: test_closing_during_buffered_events_cleans_or_keeps_partial (__main__.BrokenStdoutTests.test_closing_during_buffered_events_cleans_or_keeps_partial) (direction='push', partial=False)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "~/xsyncv4-auto/gate/b02ae2394a86/tests/broken_stdout_test.py", line 154, in test_closing_during_buffered_events_cleans_or_keeps_partial
+    self.assertLess(time.monotonic(),deadline,'no data written')
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 361133.195556 not less than 361133.125010083 : no data written
+
+======================================================================
+FAIL: test_closing_during_buffered_events_cleans_or_keeps_partial (__main__.BrokenStdoutTests.test_closing_during_buffered_events_cleans_or_keeps_partial) (direction='push', partial=True)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "~/xsyncv4-auto/gate/b02ae2394a86/tests/broken_stdout_test.py", line 154, in test_closing_during_buffered_events_cleans_or_keeps_partial
+    self.assertLess(time.monotonic(),deadline,'no data written')
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 361143.355782708 not less than 361143.238291958 : no data written
+
+======================================================================
+FAIL: test_closing_during_buffered_events_cleans_or_keeps_partial (__main__.BrokenStdoutTests.test_closing_during_buffered_events_cleans_or_keeps_partial) (direction='pull', partial=False)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "~/xsyncv4-auto/gate/b02ae2394a86/tests/broken_stdout_test.py", line 154, in test_closing_during_buffered_events_cleans_or_keeps_partial
+    self.assertLess(time.monotonic(),deadline,'no data written')
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 361153.41929325 not less than 361153.367444166 : no data written
+
+======================================================================
+FAIL: test_closing_during_buffered_events_cleans_or_keeps_partial (__main__.BrokenStdoutTests.test_closing_during_buffered_events_cleans_or_keeps_partial) (direction='pull', partial=True)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "~/xsyncv4-auto/gate/b02ae2394a86/tests/broken_stdout_test.py", line 154, in test_closing_during_buffered_events_cleans_or_keeps_partial
+    self.assertLess(time.monotonic(),deadline,'no data written')
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 361163.51032725 not less than 361163.436510958 : no data written
+
+----------------------------------------------------------------------
+Ran 8 tests in 114.268s
+
+FAILED (failures=4, skipped=1)
+
+$ /opt/homebrew/opt/python@3.15/bin/python3.15 tests/defaults_test.py
+..........
+----------------------------------------------------------------------
+Ran 10 tests in 26.277s
+
+OK
+
+$ /opt/homebrew/opt/python@3.15/bin/python3.15 tests/deletion_test.py
+.....
+----------------------------------------------------------------------
+Ran 5 tests in 561.780s
+
+OK
+
+$ /opt/homebrew/opt/python@3.15/bin/python3.15 tests/delta_test.py
+........................
+----------------------------------------------------------------------
+Ran 24 tests in 89.595s
+
+OK
+
+$ /opt/homebrew/opt/python@3.15/bin/python3.15 tests/destination_scope_test.py
+...F...F..F...
+======================================================================
+FAIL: test_inherited_parent_survives_scope_and_rejects_symlinks (__main__.DestinationScopeTests.test_inherited_parent_survives_scope_and_rejects_symlinks)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "~/xsyncv4-auto/gate/b02ae2394a86/tests/destination_scope_test.py", line 37, in test_inherited_parent_survives_scope_and_rejects_symlinks
+    def test_inherited_parent_survives_scope_and_rejects_symlinks(self): self.exercise('inherited')
+                                                                         ~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "~/xsyncv4-auto/gate/b02ae2394a86/tests/destination_scope_test.py", line 28, in exercise
+    self.assertEqual(result.returncode, 0, result.stderr)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 1 != 0 : b'parent sharing failed\n'
+
+======================================================================
+FAIL: test_parent_capability_survives_worker_handoff (__main__.DestinationScopeTests.test_parent_capability_survives_worker_handoff)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "~/xsyncv4-auto/gate/b02ae2394a86/tests/destination_scope_test.py", line 39, in test_parent_capability_survives_worker_handoff
+    def test_parent_capability_survives_worker_handoff(self): self.exercise('inherited-thread')
+                                                              ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "~/xsyncv4-auto/gate/b02ae2394a86/tests/destination_scope_test.py", line 28, in exercise
+    self.assertEqual(result.returncode, 0, result.stderr)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 1 != 0 : b'anchored parent lookup failed\n'
+
+======================================================================
+FAIL: test_retained_parent_budget_and_fallback (__main__.DestinationScopeTests.test_retained_parent_budget_and_fallback)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "~/xsyncv4-auto/gate/b02ae2394a86/tests/destination_scope_test.py", line 40, in test_retained_parent_budget_and_fallback
+    def test_retained_parent_budget_and_fallback(self): self.exercise('parent-budget')
+                                                        ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "~/xsyncv4-auto/gate/b02ae2394a86/tests/destination_scope_test.py", line 28, in exercise
+    self.assertEqual(result.returncode, 0, result.stderr)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 1 != 0 : b'retained parent descriptors are not bounded\n'
+
+----------------------------------------------------------------------
+Ran 14 tests in 26.740s
+
+FAILED (failures=3)
+
+$ /opt/homebrew/opt/python@3.15/bin/python3.15 tests/directory_lifetime_test.py
+.........
+----------------------------------------------------------------------
+Ran 9 tests in 0.360s
+
+OK
+
+$ /opt/homebrew/opt/python@3.15/bin/python3.15 tests/dry_summary_test.py
+....
+----------------------------------------------------------------------
+Ran 4 tests in 11.843s
+
+OK
+
+$ /opt/homebrew/opt/python@3.15/bin/python3.15 tests/error_test.py
+...........
+----------------------------------------------------------------------
+Ran 11 tests in 14.144s
+
+OK
+
+$ /opt/homebrew/opt/python@3.15/bin/python3.15 tests/filter_merge_test.py
+...FFFF.FFFFFFFF
+======================================================================
+FAIL: test_local (__main__.MergeDifferentials.test_local) (direction='local', seed='merge-25', rules=[': ../.rules'], delete_excluded=False)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "~/xsyncv4-auto/gate/b02ae2394a86/tests/filter_diff_test.py", line 115, in check_rules
+    self.assertFalse(differences, '\n'.join(differences))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ['only in rsync result: dst/dir1/stale.o  [file (12 bytes)]', 'only in rsync result: dst/gone  [dir] (+1 entries below it)', 'only in rsync result: dst/stale.o  [file (7 bytes)]'] is not false : only in rsync result: dst/dir1/stale.o  [file (12 bytes)]
+only in rsync result: dst/gone  [dir] (+1 entries below it)
+only in rsync result: dst/stale.o  [file (7 bytes)]
+
+======================================================================
+FAIL: test_local (__main__.MergeDifferentials.test_local) (direction='local', seed='merge-32', rules=[': /private/tmp/xsync filters nm5kffqc/src/../.rules'], delete_excluded=False)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "~/xsyncv4-auto/gate/b02ae2394a86/tests/filter_diff_test.py", line 115, in check_rules
+    self.assertFalse(differences, '\n'.join(differences))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ['only in rsync result: dst/dir1/stale.o  [file (12 bytes)]', 'only in rsync result: dst/gone  [dir] (+1 entries below it)', 'only in rsync result: dst/stale.o  [file (7 bytes)]', 'dst/b.o: content expected=19 bytes [203de204] got=7 bytes [97980f82]', 'dst/dir1/b.o: content expected=24 bytes [536e1248] got=12 bytes [59448c23]', 'dst/dir1/deep/c.o: content expected=29 bytes [0461a999] got=17 bytes [c46df940]'] is not false : only in rsync result: dst/dir1/stale.o  [file (12 bytes)]
+only in rsync result: dst/gone  [dir] (+1 entries below it)
+only in rsync result: dst/stale.o  [file (7 bytes)]
+dst/b.o: content expected=19 bytes [203de204] got=7 bytes [97980f82]
+dst/dir1/b.o: content expected=24 bytes [536e1248] got=12 bytes [59448c23]
+dst/dir1/deep/c.o: content expected=29 bytes [0461a999] got=17 bytes [c46df940]
+
+======================================================================
+FAIL: test_local (__main__.MergeDifferentials.test_local) (direction='local', seed='merge-32', rules=[': /private/tmp/xsync filters nm5kffqc/src/../.rules'], delete_excluded=True)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "~/xsyncv4-auto/gate/b02ae2394a86/tests/filter_diff_test.py", line 115, in check_rules
+    self.assertFalse(differences, '\n'.join(differences))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ['only in xsync result: dst/b.o  [file (7 bytes)]', 'only in xsync result: dst/dir1/b.o  [file (12 bytes)]', 'only in xsync result: dst/dir1/deep/c.o  [file (17 bytes)]'] is not false : only in xsync result: dst/b.o  [file (7 bytes)]
+only in xsync result: dst/dir1/b.o  [file (12 bytes)]
+only in xsync result: dst/dir1/deep/c.o  [file (17 bytes)]
+
+======================================================================
+FAIL: test_local (__main__.MergeDifferentials.test_local) (direction='local', seed='named-: ../.rules', rules=[': ../.rules'], delete_excluded=False)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "~/xsyncv4-auto/gate/b02ae2394a86/tests/filter_diff_test.py", line 115, in check_rules
+    self.assertFalse(differences, '\n'.join(differences))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ['only in xsync result: dst/src/b.o  [file (7 bytes)]'] is not false : only in xsync result: dst/src/b.o  [file (7 bytes)]
+
+======================================================================
+FAIL: test_pull (__main__.MergeDifferentials.test_pull) (direction='pull', seed='merge-25', rules=[': ../.rules'], delete_excluded=False)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "~/xsyncv4-auto/gate/b02ae2394a86/tests/filter_diff_test.py", line 115, in check_rules
+    self.assertFalse(differences, '\n'.join(differences))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ['only in rsync result: dst/dir1/stale.o  [file (12 bytes)]', 'only in rsync result: dst/gone  [dir] (+1 entries below it)', 'only in rsync result: dst/stale.o  [file (7 bytes)]'] is not false : only in rsync result: dst/dir1/stale.o  [file (12 bytes)]
+only in rsync result: dst/gone  [dir] (+1 entries below it)
+only in rsync result: dst/stale.o  [file (7 bytes)]
+
+======================================================================
+FAIL: test_pull (__main__.MergeDifferentials.test_pull) (direction='pull', seed='merge-32', rules=[': /private/tmp/xsync filters usw91d3h/src/../.rules'], delete_excluded=False)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "~/xsyncv4-auto/gate/b02ae2394a86/tests/filter_diff_test.py", line 115, in check_rules
+    self.assertFalse(differences, '\n'.join(differences))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ['only in rsync result: dst/dir1/stale.o  [file (12 bytes)]', 'only in rsync result: dst/gone  [dir] (+1 entries below it)', 'only in rsync result: dst/stale.o  [file (7 bytes)]', 'dst/b.o: content expected=19 bytes [203de204] got=7 bytes [97980f82]', 'dst/dir1/b.o: content expected=24 bytes [536e1248] got=12 bytes [59448c23]', 'dst/dir1/deep/c.o: content expected=29 bytes [0461a999] got=17 bytes [c46df940]'] is not false : only in rsync result: dst/dir1/stale.o  [file (12 bytes)]
+only in rsync result: dst/gone  [dir] (+1 entries below it)
+only in rsync result: dst/stale.o  [file (7 bytes)]
+dst/b.o: content expected=19 bytes [203de204] got=7 bytes [97980f82]
+dst/dir1/b.o: content expected=24 bytes [536e1248] got=12 bytes [59448c23]
+dst/dir1/deep/c.o: content expected=29 bytes [0461a999] got=17 bytes [c46df940]
+
+======================================================================
+FAIL: test_pull (__main__.MergeDifferentials.test_pull) (direction='pull', seed='merge-32', rules=[': /private/tmp/xsync filters usw91d3h/src/../.rules'], delete_excluded=True)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "~/xsyncv4-auto/gate/b02ae2394a86/tests/filter_diff_test.py", line 115, in check_rules
+    self.assertFalse(differences, '\n'.join(differences))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ['only in xsync result: dst/b.o  [file (7 bytes)]', 'only in xsync result: dst/dir1/b.o  [file (12 bytes)]', 'only in xsync result: dst/dir1/deep/c.o  [file (17 bytes)]'] is not false : only in xsync result: dst/b.o  [file (7 bytes)]
+only in xsync result: dst/dir1/b.o  [file (12 bytes)]
+only in xsync result: dst/dir1/deep/c.o  [file (17 bytes)]
+
+======================================================================
+FAIL: test_pull (__main__.MergeDifferentials.test_pull) (direction='pull', seed='named-: ../.rules', rules=[': ../.rules'], delete_excluded=False)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "~/xsyncv4-auto/gate/b02ae2394a86/tests/filter_diff_test.py", line 115, in check_rules
+    self.assertFalse(differences, '\n'.join(differences))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ['only in xsync result: dst/src/b.o  [file (7 bytes)]'] is not false : only in xsync result: dst/src/b.o  [file (7 bytes)]
+
+======================================================================
+FAIL: test_push (__main__.MergeDifferentials.test_push) (direction='push', seed='merge-25', rules=[': ../.rules'], delete_excluded=False)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "~/xsyncv4-auto/gate/b02ae2394a86/tests/filter_diff_test.py", line 115, in check_rules
+    self.assertFalse(differences, '\n'.join(differences))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ['only in rsync result: dst/dir1/stale.o  [file (12 bytes)]', 'only in rsync result: dst/gone  [dir] (+1 entries below it)', 'only in rsync result: dst/stale.o  [file (7 bytes)]'] is not false : only in rsync result: dst/dir1/stale.o  [file (12 bytes)]
+only in rsync result: dst/gone  [dir] (+1 entries below it)
+only in rsync result: dst/stale.o  [file (7 bytes)]
+
+======================================================================
+FAIL: test_push (__main__.MergeDifferentials.test_push) (direction='push', seed='merge-32', rules=[': /private/tmp/xsync filters oi90yuvv/src/../.rules'], delete_excluded=False)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "~/xsyncv4-auto/gate/b02ae2394a86/tests/filter_diff_test.py", line 115, in check_rules
+    self.assertFalse(differences, '\n'.join(differences))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ['only in rsync result: dst/dir1/stale.o  [file (12 bytes)]', 'only in rsync result: dst/gone  [dir] (+1 entries below it)', 'only in rsync result: dst/stale.o  [file (7 bytes)]', 'dst/b.o: content expected=19 bytes [203de204] got=7 bytes [97980f82]', 'dst/dir1/b.o: content expected=24 bytes [536e1248] got=12 bytes [59448c23]', 'dst/dir1/deep/c.o: content expected=29 bytes [0461a999] got=17 bytes [c46df940]'] is not false : only in rsync result: dst/dir1/stale.o  [file (12 bytes)]
+only in rsync result: dst/gone  [dir] (+1 entries below it)
+only in rsync result: dst/stale.o  [file (7 bytes)]
+dst/b.o: content expected=19 bytes [203de204] got=7 bytes [97980f82]
+dst/dir1/b.o: content expected=24 bytes [536e1248] got=12 bytes [59448c23]
+dst/dir1/deep/c.o: content expected=29 bytes [0461a999] got=17 bytes [c46df940]
+
+======================================================================
+FAIL: test_push (__main__.MergeDifferentials.test_push) (direction='push', seed='merge-32', rules=[': /private/tmp/xsync filters oi90yuvv/src/../.rules'], delete_excluded=True)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "~/xsyncv4-auto/gate/b02ae2394a86/tests/filter_diff_test.py", line 115, in check_rules
+    self.assertFalse(differences, '\n'.join(differences))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ['only in xsync result: dst/b.o  [file (7 bytes)]', 'only in xsync result: dst/dir1/b.o  [file (12 bytes)]', 'only in xsync result: dst/dir1/deep/c.o  [file (17 bytes)]'] is not false : only in xsync result: dst/b.o  [file (7 bytes)]
+only in xsync result: dst/dir1/b.o  [file (12 bytes)]
+only in xsync result: dst/dir1/deep/c.o  [file (17 bytes)]
+
+======================================================================
+FAIL: test_push (__main__.MergeDifferentials.test_push) (direction='push', seed='named-: ../.rules', rules=[': ../.rules'], delete_excluded=False)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "~/xsyncv4-auto/gate/b02ae2394a86/tests/filter_diff_test.py", line 115, in check_rules
+    self.assertFalse(differences, '\n'.join(differences))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ['only in xsync result: dst/src/b.o  [file (7 bytes)]'] is not false : only in xsync result: dst/src/b.o  [file (7 bytes)]
+
+----------------------------------------------------------------------
+Ran 7 tests in 274.983s
+
+FAILED (failures=12)
+
+$ /opt/homebrew/opt/python@3.15/bin/python3.15 tests/list_test.py
+.......
+----------------------------------------------------------------------
+Ran 7 tests in 141.745s
+
+OK
+
+$ /opt/homebrew/opt/python@3.15/bin/python3.15 tests/output_test.py
+..........
+----------------------------------------------------------------------
+Ran 10 tests in 11.665s
+
+OK
+
+$ /opt/homebrew/opt/python@3.15/bin/python3.15 tests/p0_test.py
+test_atomic_default (__main__.TrustTests.test_atomic_default) ... ok
+test_case_sensitive_destination (__main__.TrustTests.test_case_sensitive_destination) ... ok
+test_destination_name_collisions (__main__.TrustTests.test_destination_name_collisions) ... ok
+test_directory_name_collisions (__main__.TrustTests.test_directory_name_collisions) ... ok
+test_hardlink_anchor_replacement_is_rejected (__main__.TrustTests.test_hardlink_anchor_replacement_is_rejected) ... ok
+test_nested_destination_alias (__main__.TrustTests.test_nested_destination_alias) ... ok
+test_no_silent_options (__main__.TrustTests.test_no_silent_options) ... ok
+test_read_error_protects_deletions (__main__.TrustTests.test_read_error_protects_deletions) ... ok
+test_receiver_symlink_swaps (__main__.TrustTests.test_receiver_symlink_swaps) ... ok
+test_remote_disconnect_cleanup (__main__.TrustTests.test_remote_disconnect_cleanup) ... ok
+test_remote_home (__main__.TrustTests.test_remote_home) ... ok
+test_source_changes (__main__.TrustTests.test_source_changes) ... ok
+test_source_error_protects_siblings (__main__.TrustTests.test_source_error_protects_siblings) ... ok
+
+----------------------------------------------------------------------
+Ran 13 tests in 86.287s
+
+OK
+
+$ /opt/homebrew/opt/python@3.15/bin/python3.15 tests/prune_wire_test.py
+.
+----------------------------------------------------------------------
+Ran 1 test in 0.140s
+
+OK
+
+$ /opt/homebrew/opt/python@3.15/bin/python3.15 tests/wire_test.py
+..
+----------------------------------------------------------------------
+Ran 2 tests in 0.568s
+
+OK
+
+== suite of c5b765eb54fc
+
+$ cmake -S ~/xsyncv4-auto/gate/c5b765eb54fc -B ~/xsyncv4-auto/gate/c5b765eb54fc/build -G Ninja -DCMAKE_BUILD_TYPE=Release -DXSYNC_GIT_HASH=c5b765eb54fc
+-- The C compiler identification is AppleClang 21.0.0.21000334
+-- The CXX compiler identification is AppleClang 21.0.0.21000334
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /usr/bin/cc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+-- Found Threads: TRUE
+-- Found ICU: /opt/homebrew/opt/icu4c/include (found version "78.3") found components: uc
+-- Found Python3: /opt/homebrew/Frameworks/Python.framework/Versions/3.15/bin/python3.15 (found version "3.15.0") found components: Interpreter
+-- Configuring done (14.6s)
+-- Generating done (0.3s)
+-- Build files have been written to: ~/xsyncv4-auto/gate/c5b765eb54fc/build
+
+$ cmake --build ~/xsyncv4-auto/gate/c5b765eb54fc/build --target xsync -j 16
+[1/43] Building CXX object CMakeFiles/xsync.dir/src/app_actor.cpp.o
+[2/43] Building CXX object CMakeFiles/xsync.dir/src/app_preview_guard.cpp.o
+[3/43] Building CXX object CMakeFiles/xsync.dir/src/app_json.cpp.o
+[4/43] Building CXX object CMakeFiles/xsync.dir/src/app_preview_manifest.cpp.o
+[5/43] Building CXX object CMakeFiles/xsync.dir/src/item.cpp.o
+[6/43] Building CXX object CMakeFiles/xsync.dir/src/app_preflight.cpp.o
+[7/43] Building CXX object CMakeFiles/xsync.dir/src/util.cpp.o
+[8/43] Building CXX object CMakeFiles/xsync.dir/src/app_actions.cpp.o
+[9/43] Building CXX object CMakeFiles/xsync.dir/src/main.cpp.o
+[10/43] Building CXX object CMakeFiles/xsync.dir/src/app_conflict.cpp.o
+[11/43] Building CXX object CMakeFiles/xsync.dir/src/app_move.cpp.o
+[12/43] Building CXX object CMakeFiles/xsync.dir/src/linux_scan.cpp.o
+[13/43] Building CXX object CMakeFiles/xsync.dir/src/app_mirror.cpp.o
+[14/43] Building CXX object CMakeFiles/xsync.dir/src/destination.cpp.o
+[15/43] Building CXX object CMakeFiles/xsync.dir/src/app_preview.cpp.o
+[16/43] Building CXX object CMakeFiles/xsync.dir/src/app_ssh.cpp.o
+[17/43] Building CXX object CMakeFiles/xsync.dir/src/progress.cpp.o
+[18/43] Building CXX object CMakeFiles/xsync.dir/src/compression.cpp.o
+[19/43] Building CXX object CMakeFiles/xsync.dir/src/filter.cpp.o
+[20/43] Building CXX object CMakeFiles/xsync.dir/src/names.cpp.o
+[21/43] Building CXX object CMakeFiles/xsync.dir/src/fallback.cpp.o
+[22/43] Building CXX object CMakeFiles/xsync.dir/src/app_partials.cpp.o
+[23/43] Building CXX object CMakeFiles/xsync.dir/src/transport.cpp.o
+[24/43] Building CXX object CMakeFiles/xsync.dir/src/rate_limit.cpp.o
+[25/43] Building CXX object CMakeFiles/xsync.dir/src/install.cpp.o
+[26/43] Building CXX object CMakeFiles/xsync.dir/src/arguments.cpp.o
+[27/43] Building CXX object CMakeFiles/xsync.dir/src/permissions.cpp.o
+[28/43] Building CXX object CMakeFiles/xsync.dir/src/local.cpp.o
+[29/43] Building CXX object CMakeFiles/xsync.dir/src/output.cpp.o
+[30/43] Building CXX object CMakeFiles/xsync.dir/src/hardlink.cpp.o
+[31/43] Building CXX object CMakeFiles/xsync.dir/src/delta.cpp.o
+[32/43] Building CXX object CMakeFiles/xsync.dir/src/ownership.cpp.o
+[33/43] Building CXX object CMakeFiles/xsync.dir/src/sparse.cpp.o
+[34/43] Building CXX object CMakeFiles/xsync.dir/src/xattrs.cpp.o
+[35/43] Building CXX object CMakeFiles/xsync.dir/src/xattr_value.cpp.o
+[36/43] Building CXX object CMakeFiles/xsync.dir/src/listing.cpp.o
+[37/43] Building CXX object CMakeFiles/xsync.dir/src/acls.cpp.o
+[38/43] Building CXX object CMakeFiles/xsync.dir/src/selection.cpp.o
+[39/43] Building CXX object CMakeFiles/xsync.dir/src/app.cpp.o
+~/xsyncv4-auto/gate/c5b765eb54fc/src/app.cpp:1221:177: warning: missing field 'preview_inventory' initializer [-Wmissing-field-initializers]
+ 1221 |     app_ssh::Copy copy{j.push, !j.selection_names.empty(), j.policy == "ask", j.sources, j.path + '/', [] { copy_progress_enabled.store(true); }, nullptr, false, {}, {}, {}, {}};
+      |                                                                                                                                                                                 ^
+1 warning generated.
+[40/43] Building CXX object CMakeFiles/xsync.dir/src/link_dest.cpp.o
+[41/43] Building CXX object CMakeFiles/xsync.dir/src/fs.cpp.o
+[42/43] Building CXX object CMakeFiles/xsync.dir/src/remote.cpp.o
+[43/43] Linking CXX executable xs
+
+$ cmake --build ~/xsyncv4-auto/gate/c5b765eb54fc/build --target filter_test -j 16
+[1/3] Building CXX object CMakeFiles/filter_test.dir/src/filter.cpp.o
+[2/3] Building CXX object CMakeFiles/filter_test.dir/tests/filter_test.cpp.o
+[3/3] Linking CXX executable filter_test
+
+$ ~/xsyncv4-auto/gate/c5b765eb54fc/build/filter_test
+32940 checks, 0 failures
+
+$ cmake --build ~/xsyncv4-auto/gate/c5b765eb54fc/build --target xattr_value_test -j 16
+[1/3] Building CXX object CMakeFiles/xattr_value_test.dir/tests/xattr_value_test.cpp.o
+[2/3] Building CXX object CMakeFiles/xattr_value_test.dir/src/xattr_value.cpp.o
+[3/3] Linking CXX executable xattr_value_test
+
+$ ~/xsyncv4-auto/gate/c5b765eb54fc/build/xattr_value_test
+small-stack xattr comparison, allocation and streaming passed
+
+$ cmake --build ~/xsyncv4-auto/gate/c5b765eb54fc/build --target sparse_test -j 16
+[1/3] Building CXX object CMakeFiles/sparse_test.dir/src/sparse.cpp.o
+[2/3] Building CXX object CMakeFiles/sparse_test.dir/tests/sparse_test.cpp.o
+[3/3] Linking CXX executable sparse_test
+
+$ ~/xsyncv4-auto/gate/c5b765eb54fc/build/sparse_test
+
+$ cmake --build ~/xsyncv4-auto/gate/c5b765eb54fc/build --target scan_admission_test -j 16
+[1/2] Building CXX object CMakeFiles/scan_admission_test.dir/tests/scan_admission_test.cpp.o
+[2/2] Linking CXX executable scan_admission_test
+
+$ ~/xsyncv4-auto/gate/c5b765eb54fc/build/scan_admission_test
+
+$ /opt/homebrew/opt/python@3.15/bin/python3.15 tests/broken_stdout_test.py
+..FFFFs....
+======================================================================
+FAIL: test_closing_during_buffered_events_cleans_or_keeps_partial (__main__.BrokenStdoutTests.test_closing_during_buffered_events_cleans_or_keeps_partial) (direction='push', partial=False)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "~/xsyncv4-auto/gate/c5b765eb54fc/tests/broken_stdout_test.py", line 154, in test_closing_during_buffered_events_cleans_or_keeps_partial
+    self.assertLess(time.monotonic(),deadline,'no data written')
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 363532.532480458 not less than 363532.492158833 : no data written
+
+======================================================================
+FAIL: test_closing_during_buffered_events_cleans_or_keeps_partial (__main__.BrokenStdoutTests.test_closing_during_buffered_events_cleans_or_keeps_partial) (direction='push', partial=True)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "~/xsyncv4-auto/gate/c5b765eb54fc/tests/broken_stdout_test.py", line 154, in test_closing_during_buffered_events_cleans_or_keeps_partial
+    self.assertLess(time.monotonic(),deadline,'no data written')
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 363542.641321541 not less than 363542.552237583 : no data written
+
+======================================================================
+FAIL: test_closing_during_buffered_events_cleans_or_keeps_partial (__main__.BrokenStdoutTests.test_closing_during_buffered_events_cleans_or_keeps_partial) (direction='pull', partial=False)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "~/xsyncv4-auto/gate/c5b765eb54fc/tests/broken_stdout_test.py", line 154, in test_closing_during_buffered_events_cleans_or_keeps_partial
+    self.assertLess(time.monotonic(),deadline,'no data written')
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 363552.757229375 not less than 363552.660620708 : no data written
+
+======================================================================
+FAIL: test_closing_during_buffered_events_cleans_or_keeps_partial (__main__.BrokenStdoutTests.test_closing_during_buffered_events_cleans_or_keeps_partial) (direction='pull', partial=True)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "~/xsyncv4-auto/gate/c5b765eb54fc/tests/broken_stdout_test.py", line 154, in test_closing_during_buffered_events_cleans_or_keeps_partial
+    self.assertLess(time.monotonic(),deadline,'no data written')
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 363562.887803541 not less than 363562.816492875 : no data written
+
+----------------------------------------------------------------------
+Ran 8 tests in 71.405s
+
+FAILED (failures=4, skipped=1)
+
+$ /opt/homebrew/opt/python@3.15/bin/python3.15 tests/defaults_test.py
+..........
+----------------------------------------------------------------------
+Ran 10 tests in 8.115s
+
+OK
+
+$ /opt/homebrew/opt/python@3.15/bin/python3.15 tests/deletion_test.py
+.....
+----------------------------------------------------------------------
+Ran 5 tests in 206.578s
+
+OK
+
+$ /opt/homebrew/opt/python@3.15/bin/python3.15 tests/delta_test.py
+........................
+----------------------------------------------------------------------
+Ran 24 tests in 58.215s
+
+OK
+
+$ /opt/homebrew/opt/python@3.15/bin/python3.15 tests/destination_scope_test.py
+...F...F..F...
+======================================================================
+FAIL: test_inherited_parent_survives_scope_and_rejects_symlinks (__main__.DestinationScopeTests.test_inherited_parent_survives_scope_and_rejects_symlinks)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "~/xsyncv4-auto/gate/c5b765eb54fc/tests/destination_scope_test.py", line 37, in test_inherited_parent_survives_scope_and_rejects_symlinks
+    def test_inherited_parent_survives_scope_and_rejects_symlinks(self): self.exercise('inherited')
+                                                                         ~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "~/xsyncv4-auto/gate/c5b765eb54fc/tests/destination_scope_test.py", line 28, in exercise
+    self.assertEqual(result.returncode, 0, result.stderr)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 1 != 0 : b'parent sharing failed\n'
+
+======================================================================
+FAIL: test_parent_capability_survives_worker_handoff (__main__.DestinationScopeTests.test_parent_capability_survives_worker_handoff)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "~/xsyncv4-auto/gate/c5b765eb54fc/tests/destination_scope_test.py", line 39, in test_parent_capability_survives_worker_handoff
+    def test_parent_capability_survives_worker_handoff(self): self.exercise('inherited-thread')
+                                                              ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "~/xsyncv4-auto/gate/c5b765eb54fc/tests/destination_scope_test.py", line 28, in exercise
+    self.assertEqual(result.returncode, 0, result.stderr)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 1 != 0 : b'anchored parent lookup failed\n'
+
+======================================================================
+FAIL: test_retained_parent_budget_and_fallback (__main__.DestinationScopeTests.test_retained_parent_budget_and_fallback)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "~/xsyncv4-auto/gate/c5b765eb54fc/tests/destination_scope_test.py", line 40, in test_retained_parent_budget_and_fallback
+    def test_retained_parent_budget_and_fallback(self): self.exercise('parent-budget')
+                                                        ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "~/xsyncv4-auto/gate/c5b765eb54fc/tests/destination_scope_test.py", line 28, in exercise
+    self.assertEqual(result.returncode, 0, result.stderr)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 1 != 0 : b'retained parent descriptors are not bounded\n'
+
+----------------------------------------------------------------------
+Ran 14 tests in 9.259s
+
+FAILED (failures=3)
+
+$ /opt/homebrew/opt/python@3.15/bin/python3.15 tests/directory_lifetime_test.py
+.........
+----------------------------------------------------------------------
+Ran 9 tests in 0.444s
+
+OK
+
+$ /opt/homebrew/opt/python@3.15/bin/python3.15 tests/dry_summary_test.py
+....
+----------------------------------------------------------------------
+Ran 4 tests in 6.119s
+
+OK
+
+$ /opt/homebrew/opt/python@3.15/bin/python3.15 tests/error_test.py
+...........
+----------------------------------------------------------------------
+Ran 11 tests in 7.999s
+
+OK
+
+$ /opt/homebrew/opt/python@3.15/bin/python3.15 tests/filter_merge_test.py
+...FFFF.FFFFFFFF
+======================================================================
+FAIL: test_local (__main__.MergeDifferentials.test_local) (direction='local', seed='merge-25', rules=[': ../.rules'], delete_excluded=False)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "~/xsyncv4-auto/gate/c5b765eb54fc/tests/filter_diff_test.py", line 115, in check_rules
+    self.assertFalse(differences, '\n'.join(differences))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ['only in rsync result: dst/dir1/stale.o  [file (12 bytes)]', 'only in rsync result: dst/gone  [dir] (+1 entries below it)', 'only in rsync result: dst/stale.o  [file (7 bytes)]'] is not false : only in rsync result: dst/dir1/stale.o  [file (12 bytes)]
+only in rsync result: dst/gone  [dir] (+1 entries below it)
+only in rsync result: dst/stale.o  [file (7 bytes)]
+
+======================================================================
+FAIL: test_local (__main__.MergeDifferentials.test_local) (direction='local', seed='merge-32', rules=[': /private/tmp/xsync filters xvqinrhe/src/../.rules'], delete_excluded=False)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "~/xsyncv4-auto/gate/c5b765eb54fc/tests/filter_diff_test.py", line 115, in check_rules
+    self.assertFalse(differences, '\n'.join(differences))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ['only in rsync result: dst/dir1/stale.o  [file (12 bytes)]', 'only in rsync result: dst/gone  [dir] (+1 entries below it)', 'only in rsync result: dst/stale.o  [file (7 bytes)]', 'dst/b.o: content expected=19 bytes [203de204] got=7 bytes [97980f82]', 'dst/dir1/b.o: content expected=24 bytes [536e1248] got=12 bytes [59448c23]', 'dst/dir1/deep/c.o: content expected=29 bytes [0461a999] got=17 bytes [c46df940]'] is not false : only in rsync result: dst/dir1/stale.o  [file (12 bytes)]
+only in rsync result: dst/gone  [dir] (+1 entries below it)
+only in rsync result: dst/stale.o  [file (7 bytes)]
+dst/b.o: content expected=19 bytes [203de204] got=7 bytes [97980f82]
+dst/dir1/b.o: content expected=24 bytes [536e1248] got=12 bytes [59448c23]
+dst/dir1/deep/c.o: content expected=29 bytes [0461a999] got=17 bytes [c46df940]
+
+======================================================================
+FAIL: test_local (__main__.MergeDifferentials.test_local) (direction='local', seed='merge-32', rules=[': /private/tmp/xsync filters xvqinrhe/src/../.rules'], delete_excluded=True)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "~/xsyncv4-auto/gate/c5b765eb54fc/tests/filter_diff_test.py", line 115, in check_rules
+    self.assertFalse(differences, '\n'.join(differences))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ['only in xsync result: dst/b.o  [file (7 bytes)]', 'only in xsync result: dst/dir1/b.o  [file (12 bytes)]', 'only in xsync result: dst/dir1/deep/c.o  [file (17 bytes)]'] is not false : only in xsync result: dst/b.o  [file (7 bytes)]
+only in xsync result: dst/dir1/b.o  [file (12 bytes)]
+only in xsync result: dst/dir1/deep/c.o  [file (17 bytes)]
+
+======================================================================
+FAIL: test_local (__main__.MergeDifferentials.test_local) (direction='local', seed='named-: ../.rules', rules=[': ../.rules'], delete_excluded=False)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "~/xsyncv4-auto/gate/c5b765eb54fc/tests/filter_diff_test.py", line 115, in check_rules
+    self.assertFalse(differences, '\n'.join(differences))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ['only in xsync result: dst/src/b.o  [file (7 bytes)]'] is not false : only in xsync result: dst/src/b.o  [file (7 bytes)]
+
+======================================================================
+FAIL: test_pull (__main__.MergeDifferentials.test_pull) (direction='pull', seed='merge-25', rules=[': ../.rules'], delete_excluded=False)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "~/xsyncv4-auto/gate/c5b765eb54fc/tests/filter_diff_test.py", line 115, in check_rules
+    self.assertFalse(differences, '\n'.join(differences))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ['only in rsync result: dst/dir1/stale.o  [file (12 bytes)]', 'only in rsync result: dst/gone  [dir] (+1 entries below it)', 'only in rsync result: dst/stale.o  [file (7 bytes)]'] is not false : only in rsync result: dst/dir1/stale.o  [file (12 bytes)]
+only in rsync result: dst/gone  [dir] (+1 entries below it)
+only in rsync result: dst/stale.o  [file (7 bytes)]
+
+======================================================================
+FAIL: test_pull (__main__.MergeDifferentials.test_pull) (direction='pull', seed='merge-32', rules=[': /private/tmp/xsync filters 4tv5zxlb/src/../.rules'], delete_excluded=False)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "~/xsyncv4-auto/gate/c5b765eb54fc/tests/filter_diff_test.py", line 115, in check_rules
+    self.assertFalse(differences, '\n'.join(differences))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ['only in rsync result: dst/dir1/stale.o  [file (12 bytes)]', 'only in rsync result: dst/gone  [dir] (+1 entries below it)', 'only in rsync result: dst/stale.o  [file (7 bytes)]', 'dst/b.o: content expected=19 bytes [203de204] got=7 bytes [97980f82]', 'dst/dir1/b.o: content expected=24 bytes [536e1248] got=12 bytes [59448c23]', 'dst/dir1/deep/c.o: content expected=29 bytes [0461a999] got=17 bytes [c46df940]'] is not false : only in rsync result: dst/dir1/stale.o  [file (12 bytes)]
+only in rsync result: dst/gone  [dir] (+1 entries below it)
+only in rsync result: dst/stale.o  [file (7 bytes)]
+dst/b.o: content expected=19 bytes [203de204] got=7 bytes [97980f82]
+dst/dir1/b.o: content expected=24 bytes [536e1248] got=12 bytes [59448c23]
+dst/dir1/deep/c.o: content expected=29 bytes [0461a999] got=17 bytes [c46df940]
+
+======================================================================
+FAIL: test_pull (__main__.MergeDifferentials.test_pull) (direction='pull', seed='merge-32', rules=[': /private/tmp/xsync filters 4tv5zxlb/src/../.rules'], delete_excluded=True)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "~/xsyncv4-auto/gate/c5b765eb54fc/tests/filter_diff_test.py", line 115, in check_rules
+    self.assertFalse(differences, '\n'.join(differences))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ['only in xsync result: dst/b.o  [file (7 bytes)]', 'only in xsync result: dst/dir1/b.o  [file (12 bytes)]', 'only in xsync result: dst/dir1/deep/c.o  [file (17 bytes)]'] is not false : only in xsync result: dst/b.o  [file (7 bytes)]
+only in xsync result: dst/dir1/b.o  [file (12 bytes)]
+only in xsync result: dst/dir1/deep/c.o  [file (17 bytes)]
+
+======================================================================
+FAIL: test_pull (__main__.MergeDifferentials.test_pull) (direction='pull', seed='named-: ../.rules', rules=[': ../.rules'], delete_excluded=False)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "~/xsyncv4-auto/gate/c5b765eb54fc/tests/filter_diff_test.py", line 115, in check_rules
+    self.assertFalse(differences, '\n'.join(differences))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ['only in xsync result: dst/src/b.o  [file (7 bytes)]'] is not false : only in xsync result: dst/src/b.o  [file (7 bytes)]
+
+======================================================================
+FAIL: test_push (__main__.MergeDifferentials.test_push) (direction='push', seed='merge-25', rules=[': ../.rules'], delete_excluded=False)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "~/xsyncv4-auto/gate/c5b765eb54fc/tests/filter_diff_test.py", line 115, in check_rules
+    self.assertFalse(differences, '\n'.join(differences))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ['only in rsync result: dst/dir1/stale.o  [file (12 bytes)]', 'only in rsync result: dst/gone  [dir] (+1 entries below it)', 'only in rsync result: dst/stale.o  [file (7 bytes)]'] is not false : only in rsync result: dst/dir1/stale.o  [file (12 bytes)]
+only in rsync result: dst/gone  [dir] (+1 entries below it)
+only in rsync result: dst/stale.o  [file (7 bytes)]
+
+======================================================================
+FAIL: test_push (__main__.MergeDifferentials.test_push) (direction='push', seed='merge-32', rules=[': /private/tmp/xsync filters mim_j8jc/src/../.rules'], delete_excluded=False)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "~/xsyncv4-auto/gate/c5b765eb54fc/tests/filter_diff_test.py", line 115, in check_rules
+    self.assertFalse(differences, '\n'.join(differences))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ['only in rsync result: dst/dir1/stale.o  [file (12 bytes)]', 'only in rsync result: dst/gone  [dir] (+1 entries below it)', 'only in rsync result: dst/stale.o  [file (7 bytes)]', 'dst/b.o: content expected=19 bytes [203de204] got=7 bytes [97980f82]', 'dst/dir1/b.o: content expected=24 bytes [536e1248] got=12 bytes [59448c23]', 'dst/dir1/deep/c.o: content expected=29 bytes [0461a999] got=17 bytes [c46df940]'] is not false : only in rsync result: dst/dir1/stale.o  [file (12 bytes)]
+only in rsync result: dst/gone  [dir] (+1 entries below it)
+only in rsync result: dst/stale.o  [file (7 bytes)]
+dst/b.o: content expected=19 bytes [203de204] got=7 bytes [97980f82]
+dst/dir1/b.o: content expected=24 bytes [536e1248] got=12 bytes [59448c23]
+dst/dir1/deep/c.o: content expected=29 bytes [0461a999] got=17 bytes [c46df940]
+
+======================================================================
+FAIL: test_push (__main__.MergeDifferentials.test_push) (direction='push', seed='merge-32', rules=[': /private/tmp/xsync filters mim_j8jc/src/../.rules'], delete_excluded=True)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "~/xsyncv4-auto/gate/c5b765eb54fc/tests/filter_diff_test.py", line 115, in check_rules
+    self.assertFalse(differences, '\n'.join(differences))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ['only in xsync result: dst/b.o  [file (7 bytes)]', 'only in xsync result: dst/dir1/b.o  [file (12 bytes)]', 'only in xsync result: dst/dir1/deep/c.o  [file (17 bytes)]'] is not false : only in xsync result: dst/b.o  [file (7 bytes)]
+only in xsync result: dst/dir1/b.o  [file (12 bytes)]
+only in xsync result: dst/dir1/deep/c.o  [file (17 bytes)]
+
+======================================================================
+FAIL: test_push (__main__.MergeDifferentials.test_push) (direction='push', seed='named-: ../.rules', rules=[': ../.rules'], delete_excluded=False)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "~/xsyncv4-auto/gate/c5b765eb54fc/tests/filter_diff_test.py", line 115, in check_rules
+    self.assertFalse(differences, '\n'.join(differences))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ['only in xsync result: dst/src/b.o  [file (7 bytes)]'] is not false : only in xsync result: dst/src/b.o  [file (7 bytes)]
+
+----------------------------------------------------------------------
+Ran 7 tests in 178.220s
+
+FAILED (failures=12)
+
+$ /opt/homebrew/opt/python@3.15/bin/python3.15 tests/list_test.py
+.......
+----------------------------------------------------------------------
+Ran 7 tests in 118.300s
+
+OK
+
+$ /opt/homebrew/opt/python@3.15/bin/python3.15 tests/output_test.py
+..........
+----------------------------------------------------------------------
+Ran 10 tests in 11.199s
+
+OK
+
+$ /opt/homebrew/opt/python@3.15/bin/python3.15 tests/p0_test.py
+test_atomic_default (__main__.TrustTests.test_atomic_default) ... ok
+test_case_sensitive_destination (__main__.TrustTests.test_case_sensitive_destination) ... ok
+test_destination_name_collisions (__main__.TrustTests.test_destination_name_collisions) ... ok
+test_directory_name_collisions (__main__.TrustTests.test_directory_name_collisions) ... ok
+test_hardlink_anchor_replacement_is_rejected (__main__.TrustTests.test_hardlink_anchor_replacement_is_rejected) ... ok
+test_nested_destination_alias (__main__.TrustTests.test_nested_destination_alias) ... ok
+test_no_silent_options (__main__.TrustTests.test_no_silent_options) ... ok
+test_read_error_protects_deletions (__main__.TrustTests.test_read_error_protects_deletions) ... ok
+test_receiver_symlink_swaps (__main__.TrustTests.test_receiver_symlink_swaps) ... ok
+test_remote_disconnect_cleanup (__main__.TrustTests.test_remote_disconnect_cleanup) ... ok
+test_remote_home (__main__.TrustTests.test_remote_home) ... ok
+test_source_changes (__main__.TrustTests.test_source_changes) ... ok
+test_source_error_protects_siblings (__main__.TrustTests.test_source_error_protects_siblings) ... ok
+
+----------------------------------------------------------------------
+Ran 13 tests in 87.096s
+
+OK
+
+$ /opt/homebrew/opt/python@3.15/bin/python3.15 tests/prune_wire_test.py
+.
+----------------------------------------------------------------------
+Ran 1 test in 0.196s
+
+OK
+
+$ /opt/homebrew/opt/python@3.15/bin/python3.15 tests/receiver_concurrency_test.py
+..
+----------------------------------------------------------------------
+Ran 2 tests in 49.520s
+
+OK
+
+$ /opt/homebrew/opt/python@3.15/bin/python3.15 tests/wire_test.py
+..
+----------------------------------------------------------------------
+Ran 2 tests in 0.646s
+
+OK

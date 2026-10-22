@@ -14,7 +14,7 @@
    "kind": "experiment",
    "experiment": "MA8-psample-pull-anchors",
    "question": "Pulling psample onto the Mac, is xs with the larger budget faster than its parent and rsync, at a no-op and a 1% update?",
-   "estimateHours": 0.2,
+   "estimateHours": 0.6,
    "hypothesis": "With a larger parent-descriptor budget, xs -aH re-syncs psample onto the Mac faster than its parent and than rsync -aH, at a no-op and after 1% of files change.",
    "design": "confirmatory",
    "state": "failed",

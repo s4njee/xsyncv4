@@ -1,0 +1,58 @@
+{
+ "ok": true,
+ "analysis": {
+  "decision": {
+   "node": "",
+   "branch": -1,
+   "keep": false,
+   "reason": "No race finished this slot (facts.tested is null). A1, the receiver-lock branch built as c5b765eb54fc on b02ae2394a86, races next slot."
+  },
+  "priorities": [
+   {
+    "node": "B1",
+    "brief": "Analysis only; no product code is needed. Base: use A1's commit c5b765eb54fc if its race keeps it, otherwise b02ae2394a86. Do not start until A1's verdict is in, because the question is about time spent once the receiver fixes land. Steps: (1) Do a fresh copy of real-congress and real-psample to the destination with xs -a -j4. Then run a no-op re-sync in both directions, push (mac to mars) and pull (mars to mac). Use the same flags and the same trees with rsync -a. Repeat each run at least 3 times warm. (2) Wrap each end's process in /usr/bin/time -l, and record wall, user and sys time on the sender and on the receiver separately. Run sample(1) or dtrace profiling on the receiver and the sender during one run of each cell, and keep the top stacks. (3) Tabulate wall and CPU per end against rsync. Attribute receiver time to: destination path walks (lstat/open per component, the cause in MA7's pull deficit), file-list build, comparison, and protocol waits. Compare with H21 (congress no-op push at 0.74x rsync, 408.8 s CPU against 18.8 s) to see whether the CPU gap remains. Edge cases: make sure the runs really are no-ops (the second run transfers 0 files and no mtimes change), drop caches consistently or state the runs are warm, and confirm -j4 is honoured on pull. Deliverable: a short table and the top three hot paths per direction. These name the next change (likely B2 dest-anchors or A3 cheaper path walks).",
+    "why": "No-op re-syncs are a lab workload where xs was measured at 0.74x rsync with about 20x the CPU (H21). It costs only race and profiling time, and it decides which of B2, B3 or A3 to build next. It should follow A1's race, as history planned."
+   },
+   {
+    "node": "C5",
+    "brief": "Scope this sitting to the part that runs on this link: negative (fast) zstd levels, plus an optional long-range flag. Dictionary training is left for later, since it needs lab2's internet link. Find where the transport sets up its zstd compressor and where the compression level option is parsed (search for ZSTD_createCCtx, ZSTD_c_compressionLevel and the compress-level option). Changes: (1) Accept negative levels in the option parser, validated against ZSTD_minCLevel()..ZSTD_maxCLevel(). Reject 0 explicitly or document it as zstd's default. (2) Pass the level through ZSTD_CCtx_setParameter(ZSTD_c_compressionLevel). (3) Add --zstd-long[=windowLog], which sets ZSTD_c_enableLongDistanceMatching and ZSTD_c_windowLog on the compressor. The decompressor must set ZSTD_d_windowLogMax to match, or reject the frame. Because the receiver needs to know this, carry the flag in the existing option negotiation, or fail cleanly if the peer lacks it. Edge cases: with -j4 each worker owns its own CCtx (no sharing); small files must not regress (keep the existing threshold below which data is sent uncompressed); level and long mode must apply identically on push and pull. Tests: a unit round-trip test compressing and decompressing random, text and incompressible buffers at levels -7, -1, 1 and 3, with and without long mode. Also add option-parse tests for out-of-range values. Keep the change under about 400 lines. Race to propose afterwards (RQ-Z2): no compression vs level -1 vs level -5 on the 10G link with the large and mixed-bimodal corpora.",
+    "why": "This is lower expected gain on the lab's current workloads. The races are fresh copies on a 10G link where xs-cpp is CPU-bound and trails xs-rs (e.g. small-deep push 24.037 s vs 9.84 s), and Z1 showed level 3 slowing the 10 GbE copy below no compression. Still, it is small, self-contained, and the only buildable change."
+   }
+  ],
+  "resolutions": [],
+  "drops": [],
+  "summary": "No race finished this slot; the lab races still show xs-cpp well behind xs-rs on small-file fresh copies (small-deep push 24.037 s vs 9.84 s, ratio 0.409). Next we race A1 (receiver-lock branch c5b765eb54fc), then re-profile no-op re-syncs (B1) on the result. Negative zstd levels (C5) are a low-priority side change."
+ },
+ "usage": {
+  "input_tokens": 2782,
+  "cache_creation_input_tokens": 1412,
+  "cache_read_input_tokens": 0,
+  "cache_creation": {
+   "ephemeral_5m_input_tokens": 1412,
+   "ephemeral_1h_input_tokens": 0
+  },
+  "iterations": [
+   {
+    "input_tokens": 2782,
+    "output_tokens": 2459,
+    "cache_read_input_tokens": 0,
+    "cache_creation_input_tokens": 1412,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 1412,
+     "ephemeral_1h_input_tokens": 0
+    },
+    "type": "message",
+    "model": null
+   }
+  ],
+  "output_tokens": 2459,
+  "output_tokens_details": {
+   "thinking_tokens": 861
+  },
+  "service_tier": "standard",
+  "inference_geo": "global",
+  "speed": "standard"
+ },
+ "cost_usd": 0.067368,
+ "model": "claude-opus-5-5"
+}

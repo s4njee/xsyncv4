@@ -145,3 +145,11 @@
 "AP10210751-AP10210749-L2P4-local-small-cpu2" = "With neo held to 2 CPUs, does xs -a -j4 still beat rsync -a on local fresh and no-op copies of small-flat, small-deep and mixed-bimodal?"
 
 "AP10210751-AP10210749-L2P5-local-psample-resync-cpu" = "For the corpus behind lab2's real-projects gap: with neo held to 2 CPUs, does xs -a -j4 still re-sync real-psample faster than rsync -a at a no-op and after a 1% change?"
+
+"AP10211357-L2B1-lab2-build-small-fresh" = "For lab2's real-projects and congress-sample fresh gaps: is lab2's C++ xs build 0c94b3d70b9d (-a -j4) slower than e51c1df1329a, the build all home reproductions used, on fresh small-tree copies, and does -j2 change its standing against rsync -a?"
+
+"NT1021-fresh" = "Tonight's builds, fresh copies: how do rsync, xs-c++ and xs-rs compare?"
+
+"NT1021-noop" = "Tonight's builds, noop copies: how do rsync, xs-c++ and xs-rs compare?"
+
+"NT1021-update-10pct" = "Tonight's builds, update-10pct copies: how do rsync, xs-c++ and xs-rs compare?"

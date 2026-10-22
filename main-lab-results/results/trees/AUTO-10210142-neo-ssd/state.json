@@ -15,11 +15,16 @@
    }
   },
   "N1": {
-   "state": "queued",
+   "state": "decided",
    "runs": [
     "20261021T014239Z-AP10210142-L2R6-local-psample-cpu2"
    ],
-   "spec": "auto/AP10210142-L2R6-local-psample-cpu2.toml"
+   "spec": "auto/AP10210142-L2R6-local-psample-cpu2.toml",
+   "decision": {
+    "utc": "2026-10-21T13:57:10Z",
+    "text": "N1: done (1 run)",
+    "next": []
+   }
   }
  }
 }

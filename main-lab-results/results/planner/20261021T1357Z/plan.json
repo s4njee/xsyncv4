@@ -1,0 +1,94 @@
+{
+ "summary": "This window cannot reproduce either lab2 gap (real-projects fresh and congress-sample fresh, rsync ahead, neither proven) under lab2's conditions. The only runner, mac, drives mac-mars-usb10g, and that link has no host for netem delay or a CPU cap; no development case is opened, since the gaps have not reproduced at home and engineering.can_open is false. mac instead runs one cheap step-1 check after MM1 finishes: does lab2's exact build 0c94b3d70b9d with -a -j4 lose ground on small trees compared with e51c1df1329a, the build every home reproduction has used, and with -j2 (lab2's vCPU count) compared with -j4?",
+ "runners": [
+  {
+   "runner": "mac",
+   "rationale": "mac has about 4.5 h of room: 6 h minus 1.5 h left on MM1, with nothing queued. Its one link, mac-mars-usb10g, cannot apply wan_delay_ms or cpus (limits.wan.hosts and limits.cpus.hosts are empty), so lab2's 11 ms and 2-vCPU conditions cannot be reproduced here. Only mixed-bimodal and small-flat have measured sample times on this link. One experiment of about 24 min checks an untested confound behind both lab2 gaps: lab2 runs 0c94b3d70b9d, while all home reproductions (L2R1 to L2R8) used e51c1df1329a. It deliberately repeats only lab2's fresh scenario with lab2's flags, so it does not duplicate MM1's baseline sweep.",
+   "experiments": [
+    {
+     "id": "L2B1-lab2-build-small-fresh",
+     "question": "For lab2's real-projects and congress-sample fresh gaps: is lab2's C++ xs build 0c94b3d70b9d (-a -j4) slower than e51c1df1329a, the build all home reproductions used, on fresh small-tree copies, and does -j2 change its standing against rsync -a?",
+     "hypothesis": "0c94b3d70b9d is within 5% of e51c1df1329a and still well ahead of rsync -a on small-flat and mixed-bimodal fresh copies, so the build difference does not explain lab2's losses; -j2 is no faster than -j4.",
+     "why": "Step 1 input: home reproductions have used a different build from lab2's, so this checks lab2's exact build and flags on the plain link, which is the only condition this link can provide.",
+     "front": false,
+     "link": "mac-mars-usb10g",
+     "corpus": [
+      "small-flat",
+      "mixed-bimodal"
+     ],
+     "scenario": [
+      "fresh"
+     ],
+     "direction": [
+      "mac>mars"
+     ],
+     "client": "initiator",
+     "cache": [
+      "warm"
+     ],
+     "primary": "durable_s",
+     "delta": 0.05,
+     "blocks": 10,
+     "control": "xs-lab2",
+     "arms": [
+      {
+       "name": "xs-lab2",
+       "tool": "xs",
+       "rev": "0c94b3d70b9d",
+       "flags": [
+        "-a",
+        "-j4"
+       ],
+       "tune": null,
+       "writeback": "default",
+       "verify": "full",
+       "streams": null
+      },
+      {
+       "name": "xs-home",
+       "tool": "xs",
+       "rev": "e51c1df1329a",
+       "flags": [
+        "-a",
+        "-j4"
+       ],
+       "tune": null,
+       "writeback": "default",
+       "verify": "full",
+       "streams": null
+      },
+      {
+       "name": "xs-lab2-j2",
+       "tool": "xs",
+       "rev": "0c94b3d70b9d",
+       "flags": [
+        "-a",
+        "-j2"
+       ],
+       "tune": null,
+       "writeback": "default",
+       "verify": "full",
+       "streams": null
+      },
+      {
+       "name": "rsync",
+       "tool": "rsync",
+       "rev": null,
+       "flags": [
+        "-a"
+       ],
+       "tune": null,
+       "writeback": "default",
+       "verify": "full",
+       "streams": null
+      }
+     ],
+     "confirm": null,
+     "wan_delay_ms": 0,
+     "cpus": 0
+    }
+   ]
+  }
+ ],
+ "engineering": null
+}

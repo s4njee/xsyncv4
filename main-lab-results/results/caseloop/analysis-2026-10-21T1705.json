@@ -1,0 +1,181 @@
+{
+ "ok": true,
+ "analysis": {
+  "decision": {
+   "node": "",
+   "branch": -1,
+   "keep": false,
+   "reason": "No race ended this slot (facts.tested is null). Nothing is decided."
+  },
+  "priorities": [
+   {
+    "node": "B1",
+    "brief": "Measurement only, no code. Race no-op re-syncs on real-congress and real-psample, push (mac>mars) and pull (mars>mac). Arms: system rsync -a as the control; xs-rs at -a -j4 (the loop's flags); xs-rs at -a -j1 and -a -j8, to see whether no-op time scales with workers or is serial; xs-cpp at -a -j4 for reference. Compare time to durable against rsync. Then compare CPU seconds and peak memory on the client and on the peer separately, to tell whether the cost sits on the sender (file-list build, stat walk) or on the receiver (destination path walks, which MA7 blamed for the pull deficit). The result shows whether the H21 gap is still there after the receiver-lock change: 0.74x rsync's speed, with 408.8 s of CPU against 18.8 s. It also shows which end burns the CPU, which tells us whether A3 (cheaper destination path walks) or B2/B3 is next.",
+    "why": "No-op re-syncs are the one known workload where xs-rs loses to rsync: H21 congress no-op push ran at 0.74x rsync with about 22x the CPU. On fresh copies xs-rs already beats rsync in every lab cell, for example 'real-congress.fresh.mac-mars' at 14.723 s against 43.938 s. A1's no-op result was 'noop 1.007 (inconclusive)', so the receiver fix did not move this gap. It costs no coding hours and steers A3, B2 and B3.",
+    "measure": {
+     "arms": [
+      {
+       "name": "rsync",
+       "tool": "rsync",
+       "flags": [
+        "-a"
+       ]
+      },
+      {
+       "name": "xs-rs-j4",
+       "tool": "xs-rs",
+       "flags": [
+        "-a",
+        "-j4"
+       ]
+      },
+      {
+       "name": "xs-rs-j1",
+       "tool": "xs-rs",
+       "flags": [
+        "-a",
+        "-j1"
+       ]
+      },
+      {
+       "name": "xs-rs-j8",
+       "tool": "xs-rs",
+       "flags": [
+        "-a",
+        "-j8"
+       ]
+      },
+      {
+       "name": "xs-cpp-j4",
+       "tool": "xs-cpp",
+       "flags": [
+        "-a",
+        "-j4"
+       ]
+      }
+     ],
+     "control": "rsync",
+     "corpus": [
+      "real-congress",
+      "real-psample"
+     ],
+     "scenario": [
+      "noop"
+     ],
+     "direction": [
+      "mac>mars",
+      "mars>mac"
+     ],
+     "blocks": 10,
+     "hypothesis": "xs-rs still takes longer than rsync on congress no-op, especially on pull, and its CPU seconds far exceed rsync's on one end. Receiver-side CPU dominating, mostly on pull, would point at destination path walks (A3). Sender-side CPU dominating would point at file-list and stat cost (B2/B3). Little change from -j1 to -j8 would mean a serial bottleneck. The lab records total CPU per end, not the user/kernel split the node asks for, and cannot profile, so syscall-heavy and compute-heavy costs are not separated."
+    }
+   },
+   {
+    "node": "A2",
+    "brief": "Measurement only, no code. Race small-deep fresh copies push (mac>mars, mars receiving) and pull (mars>mac). Arms: xs-rs -a -j4 as the control (current chain tip at the loop's flags), xs-rs -a -j1, -a -j8, -a -j16, xs-rs -a -j8 --no-atomic, and xs-cpp -a -j4 for reference. Report each setting separately, as A1 asked: does the receiver now gain from more workers, and how much does atomic rename still cost? Compare client and peer CPU seconds against wall time. A receiver whose CPU stays far below wall times workers is waiting (filesystem metadata or fsync), not computing. The local tar baseline and the sample profiles that the node wants cannot be run in the lab; that part stays open for a manual run on mars.",
+    "why": "Small-file fresh copies are the lab's largest absolute cells: small-deep pull takes 19.878 s against push 9.84 s. A1 more than halved them ('fresh 0.411 (faster)'), so the next limit is unknown. Knowing whether -j and atomic rename still matter picks between A5, A6 and A7 for the next build.",
+    "measure": {
+     "arms": [
+      {
+       "name": "xs-rs-j4",
+       "tool": "xs-rs",
+       "flags": [
+        "-a",
+        "-j4"
+       ]
+      },
+      {
+       "name": "xs-rs-j1",
+       "tool": "xs-rs",
+       "flags": [
+        "-a",
+        "-j1"
+       ]
+      },
+      {
+       "name": "xs-rs-j8",
+       "tool": "xs-rs",
+       "flags": [
+        "-a",
+        "-j8"
+       ]
+      },
+      {
+       "name": "xs-rs-j16",
+       "tool": "xs-rs",
+       "flags": [
+        "-a",
+        "-j16"
+       ]
+      },
+      {
+       "name": "xs-rs-j8-noatomic",
+       "tool": "xs-rs",
+       "flags": [
+        "-a",
+        "-j8",
+        "--no-atomic"
+       ]
+      },
+      {
+       "name": "xs-cpp-j4",
+       "tool": "xs-cpp",
+       "flags": [
+        "-a",
+        "-j4"
+       ]
+      }
+     ],
+     "control": "xs-rs-j4",
+     "corpus": [
+      "small-deep"
+     ],
+     "scenario": [
+      "fresh"
+     ],
+     "direction": [
+      "mac>mars",
+      "mars>mac"
+     ],
+     "blocks": 10,
+     "hypothesis": "After the receiver-lock change, going from -j4 to -j8 or -j16 shortens time to durable on small-deep if the receiver still has spare parallelism. --no-atomic shortens it further if per-file rename is a real cost. If neither moves and receiver CPU stays well below wall time, the limit is filesystem metadata or durability work on the macOS receiver (A6/A7 territory). The run leaves out the local tar extraction baseline (the lab cannot run tar) and the macOS sample profiles of both ends. The distance to the best possible receiver and the call-level breakdown therefore remain unmeasured."
+    }
+   }
+  ],
+  "resolutions": [],
+  "drops": [],
+  "summary": "No race finished this slot; the compression change (C5) was dropped after 'fresh 1.001 (equivalent)', and the receiver-lock change stays after 'fresh 0.411 (faster)'. Next the lab races no-op re-syncs against rsync on real-congress and real-psample, push and pull, to see which end still burns the CPU (B1). After that it races small-deep fresh copies across -j1 to -j16 and --no-atomic to find the next small-file limit (A2)."
+ },
+ "usage": {
+  "input_tokens": 5379,
+  "cache_creation_input_tokens": 2626,
+  "cache_read_input_tokens": 0,
+  "cache_creation": {
+   "ephemeral_5m_input_tokens": 2626,
+   "ephemeral_1h_input_tokens": 0
+  },
+  "iterations": [
+   {
+    "input_tokens": 5379,
+    "output_tokens": 2813,
+    "cache_read_input_tokens": 0,
+    "cache_creation_input_tokens": 2626,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 2626,
+     "ephemeral_1h_input_tokens": 0
+    },
+    "type": "message",
+    "model": null
+   }
+  ],
+  "output_tokens": 2813,
+  "output_tokens_details": {
+   "thinking_tokens": 688
+  },
+  "service_tier": "standard",
+  "inference_geo": "global",
+  "speed": "standard"
+ },
+ "cost_usd": 0.090906,
+ "model": "claude-opus-5-5"
+}

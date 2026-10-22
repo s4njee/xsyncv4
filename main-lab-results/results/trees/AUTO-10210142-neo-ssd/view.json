@@ -38,22 +38,28 @@
    "estimateHours": 1.6,
    "hypothesis": "With 2 CPUs, xs -a -j4 is more than 15% slower than rsync -a on a fresh cold local real-psample copy, which would point at CPU contention among its workers.",
    "design": "screening",
-   "state": "queued",
+   "state": "decided",
    "runs": [
     {
      "id": "20261021T014239Z-AP10210142-L2R6-local-psample-cpu2",
      "key": "local/AP10210142-L2R6-local-psample-cpu2/20261021T014239Z-AP10210142-L2R6-local-psample-cpu2",
-     "state": "running"
+     "state": "complete"
     }
    ],
-   "decision": null,
-   "decidedUtc": null,
+   "decision": "N1: done (1 run)",
+   "decidedUtc": "2026-10-21T13:57:10Z",
    "start": true,
    "promote": null
   }
  ],
  "edges": [],
  "decisions": [
+  {
+   "utc": "2026-10-21T13:57:10Z",
+   "node": "N1",
+   "kind": "decision",
+   "text": "N1: done (1 run)"
+  },
   {
    "utc": "2026-10-21T06:54:43Z",
    "node": "N0",

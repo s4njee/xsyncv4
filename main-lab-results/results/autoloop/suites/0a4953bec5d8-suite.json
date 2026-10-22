@@ -1,0 +1,74 @@
+{
+ "filter_test": {
+  "ok": true,
+  "seconds": 9.8
+ },
+ "xattr_value_test": {
+  "ok": true,
+  "seconds": 1.2
+ },
+ "sparse_test": {
+  "ok": true,
+  "seconds": 0.7
+ },
+ "scan_admission_test": {
+  "ok": true,
+  "seconds": 1.8
+ },
+ "broken_stdout_test.py": {
+  "ok": true,
+  "seconds": 51.8
+ },
+ "defaults_test.py": {
+  "ok": true,
+  "seconds": 2.5
+ },
+ "deletion_test.py": {
+  "ok": true,
+  "seconds": 24.3
+ },
+ "delta_test.py": {
+  "ok": true,
+  "seconds": 34.6
+ },
+ "destination_scope_test.py": {
+  "ok": false,
+  "seconds": 1.8
+ },
+ "directory_lifetime_test.py": {
+  "ok": true,
+  "seconds": 0.2
+ },
+ "dry_summary_test.py": {
+  "ok": true,
+  "seconds": 1.6
+ },
+ "error_test.py": {
+  "ok": true,
+  "seconds": 1.9
+ },
+ "filter_merge_test.py": {
+  "ok": false,
+  "seconds": 54.8
+ },
+ "list_test.py": {
+  "ok": true,
+  "seconds": 26.4
+ },
+ "output_test.py": {
+  "ok": true,
+  "seconds": 3.1
+ },
+ "p0_test.py": {
+  "ok": false,
+  "seconds": 58.0
+ },
+ "prune_wire_test.py": {
+  "ok": true,
+  "seconds": 1.6
+ },
+ "wire_test.py": {
+  "ok": true,
+  "seconds": 0.4
+ }
+}

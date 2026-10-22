@@ -1,0 +1,11 @@
+{
+ "name": "PB1-profile",
+ "steps": [
+  {
+   "host": "neo",
+   "ssh": "[email]",
+   "local": true,
+   "command": "sh ~/benchmarks/xsyncv4/lab/profile_pair.sh ~/benchmarks/xsyncv4/lab 0c94b3d70b9d"
+  }
+ ]
+}

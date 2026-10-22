@@ -1,0 +1,19 @@
+{
+ "experiment": "AP10211357-L2B1-lab2-build-small-fresh",
+ "kind": "screening",
+ "hypothesis": "0c94b3d70b9d is within 5% of e51c1df1329a and still well ahead of rsync -a on small-flat and mixed-bimodal fresh copies, so the build difference does not explain lab2's losses; -j2 is no faster than -j4.",
+ "primary": "durable_s",
+ "control": "xs-lab2",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261021T135748Z-AP10211357-L2B1-lab2-build-small-fresh"
+ ],
+ "spec_sha256": [
+  "f495046bd26b6dc045b1048cc62e7a6e773152ef8ed59c54e3f2ecd3abde1bf1"
+ ],
+ "valid_blocks": 20,
+ "void_attempts": 0,
+ "void_reasons": []
+}

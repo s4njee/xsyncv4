@@ -1,0 +1,29 @@
+# Written by the 6-hourly planner (2026-10-21T21:11:40+00:00). Why: exploration node A1 against its parent, by the case loop
+id = "CL-A1-c5b765eb54fc"
+kind = "screening"
+hypothesis = "A1 (c5b765eb54fc) changes the time to copy real-congress by more than 5%."
+primary = "durable_s"
+delta = 0.05
+blocks = 8
+control = "parent"
+verify = "first-last"
+cleanup = "eager"
+sample_timeout_s = 7200
+
+[arms.parent]
+tool = "xs"
+rev = "b02ae2394a86"
+flags = ["-a", "-j4"]
+
+[arms.candidate]
+tool = "xs"
+rev = "c5b765eb54fc"
+flags = ["-a", "-j4"]
+
+[matrix]
+link = "mac-mars-usb10g"
+corpus = ["real-congress"]
+scenario = ["fresh", "noop"]
+direction = ["mac>mars"]
+client = ["initiator"]
+cache = ["warm"]

@@ -1,0 +1,48 @@
+{
+ "id": "AUTO-10211357-mac",
+ "question": "mac has about 4.5 h of room: 6 h minus 1.5 h left on MM1, with nothing queued. Its one link, mac-mars-usb10g, cannot apply wan_delay_ms or cpus (limits.wan.hosts and limits.cpus.hosts are empty), so lab2's 11 ms and 2-vCPU conditions cannot be reproduced here. Only mixed-bimodal and small-flat have measured sample times on this link. One experiment of about 24 min checks an untested confound behind both lab2 gaps: lab2 runs 0c94b3d70b9d, while all home reproductions (L2R1 to L2R8) used e51c1df1329a. It deliberately repeats only lab2's fresh scenario with lab2's flags, so it does not duplicate MM1's baseline sweep.",
+ "start": [
+  "N0"
+ ],
+ "startedUtc": "2026-10-21T13:57:48Z",
+ "until": null,
+ "fills": 0,
+ "nodes": [
+  {
+   "id": "N0",
+   "kind": "experiment",
+   "experiment": "AP10211357-L2B1-lab2-build-small-fresh",
+   "question": "For lab2's real-projects and congress-sample fresh gaps: is lab2's C++ xs build 0c94b3d70b9d (-a -j4) slower than e51c1df1329a, the build all home reproductions used, on fresh small-tree copies, and does -j2 change its standing against rsync -a?",
+   "estimateHours": 0.7,
+   "hypothesis": "0c94b3d70b9d is within 5% of e51c1df1329a and still well ahead of rsync -a on small-flat and mixed-bimodal fresh copies, so the build difference does not explain lab2's losses; -j2 is no faster than -j4.",
+   "design": "screening",
+   "state": "decided",
+   "runs": [
+    {
+     "id": "20261021T135748Z-AP10211357-L2B1-lab2-build-small-fresh",
+     "key": "mac-mac/AP10211357-L2B1-lab2-build-small-fresh/20261021T135748Z-AP10211357-L2B1-lab2-build-small-fresh",
+     "state": "complete"
+    }
+   ],
+   "decision": "N0: done (1 run)",
+   "decidedUtc": "2026-10-21T14:59:37Z",
+   "start": true,
+   "promote": null
+  }
+ ],
+ "edges": [],
+ "decisions": [
+  {
+   "utc": "2026-10-21T14:59:37Z",
+   "node": "N0",
+   "kind": "decision",
+   "text": "N0: done (1 run)"
+  },
+  {
+   "utc": "2026-10-21T13:57:49Z",
+   "node": "N0",
+   "kind": "queued",
+   "text": "N0 queued on mac (80 samples): start of the tree"
+  }
+ ]
+}

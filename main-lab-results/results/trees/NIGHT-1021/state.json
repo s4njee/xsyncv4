@@ -1,0 +1,27 @@
+{
+ "tree": "NIGHT-1021",
+ "started_utc": "2026-10-21T16:56:34Z",
+ "nodes": {
+  "N2": {
+   "state": "queued",
+   "runs": [
+    "20261021T165634Z-NT1021-update-10pct"
+   ],
+   "spec": "auto/NT1021-update-10pct.toml"
+  },
+  "N1": {
+   "state": "queued",
+   "runs": [
+    "20261021T165635Z-NT1021-noop"
+   ],
+   "spec": "auto/NT1021-noop.toml"
+  },
+  "N0": {
+   "state": "queued",
+   "runs": [
+    "20261021T165635Z-NT1021-fresh"
+   ],
+   "spec": "auto/NT1021-fresh.toml"
+  }
+ }
+}

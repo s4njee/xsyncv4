@@ -1,0 +1,415 @@
+{
+ "id": "EXA-small-fresh-copies",
+ "manual": true,
+ "question": "What limits xs's small-file fresh copies once the receiver's global lock and serial final pass are gone, and what removes the next limit?",
+ "start": [
+  "A1"
+ ],
+ "startedUtc": "2026-10-21T19:31:04Z",
+ "until": null,
+ "fills": 0,
+ "nodes": [
+  {
+   "id": "A1",
+   "kind": "experiment",
+   "experiment": null,
+   "title": "Race the receiver-lock branch",
+   "question": "Do the lock split and the parallel final pass make small fresh copies faster, and do extra receiving workers now help?",
+   "measure": "LK1 on the Mac-mars link: parent 21ae6844 against 4c5c425c (engine/receiver-locks), default, --no-atomic and -j8; small-flat, small-deep, real-congress; fresh and no-op; time to durable, 8 blocks.",
+   "hypothesis": "N3 small-flat: the transfer phase stayed at 2.96-3.23 s from 1 to 16 receiving workers while their summed write time rose from 2.9 to 47 s. The serial final pass took 1.31-1.45 s of every small-deep run.",
+   "needs": [],
+   "estimateHours": null,
+   "design": null,
+   "state": "decided",
+   "runs": [],
+   "decision": "A1: faster: merge it. fresh 0.411 (faster) / noop 1.007 (inconclusive). The receiver-lock branch (c5b765eb54fc against b02ae2394a86) is clearly faster on fresh copies: 'fresh 0.411 (faster)' with a 95% interval of 0.406 to 0.415 over 8 blocks. That is the minimum block count, but the interval is narrow and far below 1. No-op re-syncs are unchanged within noise: 'noop 1.007 (inconclusive)', interval 0.962 to 1.055. Keep it and merge. The pooled verdicts do not separate the default, --no-atomic and -j8 configurations, so whether extra receiving workers now help is not answered by these facts; A2 should look at that split.",
+   "decidedUtc": "2026-10-21T21:42:16Z",
+   "start": true,
+   "promote": null
+  },
+  {
+   "id": "A2",
+   "kind": "experiment",
+   "experiment": null,
+   "title": "Find the next limit",
+   "question": "How far is xs from the receiver creating the same files by itself, and what is it doing with the difference?",
+   "measure": "The best arm so far against local tar extraction on the receiver (P2b's local arms; mars now runs macOS, so measured again there), and a profile of both ends during a small-deep fresh copy: sample on macOS, perf on Linux. A quiet sender first: P2b lost runs to its load.",
+   "hypothesis": "P2b, with mars on Linux: 4 local tar processes took 2.70 s on small-deep (about 37k files/s) against 5.26 s for xs in N3.",
+   "needs": [],
+   "estimateHours": null,
+   "design": null,
+   "state": "running",
+   "runs": [],
+   "decision": "A2: measuring: After the receiver-lock change, small-file fresh copies are limited by per-file work on the receiving Mac. If so, -j8 and -j16 give little over -j4 while peer CPU rises, and the effect is stronger on  (CM-A2-10220216)",
+   "decidedUtc": "2026-10-22T07:16:52Z",
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "A2~end4",
+   "kind": "end",
+   "experiment": null,
+   "question": null,
+   "estimateHours": null,
+   "hypothesis": "The receiver is close to its disk; small fresh copies are done.",
+   "design": null,
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "A3",
+   "kind": "experiment",
+   "experiment": null,
+   "title": "Cheaper destination path walks",
+   "question": "Do retained parent descriptors, and single-call opens on Linux, remove the path-walk cost?",
+   "measure": "engine/dest-anchors (e51c1df1) on every receiver, and openat2 with RESOLVE_BENEATH on Linux receivers only; opens per file and time to durable.",
+   "hypothesis": "MA7, the Mac receiving a psample pull: most of 187 s of kernel time was openat from the destination path walk. dest-anchors cut those samples by 68%.",
+   "needs": [],
+   "estimateHours": null,
+   "design": null,
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "A3~end0",
+   "kind": "end",
+   "experiment": null,
+   "question": null,
+   "estimateHours": null,
+   "hypothesis": "Adopt, then find the next limit again (A2).",
+   "design": null,
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "A3~end1",
+   "kind": "end",
+   "experiment": null,
+   "question": null,
+   "estimateHours": null,
+   "hypothesis": "Not the limit: drop the change.",
+   "design": null,
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "A5",
+   "kind": "experiment",
+   "experiment": null,
+   "title": "Fast path for fresh subtrees",
+   "question": "Can directories the receiver lacks skip the directory-by-directory request round trip, and the rename per file?",
+   "measure": "A new feature bit: listing and data stream together for new directories, NEED frames batched across directories, and optionally one staging directory renamed into place. small-deep and real-congress fresh: time to durable and receiver context switches.",
+   "hypothesis": "About 200k voluntary context switches on the receiver per small-deep run; the temporary-file rename cost about 12 us of serialized time per file in N3.",
+   "needs": [],
+   "estimateHours": null,
+   "design": null,
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "A5~end0",
+   "kind": "end",
+   "experiment": null,
+   "question": null,
+   "estimateHours": null,
+   "hypothesis": "Adopt behind the feature bit, then find the next limit again (A2).",
+   "design": null,
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "A5~end1",
+   "kind": "end",
+   "experiment": null,
+   "question": null,
+   "estimateHours": null,
+   "hypothesis": "Drop.",
+   "design": null,
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "A6",
+   "kind": "experiment",
+   "experiment": null,
+   "title": "Several receiver processes",
+   "question": "Once one process is the limit, do lanes split by top-level subtree scale?",
+   "measure": "N TCP streams, each feeding its own receiver process: 1, 2, 4 and 8 lanes into mars (macOS), freya (ZFS) and the Pi (ext4); small-flat, small-deep, real-congress.",
+   "hypothesis": "The old xsync gained 1.12-2.18x with streams on Linux receivers and lost 1.12-1.17x on NTFS, where siblings were split across processes.",
+   "needs": [
+    "EXC-transport.C1"
+   ],
+   "estimateHours": null,
+   "design": null,
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "A6~end0",
+   "kind": "end",
+   "experiment": null,
+   "question": null,
+   "estimateHours": null,
+   "hypothesis": "Adopt lanes, chosen from the core count.",
+   "design": null,
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "A6~end1",
+   "kind": "end",
+   "experiment": null,
+   "question": null,
+   "estimateHours": null,
+   "hypothesis": "Adopt per platform.",
+   "design": null,
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "A6~end2",
+   "kind": "end",
+   "experiment": null,
+   "question": null,
+   "estimateHours": null,
+   "hypothesis": "Stop the multi-stream line.",
+   "design": null,
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "A7",
+   "kind": "experiment",
+   "experiment": null,
+   "title": "Writeback control",
+   "question": "Does starting writeback early shorten the time to durable?",
+   "measure": "Linux receivers only: sync_file_range as each file closes, then one syncfs. mars runs macOS, so on the Mac-mars link this node is dropped, not measured.",
+   "hypothesis": "P2b's eager-writeback arm was about 1.15x overall; it removed dirty-page throttling stalls such as one block's 56.6 s of receiver write time.",
+   "needs": [],
+   "estimateHours": null,
+   "design": null,
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "A7~end0",
+   "kind": "end",
+   "experiment": null,
+   "question": null,
+   "estimateHours": null,
+   "hypothesis": "Adopt on Linux receivers.",
+   "design": null,
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  },
+  {
+   "id": "A7~end1",
+   "kind": "end",
+   "experiment": null,
+   "question": null,
+   "estimateHours": null,
+   "hypothesis": "Drop.",
+   "design": null,
+   "state": "waiting",
+   "runs": [],
+   "decision": null,
+   "decidedUtc": null,
+   "start": false,
+   "promote": null
+  }
+ ],
+ "edges": [
+  {
+   "from": "A1",
+   "to": "A2",
+   "label": "faster: merge it",
+   "taken": true
+  },
+  {
+   "from": "A1",
+   "to": "A2",
+   "label": "no faster",
+   "taken": false
+  },
+  {
+   "from": "A2",
+   "to": "A3",
+   "label": "path walks: opening directories from the root",
+   "taken": null
+  },
+  {
+   "from": "A2",
+   "to": "A5",
+   "label": "per-directory requests and wakeups",
+   "taken": null
+  },
+  {
+   "from": "A2",
+   "to": "A6",
+   "label": "one receiver process saturated",
+   "taken": null
+  },
+  {
+   "from": "A2",
+   "to": "A7",
+   "label": "writeback stalls",
+   "taken": null
+  },
+  {
+   "from": "A2",
+   "to": "A2~end4",
+   "label": "within 1.3x of the local ceiling",
+   "taken": null
+  },
+  {
+   "from": "A3",
+   "to": "A3~end0",
+   "label": "fewer opens and faster",
+   "taken": null
+  },
+  {
+   "from": "A3",
+   "to": "A3~end1",
+   "label": "fewer opens, same time",
+   "taken": null
+  },
+  {
+   "from": "A5",
+   "to": "A5~end0",
+   "label": "10% or more faster",
+   "taken": null
+  },
+  {
+   "from": "A5",
+   "to": "A5~end1",
+   "label": "under 3%",
+   "taken": null
+  },
+  {
+   "from": "A6",
+   "to": "A6~end0",
+   "label": "scales on every receiver",
+   "taken": null
+  },
+  {
+   "from": "A6",
+   "to": "A6~end1",
+   "label": "scales on some receivers",
+   "taken": null
+  },
+  {
+   "from": "A6",
+   "to": "A6~end2",
+   "label": "no gain",
+   "taken": null
+  },
+  {
+   "from": "A7",
+   "to": "A7~end0",
+   "label": "faster to durable",
+   "taken": null
+  },
+  {
+   "from": "A7",
+   "to": "A7~end1",
+   "label": "no change",
+   "taken": null
+  }
+ ],
+ "decisions": [
+  {
+   "utc": "2026-10-22T07:16:52Z",
+   "node": "A2",
+   "kind": "note",
+   "text": "A2: running. measuring: After the receiver-lock change, small-file fresh copies are limited by per-file work on the receiving Mac. If so, -j8 and -j16 give little over -j4 while peer CPU rises, and the effect is stronger on  (CM-A2-10220216)"
+  },
+  {
+   "utc": "2026-10-21T21:42:16Z",
+   "node": "A1",
+   "kind": "decision",
+   "text": "A1: faster: merge it. fresh 0.411 (faster) / noop 1.007 (inconclusive). The receiver-lock branch (c5b765eb54fc against b02ae2394a86) is clearly faster on fresh copies: 'fresh 0.411 (faster)' with a 95% interval of 0.406 to 0.415 over 8 blocks. That is the minimum block count, but the interval is narrow and far below 1. No-op re-syncs are unchanged within noise: 'noop 1.007 (inconclusive)', interval 0.962 to 1.055. Keep it and merge. The pooled verdicts do not separate the default, --no-atomic and -j8 configurations, so whether extra receiving workers now help is not answered by these facts; A2 should look at that split."
+  },
+  {
+   "utc": "2026-10-21T21:11:40Z",
+   "node": "A1",
+   "kind": "note",
+   "text": "A1: running. racing c5b765eb54fc against b02ae2394a86 (CL-A1-c5b765eb54fc)"
+  },
+  {
+   "utc": "2026-10-21T20:56:29Z",
+   "node": "A1",
+   "kind": "note",
+   "text": "A1: running. built as c5b765eb54fc on b02ae2394a86; races next slot"
+  },
+  {
+   "utc": "2026-10-21T20:56:28Z",
+   "node": "A1",
+   "kind": "note",
+   "text": "A1: running. building: Small-file fresh copies are where xs-cpp trails most. Lab races: small-deep.fresh.mac-mars.sender at 24.037 s against xs-rs 9.84 s (rs_vs_cpp 0.409); small-flat.fresh.mac-mars.sender at 13.302 s again"
+  },
+  {
+   "utc": "2026-10-21T20:20:04Z",
+   "node": "A1",
+   "kind": "note",
+   "text": "A1: open. handed to the engineering-case loop"
+  },
+  {
+   "utc": "2026-10-21T19:31:04Z",
+   "node": "A1",
+   "kind": "note",
+   "text": "A1: running. Committed as 4c5c425c2434 on engine/receiver-locks, with LK1 (parent 21ae6844ed20) in dc2602b7. Not raced yet."
+  }
+ ]
+}

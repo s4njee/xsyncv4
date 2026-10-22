@@ -1,0 +1,75 @@
+{
+ "date": "2026-10-21",
+ "utc": "2026-10-21T16:55:32+00:00",
+ "link": "mac-mars-usb10g",
+ "note": "The first night of the loop: a baseline of experimental's tip against rust-ds's head, before any change by hand.",
+ "cpp": {
+  "commit": "fe012667764a40f56fcfe4e25838cfe16f341a70",
+  "subject": "Build the binaries of each commit the merge job merges, which GitHub's push trigger never sees",
+  "since": []
+ },
+ "rs": {
+  "commit": "aa7aee15098700d78754be2638e607d9467686de",
+  "subject": "Merge pull request #30 from s4njee/rs/flaky-io-config",
+  "since": []
+ },
+ "tree": "NIGHT-1021",
+ "experiments": [
+  {
+   "id": "NT1021-fresh",
+   "question": "Tonight's builds, fresh copies: how do rsync, xs-c++ and xs-rs compare?",
+   "blocks": 5,
+   "corpus": [
+    "small-flat",
+    "small-deep",
+    "mixed-bimodal",
+    "real-congress"
+   ],
+   "scenario": [
+    "fresh"
+   ],
+   "direction": [
+    "mac>mars",
+    "mars>mac"
+   ]
+  },
+  {
+   "id": "NT1021-noop",
+   "question": "Tonight's builds, noop copies: how do rsync, xs-c++ and xs-rs compare?",
+   "blocks": 5,
+   "corpus": [
+    "small-flat",
+    "small-deep",
+    "mixed-bimodal",
+    "real-congress"
+   ],
+   "scenario": [
+    "noop"
+   ],
+   "direction": [
+    "mac>mars",
+    "mars>mac"
+   ]
+  },
+  {
+   "id": "NT1021-update-10pct",
+   "question": "Tonight's builds, update-10pct copies: how do rsync, xs-c++ and xs-rs compare?",
+   "blocks": 5,
+   "corpus": [
+    "small-flat",
+    "small-deep",
+    "mixed-bimodal",
+    "real-congress"
+   ],
+   "scenario": [
+    "update-10pct"
+   ],
+   "direction": [
+    "mac>mars",
+    "mars>mac"
+   ]
+  }
+ ],
+ "done": [],
+ "retired": []
+}

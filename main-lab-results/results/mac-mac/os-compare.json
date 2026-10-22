@@ -1,0 +1,1255 @@
+{
+ "sources": [
+  {
+   "label": "mac-mac MM1 (xs-e6b)",
+   "experiment": "mac-mac/MM1-mac-mac-baseline",
+   "xs_arm": "xs-e6b",
+   "other_end": "macOS",
+   "cells": 16
+  },
+  {
+   "label": "mac-mac MM1 (xs-cpp -j4)",
+   "experiment": "mac-mac/MM1-mac-mac-baseline",
+   "xs_arm": "xs-cpp",
+   "other_end": "macOS",
+   "cells": 16
+  },
+  {
+   "label": "mac-mac MM0 sentinel",
+   "experiment": "mac-mac/MM0-mac-mac-sentinel",
+   "xs_arm": "xs",
+   "other_end": "macOS",
+   "cells": 8
+  },
+  {
+   "label": "mars on Linux E6b",
+   "experiment": "macmars/E6b-mac-mars-receiver-defaults",
+   "xs_arm": "xs",
+   "other_end": "Linux",
+   "cells": 20
+  },
+  {
+   "label": "mars on Linux S3 sentinel",
+   "experiment": "macmars/S3-mac-mars-sentinel",
+   "xs_arm": "xs",
+   "other_end": "Linux",
+   "cells": 8
+  },
+  {
+   "label": "freya on Linux G0",
+   "experiment": "tengig/G0-10g-baseline",
+   "xs_arm": "xs",
+   "other_end": "Linux",
+   "cells": 8
+  }
+ ],
+ "threshold": 0.1,
+ "rows": [
+  {
+   "corpus": "large-text",
+   "scenario": "fresh",
+   "role": "Mac receives",
+   "by_source": {
+    "freya on Linux G0": {
+     "xs_s": 10.919,
+     "rsync_s": 31.623,
+     "xs_over_rsync": 0.345,
+     "blocks": 8
+    }
+   }
+  },
+  {
+   "corpus": "large-text",
+   "scenario": "fresh",
+   "role": "Mac sends",
+   "by_source": {
+    "freya on Linux G0": {
+     "xs_s": 10.55,
+     "rsync_s": 25.782,
+     "xs_over_rsync": 0.409,
+     "blocks": 8
+    }
+   }
+  },
+  {
+   "corpus": "mixed-bimodal",
+   "scenario": "fresh",
+   "role": "Mac receives",
+   "by_source": {
+    "mac-mac MM1 (xs-e6b)": {
+     "xs_s": 4.462,
+     "rsync_s": 10.016,
+     "xs_over_rsync": 0.445,
+     "blocks": 6
+    },
+    "mac-mac MM1 (xs-cpp -j4)": {
+     "xs_s": 4.192,
+     "rsync_s": 10.016,
+     "xs_over_rsync": 0.419,
+     "blocks": 6
+    },
+    "mac-mac MM0 sentinel": {
+     "xs_s": 4.595,
+     "rsync_s": 11.458,
+     "xs_over_rsync": 0.401,
+     "blocks": 4
+    },
+    "mars on Linux E6b": {
+     "xs_s": 5.309,
+     "rsync_s": 10.872,
+     "xs_over_rsync": 0.488,
+     "blocks": 12
+    },
+    "mars on Linux S3 sentinel": {
+     "xs_s": 3.868,
+     "rsync_s": 8.705,
+     "xs_over_rsync": 0.444,
+     "blocks": 8
+    },
+    "freya on Linux G0": {
+     "xs_s": 5.248,
+     "rsync_s": 10.573,
+     "xs_over_rsync": 0.496,
+     "blocks": 8
+    }
+   }
+  },
+  {
+   "corpus": "mixed-bimodal",
+   "scenario": "fresh",
+   "role": "Mac sends",
+   "by_source": {
+    "mac-mac MM1 (xs-e6b)": {
+     "xs_s": 5.809,
+     "rsync_s": 9.945,
+     "xs_over_rsync": 0.584,
+     "blocks": 7
+    },
+    "mac-mac MM1 (xs-cpp -j4)": {
+     "xs_s": 5.346,
+     "rsync_s": 9.945,
+     "xs_over_rsync": 0.538,
+     "blocks": 7
+    },
+    "mac-mac MM0 sentinel": {
+     "xs_s": 4.04,
+     "rsync_s": 8.117,
+     "xs_over_rsync": 0.498,
+     "blocks": 4
+    },
+    "mars on Linux E6b": {
+     "xs_s": 2.368,
+     "rsync_s": 6.543,
+     "xs_over_rsync": 0.362,
+     "blocks": 12
+    },
+    "mars on Linux S3 sentinel": {
+     "xs_s": 1.994,
+     "rsync_s": 5.83,
+     "xs_over_rsync": 0.342,
+     "blocks": 10
+    },
+    "freya on Linux G0": {
+     "xs_s": 2.064,
+     "rsync_s": 6.78,
+     "xs_over_rsync": 0.304,
+     "blocks": 8
+    }
+   }
+  },
+  {
+   "corpus": "mixed-bimodal",
+   "scenario": "noop",
+   "role": "Mac receives",
+   "by_source": {
+    "mac-mac MM1 (xs-e6b)": {
+     "xs_s": 0.43,
+     "rsync_s": 0.455,
+     "xs_over_rsync": 0.945,
+     "blocks": 7
+    },
+    "mac-mac MM1 (xs-cpp -j4)": {
+     "xs_s": 0.335,
+     "rsync_s": 0.455,
+     "xs_over_rsync": 0.738,
+     "blocks": 7
+    },
+    "mac-mac MM0 sentinel": {
+     "xs_s": 0.371,
+     "rsync_s": 0.453,
+     "xs_over_rsync": 0.818,
+     "blocks": 4
+    },
+    "mars on Linux E6b": {
+     "xs_s": 0.456,
+     "rsync_s": 0.513,
+     "xs_over_rsync": 0.888,
+     "blocks": 12
+    },
+    "mars on Linux S3 sentinel": {
+     "xs_s": 0.407,
+     "rsync_s": 0.456,
+     "xs_over_rsync": 0.894,
+     "blocks": 8
+    }
+   }
+  },
+  {
+   "corpus": "mixed-bimodal",
+   "scenario": "noop",
+   "role": "Mac sends",
+   "by_source": {
+    "mac-mac MM1 (xs-e6b)": {
+     "xs_s": 0.419,
+     "rsync_s": 0.539,
+     "xs_over_rsync": 0.778,
+     "blocks": 6
+    },
+    "mac-mac MM1 (xs-cpp -j4)": {
+     "xs_s": 0.378,
+     "rsync_s": 0.539,
+     "xs_over_rsync": 0.701,
+     "blocks": 6
+    },
+    "mac-mac MM0 sentinel": {
+     "xs_s": 0.383,
+     "rsync_s": 0.505,
+     "xs_over_rsync": 0.758,
+     "blocks": 4
+    },
+    "mars on Linux E6b": {
+     "xs_s": 0.266,
+     "rsync_s": 0.365,
+     "xs_over_rsync": 0.73,
+     "blocks": 12
+    },
+    "mars on Linux S3 sentinel": {
+     "xs_s": 0.297,
+     "rsync_s": 0.375,
+     "xs_over_rsync": 0.792,
+     "blocks": 10
+    }
+   }
+  },
+  {
+   "corpus": "real-congress",
+   "scenario": "fresh",
+   "role": "Mac receives",
+   "by_source": {
+    "mac-mac MM1 (xs-e6b)": {
+     "xs_s": 49.034,
+     "rsync_s": 84.859,
+     "xs_over_rsync": 0.578,
+     "blocks": 6
+    },
+    "mac-mac MM1 (xs-cpp -j4)": {
+     "xs_s": 45.783,
+     "rsync_s": 84.859,
+     "xs_over_rsync": 0.54,
+     "blocks": 6
+    },
+    "mars on Linux E6b": {
+     "xs_s": 67.8,
+     "rsync_s": 93.747,
+     "xs_over_rsync": 0.723,
+     "blocks": 12
+    },
+    "freya on Linux G0": {
+     "xs_s": 54.255,
+     "rsync_s": 60.351,
+     "xs_over_rsync": 0.899,
+     "blocks": 8
+    }
+   }
+  },
+  {
+   "corpus": "real-congress",
+   "scenario": "fresh",
+   "role": "Mac sends",
+   "by_source": {
+    "mac-mac MM1 (xs-e6b)": {
+     "xs_s": 32.388,
+     "rsync_s": 44.129,
+     "xs_over_rsync": 0.734,
+     "blocks": 6
+    },
+    "mac-mac MM1 (xs-cpp -j4)": {
+     "xs_s": 31.487,
+     "rsync_s": 44.129,
+     "xs_over_rsync": 0.714,
+     "blocks": 6
+    },
+    "mars on Linux E6b": {
+     "xs_s": 9.869,
+     "rsync_s": 42.023,
+     "xs_over_rsync": 0.235,
+     "blocks": 12
+    },
+    "freya on Linux G0": {
+     "xs_s": 9.743,
+     "rsync_s": 41.813,
+     "xs_over_rsync": 0.233,
+     "blocks": 8
+    }
+   }
+  },
+  {
+   "corpus": "real-congress",
+   "scenario": "noop",
+   "role": "Mac receives",
+   "by_source": {
+    "mac-mac MM1 (xs-e6b)": {
+     "xs_s": 3.268,
+     "rsync_s": 5.699,
+     "xs_over_rsync": 0.573,
+     "blocks": 6
+    },
+    "mac-mac MM1 (xs-cpp -j4)": {
+     "xs_s": 2.489,
+     "rsync_s": 5.699,
+     "xs_over_rsync": 0.437,
+     "blocks": 6
+    },
+    "mars on Linux E6b": {
+     "xs_s": 4.069,
+     "rsync_s": 5.673,
+     "xs_over_rsync": 0.717,
+     "blocks": 12
+    }
+   }
+  },
+  {
+   "corpus": "real-congress",
+   "scenario": "noop",
+   "role": "Mac sends",
+   "by_source": {
+    "mac-mac MM1 (xs-e6b)": {
+     "xs_s": 2.589,
+     "rsync_s": 6.763,
+     "xs_over_rsync": 0.383,
+     "blocks": 6
+    },
+    "mac-mac MM1 (xs-cpp -j4)": {
+     "xs_s": 2.007,
+     "rsync_s": 6.763,
+     "xs_over_rsync": 0.297,
+     "blocks": 6
+    },
+    "mars on Linux E6b": {
+     "xs_s": 1.913,
+     "rsync_s": 7.623,
+     "xs_over_rsync": 0.251,
+     "blocks": 12
+    }
+   }
+  },
+  {
+   "corpus": "small-deep",
+   "scenario": "fresh",
+   "role": "Mac receives",
+   "by_source": {
+    "mac-mac MM1 (xs-e6b)": {
+     "xs_s": 43.954,
+     "rsync_s": 47.248,
+     "xs_over_rsync": 0.93,
+     "blocks": 6
+    },
+    "mac-mac MM1 (xs-cpp -j4)": {
+     "xs_s": 48.496,
+     "rsync_s": 47.248,
+     "xs_over_rsync": 1.026,
+     "blocks": 6
+    },
+    "mars on Linux E6b": {
+     "xs_s": 53.921,
+     "rsync_s": 62.787,
+     "xs_over_rsync": 0.859,
+     "blocks": 12
+    }
+   }
+  },
+  {
+   "corpus": "small-deep",
+   "scenario": "fresh",
+   "role": "Mac sends",
+   "by_source": {
+    "mac-mac MM1 (xs-e6b)": {
+     "xs_s": 24.612,
+     "rsync_s": 28.934,
+     "xs_over_rsync": 0.851,
+     "blocks": 6
+    },
+    "mac-mac MM1 (xs-cpp -j4)": {
+     "xs_s": 23.962,
+     "rsync_s": 28.934,
+     "xs_over_rsync": 0.828,
+     "blocks": 6
+    },
+    "mars on Linux E6b": {
+     "xs_s": 8.921,
+     "rsync_s": 31.459,
+     "xs_over_rsync": 0.284,
+     "blocks": 12
+    }
+   }
+  },
+  {
+   "corpus": "small-deep",
+   "scenario": "noop",
+   "role": "Mac receives",
+   "by_source": {
+    "mac-mac MM1 (xs-e6b)": {
+     "xs_s": 9.046,
+     "rsync_s": 8.94,
+     "xs_over_rsync": 1.012,
+     "blocks": 7
+    },
+    "mac-mac MM1 (xs-cpp -j4)": {
+     "xs_s": 9.394,
+     "rsync_s": 8.94,
+     "xs_over_rsync": 1.051,
+     "blocks": 7
+    },
+    "mars on Linux E6b": {
+     "xs_s": 10.694,
+     "rsync_s": 5.77,
+     "xs_over_rsync": 1.853,
+     "blocks": 12
+    }
+   }
+  },
+  {
+   "corpus": "small-deep",
+   "scenario": "noop",
+   "role": "Mac sends",
+   "by_source": {
+    "mac-mac MM1 (xs-e6b)": {
+     "xs_s": 3.967,
+     "rsync_s": 11.855,
+     "xs_over_rsync": 0.335,
+     "blocks": 6
+    },
+    "mac-mac MM1 (xs-cpp -j4)": {
+     "xs_s": 3.711,
+     "rsync_s": 11.855,
+     "xs_over_rsync": 0.313,
+     "blocks": 6
+    },
+    "mars on Linux E6b": {
+     "xs_s": 3.098,
+     "rsync_s": 13.979,
+     "xs_over_rsync": 0.222,
+     "blocks": 12
+    }
+   }
+  },
+  {
+   "corpus": "small-flat",
+   "scenario": "fresh",
+   "role": "Mac receives",
+   "by_source": {
+    "mac-mac MM1 (xs-e6b)": {
+     "xs_s": 18.479,
+     "rsync_s": 28.582,
+     "xs_over_rsync": 0.647,
+     "blocks": 6
+    },
+    "mac-mac MM1 (xs-cpp -j4)": {
+     "xs_s": 18.926,
+     "rsync_s": 28.582,
+     "xs_over_rsync": 0.662,
+     "blocks": 6
+    },
+    "mac-mac MM0 sentinel": {
+     "xs_s": 18.452,
+     "rsync_s": 26.627,
+     "xs_over_rsync": 0.693,
+     "blocks": 4
+    },
+    "mars on Linux E6b": {
+     "xs_s": 20.858,
+     "rsync_s": 30.304,
+     "xs_over_rsync": 0.688,
+     "blocks": 12
+    },
+    "mars on Linux S3 sentinel": {
+     "xs_s": 16.745,
+     "rsync_s": 26.476,
+     "xs_over_rsync": 0.632,
+     "blocks": 8
+    },
+    "freya on Linux G0": {
+     "xs_s": 19.636,
+     "rsync_s": 25.606,
+     "xs_over_rsync": 0.767,
+     "blocks": 8
+    }
+   }
+  },
+  {
+   "corpus": "small-flat",
+   "scenario": "fresh",
+   "role": "Mac sends",
+   "by_source": {
+    "mac-mac MM1 (xs-e6b)": {
+     "xs_s": 13.763,
+     "rsync_s": 17.416,
+     "xs_over_rsync": 0.79,
+     "blocks": 6
+    },
+    "mac-mac MM1 (xs-cpp -j4)": {
+     "xs_s": 13.77,
+     "rsync_s": 17.416,
+     "xs_over_rsync": 0.791,
+     "blocks": 6
+    },
+    "mac-mac MM0 sentinel": {
+     "xs_s": 13.714,
+     "rsync_s": 18.338,
+     "xs_over_rsync": 0.748,
+     "blocks": 4
+    },
+    "mars on Linux E6b": {
+     "xs_s": 4.37,
+     "rsync_s": 10.83,
+     "xs_over_rsync": 0.404,
+     "blocks": 12
+    },
+    "mars on Linux S3 sentinel": {
+     "xs_s": 4.385,
+     "rsync_s": 10.744,
+     "xs_over_rsync": 0.408,
+     "blocks": 10
+    },
+    "freya on Linux G0": {
+     "xs_s": 3.86,
+     "rsync_s": 6.61,
+     "xs_over_rsync": 0.584,
+     "blocks": 8
+    }
+   }
+  },
+  {
+   "corpus": "small-flat",
+   "scenario": "noop",
+   "role": "Mac receives",
+   "by_source": {
+    "mac-mac MM1 (xs-e6b)": {
+     "xs_s": 0.824,
+     "rsync_s": 1.46,
+     "xs_over_rsync": 0.564,
+     "blocks": 7
+    },
+    "mac-mac MM1 (xs-cpp -j4)": {
+     "xs_s": 0.51,
+     "rsync_s": 1.46,
+     "xs_over_rsync": 0.349,
+     "blocks": 7
+    },
+    "mac-mac MM0 sentinel": {
+     "xs_s": 0.829,
+     "rsync_s": 1.455,
+     "xs_over_rsync": 0.57,
+     "blocks": 4
+    },
+    "mars on Linux E6b": {
+     "xs_s": 0.938,
+     "rsync_s": 1.412,
+     "xs_over_rsync": 0.664,
+     "blocks": 12
+    },
+    "mars on Linux S3 sentinel": {
+     "xs_s": 0.67,
+     "rsync_s": 1.137,
+     "xs_over_rsync": 0.589,
+     "blocks": 8
+    }
+   }
+  },
+  {
+   "corpus": "small-flat",
+   "scenario": "noop",
+   "role": "Mac sends",
+   "by_source": {
+    "mac-mac MM1 (xs-e6b)": {
+     "xs_s": 0.782,
+     "rsync_s": 1.715,
+     "xs_over_rsync": 0.456,
+     "blocks": 6
+    },
+    "mac-mac MM1 (xs-cpp -j4)": {
+     "xs_s": 0.495,
+     "rsync_s": 1.715,
+     "xs_over_rsync": 0.288,
+     "blocks": 6
+    },
+    "mac-mac MM0 sentinel": {
+     "xs_s": 0.681,
+     "rsync_s": 1.365,
+     "xs_over_rsync": 0.499,
+     "blocks": 4
+    },
+    "mars on Linux E6b": {
+     "xs_s": 0.376,
+     "rsync_s": 0.84,
+     "xs_over_rsync": 0.447,
+     "blocks": 12
+    },
+    "mars on Linux S3 sentinel": {
+     "xs_s": 0.351,
+     "rsync_s": 0.741,
+     "xs_over_rsync": 0.474,
+     "blocks": 10
+    }
+   }
+  },
+  {
+   "corpus": "tiny-one",
+   "scenario": "fresh",
+   "role": "Mac receives",
+   "by_source": {
+    "mars on Linux E6b": {
+     "xs_s": 0.301,
+     "rsync_s": 0.385,
+     "xs_over_rsync": 0.781,
+     "blocks": 12
+    }
+   }
+  },
+  {
+   "corpus": "tiny-one",
+   "scenario": "fresh",
+   "role": "Mac sends",
+   "by_source": {
+    "mars on Linux E6b": {
+     "xs_s": 0.223,
+     "rsync_s": 0.245,
+     "xs_over_rsync": 0.908,
+     "blocks": 12
+    }
+   }
+  },
+  {
+   "corpus": "tiny-one",
+   "scenario": "noop",
+   "role": "Mac receives",
+   "by_source": {
+    "mars on Linux E6b": {
+     "xs_s": 0.317,
+     "rsync_s": 0.312,
+     "xs_over_rsync": 1.014,
+     "blocks": 12
+    }
+   }
+  },
+  {
+   "corpus": "tiny-one",
+   "scenario": "noop",
+   "role": "Mac sends",
+   "by_source": {
+    "mars on Linux E6b": {
+     "xs_s": 0.228,
+     "rsync_s": 0.262,
+     "xs_over_rsync": 0.87,
+     "blocks": 12
+    }
+   }
+  }
+ ],
+ "discrepancies": [
+  {
+   "corpus": "mixed-bimodal",
+   "scenario": "fresh",
+   "role": "Mac receives",
+   "mac_mac": "mac-mac MM1 (xs-e6b)",
+   "linux": "freya on Linux G0",
+   "mac_mac_ratio": 0.445,
+   "linux_ratio": 0.496,
+   "change": -0.103,
+   "winner_changed": false
+  },
+  {
+   "corpus": "mixed-bimodal",
+   "scenario": "fresh",
+   "role": "Mac receives",
+   "mac_mac": "mac-mac MM1 (xs-cpp -j4)",
+   "linux": "mars on Linux E6b",
+   "mac_mac_ratio": 0.419,
+   "linux_ratio": 0.488,
+   "change": -0.141,
+   "winner_changed": false
+  },
+  {
+   "corpus": "mixed-bimodal",
+   "scenario": "fresh",
+   "role": "Mac receives",
+   "mac_mac": "mac-mac MM1 (xs-cpp -j4)",
+   "linux": "freya on Linux G0",
+   "mac_mac_ratio": 0.419,
+   "linux_ratio": 0.496,
+   "change": -0.155,
+   "winner_changed": false
+  },
+  {
+   "corpus": "mixed-bimodal",
+   "scenario": "fresh",
+   "role": "Mac receives",
+   "mac_mac": "mac-mac MM0 sentinel",
+   "linux": "mars on Linux E6b",
+   "mac_mac_ratio": 0.401,
+   "linux_ratio": 0.488,
+   "change": -0.178,
+   "winner_changed": false
+  },
+  {
+   "corpus": "mixed-bimodal",
+   "scenario": "fresh",
+   "role": "Mac receives",
+   "mac_mac": "mac-mac MM0 sentinel",
+   "linux": "freya on Linux G0",
+   "mac_mac_ratio": 0.401,
+   "linux_ratio": 0.496,
+   "change": -0.192,
+   "winner_changed": false
+  },
+  {
+   "corpus": "mixed-bimodal",
+   "scenario": "fresh",
+   "role": "Mac sends",
+   "mac_mac": "mac-mac MM1 (xs-e6b)",
+   "linux": "mars on Linux E6b",
+   "mac_mac_ratio": 0.584,
+   "linux_ratio": 0.362,
+   "change": 0.613,
+   "winner_changed": false
+  },
+  {
+   "corpus": "mixed-bimodal",
+   "scenario": "fresh",
+   "role": "Mac sends",
+   "mac_mac": "mac-mac MM1 (xs-e6b)",
+   "linux": "mars on Linux S3 sentinel",
+   "mac_mac_ratio": 0.584,
+   "linux_ratio": 0.342,
+   "change": 0.708,
+   "winner_changed": false
+  },
+  {
+   "corpus": "mixed-bimodal",
+   "scenario": "fresh",
+   "role": "Mac sends",
+   "mac_mac": "mac-mac MM1 (xs-e6b)",
+   "linux": "freya on Linux G0",
+   "mac_mac_ratio": 0.584,
+   "linux_ratio": 0.304,
+   "change": 0.921,
+   "winner_changed": false
+  },
+  {
+   "corpus": "mixed-bimodal",
+   "scenario": "fresh",
+   "role": "Mac sends",
+   "mac_mac": "mac-mac MM1 (xs-cpp -j4)",
+   "linux": "mars on Linux E6b",
+   "mac_mac_ratio": 0.538,
+   "linux_ratio": 0.362,
+   "change": 0.486,
+   "winner_changed": false
+  },
+  {
+   "corpus": "mixed-bimodal",
+   "scenario": "fresh",
+   "role": "Mac sends",
+   "mac_mac": "mac-mac MM1 (xs-cpp -j4)",
+   "linux": "mars on Linux S3 sentinel",
+   "mac_mac_ratio": 0.538,
+   "linux_ratio": 0.342,
+   "change": 0.573,
+   "winner_changed": false
+  },
+  {
+   "corpus": "mixed-bimodal",
+   "scenario": "fresh",
+   "role": "Mac sends",
+   "mac_mac": "mac-mac MM1 (xs-cpp -j4)",
+   "linux": "freya on Linux G0",
+   "mac_mac_ratio": 0.538,
+   "linux_ratio": 0.304,
+   "change": 0.77,
+   "winner_changed": false
+  },
+  {
+   "corpus": "mixed-bimodal",
+   "scenario": "fresh",
+   "role": "Mac sends",
+   "mac_mac": "mac-mac MM0 sentinel",
+   "linux": "mars on Linux E6b",
+   "mac_mac_ratio": 0.498,
+   "linux_ratio": 0.362,
+   "change": 0.376,
+   "winner_changed": false
+  },
+  {
+   "corpus": "mixed-bimodal",
+   "scenario": "fresh",
+   "role": "Mac sends",
+   "mac_mac": "mac-mac MM0 sentinel",
+   "linux": "mars on Linux S3 sentinel",
+   "mac_mac_ratio": 0.498,
+   "linux_ratio": 0.342,
+   "change": 0.456,
+   "winner_changed": false
+  },
+  {
+   "corpus": "mixed-bimodal",
+   "scenario": "fresh",
+   "role": "Mac sends",
+   "mac_mac": "mac-mac MM0 sentinel",
+   "linux": "freya on Linux G0",
+   "mac_mac_ratio": 0.498,
+   "linux_ratio": 0.304,
+   "change": 0.638,
+   "winner_changed": false
+  },
+  {
+   "corpus": "mixed-bimodal",
+   "scenario": "noop",
+   "role": "Mac receives",
+   "mac_mac": "mac-mac MM1 (xs-cpp -j4)",
+   "linux": "mars on Linux E6b",
+   "mac_mac_ratio": 0.738,
+   "linux_ratio": 0.888,
+   "change": -0.169,
+   "winner_changed": false
+  },
+  {
+   "corpus": "mixed-bimodal",
+   "scenario": "noop",
+   "role": "Mac receives",
+   "mac_mac": "mac-mac MM1 (xs-cpp -j4)",
+   "linux": "mars on Linux S3 sentinel",
+   "mac_mac_ratio": 0.738,
+   "linux_ratio": 0.894,
+   "change": -0.174,
+   "winner_changed": false
+  },
+  {
+   "corpus": "mixed-bimodal",
+   "scenario": "noop",
+   "role": "Mac sends",
+   "mac_mac": "mac-mac MM1 (xs-cpp -j4)",
+   "linux": "mars on Linux S3 sentinel",
+   "mac_mac_ratio": 0.701,
+   "linux_ratio": 0.792,
+   "change": -0.115,
+   "winner_changed": false
+  },
+  {
+   "corpus": "real-congress",
+   "scenario": "fresh",
+   "role": "Mac receives",
+   "mac_mac": "mac-mac MM1 (xs-e6b)",
+   "linux": "mars on Linux E6b",
+   "mac_mac_ratio": 0.578,
+   "linux_ratio": 0.723,
+   "change": -0.201,
+   "winner_changed": false
+  },
+  {
+   "corpus": "real-congress",
+   "scenario": "fresh",
+   "role": "Mac receives",
+   "mac_mac": "mac-mac MM1 (xs-e6b)",
+   "linux": "freya on Linux G0",
+   "mac_mac_ratio": 0.578,
+   "linux_ratio": 0.899,
+   "change": -0.357,
+   "winner_changed": false
+  },
+  {
+   "corpus": "real-congress",
+   "scenario": "fresh",
+   "role": "Mac receives",
+   "mac_mac": "mac-mac MM1 (xs-cpp -j4)",
+   "linux": "mars on Linux E6b",
+   "mac_mac_ratio": 0.54,
+   "linux_ratio": 0.723,
+   "change": -0.253,
+   "winner_changed": false
+  },
+  {
+   "corpus": "real-congress",
+   "scenario": "fresh",
+   "role": "Mac receives",
+   "mac_mac": "mac-mac MM1 (xs-cpp -j4)",
+   "linux": "freya on Linux G0",
+   "mac_mac_ratio": 0.54,
+   "linux_ratio": 0.899,
+   "change": -0.399,
+   "winner_changed": false
+  },
+  {
+   "corpus": "real-congress",
+   "scenario": "fresh",
+   "role": "Mac sends",
+   "mac_mac": "mac-mac MM1 (xs-e6b)",
+   "linux": "mars on Linux E6b",
+   "mac_mac_ratio": 0.734,
+   "linux_ratio": 0.235,
+   "change": 2.123,
+   "winner_changed": false
+  },
+  {
+   "corpus": "real-congress",
+   "scenario": "fresh",
+   "role": "Mac sends",
+   "mac_mac": "mac-mac MM1 (xs-e6b)",
+   "linux": "freya on Linux G0",
+   "mac_mac_ratio": 0.734,
+   "linux_ratio": 0.233,
+   "change": 2.15,
+   "winner_changed": false
+  },
+  {
+   "corpus": "real-congress",
+   "scenario": "fresh",
+   "role": "Mac sends",
+   "mac_mac": "mac-mac MM1 (xs-cpp -j4)",
+   "linux": "mars on Linux E6b",
+   "mac_mac_ratio": 0.714,
+   "linux_ratio": 0.235,
+   "change": 2.038,
+   "winner_changed": false
+  },
+  {
+   "corpus": "real-congress",
+   "scenario": "fresh",
+   "role": "Mac sends",
+   "mac_mac": "mac-mac MM1 (xs-cpp -j4)",
+   "linux": "freya on Linux G0",
+   "mac_mac_ratio": 0.714,
+   "linux_ratio": 0.233,
+   "change": 2.064,
+   "winner_changed": false
+  },
+  {
+   "corpus": "real-congress",
+   "scenario": "noop",
+   "role": "Mac receives",
+   "mac_mac": "mac-mac MM1 (xs-e6b)",
+   "linux": "mars on Linux E6b",
+   "mac_mac_ratio": 0.573,
+   "linux_ratio": 0.717,
+   "change": -0.201,
+   "winner_changed": false
+  },
+  {
+   "corpus": "real-congress",
+   "scenario": "noop",
+   "role": "Mac receives",
+   "mac_mac": "mac-mac MM1 (xs-cpp -j4)",
+   "linux": "mars on Linux E6b",
+   "mac_mac_ratio": 0.437,
+   "linux_ratio": 0.717,
+   "change": -0.391,
+   "winner_changed": false
+  },
+  {
+   "corpus": "real-congress",
+   "scenario": "noop",
+   "role": "Mac sends",
+   "mac_mac": "mac-mac MM1 (xs-e6b)",
+   "linux": "mars on Linux E6b",
+   "mac_mac_ratio": 0.383,
+   "linux_ratio": 0.251,
+   "change": 0.526,
+   "winner_changed": false
+  },
+  {
+   "corpus": "real-congress",
+   "scenario": "noop",
+   "role": "Mac sends",
+   "mac_mac": "mac-mac MM1 (xs-cpp -j4)",
+   "linux": "mars on Linux E6b",
+   "mac_mac_ratio": 0.297,
+   "linux_ratio": 0.251,
+   "change": 0.183,
+   "winner_changed": false
+  },
+  {
+   "corpus": "small-deep",
+   "scenario": "fresh",
+   "role": "Mac receives",
+   "mac_mac": "mac-mac MM1 (xs-cpp -j4)",
+   "linux": "mars on Linux E6b",
+   "mac_mac_ratio": 1.026,
+   "linux_ratio": 0.859,
+   "change": 0.194,
+   "winner_changed": true
+  },
+  {
+   "corpus": "small-deep",
+   "scenario": "fresh",
+   "role": "Mac sends",
+   "mac_mac": "mac-mac MM1 (xs-e6b)",
+   "linux": "mars on Linux E6b",
+   "mac_mac_ratio": 0.851,
+   "linux_ratio": 0.284,
+   "change": 1.996,
+   "winner_changed": false
+  },
+  {
+   "corpus": "small-deep",
+   "scenario": "fresh",
+   "role": "Mac sends",
+   "mac_mac": "mac-mac MM1 (xs-cpp -j4)",
+   "linux": "mars on Linux E6b",
+   "mac_mac_ratio": 0.828,
+   "linux_ratio": 0.284,
+   "change": 1.915,
+   "winner_changed": false
+  },
+  {
+   "corpus": "small-deep",
+   "scenario": "noop",
+   "role": "Mac receives",
+   "mac_mac": "mac-mac MM1 (xs-e6b)",
+   "linux": "mars on Linux E6b",
+   "mac_mac_ratio": 1.012,
+   "linux_ratio": 1.853,
+   "change": -0.454,
+   "winner_changed": false
+  },
+  {
+   "corpus": "small-deep",
+   "scenario": "noop",
+   "role": "Mac receives",
+   "mac_mac": "mac-mac MM1 (xs-cpp -j4)",
+   "linux": "mars on Linux E6b",
+   "mac_mac_ratio": 1.051,
+   "linux_ratio": 1.853,
+   "change": -0.433,
+   "winner_changed": false
+  },
+  {
+   "corpus": "small-deep",
+   "scenario": "noop",
+   "role": "Mac sends",
+   "mac_mac": "mac-mac MM1 (xs-e6b)",
+   "linux": "mars on Linux E6b",
+   "mac_mac_ratio": 0.335,
+   "linux_ratio": 0.222,
+   "change": 0.509,
+   "winner_changed": false
+  },
+  {
+   "corpus": "small-deep",
+   "scenario": "noop",
+   "role": "Mac sends",
+   "mac_mac": "mac-mac MM1 (xs-cpp -j4)",
+   "linux": "mars on Linux E6b",
+   "mac_mac_ratio": 0.313,
+   "linux_ratio": 0.222,
+   "change": 0.41,
+   "winner_changed": false
+  },
+  {
+   "corpus": "small-flat",
+   "scenario": "fresh",
+   "role": "Mac receives",
+   "mac_mac": "mac-mac MM1 (xs-e6b)",
+   "linux": "freya on Linux G0",
+   "mac_mac_ratio": 0.647,
+   "linux_ratio": 0.767,
+   "change": -0.156,
+   "winner_changed": false
+  },
+  {
+   "corpus": "small-flat",
+   "scenario": "fresh",
+   "role": "Mac receives",
+   "mac_mac": "mac-mac MM1 (xs-cpp -j4)",
+   "linux": "freya on Linux G0",
+   "mac_mac_ratio": 0.662,
+   "linux_ratio": 0.767,
+   "change": -0.137,
+   "winner_changed": false
+  },
+  {
+   "corpus": "small-flat",
+   "scenario": "fresh",
+   "role": "Mac sends",
+   "mac_mac": "mac-mac MM1 (xs-e6b)",
+   "linux": "mars on Linux E6b",
+   "mac_mac_ratio": 0.79,
+   "linux_ratio": 0.404,
+   "change": 0.955,
+   "winner_changed": false
+  },
+  {
+   "corpus": "small-flat",
+   "scenario": "fresh",
+   "role": "Mac sends",
+   "mac_mac": "mac-mac MM1 (xs-e6b)",
+   "linux": "mars on Linux S3 sentinel",
+   "mac_mac_ratio": 0.79,
+   "linux_ratio": 0.408,
+   "change": 0.936,
+   "winner_changed": false
+  },
+  {
+   "corpus": "small-flat",
+   "scenario": "fresh",
+   "role": "Mac sends",
+   "mac_mac": "mac-mac MM1 (xs-e6b)",
+   "linux": "freya on Linux G0",
+   "mac_mac_ratio": 0.79,
+   "linux_ratio": 0.584,
+   "change": 0.353,
+   "winner_changed": false
+  },
+  {
+   "corpus": "small-flat",
+   "scenario": "fresh",
+   "role": "Mac sends",
+   "mac_mac": "mac-mac MM1 (xs-cpp -j4)",
+   "linux": "mars on Linux E6b",
+   "mac_mac_ratio": 0.791,
+   "linux_ratio": 0.404,
+   "change": 0.958,
+   "winner_changed": false
+  },
+  {
+   "corpus": "small-flat",
+   "scenario": "fresh",
+   "role": "Mac sends",
+   "mac_mac": "mac-mac MM1 (xs-cpp -j4)",
+   "linux": "mars on Linux S3 sentinel",
+   "mac_mac_ratio": 0.791,
+   "linux_ratio": 0.408,
+   "change": 0.939,
+   "winner_changed": false
+  },
+  {
+   "corpus": "small-flat",
+   "scenario": "fresh",
+   "role": "Mac sends",
+   "mac_mac": "mac-mac MM1 (xs-cpp -j4)",
+   "linux": "freya on Linux G0",
+   "mac_mac_ratio": 0.791,
+   "linux_ratio": 0.584,
+   "change": 0.354,
+   "winner_changed": false
+  },
+  {
+   "corpus": "small-flat",
+   "scenario": "fresh",
+   "role": "Mac sends",
+   "mac_mac": "mac-mac MM0 sentinel",
+   "linux": "mars on Linux E6b",
+   "mac_mac_ratio": 0.748,
+   "linux_ratio": 0.404,
+   "change": 0.851,
+   "winner_changed": false
+  },
+  {
+   "corpus": "small-flat",
+   "scenario": "fresh",
+   "role": "Mac sends",
+   "mac_mac": "mac-mac MM0 sentinel",
+   "linux": "mars on Linux S3 sentinel",
+   "mac_mac_ratio": 0.748,
+   "linux_ratio": 0.408,
+   "change": 0.833,
+   "winner_changed": false
+  },
+  {
+   "corpus": "small-flat",
+   "scenario": "fresh",
+   "role": "Mac sends",
+   "mac_mac": "mac-mac MM0 sentinel",
+   "linux": "freya on Linux G0",
+   "mac_mac_ratio": 0.748,
+   "linux_ratio": 0.584,
+   "change": 0.281,
+   "winner_changed": false
+  },
+  {
+   "corpus": "small-flat",
+   "scenario": "noop",
+   "role": "Mac receives",
+   "mac_mac": "mac-mac MM1 (xs-e6b)",
+   "linux": "mars on Linux E6b",
+   "mac_mac_ratio": 0.564,
+   "linux_ratio": 0.664,
+   "change": -0.151,
+   "winner_changed": false
+  },
+  {
+   "corpus": "small-flat",
+   "scenario": "noop",
+   "role": "Mac receives",
+   "mac_mac": "mac-mac MM1 (xs-cpp -j4)",
+   "linux": "mars on Linux E6b",
+   "mac_mac_ratio": 0.349,
+   "linux_ratio": 0.664,
+   "change": -0.474,
+   "winner_changed": false
+  },
+  {
+   "corpus": "small-flat",
+   "scenario": "noop",
+   "role": "Mac receives",
+   "mac_mac": "mac-mac MM1 (xs-cpp -j4)",
+   "linux": "mars on Linux S3 sentinel",
+   "mac_mac_ratio": 0.349,
+   "linux_ratio": 0.589,
+   "change": -0.407,
+   "winner_changed": false
+  },
+  {
+   "corpus": "small-flat",
+   "scenario": "noop",
+   "role": "Mac receives",
+   "mac_mac": "mac-mac MM0 sentinel",
+   "linux": "mars on Linux E6b",
+   "mac_mac_ratio": 0.57,
+   "linux_ratio": 0.664,
+   "change": -0.142,
+   "winner_changed": false
+  },
+  {
+   "corpus": "small-flat",
+   "scenario": "noop",
+   "role": "Mac sends",
+   "mac_mac": "mac-mac MM1 (xs-cpp -j4)",
+   "linux": "mars on Linux E6b",
+   "mac_mac_ratio": 0.288,
+   "linux_ratio": 0.447,
+   "change": -0.356,
+   "winner_changed": false
+  },
+  {
+   "corpus": "small-flat",
+   "scenario": "noop",
+   "role": "Mac sends",
+   "mac_mac": "mac-mac MM1 (xs-cpp -j4)",
+   "linux": "mars on Linux S3 sentinel",
+   "mac_mac_ratio": 0.288,
+   "linux_ratio": 0.474,
+   "change": -0.392,
+   "winner_changed": false
+  },
+  {
+   "corpus": "small-flat",
+   "scenario": "noop",
+   "role": "Mac sends",
+   "mac_mac": "mac-mac MM0 sentinel",
+   "linux": "mars on Linux E6b",
+   "mac_mac_ratio": 0.499,
+   "linux_ratio": 0.447,
+   "change": 0.116,
+   "winner_changed": false
+  }
+ ]
+}

@@ -5,7 +5,7 @@ With 2 CPUs, xs -a -j4 is more than 15% slower than rsync -a on a fresh cold loc
 - Kind: screening. Primary metric: `durable_s`. Control arm: `xs-j4`.
 - Smallest effect of interest: 5%. Interval level: 95.0%.
 - Runs: 20261021T014239Z-AP10210142-L2R6-local-psample-cpu2.
-- Valid blocks: 0. Voided block attempts: 16.
+- Valid blocks: 0. Voided block attempts: 24.
 
 ## Ratio to the control
 

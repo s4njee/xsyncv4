@@ -1,0 +1,79 @@
+# EXC: large files and slow links, where one ssh connection, one stream or the bytes on the wire
+# are the limit. Recorded by hand with lab/explore.py; nothing here is queued.
+id = "EXC-transport"
+question = "How much speed does a transport other than one ssh connection give, and what keeps it encrypted?"
+start = ["C1", "C5"]
+
+[nodes.C1]
+title = "Race the TCP transport"
+kind = "measure"   # needs the transport branch on the controller to name its commit
+question = "How much of the large-file ceiling is the ssh connection?"
+measure = "--transport=tcp (branch transport) against ssh: Mac-mars at 10 GbE, with the X540 back in an x8 slot, on the large corpora; the Pi sending over 2.5 GbE. Gb/s and sender CPU."
+evidence = "Raw TCP carried 9.41 Gb/s on one stream; one ssh connection 7.7-8.6 Gb/s with AES-GCM and 2.2 with ChaCha20. In X6 nothing moved more than 2% under ssh."
+
+  [[nodes.C1.branch]]
+  label = "9 Gb/s or more where ssh gave 8.6 at most"
+  next = ["C2"]
+
+  [[nodes.C1.branch]]
+  label = "the Pi faster, or less kernel time"
+  next = ["C3"]
+
+  [[nodes.C1.branch]]
+  label = "no gain: the sender is the limit"
+  next = ["C3"]
+
+[nodes.C2]
+title = "Encryption at TCP speed"
+question = "Can an encrypted TCP connection keep that rate?"
+measure = "TLS 1.3 per connection, its key pinned through the ssh start-up; AES-GCM where the CPU has AES, ChaCha20 elsewhere; kTLS on Linux. Target: within 5% of plain TCP."
+
+  [[nodes.C2.branch]]
+  label = "within 5% of plain TCP"
+  end = "Offer encrypted TCP as the TCP default."
+
+  [[nodes.C2.branch]]
+  label = "one stream is crypto-bound"
+  next = ["C4"]
+
+[nodes.C3]
+title = "Rewrite the transport writer"
+question = "Do large blocking writes remove the overhead on a weak sender?"
+measure = "Write about 1 MiB per blocking call; TCP_NOTSENT_LOWAT; larger socket buffers on macOS. On the Pi: write, EAGAIN and ppoll counts, and time."
+evidence = "H25: 135k writes for 1.33 GiB, 31% failing with EAGAIN, plus 98k ppoll calls; 8.3 s of kernel time against rsync's 2.5 s."
+
+  [[nodes.C3.branch]]
+  label = "fewer syscalls and faster"
+  end = "Adopt."
+
+  [[nodes.C3.branch]]
+  label = "no change"
+  end = "Drop."
+
+[nodes.C4]
+title = "Control stream and data streams"
+question = "Do parallel data streams help on long or crypto-bound paths?"
+measure = "One control stream and N data streams; lab2's internet link, and added round-trip times of 1, 5, 20 and 40 ms."
+evidence = "Control frames stop queueing behind 1 MiB data blocks, and each stream encrypts on its own core."
+
+  [[nodes.C4.branch]]
+  label = "helps above some round-trip time"
+  end = "Choose the stream count from the measured round-trip time."
+
+  [[nodes.C4.branch]]
+  label = "no gain"
+  end = "Keep one stream."
+
+[nodes.C5]
+title = "Compression for slow links"
+question = "Where bytes are the limit, does better compression pay for its CPU?"
+measure = "A zstd dictionary trained on a corpus sample, and long-range mode, on lab2's internet link; negative levels on the 10 GbE cable (RQ-Z2)."
+evidence = "The old solid tar plus zstd had about 2x the ratio but ran 1.5x slower. In Z1, level 3 slowed the 10 GbE copy below no compression."
+
+  [[nodes.C5.branch]]
+  label = "faster on lab2"
+  end = "Adopt for slow links."
+
+  [[nodes.C5.branch]]
+  label = "only fewer bytes"
+  end = "Drop."

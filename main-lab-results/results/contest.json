@@ -1,0 +1,607 @@
+{
+ "updated": "2026-10-22T10:47:08+00:00",
+ "enabled": true,
+ "cpp_rev": "fe012667764a",
+ "rs": {
+  "commit": "aa7aee15098700d78754be2638e607d9467686de",
+  "step": "2026-10-21"
+ },
+ "night": "2026-10-21",
+ "margin": 0.05,
+ "score": {
+  "xs-rs": 12,
+  "xs-cpp": 0,
+  "tie": 0,
+  "pending": 0
+ },
+ "cells": [
+  {
+   "cell": "mixed-bimodal.fresh.mac-mars.sender.warm",
+   "corpus": "mixed-bimodal",
+   "scenario": "fresh",
+   "link": "mac-mars-usb10g",
+   "metric": "durable_s",
+   "experiment": "NT1021-fresh",
+   "run": "20261021T165635Z-NT1021-fresh",
+   "tools": {
+    "xs-cpp": {
+     "arm": "xs-cpp",
+     "flags": [
+      "-a",
+      "-j4"
+     ],
+     "rev": "fe012667764a",
+     "seconds": 5.266,
+     "lo": 2.644,
+     "hi": 10.49,
+     "blocks": 5
+    },
+    "rsync": {
+     "arm": "rsync",
+     "flags": [
+      "-a"
+     ],
+     "rev": null,
+     "seconds": 7.306,
+     "lo": 6.006,
+     "hi": 8.889,
+     "blocks": 5
+    },
+    "xs-rs": {
+     "arm": "xs-rs",
+     "flags": [
+      "-a",
+      "-j4"
+     ],
+     "rev": "aa7aee150987-rs",
+     "seconds": 4.33,
+     "lo": 1.804,
+     "hi": 10.394,
+     "blocks": 5
+    }
+   },
+   "verdict": "xs-rs",
+   "rs_vs_cpp": 0.822,
+   "fastest": "xs-rs"
+  },
+  {
+   "cell": "mixed-bimodal.fresh.mars-mac.receiver.warm",
+   "corpus": "mixed-bimodal",
+   "scenario": "fresh",
+   "link": "mac-mars-usb10g",
+   "metric": "durable_s",
+   "experiment": "NT1021-fresh",
+   "run": "20261021T165635Z-NT1021-fresh",
+   "tools": {
+    "xs-cpp": {
+     "arm": "xs-cpp",
+     "flags": [
+      "-a",
+      "-j4"
+     ],
+     "rev": "fe012667764a",
+     "seconds": 4.13,
+     "lo": 3.688,
+     "hi": 4.625,
+     "blocks": 5
+    },
+    "rsync": {
+     "arm": "rsync",
+     "flags": [
+      "-a"
+     ],
+     "rev": null,
+     "seconds": 9.391,
+     "lo": 8.348,
+     "hi": 10.565,
+     "blocks": 5
+    },
+    "xs-rs": {
+     "arm": "xs-rs",
+     "flags": [
+      "-a",
+      "-j4"
+     ],
+     "rev": "aa7aee150987-rs",
+     "seconds": 2.744,
+     "lo": 2.375,
+     "hi": 3.171,
+     "blocks": 5
+    }
+   },
+   "verdict": "xs-rs",
+   "rs_vs_cpp": 0.664,
+   "fastest": "xs-rs"
+  },
+  {
+   "cell": "real-congress.fresh.mac-mars.sender.warm",
+   "corpus": "real-congress",
+   "scenario": "fresh",
+   "link": "mac-mars-usb10g",
+   "metric": "durable_s",
+   "experiment": "NT1021-fresh",
+   "run": "20261021T165635Z-NT1021-fresh",
+   "tools": {
+    "xs-cpp": {
+     "arm": "xs-cpp",
+     "flags": [
+      "-a",
+      "-j4"
+     ],
+     "rev": "fe012667764a",
+     "seconds": 32.594,
+     "lo": 30.663,
+     "hi": 34.648,
+     "blocks": 5
+    },
+    "rsync": {
+     "arm": "rsync",
+     "flags": [
+      "-a"
+     ],
+     "rev": null,
+     "seconds": 43.938,
+     "lo": 42.54,
+     "hi": 45.382,
+     "blocks": 5
+    },
+    "xs-rs": {
+     "arm": "xs-rs",
+     "flags": [
+      "-a",
+      "-j4"
+     ],
+     "rev": "aa7aee150987-rs",
+     "seconds": 14.723,
+     "lo": 13.523,
+     "hi": 16.031,
+     "blocks": 5
+    }
+   },
+   "verdict": "xs-rs",
+   "rs_vs_cpp": 0.452,
+   "fastest": "xs-rs"
+  },
+  {
+   "cell": "real-congress.fresh.mars-mac.receiver.warm",
+   "corpus": "real-congress",
+   "scenario": "fresh",
+   "link": "mac-mars-usb10g",
+   "metric": "durable_s",
+   "experiment": "NT1021-fresh",
+   "run": "20261021T165635Z-NT1021-fresh",
+   "tools": {
+    "xs-cpp": {
+     "arm": "xs-cpp",
+     "flags": [
+      "-a",
+      "-j4"
+     ],
+     "rev": "fe012667764a",
+     "seconds": 43.675,
+     "lo": 41.183,
+     "hi": 46.318,
+     "blocks": 5
+    },
+    "rsync": {
+     "arm": "rsync",
+     "flags": [
+      "-a"
+     ],
+     "rev": null,
+     "seconds": 81.499,
+     "lo": 57.371,
+     "hi": 115.773,
+     "blocks": 5
+    },
+    "xs-rs": {
+     "arm": "xs-rs",
+     "flags": [
+      "-a",
+      "-j4"
+     ],
+     "rev": "aa7aee150987-rs",
+     "seconds": 25.333,
+     "lo": 20.394,
+     "hi": 31.467,
+     "blocks": 5
+    }
+   },
+   "verdict": "xs-rs",
+   "rs_vs_cpp": 0.58,
+   "fastest": "xs-rs"
+  },
+  {
+   "cell": "real-congress.noop.mac-mars.sender.warm",
+   "corpus": "real-congress",
+   "scenario": "noop",
+   "link": "mac-mars-usb10g",
+   "metric": "durable_s",
+   "experiment": "CM-B1-10211710",
+   "run": "20261021T221144Z-CM-B1-10211710",
+   "tools": {
+    "rsync": {
+     "arm": "rsync",
+     "flags": [
+      "-a"
+     ],
+     "rev": null,
+     "seconds": 6.482,
+     "lo": 5.533,
+     "hi": 7.593,
+     "blocks": 10
+    },
+    "xs-rs": {
+     "arm": "xs-rs-j4",
+     "flags": [
+      "-a",
+      "-j4"
+     ],
+     "rev": "61d1dd83a530-rs",
+     "seconds": 1.747,
+     "lo": 1.34,
+     "hi": 2.278,
+     "blocks": 10
+    },
+    "xs-cpp": {
+     "arm": "xs-cpp-j4",
+     "flags": [
+      "-a",
+      "-j4"
+     ],
+     "rev": "52d76dbca2b2",
+     "seconds": 2.289,
+     "lo": 1.94,
+     "hi": 2.7,
+     "blocks": 10
+    }
+   },
+   "verdict": "xs-rs",
+   "rs_vs_cpp": 0.763,
+   "fastest": "xs-rs"
+  },
+  {
+   "cell": "real-congress.noop.mars-mac.receiver.warm",
+   "corpus": "real-congress",
+   "scenario": "noop",
+   "link": "mac-mars-usb10g",
+   "metric": "durable_s",
+   "experiment": "CM-B1-10211710",
+   "run": "20261021T221144Z-CM-B1-10211710",
+   "tools": {
+    "rsync": {
+     "arm": "rsync",
+     "flags": [
+      "-a"
+     ],
+     "rev": null,
+     "seconds": 4.775,
+     "lo": 4.187,
+     "hi": 5.445,
+     "blocks": 10
+    },
+    "xs-rs": {
+     "arm": "xs-rs-j4",
+     "flags": [
+      "-a",
+      "-j4"
+     ],
+     "rev": "61d1dd83a530-rs",
+     "seconds": 1.468,
+     "lo": 1.309,
+     "hi": 1.647,
+     "blocks": 10
+    },
+    "xs-cpp": {
+     "arm": "xs-cpp-j4",
+     "flags": [
+      "-a",
+      "-j4"
+     ],
+     "rev": "52d76dbca2b2",
+     "seconds": 2.685,
+     "lo": 2.466,
+     "hi": 2.924,
+     "blocks": 10
+    }
+   },
+   "verdict": "xs-rs",
+   "rs_vs_cpp": 0.547,
+   "fastest": "xs-rs"
+  },
+  {
+   "cell": "real-psample.noop.mac-mars.sender.warm",
+   "corpus": "real-psample",
+   "scenario": "noop",
+   "link": "mac-mars-usb10g",
+   "metric": "durable_s",
+   "experiment": "CM-B1-10211710",
+   "run": "20261021T221144Z-CM-B1-10211710",
+   "tools": {
+    "rsync": {
+     "arm": "rsync",
+     "flags": [
+      "-a"
+     ],
+     "rev": null,
+     "seconds": 88.126,
+     "lo": 81.967,
+     "hi": 94.746,
+     "blocks": 8
+    },
+    "xs-rs": {
+     "arm": "xs-rs-j4",
+     "flags": [
+      "-a",
+      "-j4"
+     ],
+     "rev": "61d1dd83a530-rs",
+     "seconds": 20.395,
+     "lo": 18.958,
+     "hi": 21.94,
+     "blocks": 8
+    },
+    "xs-cpp": {
+     "arm": "xs-cpp-j4",
+     "flags": [
+      "-a",
+      "-j4"
+     ],
+     "rev": "52d76dbca2b2",
+     "seconds": 26.981,
+     "lo": 23.723,
+     "hi": 30.687,
+     "blocks": 8
+    }
+   },
+   "verdict": "xs-rs",
+   "rs_vs_cpp": 0.756,
+   "fastest": "xs-rs"
+  },
+  {
+   "cell": "real-psample.noop.mars-mac.receiver.warm",
+   "corpus": "real-psample",
+   "scenario": "noop",
+   "link": "mac-mars-usb10g",
+   "metric": "durable_s",
+   "experiment": "CM-B1-10211710",
+   "run": "20261021T221144Z-CM-B1-10211710",
+   "tools": {
+    "rsync": {
+     "arm": "rsync",
+     "flags": [
+      "-a"
+     ],
+     "rev": null,
+     "seconds": 75.716,
+     "lo": 58.699,
+     "hi": 97.667,
+     "blocks": 9
+    },
+    "xs-rs": {
+     "arm": "xs-rs-j4",
+     "flags": [
+      "-a",
+      "-j4"
+     ],
+     "rev": "61d1dd83a530-rs",
+     "seconds": 45.418,
+     "lo": 17.153,
+     "hi": 120.253,
+     "blocks": 9
+    },
+    "xs-cpp": {
+     "arm": "xs-cpp-j4",
+     "flags": [
+      "-a",
+      "-j4"
+     ],
+     "rev": "52d76dbca2b2",
+     "seconds": 151.588,
+     "lo": 63.872,
+     "hi": 359.764,
+     "blocks": 9
+    }
+   },
+   "verdict": "xs-rs",
+   "rs_vs_cpp": 0.3,
+   "fastest": "xs-rs"
+  },
+  {
+   "cell": "small-deep.fresh.mac-mars.sender.warm",
+   "corpus": "small-deep",
+   "scenario": "fresh",
+   "link": "mac-mars-usb10g",
+   "metric": "durable_s",
+   "experiment": "NT1021-fresh",
+   "run": "20261021T165635Z-NT1021-fresh",
+   "tools": {
+    "xs-cpp": {
+     "arm": "xs-cpp",
+     "flags": [
+      "-a",
+      "-j4"
+     ],
+     "rev": "fe012667764a",
+     "seconds": 24.037,
+     "lo": 23.236,
+     "hi": 24.865,
+     "blocks": 5
+    },
+    "rsync": {
+     "arm": "rsync",
+     "flags": [
+      "-a"
+     ],
+     "rev": null,
+     "seconds": 26.643,
+     "lo": 25.122,
+     "hi": 28.257,
+     "blocks": 5
+    },
+    "xs-rs": {
+     "arm": "xs-rs",
+     "flags": [
+      "-a",
+      "-j4"
+     ],
+     "rev": "aa7aee150987-rs",
+     "seconds": 9.84,
+     "lo": 9.462,
+     "hi": 10.232,
+     "blocks": 5
+    }
+   },
+   "verdict": "xs-rs",
+   "rs_vs_cpp": 0.409,
+   "fastest": "xs-rs"
+  },
+  {
+   "cell": "small-deep.fresh.mars-mac.receiver.warm",
+   "corpus": "small-deep",
+   "scenario": "fresh",
+   "link": "mac-mars-usb10g",
+   "metric": "durable_s",
+   "experiment": "NT1021-fresh",
+   "run": "20261021T165635Z-NT1021-fresh",
+   "tools": {
+    "xs-cpp": {
+     "arm": "xs-cpp",
+     "flags": [
+      "-a",
+      "-j4"
+     ],
+     "rev": "fe012667764a",
+     "seconds": 43.172,
+     "lo": 41.792,
+     "hi": 44.597,
+     "blocks": 5
+    },
+    "rsync": {
+     "arm": "rsync",
+     "flags": [
+      "-a"
+     ],
+     "rev": null,
+     "seconds": 48.05,
+     "lo": 42.811,
+     "hi": 53.931,
+     "blocks": 5
+    },
+    "xs-rs": {
+     "arm": "xs-rs",
+     "flags": [
+      "-a",
+      "-j4"
+     ],
+     "rev": "aa7aee150987-rs",
+     "seconds": 19.878,
+     "lo": 16.81,
+     "hi": 23.506,
+     "blocks": 5
+    }
+   },
+   "verdict": "xs-rs",
+   "rs_vs_cpp": 0.46,
+   "fastest": "xs-rs"
+  },
+  {
+   "cell": "small-flat.fresh.mac-mars.sender.warm",
+   "corpus": "small-flat",
+   "scenario": "fresh",
+   "link": "mac-mars-usb10g",
+   "metric": "durable_s",
+   "experiment": "NT1021-fresh",
+   "run": "20261021T165635Z-NT1021-fresh",
+   "tools": {
+    "xs-cpp": {
+     "arm": "xs-cpp",
+     "flags": [
+      "-a",
+      "-j4"
+     ],
+     "rev": "fe012667764a",
+     "seconds": 13.302,
+     "lo": 12.832,
+     "hi": 13.79,
+     "blocks": 5
+    },
+    "rsync": {
+     "arm": "rsync",
+     "flags": [
+      "-a"
+     ],
+     "rev": null,
+     "seconds": 16.877,
+     "lo": 15.482,
+     "hi": 18.399,
+     "blocks": 5
+    },
+    "xs-rs": {
+     "arm": "xs-rs",
+     "flags": [
+      "-a",
+      "-j4"
+     ],
+     "rev": "aa7aee150987-rs",
+     "seconds": 6.528,
+     "lo": 6.229,
+     "hi": 6.841,
+     "blocks": 5
+    }
+   },
+   "verdict": "xs-rs",
+   "rs_vs_cpp": 0.491,
+   "fastest": "xs-rs"
+  },
+  {
+   "cell": "small-flat.fresh.mars-mac.receiver.warm",
+   "corpus": "small-flat",
+   "scenario": "fresh",
+   "link": "mac-mars-usb10g",
+   "metric": "durable_s",
+   "experiment": "NT1021-fresh",
+   "run": "20261021T165635Z-NT1021-fresh",
+   "tools": {
+    "xs-cpp": {
+     "arm": "xs-cpp",
+     "flags": [
+      "-a",
+      "-j4"
+     ],
+     "rev": "fe012667764a",
+     "seconds": 17.087,
+     "lo": 15.76,
+     "hi": 18.527,
+     "blocks": 5
+    },
+    "rsync": {
+     "arm": "rsync",
+     "flags": [
+      "-a"
+     ],
+     "rev": null,
+     "seconds": 25.826,
+     "lo": 24.499,
+     "hi": 27.226,
+     "blocks": 5
+    },
+    "xs-rs": {
+     "arm": "xs-rs",
+     "flags": [
+      "-a",
+      "-j4"
+     ],
+     "rev": "aa7aee150987-rs",
+     "seconds": 9.141,
+     "lo": 8.644,
+     "hi": 9.666,
+     "blocks": 5
+    }
+   },
+   "verdict": "xs-rs",
+   "rs_vs_cpp": 0.535,
+   "fastest": "xs-rs"
+  }
+ ]
+}

@@ -1,0 +1,53 @@
+{
+ "ok": true,
+ "analysis": {
+  "decision": {
+   "node": "A1",
+   "branch": 0,
+   "keep": true,
+   "reason": "The receiver-lock branch (c5b765eb54fc against b02ae2394a86) is clearly faster on fresh copies: 'fresh 0.411 (faster)' with a 95% interval of 0.406 to 0.415 over 8 blocks. That is the minimum block count, but the interval is narrow and far below 1. No-op re-syncs are unchanged within noise: 'noop 1.007 (inconclusive)', interval 0.962 to 1.055. Keep it and merge. The pooled verdicts do not separate the default, --no-atomic and -j8 configurations, so whether extra receiving workers now help is not answered by these facts; A2 should look at that split."
+  },
+  "priorities": [
+   {
+    "node": "B1",
+    "brief": "No code change; this is a measurement on the chain tip with A1 merged (c5b765eb54fc). (1) Workloads: real-congress and real-psample. (2) Do a fresh seed first, then time no-op re-syncs: push (mac to mars, xs as sender) and pull (mars to mac, xs as receiver). (3) Run xs-cpp with -a -j4 against rsync -a. Use at least 8 blocks per cell and report time to durable. (4) On both ends, record user and system CPU for every xs and rsync process, for example /usr/bin/time -l on each side or rusage from the race harness, kept per process rather than summed. (5) For the side burning the most CPU, take a sampling profile of one representative run with macOS sample or dtrace profile-997 on the xs process. Bucket the stacks into: destination path walks (lstat, getattrlist, open of parent dirs, path string building), file-list generation and transfer, quick-check comparison, protocol and ssh I/O, and lock or wait time. (6) Edge cases: drop the page cache equally between runs or report warm for both tools; make sure the no-op really transfers zero files (check the itemize output); keep ssh cipher and flags identical for xs and rsync. (7) Compare against H21, where the congress no-op push ran at 0.74x rsync's speed with 408.8 s of CPU against 18.8 s. Report whether that CPU gap persists after A1. Also report whether MA7's pull deficit from destination path walks still dominates, which would point the next build at A3 (cheaper destination path walks) or B3 (persistent index).",
+    "why": "It is the only buildable node and costs only race time. A1 left no-op unchanged ('noop 1.007 (inconclusive)'), and H21's 408.8 s against 18.8 s of CPU shows a large known deficit with no current attribution. The profile decides which build comes next in EXB and in A3."
+   }
+  ],
+  "resolutions": [],
+  "drops": [],
+  "summary": "Splitting the receiver's lock and parallelising its final pass made small fresh copies clearly faster: time to durable fell to 0.411 of the parent's (95% interval 0.406 to 0.415, 8 blocks), while no-op re-syncs were unchanged (1.007, inconclusive). The change stays in the chain, though these results do not yet show whether -j8 helps on its own. Next we profile no-op re-syncs (B1) on real-congress and real-psample, push and pull, against rsync, to find where xs still burns far more CPU than rsync."
+ },
+ "usage": {
+  "input_tokens": 3304,
+  "cache_creation_input_tokens": 1429,
+  "cache_read_input_tokens": 0,
+  "cache_creation": {
+   "ephemeral_5m_input_tokens": 1429,
+   "ephemeral_1h_input_tokens": 0
+  },
+  "iterations": [
+   {
+    "input_tokens": 3304,
+    "output_tokens": 1719,
+    "cache_read_input_tokens": 0,
+    "cache_creation_input_tokens": 1429,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 1429,
+     "ephemeral_1h_input_tokens": 0
+    },
+    "type": "message",
+    "model": null
+   }
+  ],
+  "output_tokens": 1719,
+  "output_tokens_details": {
+   "thinking_tokens": 610
+  },
+  "service_tier": "standard",
+  "inference_geo": "global",
+  "speed": "standard"
+ },
+ "cost_usd": 0.054741,
+ "model": "claude-opus-5-5"
+}

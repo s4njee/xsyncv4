@@ -1,0 +1,58 @@
+{
+ "ok": true,
+ "analysis": {
+  "decision": {
+   "node": "",
+   "branch": -1,
+   "keep": false,
+   "reason": "No race ended this slot (facts.tested is null). The C5 compression race (c9e8d5d5f87d against 0a4953bec5d8) is still running."
+  },
+  "priorities": [
+   {
+    "node": "B1",
+    "brief": "No code change. Build the current chain head of xs-rs, which includes the kept receiver-lock change c5b765eb54fc. Run no-op re-syncs (the destination already matches the source) with flags -a -j4 on real-congress and real-psample, both push (mac to mars) and pull (mars to mac). Run rsync on the same cells as the reference. Keep both machines quiet: no other lab jobs, and warm caches with one discarded run first. For each run, record wall time to durable, plus user and system CPU on each end separately. Use /usr/bin/time -l on the local process and the same on the remote side by wrapping the remote command. While xs-rs runs, take macOS `sample` profiles of the sender and receiver processes, sampling all threads for the length of the run. Report, for each end, the share of CPU in: destination path walks (lstat/stat/openat/getattrlist and path building), metadata comparison, file-list encoding and decoding, hashing, and transport read/write. Compare the totals with H21's 408.8 s of CPU for xs against 18.8 s for rsync, and check whether MA7's pull deficit from destination path walks is still there. Output a short table per cell and the top five functions per end. That table chooses between B2 (dest-anchors), B3 (persistent index) and A3 (cheaper destination path walks).",
+    "why": "No-op re-syncs are where xs still loses to rsync outright. H21 gave congress no-op push at 0.74x rsync's speed with 408.8 s of CPU against 18.8 s. A1 left the no-op path unchanged ('noop 1.007 (inconclusive)'), so the gap is presumably still there. The work costs only lab time, and it picks the next code change in tree EXB."
+   },
+   {
+    "node": "A2",
+    "brief": "No code change. On mars, which now runs macOS, re-measure the local ceiling. Extract the small-deep tree on the receiver volume with 4 parallel tar processes, as P2b's local arms did, and time it through to durable: include the final sync/fsync step xs uses so the comparison is fair. Repeat at least 5 times. Then run xs-rs fresh copies of small-deep from the chain head (with c5b765eb54fc) to mars, keeping the sender quiet; P2b lost runs to sender load. Run three configurations separately: default -a -j4, --no-atomic, and -j8. A1's pooled verdict did not separate them, so report each one on its own. During one default run, take macOS `sample` profiles of the sender and receiver for the whole copy. Report: xs time divided by local-tar time; receiver CPU split among file creation (open/write/close), metadata setting (utimes/chmod/chown), fsync/durability, path work and protocol decoding; sender CPU split the same way; and idle or wait time on each end. State whether the remaining gap is receiver syscalls, sender-side limits, or serialization. That answer decides among A3, A5 (fast path for fresh subtrees), A6 (several receiver processes) and A7 (writeback control).",
+    "why": "A1 made fresh copies much faster ('fresh 0.411 (faster)', 0.406 to 0.415). The lab races now show xs-rs at 9.84 s on small-deep push against 26.643 s for rsync. The next fresh-copy gain is unclear until we know how far xs is from local extraction on macOS. P2b's 2.70 s tar figure is from Linux and no longer applies. This analysis gates A3 to A7."
+   }
+  ],
+  "resolutions": [],
+  "drops": [],
+  "summary": "No race finished this slot. The compression change (C5) is still racing, and the receiver-lock change stays in the chain after 'fresh 0.411 (faster)'. Next we profile no-op re-syncs against rsync (B1), where xs last used far more CPU than rsync. Then we measure how far fresh small-file copies are from local tar extraction on the now-macOS receiver (A2), with the default, --no-atomic and -j8 settings reported separately."
+ },
+ "usage": {
+  "input_tokens": 3933,
+  "cache_creation_input_tokens": 1582,
+  "cache_read_input_tokens": 0,
+  "cache_creation": {
+   "ephemeral_5m_input_tokens": 1582,
+   "ephemeral_1h_input_tokens": 0
+  },
+  "iterations": [
+   {
+    "input_tokens": 3933,
+    "output_tokens": 2290,
+    "cache_read_input_tokens": 0,
+    "cache_creation_input_tokens": 1582,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 1582,
+     "ephemeral_1h_input_tokens": 0
+    },
+    "type": "message",
+    "model": null
+   }
+  ],
+  "output_tokens": 2290,
+  "output_tokens_details": {
+   "thinking_tokens": 874
+  },
+  "service_tier": "standard",
+  "inference_geo": "global",
+  "speed": "standard"
+ },
+ "cost_usd": 0.069442,
+ "model": "claude-opus-5-5"
+}
