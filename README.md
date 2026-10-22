@@ -880,7 +880,8 @@ request. `--no-prune-empty-dirs` disables it.
 
 xs-only options: `-j N`/`--jobs=N` (worker threads), `--no-clone`, `--atomic`
 (default), `--no-atomic`. Automatic workers use up to 16 CPU cores (performance
-cores on macOS); local and receiver pools on APFS use at most four. Explicit
+cores on macOS); local and receiver pools on APFS use at most four, and the
+receiving end of a remote transfer uses at most four on any filesystem. Explicit
 `-j` values override the filesystem budget. Automatic worker selection does
 not enable the intra-file ranges reserved for explicit parallel requests.
 
