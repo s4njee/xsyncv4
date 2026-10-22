@@ -126,6 +126,35 @@ fn one_worker_and_the_default_both_copy_a_large_file() {
 }
 
 #[test]
+fn a_worker_batches_small_one_file_directories_and_still_ends_cleanly() {
+    let Some(cpp) = xs_bin() else { return };
+    let root = temp_root("batched");
+    let source = root.join("source");
+    fs::create_dir_all(&source).unwrap();
+    // Each NEED asks for one small file; the sender carries partial blocks across them.
+    let body = vec![b'x'; 2048];
+    for index in 0..300 {
+        let dir = source.join(format!("d{index:03}"));
+        fs::create_dir_all(&dir).unwrap();
+        fs::write(dir.join("file"), &body).unwrap();
+    }
+    let dest = root.join("dest");
+    fs::create_dir_all(&dest).unwrap();
+    transfer(OsStr::new(xs_rs()), &cpp, &source, &dest, "-j4", false);
+    compare(&source, &dest);
+    // A second pass asks again for every file, still one NEED per directory.
+    for index in 0..300 {
+        let path = source.join(format!("d{index:03}")).join("file");
+        let mut bytes = fs::read(&path).unwrap();
+        bytes.extend_from_slice(b"changed");
+        fs::write(&path, bytes).unwrap();
+    }
+    transfer(OsStr::new(xs_rs()), &cpp, &source, &dest, "-j4", false);
+    compare(&source, &dest);
+    let _ = fs::remove_dir_all(root);
+}
+
+#[test]
 fn an_unknown_option_is_refused_before_the_destination_exists() {
     let root = temp_root("refuse");
     let source = root.join("source");

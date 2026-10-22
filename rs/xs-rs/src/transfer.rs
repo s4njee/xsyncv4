@@ -283,6 +283,11 @@ struct Outbox {
 
 /// `Conn::MAX_Q` (`remote.cpp:254`): a sender's listings and data wait while this much is queued.
 const MAX_QUEUED: usize = 48 << 20;
+/// Automatic compression skips listings smaller than this (explicit `-z` does not).
+const AUTO_LISTING_MIN: usize = 16 << 10;
+/// A worker carries a partial DATA block across NEEDs up to this size, then sends it:
+/// four workers can pack many one-file directories without a tiny frame each.
+const DATA_BATCH: usize = 256 << 10;
 
 impl Outbox {
     fn push(&self, kind: u8, payload: Vec<u8>, activity: bool, bounded: bool) -> io::Result<()> {
@@ -468,6 +473,9 @@ struct WorkState {
     /// DATA_END is queued: no task can come after it.
     ended: bool,
     aborted: bool,
+    /// Sending workers, and how many have flushed their partial DATA block.
+    workers: usize,
+    flushed: usize,
 }
 
 impl WorkState {
@@ -543,11 +551,6 @@ impl Sending<'_> {
             for _ in 0..added.min(crate::parallel::MAX_WORKERS) {
                 self.work_changed.notify_one();
             }
-        }
-        if due {
-            let mut end = Encoder::new();
-            end.var(0);
-            self.tx.send_bounded(frame_type::DATA_END, end.bytes)?;
         }
         Ok(())
     }
@@ -701,7 +704,11 @@ fn walk_dir(s: &Sending, task: WalkTask) -> io::Result<()> {
     let flag_at = frame.bytes.len();
     frame.byte(flags);
     let level = s.link.level(opts.compress_level_explicit, opts.compress_level, opts.bwlimit);
-    if protocol::pack_body(&mut frame, &body.bytes, s.compressing(), level) {
+    // Automatic compression is our choice, not the peer's `-z`: a listing is usually a
+    // kilobyte or two, where a zstd frame costs more CPU than it saves on the wire.
+    // With `-z`, every listing is compressed as the C++ does.
+    let compress = s.compressing() && (opts.compress || body.bytes.len() >= AUTO_LISTING_MIN);
+    if protocol::pack_body(&mut frame, &body.bytes, compress, level) {
         frame.bytes[flag_at] |= protocol::DF_ZSTD;
         s.link.set_last_level(level);
         if !opts.compress_level_explicit {
@@ -1017,7 +1024,7 @@ fn send_task(s: &Sending, task: &ReadTask, block: &mut Vec<u8>, contents: &mut V
                         e.str(&contents[..]);
                         Ok(())
                     })?;
-                    if block.len() >= protocol::BLOCK_TARGET {
+                    if block.len() >= DATA_BATCH {
                         flush_data(s, block, s.compress && !block_skip)?;
                     }
                 }
@@ -1041,7 +1048,10 @@ fn send_task(s: &Sending, task: &ReadTask, block: &mut Vec<u8>, contents: &mut V
             flush_data(s, block, false)?;
         }
     }
-    flush_data(s, block, s.compress && !block_skip)
+    // The block stays with the worker: a NEED often asks for one file, and flushing
+    // every task would send a tiny DATA frame per directory. It is flushed when it
+    // reaches its batch limit or when the worker has no more reads.
+    Ok(())
 }
 
 enum SendJob {
@@ -1072,13 +1082,34 @@ fn send_worker(s: &Sending, prefers_walk: bool) {
                     if matches!(job, SendJob::Read(_)) {
                         state.active += 1;
                     }
-                    break job;
+                    break Some(job);
                 }
                 if state.ended {
-                    return;
+                    break None;
                 }
                 state = s.work_changed.wait(state).unwrap();
             }
+        };
+        let Some(job) = job else {
+            // No more reads: put this worker's partial block on the wire before the
+            // last worker sends DATA_END, so DATA never follows the end marker.
+            if let Err(error) = flush_data(s, &mut block, s.compress) {
+                s.fail(&error);
+                return;
+            }
+            let last = {
+                let mut state = s.work.lock().unwrap();
+                state.flushed += 1;
+                state.flushed == state.workers
+            };
+            if last {
+                let mut end = Encoder::new();
+                end.var(0);
+                if let Err(error) = s.tx.send_bounded(frame_type::DATA_END, end.bytes) {
+                    s.fail(&error);
+                }
+            }
+            return;
         };
         let result = match job {
             SendJob::Walk(task) => walk_dir(s, task).and_then(|()| s.walked()),
@@ -1248,6 +1279,8 @@ pub fn run_sender<R: Read, W: Write + Send + 'static>(
         next_dir: AtomicU32::new(0),
         ids: Mutex::new(idmap::Sender::default()),
     };
+    let jobs = crate::parallel::effective_jobs(opts.jobs);
+    s.work.lock().unwrap().workers = jobs;
     s.push_walks(vec![WalkTask {
         parent_plus1: 0,
         pidx: 0,
@@ -1260,7 +1293,6 @@ pub fn run_sender<R: Read, W: Write + Send + 'static>(
     }]);
     let code = std::thread::scope(|scope| {
         let s = &s;
-        let jobs = crate::parallel::effective_jobs(opts.jobs);
         for worker in 0..jobs {
             // Half of them, at least one, prefer walking (`scan_workers`).
             let prefers_walk = worker < (jobs / 2).max(1);
