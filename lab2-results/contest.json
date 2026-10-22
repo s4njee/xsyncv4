@@ -1,5 +1,5 @@
 {
- "updated": "2026-10-22T06:14:13+00:00",
+ "updated": "2026-10-22T07:14:13+00:00",
  "enabled": true,
  "cpp_rev": "fe012667764a",
  "rs": {
@@ -20,9 +20,20 @@
    "scenario": "fresh",
    "link": "a-aws",
    "metric": "durable_s",
-   "experiment": "PS-e671c84aa680-fresh",
-   "run": "20261022T041438Z-PS-e671c84aa680-fresh",
+   "experiment": "FC-e671c84-fresh",
+   "run": "20261022T062149Z-FC-e671c84-fresh",
    "tools": {
+    "rsync": {
+     "arm": "rsync",
+     "flags": [
+      "-a"
+     ],
+     "rev": null,
+     "seconds": 3.241,
+     "lo": 3.061,
+     "hi": 3.431,
+     "blocks": 8
+    },
     "xs-cpp": {
      "arm": "xs-cpp",
      "flags": [
@@ -30,10 +41,10 @@
       "-j4"
      ],
      "rev": "fe012667764a",
-     "seconds": 3.513,
-     "lo": 3.257,
-     "hi": 3.789,
-     "blocks": 3
+     "seconds": 3.579,
+     "lo": 3.273,
+     "hi": 3.914,
+     "blocks": 8
     },
     "xs-rs": {
      "arm": "xs-rs",
@@ -42,25 +53,14 @@
       "-j4"
      ],
      "rev": "e671c84aa680-rs",
-     "seconds": 3.169,
-     "lo": 2.431,
-     "hi": 4.131,
-     "blocks": 3
-    },
-    "rsync": {
-     "arm": "rsync",
-     "flags": [
-      "-a"
-     ],
-     "rev": null,
-     "seconds": 3.215,
-     "lo": 3.001,
-     "hi": 3.444,
-     "blocks": 3
+     "seconds": 3.171,
+     "lo": 2.86,
+     "hi": 3.515,
+     "blocks": 8
     }
    },
    "verdict": "xs-rs",
-   "rs_vs_cpp": 0.902,
+   "rs_vs_cpp": 0.886,
    "fastest": "xs-rs"
   },
   {

@@ -1985,6 +1985,80 @@
    "model": "opencode/deepseek-v4.1-flash",
    "summarizedUtc": 1792642717.964,
    "driver": "a"
+  },
+  "FC-e671c84-fresh": {
+   "run": "20261022T062149Z-FC-e671c84-fresh",
+   "experiment": "FC-e671c84-fresh",
+   "key": "congress-sample.fresh.a-aws.sender.warm|2|0",
+   "utc": 1792650199.513,
+   "cell": "congress-sample.fresh.a-aws.sender.warm",
+   "factors": {
+    "corpus": "congress-sample",
+    "scenario": "fresh",
+    "sender": "a",
+    "receiver": "aws",
+    "client": "sender",
+    "link": "a-aws",
+    "cache": "warm"
+   },
+   "block": 2,
+   "attempt": 0,
+   "control": "rsync",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "rsync",
+     "label": "rsync",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 3.171,
+     "gbps": 0.551,
+     "files_per_s": 7963,
+     "speed": 1
+    },
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 3.681,
+     "gbps": 0.474,
+     "files_per_s": 6859,
+     "speed": 0.86
+    },
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 2.978,
+     "gbps": 0.586,
+     "files_per_s": 8477,
+     "speed": 1.06
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "speed": 0.91,
+     "blocks": 3
+    },
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "speed": 0.98,
+     "blocks": 3
+    }
+   ],
+   "question": "On congress-sample, fresh copies: how do rsync, xs-c++ and xs-rs at e671c84aa680 compare?",
+   "summary": "In block 2, xs-rs was fastest at 2.978 s versus rsync\u2019s 3.171 s, or 1.06x, while xs-c++ ran at 0.86x. Cumulatively for this cell, xs-c++ is at 0.91x and xs-rs at 0.98x across three blocks each, so the evidence is not thin but shows both near or below control. This bears on the question: xs-rs edged rsync here, but its cumulative 0.98x does not establish an advantage.",
+   "model": "opencode/deepseek-v4.1-flash",
+   "summarizedUtc": 1792650279.229,
+   "driver": "a"
   }
  }
 }
