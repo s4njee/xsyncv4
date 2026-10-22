@@ -1,10 +1,10 @@
 {
  "experiments": {
   "S0-vps-sentinel": {
-   "run": "20261020T000739Z-S0-vps-sentinel-s0001",
+   "run": "20261020T030137Z-S0-vps-sentinel-s0003",
    "experiment": "S0-vps-sentinel",
-   "key": "real-projects.noop.a-aws.sender.warm|2|0",
-   "utc": 1792455205.062,
+   "key": "real-projects.noop.a-aws.sender.warm|1|0",
+   "utc": 1792627963.381,
    "cell": "real-projects.noop.a-aws.sender.warm",
    "factors": {
     "corpus": "real-projects",
@@ -15,58 +15,63 @@
     "link": "a-aws",
     "cache": "warm"
    },
-   "block": 2,
+   "block": 1,
    "attempt": 0,
    "control": "xs",
    "primary": "wall_s",
    "arms": [
     {
      "arm": "xs",
+     "label": "xs-c++",
      "control": true,
      "valid": true,
      "void": null,
-     "seconds": 5.519,
-     "gbps": 3.095,
-     "files_per_s": 12559,
+     "seconds": 4.5,
+     "gbps": 3.795,
+     "files_per_s": 15402,
      "speed": 1
     },
     {
      "arm": "again",
+     "label": "xs-c++",
      "control": false,
      "valid": true,
      "void": null,
-     "seconds": 5.718,
-     "gbps": 2.987,
-     "files_per_s": 12122,
-     "speed": 0.97
+     "seconds": 4.427,
+     "gbps": 3.858,
+     "files_per_s": 15658,
+     "speed": 1.02
     },
     {
      "arm": "rsync",
+     "label": "rsync",
      "control": false,
      "valid": true,
      "void": null,
-     "seconds": 3.699,
-     "gbps": 4.617,
-     "files_per_s": 18737,
-     "speed": 1.49
+     "seconds": 3.907,
+     "gbps": 4.371,
+     "files_per_s": 17740,
+     "speed": 1.15
     }
    ],
    "soFar": [
     {
      "arm": "again",
-     "speed": 1,
-     "blocks": 3
+     "label": "xs-c++",
+     "speed": 0.99,
+     "blocks": 2
     },
     {
      "arm": "rsync",
-     "speed": 1.52,
-     "blocks": 3
+     "label": "rsync",
+     "speed": 1.08,
+     "blocks": 2
     }
    ],
    "question": null,
-   "summary": "In block 2, rsync was fastest at 3.699 s, 1.49x the control xs (5.519 s), while again ran 5.718 s at 0.97x. Cumulatively for this cell, rsync stands at 1.52x over three blocks and again at 1.00x over three, so the evidence is not below the three-block thinness threshold. No experiment question was stated, so this block does not bear on one.",
+   "summary": "In this block rsync was fastest at 3.907 s, 1.15x the xs-c++ control (15% faster). The running cell averages are xs-c++ 0.99x and rsync 1.08x, each based on only 2 blocks, so the evidence is still thin. No experiment question is specified, so this does not support a broader conclusion beyond the measured speeds.",
    "model": "opencode/deepseek-v4.1-flash",
-   "summarizedUtc": 1792455229.27,
+   "summarizedUtc": 1792627989.536,
    "driver": "a"
   },
   "E1-vps-baseline": {
