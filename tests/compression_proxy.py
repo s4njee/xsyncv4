@@ -7,6 +7,7 @@ import struct
 import subprocess
 import sys
 import threading
+import time
 
 
 def exact(stream, length):
@@ -21,6 +22,7 @@ def exact(stream, length):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--log', required=True)
+    parser.add_argument('--rate', type=float, default=0, help='bytes per second the client may send: a slow link')
     parser.add_argument('command', nargs=argparse.REMAINDER)
     args = parser.parse_args()
     child = subprocess.Popen(args.command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, bufsize=0)
@@ -36,6 +38,7 @@ def main():
                 with lock:
                     records.append({'direction': direction, 'kind': kind, 'bytes': length,
                                     'flag': payload[0] if payload else None})
+            if args.rate and direction == 'client': time.sleep((5 + length) / args.rate)
             remaining = memoryview(header + payload)
             while remaining:
                 count = os.write(destination.fileno(), remaining)

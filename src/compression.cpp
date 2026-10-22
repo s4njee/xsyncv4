@@ -133,6 +133,12 @@ int CompressionLink::level(bool explicit_level, int requested, uint64_t rate_lim
   return std::min(chosen, cap.load(std::memory_order_relaxed));
 }
 
+bool CompressionLink::automatic_pays() const {
+  uint64_t count = bytes.load(std::memory_order_relaxed), elapsed = nanoseconds.load(std::memory_order_relaxed);
+  if (count < 256 * 1024 || elapsed < 1000000) return true;
+  return (double)count * 1e9 / elapsed < AUTO_RATE;
+}
+
 bool compression_worthwhile(std::string_view raw, void* context) {
   if (raw.size() < 16 * 1024) return true;
   constexpr size_t span = 2048;

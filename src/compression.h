@@ -57,6 +57,12 @@ struct CompressionLink {
   // Writer thread only: `count` bytes took `elapsed` ns to write, finishing at `now`.
   void observe(uint64_t count, uint64_t elapsed, Transport state, uint64_t now, uint64_t rate_limit = 0);
   int level(bool explicit_level, int requested, uint64_t rate_limit) const;
+  // Automatic compression (no -z) pays while the writer moves under AUTO_RATE: over an internet link that is the
+  // link's rate, as the writer waits on ssh; on a local pipe or a fast LAN the writer's own rate turns it off.
+  // From the start, until 256 KiB have been written, it is on.
+  static constexpr double AUTO_RATE = 256.0 * 1024 * 1024;
+  static constexpr int AUTO_MAX_LEVEL = 3;  // a transient writer stall must not push it to level 6
+  bool automatic_pays() const;
   // Record that a worker compressed `raw` bytes at an automatic level.
   void count(int level, uint64_t raw) {
     compressed_input[level >= 6 ? 2 : level >= 3 ? 1 : 0].fetch_add(raw, std::memory_order_relaxed);

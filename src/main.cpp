@@ -112,6 +112,9 @@ Options (same meaning as rsync):
  -z, --compress           compress file data during the transfer (zstd)
      --compress-level=NUM explicitly set compression level (default: adaptive)
      --skip-compress=LIST skip suffixes, separated by / (empty disables the list)
+     --no-auto-compress   without -z, never compress (by default a push compresses
+                          while the link is slower than compression, levels 1-3;
+                          not under --bwlimit)
  -f, --filter=RULE        add a file-filtering RULE
  -F                       merge .rsync-filter files (twice also excludes them)
  -C, --cvs-exclude        exclude CVS defaults and .cvsignore patterns
@@ -302,6 +305,7 @@ Parsed parse(int argc, char** argv) {
     else if (name == "no-D") o.devices = o.specials = false;
     else if (name == "cvs-exclude") o.cvs_exclude = true;
     else if (name == "atomic") o.direct_new = false;
+    else if (name == "auto-compress" || name == "no-auto-compress") o.auto_compress = name == "auto-compress";
     else if (name == "no-atomic") o.direct_new = true;
     else if (name == "delete-before") o.del = o.delete_before = true, delete_modes |= 1;
     else if (name == "delete-after") o.del = o.delete_after = true, delete_modes |= 8;
@@ -354,7 +358,7 @@ Parsed parse(int argc, char** argv) {
     }
     else if (name == "compress-choice" || name == "zc") {
       std::string choice = need();
-      if (choice == "none") o.compress = false, compression_none = true;
+      if (choice == "none") o.compress = false, compression_none = true, o.auto_compress = false;
       else if (choice == "zstd") o.compress = true, compression_none = false;
       else if (choice != "zstd") usage_error("--" + name + " supports only zstd or none");
     } else if (name == "exclude") o.filters.add_pattern(need(), false);

@@ -92,6 +92,9 @@ struct Options {
 #undef X
   bool quiet = false, progress = false, stats = false, mkpath = false;
   bool compress_level_explicit = false, skip_compress_set = false;
+  // Without -z, a sender still compresses while its writer is slower than compression (see auto_compressing in
+  // remote.cpp). Not on the wire: each end keeps its own setting, and every receiver decodes compressed frames.
+  bool auto_compress = true;
   std::string skip_compress{DEFAULT_SKIP_COMPRESS};
   CompressionSuffixes compression_suffixes;
   enum ProgressMode { Display, Progress2, Json } progress_mode = Display;

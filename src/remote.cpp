@@ -829,10 +829,23 @@ void handle_output(std::string_view payload) {
   output_event(std::move(event));
 }
 
-// Optionally compress `raw` into `f` (appending). Returns true if compressed.
-bool pack(std::string& f, std::string_view raw, Worker& w) {
+// Without -z a client that sends (a push) still compresses what it sends, at level 1-3, while that pays
+// (CompressionLink::automatic_pays). It stays wire-compatible: zstd is always negotiated, and every receiver decodes
+// a frame flagged as compressed whenever it is (unpack). --no-auto-compress and --compress-choice=none turn it off.
+// A server does not: the client's --compress-choice=none does not reach it, so it could not be honoured on a pull.
+// Nor does a transfer under --bwlimit: that rate is set by hand, not measured from the link.
+bool auto_compressing() {
+  return !g_opt.compress && g_opt.auto_compress && !g_opt.am_server && !g_opt.list_only && !g_opt.bwlimit && g_conn &&
+         (g_opt.peer_features & PF_ZSTD) &&
+         g_conn->compression_link.automatic_pays();
+}
+
+// Optionally compress `raw` into `f` (appending). Returns true if compressed. Automatic compression takes only a
+// `raw` of at least `auto_min` bytes (a small listing gains little), and none with SIZE_MAX.
+bool pack(std::string& f, std::string_view raw, Worker& w, size_t auto_min = 128) {
   StageTimer timing(g_stats.read_ns);
-  if (!g_opt.compress || raw.size() < 128) return false;
+  const bool automatic = !g_opt.compress && raw.size() >= auto_min && auto_compressing();
+  if ((!g_opt.compress && !automatic) || raw.size() < 128) return false;
   if (!w.zc) w.zc = ZSTD_createCCtx();
   if (!w.zc || !compression_worthwhile(raw, w.zc)) return false;
   size_t base = f.size(), bound = ZSTD_compressBound(raw.size());
@@ -841,6 +854,7 @@ bool pack(std::string& f, std::string_view raw, Worker& w) {
   f.resize(at + bound);
   int level = g_conn ? g_conn->compression_link.level(g_opt.compress_level_explicit, (int)g_opt.compress_level, g_opt.bwlimit)
                      : (int)g_opt.compress_level;
+  if (automatic) level = std::min(level, CompressionLink::AUTO_MAX_LEVEL);
   level = std::clamp(level, ZSTD_minCLevel(), ZSTD_maxCLevel());
   if (g_conn) {
     g_conn->compression_link.last_level.store(level, std::memory_order_relaxed);
@@ -1283,7 +1297,7 @@ struct Sender {
     put_var(f, pidx);
     size_t flag_at = f.size();
     f.push_back((char)d->flags);
-    if (pack(f, body, w)) f[flag_at] |= DF_ZSTD;
+    if (pack(f, body, w, 16 * 1024)) f[flag_at] |= DF_ZSTD;
     else f.append(body);
     {
       std::lock_guard<std::mutex> lk(smu);
@@ -1401,7 +1415,7 @@ struct Sender {
     std::string_view raw(w.block.data() + DATA_PREFIX, w.block.size() - DATA_PREFIX);
     u64 h = XXH3_64bits(raw.data(), raw.size());
     std::string f;
-    if (g_opt.compress && !w.block_raw) {
+    if ((g_opt.compress || auto_compressing()) && !w.block_raw) {
       f = new_frame(F_DATA);
       f.push_back(1);
       f.append((const char*)&h, 8);
@@ -1436,7 +1450,7 @@ struct Sender {
   void read_one(SDir& d, u32 idx, Worker& w) {
     const Options& o = g_opt;
     const Entry& scanned = d.list.e[idx];
-    RawFileBlock raw_file(*this, w, o.compress && o.compression_suffixes.matches(d.list.name_sv(scanned)));
+    RawFileBlock raw_file(*this, w, (o.compress || auto_compressing()) && o.compression_suffixes.matches(d.list.name_sv(scanned)));
     if (w.block.size() < DATA_PREFIX) begin_block(w);
     auto head = [&](u8 kind) {
       put_var(w.block, d.id), put_var(w.block, idx);
@@ -1587,7 +1601,7 @@ struct Sender {
             // Complete only this abandoned attempt; the usual stable-source
             // check selects a fresh attempt before output publication.
             if (n < want) { memset(worker.buf.data() + n, 0, want - n); input_ok = false; }
-            RawFileBlock raw(*this, worker, o.compress && o.compression_suffixes.matches(d.list.name_sv(scanned)));
+            RawFileBlock raw(*this, worker, (o.compress || auto_compressing()) && o.compression_suffixes.matches(d.list.name_sv(scanned)));
             flush_block(worker);
             if (worker.block.size() < DATA_PREFIX) begin_block(worker);
             put_var(worker.block, d.id), put_var(worker.block, idx);
@@ -2010,7 +2024,7 @@ struct Receiver {
       if (d.completed.count(idx)) die(RERR_PROTOCOL, "protocol error: delta request after file completion");
       d.bases.emplace(idx, std::move(basis));
     }
-    if (pack(f, body, worker)) f[flag_at] = 1;
+    if (pack(f, body, worker, SIZE_MAX)) f[flag_at] = 1;  // delta requests: only with -z
     else f.append(body);
     c.send(std::move(f), true);
   }
@@ -3092,7 +3106,7 @@ int run_client(const std::vector<std::string>& srcs, const std::string& dest, u3
       fallback("peer does not support hard-link preservation", RERR_UNSUPPORTED);
     break;
   }
-  c.compression_observe = o.compress;
+  c.compression_observe = o.compress || o.auto_compress;
   if (o.peer_features & PF_IO_CONTROL) {
     std::string config = new_frame(F_IO_CONFIG);
     put_var(config, o.bwlimit), put_var(config, o.timeout);
@@ -3319,7 +3333,7 @@ int run_server(const AppServer* app) {
   if (ver == 3 && o.compress && !(o.peer_features & PF_ZSTD))
     die(RERR_UNSUPPORTED, "peer does not support legacy protocol compression");
   if (!(o.peer_features & PF_ZSTD)) o.compress = false;
-  c.compression_observe = o.compress;
+  c.compression_observe = o.compress || o.auto_compress;
   init_ids();
   std::vector<std::string> paths;
   size_t n = (size_t)r.var();

@@ -100,7 +100,8 @@ void init_fallback(int argc, char** argv) {
     if (a == "--server" || a == "--install" || a.rfind("--install=", 0) == 0) server = true;
     if (a == "--no-fallback") { enabled = false; continue; }
     if (a == "--fallback") { enabled = true; continue; }
-    if (a == "--atomic" || a == "--no-atomic" || a == "--clone" || a == "--no-clone") continue;
+    if (a == "--atomic" || a == "--no-atomic" || a == "--clone" || a == "--no-clone" ||
+        a == "--auto-compress" || a == "--no-auto-compress") continue;
     if (a == "--jobs" || a.rfind("--jobs=", 0) == 0) {
       if (a == "--jobs" && i + 1 < argc) ++i;
       continue;
