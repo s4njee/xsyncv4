@@ -12,10 +12,10 @@
   "cache": "warm",
   "arm": "xs",
   "metric": "wall_s",
-  "n_blocks": 9,
-  "geomean": 4.804414702658026,
-  "lo": 4.418880052068134,
-  "hi": 5.223586149235604
+  "n_blocks": 12,
+  "geomean": 4.87172135116623,
+  "lo": 4.5820689782754185,
+  "hi": 5.179683901734213
  },
  {
   "experiment": "S0-vps-sentinel",
@@ -30,10 +30,10 @@
   "cache": "warm",
   "arm": "again",
   "metric": "wall_s",
-  "n_blocks": 9,
-  "geomean": 4.679596712698416,
-  "lo": 4.279410141768888,
-  "hi": 5.117206499970123
+  "n_blocks": 12,
+  "geomean": 4.890265308949855,
+  "lo": 4.499336951907851,
+  "hi": 5.3151597774374055
  },
  {
   "experiment": "S0-vps-sentinel",
@@ -48,10 +48,10 @@
   "cache": "warm",
   "arm": "rsync",
   "metric": "wall_s",
-  "n_blocks": 9,
-  "geomean": 3.6167052101780484,
-  "lo": 3.401901854500758,
-  "hi": 3.8450717089393103
+  "n_blocks": 12,
+  "geomean": 3.7312734418306133,
+  "lo": 3.4808533650297653,
+  "hi": 3.999709277495353
  },
  {
   "experiment": "S0-vps-sentinel",
@@ -66,10 +66,10 @@
   "cache": "warm",
   "arm": "xs",
   "metric": "durable_s",
-  "n_blocks": 9,
-  "geomean": 4.836876075729519,
-  "lo": 4.454849913744797,
-  "hi": 5.25166293476724
+  "n_blocks": 12,
+  "geomean": 4.902797252700579,
+  "lo": 4.616047626268247,
+  "hi": 5.207359812385846
  },
  {
   "experiment": "S0-vps-sentinel",
@@ -84,10 +84,10 @@
   "cache": "warm",
   "arm": "again",
   "metric": "durable_s",
-  "n_blocks": 9,
-  "geomean": 4.710637533104447,
-  "lo": 4.311929762588431,
-  "hi": 5.146212297060176
+  "n_blocks": 12,
+  "geomean": 4.92162325312734,
+  "lo": 4.531370569683874,
+  "hi": 5.345485449320378
  },
  {
   "experiment": "S0-vps-sentinel",
@@ -102,10 +102,10 @@
   "cache": "warm",
   "arm": "rsync",
   "metric": "durable_s",
-  "n_blocks": 9,
-  "geomean": 3.6459797005770156,
-  "lo": 3.4329388242459533,
-  "hi": 3.8722414402300087
+  "n_blocks": 12,
+  "geomean": 3.7604298657862163,
+  "lo": 3.511226231109185,
+  "hi": 4.027320327642316
  },
  {
   "experiment": "S0-vps-sentinel",
@@ -120,10 +120,10 @@
   "cache": "warm",
   "arm": "xs",
   "metric": "cpu_s",
-  "n_blocks": 9,
-  "geomean": 10.14980285536092,
-  "lo": 9.376536978812783,
-  "hi": 10.98683855622531
+  "n_blocks": 12,
+  "geomean": 10.343976080828446,
+  "lo": 9.740267937200834,
+  "hi": 10.985102447962038
  },
  {
   "experiment": "S0-vps-sentinel",
@@ -138,10 +138,10 @@
   "cache": "warm",
   "arm": "again",
   "metric": "cpu_s",
-  "n_blocks": 9,
-  "geomean": 10.03094386206115,
-  "lo": 9.259546891476361,
-  "hi": 10.866604591251141
+  "n_blocks": 12,
+  "geomean": 10.373822754880043,
+  "lo": 9.68527106185655,
+  "hi": 11.111325420048516
  },
  {
   "experiment": "S0-vps-sentinel",
@@ -156,10 +156,10 @@
   "cache": "warm",
   "arm": "rsync",
   "metric": "cpu_s",
-  "n_blocks": 9,
-  "geomean": 2.4982357501710712,
-  "lo": 2.408377618830002,
-  "hi": 2.591446546685981
+  "n_blocks": 12,
+  "geomean": 2.5382763196275233,
+  "lo": 2.445295795370718,
+  "hi": 2.634792358036619
  },
  {
   "experiment": "S0-vps-sentinel",
@@ -174,10 +174,10 @@
   "cache": "warm",
   "arm": "xs",
   "metric": "rss_bytes",
-  "n_blocks": 9,
-  "geomean": 27002547.915646624,
-  "lo": 26380237.961893264,
-  "hi": 27639538.16451711
+  "n_blocks": 12,
+  "geomean": 26910202.19046547,
+  "lo": 26451294.877568997,
+  "hi": 27377071.152226567
  },
  {
   "experiment": "S0-vps-sentinel",
@@ -192,10 +192,10 @@
   "cache": "warm",
   "arm": "again",
   "metric": "rss_bytes",
-  "n_blocks": 9,
-  "geomean": 27136017.193058264,
-  "lo": 26695916.467754923,
-  "hi": 27583373.284501456
+  "n_blocks": 12,
+  "geomean": 27105865.786721516,
+  "lo": 26712271.168832798,
+  "hi": 27505259.863677263
  },
  {
   "experiment": "S0-vps-sentinel",
@@ -210,9 +210,9 @@
   "cache": "warm",
   "arm": "rsync",
   "metric": "rss_bytes",
-  "n_blocks": 9,
-  "geomean": 12760768.302204821,
-  "lo": 12721267.312964978,
-  "hi": 12800391.946531814
+  "n_blocks": 12,
+  "geomean": 13067270.66586669,
+  "lo": 12415957.397640467,
+  "hi": 13752750.366835998
  }
 ]
