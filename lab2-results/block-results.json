@@ -2281,6 +2281,80 @@
    "model": "opencode/deepseek-v4.1-flash",
    "summarizedUtc": 1792714390.443,
    "driver": "a"
+  },
+  "AP10222213-PS-beabaee-laikav2-update-1pct": {
+   "run": "20261022T221401Z-AP10222213-PS-beabaee-laikav2-update-1pct",
+   "experiment": "AP10222213-PS-beabaee-laikav2-update-1pct",
+   "key": "laikav2-sample.update-1pct.a-aws.sender.warm|6|0",
+   "utc": 1792723616.374,
+   "cell": "laikav2-sample.update-1pct.a-aws.sender.warm",
+   "factors": {
+    "corpus": "laikav2-sample",
+    "scenario": "update-1pct",
+    "sender": "a",
+    "receiver": "aws",
+    "client": "sender",
+    "link": "a-aws",
+    "cache": "warm"
+   },
+   "block": 6,
+   "attempt": 0,
+   "control": "rsync",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.376,
+     "gbps": 0.005,
+     "files_per_s": 3555,
+     "speed": 1.27
+    },
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.41,
+     "gbps": 0.005,
+     "files_per_s": 3263,
+     "speed": 1.17
+    },
+    {
+     "arm": "rsync",
+     "label": "rsync",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 0.48,
+     "gbps": 0.004,
+     "files_per_s": 2788,
+     "speed": 1
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "speed": 1.17,
+     "blocks": 7
+    },
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "speed": 1.26,
+     "blocks": 7
+    }
+   ],
+   "question": "On laikav2-sample with 1% of files changed, does xs-rs at beabaee992b6 beat xs-c++ and rsync, in a scenario-corpus pair no experiment has run?",
+   "summary": "Block 6 showed xs-rs fastest at 0.376 s versus rsync\u2019s 0.48 s, or 1.27x (27% faster); xs-c++ was 1.17x. Cumulatively for this cell, xs-rs is at 1.26x and xs-c++ at 1.17x, each across seven blocks, so the evidence is not thin. This supports xs-rs beating both in this previously unrun cell, though it is one cell of one experiment.",
+   "model": "opencode/deepseek-v4.1-flash",
+   "summarizedUtc": 1792723694.596,
+   "driver": "a"
   }
  }
 }
