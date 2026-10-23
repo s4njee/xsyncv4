@@ -1,0 +1,19 @@
+{
+ "experiment": "AP10230414-AP10230412-lk-u01pct-4b",
+ "kind": "screening",
+ "hypothesis": "On laikav2-sample update-0p1pct, where scanning and metadata dominate the transferred bytes, xs-rs at beabaee992b6 is faster than xs-c++ by at least 5% and both xs tools beat rsync.",
+ "primary": "durable_s",
+ "control": "rsync",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261023T041408Z-AP10230414-AP10230412-lk-u01pct-4b"
+ ],
+ "spec_sha256": [
+  "6841464a0f5cef445d297887332ac038e3505a49cf8f75378706f28338875170"
+ ],
+ "valid_blocks": 4,
+ "void_attempts": 0,
+ "void_reasons": []
+}

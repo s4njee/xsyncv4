@@ -1,0 +1,33 @@
+# Written by the 6-hourly planner (2026-10-23T04:14Z). Why: The current 0.939 ratio sits just outside the 5% margin and needs a tighter direct xs-rs-versus-xs-c++ interval before it can be counted as a stable win.
+id = "AP10230414-AP10230412-lk-u1pct-8b-pin"
+kind = "screening"
+hypothesis = "The 0.939 xs-rs over xs-c++ point estimate for laikav2-sample update-1pct is real: with additional blocks the direct ratio stays below 1 by at least the 5% margin; if the interval includes 1, the cell is a tie rather than a win."
+primary = "durable_s"
+delta = 0.05
+blocks = 8
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+sample_timeout_s = 7200
+
+[arms.xs-rs]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j4"]
+
+[arms.xs-cpp]
+tool = "xs"
+rev = "e104bde552f2"
+flags = ["-a", "-j4"]
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[matrix]
+link = "a-aws"
+corpus = ["laikav2-sample"]
+scenario = ["update-1pct"]
+direction = ["a>aws"]
+client = ["initiator"]
+cache = ["warm"]
