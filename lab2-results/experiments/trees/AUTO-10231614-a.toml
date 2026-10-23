@@ -1,0 +1,10 @@
+# Written by the 6-hourly planner at 2026-10-23T16:14Z for a; nothing is queued after the deadline.
+id = "AUTO-10231614-a"
+question = "Runner a has 5.8 h of hour room after its 0.2 h queued load, but the binding limit is A's 32 GiB/day write budget: the queued 4-block real-projects fresh run may use about 25.6 GiB, leaving about 6.4 GiB. One 8-block congress-sample update-0p1pct race costs about 5.2 GiB and follows the latest 4-block screening (analysed 13:10Z), which left xs-rs's roughly 0.85 advantage unconfirmed. I avoid real-projects updates, all no-op cells, and every queued cell (congress fresh, congress update-10pct, laikav2 update-0p1pct, laikav2 update-1pct, laikav2 update-10pct-j8, real-projects fresh). Front is true so this small pin runs before the queued real-projects fresh run while both still fit under the daily cap. Engineering and port are null because engineering.can_open is false and port.next is null."
+deadline = "2026-10-23T22:14Z"
+start = ["N0"]
+
+[nodes.N0]
+spec = "auto/AP10231614-AP10231612-congress-u01pct-8b-pin.toml"
+question = "Does xs-rs at beabaee992b6 with -a -j4 beat xs-c++ at e104bde552f2 with -a -j4 by at least 5% in durable time on congress-sample update-0p1pct, over 8 paired blocks, with rsync as the reference?"
+front = true

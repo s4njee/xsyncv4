@@ -1,0 +1,33 @@
+# Written by the 6-hourly planner (2026-10-23T16:14Z). Why: This is the latest open screening on the board (4 blocks, 'too few blocks'), and 8 blocks can convert it to a durable xs-rs score without touching the real-projects traffic reserve.
+id = "AP10231614-AP10231612-congress-u01pct-8b-pin"
+kind = "screening"
+hypothesis = "The 4-block screening put xs-rs at 0.448 of rsync and xs-c++ at 0.525, an xs-rs/xs-c++ ratio of about 0.85; over 8 blocks the xs-rs advantage will persist, its interval will exclude 1.0, and rsync will remain slower than both."
+primary = "durable_s"
+delta = 0.05
+blocks = 8
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+sample_timeout_s = 7200
+
+[arms.xs-rs]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j4"]
+
+[arms.xs-cpp]
+tool = "xs"
+rev = "e104bde552f2"
+flags = ["-a", "-j4"]
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[matrix]
+link = "a-aws"
+corpus = ["congress-sample"]
+scenario = ["update-0p1pct"]
+direction = ["a>aws"]
+client = ["initiator"]
+cache = ["warm"]
