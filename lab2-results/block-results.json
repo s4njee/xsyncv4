@@ -2651,6 +2651,80 @@
    "model": "opencode/deepseek-v4.1-flash",
    "summarizedUtc": 1792761079.174,
    "driver": "a"
+  },
+  "AP10230414-AP10230412-lk-u1pct-8b-pin": {
+   "run": "20261023T041406Z-AP10230414-AP10230412-lk-u1pct-8b-pin",
+   "experiment": "AP10230414-AP10230412-lk-u1pct-8b-pin",
+   "key": "laikav2-sample.update-1pct.a-aws.sender.warm|6|0",
+   "utc": 1792785499.492,
+   "cell": "laikav2-sample.update-1pct.a-aws.sender.warm",
+   "factors": {
+    "corpus": "laikav2-sample",
+    "scenario": "update-1pct",
+    "sender": "a",
+    "receiver": "aws",
+    "client": "sender",
+    "link": "a-aws",
+    "cache": "warm"
+   },
+   "block": 6,
+   "attempt": 0,
+   "control": "rsync",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.349,
+     "gbps": 0.001,
+     "files_per_s": 3835,
+     "speed": 1.41
+    },
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.407,
+     "gbps": 0.001,
+     "files_per_s": 3283,
+     "speed": 1.2
+    },
+    {
+     "arm": "rsync",
+     "label": "rsync",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 0.49,
+     "gbps": 0.001,
+     "files_per_s": 2728,
+     "speed": 1
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "speed": 1.16,
+     "blocks": 7
+    },
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "speed": 1.28,
+     "blocks": 7
+    }
+   ],
+   "question": "Does the near-parity xs-rs over xs-c++ result on laikav2-sample update-1pct survive more blocks and a direct interval that excludes 1?",
+   "summary": "In block 6, xs-rs was fastest at 1.41x the rsync control, ahead of xs-c++ at 1.20x. Cumulatively, xs-rs stands at 1.28x and xs-c++ at 1.16x across seven blocks, so the evidence is not thin. This block again puts xs-rs ahead of xs-c++ in this cell, bearing on the near-parity question but not resolving the interval-excludes-1 criterion by itself.",
+   "model": "opencode/deepseek-v4.1-flash",
+   "summarizedUtc": 1792785580.452,
+   "driver": "a"
   }
  }
 }

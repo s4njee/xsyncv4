@@ -1,0 +1,19 @@
+{
+ "experiment": "AP10230414-AP10230412-lk-u1pct-8b-pin",
+ "kind": "screening",
+ "hypothesis": "The 0.939 xs-rs over xs-c++ point estimate for laikav2-sample update-1pct is real: with additional blocks the direct ratio stays below 1 by at least the 5% margin; if the interval includes 1, the cell is a tie rather than a win.",
+ "primary": "durable_s",
+ "control": "rsync",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261023T041406Z-AP10230414-AP10230412-lk-u1pct-8b-pin"
+ ],
+ "spec_sha256": [
+  "448fce0817b179a5a1f1f1f60d42637167c398543b9d1c565ae8dae4fd6282bf"
+ ],
+ "valid_blocks": 8,
+ "void_attempts": 0,
+ "void_reasons": []
+}
