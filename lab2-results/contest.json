@@ -1,5 +1,5 @@
 {
- "updated": "2026-10-23T04:12:18+00:00",
+ "updated": "2026-10-23T05:12:18+00:00",
  "enabled": true,
  "cpp_rev": "e104bde552f2",
  "rs": {
@@ -10,7 +10,7 @@
  "score": {
   "xs-rs": 7,
   "xs-cpp": 2,
-  "tie": 0,
+  "tie": 1,
   "pending": 0
  },
  "cells": [
@@ -170,8 +170,8 @@
    "scenario": "update-1pct",
    "link": "a-aws",
    "metric": "durable_s",
-   "experiment": "FC-e671c84-update-1pct",
-   "run": "20261022T062411Z-FC-e671c84-update-1pct",
+   "experiment": "FC-beabaee-update-1pct",
+   "run": "20261022T195833Z-FC-beabaee-update-1pct",
    "tools": {
     "rsync": {
      "arm": "rsync",
@@ -179,9 +179,9 @@
       "-a"
      ],
      "rev": null,
-     "seconds": 1.805,
-     "lo": 1.7,
-     "hi": 1.916,
+     "seconds": 1.774,
+     "lo": 1.714,
+     "hi": 1.835,
      "blocks": 4
     },
     "xs-cpp": {
@@ -190,10 +190,10 @@
       "-a",
       "-j4"
      ],
-     "rev": "fe012667764a",
-     "seconds": 0.87,
-     "lo": 0.809,
-     "hi": 0.935,
+     "rev": "e104bde552f2",
+     "seconds": 1.05,
+     "lo": 0.97,
+     "hi": 1.136,
      "blocks": 4
     },
     "xs-rs": {
@@ -202,16 +202,16 @@
       "-a",
       "-j4"
      ],
-     "rev": "e671c84aa680-rs",
-     "seconds": 0.75,
-     "lo": 0.664,
-     "hi": 0.847,
+     "rev": "beabaee992b6-rs",
+     "seconds": 0.884,
+     "lo": 0.779,
+     "hi": 1.004,
      "blocks": 4
     }
    },
    "verdict": "xs-rs",
-   "rs_vs_cpp": 0.862,
-   "rs_vs_rsync": 0.416,
+   "rs_vs_cpp": 0.842,
+   "rs_vs_rsync": 0.498,
    "fastest": "xs-rs"
   },
   {
@@ -312,6 +312,56 @@
    "verdict": "xs-rs",
    "rs_vs_cpp": 0.874,
    "rs_vs_rsync": 0.771,
+   "fastest": "xs-rs"
+  },
+  {
+   "cell": "laikav2-sample.update-0p1pct.a-aws.sender.warm",
+   "corpus": "laikav2-sample",
+   "scenario": "update-0p1pct",
+   "link": "a-aws",
+   "metric": "durable_s",
+   "experiment": "AP10230414-AP10230412-lk-u01pct-4b",
+   "run": "20261023T041408Z-AP10230414-AP10230412-lk-u01pct-4b",
+   "tools": {
+    "rsync": {
+     "arm": "rsync",
+     "flags": [
+      "-a"
+     ],
+     "rev": null,
+     "seconds": 0.467,
+     "lo": 0.449,
+     "hi": 0.485,
+     "blocks": 4
+    },
+    "xs-rs": {
+     "arm": "xs-rs",
+     "flags": [
+      "-a",
+      "-j4"
+     ],
+     "rev": "beabaee992b6-rs",
+     "seconds": 0.375,
+     "lo": 0.351,
+     "hi": 0.401,
+     "blocks": 4
+    },
+    "xs-cpp": {
+     "arm": "xs-cpp",
+     "flags": [
+      "-a",
+      "-j4"
+     ],
+     "rev": "e104bde552f2",
+     "seconds": 0.38,
+     "lo": 0.34,
+     "hi": 0.426,
+     "blocks": 4
+    }
+   },
+   "verdict": "tie",
+   "rs_vs_cpp": 0.987,
+   "rs_vs_rsync": 0.803,
    "fastest": "xs-rs"
   },
   {

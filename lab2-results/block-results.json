@@ -2429,6 +2429,80 @@
    "model": "opencode/deepseek-v4.1-flash",
    "summarizedUtc": 1792728974.7,
    "driver": "a"
+  },
+  "FC-beabaee-update-1pct": {
+   "run": "20261022T195833Z-FC-beabaee-update-1pct",
+   "experiment": "FC-beabaee-update-1pct",
+   "key": "congress-sample.update-1pct.a-aws.sender.warm|3|0",
+   "utc": 1792729221.418,
+   "cell": "congress-sample.update-1pct.a-aws.sender.warm",
+   "factors": {
+    "corpus": "congress-sample",
+    "scenario": "update-1pct",
+    "sender": "a",
+    "receiver": "aws",
+    "client": "sender",
+    "link": "a-aws",
+    "cache": "warm"
+   },
+   "block": 3,
+   "attempt": 0,
+   "control": "rsync",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "rsync",
+     "label": "rsync",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 1.73,
+     "gbps": 0.006,
+     "files_per_s": 14595,
+     "speed": 1
+    },
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 1.077,
+     "gbps": 0.01,
+     "files_per_s": 23441,
+     "speed": 1.61
+    },
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.9,
+     "gbps": 0.012,
+     "files_per_s": 28049,
+     "speed": 1.92
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "speed": 1.69,
+     "blocks": 4
+    },
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "speed": 2.01,
+     "blocks": 4
+    }
+   ],
+   "question": "On congress-sample, update-1pct copies: how do rsync, xs-c++ and xs-rs at beabaee992b6 compare?",
+   "summary": "In block 3, xs-rs was fastest at 0.90 s, 1.92x the rsync control's 1.73 s, while xs-c++ took 1.08 s for 1.61x. Cumulatively for this cell, xs-c++ is at 1.69x and xs-rs at 2.01x, each over four blocks, so the evidence is not thin. For the experiment's question, both xs arms beat rsync in this block and xs-rs led, matching the cumulative picture without showing why.",
+   "model": "opencode/deepseek-v4.1-flash",
+   "summarizedUtc": 1792729243.795,
+   "driver": "a"
   }
  }
 }
