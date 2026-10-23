@@ -1,0 +1,19 @@
+{
+ "experiment": "AP10222213-PS-beabaee-update-0p1pct",
+ "kind": "screening",
+ "hypothesis": "At 0.1% churn the run is mostly scanning and metadata, where xs-rs has matched or edged xs-c++ on the deferred no-op cell; xs-rs finishes at or below 1.0 of xs-c++'s durable time and rsync falls behind, making update-0p1pct a likely xs-rs cell.",
+ "primary": "durable_s",
+ "control": "rsync",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261022T221402Z-AP10222213-PS-beabaee-update-0p1pct"
+ ],
+ "spec_sha256": [
+  "733d1f0e18953eab1e18a4ce4d9a55bed8148b2408b42d00d158fddbdd5b095a"
+ ],
+ "valid_blocks": 4,
+ "void_attempts": 0,
+ "void_reasons": []
+}

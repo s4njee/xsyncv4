@@ -2577,6 +2577,80 @@
    "model": "opencode/deepseek-v4.1-flash",
    "summarizedUtc": 1792736734.249,
    "driver": "a"
+  },
+  "AP10222213-PS-beabaee-update-0p1pct": {
+   "run": "20261022T221402Z-AP10222213-PS-beabaee-update-0p1pct",
+   "experiment": "AP10222213-PS-beabaee-update-0p1pct",
+   "key": "congress-sample.update-0p1pct.a-aws.sender.warm|2|0",
+   "utc": 1792760982.822,
+   "cell": "congress-sample.update-0p1pct.a-aws.sender.warm",
+   "factors": {
+    "corpus": "congress-sample",
+    "scenario": "update-0p1pct",
+    "sender": "a",
+    "receiver": "aws",
+    "client": "sender",
+    "link": "a-aws",
+    "cache": "warm"
+   },
+   "block": 2,
+   "attempt": 0,
+   "control": "rsync",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.698,
+     "gbps": 0.001,
+     "files_per_s": 36191,
+     "speed": 2.39
+    },
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.901,
+     "gbps": 0.001,
+     "files_per_s": 28020,
+     "speed": 1.85
+    },
+    {
+     "arm": "rsync",
+     "label": "rsync",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 1.668,
+     "gbps": 0,
+     "files_per_s": 15134,
+     "speed": 1
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "speed": 1.93,
+     "blocks": 3
+    },
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "speed": 2.3,
+     "blocks": 3
+    }
+   ],
+   "question": "On congress-sample with 0.1% of files changed, does xs-rs at beabaee992b6 hold its small-file advantage over xs-c++ and rsync when almost nothing has changed?",
+   "summary": "In block 2, xs-rs was fastest at 0.698 s, 2.39x the rsync control, ahead of xs-c++ at 1.85x. So far in this cell, cumulative ratios are 2.3x for xs-rs and 1.93x for xs-c++, each over 3 blocks, so the evidence is not thin by the three-block threshold. This supports xs-rs holding its small-file advantage when 0.1% of files changed, though it is one cell\u2019s running result.",
+   "model": "opencode/deepseek-v4.1-flash",
+   "summarizedUtc": 1792761079.174,
+   "driver": "a"
   }
  }
 }
