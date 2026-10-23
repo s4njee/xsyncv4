@@ -1,0 +1,35 @@
+# MM2c (mac-mac, 2026-10-22): phase 1, third. ~/projects/csearchv3 pinned on 2026-10-22; rsync's pull of 1.3 M files
+# Re-queued 2026-10-22 with xs-c++ at cc8288d4f08c (the P0 merge), as MM2c-real-csearchv3-p0; the original's runs stay apart.
+# is the long pole, about 36 min a block.
+id = "MM2c-real-csearchv3-p0"
+kind = "screening"
+hypothesis = "On the user's csearchv3 tree (14 GB, 1,345,908 files, 472,330 directories), rsync -a, xs-c++ -a -j4 and xs-rs -a -j4 differ by more than 5% in time to durable in some cell."
+primary = "durable_s"
+delta = 0.05
+blocks = 12
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+max_hours = 5.5       # its share of phase 1: 2.5 + 4 + 5.5 = 12 hours; blocks go round the cells, so a run cut short stays balanced
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[arms.xs-cpp]
+tool = "xs"
+rev = "cc8288d4f08c"    # main after the P0 merge of 2026-10-22: receiver-locks, receiver-defaults, dest-anchors, local-source-guard
+flags = ["-a", "-j4"]
+
+[arms.xs-rs]
+tool = "xs"
+rev = "e671c84aa680-rs" # rust-ds's tip, 2026-10-22
+flags = ["-a", "-j4"]
+
+[matrix]
+link = "mac-mars-usb10g"
+corpus = ["real-csearchv3"]
+scenario = ["fresh", "noop", "update-10pct"]
+direction = ["mac>mars", "mars>mac"]
+client = ["initiator"]
+cache = ["warm"]

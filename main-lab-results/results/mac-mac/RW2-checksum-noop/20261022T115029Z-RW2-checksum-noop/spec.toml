@@ -1,0 +1,29 @@
+# RW2-checksum-noop (mac-mac, 2026-10-22): the user's 24-hour plan, phase 2, a screening hunt for cells where rsync beats either
+# xs by 5% or more, for the next development case. 3 blocks a cell; every sample records client and peer CPU.
+# No-ops with --checksum, where every file is read and hashed at both ends. xs-rs has no -c, so it sits out.
+id = "RW2-checksum-noop"
+kind = "screening"
+hypothesis = "rsync is at least 5% faster to durable than xs-c++ or xs-rs in some cell. No-ops with --checksum, where every file is read and hashed at both ends. xs-rs has no -c, so it sits out."
+primary = "durable_s"
+delta = 0.05
+blocks = 3
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+max_hours = 2       # its share of phase 2: 11 hours across RW1-6; blocks go round the cells, so a run cut short stays balanced
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a", "-c"]
+[arms.xs-cpp]
+tool = "xs"
+rev = "1594f4c4d0bf"
+flags = ["-a", "-c", "-j4"]
+
+[matrix]
+link = "mac-mars-usb10g"
+corpus = ["real-congress", "real-csearchv3"]
+scenario = ["noop"]
+direction = ["mac>mars", "mars>mac"]
+client = ["initiator"]
+cache = ["warm"]

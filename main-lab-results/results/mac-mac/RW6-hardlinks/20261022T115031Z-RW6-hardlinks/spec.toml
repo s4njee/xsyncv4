@@ -1,0 +1,29 @@
+# RW6-hardlinks (mac-mac, 2026-10-22): the user's 24-hour plan, phase 2, a screening hunt for cells where rsync beats either
+# xs by 5% or more, for the next development case. 3 blocks a cell; every sample records client and peer CPU.
+# Hard links kept with -H, on laikav2 (1,234 linked files in its Rust target folder). xs-rs has no -H, so it sits out.
+id = "RW6-hardlinks"
+kind = "screening"
+hypothesis = "rsync is at least 5% faster to durable than xs-c++ or xs-rs in some cell. Hard links kept with -H, on laikav2 (1,234 linked files in its Rust target folder). xs-rs has no -H, so it sits out."
+primary = "durable_s"
+delta = 0.05
+blocks = 3
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+max_hours = 1       # its share of phase 2: 11 hours across RW1-6; blocks go round the cells, so a run cut short stays balanced
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-aH"]
+[arms.xs-cpp]
+tool = "xs"
+rev = "1594f4c4d0bf"
+flags = ["-aH", "-j4"]
+
+[matrix]
+link = "mac-mars-usb10g"
+corpus = ["local-laikav2"]
+scenario = ["fresh", "noop"]
+direction = ["mac>mars", "mars>mac"]
+client = ["initiator"]
+cache = ["warm"]

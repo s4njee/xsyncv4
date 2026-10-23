@@ -1,0 +1,35 @@
+# MM2a (mac-mac, 2026-10-22): the user's 24-hour plan, phase 1, first. One 4 GiB file, alternating MiB of text and
+# Re-queued 2026-10-22 with xs-c++ at cc8288d4f08c (the P0 merge), as MM2a-large-solo-p0; the original's runs stay apart.
+# noise, both ways over the Mac-mars cable.
+id = "MM2a-large-solo-p0"
+kind = "screening"
+hypothesis = "On one 4 GiB file, half compressible within the file, rsync -a, xs-c++ -a -j4 and xs-rs -a -j4 differ by more than 5% in time to durable, fresh or after a 4 KiB edit in its middle (update-1pct of one file is that one edit)."
+primary = "durable_s"
+delta = 0.05
+blocks = 20
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+max_hours = 2.5       # its share of phase 1: 2.5 + 4 + 5.5 = 12 hours; blocks go round the cells, so a run cut short stays balanced
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[arms.xs-cpp]
+tool = "xs"
+rev = "cc8288d4f08c"    # main after the P0 merge of 2026-10-22: receiver-locks, receiver-defaults, dest-anchors, local-source-guard
+flags = ["-a", "-j4"]
+
+[arms.xs-rs]
+tool = "xs"
+rev = "e671c84aa680-rs" # rust-ds's tip, 2026-10-22
+flags = ["-a", "-j4"]
+
+[matrix]
+link = "mac-mars-usb10g"
+corpus = ["large-solo"]
+scenario = ["fresh", "update-1pct"]
+direction = ["mac>mars", "mars>mac"]
+client = ["initiator"]
+cache = ["warm"]

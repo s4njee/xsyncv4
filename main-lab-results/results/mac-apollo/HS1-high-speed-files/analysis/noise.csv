@@ -1,0 +1,17 @@
+experiment,kind,cell_id,corpus,scenario,sender,receiver,client,link,cache,arm,n_blocks,sigma_d,blocks_for_2pct,blocks_for_3pct,blocks_for_5pct,blocks_for_10pct,blocks_equivalent_2pct,blocks_equivalent_3pct,blocks_equivalent_5pct,blocks_equivalent_10pct
+HS1-high-speed-files,screening,hs-16x256m.fresh.apollo-mac.receiver.warm,hs-16x256m,fresh,apollo,mac,receiver,mac-apollo-10g,warm,xs-cpp,10,0.01627906618024171,8,8,8,8,10,8,8,8
+HS1-high-speed-files,screening,hs-16x256m.fresh.apollo-mac.receiver.warm,hs-16x256m,fresh,apollo,mac,receiver,mac-apollo-10g,warm,xs-rs,10,0.018867378567996116,10,8,8,8,12,8,8,8
+HS1-high-speed-files,screening,hs-16x256m.fresh.mac-apollo.sender.warm,hs-16x256m,fresh,mac,apollo,sender,mac-apollo-10g,warm,xs-cpp,10,0.33087819249604833,2191,985,363,97,2936,1319,486,129
+HS1-high-speed-files,screening,hs-16x256m.fresh.mac-apollo.sender.warm,hs-16x256m,fresh,mac,apollo,sender,mac-apollo-10g,warm,xs-rs,10,0.32913904535686744,2168,975,359,96,2905,1305,481,128
+HS1-high-speed-files,screening,hs-1x4g.fresh.apollo-mac.receiver.warm,hs-1x4g,fresh,apollo,mac,receiver,mac-apollo-10g,warm,xs-cpp,10,0.018008316813231,9,8,8,8,11,8,8,8
+HS1-high-speed-files,screening,hs-1x4g.fresh.apollo-mac.receiver.warm,hs-1x4g,fresh,apollo,mac,receiver,mac-apollo-10g,warm,xs-rs,10,0.1879343947246618,709,319,119,33,949,427,158,43
+HS1-high-speed-files,screening,hs-1x4g.fresh.mac-apollo.sender.warm,hs-1x4g,fresh,mac,apollo,sender,mac-apollo-10g,warm,xs-cpp,10,0.5168289804714605,5343,2399,882,233,7160,3215,1182,311
+HS1-high-speed-files,screening,hs-1x4g.fresh.mac-apollo.sender.warm,hs-1x4g,fresh,mac,apollo,sender,mac-apollo-10g,warm,xs-rs,10,0.5803722558183789,6737,3025,1112,293,9028,4053,1489,392
+HS1-high-speed-files,screening,hs-4x1g.fresh.apollo-mac.receiver.warm,hs-4x1g,fresh,apollo,mac,receiver,mac-apollo-10g,warm,xs-cpp,10,0.024076961955241852,14,8,8,8,18,9,8,8
+HS1-high-speed-files,screening,hs-4x1g.fresh.apollo-mac.receiver.warm,hs-4x1g,fresh,apollo,mac,receiver,mac-apollo-10g,warm,xs-rs,10,0.021025922565673094,11,8,8,8,14,8,8,8
+HS1-high-speed-files,screening,hs-4x1g.fresh.mac-apollo.sender.warm,hs-4x1g,fresh,mac,apollo,sender,mac-apollo-10g,warm,xs-cpp,10,0.2987009286264847,1786,803,296,80,2393,1076,396,106
+HS1-high-speed-files,screening,hs-4x1g.fresh.mac-apollo.sender.warm,hs-4x1g,fresh,mac,apollo,sender,mac-apollo-10g,warm,xs-rs,10,0.39360609050513995,3100,1393,513,136,4154,1866,686,182
+HS1-high-speed-files,screening,hs-64x64m.fresh.apollo-mac.receiver.warm,hs-64x64m,fresh,apollo,mac,receiver,mac-apollo-10g,warm,xs-cpp,10,0.07683964539114166,121,55,22,8,161,74,29,9
+HS1-high-speed-files,screening,hs-64x64m.fresh.apollo-mac.receiver.warm,hs-64x64m,fresh,apollo,mac,receiver,mac-apollo-10g,warm,xs-rs,10,0.02968857535141397,20,10,8,8,26,13,8,8
+HS1-high-speed-files,screening,hs-64x64m.fresh.mac-apollo.sender.warm,hs-64x64m,fresh,mac,apollo,sender,mac-apollo-10g,warm,xs-cpp,10,0.41062778783160975,3374,1516,558,148,4521,2030,747,198
+HS1-high-speed-files,screening,hs-64x64m.fresh.mac-apollo.sender.warm,hs-64x64m,fresh,mac,apollo,sender,mac-apollo-10g,warm,xs-rs,10,0.24771626047690506,1229,553,205,55,1647,740,273,73

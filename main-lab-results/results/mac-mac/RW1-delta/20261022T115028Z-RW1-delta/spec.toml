@@ -1,0 +1,33 @@
+# RW1-delta (mac-mac, 2026-10-22): the user's 24-hour plan, phase 2, a screening hunt for cells where rsync beats either
+# xs by 5% or more, for the next development case. 3 blocks a cell; every sample records client and peer CPU.
+# Delta updates of large files: a 4 KiB edit in a file (update-1pct), and a file grown at its end (append-1pct).
+id = "RW1-delta"
+kind = "screening"
+hypothesis = "rsync is at least 5% faster to durable than xs-c++ or xs-rs in some cell. Delta updates of large files: a 4 KiB edit in a file (update-1pct), and a file grown at its end (append-1pct)."
+primary = "durable_s"
+delta = 0.05
+blocks = 3
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+max_hours = 2.5       # its share of phase 2: 11 hours across RW1-6; blocks go round the cells, so a run cut short stays balanced
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+[arms.xs-cpp]
+tool = "xs"
+rev = "1594f4c4d0bf"
+flags = ["-a", "-j4"]
+[arms.xs-rs]
+tool = "xs"
+rev = "e671c84aa680-rs"
+flags = ["-a", "-j4"]
+
+[matrix]
+link = "mac-mars-usb10g"
+corpus = ["large-text", "large-solo"]
+scenario = ["update-1pct", "append-1pct"]
+direction = ["mac>mars", "mars>mac"]
+client = ["initiator"]
+cache = ["warm"]

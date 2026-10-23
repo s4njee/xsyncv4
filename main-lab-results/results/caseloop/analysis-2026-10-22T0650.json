@@ -1,0 +1,47 @@
+{
+ "ok": true,
+ "analysis": {
+  "decision": {
+   "node": "A2",
+   "branch": -1,
+   "keep": false,
+   "reason": "The A2 measurement (run 20261022T071651Z-CM-A2-10220216) ended with status 'stopped' and carries no verdicts, no times and no arm-vs-control effects, so no branch can be chosen. The lab's standing races show xs-rs at 9.84 s on small-deep fresh push against 19.878 s on pull, and 6.528 s against 9.141 s on small-flat. That confirms pull is slower, but it says nothing about how -j1 to -j16 scale, whether --no-atomic matters, or how far xs is from the receiver's local ceiling. Those are what separate path walks, per-directory requests, a saturated receiver process, writeback stalls and 'within 1.3x'. A2 stays open and the same design should be run again to completion. A measurement changes no code, so keep is false."
+  },
+  "priorities": [],
+  "resolutions": [],
+  "drops": [],
+  "summary": "The small-file limit measurement (A2) stopped before it recorded any times, so we still do not know what limits fresh small-file copies after the receiver-lock change. That change was kept after 'fresh 0.411 (faster)'. xs-rs already beats rsync and xs-c++ on every lab cell, for example 9.84 s against rsync's 26.643 s on small-deep push. No other node is buildable, so the next step is to re-run A2's design (-j1 to -j16 and --no-atomic on small-deep and small-flat, both directions) to completion."
+ },
+ "usage": {
+  "input_tokens": 7620,
+  "cache_creation_input_tokens": 2626,
+  "cache_read_input_tokens": 0,
+  "cache_creation": {
+   "ephemeral_5m_input_tokens": 2626,
+   "ephemeral_1h_input_tokens": 0
+  },
+  "iterations": [
+   {
+    "input_tokens": 7620,
+    "output_tokens": 797,
+    "cache_read_input_tokens": 0,
+    "cache_creation_input_tokens": 2626,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 2626,
+     "ephemeral_1h_input_tokens": 0
+    },
+    "type": "message",
+    "model": null
+   }
+  ],
+  "output_tokens": 797,
+  "output_tokens_details": {
+   "thinking_tokens": 289
+  },
+  "service_tier": "standard",
+  "inference_geo": "global",
+  "speed": "standard"
+ },
+ "cost_usd": 0.059550000000000006,
+ "model": "claude-opus-5-5"
+}

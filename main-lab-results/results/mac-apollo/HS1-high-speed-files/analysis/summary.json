@@ -1,0 +1,19 @@
+{
+ "experiment": "HS1-high-speed-files",
+ "kind": "screening",
+ "hypothesis": "On 4 GiB of incompressible data, rsync -a, xs-c++ -a -j4 and xs-rs -a -j4 differ by more than 5% in time to durable in some of the four file counts, and the gap changes with the number of files.",
+ "primary": "durable_s",
+ "control": "rsync",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261023T060258Z-HS1-high-speed-files"
+ ],
+ "spec_sha256": [
+  "0c5adad49b2baa161e3e287d5d39d49cffa925467eadf8e3dcab57b3fac18162"
+ ],
+ "valid_blocks": 80,
+ "void_attempts": 0,
+ "void_reasons": []
+}

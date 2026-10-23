@@ -1,8 +1,8 @@
 {
  "cards": {
   "mac": {
-   "key": "[\"paused\",\"mac-mac: Mac \u2194 mars, both macOS (direct 10 GbE, USB adapter)\",null]",
-   "text": "A MacBook Pro named Mac and a desktop named mars are joined by a direct wired link rated at 10 GbE, though mars's USB adapter is running at gigabit. The card is paused, with no experiment currently set up on this pair.",
+   "key": "[\"running\",\"Mac \u2194 apollo, mars's box on Linux (direct 10 GbE, X540)\",\"RW3-noop-many-apollo\"]",
+   "text": "The Mac, a MacBook Pro with an M1 Max, is linked by wired 10 GbE to apollo, a Linux machine belonging to mars. The lab is comparing rsync with two xs file-transfer tools when moving many small files, to see whether rsync is at least 5% faster to durable storage in some setting.",
    "model": "claude-haiku-5-5"
   },
   "mars": {
@@ -12,7 +12,7 @@
   },
   "neo": {
    "key": "[\"no runner\",\"neo-vpsb\",null]",
-   "text": "The pair neo and vpsb are joined by a wired link. No experiment is running on this link right now, so the card is idle.",
+   "text": "The pair neo and vpsb is joined by a wired link. No runner is active and no experiment is set up, so this pair is idle.",
    "model": "claude-haiku-5-5"
   },
   "neo-ssd": {

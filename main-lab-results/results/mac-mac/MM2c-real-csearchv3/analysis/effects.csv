@@ -1,0 +1,9 @@
+experiment,kind,cell_id,corpus,scenario,sender,receiver,client,link,cache,arm,control,metric,primary,n_blocks,ratio,level,delta,lo,hi,hl_ratio,hl_lo,hl_hi,p,sd_log,verdict,err_minus,err_plus,p_holm
+MM2c-real-csearchv3,screening,real-csearchv3.fresh.mac-mars.sender.warm,real-csearchv3,fresh,mac,mars,sender,mac-mars-usb10g,warm,xs-cpp,rsync,durable_s,True,1,0.2888973381777431,0.95,0.05,,,,,,,,too few blocks,,,
+MM2c-real-csearchv3,screening,real-csearchv3.fresh.mac-mars.sender.warm,real-csearchv3,fresh,mac,mars,sender,mac-mars-usb10g,warm,xs-rs,rsync,durable_s,True,1,0.29762203512868207,0.95,0.05,,,,,,,,too few blocks,,,
+MM2c-real-csearchv3,screening,real-csearchv3.fresh.mac-mars.sender.warm,real-csearchv3,fresh,mac,mars,sender,mac-mars-usb10g,warm,xs-cpp,rsync,wall_s,False,1,0.28872112272292255,0.95,0.05,,,,,,,,too few blocks,,,
+MM2c-real-csearchv3,screening,real-csearchv3.fresh.mac-mars.sender.warm,real-csearchv3,fresh,mac,mars,sender,mac-mars-usb10g,warm,xs-rs,rsync,wall_s,False,1,0.2974594233740209,0.95,0.05,,,,,,,,too few blocks,,,
+MM2c-real-csearchv3,screening,real-csearchv3.fresh.mac-mars.sender.warm,real-csearchv3,fresh,mac,mars,sender,mac-mars-usb10g,warm,xs-cpp,rsync,cpu_s,False,1,0.7649561494098908,0.95,0.05,,,,,,,,too few blocks,,,
+MM2c-real-csearchv3,screening,real-csearchv3.fresh.mac-mars.sender.warm,real-csearchv3,fresh,mac,mars,sender,mac-mars-usb10g,warm,xs-rs,rsync,cpu_s,False,1,0.6763786213577156,0.95,0.05,,,,,,,,too few blocks,,,
+MM2c-real-csearchv3,screening,real-csearchv3.fresh.mac-mars.sender.warm,real-csearchv3,fresh,mac,mars,sender,mac-mars-usb10g,warm,xs-cpp,rsync,rss_bytes,False,1,4.103199090613831,0.95,0.05,,,,,,,,too few blocks,,,
+MM2c-real-csearchv3,screening,real-csearchv3.fresh.mac-mars.sender.warm,real-csearchv3,fresh,mac,mars,sender,mac-mars-usb10g,warm,xs-rs,rsync,rss_bytes,False,1,7.498700876908082,0.95,0.05,,,,,,,,too few blocks,,,

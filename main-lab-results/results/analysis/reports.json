@@ -1,6 +1,3220 @@
 {
  "reports": [
   {
+   "id": "2026-10-23T00:00:00.000Z",
+   "start": 1792627200,
+   "end": 1792713600,
+   "generatedAt": 1792746873.634,
+   "model": "claude-opus-5-5",
+   "samples": 1355,
+   "invalid": 6,
+   "runCount": 9,
+   "runKeys": [
+    "mac-apollo/MM2c-real-csearchv3-apollo/20261022T162409Z-MM2c-real-csearchv3-apollo",
+    "mac-apollo/MM2b-local-laikav2-apollo/20261022T162409Z-MM2b-local-laikav2-apollo",
+    "mac-apollo/MM2a-large-solo-apollo/20261022T162408Z-MM2a-large-solo-apollo",
+    "mac-mac/MM2a-large-solo-p0/20261022T144412Z-MM2a-large-solo-p0",
+    "mac-mac/MM2c-real-csearchv3/20261022T114747Z-MM2c-real-csearchv3",
+    "mac-mac/MM2b-local-laikav2/20261022T114746Z-MM2b-local-laikav2",
+    "mac-mac/MM2a-large-solo/20261022T114745Z-MM2a-large-solo",
+    "mac-mac/CM-A2-10220216/20261022T071651Z-CM-A2-10220216",
+    "mac-mac/CM-B1-10211710/20261021T221144Z-CM-B1-10211710"
+   ],
+   "evidenceRuns": [
+    {
+     "key": "mac-apollo/MM2c-real-csearchv3-apollo/20261022T162409Z-MM2c-real-csearchv3-apollo",
+     "experiment": "MM2c-real-csearchv3-apollo",
+     "question": null,
+     "state": "deadline",
+     "hypothesis": "On the user's csearchv3 tree (14 GB, 1,345,908 files, 472,330 directories), rsync -a, xs-c++ -a -j4 and xs-rs -a -j4 differ by more than 5% in time to durable in some cell.",
+     "primary": "durable_s",
+     "control": "rsync",
+     "revisions": [
+      "cc8288d4f08c",
+      "e671c84aa680-rs"
+     ],
+     "arms": [
+      {
+       "name": "rsync",
+       "tool": "rsync",
+       "client": null,
+       "scales": [],
+       "tuningFlags": []
+      },
+      {
+       "name": "xs-cpp",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 4,
+         "group": "f49a669e52478a83f6b3af37"
+        }
+       ],
+       "tuningFlags": [
+        "-j4"
+       ]
+      },
+      {
+       "name": "xs-rs",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 4,
+         "group": "ebc6729f9e75c63d939997be"
+        }
+       ],
+       "tuningFlags": [
+        "-j4"
+       ]
+      }
+     ],
+     "samples": 34,
+     "invalid": 0,
+     "cells": [
+      {
+       "factors": {
+        "id": "real-csearchv3.fresh.apollo-mac.receiver.warm",
+        "corpus": "real-csearchv3",
+        "scenario": "fresh",
+        "sender": "apollo",
+        "receiver": "mac",
+        "client": "receiver",
+        "link": "mac-apollo-10g",
+        "cache": "warm",
+        "files": 1345908,
+        "bytes": 11318824647
+       },
+       "arm": "xs-cpp",
+       "validSamples": 4,
+       "blocks": 4,
+       "medianSeconds": 150.90845000000002,
+       "medianGbps": 0.6000437492833626,
+       "medianClientCpuSeconds": 506.374,
+       "pairedBlocks": 3,
+       "medianPairedSpeedVsControl": 3.5336560845387797
+      },
+      {
+       "factors": {
+        "id": "real-csearchv3.fresh.apollo-mac.receiver.warm",
+        "corpus": "real-csearchv3",
+        "scenario": "fresh",
+        "sender": "apollo",
+        "receiver": "mac",
+        "client": "receiver",
+        "link": "mac-apollo-10g",
+        "cache": "warm",
+        "files": 1345908,
+        "bytes": 11318824647
+       },
+       "arm": "rsync",
+       "validSamples": 3,
+       "blocks": 3,
+       "medianSeconds": 528.7663,
+       "medianGbps": 0.171248805334228,
+       "medianClientCpuSeconds": 728.486,
+       "pairedBlocks": 3,
+       "medianPairedSpeedVsControl": 1
+      },
+      {
+       "factors": {
+        "id": "real-csearchv3.fresh.apollo-mac.receiver.warm",
+        "corpus": "real-csearchv3",
+        "scenario": "fresh",
+        "sender": "apollo",
+        "receiver": "mac",
+        "client": "receiver",
+        "link": "mac-apollo-10g",
+        "cache": "warm",
+        "files": 1345908,
+        "bytes": 11318824647
+       },
+       "arm": "xs-rs",
+       "validSamples": 3,
+       "blocks": 3,
+       "medianSeconds": 152.1736,
+       "medianGbps": 0.59504800554104,
+       "medianClientCpuSeconds": 453.636,
+       "pairedBlocks": 3,
+       "medianPairedSpeedVsControl": 3.4623977191769337
+      },
+      {
+       "factors": {
+        "id": "real-csearchv3.update-10pct.apollo-mac.receiver.warm",
+        "corpus": "real-csearchv3",
+        "scenario": "update-10pct",
+        "sender": "apollo",
+        "receiver": "mac",
+        "client": "receiver",
+        "link": "mac-apollo-10g",
+        "cache": "warm",
+        "files": 1345908,
+        "bytes": 11318824647
+       },
+       "arm": "rsync",
+       "validSamples": 4,
+       "blocks": 4,
+       "medianSeconds": 102.63745,
+       "medianGbps": 0.882330051199097,
+       "medianClientCpuSeconds": 109.65799999999999,
+       "pairedBlocks": 4,
+       "medianPairedSpeedVsControl": 1
+      },
+      {
+       "factors": {
+        "id": "real-csearchv3.update-10pct.apollo-mac.receiver.warm",
+        "corpus": "real-csearchv3",
+        "scenario": "update-10pct",
+        "sender": "apollo",
+        "receiver": "mac",
+        "client": "receiver",
+        "link": "mac-apollo-10g",
+        "cache": "warm",
+        "files": 1345908,
+        "bytes": 11318824647
+       },
+       "arm": "xs-cpp",
+       "validSamples": 4,
+       "blocks": 4,
+       "medianSeconds": 52.545649999999995,
+       "medianGbps": 1.7246186420434535,
+       "medianClientCpuSeconds": 132.57299999999998,
+       "pairedBlocks": 4,
+       "medianPairedSpeedVsControl": 1.93093697577561
+      },
+      {
+       "factors": {
+        "id": "real-csearchv3.update-10pct.apollo-mac.receiver.warm",
+        "corpus": "real-csearchv3",
+        "scenario": "update-10pct",
+        "sender": "apollo",
+        "receiver": "mac",
+        "client": "receiver",
+        "link": "mac-apollo-10g",
+        "cache": "warm",
+        "files": 1345908,
+        "bytes": 11318824647
+       },
+       "arm": "xs-rs",
+       "validSamples": 4,
+       "blocks": 4,
+       "medianSeconds": 52.5343,
+       "medianGbps": 1.724625285104304,
+       "medianClientCpuSeconds": 111.007,
+       "pairedBlocks": 4,
+       "medianPairedSpeedVsControl": 2.018010526546298
+      },
+      {
+       "factors": {
+        "id": "real-csearchv3.noop.apollo-mac.receiver.warm",
+        "corpus": "real-csearchv3",
+        "scenario": "noop",
+        "sender": "apollo",
+        "receiver": "mac",
+        "client": "receiver",
+        "link": "mac-apollo-10g",
+        "cache": "warm",
+        "files": 1345908,
+        "bytes": 11318824647
+       },
+       "arm": "xs-cpp",
+       "validSamples": 4,
+       "blocks": 4,
+       "medianSeconds": 22.7931,
+       "medianGbps": 3.9751527414643144,
+       "medianClientCpuSeconds": 69.17150000000001,
+       "pairedBlocks": 4,
+       "medianPairedSpeedVsControl": 1.7961011994727554
+      },
+      {
+       "factors": {
+        "id": "real-csearchv3.noop.apollo-mac.receiver.warm",
+        "corpus": "real-csearchv3",
+        "scenario": "noop",
+        "sender": "apollo",
+        "receiver": "mac",
+        "client": "receiver",
+        "link": "mac-apollo-10g",
+        "cache": "warm",
+        "files": 1345908,
+        "bytes": 11318824647
+       },
+       "arm": "xs-rs",
+       "validSamples": 4,
+       "blocks": 4,
+       "medianSeconds": 17.8384,
+       "medianGbps": 5.076180922498281,
+       "medianClientCpuSeconds": 49.235,
+       "pairedBlocks": 4,
+       "medianPairedSpeedVsControl": 2.3003100834412358
+      },
+      {
+       "factors": {
+        "id": "real-csearchv3.noop.apollo-mac.receiver.warm",
+        "corpus": "real-csearchv3",
+        "scenario": "noop",
+        "sender": "apollo",
+        "receiver": "mac",
+        "client": "receiver",
+        "link": "mac-apollo-10g",
+        "cache": "warm",
+        "files": 1345908,
+        "bytes": 11318824647
+       },
+       "arm": "rsync",
+       "validSamples": 4,
+       "blocks": 4,
+       "medianSeconds": 41.2097,
+       "medianGbps": 2.197792206378221,
+       "medianClientCpuSeconds": 31.653,
+       "pairedBlocks": 4,
+       "medianPairedSpeedVsControl": 1
+      }
+     ]
+    },
+    {
+     "key": "mac-apollo/MM2b-local-laikav2-apollo/20261022T162409Z-MM2b-local-laikav2-apollo",
+     "experiment": "MM2b-local-laikav2-apollo",
+     "question": null,
+     "state": "complete",
+     "hypothesis": "On the user's laikav2 project as it is on the Mac (6.5 GB, 13,246 files, mostly its Rust target folder, with hard links), rsync -a, xs-c++ -a -j4 and xs-rs -a -j4 differ by more than 5% in time to durable in some cell.",
+     "primary": "durable_s",
+     "control": "rsync",
+     "revisions": [
+      "e671c84aa680-rs",
+      "cc8288d4f08c"
+     ],
+     "arms": [
+      {
+       "name": "rsync",
+       "tool": "rsync",
+       "client": null,
+       "scales": [],
+       "tuningFlags": []
+      },
+      {
+       "name": "xs-cpp",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 4,
+         "group": "4e9f3427f6508d936504f4e1"
+        }
+       ],
+       "tuningFlags": [
+        "-j4"
+       ]
+      },
+      {
+       "name": "xs-rs",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 4,
+         "group": "23d1060e2cc0a4336d827969"
+        }
+       ],
+       "tuningFlags": [
+        "-j4"
+       ]
+      }
+     ],
+     "samples": 168,
+     "invalid": 0,
+     "cells": [
+      {
+       "factors": {
+        "id": "local-laikav2.fresh.apollo-mac.receiver.warm",
+        "corpus": "local-laikav2",
+        "scenario": "fresh",
+        "sender": "apollo",
+        "receiver": "mac",
+        "client": "receiver",
+        "link": "mac-apollo-10g",
+        "cache": "warm",
+        "files": 13246,
+        "bytes": 7253587511
+       },
+       "arm": "rsync",
+       "validSamples": 20,
+       "blocks": 19,
+       "medianSeconds": 19.10185,
+       "medianGbps": 3.0378885234958046,
+       "medianClientCpuSeconds": 22.187,
+       "pairedBlocks": 20,
+       "medianPairedSpeedVsControl": 1
+      },
+      {
+       "factors": {
+        "id": "local-laikav2.fresh.apollo-mac.receiver.warm",
+        "corpus": "local-laikav2",
+        "scenario": "fresh",
+        "sender": "apollo",
+        "receiver": "mac",
+        "client": "receiver",
+        "link": "mac-apollo-10g",
+        "cache": "warm",
+        "files": 13246,
+        "bytes": 7253587511
+       },
+       "arm": "xs-rs",
+       "validSamples": 19,
+       "blocks": 19,
+       "medianSeconds": 6.9698,
+       "medianGbps": 8.32573389308158,
+       "medianClientCpuSeconds": 6.87,
+       "pairedBlocks": 19,
+       "medianPairedSpeedVsControl": 2.722019631300538
+      },
+      {
+       "factors": {
+        "id": "local-laikav2.fresh.apollo-mac.receiver.warm",
+        "corpus": "local-laikav2",
+        "scenario": "fresh",
+        "sender": "apollo",
+        "receiver": "mac",
+        "client": "receiver",
+        "link": "mac-apollo-10g",
+        "cache": "warm",
+        "files": 13246,
+        "bytes": 7253587511
+       },
+       "arm": "xs-cpp",
+       "validSamples": 20,
+       "blocks": 19,
+       "medianSeconds": 7.2273,
+       "medianGbps": 8.029103549302548,
+       "medianClientCpuSeconds": 11.242,
+       "pairedBlocks": 19,
+       "medianPairedSpeedVsControl": 2.632593048981992
+      },
+      {
+       "factors": {
+        "id": "local-laikav2.update-10pct.apollo-mac.receiver.warm",
+        "corpus": "local-laikav2",
+        "scenario": "update-10pct",
+        "sender": "apollo",
+        "receiver": "mac",
+        "client": "receiver",
+        "link": "mac-apollo-10g",
+        "cache": "warm",
+        "files": 13246,
+        "bytes": 7253587511
+       },
+       "arm": "xs-rs",
+       "validSamples": 17,
+       "blocks": 17,
+       "medianSeconds": 1.7503,
+       "medianGbps": 33.15357372336171,
+       "medianClientCpuSeconds": 1.849,
+       "pairedBlocks": 17,
+       "medianPairedSpeedVsControl": 0.8493066633942816
+      },
+      {
+       "factors": {
+        "id": "local-laikav2.update-10pct.apollo-mac.receiver.warm",
+        "corpus": "local-laikav2",
+        "scenario": "update-10pct",
+        "sender": "apollo",
+        "receiver": "mac",
+        "client": "receiver",
+        "link": "mac-apollo-10g",
+        "cache": "warm",
+        "files": 13246,
+        "bytes": 7253587511
+       },
+       "arm": "rsync",
+       "validSamples": 17,
+       "blocks": 17,
+       "medianSeconds": 1.4834,
+       "medianGbps": 39.118713824996625,
+       "medianClientCpuSeconds": 1.489,
+       "pairedBlocks": 17,
+       "medianPairedSpeedVsControl": 1
+      },
+      {
+       "factors": {
+        "id": "local-laikav2.update-10pct.apollo-mac.receiver.warm",
+        "corpus": "local-laikav2",
+        "scenario": "update-10pct",
+        "sender": "apollo",
+        "receiver": "mac",
+        "client": "receiver",
+        "link": "mac-apollo-10g",
+        "cache": "warm",
+        "files": 13246,
+        "bytes": 7253587511
+       },
+       "arm": "xs-cpp",
+       "validSamples": 18,
+       "blocks": 17,
+       "medianSeconds": 1.1869,
+       "medianGbps": 48.89214409420012,
+       "medianClientCpuSeconds": 3.0475,
+       "pairedBlocks": 17,
+       "medianPairedSpeedVsControl": 1.235470710491879
+      },
+      {
+       "factors": {
+        "id": "local-laikav2.noop.apollo-mac.receiver.warm",
+        "corpus": "local-laikav2",
+        "scenario": "noop",
+        "sender": "apollo",
+        "receiver": "mac",
+        "client": "receiver",
+        "link": "mac-apollo-10g",
+        "cache": "warm",
+        "files": 13246,
+        "bytes": 7253587511
+       },
+       "arm": "xs-rs",
+       "validSamples": 18,
+       "blocks": 18,
+       "medianSeconds": 0.27754999999999996,
+       "medianGbps": 209.0830737548367,
+       "medianClientCpuSeconds": 0.198,
+       "pairedBlocks": 18,
+       "medianPairedSpeedVsControl": 1.561853128295112
+      },
+      {
+       "factors": {
+        "id": "local-laikav2.noop.apollo-mac.receiver.warm",
+        "corpus": "local-laikav2",
+        "scenario": "noop",
+        "sender": "apollo",
+        "receiver": "mac",
+        "client": "receiver",
+        "link": "mac-apollo-10g",
+        "cache": "warm",
+        "files": 13246,
+        "bytes": 7253587511
+       },
+       "arm": "rsync",
+       "validSamples": 20,
+       "blocks": 19,
+       "medianSeconds": 0.44620000000000004,
+       "medianGbps": 130.05432982794693,
+       "medianClientCpuSeconds": 0.2265,
+       "pairedBlocks": 20,
+       "medianPairedSpeedVsControl": 1
+      },
+      {
+       "factors": {
+        "id": "local-laikav2.noop.apollo-mac.receiver.warm",
+        "corpus": "local-laikav2",
+        "scenario": "noop",
+        "sender": "apollo",
+        "receiver": "mac",
+        "client": "receiver",
+        "link": "mac-apollo-10g",
+        "cache": "warm",
+        "files": 13246,
+        "bytes": 7253587511
+       },
+       "arm": "xs-cpp",
+       "validSamples": 19,
+       "blocks": 19,
+       "medianSeconds": 0.3108,
+       "medianGbps": 186.70752924066923,
+       "medianClientCpuSeconds": 0.383,
+       "pairedBlocks": 19,
+       "medianPairedSpeedVsControl": 1.3745650110724454
+      }
+     ]
+    },
+    {
+     "key": "mac-apollo/MM2a-large-solo-apollo/20261022T162408Z-MM2a-large-solo-apollo",
+     "experiment": "MM2a-large-solo-apollo",
+     "question": null,
+     "state": "complete",
+     "hypothesis": "On one 4 GiB file, half compressible within the file, rsync -a, xs-c++ -a -j4 and xs-rs -a -j4 differ by more than 5% in time to durable, fresh or after a 4 KiB edit in its middle (update-1pct of one file is that one edit).",
+     "primary": "durable_s",
+     "control": "rsync",
+     "revisions": [
+      "cc8288d4f08c",
+      "e671c84aa680-rs"
+     ],
+     "arms": [
+      {
+       "name": "rsync",
+       "tool": "rsync",
+       "client": null,
+       "scales": [],
+       "tuningFlags": []
+      },
+      {
+       "name": "xs-cpp",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 4,
+         "group": "f49a669e52478a83f6b3af37"
+        }
+       ],
+       "tuningFlags": [
+        "-j4"
+       ]
+      },
+      {
+       "name": "xs-rs",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 4,
+         "group": "ebc6729f9e75c63d939997be"
+        }
+       ],
+       "tuningFlags": [
+        "-j4"
+       ]
+      }
+     ],
+     "samples": 225,
+     "invalid": 0,
+     "cells": [
+      {
+       "factors": {
+        "id": "large-solo.fresh.apollo-mac.receiver.warm",
+        "corpus": "large-solo",
+        "scenario": "fresh",
+        "sender": "apollo",
+        "receiver": "mac",
+        "client": "receiver",
+        "link": "mac-apollo-10g",
+        "cache": "warm",
+        "files": 1,
+        "bytes": 4294967296
+       },
+       "arm": "rsync",
+       "validSamples": 20,
+       "blocks": 20,
+       "medianSeconds": 14.0939,
+       "medianGbps": 2.437925828935467,
+       "medianClientCpuSeconds": 14.789,
+       "pairedBlocks": 20,
+       "medianPairedSpeedVsControl": 1
+      },
+      {
+       "factors": {
+        "id": "large-solo.fresh.apollo-mac.receiver.warm",
+        "corpus": "large-solo",
+        "scenario": "fresh",
+        "sender": "apollo",
+        "receiver": "mac",
+        "client": "receiver",
+        "link": "mac-apollo-10g",
+        "cache": "warm",
+        "files": 1,
+        "bytes": 4294967296
+       },
+       "arm": "xs-cpp",
+       "validSamples": 20,
+       "blocks": 20,
+       "medianSeconds": 4.53775,
+       "medianGbps": 7.57199627069345,
+       "medianClientCpuSeconds": 5.6955,
+       "pairedBlocks": 20,
+       "medianPairedSpeedVsControl": 3.1078480117710363
+      },
+      {
+       "factors": {
+        "id": "large-solo.fresh.apollo-mac.receiver.warm",
+        "corpus": "large-solo",
+        "scenario": "fresh",
+        "sender": "apollo",
+        "receiver": "mac",
+        "client": "receiver",
+        "link": "mac-apollo-10g",
+        "cache": "warm",
+        "files": 1,
+        "bytes": 4294967296
+       },
+       "arm": "xs-rs",
+       "validSamples": 20,
+       "blocks": 20,
+       "medianSeconds": 5.3346,
+       "medianGbps": 6.441014495349538,
+       "medianClientCpuSeconds": 2.2705,
+       "pairedBlocks": 20,
+       "medianPairedSpeedVsControl": 2.623566496817371
+      },
+      {
+       "factors": {
+        "id": "large-solo.update-1pct.mac-apollo.sender.warm",
+        "corpus": "large-solo",
+        "scenario": "update-1pct",
+        "sender": "mac",
+        "receiver": "apollo",
+        "client": "sender",
+        "link": "mac-apollo-10g",
+        "cache": "warm",
+        "files": 1,
+        "bytes": 4294967296
+       },
+       "arm": "xs-cpp",
+       "validSamples": 17,
+       "blocks": 17,
+       "medianSeconds": 6.5865,
+       "medianGbps": 5.216691470128293,
+       "medianClientCpuSeconds": 2.501,
+       "pairedBlocks": 17,
+       "medianPairedSpeedVsControl": 0.7863382500358013
+      },
+      {
+       "factors": {
+        "id": "large-solo.update-1pct.mac-apollo.sender.warm",
+        "corpus": "large-solo",
+        "scenario": "update-1pct",
+        "sender": "mac",
+        "receiver": "apollo",
+        "client": "sender",
+        "link": "mac-apollo-10g",
+        "cache": "warm",
+        "files": 1,
+        "bytes": 4294967296
+       },
+       "arm": "xs-rs",
+       "validSamples": 17,
+       "blocks": 17,
+       "medianSeconds": 6.3734,
+       "medianGbps": 5.391115945649104,
+       "medianClientCpuSeconds": 2.303,
+       "pairedBlocks": 17,
+       "medianPairedSpeedVsControl": 0.820226519071496
+      },
+      {
+       "factors": {
+        "id": "large-solo.update-1pct.mac-apollo.sender.warm",
+        "corpus": "large-solo",
+        "scenario": "update-1pct",
+        "sender": "mac",
+        "receiver": "apollo",
+        "client": "sender",
+        "link": "mac-apollo-10g",
+        "cache": "warm",
+        "files": 1,
+        "bytes": 4294967296
+       },
+       "arm": "rsync",
+       "validSamples": 17,
+       "blocks": 17,
+       "medianSeconds": 5.2539,
+       "medianGbps": 6.539853892917643,
+       "medianClientCpuSeconds": 2.937,
+       "pairedBlocks": 17,
+       "medianPairedSpeedVsControl": 1
+      },
+      {
+       "factors": {
+        "id": "large-solo.update-1pct.apollo-mac.receiver.warm",
+        "corpus": "large-solo",
+        "scenario": "update-1pct",
+        "sender": "apollo",
+        "receiver": "mac",
+        "client": "receiver",
+        "link": "mac-apollo-10g",
+        "cache": "warm",
+        "files": 1,
+        "bytes": 4294967296
+       },
+       "arm": "rsync",
+       "validSamples": 20,
+       "blocks": 20,
+       "medianSeconds": 4.90125,
+       "medianGbps": 7.010454370228452,
+       "medianClientCpuSeconds": 4.025,
+       "pairedBlocks": 20,
+       "medianPairedSpeedVsControl": 1
+      },
+      {
+       "factors": {
+        "id": "large-solo.update-1pct.apollo-mac.receiver.warm",
+        "corpus": "large-solo",
+        "scenario": "update-1pct",
+        "sender": "apollo",
+        "receiver": "mac",
+        "client": "receiver",
+        "link": "mac-apollo-10g",
+        "cache": "warm",
+        "files": 1,
+        "bytes": 4294967296
+       },
+       "arm": "xs-rs",
+       "validSamples": 20,
+       "blocks": 20,
+       "medianSeconds": 5.991949999999999,
+       "medianGbps": 5.734378272936944,
+       "medianClientCpuSeconds": 4.072,
+       "pairedBlocks": 20,
+       "medianPairedSpeedVsControl": 0.8000972973358055
+      },
+      {
+       "factors": {
+        "id": "large-solo.update-1pct.apollo-mac.receiver.warm",
+        "corpus": "large-solo",
+        "scenario": "update-1pct",
+        "sender": "apollo",
+        "receiver": "mac",
+        "client": "receiver",
+        "link": "mac-apollo-10g",
+        "cache": "warm",
+        "files": 1,
+        "bytes": 4294967296
+       },
+       "arm": "xs-cpp",
+       "validSamples": 20,
+       "blocks": 20,
+       "medianSeconds": 11.2119,
+       "medianGbps": 3.0645787310243366,
+       "medianClientCpuSeconds": 4.521,
+       "pairedBlocks": 20,
+       "medianPairedSpeedVsControl": 0.4328791782123381
+      },
+      {
+       "factors": {
+        "id": "large-solo.fresh.mac-apollo.sender.warm",
+        "corpus": "large-solo",
+        "scenario": "fresh",
+        "sender": "mac",
+        "receiver": "apollo",
+        "client": "sender",
+        "link": "mac-apollo-10g",
+        "cache": "warm",
+        "files": 1,
+        "bytes": 4294967296
+       },
+       "arm": "xs-cpp",
+       "validSamples": 18,
+       "blocks": 18,
+       "medianSeconds": 5.0531500000000005,
+       "medianGbps": 6.799670199644301,
+       "medianClientCpuSeconds": 5.324999999999999,
+       "pairedBlocks": 18,
+       "medianPairedSpeedVsControl": 2.4444883426537567
+      },
+      {
+       "factors": {
+        "id": "large-solo.fresh.mac-apollo.sender.warm",
+        "corpus": "large-solo",
+        "scenario": "fresh",
+        "sender": "mac",
+        "receiver": "apollo",
+        "client": "sender",
+        "link": "mac-apollo-10g",
+        "cache": "warm",
+        "files": 1,
+        "bytes": 4294967296
+       },
+       "arm": "xs-rs",
+       "validSamples": 18,
+       "blocks": 18,
+       "medianSeconds": 5.308400000000001,
+       "medianGbps": 6.473341626833678,
+       "medianClientCpuSeconds": 2.599,
+       "pairedBlocks": 18,
+       "medianPairedSpeedVsControl": 2.398095213759308
+      },
+      {
+       "factors": {
+        "id": "large-solo.fresh.mac-apollo.sender.warm",
+        "corpus": "large-solo",
+        "scenario": "fresh",
+        "sender": "mac",
+        "receiver": "apollo",
+        "client": "sender",
+        "link": "mac-apollo-10g",
+        "cache": "warm",
+        "files": 1,
+        "bytes": 4294967296
+       },
+       "arm": "rsync",
+       "validSamples": 18,
+       "blocks": 18,
+       "medianSeconds": 12.7859,
+       "medianGbps": 2.687517721474434,
+       "medianClientCpuSeconds": 12.789000000000001,
+       "pairedBlocks": 18,
+       "medianPairedSpeedVsControl": 1
+      }
+     ]
+    },
+    {
+     "key": "mac-mac/MM2a-large-solo-p0/20261022T144412Z-MM2a-large-solo-p0",
+     "experiment": "MM2a-large-solo-p0",
+     "question": null,
+     "state": "failed",
+     "hypothesis": "On one 4 GiB file, half compressible within the file, rsync -a, xs-c++ -a -j4 and xs-rs -a -j4 differ by more than 5% in time to durable, fresh or after a 4 KiB edit in its middle (update-1pct of one file is that one edit).",
+     "primary": "durable_s",
+     "control": "rsync",
+     "revisions": [
+      "e671c84aa680-rs",
+      "cc8288d4f08c"
+     ],
+     "arms": [
+      {
+       "name": "rsync",
+       "tool": "rsync",
+       "client": null,
+       "scales": [],
+       "tuningFlags": []
+      },
+      {
+       "name": "xs-cpp",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 4,
+         "group": "4e05f215029dc6d11ab5687f"
+        }
+       ],
+       "tuningFlags": [
+        "-j4"
+       ]
+      },
+      {
+       "name": "xs-rs",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 4,
+         "group": "9a87593f6ba7a5094c0025b3"
+        }
+       ],
+       "tuningFlags": [
+        "-j4"
+       ]
+      }
+     ],
+     "samples": 138,
+     "invalid": 0,
+     "cells": [
+      {
+       "factors": {
+        "id": "large-solo.update-1pct.mac-mars.sender.warm",
+        "corpus": "large-solo",
+        "scenario": "update-1pct",
+        "sender": "mac",
+        "receiver": "mars",
+        "client": "sender",
+        "link": "mac-mars-usb10g",
+        "cache": "warm",
+        "files": 1,
+        "bytes": 4294967296
+       },
+       "arm": "xs-rs",
+       "validSamples": 12,
+       "blocks": 12,
+       "medianSeconds": 8.264050000000001,
+       "medianGbps": 4.157742417604033,
+       "medianClientCpuSeconds": 2.266,
+       "pairedBlocks": 12,
+       "medianPairedSpeedVsControl": 0.6678369934111654
+      },
+      {
+       "factors": {
+        "id": "large-solo.update-1pct.mac-mars.sender.warm",
+        "corpus": "large-solo",
+        "scenario": "update-1pct",
+        "sender": "mac",
+        "receiver": "mars",
+        "client": "sender",
+        "link": "mac-mars-usb10g",
+        "cache": "warm",
+        "files": 1,
+        "bytes": 4294967296
+       },
+       "arm": "rsync",
+       "validSamples": 12,
+       "blocks": 12,
+       "medianSeconds": 5.5066500000000005,
+       "medianGbps": 6.239685265787367,
+       "medianClientCpuSeconds": 2.9050000000000002,
+       "pairedBlocks": 12,
+       "medianPairedSpeedVsControl": 1
+      },
+      {
+       "factors": {
+        "id": "large-solo.update-1pct.mac-mars.sender.warm",
+        "corpus": "large-solo",
+        "scenario": "update-1pct",
+        "sender": "mac",
+        "receiver": "mars",
+        "client": "sender",
+        "link": "mac-mars-usb10g",
+        "cache": "warm",
+        "files": 1,
+        "bytes": 4294967296
+       },
+       "arm": "xs-cpp",
+       "validSamples": 12,
+       "blocks": 12,
+       "medianSeconds": 12.991299999999999,
+       "medianGbps": 2.644845884376301,
+       "medianClientCpuSeconds": 2.49,
+       "pairedBlocks": 12,
+       "medianPairedSpeedVsControl": 0.42662200460653155
+      },
+      {
+       "factors": {
+        "id": "large-solo.fresh.mars-mac.receiver.warm",
+        "corpus": "large-solo",
+        "scenario": "fresh",
+        "sender": "mars",
+        "receiver": "mac",
+        "client": "receiver",
+        "link": "mac-mars-usb10g",
+        "cache": "warm",
+        "files": 1,
+        "bytes": 4294967296
+       },
+       "arm": "xs-rs",
+       "validSamples": 12,
+       "blocks": 12,
+       "medianSeconds": 6.50405,
+       "medianGbps": 5.282935513172063,
+       "medianClientCpuSeconds": 1.9,
+       "pairedBlocks": 12,
+       "medianPairedSpeedVsControl": 1.659807999988649
+      },
+      {
+       "factors": {
+        "id": "large-solo.fresh.mars-mac.receiver.warm",
+        "corpus": "large-solo",
+        "scenario": "fresh",
+        "sender": "mars",
+        "receiver": "mac",
+        "client": "receiver",
+        "link": "mac-mars-usb10g",
+        "cache": "warm",
+        "files": 1,
+        "bytes": 4294967296
+       },
+       "arm": "rsync",
+       "validSamples": 12,
+       "blocks": 12,
+       "medianSeconds": 10.789950000000001,
+       "medianGbps": 3.185201470704849,
+       "medianClientCpuSeconds": 11.466000000000001,
+       "pairedBlocks": 12,
+       "medianPairedSpeedVsControl": 1
+      },
+      {
+       "factors": {
+        "id": "large-solo.fresh.mars-mac.receiver.warm",
+        "corpus": "large-solo",
+        "scenario": "fresh",
+        "sender": "mars",
+        "receiver": "mac",
+        "client": "receiver",
+        "link": "mac-mars-usb10g",
+        "cache": "warm",
+        "files": 1,
+        "bytes": 4294967296
+       },
+       "arm": "xs-cpp",
+       "validSamples": 12,
+       "blocks": 12,
+       "medianSeconds": 6.24485,
+       "medianGbps": 5.502575562245257,
+       "medianClientCpuSeconds": 4.4035,
+       "pairedBlocks": 12,
+       "medianPairedSpeedVsControl": 1.734604268659194
+      },
+      {
+       "factors": {
+        "id": "large-solo.update-1pct.mars-mac.receiver.warm",
+        "corpus": "large-solo",
+        "scenario": "update-1pct",
+        "sender": "mars",
+        "receiver": "mac",
+        "client": "receiver",
+        "link": "mac-mars-usb10g",
+        "cache": "warm",
+        "files": 1,
+        "bytes": 4294967296
+       },
+       "arm": "rsync",
+       "validSamples": 11,
+       "blocks": 11,
+       "medianSeconds": 4.8436,
+       "medianGbps": 7.093843085308448,
+       "medianClientCpuSeconds": 3.857,
+       "pairedBlocks": 11,
+       "medianPairedSpeedVsControl": 1
+      },
+      {
+       "factors": {
+        "id": "large-solo.update-1pct.mars-mac.receiver.warm",
+        "corpus": "large-solo",
+        "scenario": "update-1pct",
+        "sender": "mars",
+        "receiver": "mac",
+        "client": "receiver",
+        "link": "mac-mars-usb10g",
+        "cache": "warm",
+        "files": 1,
+        "bytes": 4294967296
+       },
+       "arm": "xs-cpp",
+       "validSamples": 11,
+       "blocks": 11,
+       "medianSeconds": 10.6737,
+       "medianGbps": 3.2191028760411107,
+       "medianClientCpuSeconds": 4.165,
+       "pairedBlocks": 11,
+       "medianPairedSpeedVsControl": 0.45546902756839286
+      },
+      {
+       "factors": {
+        "id": "large-solo.update-1pct.mars-mac.receiver.warm",
+        "corpus": "large-solo",
+        "scenario": "update-1pct",
+        "sender": "mars",
+        "receiver": "mac",
+        "client": "receiver",
+        "link": "mac-mars-usb10g",
+        "cache": "warm",
+        "files": 1,
+        "bytes": 4294967296
+       },
+       "arm": "xs-rs",
+       "validSamples": 11,
+       "blocks": 11,
+       "medianSeconds": 5.8337,
+       "medianGbps": 5.889870642645319,
+       "medianClientCpuSeconds": 3.806,
+       "pairedBlocks": 11,
+       "medianPairedSpeedVsControl": 0.8302792395906543
+      },
+      {
+       "factors": {
+        "id": "large-solo.fresh.mac-mars.sender.warm",
+        "corpus": "large-solo",
+        "scenario": "fresh",
+        "sender": "mac",
+        "receiver": "mars",
+        "client": "sender",
+        "link": "mac-mars-usb10g",
+        "cache": "warm",
+        "files": 1,
+        "bytes": 4294967296
+       },
+       "arm": "xs-rs",
+       "validSamples": 11,
+       "blocks": 11,
+       "medianSeconds": 8.1925,
+       "medianGbps": 4.194048015624046,
+       "medianClientCpuSeconds": 2.252,
+       "pairedBlocks": 11,
+       "medianPairedSpeedVsControl": 1.1826329367747932
+      },
+      {
+       "factors": {
+        "id": "large-solo.fresh.mac-mars.sender.warm",
+        "corpus": "large-solo",
+        "scenario": "fresh",
+        "sender": "mac",
+        "receiver": "mars",
+        "client": "sender",
+        "link": "mac-mars-usb10g",
+        "cache": "warm",
+        "files": 1,
+        "bytes": 4294967296
+       },
+       "arm": "rsync",
+       "validSamples": 11,
+       "blocks": 11,
+       "medianSeconds": 9.6724,
+       "medianGbps": 3.5523487829287457,
+       "medianClientCpuSeconds": 10.048,
+       "pairedBlocks": 11,
+       "medianPairedSpeedVsControl": 1
+      },
+      {
+       "factors": {
+        "id": "large-solo.fresh.mac-mars.sender.warm",
+        "corpus": "large-solo",
+        "scenario": "fresh",
+        "sender": "mac",
+        "receiver": "mars",
+        "client": "sender",
+        "link": "mac-mars-usb10g",
+        "cache": "warm",
+        "files": 1,
+        "bytes": 4294967296
+       },
+       "arm": "xs-cpp",
+       "validSamples": 11,
+       "blocks": 11,
+       "medianSeconds": 5.4343,
+       "medianGbps": 6.322753320206834,
+       "medianClientCpuSeconds": 4.036,
+       "pairedBlocks": 11,
+       "medianPairedSpeedVsControl": 1.7962412717278264
+      }
+     ]
+    },
+    {
+     "key": "mac-mac/MM2c-real-csearchv3/20261022T114747Z-MM2c-real-csearchv3",
+     "experiment": "MM2c-real-csearchv3",
+     "question": null,
+     "state": "stopped",
+     "hypothesis": "On the user's csearchv3 tree (14 GB, 1,345,908 files, 472,330 directories), rsync -a, xs-c++ -a -j4 and xs-rs -a -j4 differ by more than 5% in time to durable in some cell.",
+     "primary": "durable_s",
+     "control": "rsync",
+     "revisions": [
+      "e671c84aa680-rs",
+      "1594f4c4d0bf"
+     ],
+     "arms": [
+      {
+       "name": "rsync",
+       "tool": "rsync",
+       "client": null,
+       "scales": [],
+       "tuningFlags": []
+      },
+      {
+       "name": "xs-cpp",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 4,
+         "group": "26a8066d8eba5a7886d2cf0c"
+        }
+       ],
+       "tuningFlags": [
+        "-j4"
+       ]
+      },
+      {
+       "name": "xs-rs",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 4,
+         "group": "9a87593f6ba7a5094c0025b3"
+        }
+       ],
+       "tuningFlags": [
+        "-j4"
+       ]
+      }
+     ],
+     "samples": 4,
+     "invalid": 0,
+     "cells": [
+      {
+       "factors": {
+        "id": "real-csearchv3.fresh.mac-mars.sender.warm",
+        "corpus": "real-csearchv3",
+        "scenario": "fresh",
+        "sender": "mac",
+        "receiver": "mars",
+        "client": "sender",
+        "link": "mac-mars-usb10g",
+        "cache": "warm",
+        "files": 1345908,
+        "bytes": 11318824647
+       },
+       "arm": "xs-rs",
+       "validSamples": 1,
+       "blocks": 1,
+       "medianSeconds": 96.1086,
+       "medianGbps": 0.9421695579375832,
+       "medianClientCpuSeconds": 126.63,
+       "pairedBlocks": 1,
+       "medianPairedSpeedVsControl": 3.3599677864415884
+      },
+      {
+       "factors": {
+        "id": "real-csearchv3.fresh.mac-mars.sender.warm",
+        "corpus": "real-csearchv3",
+        "scenario": "fresh",
+        "sender": "mac",
+        "receiver": "mars",
+        "client": "sender",
+        "link": "mac-mars-usb10g",
+        "cache": "warm",
+        "files": 1345908,
+        "bytes": 11318824647
+       },
+       "arm": "rsync",
+       "validSamples": 1,
+       "blocks": 1,
+       "medianSeconds": 322.9218,
+       "medianGbps": 0.28041029492589226,
+       "medianClientCpuSeconds": 244.326,
+       "pairedBlocks": 1,
+       "medianPairedSpeedVsControl": 1
+      },
+      {
+       "factors": {
+        "id": "real-csearchv3.fresh.mac-mars.sender.warm",
+        "corpus": "real-csearchv3",
+        "scenario": "fresh",
+        "sender": "mac",
+        "receiver": "mars",
+        "client": "sender",
+        "link": "mac-mars-usb10g",
+        "cache": "warm",
+        "files": 1345908,
+        "bytes": 11318824647
+       },
+       "arm": "xs-cpp",
+       "validSamples": 1,
+       "blocks": 1,
+       "medianSeconds": 93.2912,
+       "medianGbps": 0.9706231367588797,
+       "medianClientCpuSeconds": 135.781,
+       "pairedBlocks": 1,
+       "medianPairedSpeedVsControl": 3.4614390210437858
+      },
+      {
+       "factors": {
+        "id": "real-csearchv3.update-10pct.mars-mac.receiver.warm",
+        "corpus": "real-csearchv3",
+        "scenario": "update-10pct",
+        "sender": "mars",
+        "receiver": "mac",
+        "client": "receiver",
+        "link": "mac-mars-usb10g",
+        "cache": "warm",
+        "files": 1345908,
+        "bytes": 11318824647
+       },
+       "arm": "xs-rs",
+       "validSamples": 1,
+       "blocks": 1,
+       "medianSeconds": 56.2375,
+       "medianGbps": 1.6101462045076684,
+       "medianClientCpuSeconds": 108.907,
+       "pairedBlocks": 0,
+       "medianPairedSpeedVsControl": null
+      }
+     ]
+    },
+    {
+     "key": "mac-mac/MM2b-local-laikav2/20261022T114746Z-MM2b-local-laikav2",
+     "experiment": "MM2b-local-laikav2",
+     "question": null,
+     "state": "complete",
+     "hypothesis": "On the user's laikav2 project as it is on the Mac (6.5 GB, 13,246 files, mostly its Rust target folder, with hard links), rsync -a, xs-c++ -a -j4 and xs-rs -a -j4 differ by more than 5% in time to durable in some cell.",
+     "primary": "durable_s",
+     "control": "rsync",
+     "revisions": [
+      "1594f4c4d0bf",
+      "e671c84aa680-rs"
+     ],
+     "arms": [
+      {
+       "name": "rsync",
+       "tool": "rsync",
+       "client": null,
+       "scales": [],
+       "tuningFlags": []
+      },
+      {
+       "name": "xs-cpp",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 4,
+         "group": "af7b28dd559fe57806eb3bc4"
+        }
+       ],
+       "tuningFlags": [
+        "-j4"
+       ]
+      },
+      {
+       "name": "xs-rs",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 4,
+         "group": "e9dcdded10323640a2aff483"
+        }
+       ],
+       "tuningFlags": [
+        "-j4"
+       ]
+      }
+     ],
+     "samples": 360,
+     "invalid": 0,
+     "cells": [
+      {
+       "factors": {
+        "id": "local-laikav2.fresh.mac-mars.sender.warm",
+        "corpus": "local-laikav2",
+        "scenario": "fresh",
+        "sender": "mac",
+        "receiver": "mars",
+        "client": "sender",
+        "link": "mac-mars-usb10g",
+        "cache": "warm",
+        "files": 13246,
+        "bytes": 7253587511
+       },
+       "arm": "rsync",
+       "validSamples": 20,
+       "blocks": 20,
+       "medianSeconds": 19.177999999999997,
+       "medianGbps": 3.02579554492901,
+       "medianClientCpuSeconds": 19.865499999999997,
+       "pairedBlocks": 20,
+       "medianPairedSpeedVsControl": 1
+      },
+      {
+       "factors": {
+        "id": "local-laikav2.fresh.mac-mars.sender.warm",
+        "corpus": "local-laikav2",
+        "scenario": "fresh",
+        "sender": "mac",
+        "receiver": "mars",
+        "client": "sender",
+        "link": "mac-mars-usb10g",
+        "cache": "warm",
+        "files": 13246,
+        "bytes": 7253587511
+       },
+       "arm": "xs-cpp",
+       "validSamples": 20,
+       "blocks": 20,
+       "medianSeconds": 9.41295,
+       "medianGbps": 6.164806530795422,
+       "medianClientCpuSeconds": 8.0135,
+       "pairedBlocks": 20,
+       "medianPairedSpeedVsControl": 2.011461995971068
+      },
+      {
+       "factors": {
+        "id": "local-laikav2.fresh.mac-mars.sender.warm",
+        "corpus": "local-laikav2",
+        "scenario": "fresh",
+        "sender": "mac",
+        "receiver": "mars",
+        "client": "sender",
+        "link": "mac-mars-usb10g",
+        "cache": "warm",
+        "files": 13246,
+        "bytes": 7253587511
+       },
+       "arm": "xs-rs",
+       "validSamples": 20,
+       "blocks": 20,
+       "medianSeconds": 9.5097,
+       "medianGbps": 6.102074841090811,
+       "medianClientCpuSeconds": 3.5170000000000003,
+       "pairedBlocks": 20,
+       "medianPairedSpeedVsControl": 2.00746761214973
+      },
+      {
+       "factors": {
+        "id": "local-laikav2.fresh.mars-mac.receiver.warm",
+        "corpus": "local-laikav2",
+        "scenario": "fresh",
+        "sender": "mars",
+        "receiver": "mac",
+        "client": "receiver",
+        "link": "mac-mars-usb10g",
+        "cache": "warm",
+        "files": 13246,
+        "bytes": 7253587511
+       },
+       "arm": "rsync",
+       "validSamples": 20,
+       "blocks": 20,
+       "medianSeconds": 21.01765,
+       "medianGbps": 2.762832228904447,
+       "medianClientCpuSeconds": 24.475,
+       "pairedBlocks": 20,
+       "medianPairedSpeedVsControl": 1
+      },
+      {
+       "factors": {
+        "id": "local-laikav2.fresh.mars-mac.receiver.warm",
+        "corpus": "local-laikav2",
+        "scenario": "fresh",
+        "sender": "mars",
+        "receiver": "mac",
+        "client": "receiver",
+        "link": "mac-mars-usb10g",
+        "cache": "warm",
+        "files": 13246,
+        "bytes": 7253587511
+       },
+       "arm": "xs-rs",
+       "validSamples": 20,
+       "blocks": 20,
+       "medianSeconds": 10.72645,
+       "medianGbps": 5.409979468212942,
+       "medianClientCpuSeconds": 7.3175,
+       "pairedBlocks": 20,
+       "medianPairedSpeedVsControl": 1.959927793506751
+      },
+      {
+       "factors": {
+        "id": "local-laikav2.fresh.mars-mac.receiver.warm",
+        "corpus": "local-laikav2",
+        "scenario": "fresh",
+        "sender": "mars",
+        "receiver": "mac",
+        "client": "receiver",
+        "link": "mac-mars-usb10g",
+        "cache": "warm",
+        "files": 13246,
+        "bytes": 7253587511
+       },
+       "arm": "xs-cpp",
+       "validSamples": 20,
+       "blocks": 20,
+       "medianSeconds": 10.76435,
+       "medianGbps": 5.3908631170510795,
+       "medianClientCpuSeconds": 12.6525,
+       "pairedBlocks": 20,
+       "medianPairedSpeedVsControl": 1.9640700186973041
+      },
+      {
+       "factors": {
+        "id": "local-laikav2.update-10pct.mars-mac.receiver.warm",
+        "corpus": "local-laikav2",
+        "scenario": "update-10pct",
+        "sender": "mars",
+        "receiver": "mac",
+        "client": "receiver",
+        "link": "mac-mars-usb10g",
+        "cache": "warm",
+        "files": 13246,
+        "bytes": 7253587511
+       },
+       "arm": "rsync",
+       "validSamples": 20,
+       "blocks": 20,
+       "medianSeconds": 1.47675,
+       "medianGbps": 39.29852980215378,
+       "medianClientCpuSeconds": 1.4860000000000002,
+       "pairedBlocks": 20,
+       "medianPairedSpeedVsControl": 1
+      },
+      {
+       "factors": {
+        "id": "local-laikav2.update-10pct.mars-mac.receiver.warm",
+        "corpus": "local-laikav2",
+        "scenario": "update-10pct",
+        "sender": "mars",
+        "receiver": "mac",
+        "client": "receiver",
+        "link": "mac-mars-usb10g",
+        "cache": "warm",
+        "files": 13246,
+        "bytes": 7253587511
+       },
+       "arm": "xs-rs",
+       "validSamples": 20,
+       "blocks": 20,
+       "medianSeconds": 1.6388,
+       "medianGbps": 35.40928877068932,
+       "medianClientCpuSeconds": 1.7570000000000001,
+       "pairedBlocks": 20,
+       "medianPairedSpeedVsControl": 0.8873731233155931
+      },
+      {
+       "factors": {
+        "id": "local-laikav2.update-10pct.mars-mac.receiver.warm",
+        "corpus": "local-laikav2",
+        "scenario": "update-10pct",
+        "sender": "mars",
+        "receiver": "mac",
+        "client": "receiver",
+        "link": "mac-mars-usb10g",
+        "cache": "warm",
+        "files": 13246,
+        "bytes": 7253587511
+       },
+       "arm": "xs-cpp",
+       "validSamples": 20,
+       "blocks": 20,
+       "medianSeconds": 1.246,
+       "medianGbps": 46.57237921392283,
+       "medianClientCpuSeconds": 3.0835,
+       "pairedBlocks": 20,
+       "medianPairedSpeedVsControl": 1.1749033473444983
+      },
+      {
+       "factors": {
+        "id": "local-laikav2.update-10pct.mac-mars.sender.warm",
+        "corpus": "local-laikav2",
+        "scenario": "update-10pct",
+        "sender": "mac",
+        "receiver": "mars",
+        "client": "sender",
+        "link": "mac-mars-usb10g",
+        "cache": "warm",
+        "files": 13246,
+        "bytes": 7253587511
+       },
+       "arm": "rsync",
+       "validSamples": 20,
+       "blocks": 20,
+       "medianSeconds": 1.45175,
+       "medianGbps": 39.975137647939704,
+       "medianClientCpuSeconds": 0.823,
+       "pairedBlocks": 20,
+       "medianPairedSpeedVsControl": 1
+      },
+      {
+       "factors": {
+        "id": "local-laikav2.update-10pct.mac-mars.sender.warm",
+        "corpus": "local-laikav2",
+        "scenario": "update-10pct",
+        "sender": "mac",
+        "receiver": "mars",
+        "client": "sender",
+        "link": "mac-mars-usb10g",
+        "cache": "warm",
+        "files": 13246,
+        "bytes": 7253587511
+       },
+       "arm": "xs-cpp",
+       "validSamples": 20,
+       "blocks": 20,
+       "medianSeconds": 1.2205,
+       "medianGbps": 47.55435744584214,
+       "medianClientCpuSeconds": 0.8745,
+       "pairedBlocks": 20,
+       "medianPairedSpeedVsControl": 1.2165894644969621
+      },
+      {
+       "factors": {
+        "id": "local-laikav2.update-10pct.mac-mars.sender.warm",
+        "corpus": "local-laikav2",
+        "scenario": "update-10pct",
+        "sender": "mac",
+        "receiver": "mars",
+        "client": "sender",
+        "link": "mac-mars-usb10g",
+        "cache": "warm",
+        "files": 13246,
+        "bytes": 7253587511
+       },
+       "arm": "xs-rs",
+       "validSamples": 20,
+       "blocks": 20,
+       "medianSeconds": 1.7604,
+       "medianGbps": 32.96404141561402,
+       "medianClientCpuSeconds": 0.9989999999999999,
+       "pairedBlocks": 20,
+       "medianPairedSpeedVsControl": 0.8560253326714073
+      },
+      {
+       "factors": {
+        "id": "local-laikav2.noop.mars-mac.receiver.warm",
+        "corpus": "local-laikav2",
+        "scenario": "noop",
+        "sender": "mars",
+        "receiver": "mac",
+        "client": "receiver",
+        "link": "mac-mars-usb10g",
+        "cache": "warm",
+        "files": 13246,
+        "bytes": 7253587511
+       },
+       "arm": "rsync",
+       "validSamples": 20,
+       "blocks": 20,
+       "medianSeconds": 0.49405,
+       "medianGbps": 117.45555034619733,
+       "medianClientCpuSeconds": 0.2445,
+       "pairedBlocks": 20,
+       "medianPairedSpeedVsControl": 1
+      },
+      {
+       "factors": {
+        "id": "local-laikav2.noop.mars-mac.receiver.warm",
+        "corpus": "local-laikav2",
+        "scenario": "noop",
+        "sender": "mars",
+        "receiver": "mac",
+        "client": "receiver",
+        "link": "mac-mars-usb10g",
+        "cache": "warm",
+        "files": 13246,
+        "bytes": 7253587511
+       },
+       "arm": "xs-cpp",
+       "validSamples": 20,
+       "blocks": 20,
+       "medianSeconds": 0.3538,
+       "medianGbps": 164.01743260235355,
+       "medianClientCpuSeconds": 0.394,
+       "pairedBlocks": 20,
+       "medianPairedSpeedVsControl": 1.4090425974567875
+      },
+      {
+       "factors": {
+        "id": "local-laikav2.noop.mars-mac.receiver.warm",
+        "corpus": "local-laikav2",
+        "scenario": "noop",
+        "sender": "mars",
+        "receiver": "mac",
+        "client": "receiver",
+        "link": "mac-mars-usb10g",
+        "cache": "warm",
+        "files": 13246,
+        "bytes": 7253587511
+       },
+       "arm": "xs-rs",
+       "validSamples": 20,
+       "blocks": 20,
+       "medianSeconds": 0.27490000000000003,
+       "medianGbps": 211.09122053881686,
+       "medianClientCpuSeconds": 0.2105,
+       "pairedBlocks": 20,
+       "medianPairedSpeedVsControl": 1.7982219581143197
+      },
+      {
+       "factors": {
+        "id": "local-laikav2.noop.mac-mars.sender.warm",
+        "corpus": "local-laikav2",
+        "scenario": "noop",
+        "sender": "mac",
+        "receiver": "mars",
+        "client": "sender",
+        "link": "mac-mars-usb10g",
+        "cache": "warm",
+        "files": 13246,
+        "bytes": 7253587511
+       },
+       "arm": "rsync",
+       "validSamples": 20,
+       "blocks": 20,
+       "medianSeconds": 0.5204,
+       "medianGbps": 111.50802695335796,
+       "medianClientCpuSeconds": 0.2125,
+       "pairedBlocks": 20,
+       "medianPairedSpeedVsControl": 1
+      },
+      {
+       "factors": {
+        "id": "local-laikav2.noop.mac-mars.sender.warm",
+        "corpus": "local-laikav2",
+        "scenario": "noop",
+        "sender": "mac",
+        "receiver": "mars",
+        "client": "sender",
+        "link": "mac-mars-usb10g",
+        "cache": "warm",
+        "files": 13246,
+        "bytes": 7253587511
+       },
+       "arm": "xs-cpp",
+       "validSamples": 20,
+       "blocks": 20,
+       "medianSeconds": 0.3227,
+       "medianGbps": 179.82245323964753,
+       "medianClientCpuSeconds": 0.213,
+       "pairedBlocks": 20,
+       "medianPairedSpeedVsControl": 1.596309847991399
+      },
+      {
+       "factors": {
+        "id": "local-laikav2.noop.mac-mars.sender.warm",
+        "corpus": "local-laikav2",
+        "scenario": "noop",
+        "sender": "mac",
+        "receiver": "mars",
+        "client": "sender",
+        "link": "mac-mars-usb10g",
+        "cache": "warm",
+        "files": 13246,
+        "bytes": 7253587511
+       },
+       "arm": "xs-rs",
+       "validSamples": 20,
+       "blocks": 20,
+       "medianSeconds": 0.27449999999999997,
+       "medianGbps": 211.39961008631633,
+       "medianClientCpuSeconds": 0.176,
+       "pairedBlocks": 20,
+       "medianPairedSpeedVsControl": 1.8903520381609007
+      }
+     ]
+    },
+    {
+     "key": "mac-mac/MM2a-large-solo/20261022T114745Z-MM2a-large-solo",
+     "experiment": "MM2a-large-solo",
+     "question": null,
+     "state": "complete",
+     "hypothesis": "On one 4 GiB file, half compressible within the file, rsync -a, xs-c++ -a -j4 and xs-rs -a -j4 differ by more than 5% in time to durable, fresh or after a 4 KiB edit in its middle (update-1pct of one file is that one edit).",
+     "primary": "durable_s",
+     "control": "rsync",
+     "revisions": [
+      "e671c84aa680-rs",
+      "1594f4c4d0bf"
+     ],
+     "arms": [
+      {
+       "name": "rsync",
+       "tool": "rsync",
+       "client": null,
+       "scales": [],
+       "tuningFlags": []
+      },
+      {
+       "name": "xs-cpp",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 4,
+         "group": "26a8066d8eba5a7886d2cf0c"
+        }
+       ],
+       "tuningFlags": [
+        "-j4"
+       ]
+      },
+      {
+       "name": "xs-rs",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 4,
+         "group": "9a87593f6ba7a5094c0025b3"
+        }
+       ],
+       "tuningFlags": [
+        "-j4"
+       ]
+      }
+     ],
+     "samples": 240,
+     "invalid": 0,
+     "cells": [
+      {
+       "factors": {
+        "id": "large-solo.update-1pct.mac-mars.sender.warm",
+        "corpus": "large-solo",
+        "scenario": "update-1pct",
+        "sender": "mac",
+        "receiver": "mars",
+        "client": "sender",
+        "link": "mac-mars-usb10g",
+        "cache": "warm",
+        "files": 1,
+        "bytes": 4294967296
+       },
+       "arm": "xs-rs",
+       "validSamples": 20,
+       "blocks": 20,
+       "medianSeconds": 7.4535,
+       "medianGbps": 4.609917704680133,
+       "medianClientCpuSeconds": 2.3225,
+       "pairedBlocks": 20,
+       "medianPairedSpeedVsControl": 0.7394621167696346
+      },
+      {
+       "factors": {
+        "id": "large-solo.update-1pct.mac-mars.sender.warm",
+        "corpus": "large-solo",
+        "scenario": "update-1pct",
+        "sender": "mac",
+        "receiver": "mars",
+        "client": "sender",
+        "link": "mac-mars-usb10g",
+        "cache": "warm",
+        "files": 1,
+        "bytes": 4294967296
+       },
+       "arm": "rsync",
+       "validSamples": 20,
+       "blocks": 20,
+       "medianSeconds": 5.495,
+       "medianGbps": 6.252912015003229,
+       "medianClientCpuSeconds": 2.9495,
+       "pairedBlocks": 20,
+       "medianPairedSpeedVsControl": 1
+      },
+      {
+       "factors": {
+        "id": "large-solo.update-1pct.mac-mars.sender.warm",
+        "corpus": "large-solo",
+        "scenario": "update-1pct",
+        "sender": "mac",
+        "receiver": "mars",
+        "client": "sender",
+        "link": "mac-mars-usb10g",
+        "cache": "warm",
+        "files": 1,
+        "bytes": 4294967296
+       },
+       "arm": "xs-cpp",
+       "validSamples": 20,
+       "blocks": 20,
+       "medianSeconds": 12.62675,
+       "medianGbps": 2.7211910868705207,
+       "medianClientCpuSeconds": 2.533,
+       "pairedBlocks": 20,
+       "medianPairedSpeedVsControl": 0.43478298888246714
+      },
+      {
+       "factors": {
+        "id": "large-solo.update-1pct.mars-mac.receiver.warm",
+        "corpus": "large-solo",
+        "scenario": "update-1pct",
+        "sender": "mars",
+        "receiver": "mac",
+        "client": "receiver",
+        "link": "mac-mars-usb10g",
+        "cache": "warm",
+        "files": 1,
+        "bytes": 4294967296
+       },
+       "arm": "rsync",
+       "validSamples": 20,
+       "blocks": 20,
+       "medianSeconds": 4.912100000000001,
+       "medianGbps": 6.994918364072721,
+       "medianClientCpuSeconds": 4.0445,
+       "pairedBlocks": 20,
+       "medianPairedSpeedVsControl": 1
+      },
+      {
+       "factors": {
+        "id": "large-solo.update-1pct.mars-mac.receiver.warm",
+        "corpus": "large-solo",
+        "scenario": "update-1pct",
+        "sender": "mars",
+        "receiver": "mac",
+        "client": "receiver",
+        "link": "mac-mars-usb10g",
+        "cache": "warm",
+        "files": 1,
+        "bytes": 4294967296
+       },
+       "arm": "xs-rs",
+       "validSamples": 20,
+       "blocks": 20,
+       "medianSeconds": 6.04045,
+       "medianGbps": 5.688275265167788,
+       "medianClientCpuSeconds": 4.102,
+       "pairedBlocks": 20,
+       "medianPairedSpeedVsControl": 0.8124835963297856
+      },
+      {
+       "factors": {
+        "id": "large-solo.update-1pct.mars-mac.receiver.warm",
+        "corpus": "large-solo",
+        "scenario": "update-1pct",
+        "sender": "mars",
+        "receiver": "mac",
+        "client": "receiver",
+        "link": "mac-mars-usb10g",
+        "cache": "warm",
+        "files": 1,
+        "bytes": 4294967296
+       },
+       "arm": "xs-cpp",
+       "validSamples": 20,
+       "blocks": 20,
+       "medianSeconds": 10.93705,
+       "medianGbps": 3.1415940827326563,
+       "medianClientCpuSeconds": 4.436,
+       "pairedBlocks": 20,
+       "medianPairedSpeedVsControl": 0.44860749728195315
+      },
+      {
+       "factors": {
+        "id": "large-solo.fresh.mars-mac.receiver.warm",
+        "corpus": "large-solo",
+        "scenario": "fresh",
+        "sender": "mars",
+        "receiver": "mac",
+        "client": "receiver",
+        "link": "mac-mars-usb10g",
+        "cache": "warm",
+        "files": 1,
+        "bytes": 4294967296
+       },
+       "arm": "xs-rs",
+       "validSamples": 20,
+       "blocks": 20,
+       "medianSeconds": 6.48095,
+       "medianGbps": 5.301656763342326,
+       "medianClientCpuSeconds": 2.268,
+       "pairedBlocks": 20,
+       "medianPairedSpeedVsControl": 2.1337425983819633
+      },
+      {
+       "factors": {
+        "id": "large-solo.fresh.mars-mac.receiver.warm",
+        "corpus": "large-solo",
+        "scenario": "fresh",
+        "sender": "mars",
+        "receiver": "mac",
+        "client": "receiver",
+        "link": "mac-mars-usb10g",
+        "cache": "warm",
+        "files": 1,
+        "bytes": 4294967296
+       },
+       "arm": "xs-cpp",
+       "validSamples": 20,
+       "blocks": 20,
+       "medianSeconds": 6.13355,
+       "medianGbps": 5.601934570761725,
+       "medianClientCpuSeconds": 5.414,
+       "pairedBlocks": 20,
+       "medianPairedSpeedVsControl": 2.2383013435745847
+      },
+      {
+       "factors": {
+        "id": "large-solo.fresh.mars-mac.receiver.warm",
+        "corpus": "large-solo",
+        "scenario": "fresh",
+        "sender": "mars",
+        "receiver": "mac",
+        "client": "receiver",
+        "link": "mac-mars-usb10g",
+        "cache": "warm",
+        "files": 1,
+        "bytes": 4294967296
+       },
+       "arm": "rsync",
+       "validSamples": 20,
+       "blocks": 20,
+       "medianSeconds": 13.7025,
+       "medianGbps": 2.5075549874582075,
+       "medianClientCpuSeconds": 14.614,
+       "pairedBlocks": 20,
+       "medianPairedSpeedVsControl": 1
+      },
+      {
+       "factors": {
+        "id": "large-solo.fresh.mac-mars.sender.warm",
+        "corpus": "large-solo",
+        "scenario": "fresh",
+        "sender": "mac",
+        "receiver": "mars",
+        "client": "sender",
+        "link": "mac-mars-usb10g",
+        "cache": "warm",
+        "files": 1,
+        "bytes": 4294967296
+       },
+       "arm": "xs-rs",
+       "validSamples": 20,
+       "blocks": 20,
+       "medianSeconds": 8.2168,
+       "medianGbps": 4.181646807501239,
+       "medianClientCpuSeconds": 2.5355,
+       "pairedBlocks": 20,
+       "medianPairedSpeedVsControl": 1.445744910202205
+      },
+      {
+       "factors": {
+        "id": "large-solo.fresh.mac-mars.sender.warm",
+        "corpus": "large-solo",
+        "scenario": "fresh",
+        "sender": "mac",
+        "receiver": "mars",
+        "client": "sender",
+        "link": "mac-mars-usb10g",
+        "cache": "warm",
+        "files": 1,
+        "bytes": 4294967296
+       },
+       "arm": "rsync",
+       "validSamples": 20,
+       "blocks": 20,
+       "medianSeconds": 11.4656,
+       "medianGbps": 2.9974746799550376,
+       "medianClientCpuSeconds": 12.4285,
+       "pairedBlocks": 20,
+       "medianPairedSpeedVsControl": 1
+      },
+      {
+       "factors": {
+        "id": "large-solo.fresh.mac-mars.sender.warm",
+        "corpus": "large-solo",
+        "scenario": "fresh",
+        "sender": "mac",
+        "receiver": "mars",
+        "client": "sender",
+        "link": "mac-mars-usb10g",
+        "cache": "warm",
+        "files": 1,
+        "bytes": 4294967296
+       },
+       "arm": "xs-cpp",
+       "validSamples": 20,
+       "blocks": 20,
+       "medianSeconds": 5.44455,
+       "medianGbps": 6.310869012135457,
+       "medianClientCpuSeconds": 4.926500000000001,
+       "pairedBlocks": 20,
+       "medianPairedSpeedVsControl": 2.0790227055517034
+      }
+     ]
+    },
+    {
+     "key": "mac-mac/CM-A2-10220216/20261022T071651Z-CM-A2-10220216",
+     "experiment": "CM-A2-10220216",
+     "question": null,
+     "state": "stopped",
+     "hypothesis": "After the receiver-lock change, small-file fresh copies are limited by per-file work on the receiving Mac. If so, -j8 and -j16 give little over -j4 while peer CPU rises, and the effect is stronger on pull (mars>mac), where small-deep takes about twice as long as push. --no-atomic at -j8 beats -j8 if temp-file rename costs matter. A large gap between durable_s and wall_s would point at writeback. T",
+     "primary": "durable_s",
+     "control": "xs-rs-j4",
+     "revisions": [
+      "f9a85e73d94e-rs"
+     ],
+     "arms": [
+      {
+       "name": "xs-rs-j4",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 4,
+         "group": "3ac457e44cbcd8ab96e85ad9"
+        }
+       ],
+       "tuningFlags": [
+        "-j4"
+       ]
+      },
+      {
+       "name": "xs-rs-j1",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 1,
+         "group": "3ac457e44cbcd8ab96e85ad9"
+        }
+       ],
+       "tuningFlags": [
+        "-j1"
+       ]
+      },
+      {
+       "name": "xs-rs-j8",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 8,
+         "group": "3ac457e44cbcd8ab96e85ad9"
+        }
+       ],
+       "tuningFlags": [
+        "-j8"
+       ]
+      },
+      {
+       "name": "xs-rs-j16",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 16,
+         "group": "3ac457e44cbcd8ab96e85ad9"
+        }
+       ],
+       "tuningFlags": [
+        "-j16"
+       ]
+      },
+      {
+       "name": "xs-rs-j8-noatomic",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 8,
+         "group": "3e41ccc5dfa52865fd0d505a"
+        }
+       ],
+       "tuningFlags": [
+        "-j8",
+        "--no-atomic"
+       ]
+      },
+      {
+       "name": "rsync",
+       "tool": "rsync",
+       "client": null,
+       "scales": [],
+       "tuningFlags": []
+      }
+     ],
+     "samples": 1,
+     "invalid": 0,
+     "cells": [
+      {
+       "factors": {
+        "id": "small-flat.fresh.mars-mac.receiver.warm",
+        "corpus": "small-flat",
+        "scenario": "fresh",
+        "sender": "mars",
+        "receiver": "mac",
+        "client": "receiver",
+        "link": "mac-mars-usb10g",
+        "cache": "warm",
+        "files": 100000,
+        "bytes": 319224077
+       },
+       "arm": "xs-rs-j8",
+       "validSamples": 1,
+       "blocks": 1,
+       "medianSeconds": 11.4253,
+       "medianGbps": 0.22352083673951667,
+       "medianClientCpuSeconds": 36.55,
+       "pairedBlocks": 0,
+       "medianPairedSpeedVsControl": null
+      }
+     ]
+    },
+    {
+     "key": "mac-mac/CM-B1-10211710/20261021T221144Z-CM-B1-10211710",
+     "experiment": "CM-B1-10211710",
+     "question": null,
+     "state": "failed",
+     "hypothesis": "xs-rs still takes longer than rsync on congress no-op, especially on pull, and its CPU seconds far exceed rsync's on one end. Receiver-side CPU dominating, mostly on pull, would point at destination path walks (A3). Sender-side CPU dominating would point at file-list and stat cost (B2/B3). Little change from -j1 to -j8 would mean a serial bottleneck. The lab records total CPU per end, not the user",
+     "primary": "durable_s",
+     "control": "rsync",
+     "revisions": [
+      "61d1dd83a530-rs",
+      "52d76dbca2b2"
+     ],
+     "arms": [
+      {
+       "name": "rsync",
+       "tool": "rsync",
+       "client": null,
+       "scales": [],
+       "tuningFlags": []
+      },
+      {
+       "name": "xs-rs-j4",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 4,
+         "group": "d121dc124c927edad9431307"
+        }
+       ],
+       "tuningFlags": [
+        "-j4"
+       ]
+      },
+      {
+       "name": "xs-rs-j1",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 1,
+         "group": "d121dc124c927edad9431307"
+        }
+       ],
+       "tuningFlags": [
+        "-j1"
+       ]
+      },
+      {
+       "name": "xs-rs-j8",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 8,
+         "group": "d121dc124c927edad9431307"
+        }
+       ],
+       "tuningFlags": [
+        "-j8"
+       ]
+      },
+      {
+       "name": "xs-cpp-j4",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 4,
+         "group": "bc18876e589d57019b3309bb"
+        }
+       ],
+       "tuningFlags": [
+        "-j4"
+       ]
+      }
+     ],
+     "samples": 185,
+     "invalid": 6,
+     "cells": [
+      {
+       "factors": {
+        "id": "real-psample.noop.mars-mac.receiver.warm",
+        "corpus": "real-psample",
+        "scenario": "noop",
+        "sender": "mars",
+        "receiver": "mac",
+        "client": "receiver",
+        "link": "mac-mars-usb10g",
+        "cache": "warm",
+        "files": 711103,
+        "bytes": 21045458323
+       },
+       "arm": "xs-rs-j8",
+       "validSamples": 9,
+       "blocks": 9,
+       "medianSeconds": 14.2604,
+       "medianGbps": 11.80637756191972,
+       "medianClientCpuSeconds": 80.238,
+       "pairedBlocks": 8,
+       "medianPairedSpeedVsControl": 4.771242732205705
+      },
+      {
+       "factors": {
+        "id": "real-psample.noop.mars-mac.receiver.warm",
+        "corpus": "real-psample",
+        "scenario": "noop",
+        "sender": "mars",
+        "receiver": "mac",
+        "client": "receiver",
+        "link": "mac-mars-usb10g",
+        "cache": "warm",
+        "files": 711103,
+        "bytes": 21045458323
+       },
+       "arm": "xs-cpp-j4",
+       "validSamples": 9,
+       "blocks": 9,
+       "medianSeconds": 104.0227,
+       "medianGbps": 1.6185281345706275,
+       "medianClientCpuSeconds": 219.615,
+       "pairedBlocks": 8,
+       "medianPairedSpeedVsControl": 0.5933044851928279
+      },
+      {
+       "factors": {
+        "id": "real-psample.noop.mars-mac.receiver.warm",
+        "corpus": "real-psample",
+        "scenario": "noop",
+        "sender": "mars",
+        "receiver": "mac",
+        "client": "receiver",
+        "link": "mac-mars-usb10g",
+        "cache": "warm",
+        "files": 711103,
+        "bytes": 21045458323
+       },
+       "arm": "xs-rs-j4",
+       "validSamples": 8,
+       "blocks": 8,
+       "medianSeconds": 36.8544,
+       "medianGbps": 6.248266360042925,
+       "medianClientCpuSeconds": 59.097,
+       "pairedBlocks": 8,
+       "medianPairedSpeedVsControl": 2.375681322234522
+      },
+      {
+       "factors": {
+        "id": "real-psample.noop.mars-mac.receiver.warm",
+        "corpus": "real-psample",
+        "scenario": "noop",
+        "sender": "mars",
+        "receiver": "mac",
+        "client": "receiver",
+        "link": "mac-mars-usb10g",
+        "cache": "warm",
+        "files": 711103,
+        "bytes": 21045458323
+       },
+       "arm": "rsync",
+       "validSamples": 8,
+       "blocks": 8,
+       "medianSeconds": 67.46045000000001,
+       "medianGbps": 2.496388855859686,
+       "medianClientCpuSeconds": 29.8705,
+       "pairedBlocks": 8,
+       "medianPairedSpeedVsControl": 1
+      },
+      {
+       "factors": {
+        "id": "real-psample.noop.mars-mac.receiver.warm",
+        "corpus": "real-psample",
+        "scenario": "noop",
+        "sender": "mars",
+        "receiver": "mac",
+        "client": "receiver",
+        "link": "mac-mars-usb10g",
+        "cache": "warm",
+        "files": 711103,
+        "bytes": 21045458323
+       },
+       "arm": "xs-rs-j1",
+       "validSamples": 8,
+       "blocks": 8,
+       "medianSeconds": 37.2856,
+       "medianGbps": 4.516169385517394,
+       "medianClientCpuSeconds": 39.358000000000004,
+       "pairedBlocks": 8,
+       "medianPairedSpeedVsControl": 1.8100666704315782
+      },
+      {
+       "factors": {
+        "id": "real-congress.noop.mars-mac.receiver.warm",
+        "corpus": "real-congress",
+        "scenario": "noop",
+        "sender": "mars",
+        "receiver": "mac",
+        "client": "receiver",
+        "link": "mac-mars-usb10g",
+        "cache": "warm",
+        "files": 216518,
+        "bytes": 1159189826
+       },
+       "arm": "xs-rs-j1",
+       "validSamples": 9,
+       "blocks": 9,
+       "medianSeconds": 2.5654,
+       "medianGbps": 3.6148431464878774,
+       "medianClientCpuSeconds": 3.426,
+       "pairedBlocks": 9,
+       "medianPairedSpeedVsControl": 1.7662352849458176
+      },
+      {
+       "factors": {
+        "id": "real-congress.noop.mars-mac.receiver.warm",
+        "corpus": "real-congress",
+        "scenario": "noop",
+        "sender": "mars",
+        "receiver": "mac",
+        "client": "receiver",
+        "link": "mac-mars-usb10g",
+        "cache": "warm",
+        "files": 216518,
+        "bytes": 1159189826
+       },
+       "arm": "rsync",
+       "validSamples": 9,
+       "blocks": 9,
+       "medianSeconds": 4.5311,
+       "medianGbps": 2.046637374588952,
+       "medianClientCpuSeconds": 3.985,
+       "pairedBlocks": 9,
+       "medianPairedSpeedVsControl": 1
+      },
+      {
+       "factors": {
+        "id": "real-congress.noop.mars-mac.receiver.warm",
+        "corpus": "real-congress",
+        "scenario": "noop",
+        "sender": "mars",
+        "receiver": "mac",
+        "client": "receiver",
+        "link": "mac-mars-usb10g",
+        "cache": "warm",
+        "files": 216518,
+        "bytes": 1159189826
+       },
+       "arm": "xs-rs-j4",
+       "validSamples": 9,
+       "blocks": 9,
+       "medianSeconds": 1.4098,
+       "medianGbps": 6.577896586749894,
+       "medianClientCpuSeconds": 4.582,
+       "pairedBlocks": 9,
+       "medianPairedSpeedVsControl": 3.1561332845111685
+      },
+      {
+       "factors": {
+        "id": "real-congress.noop.mars-mac.receiver.warm",
+        "corpus": "real-congress",
+        "scenario": "noop",
+        "sender": "mars",
+        "receiver": "mac",
+        "client": "receiver",
+        "link": "mac-mars-usb10g",
+        "cache": "warm",
+        "files": 216518,
+        "bytes": 1159189826
+       },
+       "arm": "xs-rs-j8",
+       "validSamples": 9,
+       "blocks": 9,
+       "medianSeconds": 1.2346,
+       "medianGbps": 7.511354777255792,
+       "medianClientCpuSeconds": 6.326,
+       "pairedBlocks": 9,
+       "medianPairedSpeedVsControl": 3.746997598078462
+      },
+      {
+       "factors": {
+        "id": "real-congress.noop.mars-mac.receiver.warm",
+        "corpus": "real-congress",
+        "scenario": "noop",
+        "sender": "mars",
+        "receiver": "mac",
+        "client": "receiver",
+        "link": "mac-mars-usb10g",
+        "cache": "warm",
+        "files": 216518,
+        "bytes": 1159189826
+       },
+       "arm": "xs-cpp-j4",
+       "validSamples": 9,
+       "blocks": 9,
+       "medianSeconds": 2.6117,
+       "medianGbps": 3.5507595083661987,
+       "medianClientCpuSeconds": 9.422,
+       "pairedBlocks": 9,
+       "medianPairedSpeedVsControl": 1.7141478980371785
+      },
+      {
+       "factors": {
+        "id": "real-psample.noop.mac-mars.sender.warm",
+        "corpus": "real-psample",
+        "scenario": "noop",
+        "sender": "mac",
+        "receiver": "mars",
+        "client": "sender",
+        "link": "mac-mars-usb10g",
+        "cache": "warm",
+        "files": 711103,
+        "bytes": 21045458323
+       },
+       "arm": "xs-rs-j8",
+       "validSamples": 9,
+       "blocks": 8,
+       "medianSeconds": 16.3127,
+       "medianGbps": 10.321017770448792,
+       "medianClientCpuSeconds": 76.589,
+       "pairedBlocks": 8,
+       "medianPairedSpeedVsControl": 5.235058268977109
+      },
+      {
+       "factors": {
+        "id": "real-psample.noop.mac-mars.sender.warm",
+        "corpus": "real-psample",
+        "scenario": "noop",
+        "sender": "mac",
+        "receiver": "mars",
+        "client": "sender",
+        "link": "mac-mars-usb10g",
+        "cache": "warm",
+        "files": 711103,
+        "bytes": 21045458323
+       },
+       "arm": "xs-rs-j1",
+       "validSamples": 9,
+       "blocks": 9,
+       "medianSeconds": 37.7897,
+       "medianGbps": 4.45527925821057,
+       "medianClientCpuSeconds": 27.676,
+       "pairedBlocks": 9,
+       "medianPairedSpeedVsControl": 2.3163269356464853
+      },
+      {
+       "factors": {
+        "id": "real-psample.noop.mac-mars.sender.warm",
+        "corpus": "real-psample",
+        "scenario": "noop",
+        "sender": "mac",
+        "receiver": "mars",
+        "client": "sender",
+        "link": "mac-mars-usb10g",
+        "cache": "warm",
+        "files": 711103,
+        "bytes": 21045458323
+       },
+       "arm": "rsync",
+       "validSamples": 9,
+       "blocks": 9,
+       "medianSeconds": 85.6936,
+       "medianGbps": 1.9647169284987442,
+       "medianClientCpuSeconds": 62.444,
+       "pairedBlocks": 9,
+       "medianPairedSpeedVsControl": 1
+      },
+      {
+       "factors": {
+        "id": "real-psample.noop.mac-mars.sender.warm",
+        "corpus": "real-psample",
+        "scenario": "noop",
+        "sender": "mac",
+        "receiver": "mars",
+        "client": "sender",
+        "link": "mac-mars-usb10g",
+        "cache": "warm",
+        "files": 711103,
+        "bytes": 21045458323
+       },
+       "arm": "xs-cpp-j4",
+       "validSamples": 10,
+       "blocks": 9,
+       "medianSeconds": 24.93045,
+       "medianGbps": 6.754365696420041,
+       "medianClientCpuSeconds": 56.5165,
+       "pairedBlocks": 9,
+       "medianPairedSpeedVsControl": 3.3088297640509543
+      },
+      {
+       "factors": {
+        "id": "real-psample.noop.mac-mars.sender.warm",
+        "corpus": "real-psample",
+        "scenario": "noop",
+        "sender": "mac",
+        "receiver": "mars",
+        "client": "sender",
+        "link": "mac-mars-usb10g",
+        "cache": "warm",
+        "files": 711103,
+        "bytes": 21045458323
+       },
+       "arm": "xs-rs-j4",
+       "validSamples": 10,
+       "blocks": 9,
+       "medianSeconds": 19.5261,
+       "medianGbps": 8.622691021046018,
+       "medianClientCpuSeconds": 50.033500000000004,
+       "pairedBlocks": 9,
+       "medianPairedSpeedVsControl": 4.359042867741137
+      },
+      {
+       "factors": {
+        "id": "real-congress.noop.mac-mars.sender.warm",
+        "corpus": "real-congress",
+        "scenario": "noop",
+        "sender": "mac",
+        "receiver": "mars",
+        "client": "sender",
+        "link": "mac-mars-usb10g",
+        "cache": "warm",
+        "files": 216518,
+        "bytes": 1159189826
+       },
+       "arm": "rsync",
+       "validSamples": 9,
+       "blocks": 9,
+       "medianSeconds": 6.0892,
+       "medianGbps": 1.522945314327005,
+       "medianClientCpuSeconds": 5.135,
+       "pairedBlocks": 9,
+       "medianPairedSpeedVsControl": 1
+      },
+      {
+       "factors": {
+        "id": "real-congress.noop.mac-mars.sender.warm",
+        "corpus": "real-congress",
+        "scenario": "noop",
+        "sender": "mac",
+        "receiver": "mars",
+        "client": "sender",
+        "link": "mac-mars-usb10g",
+        "cache": "warm",
+        "files": 216518,
+        "bytes": 1159189826
+       },
+       "arm": "xs-cpp-j4",
+       "validSamples": 9,
+       "blocks": 9,
+       "medianSeconds": 2.0227,
+       "medianGbps": 4.5847227013397935,
+       "medianClientCpuSeconds": 5.721,
+       "pairedBlocks": 9,
+       "medianPairedSpeedVsControl": 2.9532846715328467
+      },
+      {
+       "factors": {
+        "id": "real-congress.noop.mac-mars.sender.warm",
+        "corpus": "real-congress",
+        "scenario": "noop",
+        "sender": "mac",
+        "receiver": "mars",
+        "client": "sender",
+        "link": "mac-mars-usb10g",
+        "cache": "warm",
+        "files": 216518,
+        "bytes": 1159189826
+       },
+       "arm": "xs-rs-j8",
+       "validSamples": 9,
+       "blocks": 9,
+       "medianSeconds": 1.519,
+       "medianGbps": 6.105015541803819,
+       "medianClientCpuSeconds": 6.974,
+       "pairedBlocks": 9,
+       "medianPairedSpeedVsControl": 4.1665569453587885
+      },
+      {
+       "factors": {
+        "id": "real-congress.noop.mac-mars.sender.warm",
+        "corpus": "real-congress",
+        "scenario": "noop",
+        "sender": "mac",
+        "receiver": "mars",
+        "client": "sender",
+        "link": "mac-mars-usb10g",
+        "cache": "warm",
+        "files": 216518,
+        "bytes": 1159189826
+       },
+       "arm": "xs-rs-j4",
+       "validSamples": 9,
+       "blocks": 9,
+       "medianSeconds": 1.4132,
+       "medianGbps": 6.56207090857628,
+       "medianClientCpuSeconds": 4.562,
+       "pairedBlocks": 9,
+       "medianPairedSpeedVsControl": 3.9872482131254054
+      },
+      {
+       "factors": {
+        "id": "real-congress.noop.mac-mars.sender.warm",
+        "corpus": "real-congress",
+        "scenario": "noop",
+        "sender": "mac",
+        "receiver": "mars",
+        "client": "sender",
+        "link": "mac-mars-usb10g",
+        "cache": "warm",
+        "files": 216518,
+        "bytes": 1159189826
+       },
+       "arm": "xs-rs-j1",
+       "validSamples": 9,
+       "blocks": 9,
+       "medianSeconds": 2.9514,
+       "medianGbps": 3.1420744758419734,
+       "medianClientCpuSeconds": 2.814,
+       "pairedBlocks": 9,
+       "medianPairedSpeedVsControl": 2.034934025524551
+      }
+     ]
+    }
+   ],
+   "commentary": {
+    "headline": "A small edit to one big file is xs's weak spot: xs-c++ takes longer to update the file than to copy it fresh",
+    "paragraphs": [
+     "The clearest result today is a regression, not a win. We edited 4 KiB in the middle of a 4 GiB file. Rsync then beat both xs builds in every one of the ten matched cells across three runs. xs-c++ was worse. It ran at 0.43-0.46x rsync whenever the Mac or mars received, taking 11-13 s against rsync's 5 s. That is more than twice its own fresh copy of the same file (4.5-6.1 s). xs-rs ran at 0.67-0.83x. Each cell has 11-20 blocks, and the medians repeat across runs and builds. That makes this the most trustworthy finding of the day. It points at the delta-update path, not the network.",
+     "Fresh copies are still the big win: 2-3.5x rsync on the large file, the laikav2 project and the 1.35M-file csearchv3 tree. The two builds are usually within a few percent of each other. There are two exceptions, both specific to xs-rs and both measured over 17-20 blocks. First, pushing one big file from the Mac to mars, xs-rs managed only 1.45x (8.2 s against xs-c++'s 5.4 s), and a second run reproduced the gap. Second, on laikav2's 10% update xs-rs was slower than rsync in all three directions (0.85-0.89x), while xs-c++ won (1.17-1.24x).",
+     "No-op runs, where nothing has changed, favour xs-rs: 1.56-1.89x on laikav2, and 2.30x against xs-c++'s 1.80x on csearchv3, with less CPU than xs-c++. Yesterday's worker sweep used older builds and its run failed. It suggested 8 workers help a lot on a 711k-file no-op pull (14.3 s against 36.9 s with 4) but barely on a smaller tree. It also showed xs-c++ taking 104 s on that pull, slower than rsync. Treat all of these as leads. The csearchv3 cells have only 1-4 blocks."
+    ]
+   },
+   "overview": "These experiments provided useful tuning insights. Here are the insights: both xs versions copy new data two to three and a half times faster than rsync on every data set tried. Both lose to rsync when one small edit is made inside one very large file, and the C++ version is then slower than simply copying the file again. The Rust version is slightly slower than rsync on a mid-sized project after a 10% change, and noticeably slower than the C++ version when pushing one big file to mars. When nothing has changed, the Rust version checks fastest. More workers looked helpful on very large trees, but that comes from a failed run on older builds and is provisional.",
+   "insights": [
+    {
+     "title": "Small edit in one large file: rsync wins everywhere; xs-c++ updates slower than it copies fresh",
+     "finding": "Rsync beat both xs builds in all ten matched update-1pct cells. xs-c++ is hit hardest when the Mac or mars receives.",
+     "evidence": "Apollo to Mac (20 blocks): rsync 4.90 s, xs-rs 5.99 s (0.80x), xs-c++ 11.21 s (0.43x). xs-c++'s fresh copy in the same direction took 4.54 s. Mars to Mac: 0.45x and 0.81x (20 blocks). Mac to mars: 0.43x and 0.74x (20 blocks); the p0 run repeated this at 0.43x and 0.67x (12 blocks). Mac to apollo is milder: 0.79x and 0.82x (17 blocks), with xs-c++ at 6.59 s.",
+     "caveat": "One file layout and one edit size. The p0 run failed. The idea that apollo's receiving side explains the milder xs-c++ penalty is an untested hypothesis.",
+     "runKeys": [
+      "mac-apollo/MM2a-large-solo-apollo/20261022T162408Z-MM2a-large-solo-apollo",
+      "mac-mac/MM2a-large-solo/20261022T114745Z-MM2a-large-solo",
+      "mac-mac/MM2a-large-solo-p0/20261022T144412Z-MM2a-large-solo-p0"
+     ]
+    },
+    {
+     "title": "Fresh large file: xs-rs lags xs-c++ only when pushing to mars, at lower CPU",
+     "finding": "Both builds are 2-3x rsync on fresh single-file copies, except xs-rs pushing from the Mac to mars.",
+     "evidence": "Mac to mars: xs-rs 8.22 s (1.45x) against xs-c++ 5.44 s (2.08x), 20 blocks. The p0 run gave 1.18x against 1.80x over 11 blocks. Mars to Mac: 2.13x against 2.24x. Mac to apollo: 2.40x against 2.44x. Apollo to Mac: xs-c++ 3.11x (7.57 Gb/s) against xs-rs 2.62x. xs-rs used 2.27-2.60 client CPU seconds against xs-c++'s 4.9-5.7.",
+     "caveat": "The xs-c++ revisions differ between runs. Whether the mars write path or the xs-rs sender causes the gap is a hypothesis.",
+     "runKeys": [
+      "mac-mac/MM2a-large-solo/20261022T114745Z-MM2a-large-solo",
+      "mac-mac/MM2a-large-solo-p0/20261022T144412Z-MM2a-large-solo-p0",
+      "mac-apollo/MM2a-large-solo-apollo/20261022T162408Z-MM2a-large-solo-apollo"
+     ]
+    },
+    {
+     "title": "laikav2 10% update: xs-rs slower than rsync, xs-c++ faster",
+     "finding": "The xs-rs result is consistent in all three directions.",
+     "evidence": "xs-rs ran at 0.85x (17 blocks, from apollo), 0.89x (20, from mars) and 0.86x (20, to mars): 1.64-1.76 s against rsync's 1.45-1.48 s. xs-c++ took 1.19-1.25 s (1.17-1.24x). When the Mac received, xs-c++ used 3.05-3.08 client CPU seconds against xs-rs's 1.76-1.85.",
+     "caveat": "Runs are under 2 s, so fixed startup cost may dominate. The tree contains hard links.",
+     "runKeys": [
+      "mac-apollo/MM2b-local-laikav2-apollo/20261022T162409Z-MM2b-local-laikav2-apollo",
+      "mac-mac/MM2b-local-laikav2/20261022T114746Z-MM2b-local-laikav2"
+     ]
+    },
+    {
+     "title": "No-op runs: xs-rs fastest, but xs uses more CPU than rsync",
+     "finding": "xs-rs leads on unchanged trees of both sizes.",
+     "evidence": "laikav2 no-op: xs-rs 1.56x, 1.80x and 1.89x (18-20 blocks) against xs-c++'s 1.37x, 1.41x and 1.60x. csearchv3 no-op (4 blocks): xs-rs 17.8 s (2.30x), xs-c++ 22.8 s (1.80x), rsync 41.2 s. Client CPU was 49 s, 69 s and 31.7 s respectively.",
+     "caveat": "Only 4 blocks for csearchv3, all in one direction.",
+     "runKeys": [
+      "mac-apollo/MM2c-real-csearchv3-apollo/20261022T162409Z-MM2c-real-csearchv3-apollo",
+      "mac-apollo/MM2b-local-laikav2-apollo/20261022T162409Z-MM2b-local-laikav2-apollo",
+      "mac-mac/MM2b-local-laikav2/20261022T114746Z-MM2b-local-laikav2"
+     ]
+    },
+    {
+     "title": "Many-file fresh copy: large win, low throughput ceiling",
+     "finding": "On 1.35M files, both builds are about 3.5x rsync, yet deliver only about 0.6 Gb/s. That suggests per-file work, not bandwidth, is the limit.",
+     "evidence": "Apollo to Mac, fresh (3 blocks): xs-c++ 151 s (3.53x), xs-rs 152 s (3.46x), rsync 529 s. Client CPU was 506 s, 454 s and 729 s. Update-10pct (4 blocks): 52.5 s for both builds (1.93x and 2.02x). A single-block Mac-to-mars push took 93-96 s.",
+     "caveat": "One run hit its deadline and the other was stopped. The mars cell is a single sample.",
+     "runKeys": [
+      "mac-apollo/MM2c-real-csearchv3-apollo/20261022T162409Z-MM2c-real-csearchv3-apollo",
+      "mac-mac/MM2c-real-csearchv3/20261022T114747Z-MM2c-real-csearchv3"
+     ]
+    },
+    {
+     "title": "Worker scaling on no-op scans is uneven (older builds)",
+     "finding": "8 workers helped greatly on the 711k-file pull, while 1 and 4 workers were almost tied. On congress, the gain stopped at 4 workers.",
+     "evidence": "psample pull: 1 worker 37.3 s, 4 workers 36.9 s, 8 workers 14.3 s (4.77x, 8 blocks). psample push: 37.8, 19.5 and 16.3 s. congress pull: 2.57, 1.41 and 1.23 s. congress push: 2.95, 1.41 and 1.52 s. psample pull CPU at 8 workers was 80 s, against 59 s at 4 and rsync's 30 s. The run's hypothesis that xs-rs is slower than rsync on congress no-op is contradicted: 3.16-3.99x with 4 workers.",
+     "caveat": "The run failed, 6 samples were invalid, and the builds are older. For the 4-worker pull, the median throughput of 6.25 Gb/s implies about 27 s, not 36.9 s, which suggests a widely spread distribution.",
+     "runKeys": [
+      "mac-mac/CM-B1-10211710/20261021T221144Z-CM-B1-10211710"
+     ]
+    },
+    {
+     "title": "xs-c++ was slower than rsync on a large no-op pull (older build)",
+     "finding": "xs-c++ with 4 workers fell well behind on a many-file pull to the Mac.",
+     "evidence": "psample pull: xs-c++ 104.0 s (0.59x, 220 s client CPU) against rsync 67.5 s. The same tree pushed took 24.9 s (3.31x). Today's xs-c++ build ran the csearchv3 no-op pull at 1.80x.",
+     "caveat": "Older revision and a failed run. The issue may already be fixed, or may be specific to this data set.",
+     "runKeys": [
+      "mac-mac/CM-B1-10211710/20261021T221144Z-CM-B1-10211710",
+      "mac-apollo/MM2c-real-csearchv3-apollo/20261022T162409Z-MM2c-real-csearchv3-apollo"
+     ]
+    }
+   ],
+   "limitations": [
+    "Medians only; no significance tests or confidence intervals.",
+    "The csearchv3 cells have 1-4 blocks; one run hit its deadline and the other was stopped.",
+    "The large-solo p0 and worker-sweep runs failed; the worker sweep had 6 invalid samples and older revisions.",
+    "The small-file worker run produced one sample of one arm and cannot be compared.",
+    "Runs differ in revision, link and storage, so comparisons across runs are not controlled.",
+    "Client CPU covers one end only."
+   ],
+   "nextSteps": [
+    "xs-c++: profile the 4 KiB edit update with the Mac receiving (11.2 s against a 4.5 s fresh copy). Add a fallback to whole-file transfer when delta work exceeds the cost of a fresh copy, then re-run large-solo update-1pct in all four directions.",
+    "xs-rs: time the delta stages on large-solo update-1pct (0.67-0.83x rsync) to find which stage is slower than rsync's.",
+    "xs-rs: investigate the fresh single-file push from the Mac to mars (8.2 s against xs-c++'s 5.4 s) by comparing sender and receiver timing.",
+    "xs-rs: break down the roughly 0.5 s gap to xs-c++ on the laikav2 10% update, checking startup and hard-link handling.",
+    "xs-c++: re-run the psample no-op pull at the current revision to confirm the 104 s regression is gone.",
+    "lab: repeat the 1, 4 and 8 worker sweep with current builds on psample and csearchv3, both directions, to at least 10 blocks.",
+    "lab: finish the csearchv3 matrix to at least 10 blocks per cell and re-run the stopped small-file worker experiment."
+   ],
+   "tuningImplications": [
+    {
+     "experiment": "MM2c-real-csearchv3-apollo",
+     "recommendation": "Both builds with 4 workers are strong provisional candidates for this huge tree. xs-rs is preferred for no-op runs.",
+     "settings": [
+      "-j4"
+     ],
+     "tradeoffs": "On no-op runs xs uses 49-69 s of CPU against rsync's 31.7 s. Fresh copies use less CPU than rsync.",
+     "evidenceStrength": "Weak: 3-4 blocks, run hit its deadline.",
+     "nextTest": "Complete to at least 10 blocks and add the other direction.",
+     "runKeys": [
+      "mac-apollo/MM2c-real-csearchv3-apollo/20261022T162409Z-MM2c-real-csearchv3-apollo"
+     ]
+    },
+    {
+     "experiment": "MM2b-local-laikav2-apollo",
+     "recommendation": "Use either build for fresh copies (about 2.7x). For 10% updates prefer xs-c++; xs-rs is 0.85x rsync.",
+     "settings": [
+      "-j4"
+     ],
+     "tradeoffs": "xs-c++ uses about 1.6x xs-rs's CPU on updates.",
+     "evidenceStrength": "Moderate: 17-19 blocks.",
+     "nextTest": "Repeat the update cell after the xs-rs fix.",
+     "runKeys": [
+      "mac-apollo/MM2b-local-laikav2-apollo/20261022T162409Z-MM2b-local-laikav2-apollo"
+     ]
+    },
+    {
+     "experiment": "MM2a-large-solo-apollo",
+     "recommendation": "Use xs for fresh large-file copies. Avoid both builds for small edits inside one large file.",
+     "settings": [
+      "-j4"
+     ],
+     "tradeoffs": "xs-rs uses about 40% of xs-c++'s CPU on fresh copies but runs 15% slower when pulling.",
+     "evidenceStrength": "Moderate: 17-20 blocks.",
+     "nextTest": "Re-run update-1pct after the delta fixes.",
+     "runKeys": [
+      "mac-apollo/MM2a-large-solo-apollo/20261022T162408Z-MM2a-large-solo-apollo"
+     ]
+    },
+    {
+     "experiment": "MM2a-large-solo-p0",
+     "recommendation": "Confirms the update and push gaps but adds no new setting guidance.",
+     "settings": [
+      "-j4"
+     ],
+     "tradeoffs": "None beyond the main run.",
+     "evidenceStrength": "Weak to moderate: 11-12 blocks, run failed.",
+     "nextTest": "Find the cause of the failure before reuse.",
+     "runKeys": [
+      "mac-mac/MM2a-large-solo-p0/20261022T144412Z-MM2a-large-solo-p0"
+     ]
+    },
+    {
+     "experiment": "MM2c-real-csearchv3",
+     "recommendation": "Insufficient evidence; the single block agrees with about 3.4x for fresh copies.",
+     "settings": [
+      "-j4"
+     ],
+     "tradeoffs": "Unknown.",
+     "evidenceStrength": "Insufficient: 1 block, run stopped.",
+     "nextTest": "Re-run to completion over the mars link.",
+     "runKeys": [
+      "mac-mac/MM2c-real-csearchv3/20261022T114747Z-MM2c-real-csearchv3"
+     ]
+    },
+    {
+     "experiment": "MM2b-local-laikav2",
+     "recommendation": "Fresh copies are about 2x for both builds in both directions. Prefer xs-c++ for updates and xs-rs for no-op runs.",
+     "settings": [
+      "-j4"
+     ],
+     "tradeoffs": "xs-c++ uses more receiver CPU.",
+     "evidenceStrength": "Moderate: 20 blocks per cell.",
+     "nextTest": "Re-test the xs-rs update after the fix.",
+     "runKeys": [
+      "mac-mac/MM2b-local-laikav2/20261022T114746Z-MM2b-local-laikav2"
+     ]
+    },
+    {
+     "experiment": "MM2a-large-solo",
+     "recommendation": "xs-c++ is preferred for fresh pushes to mars. Rsync is better for single-file small edits.",
+     "settings": [
+      "-j4"
+     ],
+     "tradeoffs": "xs-rs uses less CPU but is slower pushing to mars.",
+     "evidenceStrength": "Moderate: 20 blocks.",
+     "nextTest": "Run a controlled push to mars with matched revisions.",
+     "runKeys": [
+      "mac-mac/MM2a-large-solo/20261022T114745Z-MM2a-large-solo"
+     ]
+    },
+    {
+     "experiment": "CM-A2-10220216",
+     "recommendation": "No guidance; only one sample of the 8-worker arm.",
+     "settings": [],
+     "tradeoffs": "Unknown.",
+     "evidenceStrength": "Insufficient.",
+     "nextTest": "Re-run the full worker and atomic-write matrix.",
+     "runKeys": [
+      "mac-mac/CM-A2-10220216/20261022T071651Z-CM-A2-10220216"
+     ]
+    },
+    {
+     "experiment": "CM-B1-10211710",
+     "recommendation": "8 workers are a provisional candidate for very large no-op pulls. 4 workers suffice on smaller trees.",
+     "settings": [
+      "-j4",
+      "-j8"
+     ],
+     "tradeoffs": "8 workers raised CPU to 80 s against 30 s for rsync.",
+     "evidenceStrength": "Weak: run failed, 6 invalid samples, older builds.",
+     "nextTest": "Repeat with current builds.",
+     "runKeys": [
+      "mac-mac/CM-B1-10211710/20261021T221144Z-CM-B1-10211710"
+     ]
+    }
+   ],
+   "charts": [
+    {
+     "id": "2-2-medianPairedSpeedVsControl",
+     "title": "Speed vs rsync: large-solo (apollo \u2192 mac)",
+     "runKey": "mac-apollo/MM2a-large-solo-apollo/20261022T162408Z-MM2a-large-solo-apollo",
+     "metric": "medianPairedSpeedVsControl",
+     "unit": "\u00d7 rsync",
+     "primary": "durable_s",
+     "factors": {
+      "id": "large-solo.update-1pct.apollo-mac.receiver.warm",
+      "corpus": "large-solo",
+      "scenario": "update-1pct",
+      "sender": "apollo",
+      "receiver": "mac",
+      "client": "receiver",
+      "link": "mac-apollo-10g",
+      "cache": "warm",
+      "files": 1,
+      "bytes": 4294967296
+     },
+     "values": [
+      {
+       "arm": "rsync",
+       "value": 1,
+       "samples": 20,
+       "blocks": 20
+      },
+      {
+       "arm": "xs-rs",
+       "value": 0.8000972973358055,
+       "samples": 20,
+       "blocks": 20
+      },
+      {
+       "arm": "xs-cpp",
+       "value": 0.4328791782123381,
+       "samples": 20,
+       "blocks": 20
+      }
+     ],
+     "note": "Window-only medians; no confidence intervals. Compare arms within this cell. "
+    },
+    {
+     "id": "6-3-medianSeconds",
+     "title": "Transfer duration: large-solo (mac \u2192 mars)",
+     "runKey": "mac-mac/MM2a-large-solo/20261022T114745Z-MM2a-large-solo",
+     "metric": "medianSeconds",
+     "unit": "s",
+     "primary": "durable_s",
+     "factors": {
+      "id": "large-solo.fresh.mac-mars.sender.warm",
+      "corpus": "large-solo",
+      "scenario": "fresh",
+      "sender": "mac",
+      "receiver": "mars",
+      "client": "sender",
+      "link": "mac-mars-usb10g",
+      "cache": "warm",
+      "files": 1,
+      "bytes": 4294967296
+     },
+     "values": [
+      {
+       "arm": "xs-rs",
+       "value": 8.2168,
+       "samples": 20,
+       "blocks": 20
+      },
+      {
+       "arm": "rsync",
+       "value": 11.4656,
+       "samples": 20,
+       "blocks": 20
+      },
+      {
+       "arm": "xs-cpp",
+       "value": 5.44455,
+       "samples": 20,
+       "blocks": 20
+      }
+     ],
+     "note": "Window-only medians; no confidence intervals. Compare arms within this cell. "
+    },
+    {
+     "id": "5-3-medianPairedSpeedVsControl",
+     "title": "Speed vs rsync: local-laikav2 (mac \u2192 mars)",
+     "runKey": "mac-mac/MM2b-local-laikav2/20261022T114746Z-MM2b-local-laikav2",
+     "metric": "medianPairedSpeedVsControl",
+     "unit": "\u00d7 rsync",
+     "primary": "durable_s",
+     "factors": {
+      "id": "local-laikav2.update-10pct.mac-mars.sender.warm",
+      "corpus": "local-laikav2",
+      "scenario": "update-10pct",
+      "sender": "mac",
+      "receiver": "mars",
+      "client": "sender",
+      "link": "mac-mars-usb10g",
+      "cache": "warm",
+      "files": 13246,
+      "bytes": 7253587511
+     },
+     "values": [
+      {
+       "arm": "rsync",
+       "value": 1,
+       "samples": 20,
+       "blocks": 20
+      },
+      {
+       "arm": "xs-cpp",
+       "value": 1.2165894644969621,
+       "samples": 20,
+       "blocks": 20
+      },
+      {
+       "arm": "xs-rs",
+       "value": 0.8560253326714073,
+       "samples": 20,
+       "blocks": 20
+      }
+     ],
+     "note": "Window-only medians; no confidence intervals. Compare arms within this cell. "
+    },
+    {
+     "id": "0-2-medianSeconds",
+     "title": "Transfer duration: real-csearchv3 (apollo \u2192 mac)",
+     "runKey": "mac-apollo/MM2c-real-csearchv3-apollo/20261022T162409Z-MM2c-real-csearchv3-apollo",
+     "metric": "medianSeconds",
+     "unit": "s",
+     "primary": "durable_s",
+     "factors": {
+      "id": "real-csearchv3.noop.apollo-mac.receiver.warm",
+      "corpus": "real-csearchv3",
+      "scenario": "noop",
+      "sender": "apollo",
+      "receiver": "mac",
+      "client": "receiver",
+      "link": "mac-apollo-10g",
+      "cache": "warm",
+      "files": 1345908,
+      "bytes": 11318824647
+     },
+     "values": [
+      {
+       "arm": "xs-cpp",
+       "value": 22.7931,
+       "samples": 4,
+       "blocks": 4
+      },
+      {
+       "arm": "xs-rs",
+       "value": 17.8384,
+       "samples": 4,
+       "blocks": 4
+      },
+      {
+       "arm": "rsync",
+       "value": 41.2097,
+       "samples": 4,
+       "blocks": 4
+      }
+     ],
+     "note": "Window-only medians; no confidence intervals. Compare arms within this cell. "
+    },
+    {
+     "id": "0-0-medianPairedSpeedVsControl",
+     "title": "Speed vs rsync: real-csearchv3 (apollo \u2192 mac)",
+     "runKey": "mac-apollo/MM2c-real-csearchv3-apollo/20261022T162409Z-MM2c-real-csearchv3-apollo",
+     "metric": "medianPairedSpeedVsControl",
+     "unit": "\u00d7 rsync",
+     "primary": "durable_s",
+     "factors": {
+      "id": "real-csearchv3.fresh.apollo-mac.receiver.warm",
+      "corpus": "real-csearchv3",
+      "scenario": "fresh",
+      "sender": "apollo",
+      "receiver": "mac",
+      "client": "receiver",
+      "link": "mac-apollo-10g",
+      "cache": "warm",
+      "files": 1345908,
+      "bytes": 11318824647
+     },
+     "values": [
+      {
+       "arm": "xs-cpp",
+       "value": 3.5336560845387797,
+       "samples": 4,
+       "blocks": 3
+      },
+      {
+       "arm": "rsync",
+       "value": 1,
+       "samples": 3,
+       "blocks": 3
+      },
+      {
+       "arm": "xs-rs",
+       "value": 3.4623977191769337,
+       "samples": 3,
+       "blocks": 3
+      }
+     ],
+     "note": "Window-only medians; no confidence intervals. Compare arms within this cell. "
+    },
+    {
+     "id": "8-0-medianSeconds",
+     "title": "Transfer duration: real-psample (mars \u2192 mac)",
+     "runKey": "mac-mac/CM-B1-10211710/20261021T221144Z-CM-B1-10211710",
+     "metric": "medianSeconds",
+     "unit": "s",
+     "primary": "durable_s",
+     "factors": {
+      "id": "real-psample.noop.mars-mac.receiver.warm",
+      "corpus": "real-psample",
+      "scenario": "noop",
+      "sender": "mars",
+      "receiver": "mac",
+      "client": "receiver",
+      "link": "mac-mars-usb10g",
+      "cache": "warm",
+      "files": 711103,
+      "bytes": 21045458323
+     },
+     "values": [
+      {
+       "arm": "xs-rs-j8",
+       "value": 14.2604,
+       "samples": 9,
+       "blocks": 9
+      },
+      {
+       "arm": "xs-cpp-j4",
+       "value": 104.0227,
+       "samples": 9,
+       "blocks": 9
+      },
+      {
+       "arm": "xs-rs-j4",
+       "value": 36.8544,
+       "samples": 8,
+       "blocks": 8
+      },
+      {
+       "arm": "rsync",
+       "value": 67.46045000000001,
+       "samples": 8,
+       "blocks": 8
+      },
+      {
+       "arm": "xs-rs-j1",
+       "value": 37.2856,
+       "samples": 8,
+       "blocks": 8
+      }
+     ],
+     "note": "Window-only medians; no confidence intervals. Compare arms within this cell. "
+    }
+   ]
+  },
+  {
    "id": "2026-10-20T09:00:00.000Z",
    "start": 1792400400,
    "end": 1792486800,
@@ -36527,6 +39741,6 @@
    ]
   }
  ],
- "error": "Analysis skipped by the budget: analysis already made 3 call(s) in 24 hours",
- "lastAttempt": 1792665908.039
+ "error": null,
+ "lastAttempt": 1792746751.716
 }

@@ -1,0 +1,33 @@
+# Apollo copy (2026-10-22): RW6-hardlinks-p0 with Linux at the far end. mars's hardware now dual-boots, and as apollo
+# (Arch Linux, ext4 on NVMe, its X540 on the cable) it takes the plan mars was running, from the Mac over the
+# same direct cable; read against the -p0 runs for macOS against Linux on one machine.
+# RW6-hardlinks (mac-mac, 2026-10-22): the user's 24-hour plan, phase 2, a screening hunt for cells where rsync beats either
+# Re-queued 2026-10-22 with xs-c++ at cc8288d4f08c (the P0 merge), as RW6-hardlinks-p0; the original's runs stay apart.
+# xs by 5% or more, for the next development case. 3 blocks a cell; every sample records client and peer CPU.
+# Hard links kept with -H, on laikav2 (1,234 linked files in its Rust target folder). xs-rs has no -H, so it sits out.
+id = "RW6-hardlinks-apollo"
+kind = "screening"
+hypothesis = "rsync is at least 5% faster to durable than xs-c++ or xs-rs in some cell. Hard links kept with -H, on laikav2 (1,234 linked files in its Rust target folder). xs-rs has no -H, so it sits out."
+primary = "durable_s"
+delta = 0.05
+blocks = 3
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+max_hours = 1       # its share of phase 2: 11 hours across RW1-6; blocks go round the cells, so a run cut short stays balanced
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-aH"]
+[arms.xs-cpp]
+tool = "xs"
+rev = "cc8288d4f08c"    # main after the P0 merge of 2026-10-22 (replaces e104bde5: the automatic-compression push is not in this build)
+flags = ["-aH", "-j4"]
+
+[matrix]
+link = "mac-apollo-10g"
+corpus = ["local-laikav2"]
+scenario = ["fresh", "noop"]
+direction = ["mac>apollo", "apollo>mac"]
+client = ["initiator"]
+cache = ["warm"]

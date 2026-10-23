@@ -1,0 +1,223 @@
+{
+ "schema": 1,
+ "run_id": "20261023T040632Z-RW5-delete-apollo",
+ "started_utc": "2026-10-23T10:31:24.133+00:00",
+ "driver": "[host]",
+ "plan": {
+  "schema": 1,
+  "experiment": "RW5-delete-apollo",
+  "spec_sha256": "cf20615a0cf68258a1ada6023b2d5e4a198260c66db342ef9ac117e92a951e5d",
+  "kind": "screening",
+  "bundle": "e7e150691944",
+  "writes": {
+   "mac": 0,
+   "apollo": 16228657564
+  },
+  "hypothesis": "rsync is at least 5% faster to durable than xs-c++ or xs-rs in some cell. A backup whose source lost 10% of its files: --delete must remove them. xs-rs has no --delete, so it sits out.",
+  "primary": "durable_s",
+  "delta": 0.05,
+  "control": "rsync",
+  "seed": 1,
+  "run_id": "20261023T040632Z-RW5-delete-apollo",
+  "driver": "mac",
+  "sample_timeout_s": 3600,
+  "results": "mac-apollo",
+  "background": true,
+  "local_link": false,
+  "eager_cleanup": true,
+  "hours": null,
+  "max_hours": 0.5,
+  "hosts": {
+   "mac": {
+    "ssh": "[host]",
+    "name": "[host]",
+    "hostname": "[host]",
+    "root": "~/benchmarks/xsbench.noindex",
+    "interface": "en4",
+    "helper": false,
+    "gates": {},
+    "local": true,
+    "system": "Darwin"
+   },
+   "apollo": {
+    "ssh": "[host]",
+    "name": "[host]",
+    "hostname": "apollo",
+    "root": "~/xsbench",
+    "interface": "enp25s0f0",
+    "helper": true,
+    "gates": {},
+    "local": false,
+    "system": "Linux"
+   }
+  },
+  "links": {
+   "mac-apollo-10g": {
+    "hosts": [
+     "mac",
+     "apollo"
+    ],
+    "medium": "wired",
+    "min_speed_mbps": 10000,
+    "max_rtt_ms": 2.0,
+    "initiator": "mac",
+    "driver": "mac",
+    "results": "mac-apollo",
+    "background": true,
+    "address": {
+     "mac": "[address]",
+     "apollo": "[host]"
+    }
+   }
+  },
+  "arms": [
+   {
+    "name": "rsync",
+    "tool": "rsync",
+    "flags": [
+     "-a",
+     "--delete"
+    ],
+    "binary": {
+     "mac": "/opt/homebrew/bin/rsync",
+     "apollo": "rsync"
+    }
+   },
+   {
+    "name": "xs-cpp",
+    "tool": "xs",
+    "flags": [
+     "-a",
+     "--delete",
+     "-j4"
+    ],
+    "rev": "cc8288d4f08c",
+    "binary": {
+     "mac": "~/benchmarks/xsbench.noindex/bin/xs-cc8288d4f08c",
+     "apollo": "~/xsbench/bin/xs-cc8288d4f08c"
+    },
+    "sha256": {
+     "mac": "df9b6db403c2fca77fe5a16217e6ac4e810cd142cc376e8dfa54563a48b08448",
+     "apollo": "4b113206d5acabdfb434c485979c2798e9bee7d2faecc142aa206fb3286e26d5"
+    },
+    "artifacts": {
+     "xs-darwin-arm64": "df9b6db403c2fca77fe5a16217e6ac4e810cd142cc376e8dfa54563a48b08448",
+     "xs-linux-amd64": "4b113206d5acabdfb434c485979c2798e9bee7d2faecc142aa206fb3286e26d5",
+     "xs-linux-arm64": "17b9544f92ec49b3d312b428c90d2b1e7aa2ecd513253490bc927af9d4e0b5d6",
+     "xs-darwin-amd64": "67498c3d86c0a00850a320af4e5b07637275c40109e90b3dd5d377874acca0ab"
+    }
+   }
+  ],
+  "cells": [
+   {
+    "id": "real-congress.delete-10pct.mac-apollo.sender.warm",
+    "corpus": "real-congress",
+    "scenario": "delete-10pct",
+    "sender": "mac",
+    "receiver": "apollo",
+    "client": "sender",
+    "link": "mac-apollo-10g",
+    "cache": "warm"
+   }
+  ],
+  "corpora": {
+   "real-congress": {
+    "files": 216518,
+    "directories": 52593,
+    "bytes": 1159189826,
+    "digest": "29d93dcc4c117de24dc4f6e1b8d26f0e7bbc9c26cfb4aa03d2d52de078b6a102",
+    "quick_digest": "0f493d25789a420e24c282fb3a4ba40bc690b1a3e65184088bf66e7fa0868a6b"
+   }
+  },
+  "blocks": [
+   {
+    "cell": "real-congress.delete-10pct.mac-apollo.sender.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "rsync",
+      "xs-cpp"
+     ],
+     [
+      "rsync",
+      "xs-cpp"
+     ],
+     [
+      "xs-cpp",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "real-congress.delete-10pct.mac-apollo.sender.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs-cpp"
+     ],
+     [
+      "rsync",
+      "xs-cpp"
+     ],
+     [
+      "xs-cpp",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "real-congress.delete-10pct.mac-apollo.sender.warm",
+    "block": 2,
+    "verify_full": true,
+    "orders": [
+     [
+      "rsync",
+      "xs-cpp"
+     ],
+     [
+      "rsync",
+      "xs-cpp"
+     ],
+     [
+      "xs-cpp",
+      "rsync"
+     ]
+    ]
+   }
+  ],
+  "scripts": {
+   "probe.py": "31498266d245cc6e8c7a1cd788652da3015bc80d5f454841d90254a74e85cf94",
+   "corpus.py": "e4e0f359ede75a528614cabdcd24ddf35f375a6dc7c0656825b9b80a9bcc851f",
+   "corpora.json": "a4d6a62cf837e6c210d982db0054caae22d7a524839136707f5ce5d47007aed3",
+   "agent.py": "ef95abb4c21eecfa4368d44f3f19932613164881795eac0aff9019d468f00ab3",
+   "runner.py": "cce71fee149764ad1a5c913061f19620a8ff44f792d23d55f7a290d59a9e20ff",
+   "xspipe.py": "94b3fccfc6e994d227077c453f90323ab55337fd8a98231d16a10696e8ebab6b",
+   "measure.py": "5065310f480ff1cabfa7c645f0db342624a02f9a081b96069d50d52b3d224777"
+  },
+  "observed": {
+   "mac": {
+    "rsync": {
+     "path": "/opt/homebrew/bin/rsync",
+     "sha256": "bbd302280bacdd83a6a716ab0556e1c13875a9f222b62924293ecb2d09bbb56f",
+     "version": "rsync  version 3.5.1  protocol version 33"
+    },
+    "hostname": "[host]"
+   },
+   "apollo": {
+    "rsync": {
+     "path": "/usr/bin/rsync",
+     "sha256": "7caa17cb97841ade1f916e921713f13f82081bf0f605e811f09dff89a3f26dd3",
+     "version": "rsync  version 3.5.1-g04355d27  protocol version 33"
+    },
+    "hostname": "apollo",
+    "trim": null
+   },
+   "addresses": {
+    "mac>apollo": "[host]"
+   }
+  }
+ }
+}

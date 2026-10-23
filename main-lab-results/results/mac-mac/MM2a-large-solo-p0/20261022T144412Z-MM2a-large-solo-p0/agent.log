@@ -1,0 +1,22 @@
+Traceback (most recent call last):
+  File "~/benchmarks/xsbench.noindex/lib/e7e150691944/agent.py", line 780, in <module>
+    sys.exit(Run(sys.argv[1]).execute(limit))
+             ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "~/benchmarks/xsbench.noindex/lib/e7e150691944/agent.py", line 763, in execute
+    valid += self.block(entry)
+             ~~~~~~~~~~^^^^^^^
+  File "~/benchmarks/xsbench.noindex/lib/e7e150691944/agent.py", line 720, in block
+    summary['link'] = self.link_probe(cell)
+                      ~~~~~~~~~~~~~~~^^^^^^
+  File "~/benchmarks/xsbench.noindex/lib/e7e150691944/agent.py", line 700, in link_probe
+    report = sender.probe('route', '--peer', self.link_address(receiver.name) or self.plan['hosts'][receiver.name]['name'],
+                          '--pings', '10')
+  File "~/benchmarks/xsbench.noindex/lib/e7e150691944/agent.py", line 76, in probe
+    return json.loads(self.run('python3', self.bin('probe.py'), *arguments, timeout=120).stdout)
+                      ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "~/benchmarks/xsbench.noindex/lib/e7e150691944/agent.py", line 69, in run
+    return self.shell(shlex.join(map(str, argv)), **options)
+           ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "~/benchmarks/xsbench.noindex/lib/e7e150691944/agent.py", line 65, in shell
+    raise RuntimeError(f'{self.name}: `{script[:200]}` exited {done.returncode}: {done.stderr.strip()[-400:]}')
+RuntimeError: mars: `python3 /Volumes/xsbench/lab/lib/e7e150691944/probe.py route --peer [address] --pings 10` exited 255: ssh: connect to host [host] port 22: Operation timed out

@@ -1,0 +1,396 @@
+{
+ "schema": 1,
+ "experiment": "RW6-hardlinks",
+ "spec_sha256": "90133601bdddfd3037708c8dbd47ca4e6767e2d0a0c14b06571b5fc0196e6836",
+ "kind": "screening",
+ "bundle": "e7e150691944",
+ "writes": {
+  "mac": 58028700088,
+  "mars": 58028700088
+ },
+ "hypothesis": "rsync is at least 5% faster to durable than xs-c++ or xs-rs in some cell. Hard links kept with -H, on laikav2 (1,234 linked files in its Rust target folder). xs-rs has no -H, so it sits out.",
+ "primary": "durable_s",
+ "delta": 0.05,
+ "control": "rsync",
+ "seed": 1,
+ "run_id": "20261022T115031Z-RW6-hardlinks",
+ "driver": "mac",
+ "sample_timeout_s": 3600,
+ "results": "mac-mac",
+ "background": true,
+ "local_link": false,
+ "eager_cleanup": true,
+ "hours": null,
+ "max_hours": 1.0,
+ "hosts": {
+  "mac": {
+   "ssh": "[host]",
+   "name": "[host]",
+   "hostname": "[host]",
+   "root": "~/benchmarks/xsbench.noindex",
+   "interface": "bridge100",
+   "helper": false,
+   "gates": {},
+   "local": true,
+   "system": "Darwin"
+  },
+  "mars": {
+   "ssh": "[host]",
+   "name": "[host]",
+   "hostname": "[host]",
+   "root": "/Volumes/xsbench/lab",
+   "interface": "en0",
+   "helper": false,
+   "gates": {},
+   "local": false,
+   "system": "Darwin"
+  }
+ },
+ "links": {
+  "mac-mars-usb10g": {
+   "hosts": [
+    "mac",
+    "mars"
+   ],
+   "medium": "wired",
+   "min_speed_mbps": 10000,
+   "min_speed_mbps_by_host": {
+    "mars": 2500
+   },
+   "max_rtt_ms": 2.0,
+   "initiator": "mac",
+   "driver": "mac",
+   "results": "mac-mac",
+   "background": true,
+   "address": {
+    "mac": "[address]",
+    "mars": "[host]"
+   }
+  }
+ },
+ "arms": [
+  {
+   "name": "rsync",
+   "tool": "rsync",
+   "flags": [
+    "-aH"
+   ],
+   "binary": {
+    "mac": "/opt/homebrew/bin/rsync",
+    "mars": "/opt/local/bin/rsync"
+   }
+  },
+  {
+   "name": "xs-cpp",
+   "tool": "xs",
+   "flags": [
+    "-aH",
+    "-j4"
+   ],
+   "rev": "1594f4c4d0bf",
+   "binary": {
+    "mac": "~/benchmarks/xsbench.noindex/bin/xs-1594f4c4d0bf",
+    "mars": "/Volumes/xsbench/lab/bin/xs-1594f4c4d0bf"
+   },
+   "sha256": {
+    "mac": "185ef976efd02c6602824b4f2506d5e1e9e032de8d7f043590235716dedd8b40",
+    "mars": "afc8bd5dc5bc8b8b693a5dd846223828c1aa3496c187c5897de85a07fa203ce9"
+   },
+   "artifacts": {
+    "xs-darwin-arm64": "185ef976efd02c6602824b4f2506d5e1e9e032de8d7f043590235716dedd8b40",
+    "xs-linux-arm64": "ed33d690bf4acff665155af9e7cb17d83d25334117f119bf35169491b78bafe9",
+    "xs-darwin-amd64": "afc8bd5dc5bc8b8b693a5dd846223828c1aa3496c187c5897de85a07fa203ce9"
+   }
+  }
+ ],
+ "cells": [
+  {
+   "id": "local-laikav2.fresh.mac-mars.sender.warm",
+   "corpus": "local-laikav2",
+   "scenario": "fresh",
+   "sender": "mac",
+   "receiver": "mars",
+   "client": "sender",
+   "link": "mac-mars-usb10g",
+   "cache": "warm"
+  },
+  {
+   "id": "local-laikav2.fresh.mars-mac.receiver.warm",
+   "corpus": "local-laikav2",
+   "scenario": "fresh",
+   "sender": "mars",
+   "receiver": "mac",
+   "client": "receiver",
+   "link": "mac-mars-usb10g",
+   "cache": "warm"
+  },
+  {
+   "id": "local-laikav2.noop.mac-mars.sender.warm",
+   "corpus": "local-laikav2",
+   "scenario": "noop",
+   "sender": "mac",
+   "receiver": "mars",
+   "client": "sender",
+   "link": "mac-mars-usb10g",
+   "cache": "warm"
+  },
+  {
+   "id": "local-laikav2.noop.mars-mac.receiver.warm",
+   "corpus": "local-laikav2",
+   "scenario": "noop",
+   "sender": "mars",
+   "receiver": "mac",
+   "client": "receiver",
+   "link": "mac-mars-usb10g",
+   "cache": "warm"
+  }
+ ],
+ "corpora": {
+  "local-laikav2": {
+   "files": 13246,
+   "directories": 1902,
+   "bytes": 7253587511,
+   "digest": "8635d252a13fde7cb60850c36e84985244a62210afe21f182ded657078099ada",
+   "quick_digest": "edb63aba72808721ee14a0708ec5c9b6db184b9cc91720c5d9fb0191da4990e5"
+  }
+ },
+ "blocks": [
+  {
+   "cell": "local-laikav2.fresh.mars-mac.receiver.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs-cpp",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs-cpp"
+    ],
+    [
+     "rsync",
+     "xs-cpp"
+    ]
+   ]
+  },
+  {
+   "cell": "local-laikav2.noop.mars-mac.receiver.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "rsync",
+     "xs-cpp"
+    ],
+    [
+     "xs-cpp",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs-cpp"
+    ]
+   ]
+  },
+  {
+   "cell": "local-laikav2.fresh.mac-mars.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs-cpp",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs-cpp"
+    ],
+    [
+     "xs-cpp",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "local-laikav2.noop.mac-mars.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "rsync",
+     "xs-cpp"
+    ],
+    [
+     "rsync",
+     "xs-cpp"
+    ],
+    [
+     "xs-cpp",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "local-laikav2.noop.mac-mars.sender.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync",
+     "xs-cpp"
+    ],
+    [
+     "rsync",
+     "xs-cpp"
+    ],
+    [
+     "xs-cpp",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "local-laikav2.noop.mars-mac.receiver.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-cpp",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs-cpp"
+    ],
+    [
+     "rsync",
+     "xs-cpp"
+    ]
+   ]
+  },
+  {
+   "cell": "local-laikav2.fresh.mac-mars.sender.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-cpp",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs-cpp"
+    ],
+    [
+     "rsync",
+     "xs-cpp"
+    ]
+   ]
+  },
+  {
+   "cell": "local-laikav2.fresh.mars-mac.receiver.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync",
+     "xs-cpp"
+    ],
+    [
+     "rsync",
+     "xs-cpp"
+    ],
+    [
+     "xs-cpp",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "local-laikav2.fresh.mars-mac.receiver.warm",
+   "block": 2,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs-cpp",
+     "rsync"
+    ],
+    [
+     "xs-cpp",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs-cpp"
+    ]
+   ]
+  },
+  {
+   "cell": "local-laikav2.noop.mac-mars.sender.warm",
+   "block": 2,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs-cpp",
+     "rsync"
+    ],
+    [
+     "rsync",
+     "xs-cpp"
+    ],
+    [
+     "xs-cpp",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "local-laikav2.noop.mars-mac.receiver.warm",
+   "block": 2,
+   "verify_full": true,
+   "orders": [
+    [
+     "rsync",
+     "xs-cpp"
+    ],
+    [
+     "xs-cpp",
+     "rsync"
+    ],
+    [
+     "xs-cpp",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "local-laikav2.fresh.mac-mars.sender.warm",
+   "block": 2,
+   "verify_full": true,
+   "orders": [
+    [
+     "rsync",
+     "xs-cpp"
+    ],
+    [
+     "xs-cpp",
+     "rsync"
+    ],
+    [
+     "xs-cpp",
+     "rsync"
+    ]
+   ]
+  }
+ ],
+ "scripts": {
+  "probe.py": "31498266d245cc6e8c7a1cd788652da3015bc80d5f454841d90254a74e85cf94",
+  "corpus.py": "e4e0f359ede75a528614cabdcd24ddf35f375a6dc7c0656825b9b80a9bcc851f",
+  "corpora.json": "a4d6a62cf837e6c210d982db0054caae22d7a524839136707f5ce5d47007aed3",
+  "agent.py": "ef95abb4c21eecfa4368d44f3f19932613164881795eac0aff9019d468f00ab3",
+  "runner.py": "cce71fee149764ad1a5c913061f19620a8ff44f792d23d55f7a290d59a9e20ff",
+  "xspipe.py": "94b3fccfc6e994d227077c453f90323ab55337fd8a98231d16a10696e8ebab6b",
+  "measure.py": "5065310f480ff1cabfa7c645f0db342624a02f9a081b96069d50d52b3d224777"
+ }
+}

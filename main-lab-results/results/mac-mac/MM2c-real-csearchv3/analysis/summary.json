@@ -1,0 +1,21 @@
+{
+ "experiment": "MM2c-real-csearchv3",
+ "kind": "screening",
+ "hypothesis": "On the user's csearchv3 tree (14 GB, 1,345,908 files, 472,330 directories), rsync -a, xs-c++ -a -j4 and xs-rs -a -j4 differ by more than 5% in time to durable in some cell.",
+ "primary": "durable_s",
+ "control": "rsync",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261022T114747Z-MM2c-real-csearchv3"
+ ],
+ "spec_sha256": [
+  "df1cda8d651ca2e4fa3246124de49513b8ff59318d6b40ddac772c5b5bcf8826"
+ ],
+ "valid_blocks": 1,
+ "void_attempts": 1,
+ "void_reasons": [
+  "stopped"
+ ]
+}

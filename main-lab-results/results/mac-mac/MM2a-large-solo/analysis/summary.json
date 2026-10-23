@@ -1,0 +1,19 @@
+{
+ "experiment": "MM2a-large-solo",
+ "kind": "screening",
+ "hypothesis": "On one 4 GiB file, half compressible within the file, rsync -a, xs-c++ -a -j4 and xs-rs -a -j4 differ by more than 5% in time to durable, fresh or after a 4 KiB edit in its middle (update-1pct of one file is that one edit).",
+ "primary": "durable_s",
+ "control": "rsync",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261022T114745Z-MM2a-large-solo"
+ ],
+ "spec_sha256": [
+  "4c31ab5060d6f1cc67b888fdc83c8b64da5eef7eb281a43bbc671031d247ac28"
+ ],
+ "valid_blocks": 80,
+ "void_attempts": 0,
+ "void_reasons": []
+}

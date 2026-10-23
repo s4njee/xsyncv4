@@ -1,0 +1,5 @@
+experiment,kind,cell_id,corpus,scenario,sender,receiver,client,link,cache,arm,n_blocks,sigma_d,blocks_for_2pct,blocks_for_3pct,blocks_for_5pct,blocks_for_10pct,blocks_equivalent_2pct,blocks_equivalent_3pct,blocks_equivalent_5pct,blocks_equivalent_10pct
+RW6-hardlinks-apollo,screening,local-laikav2.fresh.apollo-mac.receiver.warm,local-laikav2,fresh,apollo,mac,receiver,mac-apollo-10g,warm,xs-cpp,3,0.021197390252616764,11,8,8,8,15,8,8,8
+RW6-hardlinks-apollo,screening,local-laikav2.fresh.mac-apollo.sender.warm,local-laikav2,fresh,mac,apollo,sender,mac-apollo-10g,warm,xs-cpp,3,0.6695127687994614,8964,4025,1479,389,12013,5393,1981,521
+RW6-hardlinks-apollo,screening,local-laikav2.noop.apollo-mac.receiver.warm,local-laikav2,noop,apollo,mac,receiver,mac-apollo-10g,warm,xs-cpp,3,0.01336640765326575,8,8,8,8,8,8,8,8
+RW6-hardlinks-apollo,screening,local-laikav2.noop.mac-apollo.sender.warm,local-laikav2,noop,mac,apollo,sender,mac-apollo-10g,warm,xs-cpp,3,0.34041823581267583,2319,1042,384,103,3108,1396,514,137

@@ -1,0 +1,23 @@
+{
+ "experiment": "RW3-noop-many-apollo",
+ "kind": "screening",
+ "hypothesis": "rsync is at least 5% faster to durable than xs-c++ or xs-rs in some cell. No-ops of many files, where NT1021 saw rsync pull real-psample in 75.7 s against xs-cpp 151.6 s; -j1 arms for a per-core comparison.",
+ "primary": "durable_s",
+ "control": "rsync",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261022T162410Z-RW3-noop-many-apollo",
+  "20261023T040631Z-RW3-noop-many-apollo"
+ ],
+ "spec_sha256": [
+  "55c90e51ce2994820f314b92eb85e754cb360514a2512dae7ba7596eabedb50d",
+  "5edd0b7a6b9081af2bf736f4265c344d895678901ec4eb7c695a4fbba48e899a"
+ ],
+ "valid_blocks": 9,
+ "void_attempts": 18,
+ "void_reasons": [
+  "mac reaches apollo by en4, not bridge100"
+ ]
+}

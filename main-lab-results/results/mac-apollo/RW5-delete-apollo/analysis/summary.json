@@ -1,0 +1,23 @@
+{
+ "experiment": "RW5-delete-apollo",
+ "kind": "screening",
+ "hypothesis": "rsync is at least 5% faster to durable than xs-c++ or xs-rs in some cell. A backup whose source lost 10% of its files: --delete must remove them. xs-rs has no --delete, so it sits out.",
+ "primary": "durable_s",
+ "control": "rsync",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261022T162412Z-RW5-delete-apollo",
+  "20261023T040632Z-RW5-delete-apollo"
+ ],
+ "spec_sha256": [
+  "97107fa45416069d8a15e98de21c0d568d6b2dc24cfaffbb86c0df2a369a6532",
+  "cf20615a0cf68258a1ada6023b2d5e4a198260c66db342ef9ac117e92a951e5d"
+ ],
+ "valid_blocks": 6,
+ "void_attempts": 9,
+ "void_reasons": [
+  "mac reaches apollo by en4, not bridge100"
+ ]
+}

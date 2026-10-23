@@ -1,0 +1,42 @@
+[
+ {
+  "experiment": "MM2c-real-csearchv3",
+  "kind": "screening",
+  "cell_id": "real-csearchv3.fresh.mac-mars.sender.warm",
+  "corpus": "real-csearchv3",
+  "scenario": "fresh",
+  "sender": "mac",
+  "receiver": "mars",
+  "client": "sender",
+  "link": "mac-mars-usb10g",
+  "cache": "warm",
+  "arm": "xs-cpp",
+  "run_id": "20261022T114747Z-MM2c-real-csearchv3",
+  "block": 0,
+  "metric": "durable_s",
+  "t_arm": 93.29124107997268,
+  "t_control": 322.9217744560028,
+  "log_ratio": -1.2416838851981424,
+  "ratio": 0.2888973381777431
+ },
+ {
+  "experiment": "MM2c-real-csearchv3",
+  "kind": "screening",
+  "cell_id": "real-csearchv3.fresh.mac-mars.sender.warm",
+  "corpus": "real-csearchv3",
+  "scenario": "fresh",
+  "sender": "mac",
+  "receiver": "mars",
+  "client": "sender",
+  "link": "mac-mars-usb10g",
+  "cache": "warm",
+  "arm": "xs-rs",
+  "run_id": "20261022T114747Z-MM2c-real-csearchv3",
+  "block": 0,
+  "metric": "durable_s",
+  "t_arm": 96.1086357009608,
+  "t_control": 322.9217744560028,
+  "log_ratio": -1.2119309359931218,
+  "ratio": 0.29762203512868207
+ }
+]

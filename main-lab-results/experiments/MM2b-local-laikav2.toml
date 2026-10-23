@@ -1,0 +1,37 @@
+# MM2b (mac-mac, 2026-10-22): phase 1, second. ~/projects/laikav2 pinned on 2026-10-22 as local-laikav2: the
+# project and its target folder, not the 45 GB real-laikav2 frozen on freya.
+id = "MM2b-local-laikav2"
+kind = "screening"
+hypothesis = "On the user's laikav2 project as it is on the Mac (6.5 GB, 13,246 files, mostly its Rust target folder, with hard links), rsync -a, xs-c++ -a -j4 and xs-rs -a -j4 differ by more than 5% in time to durable in some cell."
+primary = "durable_s"
+delta = 0.05
+blocks = 20
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+max_hours = 4       # its share of phase 1: 2.5 + 4 + 5.5 = 12 hours; blocks go round the cells, so a run cut short stays balanced
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+verify = "unlinked"   # 1,234 of its files are hard links, which -a without -H does not keep
+
+[arms.xs-cpp]
+tool = "xs"
+rev = "1594f4c4d0bf"    # experimental's tip, 2026-10-22: the receiver-lock fix (A1+A2) merged
+flags = ["-a", "-j4"]
+verify = "unlinked"
+
+[arms.xs-rs]
+tool = "xs"
+rev = "e671c84aa680-rs" # rust-ds's tip, 2026-10-22
+flags = ["-a", "-j4"]
+verify = "unlinked"
+
+[matrix]
+link = "mac-mars-usb10g"
+corpus = ["local-laikav2"]
+scenario = ["fresh", "noop", "update-10pct"]
+direction = ["mac>mars", "mars>mac"]
+client = ["initiator"]
+cache = ["warm"]

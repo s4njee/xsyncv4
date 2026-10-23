@@ -1,0 +1,13 @@
+experiment,kind,cell_id,corpus,scenario,sender,receiver,client,link,cache,arm,n_blocks,sigma_d,blocks_for_2pct,blocks_for_3pct,blocks_for_5pct,blocks_for_10pct,blocks_equivalent_2pct,blocks_equivalent_3pct,blocks_equivalent_5pct,blocks_equivalent_10pct
+MM2b-local-laikav2,screening,local-laikav2.fresh.mac-mars.sender.warm,local-laikav2,fresh,mac,mars,sender,mac-mars-usb10g,warm,xs-cpp,20,0.11904172751977378,286,130,49,15,382,173,65,19
+MM2b-local-laikav2,screening,local-laikav2.fresh.mac-mars.sender.warm,local-laikav2,fresh,mac,mars,sender,mac-mars-usb10g,warm,xs-rs,20,0.10666101596633665,230,105,40,12,307,139,53,16
+MM2b-local-laikav2,screening,local-laikav2.fresh.mars-mac.receiver.warm,local-laikav2,fresh,mars,mac,receiver,mac-mars-usb10g,warm,xs-cpp,20,0.11441546180046984,264,120,46,14,353,160,60,18
+MM2b-local-laikav2,screening,local-laikav2.fresh.mars-mac.receiver.warm,local-laikav2,fresh,mars,mac,receiver,mac-mars-usb10g,warm,xs-rs,20,0.10908147987212953,240,109,42,13,321,146,55,16
+MM2b-local-laikav2,screening,local-laikav2.noop.mac-mars.sender.warm,local-laikav2,noop,mac,mars,sender,mac-mars-usb10g,warm,xs-cpp,20,0.11132360432290057,250,114,43,13,335,152,57,17
+MM2b-local-laikav2,screening,local-laikav2.noop.mac-mars.sender.warm,local-laikav2,noop,mac,mars,sender,mac-mars-usb10g,warm,xs-rs,20,0.22647343714336216,1028,463,171,47,1377,619,229,62
+MM2b-local-laikav2,screening,local-laikav2.noop.mars-mac.receiver.warm,local-laikav2,noop,mars,mac,receiver,mac-mars-usb10g,warm,xs-cpp,20,0.16249985816868315,530,239,89,25,710,320,119,33
+MM2b-local-laikav2,screening,local-laikav2.noop.mars-mac.receiver.warm,local-laikav2,noop,mars,mac,receiver,mac-mars-usb10g,warm,xs-rs,20,0.180776496426975,656,296,110,31,878,396,147,40
+MM2b-local-laikav2,screening,local-laikav2.update-10pct.mac-mars.sender.warm,local-laikav2,update-10pct,mac,mars,sender,mac-mars-usb10g,warm,xs-cpp,20,0.13128253307881357,347,157,59,17,464,210,79,22
+MM2b-local-laikav2,screening,local-laikav2.update-10pct.mac-mars.sender.warm,local-laikav2,update-10pct,mac,mars,sender,mac-mars-usb10g,warm,xs-rs,20,0.09371870011975798,178,81,31,10,238,108,41,13
+MM2b-local-laikav2,screening,local-laikav2.update-10pct.mars-mac.receiver.warm,local-laikav2,update-10pct,mars,mac,receiver,mac-mars-usb10g,warm,xs-cpp,20,0.09417284920528081,180,82,32,10,240,109,42,13
+MM2b-local-laikav2,screening,local-laikav2.update-10pct.mars-mac.receiver.warm,local-laikav2,update-10pct,mars,mac,receiver,mac-mars-usb10g,warm,xs-rs,20,0.09427263830519828,180,82,32,10,241,109,42,13

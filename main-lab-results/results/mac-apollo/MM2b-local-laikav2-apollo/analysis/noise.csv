@@ -1,0 +1,13 @@
+experiment,kind,cell_id,corpus,scenario,sender,receiver,client,link,cache,arm,n_blocks,sigma_d,blocks_for_2pct,blocks_for_3pct,blocks_for_5pct,blocks_for_10pct,blocks_equivalent_2pct,blocks_equivalent_3pct,blocks_equivalent_5pct,blocks_equivalent_10pct
+MM2b-local-laikav2-apollo,screening,local-laikav2.fresh.apollo-mac.receiver.warm,local-laikav2,fresh,apollo,mac,receiver,mac-apollo-10g,warm,xs-cpp,19,0.059950585293183686,74,35,14,8,99,46,18,8
+MM2b-local-laikav2-apollo,screening,local-laikav2.fresh.apollo-mac.receiver.warm,local-laikav2,fresh,apollo,mac,receiver,mac-apollo-10g,warm,xs-rs,19,0.050630878579862294,54,26,11,8,71,33,14,8
+MM2b-local-laikav2-apollo,screening,local-laikav2.fresh.mac-apollo.sender.warm,local-laikav2,fresh,mac,apollo,sender,mac-apollo-10g,warm,xs-cpp,20,0.38418557740003634,2953,1327,489,130,3957,1778,654,173
+MM2b-local-laikav2-apollo,screening,local-laikav2.fresh.mac-apollo.sender.warm,local-laikav2,fresh,mac,apollo,sender,mac-apollo-10g,warm,xs-rs,20,0.35590884927399435,2535,1139,420,112,3397,1526,562,149
+MM2b-local-laikav2-apollo,screening,local-laikav2.noop.apollo-mac.receiver.warm,local-laikav2,noop,apollo,mac,receiver,mac-apollo-10g,warm,xs-cpp,18,0.10271576842630831,213,97,37,12,285,129,49,15
+MM2b-local-laikav2-apollo,screening,local-laikav2.noop.apollo-mac.receiver.warm,local-laikav2,noop,apollo,mac,receiver,mac-apollo-10g,warm,xs-rs,18,0.10382299015469072,218,99,38,12,291,132,50,15
+MM2b-local-laikav2-apollo,screening,local-laikav2.noop.mac-apollo.sender.warm,local-laikav2,noop,mac,apollo,sender,mac-apollo-10g,warm,xs-cpp,20,0.7267398804686237,10562,4742,1742,458,14155,6354,2334,613
+MM2b-local-laikav2-apollo,screening,local-laikav2.noop.mac-apollo.sender.warm,local-laikav2,noop,mac,apollo,sender,mac-apollo-10g,warm,xs-rs,20,0.4500219442612887,4051,1820,669,177,5429,2438,896,237
+MM2b-local-laikav2-apollo,screening,local-laikav2.update-10pct.apollo-mac.receiver.warm,local-laikav2,update-10pct,apollo,mac,receiver,mac-apollo-10g,warm,xs-cpp,17,0.12089811442024916,295,134,51,15,394,178,67,19
+MM2b-local-laikav2-apollo,screening,local-laikav2.update-10pct.apollo-mac.receiver.warm,local-laikav2,update-10pct,apollo,mac,receiver,mac-apollo-10g,warm,xs-rs,17,0.12262952912844895,303,137,52,15,405,183,69,20
+MM2b-local-laikav2-apollo,screening,local-laikav2.update-10pct.mac-apollo.sender.warm,local-laikav2,update-10pct,mac,apollo,sender,mac-apollo-10g,warm,xs-cpp,20,1.5257422246281145,46543,20891,7669,2012,62379,27998,10278,2695
+MM2b-local-laikav2-apollo,screening,local-laikav2.update-10pct.mac-apollo.sender.warm,local-laikav2,update-10pct,mac,apollo,sender,mac-apollo-10g,warm,xs-rs,20,1.4399354156423907,41456,18607,6831,1792,55560,24938,9155,2401

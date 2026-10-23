@@ -1,0 +1,23 @@
+{
+ "experiment": "RW4-fresh-sizes-apollo",
+ "kind": "screening",
+ "hypothesis": "rsync is at least 5% faster to durable than xs-c++ or xs-rs in some cell. Fresh copies of 1 MiB and 16 MiB files and of mixed-threshold, around xs's whole-file and split thresholds; -j1 arms as in RW3.",
+ "primary": "durable_s",
+ "control": "rsync",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261022T162411Z-RW4-fresh-sizes-apollo",
+  "20261023T040631Z-RW4-fresh-sizes-apollo"
+ ],
+ "spec_sha256": [
+  "068b5e93bd2628d172f0eade56124fe87108f53a6290b43f6aaaab3aa2475569",
+  "57895281c21d29390e721727b9c29c7d9b0f04ea20f10e2dfb4834a92cab1cc0"
+ ],
+ "valid_blocks": 18,
+ "void_attempts": 27,
+ "void_reasons": [
+  "mac reaches apollo by en4, not bridge100"
+ ]
+}

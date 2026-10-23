@@ -1,0 +1,48 @@
+{
+ "experiment": "MM2b-local-laikav2-apollo",
+ "kind": "screening",
+ "hypothesis": "On the user's laikav2 project as it is on the Mac (6.5 GB, 13,246 files, mostly its Rust target folder, with hard links), rsync -a, xs-c++ -a -j4 and xs-rs -a -j4 differ by more than 5% in time to durable in some cell.",
+ "primary": "durable_s",
+ "control": "rsync",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261022T162409Z-MM2b-local-laikav2-apollo",
+  "20261023T040629Z-MM2b-local-laikav2-apollo"
+ ],
+ "spec_sha256": [
+  "bc08a7ec8e6e6d9ec59ca6e18cdd6432c953b2c18218bbac3c77e311a7ea892b",
+  "ffdb90cf364b4e227948cb4e88d94ebd76fcd987a3aaf7c15b0a348e6972e4db"
+ ],
+ "valid_blocks": 114,
+ "void_attempts": 205,
+ "void_reasons": [
+  "mac reaches apollo by en4, not bridge100",
+  "rsync: did not settle: apollo has 1056 MiB dirty",
+  "rsync: did not settle: apollo has 1067 MiB dirty",
+  "rsync: did not settle: apollo has 1559 MiB dirty",
+  "rsync: did not settle: apollo has 184 MiB dirty",
+  "rsync: did not settle: apollo has 266 MiB dirty",
+  "rsync: did not settle: apollo has 607 MiB dirty",
+  "rsync: did not settle: apollo has 736 MiB dirty",
+  "rsync: did not settle: apollo has 82 MiB dirty",
+  "rsync: did not settle: apollo has 893 MiB dirty",
+  "xs-cpp: did not settle: apollo has 1072 MiB dirty",
+  "xs-cpp: did not settle: apollo has 1358 MiB dirty",
+  "xs-cpp: did not settle: apollo has 298 MiB dirty",
+  "xs-cpp: did not settle: apollo has 361 MiB dirty",
+  "xs-cpp: did not settle: apollo has 369 MiB dirty",
+  "xs-cpp: did not settle: apollo has 418 MiB dirty",
+  "xs-cpp: did not settle: apollo has 454 MiB dirty",
+  "xs-cpp: did not settle: apollo has 685 MiB dirty",
+  "xs-cpp: did not settle: apollo has 718 MiB dirty",
+  "xs-cpp: did not settle: apollo has 747 MiB dirty",
+  "xs-rs: did not settle: apollo has 1700 MiB dirty",
+  "xs-rs: did not settle: apollo has 406 MiB dirty",
+  "xs-rs: did not settle: apollo has 452 MiB dirty",
+  "xs-rs: did not settle: apollo has 781 MiB dirty",
+  "xs-rs: did not settle: apollo has 811 MiB dirty",
+  "xs-rs: did not settle: apollo has 918 MiB dirty"
+ ]
+}

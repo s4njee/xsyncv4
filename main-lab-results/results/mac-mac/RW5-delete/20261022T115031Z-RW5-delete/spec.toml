@@ -1,0 +1,29 @@
+# RW5-delete (mac-mac, 2026-10-22): the user's 24-hour plan, phase 2, a screening hunt for cells where rsync beats either
+# xs by 5% or more, for the next development case. 3 blocks a cell; every sample records client and peer CPU.
+# A backup whose source lost 10% of its files: --delete must remove them. xs-rs has no --delete, so it sits out.
+id = "RW5-delete"
+kind = "screening"
+hypothesis = "rsync is at least 5% faster to durable than xs-c++ or xs-rs in some cell. A backup whose source lost 10% of its files: --delete must remove them. xs-rs has no --delete, so it sits out."
+primary = "durable_s"
+delta = 0.05
+blocks = 3
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+max_hours = 1       # its share of phase 2: 11 hours across RW1-6; blocks go round the cells, so a run cut short stays balanced
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a", "--delete"]
+[arms.xs-cpp]
+tool = "xs"
+rev = "1594f4c4d0bf"
+flags = ["-a", "--delete", "-j4"]
+
+[matrix]
+link = "mac-mars-usb10g"
+corpus = ["real-congress"]
+scenario = ["delete-10pct"]
+direction = ["mac>mars", "mars>mac"]
+client = ["initiator"]
+cache = ["warm"]

@@ -1,0 +1,41 @@
+# RW4-fresh-sizes (mac-mac, 2026-10-22): the user's 24-hour plan, phase 2, a screening hunt for cells where rsync beats either
+# xs by 5% or more, for the next development case. 3 blocks a cell; every sample records client and peer CPU.
+# Fresh copies of 1 MiB and 16 MiB files and of mixed-threshold, around xs's whole-file and split thresholds; -j1 arms as in RW3.
+id = "RW4-fresh-sizes"
+kind = "screening"
+hypothesis = "rsync is at least 5% faster to durable than xs-c++ or xs-rs in some cell. Fresh copies of 1 MiB and 16 MiB files and of mixed-threshold, around xs's whole-file and split thresholds; -j1 arms as in RW3."
+primary = "durable_s"
+delta = 0.05
+blocks = 3
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+max_hours = 1.5       # its share of phase 2: 11 hours across RW1-6; blocks go round the cells, so a run cut short stays balanced
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+[arms.xs-cpp]
+tool = "xs"
+rev = "e104bde552f2"    # experimental after PR #33 (automatic compression on slow pushes; off on the 10G cable)
+flags = ["-a", "-j4"]
+[arms.xs-cpp-j1]
+tool = "xs"
+rev = "e104bde552f2"    # experimental after PR #33 (automatic compression on slow pushes; off on the 10G cable)
+flags = ["-a", "-j1"]
+[arms.xs-rs]
+tool = "xs"
+rev = "e671c84aa680-rs"
+flags = ["-a", "-j4"]
+[arms.xs-rs-j1]
+tool = "xs"
+rev = "e671c84aa680-rs"
+flags = ["-a", "-j1"]
+
+[matrix]
+link = "mac-mars-usb10g"
+corpus = ["scale-size-1048576", "scale-size-16777216", "mixed-threshold"]
+scenario = ["fresh"]
+direction = ["mac>mars", "mars>mac"]
+client = ["initiator"]
+cache = ["warm"]

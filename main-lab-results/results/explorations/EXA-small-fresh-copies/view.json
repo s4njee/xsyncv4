@@ -38,10 +38,10 @@
    "needs": [],
    "estimateHours": null,
    "design": null,
-   "state": "running",
+   "state": "next",
    "runs": [],
-   "decision": "A2: measuring: After the receiver-lock change, small-file fresh copies are limited by per-file work on the receiving Mac. If so, -j8 and -j16 give little over -j4 while peer CPU rises, and the effect is stronger on  (CM-A2-10220216)",
-   "decidedUtc": "2026-10-22T07:16:52Z",
+   "decision": "A2: raced: no verdict; no usable decision",
+   "decidedUtc": "2026-10-22T11:50:16Z",
    "start": false,
    "promote": null
   },
@@ -369,6 +369,12 @@
   }
  ],
  "decisions": [
+  {
+   "utc": "2026-10-22T11:50:16Z",
+   "node": "A2",
+   "kind": "note",
+   "text": "A2: open. raced: no verdict; no usable decision"
+  },
   {
    "utc": "2026-10-22T07:16:52Z",
    "node": "A2",

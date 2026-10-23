@@ -1,0 +1,21 @@
+{
+ "experiment": "CM-A2-10220216",
+ "kind": "screening",
+ "hypothesis": "After the receiver-lock change, small-file fresh copies are limited by per-file work on the receiving Mac. If so, -j8 and -j16 give little over -j4 while peer CPU rises, and the effect is stronger on pull (mars>mac), where small-deep takes about twice as long as push. --no-atomic at -j8 beats -j8 if temp-file rename costs matter. A large gap between durable_s and wall_s would point at writeback. T",
+ "primary": "durable_s",
+ "control": "xs-rs-j4",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261022T071651Z-CM-A2-10220216"
+ ],
+ "spec_sha256": [
+  "a4c15c74286a4ea53d9cc5827e90aa8d298cd66148154bc1f7b0b48542fd742a"
+ ],
+ "valid_blocks": 0,
+ "void_attempts": 1,
+ "void_reasons": [
+  "stopped"
+ ]
+}

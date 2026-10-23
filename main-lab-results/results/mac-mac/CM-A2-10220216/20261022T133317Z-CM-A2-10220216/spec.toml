@@ -1,0 +1,48 @@
+# Written by the 6-hourly planner (2026-10-22T07:16:33+00:00). Why: a measurement for exploration node A2, designed by Claude Opus 5.5 for the case loop
+id = "CM-A2-10220216"
+kind = "screening"
+hypothesis = "After the receiver-lock change, small-file fresh copies are limited by per-file work on the receiving Mac. If so, -j8 and -j16 give little over -j4 while peer CPU rises, and the effect is stronger on pull (mars>mac), where small-deep takes about twice as long as push. --no-atomic at -j8 beats -j8 if temp-file rename costs matter. A large gap between durable_s and wall_s would point at writeback. T"
+primary = "durable_s"
+delta = 0.05
+blocks = 10
+control = "xs-rs-j4"
+verify = "first-last"
+cleanup = "eager"
+sample_timeout_s = 7200
+
+[arms.xs-rs-j4]
+tool = "xs"
+rev = "f9a85e73d94e-rs"
+flags = ["-a", "-j4"]
+
+[arms.xs-rs-j1]
+tool = "xs"
+rev = "f9a85e73d94e-rs"
+flags = ["-a", "-j1"]
+
+[arms.xs-rs-j8]
+tool = "xs"
+rev = "f9a85e73d94e-rs"
+flags = ["-a", "-j8"]
+
+[arms.xs-rs-j16]
+tool = "xs"
+rev = "f9a85e73d94e-rs"
+flags = ["-a", "-j16"]
+
+[arms.xs-rs-j8-noatomic]
+tool = "xs"
+rev = "f9a85e73d94e-rs"
+flags = ["-a", "-j8", "--no-atomic"]
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[matrix]
+link = "mac-mars-usb10g"
+corpus = ["small-deep", "small-flat"]
+scenario = ["fresh"]
+direction = ["mac>mars", "mars>mac"]
+client = ["initiator"]
+cache = ["warm"]

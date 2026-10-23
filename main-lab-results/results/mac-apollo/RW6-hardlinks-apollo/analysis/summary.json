@@ -1,0 +1,23 @@
+{
+ "experiment": "RW6-hardlinks-apollo",
+ "kind": "screening",
+ "hypothesis": "rsync is at least 5% faster to durable than xs-c++ or xs-rs in some cell. Hard links kept with -H, on laikav2 (1,234 linked files in its Rust target folder). xs-rs has no -H, so it sits out.",
+ "primary": "durable_s",
+ "control": "rsync",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261022T162412Z-RW6-hardlinks-apollo",
+  "20261023T040632Z-RW6-hardlinks-apollo"
+ ],
+ "spec_sha256": [
+  "d3646c53a0bfd51851a521f4b31f0fe40a6bf162046782fcec1b52a4ec0424ce",
+  "e5fbe2736e91ecaa93cf1e52ea3d564a799e8b14671e3ceb3ddb371b3d4cce6e"
+ ],
+ "valid_blocks": 12,
+ "void_attempts": 18,
+ "void_reasons": [
+  "mac reaches apollo by en4, not bridge100"
+ ]
+}

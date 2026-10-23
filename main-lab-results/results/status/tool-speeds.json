@@ -2,367 +2,152 @@
  "mac": {
   "bridge100": {
    "runs": {
-    "20261021T221144Z-CM-B1-10211710": {
-     "utc": 1792653275.886786,
+    "20261022T114747Z-MM2c-real-csearchv3": {
+     "utc": 1792681140.455509,
      "blocks": {
-      "real-psample.noop.mac-mars.sender.warm 0": {
-       "rsync": {
-        "attempt": 1,
-        "sum": 6294212096,
-        "count": 10
-       },
-       "xs-rs": {
-        "attempt": 1,
-        "sum": 467665678488,
-        "count": 420,
-        "done": true
-       }
-      },
-      "real-congress.noop.mac-mars.sender.warm 0": {
+      "real-csearchv3.fresh.mac-mars.sender.warm 0": {
        "xs-rs": {
         "attempt": 0,
-        "sum": 75963877072,
-        "count": 130,
+        "sum": 121822392320,
+        "count": 45,
         "done": true
        },
        "rsync": {
         "attempt": 0,
-        "sum": 18916107808,
-        "count": 49,
+        "sum": 133742537408,
+        "count": 191,
         "done": true
        },
        "xs-cpp": {
         "attempt": 0,
-        "sum": 18839037232,
-        "count": 52,
+        "sum": 156279687040,
+        "count": 65,
         "done": true
        }
       },
-      "real-congress.noop.mars-mac.receiver.warm 0": {
+      "real-csearchv3.update-10pct.mars-mac.receiver.warm 0": {
        "xs-rs": {
-        "attempt": 1,
-        "sum": 863883016,
-        "count": 13,
-        "done": true
-       },
-       "xs-cpp": {
-        "attempt": 1,
-        "sum": 10196975720,
-        "count": 76,
-        "done": true
-       },
-       "rsync": {
-        "attempt": 1,
-        "sum": 11161758776,
-        "count": 75,
+        "attempt": 0,
+        "sum": 92372908640,
+        "count": 540,
         "done": true
        }
-      },
-      "real-psample.noop.mars-mac.receiver.warm 0": {
-       "rsync": {
-        "attempt": 0,
-        "sum": 171886264544,
-        "count": 377,
-        "done": true
-       },
+      }
+     },
+     "tools": [
+      "rsync",
+      "xs-cpp",
+      "xs-rs"
+     ]
+    },
+    "20261022T144412Z-MM2a-large-solo-p0": {
+     "utc": 1792683062.326952,
+     "blocks": {
+      "large-solo.update-1pct.mac-mars.sender.warm 0": {
        "xs-rs": {
         "attempt": 0,
-        "sum": 527573591896,
-        "count": 1535,
-        "done": true
-       },
-       "xs-cpp": {
-        "attempt": 0,
-        "sum": 171792780280,
-        "count": 385,
-        "done": true
-       }
-      },
-      "real-psample.noop.mars-mac.receiver.warm 1": {
-       "xs-rs": {
-        "attempt": 0,
-        "sum": 5214184000,
-        "count": 56,
+        "sum": 67580615848,
+        "count": 10,
         "done": true
        },
        "rsync": {
         "attempt": 0,
-        "sum": 16188696,
-        "count": 1,
-        "done": true
-       },
-       "xs-cpp": {
-        "attempt": 0,
-        "sum": 1568680936,
-        "count": 34,
-        "done": true
-       }
-      },
-      "real-congress.noop.mars-mac.receiver.warm 1": {
-       "xs-rs": {
-        "attempt": 0,
-        "sum": 669085584,
-        "count": 12,
-        "done": true
-       },
-       "rsync": {
-        "attempt": 0,
-        "sum": 48554864,
-        "count": 3,
-        "done": true
-       },
-       "xs-cpp": {
-        "attempt": 0,
-        "sum": 270488048,
-        "count": 5,
-        "done": true
-       }
-      },
-      "real-psample.noop.mac-mars.sender.warm 1": {
-       "xs-rs": {
-        "attempt": 2,
-        "sum": 6853116216,
-        "count": 64,
-        "done": true
-       },
-       "rsync": {
-        "attempt": 2,
-        "sum": 108727000,
+        "sum": 54681446592,
         "count": 9,
         "done": true
        },
        "xs-cpp": {
-        "attempt": 2,
-        "sum": 2410608344,
-        "count": 21,
+        "attempt": 0,
+        "sum": 66582914888,
+        "count": 11,
         "done": true
        }
       },
-      "real-congress.noop.mac-mars.sender.warm 1": {
-       "rsync": {
-        "attempt": 0,
-        "sum": 106008664,
-        "count": 5,
-        "done": true
-       },
-       "xs-cpp": {
-        "attempt": 0,
-        "sum": 275416712,
-        "count": 2,
-        "done": true
-       },
+      "large-solo.fresh.mars-mac.receiver.warm 0": {
        "xs-rs": {
         "attempt": 0,
-        "sum": 738548280,
+        "sum": 38085275424,
         "count": 9,
         "done": true
-       }
-      },
-      "real-psample.noop.mac-mars.sender.warm 2": {
-       "xs-rs": {
-        "attempt": 2,
-        "sum": 2684077696,
-        "count": 27,
-        "done": true
-       },
-       "xs-cpp": {
-        "attempt": 1,
-        "sum": 1535552728,
-        "count": 14,
-        "done": true
        },
        "rsync": {
         "attempt": 0,
-        "sum": 95204880,
-        "count": 8,
-        "done": true
-       }
-      },
-      "real-psample.noop.mars-mac.receiver.warm 2": {
-       "xs-rs": {
-        "attempt": 0,
-        "sum": 5261369240,
-        "count": 63,
-        "done": true
-       },
-       "rsync": {
-        "attempt": 0,
-        "sum": 2770643248,
-        "count": 13,
+        "sum": 42591881096,
+        "count": 15,
         "done": true
        },
        "xs-cpp": {
         "attempt": 0,
-        "sum": 315260200,
-        "count": 16,
-        "done": true
-       }
-      },
-      "real-congress.noop.mac-mars.sender.warm 2": {
-       "xs-rs": {
-        "attempt": 0,
-        "sum": 659082208,
-        "count": 6,
-        "done": true
-       },
-       "xs-cpp": {
-        "attempt": 0,
-        "sum": 271521800,
-        "count": 2,
-        "done": true
-       },
-       "rsync": {
-        "attempt": 0,
-        "sum": 98216800,
-        "count": 4,
-        "done": true
-       }
-      },
-      "real-congress.noop.mars-mac.receiver.warm 2": {
-       "xs-rs": {
-        "attempt": 0,
-        "sum": 551176048,
-        "count": 5,
-        "done": true
-       },
-       "rsync": {
-        "attempt": 0,
-        "sum": 58072792,
-        "count": 4,
-        "done": true
-       },
-       "xs-cpp": {
-        "attempt": 0,
-        "sum": 199969672,
-        "count": 3,
-        "done": true
-       }
-      },
-      "real-congress.noop.mac-mars.sender.warm 3": {
-       "xs-cpp": {
-        "attempt": 0,
-        "sum": 270104320,
-        "count": 2,
-        "done": true
-       },
-       "rsync": {
-        "attempt": 0,
-        "sum": 99923904,
-        "count": 4,
-        "done": true
-       },
-       "xs-rs": {
-        "attempt": 0,
-        "sum": 708245424,
+        "sum": 23520243088,
         "count": 5,
         "done": true
        }
       },
-      "real-congress.noop.mars-mac.receiver.warm 3": {
-       "xs-rs": {
-        "attempt": 0,
-        "sum": 542148800,
-        "count": 5,
-        "done": true
-       },
+      "large-solo.update-1pct.mars-mac.receiver.warm 0": {
        "rsync": {
         "attempt": 0,
-        "sum": 58661096,
-        "count": 4,
-        "done": true
-       },
-       "xs-cpp": {
-        "attempt": 0,
-        "sum": 161150488,
-        "count": 2,
-        "done": true
-       }
-      },
-      "real-psample.noop.mars-mac.receiver.warm 3": {
-       "rsync": {
-        "attempt": 0,
-        "sum": 115101888,
-        "count": 7,
-        "done": true
-       },
-       "xs-rs": {
-        "attempt": 0,
-        "sum": 3021017344,
-        "count": 43,
-        "done": true
-       },
-       "xs-cpp": {
-        "attempt": 0,
-        "sum": 1632537680,
-        "count": 56,
-        "done": true
-       }
-      },
-      "real-psample.noop.mac-mars.sender.warm 3": {
-       "xs-cpp": {
-        "attempt": 0,
-        "sum": 2423535352,
-        "count": 22,
-        "done": true
-       },
-       "xs-rs": {
-        "attempt": 0,
-        "sum": 6074875360,
-        "count": 55,
-        "done": true
-       },
-       "rsync": {
-        "attempt": 0,
-        "sum": 182967912,
+        "sum": 33616992232,
         "count": 12,
         "done": true
-       }
-      },
-      "real-congress.noop.mars-mac.receiver.warm 4": {
-       "xs-rs": {
-        "attempt": 0,
-        "sum": 559338112,
-        "count": 4,
-        "done": true
        },
        "xs-cpp": {
         "attempt": 0,
-        "sum": 194206680,
-        "count": 3,
+        "sum": 40329037544,
+        "count": 15,
+        "done": true
+       },
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 49666507464,
+        "count": 13,
+        "done": true
+       }
+      },
+      "large-solo.fresh.mac-mars.sender.warm 0": {
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 45717122272,
+        "count": 4,
         "done": true
        },
        "rsync": {
         "attempt": 0,
-        "sum": 54360976,
-        "count": 3,
+        "sum": 67783260208,
+        "count": 11,
+        "done": true
+       },
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 63515235144,
+        "count": 5,
         "done": true
        }
       },
-      "real-congress.noop.mac-mars.sender.warm 4": {
-       "xs-cpp": {
-        "attempt": 0,
-        "sum": 277291984,
-        "count": 3,
-        "done": true
-       },
+      "large-solo.update-1pct.mars-mac.receiver.warm 1": {
        "xs-rs": {
         "attempt": 0,
-        "sum": 682432400,
-        "count": 7,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
         "done": true
        },
        "rsync": {
         "attempt": 0,
-        "sum": 102054288,
-        "count": 4,
+        "sum": 0,
+        "count": 0,
         "done": true
        }
       },
-      "real-psample.noop.mars-mac.receiver.warm 4": {
+      "large-solo.update-1pct.mac-mars.sender.warm 1": {
        "xs-rs": {
         "attempt": 0,
-        "sum": 4591458312,
-        "count": 64,
+        "sum": 0,
+        "count": 0,
         "done": true
        },
        "rsync": {
@@ -373,416 +158,2387 @@
        },
        "xs-cpp": {
         "attempt": 0,
-        "sum": 2170864720,
-        "count": 50,
+        "sum": 34077397688,
+        "count": 3,
         "done": true
        }
       },
-      "real-psample.noop.mac-mars.sender.warm 4": {
-       "xs-rs": {
-        "attempt": 1,
-        "sum": 6915501184,
-        "count": 64,
-        "done": true
-       },
-       "rsync": {
-        "attempt": 1,
-        "sum": 121113768,
-        "count": 10,
-        "done": true
-       },
+      "large-solo.fresh.mac-mars.sender.warm 1": {
        "xs-cpp": {
-        "attempt": 1,
-        "sum": 1697079392,
-        "count": 14,
-        "done": true
-       }
-      },
-      "real-congress.noop.mac-mars.sender.warm 5": {
-       "xs-rs": {
         "attempt": 0,
-        "sum": 791674272,
-        "count": 12,
+        "sum": 30732273040,
+        "count": 3,
         "done": true
        },
-       "rsync": {
+       "xs-rs": {
         "attempt": 0,
-        "sum": 87980224,
+        "sum": 66318259688,
         "count": 5,
         "done": true
        },
+       "rsync": {
+        "attempt": 0,
+        "sum": 66968918504,
+        "count": 10,
+        "done": true
+       }
+      },
+      "large-solo.fresh.mars-mac.receiver.warm 1": {
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 36015652584,
+        "count": 7,
+        "done": true
+       },
        "xs-cpp": {
         "attempt": 0,
-        "sum": 275216664,
+        "sum": 39832336960,
+        "count": 8,
+        "done": true
+       },
+       "rsync": {
+        "attempt": 0,
+        "sum": 36683400600,
+        "count": 11,
+        "done": true
+       }
+      },
+      "large-solo.fresh.mars-mac.receiver.warm 2": {
+       "rsync": {
+        "attempt": 0,
+        "sum": 28067851880,
+        "count": 8,
+        "done": true
+       },
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 37945150624,
+        "count": 7,
+        "done": true
+       },
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 31400907536,
+        "count": 5,
+        "done": true
+       }
+      },
+      "large-solo.update-1pct.mars-mac.receiver.warm 2": {
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "rsync": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       }
+      },
+      "large-solo.fresh.mac-mars.sender.warm 2": {
+       "rsync": {
+        "attempt": 0,
+        "sum": 67121128752,
+        "count": 9,
+        "done": true
+       },
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 79750241752,
+        "count": 7,
+        "done": true
+       },
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 50760734152,
         "count": 4,
         "done": true
        }
       },
-      "real-psample.noop.mars-mac.receiver.warm 5": {
+      "large-solo.update-1pct.mac-mars.sender.warm 2": {
        "xs-rs": {
         "attempt": 0,
-        "sum": 7997061944,
-        "count": 303,
-        "done": true
-       },
-       "xs-cpp": {
-        "attempt": 0,
-        "sum": 10220001024,
-        "count": 125,
+        "sum": 0,
+        "count": 0,
         "done": true
        },
        "rsync": {
         "attempt": 0,
-        "sum": 1140046480,
-        "count": 45,
-        "done": true
-       }
-      },
-      "real-congress.noop.mars-mac.receiver.warm 5": {
-       "xs-rs": {
-        "attempt": 0,
-        "sum": 927455960,
-        "count": 25,
+        "sum": 0,
+        "count": 0,
         "done": true
        },
        "xs-cpp": {
         "attempt": 0,
-        "sum": 276694120,
-        "count": 5,
-        "done": true
-       },
-       "rsync": {
-        "attempt": 0,
-        "sum": 151098056,
-        "count": 10,
-        "done": true
-       }
-      },
-      "real-psample.noop.mac-mars.sender.warm 5": {
-       "xs-rs": {
-        "attempt": 0,
-        "sum": 7461576104,
-        "count": 118,
-        "done": true
-       },
-       "rsync": {
-        "attempt": 0,
-        "sum": 934810704,
-        "count": 46,
-        "done": true
-       },
-       "xs-cpp": {
-        "attempt": 0,
-        "sum": 2386224160,
-        "count": 35,
-        "done": true
-       }
-      },
-      "real-congress.noop.mars-mac.receiver.warm 6": {
-       "xs-cpp": {
-        "attempt": 0,
-        "sum": 499287096,
-        "count": 20,
-        "done": true
-       },
-       "rsync": {
-        "attempt": 0,
-        "sum": 123056848,
-        "count": 6,
-        "done": true
-       },
-       "xs-rs": {
-        "attempt": 0,
-        "sum": 698372856,
-        "count": 13,
-        "done": true
-       }
-      },
-      "real-psample.noop.mars-mac.receiver.warm 6": {
-       "xs-rs": {
-        "attempt": 0,
-        "sum": 4736053264,
-        "count": 57,
-        "done": true
-       },
-       "rsync": {
-        "attempt": 0,
-        "sum": 55847928,
-        "count": 5,
-        "done": true
-       },
-       "xs-cpp": {
-        "attempt": 0,
-        "sum": 1134583608,
-        "count": 26,
-        "done": true
-       }
-      },
-      "real-congress.noop.mac-mars.sender.warm 6": {
-       "xs-rs": {
-        "attempt": 0,
-        "sum": 718788328,
-        "count": 7,
-        "done": true
-       },
-       "rsync": {
-        "attempt": 0,
-        "sum": 114113648,
-        "count": 5,
-        "done": true
-       },
-       "xs-cpp": {
-        "attempt": 0,
-        "sum": 270465392,
+        "sum": 18056373064,
         "count": 2,
         "done": true
        }
       },
-      "real-psample.noop.mac-mars.sender.warm 6": {
+      "large-solo.fresh.mac-mars.sender.warm 3": {
        "xs-cpp": {
         "attempt": 0,
-        "sum": 1702624576,
-        "count": 14,
-        "done": true
-       },
-       "xs-rs": {
-        "attempt": 0,
-        "sum": 6207724008,
-        "count": 59,
-        "done": true
-       },
-       "rsync": {
-        "attempt": 0,
-        "sum": 807194696,
-        "count": 43,
-        "done": true
-       }
-      },
-      "real-psample.noop.mars-mac.receiver.warm 7": {
-       "xs-rs": {
-        "attempt": 0,
-        "sum": 4741848992,
-        "count": 62,
-        "done": true
-       },
-       "xs-cpp": {
-        "attempt": 0,
-        "sum": 1385671176,
-        "count": 36,
-        "done": true
-       },
-       "rsync": {
-        "attempt": 0,
-        "sum": 66653416,
-        "count": 6,
-        "done": true
-       }
-      },
-      "real-congress.noop.mars-mac.receiver.warm 7": {
-       "rsync": {
-        "attempt": 0,
-        "sum": 78429416,
-        "count": 5,
-        "done": true
-       },
-       "xs-rs": {
-        "attempt": 0,
-        "sum": 541479760,
-        "count": 9,
-        "done": true
-       },
-       "xs-cpp": {
-        "attempt": 0,
-        "sum": 196143904,
-        "count": 3,
-        "done": true
-       }
-      },
-      "real-congress.noop.mac-mars.sender.warm 7": {
-       "xs-cpp": {
-        "attempt": 0,
-        "sum": 484878368,
-        "count": 15,
-        "done": true
-       },
-       "xs-rs": {
-        "attempt": 0,
-        "sum": 854956696,
-        "count": 16,
-        "done": true
-       },
-       "rsync": {
-        "attempt": 0,
-        "sum": 176976288,
-        "count": 7,
-        "done": true
-       }
-      },
-      "real-psample.noop.mac-mars.sender.warm 7": {
-       "xs-rs": {
-        "attempt": 0,
-        "sum": 7308415952,
-        "count": 115,
-        "done": true
-       },
-       "rsync": {
-        "attempt": 0,
-        "sum": 944463648,
-        "count": 49,
-        "done": true
-       },
-       "xs-cpp": {
-        "attempt": 0,
-        "sum": 2532958600,
-        "count": 38,
-        "done": true
-       }
-      },
-      "real-congress.noop.mars-mac.receiver.warm 8": {
-       "xs-cpp": {
-        "attempt": 0,
-        "sum": 396928600,
-        "count": 16,
-        "done": true
-       },
-       "rsync": {
-        "attempt": 0,
-        "sum": 149921176,
-        "count": 9,
-        "done": true
-       },
-       "xs-rs": {
-        "attempt": 0,
-        "sum": 657459608,
-        "count": 19,
-        "done": true
-       }
-      },
-      "real-congress.noop.mac-mars.sender.warm 8": {
-       "xs-rs": {
-        "attempt": 0,
-        "sum": 837642984,
-        "count": 18,
-        "done": true
-       },
-       "xs-cpp": {
-        "attempt": 0,
-        "sum": 281858936,
-        "count": 3,
-        "done": true
-       },
-       "rsync": {
-        "attempt": 0,
-        "sum": 78940280,
-        "count": 5,
-        "done": true
-       }
-      },
-      "real-psample.noop.mars-mac.receiver.warm 8": {
-       "xs-rs": {
-        "attempt": 0,
-        "sum": 3888224360,
-        "count": 47,
-        "done": true
-       },
-       "rsync": {
-        "attempt": 0,
-        "sum": 45125600,
+        "sum": 46938080320,
         "count": 4,
         "done": true
        },
-       "xs-cpp": {
-        "attempt": 0,
-        "sum": 684625080,
-        "count": 24,
-        "done": true
-       }
-      },
-      "real-psample.noop.mac-mars.sender.warm 8": {
        "rsync": {
         "attempt": 0,
-        "sum": 120946688,
+        "sum": 67130105872,
         "count": 9,
         "done": true
        },
        "xs-rs": {
         "attempt": 0,
-        "sum": 3031821760,
-        "count": 37,
-        "done": true
-       },
-       "xs-cpp": {
-        "attempt": 0,
-        "sum": 930811416,
+        "sum": 66248168456,
         "count": 9,
         "done": true
        }
       },
-      "real-congress.noop.mars-mac.receiver.warm 9": {
-       "xs-cpp": {
-        "attempt": 0,
-        "sum": 1258777936,
-        "count": 62,
-        "done": true
-       },
+      "large-solo.update-1pct.mac-mars.sender.warm 3": {
        "xs-rs": {
         "attempt": 0,
-        "sum": 298532200,
-        "count": 6,
+        "sum": 535366520,
+        "count": 13,
+        "done": true
+       },
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 308682080,
+        "count": 10,
         "done": true
        },
        "rsync": {
         "attempt": 0,
-        "sum": 64163760,
-        "count": 4,
+        "sum": 0,
+        "count": 0,
         "done": true
        }
       },
-      "real-congress.noop.mac-mars.sender.warm 9": {
-       "xs-rs": {
+      "large-solo.fresh.mars-mac.receiver.warm 3": {
+       "rsync": {
         "attempt": 0,
-        "sum": 669725856,
+        "sum": 43978475496,
         "count": 12,
         "done": true
        },
        "xs-cpp": {
         "attempt": 0,
-        "sum": 239864624,
+        "sum": 25219193472,
+        "count": 4,
+        "done": true
+       },
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 35038247472,
+        "count": 8,
+        "done": true
+       }
+      },
+      "large-solo.update-1pct.mars-mac.receiver.warm 3": {
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "rsync": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       }
+      },
+      "large-solo.update-1pct.mac-mars.sender.warm 4": {
+       "rsync": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       }
+      },
+      "large-solo.fresh.mars-mac.receiver.warm 4": {
+       "rsync": {
+        "attempt": 0,
+        "sum": 35581877640,
+        "count": 12,
+        "done": true
+       },
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 40489514040,
+        "count": 7,
+        "done": true
+       },
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 28469534480,
+        "count": 5,
+        "done": true
+       }
+      },
+      "large-solo.update-1pct.mars-mac.receiver.warm 4": {
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "rsync": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 8686191648,
+        "count": 1,
+        "done": true
+       }
+      },
+      "large-solo.fresh.mac-mars.sender.warm 4": {
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 57509244848,
+        "count": 4,
+        "done": true
+       },
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 81493963552,
+        "count": 8,
+        "done": true
+       },
+       "rsync": {
+        "attempt": 0,
+        "sum": 51734843360,
+        "count": 7,
+        "done": true
+       }
+      },
+      "large-solo.update-1pct.mars-mac.receiver.warm 5": {
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "rsync": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       }
+      },
+      "large-solo.fresh.mac-mars.sender.warm 5": {
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 65537882064,
+        "count": 6,
+        "done": true
+       },
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 70528534032,
+        "count": 7,
+        "done": true
+       },
+       "rsync": {
+        "attempt": 0,
+        "sum": 69425810904,
+        "count": 10,
+        "done": true
+       }
+      },
+      "large-solo.fresh.mars-mac.receiver.warm 5": {
+       "rsync": {
+        "attempt": 0,
+        "sum": 28594837720,
+        "count": 8,
+        "done": true
+       },
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 42666990944,
+        "count": 8,
+        "done": true
+       },
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 26506798944,
+        "count": 5,
+        "done": true
+       }
+      },
+      "large-solo.update-1pct.mac-mars.sender.warm 5": {
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "rsync": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       }
+      },
+      "large-solo.fresh.mars-mac.receiver.warm 6": {
+       "rsync": {
+        "attempt": 0,
+        "sum": 49721604352,
+        "count": 14,
+        "done": true
+       },
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 20375777544,
+        "count": 4,
+        "done": true
+       },
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 34911615352,
+        "count": 6,
+        "done": true
+       }
+      },
+      "large-solo.update-1pct.mac-mars.sender.warm 6": {
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "rsync": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 23666347472,
+        "count": 2,
+        "done": true
+       }
+      },
+      "large-solo.fresh.mac-mars.sender.warm 6": {
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 46487251536,
+        "count": 4,
+        "done": true
+       },
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 62050280728,
+        "count": 6,
+        "done": true
+       },
+       "rsync": {
+        "attempt": 0,
+        "sum": 66912300008,
+        "count": 10,
+        "done": true
+       }
+      },
+      "large-solo.update-1pct.mars-mac.receiver.warm 6": {
+       "rsync": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       }
+      },
+      "large-solo.update-1pct.mars-mac.receiver.warm 7": {
+       "rsync": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       }
+      },
+      "large-solo.update-1pct.mac-mars.sender.warm 7": {
+       "rsync": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       }
+      },
+      "large-solo.fresh.mac-mars.sender.warm 7": {
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 85468819240,
+        "count": 7,
+        "done": true
+       },
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 51821714224,
+        "count": 5,
+        "done": true
+       },
+       "rsync": {
+        "attempt": 0,
+        "sum": 61898693648,
+        "count": 8,
+        "done": true
+       }
+      },
+      "large-solo.fresh.mars-mac.receiver.warm 7": {
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 43117464568,
+        "count": 8,
+        "done": true
+       },
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 24061870344,
+        "count": 4,
+        "done": true
+       },
+       "rsync": {
+        "attempt": 0,
+        "sum": 36866218840,
+        "count": 11,
+        "done": true
+       }
+      },
+      "large-solo.fresh.mac-mars.sender.warm 8": {
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 80245559336,
+        "count": 7,
+        "done": true
+       },
+       "rsync": {
+        "attempt": 0,
+        "sum": 67980863480,
+        "count": 8,
+        "done": true
+       },
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 47744261960,
+        "count": 4,
+        "done": true
+       }
+      },
+      "large-solo.update-1pct.mac-mars.sender.warm 8": {
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "rsync": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       }
+      },
+      "large-solo.fresh.mars-mac.receiver.warm 8": {
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 34759526128,
+        "count": 6,
+        "done": true
+       },
+       "rsync": {
+        "attempt": 0,
+        "sum": 44453243960,
+        "count": 11,
+        "done": true
+       },
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 25493960520,
+        "count": 4,
+        "done": true
+       }
+      },
+      "large-solo.update-1pct.mars-mac.receiver.warm 8": {
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "rsync": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       }
+      },
+      "large-solo.update-1pct.mars-mac.receiver.warm 9": {
+       "rsync": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       }
+      },
+      "large-solo.fresh.mars-mac.receiver.warm 9": {
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 34531529336,
+        "count": 6,
+        "done": true
+       },
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 43059843192,
+        "count": 9,
+        "done": true
+       },
+       "rsync": {
+        "attempt": 0,
+        "sum": 27128115944,
+        "count": 7,
+        "done": true
+       }
+      },
+      "large-solo.update-1pct.mac-mars.sender.warm 9": {
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "rsync": {
+        "attempt": 0,
+        "sum": 25619763744,
+        "count": 2,
+        "done": true
+       }
+      },
+      "large-solo.fresh.mac-mars.sender.warm 9": {
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 40474677232,
         "count": 3,
         "done": true
        },
        "rsync": {
         "attempt": 0,
-        "sum": 110219328,
-        "count": 8,
+        "sum": 67524449920,
+        "count": 9,
+        "done": true
+       },
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 71757370744,
+        "count": 6,
         "done": true
        }
       },
-      "real-psample.noop.mac-mars.sender.warm 9": {
-       "xs-rs": {
+      "large-solo.fresh.mac-mars.sender.warm 10": {
+       "rsync": {
         "attempt": 0,
-        "sum": 5120879128,
-        "count": 66,
+        "sum": 61354533752,
+        "count": 9,
         "done": true
        },
        "xs-cpp": {
         "attempt": 0,
-        "sum": 1541249656,
-        "count": 25,
+        "sum": 77595432736,
+        "count": 7,
+        "done": true
+       },
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 53885103176,
+        "count": 4,
+        "done": true
+       }
+      },
+      "large-solo.fresh.mars-mac.receiver.warm 10": {
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 34714408680,
+        "count": 7,
+        "done": true
+       },
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 34633846832,
+        "count": 6,
         "done": true
        },
        "rsync": {
         "attempt": 0,
-        "sum": 369552936,
-        "count": 29,
+        "sum": 35430597016,
+        "count": 12,
         "done": true
        }
       },
-      "real-psample.noop.mars-mac.receiver.warm 9": {
+      "large-solo.update-1pct.mars-mac.receiver.warm 10": {
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
        "rsync": {
         "attempt": 0,
-        "sum": 380474088,
-        "count": 28
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       }
+      },
+      "large-solo.update-1pct.mac-mars.sender.warm 10": {
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "rsync": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       }
+      },
+      "large-solo.fresh.mars-mac.receiver.warm 11": {
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 34969035400,
+        "count": 6,
+        "done": true
+       },
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 38839403912,
+        "count": 8,
+        "done": true
+       },
+       "rsync": {
+        "attempt": 0,
+        "sum": 31555066264,
+        "count": 10,
+        "done": true
+       }
+      },
+      "large-solo.update-1pct.mac-mars.sender.warm 11": {
+       "rsync": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       }
+      }
+     },
+     "tools": [
+      "rsync",
+      "xs-cpp",
+      "xs-rs"
+     ]
+    },
+    "20261022T162408Z-MM2a-large-solo-apollo": {
+     "utc": 1792689071.9357922,
+     "blocks": {
+      "large-solo.fresh.apollo-mac.receiver.warm 0": {
+       "rsync": {
+        "attempt": 0,
+        "sum": 35091110624,
+        "count": 13,
+        "done": true
+       },
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 41180761184,
+        "count": 6,
+        "done": true
+       },
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 27242501728,
+        "count": 4,
+        "done": true
+       }
+      },
+      "large-solo.update-1pct.mac-apollo.sender.warm 0": {
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 66529200496,
+        "count": 11,
+        "done": true
+       },
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 89817849760,
+        "count": 15,
+        "done": true
+       },
+       "rsync": {
+        "attempt": 0,
+        "sum": 48377985808,
+        "count": 9,
+        "done": true
+       }
+      },
+      "large-solo.update-1pct.apollo-mac.receiver.warm 0": {
+       "rsync": {
+        "attempt": 0,
+        "sum": 8302470688,
+        "count": 3,
+        "done": true
+       },
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 41057289344,
+        "count": 16,
+        "done": true
+       },
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 44277110768,
+        "count": 12,
+        "done": true
+       }
+      },
+      "large-solo.fresh.mac-apollo.sender.warm 0": {
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 87421898800,
+        "count": 6,
+        "done": true
+       },
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 26404834448,
+        "count": 2,
+        "done": true
+       },
+       "rsync": {
+        "attempt": 0,
+        "sum": 66802061744,
+        "count": 11,
+        "done": true
+       }
+      },
+      "large-solo.update-1pct.apollo-mac.receiver.warm 1": {
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "rsync": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 737403888,
+        "count": 1,
+        "done": true
+       }
+      },
+      "large-solo.fresh.apollo-mac.receiver.warm 1": {
+       "rsync": {
+        "attempt": 0,
+        "sum": 34249559984,
+        "count": 12,
+        "done": true
+       },
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 52117644832,
+        "count": 7,
+        "done": true
+       },
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 16848463392,
+        "count": 2,
+        "done": true
+       }
+      },
+      "large-solo.fresh.mac-apollo.sender.warm 1": {
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 93219618736,
+        "count": 6,
+        "done": true
+       },
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 37649874352,
+        "count": 3,
+        "done": true
+       },
+       "rsync": {
+        "attempt": 0,
+        "sum": 66287495664,
+        "count": 12,
+        "done": true
+       }
+      },
+      "large-solo.update-1pct.mac-apollo.sender.warm 1": {
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "rsync": {
+        "attempt": 0,
+        "sum": 17184471680,
+        "count": 2,
+        "done": true
+       }
+      },
+      "large-solo.fresh.apollo-mac.receiver.warm 2": {
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 17864121584,
+        "count": 3,
+        "done": true
+       },
+       "rsync": {
+        "attempt": 0,
+        "sum": 41528898576,
+        "count": 13,
+        "done": true
+       },
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 26830952608,
+        "count": 4,
+        "done": true
+       }
+      },
+      "large-solo.update-1pct.mac-apollo.sender.warm 2": {
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "rsync": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       }
+      },
+      "large-solo.update-1pct.apollo-mac.receiver.warm 2": {
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "rsync": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       }
+      },
+      "large-solo.fresh.mac-apollo.sender.warm 2": {
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 65722628128,
+        "count": 4,
+        "done": true
+       },
+       "rsync": {
+        "attempt": 0,
+        "sum": 66639383744,
+        "count": 10,
+        "done": true
+       },
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 65893955344,
+        "count": 4,
+        "done": true
+       }
+      },
+      "large-solo.update-1pct.mac-apollo.sender.warm 3": {
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "rsync": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       }
+      },
+      "large-solo.fresh.mac-apollo.sender.warm 3": {
+       "rsync": {
+        "attempt": 0,
+        "sum": 70789361552,
+        "count": 12,
+        "done": true
+       },
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 59928686288,
+        "count": 4,
+        "done": true
+       },
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 64868660528,
+        "count": 5,
+        "done": true
+       }
+      },
+      "large-solo.update-1pct.apollo-mac.receiver.warm 3": {
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "rsync": {
+        "attempt": 0,
+        "sum": 4487961376,
+        "count": 2,
+        "done": true
+       }
+      },
+      "large-solo.fresh.apollo-mac.receiver.warm 3": {
+       "rsync": {
+        "attempt": 0,
+        "sum": 33036933616,
+        "count": 13,
+        "done": true
+       },
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 31245306064,
+        "count": 4,
+        "done": true
+       },
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 32998112048,
+        "count": 5,
+        "done": true
+       }
+      },
+      "large-solo.fresh.apollo-mac.receiver.warm 4": {
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 43841373952,
+        "count": 7,
+        "done": true
+       },
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 24415512256,
+        "count": 3,
+        "done": true
+       },
+       "rsync": {
+        "attempt": 0,
+        "sum": 34325812080,
+        "count": 14,
+        "done": true
+       }
+      },
+      "large-solo.update-1pct.mac-apollo.sender.warm 4": {
+       "rsync": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       }
+      },
+      "large-solo.fresh.mac-apollo.sender.warm 4": {
+       "rsync": {
+        "attempt": 0,
+        "sum": 53508386656,
+        "count": 8,
+        "done": true
+       }
+      },
+      "large-solo.update-1pct.apollo-mac.receiver.warm 4": {
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "rsync": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       }
+      },
+      "large-solo.update-1pct.mac-apollo.sender.warm 5": {
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "rsync": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 12817616608,
+        "count": 2,
+        "done": true
+       }
+      },
+      "large-solo.fresh.apollo-mac.receiver.warm 5": {
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 26774298160,
+        "count": 4,
+        "done": true
+       },
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 26973089584,
+        "count": 3,
+        "done": true
+       },
+       "rsync": {
+        "attempt": 0,
+        "sum": 47935120416,
+        "count": 15,
+        "done": true
+       }
+      },
+      "large-solo.fresh.mac-apollo.sender.warm 5": {
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 52780181872,
+        "count": 3,
+        "done": true
+       },
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 75663530560,
+        "count": 6,
+        "done": true
+       },
+       "rsync": {
+        "attempt": 0,
+        "sum": 57857232288,
+        "count": 9,
+        "done": true
+       }
+      },
+      "large-solo.update-1pct.apollo-mac.receiver.warm 5": {
+       "rsync": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       }
+      },
+      "large-solo.fresh.mac-apollo.sender.warm 6": {
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 76667572768,
+        "count": 7,
+        "done": true
+       },
+       "rsync": {
+        "attempt": 0,
+        "sum": 74690257936,
+        "count": 11,
+        "done": true
+       },
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 43704550016,
+        "count": 3,
+        "done": true
+       }
+      },
+      "large-solo.update-1pct.mac-apollo.sender.warm 6": {
+       "rsync": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       }
+      },
+      "large-solo.update-1pct.apollo-mac.receiver.warm 6": {
+       "rsync": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 2182185056,
+        "count": 1,
+        "done": true
+       }
+      },
+      "large-solo.fresh.apollo-mac.receiver.warm 6": {
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 34674578368,
+        "count": 7,
+        "done": true
+       },
+       "rsync": {
+        "attempt": 0,
+        "sum": 31421239952,
+        "count": 12,
+        "done": true
+       },
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 39768413888,
+        "count": 6,
+        "done": true
+       }
+      },
+      "large-solo.fresh.apollo-mac.receiver.warm 7": {
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 28400812624,
+        "count": 4,
+        "done": true
+       },
+       "rsync": {
+        "attempt": 0,
+        "sum": 37816454768,
+        "count": 16,
+        "done": true
+       },
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 29604509152,
+        "count": 5,
+        "done": true
+       }
+      },
+      "large-solo.update-1pct.apollo-mac.receiver.warm 7": {
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "rsync": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       }
+      },
+      "large-solo.fresh.mac-apollo.sender.warm 7": {
+       "rsync": {
+        "attempt": 0,
+        "sum": 66090720752,
+        "count": 12,
+        "done": true
+       },
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 82881448448,
+        "count": 7,
+        "done": true
+       },
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 44269969120,
+        "count": 3,
+        "done": true
+       }
+      },
+      "large-solo.update-1pct.mac-apollo.sender.warm 7": {
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "rsync": {
+        "attempt": 0,
+        "sum": 2493921040,
+        "count": 1,
+        "done": true
+       }
+      },
+      "large-solo.fresh.mac-apollo.sender.warm 8": {
+       "rsync": {
+        "attempt": 0,
+        "sum": 87767470176,
+        "count": 12,
+        "done": true
+       },
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 42335098720,
+        "count": 4,
+        "done": true
+       },
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 63520911584,
+        "count": 5,
+        "done": true
+       }
+      },
+      "large-solo.fresh.apollo-mac.receiver.warm 8": {
+       "rsync": {
+        "attempt": 0,
+        "sum": 35557956800,
+        "count": 13,
+        "done": true
+       },
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 32674203504,
+        "count": 4,
+        "done": true
+       },
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 34056939840,
+        "count": 5,
+        "done": true
+       }
+      },
+      "large-solo.update-1pct.apollo-mac.receiver.warm 8": {
+       "rsync": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       }
+      },
+      "large-solo.update-1pct.mac-apollo.sender.warm 8": {
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "rsync": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 5160888928,
+        "count": 2,
+        "done": true
+       }
+      },
+      "large-solo.fresh.apollo-mac.receiver.warm 9": {
+       "rsync": {
+        "attempt": 0,
+        "sum": 46788522416,
+        "count": 13,
+        "done": true
+       },
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 19649014512,
+        "count": 3,
+        "done": true
+       },
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 32332619088,
+        "count": 4,
+        "done": true
+       }
+      },
+      "large-solo.update-1pct.apollo-mac.receiver.warm 9": {
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "rsync": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       }
+      },
+      "large-solo.update-1pct.mac-apollo.sender.warm 9": {
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "rsync": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 3801441936,
+        "count": 1,
+        "done": true
+       }
+      },
+      "large-solo.fresh.mac-apollo.sender.warm 9": {
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 61205469392,
+        "count": 4,
+        "done": true
+       },
+       "rsync": {
+        "attempt": 0,
+        "sum": 68483883168,
+        "count": 12,
+        "done": true
+       },
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 67039352352,
+        "count": 6,
+        "done": true
+       }
+      },
+      "large-solo.fresh.apollo-mac.receiver.warm 10": {
+       "rsync": {
+        "attempt": 0,
+        "sum": 45252160000,
+        "count": 12,
+        "done": true
+       },
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 28984073232,
+        "count": 5,
+        "done": true
+       },
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 32740731024,
+        "count": 5,
+        "done": true
+       }
+      },
+      "large-solo.fresh.mac-apollo.sender.warm 10": {
+       "rsync": {
+        "attempt": 0,
+        "sum": 58619191360,
+        "count": 9,
+        "done": true
+       },
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 81177500752,
+        "count": 5,
+        "done": true
+       },
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 48823807200,
+        "count": 3,
+        "done": true
+       }
+      },
+      "large-solo.update-1pct.mac-apollo.sender.warm 10": {
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "rsync": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       }
+      },
+      "large-solo.update-1pct.apollo-mac.receiver.warm 10": {
+       "rsync": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 1257689776,
+        "count": 1,
+        "done": true
+       }
+      },
+      "large-solo.fresh.apollo-mac.receiver.warm 11": {
+       "rsync": {
+        "attempt": 0,
+        "sum": 34765576704,
+        "count": 13,
+        "done": true
+       },
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 33162571360,
+        "count": 4,
+        "done": true
+       },
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 34449320496,
+        "count": 4,
+        "done": true
+       }
+      },
+      "large-solo.update-1pct.mac-apollo.sender.warm 11": {
+       "rsync": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 1685102864,
+        "count": 1,
+        "done": true
+       }
+      },
+      "large-solo.fresh.mac-apollo.sender.warm 11": {
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 94486645056,
+        "count": 6,
+        "done": true
+       },
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 38474168560,
+        "count": 3,
+        "done": true
+       },
+       "rsync": {
+        "attempt": 0,
+        "sum": 62040287440,
+        "count": 10,
+        "done": true
+       }
+      },
+      "large-solo.update-1pct.apollo-mac.receiver.warm 11": {
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "rsync": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       }
+      },
+      "large-solo.update-1pct.mac-apollo.sender.warm 12": {
+       "rsync": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 5192483872,
+        "count": 1,
+        "done": true
+       }
+      },
+      "large-solo.fresh.mac-apollo.sender.warm 12": {
+       "rsync": {
+        "attempt": 0,
+        "sum": 87944249952,
+        "count": 12,
+        "done": true
+       },
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 46085579888,
+        "count": 3,
+        "done": true
+       },
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 74600743520,
+        "count": 6,
+        "done": true
+       }
+      },
+      "large-solo.fresh.apollo-mac.receiver.warm 12": {
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 21342953600,
+        "count": 4,
+        "done": true
+       },
+       "rsync": {
+        "attempt": 0,
+        "sum": 31226200432,
+        "count": 13,
+        "done": true
+       },
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 33698995568,
+        "count": 5,
+        "done": true
+       }
+      },
+      "large-solo.update-1pct.apollo-mac.receiver.warm 12": {
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "rsync": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 77663744,
+        "count": 1,
+        "done": true
+       }
+      },
+      "large-solo.fresh.apollo-mac.receiver.warm 13": {
+       "rsync": {
+        "attempt": 0,
+        "sum": 34822106368,
+        "count": 13,
+        "done": true
+       },
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 53322471984,
+        "count": 8,
+        "done": true
+       },
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 14606430208,
+        "count": 2,
+        "done": true
+       }
+      },
+      "large-solo.update-1pct.apollo-mac.receiver.warm 13": {
+       "rsync": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 7188992256,
+        "count": 2,
+        "done": true
+       }
+      },
+      "large-solo.fresh.mac-apollo.sender.warm 13": {
+       "rsync": {
+        "attempt": 0,
+        "sum": 79330038112,
+        "count": 12,
+        "done": true
+       },
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 66242768032,
+        "count": 5,
+        "done": true
+       },
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 42123785248,
+        "count": 3,
+        "done": true
+       }
+      },
+      "large-solo.update-1pct.mac-apollo.sender.warm 13": {
+       "rsync": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       }
+      },
+      "large-solo.update-1pct.apollo-mac.receiver.warm 14": {
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "rsync": {
+        "attempt": 0,
+        "sum": 16876020960,
+        "count": 2,
+        "done": true
+       }
+      },
+      "large-solo.fresh.apollo-mac.receiver.warm 14": {
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 25353555920,
+        "count": 5,
+        "done": true
+       },
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 25732152928,
+        "count": 4,
+        "done": true
+       },
+       "rsync": {
+        "attempt": 0,
+        "sum": 35257849488,
+        "count": 13,
+        "done": true
+       }
+      },
+      "large-solo.fresh.mac-apollo.sender.warm 14": {
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 72944253424,
+        "count": 6,
+        "done": true
+       },
+       "rsync": {
+        "attempt": 0,
+        "sum": 58747007616,
+        "count": 9,
+        "done": true
+       },
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 59156168976,
+        "count": 4,
+        "done": true
+       }
+      },
+      "large-solo.update-1pct.mac-apollo.sender.warm 14": {
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "rsync": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       }
+      },
+      "large-solo.fresh.apollo-mac.receiver.warm 15": {
+       "rsync": {
+        "attempt": 0,
+        "sum": 35382795984,
+        "count": 12,
+        "done": true
+       },
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 34710061376,
+        "count": 4,
+        "done": true
+       },
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 33941938656,
+        "count": 5,
+        "done": true
+       }
+      },
+      "large-solo.update-1pct.mac-apollo.sender.warm 15": {
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "rsync": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       }
+      },
+      "large-solo.update-1pct.apollo-mac.receiver.warm 15": {
+       "rsync": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 19832046128,
+        "count": 2,
+        "done": true
+       }
+      },
+      "large-solo.fresh.mac-apollo.sender.warm 15": {
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 59679533696,
+        "count": 4,
+        "done": true
+       },
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 50243470528,
+        "count": 3,
+        "done": true
+       },
+       "rsync": {
+        "attempt": 0,
+        "sum": 66371230752,
+        "count": 9,
+        "done": true
+       }
+      },
+      "large-solo.update-1pct.mac-apollo.sender.warm 16": {
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       },
+       "rsync": {
+        "attempt": 0,
+        "sum": 10286849624,
+        "count": 6,
+        "done": true
+       }
+      },
+      "large-solo.fresh.mac-apollo.sender.warm 16": {
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 87597811352,
+        "count": 18,
+        "done": true
+       },
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 36634468888,
+        "count": 18,
+        "done": true
+       },
+       "rsync": {
+        "attempt": 0,
+        "sum": 68148560904,
+        "count": 31,
+        "done": true
+       }
+      },
+      "large-solo.update-1pct.apollo-mac.receiver.warm 16": {
+       "rsync": {
+        "attempt": 0,
+        "sum": 508418064,
+        "count": 9,
+        "done": true
+       },
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 528177040,
+        "count": 9,
+        "done": true
+       },
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 6651949472,
+        "count": 17,
+        "done": true
+       }
+      },
+      "large-solo.fresh.apollo-mac.receiver.warm 16": {
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 28687622352,
+        "count": 5,
+        "done": true
+       },
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 30739247680,
+        "count": 4,
+        "done": true
+       },
+       "rsync": {
+        "attempt": 0,
+        "sum": 38714374288,
+        "count": 14,
+        "done": true
+       }
+      }
+     },
+     "tools": [
+      "rsync",
+      "xs-cpp",
+      "xs-rs"
+     ]
+    }
+   },
+   "current": null
+  },
+  "en4": {
+   "runs": {
+    "20261023T040632Z-RW5-delete-apollo": {
+     "utc": 1792751744.482186,
+     "blocks": {
+      "real-congress.delete-10pct.mac-apollo.sender.warm 0": {
+       "rsync": {
+        "attempt": 0,
+        "sum": 9060084728,
+        "count": 30,
+        "done": true
+       },
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 9456826736,
+        "count": 25,
+        "done": true
+       }
+      },
+      "real-congress.delete-10pct.mac-apollo.sender.warm 1": {
+       "rsync": {
+        "attempt": 0,
+        "sum": 63032464,
+        "count": 5,
+        "done": true
+       },
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 166537568,
+        "count": 4,
+        "done": true
+       }
+      },
+      "real-congress.delete-10pct.mac-apollo.sender.warm 2": {
+       "rsync": {
+        "attempt": 0,
+        "sum": 92336096,
+        "count": 7,
+        "done": true
+       },
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 139576752,
+        "count": 3,
+        "done": true
+       }
+      }
+     },
+     "tools": [
+      "rsync",
+      "xs-cpp"
+     ]
+    },
+    "20261023T040632Z-RW6-hardlinks-apollo": {
+     "utc": 1792751983.259242,
+     "blocks": {
+      "local-laikav2.noop.mac-apollo.sender.warm 0": {
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 45365521472,
+        "count": 12,
+        "done": true
+       },
+       "rsync": {
+        "attempt": 0,
+        "sum": 52830643200,
+        "count": 12,
+        "done": true
+       }
+      },
+      "local-laikav2.fresh.mac-apollo.sender.warm 0": {
+       "rsync": {
+        "attempt": 0,
+        "sum": 54200073072,
+        "count": 14,
+        "done": true
+       },
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 53913048352,
+        "count": 6,
+        "done": true
+       }
+      },
+      "local-laikav2.fresh.mac-apollo.sender.warm 1": {
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 53399913120,
+        "count": 9,
+        "done": true
+       },
+       "rsync": {
+        "attempt": 0,
+        "sum": 54611308912,
+        "count": 14,
+        "done": true
+       }
+      },
+      "local-laikav2.noop.mac-apollo.sender.warm 1": {
+       "rsync": {
+        "attempt": 0,
+        "sum": 0,
+        "count": 0,
+        "done": true
+       }
+      },
+      "local-laikav2.noop.mac-apollo.sender.warm 2": {
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 11588672,
+        "count": 1,
+        "done": true
+       },
+       "rsync": {
+        "attempt": 0,
+        "sum": 8788887904,
+        "count": 1,
+        "done": true
+       }
+      },
+      "local-laikav2.fresh.mac-apollo.sender.warm 2": {
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 45099015056,
+        "count": 6,
+        "done": true
+       },
+       "rsync": {
+        "attempt": 0,
+        "sum": 54358178640,
+        "count": 13,
+        "done": true
+       }
+      }
+     },
+     "tools": [
+      "rsync",
+      "xs-cpp"
+     ]
+    },
+    "20261023T092441Z-RW1-delta-apollo-pr34": {
+     "utc": 1792752394.3107982,
+     "blocks": {
+      "large-text.append-1pct.apollo-mac.receiver.warm 0": {
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 69763564160,
+        "count": 19,
+        "done": true
+       },
+       "rsync": {
+        "attempt": 0,
+        "sum": 75578276304,
+        "count": 21,
+        "done": true
+       },
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 64594499120,
+        "count": 15,
+        "done": true
+       }
+      },
+      "large-text.append-1pct.mac-apollo.sender.warm 0": {
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 74951746208,
+        "count": 17,
+        "done": true
+       },
+       "rsync": {
+        "attempt": 0,
+        "sum": 60628240384,
+        "count": 15,
+        "done": true
+       },
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 67775293464,
+        "count": 15,
+        "done": true
+       }
+      },
+      "large-solo.append-1pct.mac-apollo.sender.warm 0": {
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 40527782848,
+        "count": 10,
+        "done": true
+       },
+       "xs-rs": {
+        "attempt": 0,
+        "sum": 31644872064,
+        "count": 8,
+        "done": true
+       },
+       "rsync": {
+        "attempt": 0,
+        "sum": 34589870992,
+        "count": 9,
+        "done": true
+       }
+      },
+      "large-text.update-1pct.apollo-mac.receiver.warm 0": {
+       "rsync": {
+        "attempt": 0,
+        "sum": 65017702152,
+        "count": 16,
+        "done": true
+       },
+       "xs-cpp": {
+        "attempt": 0,
+        "sum": 51508827520,
+        "count": 12
        }
       }
      },
@@ -794,9 +2550,9 @@
     }
    },
    "current": {
-    "run": "20261021T221144Z-CM-B1-10211710",
-    "block": "real-psample.noop.mars-mac.receiver.warm 9",
-    "tool": "rsync",
+    "run": "20261023T092441Z-RW1-delta-apollo-pr34",
+    "block": "large-text.update-1pct.apollo-mac.receiver.warm 0",
+    "tool": "xs-cpp",
     "attempt": 0
    }
   }

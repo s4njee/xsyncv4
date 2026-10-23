@@ -1,0 +1,35 @@
+# HS1 (mac-apollo, 2026-10-23): high-speed transfers, the user's request. 4 GiB of incompressible data in 1, 4, 16 and
+# 64 equal files (hs-1x4g, hs-4x1g, hs-16x256m, hs-64x64m), fresh copies both ways over the Mac-apollo 10 GbE cable:
+# where per-file costs shrink to nothing, how close each tool gets to the link, and where the file count starts to tell.
+id = "HS1-high-speed-files"
+kind = "screening"
+hypothesis = "On 4 GiB of incompressible data, rsync -a, xs-c++ -a -j4 and xs-rs -a -j4 differ by more than 5% in time to durable in some of the four file counts, and the gap changes with the number of files."
+primary = "durable_s"
+delta = 0.05
+blocks = 10
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+max_hours = 2
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[arms.xs-cpp]
+tool = "xs"
+rev = "cc8288d4f08c"    # main after the P0 merge, as in the apollo plan
+flags = ["-a", "-j4"]
+
+[arms.xs-rs]
+tool = "xs"
+rev = "e671c84aa680-rs" # rust-ds's tip, as in the apollo plan
+flags = ["-a", "-j4"]
+
+[matrix]
+link = "mac-apollo-10g"
+corpus = ["hs-1x4g", "hs-4x1g", "hs-16x256m", "hs-64x64m"]
+scenario = ["fresh"]
+direction = ["mac>apollo", "apollo>mac"]
+client = ["initiator"]
+cache = ["warm"]

@@ -1,0 +1,2037 @@
+{
+ "schema": 1,
+ "run_id": "20261023T060258Z-HS1-high-speed-files",
+ "started_utc": "2026-10-23T07:21:35.731+00:00",
+ "driver": "[host]",
+ "plan": {
+  "schema": 1,
+  "experiment": "HS1-high-speed-files",
+  "spec_sha256": "0c5adad49b2baa161e3e287d5d39d49cffa925467eadf8e3dcab57b3fac18162",
+  "kind": "screening",
+  "bundle": "0a0b38d49e22",
+  "writes": {
+   "mac": 515396075520,
+   "apollo": 515396075520
+  },
+  "hypothesis": "On 4 GiB of incompressible data, rsync -a, xs-c++ -a -j4 and xs-rs -a -j4 differ by more than 5% in time to durable in some of the four file counts, and the gap changes with the number of files.",
+  "primary": "durable_s",
+  "delta": 0.05,
+  "control": "rsync",
+  "seed": 1,
+  "run_id": "20261023T060258Z-HS1-high-speed-files",
+  "driver": "mac",
+  "sample_timeout_s": 3600,
+  "results": "mac-apollo",
+  "background": true,
+  "local_link": false,
+  "eager_cleanup": true,
+  "hours": null,
+  "max_hours": 2.0,
+  "hosts": {
+   "mac": {
+    "ssh": "[host]",
+    "name": "[host]",
+    "hostname": "[host]",
+    "root": "~/benchmarks/xsbench.noindex",
+    "interface": "en4",
+    "helper": false,
+    "gates": {},
+    "local": true,
+    "system": "Darwin"
+   },
+   "apollo": {
+    "ssh": "[host]",
+    "name": "[host]",
+    "hostname": "apollo",
+    "root": "~/xsbench",
+    "interface": "enp25s0f0",
+    "helper": true,
+    "gates": {},
+    "local": false,
+    "system": "Linux"
+   }
+  },
+  "links": {
+   "mac-apollo-10g": {
+    "hosts": [
+     "mac",
+     "apollo"
+    ],
+    "medium": "wired",
+    "min_speed_mbps": 10000,
+    "max_rtt_ms": 2.0,
+    "initiator": "mac",
+    "driver": "mac",
+    "results": "mac-apollo",
+    "background": true,
+    "address": {
+     "mac": "[address]",
+     "apollo": "[host]"
+    }
+   }
+  },
+  "arms": [
+   {
+    "name": "rsync",
+    "tool": "rsync",
+    "flags": [
+     "-a"
+    ],
+    "binary": {
+     "mac": "/opt/homebrew/bin/rsync",
+     "apollo": "rsync"
+    }
+   },
+   {
+    "name": "xs-cpp",
+    "tool": "xs",
+    "flags": [
+     "-a",
+     "-j4"
+    ],
+    "rev": "cc8288d4f08c",
+    "binary": {
+     "mac": "~/benchmarks/xsbench.noindex/bin/xs-cc8288d4f08c",
+     "apollo": "~/xsbench/bin/xs-cc8288d4f08c"
+    },
+    "sha256": {
+     "mac": "df9b6db403c2fca77fe5a16217e6ac4e810cd142cc376e8dfa54563a48b08448",
+     "apollo": "4b113206d5acabdfb434c485979c2798e9bee7d2faecc142aa206fb3286e26d5"
+    },
+    "artifacts": {
+     "xs-darwin-arm64": "df9b6db403c2fca77fe5a16217e6ac4e810cd142cc376e8dfa54563a48b08448",
+     "xs-linux-amd64": "4b113206d5acabdfb434c485979c2798e9bee7d2faecc142aa206fb3286e26d5",
+     "xs-linux-arm64": "17b9544f92ec49b3d312b428c90d2b1e7aa2ecd513253490bc927af9d4e0b5d6",
+     "xs-darwin-amd64": "67498c3d86c0a00850a320af4e5b07637275c40109e90b3dd5d377874acca0ab"
+    }
+   },
+   {
+    "name": "xs-rs",
+    "tool": "xs",
+    "flags": [
+     "-a",
+     "-j4"
+    ],
+    "rev": "e671c84aa680-rs",
+    "binary": {
+     "mac": "~/benchmarks/xsbench.noindex/bin/xs-e671c84aa680-rs",
+     "apollo": "~/xsbench/bin/xs-e671c84aa680-rs"
+    },
+    "sha256": {
+     "mac": "232d412384575a52433774d01d5132ab2e7c44fa50fc5734c805c9fab9459d9c",
+     "apollo": "9bf12dca91bc3cfc7a6b5a956254c027b8127dc7235f66d9f7742162055d3b5c"
+    },
+    "artifacts": {
+     "xs-darwin-arm64": "232d412384575a52433774d01d5132ab2e7c44fa50fc5734c805c9fab9459d9c",
+     "xs-darwin-amd64": "02dad2d29fa27bdc7563c4ebbd8ca5631ea24b95c095d1eba06ec491ca5b6836",
+     "xs-linux-amd64": "9bf12dca91bc3cfc7a6b5a956254c027b8127dc7235f66d9f7742162055d3b5c"
+    }
+   }
+  ],
+  "cells": [
+   {
+    "id": "hs-1x4g.fresh.mac-apollo.sender.warm",
+    "corpus": "hs-1x4g",
+    "scenario": "fresh",
+    "sender": "mac",
+    "receiver": "apollo",
+    "client": "sender",
+    "link": "mac-apollo-10g",
+    "cache": "warm"
+   },
+   {
+    "id": "hs-1x4g.fresh.apollo-mac.receiver.warm",
+    "corpus": "hs-1x4g",
+    "scenario": "fresh",
+    "sender": "apollo",
+    "receiver": "mac",
+    "client": "receiver",
+    "link": "mac-apollo-10g",
+    "cache": "warm"
+   },
+   {
+    "id": "hs-4x1g.fresh.mac-apollo.sender.warm",
+    "corpus": "hs-4x1g",
+    "scenario": "fresh",
+    "sender": "mac",
+    "receiver": "apollo",
+    "client": "sender",
+    "link": "mac-apollo-10g",
+    "cache": "warm"
+   },
+   {
+    "id": "hs-4x1g.fresh.apollo-mac.receiver.warm",
+    "corpus": "hs-4x1g",
+    "scenario": "fresh",
+    "sender": "apollo",
+    "receiver": "mac",
+    "client": "receiver",
+    "link": "mac-apollo-10g",
+    "cache": "warm"
+   },
+   {
+    "id": "hs-16x256m.fresh.mac-apollo.sender.warm",
+    "corpus": "hs-16x256m",
+    "scenario": "fresh",
+    "sender": "mac",
+    "receiver": "apollo",
+    "client": "sender",
+    "link": "mac-apollo-10g",
+    "cache": "warm"
+   },
+   {
+    "id": "hs-16x256m.fresh.apollo-mac.receiver.warm",
+    "corpus": "hs-16x256m",
+    "scenario": "fresh",
+    "sender": "apollo",
+    "receiver": "mac",
+    "client": "receiver",
+    "link": "mac-apollo-10g",
+    "cache": "warm"
+   },
+   {
+    "id": "hs-64x64m.fresh.mac-apollo.sender.warm",
+    "corpus": "hs-64x64m",
+    "scenario": "fresh",
+    "sender": "mac",
+    "receiver": "apollo",
+    "client": "sender",
+    "link": "mac-apollo-10g",
+    "cache": "warm"
+   },
+   {
+    "id": "hs-64x64m.fresh.apollo-mac.receiver.warm",
+    "corpus": "hs-64x64m",
+    "scenario": "fresh",
+    "sender": "apollo",
+    "receiver": "mac",
+    "client": "receiver",
+    "link": "mac-apollo-10g",
+    "cache": "warm"
+   }
+  ],
+  "corpora": {
+   "hs-1x4g": {
+    "files": 1,
+    "directories": 0,
+    "bytes": 4294967296,
+    "digest": "17a33aafb49c785c555c1ee777b994218f225732cf351438881b8265608917e4",
+    "quick_digest": "026357cc69ec43497d3a86b8991b49cc9d732176f5083a2409d3aa693346d973"
+   },
+   "hs-4x1g": {
+    "files": 4,
+    "directories": 0,
+    "bytes": 4294967296,
+    "digest": "d6b8e252156dde75133633636f0c6e478c123ae669316c12c4f6604fee7f1af5",
+    "quick_digest": "216e34d191f5ff30ae61e6ee50312e78d65562cf1990a89270a5cdcb34a5c4b1"
+   },
+   "hs-16x256m": {
+    "files": 16,
+    "directories": 0,
+    "bytes": 4294967296,
+    "digest": "c1c9cfe35269d7a8ba8e1bd2436f4c3e96d5b779abebf53195d60a531c7cb542",
+    "quick_digest": "660e730c624bda5b33fa0e0fecd790ed5d8fcc7b741f41775734673f3f5ef1e6"
+   },
+   "hs-64x64m": {
+    "files": 64,
+    "directories": 0,
+    "bytes": 4294967296,
+    "digest": "f77548fd3b3f2a8e273bbb663b26007b0f4b60cdf9836f07b4f2abc8720777a1",
+    "quick_digest": "540fa327fdc4cf02ef05939662a24d900354f47d84a3c58d5d68308da5de5ed1"
+   }
+  },
+  "blocks": [
+   {
+    "cell": "hs-16x256m.fresh.mac-apollo.sender.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "rsync",
+      "xs-cpp",
+      "xs-rs"
+     ],
+     [
+      "rsync",
+      "xs-rs",
+      "xs-cpp"
+     ],
+     [
+      "xs-rs",
+      "xs-cpp",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-64x64m.fresh.apollo-mac.receiver.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs-rs",
+      "rsync",
+      "xs-cpp"
+     ],
+     [
+      "rsync",
+      "xs-cpp",
+      "xs-rs"
+     ],
+     [
+      "rsync",
+      "xs-cpp",
+      "xs-rs"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-64x64m.fresh.mac-apollo.sender.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "rsync",
+      "xs-rs",
+      "xs-cpp"
+     ],
+     [
+      "xs-cpp",
+      "xs-rs",
+      "rsync"
+     ],
+     [
+      "xs-rs",
+      "rsync",
+      "xs-cpp"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-4x1g.fresh.mac-apollo.sender.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs-rs",
+      "rsync",
+      "xs-cpp"
+     ],
+     [
+      "xs-rs",
+      "rsync",
+      "xs-cpp"
+     ],
+     [
+      "xs-rs",
+      "rsync",
+      "xs-cpp"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-1x4g.fresh.mac-apollo.sender.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "rsync",
+      "xs-rs",
+      "xs-cpp"
+     ],
+     [
+      "rsync",
+      "xs-rs",
+      "xs-cpp"
+     ],
+     [
+      "rsync",
+      "xs-cpp",
+      "xs-rs"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-4x1g.fresh.apollo-mac.receiver.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs-cpp",
+      "xs-rs",
+      "rsync"
+     ],
+     [
+      "xs-rs",
+      "rsync",
+      "xs-cpp"
+     ],
+     [
+      "xs-cpp",
+      "xs-rs",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-16x256m.fresh.apollo-mac.receiver.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs-rs",
+      "rsync",
+      "xs-cpp"
+     ],
+     [
+      "xs-rs",
+      "xs-cpp",
+      "rsync"
+     ],
+     [
+      "xs-cpp",
+      "xs-rs",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-1x4g.fresh.apollo-mac.receiver.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "rsync",
+      "xs-cpp",
+      "xs-rs"
+     ],
+     [
+      "xs-rs",
+      "xs-cpp",
+      "rsync"
+     ],
+     [
+      "xs-rs",
+      "xs-cpp",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-16x256m.fresh.mac-apollo.sender.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-rs",
+      "rsync",
+      "xs-cpp"
+     ],
+     [
+      "rsync",
+      "xs-cpp",
+      "xs-rs"
+     ],
+     [
+      "xs-rs",
+      "rsync",
+      "xs-cpp"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-64x64m.fresh.mac-apollo.sender.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-cpp",
+      "rsync",
+      "xs-rs"
+     ],
+     [
+      "xs-rs",
+      "xs-cpp",
+      "rsync"
+     ],
+     [
+      "xs-cpp",
+      "rsync",
+      "xs-rs"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-1x4g.fresh.apollo-mac.receiver.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-rs",
+      "rsync",
+      "xs-cpp"
+     ],
+     [
+      "xs-cpp",
+      "xs-rs",
+      "rsync"
+     ],
+     [
+      "xs-cpp",
+      "rsync",
+      "xs-rs"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-4x1g.fresh.mac-apollo.sender.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-rs",
+      "rsync",
+      "xs-cpp"
+     ],
+     [
+      "xs-cpp",
+      "xs-rs",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs-rs",
+      "xs-cpp"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-4x1g.fresh.apollo-mac.receiver.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-rs",
+      "xs-cpp",
+      "rsync"
+     ],
+     [
+      "xs-cpp",
+      "xs-rs",
+      "rsync"
+     ],
+     [
+      "xs-rs",
+      "rsync",
+      "xs-cpp"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-16x256m.fresh.apollo-mac.receiver.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-cpp",
+      "rsync",
+      "xs-rs"
+     ],
+     [
+      "xs-cpp",
+      "rsync",
+      "xs-rs"
+     ],
+     [
+      "xs-cpp",
+      "xs-rs",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-1x4g.fresh.mac-apollo.sender.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs-cpp",
+      "xs-rs"
+     ],
+     [
+      "xs-rs",
+      "rsync",
+      "xs-cpp"
+     ],
+     [
+      "xs-rs",
+      "xs-cpp",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-64x64m.fresh.apollo-mac.receiver.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-cpp",
+      "xs-rs",
+      "rsync"
+     ],
+     [
+      "xs-rs",
+      "xs-cpp",
+      "rsync"
+     ],
+     [
+      "xs-cpp",
+      "rsync",
+      "xs-rs"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-64x64m.fresh.apollo-mac.receiver.warm",
+    "block": 2,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-cpp",
+      "xs-rs",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs-rs",
+      "xs-cpp"
+     ],
+     [
+      "xs-rs",
+      "xs-cpp",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-64x64m.fresh.mac-apollo.sender.warm",
+    "block": 2,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-cpp",
+      "rsync",
+      "xs-rs"
+     ],
+     [
+      "xs-cpp",
+      "rsync",
+      "xs-rs"
+     ],
+     [
+      "rsync",
+      "xs-cpp",
+      "xs-rs"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-16x256m.fresh.apollo-mac.receiver.warm",
+    "block": 2,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-rs",
+      "xs-cpp",
+      "rsync"
+     ],
+     [
+      "xs-rs",
+      "xs-cpp",
+      "rsync"
+     ],
+     [
+      "xs-rs",
+      "rsync",
+      "xs-cpp"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-4x1g.fresh.mac-apollo.sender.warm",
+    "block": 2,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-rs",
+      "xs-cpp",
+      "rsync"
+     ],
+     [
+      "xs-rs",
+      "rsync",
+      "xs-cpp"
+     ],
+     [
+      "rsync",
+      "xs-cpp",
+      "xs-rs"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-4x1g.fresh.apollo-mac.receiver.warm",
+    "block": 2,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs-cpp",
+      "xs-rs"
+     ],
+     [
+      "rsync",
+      "xs-rs",
+      "xs-cpp"
+     ],
+     [
+      "xs-rs",
+      "rsync",
+      "xs-cpp"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-1x4g.fresh.apollo-mac.receiver.warm",
+    "block": 2,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-cpp",
+      "rsync",
+      "xs-rs"
+     ],
+     [
+      "xs-cpp",
+      "rsync",
+      "xs-rs"
+     ],
+     [
+      "rsync",
+      "xs-rs",
+      "xs-cpp"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-16x256m.fresh.mac-apollo.sender.warm",
+    "block": 2,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-cpp",
+      "xs-rs",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs-rs",
+      "xs-cpp"
+     ],
+     [
+      "xs-rs",
+      "rsync",
+      "xs-cpp"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-1x4g.fresh.mac-apollo.sender.warm",
+    "block": 2,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-rs",
+      "xs-cpp",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs-cpp",
+      "xs-rs"
+     ],
+     [
+      "rsync",
+      "xs-cpp",
+      "xs-rs"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-64x64m.fresh.mac-apollo.sender.warm",
+    "block": 3,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-rs",
+      "xs-cpp",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs-rs",
+      "xs-cpp"
+     ],
+     [
+      "rsync",
+      "xs-rs",
+      "xs-cpp"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-16x256m.fresh.apollo-mac.receiver.warm",
+    "block": 3,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs-rs",
+      "xs-cpp"
+     ],
+     [
+      "rsync",
+      "xs-rs",
+      "xs-cpp"
+     ],
+     [
+      "xs-cpp",
+      "xs-rs",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-64x64m.fresh.apollo-mac.receiver.warm",
+    "block": 3,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-rs",
+      "xs-cpp",
+      "rsync"
+     ],
+     [
+      "xs-rs",
+      "xs-cpp",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs-rs",
+      "xs-cpp"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-1x4g.fresh.apollo-mac.receiver.warm",
+    "block": 3,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs-cpp",
+      "xs-rs"
+     ],
+     [
+      "xs-rs",
+      "xs-cpp",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs-cpp",
+      "xs-rs"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-16x256m.fresh.mac-apollo.sender.warm",
+    "block": 3,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-cpp",
+      "rsync",
+      "xs-rs"
+     ],
+     [
+      "xs-rs",
+      "rsync",
+      "xs-cpp"
+     ],
+     [
+      "xs-cpp",
+      "xs-rs",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-4x1g.fresh.apollo-mac.receiver.warm",
+    "block": 3,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs-cpp",
+      "xs-rs"
+     ],
+     [
+      "xs-cpp",
+      "rsync",
+      "xs-rs"
+     ],
+     [
+      "xs-cpp",
+      "xs-rs",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-1x4g.fresh.mac-apollo.sender.warm",
+    "block": 3,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs-rs",
+      "xs-cpp"
+     ],
+     [
+      "xs-rs",
+      "rsync",
+      "xs-cpp"
+     ],
+     [
+      "rsync",
+      "xs-cpp",
+      "xs-rs"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-4x1g.fresh.mac-apollo.sender.warm",
+    "block": 3,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-cpp",
+      "xs-rs",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs-rs",
+      "xs-cpp"
+     ],
+     [
+      "xs-rs",
+      "rsync",
+      "xs-cpp"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-4x1g.fresh.apollo-mac.receiver.warm",
+    "block": 4,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs-cpp",
+      "xs-rs"
+     ],
+     [
+      "rsync",
+      "xs-cpp",
+      "xs-rs"
+     ],
+     [
+      "rsync",
+      "xs-rs",
+      "xs-cpp"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-64x64m.fresh.apollo-mac.receiver.warm",
+    "block": 4,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-cpp",
+      "rsync",
+      "xs-rs"
+     ],
+     [
+      "xs-rs",
+      "rsync",
+      "xs-cpp"
+     ],
+     [
+      "rsync",
+      "xs-cpp",
+      "xs-rs"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-16x256m.fresh.mac-apollo.sender.warm",
+    "block": 4,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-rs",
+      "xs-cpp",
+      "rsync"
+     ],
+     [
+      "xs-cpp",
+      "xs-rs",
+      "rsync"
+     ],
+     [
+      "xs-rs",
+      "rsync",
+      "xs-cpp"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-1x4g.fresh.apollo-mac.receiver.warm",
+    "block": 4,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-cpp",
+      "xs-rs",
+      "rsync"
+     ],
+     [
+      "xs-rs",
+      "xs-cpp",
+      "rsync"
+     ],
+     [
+      "xs-rs",
+      "xs-cpp",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-1x4g.fresh.mac-apollo.sender.warm",
+    "block": 4,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-rs",
+      "xs-cpp",
+      "rsync"
+     ],
+     [
+      "xs-rs",
+      "rsync",
+      "xs-cpp"
+     ],
+     [
+      "xs-rs",
+      "xs-cpp",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-64x64m.fresh.mac-apollo.sender.warm",
+    "block": 4,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs-cpp",
+      "xs-rs"
+     ],
+     [
+      "xs-cpp",
+      "rsync",
+      "xs-rs"
+     ],
+     [
+      "rsync",
+      "xs-rs",
+      "xs-cpp"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-4x1g.fresh.mac-apollo.sender.warm",
+    "block": 4,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-cpp",
+      "xs-rs",
+      "rsync"
+     ],
+     [
+      "xs-cpp",
+      "rsync",
+      "xs-rs"
+     ],
+     [
+      "rsync",
+      "xs-cpp",
+      "xs-rs"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-16x256m.fresh.apollo-mac.receiver.warm",
+    "block": 4,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs-cpp",
+      "xs-rs"
+     ],
+     [
+      "xs-cpp",
+      "rsync",
+      "xs-rs"
+     ],
+     [
+      "xs-cpp",
+      "xs-rs",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-16x256m.fresh.apollo-mac.receiver.warm",
+    "block": 5,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-rs",
+      "xs-cpp",
+      "rsync"
+     ],
+     [
+      "xs-rs",
+      "xs-cpp",
+      "rsync"
+     ],
+     [
+      "xs-rs",
+      "xs-cpp",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-64x64m.fresh.apollo-mac.receiver.warm",
+    "block": 5,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-rs",
+      "rsync",
+      "xs-cpp"
+     ],
+     [
+      "xs-rs",
+      "xs-cpp",
+      "rsync"
+     ],
+     [
+      "xs-cpp",
+      "rsync",
+      "xs-rs"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-4x1g.fresh.mac-apollo.sender.warm",
+    "block": 5,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-cpp",
+      "rsync",
+      "xs-rs"
+     ],
+     [
+      "rsync",
+      "xs-cpp",
+      "xs-rs"
+     ],
+     [
+      "xs-rs",
+      "rsync",
+      "xs-cpp"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-1x4g.fresh.mac-apollo.sender.warm",
+    "block": 5,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-cpp",
+      "rsync",
+      "xs-rs"
+     ],
+     [
+      "xs-rs",
+      "xs-cpp",
+      "rsync"
+     ],
+     [
+      "xs-rs",
+      "xs-cpp",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-4x1g.fresh.apollo-mac.receiver.warm",
+    "block": 5,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs-cpp",
+      "xs-rs"
+     ],
+     [
+      "xs-rs",
+      "xs-cpp",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs-rs",
+      "xs-cpp"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-1x4g.fresh.apollo-mac.receiver.warm",
+    "block": 5,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs-rs",
+      "xs-cpp"
+     ],
+     [
+      "xs-rs",
+      "xs-cpp",
+      "rsync"
+     ],
+     [
+      "xs-cpp",
+      "xs-rs",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-16x256m.fresh.mac-apollo.sender.warm",
+    "block": 5,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-rs",
+      "rsync",
+      "xs-cpp"
+     ],
+     [
+      "rsync",
+      "xs-cpp",
+      "xs-rs"
+     ],
+     [
+      "xs-rs",
+      "rsync",
+      "xs-cpp"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-64x64m.fresh.mac-apollo.sender.warm",
+    "block": 5,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-rs",
+      "rsync",
+      "xs-cpp"
+     ],
+     [
+      "xs-cpp",
+      "xs-rs",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs-rs",
+      "xs-cpp"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-4x1g.fresh.apollo-mac.receiver.warm",
+    "block": 6,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-rs",
+      "rsync",
+      "xs-cpp"
+     ],
+     [
+      "xs-cpp",
+      "rsync",
+      "xs-rs"
+     ],
+     [
+      "rsync",
+      "xs-rs",
+      "xs-cpp"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-64x64m.fresh.apollo-mac.receiver.warm",
+    "block": 6,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-cpp",
+      "rsync",
+      "xs-rs"
+     ],
+     [
+      "rsync",
+      "xs-cpp",
+      "xs-rs"
+     ],
+     [
+      "xs-cpp",
+      "rsync",
+      "xs-rs"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-16x256m.fresh.mac-apollo.sender.warm",
+    "block": 6,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-rs",
+      "xs-cpp",
+      "rsync"
+     ],
+     [
+      "xs-rs",
+      "xs-cpp",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs-cpp",
+      "xs-rs"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-1x4g.fresh.mac-apollo.sender.warm",
+    "block": 6,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-rs",
+      "xs-cpp",
+      "rsync"
+     ],
+     [
+      "xs-rs",
+      "rsync",
+      "xs-cpp"
+     ],
+     [
+      "xs-cpp",
+      "xs-rs",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-4x1g.fresh.mac-apollo.sender.warm",
+    "block": 6,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-cpp",
+      "xs-rs",
+      "rsync"
+     ],
+     [
+      "xs-cpp",
+      "xs-rs",
+      "rsync"
+     ],
+     [
+      "xs-cpp",
+      "xs-rs",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-64x64m.fresh.mac-apollo.sender.warm",
+    "block": 6,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs-cpp",
+      "xs-rs"
+     ],
+     [
+      "rsync",
+      "xs-cpp",
+      "xs-rs"
+     ],
+     [
+      "xs-rs",
+      "xs-cpp",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-16x256m.fresh.apollo-mac.receiver.warm",
+    "block": 6,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-cpp",
+      "xs-rs",
+      "rsync"
+     ],
+     [
+      "xs-rs",
+      "xs-cpp",
+      "rsync"
+     ],
+     [
+      "xs-rs",
+      "xs-cpp",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-1x4g.fresh.apollo-mac.receiver.warm",
+    "block": 6,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-rs",
+      "rsync",
+      "xs-cpp"
+     ],
+     [
+      "rsync",
+      "xs-rs",
+      "xs-cpp"
+     ],
+     [
+      "xs-rs",
+      "xs-cpp",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-16x256m.fresh.mac-apollo.sender.warm",
+    "block": 7,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-cpp",
+      "rsync",
+      "xs-rs"
+     ],
+     [
+      "xs-rs",
+      "xs-cpp",
+      "rsync"
+     ],
+     [
+      "xs-cpp",
+      "xs-rs",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-64x64m.fresh.apollo-mac.receiver.warm",
+    "block": 7,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-cpp",
+      "xs-rs",
+      "rsync"
+     ],
+     [
+      "xs-cpp",
+      "rsync",
+      "xs-rs"
+     ],
+     [
+      "xs-rs",
+      "xs-cpp",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-4x1g.fresh.apollo-mac.receiver.warm",
+    "block": 7,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs-cpp",
+      "xs-rs"
+     ],
+     [
+      "xs-rs",
+      "xs-cpp",
+      "rsync"
+     ],
+     [
+      "xs-cpp",
+      "xs-rs",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-1x4g.fresh.mac-apollo.sender.warm",
+    "block": 7,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-cpp",
+      "xs-rs",
+      "rsync"
+     ],
+     [
+      "xs-cpp",
+      "xs-rs",
+      "rsync"
+     ],
+     [
+      "xs-cpp",
+      "xs-rs",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-4x1g.fresh.mac-apollo.sender.warm",
+    "block": 7,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-cpp",
+      "xs-rs",
+      "rsync"
+     ],
+     [
+      "xs-cpp",
+      "rsync",
+      "xs-rs"
+     ],
+     [
+      "xs-cpp",
+      "xs-rs",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-16x256m.fresh.apollo-mac.receiver.warm",
+    "block": 7,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-cpp",
+      "xs-rs",
+      "rsync"
+     ],
+     [
+      "xs-rs",
+      "xs-cpp",
+      "rsync"
+     ],
+     [
+      "xs-cpp",
+      "xs-rs",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-1x4g.fresh.apollo-mac.receiver.warm",
+    "block": 7,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs-cpp",
+      "xs-rs"
+     ],
+     [
+      "xs-cpp",
+      "xs-rs",
+      "rsync"
+     ],
+     [
+      "xs-cpp",
+      "rsync",
+      "xs-rs"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-64x64m.fresh.mac-apollo.sender.warm",
+    "block": 7,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs-cpp",
+      "xs-rs"
+     ],
+     [
+      "xs-cpp",
+      "xs-rs",
+      "rsync"
+     ],
+     [
+      "xs-rs",
+      "rsync",
+      "xs-cpp"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-16x256m.fresh.mac-apollo.sender.warm",
+    "block": 8,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-rs",
+      "rsync",
+      "xs-cpp"
+     ],
+     [
+      "xs-rs",
+      "rsync",
+      "xs-cpp"
+     ],
+     [
+      "xs-rs",
+      "xs-cpp",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-4x1g.fresh.mac-apollo.sender.warm",
+    "block": 8,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs-cpp",
+      "xs-rs"
+     ],
+     [
+      "xs-cpp",
+      "xs-rs",
+      "rsync"
+     ],
+     [
+      "xs-rs",
+      "xs-cpp",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-64x64m.fresh.apollo-mac.receiver.warm",
+    "block": 8,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-rs",
+      "xs-cpp",
+      "rsync"
+     ],
+     [
+      "xs-cpp",
+      "rsync",
+      "xs-rs"
+     ],
+     [
+      "xs-cpp",
+      "xs-rs",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-16x256m.fresh.apollo-mac.receiver.warm",
+    "block": 8,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs-rs",
+      "xs-cpp"
+     ],
+     [
+      "xs-rs",
+      "rsync",
+      "xs-cpp"
+     ],
+     [
+      "xs-cpp",
+      "rsync",
+      "xs-rs"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-64x64m.fresh.mac-apollo.sender.warm",
+    "block": 8,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-rs",
+      "xs-cpp",
+      "rsync"
+     ],
+     [
+      "xs-rs",
+      "rsync",
+      "xs-cpp"
+     ],
+     [
+      "xs-cpp",
+      "rsync",
+      "xs-rs"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-1x4g.fresh.mac-apollo.sender.warm",
+    "block": 8,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-cpp",
+      "rsync",
+      "xs-rs"
+     ],
+     [
+      "rsync",
+      "xs-cpp",
+      "xs-rs"
+     ],
+     [
+      "xs-rs",
+      "xs-cpp",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-4x1g.fresh.apollo-mac.receiver.warm",
+    "block": 8,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-cpp",
+      "rsync",
+      "xs-rs"
+     ],
+     [
+      "rsync",
+      "xs-cpp",
+      "xs-rs"
+     ],
+     [
+      "xs-rs",
+      "rsync",
+      "xs-cpp"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-1x4g.fresh.apollo-mac.receiver.warm",
+    "block": 8,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-cpp",
+      "rsync",
+      "xs-rs"
+     ],
+     [
+      "xs-rs",
+      "xs-cpp",
+      "rsync"
+     ],
+     [
+      "xs-cpp",
+      "xs-rs",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-64x64m.fresh.apollo-mac.receiver.warm",
+    "block": 9,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs-cpp",
+      "rsync",
+      "xs-rs"
+     ],
+     [
+      "rsync",
+      "xs-rs",
+      "xs-cpp"
+     ],
+     [
+      "rsync",
+      "xs-rs",
+      "xs-cpp"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-16x256m.fresh.apollo-mac.receiver.warm",
+    "block": 9,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs-rs",
+      "xs-cpp",
+      "rsync"
+     ],
+     [
+      "xs-cpp",
+      "rsync",
+      "xs-rs"
+     ],
+     [
+      "xs-cpp",
+      "xs-rs",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-1x4g.fresh.apollo-mac.receiver.warm",
+    "block": 9,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs-cpp",
+      "rsync",
+      "xs-rs"
+     ],
+     [
+      "xs-cpp",
+      "xs-rs",
+      "rsync"
+     ],
+     [
+      "xs-cpp",
+      "rsync",
+      "xs-rs"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-64x64m.fresh.mac-apollo.sender.warm",
+    "block": 9,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs-cpp",
+      "xs-rs",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs-rs",
+      "xs-cpp"
+     ],
+     [
+      "xs-cpp",
+      "rsync",
+      "xs-rs"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-4x1g.fresh.mac-apollo.sender.warm",
+    "block": 9,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs-cpp",
+      "xs-rs",
+      "rsync"
+     ],
+     [
+      "xs-rs",
+      "rsync",
+      "xs-cpp"
+     ],
+     [
+      "xs-rs",
+      "rsync",
+      "xs-cpp"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-1x4g.fresh.mac-apollo.sender.warm",
+    "block": 9,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs-cpp",
+      "rsync",
+      "xs-rs"
+     ],
+     [
+      "xs-rs",
+      "rsync",
+      "xs-cpp"
+     ],
+     [
+      "xs-rs",
+      "xs-cpp",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-4x1g.fresh.apollo-mac.receiver.warm",
+    "block": 9,
+    "verify_full": true,
+    "orders": [
+     [
+      "rsync",
+      "xs-cpp",
+      "xs-rs"
+     ],
+     [
+      "xs-cpp",
+      "rsync",
+      "xs-rs"
+     ],
+     [
+      "xs-cpp",
+      "rsync",
+      "xs-rs"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-16x256m.fresh.mac-apollo.sender.warm",
+    "block": 9,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs-rs",
+      "xs-cpp",
+      "rsync"
+     ],
+     [
+      "xs-rs",
+      "rsync",
+      "xs-cpp"
+     ],
+     [
+      "xs-cpp",
+      "xs-rs",
+      "rsync"
+     ]
+    ]
+   }
+  ],
+  "scripts": {
+   "probe.py": "31498266d245cc6e8c7a1cd788652da3015bc80d5f454841d90254a74e85cf94",
+   "corpus.py": "cf3eb8a5442c04e2456fedc6bfef2801c484d9835ddb5e256774e9c7d68cde1c",
+   "corpora.json": "21f1b56afc8cc2aa061fe9974acc3e4e77ab493d6c05d1956713efeead0010d5",
+   "agent.py": "ef95abb4c21eecfa4368d44f3f19932613164881795eac0aff9019d468f00ab3",
+   "runner.py": "cce71fee149764ad1a5c913061f19620a8ff44f792d23d55f7a290d59a9e20ff",
+   "xspipe.py": "94b3fccfc6e994d227077c453f90323ab55337fd8a98231d16a10696e8ebab6b",
+   "measure.py": "5065310f480ff1cabfa7c645f0db342624a02f9a081b96069d50d52b3d224777"
+  },
+  "observed": {
+   "mac": {
+    "rsync": {
+     "path": "/opt/homebrew/bin/rsync",
+     "sha256": "bbd302280bacdd83a6a716ab0556e1c13875a9f222b62924293ecb2d09bbb56f",
+     "version": "rsync  version 3.5.1  protocol version 33"
+    },
+    "hostname": "[host]"
+   },
+   "apollo": {
+    "rsync": {
+     "path": "/usr/bin/rsync",
+     "sha256": "7caa17cb97841ade1f916e921713f13f82081bf0f605e811f09dff89a3f26dd3",
+     "version": "rsync  version 3.5.1-g04355d27  protocol version 33"
+    },
+    "hostname": "apollo",
+    "trim": null
+   },
+   "addresses": {
+    "mac>apollo": "[host]"
+   }
+  }
+ }
+}

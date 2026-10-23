@@ -1,0 +1,13 @@
+experiment,kind,cell_id,corpus,scenario,sender,receiver,client,link,cache,arm,n_blocks,sigma_d,blocks_for_2pct,blocks_for_3pct,blocks_for_5pct,blocks_for_10pct,blocks_equivalent_2pct,blocks_equivalent_3pct,blocks_equivalent_5pct,blocks_equivalent_10pct
+MM2c-real-csearchv3-apollo,screening,real-csearchv3.fresh.apollo-mac.receiver.warm,real-csearchv3,fresh,apollo,mac,receiver,mac-apollo-10g,warm,xs-cpp,4,0.04202503363810168,38,18,8,8,50,24,10,8
+MM2c-real-csearchv3-apollo,screening,real-csearchv3.fresh.apollo-mac.receiver.warm,real-csearchv3,fresh,apollo,mac,receiver,mac-apollo-10g,warm,xs-rs,4,0.03117592073410685,22,11,8,8,29,14,8,8
+MM2c-real-csearchv3-apollo,screening,real-csearchv3.fresh.mac-apollo.sender.warm,real-csearchv3,fresh,mac,apollo,sender,mac-apollo-10g,warm,xs-cpp,3,0.06507568959360516,87,40,16,8,116,53,21,8
+MM2c-real-csearchv3-apollo,screening,real-csearchv3.fresh.mac-apollo.sender.warm,real-csearchv3,fresh,mac,apollo,sender,mac-apollo-10g,warm,xs-rs,3,0.09975338634204566,201,92,35,11,269,122,46,14
+MM2c-real-csearchv3-apollo,screening,real-csearchv3.noop.apollo-mac.receiver.warm,real-csearchv3,noop,apollo,mac,receiver,mac-apollo-10g,warm,xs-cpp,4,0.17219717005916058,595,269,100,28,797,359,133,37
+MM2c-real-csearchv3-apollo,screening,real-csearchv3.noop.apollo-mac.receiver.warm,real-csearchv3,noop,apollo,mac,receiver,mac-apollo-10g,warm,xs-rs,4,0.04588071813766074,45,21,9,8,59,28,12,8
+MM2c-real-csearchv3-apollo,screening,real-csearchv3.noop.mac-apollo.sender.warm,real-csearchv3,noop,mac,apollo,sender,mac-apollo-10g,warm,xs-cpp,2,0.012216595313011436,8,8,8,8,8,8,8,8
+MM2c-real-csearchv3-apollo,screening,real-csearchv3.noop.mac-apollo.sender.warm,real-csearchv3,noop,mac,apollo,sender,mac-apollo-10g,warm,xs-rs,2,0.05841981205038094,71,33,14,8,94,44,18,8
+MM2c-real-csearchv3-apollo,screening,real-csearchv3.update-10pct.apollo-mac.receiver.warm,real-csearchv3,update-10pct,apollo,mac,receiver,mac-apollo-10g,warm,xs-cpp,4,0.04023245287940778,35,17,8,8,46,22,10,8
+MM2c-real-csearchv3-apollo,screening,real-csearchv3.update-10pct.apollo-mac.receiver.warm,real-csearchv3,update-10pct,apollo,mac,receiver,mac-apollo-10g,warm,xs-rs,4,0.03381626626676662,25,13,8,8,33,16,8,8
+MM2c-real-csearchv3-apollo,screening,real-csearchv3.update-10pct.mac-apollo.sender.warm,real-csearchv3,update-10pct,mac,apollo,sender,mac-apollo-10g,warm,xs-cpp,2,0.05028281067400872,53,25,11,8,70,33,14,8
+MM2c-real-csearchv3-apollo,screening,real-csearchv3.update-10pct.mac-apollo.sender.warm,real-csearchv3,update-10pct,mac,apollo,sender,mac-apollo-10g,warm,xs-rs,2,0.05288433061714637,58,28,12,8,77,36,15,8

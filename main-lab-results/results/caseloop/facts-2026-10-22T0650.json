@@ -1,0 +1,516 @@
+{
+ "now": "2026-10-22T11:50:06+00:00",
+ "ceiling_hours": 6,
+ "target": "xs-rs",
+ "link": "mac-mars-usb10g",
+ "flags": [
+  "-a",
+  "-j4"
+ ],
+ "lab": {
+  "tools": [
+   "rsync",
+   "xs-rs",
+   "xs-cpp"
+  ],
+  "flags": "-a -aH -H -z -az -W -O --no-atomic --inplace --whole-file, -j1 to -j16, --compress-level=-20 to 9",
+  "corpora": [
+   "large-four",
+   "large-half",
+   "large-mixed",
+   "large-one",
+   "large-text",
+   "mixed-bimodal",
+   "mixed-threshold",
+   "real-congress",
+   "real-holochart",
+   "real-laikav2",
+   "real-psample",
+   "scale-count-1000",
+   "scale-count-10000",
+   "scale-count-100000",
+   "scale-count-1000000",
+   "scale-count-3000",
+   "scale-count-30000",
+   "scale-count-300000",
+   "scale-size-1024",
+   "scale-size-1048576",
+   "scale-size-16384",
+   "scale-size-16777216",
+   "scale-size-262144",
+   "scale-size-4096",
+   "scale-size-4194304",
+   "scale-size-65536",
+   "small-deep",
+   "small-flat",
+   "small-opaque",
+   "small-real",
+   "tiny-one"
+  ],
+  "scenarios": [
+   "fresh",
+   "noop",
+   "update-0p1pct",
+   "update-1pct",
+   "update-10pct"
+  ],
+  "directions": [
+   "mac>mars",
+   "mars>mac"
+  ],
+  "max_arms": 6,
+  "blocks": [
+   2,
+   12
+  ],
+  "records": [
+   "durable_s",
+   "wall_s",
+   "cpu_s",
+   "rss_bytes"
+  ]
+ },
+ "tested": {
+  "node": "A2",
+  "tree": "EXA-small-fresh-copies",
+  "commit": null,
+  "parent": null,
+  "run": "20261022T071651Z-CM-A2-10220216",
+  "experiment": "CM-A2-10220216",
+  "kind": "measure",
+  "design": {
+   "arms": [
+    {
+     "name": "xs-rs-j4",
+     "tool": "xs-rs",
+     "flags": [
+      "-a",
+      "-j4"
+     ]
+    },
+    {
+     "name": "xs-rs-j1",
+     "tool": "xs-rs",
+     "flags": [
+      "-a",
+      "-j1"
+     ]
+    },
+    {
+     "name": "xs-rs-j8",
+     "tool": "xs-rs",
+     "flags": [
+      "-a",
+      "-j8"
+     ]
+    },
+    {
+     "name": "xs-rs-j16",
+     "tool": "xs-rs",
+     "flags": [
+      "-a",
+      "-j16"
+     ]
+    },
+    {
+     "name": "xs-rs-j8-noatomic",
+     "tool": "xs-rs",
+     "flags": [
+      "-a",
+      "-j8",
+      "--no-atomic"
+     ]
+    },
+    {
+     "name": "rsync",
+     "tool": "rsync",
+     "flags": [
+      "-a"
+     ]
+    }
+   ],
+   "control": "xs-rs-j4",
+   "corpus": [
+    "small-deep",
+    "small-flat"
+   ],
+   "scenario": [
+    "fresh"
+   ],
+   "direction": [
+    "mac>mars",
+    "mars>mac"
+   ],
+   "blocks": 10,
+   "hypothesis": "After the receiver-lock change, small-file fresh copies are limited by per-file work on the receiving Mac. If so, -j8 and -j16 give little over -j4 while peer CPU rises, and the effect is stronger on pull (mars>mac), where small-deep takes about twice as long as push. --no-atomic at -j8 beats -j8 if temp-file rename costs matter. A large gap between durable_s and wall_s would point at writeback. This run leaves out the local tar-extraction baseline on the receiver and any sample/perf profile, so it bounds the limit by scaling and CPU, not by an absolute ceiling or a per-function breakdown."
+  },
+  "impl": "rs",
+  "title": "Find the next limit",
+  "question": "How far is xs from the receiver creating the same files by itself, and what is it doing with the difference?",
+  "measure": "The best arm so far against local tar extraction on the receiver (P2b's local arms; mars now runs macOS, so measured again there), and a profile of both ends during a small-deep fresh copy: sample on macOS, perf on Linux. A quiet sender first: P2b lost runs to its load.",
+  "branches": [
+   {
+    "index": 0,
+    "label": "path walks: opening directories from the root",
+    "next": [
+     "A3"
+    ]
+   },
+   {
+    "index": 1,
+    "label": "per-directory requests and wakeups",
+    "next": [
+     "A5"
+    ]
+   },
+   {
+    "index": 2,
+    "label": "one receiver process saturated",
+    "next": [
+     "A6"
+    ]
+   },
+   {
+    "index": 3,
+    "label": "writeback stalls",
+    "next": [
+     "A7"
+    ]
+   },
+   {
+    "index": 4,
+    "label": "within 1.3x of the local ceiling",
+    "end": "The receiver is close to its disk; small fresh copies are done."
+   }
+  ],
+  "status": "stopped",
+  "verdicts": {},
+  "verdict_text": null,
+  "times": {},
+  "effects": []
+ },
+ "buildable": [],
+ "unavailable": [
+  {
+   "tree": "EXC-transport",
+   "node": "C1",
+   "kind": "measure",
+   "title": "Race the TCP transport",
+   "question": "How much of the large-file ceiling is the ssh connection?",
+   "measure": "--transport=tcp (branch transport) against ssh: Mac-mars at 10 GbE, with the X540 back in an x8 slot, on the large corpora; the Pi sending over 2.5 GbE. Gb/s and sender CPU.",
+   "evidence": "Raw TCP carried 9.41 Gb/s on one stream; one ssh connection 7.7-8.6 Gb/s with AES-GCM and 2.2 with ChaCha20. In X6 nothing moved more than 2% under ssh.",
+   "needs": [],
+   "tries": 0,
+   "last_problem": "--transport=tcp is built on branch transport (dd867d7a, 6fb1e19b). Not raced: it needs the 10 GbE path and a Pi-sender run.",
+   "why": "it measures a commit the node does not name"
+  }
+ ],
+ "trees": [
+  {
+   "tree": "EXA-small-fresh-copies",
+   "question": "What limits xs's small-file fresh copies once the receiver's global lock and serial final pass are gone, and what removes the next limit?",
+   "nodes": [
+    {
+     "node": "A1",
+     "title": "Race the receiver-lock branch",
+     "status": "done",
+     "result": "fresh 0.411 (faster) / noop 1.007 (inconclusive). The receiver-lock branch (c5b765eb54fc against b02ae2394a86) is clearly faster on fresh copies: 'fresh 0.411 (faster)' with a 95% interval of 0.406 to 0.415 over 8 blocks. That is the minimum block count, but the interval is narrow and far below 1. No-op re-syncs are unchanged within noise: 'noop 1.007 (inconclusive)', interval 0.962 to 1.055. Keep it and merge. The pooled verdicts do not separate the default, --no-atomic and -j8 configurations, so whether extra receiving workers now help is not answered by these facts; A2 should look at that split."
+    },
+    {
+     "node": "A2",
+     "title": "Find the next limit",
+     "status": "running",
+     "result": "measuring: After the receiver-lock change, small-file fresh copies are limited by per-file work on the receiving Mac. If so, -j8 and -j16 give little over -j4 while peer CPU rises, and the effect is stronger on  (CM-A2-10220216)"
+    },
+    {
+     "node": "A3",
+     "title": "Cheaper destination path walks",
+     "status": "open",
+     "result": null
+    },
+    {
+     "node": "A5",
+     "title": "Fast path for fresh subtrees",
+     "status": "open",
+     "result": null
+    },
+    {
+     "node": "A6",
+     "title": "Several receiver processes",
+     "status": "open",
+     "result": null
+    },
+    {
+     "node": "A7",
+     "title": "Writeback control",
+     "status": "open",
+     "result": null
+    }
+   ]
+  },
+  {
+   "tree": "EXB-noop-resyncs",
+   "question": "Where does a re-sync that changes nothing spend its time, and can it skip unchanged subtrees?",
+   "nodes": [
+    {
+     "node": "B1",
+     "title": "Re-measure no-op syncs",
+     "status": "done",
+     "result": "no verdict. The run's status is 'failed' and it carries no lab verdicts, so this branch rests on the arm-vs-control effects alone. Some cells kept only 8 or 9 of 10 blocks. Even so, the hypothesis that xs-rs still trails rsync on no-op re-syncs is refuted. At the default -j4, xs-rs against rsync was 0.269 (0.235 to 0.309, 10 blocks) on congress push and 0.308 (0.262 to 0.361, 10 blocks) on congress pull. It was 0.231 (0.219 to 0.245, 8 blocks) on psample push. The one weak cell is psample pull at -j4: 0.6 with a 95% interval of 0.213 to 1.689 over 9 blocks, too wide to call, at 45.418 s against 75.716 s. At -j8 xs-rs is clearly ahead in all four cells: 0.249, 0.268, 0.185, and 0.191 (0.147 to 0.249) on psample pull. -j1 is also ahead everywhere it is decided: 0.519, 0.584 and 0.421, with psample pull at 0.82 (0.317 to 2.121), inconclusive. Going from -j1 to -j8 roughly halves time on every cell, so no serial bottleneck dominates. xs-rs CPU seconds are close to rsync's at -j4 (7.747 vs 8.098 on congress push), not far above. The lab records only total CPU, not a user/kernel split, so branches 0 and 1 could not be told apart anyway, and neither is needed: xs-rs is at or ahead of rsync both ways. The remaining oddity is the high variance of psample pull at -j4 (and xs-cpp-j4 there at 2.002, 0.912 to 4.393). That is noise worth watching, not a deficit against rsync. A measurement changes no code, so keep is false."
+    },
+    {
+     "node": "B2",
+     "title": "Confirm dest-anchors",
+     "status": "open",
+     "result": null
+    },
+    {
+     "node": "B3",
+     "title": "Persistent index",
+     "status": "open",
+     "result": null
+    }
+   ]
+  },
+  {
+   "tree": "EXC-transport",
+   "question": "How much speed does a transport other than one ssh connection give, and what keeps it encrypted?",
+   "nodes": [
+    {
+     "node": "C1",
+     "title": "Race the TCP transport",
+     "status": "open",
+     "result": "--transport=tcp is built on branch transport (dd867d7a, 6fb1e19b). Not raced: it needs the 10 GbE path and a Pi-sender run."
+    },
+    {
+     "node": "C2",
+     "title": "Encryption at TCP speed",
+     "status": "open",
+     "result": null
+    },
+    {
+     "node": "C3",
+     "title": "Rewrite the transport writer",
+     "status": "open",
+     "result": null
+    },
+    {
+     "node": "C4",
+     "title": "Control stream and data streams",
+     "status": "open",
+     "result": null
+    },
+    {
+     "node": "C5",
+     "title": "Compression for slow links",
+     "status": "done",
+     "result": "fresh 1.001 (equivalent) / noop 0.991 (inconclusive). The compression change (c9e8d5d5f87d against 0a4953bec5d8) did not make copies faster on this link. Fresh copies were 'fresh 1.001 (equivalent)', 95% interval 0.974 to 1.030 over 8 blocks, at 12.42 s against 12.402 s. No-op re-syncs were 'noop 0.991 (inconclusive)', interval 0.942 to 1.043 over 8 blocks, at 1.714 s against 1.73 s. Eight blocks is the minimum. The fresh interval is reasonably tight around 1, but the no-op interval is wide, so this is weak evidence in both directions. The race also ran on mac-mars-usb10g, not on lab2's internet link, so it says nothing for or against the 'faster on lab2' branch. On the 10 GbE cable, where negative levels were meant to help, it bought no time. No later node depends on it. Drop it from the chain; the dictionary and long-range ideas would need a separate slow-link race."
+    }
+   ]
+  }
+ ],
+ "history": [
+  {
+   "utc": "2026-10-21T21:42:17+00:00",
+   "kind": "decision",
+   "node": "A1",
+   "text": "faster: merge it (kept): The receiver-lock branch (c5b765eb54fc against b02ae2394a86) is clearly faster on fresh copies: 'fresh 0.411 (faster)' with a 95% interval of 0.406 to 0.415 over 8 blocks. That is the minimum block count, but the interval is narrow and far below 1. No-op re-syncs are unchanged within noise: 'noop 1.007 (inconclusive)', interval 0.962 to 1.055. Keep it and merge. The pooled verdicts do not separate the default, --no-atomic and -j8 configurations, so whether extra receiving workers now help is not answered by these facts; A2 should look at that split."
+  },
+  {
+   "utc": "2026-10-21T21:43:18+00:00",
+   "kind": "test",
+   "node": "C5",
+   "text": "racing c9e8d5d5f87d against its parent: 20261021T214317Z-CL-C5-c9e8d5d5f87d"
+  },
+  {
+   "utc": "2026-10-21T21:43:18+00:00",
+   "kind": "build",
+   "node": null,
+   "text": "nothing to build until the next analysis"
+  },
+  {
+   "utc": "2026-10-21T21:59:10+00:00",
+   "kind": "analysis",
+   "node": null,
+   "text": "$0.07: No race finished this slot. The compression change (C5) is still racing, and the receiver-lock change stays in the chain after 'fresh 0.411 (faster)'. Next we profile no-op re-syncs against rsync (B1), where xs last used far more CPU than rsync. Then we measure how far fresh small-file copies are from local tar extraction on the now-macOS receiver (A2), with the default, --no-atomic and -j8 settings reported separately.",
+   "cost_usd": 0.069442
+  },
+  {
+   "utc": "2026-10-21T22:04:45+00:00",
+   "kind": "analysis",
+   "node": null,
+   "text": "$0.08: The compression change (C5) gave no speed on the 10 GbE Mac link: 'fresh 1.001 (equivalent)' and 'noop 0.991 (inconclusive)' over 8 blocks, so it is dropped. Its slow-link question was not tested here. Next we profile no-op re-syncs against rsync on real-congress and real-psample (B1), where xs last used far more CPU than rsync. Then we measure fresh small-file copies against local tar extraction on the now-macOS receiver (A2), reporting default, --no-atomic and -j8 separately.",
+   "cost_usd": 0.082762
+  },
+  {
+   "utc": "2026-10-21T22:04:45+00:00",
+   "kind": "decision",
+   "node": "C5",
+   "text": "only fewer bytes: The compression change (c9e8d5d5f87d against 0a4953bec5d8) did not make copies faster on this link. Fresh copies were 'fresh 1.001 (equivalent)', 95% interval 0.974 to 1.030 over 8 blocks, at 12.42 s against 12.402 s. No-op re-syncs were 'noop 0.991 (inconclusive)', interval 0.942 to 1.043 over 8 blocks, at 1.714 s against 1.73 s. Eight blocks is the minimum. The fresh interval is reasonably tight around 1, but the no-op interval is wide, so this is weak evidence in both directions. The race also ran on mac-mars-usb10g, not on lab2's internet link, so it says nothing for or against the 'faster on lab2' branch. On the 10 GbE cable, where negative levels were meant to help, it bought no time. No later node depends on it. Drop it from the chain; the dictionary and long-range ideas would need a separate slow-link race."
+  },
+  {
+   "utc": "2026-10-21T22:06:28+00:00",
+   "kind": "analysis",
+   "node": null,
+   "text": "$0.09: No race finished this slot; the compression change (C5) was dropped after 'fresh 1.001 (equivalent)', and the receiver-lock change stays after 'fresh 0.411 (faster)'. Next the lab races no-op re-syncs against rsync on real-congress and real-psample, push and pull, to see which end still burns the CPU (B1). After that it races small-deep fresh copies across -j1 to -j16 and --no-atomic to find the next small-file limit (A2).",
+   "cost_usd": 0.090906
+  },
+  {
+   "utc": "2026-10-21T22:06:29+00:00",
+   "kind": "measure",
+   "node": "B1",
+   "text": "could not run the design: 61d1dd83a530-rs has not been built: run stage.py build --rev 61d1dd83a530-rs"
+  },
+  {
+   "utc": "2026-10-21T22:11:45+00:00",
+   "kind": "measure",
+   "node": "B1",
+   "text": "measuring rsync, xs-rs-j4, xs-rs-j1, xs-rs-j8, xs-cpp-j4 on real-congress, real-psample: 20261021T221144Z-CM-B1-10211710"
+  },
+  {
+   "utc": "2026-10-22T07:16:32+00:00",
+   "kind": "analysis",
+   "node": null,
+   "text": "$0.11: Re-measuring no-op re-syncs (B1) showed xs-rs ahead of rsync both ways. At -j4 it took 0.269 to 0.308 of rsync's time on real-congress and 0.231 on real-psample push. At -j8 it was ahead in every cell, though psample pull at -j4 was too noisy to call (0.6, interval 0.213 to 1.689). The no-op question is closed, and next the lab races small-file fresh copies across -j1 to -j16 and --no-atomic (A2) to find which receiver-side limit to build against.",
+   "cost_usd": 0.105218
+  },
+  {
+   "utc": "2026-10-22T07:16:32+00:00",
+   "kind": "decision",
+   "node": "B1",
+   "text": "at or ahead of rsync both ways: The run's status is 'failed' and it carries no lab verdicts, so this branch rests on the arm-vs-control effects alone. Some cells kept only 8 or 9 of 10 blocks. Even so, the hypothesis that xs-rs still trails rsync on no-op re-syncs is refuted. At the default -j4, xs-rs against rsync was 0.269 (0.235 to 0.309, 10 blocks) on congress push and 0.308 (0.262 to 0.361, 10 blocks) on congress pull. It was 0.231 (0.219 to 0.245, 8 blocks) on psample push. The one weak cell is psample pull at -j4: 0.6 with a 95% interval of 0.213 to 1.689 over 9 blocks, too wide to call, at 45.418 s against 75.716 s. At -j8 xs-rs is clearly ahead in all four cells: 0.249, 0.268, 0.185, and 0.191 (0.147 to 0.249) on psample pull. -j1 is also ahead everywhere it is decided: 0.519, 0.584 and 0.421, with psample pull at 0.82 (0.317 to 2.121), inconclusive. Going from -j1 to -j8 roughly halves time on every cell, so no serial bottleneck dominates. xs-rs CPU seconds are close to rsync's at -j4 (7.747 vs 8.098 on congress push), not far above. The lab records only total CPU, not a user/kernel split, so branches 0 and 1 could not be told apart anyway, and neither is needed: xs-rs is at or ahead of rsync both ways. The remaining oddity is the high variance of psample pull at -j4 (and xs-cpp-j4 there at 2.002, 0.912 to 4.393). That is noise worth watching, not a deficit against rsync. A measurement changes no code, so keep is false."
+  },
+  {
+   "utc": "2026-10-22T07:16:52+00:00",
+   "kind": "measure",
+   "node": "A2",
+   "text": "measuring xs-rs-j4, xs-rs-j1, xs-rs-j8, xs-rs-j16, xs-rs-j8-noatomic, rsync on small-deep, small-flat: 20261022T071651Z-CM-A2-10220216"
+  }
+ ],
+ "lab_races": [
+  {
+   "cell": "mixed-bimodal.fresh.mac-mars.sender.warm",
+   "verdict": "xs-rs",
+   "rs_vs_cpp": 0.822,
+   "seconds": {
+    "xs-cpp": 5.266,
+    "rsync": 7.306,
+    "xs-rs": 4.33
+   }
+  },
+  {
+   "cell": "mixed-bimodal.fresh.mars-mac.receiver.warm",
+   "verdict": "xs-rs",
+   "rs_vs_cpp": 0.664,
+   "seconds": {
+    "xs-cpp": 4.13,
+    "rsync": 9.391,
+    "xs-rs": 2.744
+   }
+  },
+  {
+   "cell": "real-congress.fresh.mac-mars.sender.warm",
+   "verdict": "xs-rs",
+   "rs_vs_cpp": 0.452,
+   "seconds": {
+    "xs-cpp": 32.594,
+    "rsync": 43.938,
+    "xs-rs": 14.723
+   }
+  },
+  {
+   "cell": "real-congress.fresh.mars-mac.receiver.warm",
+   "verdict": "xs-rs",
+   "rs_vs_cpp": 0.58,
+   "seconds": {
+    "xs-cpp": 43.675,
+    "rsync": 81.499,
+    "xs-rs": 25.333
+   }
+  },
+  {
+   "cell": "real-congress.noop.mac-mars.sender.warm",
+   "verdict": "xs-rs",
+   "rs_vs_cpp": 0.763,
+   "seconds": {
+    "rsync": 6.482,
+    "xs-rs": 1.747,
+    "xs-cpp": 2.289
+   }
+  },
+  {
+   "cell": "real-congress.noop.mars-mac.receiver.warm",
+   "verdict": "xs-rs",
+   "rs_vs_cpp": 0.547,
+   "seconds": {
+    "rsync": 4.775,
+    "xs-rs": 1.468,
+    "xs-cpp": 2.685
+   }
+  },
+  {
+   "cell": "real-psample.noop.mac-mars.sender.warm",
+   "verdict": "xs-rs",
+   "rs_vs_cpp": 0.756,
+   "seconds": {
+    "rsync": 88.126,
+    "xs-rs": 20.395,
+    "xs-cpp": 26.981
+   }
+  },
+  {
+   "cell": "real-psample.noop.mars-mac.receiver.warm",
+   "verdict": "xs-rs",
+   "rs_vs_cpp": 0.3,
+   "seconds": {
+    "rsync": 75.716,
+    "xs-rs": 45.418,
+    "xs-cpp": 151.588
+   }
+  },
+  {
+   "cell": "small-deep.fresh.mac-mars.sender.warm",
+   "verdict": "xs-rs",
+   "rs_vs_cpp": 0.409,
+   "seconds": {
+    "xs-cpp": 24.037,
+    "rsync": 26.643,
+    "xs-rs": 9.84
+   }
+  },
+  {
+   "cell": "small-deep.fresh.mars-mac.receiver.warm",
+   "verdict": "xs-rs",
+   "rs_vs_cpp": 0.46,
+   "seconds": {
+    "xs-cpp": 43.172,
+    "rsync": 48.05,
+    "xs-rs": 19.878
+   }
+  },
+  {
+   "cell": "small-flat.fresh.mac-mars.sender.warm",
+   "verdict": "xs-rs",
+   "rs_vs_cpp": 0.491,
+   "seconds": {
+    "xs-cpp": 13.302,
+    "rsync": 16.877,
+    "xs-rs": 6.528
+   }
+  },
+  {
+   "cell": "small-flat.fresh.mars-mac.receiver.warm",
+   "verdict": "xs-rs",
+   "rs_vs_cpp": 0.535,
+   "seconds": {
+    "xs-cpp": 17.087,
+    "rsync": 25.826,
+    "xs-rs": 9.141
+   }
+  }
+ ],
+ "budget": {
+  "week_usd": 83.0,
+  "spent_last_7_days": 0.55
+ }
+}

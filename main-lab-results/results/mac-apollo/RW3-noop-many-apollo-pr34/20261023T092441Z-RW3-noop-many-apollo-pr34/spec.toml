@@ -1,0 +1,48 @@
+# PR #34 copy (2026-10-23): xs-rs at ac1aeef0, the CPU-aware zstd level (starts at 1, steps up only while the measured
+# compression speed sustains it) and 8 sender workers by default, so its arm has no -j. Its own id: the e671c84a runs
+# stay apart. RW2, RW5 and RW6 are not repeated, since xs-rs still takes no -c, --delete or -H.
+# Apollo copy (2026-10-22): RW3-noop-many-p0 with Linux at the far end. mars's hardware now dual-boots, and as apollo
+# (Arch Linux, ext4 on NVMe, its X540 on the cable) it takes the plan mars was running, from the Mac over the
+# same direct cable; read against the -p0 runs for macOS against Linux on one machine.
+# RW3-noop-many (mac-mac, 2026-10-22): the user's 24-hour plan, phase 2, a screening hunt for cells where rsync beats either
+# Re-queued 2026-10-22 with xs-c++ at cc8288d4f08c (the P0 merge), as RW3-noop-many-p0; the original's runs stay apart.
+# xs by 5% or more, for the next development case. 3 blocks a cell; every sample records client and peer CPU.
+# No-ops of many files, where NT1021 saw rsync pull real-psample in 75.7 s against xs-cpp 151.6 s; -j1 arms for a per-core comparison.
+id = "RW3-noop-many-apollo-pr34"
+kind = "screening"
+hypothesis = "rsync is at least 5% faster to durable than xs-c++ or xs-rs in some cell. No-ops of many files, where NT1021 saw rsync pull real-psample in 75.7 s against xs-cpp 151.6 s; -j1 arms for a per-core comparison."
+primary = "durable_s"
+delta = 0.05
+blocks = 3
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+max_hours = 3       # its share of phase 2: 11 hours across RW1-6; blocks go round the cells, so a run cut short stays balanced
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+[arms.xs-cpp]
+tool = "xs"
+rev = "cc8288d4f08c"    # main after the P0 merge of 2026-10-22 (replaces e104bde5: the automatic-compression push is not in this build)
+flags = ["-a", "-j4"]
+[arms.xs-cpp-j1]
+tool = "xs"
+rev = "cc8288d4f08c"    # main after the P0 merge of 2026-10-22 (replaces e104bde5: the automatic-compression push is not in this build)
+flags = ["-a", "-j1"]
+[arms.xs-rs]
+tool = "xs"
+rev = "ac1aeef00c80-rs" # PR #34 head
+flags = ["-a"]           # 8 workers and the CPU-aware level by default
+[arms.xs-rs-j1]
+tool = "xs"
+rev = "ac1aeef00c80-rs"
+flags = ["-a", "-j1"]
+
+[matrix]
+link = "mac-apollo-10g"
+corpus = ["real-psample", "scale-count-1000000"]
+scenario = ["noop"]
+direction = ["mac>apollo", "apollo>mac"]
+client = ["initiator"]
+cache = ["warm"]

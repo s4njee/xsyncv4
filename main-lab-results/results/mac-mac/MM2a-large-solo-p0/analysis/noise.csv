@@ -1,0 +1,9 @@
+experiment,kind,cell_id,corpus,scenario,sender,receiver,client,link,cache,arm,n_blocks,sigma_d,blocks_for_2pct,blocks_for_3pct,blocks_for_5pct,blocks_for_10pct,blocks_equivalent_2pct,blocks_equivalent_3pct,blocks_equivalent_5pct,blocks_equivalent_10pct
+MM2a-large-solo-p0,screening,large-solo.fresh.mac-mars.sender.warm,large-solo,fresh,mac,mars,sender,mac-mars-usb10g,warm,xs-cpp,11,0.04800554874346023,49,23,10,8,64,30,13,8
+MM2a-large-solo-p0,screening,large-solo.fresh.mac-mars.sender.warm,large-solo,fresh,mac,mars,sender,mac-mars-usb10g,warm,xs-rs,11,0.06903329080498322,98,45,18,8,130,60,24,8
+MM2a-large-solo-p0,screening,large-solo.fresh.mars-mac.receiver.warm,large-solo,fresh,mars,mac,receiver,mac-mars-usb10g,warm,xs-cpp,12,0.12911096320457877,336,152,57,17,449,203,76,22
+MM2a-large-solo-p0,screening,large-solo.fresh.mars-mac.receiver.warm,large-solo,fresh,mars,mac,receiver,mac-mars-usb10g,warm,xs-rs,12,0.13001561435565445,340,154,58,17,455,206,77,22
+MM2a-large-solo-p0,screening,large-solo.update-1pct.mac-mars.sender.warm,large-solo,update-1pct,mac,mars,sender,mac-mars-usb10g,warm,xs-cpp,12,0.01643885695616554,8,8,8,8,10,8,8,8
+MM2a-large-solo-p0,screening,large-solo.update-1pct.mac-mars.sender.warm,large-solo,update-1pct,mac,mars,sender,mac-mars-usb10g,warm,xs-rs,12,0.03498543468758435,27,13,8,8,35,17,8,8
+MM2a-large-solo-p0,screening,large-solo.update-1pct.mars-mac.receiver.warm,large-solo,update-1pct,mars,mac,receiver,mac-mars-usb10g,warm,xs-cpp,11,0.024507502520178658,15,8,8,8,19,10,8,8
+MM2a-large-solo-p0,screening,large-solo.update-1pct.mars-mac.receiver.warm,large-solo,update-1pct,mars,mac,receiver,mac-mars-usb10g,warm,xs-rs,11,0.04220948470601706,38,18,8,8,50,24,10,8

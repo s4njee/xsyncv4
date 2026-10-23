@@ -1,0 +1,23 @@
+{
+ "experiment": "RW2-checksum-noop-apollo",
+ "kind": "screening",
+ "hypothesis": "rsync is at least 5% faster to durable than xs-c++ or xs-rs in some cell. No-ops with --checksum, where every file is read and hashed at both ends. xs-rs has no -c, so it sits out.",
+ "primary": "durable_s",
+ "control": "rsync",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261022T162410Z-RW2-checksum-noop-apollo",
+  "20261023T040631Z-RW2-checksum-noop-apollo"
+ ],
+ "spec_sha256": [
+  "09941b56c621a984aeea1c3adfed5a58d509e7413397c464040ebde168c674e8",
+  "f6dca072452d477986dc9970785968717ce73d44464f11f0b5f474becedd700c"
+ ],
+ "valid_blocks": 12,
+ "void_attempts": 18,
+ "void_reasons": [
+  "mac reaches apollo by en4, not bridge100"
+ ]
+}

@@ -1,0 +1,23 @@
+{
+ "experiment": "RW1-delta-apollo",
+ "kind": "screening",
+ "hypothesis": "rsync is at least 5% faster to durable than xs-c++ or xs-rs in some cell. Delta updates of large files: a 4 KiB edit in a file (update-1pct), and a file grown at its end (append-1pct).",
+ "primary": "durable_s",
+ "control": "rsync",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261022T162410Z-RW1-delta-apollo",
+  "20261023T040630Z-RW1-delta-apollo"
+ ],
+ "spec_sha256": [
+  "96b1c94c1874283ae31a66670bd7d5a1ed165752f69bbcca17c8943bf8ac8296",
+  "ac2ee7c49197b12fabe4c0919e7bb9f960b83c51319301410e9c1c5eb96961d6"
+ ],
+ "valid_blocks": 24,
+ "void_attempts": 36,
+ "void_reasons": [
+  "mac reaches apollo by en4, not bridge100"
+ ]
+}
