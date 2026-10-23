@@ -1,0 +1,13 @@
+experiment,kind,cell_id,corpus,scenario,sender,receiver,client,link,cache,arm,metric,n_blocks,geomean,lo,hi
+AP10222213-PS-beabaee-laikav2-fresh,screening,laikav2-sample.fresh.a-aws.sender.warm,laikav2-sample,fresh,a,aws,sender,a-aws,warm,rsync,durable_s,8,1.4006032107228261,1.2853280851693116,1.5262168286229292
+AP10222213-PS-beabaee-laikav2-fresh,screening,laikav2-sample.fresh.a-aws.sender.warm,laikav2-sample,fresh,a,aws,sender,a-aws,warm,xs-rs,durable_s,8,1.1513721009557276,1.057923400479849,1.2530753306505171
+AP10222213-PS-beabaee-laikav2-fresh,screening,laikav2-sample.fresh.a-aws.sender.warm,laikav2-sample,fresh,a,aws,sender,a-aws,warm,xs-cpp,durable_s,8,1.3249743913980745,1.195220142657505,1.4688148862328532
+AP10222213-PS-beabaee-laikav2-fresh,screening,laikav2-sample.fresh.a-aws.sender.warm,laikav2-sample,fresh,a,aws,sender,a-aws,warm,rsync,wall_s,8,1.2093888805751372,1.0957325274446377,1.3348343941835594
+AP10222213-PS-beabaee-laikav2-fresh,screening,laikav2-sample.fresh.a-aws.sender.warm,laikav2-sample,fresh,a,aws,sender,a-aws,warm,xs-rs,wall_s,8,0.9677470379901272,0.8725448147678366,1.0733366512387723
+AP10222213-PS-beabaee-laikav2-fresh,screening,laikav2-sample.fresh.a-aws.sender.warm,laikav2-sample,fresh,a,aws,sender,a-aws,warm,xs-cpp,wall_s,8,1.149986009018628,1.0265529028402594,1.2882607581933647
+AP10222213-PS-beabaee-laikav2-fresh,screening,laikav2-sample.fresh.a-aws.sender.warm,laikav2-sample,fresh,a,aws,sender,a-aws,warm,rsync,cpu_s,8,0.8778825120059665,0.8426276249682034,0.9146124362051236
+AP10222213-PS-beabaee-laikav2-fresh,screening,laikav2-sample.fresh.a-aws.sender.warm,laikav2-sample,fresh,a,aws,sender,a-aws,warm,xs-rs,cpu_s,8,0.8266851500150078,0.8083415777364111,0.8454449901848123
+AP10222213-PS-beabaee-laikav2-fresh,screening,laikav2-sample.fresh.a-aws.sender.warm,laikav2-sample,fresh,a,aws,sender,a-aws,warm,xs-cpp,cpu_s,8,1.2576743665842145,1.193903200445852,1.3248518068904724
+AP10222213-PS-beabaee-laikav2-fresh,screening,laikav2-sample.fresh.a-aws.sender.warm,laikav2-sample,fresh,a,aws,sender,a-aws,warm,rsync,rss_bytes,8,13098086.077903703,12521505.609136622,13701216.471842809
+AP10222213-PS-beabaee-laikav2-fresh,screening,laikav2-sample.fresh.a-aws.sender.warm,laikav2-sample,fresh,a,aws,sender,a-aws,warm,xs-rs,rss_bytes,8,81525735.2840077,80380489.61045101,82687298.19647592
+AP10222213-PS-beabaee-laikav2-fresh,screening,laikav2-sample.fresh.a-aws.sender.warm,laikav2-sample,fresh,a,aws,sender,a-aws,warm,xs-cpp,rss_bytes,8,104568490.48205844,100101041.85762359,109235318.6218469

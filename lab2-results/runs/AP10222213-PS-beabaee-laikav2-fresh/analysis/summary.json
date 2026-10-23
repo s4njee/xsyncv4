@@ -1,0 +1,19 @@
+{
+ "experiment": "AP10222213-PS-beabaee-laikav2-fresh",
+ "kind": "screening",
+ "hypothesis": "The 0.945 ratio from five blocks at an older rev converges to below 0.95 with an eight-block interval that excludes 1 at the current rev; if the interval instead straddles 1, laikav2-sample fresh is an honest tie and should not be claimed as a win.",
+ "primary": "durable_s",
+ "control": "rsync",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261022T221359Z-AP10222213-PS-beabaee-laikav2-fresh"
+ ],
+ "spec_sha256": [
+  "2335c3e07dca176f1c8bed6b01aecb95468dfcebe8ed077d4963b8de07be85f5"
+ ],
+ "valid_blocks": 8,
+ "void_attempts": 0,
+ "void_reasons": []
+}

@@ -2207,6 +2207,80 @@
    "model": "opencode/deepseek-v4.1-flash",
    "summarizedUtc": 1792699103.25,
    "driver": "a"
+  },
+  "AP10222213-PS-beabaee-laikav2-fresh": {
+   "run": "20261022T221359Z-AP10222213-PS-beabaee-laikav2-fresh",
+   "experiment": "AP10222213-PS-beabaee-laikav2-fresh",
+   "key": "laikav2-sample.fresh.a-aws.sender.warm|6|0",
+   "utc": 1792714310.351,
+   "cell": "laikav2-sample.fresh.a-aws.sender.warm",
+   "factors": {
+    "corpus": "laikav2-sample",
+    "scenario": "fresh",
+    "sender": "a",
+    "receiver": "aws",
+    "client": "sender",
+    "link": "a-aws",
+    "cache": "warm"
+   },
+   "block": 6,
+   "attempt": 0,
+   "control": "rsync",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 1.126,
+     "gbps": 0.667,
+     "files_per_s": 1187,
+     "speed": 1.14
+    },
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 1.14,
+     "gbps": 0.659,
+     "files_per_s": 1173,
+     "speed": 1.12
+    },
+    {
+     "arm": "rsync",
+     "label": "rsync",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 1.279,
+     "gbps": 0.588,
+     "files_per_s": 1045,
+     "speed": 1
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "speed": 1.02,
+     "blocks": 7
+    },
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "speed": 1.17,
+     "blocks": 7
+    }
+   ],
+   "question": "On laikav2-sample fresh copies, is xs-rs at beabaee992b6 faster than xs-c++ by more than the 5% margin, or was the five-block 0.945 ratio a tie?",
+   "summary": "In block 6 xs-rs was fastest at 1.14x the control (1.126 s vs 1.279 s), with xs-c++ at 1.12x (1.140 s), making xs-rs about 1.2% quicker than xs-c++ in this block. For the cell so far, xs-rs sits at 1.17x and xs-c++ at 1.02x, each over seven blocks, so the running evidence is not thin. This block's xs-rs/xs-c++ gap is below the 5% margin, while the cumulative ratios point to a larger gap.",
+   "model": "opencode/deepseek-v4.1-flash",
+   "summarizedUtc": 1792714390.443,
+   "driver": "a"
   }
  }
 }
