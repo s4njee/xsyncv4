@@ -1,0 +1,33 @@
+# Written by the 6-hourly planner (2026-10-23T22:14Z). Why: Congress update-1pct is the only non-noop board cell still on a 4-block screening with no queued follow-up, so 8 blocks are exactly what turn its provisional xs-rs win into a verdict.
+id = "AP10232214-AP10232212-AP10232214-congress-u1pct-8b"
+kind = "screening"
+hypothesis = "The 4-block 0.842 xs-rs over xs-c++ ratio is real: at 8 paired blocks xs-rs's interval stays below 0.95 and excludes 1, certifying a new xs-rs win while rsync stays behind both xs builds."
+primary = "durable_s"
+delta = 0.05
+blocks = 8
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+sample_timeout_s = 7200
+
+[arms.xs-rs]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j4"]
+
+[arms.xs-cpp]
+tool = "xs"
+rev = "e104bde552f2"
+flags = ["-a", "-j4"]
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[matrix]
+link = "a-aws"
+corpus = ["congress-sample"]
+scenario = ["update-1pct"]
+direction = ["a>aws"]
+client = ["initiator"]
+cache = ["warm"]

@@ -1,0 +1,14 @@
+# Written by the 6-hourly planner at 2026-10-23T22:14Z for a; nothing is queued after the deadline.
+id = "AUTO-10232214-a"
+question = "Runner a has 5.7 h of window room after its 0.1 h queued load, but the binding limit is A's 32 GiB/day write budget: the queued 4-block real-projects fresh re-measure (~25.6 GB) plus the queued 8-block congress update-0p1pct pin (~5.2 GB) already nearly fill a day. The plan therefore spends only two 8-block congress-sample update races (~5.3 GB each), both verdict-grade pins on the only non-noop cells not already covered by a tree in progress: update-1pct (4 blocks, xs-rs/xs-cpp 0.842, no queued follow-up) and update-10pct (2 blocks, 0.871, queued only at 4 blocks). The update-1pct pin is fronted so it runs before the traffic-heavy real-projects fresh job; the update-10pct pin runs behind the backlog (after 00:00Z, on the next day's budget). Laikav2 fresh/update-1pct already have 8-block verdicts, the laikav2 ties and congress fresh/update-0p1pct are queued, real-projects fresh is queued at the newest rev, no-op cells stay postponed, and real-projects update cells cost more than 12.8 GB at the 2-block minimum so they cannot fit the cap. No xs-rs flag variants: jobs is another lab's question and no other setting has screening support."
+deadline = "2026-10-24T04:14Z"
+start = ["N0", "N1"]
+
+[nodes.N0]
+spec = "auto/AP10232214-AP10232212-AP10232214-congress-u1pct-8b.toml"
+question = "Does the newest xs-rs (beabaee992b6) still finish at or below 0.95 of xs-c++ on congress-sample update-1pct when the 4-block screening is extended to 8 paired blocks, with an interval that excludes 1?"
+front = true
+
+[nodes.N1]
+spec = "auto/AP10232214-AP10232212-AP10232214-congress-u10pct-8b.toml"
+question = "Does xs-rs at beabaee992b6 beat xs-c++ on congress-sample update-10pct once the 2-block point estimate (0.871) is replaced by an 8-block interval, taken after the queued 4-block screening has run?"
