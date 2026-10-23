@@ -1,0 +1,33 @@
+# Written by the 6-hourly planner (2026-10-23T10:14Z). Why: This is the only unpinned non-noop tie on the board, and converting it to xs-rs would add a scored win.
+id = "AP10231014-AP10231012-lk-u01pct-8b-tiebreak"
+kind = "screening"
+hypothesis = "The 4-block 0.987 xs-rs/xs-c++ ratio on laikav2-sample update-0p1pct is noise; with 8 paired blocks xs-rs at beabaee992b6 finishes at or below 0.95 of xs-c++'s durable time while both remain faster than rsync."
+primary = "durable_s"
+delta = 0.05
+blocks = 8
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+sample_timeout_s = 7200
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[arms.xs-cpp]
+tool = "xs"
+rev = "e104bde552f2"
+flags = ["-a", "-j4"]
+
+[arms.xs-rs]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j4"]
+
+[matrix]
+link = "a-aws"
+corpus = ["laikav2-sample"]
+scenario = ["update-0p1pct"]
+direction = ["a>aws"]
+client = ["initiator"]
+cache = ["warm"]

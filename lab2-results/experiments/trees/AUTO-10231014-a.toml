@@ -1,0 +1,13 @@
+# Written by the 6-hourly planner at 2026-10-23T10:14Z for a; nothing is queued after the deadline.
+id = "AUTO-10231014-a"
+question = "Runner a has 5.9 h of room after its 0.1 h queued load, but the binding limit is A's 32 GiB/day traffic: the queued 4-block real-projects fresh run may consume about 25.6 GiB, so both experiments stay on laikav2-sample, about 5.3 GiB in total. They pin the two remaining laikav2 near-ties, with one extra xs-rs -j8 arm on update-10pct to test whether a jobs setting changes a decision. All arms use full verification because this is a remote internet link, not a local one. I avoid every queued cell (congress fresh, congress update-10pct, congress update-0p1pct, laikav2 update-1pct, real-projects fresh, large-four) and leave no-op cells postponed."
+deadline = "2026-10-23T16:14Z"
+start = ["N0", "N1"]
+
+[nodes.N0]
+spec = "auto/AP10231014-AP10231012-lk-u01pct-8b-tiebreak.toml"
+question = "With a full 8-block run, is xs-rs at beabaee992b6 actually at least 5% faster than xs-c++ on laikav2-sample update-0p1pct, or is the current 4-block tie real?"
+
+[nodes.N1]
+spec = "auto/AP10231014-AP10231012-lk-u10pct-j8.toml"
+question = "Does xs-rs at beabaee992b6 hold a 5% durable-time edge on laikav2-sample update-10pct, and does raising only xs-rs to -j8 widen that edge enough to matter?"

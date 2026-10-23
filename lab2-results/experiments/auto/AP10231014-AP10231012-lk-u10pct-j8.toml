@@ -1,0 +1,38 @@
+# Written by the 6-hourly planner (2026-10-23T10:14Z). Why: It pins the other laikav2 near-tie and tests a jobs interaction no update-cell experiment has tried, while staying off the queued congress and real-projects cells.
+id = "AP10231014-AP10231012-lk-u10pct-j8"
+kind = "screening"
+hypothesis = "xs-rs holds near its current 0.967 ratio on laikav2-sample update-10pct, and raising only xs-rs to -j8 changes durable time by less than 5%, because the remaining scan and metadata work does not scale with transfer jobs."
+primary = "durable_s"
+delta = 0.05
+blocks = 8
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+sample_timeout_s = 7200
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[arms.xs-cpp]
+tool = "xs"
+rev = "e104bde552f2"
+flags = ["-a", "-j4"]
+
+[arms.xs-rs]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j4"]
+
+[arms.xs-rs-j8]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j8"]
+
+[matrix]
+link = "a-aws"
+corpus = ["laikav2-sample"]
+scenario = ["update-10pct"]
+direction = ["a>aws"]
+client = ["initiator"]
+cache = ["warm"]
