@@ -2503,6 +2503,80 @@
    "model": "opencode/deepseek-v4.1-flash",
    "summarizedUtc": 1792729243.795,
    "driver": "a"
+  },
+  "AP10230414-AP10230412-lk-u10pct-8b": {
+   "run": "20261023T041405Z-AP10230414-AP10230412-lk-u10pct-8b",
+   "experiment": "AP10230414-AP10230412-lk-u10pct-8b",
+   "key": "laikav2-sample.update-10pct.a-aws.sender.warm|6|0",
+   "utc": 1792736656.362,
+   "cell": "laikav2-sample.update-10pct.a-aws.sender.warm",
+   "factors": {
+    "corpus": "laikav2-sample",
+    "scenario": "update-10pct",
+    "sender": "a",
+    "receiver": "aws",
+    "client": "sender",
+    "link": "a-aws",
+    "cache": "warm"
+   },
+   "block": 6,
+   "attempt": 0,
+   "control": "rsync",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.56,
+     "gbps": 0.462,
+     "files_per_s": 2389,
+     "speed": 1.14
+    },
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.581,
+     "gbps": 0.445,
+     "files_per_s": 2299,
+     "speed": 1.1
+    },
+    {
+     "arm": "rsync",
+     "label": "rsync",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 0.638,
+     "gbps": 0.405,
+     "files_per_s": 2095,
+     "speed": 1
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "speed": 1.1,
+     "blocks": 7
+    },
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "speed": 1.13,
+     "blocks": 7
+    }
+   ],
+   "question": "Does the newest xs-rs at beabaee992b6 beat xs-c++ (-a -j4) on laikav2-sample update-10pct, the first time this cell races them with rsync as control?",
+   "summary": "In block 6, xs-rs was fastest at 0.56 s, 1.14x the rsync control, while xs-c++ was 1.10x. Cumulatively for this cell, xs-rs stands at 1.13x and xs-c++ at 1.10x, each across seven blocks, so the evidence is not thin. On the experiment\u2019s question, this block and the cumulative figures put xs-rs narrowly ahead of xs-c++ (1.14 vs 1.10 this block; 1.13 vs 1.10 cumulative), without showing a decisive gap.",
+   "model": "opencode/deepseek-v4.1-flash",
+   "summarizedUtc": 1792736734.249,
+   "driver": "a"
   }
  }
 }

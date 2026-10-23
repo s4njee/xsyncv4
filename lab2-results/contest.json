@@ -1,5 +1,5 @@
 {
- "updated": "2026-10-23T06:12:18+00:00",
+ "updated": "2026-10-23T07:12:18+00:00",
  "enabled": true,
  "cpp_rev": "e104bde552f2",
  "rs": {
@@ -10,7 +10,7 @@
  "score": {
   "xs-rs": 7,
   "xs-cpp": 2,
-  "tie": 1,
+  "tie": 2,
   "pending": 0
  },
  "cells": [
@@ -362,6 +362,56 @@
    "verdict": "tie",
    "rs_vs_cpp": 0.987,
    "rs_vs_rsync": 0.803,
+   "fastest": "xs-rs"
+  },
+  {
+   "cell": "laikav2-sample.update-10pct.a-aws.sender.warm",
+   "corpus": "laikav2-sample",
+   "scenario": "update-10pct",
+   "link": "a-aws",
+   "metric": "durable_s",
+   "experiment": "AP10230414-AP10230412-lk-u10pct-8b",
+   "run": "20261023T041405Z-AP10230414-AP10230412-lk-u10pct-8b",
+   "tools": {
+    "rsync": {
+     "arm": "rsync",
+     "flags": [
+      "-a"
+     ],
+     "rev": null,
+     "seconds": 0.542,
+     "lo": 0.508,
+     "hi": 0.578,
+     "blocks": 8
+    },
+    "xs-rs": {
+     "arm": "xs-rs",
+     "flags": [
+      "-a",
+      "-j4"
+     ],
+     "rev": "beabaee992b6-rs",
+     "seconds": 0.469,
+     "lo": 0.411,
+     "hi": 0.536,
+     "blocks": 8
+    },
+    "xs-cpp": {
+     "arm": "xs-cpp",
+     "flags": [
+      "-a",
+      "-j4"
+     ],
+     "rev": "e104bde552f2",
+     "seconds": 0.485,
+     "lo": 0.436,
+     "hi": 0.539,
+     "blocks": 8
+    }
+   },
+   "verdict": "tie",
+   "rs_vs_cpp": 0.967,
+   "rs_vs_rsync": 0.865,
    "fastest": "xs-rs"
   },
   {
