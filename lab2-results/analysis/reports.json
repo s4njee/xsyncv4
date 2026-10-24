@@ -1,6 +1,1346 @@
 {
  "reports": [
   {
+   "id": "2026-10-24T09:00:00.000Z",
+   "start": 1792746000,
+   "end": 1792832400,
+   "generatedAt": 1792832506.451,
+   "model": "opencode/deepseek-v4.1-flash",
+   "samples": 125,
+   "invalid": 0,
+   "runCount": 7,
+   "runKeys": [
+    "vps/AP10231014-AP10231012-lk-u10pct-j8/20261023T101433Z-AP10231014-AP10231012-lk-u10pct-j8",
+    "vps/FC-beabaee-fresh/20261024T041853Z-FC-beabaee-fresh",
+    "vps/FC-beabaee-update-10pct/20261023T042059Z-FC-beabaee-update-10pct",
+    "vps/S0-vps-sentinel/20261020T030139Z-S0-vps-sentinel-s0005",
+    "vps/AP10231014-AP10231012-lk-u01pct-8b-tiebreak/20261023T101432Z-AP10231014-AP10231012-lk-u01pct-8b-tiebreak",
+    "vps/AP10230414-AP10230412-lk-u1pct-8b-pin/20261023T041406Z-AP10230414-AP10230412-lk-u1pct-8b-pin",
+    "vps/AP10222213-PS-beabaee-update-0p1pct/20261022T221402Z-AP10222213-PS-beabaee-update-0p1pct"
+   ],
+   "evidenceRuns": [
+    {
+     "key": "vps/AP10231014-AP10231012-lk-u10pct-j8/20261023T101433Z-AP10231014-AP10231012-lk-u10pct-j8",
+     "experiment": "AP10231014-AP10231012-lk-u10pct-j8",
+     "question": "Does xs-rs at beabaee992b6 hold a 5% durable-time edge on laikav2-sample update-10pct, and does raising only xs-rs to -j8 widen that edge enough to matter?",
+     "state": "complete",
+     "hypothesis": "xs-rs holds near its current 0.967 ratio on laikav2-sample update-10pct, and raising only xs-rs to -j8 changes durable time by less than 5%, because the remaining scan and metadata work does not scale with transfer jobs.",
+     "primary": "durable_s",
+     "control": "rsync",
+     "revisions": [
+      "beabaee992b6-rs",
+      "e104bde552f2"
+     ],
+     "arms": [
+      {
+       "name": "rsync",
+       "tool": "rsync",
+       "client": null,
+       "scales": [],
+       "tuningFlags": []
+      },
+      {
+       "name": "xs-cpp",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 4,
+         "group": "201f5f0894b3ddc460440d48"
+        }
+       ],
+       "tuningFlags": [
+        "-j4"
+       ]
+      },
+      {
+       "name": "xs-rs",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 4,
+         "group": "a43f44991553c47e07a466f3"
+        }
+       ],
+       "tuningFlags": [
+        "-j4"
+       ]
+      },
+      {
+       "name": "xs-rs-j8",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 8,
+         "group": "a43f44991553c47e07a466f3"
+        }
+       ],
+       "tuningFlags": [
+        "-j8"
+       ]
+      }
+     ],
+     "samples": 32,
+     "invalid": 0,
+     "cells": [
+      {
+       "factors": {
+        "id": "laikav2-sample.update-10pct.a-aws.sender.warm",
+        "corpus": "laikav2-sample",
+        "scenario": "update-10pct",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 1337,
+        "bytes": 93971741
+       },
+       "arm": "xs-rs",
+       "validSamples": 8,
+       "blocks": 8,
+       "medianSeconds": 0.4437,
+       "medianGbps": 1.6947391870546231,
+       "medianClientCpuSeconds": 0.088,
+       "pairedBlocks": 8,
+       "medianPairedSpeedVsControl": 1.2211599878690536
+      },
+      {
+       "factors": {
+        "id": "laikav2-sample.update-10pct.a-aws.sender.warm",
+        "corpus": "laikav2-sample",
+        "scenario": "update-10pct",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 1337,
+        "bytes": 93971741
+       },
+       "arm": "xs-cpp",
+       "validSamples": 8,
+       "blocks": 8,
+       "medianSeconds": 0.47435,
+       "medianGbps": 1.5853901507855552,
+       "medianClientCpuSeconds": 0.172,
+       "pairedBlocks": 8,
+       "medianPairedSpeedVsControl": 1.1327463231185055
+      },
+      {
+       "factors": {
+        "id": "laikav2-sample.update-10pct.a-aws.sender.warm",
+        "corpus": "laikav2-sample",
+        "scenario": "update-10pct",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 1337,
+        "bytes": 93971741
+       },
+       "arm": "rsync",
+       "validSamples": 8,
+       "blocks": 8,
+       "medianSeconds": 0.53935,
+       "medianGbps": 1.3938518330344891,
+       "medianClientCpuSeconds": 0.103,
+       "pairedBlocks": 8,
+       "medianPairedSpeedVsControl": 1
+      },
+      {
+       "factors": {
+        "id": "laikav2-sample.update-10pct.a-aws.sender.warm",
+        "corpus": "laikav2-sample",
+        "scenario": "update-10pct",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 1337,
+        "bytes": 93971741
+       },
+       "arm": "xs-rs-j8",
+       "validSamples": 8,
+       "blocks": 8,
+       "medianSeconds": 0.44589999999999996,
+       "medianGbps": 1.6866267022391064,
+       "medianClientCpuSeconds": 0.1105,
+       "pairedBlocks": 8,
+       "medianPairedSpeedVsControl": 1.238817674732699
+      }
+     ]
+    },
+    {
+     "key": "vps/FC-beabaee-fresh/20261024T041853Z-FC-beabaee-fresh",
+     "experiment": "FC-beabaee-fresh",
+     "question": "On congress-sample, fresh copies: how do rsync, xs-c++ and xs-rs at beabaee992b6 compare?",
+     "state": "complete",
+     "hypothesis": "On congress-sample, fresh, the three tools differ by more than 5% in time to durable.",
+     "primary": "durable_s",
+     "control": "rsync",
+     "revisions": [
+      "e104bde552f2",
+      "beabaee992b6-rs"
+     ],
+     "arms": [
+      {
+       "name": "rsync",
+       "tool": "rsync",
+       "client": null,
+       "scales": [],
+       "tuningFlags": []
+      },
+      {
+       "name": "xs-cpp",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 4,
+         "group": "201f5f0894b3ddc460440d48"
+        }
+       ],
+       "tuningFlags": [
+        "-j4"
+       ]
+      },
+      {
+       "name": "xs-rs",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 4,
+         "group": "a43f44991553c47e07a466f3"
+        }
+       ],
+       "tuningFlags": [
+        "-j4"
+       ]
+      }
+     ],
+     "samples": 12,
+     "invalid": 0,
+     "cells": [
+      {
+       "factors": {
+        "id": "congress-sample.fresh.a-aws.sender.warm",
+        "corpus": "congress-sample",
+        "scenario": "fresh",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 25246,
+        "bytes": 218210440
+       },
+       "arm": "xs-cpp",
+       "validSamples": 4,
+       "blocks": 4,
+       "medianSeconds": 3.4074,
+       "medianGbps": 0.5123222519689403,
+       "medianClientCpuSeconds": 2.9859999999999998,
+       "pairedBlocks": 4,
+       "medianPairedSpeedVsControl": 0.9518384053034878
+      },
+      {
+       "factors": {
+        "id": "congress-sample.fresh.a-aws.sender.warm",
+        "corpus": "congress-sample",
+        "scenario": "fresh",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 25246,
+        "bytes": 218210440
+       },
+       "arm": "rsync",
+       "validSamples": 4,
+       "blocks": 4,
+       "medianSeconds": 3.22335,
+       "medianGbps": 0.5415801016950166,
+       "medianClientCpuSeconds": 2.524,
+       "pairedBlocks": 4,
+       "medianPairedSpeedVsControl": 1
+      },
+      {
+       "factors": {
+        "id": "congress-sample.fresh.a-aws.sender.warm",
+        "corpus": "congress-sample",
+        "scenario": "fresh",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 25246,
+        "bytes": 218210440
+       },
+       "arm": "xs-rs",
+       "validSamples": 4,
+       "blocks": 4,
+       "medianSeconds": 2.912,
+       "medianGbps": 0.5995713759345602,
+       "medianClientCpuSeconds": 1.9565,
+       "pairedBlocks": 4,
+       "medianPairedSpeedVsControl": 1.1071347064275483
+      }
+     ]
+    },
+    {
+     "key": "vps/FC-beabaee-update-10pct/20261023T042059Z-FC-beabaee-update-10pct",
+     "experiment": "FC-beabaee-update-10pct",
+     "question": "On congress-sample, update-10pct copies: how do rsync, xs-c++ and xs-rs at beabaee992b6 compare?",
+     "state": "complete",
+     "hypothesis": "On congress-sample, update-10pct, the three tools differ by more than 5% in time to durable.",
+     "primary": "durable_s",
+     "control": "rsync",
+     "revisions": [
+      "e104bde552f2",
+      "beabaee992b6-rs"
+     ],
+     "arms": [
+      {
+       "name": "rsync",
+       "tool": "rsync",
+       "client": null,
+       "scales": [],
+       "tuningFlags": []
+      },
+      {
+       "name": "xs-cpp",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 4,
+         "group": "201f5f0894b3ddc460440d48"
+        }
+       ],
+       "tuningFlags": [
+        "-j4"
+       ]
+      },
+      {
+       "name": "xs-rs",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 4,
+         "group": "a43f44991553c47e07a466f3"
+        }
+       ],
+       "tuningFlags": [
+        "-j4"
+       ]
+      }
+     ],
+     "samples": 12,
+     "invalid": 0,
+     "cells": [
+      {
+       "factors": {
+        "id": "congress-sample.update-10pct.a-aws.sender.warm",
+        "corpus": "congress-sample",
+        "scenario": "update-10pct",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 25246,
+        "bytes": 218210440
+       },
+       "arm": "xs-cpp",
+       "validSamples": 4,
+       "blocks": 4,
+       "medianSeconds": 1.1522000000000001,
+       "medianGbps": 1.5152801380965606,
+       "medianClientCpuSeconds": 1.286,
+       "pairedBlocks": 4,
+       "medianPairedSpeedVsControl": 1.3096522082959399
+      },
+      {
+       "factors": {
+        "id": "congress-sample.update-10pct.a-aws.sender.warm",
+        "corpus": "congress-sample",
+        "scenario": "update-10pct",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 25246,
+        "bytes": 218210440
+       },
+       "arm": "rsync",
+       "validSamples": 4,
+       "blocks": 4,
+       "medianSeconds": 1.498,
+       "medianGbps": 1.1656321126974318,
+       "medianClientCpuSeconds": 0.79,
+       "pairedBlocks": 4,
+       "medianPairedSpeedVsControl": 1
+      },
+      {
+       "factors": {
+        "id": "congress-sample.update-10pct.a-aws.sender.warm",
+        "corpus": "congress-sample",
+        "scenario": "update-10pct",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 25246,
+        "bytes": 218210440
+       },
+       "arm": "xs-rs",
+       "validSamples": 4,
+       "blocks": 4,
+       "medianSeconds": 0.96665,
+       "medianGbps": 1.8071633034504244,
+       "medianClientCpuSeconds": 0.9005000000000001,
+       "pairedBlocks": 4,
+       "medianPairedSpeedVsControl": 1.5375691656899968
+      }
+     ]
+    },
+    {
+     "key": "vps/S0-vps-sentinel/20261020T030139Z-S0-vps-sentinel-s0005",
+     "experiment": "S0-vps-sentinel",
+     "question": null,
+     "state": "complete",
+     "hypothesis": "Hour by hour, the A/A ratio stays within 3% of 1 and the xs to rsync ratio stays where the baseline put it.",
+     "primary": "wall_s",
+     "control": "xs",
+     "revisions": [
+      "a3e52c2c61de"
+     ],
+     "arms": [
+      {
+       "name": "xs",
+       "tool": "xs",
+       "client": null,
+       "scales": [],
+       "tuningFlags": []
+      },
+      {
+       "name": "again",
+       "tool": "xs",
+       "client": null,
+       "scales": [],
+       "tuningFlags": []
+      },
+      {
+       "name": "rsync",
+       "tool": "rsync",
+       "client": null,
+       "scales": [],
+       "tuningFlags": []
+      }
+     ],
+     "samples": 9,
+     "invalid": 0,
+     "cells": [
+      {
+       "factors": {
+        "id": "real-projects.noop.a-aws.sender.warm",
+        "corpus": "real-projects",
+        "scenario": "noop",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 69316,
+        "bytes": 2134981089
+       },
+       "arm": "rsync",
+       "validSamples": 3,
+       "blocks": 3,
+       "medianSeconds": 3.5731,
+       "medianGbps": 4.780120542945901,
+       "medianClientCpuSeconds": 1.948,
+       "pairedBlocks": 3,
+       "medianPairedSpeedVsControl": 1.266325048639465
+      },
+      {
+       "factors": {
+        "id": "real-projects.noop.a-aws.sender.warm",
+        "corpus": "real-projects",
+        "scenario": "noop",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 69316,
+        "bytes": 2134981089
+       },
+       "arm": "again",
+       "validSamples": 3,
+       "blocks": 3,
+       "medianSeconds": 4.428,
+       "medianGbps": 3.8572377398373985,
+       "medianClientCpuSeconds": 7.747,
+       "pairedBlocks": 3,
+       "medianPairedSpeedVsControl": 0.9963133439497391
+      },
+      {
+       "factors": {
+        "id": "real-projects.noop.a-aws.sender.warm",
+        "corpus": "real-projects",
+        "scenario": "noop",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 69316,
+        "bytes": 2134981089
+       },
+       "arm": "xs",
+       "validSamples": 3,
+       "blocks": 3,
+       "medianSeconds": 4.5672,
+       "medianGbps": 3.7396761061481874,
+       "medianClientCpuSeconds": 7.869,
+       "pairedBlocks": 3,
+       "medianPairedSpeedVsControl": 1
+      }
+     ]
+    },
+    {
+     "key": "vps/AP10231014-AP10231012-lk-u01pct-8b-tiebreak/20261023T101432Z-AP10231014-AP10231012-lk-u01pct-8b-tiebreak",
+     "experiment": "AP10231014-AP10231012-lk-u01pct-8b-tiebreak",
+     "question": "With a full 8-block run, is xs-rs at beabaee992b6 actually at least 5% faster than xs-c++ on laikav2-sample update-0p1pct, or is the current 4-block tie real?",
+     "state": "complete",
+     "hypothesis": "The 4-block 0.987 xs-rs/xs-c++ ratio on laikav2-sample update-0p1pct is noise; with 8 paired blocks xs-rs at beabaee992b6 finishes at or below 0.95 of xs-c++'s durable time while both remain faster than rsync.",
+     "primary": "durable_s",
+     "control": "rsync",
+     "revisions": [
+      "beabaee992b6-rs",
+      "e104bde552f2"
+     ],
+     "arms": [
+      {
+       "name": "rsync",
+       "tool": "rsync",
+       "client": null,
+       "scales": [],
+       "tuningFlags": []
+      },
+      {
+       "name": "xs-cpp",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 4,
+         "group": "201f5f0894b3ddc460440d48"
+        }
+       ],
+       "tuningFlags": [
+        "-j4"
+       ]
+      },
+      {
+       "name": "xs-rs",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 4,
+         "group": "a43f44991553c47e07a466f3"
+        }
+       ],
+       "tuningFlags": [
+        "-j4"
+       ]
+      }
+     ],
+     "samples": 24,
+     "invalid": 0,
+     "cells": [
+      {
+       "factors": {
+        "id": "laikav2-sample.update-0p1pct.a-aws.sender.warm",
+        "corpus": "laikav2-sample",
+        "scenario": "update-0p1pct",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 1337,
+        "bytes": 93971741
+       },
+       "arm": "xs-rs",
+       "validSamples": 8,
+       "blocks": 8,
+       "medianSeconds": 0.3769,
+       "medianGbps": 1.9946294327176606,
+       "medianClientCpuSeconds": 0.045,
+       "pairedBlocks": 8,
+       "medianPairedSpeedVsControl": 1.2364526796304949
+      },
+      {
+       "factors": {
+        "id": "laikav2-sample.update-0p1pct.a-aws.sender.warm",
+        "corpus": "laikav2-sample",
+        "scenario": "update-0p1pct",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 1337,
+        "bytes": 93971741
+       },
+       "arm": "xs-cpp",
+       "validSamples": 8,
+       "blocks": 8,
+       "medianSeconds": 0.40135,
+       "medianGbps": 1.8731668169225688,
+       "medianClientCpuSeconds": 0.105,
+       "pairedBlocks": 8,
+       "medianPairedSpeedVsControl": 1.2060431271464864
+      },
+      {
+       "factors": {
+        "id": "laikav2-sample.update-0p1pct.a-aws.sender.warm",
+        "corpus": "laikav2-sample",
+        "scenario": "update-0p1pct",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 1337,
+        "bytes": 93971741
+       },
+       "arm": "rsync",
+       "validSamples": 8,
+       "blocks": 8,
+       "medianSeconds": 0.4646,
+       "medianGbps": 1.6182126788432163,
+       "medianClientCpuSeconds": 0.0815,
+       "pairedBlocks": 8,
+       "medianPairedSpeedVsControl": 1
+      }
+     ]
+    },
+    {
+     "key": "vps/AP10230414-AP10230412-lk-u1pct-8b-pin/20261023T041406Z-AP10230414-AP10230412-lk-u1pct-8b-pin",
+     "experiment": "AP10230414-AP10230412-lk-u1pct-8b-pin",
+     "question": "Does the near-parity xs-rs over xs-c++ result on laikav2-sample update-1pct survive more blocks and a direct interval that excludes 1?",
+     "state": "complete",
+     "hypothesis": "The 0.939 xs-rs over xs-c++ point estimate for laikav2-sample update-1pct is real: with additional blocks the direct ratio stays below 1 by at least the 5% margin; if the interval includes 1, the cell is a tie rather than a win.",
+     "primary": "durable_s",
+     "control": "rsync",
+     "revisions": [
+      "beabaee992b6-rs",
+      "e104bde552f2"
+     ],
+     "arms": [
+      {
+       "name": "xs-rs",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 4,
+         "group": "a43f44991553c47e07a466f3"
+        }
+       ],
+       "tuningFlags": [
+        "-j4"
+       ]
+      },
+      {
+       "name": "xs-cpp",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 4,
+         "group": "201f5f0894b3ddc460440d48"
+        }
+       ],
+       "tuningFlags": [
+        "-j4"
+       ]
+      },
+      {
+       "name": "rsync",
+       "tool": "rsync",
+       "client": null,
+       "scales": [],
+       "tuningFlags": []
+      }
+     ],
+     "samples": 24,
+     "invalid": 0,
+     "cells": [
+      {
+       "factors": {
+        "id": "laikav2-sample.update-1pct.a-aws.sender.warm",
+        "corpus": "laikav2-sample",
+        "scenario": "update-1pct",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 1337,
+        "bytes": 93971741
+       },
+       "arm": "xs-rs",
+       "validSamples": 8,
+       "blocks": 8,
+       "medianSeconds": 0.36435,
+       "medianGbps": 2.0637254767534357,
+       "medianClientCpuSeconds": 0.0495,
+       "pairedBlocks": 8,
+       "medianPairedSpeedVsControl": 1.2825098236645247
+      },
+      {
+       "factors": {
+        "id": "laikav2-sample.update-1pct.a-aws.sender.warm",
+        "corpus": "laikav2-sample",
+        "scenario": "update-1pct",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 1337,
+        "bytes": 93971741
+       },
+       "arm": "rsync",
+       "validSamples": 8,
+       "blocks": 8,
+       "medianSeconds": 0.47419999999999995,
+       "medianGbps": 1.5854288008485478,
+       "medianClientCpuSeconds": 0.084,
+       "pairedBlocks": 8,
+       "medianPairedSpeedVsControl": 1
+      },
+      {
+       "factors": {
+        "id": "laikav2-sample.update-1pct.a-aws.sender.warm",
+        "corpus": "laikav2-sample",
+        "scenario": "update-1pct",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 1337,
+        "bytes": 93971741
+       },
+       "arm": "xs-cpp",
+       "validSamples": 8,
+       "blocks": 8,
+       "medianSeconds": 0.40645,
+       "medianGbps": 1.849617950192517,
+       "medianClientCpuSeconds": 0.1105,
+       "pairedBlocks": 8,
+       "medianPairedSpeedVsControl": 1.1816053305398557
+      }
+     ]
+    },
+    {
+     "key": "vps/AP10222213-PS-beabaee-update-0p1pct/20261022T221402Z-AP10222213-PS-beabaee-update-0p1pct",
+     "experiment": "AP10222213-PS-beabaee-update-0p1pct",
+     "question": "On congress-sample with 0.1% of files changed, does xs-rs at beabaee992b6 hold its small-file advantage over xs-c++ and rsync when almost nothing has changed?",
+     "state": "complete",
+     "hypothesis": "At 0.1% churn the run is mostly scanning and metadata, where xs-rs has matched or edged xs-c++ on the deferred no-op cell; xs-rs finishes at or below 1.0 of xs-c++'s durable time and rsync falls behind, making update-0p1pct a likely xs-rs cell.",
+     "primary": "durable_s",
+     "control": "rsync",
+     "revisions": [
+      "e104bde552f2",
+      "beabaee992b6-rs"
+     ],
+     "arms": [
+      {
+       "name": "xs-rs",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 4,
+         "group": "a43f44991553c47e07a466f3"
+        }
+       ],
+       "tuningFlags": [
+        "-j4"
+       ]
+      },
+      {
+       "name": "xs-cpp",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 4,
+         "group": "201f5f0894b3ddc460440d48"
+        }
+       ],
+       "tuningFlags": [
+        "-j4"
+       ]
+      },
+      {
+       "name": "rsync",
+       "tool": "rsync",
+       "client": null,
+       "scales": [],
+       "tuningFlags": []
+      }
+     ],
+     "samples": 12,
+     "invalid": 0,
+     "cells": [
+      {
+       "factors": {
+        "id": "congress-sample.update-0p1pct.a-aws.sender.warm",
+        "corpus": "congress-sample",
+        "scenario": "update-0p1pct",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 25246,
+        "bytes": 218210440
+       },
+       "arm": "rsync",
+       "validSamples": 4,
+       "blocks": 4,
+       "medianSeconds": 1.63205,
+       "medianGbps": 1.0701483899846131,
+       "medianClientCpuSeconds": 0.6545000000000001,
+       "pairedBlocks": 4,
+       "medianPairedSpeedVsControl": 1
+      },
+      {
+       "factors": {
+        "id": "congress-sample.update-0p1pct.a-aws.sender.warm",
+        "corpus": "congress-sample",
+        "scenario": "update-0p1pct",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 25246,
+        "bytes": 218210440
+       },
+       "arm": "xs-cpp",
+       "validSamples": 4,
+       "blocks": 4,
+       "medianSeconds": 0.84605,
+       "medianGbps": 2.0660099286055402,
+       "medianClientCpuSeconds": 0.943,
+       "pairedBlocks": 4,
+       "medianPairedSpeedVsControl": 1.8629285127275879
+      },
+      {
+       "factors": {
+        "id": "congress-sample.update-0p1pct.a-aws.sender.warm",
+        "corpus": "congress-sample",
+        "scenario": "update-0p1pct",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 25246,
+        "bytes": 218210440
+       },
+       "arm": "xs-rs",
+       "validSamples": 4,
+       "blocks": 4,
+       "medianSeconds": 0.7159,
+       "medianGbps": 2.440040429638201,
+       "medianClientCpuSeconds": 0.7295,
+       "pairedBlocks": 4,
+       "medianPairedSpeedVsControl": 2.260018629992685
+      }
+     ]
+    }
+   ],
+   "commentary": {
+    "headline": "xs-rs wins most small-file cells, but real-projects is a clear loss",
+    "paragraphs": [
+     "The day's scoreboard is lopsided in xs-rs's favor: 10 wins to xs-c++'s 2, with no ties or pending cells. The exceptions are the largest real-projects cells. On fresh real-projects, xs-rs took 42.805s versus 29.298s for xs-c++ and 20.055s for rsync (1.461 times xs-c++, 2.134 times rsync). On noop it took 2.983s versus 1.793s for xs-c++, though still ahead of rsync's 3.77s. These are the losses that matter most, and the supplied run list has no detailed BL2-real-projects run to explain them.",
+     "In congress and laikav2, xs-rs mostly delivered. It won congress fresh at 2.912s versus 3.4074s for xs-c++ and 3.22335s for rsync, and congress update-10pct at 0.96665s versus 1.1522s and 1.498s. The narrowest win was laikav2 update-0.1pct: 0.3769s versus 0.40135s, a scoreboard ratio of 0.952 that misses the planned 0.95 bar, so it is provisional. On laikav2 update-1pct, xs-rs reached 0.36435s versus 0.40645s for xs-c++ and 0.4742s for rsync over eight matched blocks.",
+     "A useful negative result came from raising only xs-rs to -j8 on laikav2 update-10pct: 0.4459s versus 0.4437s at -j4, while client CPU rose from 0.088s to 0.1105s. That does not support more workers as a simple win. The sentinel's A/A ratio of 0.996 suggests low drift in its own setup, but it used an older revision and its xs arm was far slower than rsync on large real-projects noop, so it warns about corpus effects rather than settling the current race. Most congress comparisons rest on four blocks; treat them as screening evidence."
+    ]
+   },
+   "overview": "These experiments provided useful tuning insights. Here are the insights: xs-rs is the leading candidate on most congress and laikav2 small-file and update cells, beating xs-c++ in ten scoreboard cells and often using less client CPU. It is not universal: xs-c++ wins both real-projects cells, and rsync also beats xs-rs on fresh real-projects. Raising xs-rs from four to eight workers did not improve laikav2 update-10pct and added CPU. The laikav2 update-0.1pct win is narrow and provisional. Target the real-projects losses next before treating xs-rs as a broad default.",
+   "insights": [
+    {
+     "caveat": "No BL2-real-projects run-level samples, block counts or receiver CPU are supplied in the window; the sentinel is an older revision and not a controlled current comparison.",
+     "evidence": "Contest scoreboard BL2-real-projects; related sentinel run shows the large real-projects noop workload is CPU-heavy for the older xs arm (4.5672s, 7.869s client CPU versus rsync 3.5731s, 1.948s).",
+     "finding": "xs-c++ beats xs-rs in both real-projects scoreboard cells, and rsync also beats xs-rs on fresh. xs-rs took 42.805s versus 29.298s for xs-c++ and 20.055s for rsync on fresh (rs_vs_cpp 1.461, rs_vs_rsync 2.134); noop was 2.983s versus 1.793s (1.664) but still 0.791 of rsync's time.",
+     "runKeys": [
+      "vps/S0-vps-sentinel/20261020T030139Z-S0-vps-sentinel-s0005"
+     ],
+     "title": "Real-projects is xs-rs's clear weak spot"
+    },
+    {
+     "caveat": "Single cell and one workload; -j8 was tested only for xs-rs, so it is not a general worker-count result.",
+     "evidence": "8 valid paired blocks per arm; speed vs rsync 1.2212 (xs-rs -j4), 1.1327 (xs-c++), 1.2388 (xs-rs -j8).",
+     "finding": "On laikav2 update-10pct, xs-rs -j4 was faster than xs-c++ and rsync, and -j8 did not improve it. Times were 0.4437s (xs-rs -j4), 0.47435s (xs-c++), 0.53935s (rsync) and 0.4459s (xs-rs -j8); client CPU rose from 0.088s at -j4 to 0.1105s at -j8.",
+     "runKeys": [
+      "vps/AP10231014-AP10231012-lk-u10pct-j8/20261023T101433Z-AP10231014-AP10231012-lk-u10pct-j8"
+     ],
+     "title": "xs-rs beats both controls on laikav2 update-10pct, but -j8 does not help"
+    },
+    {
+     "caveat": "Eight blocks in one warm, sender-client, a-aws cell; medians only, no interval.",
+     "evidence": "Speed vs rsync 1.2825 for xs-rs and 1.1816 for xs-c++; scoreboard rs_vs_cpp 0.909.",
+     "finding": "Laikav2 update-1pct gives xs-rs a clear eight-block win: 0.36435s versus 0.40645s for xs-c++ and 0.4742s for rsync, with client CPU 0.0495s versus 0.1105s and 0.084s.",
+     "runKeys": [
+      "vps/AP10230414-AP10230412-lk-u1pct-8b-pin/20261023T041406Z-AP10230414-AP10230412-lk-u1pct-8b-pin"
+     ],
+     "title": "Laikav2 update-1pct confirms an xs-rs edge over eight blocks"
+    },
+    {
+     "caveat": "The hypothesis that additional blocks would push the ratio to 0.95 or below was not confirmed; 0.952 is very close to parity and small-sample noise could matter.",
+     "evidence": "8 paired blocks; speed vs rsync 1.2365 for xs-rs and 1.2060 for xs-c++; scoreboard rs_vs_cpp 0.952, rs_vs_rsync 0.809.",
+     "finding": "Laikav2 update-0.1pct is only a narrow, provisional xs-rs win. Raw medians were 0.3769s versus 0.40135s for xs-c++ and 0.4646s for rsync, but the scoreboard ratio is 0.952, missing the pre-set 0.95 margin; client CPU was 0.045s versus 0.105s for xs-c++.",
+     "runKeys": [
+      "vps/AP10231014-AP10231012-lk-u01pct-8b-tiebreak/20261023T101432Z-AP10231014-AP10231012-lk-u01pct-8b-tiebreak"
+     ],
+     "title": "Laikav2 update-0.1pct stays a narrow provisional win"
+    },
+    {
+     "caveat": "Only four blocks; the xs-c++-slower-than-rsync result may not repeat and no receiver CPU is supplied.",
+     "evidence": "4 paired blocks; speed vs rsync 1.1071 (xs-rs) and 0.9518 (xs-c++); scoreboard rs_vs_cpp 0.849.",
+     "finding": "Congress fresh reverses an assumption that xs-c++ should at least match rsync: xs-rs was fastest at 2.912s, rsync second at 3.22335s, and xs-c++ slowest at 3.4074s, with lower client CPU for xs-rs (1.9565s versus 2.986s for xs-c++).",
+     "runKeys": [
+      "vps/FC-beabaee-fresh/20261024T041853Z-FC-beabaee-fresh"
+     ],
+     "title": "Congress fresh exposes an xs-c++ regression against rsync"
+    },
+    {
+     "caveat": "Four blocks only; rsync used less client CPU (0.79s), so xs-rs's advantage is not simply lower CPU across all tools.",
+     "evidence": "4 paired blocks; speed vs rsync 1.5376 for xs-rs and 1.3097 for xs-c++; scoreboard rs_vs_cpp 0.912.",
+     "finding": "On congress update-10pct, xs-rs beat both tools: 0.96665s versus 1.1522s for xs-c++ and 1.498s for rsync, while using less client CPU than xs-c++ (0.9005s versus 1.286s).",
+     "runKeys": [
+      "vps/FC-beabaee-update-10pct/20261023T042059Z-FC-beabaee-update-10pct"
+     ],
+     "title": "Congress update-10pct favors xs-rs but the sample is small"
+    },
+    {
+     "caveat": "Four blocks and a scan-heavy scenario; the large rsync gap is not evidence that xs-rs will dominate all congress workloads.",
+     "evidence": "4 paired blocks; client CPU 0.7295s for xs-rs versus 0.943s for xs-c++ and 0.6545s for rsync; scoreboard rs_vs_cpp 0.851.",
+     "finding": "Congress update-0.1pct produced the largest rsync margin in the supplied runs: xs-rs 0.7159s versus 0.84605s for xs-c++ and 1.63205s for rsync, with speed vs rsync 2.26x.",
+     "runKeys": [
+      "vps/AP10222213-PS-beabaee-update-0p1pct/20261022T221402Z-AP10222213-PS-beabaee-update-0p1pct"
+     ],
+     "title": "Congress little-churn cell shows the largest rsync gap"
+    },
+    {
+     "caveat": "This is an old revision (a3e52c2c61de), uses xs rather than the current xs-rs vs xs-c++ race, and has only three blocks; it cannot be used as a current head-to-head.",
+     "evidence": "3 valid blocks per arm, real-projects noop, 69,316 files and 2,134,981,089 bytes; again/xs ratio 0.9963.",
+     "finding": "The sentinel's A/A rerun was stable at 0.9963 of xs time, but its older xs arm was much slower and more CPU-hungry than rsync on real-projects noop: 4.5672s versus 3.5731s, with 7.869s versus 1.948s client CPU.",
+     "runKeys": [
+      "vps/S0-vps-sentinel/20261020T030139Z-S0-vps-sentinel-s0005"
+     ],
+     "title": "Sentinel A/A is stable, but the large-corpus CPU penalty is real for the old xs arm"
+    }
+   ],
+   "limitations": [
+    "Most congress and laikav2 cells have four or eight paired blocks; no confidence intervals or significance tests were supplied.",
+    "The real-projects scoreboard losses lack corresponding detailed run entries in this window, so their cause is unresolved.",
+    "All cells are warm-cache, sender-client, a-aws runs; direction, storage, compression and cache interactions are not varied here.",
+    "Client CPU only is reported; receiver CPU, network, storage and server cost are not measured.",
+    "Cross-experiment comparisons are not controlled: corpora, file counts, revisions and arm sets differ.",
+    "The sentinel uses an older revision and a different arm mix; it is a stability illustration, not current race evidence."
+   ],
+   "nextSteps": [
+    "Tune real-projects fresh first: xs-rs 42.805s versus xs-c++ 29.298s and rsync 20.055s (rs_vs_cpp 1.461, rs_vs_rsync 2.134); collect full run-level blocks, receiver CPU and storage metrics.",
+    "Then tune real-projects noop: xs-rs 2.983s versus xs-c++ 1.793s (rs_vs_cpp 1.664), though xs-rs still beats rsync at 3.77s; isolate scanning and metadata cost.",
+    "Repeat laikav2 update-0.1pct with more paired blocks to test the 0.952 scoreboard ratio against the 0.95 target.",
+    "Validate congress fresh and update-10pct wins with at least eight blocks and receiver CPU; four-block wins are screening only.",
+    "Keep xs-rs at -j4 for now; do not promote -j8 after 0.4459s versus 0.4437s and higher client CPU on laikav2 update-10pct.",
+    "Re-run sentinel on current xs-rs and xs-c++ revisions to check A/A drift and large-corpus CPU before drawing default conclusions."
+   ],
+   "tuningImplications": [
+    {
+     "evidenceStrength": "Moderate: 8 paired blocks, one cell.",
+     "experiment": "AP10231014-AP10231012-lk-u10pct-j8",
+     "nextTest": "Repeat -j4 versus -j8 on update-10pct and test worker count on real-projects fresh.",
+     "recommendation": "Keep xs-rs -j4 as the candidate for laikav2 update-10pct; do not adopt -j8 from this evidence.",
+     "runKeys": [
+      "vps/AP10231014-AP10231012-lk-u10pct-j8/20261023T101433Z-AP10231014-AP10231012-lk-u10pct-j8"
+     ],
+     "settings": [
+      "xs-rs -j4",
+      "xs-rs -j8"
+     ],
+     "tradeoffs": "-j8 was 0.4459s versus 0.4437s at -j4 and used 0.1105s versus 0.088s client CPU; no time benefit and more CPU."
+    },
+    {
+     "evidenceStrength": "Provisional: 4 paired blocks.",
+     "experiment": "FC-beabaee-fresh",
+     "nextTest": "Repeat with at least 8 blocks plus receiver CPU.",
+     "recommendation": "Keep xs-rs -j4 as candidate for congress fresh; xs-c++ is not the safe pick because it fell behind rsync.",
+     "runKeys": [
+      "vps/FC-beabaee-fresh/20261024T041853Z-FC-beabaee-fresh"
+     ],
+     "settings": [
+      "xs-rs -j4"
+     ],
+     "tradeoffs": "xs-rs 2.912s versus xs-c++ 3.4074s and rsync 3.22335s, with lower client CPU (1.9565s versus 2.986s); only 4 blocks."
+    },
+    {
+     "evidenceStrength": "Provisional: 4 paired blocks.",
+     "experiment": "FC-beabaee-update-10pct",
+     "nextTest": "Validate with 8 or more blocks and compare 0.1pct, 1pct and 10pct churn.",
+     "recommendation": "Keep xs-rs -j4 as candidate for congress update-10pct; it beat both controls.",
+     "runKeys": [
+      "vps/FC-beabaee-update-10pct/20261023T042059Z-FC-beabaee-update-10pct"
+     ],
+     "settings": [
+      "xs-rs -j4"
+     ],
+     "tradeoffs": "0.96665s versus 1.1522s for xs-c++ and 1.498s for rsync; rsync used less client CPU (0.79s versus 0.9005s), showing a mixed CPU tradeoff."
+    },
+    {
+     "evidenceStrength": "Low for current race; useful stability check.",
+     "experiment": "S0-vps-sentinel",
+     "nextTest": "Re-run sentinel on current xs-rs and xs-c++ with at least 8 blocks.",
+     "recommendation": "Use as noise-floor and large-corpus warning, not as a current race result.",
+     "runKeys": [
+      "vps/S0-vps-sentinel/20261020T030139Z-S0-vps-sentinel-s0005"
+     ],
+     "settings": [],
+     "tradeoffs": "A/A 0.9963, but older xs took 4.5672s versus rsync 3.5731s on real-projects noop and used 7.869s versus 1.948s client CPU."
+    },
+    {
+     "evidenceStrength": "Provisional: 8 blocks but narrow ratio.",
+     "experiment": "AP10231014-AP10231012-lk-u01pct-8b-tiebreak",
+     "nextTest": "Add paired blocks to test whether the ratio is reliably below 0.95.",
+     "recommendation": "Treat xs-rs -j4 as a provisional narrow winner on laikav2 update-0.1pct, not a proven 5% margin.",
+     "runKeys": [
+      "vps/AP10231014-AP10231012-lk-u01pct-8b-tiebreak/20261023T101432Z-AP10231014-AP10231012-lk-u01pct-8b-tiebreak"
+     ],
+     "settings": [
+      "xs-rs -j4"
+     ],
+     "tradeoffs": "0.3769s versus 0.40135s for xs-c++ and 0.4646s for rsync; scoreboard ratio 0.952, just missing the 0.95 bar, with lower client CPU (0.045s versus 0.105s)."
+    },
+    {
+     "evidenceStrength": "Moderate: 8 paired blocks, one cell.",
+     "experiment": "AP10230414-AP10230412-lk-u1pct-8b-pin",
+     "nextTest": "Repeat and check churn neighbors 0.1pct and 10pct.",
+     "recommendation": "Keep xs-rs -j4 as candidate for laikav2 update-1pct.",
+     "runKeys": [
+      "vps/AP10230414-AP10230412-lk-u1pct-8b-pin/20261023T041406Z-AP10230414-AP10230412-lk-u1pct-8b-pin"
+     ],
+     "settings": [
+      "xs-rs -j4"
+     ],
+     "tradeoffs": "0.36435s versus 0.40645s for xs-c++ and 0.4742s for rsync; client CPU 0.0495s versus 0.1105s. Clear in this cell but not broad."
+    },
+    {
+     "evidenceStrength": "Provisional: 4 paired blocks.",
+     "experiment": "AP10222213-PS-beabaee-update-0p1pct",
+     "nextTest": "Repeat with at least 8 blocks and receiver CPU; include noop to isolate scanning.",
+     "recommendation": "Keep xs-rs -j4 as candidate for congress update-0.1pct; strongest rsync margin but low block count.",
+     "runKeys": [
+      "vps/AP10222213-PS-beabaee-update-0p1pct/20261022T221402Z-AP10222213-PS-beabaee-update-0p1pct"
+     ],
+     "settings": [
+      "xs-rs -j4"
+     ],
+     "tradeoffs": "0.7159s versus 0.84605s for xs-c++ and 1.63205s for rsync; client CPU 0.7295s versus 0.943s for xs-c++, though rsync used 0.6545s. Four blocks."
+    }
+   ],
+   "charts": [
+    {
+     "id": "0-0-medianPairedSpeedVsControl",
+     "title": "Speed vs rsync: laikav2-sample (a \u2192 aws)",
+     "runKey": "vps/AP10231014-AP10231012-lk-u10pct-j8/20261023T101433Z-AP10231014-AP10231012-lk-u10pct-j8",
+     "metric": "medianPairedSpeedVsControl",
+     "unit": "\u00d7 rsync",
+     "primary": "durable_s",
+     "factors": {
+      "id": "laikav2-sample.update-10pct.a-aws.sender.warm",
+      "corpus": "laikav2-sample",
+      "scenario": "update-10pct",
+      "sender": "a",
+      "receiver": "aws",
+      "client": "sender",
+      "link": "a-aws",
+      "cache": "warm",
+      "files": 1337,
+      "bytes": 93971741
+     },
+     "values": [
+      {
+       "arm": "xs-rs",
+       "value": 1.2211599878690536,
+       "samples": 8,
+       "blocks": 8
+      },
+      {
+       "arm": "xs-cpp",
+       "value": 1.1327463231185055,
+       "samples": 8,
+       "blocks": 8
+      },
+      {
+       "arm": "rsync",
+       "value": 1,
+       "samples": 8,
+       "blocks": 8
+      },
+      {
+       "arm": "xs-rs-j8",
+       "value": 1.238817674732699,
+       "samples": 8,
+       "blocks": 8
+      }
+     ],
+     "note": "Window-only medians; no confidence intervals. Compare arms within this cell. "
+    },
+    {
+     "id": "1-0-medianPairedSpeedVsControl",
+     "title": "Speed vs rsync: congress-sample (a \u2192 aws)",
+     "runKey": "vps/FC-beabaee-fresh/20261024T041853Z-FC-beabaee-fresh",
+     "metric": "medianPairedSpeedVsControl",
+     "unit": "\u00d7 rsync",
+     "primary": "durable_s",
+     "factors": {
+      "id": "congress-sample.fresh.a-aws.sender.warm",
+      "corpus": "congress-sample",
+      "scenario": "fresh",
+      "sender": "a",
+      "receiver": "aws",
+      "client": "sender",
+      "link": "a-aws",
+      "cache": "warm",
+      "files": 25246,
+      "bytes": 218210440
+     },
+     "values": [
+      {
+       "arm": "xs-cpp",
+       "value": 0.9518384053034878,
+       "samples": 4,
+       "blocks": 4
+      },
+      {
+       "arm": "rsync",
+       "value": 1,
+       "samples": 4,
+       "blocks": 4
+      },
+      {
+       "arm": "xs-rs",
+       "value": 1.1071347064275483,
+       "samples": 4,
+       "blocks": 4
+      }
+     ],
+     "note": "Window-only medians; no confidence intervals. Compare arms within this cell. "
+    },
+    {
+     "id": "2-0-medianPairedSpeedVsControl",
+     "title": "Speed vs rsync: congress-sample (a \u2192 aws)",
+     "runKey": "vps/FC-beabaee-update-10pct/20261023T042059Z-FC-beabaee-update-10pct",
+     "metric": "medianPairedSpeedVsControl",
+     "unit": "\u00d7 rsync",
+     "primary": "durable_s",
+     "factors": {
+      "id": "congress-sample.update-10pct.a-aws.sender.warm",
+      "corpus": "congress-sample",
+      "scenario": "update-10pct",
+      "sender": "a",
+      "receiver": "aws",
+      "client": "sender",
+      "link": "a-aws",
+      "cache": "warm",
+      "files": 25246,
+      "bytes": 218210440
+     },
+     "values": [
+      {
+       "arm": "xs-cpp",
+       "value": 1.3096522082959399,
+       "samples": 4,
+       "blocks": 4
+      },
+      {
+       "arm": "rsync",
+       "value": 1,
+       "samples": 4,
+       "blocks": 4
+      },
+      {
+       "arm": "xs-rs",
+       "value": 1.5375691656899968,
+       "samples": 4,
+       "blocks": 4
+      }
+     ],
+     "note": "Window-only medians; no confidence intervals. Compare arms within this cell. "
+    },
+    {
+     "id": "4-0-medianPairedSpeedVsControl",
+     "title": "Speed vs rsync: laikav2-sample (a \u2192 aws)",
+     "runKey": "vps/AP10231014-AP10231012-lk-u01pct-8b-tiebreak/20261023T101432Z-AP10231014-AP10231012-lk-u01pct-8b-tiebreak",
+     "metric": "medianPairedSpeedVsControl",
+     "unit": "\u00d7 rsync",
+     "primary": "durable_s",
+     "factors": {
+      "id": "laikav2-sample.update-0p1pct.a-aws.sender.warm",
+      "corpus": "laikav2-sample",
+      "scenario": "update-0p1pct",
+      "sender": "a",
+      "receiver": "aws",
+      "client": "sender",
+      "link": "a-aws",
+      "cache": "warm",
+      "files": 1337,
+      "bytes": 93971741
+     },
+     "values": [
+      {
+       "arm": "xs-rs",
+       "value": 1.2364526796304949,
+       "samples": 8,
+       "blocks": 8
+      },
+      {
+       "arm": "xs-cpp",
+       "value": 1.2060431271464864,
+       "samples": 8,
+       "blocks": 8
+      },
+      {
+       "arm": "rsync",
+       "value": 1,
+       "samples": 8,
+       "blocks": 8
+      }
+     ],
+     "note": "Window-only medians; no confidence intervals. Compare arms within this cell. "
+    },
+    {
+     "id": "5-0-medianPairedSpeedVsControl",
+     "title": "Speed vs rsync: laikav2-sample (a \u2192 aws)",
+     "runKey": "vps/AP10230414-AP10230412-lk-u1pct-8b-pin/20261023T041406Z-AP10230414-AP10230412-lk-u1pct-8b-pin",
+     "metric": "medianPairedSpeedVsControl",
+     "unit": "\u00d7 rsync",
+     "primary": "durable_s",
+     "factors": {
+      "id": "laikav2-sample.update-1pct.a-aws.sender.warm",
+      "corpus": "laikav2-sample",
+      "scenario": "update-1pct",
+      "sender": "a",
+      "receiver": "aws",
+      "client": "sender",
+      "link": "a-aws",
+      "cache": "warm",
+      "files": 1337,
+      "bytes": 93971741
+     },
+     "values": [
+      {
+       "arm": "xs-rs",
+       "value": 1.2825098236645247,
+       "samples": 8,
+       "blocks": 8
+      },
+      {
+       "arm": "rsync",
+       "value": 1,
+       "samples": 8,
+       "blocks": 8
+      },
+      {
+       "arm": "xs-cpp",
+       "value": 1.1816053305398557,
+       "samples": 8,
+       "blocks": 8
+      }
+     ],
+     "note": "Window-only medians; no confidence intervals. Compare arms within this cell. "
+    },
+    {
+     "id": "6-0-medianPairedSpeedVsControl",
+     "title": "Speed vs rsync: congress-sample (a \u2192 aws)",
+     "runKey": "vps/AP10222213-PS-beabaee-update-0p1pct/20261022T221402Z-AP10222213-PS-beabaee-update-0p1pct",
+     "metric": "medianPairedSpeedVsControl",
+     "unit": "\u00d7 rsync",
+     "primary": "durable_s",
+     "factors": {
+      "id": "congress-sample.update-0p1pct.a-aws.sender.warm",
+      "corpus": "congress-sample",
+      "scenario": "update-0p1pct",
+      "sender": "a",
+      "receiver": "aws",
+      "client": "sender",
+      "link": "a-aws",
+      "cache": "warm",
+      "files": 25246,
+      "bytes": 218210440
+     },
+     "values": [
+      {
+       "arm": "rsync",
+       "value": 1,
+       "samples": 4,
+       "blocks": 4
+      },
+      {
+       "arm": "xs-cpp",
+       "value": 1.8629285127275879,
+       "samples": 4,
+       "blocks": 4
+      },
+      {
+       "arm": "xs-rs",
+       "value": 2.260018629992685,
+       "samples": 4,
+       "blocks": 4
+      }
+     ],
+     "note": "Window-only medians; no confidence intervals. Compare arms within this cell. "
+    }
+   ]
+  },
+  {
    "id": "2026-10-23T09:00:00.000Z",
    "start": 1792659600,
    "end": 1792746000,
@@ -9000,5 +10340,5 @@
   }
  ],
  "error": null,
- "lastAttempt": 1792746312.905
+ "lastAttempt": 1792832415.674
 }
