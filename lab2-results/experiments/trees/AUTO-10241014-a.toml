@@ -1,0 +1,14 @@
+# Written by the 6-hourly planner at 2026-10-24T10:14Z for a; nothing is queued after the deadline.
+id = "AUTO-10241014-a"
+question = "Runner a is idle, so after its 0.4 h queued load it has 5.6 h of measurement room; the binding limit is A's 32 GiB/day write budget, which the queued 4-block real-projects fresh re-measure (~25.6 GB) and the three queued congress update pins (~10.4 GB) already exhaust, with the three real-projects update screens also queued. Every congress and real-projects transfer cell is therefore either queued or already decided, so the plan spends only ~7.4 GB on the two laikav2 cells whose ratios sit on the 5% line: u10pct at the standard flags (0.951 for xs-rs -j4 over xs-c++, while the scored win came from an xs-rs-j8 arm) and u0p1pct (0.952). The u10pct race is fronted so it runs before the traffic-heavy real-projects job; the u0p1pct race runs behind the backlog. No no-op cells, no duplicate queued cells, no new flag variants, and no confirm arm because no absolute speed floor is known."
+deadline = "2026-10-24T16:14Z"
+start = ["N0", "N1"]
+
+[nodes.N0]
+spec = "auto/AP10241014-AP10241012-lk-u10pct-j4-12b.toml"
+question = "On laikav2-sample update-10pct over a>aws, does xs-rs's cell win hold at the standard -a -j4 flags with 12 paired blocks, or was the 0.911 rs_vs_cpp score produced only by the xs-rs-j8 arm?"
+front = true
+
+[nodes.N1]
+spec = "auto/AP10241014-AP10241012-lk-u01pct-12b.toml"
+question = "On laikav2-sample update-0p1pct over a>aws, does xs-rs at -a -j4 stay at or below 0.95 of xs-c++'s durable time with 12 paired blocks, or does the current 0.952 ratio resolve to a tie?"

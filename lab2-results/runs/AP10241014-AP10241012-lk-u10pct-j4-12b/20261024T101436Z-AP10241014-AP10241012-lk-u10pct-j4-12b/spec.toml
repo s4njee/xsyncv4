@@ -1,0 +1,33 @@
+# Written by the 6-hourly planner (2026-10-24T10:14Z). Why: The scoreboard's only u10pct verdict was recorded with an xs-rs-j8 arm while the same run's -j4 arm was 0.951 against xs-c++, so 12 blocks at the standard flags decide whether the cell is won, tied, or a variant-only win.
+id = "AP10241014-AP10241012-lk-u10pct-j4-12b"
+kind = "screening"
+hypothesis = "At -a -j4, xs-rs's durable time is about 0.95 of xs-c++'s and the 12-block ratio interval includes 0.95, so the default-flag cell is a near-tie; only the -j8 variant clears the 5% margin."
+primary = "durable_s"
+delta = 0.05
+blocks = 12
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+sample_timeout_s = 7200
+
+[arms.xs-rs]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j4"]
+
+[arms.xs-cpp]
+tool = "xs"
+rev = "e104bde552f2"
+flags = ["-a", "-j4"]
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[matrix]
+link = "a-aws"
+corpus = ["laikav2-sample"]
+scenario = ["update-10pct"]
+direction = ["a>aws"]
+client = ["initiator"]
+cache = ["warm"]
