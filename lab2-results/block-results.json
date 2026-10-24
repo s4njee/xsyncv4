@@ -2872,6 +2872,97 @@
    "summary": null,
    "model": null,
    "driver": "a"
+  },
+  "AP10231014-AP10231012-lk-u10pct-j8": {
+   "run": "20261023T101433Z-AP10231014-AP10231012-lk-u10pct-j8",
+   "experiment": "AP10231014-AP10231012-lk-u10pct-j8",
+   "key": "laikav2-sample.update-10pct.a-aws.sender.warm|6|0",
+   "utc": 1792823102.384,
+   "cell": "laikav2-sample.update-10pct.a-aws.sender.warm",
+   "factors": {
+    "corpus": "laikav2-sample",
+    "scenario": "update-10pct",
+    "sender": "a",
+    "receiver": "aws",
+    "client": "sender",
+    "link": "a-aws",
+    "cache": "warm"
+   },
+   "block": 6,
+   "attempt": 0,
+   "control": "rsync",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "rsync",
+     "label": "rsync",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 0.593,
+     "gbps": 0.218,
+     "files_per_s": 2256,
+     "speed": 1
+    },
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.487,
+     "gbps": 0.265,
+     "files_per_s": 2746,
+     "speed": 1.22
+    },
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.475,
+     "gbps": 0.272,
+     "files_per_s": 2814,
+     "speed": 1.25
+    },
+    {
+     "arm": "xs-rs-j8",
+     "label": "xs-rs -j8",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.479,
+     "gbps": 0.27,
+     "files_per_s": 2790,
+     "speed": 1.24
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "speed": 1.13,
+     "blocks": 7
+    },
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "speed": 1.23,
+     "blocks": 7
+    },
+    {
+     "arm": "xs-rs-j8",
+     "label": "xs-rs -j8",
+     "speed": 1.23,
+     "blocks": 7
+    }
+   ],
+   "question": "Does xs-rs at beabaee992b6 hold a 5% durable-time edge on laikav2-sample update-10pct, and does raising only xs-rs to -j8 widen that edge enough to matter?",
+   "summary": "In this block xs-rs was fastest at 0.475 s against rsync's 0.593 s, a 1.25x speed ratio; xs-rs -j8 came in at 1.24x and xs-c++ at 1.22x. Across seven blocks the cumulative ratios are 1.23x for xs-rs, 1.23x for xs-rs -j8 and 1.13x for xs-c++, so the evidence is not thin. This supports xs-rs clearing the 5% durable-time margin, while raising it to -j8 showed no measurable widening here.",
+   "model": "opencode/deepseek-v4.1-flash",
+   "summarizedUtc": 1792823143.435,
+   "driver": "a"
   }
  }
 }

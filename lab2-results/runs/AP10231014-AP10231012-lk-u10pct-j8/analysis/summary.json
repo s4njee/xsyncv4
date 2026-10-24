@@ -1,0 +1,19 @@
+{
+ "experiment": "AP10231014-AP10231012-lk-u10pct-j8",
+ "kind": "screening",
+ "hypothesis": "xs-rs holds near its current 0.967 ratio on laikav2-sample update-10pct, and raising only xs-rs to -j8 changes durable time by less than 5%, because the remaining scan and metadata work does not scale with transfer jobs.",
+ "primary": "durable_s",
+ "control": "rsync",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261023T101433Z-AP10231014-AP10231012-lk-u10pct-j8"
+ ],
+ "spec_sha256": [
+  "808db60f187350acf710b2d373d82a98002cd0b5d2ffc7c3f099c322d26dacb4"
+ ],
+ "valid_blocks": 8,
+ "void_attempts": 0,
+ "void_reasons": []
+}
