@@ -1,0 +1,19 @@
+{
+ "experiment": "AP10231014-AP10231012-lk-u01pct-8b-tiebreak",
+ "kind": "screening",
+ "hypothesis": "The 4-block 0.987 xs-rs/xs-c++ ratio on laikav2-sample update-0p1pct is noise; with 8 paired blocks xs-rs at beabaee992b6 finishes at or below 0.95 of xs-c++'s durable time while both remain faster than rsync.",
+ "primary": "durable_s",
+ "control": "rsync",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261023T101432Z-AP10231014-AP10231012-lk-u01pct-8b-tiebreak"
+ ],
+ "spec_sha256": [
+  "05218e020ddd72c58ecd87eb925c463e6c115feefdeb0313741e5689ec265022"
+ ],
+ "valid_blocks": 8,
+ "void_attempts": 0,
+ "void_reasons": []
+}

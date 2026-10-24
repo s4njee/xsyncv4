@@ -2725,6 +2725,80 @@
    "model": "opencode/deepseek-v4.1-flash",
    "summarizedUtc": 1792785580.452,
    "driver": "a"
+  },
+  "AP10231014-AP10231012-lk-u01pct-8b-tiebreak": {
+   "run": "20261023T101432Z-AP10231014-AP10231012-lk-u01pct-8b-tiebreak",
+   "experiment": "AP10231014-AP10231012-lk-u01pct-8b-tiebreak",
+   "key": "laikav2-sample.update-0p1pct.a-aws.sender.warm|7|0",
+   "utc": 1792802513.809,
+   "cell": "laikav2-sample.update-0p1pct.a-aws.sender.warm",
+   "factors": {
+    "corpus": "laikav2-sample",
+    "scenario": "update-0p1pct",
+    "sender": "a",
+    "receiver": "aws",
+    "client": "sender",
+    "link": "a-aws",
+    "cache": "warm"
+   },
+   "block": 7,
+   "attempt": 0,
+   "control": "rsync",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "rsync",
+     "label": "rsync",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 0.481,
+     "gbps": 0.002,
+     "files_per_s": 2782,
+     "speed": 1
+    },
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.399,
+     "gbps": 0.003,
+     "files_per_s": 3349,
+     "speed": 1.2
+    },
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.388,
+     "gbps": 0.003,
+     "files_per_s": 3444,
+     "speed": 1.24
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "speed": 1.18,
+     "blocks": 8
+    },
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "speed": 1.24,
+     "blocks": 8
+    }
+   ],
+   "question": "With a full 8-block run, is xs-rs at beabaee992b6 actually at least 5% faster than xs-c++ on laikav2-sample update-0p1pct, or is the current 4-block tie real?",
+   "summary": "In block 7, xs-rs was fastest at 1.24x the control (24% faster), with xs-c++ at 1.20x. With 8 blocks, the evidence is not thin: xs-rs stands at 1.24x and xs-c++ at 1.18x cumulatively, roughly a 5% edge. That bears on the question by putting xs-rs near the 5% threshold over xs-c++, rather than showing a clear tie.",
+   "model": "opencode/deepseek-v4.1-flash",
+   "summarizedUtc": 1792802577.636,
+   "driver": "a"
   }
  }
 }
