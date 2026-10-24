@@ -35,7 +35,17 @@ struct WriterState {
     sustained: f64,
 }
 
-/// `CompressionLink`: chooses the zstd level from the rate of active transport writes.
+/// How fast levels 3 and 6 compress against level 1 on one core, and how much smaller their output
+/// is, where a level has not been measured itself. From the compression study's zstd measurements on
+/// a Raspberry Pi 4 and 5 (docs/compression-study.md): 0.67-0.78 and 0.16 of level 1's speed, and
+/// 0.77 and 0.61 of its size on congress; rounded towards caution.
+const SPEED_AGAINST_LEVEL_1: [f64; 3] = [1.0, 0.6, 0.15];
+const SIZE_AGAINST_LEVEL_1: [f64; 3] = [1.0, 0.85, 0.75];
+/// A level's speed and ratio are trusted from this much input on.
+const MEASURED_BYTES: u64 = 1 << 20;
+
+/// `CompressionLink`: chooses the zstd level from the rate of active transport writes, and from how
+/// fast this machine's workers compress at each level.
 #[derive(Debug, Default)]
 pub struct CompressionLink {
     bytes: AtomicU64,
@@ -44,11 +54,26 @@ pub struct CompressionLink {
     last_level: AtomicI32,
     compressed_input: [AtomicU64; 3],
     writer: Mutex<WriterState>,
+    /// Per level (1, 3, 6): input bytes, output bytes and nanoseconds spent compressing, by all workers.
+    cpu_input: [AtomicU64; 3],
+    cpu_output: [AtomicU64; 3],
+    cpu_ns: [AtomicU64; 3],
+    workers: AtomicU64,
+}
+
+fn slot(level: i32) -> usize {
+    if level >= 6 {
+        2
+    } else if level >= 3 {
+        1
+    } else {
+        0
+    }
 }
 
 impl CompressionLink {
     pub fn new() -> Self {
-        Self { cap: AtomicI32::new(6), last_level: AtomicI32::new(3), ..Self::default() }
+        Self { cap: AtomicI32::new(6), last_level: AtomicI32::new(1), ..Self::default() }
     }
 
     /// Record a writer batch: `count` bytes took `elapsed` ns to write, finishing at `now`.
@@ -103,21 +128,77 @@ impl CompressionLink {
         }
         let count = self.bytes.load(Ordering::Relaxed);
         let elapsed = self.nanoseconds.load(Ordering::Relaxed);
+        // Level 1 until the link is known: the cheapest level that still compresses well, and the one
+        // a slow CPU can always afford (level 3 cost a Raspberry Pi 4 two to five times level 1's time).
         if count < 256 * 1024 || elapsed < 1_000_000 {
-            return 3.min(self.cap());
+            return 1.min(self.cap());
         }
         let mut rate = count as f64 * 1e9 / elapsed as f64;
         if rate_limit != 0 {
             rate = rate.min(rate_limit as f64);
         }
-        let chosen = if rate >= 64.0 * 1024.0 * 1024.0 {
+        let mut chosen = if rate >= 64.0 * 1024.0 * 1024.0 {
             1
         } else if rate < 8.0 * 1024.0 * 1024.0 {
             6
         } else {
             3
         };
+        // A higher level pays only while this machine compresses at it faster than the link would
+        // carry the lower level's output (the study's model: level L+ beats L when the link is
+        // slower than ratio(L) x speed(L+)). Step down until it does, or to level 1.
+        while chosen > 1 {
+            let lower = if chosen == 6 { 3 } else { 1 };
+            match self.capacity(chosen) {
+                Some(capacity) if capacity < rate / self.ratio(lower) => chosen = lower,
+                _ => break,
+            }
+        }
         chosen.min(self.cap())
+    }
+
+    /// Record that the workers compressed `input` bytes into `output` at `level`, in `nanoseconds`.
+    pub fn record_compression(&self, level: i32, input: u64, output: u64, nanoseconds: u64) {
+        let i = slot(level);
+        self.cpu_input[i].fetch_add(input, Ordering::Relaxed);
+        self.cpu_output[i].fetch_add(output, Ordering::Relaxed);
+        self.cpu_ns[i].fetch_add(nanoseconds, Ordering::Relaxed);
+    }
+
+    /// How many workers compress at once, which scales one worker's measured speed to the machine's.
+    pub fn set_workers(&self, workers: usize) {
+        self.workers.store(workers as u64, Ordering::Relaxed);
+    }
+
+    /// Raw bytes per second all workers together compress at `level`: measured at that level, or else
+    /// from a measured level by zstd's usual speeds. None until some level has been measured.
+    fn capacity(&self, level: i32) -> Option<f64> {
+        let workers = self.workers.load(Ordering::Relaxed).max(1) as f64;
+        let per_worker = |i: usize| {
+            let (input, ns) = (self.cpu_input[i].load(Ordering::Relaxed), self.cpu_ns[i].load(Ordering::Relaxed));
+            (input >= MEASURED_BYTES && ns > 0).then(|| input as f64 * 1e9 / ns as f64)
+        };
+        let target = slot(level);
+        if let Some(rate) = per_worker(target) {
+            return Some(rate * workers);
+        }
+        (0..3).find_map(|i| {
+            per_worker(i).map(|rate| rate / SPEED_AGAINST_LEVEL_1[i] * SPEED_AGAINST_LEVEL_1[target] * workers)
+        })
+    }
+
+    /// Compressed bytes per raw byte at `level`: measured, or from level 1's by zstd's usual sizes,
+    /// or a third, as text and the congress corpus compress at level 1 in xs's frames.
+    fn ratio(&self, level: i32) -> f64 {
+        let measured = |i: usize| {
+            let input = self.cpu_input[i].load(Ordering::Relaxed);
+            (input >= MEASURED_BYTES).then(|| self.cpu_output[i].load(Ordering::Relaxed) as f64 / input as f64)
+        };
+        let target = slot(level);
+        measured(target)
+            .or_else(|| (0..3).find_map(|i| measured(i).map(|r| r / SIZE_AGAINST_LEVEL_1[i] * SIZE_AGAINST_LEVEL_1[target])))
+            .unwrap_or(0.33 * SIZE_AGAINST_LEVEL_1[target])
+            .clamp(0.01, 1.0)
     }
 
     /// The level for compression this end chose (not the peer's `-z`). A transient stall
@@ -142,8 +223,7 @@ impl CompressionLink {
 
     /// Record that a worker compressed `raw` bytes at an automatic level.
     pub fn count(&self, level: i32, raw: u64) {
-        let slot = if level >= 6 { 2 } else if level >= 3 { 1 } else { 0 };
-        self.compressed_input[slot].fetch_add(raw, Ordering::Relaxed);
+        self.compressed_input[slot(level)].fetch_add(raw, Ordering::Relaxed);
     }
 
     pub fn set_last_level(&self, level: i32) {
@@ -241,10 +321,11 @@ mod tests {
 
     #[test]
     fn the_rate_rule_is_the_one_compression_cpp_documents() {
+        // Unlike the C++ (level 3), an unknown link starts at level 1.
         let unknown = CompressionLink::new();
-        assert_eq!(unknown.level(false, 3, 0), 3);
+        assert_eq!(unknown.level(false, 3, 0), 1);
         unknown.observe(128 * 1024, SECOND, Transport::Saturated, SECOND, 0);
-        assert_eq!(unknown.level(false, 3, 0), 3);
+        assert_eq!(unknown.level(false, 3, 0), 1);
 
         let fast = CompressionLink::new();
         let medium = CompressionLink::new();
@@ -313,9 +394,41 @@ mod tests {
     }
 
     #[test]
+    fn a_level_this_cpu_cannot_feed_the_link_with_steps_down() {
+        // A 20 MiB/s link: the rate rule alone picks level 3.
+        let link = || {
+            let link = CompressionLink::new();
+            link.observe(20 * MIB, SECOND, Transport::Saturated, SECOND, 0);
+            link
+        };
+        assert_eq!(link().level(false, 3, 0), 3);
+        // One slow worker at level 1, 50 MB/s of input into a third of it: at level 3 it would
+        // manage about 30 MB/s, below the 63 MB/s of input level 1 fills that link with.
+        let slow = link();
+        slow.set_workers(1);
+        slow.record_compression(1, 50 << 20, (50 << 20) / 3, SECOND);
+        assert_eq!(slow.level(false, 3, 0), 1);
+        // Four workers at 500 MB/s each afford level 3, and are measured at it from then on.
+        let fast = link();
+        fast.set_workers(4);
+        fast.record_compression(1, 500 << 20, (500 << 20) / 3, SECOND);
+        assert_eq!(fast.level(false, 3, 0), 3);
+        fast.record_compression(3, 8 << 20, 2 << 20, SECOND);
+        assert_eq!(fast.level(false, 3, 0), 1);
+        // A 4 MiB/s link: level 6 by the rate rule, which a 50 MB/s worker cannot sustain, but level 3 it can.
+        let crawling = CompressionLink::new();
+        crawling.observe(4 * MIB, SECOND, Transport::Saturated, SECOND, 0);
+        crawling.set_workers(1);
+        crawling.record_compression(1, 50 << 20, (50 << 20) / 3, SECOND);
+        assert_eq!(crawling.level(false, 3, 0), 3);
+        // Explicit levels are never second-guessed.
+        assert_eq!(slow.level(true, 6, 0), 6);
+    }
+
+    #[test]
     fn the_summary_names_the_dominant_level_and_its_share() {
         let report = CompressionLink::new();
-        assert_eq!(report.summary(), "3 (automatic)");
+        assert_eq!(report.summary(), "1 (automatic)");
         report.count(1, 600);
         assert_eq!(report.summary(), "1 (automatic)");
         report.count(3, 300);
