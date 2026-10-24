@@ -1,10 +1,10 @@
 {
  "experiments": {
   "S0-vps-sentinel": {
-   "run": "20261020T030138Z-S0-vps-sentinel-s0004",
+   "run": "20261020T030139Z-S0-vps-sentinel-s0005",
    "experiment": "S0-vps-sentinel",
    "key": "real-projects.noop.a-aws.sender.warm|1|0",
-   "utc": 1792716154.333,
+   "utc": 1792810072.527,
    "cell": "real-projects.noop.a-aws.sender.warm",
    "factors": {
     "corpus": "real-projects",
@@ -26,9 +26,9 @@
      "control": true,
      "valid": true,
      "void": null,
-     "seconds": 5.041,
-     "gbps": 3.388,
-     "files_per_s": 13750,
+     "seconds": 4.603,
+     "gbps": 3.711,
+     "files_per_s": 15059,
      "speed": 1
     },
     {
@@ -37,10 +37,10 @@
      "control": false,
      "valid": true,
      "void": null,
-     "seconds": 5.336,
-     "gbps": 3.201,
-     "files_per_s": 12991,
-     "speed": 0.94
+     "seconds": 4.62,
+     "gbps": 3.697,
+     "files_per_s": 15004,
+     "speed": 1
     },
     {
      "arm": "rsync",
@@ -48,30 +48,30 @@
      "control": false,
      "valid": true,
      "void": null,
-     "seconds": 4.095,
-     "gbps": 4.171,
-     "files_per_s": 16928,
-     "speed": 1.23
+     "seconds": 3.435,
+     "gbps": 4.972,
+     "files_per_s": 20178,
+     "speed": 1.34
     }
    ],
    "soFar": [
     {
      "arm": "again",
      "label": "xs-c++",
-     "speed": 0.89,
+     "speed": 0.98,
      "blocks": 2
     },
     {
      "arm": "rsync",
      "label": "rsync",
-     "speed": 1.14,
+     "speed": 1.26,
      "blocks": 2
     }
    ],
    "question": null,
-   "summary": "In this a-to-aws noop block, rsync was fastest at 1.23x the control, running in 4.095 s versus xs-c++'s 5.041 s; a second xs-c++ run measured 0.94x. Cumulatively this cell shows xs-c++ at 0.89x and rsync at 1.14x, each over two blocks, so the evidence is still thin. No experiment question is stated, so the block only establishes that rsync led here.",
+   "summary": "In block 1 of real-projects noop a\u2192aws, rsync was fastest at 3.435 s against the xs-c++ control's 4.603 s, a 1.34x speedup. Cumulatively rsync sits at 1.26x and xs-c++ at 0.98x, each resting on only two blocks, so the evidence is still thin. This block is consistent with that early rsync lead but does not settle it.",
    "model": "opencode/deepseek-v4.1-flash",
-   "summarizedUtc": 1792716180.329,
+   "summarizedUtc": 1792810098.653,
    "driver": "a"
   },
   "E1-vps-baseline": {
