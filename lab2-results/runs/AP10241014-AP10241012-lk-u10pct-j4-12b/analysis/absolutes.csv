@@ -1,0 +1,13 @@
+experiment,kind,cell_id,corpus,scenario,sender,receiver,client,link,cache,arm,metric,n_blocks,geomean,lo,hi
+AP10241014-AP10241012-lk-u10pct-j4-12b,screening,laikav2-sample.update-10pct.a-aws.sender.warm,laikav2-sample,update-10pct,a,aws,sender,a-aws,warm,rsync,durable_s,12,0.5429884748099836,0.5109582458518132,0.5770265695290882
+AP10241014-AP10241012-lk-u10pct-j4-12b,screening,laikav2-sample.update-10pct.a-aws.sender.warm,laikav2-sample,update-10pct,a,aws,sender,a-aws,warm,xs-rs,durable_s,12,0.45063354324569627,0.4141487319074425,0.4903325174096024
+AP10241014-AP10241012-lk-u10pct-j4-12b,screening,laikav2-sample.update-10pct.a-aws.sender.warm,laikav2-sample,update-10pct,a,aws,sender,a-aws,warm,xs-cpp,durable_s,12,0.4937277795408372,0.45715580511126713,0.5332254727269515
+AP10241014-AP10241012-lk-u10pct-j4-12b,screening,laikav2-sample.update-10pct.a-aws.sender.warm,laikav2-sample,update-10pct,a,aws,sender,a-aws,warm,rsync,wall_s,12,0.512174373759614,0.48052189850074944,0.5459118303546862
+AP10241014-AP10241012-lk-u10pct-j4-12b,screening,laikav2-sample.update-10pct.a-aws.sender.warm,laikav2-sample,update-10pct,a,aws,sender,a-aws,warm,xs-rs,wall_s,12,0.42010802341513426,0.3837075966251779,0.45996157722718944
+AP10241014-AP10241012-lk-u10pct-j4-12b,screening,laikav2-sample.update-10pct.a-aws.sender.warm,laikav2-sample,update-10pct,a,aws,sender,a-aws,warm,xs-cpp,wall_s,12,0.4627847005034747,0.42625313214103155,0.5024471678233436
+AP10241014-AP10241012-lk-u10pct-j4-12b,screening,laikav2-sample.update-10pct.a-aws.sender.warm,laikav2-sample,update-10pct,a,aws,sender,a-aws,warm,rsync,cpu_s,12,0.1517058735585119,0.13500171671153374,0.17047688453716506
+AP10241014-AP10241012-lk-u10pct-j4-12b,screening,laikav2-sample.update-10pct.a-aws.sender.warm,laikav2-sample,update-10pct,a,aws,sender,a-aws,warm,xs-rs,cpu_s,12,0.1380014181163553,0.1121813765997091,0.16976428690191794
+AP10241014-AP10241012-lk-u10pct-j4-12b,screening,laikav2-sample.update-10pct.a-aws.sender.warm,laikav2-sample,update-10pct,a,aws,sender,a-aws,warm,xs-cpp,cpu_s,12,0.22829382355081493,0.20002870719819102,0.2605529506312879
+AP10241014-AP10241012-lk-u10pct-j4-12b,screening,laikav2-sample.update-10pct.a-aws.sender.warm,laikav2-sample,update-10pct,a,aws,sender,a-aws,warm,rsync,rss_bytes,12,12451840.000000007,0.0,0.0
+AP10241014-AP10241012-lk-u10pct-j4-12b,screening,laikav2-sample.update-10pct.a-aws.sender.warm,laikav2-sample,update-10pct,a,aws,sender,a-aws,warm,xs-rs,rss_bytes,12,12451840.000000007,0.0,0.0
+AP10241014-AP10241012-lk-u10pct-j4-12b,screening,laikav2-sample.update-10pct.a-aws.sender.warm,laikav2-sample,update-10pct,a,aws,sender,a-aws,warm,xs-cpp,rss_bytes,12,12457967.389119526,12444485.079632897,12471464.305290798

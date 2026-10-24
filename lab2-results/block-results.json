@@ -2963,6 +2963,80 @@
    "model": "opencode/deepseek-v4.1-flash",
    "summarizedUtc": 1792823143.435,
    "driver": "a"
+  },
+  "AP10241014-AP10241012-lk-u10pct-j4-12b": {
+   "run": "20261024T101436Z-AP10241014-AP10241012-lk-u10pct-j4-12b",
+   "experiment": "AP10241014-AP10241012-lk-u10pct-j4-12b",
+   "key": "laikav2-sample.update-10pct.a-aws.sender.warm|11|0",
+   "utc": 1792847485.367,
+   "cell": "laikav2-sample.update-10pct.a-aws.sender.warm",
+   "factors": {
+    "corpus": "laikav2-sample",
+    "scenario": "update-10pct",
+    "sender": "a",
+    "receiver": "aws",
+    "client": "sender",
+    "link": "a-aws",
+    "cache": "warm"
+   },
+   "block": 11,
+   "attempt": 0,
+   "control": "rsync",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.43,
+     "gbps": 0.045,
+     "files_per_s": 3108,
+     "speed": 1.16
+    },
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.424,
+     "gbps": 0.046,
+     "files_per_s": 3156,
+     "speed": 1.18
+    },
+    {
+     "arm": "rsync",
+     "label": "rsync",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 0.498,
+     "gbps": 0.039,
+     "files_per_s": 2685,
+     "speed": 1
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "speed": 1.1,
+     "blocks": 12
+    },
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "speed": 1.2,
+     "blocks": 12
+    }
+   ],
+   "question": "On laikav2-sample update-10pct over a>aws, does xs-rs's cell win hold at the standard -a -j4 flags with 12 paired blocks, or was the 0.911 rs_vs_cpp score produced only by the xs-rs-j8 arm?",
+   "summary": "In block 11, xs-c++ was fastest at 0.424 s, 1.18x the rsync control (0.498 s), just ahead of xs-rs at 1.16x. Across 12 blocks in this cell, the cumulative ratios are 1.2x for xs-rs and 1.1x for xs-c++, so the evidence is not thin. This supports xs-rs's cell win at the standard flags, though this block alone shows xs-c++ slightly ahead.",
+   "model": "opencode/deepseek-v4.1-flash",
+   "summarizedUtc": 1792847559.769,
+   "driver": "a"
   }
  }
 }
