@@ -1,0 +1,29 @@
+# Made by conduct.py for tree T19-until-sunday, node SM1c: confirms xs-cpp-noatomic from SM1-small-onto-mac-apollo,
+# faster there on real-congress, scale-count-1000000: real-congress apollo→mac xs-cpp-noatomic 1.42×; scale-count-1000000 apollo→mac xs-cpp-noatomic 1.76×
+id = "SM1c-small-onto-mac-confirm"
+kind = "confirmatory"
+hypothesis = "xs-cpp-noatomic is more than 5% faster than xs-cpp on real-congress, scale-count-1000000 (from SM1-small-onto-mac-apollo, confirmed with fresh blocks)."
+primary = "durable_s"
+delta = 0.05
+blocks = 8
+control = "xs-cpp"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.xs-cpp]
+tool = "xs"
+rev = "cc8288d4f08c"
+flags = ["-a", "-j4"]
+
+[arms.xs-cpp-noatomic]
+tool = "xs"
+rev = "cc8288d4f08c"
+flags = ["-a", "-j4", "--no-atomic"]
+
+[matrix]
+link = "mac-apollo-10g"
+corpus = ["real-congress", "scale-count-1000000"]
+scenario = ["fresh", "noop"]
+direction = ["apollo>mac"]
+client = ["initiator"]
+cache = ["warm"]

@@ -1,0 +1,35 @@
+# T19-until-sunday, wave 2 (2026-10-23): new questions in place of repeating the sentinel.
+# RW2 checked -c no-ops on congress and csearchv3 only. The same on psample (21 GB) and laikav2 (large build files), where hashing, not file count, dominates.
+id = "CK1-checksum-noop-more-apollo"
+kind = "screening"
+hypothesis = "rsync -c is at least 5% faster than xs -c at a no-op on a tree of large files."
+primary = "durable_s"
+delta = 0.05
+blocks = 3
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+max_hours = 2
+sample_timeout_s = 3600
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a", "-c"]
+
+[arms.xs-cpp]
+tool = "xs"
+rev = "cc8288d4f08c"
+flags = ["-a", "-c", "-j4"]
+
+[arms.xs-cpp-j8]
+tool = "xs"
+rev = "cc8288d4f08c"
+flags = ["-a", "-c", "-j8"]
+
+[matrix]
+link = "mac-apollo-10g"
+corpus = ["real-psample", "local-laikav2"]
+scenario = ["noop"]
+direction = ["mac>apollo", "apollo>mac"]
+client = ["initiator"]
+cache = ["warm"]

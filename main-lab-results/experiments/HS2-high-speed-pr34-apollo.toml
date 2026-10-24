@@ -1,0 +1,40 @@
+# T19-until-sunday, wave 2 (2026-10-23): new questions in place of repeating the sentinel.
+# HS1 again with PR #34 at its own defaults, beside the xs-rs it changes: 4 GiB of incompressible data as 1, 4, 16 and 64 files.
+id = "HS2-high-speed-pr34-apollo"
+kind = "screening"
+hypothesis = "On 4 GiB of incompressible data, xs-rs at PR #34 is at least as fast as its base in every file count."
+primary = "durable_s"
+delta = 0.05
+blocks = 4
+control = "xs-rs-base"
+verify = "first-last"
+cleanup = "eager"
+max_hours = 2.5
+sample_timeout_s = 3600
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[arms.xs-cpp]
+tool = "xs"
+rev = "cc8288d4f08c"
+flags = ["-a", "-j4"]
+
+[arms.xs-rs]
+tool = "xs"
+rev = "ac1aeef00c80-rs"
+flags = ["-a"]
+
+[arms.xs-rs-base]
+tool = "xs"
+rev = "e671c84aa680-rs"
+flags = ["-a", "-j4"]
+
+[matrix]
+link = "mac-apollo-10g"
+corpus = ["hs-1x4g", "hs-4x1g", "hs-16x256m", "hs-64x64m"]
+scenario = ["fresh"]
+direction = ["mac>apollo", "apollo>mac"]
+client = ["initiator"]
+cache = ["warm"]

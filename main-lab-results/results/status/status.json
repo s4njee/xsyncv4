@@ -1,38 +1,25 @@
 {
- "generatedUtc": 1792749604.997,
- "nextUtc": 1792753200,
+ "generatedUtc": 1792836057.743,
+ "nextUtc": 1792839600,
  "runners": [
   {
    "id": "mac",
    "state": "running",
    "reachable": true,
    "current": {
-    "experiment": "RW3-noop-many-apollo",
-    "run": "20261023T040631Z-RW3-noop-many-apollo",
-    "done": 6,
-    "planned": 30,
-    "question": "rsync is at least 5% faster to durable than xs-c++ or xs-rs in some cell. No-ops of many files, where NT1021 saw rsync pull real-psample in 75.7 s against xs-cpp 151.6 s; -j1 arms for a per-core comparison."
+    "experiment": "SM1-small-onto-mac-apollo",
+    "run": "20261024T082417Z-SM1-small-onto-mac-apollo",
+    "done": 74,
+    "planned": 90,
+    "question": "Pulling small files onto the Mac, xs --no-atomic is at least 5% faster than xs's default, and xs is at least as fast as rsync."
    },
-   "next": [
-    {
-     "experiment": "RW4-fresh-sizes-apollo",
-     "kind": "screening"
-    },
-    {
-     "experiment": "RW5-delete-apollo",
-     "kind": "screening"
-    },
-    {
-     "experiment": "RW6-hardlinks-apollo",
-     "kind": "screening"
-    }
-   ],
-   "waiting": 6
+   "next": [],
+   "waiting": 0
   }
  ],
  "loop": null,
  "cases": {
-  "generatedUtc": 1792749604.997,
+  "generatedUtc": 1792836057.743,
   "slot": "2026-10-22T0650",
   "nextUtc": 1792691416,
   "weekUsd": 83,

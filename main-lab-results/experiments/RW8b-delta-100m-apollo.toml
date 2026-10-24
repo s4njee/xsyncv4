@@ -1,0 +1,37 @@
+# Part of T19-until-sunday (2026-10-23): one tree for the Mac-apollo runner until Sunday 07:00 Central.
+# The delta cells over a 20 ms round trip with every tool held to 100 Mb/s by --bwlimit: where sending only the changes matters most.
+# No whole-file arm: 8 GiB at 100 Mb/s is 11 minutes a sample.
+id = "RW8b-delta-100m-apollo"
+kind = "screening"
+hypothesis = "Over a 20 ms, 100 Mb/s path, rsync is at least 5% faster than xs in some delta cell."
+primary = "durable_s"
+delta = 0.05
+blocks = 2
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+max_hours = 2.5
+sample_timeout_s = 3600
+wan = { host = "apollo", delay_ms = 20 }
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a", "--bwlimit=12207"]
+
+[arms.xs-cpp]
+tool = "xs"
+rev = "cc8288d4f08c"
+flags = ["-a", "-j4", "--bwlimit=12207"]
+
+[arms.xs-rs]
+tool = "xs"
+rev = "ac1aeef00c80-rs"
+flags = ["-a", "--bwlimit=12207"]
+
+[matrix]
+link = "mac-apollo-10g"
+corpus = ["large-text"]
+scenario = ["update-1pct", "append-1pct"]
+direction = ["mac>apollo", "apollo>mac"]
+client = ["initiator"]
+cache = ["warm"]

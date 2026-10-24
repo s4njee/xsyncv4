@@ -1,0 +1,35 @@
+# T19-until-sunday, wave 2 (2026-10-23): new questions in place of repeating the sentinel.
+# The 1% update on the 21 GB psample tree, with hard links kept (xs-rs has no -H and sits out).
+id = "IN2-incremental-psample-apollo"
+kind = "screening"
+hypothesis = "rsync -aH is at least 5% faster than xs -aH at a 1% update of psample."
+primary = "durable_s"
+delta = 0.05
+blocks = 3
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+max_hours = 2
+sample_timeout_s = 3600
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-aH"]
+
+[arms.xs-cpp]
+tool = "xs"
+rev = "cc8288d4f08c"
+flags = ["-aH", "-j4"]
+
+[arms.xs-cpp-j8]
+tool = "xs"
+rev = "cc8288d4f08c"
+flags = ["-aH", "-j8"]
+
+[matrix]
+link = "mac-apollo-10g"
+corpus = ["real-psample"]
+scenario = ["update-1pct"]
+direction = ["mac>apollo", "apollo>mac"]
+client = ["initiator"]
+cache = ["warm"]

@@ -1,0 +1,2728 @@
+{
+ "schema": 1,
+ "run_id": "20261024T040403Z-PR1r-pr34-regression-apollo",
+ "started_utc": "2026-10-24T04:04:25.641+00:00",
+ "driver": "[host]",
+ "plan": {
+  "schema": 1,
+  "experiment": "PR1r-pr34-regression-apollo",
+  "spec_sha256": "ea37d1f57ae324f410576822d8a422f54fdb6563582057e5ff1fe725469718eb",
+  "kind": "screening",
+  "bundle": "29b78fce3bcd",
+  "writes": {
+   "mac": 457478806788,
+   "apollo": 457478806788
+  },
+  "hypothesis": "xs-rs at PR #34 is within 5% of its base or faster in every cell at 10 GbE.",
+  "primary": "durable_s",
+  "delta": 0.05,
+  "control": "xs-rs-base",
+  "seed": 90671,
+  "run_id": "20261024T040403Z-PR1r-pr34-regression-apollo",
+  "driver": "mac",
+  "sample_timeout_s": 3600,
+  "results": "mac-apollo",
+  "background": true,
+  "local_link": false,
+  "eager_cleanup": true,
+  "hours": null,
+  "max_hours": 4.0,
+  "hosts": {
+   "mac": {
+    "ssh": "[host]",
+    "name": "[host]",
+    "hostname": "[host]",
+    "root": "~/benchmarks/xsbench.noindex",
+    "interface": "en4",
+    "helper": false,
+    "gates": {},
+    "local": true,
+    "system": "Darwin"
+   },
+   "apollo": {
+    "ssh": "[host]",
+    "name": "[host]",
+    "hostname": "apollo",
+    "root": "~/xsbench",
+    "interface": "enp25s0f0",
+    "helper": true,
+    "gates": {},
+    "local": false,
+    "system": "Linux"
+   }
+  },
+  "links": {
+   "mac-apollo-10g": {
+    "hosts": [
+     "mac",
+     "apollo"
+    ],
+    "medium": "wired",
+    "min_speed_mbps": 10000,
+    "max_rtt_ms": 2.0,
+    "initiator": "mac",
+    "driver": "mac",
+    "results": "mac-apollo",
+    "background": true,
+    "address": {
+     "mac": "[address]",
+     "apollo": "[host]"
+    }
+   }
+  },
+  "arms": [
+   {
+    "name": "xs-rs-base",
+    "tool": "xs",
+    "flags": [
+     "-a",
+     "-j4"
+    ],
+    "rev": "e671c84aa680-rs",
+    "binary": {
+     "mac": "~/benchmarks/xsbench.noindex/bin/xs-e671c84aa680-rs",
+     "apollo": "~/xsbench/bin/xs-e671c84aa680-rs"
+    },
+    "sha256": {
+     "mac": "232d412384575a52433774d01d5132ab2e7c44fa50fc5734c805c9fab9459d9c",
+     "apollo": "9bf12dca91bc3cfc7a6b5a956254c027b8127dc7235f66d9f7742162055d3b5c"
+    },
+    "artifacts": {
+     "xs-darwin-arm64": "232d412384575a52433774d01d5132ab2e7c44fa50fc5734c805c9fab9459d9c",
+     "xs-darwin-amd64": "02dad2d29fa27bdc7563c4ebbd8ca5631ea24b95c095d1eba06ec491ca5b6836",
+     "xs-linux-amd64": "9bf12dca91bc3cfc7a6b5a956254c027b8127dc7235f66d9f7742162055d3b5c"
+    }
+   },
+   {
+    "name": "xs-rs",
+    "tool": "xs",
+    "flags": [
+     "-a"
+    ],
+    "rev": "ac1aeef00c80-rs",
+    "binary": {
+     "mac": "~/benchmarks/xsbench.noindex/bin/xs-ac1aeef00c80-rs",
+     "apollo": "~/xsbench/bin/xs-ac1aeef00c80-rs"
+    },
+    "sha256": {
+     "mac": "699e7c359b2ef64ba4cbbf06675e32334f2d1ee6c12b9af811b044ae5fb95707",
+     "apollo": "3b9962fb1633ba9337666f90640861fbb19414c06d5593e24757391364bb40c7"
+    },
+    "artifacts": {
+     "xs-darwin-arm64": "699e7c359b2ef64ba4cbbf06675e32334f2d1ee6c12b9af811b044ae5fb95707",
+     "xs-linux-amd64": "3b9962fb1633ba9337666f90640861fbb19414c06d5593e24757391364bb40c7"
+    }
+   },
+   {
+    "name": "xs-rs-j4",
+    "tool": "xs",
+    "flags": [
+     "-a",
+     "-j4"
+    ],
+    "rev": "ac1aeef00c80-rs",
+    "binary": {
+     "mac": "~/benchmarks/xsbench.noindex/bin/xs-ac1aeef00c80-rs",
+     "apollo": "~/xsbench/bin/xs-ac1aeef00c80-rs"
+    },
+    "sha256": {
+     "mac": "699e7c359b2ef64ba4cbbf06675e32334f2d1ee6c12b9af811b044ae5fb95707",
+     "apollo": "3b9962fb1633ba9337666f90640861fbb19414c06d5593e24757391364bb40c7"
+    },
+    "artifacts": {
+     "xs-darwin-arm64": "699e7c359b2ef64ba4cbbf06675e32334f2d1ee6c12b9af811b044ae5fb95707",
+     "xs-linux-amd64": "3b9962fb1633ba9337666f90640861fbb19414c06d5593e24757391364bb40c7"
+    }
+   },
+   {
+    "name": "rsync",
+    "tool": "rsync",
+    "flags": [
+     "-a"
+    ],
+    "binary": {
+     "mac": "/opt/homebrew/bin/rsync",
+     "apollo": "rsync"
+    }
+   }
+  ],
+  "cells": [
+   {
+    "id": "real-congress.fresh.mac-apollo.sender.warm",
+    "corpus": "real-congress",
+    "scenario": "fresh",
+    "sender": "mac",
+    "receiver": "apollo",
+    "client": "sender",
+    "link": "mac-apollo-10g",
+    "cache": "warm"
+   },
+   {
+    "id": "real-congress.fresh.apollo-mac.receiver.warm",
+    "corpus": "real-congress",
+    "scenario": "fresh",
+    "sender": "apollo",
+    "receiver": "mac",
+    "client": "receiver",
+    "link": "mac-apollo-10g",
+    "cache": "warm"
+   },
+   {
+    "id": "real-congress.noop.mac-apollo.sender.warm",
+    "corpus": "real-congress",
+    "scenario": "noop",
+    "sender": "mac",
+    "receiver": "apollo",
+    "client": "sender",
+    "link": "mac-apollo-10g",
+    "cache": "warm"
+   },
+   {
+    "id": "real-congress.noop.apollo-mac.receiver.warm",
+    "corpus": "real-congress",
+    "scenario": "noop",
+    "sender": "apollo",
+    "receiver": "mac",
+    "client": "receiver",
+    "link": "mac-apollo-10g",
+    "cache": "warm"
+   },
+   {
+    "id": "local-laikav2.fresh.mac-apollo.sender.warm",
+    "corpus": "local-laikav2",
+    "scenario": "fresh",
+    "sender": "mac",
+    "receiver": "apollo",
+    "client": "sender",
+    "link": "mac-apollo-10g",
+    "cache": "warm"
+   },
+   {
+    "id": "local-laikav2.fresh.apollo-mac.receiver.warm",
+    "corpus": "local-laikav2",
+    "scenario": "fresh",
+    "sender": "apollo",
+    "receiver": "mac",
+    "client": "receiver",
+    "link": "mac-apollo-10g",
+    "cache": "warm"
+   },
+   {
+    "id": "local-laikav2.noop.mac-apollo.sender.warm",
+    "corpus": "local-laikav2",
+    "scenario": "noop",
+    "sender": "mac",
+    "receiver": "apollo",
+    "client": "sender",
+    "link": "mac-apollo-10g",
+    "cache": "warm"
+   },
+   {
+    "id": "local-laikav2.noop.apollo-mac.receiver.warm",
+    "corpus": "local-laikav2",
+    "scenario": "noop",
+    "sender": "apollo",
+    "receiver": "mac",
+    "client": "receiver",
+    "link": "mac-apollo-10g",
+    "cache": "warm"
+   },
+   {
+    "id": "hs-16x256m.fresh.mac-apollo.sender.warm",
+    "corpus": "hs-16x256m",
+    "scenario": "fresh",
+    "sender": "mac",
+    "receiver": "apollo",
+    "client": "sender",
+    "link": "mac-apollo-10g",
+    "cache": "warm"
+   },
+   {
+    "id": "hs-16x256m.fresh.apollo-mac.receiver.warm",
+    "corpus": "hs-16x256m",
+    "scenario": "fresh",
+    "sender": "apollo",
+    "receiver": "mac",
+    "client": "receiver",
+    "link": "mac-apollo-10g",
+    "cache": "warm"
+   },
+   {
+    "id": "hs-16x256m.noop.mac-apollo.sender.warm",
+    "corpus": "hs-16x256m",
+    "scenario": "noop",
+    "sender": "mac",
+    "receiver": "apollo",
+    "client": "sender",
+    "link": "mac-apollo-10g",
+    "cache": "warm"
+   },
+   {
+    "id": "hs-16x256m.noop.apollo-mac.receiver.warm",
+    "corpus": "hs-16x256m",
+    "scenario": "noop",
+    "sender": "apollo",
+    "receiver": "mac",
+    "client": "receiver",
+    "link": "mac-apollo-10g",
+    "cache": "warm"
+   }
+  ],
+  "corpora": {
+   "real-congress": {
+    "files": 216518,
+    "directories": 52593,
+    "bytes": 1159189826,
+    "digest": "29d93dcc4c117de24dc4f6e1b8d26f0e7bbc9c26cfb4aa03d2d52de078b6a102",
+    "quick_digest": "0f493d25789a420e24c282fb3a4ba40bc690b1a3e65184088bf66e7fa0868a6b"
+   },
+   "local-laikav2": {
+    "files": 13246,
+    "directories": 1902,
+    "bytes": 7253587511,
+    "digest": "8635d252a13fde7cb60850c36e84985244a62210afe21f182ded657078099ada",
+    "quick_digest": "edb63aba72808721ee14a0708ec5c9b6db184b9cc91720c5d9fb0191da4990e5"
+   },
+   "hs-16x256m": {
+    "files": 16,
+    "directories": 0,
+    "bytes": 4294967296,
+    "digest": "c1c9cfe35269d7a8ba8e1bd2436f4c3e96d5b779abebf53195d60a531c7cb542",
+    "quick_digest": "660e730c624bda5b33fa0e0fecd790ed5d8fcc7b741f41775734673f3f5ef1e6"
+   }
+  },
+  "blocks": [
+   {
+    "cell": "hs-16x256m.noop.mac-apollo.sender.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs-rs-base",
+      "xs-rs",
+      "rsync",
+      "xs-rs-j4"
+     ],
+     [
+      "xs-rs-j4",
+      "xs-rs-base",
+      "xs-rs",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs-rs-j4",
+      "xs-rs",
+      "xs-rs-base"
+     ]
+    ]
+   },
+   {
+    "cell": "local-laikav2.noop.mac-apollo.sender.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs-rs-j4",
+      "xs-rs",
+      "rsync",
+      "xs-rs-base"
+     ],
+     [
+      "rsync",
+      "xs-rs-j4",
+      "xs-rs",
+      "xs-rs-base"
+     ],
+     [
+      "rsync",
+      "xs-rs-base",
+      "xs-rs",
+      "xs-rs-j4"
+     ]
+    ]
+   },
+   {
+    "cell": "real-congress.noop.mac-apollo.sender.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "rsync",
+      "xs-rs",
+      "xs-rs-j4",
+      "xs-rs-base"
+     ],
+     [
+      "xs-rs-j4",
+      "xs-rs-base",
+      "rsync",
+      "xs-rs"
+     ],
+     [
+      "xs-rs",
+      "rsync",
+      "xs-rs-base",
+      "xs-rs-j4"
+     ]
+    ]
+   },
+   {
+    "cell": "real-congress.fresh.mac-apollo.sender.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs-rs-j4",
+      "xs-rs",
+      "rsync",
+      "xs-rs-base"
+     ],
+     [
+      "rsync",
+      "xs-rs",
+      "xs-rs-j4",
+      "xs-rs-base"
+     ],
+     [
+      "rsync",
+      "xs-rs",
+      "xs-rs-base",
+      "xs-rs-j4"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-16x256m.fresh.apollo-mac.receiver.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs-rs-base",
+      "xs-rs-j4",
+      "xs-rs",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs-rs-base",
+      "xs-rs",
+      "xs-rs-j4"
+     ],
+     [
+      "xs-rs",
+      "rsync",
+      "xs-rs-base",
+      "xs-rs-j4"
+     ]
+    ]
+   },
+   {
+    "cell": "local-laikav2.fresh.mac-apollo.sender.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs-rs",
+      "xs-rs-j4",
+      "rsync",
+      "xs-rs-base"
+     ],
+     [
+      "xs-rs-j4",
+      "xs-rs",
+      "rsync",
+      "xs-rs-base"
+     ],
+     [
+      "rsync",
+      "xs-rs-j4",
+      "xs-rs",
+      "xs-rs-base"
+     ]
+    ]
+   },
+   {
+    "cell": "real-congress.fresh.apollo-mac.receiver.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "rsync",
+      "xs-rs-base",
+      "xs-rs",
+      "xs-rs-j4"
+     ],
+     [
+      "rsync",
+      "xs-rs",
+      "xs-rs-base",
+      "xs-rs-j4"
+     ],
+     [
+      "xs-rs-base",
+      "xs-rs",
+      "rsync",
+      "xs-rs-j4"
+     ]
+    ]
+   },
+   {
+    "cell": "local-laikav2.fresh.apollo-mac.receiver.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs-rs-j4",
+      "xs-rs-base",
+      "xs-rs",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs-rs",
+      "xs-rs-j4",
+      "xs-rs-base"
+     ],
+     [
+      "xs-rs-j4",
+      "xs-rs",
+      "rsync",
+      "xs-rs-base"
+     ]
+    ]
+   },
+   {
+    "cell": "local-laikav2.noop.apollo-mac.receiver.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "rsync",
+      "xs-rs",
+      "xs-rs-j4",
+      "xs-rs-base"
+     ],
+     [
+      "rsync",
+      "xs-rs",
+      "xs-rs-j4",
+      "xs-rs-base"
+     ],
+     [
+      "xs-rs-j4",
+      "rsync",
+      "xs-rs-base",
+      "xs-rs"
+     ]
+    ]
+   },
+   {
+    "cell": "real-congress.noop.apollo-mac.receiver.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs-rs-base",
+      "xs-rs",
+      "rsync",
+      "xs-rs-j4"
+     ],
+     [
+      "rsync",
+      "xs-rs",
+      "xs-rs-base",
+      "xs-rs-j4"
+     ],
+     [
+      "rsync",
+      "xs-rs-j4",
+      "xs-rs",
+      "xs-rs-base"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-16x256m.noop.apollo-mac.receiver.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs-rs-j4",
+      "xs-rs",
+      "xs-rs-base",
+      "rsync"
+     ],
+     [
+      "xs-rs-base",
+      "rsync",
+      "xs-rs",
+      "xs-rs-j4"
+     ],
+     [
+      "xs-rs-j4",
+      "xs-rs-base",
+      "rsync",
+      "xs-rs"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-16x256m.fresh.mac-apollo.sender.warm",
+    "block": 0,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs-rs",
+      "xs-rs-base",
+      "xs-rs-j4",
+      "rsync"
+     ],
+     [
+      "xs-rs-j4",
+      "xs-rs-base",
+      "rsync",
+      "xs-rs"
+     ],
+     [
+      "xs-rs-base",
+      "xs-rs",
+      "xs-rs-j4",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "local-laikav2.noop.mac-apollo.sender.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-rs-j4",
+      "rsync",
+      "xs-rs",
+      "xs-rs-base"
+     ],
+     [
+      "xs-rs-base",
+      "xs-rs-j4",
+      "rsync",
+      "xs-rs"
+     ],
+     [
+      "xs-rs",
+      "xs-rs-j4",
+      "xs-rs-base",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-16x256m.noop.apollo-mac.receiver.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-rs-j4",
+      "xs-rs-base",
+      "xs-rs",
+      "rsync"
+     ],
+     [
+      "xs-rs-base",
+      "xs-rs",
+      "rsync",
+      "xs-rs-j4"
+     ],
+     [
+      "xs-rs",
+      "xs-rs-j4",
+      "xs-rs-base",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-16x256m.fresh.apollo-mac.receiver.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs-rs-j4",
+      "xs-rs-base",
+      "xs-rs"
+     ],
+     [
+      "xs-rs-base",
+      "xs-rs-j4",
+      "xs-rs",
+      "rsync"
+     ],
+     [
+      "xs-rs-j4",
+      "xs-rs-base",
+      "rsync",
+      "xs-rs"
+     ]
+    ]
+   },
+   {
+    "cell": "real-congress.noop.mac-apollo.sender.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-rs-base",
+      "xs-rs",
+      "xs-rs-j4",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs-rs-base",
+      "xs-rs-j4",
+      "xs-rs"
+     ],
+     [
+      "xs-rs",
+      "xs-rs-base",
+      "xs-rs-j4",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "local-laikav2.noop.apollo-mac.receiver.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-rs-j4",
+      "xs-rs-base",
+      "xs-rs",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs-rs-j4",
+      "xs-rs",
+      "xs-rs-base"
+     ],
+     [
+      "rsync",
+      "xs-rs-j4",
+      "xs-rs-base",
+      "xs-rs"
+     ]
+    ]
+   },
+   {
+    "cell": "real-congress.fresh.apollo-mac.receiver.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-rs-j4",
+      "xs-rs",
+      "xs-rs-base",
+      "rsync"
+     ],
+     [
+      "xs-rs-j4",
+      "xs-rs",
+      "rsync",
+      "xs-rs-base"
+     ],
+     [
+      "xs-rs-j4",
+      "xs-rs",
+      "rsync",
+      "xs-rs-base"
+     ]
+    ]
+   },
+   {
+    "cell": "local-laikav2.fresh.mac-apollo.sender.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs-rs-base",
+      "xs-rs-j4",
+      "xs-rs"
+     ],
+     [
+      "xs-rs-base",
+      "xs-rs",
+      "rsync",
+      "xs-rs-j4"
+     ],
+     [
+      "xs-rs-base",
+      "rsync",
+      "xs-rs-j4",
+      "xs-rs"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-16x256m.fresh.mac-apollo.sender.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-rs-j4",
+      "xs-rs-base",
+      "xs-rs",
+      "rsync"
+     ],
+     [
+      "xs-rs-j4",
+      "rsync",
+      "xs-rs",
+      "xs-rs-base"
+     ],
+     [
+      "xs-rs",
+      "xs-rs-base",
+      "xs-rs-j4",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-16x256m.noop.mac-apollo.sender.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-rs-j4",
+      "xs-rs",
+      "xs-rs-base",
+      "rsync"
+     ],
+     [
+      "xs-rs-j4",
+      "xs-rs",
+      "xs-rs-base",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs-rs",
+      "xs-rs-base",
+      "xs-rs-j4"
+     ]
+    ]
+   },
+   {
+    "cell": "real-congress.fresh.mac-apollo.sender.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-rs",
+      "xs-rs-base",
+      "rsync",
+      "xs-rs-j4"
+     ],
+     [
+      "xs-rs-j4",
+      "xs-rs",
+      "rsync",
+      "xs-rs-base"
+     ],
+     [
+      "xs-rs-base",
+      "rsync",
+      "xs-rs",
+      "xs-rs-j4"
+     ]
+    ]
+   },
+   {
+    "cell": "real-congress.noop.apollo-mac.receiver.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-rs-j4",
+      "rsync",
+      "xs-rs",
+      "xs-rs-base"
+     ],
+     [
+      "rsync",
+      "xs-rs",
+      "xs-rs-base",
+      "xs-rs-j4"
+     ],
+     [
+      "xs-rs-j4",
+      "rsync",
+      "xs-rs-base",
+      "xs-rs"
+     ]
+    ]
+   },
+   {
+    "cell": "local-laikav2.fresh.apollo-mac.receiver.warm",
+    "block": 1,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-rs-base",
+      "xs-rs",
+      "xs-rs-j4",
+      "rsync"
+     ],
+     [
+      "xs-rs-j4",
+      "xs-rs",
+      "rsync",
+      "xs-rs-base"
+     ],
+     [
+      "rsync",
+      "xs-rs",
+      "xs-rs-base",
+      "xs-rs-j4"
+     ]
+    ]
+   },
+   {
+    "cell": "real-congress.noop.apollo-mac.receiver.warm",
+    "block": 2,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-rs-base",
+      "xs-rs",
+      "xs-rs-j4",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs-rs",
+      "xs-rs-j4",
+      "xs-rs-base"
+     ],
+     [
+      "xs-rs-base",
+      "xs-rs",
+      "xs-rs-j4",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "real-congress.noop.mac-apollo.sender.warm",
+    "block": 2,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-rs",
+      "xs-rs-j4",
+      "rsync",
+      "xs-rs-base"
+     ],
+     [
+      "rsync",
+      "xs-rs",
+      "xs-rs-j4",
+      "xs-rs-base"
+     ],
+     [
+      "xs-rs",
+      "xs-rs-base",
+      "xs-rs-j4",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-16x256m.fresh.mac-apollo.sender.warm",
+    "block": 2,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-rs-j4",
+      "xs-rs-base",
+      "xs-rs",
+      "rsync"
+     ],
+     [
+      "xs-rs-j4",
+      "rsync",
+      "xs-rs",
+      "xs-rs-base"
+     ],
+     [
+      "xs-rs",
+      "rsync",
+      "xs-rs-base",
+      "xs-rs-j4"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-16x256m.fresh.apollo-mac.receiver.warm",
+    "block": 2,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs-rs",
+      "xs-rs-base",
+      "xs-rs-j4"
+     ],
+     [
+      "xs-rs",
+      "xs-rs-base",
+      "xs-rs-j4",
+      "rsync"
+     ],
+     [
+      "xs-rs",
+      "xs-rs-base",
+      "rsync",
+      "xs-rs-j4"
+     ]
+    ]
+   },
+   {
+    "cell": "real-congress.fresh.mac-apollo.sender.warm",
+    "block": 2,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-rs-j4",
+      "xs-rs",
+      "rsync",
+      "xs-rs-base"
+     ],
+     [
+      "xs-rs-base",
+      "rsync",
+      "xs-rs",
+      "xs-rs-j4"
+     ],
+     [
+      "xs-rs-j4",
+      "xs-rs",
+      "xs-rs-base",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "local-laikav2.noop.mac-apollo.sender.warm",
+    "block": 2,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-rs",
+      "xs-rs-base",
+      "xs-rs-j4",
+      "rsync"
+     ],
+     [
+      "xs-rs",
+      "xs-rs-j4",
+      "xs-rs-base",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs-rs-base",
+      "xs-rs-j4",
+      "xs-rs"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-16x256m.noop.apollo-mac.receiver.warm",
+    "block": 2,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-rs-base",
+      "xs-rs",
+      "rsync",
+      "xs-rs-j4"
+     ],
+     [
+      "xs-rs-j4",
+      "xs-rs",
+      "rsync",
+      "xs-rs-base"
+     ],
+     [
+      "rsync",
+      "xs-rs-j4",
+      "xs-rs",
+      "xs-rs-base"
+     ]
+    ]
+   },
+   {
+    "cell": "real-congress.fresh.apollo-mac.receiver.warm",
+    "block": 2,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-rs",
+      "rsync",
+      "xs-rs-j4",
+      "xs-rs-base"
+     ],
+     [
+      "xs-rs",
+      "xs-rs-base",
+      "rsync",
+      "xs-rs-j4"
+     ],
+     [
+      "xs-rs-base",
+      "xs-rs-j4",
+      "xs-rs",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-16x256m.noop.mac-apollo.sender.warm",
+    "block": 2,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-rs",
+      "rsync",
+      "xs-rs-j4",
+      "xs-rs-base"
+     ],
+     [
+      "xs-rs",
+      "xs-rs-base",
+      "xs-rs-j4",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs-rs-j4",
+      "xs-rs",
+      "xs-rs-base"
+     ]
+    ]
+   },
+   {
+    "cell": "local-laikav2.fresh.apollo-mac.receiver.warm",
+    "block": 2,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs-rs",
+      "xs-rs-base",
+      "xs-rs-j4"
+     ],
+     [
+      "xs-rs-j4",
+      "xs-rs",
+      "rsync",
+      "xs-rs-base"
+     ],
+     [
+      "xs-rs-j4",
+      "rsync",
+      "xs-rs-base",
+      "xs-rs"
+     ]
+    ]
+   },
+   {
+    "cell": "local-laikav2.fresh.mac-apollo.sender.warm",
+    "block": 2,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs-rs-j4",
+      "xs-rs-base",
+      "xs-rs"
+     ],
+     [
+      "xs-rs-base",
+      "xs-rs",
+      "rsync",
+      "xs-rs-j4"
+     ],
+     [
+      "xs-rs-j4",
+      "xs-rs",
+      "xs-rs-base",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "local-laikav2.noop.apollo-mac.receiver.warm",
+    "block": 2,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-rs-base",
+      "xs-rs-j4",
+      "rsync",
+      "xs-rs"
+     ],
+     [
+      "rsync",
+      "xs-rs",
+      "xs-rs-j4",
+      "xs-rs-base"
+     ],
+     [
+      "rsync",
+      "xs-rs-j4",
+      "xs-rs",
+      "xs-rs-base"
+     ]
+    ]
+   },
+   {
+    "cell": "real-congress.fresh.apollo-mac.receiver.warm",
+    "block": 3,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-rs-base",
+      "rsync",
+      "xs-rs",
+      "xs-rs-j4"
+     ],
+     [
+      "xs-rs-j4",
+      "rsync",
+      "xs-rs",
+      "xs-rs-base"
+     ],
+     [
+      "xs-rs-j4",
+      "rsync",
+      "xs-rs",
+      "xs-rs-base"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-16x256m.fresh.apollo-mac.receiver.warm",
+    "block": 3,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-rs",
+      "xs-rs-j4",
+      "xs-rs-base",
+      "rsync"
+     ],
+     [
+      "xs-rs-j4",
+      "xs-rs-base",
+      "xs-rs",
+      "rsync"
+     ],
+     [
+      "xs-rs-j4",
+      "xs-rs-base",
+      "rsync",
+      "xs-rs"
+     ]
+    ]
+   },
+   {
+    "cell": "local-laikav2.noop.mac-apollo.sender.warm",
+    "block": 3,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs-rs-base",
+      "xs-rs",
+      "xs-rs-j4"
+     ],
+     [
+      "rsync",
+      "xs-rs-base",
+      "xs-rs-j4",
+      "xs-rs"
+     ],
+     [
+      "rsync",
+      "xs-rs",
+      "xs-rs-j4",
+      "xs-rs-base"
+     ]
+    ]
+   },
+   {
+    "cell": "real-congress.fresh.mac-apollo.sender.warm",
+    "block": 3,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs-rs",
+      "xs-rs-base",
+      "xs-rs-j4"
+     ],
+     [
+      "rsync",
+      "xs-rs-j4",
+      "xs-rs-base",
+      "xs-rs"
+     ],
+     [
+      "xs-rs-base",
+      "xs-rs-j4",
+      "xs-rs",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "local-laikav2.fresh.apollo-mac.receiver.warm",
+    "block": 3,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs-rs-base",
+      "xs-rs",
+      "xs-rs-j4"
+     ],
+     [
+      "xs-rs",
+      "xs-rs-base",
+      "rsync",
+      "xs-rs-j4"
+     ],
+     [
+      "xs-rs-base",
+      "xs-rs",
+      "xs-rs-j4",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "real-congress.noop.mac-apollo.sender.warm",
+    "block": 3,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-rs-j4",
+      "rsync",
+      "xs-rs",
+      "xs-rs-base"
+     ],
+     [
+      "xs-rs-j4",
+      "xs-rs-base",
+      "xs-rs",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs-rs-j4",
+      "xs-rs-base",
+      "xs-rs"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-16x256m.noop.apollo-mac.receiver.warm",
+    "block": 3,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs-rs",
+      "xs-rs-j4",
+      "xs-rs-base"
+     ],
+     [
+      "xs-rs",
+      "xs-rs-base",
+      "xs-rs-j4",
+      "rsync"
+     ],
+     [
+      "xs-rs",
+      "xs-rs-base",
+      "rsync",
+      "xs-rs-j4"
+     ]
+    ]
+   },
+   {
+    "cell": "local-laikav2.fresh.mac-apollo.sender.warm",
+    "block": 3,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs-rs-j4",
+      "xs-rs",
+      "xs-rs-base"
+     ],
+     [
+      "xs-rs-j4",
+      "rsync",
+      "xs-rs-base",
+      "xs-rs"
+     ],
+     [
+      "xs-rs",
+      "xs-rs-j4",
+      "xs-rs-base",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-16x256m.fresh.mac-apollo.sender.warm",
+    "block": 3,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs-rs-j4",
+      "xs-rs",
+      "xs-rs-base"
+     ],
+     [
+      "xs-rs-base",
+      "xs-rs-j4",
+      "rsync",
+      "xs-rs"
+     ],
+     [
+      "xs-rs",
+      "xs-rs-base",
+      "rsync",
+      "xs-rs-j4"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-16x256m.noop.mac-apollo.sender.warm",
+    "block": 3,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs-rs",
+      "xs-rs-base",
+      "xs-rs-j4"
+     ],
+     [
+      "rsync",
+      "xs-rs-base",
+      "xs-rs-j4",
+      "xs-rs"
+     ],
+     [
+      "xs-rs",
+      "xs-rs-base",
+      "xs-rs-j4",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "local-laikav2.noop.apollo-mac.receiver.warm",
+    "block": 3,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-rs",
+      "xs-rs-j4",
+      "xs-rs-base",
+      "rsync"
+     ],
+     [
+      "xs-rs-base",
+      "rsync",
+      "xs-rs",
+      "xs-rs-j4"
+     ],
+     [
+      "xs-rs-base",
+      "xs-rs-j4",
+      "rsync",
+      "xs-rs"
+     ]
+    ]
+   },
+   {
+    "cell": "real-congress.noop.apollo-mac.receiver.warm",
+    "block": 3,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-rs-base",
+      "xs-rs-j4",
+      "rsync",
+      "xs-rs"
+     ],
+     [
+      "rsync",
+      "xs-rs-base",
+      "xs-rs-j4",
+      "xs-rs"
+     ],
+     [
+      "rsync",
+      "xs-rs",
+      "xs-rs-j4",
+      "xs-rs-base"
+     ]
+    ]
+   },
+   {
+    "cell": "local-laikav2.noop.apollo-mac.receiver.warm",
+    "block": 4,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-rs-base",
+      "xs-rs",
+      "xs-rs-j4",
+      "rsync"
+     ],
+     [
+      "xs-rs-j4",
+      "xs-rs-base",
+      "xs-rs",
+      "rsync"
+     ],
+     [
+      "xs-rs",
+      "xs-rs-j4",
+      "xs-rs-base",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "real-congress.fresh.mac-apollo.sender.warm",
+    "block": 4,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-rs-j4",
+      "xs-rs",
+      "xs-rs-base",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs-rs-base",
+      "xs-rs-j4",
+      "xs-rs"
+     ],
+     [
+      "xs-rs",
+      "rsync",
+      "xs-rs-base",
+      "xs-rs-j4"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-16x256m.fresh.mac-apollo.sender.warm",
+    "block": 4,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-rs-j4",
+      "xs-rs-base",
+      "rsync",
+      "xs-rs"
+     ],
+     [
+      "xs-rs-base",
+      "xs-rs-j4",
+      "xs-rs",
+      "rsync"
+     ],
+     [
+      "xs-rs",
+      "xs-rs-j4",
+      "rsync",
+      "xs-rs-base"
+     ]
+    ]
+   },
+   {
+    "cell": "local-laikav2.fresh.apollo-mac.receiver.warm",
+    "block": 4,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs-rs",
+      "xs-rs-j4",
+      "xs-rs-base"
+     ],
+     [
+      "xs-rs-j4",
+      "rsync",
+      "xs-rs",
+      "xs-rs-base"
+     ],
+     [
+      "xs-rs-j4",
+      "xs-rs-base",
+      "rsync",
+      "xs-rs"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-16x256m.noop.mac-apollo.sender.warm",
+    "block": 4,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-rs-base",
+      "xs-rs-j4",
+      "xs-rs",
+      "rsync"
+     ],
+     [
+      "xs-rs-base",
+      "xs-rs-j4",
+      "rsync",
+      "xs-rs"
+     ],
+     [
+      "rsync",
+      "xs-rs-j4",
+      "xs-rs",
+      "xs-rs-base"
+     ]
+    ]
+   },
+   {
+    "cell": "real-congress.noop.apollo-mac.receiver.warm",
+    "block": 4,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-rs",
+      "rsync",
+      "xs-rs-j4",
+      "xs-rs-base"
+     ],
+     [
+      "xs-rs-base",
+      "rsync",
+      "xs-rs",
+      "xs-rs-j4"
+     ],
+     [
+      "rsync",
+      "xs-rs-base",
+      "xs-rs-j4",
+      "xs-rs"
+     ]
+    ]
+   },
+   {
+    "cell": "real-congress.noop.mac-apollo.sender.warm",
+    "block": 4,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-rs-base",
+      "xs-rs-j4",
+      "xs-rs",
+      "rsync"
+     ],
+     [
+      "xs-rs",
+      "xs-rs-j4",
+      "rsync",
+      "xs-rs-base"
+     ],
+     [
+      "xs-rs",
+      "rsync",
+      "xs-rs-base",
+      "xs-rs-j4"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-16x256m.fresh.apollo-mac.receiver.warm",
+    "block": 4,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-rs",
+      "xs-rs-j4",
+      "rsync",
+      "xs-rs-base"
+     ],
+     [
+      "xs-rs",
+      "rsync",
+      "xs-rs-j4",
+      "xs-rs-base"
+     ],
+     [
+      "xs-rs",
+      "xs-rs-j4",
+      "xs-rs-base",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "local-laikav2.fresh.mac-apollo.sender.warm",
+    "block": 4,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs-rs",
+      "xs-rs-base",
+      "xs-rs-j4"
+     ],
+     [
+      "xs-rs-base",
+      "xs-rs-j4",
+      "xs-rs",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs-rs",
+      "xs-rs-j4",
+      "xs-rs-base"
+     ]
+    ]
+   },
+   {
+    "cell": "local-laikav2.noop.mac-apollo.sender.warm",
+    "block": 4,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-rs",
+      "rsync",
+      "xs-rs-base",
+      "xs-rs-j4"
+     ],
+     [
+      "rsync",
+      "xs-rs",
+      "xs-rs-base",
+      "xs-rs-j4"
+     ],
+     [
+      "xs-rs",
+      "rsync",
+      "xs-rs-j4",
+      "xs-rs-base"
+     ]
+    ]
+   },
+   {
+    "cell": "real-congress.fresh.apollo-mac.receiver.warm",
+    "block": 4,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-rs",
+      "xs-rs-j4",
+      "xs-rs-base",
+      "rsync"
+     ],
+     [
+      "xs-rs",
+      "xs-rs-base",
+      "xs-rs-j4",
+      "rsync"
+     ],
+     [
+      "xs-rs-j4",
+      "xs-rs-base",
+      "rsync",
+      "xs-rs"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-16x256m.noop.apollo-mac.receiver.warm",
+    "block": 4,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-rs",
+      "rsync",
+      "xs-rs-base",
+      "xs-rs-j4"
+     ],
+     [
+      "xs-rs-base",
+      "xs-rs",
+      "rsync",
+      "xs-rs-j4"
+     ],
+     [
+      "xs-rs-j4",
+      "rsync",
+      "xs-rs-base",
+      "xs-rs"
+     ]
+    ]
+   },
+   {
+    "cell": "local-laikav2.noop.mac-apollo.sender.warm",
+    "block": 5,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-rs-j4",
+      "rsync",
+      "xs-rs-base",
+      "xs-rs"
+     ],
+     [
+      "xs-rs",
+      "rsync",
+      "xs-rs-j4",
+      "xs-rs-base"
+     ],
+     [
+      "rsync",
+      "xs-rs-base",
+      "xs-rs",
+      "xs-rs-j4"
+     ]
+    ]
+   },
+   {
+    "cell": "real-congress.fresh.apollo-mac.receiver.warm",
+    "block": 5,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-rs-base",
+      "xs-rs",
+      "rsync",
+      "xs-rs-j4"
+     ],
+     [
+      "xs-rs-base",
+      "rsync",
+      "xs-rs-j4",
+      "xs-rs"
+     ],
+     [
+      "xs-rs",
+      "xs-rs-base",
+      "xs-rs-j4",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "local-laikav2.fresh.apollo-mac.receiver.warm",
+    "block": 5,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs-rs-j4",
+      "xs-rs",
+      "xs-rs-base"
+     ],
+     [
+      "xs-rs",
+      "xs-rs-j4",
+      "rsync",
+      "xs-rs-base"
+     ],
+     [
+      "xs-rs-base",
+      "xs-rs",
+      "rsync",
+      "xs-rs-j4"
+     ]
+    ]
+   },
+   {
+    "cell": "real-congress.noop.mac-apollo.sender.warm",
+    "block": 5,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-rs-j4",
+      "xs-rs-base",
+      "rsync",
+      "xs-rs"
+     ],
+     [
+      "rsync",
+      "xs-rs-base",
+      "xs-rs-j4",
+      "xs-rs"
+     ],
+     [
+      "xs-rs-j4",
+      "xs-rs",
+      "xs-rs-base",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-16x256m.noop.apollo-mac.receiver.warm",
+    "block": 5,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs-rs-base",
+      "xs-rs-j4",
+      "xs-rs"
+     ],
+     [
+      "xs-rs",
+      "xs-rs-j4",
+      "rsync",
+      "xs-rs-base"
+     ],
+     [
+      "xs-rs-base",
+      "xs-rs",
+      "xs-rs-j4",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "real-congress.noop.apollo-mac.receiver.warm",
+    "block": 5,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs-rs-j4",
+      "xs-rs-base",
+      "xs-rs"
+     ],
+     [
+      "xs-rs-base",
+      "xs-rs",
+      "xs-rs-j4",
+      "rsync"
+     ],
+     [
+      "xs-rs-j4",
+      "xs-rs-base",
+      "rsync",
+      "xs-rs"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-16x256m.noop.mac-apollo.sender.warm",
+    "block": 5,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-rs",
+      "xs-rs-base",
+      "rsync",
+      "xs-rs-j4"
+     ],
+     [
+      "xs-rs-j4",
+      "xs-rs",
+      "xs-rs-base",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs-rs",
+      "xs-rs-base",
+      "xs-rs-j4"
+     ]
+    ]
+   },
+   {
+    "cell": "local-laikav2.fresh.mac-apollo.sender.warm",
+    "block": 5,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-rs",
+      "xs-rs-j4",
+      "xs-rs-base",
+      "rsync"
+     ],
+     [
+      "xs-rs-j4",
+      "xs-rs-base",
+      "rsync",
+      "xs-rs"
+     ],
+     [
+      "xs-rs-j4",
+      "xs-rs-base",
+      "xs-rs",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "real-congress.fresh.mac-apollo.sender.warm",
+    "block": 5,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-rs-j4",
+      "xs-rs-base",
+      "xs-rs",
+      "rsync"
+     ],
+     [
+      "xs-rs-base",
+      "rsync",
+      "xs-rs",
+      "xs-rs-j4"
+     ],
+     [
+      "xs-rs-base",
+      "rsync",
+      "xs-rs",
+      "xs-rs-j4"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-16x256m.fresh.apollo-mac.receiver.warm",
+    "block": 5,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-rs-base",
+      "xs-rs-j4",
+      "rsync",
+      "xs-rs"
+     ],
+     [
+      "xs-rs-base",
+      "xs-rs",
+      "rsync",
+      "xs-rs-j4"
+     ],
+     [
+      "xs-rs-base",
+      "xs-rs",
+      "xs-rs-j4",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "local-laikav2.noop.apollo-mac.receiver.warm",
+    "block": 5,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-rs-base",
+      "rsync",
+      "xs-rs-j4",
+      "xs-rs"
+     ],
+     [
+      "xs-rs-j4",
+      "rsync",
+      "xs-rs",
+      "xs-rs-base"
+     ],
+     [
+      "xs-rs",
+      "xs-rs-j4",
+      "xs-rs-base",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-16x256m.fresh.mac-apollo.sender.warm",
+    "block": 5,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-rs-base",
+      "rsync",
+      "xs-rs",
+      "xs-rs-j4"
+     ],
+     [
+      "xs-rs-j4",
+      "xs-rs",
+      "rsync",
+      "xs-rs-base"
+     ],
+     [
+      "xs-rs",
+      "rsync",
+      "xs-rs-base",
+      "xs-rs-j4"
+     ]
+    ]
+   },
+   {
+    "cell": "real-congress.fresh.mac-apollo.sender.warm",
+    "block": 6,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-rs-j4",
+      "rsync",
+      "xs-rs-base",
+      "xs-rs"
+     ],
+     [
+      "xs-rs",
+      "rsync",
+      "xs-rs-j4",
+      "xs-rs-base"
+     ],
+     [
+      "rsync",
+      "xs-rs",
+      "xs-rs-j4",
+      "xs-rs-base"
+     ]
+    ]
+   },
+   {
+    "cell": "local-laikav2.fresh.apollo-mac.receiver.warm",
+    "block": 6,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-rs-j4",
+      "rsync",
+      "xs-rs-base",
+      "xs-rs"
+     ],
+     [
+      "xs-rs-j4",
+      "xs-rs-base",
+      "rsync",
+      "xs-rs"
+     ],
+     [
+      "rsync",
+      "xs-rs",
+      "xs-rs-j4",
+      "xs-rs-base"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-16x256m.noop.apollo-mac.receiver.warm",
+    "block": 6,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-rs",
+      "xs-rs-j4",
+      "rsync",
+      "xs-rs-base"
+     ],
+     [
+      "rsync",
+      "xs-rs",
+      "xs-rs-j4",
+      "xs-rs-base"
+     ],
+     [
+      "xs-rs-j4",
+      "rsync",
+      "xs-rs",
+      "xs-rs-base"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-16x256m.noop.mac-apollo.sender.warm",
+    "block": 6,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs-rs",
+      "xs-rs-base",
+      "xs-rs-j4"
+     ],
+     [
+      "xs-rs",
+      "rsync",
+      "xs-rs-j4",
+      "xs-rs-base"
+     ],
+     [
+      "xs-rs-base",
+      "xs-rs-j4",
+      "rsync",
+      "xs-rs"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-16x256m.fresh.mac-apollo.sender.warm",
+    "block": 6,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-rs-j4",
+      "rsync",
+      "xs-rs",
+      "xs-rs-base"
+     ],
+     [
+      "xs-rs-base",
+      "xs-rs-j4",
+      "xs-rs",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs-rs",
+      "xs-rs-j4",
+      "xs-rs-base"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-16x256m.fresh.apollo-mac.receiver.warm",
+    "block": 6,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-rs-j4",
+      "rsync",
+      "xs-rs-base",
+      "xs-rs"
+     ],
+     [
+      "xs-rs-base",
+      "xs-rs",
+      "rsync",
+      "xs-rs-j4"
+     ],
+     [
+      "xs-rs-j4",
+      "rsync",
+      "xs-rs-base",
+      "xs-rs"
+     ]
+    ]
+   },
+   {
+    "cell": "real-congress.noop.apollo-mac.receiver.warm",
+    "block": 6,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-rs",
+      "rsync",
+      "xs-rs-base",
+      "xs-rs-j4"
+     ],
+     [
+      "xs-rs-base",
+      "xs-rs",
+      "rsync",
+      "xs-rs-j4"
+     ],
+     [
+      "rsync",
+      "xs-rs",
+      "xs-rs-base",
+      "xs-rs-j4"
+     ]
+    ]
+   },
+   {
+    "cell": "local-laikav2.noop.apollo-mac.receiver.warm",
+    "block": 6,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-rs-base",
+      "xs-rs",
+      "rsync",
+      "xs-rs-j4"
+     ],
+     [
+      "xs-rs-j4",
+      "xs-rs-base",
+      "xs-rs",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs-rs-base",
+      "xs-rs",
+      "xs-rs-j4"
+     ]
+    ]
+   },
+   {
+    "cell": "local-laikav2.noop.mac-apollo.sender.warm",
+    "block": 6,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-rs-j4",
+      "xs-rs",
+      "xs-rs-base",
+      "rsync"
+     ],
+     [
+      "xs-rs-j4",
+      "xs-rs",
+      "xs-rs-base",
+      "rsync"
+     ],
+     [
+      "xs-rs-j4",
+      "rsync",
+      "xs-rs",
+      "xs-rs-base"
+     ]
+    ]
+   },
+   {
+    "cell": "real-congress.noop.mac-apollo.sender.warm",
+    "block": 6,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-rs",
+      "xs-rs-base",
+      "rsync",
+      "xs-rs-j4"
+     ],
+     [
+      "xs-rs-base",
+      "xs-rs-j4",
+      "rsync",
+      "xs-rs"
+     ],
+     [
+      "xs-rs",
+      "rsync",
+      "xs-rs-base",
+      "xs-rs-j4"
+     ]
+    ]
+   },
+   {
+    "cell": "real-congress.fresh.apollo-mac.receiver.warm",
+    "block": 6,
+    "verify_full": false,
+    "orders": [
+     [
+      "rsync",
+      "xs-rs-base",
+      "xs-rs-j4",
+      "xs-rs"
+     ],
+     [
+      "xs-rs-j4",
+      "rsync",
+      "xs-rs",
+      "xs-rs-base"
+     ],
+     [
+      "rsync",
+      "xs-rs-j4",
+      "xs-rs-base",
+      "xs-rs"
+     ]
+    ]
+   },
+   {
+    "cell": "local-laikav2.fresh.mac-apollo.sender.warm",
+    "block": 6,
+    "verify_full": false,
+    "orders": [
+     [
+      "xs-rs-base",
+      "xs-rs",
+      "xs-rs-j4",
+      "rsync"
+     ],
+     [
+      "xs-rs",
+      "xs-rs-j4",
+      "xs-rs-base",
+      "rsync"
+     ],
+     [
+      "xs-rs",
+      "rsync",
+      "xs-rs-j4",
+      "xs-rs-base"
+     ]
+    ]
+   },
+   {
+    "cell": "local-laikav2.fresh.apollo-mac.receiver.warm",
+    "block": 7,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs-rs-base",
+      "xs-rs-j4",
+      "rsync",
+      "xs-rs"
+     ],
+     [
+      "xs-rs-j4",
+      "rsync",
+      "xs-rs",
+      "xs-rs-base"
+     ],
+     [
+      "xs-rs",
+      "xs-rs-base",
+      "xs-rs-j4",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "real-congress.fresh.mac-apollo.sender.warm",
+    "block": 7,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs-rs",
+      "rsync",
+      "xs-rs-base",
+      "xs-rs-j4"
+     ],
+     [
+      "xs-rs-j4",
+      "xs-rs",
+      "rsync",
+      "xs-rs-base"
+     ],
+     [
+      "xs-rs-j4",
+      "rsync",
+      "xs-rs",
+      "xs-rs-base"
+     ]
+    ]
+   },
+   {
+    "cell": "real-congress.fresh.apollo-mac.receiver.warm",
+    "block": 7,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs-rs-j4",
+      "xs-rs-base",
+      "rsync",
+      "xs-rs"
+     ],
+     [
+      "xs-rs-j4",
+      "xs-rs-base",
+      "rsync",
+      "xs-rs"
+     ],
+     [
+      "xs-rs-j4",
+      "xs-rs-base",
+      "xs-rs",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "real-congress.noop.apollo-mac.receiver.warm",
+    "block": 7,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs-rs",
+      "xs-rs-j4",
+      "rsync",
+      "xs-rs-base"
+     ],
+     [
+      "xs-rs-j4",
+      "xs-rs-base",
+      "xs-rs",
+      "rsync"
+     ],
+     [
+      "xs-rs",
+      "rsync",
+      "xs-rs-j4",
+      "xs-rs-base"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-16x256m.noop.apollo-mac.receiver.warm",
+    "block": 7,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs-rs-j4",
+      "xs-rs-base",
+      "xs-rs",
+      "rsync"
+     ],
+     [
+      "rsync",
+      "xs-rs",
+      "xs-rs-base",
+      "xs-rs-j4"
+     ],
+     [
+      "xs-rs-base",
+      "xs-rs-j4",
+      "xs-rs",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-16x256m.fresh.apollo-mac.receiver.warm",
+    "block": 7,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs-rs-base",
+      "xs-rs-j4",
+      "xs-rs",
+      "rsync"
+     ],
+     [
+      "xs-rs",
+      "xs-rs-base",
+      "rsync",
+      "xs-rs-j4"
+     ],
+     [
+      "xs-rs-base",
+      "xs-rs",
+      "rsync",
+      "xs-rs-j4"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-16x256m.noop.mac-apollo.sender.warm",
+    "block": 7,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs-rs-j4",
+      "xs-rs",
+      "rsync",
+      "xs-rs-base"
+     ],
+     [
+      "xs-rs-base",
+      "xs-rs",
+      "rsync",
+      "xs-rs-j4"
+     ],
+     [
+      "xs-rs-base",
+      "xs-rs-j4",
+      "xs-rs",
+      "rsync"
+     ]
+    ]
+   },
+   {
+    "cell": "local-laikav2.fresh.mac-apollo.sender.warm",
+    "block": 7,
+    "verify_full": true,
+    "orders": [
+     [
+      "rsync",
+      "xs-rs-base",
+      "xs-rs-j4",
+      "xs-rs"
+     ],
+     [
+      "rsync",
+      "xs-rs-base",
+      "xs-rs",
+      "xs-rs-j4"
+     ],
+     [
+      "xs-rs-base",
+      "xs-rs-j4",
+      "rsync",
+      "xs-rs"
+     ]
+    ]
+   },
+   {
+    "cell": "hs-16x256m.fresh.mac-apollo.sender.warm",
+    "block": 7,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs-rs-j4",
+      "rsync",
+      "xs-rs-base",
+      "xs-rs"
+     ],
+     [
+      "xs-rs-base",
+      "rsync",
+      "xs-rs",
+      "xs-rs-j4"
+     ],
+     [
+      "xs-rs",
+      "rsync",
+      "xs-rs-base",
+      "xs-rs-j4"
+     ]
+    ]
+   },
+   {
+    "cell": "local-laikav2.noop.mac-apollo.sender.warm",
+    "block": 7,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs-rs-j4",
+      "rsync",
+      "xs-rs",
+      "xs-rs-base"
+     ],
+     [
+      "xs-rs-base",
+      "xs-rs",
+      "rsync",
+      "xs-rs-j4"
+     ],
+     [
+      "xs-rs",
+      "rsync",
+      "xs-rs-j4",
+      "xs-rs-base"
+     ]
+    ]
+   },
+   {
+    "cell": "real-congress.noop.mac-apollo.sender.warm",
+    "block": 7,
+    "verify_full": true,
+    "orders": [
+     [
+      "xs-rs-j4",
+      "xs-rs-base",
+      "rsync",
+      "xs-rs"
+     ],
+     [
+      "xs-rs-base",
+      "xs-rs-j4",
+      "rsync",
+      "xs-rs"
+     ],
+     [
+      "rsync",
+      "xs-rs",
+      "xs-rs-base",
+      "xs-rs-j4"
+     ]
+    ]
+   },
+   {
+    "cell": "local-laikav2.noop.apollo-mac.receiver.warm",
+    "block": 7,
+    "verify_full": true,
+    "orders": [
+     [
+      "rsync",
+      "xs-rs-base",
+      "xs-rs",
+      "xs-rs-j4"
+     ],
+     [
+      "rsync",
+      "xs-rs-base",
+      "xs-rs-j4",
+      "xs-rs"
+     ],
+     [
+      "xs-rs-j4",
+      "xs-rs",
+      "xs-rs-base",
+      "rsync"
+     ]
+    ]
+   }
+  ],
+  "scripts": {
+   "probe.py": "31498266d245cc6e8c7a1cd788652da3015bc80d5f454841d90254a74e85cf94",
+   "corpus.py": "9332674b442eb999872aa51080b2cff8f84890e44d16669a18c669a2005e3fc9",
+   "corpora.json": "21f1b56afc8cc2aa061fe9974acc3e4e77ab493d6c05d1956713efeead0010d5",
+   "agent.py": "9f96da09e1546e6ad4485beee62576d2b3d57062d763bf2871a59ff9408b7e1d",
+   "runner.py": "cce71fee149764ad1a5c913061f19620a8ff44f792d23d55f7a290d59a9e20ff",
+   "xspipe.py": "94b3fccfc6e994d227077c453f90323ab55337fd8a98231d16a10696e8ebab6b",
+   "measure.py": "5065310f480ff1cabfa7c645f0db342624a02f9a081b96069d50d52b3d224777"
+  },
+  "observed": {
+   "mac": {
+    "rsync": {
+     "path": "/opt/homebrew/bin/rsync",
+     "sha256": "bbd302280bacdd83a6a716ab0556e1c13875a9f222b62924293ecb2d09bbb56f",
+     "version": "rsync  version 3.5.1  protocol version 33"
+    },
+    "hostname": "[host]"
+   },
+   "apollo": {
+    "rsync": {
+     "path": "/usr/bin/rsync",
+     "sha256": "7caa17cb97841ade1f916e921713f13f82081bf0f605e811f09dff89a3f26dd3",
+     "version": "rsync  version 3.5.1-g04355d27  protocol version 33"
+    },
+    "hostname": "apollo",
+    "trim": null
+   },
+   "addresses": {
+    "mac>apollo": "[host]"
+   }
+  }
+ }
+}

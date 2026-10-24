@@ -1,0 +1,470 @@
+# T19 (2026-10-23): every open question on the Tree page, as one tree for the one runner left, the Mac to
+# apollo over the direct 10 GbE cable, until Sunday 07:00 Central. A single chain: each node's rules may add a
+# confirmation, but every rule also names the next node, so no outcome stops the lab before Sunday. After the
+# last node the fill (a short congress sentinel) repeats until `until`.
+#
+# Order: first what the user asked for on 2026-10-23 (CZ1, RW7, RW8, RW3b, RW6b), then the follow-ups.
+# Wave 2 (CS1 to CP1, added later the same day) replaces repeating the sentinel with new questions: csearchv3 with
+# PR #34, incremental syncs of real trees, worker counts, large files with PR #34, an internet-like path, -c on
+# large files, deletes at scale and a weak receiver. The sentinel fills only if both waves finish before Sunday.
+#
+# Where each earlier tree's open questions went (they are retired to trees/retired/):
+#   T8   mac-mars psample: decided (xs faster); nothing open.
+#   T12  B/Bc, psample no-op push knobs: RW3-pr34 found xs-rs 2-12x faster at no-ops of many files, so the deficit
+#        is gone; RW3b finishes that run.
+#   T13  psample pull onto the Mac: PS1, the same settings that need no tuning build, with apollo as the sender.
+#   T14, T16  the Pi's local backup to the T5: neo's lab is not rebuilt since its reinstall; not on this runner.
+#   T17  dest-anchors: merged into xs-c++ at cc8288d4 (the P0 merge); its Mac receive question is SM1's.
+#   T18  small files onto the Mac (MA9, MA10): SM1, apollo to the Mac, with and without --no-atomic.
+#   EXA  small fresh copies: A3 merged (dest-anchors); A7 eager writeback on a Linux receiver is WB1; A2 (a profile),
+#        A5 (fresh-subtree fast path) and A6 (receiver lanes) need code or hand work: named in SM1's rules.
+#   EXB  no-op re-syncs: B1 decided; B2 merged; B3 (skip unchanged subtrees) needs code. RW3b re-measures no-ops.
+#   EXC  transport: C1 (how much is the ssh connection) is XC1; C5 (compression where bytes are the limit) is CZ2-CZ4;
+#        C2-C4 need xs-helper, which the harness does not run: lab3 measures those on the Pis.
+#   Retired campaigns (T1-T7, T9-T11, AUTO-*, NIGHT-1021) ran on links that are down (neo, freya, mars on macOS).
+#   Their lasting questions: compression on a slower wire (T7) is CZ2-CZ4; latency (the AUTO-neo windows) is LT1-LT2.
+id = "T19-until-sunday"
+question = "On the Mac-apollo cable, where does rsync still beat xs, does PR #34's compression pick well on fast hosts, and which settings should be xs's defaults?"
+start = ["CZ1"]
+until = "2026-10-25T12:00Z"
+deadline = "2026-10-25T12:00Z"
+fill = ["FS1"]
+
+[nodes.CZ1]
+title = "Compression at 10 GbE"
+spec = "CZ1-compress-pr34-apollo.toml"
+front = true
+question = "At full link speed with fast CPUs, does xs-rs -z at its automatic level (PR #34) keep up with the best fixed level, and with no compression?"
+
+  [[nodes.CZ1.branch]]
+  when = { arm = "xs-rs-z[13]", speed_at_least = 1.05 }
+  next = ["CZ1c", "RW7"]
+  label = "a fixed level beat automatic"
+  note = "a fixed zstd level beat PR #34's automatic choice at 10 GbE: confirm it, and the policy needs another look"
+
+  [[nodes.CZ1.branch]]
+  when = { arm = "xs-rs", speed_at_least = 1.05 }
+  next = ["RW7"]
+  label = "-z costs at 10 GbE"
+  note = "no compression beat -z at full link speed: -z should stand down when the link outruns the compressor"
+
+  [[nodes.CZ1.branch]]
+  otherwise = true
+  next = ["RW7"]
+  label = "automatic keeps up"
+  note = "the automatic level is within 5% of the best fixed level and of none"
+
+[nodes.CZ1c]
+title = "Confirm the faster fixed level"
+promote = "CZ1"
+arm = "xs-rs-z[13]"
+id = "CZ1c-level-confirm"
+blocks = 8
+question = "Does the fixed level that beat the automatic one do it again on eight fresh blocks?"
+
+[nodes.RW7]
+title = "Take the delta loss apart"
+spec = "RW7-delta-breakdown-apollo.toml"
+question = "On delta updates of large files, where rsync won RW1, is it xs's delta path or its copy that loses, and does --whole-file win at 10 GbE?"
+
+  [[nodes.RW7.branch]]
+  when = { arm = "xs-*-W", speed_at_least = 1.05 }
+  next = ["RW7c", "RW8a"]
+  label = "xs --whole-file beat rsync"
+  note = "xs with --whole-file beat rsync's delta at 10 GbE: on a fast link xs should skip the delta; confirm"
+
+  [[nodes.RW7.branch]]
+  when = { arm = "xs-*", speed_below = 0.95 }
+  next = ["RW8a"]
+  label = "xs still loses a delta cell"
+  note = "xs loses a delta cell with and without --whole-file: a code case for xs's delta path (signature, matching, sending)"
+
+  [[nodes.RW7.branch]]
+  otherwise = true
+  next = ["RW8a"]
+  label = "no delta deficit"
+  note = "xs is level with or ahead of rsync in every delta cell here"
+
+[nodes.RW7c]
+title = "Confirm --whole-file on fast links"
+promote = "RW7"
+arm = "xs-*-W"
+id = "RW7c-whole-file-confirm"
+blocks = 8
+question = "Does xs with --whole-file beat rsync's delta again on eight fresh blocks?"
+
+[nodes.RW8a]
+title = "Deltas over a 20 ms round trip"
+spec = "RW8a-delta-wan-apollo.toml"
+question = "Over a 20 ms round trip, does rsync's delta beat xs's?"
+
+  [[nodes.RW8a.branch]]
+  when = { arm = "xs-*", speed_below = 0.95 }
+  next = ["RW8b"]
+  label = "rsync wins at 20 ms"
+  note = "latency widens rsync's delta lead: xs's signature exchange costs round trips"
+
+  [[nodes.RW8a.branch]]
+  otherwise = true
+  next = ["RW8b"]
+  label = "no deficit at 20 ms"
+
+[nodes.RW8b]
+title = "Deltas on a slow, distant path"
+spec = "RW8b-delta-100m-apollo.toml"
+question = "On a 20 ms, 100 Mb/s path, where sending only the changes matters most, does rsync's delta beat xs's?"
+
+  [[nodes.RW8b.branch]]
+  when = { arm = "xs-*", speed_below = 0.95 }
+  next = ["RW3b"]
+  label = "rsync wins on a slow path"
+  note = "on a slow path rsync's delta beats xs: xs must send less when bytes are the limit; a code case"
+
+  [[nodes.RW8b.branch]]
+  otherwise = true
+  next = ["RW3b"]
+  label = "xs level on a slow path"
+
+[nodes.RW3b]
+title = "Finish the many-file no-ops"
+spec = "RW3b-noop-many-apollo-pr34.toml"
+question = "With three more blocks, does xs keep its lead at no-ops of many files?"
+
+  [[nodes.RW3b.branch]]
+  otherwise = true
+  next = ["RW6b"]
+  label = "next: hard links"
+
+[nodes.RW6b]
+title = "Hard links, checked again"
+spec = "RW6b-hardlinks-apollo.toml"
+question = "With hard links kept (-H) on laikav2, is xs-c++ as fast as rsync, over six blocks?"
+
+  [[nodes.RW6b.branch]]
+  otherwise = true
+  next = ["PR1"]
+  label = "next: PR #34 against its base"
+
+[nodes.PR1]
+title = "PR #34 against its base"
+spec = "PR1-pr34-vs-base-apollo.toml"
+question = "Is xs-rs at PR #34 at least as fast as the xs-rs it changes, in every cell at 10 GbE?"
+
+  [[nodes.PR1.branch]]
+  when = { arm = "xs-rs", speed_below = 0.95 }
+  next = ["PR1r", "CZ2"]
+  label = "PR #34 slower somewhere"
+  note = "PR #34 is slower than its base in some cell: confirm on fresh blocks before merging"
+
+  [[nodes.PR1.branch]]
+  otherwise = true
+  next = ["CZ2"]
+  label = "no regression"
+  note = "PR #34 is level with or faster than its base at 10 GbE"
+
+[nodes.PR1r]
+title = "Confirm the PR #34 regression"
+spec = "PR1r-pr34-regression-apollo.toml"
+question = "On eight fresh blocks, is PR #34 really slower than its base where PR1 said so?"
+
+[nodes.CZ2]
+title = "Compression at 1 Gb/s"
+spec = "CZ2-compress-1g-apollo.toml"
+question = "Held to 1 Gb/s, does the automatic level keep up with the best fixed level?"
+
+  [[nodes.CZ2.branch]]
+  when = { arm = "xs-rs-z[13]", speed_at_least = 1.05 }
+  next = ["CZ3"]
+  label = "a fixed level beat automatic"
+  note = "at 1 Gb/s a fixed level beat the automatic one: the rate rule's thresholds need moving"
+
+  [[nodes.CZ2.branch]]
+  otherwise = true
+  next = ["CZ3"]
+  label = "automatic keeps up"
+
+[nodes.CZ3]
+title = "Compression at 100 Mb/s"
+spec = "CZ3-compress-100m-apollo.toml"
+question = "Held to 100 Mb/s, does the automatic level keep up with the best of levels 1, 3 and 6, and does compression beat none?"
+
+  [[nodes.CZ3.branch]]
+  when = { arm = "xs-rs-z[136]", speed_at_least = 1.05 }
+  next = ["CZ4"]
+  label = "a fixed level beat automatic"
+  note = "at 100 Mb/s a fixed level beat the automatic one: the policy should climb sooner when bytes are the limit"
+
+  [[nodes.CZ3.branch]]
+  otherwise = true
+  next = ["CZ4"]
+  label = "automatic keeps up"
+
+[nodes.CZ4]
+title = "Compression on two cores"
+spec = "CZ4-compress-2core-apollo.toml"
+question = "With apollo held to 2 cores on the fast link, does the automatic level stay within 5% of the best?"
+
+  [[nodes.CZ4.branch]]
+  when = { arm = "xs-rs-z[13]", speed_at_least = 1.05 }
+  next = ["SM1"]
+  label = "a fixed level beat automatic"
+  note = "with 2 cores a fixed level beat the automatic one: the CPU veto misjudges this machine"
+
+  [[nodes.CZ4.branch]]
+  otherwise = true
+  next = ["SM1"]
+  label = "automatic keeps up"
+
+[nodes.SM1]
+title = "Small files onto the Mac"
+spec = "SM1-small-onto-mac-apollo.toml"
+question = "Writing small files onto the Mac's APFS, does --no-atomic or more workers make xs faster, and is xs at least as fast as rsync?"
+
+  [[nodes.SM1.branch]]
+  when = { arm = ["xs-cpp-noatomic", "xs-cpp-j8"], speed_at_least = 1.05 }
+  next = ["SM1c", "PS1"]
+  label = "a setting beat xs's default"
+  note = "skipping the rename or more workers writes small files onto APFS faster: confirm"
+
+  [[nodes.SM1.branch]]
+  when = { arm = "rsync", speed_at_least = 1.05 }
+  next = ["PS1"]
+  label = "rsync faster onto the Mac"
+  note = "rsync still writes small files onto APFS faster: code cases EXA A5 (fresh-subtree fast path) and A6 (receiver lanes)"
+
+  [[nodes.SM1.branch]]
+  otherwise = true
+  next = ["PS1"]
+  label = "xs's default holds"
+
+[nodes.SM1c]
+title = "Confirm the faster APFS setting"
+promote = "SM1"
+arm = "xs-cpp-*"
+id = "SM1c-small-onto-mac-confirm"
+blocks = 8
+question = "Does the setting that wrote small files onto the Mac faster do it again on eight fresh blocks?"
+
+[nodes.PS1]
+title = "Pull psample onto the Mac"
+spec = "PS1-psample-pull-apollo.toml"
+question = "Pulling the 21 GB psample tree onto the Mac, does --no-atomic, -O or 8 workers beat xs's default, and is xs at least as fast as rsync?"
+
+  [[nodes.PS1.branch]]
+  when = { arm = ["xs-cpp-j8", "xs-cpp-noatomic", "xs-cpp-O"], speed_at_least = 1.05 }
+  next = ["PS1c", "WB1"]
+  label = "a setting recovered the pull"
+  note = "a setting pulls psample onto the Mac faster than xs's default: confirm"
+
+  [[nodes.PS1.branch]]
+  when = { arm = "rsync", speed_at_least = 1.05 }
+  next = ["WB1"]
+  label = "rsync faster pulling psample"
+  note = "rsync still pulls psample onto the Mac faster: a code case on the APFS receiver"
+
+  [[nodes.PS1.branch]]
+  otherwise = true
+  next = ["WB1"]
+  label = "xs's default holds"
+
+[nodes.PS1c]
+title = "Confirm the psample pull setting"
+promote = "PS1"
+arm = "xs-cpp-*"
+id = "PS1c-psample-pull-confirm"
+blocks = 6
+question = "Does the setting that recovered the psample pull hold up on fresh blocks?"
+
+[nodes.WB1]
+title = "Eager writeback on Linux"
+spec = "WB1-eager-writeback-apollo.toml"
+question = "On a Linux receiver, does eager writeback get xs's copies onto disk sooner?"
+
+  [[nodes.WB1.branch]]
+  when = { arm = "xs-cpp-eager", speed_at_least = 1.05 }
+  next = ["WB1c", "XC1", "LT1"]
+  label = "eager writeback helps"
+  note = "eager writeback shortens the time to durable on apollo: confirm, then adopt on Linux receivers (EXA A7)"
+
+  [[nodes.WB1.branch]]
+  otherwise = true
+  next = ["XC1", "LT1"]
+  label = "no gain from eager writeback"
+
+[nodes.WB1c]
+title = "Confirm eager writeback"
+promote = "WB1"
+arm = "xs-cpp-eager"
+id = "WB1c-eager-writeback-confirm"
+blocks = 8
+question = "Does eager writeback shorten xs's time to durable again on eight fresh blocks?"
+
+[nodes.XC1]
+title = "The ssh ceiling"
+spec = "XC1-ssh-ceiling-apollo.toml"
+question = "On large files, how far is xs from a bare tar pipe on 1 and 8 streams: how much of the ceiling is the one ssh connection?"
+
+[nodes.LT1]
+title = "20 ms of latency"
+spec = "LT1-latency20-apollo.toml"
+question = "Over a 20 ms round trip, does rsync beat xs at fresh copies, no-ops or 1% updates?"
+
+  [[nodes.LT1.branch]]
+  when = { arm = "xs-*", speed_below = 0.95 }
+  next = ["LT2"]
+  label = "rsync wins at 20 ms"
+  note = "latency hurts xs more than rsync: round trips per directory (EXA A5's fast path would remove them)"
+
+  [[nodes.LT1.branch]]
+  otherwise = true
+  next = ["LT2"]
+  label = "xs holds at 20 ms"
+
+[nodes.LT2]
+title = "80 ms of latency"
+spec = "LT2-latency80-apollo.toml"
+question = "Over an 80 ms round trip, a long internet path, does rsync beat xs anywhere?"
+
+  [[nodes.LT2.branch]]
+  when = { arm = "xs-*", speed_below = 0.95 }
+  next = ["CS1"]
+  label = "rsync wins at 80 ms"
+  note = "on a long path rsync beats xs somewhere: a code case for round trips"
+
+  [[nodes.LT2.branch]]
+  otherwise = true
+  next = ["CS1"]
+  label = "xs holds at 80 ms"
+
+# Wave 2 (added 2026-10-23 at the user's request: new data rather than repeating the sentinel). The chain goes on
+# through these in order of value; whatever the deadline reaches first runs, and the sentinel fills only after.
+
+[nodes.CS1]
+title = "csearchv3 with PR #34"
+spec = "CS1-csearchv3-pr34-apollo.toml"
+question = "On the user's csearchv3 tree, is xs-rs at PR #34 faster than its base and than rsync, fresh, at a no-op and at a 10% update?"
+
+  [[nodes.CS1.branch]]
+  when = { arm = "xs-*", speed_below = 0.95 }
+  next = ["IN1"]
+  label = "rsync wins a csearchv3 cell"
+  note = "rsync beats an xs build on csearchv3 somewhere: a case for the next engineering loop"
+
+  [[nodes.CS1.branch]]
+  otherwise = true
+  next = ["IN1"]
+  label = "xs holds on csearchv3"
+
+[nodes.IN1]
+title = "Everyday incremental backups"
+spec = "IN1-incremental-real-apollo.toml"
+question = "On congress with 0.1%, 1% and 10% of files edited, the everyday incremental backup, does rsync beat xs?"
+
+  [[nodes.IN1.branch]]
+  when = { arm = "xs-*", speed_below = 0.95 }
+  next = ["JB1"]
+  label = "rsync wins an incremental cell"
+  note = "rsync beats xs at an incremental sync of many small files: a code case beside RW7's large-file deltas"
+
+  [[nodes.IN1.branch]]
+  otherwise = true
+  next = ["JB1"]
+  label = "xs holds incrementally"
+
+[nodes.JB1]
+title = "How many xs-rs workers"
+spec = "JB1-xs-rs-workers-apollo.toml"
+question = "PR #34 gives xs-rs 8 sender workers by default: is 8 the best at 10 GbE, against 1, 2, 4 and 16?"
+
+  [[nodes.JB1.branch]]
+  when = { arm = "xs-rs-j*", speed_at_least = 1.05 }
+  next = ["HS2"]
+  label = "another worker count won"
+  note = "a worker count beat xs-rs's default of 8 at 10 GbE: the default should depend on the link or the files"
+
+  [[nodes.JB1.branch]]
+  otherwise = true
+  next = ["HS2"]
+  label = "8 workers hold"
+
+[nodes.HS2]
+title = "Large files with PR #34"
+spec = "HS2-high-speed-pr34-apollo.toml"
+question = "On 4 GiB of incompressible data in 1 to 64 files, is PR #34 at least as fast as the xs-rs it changes?"
+
+  [[nodes.HS2.branch]]
+  when = { arm = "xs-rs", speed_below = 0.95 }
+  next = ["LT3"]
+  label = "PR #34 slower on large files"
+  note = "PR #34 is slower than its base on large incompressible files: check the CPU probe's cost"
+
+  [[nodes.HS2.branch]]
+  otherwise = true
+  next = ["LT3"]
+  label = "no large-file cost"
+
+[nodes.LT3]
+title = "An internet-like path"
+spec = "LT3-internet-sync-apollo.toml"
+question = "Over a 40 ms, 1 Gb/s path, like a home link to a remote host, does xs-rs -z at its automatic level beat rsync -az and xs-c++ -z?"
+
+  [[nodes.LT3.branch]]
+  when = { arm = ["xs-cpp-z", "xs-rs-z"], speed_below = 0.95 }
+  next = ["IN2"]
+  label = "rsync -az wins over the WAN"
+  note = "rsync -az beats xs with compression on an internet-like path: a code case"
+
+  [[nodes.LT3.branch]]
+  otherwise = true
+  next = ["IN2"]
+  label = "xs holds over the WAN"
+
+[nodes.IN2]
+title = "A 1% update of psample"
+spec = "IN2-incremental-psample-apollo.toml"
+question = "On the 21 GB psample tree with 1% of files edited and hard links kept, does rsync -aH beat xs -aH?"
+
+  [[nodes.IN2.branch]]
+  otherwise = true
+  next = ["CK1"]
+  label = "next: checksum no-ops"
+
+[nodes.CK1]
+title = "Checksum no-ops on large files"
+spec = "CK1-checksum-noop-more-apollo.toml"
+question = "With -c on trees of large files (psample, laikav2), where hashing dominates, does rsync beat xs?"
+
+  [[nodes.CK1.branch]]
+  otherwise = true
+  next = ["DE1"]
+  label = "next: deletes at scale"
+
+[nodes.DE1]
+title = "Deletes at scale"
+spec = "DE1-delete-scale-apollo.toml"
+question = "When 10% of a large tree's files are gone, is xs --delete as fast as rsync --delete?"
+
+  [[nodes.DE1.branch]]
+  otherwise = true
+  next = ["JC1"]
+  label = "next: xs-c++ workers"
+
+[nodes.JC1]
+title = "How many xs-c++ workers"
+spec = "JC1-xs-cpp-workers-apollo.toml"
+question = "Is 4 the best worker count for xs-c++ at 10 GbE, against 1, 2, 8 and 16?"
+
+  [[nodes.JC1.branch]]
+  otherwise = true
+  next = ["CP1"]
+  label = "next: a weak receiver"
+
+[nodes.CP1]
+title = "A weak receiver"
+spec = "CP1-weak-receiver-apollo.toml"
+question = "With the receiver held to 2 cores, like a small NAS, which tool and worker count is fastest?"
+
+[nodes.FS1]
+title = "Congress sentinel"
+spec = "FS1-sentinel-apollo.toml"
+question = "Until Sunday: do rsync, xs-c++ and xs-rs keep their congress ranking, and what is the noise floor at each hour?"

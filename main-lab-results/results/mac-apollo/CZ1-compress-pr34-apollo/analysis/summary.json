@@ -1,0 +1,19 @@
+{
+ "experiment": "CZ1-compress-pr34-apollo",
+ "kind": "screening",
+ "hypothesis": "On 10 GbE with fast CPUs, xs-rs -z at its automatic level (PR #34) is within 5% of the fastest fixed level and of no compression.",
+ "primary": "durable_s",
+ "control": "xs-rs-z",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261023T163747Z-CZ1-compress-pr34-apollo"
+ ],
+ "spec_sha256": [
+  "639c60a279bd26b76d481e3dd8b31d4c7db3c28e40369ba4bb7615566665e78d"
+ ],
+ "valid_blocks": 12,
+ "void_attempts": 0,
+ "void_reasons": []
+}

@@ -1,0 +1,11 @@
+experiment,kind,cell_id,corpus,scenario,sender,receiver,client,link,cache,arm,n_blocks,sigma_d,blocks_for_2pct,blocks_for_3pct,blocks_for_5pct,blocks_for_10pct,blocks_equivalent_2pct,blocks_equivalent_3pct,blocks_equivalent_5pct,blocks_equivalent_10pct
+CZ3-compress-100m-apollo,screening,real-congress.fresh.apollo-mac.receiver.warm,real-congress,fresh,apollo,mac,receiver,mac-apollo-10g,warm,rsync,2,0.011485167669607409,8,8,8,8,8,8,8,8
+CZ3-compress-100m-apollo,screening,real-congress.fresh.apollo-mac.receiver.warm,real-congress,fresh,apollo,mac,receiver,mac-apollo-10g,warm,xs-rs,2,0.015682946633910483,8,8,8,8,9,8,8,8
+CZ3-compress-100m-apollo,screening,real-congress.fresh.apollo-mac.receiver.warm,real-congress,fresh,apollo,mac,receiver,mac-apollo-10g,warm,xs-rs-z1,2,0.027763055620808434,18,9,8,8,23,12,8,8
+CZ3-compress-100m-apollo,screening,real-congress.fresh.apollo-mac.receiver.warm,real-congress,fresh,apollo,mac,receiver,mac-apollo-10g,warm,xs-rs-z3,2,0.12791804945897386,330,149,56,17,441,199,75,21
+CZ3-compress-100m-apollo,screening,real-congress.fresh.apollo-mac.receiver.warm,real-congress,fresh,apollo,mac,receiver,mac-apollo-10g,warm,xs-rs-z6,2,0.05928327088738659,73,34,14,8,97,45,18,8
+CZ3-compress-100m-apollo,screening,real-congress.fresh.mac-apollo.sender.warm,real-congress,fresh,mac,apollo,sender,mac-apollo-10g,warm,rsync,2,0.028108272956846793,18,10,8,8,24,12,8,8
+CZ3-compress-100m-apollo,screening,real-congress.fresh.mac-apollo.sender.warm,real-congress,fresh,mac,apollo,sender,mac-apollo-10g,warm,xs-rs,2,0.4908136840725857,4819,2164,796,210,6457,2900,1066,281
+CZ3-compress-100m-apollo,screening,real-congress.fresh.mac-apollo.sender.warm,real-congress,fresh,mac,apollo,sender,mac-apollo-10g,warm,xs-rs-z1,2,0.08097684672582141,134,61,24,8,178,81,31,10
+CZ3-compress-100m-apollo,screening,real-congress.fresh.mac-apollo.sender.warm,real-congress,fresh,mac,apollo,sender,mac-apollo-10g,warm,xs-rs-z3,2,0.020324031170125538,11,8,8,8,14,8,8,8
+CZ3-compress-100m-apollo,screening,real-congress.fresh.mac-apollo.sender.warm,real-congress,fresh,mac,apollo,sender,mac-apollo-10g,warm,xs-rs-z6,2,0.17229453222828875,596,269,100,28,798,360,134,37

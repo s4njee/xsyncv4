@@ -1,0 +1,19 @@
+{
+ "experiment": "CZ3-compress-100m-apollo",
+ "kind": "screening",
+ "hypothesis": "Held to 100 Mb/s, xs-rs -z at its automatic level is within 5% of the fastest fixed level, and compression beats none.",
+ "primary": "durable_s",
+ "control": "xs-rs-z",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261024T072401Z-CZ3-compress-100m-apollo"
+ ],
+ "spec_sha256": [
+  "f60e81a20b17a3eb425eae4c7b030a007f387bca51990eeba912bbbd4d70e1f3"
+ ],
+ "valid_blocks": 4,
+ "void_attempts": 0,
+ "void_reasons": []
+}

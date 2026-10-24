@@ -1,0 +1,50 @@
+# T19-until-sunday, wave 2 (2026-10-23): new questions in place of repeating the sentinel.
+# The same for xs-c++, whose default is 4: 1, 2, 8 and 16 workers.
+id = "JC1-xs-cpp-workers-apollo"
+kind = "screening"
+hypothesis = "Some worker count is at least 5% faster than xs-c++'s default of 4 in some cell."
+primary = "durable_s"
+delta = 0.05
+blocks = 3
+control = "xs-cpp"
+verify = "first-last"
+cleanup = "eager"
+max_hours = 3
+sample_timeout_s = 3600
+
+[arms.xs-cpp]
+tool = "xs"
+rev = "cc8288d4f08c"
+flags = ["-a", "-j4"]
+
+[arms.xs-cpp-j1]
+tool = "xs"
+rev = "cc8288d4f08c"
+flags = ["-a", "-j1"]
+
+[arms.xs-cpp-j2]
+tool = "xs"
+rev = "cc8288d4f08c"
+flags = ["-a", "-j2"]
+
+[arms.xs-cpp-j8]
+tool = "xs"
+rev = "cc8288d4f08c"
+flags = ["-a", "-j8"]
+
+[arms.xs-cpp-j16]
+tool = "xs"
+rev = "cc8288d4f08c"
+flags = ["-a", "-j16"]
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[matrix]
+link = "mac-apollo-10g"
+corpus = ["real-congress", "local-laikav2", "hs-16x256m"]
+scenario = ["fresh"]
+direction = ["mac>apollo", "apollo>mac"]
+client = ["initiator"]
+cache = ["warm"]

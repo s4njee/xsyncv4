@@ -1,0 +1,22 @@
+[
+ {
+  "experiment": "SM1c-small-onto-mac-confirm",
+  "kind": "confirmatory",
+  "cell_id": "scale-count-1000000.fresh.apollo-mac.receiver.warm",
+  "corpus": "scale-count-1000000",
+  "scenario": "fresh",
+  "sender": "apollo",
+  "receiver": "mac",
+  "client": "receiver",
+  "link": "mac-apollo-10g",
+  "cache": "warm",
+  "arm": "xs-cpp-noatomic",
+  "run_id": "20261024T103613Z-SM1c-small-onto-mac-confirm",
+  "block": 0,
+  "metric": "durable_s",
+  "t_arm": 44.17290537490044,
+  "t_control": 76.6812829580158,
+  "log_ratio": -0.5515460488085462,
+  "ratio": 0.5760585069903669
+ }
+]

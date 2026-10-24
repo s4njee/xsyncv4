@@ -1,0 +1,19 @@
+{
+ "experiment": "SM1c-small-onto-mac-confirm",
+ "kind": "confirmatory",
+ "hypothesis": "xs-cpp-noatomic is more than 5% faster than xs-cpp on real-congress, scale-count-1000000 (from SM1-small-onto-mac-apollo, confirmed with fresh blocks).",
+ "primary": "durable_s",
+ "control": "xs-cpp",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261024T103613Z-SM1c-small-onto-mac-confirm"
+ ],
+ "spec_sha256": [
+  "7c06aec6a4ff95c29e815cfc1cc74577edcc080bd0d31c662ac5c2da74d2607f"
+ ],
+ "valid_blocks": 1,
+ "void_attempts": 0,
+ "void_reasons": []
+}

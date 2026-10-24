@@ -1,0 +1,19 @@
+{
+ "experiment": "RW7-delta-breakdown-apollo",
+ "kind": "screening",
+ "hypothesis": "rsync is at least 5% faster than xs in some delta cell, and xs with --whole-file shows whether xs's delta path or its copy is the cause.",
+ "primary": "durable_s",
+ "control": "rsync",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261023T172300Z-RW7-delta-breakdown-apollo"
+ ],
+ "spec_sha256": [
+  "2a23b02bbe1791fbc9d13482a07462157680c389b5a14e19d41a81596c1e25b9"
+ ],
+ "valid_blocks": 36,
+ "void_attempts": 0,
+ "void_reasons": []
+}

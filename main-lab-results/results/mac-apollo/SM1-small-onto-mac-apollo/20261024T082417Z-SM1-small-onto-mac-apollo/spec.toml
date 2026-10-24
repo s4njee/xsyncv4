@@ -1,0 +1,46 @@
+# Part of T19-until-sunday (2026-10-23): one tree for the Mac-apollo runner until Sunday 07:00 Central.
+# T18 and MA10 on apollo: writing many small files onto the Mac's APFS, with and without the rename (--no-atomic) and with 8 workers.
+# apollo has no small-deep or small-flat, so congress, the million-file tree and mixed-threshold stand in.
+id = "SM1-small-onto-mac-apollo"
+kind = "screening"
+hypothesis = "Pulling small files onto the Mac, xs --no-atomic is at least 5% faster than xs's default, and xs is at least as fast as rsync."
+primary = "durable_s"
+delta = 0.05
+blocks = 3
+control = "xs-cpp"
+verify = "first-last"
+cleanup = "eager"
+max_hours = 3.5
+sample_timeout_s = 3600
+
+[arms.xs-cpp]
+tool = "xs"
+rev = "cc8288d4f08c"
+flags = ["-a", "-j4"]
+
+[arms.xs-cpp-noatomic]
+tool = "xs"
+rev = "cc8288d4f08c"
+flags = ["-a", "-j4", "--no-atomic"]
+
+[arms.xs-cpp-j8]
+tool = "xs"
+rev = "cc8288d4f08c"
+flags = ["-a", "-j8"]
+
+[arms.xs-rs]
+tool = "xs"
+rev = "ac1aeef00c80-rs"
+flags = ["-a"]
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[matrix]
+link = "mac-apollo-10g"
+corpus = ["real-congress", "scale-count-1000000", "mixed-threshold"]
+scenario = ["fresh", "noop"]
+direction = ["apollo>mac"]
+client = ["initiator"]
+cache = ["warm"]

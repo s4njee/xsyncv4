@@ -1,0 +1,26 @@
+{
+ "experiment": "FS1-sentinel-apollo",
+ "kind": "screening",
+ "hypothesis": "rsync, xs-c++ and xs-rs keep their congress ranking through the weekend.",
+ "primary": "durable_s",
+ "control": "rsync",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261023T232159Z-FS1-sentinel-apollo",
+  "20261023T233649Z-FS1-sentinel-apollo",
+  "20261023T235157Z-FS1-sentinel-apollo",
+  "20261024T000710Z-FS1-sentinel-apollo",
+  "20261024T002223Z-FS1-sentinel-apollo",
+  "20261024T003754Z-FS1-sentinel-apollo",
+  "20261024T005242Z-FS1-sentinel-apollo",
+  "20261024T010733Z-FS1-sentinel-apollo"
+ ],
+ "spec_sha256": [
+  "ee19f71beef7cfc688f17bc5216086ba1beadc60e04a1fbf95e651eeba3cd96f"
+ ],
+ "valid_blocks": 32,
+ "void_attempts": 0,
+ "void_reasons": []
+}

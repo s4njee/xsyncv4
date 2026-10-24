@@ -1,0 +1,19 @@
+{
+ "experiment": "CZ4-compress-2core-apollo",
+ "kind": "screening",
+ "hypothesis": "With apollo held to 2 cores, xs-rs -z at its automatic level is within 5% of the fastest fixed level.",
+ "primary": "durable_s",
+ "control": "xs-rs-z",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261024T075240Z-CZ4-compress-2core-apollo"
+ ],
+ "spec_sha256": [
+  "c1ec752eae8ce3c43783e475353815d7a584600c786f9edf01f8d293ce7ea9a0"
+ ],
+ "valid_blocks": 8,
+ "void_attempts": 0,
+ "void_reasons": []
+}

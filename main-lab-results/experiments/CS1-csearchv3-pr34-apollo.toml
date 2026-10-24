@@ -1,0 +1,40 @@
+# T19-until-sunday, wave 2 (2026-10-23): new questions in place of repeating the sentinel.
+# The user's csearchv3 tree (1.35 million files) with PR #34: MM2c stopped at its deadline with only the old xs-rs.
+id = "CS1-csearchv3-pr34-apollo"
+kind = "screening"
+hypothesis = "On csearchv3, xs-rs at PR #34 is at least as fast as its base and faster than rsync at fresh, no-op and a 10% update."
+primary = "durable_s"
+delta = 0.05
+blocks = 3
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+max_hours = 4
+sample_timeout_s = 3600
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[arms.xs-cpp]
+tool = "xs"
+rev = "cc8288d4f08c"
+flags = ["-a", "-j4"]
+
+[arms.xs-rs]
+tool = "xs"
+rev = "ac1aeef00c80-rs"
+flags = ["-a"]
+
+[arms.xs-rs-base]
+tool = "xs"
+rev = "e671c84aa680-rs"
+flags = ["-a", "-j4"]
+
+[matrix]
+link = "mac-apollo-10g"
+corpus = ["real-csearchv3"]
+scenario = ["fresh", "noop", "update-10pct"]
+direction = ["mac>apollo", "apollo>mac"]
+client = ["initiator"]
+cache = ["warm"]

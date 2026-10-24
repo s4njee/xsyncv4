@@ -1,0 +1,19 @@
+{
+ "experiment": "RW8a-delta-wan-apollo",
+ "kind": "screening",
+ "hypothesis": "Over a 20 ms round trip, rsync is at least 5% faster than xs in some delta cell.",
+ "primary": "durable_s",
+ "control": "rsync",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261023T185557Z-RW8a-delta-wan-apollo"
+ ],
+ "spec_sha256": [
+  "f4d4597c16f92455ae5f8be9bf23e7b336bfd3740ad26142764e094096f67126"
+ ],
+ "valid_blocks": 16,
+ "void_attempts": 0,
+ "void_reasons": []
+}

@@ -1,0 +1,237 @@
+{
+ "tree": "T19-until-sunday",
+ "started_utc": "2026-10-23T16:37:47Z",
+ "nodes": {
+  "CZ1": {
+   "state": "decided",
+   "runs": [
+    "20261023T163747Z-CZ1-compress-pr34-apollo"
+   ],
+   "spec": "CZ1-compress-pr34-apollo.toml",
+   "decision": {
+    "utc": "2026-10-23T17:23:00Z",
+    "text": "CZ1: a fixed zstd level beat PR #34's automatic choice at 10 GbE: confirm it, and the policy needs another look (large-text mac\u2192apollo xs-rs-z1 2.20\u00d7 [0.27, 18.04]; large-text mac\u2192apollo xs-rs-z3 1.41\u00d7 [0.11, 18.04]; large-text apollo\u2192mac xs-rs-z3 1.17\u00d7 [0.86, 1.59]; real-congress mac\u2192apollo xs-rs-z3 1.15\u00d7 [0.29, 4.52]; 2 more)",
+    "next": [
+     "CZ1c",
+     "RW7"
+    ],
+    "branch": 0
+   }
+  },
+  "CZ1c": {
+   "state": "skipped",
+   "runs": []
+  },
+  "RW7": {
+   "state": "decided",
+   "runs": [
+    "20261023T172300Z-RW7-delta-breakdown-apollo"
+   ],
+   "spec": "RW7-delta-breakdown-apollo.toml",
+   "decision": {
+    "utc": "2026-10-23T18:55:57Z",
+    "text": "RW7: xs with --whole-file beat rsync's delta at 10 GbE: on a fast link xs should skip the delta; confirm (large-solo mac\u2192apollo xs-cpp-W 2.66\u00d7 [0.00, 11261.27]; hs-16x256m mac\u2192apollo xs-rs-W 2.38\u00d7 [0.00, 2255.51]; large-solo mac\u2192apollo xs-cpp-W 2.30\u00d7 [0.00, 657178.09]; large-text mac\u2192apollo xs-cpp-W 1.83\u00d7 [0.00, 1734.90]; 17 more)",
+    "next": [
+     "RW7c",
+     "RW8a"
+    ],
+    "branch": 0
+   }
+  },
+  "RW7c": {
+   "state": "decided",
+   "runs": [
+    "20261023T185557Z-RW7c-whole-file-confirm"
+   ],
+   "spec": "generated/RW7c-whole-file-confirm.toml",
+   "decision": {
+    "utc": "2026-10-23T19:24:45Z",
+    "text": "RW7c: done (1 run)",
+    "next": []
+   }
+  },
+  "RW8a": {
+   "state": "decided",
+   "runs": [
+    "20261023T185557Z-RW8a-delta-wan-apollo"
+   ],
+   "spec": "RW8a-delta-wan-apollo.toml",
+   "decision": {
+    "utc": "2026-10-23T20:15:57Z",
+    "text": "RW8a: latency widens rsync's delta lead: xs's signature exchange costs round trips (large-text apollo\u2192mac xs-rs 0.91\u00d7 [0.45, 1.82]; hs-16x256m apollo\u2192mac xs-rs 0.86\u00d7 [0.82, 0.90]; hs-16x256m apollo\u2192mac xs-rs 0.84\u00d7 [0.67, 1.06]; hs-16x256m apollo\u2192mac xs-cpp 0.84\u00d7 [0.63, 1.11]; 13 more)",
+    "next": [
+     "RW8b"
+    ],
+    "branch": 0
+   }
+  },
+  "RW8b": {
+   "state": "decided",
+   "runs": [
+    "20261023T201557Z-RW8b-delta-100m-apollo"
+   ],
+   "spec": "RW8b-delta-100m-apollo.toml",
+   "decision": {
+    "utc": "2026-10-23T20:40:57Z",
+    "text": "RW8b: on a slow path rsync's delta beats xs: xs must send less when bytes are the limit; a code case (large-text apollo\u2192mac xs-rs 0.85\u00d7 [0.77, 0.94]; large-text apollo\u2192mac xs-rs 0.80\u00d7 [0.71, 0.90]; large-text apollo\u2192mac xs-cpp 0.52\u00d7 [0.51, 0.52]; large-text mac\u2192apollo xs-cpp 0.47\u00d7 [0.01, 27.43]; 1 more)",
+    "next": [
+     "RW3b"
+    ],
+    "branch": 0
+   }
+  },
+  "RW3b": {
+   "state": "decided",
+   "runs": [
+    "20261023T204057Z-RW3b-noop-many-apollo-pr34"
+   ],
+   "spec": "RW3b-noop-many-apollo-pr34.toml",
+   "decision": {
+    "utc": "2026-10-24T02:39:10Z",
+    "text": "RW3b: otherwise",
+    "next": [
+     "RW6b"
+    ],
+    "branch": 0
+   }
+  },
+  "FS1": {
+   "state": "decided",
+   "runs": [
+    "20261023T232159Z-FS1-sentinel-apollo",
+    "20261023T233649Z-FS1-sentinel-apollo",
+    "20261023T235157Z-FS1-sentinel-apollo",
+    "20261024T000710Z-FS1-sentinel-apollo",
+    "20261024T002223Z-FS1-sentinel-apollo",
+    "20261024T003754Z-FS1-sentinel-apollo",
+    "20261024T005242Z-FS1-sentinel-apollo",
+    "20261024T010733Z-FS1-sentinel-apollo"
+   ],
+   "spec": "FS1-sentinel-apollo.toml",
+   "decision": {
+    "utc": "2026-10-24T02:39:10Z",
+    "text": "FS1: done (8 runs)",
+    "next": []
+   }
+  },
+  "RW6b": {
+   "state": "decided",
+   "runs": [
+    "20261024T023910Z-RW6b-hardlinks-apollo"
+   ],
+   "spec": "RW6b-hardlinks-apollo.toml",
+   "decision": {
+    "utc": "2026-10-24T02:53:20Z",
+    "text": "RW6b: otherwise",
+    "next": [
+     "PR1"
+    ],
+    "branch": 0
+   }
+  },
+  "PR1": {
+   "state": "decided",
+   "runs": [
+    "20261024T025320Z-PR1-pr34-vs-base-apollo"
+   ],
+   "spec": "PR1-pr34-vs-base-apollo.toml",
+   "decision": {
+    "utc": "2026-10-24T04:04:03Z",
+    "text": "PR1: PR #34 is slower than its base in some cell: confirm on fresh blocks before merging (hs-16x256m apollo\u2192mac xs-rs 0.82\u00d7 [0.29, 2.34]; local-laikav2 apollo\u2192mac xs-rs 0.81\u00d7 [0.30, 2.18])",
+    "next": [
+     "PR1r",
+     "CZ2"
+    ],
+    "branch": 0
+   }
+  },
+  "PR1r": {
+   "state": "decided",
+   "runs": [
+    "20261024T040403Z-PR1r-pr34-regression-apollo"
+   ],
+   "spec": "PR1r-pr34-regression-apollo.toml",
+   "decision": {
+    "utc": "2026-10-24T06:39:16Z",
+    "text": "PR1r: done (1 run)",
+    "next": []
+   }
+  },
+  "CZ2": {
+   "state": "decided",
+   "runs": [
+    "20261024T040404Z-CZ2-compress-1g-apollo"
+   ],
+   "spec": "CZ2-compress-1g-apollo.toml",
+   "decision": {
+    "utc": "2026-10-24T07:24:01Z",
+    "text": "CZ2: at 1 Gb/s a fixed level beat the automatic one: the rate rule's thresholds need moving (large-text apollo\u2192mac xs-rs-z3 1.44\u00d7 [1.44, 1.44]; large-text mac\u2192apollo xs-rs-z3 1.15\u00d7 [0.00, 429.31])",
+    "next": [
+     "CZ3"
+    ],
+    "branch": 0
+   }
+  },
+  "CZ3": {
+   "state": "decided",
+   "runs": [
+    "20261024T072401Z-CZ3-compress-100m-apollo"
+   ],
+   "spec": "CZ3-compress-100m-apollo.toml",
+   "decision": {
+    "utc": "2026-10-24T07:52:40Z",
+    "text": "CZ3: at 100 Mb/s a fixed level beat the automatic one: the policy should climb sooner when bytes are the limit (real-congress mac\u2192apollo xs-rs-z3 1.20\u00d7 [1.00, 1.43]; real-congress mac\u2192apollo xs-rs-z1 1.19\u00d7 [0.58, 2.47])",
+    "next": [
+     "CZ4"
+    ],
+    "branch": 0
+   }
+  },
+  "CZ4": {
+   "state": "decided",
+   "runs": [
+    "20261024T075240Z-CZ4-compress-2core-apollo"
+   ],
+   "spec": "CZ4-compress-2core-apollo.toml",
+   "decision": {
+    "utc": "2026-10-24T08:24:17Z",
+    "text": "CZ4: with 2 cores a fixed level beat the automatic one: the CPU veto misjudges this machine (large-text mac\u2192apollo xs-rs-z1 1.44\u00d7 [0.00, 772.06])",
+    "next": [
+     "SM1"
+    ],
+    "branch": 0
+   }
+  },
+  "SM1": {
+   "state": "decided",
+   "runs": [
+    "20261024T082417Z-SM1-small-onto-mac-apollo"
+   ],
+   "spec": "SM1-small-onto-mac-apollo.toml",
+   "decision": {
+    "utc": "2026-10-24T10:36:12Z",
+    "text": "SM1: skipping the rename or more workers writes small files onto APFS faster: confirm (scale-count-1000000 apollo\u2192mac xs-cpp-noatomic 1.76\u00d7 [1.67, 1.86]; real-congress apollo\u2192mac xs-cpp-noatomic 1.42\u00d7 [1.38, 1.45]; real-congress apollo\u2192mac xs-cpp-j8 1.18\u00d7 [0.89, 1.58]; real-congress apollo\u2192mac xs-cpp-noatomic 1.08\u00d7 [0.71, 1.63])",
+    "next": [
+     "SM1c",
+     "PS1"
+    ],
+    "branch": 0
+   }
+  },
+  "SM1c": {
+   "state": "queued",
+   "runs": [
+    "20261024T103613Z-SM1c-small-onto-mac-confirm"
+   ],
+   "spec": "generated/SM1c-small-onto-mac-confirm.toml"
+  },
+  "PS1": {
+   "state": "queued",
+   "runs": [
+    "20261024T103613Z-PS1-psample-pull-apollo"
+   ],
+   "spec": "PS1-psample-pull-apollo.toml"
+  }
+ },
+ "fills": 8
+}

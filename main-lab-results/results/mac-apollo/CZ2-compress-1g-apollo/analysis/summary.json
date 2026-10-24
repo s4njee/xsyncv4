@@ -1,0 +1,19 @@
+{
+ "experiment": "CZ2-compress-1g-apollo",
+ "kind": "screening",
+ "hypothesis": "Held to 1 Gb/s, xs-rs -z at its automatic level is within 5% of the fastest fixed level.",
+ "primary": "durable_s",
+ "control": "xs-rs-z",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261024T040404Z-CZ2-compress-1g-apollo"
+ ],
+ "spec_sha256": [
+  "e7711bca3b773d9f9b66aa42df8717fedb1508f521b98e531bf80ad41ff09473"
+ ],
+ "valid_blocks": 8,
+ "void_attempts": 0,
+ "void_reasons": []
+}

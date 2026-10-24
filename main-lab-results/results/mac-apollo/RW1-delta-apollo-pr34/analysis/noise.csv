@@ -1,0 +1,17 @@
+experiment,kind,cell_id,corpus,scenario,sender,receiver,client,link,cache,arm,n_blocks,sigma_d,blocks_for_2pct,blocks_for_3pct,blocks_for_5pct,blocks_for_10pct,blocks_equivalent_2pct,blocks_equivalent_3pct,blocks_equivalent_5pct,blocks_equivalent_10pct
+RW1-delta-apollo-pr34,screening,large-solo.append-1pct.apollo-mac.receiver.warm,large-solo,append-1pct,apollo,mac,receiver,mac-apollo-10g,warm,xs-cpp,3,0.012560160184709592,8,8,8,8,8,8,8,8
+RW1-delta-apollo-pr34,screening,large-solo.append-1pct.apollo-mac.receiver.warm,large-solo,append-1pct,apollo,mac,receiver,mac-apollo-10g,warm,xs-rs,3,0.038598940193079447,32,16,8,8,42,20,9,8
+RW1-delta-apollo-pr34,screening,large-solo.append-1pct.mac-apollo.sender.warm,large-solo,append-1pct,mac,apollo,sender,mac-apollo-10g,warm,xs-cpp,3,0.19619756759684145,772,348,129,36,1034,465,172,47
+RW1-delta-apollo-pr34,screening,large-solo.append-1pct.mac-apollo.sender.warm,large-solo,append-1pct,mac,apollo,sender,mac-apollo-10g,warm,xs-rs,3,0.24690622602069162,1221,550,203,55,1636,736,272,73
+RW1-delta-apollo-pr34,screening,large-solo.update-1pct.apollo-mac.receiver.warm,large-solo,update-1pct,apollo,mac,receiver,mac-apollo-10g,warm,xs-cpp,3,0.03122337309941619,22,11,8,8,29,14,8,8
+RW1-delta-apollo-pr34,screening,large-solo.update-1pct.apollo-mac.receiver.warm,large-solo,update-1pct,apollo,mac,receiver,mac-apollo-10g,warm,xs-rs,3,0.01192529719839431,8,8,8,8,8,8,8,8
+RW1-delta-apollo-pr34,screening,large-solo.update-1pct.mac-apollo.sender.warm,large-solo,update-1pct,mac,apollo,sender,mac-apollo-10g,warm,xs-cpp,3,0.33520787140957986,2249,1011,373,99,3013,1354,498,132
+RW1-delta-apollo-pr34,screening,large-solo.update-1pct.mac-apollo.sender.warm,large-solo,update-1pct,mac,apollo,sender,mac-apollo-10g,warm,xs-rs,3,0.6983194685468714,9752,4378,1609,423,13069,5867,2155,567
+RW1-delta-apollo-pr34,screening,large-text.append-1pct.apollo-mac.receiver.warm,large-text,append-1pct,apollo,mac,receiver,mac-apollo-10g,warm,xs-cpp,3,0.043630071620093816,41,20,9,8,54,25,11,8
+RW1-delta-apollo-pr34,screening,large-text.append-1pct.apollo-mac.receiver.warm,large-text,append-1pct,apollo,mac,receiver,mac-apollo-10g,warm,xs-rs,3,0.03471877172246532,27,13,8,8,35,17,8,8
+RW1-delta-apollo-pr34,screening,large-text.append-1pct.mac-apollo.sender.warm,large-text,append-1pct,mac,apollo,sender,mac-apollo-10g,warm,xs-cpp,3,1.5158586443787836,45942,20621,7570,1986,61574,27637,10145,2660
+RW1-delta-apollo-pr34,screening,large-text.append-1pct.mac-apollo.sender.warm,large-text,append-1pct,mac,apollo,sender,mac-apollo-10g,warm,xs-rs,3,0.19136148795498106,735,331,123,34,984,443,164,45
+RW1-delta-apollo-pr34,screening,large-text.update-1pct.apollo-mac.receiver.warm,large-text,update-1pct,apollo,mac,receiver,mac-apollo-10g,warm,xs-cpp,3,0.02265061752371708,13,8,8,8,16,9,8,8
+RW1-delta-apollo-pr34,screening,large-text.update-1pct.apollo-mac.receiver.warm,large-text,update-1pct,apollo,mac,receiver,mac-apollo-10g,warm,xs-rs,3,0.011830689527683656,8,8,8,8,8,8,8,8
+RW1-delta-apollo-pr34,screening,large-text.update-1pct.mac-apollo.sender.warm,large-text,update-1pct,mac,apollo,sender,mac-apollo-10g,warm,xs-cpp,3,0.3223603781792438,2080,935,345,92,2787,1252,461,123
+RW1-delta-apollo-pr34,screening,large-text.update-1pct.mac-apollo.sender.warm,large-text,update-1pct,mac,apollo,sender,mac-apollo-10g,warm,xs-rs,3,1.654238518866087,54712,24557,9015,2364,73328,32913,12082,3168

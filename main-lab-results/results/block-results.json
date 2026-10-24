@@ -5651,12 +5651,812 @@
   "RW1-delta-apollo-pr34": {
    "run": "20261023T092441Z-RW1-delta-apollo-pr34",
    "experiment": "RW1-delta-apollo-pr34",
-   "key": "large-text.append-1pct.mac-apollo.sender.warm|0|0",
-   "utc": 1792752189.795,
+   "key": "large-text.update-1pct.apollo-mac.receiver.warm|2|0",
+   "utc": 1792753774.552,
+   "cell": "large-text.update-1pct.apollo-mac.receiver.warm",
+   "factors": {
+    "corpus": "large-text",
+    "scenario": "update-1pct",
+    "sender": "apollo",
+    "receiver": "mac",
+    "client": "receiver",
+    "link": "mac-apollo-10g",
+    "cache": "warm"
+   },
+   "block": 2,
+   "attempt": 0,
+   "control": "rsync",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "rsync",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 1.292,
+     "gbps": 6.647,
+     "files_per_s": 6,
+     "speed": 1
+    },
+    {
+     "arm": "xs-cpp",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 3.308,
+     "gbps": 2.597,
+     "files_per_s": 2,
+     "speed": 0.39
+    },
+    {
+     "arm": "xs-rs",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 1.588,
+     "gbps": 5.411,
+     "files_per_s": 5,
+     "speed": 0.81
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "xs-cpp",
+     "speed": 0.4,
+     "blocks": 3
+    },
+    {
+     "arm": "xs-rs",
+     "speed": 0.82,
+     "blocks": 3
+    }
+   ],
+   "question": null,
+   "summary": null,
+   "model": null,
+   "driver": "mac"
+  },
+  "RW3-noop-many-apollo-pr34": {
+   "run": "20261023T092441Z-RW3-noop-many-apollo-pr34",
+   "experiment": "RW3-noop-many-apollo-pr34",
+   "key": "real-psample.noop.apollo-mac.receiver.warm|1|0",
+   "utc": 1792762370.727,
+   "cell": "real-psample.noop.apollo-mac.receiver.warm",
+   "factors": {
+    "corpus": "real-psample",
+    "scenario": "noop",
+    "sender": "apollo",
+    "receiver": "mac",
+    "client": "receiver",
+    "link": "mac-apollo-10g",
+    "cache": "warm"
+   },
+   "block": 1,
+   "attempt": 0,
+   "control": "rsync",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "rsync",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 36.414,
+     "gbps": 4.624,
+     "files_per_s": 19528,
+     "speed": 1
+    },
+    {
+     "arm": "xs-cpp",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 21.647,
+     "gbps": 7.778,
+     "files_per_s": 32850,
+     "speed": 1.68
+    },
+    {
+     "arm": "xs-cpp-j1",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 42.291,
+     "gbps": 3.981,
+     "files_per_s": 16814,
+     "speed": 0.86
+    },
+    {
+     "arm": "xs-rs",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 18.73,
+     "gbps": 8.989,
+     "files_per_s": 37967,
+     "speed": 1.94
+    },
+    {
+     "arm": "xs-rs-j1",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 36.075,
+     "gbps": 4.667,
+     "files_per_s": 19712,
+     "speed": 1.01
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "xs-cpp",
+     "speed": 1.39,
+     "blocks": 2
+    },
+    {
+     "arm": "xs-cpp-j1",
+     "speed": 0.78,
+     "blocks": 2
+    },
+    {
+     "arm": "xs-rs",
+     "speed": 2.04,
+     "blocks": 2
+    },
+    {
+     "arm": "xs-rs-j1",
+     "speed": 1.09,
+     "blocks": 2
+    }
+   ],
+   "question": null,
+   "summary": "This block's fastest arm was xs-rs at 1.94x the rsync control (18.7 s against 36.4 s). Cumulatively across 2 blocks, xs-rs stands at 2.04x, xs-cpp at 1.39x, xs-rs-j1 at 1.09x and xs-cpp-j1 at 0.78x, so these ratios rest on only two blocks and remain thin. The results give no direct bearing on the experiment's question, which is unspecified in this record.",
+   "model": "claude-haiku-5-5",
+   "summarizedUtc": 1792762466.516,
+   "driver": "mac"
+  },
+  "RW4-fresh-sizes-apollo-pr34": {
+   "run": "20261023T092442Z-RW4-fresh-sizes-apollo-pr34",
+   "experiment": "RW4-fresh-sizes-apollo-pr34",
+   "key": "scale-size-16777216.fresh.apollo-mac.receiver.warm|2|0",
+   "utc": 1792763667.252,
+   "cell": "scale-size-16777216.fresh.apollo-mac.receiver.warm",
+   "factors": {
+    "corpus": "scale-size-16777216",
+    "scenario": "fresh",
+    "sender": "apollo",
+    "receiver": "mac",
+    "client": "receiver",
+    "link": "mac-apollo-10g",
+    "cache": "warm"
+   },
+   "block": 2,
+   "attempt": 0,
+   "control": "rsync",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "rsync",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 1.208,
+     "gbps": 1.778,
+     "files_per_s": 13,
+     "speed": 1
+    },
+    {
+     "arm": "xs-cpp",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.518,
+     "gbps": 4.147,
+     "files_per_s": 31,
+     "speed": 2.33
+    },
+    {
+     "arm": "xs-cpp-j1",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.533,
+     "gbps": 4.026,
+     "files_per_s": 30,
+     "speed": 2.26
+    },
+    {
+     "arm": "xs-rs",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.541,
+     "gbps": 3.971,
+     "files_per_s": 30,
+     "speed": 2.23
+    },
+    {
+     "arm": "xs-rs-j1",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.487,
+     "gbps": 4.413,
+     "files_per_s": 33,
+     "speed": 2.48
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "xs-cpp",
+     "speed": 2.22,
+     "blocks": 3
+    },
+    {
+     "arm": "xs-cpp-j1",
+     "speed": 2.15,
+     "blocks": 3
+    },
+    {
+     "arm": "xs-rs",
+     "speed": 2.17,
+     "blocks": 3
+    },
+    {
+     "arm": "xs-rs-j1",
+     "speed": 2.32,
+     "blocks": 3
+    }
+   ],
+   "question": null,
+   "summary": "In this block, xs-rs-j1 was fastest at 0.487 s, 2.48x the rsync control's 1.208 s (4.41 vs 1.78 Gbps). Cumulatively over three blocks in this cell, xs-rs-j1 leads at 2.32x, ahead of xs-cpp (2.22x), xs-rs (2.17x), and xs-cpp-j1 (2.15x), so the ranking rests on only three blocks and the gaps are small. This is a single-cell result for fresh transfers of this size, so it says little about the experiment's broader question.",
+   "model": "claude-haiku-5-5",
+   "summarizedUtc": 1792763701.718,
+   "driver": "mac"
+  },
+  "CZ1-compress-pr34-apollo": {
+   "run": "20261023T163747Z-CZ1-compress-pr34-apollo",
+   "experiment": "CZ1-compress-pr34-apollo",
+   "key": "large-text.fresh.mac-apollo.sender.warm|2|0",
+   "utc": 1792776113.194,
+   "cell": "large-text.fresh.mac-apollo.sender.warm",
+   "factors": {
+    "corpus": "large-text",
+    "scenario": "fresh",
+    "sender": "mac",
+    "receiver": "apollo",
+    "client": "sender",
+    "link": "mac-apollo-10g",
+    "cache": "warm"
+   },
+   "block": 2,
+   "attempt": 0,
+   "control": "xs-rs-z",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "rsync",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 32.116,
+     "gbps": 2.14,
+     "files_per_s": 0,
+     "speed": 0.34
+    },
+    {
+     "arm": "xs-rs",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 12.922,
+     "gbps": 5.318,
+     "files_per_s": 1,
+     "speed": 0.85
+    },
+    {
+     "arm": "xs-rs-z",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 10.97,
+     "gbps": 6.264,
+     "files_per_s": 1,
+     "speed": 1
+    },
+    {
+     "arm": "xs-rs-z1",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 11.899,
+     "gbps": 5.775,
+     "files_per_s": 1,
+     "speed": 0.92
+    },
+    {
+     "arm": "xs-rs-z3",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 14.116,
+     "gbps": 4.868,
+     "files_per_s": 1,
+     "speed": 0.78
+    },
+    {
+     "arm": "xs-rs-base-z",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 17.883,
+     "gbps": 3.843,
+     "files_per_s": 0,
+     "speed": 0.61
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "rsync",
+     "speed": 0.63,
+     "blocks": 3
+    },
+    {
+     "arm": "xs-rs",
+     "speed": 0.81,
+     "blocks": 3
+    },
+    {
+     "arm": "xs-rs-base-z",
+     "speed": 1.06,
+     "blocks": 3
+    },
+    {
+     "arm": "xs-rs-z1",
+     "speed": 2.2,
+     "blocks": 3
+    },
+    {
+     "arm": "xs-rs-z3",
+     "speed": 1.41,
+     "blocks": 3
+    }
+   ],
+   "question": null,
+   "summary": "In this block the control, xs-rs-z, was fastest at 10.97 s (6.26 Gbps), with xs-rs-z1 closest at 0.92x and rsync slowest at 0.34x. The cumulative table omits the control, so those ratios can't be read against it; the other arms rest on three blocks each, which is still thin. xs-rs-z1's cumulative 2.20x sits far above its 0.92x here. The experiment has no stated question, so this block doesn't bear on a hypothesis.",
+   "model": "claude-haiku-5-5",
+   "summarizedUtc": 1792776154.075,
+   "driver": "mac"
+  },
+  "RW7-delta-breakdown-apollo": {
+   "run": "20261023T172300Z-RW7-delta-breakdown-apollo",
+   "experiment": "RW7-delta-breakdown-apollo",
+   "key": "hs-16x256m.update-1pct.apollo-mac.receiver.warm|1|0",
+   "utc": 1792781721.746,
+   "cell": "hs-16x256m.update-1pct.apollo-mac.receiver.warm",
+   "factors": {
+    "corpus": "hs-16x256m",
+    "scenario": "update-1pct",
+    "sender": "apollo",
+    "receiver": "mac",
+    "client": "receiver",
+    "link": "mac-apollo-10g",
+    "cache": "warm"
+   },
+   "block": 1,
+   "attempt": 0,
+   "control": "rsync",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "rsync",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 0.56,
+     "gbps": 3.832,
+     "files_per_s": 29,
+     "speed": 1
+    },
+    {
+     "arm": "rsync-W",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.976,
+     "gbps": 2.201,
+     "files_per_s": 16,
+     "speed": 0.57
+    },
+    {
+     "arm": "xs-cpp",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.64,
+     "gbps": 3.353,
+     "files_per_s": 25,
+     "speed": 0.88
+    },
+    {
+     "arm": "xs-cpp-W",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.548,
+     "gbps": 3.917,
+     "files_per_s": 29,
+     "speed": 1.02
+    },
+    {
+     "arm": "xs-rs",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.588,
+     "gbps": 3.649,
+     "files_per_s": 27,
+     "speed": 0.95
+    },
+    {
+     "arm": "xs-rs-W",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.508,
+     "gbps": 4.225,
+     "files_per_s": 31,
+     "speed": 1.1
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "rsync-W",
+     "speed": 0.5,
+     "blocks": 2
+    },
+    {
+     "arm": "xs-cpp",
+     "speed": 0.82,
+     "blocks": 2
+    },
+    {
+     "arm": "xs-cpp-W",
+     "speed": 0.96,
+     "blocks": 2
+    },
+    {
+     "arm": "xs-rs",
+     "speed": 0.92,
+     "blocks": 2
+    },
+    {
+     "arm": "xs-rs-W",
+     "speed": 1.02,
+     "blocks": 2
+    }
+   ],
+   "question": null,
+   "summary": "In this block, xs-rs-W was fastest at 1.10x the rsync control (0.508 s against 0.56 s), while rsync-W was slowest at 0.57x. Across the two blocks so far in this cell, xs-rs-W's cumulative speed is 1.02x, and the other arms range from 0.50x (rsync-W) to 0.96x (xs-cpp-W), so the cumulative ratios rest on only two blocks and remain thin. This cell is one direction of the delta-breakdown experiment, and the results give no clear answer on the experiment's question, which is not stated in the record.",
+   "model": "claude-haiku-5-5",
+   "summarizedUtc": 1792781778.901,
+   "driver": "mac"
+  },
+  "RW7c-whole-file-confirm": {
+   "run": "20261023T185557Z-RW7c-whole-file-confirm",
+   "experiment": "RW7c-whole-file-confirm",
+   "key": "large-text.update-10pct.apollo-mac.receiver.warm|7|0",
+   "utc": 1792783422.141,
+   "cell": "large-text.update-10pct.apollo-mac.receiver.warm",
+   "factors": {
+    "corpus": "large-text",
+    "scenario": "update-10pct",
+    "sender": "apollo",
+    "receiver": "mac",
+    "client": "receiver",
+    "link": "mac-apollo-10g",
+    "cache": "warm"
+   },
+   "block": 7,
+   "attempt": 0,
+   "control": "rsync",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "rsync",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 1.39,
+     "gbps": 6.182,
+     "files_per_s": 6,
+     "speed": 1
+    },
+    {
+     "arm": "xs-rs-W",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 1.221,
+     "gbps": 7.033,
+     "files_per_s": 7,
+     "speed": 1.14
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "xs-rs-W",
+     "speed": 1.01,
+     "blocks": 8
+    }
+   ],
+   "question": null,
+   "summary": "This block's xs-rs-W arm finished in 1.22 s against rsync's 1.39 s, a speed of 1.14x. Across 8 blocks in this cell, xs-rs-W's cumulative speed is 1.01x, so this block sits well above that running figure, and eight blocks gives a reasonably settled but still near-parity picture. The experiment's question is null, so this block does not bear directly on a stated hypothesis.",
+   "model": "claude-haiku-5-5",
+   "summarizedUtc": 1792783471.066,
+   "driver": "mac"
+  },
+  "RW8a-delta-wan-apollo": {
+   "run": "20261023T185557Z-RW8a-delta-wan-apollo",
+   "experiment": "RW8a-delta-wan-apollo",
+   "key": "large-text.append-1pct.mac-apollo.sender.warm|1|0",
+   "utc": 1792786536.209,
    "cell": "large-text.append-1pct.mac-apollo.sender.warm",
    "factors": {
     "corpus": "large-text",
     "scenario": "append-1pct",
+    "sender": "mac",
+    "receiver": "apollo",
+    "client": "sender",
+    "link": "mac-apollo-10g",
+    "cache": "warm"
+   },
+   "block": 1,
+   "attempt": 0,
+   "control": "rsync",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "rsync",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 4.602,
+     "gbps": 1.867,
+     "files_per_s": 2,
+     "speed": 1
+    },
+    {
+     "arm": "xs-cpp",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 9.18,
+     "gbps": 0.936,
+     "files_per_s": 1,
+     "speed": 0.5
+    },
+    {
+     "arm": "xs-rs",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 2.788,
+     "gbps": 3.082,
+     "files_per_s": 3,
+     "speed": 1.65
+    },
+    {
+     "arm": "xs-rs-W",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 4.485,
+     "gbps": 1.915,
+     "files_per_s": 2,
+     "speed": 1.03
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "xs-cpp",
+     "speed": 0.63,
+     "blocks": 2
+    },
+    {
+     "arm": "xs-rs",
+     "speed": 1.46,
+     "blocks": 2
+    },
+    {
+     "arm": "xs-rs-W",
+     "speed": 0.83,
+     "blocks": 2
+    }
+   ],
+   "question": null,
+   "summary": "This block's fastest arm was xs-rs at 1.65x the rsync control (2.79 s against 4.60 s), with xs-rs-W roughly matching control at 1.03x and xs-cpp slowest at 0.50x. Across two blocks in this cell, the cumulative ratios are xs-rs 1.46x, xs-rs-W 0.83x and xs-cpp 0.63x, so the pattern rests on only two blocks and is still thin. This cell alone does not settle the experiment's question, which is not stated in the record.",
+   "model": "claude-haiku-5-5",
+   "summarizedUtc": 1792786598.938,
+   "driver": "mac"
+  },
+  "RW8b-delta-100m-apollo": {
+   "run": "20261023T201557Z-RW8b-delta-100m-apollo",
+   "experiment": "RW8b-delta-100m-apollo",
+   "key": "large-text.update-1pct.mac-apollo.sender.warm|1|0",
+   "utc": 1792788037.197,
+   "cell": "large-text.update-1pct.mac-apollo.sender.warm",
+   "factors": {
+    "corpus": "large-text",
+    "scenario": "update-1pct",
+    "sender": "mac",
+    "receiver": "apollo",
+    "client": "sender",
+    "link": "mac-apollo-10g",
+    "cache": "warm"
+   },
+   "block": 1,
+   "attempt": 0,
+   "control": "rsync",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "rsync",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 4.219,
+     "gbps": 2.036,
+     "files_per_s": 2,
+     "speed": 1
+    },
+    {
+     "arm": "xs-cpp",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 3.174,
+     "gbps": 2.706,
+     "files_per_s": 3,
+     "speed": 1.33
+    },
+    {
+     "arm": "xs-rs",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 2.12,
+     "gbps": 4.051,
+     "files_per_s": 4,
+     "speed": 1.99
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "xs-cpp",
+     "speed": 1.32,
+     "blocks": 2
+    },
+    {
+     "arm": "xs-rs",
+     "speed": 1.48,
+     "blocks": 2
+    }
+   ],
+   "question": null,
+   "summary": "This block's fastest arm was xs-rs at 1.99x the rsync control (2.12 s versus 4.22 s), with xs-cpp at 1.33x. Across the cell so far, xs-cpp sits at 1.32x and xs-rs at 1.48x, but these cumulative ratios rest on only two blocks, so the evidence is still thin. The block alone does not bear on the experiment's question, which is not stated in the record.",
+   "model": "claude-haiku-5-5",
+   "summarizedUtc": 1792788060.438,
+   "driver": "mac"
+  },
+  "RW3b-noop-many-apollo-pr34": {
+   "run": "20261023T204057Z-RW3b-noop-many-apollo-pr34",
+   "experiment": "RW3b-noop-many-apollo-pr34",
+   "key": "scale-count-1000000.noop.mac-apollo.sender.warm|1|0",
+   "utc": 1792796839.109,
+   "cell": "scale-count-1000000.noop.mac-apollo.sender.warm",
+   "factors": {
+    "corpus": "scale-count-1000000",
+    "scenario": "noop",
+    "sender": "mac",
+    "receiver": "apollo",
+    "client": "sender",
+    "link": "mac-apollo-10g",
+    "cache": "warm"
+   },
+   "block": 1,
+   "attempt": 0,
+   "control": "rsync",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "rsync",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 75.383,
+     "gbps": 0.341,
+     "files_per_s": 13266,
+     "speed": 1
+    },
+    {
+     "arm": "xs-cpp",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 11.845,
+     "gbps": 2.173,
+     "files_per_s": 84426,
+     "speed": 6.36
+    },
+    {
+     "arm": "xs-cpp-j1",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 55.133,
+     "gbps": 0.467,
+     "files_per_s": 18138,
+     "speed": 1.37
+    },
+    {
+     "arm": "xs-rs",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 7.089,
+     "gbps": 3.631,
+     "files_per_s": 141069,
+     "speed": 10.63
+    },
+    {
+     "arm": "xs-rs-j1",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 55.377,
+     "gbps": 0.465,
+     "files_per_s": 18058,
+     "speed": 1.36
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "xs-cpp",
+     "speed": 6.38,
+     "blocks": 2
+    },
+    {
+     "arm": "xs-cpp-j1",
+     "speed": 1.34,
+     "blocks": 2
+    },
+    {
+     "arm": "xs-rs",
+     "speed": 10.26,
+     "blocks": 2
+    },
+    {
+     "arm": "xs-rs-j1",
+     "speed": 1.41,
+     "blocks": 2
+    }
+   ],
+   "question": null,
+   "summary": "In this block on the scale-count-1000000 noop mac\u2192apollo cell, xs-rs was fastest at 10.63x the rsync control (7.1 s versus 75.4 s), with xs-cpp at 6.36x and the j1 variants near 1.4x. Across two blocks the cumulative ratios are xs-rs 10.26x, xs-cpp 6.38x, xs-rs-j1 1.41x and xs-cpp-j1 1.34x, so the ordering holds, though two blocks is still thin evidence. The question field is null, so this block does not bear on a stated hypothesis.",
+   "model": "claude-haiku-5-5",
+   "summarizedUtc": 1792796910.496,
+   "driver": "mac"
+  },
+  "FS1-sentinel-apollo": {
+   "run": "20261024T010733Z-FS1-sentinel-apollo",
+   "experiment": "FS1-sentinel-apollo",
+   "key": "real-congress.fresh.mac-apollo.sender.warm|0|0",
+   "utc": 1792804781.325,
+   "cell": "real-congress.fresh.mac-apollo.sender.warm",
+   "factors": {
+    "corpus": "real-congress",
+    "scenario": "fresh",
     "sender": "mac",
     "receiver": "apollo",
     "client": "sender",
@@ -5673,9 +6473,9 @@
      "control": true,
      "valid": true,
      "void": null,
-     "seconds": 5.927,
-     "gbps": 1.449,
-     "files_per_s": 1,
+     "seconds": 32.122,
+     "gbps": 0.289,
+     "files_per_s": 6740,
      "speed": 1
     },
     {
@@ -5683,31 +6483,742 @@
      "control": false,
      "valid": true,
      "void": null,
-     "seconds": 10.089,
-     "gbps": 0.851,
-     "files_per_s": 1,
-     "speed": 0.59
+     "seconds": 12.585,
+     "gbps": 0.737,
+     "files_per_s": 17204,
+     "speed": 2.55
     },
     {
      "arm": "xs-rs",
      "control": false,
      "valid": true,
      "void": null,
-     "seconds": 7.813,
-     "gbps": 1.099,
-     "files_per_s": 1,
-     "speed": 0.76
+     "seconds": 6.879,
+     "gbps": 1.348,
+     "files_per_s": 31474,
+     "speed": 4.67
     }
    ],
    "soFar": [
     {
      "arm": "xs-cpp",
-     "speed": 0.59,
+     "speed": 2.55,
      "blocks": 1
     },
     {
      "arm": "xs-rs",
+     "speed": 4.67,
+     "blocks": 1
+    }
+   ],
+   "question": null,
+   "summary": "This block ran the rsync control at 32.1 s, with xs-rs fastest at 6.9 s (4.67x) and xs-cpp at 12.6 s (2.55x). The running ratios for this cell, mac\u2192apollo on real-congress fresh, rest on only one block each, so they are still thin evidence. The block gives no bearing on the experiment's question, which is null in the configuration.",
+   "model": "claude-haiku-5-5",
+   "summarizedUtc": 1792804823.138,
+   "driver": "mac"
+  },
+  "RW6b-hardlinks-apollo": {
+   "run": "20261024T023910Z-RW6b-hardlinks-apollo",
+   "experiment": "RW6b-hardlinks-apollo",
+   "key": "local-laikav2.fresh.apollo-mac.receiver.warm|5|0",
+   "utc": 1792810337.698,
+   "cell": "local-laikav2.fresh.apollo-mac.receiver.warm",
+   "factors": {
+    "corpus": "local-laikav2",
+    "scenario": "fresh",
+    "sender": "apollo",
+    "receiver": "mac",
+    "client": "receiver",
+    "link": "mac-apollo-10g",
+    "cache": "warm"
+   },
+   "block": 5,
+   "attempt": 0,
+   "control": "rsync",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "rsync",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 25.853,
+     "gbps": 2.245,
+     "files_per_s": 512,
+     "speed": 1
+    },
+    {
+     "arm": "xs-cpp",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 10.01,
+     "gbps": 5.797,
+     "files_per_s": 1323,
+     "speed": 2.58
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "xs-cpp",
+     "speed": 2.6,
+     "blocks": 6
+    }
+   ],
+   "question": null,
+   "summary": "In this block on local-laikav2 (fresh, apollo\u2192mac), xs-cpp finished in 10.0 s against rsync's 25.9 s, making it 2.58x faster than the control. Across 6 blocks in this cell, xs-cpp's cumulative speed is 2.6x, so the picture is consistent and rests on enough blocks to be reasonably stable. This cell alone does not address the experiment's question, which is not stated in the input.",
+   "model": "claude-haiku-5-5",
+   "summarizedUtc": 1792810435.209,
+   "driver": "mac"
+  },
+  "PR1-pr34-vs-base-apollo": {
+   "run": "20261024T025320Z-PR1-pr34-vs-base-apollo",
+   "experiment": "PR1-pr34-vs-base-apollo",
+   "key": "hs-16x256m.fresh.apollo-mac.receiver.warm|2|0",
+   "utc": 1792814436.965,
+   "cell": "hs-16x256m.fresh.apollo-mac.receiver.warm",
+   "factors": {
+    "corpus": "hs-16x256m",
+    "scenario": "fresh",
+    "sender": "apollo",
+    "receiver": "mac",
+    "client": "receiver",
+    "link": "mac-apollo-10g",
+    "cache": "warm"
+   },
+   "block": 2,
+   "attempt": 0,
+   "control": "xs-rs-base",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "xs-rs-base",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 4.354,
+     "gbps": 7.892,
+     "files_per_s": 4,
+     "speed": 1
+    },
+    {
+     "arm": "xs-rs",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 4.474,
+     "gbps": 7.68,
+     "files_per_s": 4,
+     "speed": 0.97
+    },
+    {
+     "arm": "xs-rs-j4",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 4.318,
+     "gbps": 7.957,
+     "files_per_s": 4,
+     "speed": 1.01
+    },
+    {
+     "arm": "rsync",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 13.253,
+     "gbps": 2.593,
+     "files_per_s": 1,
+     "speed": 0.33
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "rsync",
+     "speed": 0.29,
+     "blocks": 3
+    },
+    {
+     "arm": "xs-rs",
+     "speed": 0.98,
+     "blocks": 3
+    },
+    {
+     "arm": "xs-rs-j4",
+     "speed": 0.99,
+     "blocks": 3
+    }
+   ],
+   "question": null,
+   "summary": null,
+   "model": null,
+   "driver": "mac"
+  },
+  "PR1r-pr34-regression-apollo": {
+   "run": "20261024T040403Z-PR1r-pr34-regression-apollo",
+   "experiment": "PR1r-pr34-regression-apollo",
+   "key": "local-laikav2.noop.apollo-mac.receiver.warm|7|0",
+   "utc": 1792823717.328,
+   "cell": "local-laikav2.noop.apollo-mac.receiver.warm",
+   "factors": {
+    "corpus": "local-laikav2",
+    "scenario": "noop",
+    "sender": "apollo",
+    "receiver": "mac",
+    "client": "receiver",
+    "link": "mac-apollo-10g",
+    "cache": "warm"
+   },
+   "block": 7,
+   "attempt": 0,
+   "control": "xs-rs-base",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "xs-rs-base",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 0.28,
+     "gbps": 207.528,
+     "files_per_s": 47372,
+     "speed": 1
+    },
+    {
+     "arm": "xs-rs",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.281,
+     "gbps": 206.258,
+     "files_per_s": 47082,
+     "speed": 0.99
+    },
+    {
+     "arm": "xs-rs-j4",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.282,
+     "gbps": 205.741,
+     "files_per_s": 46964,
+     "speed": 0.99
+    },
+    {
+     "arm": "rsync",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.448,
+     "gbps": 129.624,
+     "files_per_s": 29589,
+     "speed": 0.62
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "rsync",
+     "speed": 0.64,
+     "blocks": 8
+    },
+    {
+     "arm": "xs-rs",
+     "speed": 1,
+     "blocks": 8
+    },
+    {
+     "arm": "xs-rs-j4",
+     "speed": 1.08,
+     "blocks": 8
+    }
+   ],
+   "question": null,
+   "summary": null,
+   "model": null,
+   "driver": "mac"
+  },
+  "CZ2-compress-1g-apollo": {
+   "run": "20261024T040404Z-CZ2-compress-1g-apollo",
+   "experiment": "CZ2-compress-1g-apollo",
+   "key": "large-text.fresh.mac-apollo.sender.warm|1|0",
+   "utc": 1792826523.24,
+   "cell": "large-text.fresh.mac-apollo.sender.warm",
+   "factors": {
+    "corpus": "large-text",
+    "scenario": "fresh",
+    "sender": "mac",
+    "receiver": "apollo",
+    "client": "sender",
+    "link": "mac-apollo-10g",
+    "cache": "warm"
+   },
+   "block": 1,
+   "attempt": 0,
+   "control": "xs-rs-z",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "rsync",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 82.789,
+     "gbps": 0.83,
+     "files_per_s": 0,
+     "speed": 0.8
+    },
+    {
+     "arm": "xs-rs",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 38.809,
+     "gbps": 1.771,
+     "files_per_s": 0,
+     "speed": 1.71
+    },
+    {
+     "arm": "xs-rs-z",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 66.543,
+     "gbps": 1.033,
+     "files_per_s": 0,
+     "speed": 1
+    },
+    {
+     "arm": "xs-rs-z1",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 44.689,
+     "gbps": 1.538,
+     "files_per_s": 0,
+     "speed": 1.49
+    },
+    {
+     "arm": "xs-rs-z3",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 36.426,
+     "gbps": 1.887,
+     "files_per_s": 0,
+     "speed": 1.83
+    },
+    {
+     "arm": "xs-rs-base-z",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 35.124,
+     "gbps": 1.956,
+     "files_per_s": 0,
+     "speed": 1.89
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "rsync",
+     "speed": 0.68,
+     "blocks": 2
+    },
+    {
+     "arm": "xs-rs",
+     "speed": 1.16,
+     "blocks": 2
+    },
+    {
+     "arm": "xs-rs-base-z",
+     "speed": 1.17,
+     "blocks": 2
+    },
+    {
+     "arm": "xs-rs-z1",
+     "speed": 1.02,
+     "blocks": 2
+    },
+    {
+     "arm": "xs-rs-z3",
+     "speed": 1.15,
+     "blocks": 2
+    }
+   ],
+   "question": null,
+   "summary": null,
+   "model": null,
+   "driver": "mac"
+  },
+  "CZ3-compress-100m-apollo": {
+   "run": "20261024T072401Z-CZ3-compress-100m-apollo",
+   "experiment": "CZ3-compress-100m-apollo",
+   "key": "real-congress.fresh.mac-apollo.sender.warm|1|0",
+   "utc": 1792827736.162,
+   "cell": "real-congress.fresh.mac-apollo.sender.warm",
+   "factors": {
+    "corpus": "real-congress",
+    "scenario": "fresh",
+    "sender": "mac",
+    "receiver": "apollo",
+    "client": "sender",
+    "link": "mac-apollo-10g",
+    "cache": "warm"
+   },
+   "block": 1,
+   "attempt": 0,
+   "control": "xs-rs-z",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "rsync",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 100.491,
+     "gbps": 0.092,
+     "files_per_s": 2155,
+     "speed": 0.15
+    },
+    {
+     "arm": "xs-rs",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 12.092,
+     "gbps": 0.767,
+     "files_per_s": 17906,
+     "speed": 1.21
+    },
+    {
+     "arm": "xs-rs-z",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 14.633,
+     "gbps": 0.634,
+     "files_per_s": 14796,
+     "speed": 1
+    },
+    {
+     "arm": "xs-rs-z1",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 12.989,
+     "gbps": 0.714,
+     "files_per_s": 16670,
+     "speed": 1.13
+    },
+    {
+     "arm": "xs-rs-z3",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 12.418,
+     "gbps": 0.747,
+     "files_per_s": 17435,
+     "speed": 1.18
+    },
+    {
+     "arm": "xs-rs-z6",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 24.846,
+     "gbps": 0.373,
+     "files_per_s": 8715,
+     "speed": 0.59
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "rsync",
+     "speed": 0.15,
+     "blocks": 2
+    },
+    {
+     "arm": "xs-rs",
+     "speed": 0.86,
+     "blocks": 2
+    },
+    {
+     "arm": "xs-rs-z1",
+     "speed": 1.19,
+     "blocks": 2
+    },
+    {
+     "arm": "xs-rs-z3",
+     "speed": 1.2,
+     "blocks": 2
+    },
+    {
+     "arm": "xs-rs-z6",
+     "speed": 0.67,
+     "blocks": 2
+    }
+   ],
+   "question": null,
+   "summary": null,
+   "model": null,
+   "driver": "mac"
+  },
+  "CZ4-compress-2core-apollo": {
+   "run": "20261024T075240Z-CZ4-compress-2core-apollo",
+   "experiment": "CZ4-compress-2core-apollo",
+   "key": "real-congress.fresh.mac-apollo.sender.warm|1|0",
+   "utc": 1792829746.164,
+   "cell": "real-congress.fresh.mac-apollo.sender.warm",
+   "factors": {
+    "corpus": "real-congress",
+    "scenario": "fresh",
+    "sender": "mac",
+    "receiver": "apollo",
+    "client": "sender",
+    "link": "mac-apollo-10g",
+    "cache": "warm"
+   },
+   "block": 1,
+   "attempt": 0,
+   "control": "xs-rs-z",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "rsync",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 31.189,
+     "gbps": 0.297,
+     "files_per_s": 6942,
+     "speed": 0.29
+    },
+    {
+     "arm": "xs-rs",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 19.544,
+     "gbps": 0.474,
+     "files_per_s": 11078,
+     "speed": 0.46
+    },
+    {
+     "arm": "xs-rs-z",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 8.949,
+     "gbps": 1.036,
+     "files_per_s": 24195,
+     "speed": 1
+    },
+    {
+     "arm": "xs-rs-z1",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 13.099,
+     "gbps": 0.708,
+     "files_per_s": 16529,
+     "speed": 0.68
+    },
+    {
+     "arm": "xs-rs-z3",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 12.152,
+     "gbps": 0.763,
+     "files_per_s": 17817,
+     "speed": 0.74
+    },
+    {
+     "arm": "xs-rs-base-z",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 12.041,
+     "gbps": 0.77,
+     "files_per_s": 17982,
+     "speed": 0.74
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "rsync",
+     "speed": 0.25,
+     "blocks": 2
+    },
+    {
+     "arm": "xs-rs",
+     "speed": 0.46,
+     "blocks": 2
+    },
+    {
+     "arm": "xs-rs-base-z",
      "speed": 0.76,
+     "blocks": 2
+    },
+    {
+     "arm": "xs-rs-z1",
+     "speed": 0.58,
+     "blocks": 2
+    },
+    {
+     "arm": "xs-rs-z3",
+     "speed": 0.59,
+     "blocks": 2
+    }
+   ],
+   "question": null,
+   "summary": null,
+   "model": null,
+   "driver": "mac"
+  },
+  "SM1-small-onto-mac-apollo": {
+   "run": "20261024T082417Z-SM1-small-onto-mac-apollo",
+   "experiment": "SM1-small-onto-mac-apollo",
+   "key": "mixed-threshold.noop.apollo-mac.receiver.warm|2|0",
+   "utc": 1792837542.778,
+   "cell": "mixed-threshold.noop.apollo-mac.receiver.warm",
+   "factors": {
+    "corpus": "mixed-threshold",
+    "scenario": "noop",
+    "sender": "apollo",
+    "receiver": "mac",
+    "client": "receiver",
+    "link": "mac-apollo-10g",
+    "cache": "warm"
+   },
+   "block": 2,
+   "attempt": 0,
+   "control": "xs-cpp",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "xs-cpp",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 0.172,
+     "gbps": 70.061,
+     "files_per_s": 8745,
+     "speed": 1
+    },
+    {
+     "arm": "xs-cpp-noatomic",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.173,
+     "gbps": 69.594,
+     "files_per_s": 8687,
+     "speed": 0.99
+    },
+    {
+     "arm": "xs-cpp-j8",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.215,
+     "gbps": 55.977,
+     "files_per_s": 6987,
+     "speed": 0.8
+    },
+    {
+     "arm": "xs-rs",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.21,
+     "gbps": 57.342,
+     "files_per_s": 7157,
+     "speed": 0.82
+    },
+    {
+     "arm": "rsync",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.225,
+     "gbps": 53.367,
+     "files_per_s": 6661,
+     "speed": 0.76
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "rsync",
+     "speed": 0.82,
+     "blocks": 3
+    },
+    {
+     "arm": "xs-cpp-j8",
+     "speed": 0.92,
+     "blocks": 3
+    },
+    {
+     "arm": "xs-cpp-noatomic",
+     "speed": 0.77,
+     "blocks": 3
+    },
+    {
+     "arm": "xs-rs",
+     "speed": 0.98,
+     "blocks": 3
+    }
+   ],
+   "question": null,
+   "summary": null,
+   "model": null,
+   "driver": "mac"
+  },
+  "SM1c-small-onto-mac-confirm": {
+   "run": "20261024T103613Z-SM1c-small-onto-mac-confirm",
+   "experiment": "SM1c-small-onto-mac-confirm",
+   "key": "scale-count-1000000.fresh.apollo-mac.receiver.warm|0|0",
+   "utc": 1792838376.296,
+   "cell": "scale-count-1000000.fresh.apollo-mac.receiver.warm",
+   "factors": {
+    "corpus": "scale-count-1000000",
+    "scenario": "fresh",
+    "sender": "apollo",
+    "receiver": "mac",
+    "client": "receiver",
+    "link": "mac-apollo-10g",
+    "cache": "warm"
+   },
+   "block": 0,
+   "attempt": 0,
+   "control": "xs-cpp",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "xs-cpp",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 76.681,
+     "gbps": 0.336,
+     "files_per_s": 13041,
+     "speed": 1
+    },
+    {
+     "arm": "xs-cpp-noatomic",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 44.173,
+     "gbps": 0.583,
+     "files_per_s": 22638,
+     "speed": 1.74
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "xs-cpp-noatomic",
+     "speed": 1.74,
      "blocks": 1
     }
    ],

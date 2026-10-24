@@ -1,96 +1,30 @@
 {
  "page": {
-  "generatedUtc": 1792713643.368,
+  "generatedUtc": 1792800022.583,
   "model": "claude-haiku-5-5",
-  "headline": "Does rsync beat xs on real trees and edge cases?",
-  "intro": "The lab is testing how fast three file-transfer tools reach durable storage: rsync, xs-c++ and xs-rs. Today's schedule has a single runner, the Mac to apollo link. The first experiment, on the user's real csearchv3 tree, is running now, and the remaining edge-case tests queue behind it.",
+  "headline": "Do rsync and xs tools hold their ranking through the weekend?",
+  "intro": "The lab is checking whether file-transfer tools keep their relative ranking over time. One runner, Mac to apollo (Linux), is running a sentinel experiment with 12 samples now. No follow-on branches are queued for the day.",
   "runners": [
    {
     "id": "mac",
     "title": "Mac \u2194 apollo: mars's box on Linux",
     "items": [
      {
-      "experiment": "MM2c-real-csearchv3-apollo",
+      "experiment": "FS1-sentinel-apollo",
       "tree": null,
       "running": true,
-      "samples": 216,
+      "samples": 12,
       "when": "running now",
       "window": null,
-      "asks": "On the user's csearchv3 tree (14 GB, 1,345,908 files, 472,330 directories), rsync -a, xs-c++ -a -j4 and xs-rs -a -j4 differ by more than 5% in time to durable in some cell.",
-      "hypothesis": "On the user's csearchv3 tree (14 GB, 1,345,908 files, 472,330 directories), rsync -a, xs-c++ -a -j4 and xs-rs -a -j4 differ by more than 5% in time to durable in some cell.",
-      "why": "Running now on the user's real csearchv3 tree, it checks whether the three tools differ by over 5% in time to durable, which matters for this user's own workload."
-     },
-     {
-      "experiment": "RW1-delta-apollo",
-      "tree": null,
-      "running": false,
-      "samples": 72,
-      "when": "after that",
-      "window": null,
-      "asks": "rsync is at least 5% faster to durable than xs-c++ or xs-rs in some cell. Delta updates of large files: a 4 KiB edit in a file (update-1pct), and a file grown at its end (append-1pct).",
-      "hypothesis": "rsync is at least 5% faster to durable than xs-c++ or xs-rs in some cell. Delta updates of large files: a 4 KiB edit in a file (update-1pct), and a file grown at its end (append-1pct).",
-      "why": "It tests whether rsync's delta updates beat the xs tools when large files get a small edit or grow at the end, a common real-world pattern."
-     },
-     {
-      "experiment": "RW2-checksum-noop-apollo",
-      "tree": null,
-      "running": false,
-      "samples": 24,
-      "when": "after that",
-      "window": null,
-      "asks": "rsync is at least 5% faster to durable than xs-c++ or xs-rs in some cell. No-ops with --checksum, where every file is read and hashed at both ends. xs-rs has no -c, so it sits out.",
-      "hypothesis": "rsync is at least 5% faster to durable than xs-c++ or xs-rs in some cell. No-ops with --checksum, where every file is read and hashed at both ends. xs-rs has no -c, so it sits out.",
-      "why": "With --checksum, every file is read and hashed at both ends, so it tests rsync's verification cost on unchanged data. xs-rs sits out because it has no -c."
-     },
-     {
-      "experiment": "RW3-noop-many-apollo",
-      "tree": null,
-      "running": false,
-      "samples": 60,
-      "when": "after that",
-      "window": null,
-      "asks": "rsync is at least 5% faster to durable than xs-c++ or xs-rs in some cell. No-ops of many files, where NT1021 saw rsync pull real-psample in 75.7 s against xs-cpp 151.6 s; -j1 arms for a per-core comparison.",
-      "hypothesis": "rsync is at least 5% faster to durable than xs-c++ or xs-rs in some cell. No-ops of many files, where NT1021 saw rsync pull real-psample in 75.7 s against xs-cpp 151.6 s; -j1 arms for a per-core comparison.",
-      "why": "An earlier run had rsync pulling real-psample in 75.7 s against 151.6 s for xs-cpp, so this checks that gap on many no-op files, with -j1 arms for per-core comparison."
-     },
-     {
-      "experiment": "RW4-fresh-sizes-apollo",
-      "tree": null,
-      "running": false,
-      "samples": 90,
-      "when": "after that",
-      "window": null,
-      "asks": "rsync is at least 5% faster to durable than xs-c++ or xs-rs in some cell. Fresh copies of 1 MiB and 16 MiB files and of mixed-threshold, around xs's whole-file and split thresholds; -j1 arms as in RW3.",
-      "hypothesis": "rsync is at least 5% faster to durable than xs-c++ or xs-rs in some cell. Fresh copies of 1 MiB and 16 MiB files and of mixed-threshold, around xs's whole-file and split thresholds; -j1 arms as in RW3.",
-      "why": "Fresh copies of 1 MiB and 16 MiB files, plus mixed sizes, probe behaviour around xs's whole-file and split thresholds."
-     },
-     {
-      "experiment": "RW5-delete-apollo",
-      "tree": null,
-      "running": false,
-      "samples": 12,
-      "when": "after that",
-      "window": null,
-      "asks": "rsync is at least 5% faster to durable than xs-c++ or xs-rs in some cell. A backup whose source lost 10% of its files: --delete must remove them. xs-rs has no --delete, so it sits out.",
-      "hypothesis": "rsync is at least 5% faster to durable than xs-c++ or xs-rs in some cell. A backup whose source lost 10% of its files: --delete must remove them. xs-rs has no --delete, so it sits out.",
-      "why": "A backup whose source lost 10% of its files tests whether --delete removes them at the destination. xs-rs sits out because it has no --delete."
-     },
-     {
-      "experiment": "RW6-hardlinks-apollo",
-      "tree": null,
-      "running": false,
-      "samples": 24,
-      "when": "after that",
-      "window": null,
-      "asks": "rsync is at least 5% faster to durable than xs-c++ or xs-rs in some cell. Hard links kept with -H, on laikav2 (1,234 linked files in its Rust target folder). xs-rs has no -H, so it sits out.",
-      "hypothesis": "rsync is at least 5% faster to durable than xs-c++ or xs-rs in some cell. Hard links kept with -H, on laikav2 (1,234 linked files in its Rust target folder). xs-rs has no -H, so it sits out.",
-      "why": "It checks whether rsync -H keeps the 1,234 hard-linked files in laikav2's Rust target folder intact. xs-rs sits out because it has no -H."
+      "asks": "rsync, xs-c++ and xs-rs keep their congress ranking through the weekend.",
+      "hypothesis": "rsync, xs-c++ and xs-rs keep their congress ranking through the weekend.",
+      "why": "It is already running and tests whether the current top tools keep their ranking through the weekend, so the result shows if today's ordering is stable."
      }
     ]
    }
   ],
   "branches": []
  },
- "boundary": 1792713600,
- "lastAttempt": 1792713643.368
+ "boundary": 1792800000,
+ "lastAttempt": 1792800022.583
 }

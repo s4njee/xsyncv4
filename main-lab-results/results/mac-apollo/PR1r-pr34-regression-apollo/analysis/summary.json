@@ -1,0 +1,24 @@
+{
+ "experiment": "PR1r-pr34-regression-apollo",
+ "kind": "screening",
+ "hypothesis": "xs-rs at PR #34 is within 5% of its base or faster in every cell at 10 GbE.",
+ "primary": "durable_s",
+ "control": "xs-rs-base",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261024T040403Z-PR1r-pr34-regression-apollo"
+ ],
+ "spec_sha256": [
+  "ea37d1f57ae324f410576822d8a422f54fdb6563582057e5ff1fe725469718eb"
+ ],
+ "valid_blocks": 80,
+ "void_attempts": 48,
+ "void_reasons": [
+  "rsync: the destination does not match the corpus manifest: DIFFERS target/debug/incremental/mkit-1kamvep3e62m2/s-hng3ehopvi-1j46563-4fx46mu2g6x7f7kuko4hg7nkg/00",
+  "xs-rs-base: the destination does not match the corpus manifest: DIFFERS target/debug/incremental/mkit-1kamvep3e62m2/s-hng3ehopvi-1j46563-4fx46mu2g6x7f7kuko4hg7n",
+  "xs-rs-j4: the destination does not match the corpus manifest: DIFFERS target/debug/incremental/mkit-1kamvep3e62m2/s-hng3ehopvi-1j46563-4fx46mu2g6x7f7kuko4hg7nkg",
+  "xs-rs: the destination does not match the corpus manifest: DIFFERS target/debug/incremental/mkit-1kamvep3e62m2/s-hng3ehopvi-1j46563-4fx46mu2g6x7f7kuko4hg7nkg/00"
+ ]
+}

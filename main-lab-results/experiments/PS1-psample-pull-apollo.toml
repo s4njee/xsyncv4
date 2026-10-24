@@ -1,0 +1,46 @@
+# Part of T19-until-sunday (2026-10-23): one tree for the Mac-apollo runner until Sunday 07:00 Central.
+# T13 on apollo: pulling the 21 GB psample tree onto the Mac, where rsync was faster from mars, with the settings MA7 screened
+# that need no tuning build (--no-atomic, -O, 8 workers). xs-rs has no -H and sits out.
+id = "PS1-psample-pull-apollo"
+kind = "screening"
+hypothesis = "Pulling psample onto the Mac, some xs setting is at least 5% faster than xs's default, and xs is at least as fast as rsync."
+primary = "durable_s"
+delta = 0.05
+blocks = 2
+control = "xs-cpp"
+verify = "first-last"
+cleanup = "eager"
+max_hours = 4
+sample_timeout_s = 3600
+
+[arms.xs-cpp]
+tool = "xs"
+rev = "cc8288d4f08c"
+flags = ["-aH", "-j4"]
+
+[arms.xs-cpp-j8]
+tool = "xs"
+rev = "cc8288d4f08c"
+flags = ["-aH", "-j8"]
+
+[arms.xs-cpp-noatomic]
+tool = "xs"
+rev = "cc8288d4f08c"
+flags = ["-aH", "-j4", "--no-atomic"]
+
+[arms.xs-cpp-O]
+tool = "xs"
+rev = "cc8288d4f08c"
+flags = ["-aH", "-j4", "-O"]
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-aH"]
+
+[matrix]
+link = "mac-apollo-10g"
+corpus = ["real-psample"]
+scenario = ["fresh", "noop", "update-1pct"]
+direction = ["apollo>mac"]
+client = ["initiator"]
+cache = ["warm"]

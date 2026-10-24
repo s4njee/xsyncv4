@@ -1,8 +1,8 @@
 {
  "cards": {
   "mac": {
-   "key": "[\"running\",\"Mac \u2194 apollo, mars's box on Linux (direct 10 GbE, X540)\",\"RW3-noop-many-apollo\"]",
-   "text": "The Mac, a MacBook Pro with an M1 Max, is linked by wired 10 GbE to apollo, a Linux machine belonging to mars. The lab is comparing rsync with two xs file-transfer tools when moving many small files, to see whether rsync is at least 5% faster to durable storage in some setting.",
+   "key": "[\"running\",\"Mac \u2194 apollo, mars's box on Linux (direct 10 GbE, X540)\",\"SM1c-small-onto-mac-confirm\"]",
+   "text": "The Mac, a MacBook Pro with an M1 Max and a Thunderbolt 10 GbE adapter, is wired directly over 10 GbE to a Linux machine called apollo, which is mars's box. The lab is now running a confirmation test of whether the xs-cpp-noatomic build beats xs-cpp by more than 5% on a large transfer job, following up an earlier result with fresh measurement blocks.",
    "model": "claude-haiku-5-5"
   },
   "mars": {
@@ -12,7 +12,7 @@
   },
   "neo": {
    "key": "[\"no runner\",\"neo-vpsb\",null]",
-   "text": "The pair neo and vpsb is joined by a wired link. No runner is active and no experiment is set up, so this pair is idle.",
+   "text": "The pair neo and vpsb are joined by a wired link. The experiment is idle, since no runner is currently active and no experiment is set.",
    "model": "claude-haiku-5-5"
   },
   "neo-ssd": {

@@ -1,0 +1,41 @@
+# PR1r: run only if PR1 finds PR #34 slower than its base in some cell; the same arms on 8 fresh blocks, to confirm before the merge.
+# Part of T19-until-sunday (2026-10-23): one tree for the Mac-apollo runner until Sunday 07:00 Central.
+# PR #34 (ac1aeef0) against the xs-rs it changes (e671c84, -j4 as before), and PR #34 held to -j4 to separate its two changes; rsync for reference.
+id = "PR1r-pr34-regression-apollo"
+kind = "screening"
+hypothesis = "xs-rs at PR #34 is within 5% of its base or faster in every cell at 10 GbE."
+primary = "durable_s"
+delta = 0.05
+blocks = 8
+control = "xs-rs-base"
+verify = "first-last"
+cleanup = "eager"
+max_hours = 4
+sample_timeout_s = 3600
+
+[arms.xs-rs-base]
+tool = "xs"
+rev = "e671c84aa680-rs"
+flags = ["-a", "-j4"]
+
+[arms.xs-rs]
+tool = "xs"
+rev = "ac1aeef00c80-rs"
+flags = ["-a"]
+
+[arms.xs-rs-j4]
+tool = "xs"
+rev = "ac1aeef00c80-rs"
+flags = ["-a", "-j4"]
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[matrix]
+link = "mac-apollo-10g"
+corpus = ["real-congress", "local-laikav2", "hs-16x256m"]
+scenario = ["fresh", "noop"]
+direction = ["mac>apollo", "apollo>mac"]
+client = ["initiator"]
+cache = ["warm"]

@@ -1,0 +1,5 @@
+experiment,kind,cell_id,corpus,scenario,sender,receiver,client,link,cache,arm,n_blocks,sigma_d,blocks_for_2pct,blocks_for_3pct,blocks_for_5pct,blocks_for_10pct,blocks_equivalent_2pct,blocks_equivalent_3pct,blocks_equivalent_5pct,blocks_equivalent_10pct
+RW3-noop-many-apollo-pr34,screening,real-psample.noop.apollo-mac.receiver.warm,real-psample,noop,apollo,mac,receiver,mac-apollo-10g,warm,xs-cpp,2,0.27203306954147793,1482,667,246,66,1985,892,329,88
+RW3-noop-many-apollo-pr34,screening,real-psample.noop.apollo-mac.receiver.warm,real-psample,noop,apollo,mac,receiver,mac-apollo-10g,warm,xs-cpp-j1,2,0.13292125645523695,356,161,61,18,476,215,80,23
+RW3-noop-many-apollo-pr34,screening,real-psample.noop.apollo-mac.receiver.warm,real-psample,noop,apollo,mac,receiver,mac-apollo-10g,warm,xs-rs,2,0.06834730555263187,96,44,18,8,128,59,23,8
+RW3-noop-many-apollo-pr34,screening,real-psample.noop.apollo-mac.receiver.warm,real-psample,noop,apollo,mac,receiver,mac-apollo-10g,warm,xs-rs-j1,2,0.11312634878013426,258,117,45,14,345,156,59,17

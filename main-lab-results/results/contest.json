@@ -1,5 +1,5 @@
 {
- "updated": "2026-10-23T10:44:19+00:00",
+ "updated": "2026-10-24T10:45:00+00:00",
  "enabled": true,
  "cpp_rev": "fe012667764a",
  "rs": {
@@ -12,9 +12,83 @@
   "xs-rs": 37,
   "xs-cpp": 12,
   "tie": 14,
-  "pending": 0
+  "pending": 16
  },
  "cells": [
+  {
+   "cell": "hs-16x256m.append-1pct.apollo-mac.receiver.warm",
+   "corpus": "hs-16x256m",
+   "scenario": "append-1pct",
+   "link": "mac-apollo-10g",
+   "metric": "durable_s",
+   "experiment": "RW8a-delta-wan-apollo",
+   "run": "20261023T185557Z-RW8a-delta-wan-apollo",
+   "tools": {
+    "rsync": {
+     "arm": "rsync",
+     "flags": [
+      "-a"
+     ],
+     "rev": null,
+     "seconds": 0.977,
+     "lo": 0.738,
+     "hi": 1.293,
+     "blocks": 2
+    },
+    "xs-cpp": {
+     "arm": "xs-cpp",
+     "flags": [
+      "-a",
+      "-j4"
+     ],
+     "rev": "cc8288d4f08c",
+     "seconds": 1.253,
+     "lo": 1.232,
+     "hi": 1.275,
+     "blocks": 2
+    }
+   },
+   "verdict": "pending",
+   "rs_vs_cpp": null,
+   "fastest": "rsync"
+  },
+  {
+   "cell": "hs-16x256m.append-1pct.mac-apollo.sender.warm",
+   "corpus": "hs-16x256m",
+   "scenario": "append-1pct",
+   "link": "mac-apollo-10g",
+   "metric": "durable_s",
+   "experiment": "RW8a-delta-wan-apollo",
+   "run": "20261023T185557Z-RW8a-delta-wan-apollo",
+   "tools": {
+    "rsync": {
+     "arm": "rsync",
+     "flags": [
+      "-a"
+     ],
+     "rev": null,
+     "seconds": 2.527,
+     "lo": 1.497,
+     "hi": 4.266,
+     "blocks": 2
+    },
+    "xs-cpp": {
+     "arm": "xs-cpp",
+     "flags": [
+      "-a",
+      "-j4"
+     ],
+     "rev": "cc8288d4f08c",
+     "seconds": 2.042,
+     "lo": 0.021,
+     "hi": 195.368,
+     "blocks": 2
+    }
+   },
+   "verdict": "pending",
+   "rs_vs_cpp": null,
+   "fastest": "xs-cpp"
+  },
   {
    "cell": "hs-16x256m.fresh.apollo-mac.receiver.warm",
    "corpus": "hs-16x256m",
@@ -112,6 +186,154 @@
    "verdict": "xs-rs",
    "rs_vs_cpp": 0.748,
    "fastest": "xs-rs"
+  },
+  {
+   "cell": "hs-16x256m.update-10pct.apollo-mac.receiver.warm",
+   "corpus": "hs-16x256m",
+   "scenario": "update-10pct",
+   "link": "mac-apollo-10g",
+   "metric": "durable_s",
+   "experiment": "RW7-delta-breakdown-apollo",
+   "run": "20261023T172300Z-RW7-delta-breakdown-apollo",
+   "tools": {
+    "rsync": {
+     "arm": "rsync",
+     "flags": [
+      "-a"
+     ],
+     "rev": null,
+     "seconds": 0.727,
+     "lo": 0.629,
+     "hi": 0.84,
+     "blocks": 2
+    },
+    "xs-cpp": {
+     "arm": "xs-cpp",
+     "flags": [
+      "-a",
+      "-j4"
+     ],
+     "rev": "cc8288d4f08c",
+     "seconds": 0.705,
+     "lo": 0.676,
+     "hi": 0.735,
+     "blocks": 2
+    }
+   },
+   "verdict": "pending",
+   "rs_vs_cpp": null,
+   "fastest": "xs-cpp"
+  },
+  {
+   "cell": "hs-16x256m.update-10pct.mac-apollo.sender.warm",
+   "corpus": "hs-16x256m",
+   "scenario": "update-10pct",
+   "link": "mac-apollo-10g",
+   "metric": "durable_s",
+   "experiment": "RW7-delta-breakdown-apollo",
+   "run": "20261023T172300Z-RW7-delta-breakdown-apollo",
+   "tools": {
+    "rsync": {
+     "arm": "rsync",
+     "flags": [
+      "-a"
+     ],
+     "rev": null,
+     "seconds": 0.915,
+     "lo": 0.059,
+     "hi": 14.238,
+     "blocks": 2
+    },
+    "xs-cpp": {
+     "arm": "xs-cpp",
+     "flags": [
+      "-a",
+      "-j4"
+     ],
+     "rev": "cc8288d4f08c",
+     "seconds": 1.444,
+     "lo": 0.0,
+     "hi": 20191.487,
+     "blocks": 2
+    }
+   },
+   "verdict": "pending",
+   "rs_vs_cpp": null,
+   "fastest": "rsync"
+  },
+  {
+   "cell": "hs-16x256m.update-1pct.apollo-mac.receiver.warm",
+   "corpus": "hs-16x256m",
+   "scenario": "update-1pct",
+   "link": "mac-apollo-10g",
+   "metric": "durable_s",
+   "experiment": "RW8a-delta-wan-apollo",
+   "run": "20261023T185557Z-RW8a-delta-wan-apollo",
+   "tools": {
+    "rsync": {
+     "arm": "rsync",
+     "flags": [
+      "-a"
+     ],
+     "rev": null,
+     "seconds": 0.918,
+     "lo": 0.906,
+     "hi": 0.93,
+     "blocks": 2
+    },
+    "xs-cpp": {
+     "arm": "xs-cpp",
+     "flags": [
+      "-a",
+      "-j4"
+     ],
+     "rev": "cc8288d4f08c",
+     "seconds": 1.096,
+     "lo": 0.837,
+     "hi": 1.434,
+     "blocks": 2
+    }
+   },
+   "verdict": "pending",
+   "rs_vs_cpp": null,
+   "fastest": "rsync"
+  },
+  {
+   "cell": "hs-16x256m.update-1pct.mac-apollo.sender.warm",
+   "corpus": "hs-16x256m",
+   "scenario": "update-1pct",
+   "link": "mac-apollo-10g",
+   "metric": "durable_s",
+   "experiment": "RW8a-delta-wan-apollo",
+   "run": "20261023T185557Z-RW8a-delta-wan-apollo",
+   "tools": {
+    "rsync": {
+     "arm": "rsync",
+     "flags": [
+      "-a"
+     ],
+     "rev": null,
+     "seconds": 1.5,
+     "lo": 0.002,
+     "hi": 903.791,
+     "blocks": 2
+    },
+    "xs-cpp": {
+     "arm": "xs-cpp",
+     "flags": [
+      "-a",
+      "-j4"
+     ],
+     "rev": "cc8288d4f08c",
+     "seconds": 2.335,
+     "lo": 0.0,
+     "hi": 94606.083,
+     "blocks": 2
+    }
+   },
+   "verdict": "pending",
+   "rs_vs_cpp": null,
+   "fastest": "rsync"
   },
   {
    "cell": "hs-1x4g.fresh.apollo-mac.receiver.warm",
@@ -604,6 +826,80 @@
    "fastest": "xs-cpp"
   },
   {
+   "cell": "large-solo.update-10pct.apollo-mac.receiver.warm",
+   "corpus": "large-solo",
+   "scenario": "update-10pct",
+   "link": "mac-apollo-10g",
+   "metric": "durable_s",
+   "experiment": "RW7-delta-breakdown-apollo",
+   "run": "20261023T172300Z-RW7-delta-breakdown-apollo",
+   "tools": {
+    "rsync": {
+     "arm": "rsync",
+     "flags": [
+      "-a"
+     ],
+     "rev": null,
+     "seconds": 4.624,
+     "lo": 2.794,
+     "hi": 7.653,
+     "blocks": 2
+    },
+    "xs-cpp": {
+     "arm": "xs-cpp",
+     "flags": [
+      "-a",
+      "-j4"
+     ],
+     "rev": "cc8288d4f08c",
+     "seconds": 11.019,
+     "lo": 9.113,
+     "hi": 13.322,
+     "blocks": 2
+    }
+   },
+   "verdict": "pending",
+   "rs_vs_cpp": null,
+   "fastest": "rsync"
+  },
+  {
+   "cell": "large-solo.update-10pct.mac-apollo.sender.warm",
+   "corpus": "large-solo",
+   "scenario": "update-10pct",
+   "link": "mac-apollo-10g",
+   "metric": "durable_s",
+   "experiment": "RW7-delta-breakdown-apollo",
+   "run": "20261023T172300Z-RW7-delta-breakdown-apollo",
+   "tools": {
+    "rsync": {
+     "arm": "rsync",
+     "flags": [
+      "-a"
+     ],
+     "rev": null,
+     "seconds": 17.138,
+     "lo": 0.165,
+     "hi": 1777.574,
+     "blocks": 2
+    },
+    "xs-cpp": {
+     "arm": "xs-cpp",
+     "flags": [
+      "-a",
+      "-j4"
+     ],
+     "rev": "cc8288d4f08c",
+     "seconds": 13.961,
+     "lo": 0.009,
+     "hi": 21132.691,
+     "blocks": 2
+    }
+   },
+   "verdict": "pending",
+   "rs_vs_cpp": null,
+   "fastest": "xs-cpp"
+  },
+  {
    "cell": "large-solo.update-1pct.apollo-mac.receiver.warm",
    "corpus": "large-solo",
    "scenario": "update-1pct",
@@ -797,6 +1093,80 @@
    },
    "verdict": "xs-rs",
    "rs_vs_cpp": 0.541,
+   "fastest": "rsync"
+  },
+  {
+   "cell": "large-text.update-10pct.apollo-mac.receiver.warm",
+   "corpus": "large-text",
+   "scenario": "update-10pct",
+   "link": "mac-apollo-10g",
+   "metric": "durable_s",
+   "experiment": "RW7-delta-breakdown-apollo",
+   "run": "20261023T172300Z-RW7-delta-breakdown-apollo",
+   "tools": {
+    "rsync": {
+     "arm": "rsync",
+     "flags": [
+      "-a"
+     ],
+     "rev": null,
+     "seconds": 1.428,
+     "lo": 0.787,
+     "hi": 2.59,
+     "blocks": 2
+    },
+    "xs-cpp": {
+     "arm": "xs-cpp",
+     "flags": [
+      "-a",
+      "-j4"
+     ],
+     "rev": "cc8288d4f08c",
+     "seconds": 3.697,
+     "lo": 2.665,
+     "hi": 5.131,
+     "blocks": 2
+    }
+   },
+   "verdict": "pending",
+   "rs_vs_cpp": null,
+   "fastest": "rsync"
+  },
+  {
+   "cell": "large-text.update-10pct.mac-apollo.sender.warm",
+   "corpus": "large-text",
+   "scenario": "update-10pct",
+   "link": "mac-apollo-10g",
+   "metric": "durable_s",
+   "experiment": "RW7-delta-breakdown-apollo",
+   "run": "20261023T172300Z-RW7-delta-breakdown-apollo",
+   "tools": {
+    "rsync": {
+     "arm": "rsync",
+     "flags": [
+      "-a"
+     ],
+     "rev": null,
+     "seconds": 3.685,
+     "lo": 0.001,
+     "hi": 26068.248,
+     "blocks": 2
+    },
+    "xs-cpp": {
+     "arm": "xs-cpp",
+     "flags": [
+      "-a",
+      "-j4"
+     ],
+     "rev": "cc8288d4f08c",
+     "seconds": 7.021,
+     "lo": 6.348,
+     "hi": 7.764,
+     "blocks": 2
+    }
+   },
+   "verdict": "pending",
+   "rs_vs_cpp": null,
    "fastest": "rsync"
   },
   {
@@ -1290,6 +1660,191 @@
    "fastest": "xs-rs"
   },
   {
+   "cell": "mixed-threshold.noop.apollo-mac.receiver.warm",
+   "corpus": "mixed-threshold",
+   "scenario": "noop",
+   "link": "mac-apollo-10g",
+   "metric": "durable_s",
+   "experiment": "SM1-small-onto-mac-apollo",
+   "run": "20261024T082417Z-SM1-small-onto-mac-apollo",
+   "tools": {
+    "xs-cpp": {
+     "arm": "xs-cpp",
+     "flags": [
+      "-a",
+      "-j4"
+     ],
+     "rev": "cc8288d4f08c",
+     "seconds": 0.209,
+     "lo": 0.118,
+     "hi": 0.371,
+     "blocks": 3
+    },
+    "rsync": {
+     "arm": "rsync",
+     "flags": [
+      "-a"
+     ],
+     "rev": null,
+     "seconds": 0.256,
+     "lo": 0.192,
+     "hi": 0.34,
+     "blocks": 3
+    }
+   },
+   "verdict": "pending",
+   "rs_vs_cpp": null,
+   "fastest": "xs-cpp"
+  },
+  {
+   "cell": "real-congress.fresh.apollo-mac.receiver.warm",
+   "corpus": "real-congress",
+   "scenario": "fresh",
+   "link": "mac-apollo-10g",
+   "metric": "durable_s",
+   "experiment": "SM1-small-onto-mac-apollo",
+   "run": "20261024T082417Z-SM1-small-onto-mac-apollo",
+   "tools": {
+    "xs-cpp": {
+     "arm": "xs-cpp",
+     "flags": [
+      "-a",
+      "-j4"
+     ],
+     "rev": "cc8288d4f08c",
+     "seconds": 19.475,
+     "lo": 19.24,
+     "hi": 19.713,
+     "blocks": 3
+    },
+    "rsync": {
+     "arm": "rsync",
+     "flags": [
+      "-a"
+     ],
+     "rev": null,
+     "seconds": 64.691,
+     "lo": 59.724,
+     "hi": 70.071,
+     "blocks": 3
+    }
+   },
+   "verdict": "pending",
+   "rs_vs_cpp": null,
+   "fastest": "xs-cpp"
+  },
+  {
+   "cell": "real-congress.fresh.mac-apollo.sender.warm",
+   "corpus": "real-congress",
+   "scenario": "fresh",
+   "link": "mac-apollo-10g",
+   "metric": "durable_s",
+   "experiment": "FS1-sentinel-apollo",
+   "run": "20261024T010733Z-FS1-sentinel-apollo",
+   "tools": {
+    "rsync": {
+     "arm": "rsync",
+     "flags": [
+      "-a"
+     ],
+     "rev": null,
+     "seconds": 29.472,
+     "lo": 26.383,
+     "hi": 32.922,
+     "blocks": 8
+    },
+    "xs-cpp": {
+     "arm": "xs-cpp",
+     "flags": [
+      "-a",
+      "-j4"
+     ],
+     "rev": "cc8288d4f08c",
+     "seconds": 8.794,
+     "lo": 6.323,
+     "hi": 12.232,
+     "blocks": 8
+    }
+   },
+   "verdict": "pending",
+   "rs_vs_cpp": null,
+   "fastest": "xs-cpp"
+  },
+  {
+   "cell": "real-congress.noop.apollo-mac.receiver.warm",
+   "corpus": "real-congress",
+   "scenario": "noop",
+   "link": "mac-apollo-10g",
+   "metric": "durable_s",
+   "experiment": "SM1-small-onto-mac-apollo",
+   "run": "20261024T082417Z-SM1-small-onto-mac-apollo",
+   "tools": {
+    "xs-cpp": {
+     "arm": "xs-cpp",
+     "flags": [
+      "-a",
+      "-j4"
+     ],
+     "rev": "cc8288d4f08c",
+     "seconds": 2.626,
+     "lo": 1.634,
+     "hi": 4.221,
+     "blocks": 3
+    },
+    "rsync": {
+     "arm": "rsync",
+     "flags": [
+      "-a"
+     ],
+     "rev": null,
+     "seconds": 4.47,
+     "lo": 2.496,
+     "hi": 8.004,
+     "blocks": 3
+    }
+   },
+   "verdict": "pending",
+   "rs_vs_cpp": null,
+   "fastest": "xs-cpp"
+  },
+  {
+   "cell": "real-congress.noop.mac-apollo.sender.warm",
+   "corpus": "real-congress",
+   "scenario": "noop",
+   "link": "mac-apollo-10g",
+   "metric": "durable_s",
+   "experiment": "FS1-sentinel-apollo",
+   "run": "20261024T010733Z-FS1-sentinel-apollo",
+   "tools": {
+    "rsync": {
+     "arm": "rsync",
+     "flags": [
+      "-a"
+     ],
+     "rev": null,
+     "seconds": 6.21,
+     "lo": 5.723,
+     "hi": 6.739,
+     "blocks": 8
+    },
+    "xs-cpp": {
+     "arm": "xs-cpp",
+     "flags": [
+      "-a",
+      "-j4"
+     ],
+     "rev": "cc8288d4f08c",
+     "seconds": 1.443,
+     "lo": 1.26,
+     "hi": 1.653,
+     "blocks": 8
+    }
+   },
+   "verdict": "pending",
+   "rs_vs_cpp": null,
+   "fastest": "xs-cpp"
+  },
+  {
    "cell": "real-csearchv3.fresh.apollo-mac.receiver.warm",
    "corpus": "real-csearchv3",
    "scenario": "fresh",
@@ -1680,6 +2235,43 @@
    "verdict": "xs-rs",
    "rs_vs_cpp": 0.795,
    "fastest": "xs-rs"
+  },
+  {
+   "cell": "scale-count-1000000.fresh.apollo-mac.receiver.warm",
+   "corpus": "scale-count-1000000",
+   "scenario": "fresh",
+   "link": "mac-apollo-10g",
+   "metric": "durable_s",
+   "experiment": "SM1-small-onto-mac-apollo",
+   "run": "20261024T082417Z-SM1-small-onto-mac-apollo",
+   "tools": {
+    "xs-cpp": {
+     "arm": "xs-cpp",
+     "flags": [
+      "-a",
+      "-j4"
+     ],
+     "rev": "cc8288d4f08c",
+     "seconds": 79.172,
+     "lo": 69.267,
+     "hi": 90.494,
+     "blocks": 3
+    },
+    "rsync": {
+     "arm": "rsync",
+     "flags": [
+      "-a"
+     ],
+     "rev": null,
+     "seconds": 227.695,
+     "lo": 207.107,
+     "hi": 250.328,
+     "blocks": 3
+    }
+   },
+   "verdict": "pending",
+   "rs_vs_cpp": null,
+   "fastest": "xs-cpp"
   },
   {
    "cell": "scale-count-1000000.noop.apollo-mac.receiver.warm",

@@ -1,0 +1,19 @@
+{
+ "experiment": "RW7c-whole-file-confirm",
+ "kind": "confirmatory",
+ "hypothesis": "xs-rs-W is more than 5% faster than rsync on large-text (from RW7-delta-breakdown-apollo, confirmed with fresh blocks).",
+ "primary": "durable_s",
+ "control": "rsync",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261023T185557Z-RW7c-whole-file-confirm"
+ ],
+ "spec_sha256": [
+  "6b2a9da37b69ccce4bc899e8406b2b5bea698f38c587c13170a7aed89c2f7c8f"
+ ],
+ "valid_blocks": 48,
+ "void_attempts": 0,
+ "void_reasons": []
+}

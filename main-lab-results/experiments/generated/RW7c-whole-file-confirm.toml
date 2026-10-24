@@ -1,0 +1,28 @@
+# Made by conduct.py for tree T19-until-sunday, node RW7c: confirms xs-rs-W from RW7-delta-breakdown-apollo,
+# faster there on large-text: large-text mac→apollo xs-rs-W 1.23×
+id = "RW7c-whole-file-confirm"
+kind = "confirmatory"
+hypothesis = "xs-rs-W is more than 5% faster than rsync on large-text (from RW7-delta-breakdown-apollo, confirmed with fresh blocks)."
+primary = "durable_s"
+delta = 0.05
+blocks = 8
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[arms.xs-rs-W]
+tool = "xs"
+rev = "ac1aeef00c80-rs"
+flags = ["-a", "--whole-file"]
+
+[matrix]
+link = "mac-apollo-10g"
+corpus = ["large-text"]
+scenario = ["update-1pct", "update-10pct", "append-1pct"]
+direction = ["mac>apollo", "apollo>mac"]
+client = ["initiator"]
+cache = ["warm"]

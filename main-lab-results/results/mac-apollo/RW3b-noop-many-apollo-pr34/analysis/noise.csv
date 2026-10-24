@@ -1,0 +1,9 @@
+experiment,kind,cell_id,corpus,scenario,sender,receiver,client,link,cache,arm,n_blocks,sigma_d,blocks_for_2pct,blocks_for_3pct,blocks_for_5pct,blocks_for_10pct,blocks_equivalent_2pct,blocks_equivalent_3pct,blocks_equivalent_5pct,blocks_equivalent_10pct
+RW3b-noop-many-apollo-pr34,screening,real-psample.noop.mac-apollo.sender.warm,real-psample,noop,mac,apollo,sender,mac-apollo-10g,warm,xs-cpp,2,0.024131325766358205,14,8,8,8,18,10,8,8
+RW3b-noop-many-apollo-pr34,screening,real-psample.noop.mac-apollo.sender.warm,real-psample,noop,mac,apollo,sender,mac-apollo-10g,warm,xs-cpp-j1,2,0.05335987088640609,59,28,12,8,79,37,15,8
+RW3b-noop-many-apollo-pr34,screening,real-psample.noop.mac-apollo.sender.warm,real-psample,noop,mac,apollo,sender,mac-apollo-10g,warm,xs-rs,2,0.09686471519728992,190,87,33,11,254,115,44,13
+RW3b-noop-many-apollo-pr34,screening,real-psample.noop.mac-apollo.sender.warm,real-psample,noop,mac,apollo,sender,mac-apollo-10g,warm,xs-rs-j1,2,0.0051426481487415595,8,8,8,8,8,8,8,8
+RW3b-noop-many-apollo-pr34,screening,scale-count-1000000.noop.mac-apollo.sender.warm,scale-count-1000000,noop,mac,apollo,sender,mac-apollo-10g,warm,xs-cpp,2,0.003336687350474625,8,8,8,8,8,8,8,8
+RW3b-noop-many-apollo-pr34,screening,scale-count-1000000.noop.mac-apollo.sender.warm,scale-count-1000000,noop,mac,apollo,sender,mac-apollo-10g,warm,xs-cpp-j1,2,0.024427386886938535,14,8,8,8,18,10,8,8
+RW3b-noop-many-apollo-pr34,screening,scale-count-1000000.noop.mac-apollo.sender.warm,scale-count-1000000,noop,mac,apollo,sender,mac-apollo-10g,warm,xs-rs,2,0.051241598126266635,55,26,11,8,73,34,14,8
+RW3b-noop-many-apollo-pr34,screening,scale-count-1000000.noop.mac-apollo.sender.warm,scale-count-1000000,noop,mac,apollo,sender,mac-apollo-10g,warm,xs-rs-j1,2,0.0473643547275264,47,23,10,8,63,29,12,8

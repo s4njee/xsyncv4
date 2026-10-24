@@ -1,0 +1,19 @@
+{
+ "experiment": "RW8b-delta-100m-apollo",
+ "kind": "screening",
+ "hypothesis": "Over a 20 ms, 100 Mb/s path, rsync is at least 5% faster than xs in some delta cell.",
+ "primary": "durable_s",
+ "control": "rsync",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261023T201557Z-RW8b-delta-100m-apollo"
+ ],
+ "spec_sha256": [
+  "0ab070a8a0361f3e037b3bbf09a9dbb6120c289761a71c6713aabd97e1019d80"
+ ],
+ "valid_blocks": 8,
+ "void_attempts": 0,
+ "void_reasons": []
+}

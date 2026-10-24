@@ -1,0 +1,52 @@
+# Part of T19-until-sunday (2026-10-23): one tree for the Mac-apollo runner until Sunday 07:00 Central.
+# The same arms with every tool held to 1 Gb/s by its own --bwlimit (the harness has no link rate cap).
+# xs-rs with -z picks its level by itself (PR #34: starts at 1, steps up only while its measured compression keeps up), against fixed levels 1, 3 and 6, no -z, the old policy (e671c84) and rsync with and without -z.
+# Six arms fit a block: rsync -z and level 6 left out (a fast link has no use for level 6).
+id = "CZ2-compress-1g-apollo"
+kind = "screening"
+hypothesis = "Held to 1 Gb/s, xs-rs -z at its automatic level is within 5% of the fastest fixed level."
+primary = "durable_s"
+delta = 0.05
+blocks = 2
+control = "xs-rs-z"
+verify = "first-last"
+cleanup = "eager"
+max_hours = 2
+sample_timeout_s = 3600
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a", "--bwlimit=122070"]
+
+[arms.xs-rs]
+tool = "xs"
+rev = "ac1aeef00c80-rs"
+flags = ["-a", "--bwlimit=122070"]
+
+[arms.xs-rs-z]
+tool = "xs"
+rev = "ac1aeef00c80-rs"
+flags = ["-a", "-z", "--bwlimit=122070"]
+
+[arms.xs-rs-z1]
+tool = "xs"
+rev = "ac1aeef00c80-rs"
+flags = ["-a", "-z", "--compress-level=1", "--bwlimit=122070"]
+
+[arms.xs-rs-z3]
+tool = "xs"
+rev = "ac1aeef00c80-rs"
+flags = ["-a", "-z", "--compress-level=3", "--bwlimit=122070"]
+
+[arms.xs-rs-base-z]
+tool = "xs"
+rev = "e671c84aa680-rs"
+flags = ["-a", "-z", "-j4", "--bwlimit=122070"]
+
+[matrix]
+link = "mac-apollo-10g"
+corpus = ["real-congress", "large-text"]
+scenario = ["fresh"]
+direction = ["mac>apollo", "apollo>mac"]
+client = ["initiator"]
+cache = ["warm"]
