@@ -1,0 +1,14 @@
+# Written by the 6-hourly planner at 2026-10-24T16:14Z for a; nothing is queued after the deadline.
+id = "AUTO-10241614-a"
+question = "Runner a has 5.5 h of window room after its 0.5 h queued load, but the 32 GiB/day write cap and the queued real-projects/congress work keep heavy cells out of this plan. The two laikav2 screens cost roughly 6 GiB and about 0.1 h; the fresh screen is fronted so its small traffic can run before the queued real-projects fresh job, while the update screen follows the backlog. They avoid the queued laikav2 update-0p1pct pin and every queued congress/real-projects cell, leave no-op postponed, and test only the jobs interaction that the latest update-10pct result left open. Engineering and port are null because xs-c++ is fixed and every port step is merged."
+deadline = "2026-10-24T22:14Z"
+start = ["N0", "N1"]
+
+[nodes.N0]
+spec = "auto/AP10241614-W10241612-a-lk-fresh-j8.toml"
+question = "On laikav2-sample fresh over a-aws, does xs-rs with -j8 finish at least 5% faster than its -j4 default and than xs-c++, or is the fresh path scan-limited so extra jobs do not help?"
+front = true
+
+[nodes.N1]
+spec = "auto/AP10241614-W10241612-a-lk-u1pct-j8.toml"
+question = "On laikav2-sample update-1pct over a-aws, is xs-rs -j8 better than the -j4 default and xs-c++, or was the update-10pct jobs gain specific to high churn?"

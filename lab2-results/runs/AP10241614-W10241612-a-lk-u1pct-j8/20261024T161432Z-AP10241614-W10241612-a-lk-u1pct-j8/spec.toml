@@ -1,0 +1,38 @@
+# Written by the 6-hourly planner (2026-10-24T16:14Z). Why: It tests the job-setting interaction on a moderate-churn cell that no experiment has tried and that is not queued.
+id = "AP10241614-W10241612-a-lk-u1pct-j8"
+kind = "screening"
+hypothesis = "If the gain tracks transfer concurrency, xs-rs-j8 will improve on the default 0.909 xs-rs/xs-c++ ratio and clear the 5% margin; if scan and metadata dominate at 1% churn, it will be neutral."
+primary = "durable_s"
+delta = 0.05
+blocks = 8
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+sample_timeout_s = 7200
+
+[arms.xs-rs]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j4"]
+
+[arms.xs-rs-j8]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j8"]
+
+[arms.xs-cpp]
+tool = "xs"
+rev = "e104bde552f2"
+flags = ["-a", "-j4"]
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[matrix]
+link = "a-aws"
+corpus = ["laikav2-sample"]
+scenario = ["update-1pct"]
+direction = ["a>aws"]
+client = ["initiator"]
+cache = ["warm"]
