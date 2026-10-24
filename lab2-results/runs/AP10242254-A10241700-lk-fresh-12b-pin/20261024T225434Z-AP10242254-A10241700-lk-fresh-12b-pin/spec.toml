@@ -1,0 +1,33 @@
+# Written by the 6-hourly planner (2026-10-24T22:54Z). Why: It is the widest of xs-rs's scored wins and the only thin fresh cell with no queued follow-up, and 12 blocks is the largest the gate accepts, so this is the cheapest place to keep a scoreboard win from turning out to be a tie.
+id = "AP10242254-A10241700-lk-fresh-12b-pin"
+kind = "screening"
+hypothesis = "With 12 paired blocks, xs-rs over xs-c++ on laikav2-sample fresh stays below 0.95 with an interval that excludes 1.0; if the direct ratio drifts into 0.95-1.0 the cell is an honest tie and should be scored as one rather than as a win."
+primary = "durable_s"
+delta = 0.05
+blocks = 12
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+sample_timeout_s = 7200
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[arms.xs-cpp]
+tool = "xs"
+rev = "e104bde552f2"
+flags = ["-a", "-j4"]
+
+[arms.xs-rs]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j4"]
+
+[matrix]
+link = "a-aws"
+corpus = ["laikav2-sample"]
+scenario = ["fresh"]
+direction = ["a>aws"]
+client = ["initiator"]
+cache = ["warm"]

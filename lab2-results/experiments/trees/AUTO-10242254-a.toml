@@ -1,0 +1,14 @@
+# Written by the 6-hourly planner at 2026-10-24T22:54Z for a; nothing is queued after the deadline.
+id = "AUTO-10242254-a"
+question = "Runner a has no current run and 0.6 h of queued work, so about 5.4 h of measurement room; the binding resource is A's 32 GiB/day write budget, and the backlog already holds the verdict-grade work: the three 8-block congress-sample update pins, the 12-block laikav2 update-0p1pct pin, the laikav2 update-1pct -j8 screen, the 4-block real-projects fresh re-measure at the newest rev, and the three 2-block real-projects update screens. Nothing here duplicates those cells. Only two cheap, non-duplicative questions are added: a 12-block pin of the one wide fresh verdict (laikav2-sample, ~3.4 GB, fronted so its small traffic runs before the queued 25.6 GB real-projects fresh job), and an 8-block four-arm jobs screen on congress-sample fresh (~7 GB, behind the backlog, on the next day's budget) to close the jobs story on the per-file-bound corpus. Real-projects gets no new work: 4 blocks of a 3-arm fresh copy is already ~25.6 GB and an 8-block verdict would be ~51 GB, so real-projects cells cannot reach verdict grade inside one day's 32 GiB and stay screening-only. No no-op cells, no -tune arms (no -tune build is staged on either host), no confirm arm (no absolute speed floor is known), and engineering/port are null because xs-c++ is the fixed reference and every port step is merged."
+deadline = "2026-10-25T04:54Z"
+start = ["N0", "N1"]
+
+[nodes.N0]
+spec = "auto/AP10242254-A10241700-lk-fresh-12b-pin.toml"
+question = "Is xs-rs's laikav2-sample fresh win real? At 8 blocks the direct xs-rs/xs-c++ ratio was 0.895, but xs-rs's own interval against rsync still reached 0.924, so the margin could be noise."
+front = true
+
+[nodes.N1]
+spec = "auto/AP10242254-A10241700-congress-fresh-j8-8b.toml"
+question = "Does the -j8 gain xs-rs showed on laikav2-sample update-10pct (0.804 of rsync, against 0.84 at -j4) carry over to the per-file-bound congress-sample fresh copy, or is the fresh path scan-limited there too?"

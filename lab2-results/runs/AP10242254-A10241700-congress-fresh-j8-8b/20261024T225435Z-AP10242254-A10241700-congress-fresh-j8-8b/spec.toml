@@ -1,0 +1,38 @@
+# Written by the 6-hourly planner (2026-10-24T22:54Z). Why: It is the one untried interaction left by the jobs results - jobs on the small-file corpus rather than on laikav2 - and it decides whether more than four jobs is worth carrying for tiny-file trees, at about 7 GB.
+id = "AP10242254-A10241700-congress-fresh-j8-8b"
+kind = "screening"
+hypothesis = "congress-sample fresh is dominated by per-file work (25,246 files moved in about 3 s), so xs-rs-j8 lands within 5% of xs-rs at -j4 and both stay below 0.90 of xs-c++'s durable time; a gain of 5% or more for -j8 would mean the small-file engine, not the scan, is the remaining bottleneck."
+primary = "durable_s"
+delta = 0.05
+blocks = 8
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+sample_timeout_s = 7200
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[arms.xs-cpp]
+tool = "xs"
+rev = "e104bde552f2"
+flags = ["-a", "-j4"]
+
+[arms.xs-rs]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j4"]
+
+[arms.xs-rs-j8]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j8"]
+
+[matrix]
+link = "a-aws"
+corpus = ["congress-sample"]
+scenario = ["fresh"]
+direction = ["a>aws"]
+client = ["initiator"]
+cache = ["warm"]
