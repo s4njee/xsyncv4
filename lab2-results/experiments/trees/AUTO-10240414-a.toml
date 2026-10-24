@@ -1,0 +1,18 @@
+# Written by the 6-hourly planner at 2026-10-24T04:14Z for a; nothing is queued after the deadline.
+id = "AUTO-10240414-a"
+question = "Runner a has hour room after its 0.5 h queued load, but the binding resource is A's 32 GiB/day write budget. I add only the three unrun real-projects update scenarios, each at the 2-block minimum with three arms; the update-0p1pct screen is fronted so its roughly 4.3 GiB can fit before the queued 4-block real-projects fresh, while update-1pct and update-10pct sit behind the backlog and will run on later budget. I avoid duplicating the queued congress update pins, the laikav2 -j8 update-10pct run, and the real-projects fresh re-measures; no-op cells stay postponed, and engineering and port are null by the lab's rules."
+deadline = "2026-10-24T10:14Z"
+start = ["N0", "N1", "N2"]
+
+[nodes.N0]
+spec = "auto/AP10240414-AP10240412-RP-u01pct-2b.toml"
+question = "On real-projects update-0p1pct, does xs-rs at beabaee992b6 beat xs-c++ at -a -j4 on time to durable, with rsync as the reference arm?"
+front = true
+
+[nodes.N1]
+spec = "auto/AP10240414-AP10240412-RP-u1pct-2b.toml"
+question = "On real-projects update-1pct, does xs-rs at beabaee992b6 beat xs-c++ at -a -j4 on time to durable, with rsync as the reference arm?"
+
+[nodes.N2]
+spec = "auto/AP10240414-AP10240412-RP-u10pct-2b.toml"
+question = "On real-projects update-10pct, does xs-rs at beabaee992b6 beat xs-c++ at -a -j4 on time to durable, with rsync as the reference arm?"

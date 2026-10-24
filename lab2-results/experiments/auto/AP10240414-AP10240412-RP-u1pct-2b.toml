@@ -1,0 +1,33 @@
+# Written by the 6-hourly planner (2026-10-24T04:14Z). Why: This fills the middle real-projects update scenario and tests whether xs-rs's advantage on laikav2 and congress update-1pct carries over to a mixed tree.
+id = "AP10240414-AP10240412-RP-u1pct-2b"
+kind = "screening"
+hypothesis = "At 1% churn the real-projects update should be between the 0.1% metadata-heavy case and the 10% changed-byte case; xs-rs should stay at or below xs-c++'s durable time if its update path is not the source of the fresh-copy loss."
+primary = "durable_s"
+delta = 0.05
+blocks = 2
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+sample_timeout_s = 7200
+
+[arms.xs-rs]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j4"]
+
+[arms.xs-cpp]
+tool = "xs"
+rev = "e104bde552f2"
+flags = ["-a", "-j4"]
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[matrix]
+link = "a-aws"
+corpus = ["real-projects"]
+scenario = ["update-1pct"]
+direction = ["a>aws"]
+client = ["initiator"]
+cache = ["warm"]

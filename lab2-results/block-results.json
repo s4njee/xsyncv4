@@ -2799,6 +2799,79 @@
    "model": "opencode/deepseek-v4.1-flash",
    "summarizedUtc": 1792802577.636,
    "driver": "a"
+  },
+  "FC-beabaee-update-10pct": {
+   "run": "20261023T042059Z-FC-beabaee-update-10pct",
+   "experiment": "FC-beabaee-update-10pct",
+   "key": "congress-sample.update-10pct.a-aws.sender.warm|2|0",
+   "utc": 1792815426.958,
+   "cell": "congress-sample.update-10pct.a-aws.sender.warm",
+   "factors": {
+    "corpus": "congress-sample",
+    "scenario": "update-10pct",
+    "sender": "a",
+    "receiver": "aws",
+    "client": "sender",
+    "link": "a-aws",
+    "cache": "warm"
+   },
+   "block": 2,
+   "attempt": 0,
+   "control": "rsync",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "rsync",
+     "label": "rsync",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 1.54,
+     "gbps": 0.099,
+     "files_per_s": 16391,
+     "speed": 1
+    },
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 1.166,
+     "gbps": 0.131,
+     "files_per_s": 21659,
+     "speed": 1.32
+    },
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.941,
+     "gbps": 0.162,
+     "files_per_s": 26823,
+     "speed": 1.64
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "speed": 1.31,
+     "blocks": 3
+    },
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "speed": 1.57,
+     "blocks": 3
+    }
+   ],
+   "question": "On congress-sample, update-10pct copies: how do rsync, xs-c++ and xs-rs at beabaee992b6 compare?",
+   "summary": null,
+   "model": null,
+   "driver": "a"
   }
  }
 }

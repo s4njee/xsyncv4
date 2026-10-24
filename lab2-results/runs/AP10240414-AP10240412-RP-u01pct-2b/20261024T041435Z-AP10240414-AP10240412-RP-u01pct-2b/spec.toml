@@ -1,0 +1,33 @@
+# Written by the 6-hourly planner (2026-10-24T04:14Z). Why: This is the first real-projects update cell and the best place to test whether xs-rs's small-file advantage survives on a mixed tree with almost no changed bytes.
+id = "AP10240414-AP10240412-RP-u01pct-2b"
+kind = "screening"
+hypothesis = "With only 0.1% churn on the mixed real-projects tree, scanning and metadata dominate, so xs-rs at beabaee992b6 should finish at or below 0.95 of xs-c++'s durable time and both should beat rsync; if not, the real-projects fresh deficit extends into metadata-heavy updates."
+primary = "durable_s"
+delta = 0.05
+blocks = 2
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+sample_timeout_s = 7200
+
+[arms.xs-rs]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j4"]
+
+[arms.xs-cpp]
+tool = "xs"
+rev = "e104bde552f2"
+flags = ["-a", "-j4"]
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[matrix]
+link = "a-aws"
+corpus = ["real-projects"]
+scenario = ["update-0p1pct"]
+direction = ["a>aws"]
+client = ["initiator"]
+cache = ["warm"]
