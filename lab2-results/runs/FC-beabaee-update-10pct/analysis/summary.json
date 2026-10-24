@@ -1,0 +1,19 @@
+{
+ "experiment": "FC-beabaee-update-10pct",
+ "kind": "screening",
+ "hypothesis": "On congress-sample, update-10pct, the three tools differ by more than 5% in time to durable.",
+ "primary": "durable_s",
+ "control": "rsync",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261023T042059Z-FC-beabaee-update-10pct"
+ ],
+ "spec_sha256": [
+  "fe7f98d63855cd7054d966aedf7e8bcd0e104e0ac28915d9128026ef67733aa4"
+ ],
+ "valid_blocks": 4,
+ "void_attempts": 0,
+ "void_reasons": []
+}

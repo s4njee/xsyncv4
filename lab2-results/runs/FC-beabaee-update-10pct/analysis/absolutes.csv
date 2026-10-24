@@ -1,0 +1,13 @@
+experiment,kind,cell_id,corpus,scenario,sender,receiver,client,link,cache,arm,metric,n_blocks,geomean,lo,hi
+FC-beabaee-update-10pct,screening,congress-sample.update-10pct.a-aws.sender.warm,congress-sample,update-10pct,a,aws,sender,a-aws,warm,rsync,durable_s,4,1.4983842470811914,1.4384392115357307,1.5608274120281094
+FC-beabaee-update-10pct,screening,congress-sample.update-10pct.a-aws.sender.warm,congress-sample,update-10pct,a,aws,sender,a-aws,warm,xs-cpp,durable_s,4,1.1449278034737016,1.1038923324810757,1.1874887039217545
+FC-beabaee-update-10pct,screening,congress-sample.update-10pct.a-aws.sender.warm,congress-sample,update-10pct,a,aws,sender,a-aws,warm,xs-rs,durable_s,4,1.0443259998592733,0.7691409282207418,1.4179674412919379
+FC-beabaee-update-10pct,screening,congress-sample.update-10pct.a-aws.sender.warm,congress-sample,update-10pct,a,aws,sender,a-aws,warm,rsync,wall_s,4,1.3634373578279946,1.3036984733155292,1.4259136347635082
+FC-beabaee-update-10pct,screening,congress-sample.update-10pct.a-aws.sender.warm,congress-sample,update-10pct,a,aws,sender,a-aws,warm,xs-cpp,wall_s,4,1.014896398547945,0.9642059424278411,1.0682517649622068
+FC-beabaee-update-10pct,screening,congress-sample.update-10pct.a-aws.sender.warm,congress-sample,update-10pct,a,aws,sender,a-aws,warm,xs-rs,wall_s,4,0.9048711846371393,0.6383296229054983,1.282710109958093
+FC-beabaee-update-10pct,screening,congress-sample.update-10pct.a-aws.sender.warm,congress-sample,update-10pct,a,aws,sender,a-aws,warm,rsync,cpu_s,4,1.3580333375551403,1.3253467318543248,1.3915260826356077
+FC-beabaee-update-10pct,screening,congress-sample.update-10pct.a-aws.sender.warm,congress-sample,update-10pct,a,aws,sender,a-aws,warm,xs-cpp,cpu_s,4,2.198673472662773,2.1174592559431744,2.283002624878233
+FC-beabaee-update-10pct,screening,congress-sample.update-10pct.a-aws.sender.warm,congress-sample,update-10pct,a,aws,sender,a-aws,warm,xs-rs,cpu_s,4,1.485270570311333,1.3717198444089027,1.6082210052035568
+FC-beabaee-update-10pct,screening,congress-sample.update-10pct.a-aws.sender.warm,congress-sample,update-10pct,a,aws,sender,a-aws,warm,rsync,rss_bytes,4,15258358.59209948,14302229.846542364,16278406.194218788
+FC-beabaee-update-10pct,screening,congress-sample.update-10pct.a-aws.sender.warm,congress-sample,update-10pct,a,aws,sender,a-aws,warm,xs-cpp,rss_bytes,4,23472122.681214634,22681486.93410674,24290318.565205123
+FC-beabaee-update-10pct,screening,congress-sample.update-10pct.a-aws.sender.warm,congress-sample,update-10pct,a,aws,sender,a-aws,warm,xs-rs,rss_bytes,4,31146029.725974478,29202640.802055884,33218748.066886883
