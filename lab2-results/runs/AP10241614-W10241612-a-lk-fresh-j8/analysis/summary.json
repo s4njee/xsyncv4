@@ -1,0 +1,19 @@
+{
+ "experiment": "AP10241614-W10241612-a-lk-fresh-j8",
+ "kind": "screening",
+ "hypothesis": "If the jobs advantage seen on laikav2 update-10pct comes from transfer concurrency rather than churn handling, xs-rs-j8 will be faster than xs-rs at -j4 and its durable time will be at or below 0.90 of xs-c++'s; if fresh is scan-limited, j8 will be neutral or slower.",
+ "primary": "durable_s",
+ "control": "rsync",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261024T161431Z-AP10241614-W10241612-a-lk-fresh-j8"
+ ],
+ "spec_sha256": [
+  "6dc43e0bb3801d8f6981ea45255da0bb9e3c264ad150abba74cee6f677fb5b4f"
+ ],
+ "valid_blocks": 8,
+ "void_attempts": 0,
+ "void_reasons": []
+}

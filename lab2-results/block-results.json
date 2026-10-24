@@ -3037,6 +3037,97 @@
    "model": "opencode/deepseek-v4.1-flash",
    "summarizedUtc": 1792847559.769,
    "driver": "a"
+  },
+  "AP10241614-W10241612-a-lk-fresh-j8": {
+   "run": "20261024T161431Z-AP10241614-W10241612-a-lk-fresh-j8",
+   "experiment": "AP10241614-W10241612-a-lk-fresh-j8",
+   "key": "laikav2-sample.fresh.a-aws.sender.warm|7|0",
+   "utc": 1792871965.106,
+   "cell": "laikav2-sample.fresh.a-aws.sender.warm",
+   "factors": {
+    "corpus": "laikav2-sample",
+    "scenario": "fresh",
+    "sender": "a",
+    "receiver": "aws",
+    "client": "sender",
+    "link": "a-aws",
+    "cache": "warm"
+   },
+   "block": 7,
+   "attempt": 0,
+   "control": "rsync",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 1.024,
+     "gbps": 0.734,
+     "files_per_s": 1306,
+     "speed": 1.28
+    },
+    {
+     "arm": "xs-rs-j8",
+     "label": "xs-rs -j8",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 1.066,
+     "gbps": 0.705,
+     "files_per_s": 1254,
+     "speed": 1.22
+    },
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 1.153,
+     "gbps": 0.652,
+     "files_per_s": 1159,
+     "speed": 1.13
+    },
+    {
+     "arm": "rsync",
+     "label": "rsync",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 1.306,
+     "gbps": 0.576,
+     "files_per_s": 1024,
+     "speed": 1
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "speed": 1.07,
+     "blocks": 8
+    },
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "speed": 1.2,
+     "blocks": 8
+    },
+    {
+     "arm": "xs-rs-j8",
+     "label": "xs-rs -j8",
+     "speed": 1.05,
+     "blocks": 8
+    }
+   ],
+   "question": "On laikav2-sample fresh over a-aws, does xs-rs with -j8 finish at least 5% faster than its -j4 default and than xs-c++, or is the fresh path scan-limited so extra jobs do not help?",
+   "summary": "In block 7, xs-rs was fastest at 1.024 s (1.28x vs rsync), ahead of xs-rs -j8 at 1.066 s (1.22x) and xs-c++ at 1.153 s (1.13x). Across 8 blocks, cumulative speeds are xs-rs 1.20x, xs-rs -j8 1.05x, and xs-c++ 1.07x, so the evidence is not thin. This does not support xs-rs -j8 being at least 5% faster than its -j4 default; it was slower here, and its cumulative ratio trails the default and xs-c++.",
+   "model": "opencode/deepseek-v4.1-flash",
+   "summarizedUtc": 1792871992.228,
+   "driver": "a"
   }
  }
 }
