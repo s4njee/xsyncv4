@@ -1,0 +1,38 @@
+# Written by the 6-hourly planner (2026-10-25T04:54Z). Why: The -j8 screen left open whether this low-churn update cell is over-parallelized, and -j2 is the untried direction.
+id = "AP10250454-A1025-lk-u1pct-j2-8b"
+kind = "screening"
+hypothesis = "Because the latest -j8 screen was neutral-to-worse on laikav2 update-1pct, the cell may be over-parallelized; xs-rs-j2 will reduce contention and finish at or below 0.95 of xs-c++'s durable time, while default xs-rs remains ahead of rsync."
+primary = "durable_s"
+delta = 0.05
+blocks = 8
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+sample_timeout_s = 7200
+
+[arms.xs-rs]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j4"]
+
+[arms.xs-rs-j2]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j2"]
+
+[arms.xs-cpp]
+tool = "xs"
+rev = "e104bde552f2"
+flags = ["-a", "-j4"]
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[matrix]
+link = "a-aws"
+corpus = ["laikav2-sample"]
+scenario = ["update-1pct"]
+direction = ["a>aws"]
+client = ["initiator"]
+cache = ["warm"]

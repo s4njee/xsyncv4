@@ -1,0 +1,15 @@
+# Written by the 6-hourly planner at 2026-10-25T04:54Z for a; nothing is queued after the deadline.
+id = "AUTO-10250454-a"
+question = "Runner a has 5.4 h of measurement room after its 0.6 h queued load, but the binding limit is A's 32 GiB/day write budget. The queued 4-block real-projects fresh job is about 25.6 GB, so I add only two 4-arm, 8-block laikav2 screens, about 6.0 GB total, and front them so their small traffic can run before the heavy copy while still fitting the day. The first follows the latest laikav2 fresh near-tie with an untried compression variant; the second follows the failed -j8 update-1pct screen by testing lower jobs instead of higher. I do not re-run queued congress pins, the queued congress fresh -j8 screen, the queued laikav2 update-0p1pct pin, any real-projects cell, or any no-op cell, and no xs-rs -tune build is staged."
+deadline = "2026-10-25T10:54Z"
+start = ["N1", "N0"]
+
+[nodes.N0]
+spec = "auto/AP10250454-A1025-lk-fresh-z-8b.toml"
+question = "On laikav2-sample fresh copies, does explicit -z on xs-rs break the remaining near-tie with xs-c++ without losing to rsync?"
+front = true
+
+[nodes.N1]
+spec = "auto/AP10250454-A1025-lk-u1pct-j2-8b.toml"
+question = "On laikav2-sample update-1pct, does reducing xs-rs to two jobs cut scan and metadata overhead after -j8 failed to help?"
+front = true

@@ -1,0 +1,19 @@
+{
+ "experiment": "AP10241614-W10241612-a-lk-u1pct-j8",
+ "kind": "screening",
+ "hypothesis": "If the gain tracks transfer concurrency, xs-rs-j8 will improve on the default 0.909 xs-rs/xs-c++ ratio and clear the 5% margin; if scan and metadata dominate at 1% churn, it will be neutral.",
+ "primary": "durable_s",
+ "control": "rsync",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261024T161432Z-AP10241614-W10241612-a-lk-u1pct-j8"
+ ],
+ "spec_sha256": [
+  "864f40c75a73413ac25653e28a7dfdcd83b72a4201473643ef09f96562795e0e"
+ ],
+ "valid_blocks": 8,
+ "void_attempts": 0,
+ "void_reasons": []
+}
