@@ -1,0 +1,19 @@
+{
+ "experiment": "AP10250454-A1025-lk-fresh-z-8b",
+ "kind": "screening",
+ "hypothesis": "The latest 12-block laikav2 fresh pin left xs-rs close to the 5% line against xs-c++. If wire bytes are the limiting factor, xs-rs-z will bring the direct ratio below 0.95 with an interval excluding 1; if CPU or per-file overhead dominates, compression will be neutral or slower than default.",
+ "primary": "durable_s",
+ "control": "rsync",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261025T045423Z-AP10250454-A1025-lk-fresh-z-8b"
+ ],
+ "spec_sha256": [
+  "5a65f9f7cf1d121f99797c02241e20e3b743685cf771c87f02eb5f6718a45749"
+ ],
+ "valid_blocks": 8,
+ "void_attempts": 0,
+ "void_reasons": []
+}

@@ -3293,6 +3293,97 @@
    "model": "opencode/deepseek-v4.1-flash",
    "summarizedUtc": 1792902137.322,
    "driver": "a"
+  },
+  "AP10250454-A1025-lk-fresh-z-8b": {
+   "run": "20261025T045423Z-AP10250454-A1025-lk-fresh-z-8b",
+   "experiment": "AP10250454-A1025-lk-fresh-z-8b",
+   "key": "laikav2-sample.fresh.a-aws.sender.warm|6|0",
+   "utc": 1792909494.783,
+   "cell": "laikav2-sample.fresh.a-aws.sender.warm",
+   "factors": {
+    "corpus": "laikav2-sample",
+    "scenario": "fresh",
+    "sender": "a",
+    "receiver": "aws",
+    "client": "sender",
+    "link": "a-aws",
+    "cache": "warm"
+   },
+   "block": 6,
+   "attempt": 0,
+   "control": "rsync",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 1.117,
+     "gbps": 0.673,
+     "files_per_s": 1197,
+     "speed": 1.21
+    },
+    {
+     "arm": "xs-rs-z",
+     "label": "xs-rs -z",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 1.154,
+     "gbps": 0.652,
+     "files_per_s": 1159,
+     "speed": 1.17
+    },
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 1.046,
+     "gbps": 0.719,
+     "files_per_s": 1278,
+     "speed": 1.29
+    },
+    {
+     "arm": "rsync",
+     "label": "rsync",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 1.354,
+     "gbps": 0.555,
+     "files_per_s": 987,
+     "speed": 1
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "speed": 1.14,
+     "blocks": 7
+    },
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "speed": 1.13,
+     "blocks": 7
+    },
+    {
+     "arm": "xs-rs-z",
+     "label": "xs-rs -z",
+     "speed": 1.25,
+     "blocks": 7
+    }
+   ],
+   "question": "On laikav2-sample fresh copies, does explicit -z on xs-rs break the remaining near-tie with xs-c++ without losing to rsync?",
+   "summary": "In block 6, xs-c++ was fastest at 1.29x the control (1.046 s versus 1.354 s), ahead of xs-rs at 1.21x and xs-rs -z at 1.17x. Across seven blocks, cumulative ratios are 1.14x for xs-c++ and 1.13x for xs-rs, a near-tie, while xs-rs -z is 1.25x. This block does not show -z breaking the xs-rs/xs-c++ tie, though the cumulative seven-block figure for -z remains ahead and above rsync.",
+   "model": "opencode/deepseek-v4.1-flash",
+   "summarizedUtc": 1792909547.237,
+   "driver": "a"
   }
  }
 }
