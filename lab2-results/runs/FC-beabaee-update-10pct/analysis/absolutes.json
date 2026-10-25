@@ -12,10 +12,10 @@
   "cache": "warm",
   "arm": "rsync",
   "metric": "durable_s",
-  "n_blocks": 4,
-  "geomean": 1.4983842470811914,
-  "lo": 1.4384392115357307,
-  "hi": 1.5608274120281094
+  "n_blocks": 8,
+  "geomean": 1.4938868767283282,
+  "lo": 1.4401099106669786,
+  "hi": 1.549671996512767
  },
  {
   "experiment": "FC-beabaee-update-10pct",
@@ -30,10 +30,10 @@
   "cache": "warm",
   "arm": "xs-cpp",
   "metric": "durable_s",
-  "n_blocks": 4,
-  "geomean": 1.1449278034737016,
-  "lo": 1.1038923324810757,
-  "hi": 1.1874887039217545
+  "n_blocks": 8,
+  "geomean": 1.186985486091995,
+  "lo": 1.085579768262287,
+  "hi": 1.2978636719145606
  },
  {
   "experiment": "FC-beabaee-update-10pct",
@@ -48,10 +48,10 @@
   "cache": "warm",
   "arm": "xs-rs",
   "metric": "durable_s",
-  "n_blocks": 4,
-  "geomean": 1.0443259998592733,
-  "lo": 0.7691409282207418,
-  "hi": 1.4179674412919379
+  "n_blocks": 8,
+  "geomean": 1.0398459304425025,
+  "lo": 0.914135147233089,
+  "hi": 1.182844311730775
  },
  {
   "experiment": "FC-beabaee-update-10pct",
@@ -66,10 +66,10 @@
   "cache": "warm",
   "arm": "rsync",
   "metric": "wall_s",
-  "n_blocks": 4,
-  "geomean": 1.3634373578279946,
-  "lo": 1.3036984733155292,
-  "hi": 1.4259136347635082
+  "n_blocks": 8,
+  "geomean": 1.35617316059939,
+  "lo": 1.3004266597557759,
+  "hi": 1.4143093943302791
  },
  {
   "experiment": "FC-beabaee-update-10pct",
@@ -84,10 +84,10 @@
   "cache": "warm",
   "arm": "xs-cpp",
   "metric": "wall_s",
-  "n_blocks": 4,
-  "geomean": 1.014896398547945,
-  "lo": 0.9642059424278411,
-  "hi": 1.0682517649622068
+  "n_blocks": 8,
+  "geomean": 1.0534147491782189,
+  "lo": 0.9546336733036794,
+  "hi": 1.1624172337708936
  },
  {
   "experiment": "FC-beabaee-update-10pct",
@@ -102,10 +102,10 @@
   "cache": "warm",
   "arm": "xs-rs",
   "metric": "wall_s",
-  "n_blocks": 4,
-  "geomean": 0.9048711846371393,
-  "lo": 0.6383296229054983,
-  "hi": 1.282710109958093
+  "n_blocks": 8,
+  "geomean": 0.9010572390958738,
+  "lo": 0.7775403423054716,
+  "hi": 1.0441955278098052
  },
  {
   "experiment": "FC-beabaee-update-10pct",
@@ -120,10 +120,10 @@
   "cache": "warm",
   "arm": "rsync",
   "metric": "cpu_s",
-  "n_blocks": 4,
-  "geomean": 1.3580333375551403,
-  "lo": 1.3253467318543248,
-  "hi": 1.3915260826356077
+  "n_blocks": 8,
+  "geomean": 1.3541236246450563,
+  "lo": 1.331788492795494,
+  "hi": 1.3768333340776475
  },
  {
   "experiment": "FC-beabaee-update-10pct",
@@ -138,10 +138,10 @@
   "cache": "warm",
   "arm": "xs-cpp",
   "metric": "cpu_s",
-  "n_blocks": 4,
-  "geomean": 2.198673472662773,
-  "lo": 2.1174592559431744,
-  "hi": 2.283002624878233
+  "n_blocks": 8,
+  "geomean": 2.188930205132428,
+  "lo": 2.146244820803897,
+  "hi": 2.232464533634342
  },
  {
   "experiment": "FC-beabaee-update-10pct",
@@ -156,10 +156,10 @@
   "cache": "warm",
   "arm": "xs-rs",
   "metric": "cpu_s",
-  "n_blocks": 4,
-  "geomean": 1.485270570311333,
-  "lo": 1.3717198444089027,
-  "hi": 1.6082210052035568
+  "n_blocks": 8,
+  "geomean": 1.4774469038011726,
+  "lo": 1.4212308640772602,
+  "hi": 1.535886539425032
  },
  {
   "experiment": "FC-beabaee-update-10pct",
@@ -174,10 +174,10 @@
   "cache": "warm",
   "arm": "rsync",
   "metric": "rss_bytes",
-  "n_blocks": 4,
-  "geomean": 15258358.59209948,
-  "lo": 14302229.846542364,
-  "hi": 16278406.194218788
+  "n_blocks": 8,
+  "geomean": 15320155.1471253,
+  "lo": 14829593.301473679,
+  "hi": 15826944.742217978
  },
  {
   "experiment": "FC-beabaee-update-10pct",
@@ -192,10 +192,10 @@
   "cache": "warm",
   "arm": "xs-cpp",
   "metric": "rss_bytes",
-  "n_blocks": 4,
-  "geomean": 23472122.681214634,
-  "lo": 22681486.93410674,
-  "hi": 24290318.565205123
+  "n_blocks": 8,
+  "geomean": 23466682.833723158,
+  "lo": 22943857.623957958,
+  "hi": 24001421.741892785
  },
  {
   "experiment": "FC-beabaee-update-10pct",
@@ -210,9 +210,9 @@
   "cache": "warm",
   "arm": "xs-rs",
   "metric": "rss_bytes",
-  "n_blocks": 4,
-  "geomean": 31146029.725974478,
-  "lo": 29202640.802055884,
-  "hi": 33218748.066886883
+  "n_blocks": 8,
+  "geomean": 31541737.121835366,
+  "lo": 30608392.17327527,
+  "hi": 32503542.65689315
  }
 ]
