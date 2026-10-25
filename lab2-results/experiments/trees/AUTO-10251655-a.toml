@@ -1,0 +1,15 @@
+# Written by the 6-hourly planner at 2026-10-25T16:55Z for a; nothing is queued after the deadline.
+id = "AUTO-10251655-a"
+question = "Runner a has about 5.3 h of time room after its 0.7 h backlog, but it is waiting on A's 32 GiB/day write budget. The backlog already covers the congress pins, the laikav2 update-1pct -z and -j2 screens, and the real-projects fresh/update screenings, so I do not repeat those cells. I add only two small laikav2 experiments, roughly 9.5 GB and under 0.2 h total: an 8-block six-arm compression-by-jobs race on update-10pct, where default -j4 is a near-tie and -j8 already wins, and a 12-block four-arm -j2 race on the fresh tie that -z and -j8 left unresolved. Both are fronted so their small traffic runs before the queued traffic-heavy real-projects fresh copy. No no-op cells, no confirm arm because no absolute speed floor is known, and engineering/port are null by the lab's rules."
+deadline = "2026-10-25T22:55Z"
+start = ["N1", "N0"]
+
+[nodes.N0]
+spec = "auto/AP10251655-A10251652-lk-u10pct-z-j8-8b.toml"
+question = "On laikav2-sample update-10pct, can compression at default -j4 break the near-tie with xs-c++, and does compression add anything to the -j8 arm that already wins?"
+front = true
+
+[nodes.N1]
+spec = "auto/AP10251655-A10251652-lk-fresh-j2-12b.toml"
+question = "On laikav2-sample fresh, does lowering xs-rs from -j4 to -j2 break the 12-block tie with xs-c++ that compression and -j8 did not?"
+front = true

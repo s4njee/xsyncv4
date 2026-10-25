@@ -1,0 +1,38 @@
+# Written by the 6-hourly planner (2026-10-25T16:55Z). Why: The latest 12-block -z race confirmed a tie and the earlier -j8 screen was slower, so the untried jobs direction on this near-tie is downward.
+id = "AP10251655-A10251652-lk-fresh-j2-12b"
+kind = "screening"
+hypothesis = "On laikav2-sample fresh, lowering xs-rs to -j2 reduces contention on the scan/transfer mix; xs-rs-j2 finishes at or below 0.95 of xs-c++'s durable time while the default -j4 arm remains near 0.97."
+primary = "durable_s"
+delta = 0.05
+blocks = 12
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+sample_timeout_s = 7200
+
+[arms.xs-rs]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j4"]
+
+[arms.xs-rs-j2]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j2"]
+
+[arms.xs-cpp]
+tool = "xs"
+rev = "e104bde552f2"
+flags = ["-a", "-j4"]
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[matrix]
+link = "a-aws"
+corpus = ["laikav2-sample"]
+scenario = ["fresh"]
+direction = ["a>aws"]
+client = ["initiator"]
+cache = ["warm"]
