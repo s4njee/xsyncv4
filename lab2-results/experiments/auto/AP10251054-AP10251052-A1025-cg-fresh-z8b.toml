@@ -1,0 +1,38 @@
+# Written by the 6-hourly planner (2026-10-25T10:54Z). Why: The only compression evidence so far is laikav2; congress is the corpus that exposes per-file overhead, and its result decides whether -z could ever become an xs-rs default.
+id = "AP10251054-AP10251052-A1025-cg-fresh-z8b"
+kind = "screening"
+hypothesis = "Where per-file costs dominate, compression is neutral or slightly harmful: xs-rs-z stays within 2% of plain xs-rs (both near 0.85 of xs-c++), so a -z default would be justified only for mixed large trees and never for small-file corpora."
+primary = "durable_s"
+delta = 0.05
+blocks = 8
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+sample_timeout_s = 7200
+
+[arms.xs-rs]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j4"]
+
+[arms.xs-cpp]
+tool = "xs"
+rev = "e104bde552f2"
+flags = ["-a", "-j4"]
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[arms.xs-rs-z]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j4", "-z"]
+
+[matrix]
+link = "a-aws"
+corpus = ["congress-sample"]
+scenario = ["fresh"]
+direction = ["a>aws"]
+client = ["initiator"]
+cache = ["warm"]

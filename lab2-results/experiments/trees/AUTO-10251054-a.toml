@@ -1,0 +1,18 @@
+# Written by the 6-hourly planner at 2026-10-25T10:54Z for a; nothing is queued after the deadline.
+id = "AUTO-10251054-a"
+question = "Runner a is traffic-bound, not time-bound: 6.0 h of window minus its 0.6 h backlog leaves 5.4 h, and these three races need about 15 minutes of measurement, but the queued 4-block real-projects fresh copy (~25.6 GB) plus the queued congress pins nearly fill A's 32 GiB day. Only the 12-block laikav2 fresh race (~4.2 GiB) is fronted so it runs before the heavy copy; the congress fresh and laikav2 update-1pct -z screens (6.5 and 2.8 GiB) sit behind the backlog on the next day's budget. Real-projects gets no new work: a verdict-grade 8-block fresh race is ~51 GB and the newest rev is already queued at 4 blocks, while the update cells are queued at 2 blocks and cost more than 17 GB at 4 blocks. I do not repeat the queued congress update pins (u0p1pct, u1pct, u10pct), the queued laikav2 update-0p1pct 12-block pin, the queued laikav2 update-1pct -j2 screen, or the queued real-projects re-measures; no-op cells stay postponed, no confirm arm is set because no absolute speed floor is known, and engineering/port are null (engineering.can_open is false and port.next is null)."
+deadline = "2026-10-25T16:54Z"
+start = ["N0", "N1", "N2"]
+
+[nodes.N0]
+spec = "auto/AP10251054-AP10251052-A1025-lk-fresh-z12b.toml"
+question = "On laikav2-sample fresh, does xs-rs with -z beat xs-rs at its default -j4 and xs-c++, and does the direct xs-rs over xs-c++ ratio stay below 0.95 with an interval that excludes 1?"
+front = true
+
+[nodes.N1]
+spec = "auto/AP10251054-AP10251052-A1025-cg-fresh-z8b.toml"
+question = "On the per-file-bound congress-sample fresh copy, does enabling -z change xs-rs's durable time relative to its own -j4 default and to xs-c++?"
+
+[nodes.N2]
+spec = "auto/AP10251054-AP10251052-A1025-lk-u1pct-z8b.toml"
+question = "On laikav2-sample update-1pct, where scan and metadata dominate, does -z move xs-rs's durable time at all against its -j4 default and against xs-c++?"

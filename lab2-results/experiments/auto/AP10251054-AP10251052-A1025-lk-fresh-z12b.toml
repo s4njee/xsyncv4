@@ -1,0 +1,38 @@
+# Written by the 6-hourly planner (2026-10-25T10:54Z). Why: The latest 8-block run left all three arms inconclusive with the in-block xs-rs/xs-cpp ratio at 0.915, so only more blocks with both xs-rs arms can say whether compression breaks this tie.
+id = "AP10251054-AP10251052-A1025-lk-fresh-z12b"
+kind = "screening"
+hypothesis = "The 8-block -z edge (0.848 vs rsync while plain xs-rs was 0.887) is real on a fresh copy over this link: with 12 paired blocks xs-rs-z finishes at or below 0.90 of xs-c++'s durable time and its interval separates from plain xs-rs, which sits near 0.95; if the two xs-rs arms converge, compression is noise and laikav2 fresh is an honest near-tie."
+primary = "durable_s"
+delta = 0.05
+blocks = 12
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+sample_timeout_s = 7200
+
+[arms.xs-rs]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j4"]
+
+[arms.xs-cpp]
+tool = "xs"
+rev = "e104bde552f2"
+flags = ["-a", "-j4"]
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[arms.xs-rs-z]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j4", "-z"]
+
+[matrix]
+link = "a-aws"
+corpus = ["laikav2-sample"]
+scenario = ["fresh"]
+direction = ["a>aws"]
+client = ["initiator"]
+cache = ["warm"]

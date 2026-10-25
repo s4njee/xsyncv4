@@ -1,0 +1,38 @@
+# Written by the 6-hourly planner (2026-10-25T10:54Z). Why: Before -z can be recommended anywhere it must be shown not to regress the update scenarios that make up most of the scoreboard.
+id = "AP10251054-AP10251052-A1025-lk-u1pct-z8b"
+kind = "screening"
+hypothesis = "At 1% churn there is little data to compress, so -z adds CPU without shrinking the transfer: xs-rs-z lands within 3% of plain xs-rs and both stay near 0.93 of xs-c++; a larger effect would mean the update path is wire-bound after all."
+primary = "durable_s"
+delta = 0.05
+blocks = 8
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+sample_timeout_s = 7200
+
+[arms.xs-rs]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j4"]
+
+[arms.xs-cpp]
+tool = "xs"
+rev = "e104bde552f2"
+flags = ["-a", "-j4"]
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[arms.xs-rs-z]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j4", "-z"]
+
+[matrix]
+link = "a-aws"
+corpus = ["laikav2-sample"]
+scenario = ["update-1pct"]
+direction = ["a>aws"]
+client = ["initiator"]
+cache = ["warm"]
