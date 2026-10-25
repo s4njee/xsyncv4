@@ -3128,6 +3128,80 @@
    "model": "opencode/deepseek-v4.1-flash",
    "summarizedUtc": 1792871992.228,
    "driver": "a"
+  },
+  "AP10242254-A10241700-lk-fresh-12b-pin": {
+   "run": "20261024T225434Z-AP10242254-A10241700-lk-fresh-12b-pin",
+   "experiment": "AP10242254-A10241700-lk-fresh-12b-pin",
+   "key": "laikav2-sample.fresh.a-aws.sender.warm|10|0",
+   "utc": 1792888965.271,
+   "cell": "laikav2-sample.fresh.a-aws.sender.warm",
+   "factors": {
+    "corpus": "laikav2-sample",
+    "scenario": "fresh",
+    "sender": "a",
+    "receiver": "aws",
+    "client": "sender",
+    "link": "a-aws",
+    "cache": "warm"
+   },
+   "block": 10,
+   "attempt": 0,
+   "control": "rsync",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "rsync",
+     "label": "rsync",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 1.241,
+     "gbps": 0.606,
+     "files_per_s": 1077,
+     "speed": 1
+    },
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 1.316,
+     "gbps": 0.571,
+     "files_per_s": 1016,
+     "speed": 0.94
+    },
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 1.014,
+     "gbps": 0.742,
+     "files_per_s": 1319,
+     "speed": 1.22
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "speed": 1.11,
+     "blocks": 11
+    },
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "speed": 1.17,
+     "blocks": 11
+    }
+   ],
+   "question": "Is xs-rs's laikav2-sample fresh win real? At 8 blocks the direct xs-rs/xs-c++ ratio was 0.895, but xs-rs's own interval against rsync still reached 0.924, so the margin could be noise.",
+   "summary": "On block 10, xs-rs was fastest at 1.014 s, 1.22x the rsync control (22% faster); xs-c++ was 0.94x, slower. Cumulatively for this cell, xs-rs stands at 1.17x and xs-c++ at 1.11x versus rsync over 11 blocks each, so the evidence is not thin. This block shows xs-rs ahead of xs-c++ (1.014 s versus 1.316 s), bearing on the freshness question, but the supplied cumulative figures are rsync-relative, not the direct ratio.",
+   "model": "opencode/deepseek-v4.1-flash",
+   "summarizedUtc": 1792888977.612,
+   "driver": "a"
   }
  }
 }

@@ -1,0 +1,19 @@
+{
+ "experiment": "AP10242254-A10241700-lk-fresh-12b-pin",
+ "kind": "screening",
+ "hypothesis": "With 12 paired blocks, xs-rs over xs-c++ on laikav2-sample fresh stays below 0.95 with an interval that excludes 1.0; if the direct ratio drifts into 0.95-1.0 the cell is an honest tie and should be scored as one rather than as a win.",
+ "primary": "durable_s",
+ "control": "rsync",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261024T225434Z-AP10242254-A10241700-lk-fresh-12b-pin"
+ ],
+ "spec_sha256": [
+  "caf9adacfb8d8bfa27cc716c73b0f1a217902267e5a79dbfd62535db89fd9bb5"
+ ],
+ "valid_blocks": 12,
+ "void_attempts": 0,
+ "void_reasons": []
+}

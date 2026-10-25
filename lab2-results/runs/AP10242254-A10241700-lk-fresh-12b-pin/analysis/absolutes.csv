@@ -1,0 +1,13 @@
+experiment,kind,cell_id,corpus,scenario,sender,receiver,client,link,cache,arm,metric,n_blocks,geomean,lo,hi
+AP10242254-A10241700-lk-fresh-12b-pin,screening,laikav2-sample.fresh.a-aws.sender.warm,laikav2-sample,fresh,a,aws,sender,a-aws,warm,rsync,durable_s,12,1.2987254915372008,1.2524125689527985,1.3467510181400237
+AP10242254-A10241700-lk-fresh-12b-pin,screening,laikav2-sample.fresh.a-aws.sender.warm,laikav2-sample,fresh,a,aws,sender,a-aws,warm,xs-cpp,durable_s,12,1.1695799587414755,1.1082179465212836,1.2343395847212444
+AP10242254-A10241700-lk-fresh-12b-pin,screening,laikav2-sample.fresh.a-aws.sender.warm,laikav2-sample,fresh,a,aws,sender,a-aws,warm,xs-rs,durable_s,12,1.114286809488533,1.0329894938809947,1.2019823058753942
+AP10242254-A10241700-lk-fresh-12b-pin,screening,laikav2-sample.fresh.a-aws.sender.warm,laikav2-sample,fresh,a,aws,sender,a-aws,warm,rsync,wall_s,12,1.093218401026576,1.0650969683379345,1.1220823153858732
+AP10242254-A10241700-lk-fresh-12b-pin,screening,laikav2-sample.fresh.a-aws.sender.warm,laikav2-sample,fresh,a,aws,sender,a-aws,warm,xs-cpp,wall_s,12,0.9839699704335686,0.9254165030768126,1.046228265322684
+AP10242254-A10241700-lk-fresh-12b-pin,screening,laikav2-sample.fresh.a-aws.sender.warm,laikav2-sample,fresh,a,aws,sender,a-aws,warm,xs-rs,wall_s,12,0.9347069555380256,0.8802640879478605,0.9925170238035588
+AP10242254-A10241700-lk-fresh-12b-pin,screening,laikav2-sample.fresh.a-aws.sender.warm,laikav2-sample,fresh,a,aws,sender,a-aws,warm,rsync,cpu_s,12,0.8254006663198641,0.8144540381088052,0.8364944221324625
+AP10242254-A10241700-lk-fresh-12b-pin,screening,laikav2-sample.fresh.a-aws.sender.warm,laikav2-sample,fresh,a,aws,sender,a-aws,warm,xs-cpp,cpu_s,12,1.2189861001051276,1.1877035548387338,1.2510925863577695
+AP10242254-A10241700-lk-fresh-12b-pin,screening,laikav2-sample.fresh.a-aws.sender.warm,laikav2-sample,fresh,a,aws,sender,a-aws,warm,xs-rs,cpu_s,12,0.8350141161692173,0.8095524007742791,0.8612766431610734
+AP10242254-A10241700-lk-fresh-12b-pin,screening,laikav2-sample.fresh.a-aws.sender.warm,laikav2-sample,fresh,a,aws,sender,a-aws,warm,rsync,rss_bytes,12,12783083.226611385,12557557.08253662,13012659.684081258
+AP10242254-A10241700-lk-fresh-12b-pin,screening,laikav2-sample.fresh.a-aws.sender.warm,laikav2-sample,fresh,a,aws,sender,a-aws,warm,xs-cpp,rss_bytes,12,104860104.20426954,101307680.46415366,108537096.13478838
+AP10242254-A10241700-lk-fresh-12b-pin,screening,laikav2-sample.fresh.a-aws.sender.warm,laikav2-sample,fresh,a,aws,sender,a-aws,warm,xs-rs,rss_bytes,12,82062350.0050602,80777220.06961292,83367925.79082961
