@@ -1,0 +1,38 @@
+# Written by the 6-hourly planner (2026-10-25T22:55Z). Why: This is the only transfer cell xs-c++ wins, and -j8 helped on update-10pct; a 2-block screen is the most the traffic cap allows beside the queued default re-measure.
+id = "AP10252255-P10252252-a-rp-fresh-j8-2b"
+kind = "screening"
+hypothesis = "xs-rs-j8 will be faster than default xs-rs and will narrow the real-projects fresh ratio toward xs-c++; if it stays far above 1.2, the loss is per-file or metadata cost rather than transfer concurrency."
+primary = "durable_s"
+delta = 0.05
+blocks = 2
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+sample_timeout_s = 7200
+
+[arms.xs-rs]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j4"]
+
+[arms.xs-rs-j8]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j8"]
+
+[arms.xs-cpp]
+tool = "xs"
+rev = "e104bde552f2"
+flags = ["-a", "-j4"]
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[matrix]
+link = "a-aws"
+corpus = ["real-projects"]
+scenario = ["fresh"]
+direction = ["a>aws"]
+client = ["initiator"]
+cache = ["warm"]

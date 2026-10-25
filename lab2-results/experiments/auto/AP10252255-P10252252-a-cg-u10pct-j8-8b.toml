@@ -1,0 +1,38 @@
+# Written by the 6-hourly planner (2026-10-25T22:55Z). Why: The latest update-10pct screening showed -j8 helping on laikav2, while the queued congress pin tests only -j4; this cheap 8-block race decides whether jobs should change the default on the small-file update cell.
+id = "AP10252255-P10252252-a-cg-u10pct-j8-8b"
+kind = "screening"
+hypothesis = "xs-rs-j8 will be faster than default xs-rs on the per-file-bound update-10pct cell, confirming that the -j8 win on laikav2 update-10pct is a transfer-concurrency effect; if it is neutral or slower, -j4 remains the right default for small-file updates."
+primary = "durable_s"
+delta = 0.05
+blocks = 8
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+sample_timeout_s = 7200
+
+[arms.xs-rs]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j4"]
+
+[arms.xs-rs-j8]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j8"]
+
+[arms.xs-cpp]
+tool = "xs"
+rev = "e104bde552f2"
+flags = ["-a", "-j4"]
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[matrix]
+link = "a-aws"
+corpus = ["congress-sample"]
+scenario = ["update-10pct"]
+direction = ["a>aws"]
+client = ["initiator"]
+cache = ["warm"]

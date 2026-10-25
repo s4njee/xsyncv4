@@ -1,0 +1,13 @@
+# Written by the 6-hourly planner at 2026-10-25T22:55Z for a; nothing is queued after the deadline.
+id = "AUTO-10252255-a"
+question = "Runner a is traffic-bound, not time-bound: it has 5.1 h of measurement room after its 0.9 h backlog, but the queued real-projects fresh copy and the congress/laikav2 pins already consume most of the day's write budget. The backlog covers all verdict-grade base cells, so I add only two non-duplicative screens. The first attacks the one transfer cell xs-c++ wins, real-projects fresh, testing whether -j8 closes the gap; it is queued behind the backlog on the next day's budget and costs about 17.0 GB at 2 blocks. The second follows the promising -j8 update-10pct result onto congress-sample, where the queued pin tests only default -j4; 8 blocks cost about 7.7 GB. Together they stay under 32 GB for the next day, avoid the queued compression/-j2 variants and the no-op cells, and leave engineering and port null because engineering.can_open is false and port.next is null."
+deadline = "2026-10-26T04:55Z"
+start = ["N0", "N1"]
+
+[nodes.N0]
+spec = "auto/AP10252255-P10252252-a-rp-fresh-j8-2b.toml"
+question = "On real-projects fresh over a-aws, does xs-rs at -j8 close the gap to xs-c++ that the default -j4 run shows?"
+
+[nodes.N1]
+spec = "auto/AP10252255-P10252252-a-cg-u10pct-j8-8b.toml"
+question = "On congress-sample update-10pct, does xs-rs at -j8 keep the update-10pct advantage and beat xs-c++ by more than the default -j4 does?"
