@@ -1,5 +1,5 @@
 {
- "updated": "2026-10-25T13:12:24+00:00",
+ "updated": "2026-10-25T14:12:24+00:00",
  "enabled": true,
  "cpp_rev": "e104bde552f2",
  "rs": {
@@ -8,9 +8,9 @@
  },
  "margin": 0.05,
  "score": {
-  "xs-rs": 10,
+  "xs-rs": 9,
   "xs-cpp": 2,
-  "tie": 0,
+  "tie": 1,
   "pending": 0
  },
  "cells": [
@@ -21,7 +21,7 @@
    "link": "a-aws",
    "metric": "durable_s",
    "experiment": "FC-beabaee-fresh",
-   "run": "20261024T041853Z-FC-beabaee-fresh",
+   "run": "20261025T131728Z-FC-beabaee-fresh",
    "tools": {
     "rsync": {
      "arm": "rsync",
@@ -179,10 +179,10 @@
       "-a"
      ],
      "rev": null,
-     "seconds": 1.498,
-     "lo": 1.438,
-     "hi": 1.561,
-     "blocks": 4
+     "seconds": 1.494,
+     "lo": 1.44,
+     "hi": 1.55,
+     "blocks": 8
     },
     "xs-cpp": {
      "arm": "xs-cpp",
@@ -191,10 +191,10 @@
       "-j4"
      ],
      "rev": "e104bde552f2",
-     "seconds": 1.145,
-     "lo": 1.104,
-     "hi": 1.187,
-     "blocks": 4
+     "seconds": 1.187,
+     "lo": 1.086,
+     "hi": 1.298,
+     "blocks": 8
     },
     "xs-rs": {
      "arm": "xs-rs",
@@ -203,15 +203,15 @@
       "-j4"
      ],
      "rev": "beabaee992b6-rs",
-     "seconds": 1.044,
-     "lo": 0.769,
-     "hi": 1.418,
-     "blocks": 4
+     "seconds": 1.04,
+     "lo": 0.914,
+     "hi": 1.183,
+     "blocks": 8
     }
    },
    "verdict": "xs-rs",
-   "rs_vs_cpp": 0.912,
-   "rs_vs_rsync": 0.697,
+   "rs_vs_cpp": 0.876,
+   "rs_vs_rsync": 0.696,
    "fastest": "xs-rs"
   },
   {
@@ -270,8 +270,8 @@
    "scenario": "fresh",
    "link": "a-aws",
    "metric": "durable_s",
-   "experiment": "AP10250454-A1025-lk-fresh-z-8b",
-   "run": "20261025T045423Z-AP10250454-A1025-lk-fresh-z-8b",
+   "experiment": "AP10251054-AP10251052-A1025-lk-fresh-z12b",
+   "run": "20261025T105407Z-AP10251054-AP10251052-A1025-lk-fresh-z12b",
    "tools": {
     "rsync": {
      "arm": "rsync",
@@ -279,23 +279,22 @@
       "-a"
      ],
      "rev": null,
-     "seconds": 1.32,
-     "lo": 1.215,
-     "hi": 1.434,
-     "blocks": 8
+     "seconds": 1.388,
+     "lo": 1.325,
+     "hi": 1.453,
+     "blocks": 12
     },
     "xs-rs": {
-     "arm": "xs-rs-z",
+     "arm": "xs-rs",
      "flags": [
       "-a",
-      "-j4",
-      "-z"
+      "-j4"
      ],
      "rev": "beabaee992b6-rs",
-     "seconds": 1.119,
-     "lo": 1.026,
-     "hi": 1.22,
-     "blocks": 8
+     "seconds": 1.143,
+     "lo": 1.092,
+     "hi": 1.197,
+     "blocks": 12
     },
     "xs-cpp": {
      "arm": "xs-cpp",
@@ -304,15 +303,15 @@
       "-j4"
      ],
      "rev": "e104bde552f2",
-     "seconds": 1.224,
-     "lo": 1.111,
-     "hi": 1.348,
-     "blocks": 8
+     "seconds": 1.172,
+     "lo": 1.117,
+     "hi": 1.23,
+     "blocks": 12
     }
    },
-   "verdict": "xs-rs",
-   "rs_vs_cpp": 0.914,
-   "rs_vs_rsync": 0.848,
+   "verdict": "tie",
+   "rs_vs_cpp": 0.975,
+   "rs_vs_rsync": 0.823,
    "fastest": "xs-rs"
   },
   {
