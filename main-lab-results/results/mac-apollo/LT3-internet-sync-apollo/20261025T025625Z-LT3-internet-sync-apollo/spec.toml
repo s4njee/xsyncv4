@@ -1,0 +1,46 @@
+# T19-until-sunday, wave 2 (2026-10-23): new questions in place of repeating the sentinel.
+# An internet-like path: a 40 ms round trip and every tool held to 1 Gb/s, the gigabit home link to a remote host.
+# With compression, where it should pay.
+id = "LT3-internet-sync-apollo"
+kind = "screening"
+hypothesis = "Over a 40 ms, 1 Gb/s path, xs-rs -z at its automatic level is at least as fast as rsync -az and xs-c++ -z."
+primary = "durable_s"
+delta = 0.05
+blocks = 3
+control = "rsync-z"
+verify = "first-last"
+cleanup = "eager"
+max_hours = 2.5
+sample_timeout_s = 3600
+wan = { host = "apollo", delay_ms = 40 }
+
+[arms.rsync-z]
+tool = "rsync"
+flags = ["-az", "--bwlimit=122070"]
+
+[arms.xs-cpp-z]
+tool = "xs"
+rev = "cc8288d4f08c"
+flags = ["-a", "-j4", "-z", "--bwlimit=122070"]
+
+[arms.xs-rs-z]
+tool = "xs"
+rev = "ac1aeef00c80-rs"
+flags = ["-a", "-z", "--bwlimit=122070"]
+
+[arms.xs-rs]
+tool = "xs"
+rev = "ac1aeef00c80-rs"
+flags = ["-a", "--bwlimit=122070"]
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a", "--bwlimit=122070"]
+
+[matrix]
+link = "mac-apollo-10g"
+corpus = ["real-congress", "local-laikav2"]
+scenario = ["fresh", "update-1pct"]
+direction = ["mac>apollo", "apollo>mac"]
+client = ["initiator"]
+cache = ["warm"]

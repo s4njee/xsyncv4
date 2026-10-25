@@ -1,8 +1,8 @@
 {
  "cards": {
   "mac": {
-   "key": "[\"running\",\"Mac \u2194 apollo, mars's box on Linux (direct 10 GbE, X540)\",\"SM1c-small-onto-mac-confirm\"]",
-   "text": "The Mac, a MacBook Pro with an M1 Max and a Thunderbolt 10 GbE adapter, is wired directly over 10 GbE to a Linux machine called apollo, which is mars's box. The lab is now running a confirmation test of whether the xs-cpp-noatomic build beats xs-cpp by more than 5% on a large transfer job, following up an earlier result with fresh measurement blocks.",
+   "key": "[\"running\",\"Mac \u2194 apollo, mars's box on Linux (direct 10 GbE, X540)\",\"JC1-xs-cpp-workers-apollo\"]",
+   "text": "The Mac, a MacBook Pro with an M1 Max and a Thunderbolt 10 GbE adapter, is wired directly to apollo, a Linux machine with a 10 GbE X540 link. This experiment is checking whether xs-c++'s default of 4 workers is the best choice at 10 GbE, or whether 1, 2, 8 or 16 workers do better, since the question is whether any count beats 4 by at least 5%.",
    "model": "claude-haiku-5-5"
   },
   "mars": {
@@ -12,7 +12,7 @@
   },
   "neo": {
    "key": "[\"no runner\",\"neo-vpsb\",null]",
-   "text": "The pair neo and vpsb are joined by a wired link. The experiment is idle, since no runner is currently active and no experiment is set.",
+   "text": "The pair neo and vpsb are joined by a wired link. No experiment is running on this link right now, so the card is idle.",
    "model": "claude-haiku-5-5"
   },
   "neo-ssd": {

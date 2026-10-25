@@ -1,0 +1,26 @@
+{
+ "experiment": "JB1-xs-rs-workers-apollo",
+ "kind": "screening",
+ "hypothesis": "Some worker count is at least 5% faster than xs-rs's default of 8 in some cell.",
+ "primary": "durable_s",
+ "control": "xs-rs",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261025T013958Z-JB1-xs-rs-workers-apollo"
+ ],
+ "spec_sha256": [
+  "da3e9ca80a7df012b9de14467e7e302a4c68aa59f35189528569879c128ea0be"
+ ],
+ "valid_blocks": 12,
+ "void_attempts": 18,
+ "void_reasons": [
+  "rsync: the destination does not match the corpus manifest: DIFFERS target/debug/incremental/mkit-1kamvep3e62m2/s-hng3ehopvi-1j46563-4fx46mu2g6x7f7kuko4hg7nkg/00",
+  "xs-rs-j16: the destination does not match the corpus manifest: DIFFERS target/debug/incremental/mkit-1kamvep3e62m2/s-hng3ehopvi-1j46563-4fx46mu2g6x7f7kuko4hg7nk",
+  "xs-rs-j1: the destination does not match the corpus manifest: DIFFERS target/debug/incremental/mkit-1kamvep3e62m2/s-hng3ehopvi-1j46563-4fx46mu2g6x7f7kuko4hg7nkg",
+  "xs-rs-j2: the destination does not match the corpus manifest: DIFFERS target/debug/incremental/mkit-1kamvep3e62m2/s-hng3ehopvi-1j46563-4fx46mu2g6x7f7kuko4hg7nkg",
+  "xs-rs-j4: the destination does not match the corpus manifest: DIFFERS target/debug/incremental/mkit-1kamvep3e62m2/s-hng3ehopvi-1j46563-4fx46mu2g6x7f7kuko4hg7nkg",
+  "xs-rs: the destination does not match the corpus manifest: DIFFERS target/debug/incremental/mkit-1kamvep3e62m2/s-hng3ehopvi-1j46563-4fx46mu2g6x7f7kuko4hg7nkg/00"
+ ]
+}

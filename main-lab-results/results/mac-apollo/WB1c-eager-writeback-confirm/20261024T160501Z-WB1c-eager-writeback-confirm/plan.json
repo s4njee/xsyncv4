@@ -1,0 +1,301 @@
+{
+ "schema": 1,
+ "experiment": "WB1c-eager-writeback-confirm",
+ "spec_sha256": "cdfd268bccebcefd8906fb4674f59f07bd834845de9d9fab209b1647e0cf29f0",
+ "kind": "confirmatory",
+ "bundle": "29b78fce3bcd",
+ "writes": {
+  "mac": 0,
+  "apollo": 18547037216
+ },
+ "hypothesis": "xs-cpp-eager is more than 5% faster than xs-cpp on real-congress (from WB1-eager-writeback-apollo, confirmed with fresh blocks).",
+ "primary": "durable_s",
+ "delta": 0.05,
+ "control": "xs-cpp",
+ "seed": 71517,
+ "run_id": "20261024T160501Z-WB1c-eager-writeback-confirm",
+ "driver": "mac",
+ "sample_timeout_s": 3600,
+ "results": "mac-apollo",
+ "background": true,
+ "local_link": false,
+ "eager_cleanup": true,
+ "hours": null,
+ "max_hours": null,
+ "hosts": {
+  "mac": {
+   "ssh": "[host]",
+   "name": "[host]",
+   "hostname": "[host]",
+   "root": "~/benchmarks/xsbench.noindex",
+   "interface": "en4",
+   "helper": false,
+   "gates": {},
+   "local": true,
+   "system": "Darwin"
+  },
+  "apollo": {
+   "ssh": "[host]",
+   "name": "[host]",
+   "hostname": "apollo",
+   "root": "~/xsbench",
+   "interface": "enp25s0f0",
+   "helper": true,
+   "gates": {},
+   "local": false,
+   "system": "Linux"
+  }
+ },
+ "links": {
+  "mac-apollo-10g": {
+   "hosts": [
+    "mac",
+    "apollo"
+   ],
+   "medium": "wired",
+   "min_speed_mbps": 10000,
+   "max_rtt_ms": 2.0,
+   "initiator": "mac",
+   "driver": "mac",
+   "results": "mac-apollo",
+   "background": true,
+   "address": {
+    "mac": "[address]",
+    "apollo": "[host]"
+   }
+  }
+ },
+ "arms": [
+  {
+   "name": "xs-cpp",
+   "tool": "xs",
+   "flags": [
+    "-a",
+    "-j4"
+   ],
+   "rev": "cc8288d4f08c",
+   "binary": {
+    "mac": "~/benchmarks/xsbench.noindex/bin/xs-cc8288d4f08c",
+    "apollo": "~/xsbench/bin/xs-cc8288d4f08c"
+   },
+   "sha256": {
+    "mac": "df9b6db403c2fca77fe5a16217e6ac4e810cd142cc376e8dfa54563a48b08448",
+    "apollo": "4b113206d5acabdfb434c485979c2798e9bee7d2faecc142aa206fb3286e26d5"
+   },
+   "artifacts": {
+    "xs-darwin-arm64": "df9b6db403c2fca77fe5a16217e6ac4e810cd142cc376e8dfa54563a48b08448",
+    "xs-linux-amd64": "4b113206d5acabdfb434c485979c2798e9bee7d2faecc142aa206fb3286e26d5",
+    "xs-linux-arm64": "17b9544f92ec49b3d312b428c90d2b1e7aa2ecd513253490bc927af9d4e0b5d6",
+    "xs-darwin-amd64": "67498c3d86c0a00850a320af4e5b07637275c40109e90b3dd5d377874acca0ab"
+   }
+  },
+  {
+   "name": "xs-cpp-eager",
+   "tool": "xs",
+   "flags": [
+    "-a",
+    "-j4"
+   ],
+   "rev": "cc8288d4f08c",
+   "binary": {
+    "mac": "~/benchmarks/xsbench.noindex/bin/xs-cc8288d4f08c",
+    "apollo": "~/xsbench/bin/xs-cc8288d4f08c"
+   },
+   "sha256": {
+    "mac": "df9b6db403c2fca77fe5a16217e6ac4e810cd142cc376e8dfa54563a48b08448",
+    "apollo": "4b113206d5acabdfb434c485979c2798e9bee7d2faecc142aa206fb3286e26d5"
+   },
+   "artifacts": {
+    "xs-darwin-arm64": "df9b6db403c2fca77fe5a16217e6ac4e810cd142cc376e8dfa54563a48b08448",
+    "xs-linux-amd64": "4b113206d5acabdfb434c485979c2798e9bee7d2faecc142aa206fb3286e26d5",
+    "xs-linux-arm64": "17b9544f92ec49b3d312b428c90d2b1e7aa2ecd513253490bc927af9d4e0b5d6",
+    "xs-darwin-amd64": "67498c3d86c0a00850a320af4e5b07637275c40109e90b3dd5d377874acca0ab"
+   },
+   "writeback": "eager"
+  }
+ ],
+ "cells": [
+  {
+   "id": "real-congress.fresh.mac-apollo.sender.warm",
+   "corpus": "real-congress",
+   "scenario": "fresh",
+   "sender": "mac",
+   "receiver": "apollo",
+   "client": "sender",
+   "link": "mac-apollo-10g",
+   "cache": "warm"
+  }
+ ],
+ "corpora": {
+  "real-congress": {
+   "files": 216518,
+   "directories": 52593,
+   "bytes": 1159189826,
+   "digest": "29d93dcc4c117de24dc4f6e1b8d26f0e7bbc9c26cfb4aa03d2d52de078b6a102",
+   "quick_digest": "0f493d25789a420e24c282fb3a4ba40bc690b1a3e65184088bf66e7fa0868a6b"
+  }
+ },
+ "blocks": [
+  {
+   "cell": "real-congress.fresh.mac-apollo.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs-cpp",
+     "xs-cpp-eager"
+    ],
+    [
+     "xs-cpp-eager",
+     "xs-cpp"
+    ],
+    [
+     "xs-cpp-eager",
+     "xs-cpp"
+    ]
+   ]
+  },
+  {
+   "cell": "real-congress.fresh.mac-apollo.sender.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-cpp-eager",
+     "xs-cpp"
+    ],
+    [
+     "xs-cpp-eager",
+     "xs-cpp"
+    ],
+    [
+     "xs-cpp-eager",
+     "xs-cpp"
+    ]
+   ]
+  },
+  {
+   "cell": "real-congress.fresh.mac-apollo.sender.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-cpp",
+     "xs-cpp-eager"
+    ],
+    [
+     "xs-cpp",
+     "xs-cpp-eager"
+    ],
+    [
+     "xs-cpp-eager",
+     "xs-cpp"
+    ]
+   ]
+  },
+  {
+   "cell": "real-congress.fresh.mac-apollo.sender.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-cpp-eager",
+     "xs-cpp"
+    ],
+    [
+     "xs-cpp-eager",
+     "xs-cpp"
+    ],
+    [
+     "xs-cpp",
+     "xs-cpp-eager"
+    ]
+   ]
+  },
+  {
+   "cell": "real-congress.fresh.mac-apollo.sender.warm",
+   "block": 4,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-cpp-eager",
+     "xs-cpp"
+    ],
+    [
+     "xs-cpp",
+     "xs-cpp-eager"
+    ],
+    [
+     "xs-cpp",
+     "xs-cpp-eager"
+    ]
+   ]
+  },
+  {
+   "cell": "real-congress.fresh.mac-apollo.sender.warm",
+   "block": 5,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-cpp-eager",
+     "xs-cpp"
+    ],
+    [
+     "xs-cpp-eager",
+     "xs-cpp"
+    ],
+    [
+     "xs-cpp",
+     "xs-cpp-eager"
+    ]
+   ]
+  },
+  {
+   "cell": "real-congress.fresh.mac-apollo.sender.warm",
+   "block": 6,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-cpp-eager",
+     "xs-cpp"
+    ],
+    [
+     "xs-cpp",
+     "xs-cpp-eager"
+    ],
+    [
+     "xs-cpp",
+     "xs-cpp-eager"
+    ]
+   ]
+  },
+  {
+   "cell": "real-congress.fresh.mac-apollo.sender.warm",
+   "block": 7,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs-cpp",
+     "xs-cpp-eager"
+    ],
+    [
+     "xs-cpp-eager",
+     "xs-cpp"
+    ],
+    [
+     "xs-cpp",
+     "xs-cpp-eager"
+    ]
+   ]
+  }
+ ],
+ "scripts": {
+  "probe.py": "31498266d245cc6e8c7a1cd788652da3015bc80d5f454841d90254a74e85cf94",
+  "corpus.py": "9332674b442eb999872aa51080b2cff8f84890e44d16669a18c669a2005e3fc9",
+  "corpora.json": "21f1b56afc8cc2aa061fe9974acc3e4e77ab493d6c05d1956713efeead0010d5",
+  "agent.py": "9f96da09e1546e6ad4485beee62576d2b3d57062d763bf2871a59ff9408b7e1d",
+  "runner.py": "cce71fee149764ad1a5c913061f19620a8ff44f792d23d55f7a290d59a9e20ff",
+  "xspipe.py": "94b3fccfc6e994d227077c453f90323ab55337fd8a98231d16a10696e8ebab6b",
+  "measure.py": "5065310f480ff1cabfa7c645f0db342624a02f9a081b96069d50d52b3d224777"
+ }
+}

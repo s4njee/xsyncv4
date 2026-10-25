@@ -14,7 +14,7 @@
    "experiment": "CZ1-compress-pr34-apollo",
    "title": "Compression at 10 GbE",
    "question": "At full link speed with fast CPUs, does xs-rs -z at its automatic level (PR #34) keep up with the best fixed level, and with no compression?",
-   "estimateHours": 1.3,
+   "estimateHours": 5.4,
    "hypothesis": "On 10 GbE with fast CPUs, xs-rs -z at its automatic level (PR #34) is within 5% of the fastest fixed level and of no compression.",
    "design": "screening",
    "state": "decided",
@@ -36,7 +36,7 @@
    "experiment": "CZ1c-level-confirm",
    "title": "Confirm the faster fixed level",
    "question": "Does the fixed level that beat the automatic one do it again on eight fresh blocks?",
-   "estimateHours": 1.2,
+   "estimateHours": 4.8,
    "hypothesis": "Confirms the fastest arm of CZ1 with 8 fresh blocks, if it had one.",
    "design": "confirmatory",
    "state": "skipped",
@@ -52,7 +52,7 @@
    "experiment": "RW7-delta-breakdown-apollo",
    "title": "Take the delta loss apart",
    "question": "On delta updates of large files, where rsync won RW1, is it xs's delta path or its copy that loses, and does --whole-file win at 10 GbE?",
-   "estimateHours": 4.0,
+   "estimateHours": 16.2,
    "hypothesis": "rsync is at least 5% faster than xs in some delta cell, and xs with --whole-file shows whether xs's delta path or its copy is the cause.",
    "design": "screening",
    "state": "decided",
@@ -74,7 +74,7 @@
    "experiment": "RW7c-whole-file-confirm",
    "title": "Confirm --whole-file on fast links",
    "question": "Does xs with --whole-file beat rsync's delta again on eight fresh blocks?",
-   "estimateHours": 1.8,
+   "estimateHours": 7.2,
    "hypothesis": "xs-rs-W is more than 5% faster than rsync on large-text (from RW7-delta-breakdown-apollo, confirmed with fresh blocks).",
    "design": "confirmatory",
    "state": "decided",
@@ -96,7 +96,7 @@
    "experiment": "RW8a-delta-wan-apollo",
    "title": "Deltas over a 20 ms round trip",
    "question": "Over a 20 ms round trip, does rsync's delta beat xs's?",
-   "estimateHours": 1.2,
+   "estimateHours": 4.8,
    "hypothesis": "Over a 20 ms round trip, rsync is at least 5% faster than xs in some delta cell.",
    "design": "screening",
    "state": "decided",
@@ -118,7 +118,7 @@
    "experiment": "RW8b-delta-100m-apollo",
    "title": "Deltas on a slow, distant path",
    "question": "On a 20 ms, 100 Mb/s path, where sending only the changes matters most, does rsync's delta beat xs's?",
-   "estimateHours": 0.4,
+   "estimateHours": 1.8,
    "hypothesis": "Over a 20 ms, 100 Mb/s path, rsync is at least 5% faster than xs in some delta cell.",
    "design": "screening",
    "state": "decided",
@@ -140,7 +140,7 @@
    "experiment": "RW3b-noop-many-apollo-pr34",
    "title": "Finish the many-file no-ops",
    "question": "With three more blocks, does xs keep its lead at no-ops of many files?",
-   "estimateHours": 1.1,
+   "estimateHours": 4.5,
    "hypothesis": "rsync is at least 5% faster to durable than xs-c++ or xs-rs in some cell. No-ops of many files, where NT1021 saw rsync pull real-psample in 75.7 s against xs-cpp 151.6 s; -j1 arms for a per-core comparison.",
    "design": "screening",
    "state": "decided",
@@ -162,7 +162,7 @@
    "experiment": "RW6b-hardlinks-apollo",
    "title": "Hard links, checked again",
    "question": "With hard links kept (-H) on laikav2, is xs-c++ as fast as rsync, over six blocks?",
-   "estimateHours": 0.9,
+   "estimateHours": 3.6,
    "hypothesis": "rsync is at least 5% faster to durable than xs-c++ or xs-rs in some cell. Hard links kept with -H, on laikav2 (1,234 linked files in its Rust target folder). xs-rs has no -H, so it sits out.",
    "design": "screening",
    "state": "decided",
@@ -184,7 +184,7 @@
    "experiment": "PR1-pr34-vs-base-apollo",
    "title": "PR #34 against its base",
    "question": "Is xs-rs at PR #34 at least as fast as the xs-rs it changes, in every cell at 10 GbE?",
-   "estimateHours": 2.6,
+   "estimateHours": 10.8,
    "hypothesis": "xs-rs at PR #34 is within 5% of its base or faster in every cell at 10 GbE.",
    "design": "screening",
    "state": "decided",
@@ -206,7 +206,7 @@
    "experiment": "PR1r-pr34-regression-apollo",
    "title": "Confirm the PR #34 regression",
    "question": "On eight fresh blocks, is PR #34 really slower than its base where PR1 said so?",
-   "estimateHours": 7.1,
+   "estimateHours": 28.8,
    "hypothesis": "xs-rs at PR #34 is within 5% of its base or faster in every cell at 10 GbE.",
    "design": "screening",
    "state": "decided",
@@ -228,7 +228,7 @@
    "experiment": "CZ2-compress-1g-apollo",
    "title": "Compression at 1 Gb/s",
    "question": "Held to 1 Gb/s, does the automatic level keep up with the best fixed level?",
-   "estimateHours": 0.9,
+   "estimateHours": 3.6,
    "hypothesis": "Held to 1 Gb/s, xs-rs -z at its automatic level is within 5% of the fastest fixed level.",
    "design": "screening",
    "state": "decided",
@@ -250,7 +250,7 @@
    "experiment": "CZ3-compress-100m-apollo",
    "title": "Compression at 100 Mb/s",
    "question": "Held to 100 Mb/s, does the automatic level keep up with the best of levels 1, 3 and 6, and does compression beat none?",
-   "estimateHours": 0.4,
+   "estimateHours": 1.8,
    "hypothesis": "Held to 100 Mb/s, xs-rs -z at its automatic level is within 5% of the fastest fixed level, and compression beats none.",
    "design": "screening",
    "state": "decided",
@@ -272,7 +272,7 @@
    "experiment": "CZ4-compress-2core-apollo",
    "title": "Compression on two cores",
    "question": "With apollo held to 2 cores on the fast link, does the automatic level stay within 5% of the best?",
-   "estimateHours": 0.9,
+   "estimateHours": 3.6,
    "hypothesis": "With apollo held to 2 cores, xs-rs -z at its automatic level is within 5% of the fastest fixed level.",
    "design": "screening",
    "state": "decided",
@@ -294,7 +294,7 @@
    "experiment": "SM1-small-onto-mac-apollo",
    "title": "Small files onto the Mac",
    "question": "Writing small files onto the Mac's APFS, does --no-atomic or more workers make xs faster, and is xs at least as fast as rsync?",
-   "estimateHours": 1.7,
+   "estimateHours": 6.7,
    "hypothesis": "Pulling small files onto the Mac, xs --no-atomic is at least 5% faster than xs's default, and xs is at least as fast as rsync.",
    "design": "screening",
    "state": "decided",
@@ -316,19 +316,19 @@
    "experiment": "SM1c-small-onto-mac-confirm",
    "title": "Confirm the faster APFS setting",
    "question": "Does the setting that wrote small files onto the Mac faster do it again on eight fresh blocks?",
-   "estimateHours": 1.2,
+   "estimateHours": 4.8,
    "hypothesis": "xs-cpp-noatomic is more than 5% faster than xs-cpp on real-congress, scale-count-1000000 (from SM1-small-onto-mac-apollo, confirmed with fresh blocks).",
    "design": "confirmatory",
-   "state": "queued",
+   "state": "decided",
    "runs": [
     {
      "id": "20261024T103613Z-SM1c-small-onto-mac-confirm",
      "key": "mac-apollo/SM1c-small-onto-mac-confirm/20261024T103613Z-SM1c-small-onto-mac-confirm",
-     "state": "running"
+     "state": "complete"
     }
    ],
-   "decision": null,
-   "decidedUtc": null,
+   "decision": "SM1c: done (1 run)",
+   "decidedUtc": "2026-10-24T12:10:40Z",
    "start": false,
    "promote": "SM1"
   },
@@ -338,19 +338,19 @@
    "experiment": "PS1-psample-pull-apollo",
    "title": "Pull psample onto the Mac",
    "question": "Pulling the 21 GB psample tree onto the Mac, does --no-atomic, -O or 8 workers beat xs's default, and is xs at least as fast as rsync?",
-   "estimateHours": 0.6,
+   "estimateHours": 2.2,
    "hypothesis": "Pulling psample onto the Mac, some xs setting is at least 5% faster than xs's default, and xs is at least as fast as rsync.",
    "design": "screening",
-   "state": "queued",
+   "state": "decided",
    "runs": [
     {
      "id": "20261024T103613Z-PS1-psample-pull-apollo",
      "key": "mac-apollo/PS1-psample-pull-apollo/20261024T103613Z-PS1-psample-pull-apollo",
-     "state": null
+     "state": "deadline"
     }
    ],
-   "decision": null,
-   "decidedUtc": null,
+   "decision": "PS1: a setting pulls psample onto the Mac faster than xs's default: confirm (real-psample apollo\u2192mac xs-cpp-j8 1.70\u00d7; real-psample apollo\u2192mac xs-cpp-O 1.58\u00d7; real-psample apollo\u2192mac xs-cpp-noatomic 1.14\u00d7)",
+   "decidedUtc": "2026-10-24T15:48:21Z",
    "start": false,
    "promote": null
   },
@@ -360,10 +360,10 @@
    "experiment": "PS1c-psample-pull-confirm",
    "title": "Confirm the psample pull setting",
    "question": "Does the setting that recovered the psample pull hold up on fresh blocks?",
-   "estimateHours": 0.7,
+   "estimateHours": 2.7,
    "hypothesis": "Confirms the fastest arm of PS1 with 6 fresh blocks, if it had one.",
    "design": "confirmatory",
-   "state": "waiting",
+   "state": "skipped",
    "runs": [],
    "decision": null,
    "decidedUtc": null,
@@ -376,13 +376,19 @@
    "experiment": "WB1-eager-writeback-apollo",
    "title": "Eager writeback on Linux",
    "question": "On a Linux receiver, does eager writeback get xs's copies onto disk sooner?",
-   "estimateHours": 0.7,
+   "estimateHours": 2.7,
    "hypothesis": "With eager writeback on apollo, xs reaches durable at least 5% sooner than with default writeback.",
    "design": "screening",
-   "state": "waiting",
-   "runs": [],
-   "decision": null,
-   "decidedUtc": null,
+   "state": "decided",
+   "runs": [
+    {
+     "id": "20261024T154821Z-WB1-eager-writeback-apollo",
+     "key": "mac-apollo/WB1-eager-writeback-apollo/20261024T154821Z-WB1-eager-writeback-apollo",
+     "state": "complete"
+    }
+   ],
+   "decision": "WB1: eager writeback shortens the time to durable on apollo: confirm, then adopt on Linux receivers (EXA A7) (hs-16x256m mac\u2192apollo xs-cpp-eager 2.04\u00d7 [0.56, 7.42]; real-congress mac\u2192apollo xs-cpp-eager 1.79\u00d7 [1.36, 2.36])",
+   "decidedUtc": "2026-10-24T16:05:01Z",
    "start": false,
    "promote": null
   },
@@ -392,13 +398,19 @@
    "experiment": "WB1c-eager-writeback-confirm",
    "title": "Confirm eager writeback",
    "question": "Does eager writeback shorten xs's time to durable again on eight fresh blocks?",
-   "estimateHours": 0.9,
-   "hypothesis": "Confirms the fastest arm of WB1 with 8 fresh blocks, if it had one.",
+   "estimateHours": 1.2,
+   "hypothesis": "xs-cpp-eager is more than 5% faster than xs-cpp on real-congress (from WB1-eager-writeback-apollo, confirmed with fresh blocks).",
    "design": "confirmatory",
-   "state": "waiting",
-   "runs": [],
-   "decision": null,
-   "decidedUtc": null,
+   "state": "decided",
+   "runs": [
+    {
+     "id": "20261024T160501Z-WB1c-eager-writeback-confirm",
+     "key": "mac-apollo/WB1c-eager-writeback-confirm/20261024T160501Z-WB1c-eager-writeback-confirm",
+     "state": "complete"
+    }
+   ],
+   "decision": "WB1c: done (1 run)",
+   "decidedUtc": "2026-10-24T16:16:53Z",
    "start": false,
    "promote": "WB1"
   },
@@ -408,13 +420,19 @@
    "experiment": "XC1-ssh-ceiling-apollo",
    "title": "The ssh ceiling",
    "question": "On large files, how far is xs from a bare tar pipe on 1 and 8 streams: how much of the ceiling is the one ssh connection?",
-   "estimateHours": 0.6,
+   "estimateHours": 2.2,
    "hypothesis": "A bare pipe on 8 streams is at least 5% faster than xs on large files over the cable.",
    "design": "screening",
-   "state": "waiting",
-   "runs": [],
-   "decision": null,
-   "decidedUtc": null,
+   "state": "decided",
+   "runs": [
+    {
+     "id": "20261024T160501Z-XC1-ssh-ceiling-apollo",
+     "key": "mac-apollo/XC1-ssh-ceiling-apollo/20261024T160501Z-XC1-ssh-ceiling-apollo",
+     "state": "complete"
+    }
+   ],
+   "decision": "XC1: done (1 run)",
+   "decidedUtc": "2026-10-24T16:27:25Z",
    "start": false,
    "promote": null
   },
@@ -424,13 +442,19 @@
    "experiment": "LT1-latency20-apollo",
    "title": "20 ms of latency",
    "question": "Over a 20 ms round trip, does rsync beat xs at fresh copies, no-ops or 1% updates?",
-   "estimateHours": 2.0,
+   "estimateHours": 8.1,
    "hypothesis": "Over a 20 ms round trip, rsync is at least 5% faster than xs in some cell.",
    "design": "screening",
-   "state": "waiting",
-   "runs": [],
-   "decision": null,
-   "decidedUtc": null,
+   "state": "decided",
+   "runs": [
+    {
+     "id": "20261024T160502Z-LT1-latency20-apollo",
+     "key": "mac-apollo/LT1-latency20-apollo/20261024T160502Z-LT1-latency20-apollo",
+     "state": "complete"
+    }
+   ],
+   "decision": "LT1: otherwise",
+   "decidedUtc": "2026-10-24T18:25:22Z",
    "start": false,
    "promote": null
   },
@@ -440,13 +464,19 @@
    "experiment": "LT2-latency80-apollo",
    "title": "80 ms of latency",
    "question": "Over an 80 ms round trip, a long internet path, does rsync beat xs anywhere?",
-   "estimateHours": 1.3,
+   "estimateHours": 5.4,
    "hypothesis": "Over a 80 ms round trip, rsync is at least 5% faster than xs in some cell.",
    "design": "screening",
-   "state": "waiting",
-   "runs": [],
-   "decision": null,
-   "decidedUtc": null,
+   "state": "decided",
+   "runs": [
+    {
+     "id": "20261024T182522Z-LT2-latency80-apollo",
+     "key": "mac-apollo/LT2-latency80-apollo/20261024T182522Z-LT2-latency80-apollo",
+     "state": "deadline"
+    }
+   ],
+   "decision": "LT2: otherwise",
+   "decidedUtc": "2026-10-24T20:43:10Z",
    "start": false,
    "promote": null
   },
@@ -456,13 +486,19 @@
    "experiment": "CS1-csearchv3-pr34-apollo",
    "title": "csearchv3 with PR #34",
    "question": "On the user's csearchv3 tree, is xs-rs at PR #34 faster than its base and than rsync, fresh, at a no-op and at a 10% update?",
-   "estimateHours": 1.3,
+   "estimateHours": 5.4,
    "hypothesis": "On csearchv3, xs-rs at PR #34 is at least as fast as its base and faster than rsync at fresh, no-op and a 10% update.",
    "design": "screening",
-   "state": "waiting",
-   "runs": [],
-   "decision": null,
-   "decidedUtc": null,
+   "state": "decided",
+   "runs": [
+    {
+     "id": "20261024T204310Z-CS1-csearchv3-pr34-apollo",
+     "key": "mac-apollo/CS1-csearchv3-pr34-apollo/20261024T204310Z-CS1-csearchv3-pr34-apollo",
+     "state": "deadline"
+    }
+   ],
+   "decision": "CS1: otherwise",
+   "decidedUtc": "2026-10-25T00:18:15Z",
    "start": false,
    "promote": null
   },
@@ -472,13 +508,19 @@
    "experiment": "IN1-incremental-real-apollo",
    "title": "Everyday incremental backups",
    "question": "On congress with 0.1%, 1% and 10% of files edited, the everyday incremental backup, does rsync beat xs?",
-   "estimateHours": 1.3,
+   "estimateHours": 5.4,
    "hypothesis": "rsync is at least 5% faster than xs at some incremental sync of a real tree.",
    "design": "screening",
-   "state": "waiting",
-   "runs": [],
-   "decision": null,
-   "decidedUtc": null,
+   "state": "decided",
+   "runs": [
+    {
+     "id": "20261025T001815Z-IN1-incremental-real-apollo",
+     "key": "mac-apollo/IN1-incremental-real-apollo/20261025T001815Z-IN1-incremental-real-apollo",
+     "state": "complete"
+    }
+   ],
+   "decision": "IN1: otherwise",
+   "decidedUtc": "2026-10-25T01:39:58Z",
    "start": false,
    "promote": null
   },
@@ -488,13 +530,19 @@
    "experiment": "JB1-xs-rs-workers-apollo",
    "title": "How many xs-rs workers",
    "question": "PR #34 gives xs-rs 8 sender workers by default: is 8 the best at 10 GbE, against 1, 2, 4 and 16?",
-   "estimateHours": 2.0,
+   "estimateHours": 8.1,
    "hypothesis": "Some worker count is at least 5% faster than xs-rs's default of 8 in some cell.",
    "design": "screening",
-   "state": "waiting",
-   "runs": [],
-   "decision": null,
-   "decidedUtc": null,
+   "state": "decided",
+   "runs": [
+    {
+     "id": "20261025T013958Z-JB1-xs-rs-workers-apollo",
+     "key": "mac-apollo/JB1-xs-rs-workers-apollo/20261025T013958Z-JB1-xs-rs-workers-apollo",
+     "state": "complete"
+    }
+   ],
+   "decision": "JB1: a worker count beat xs-rs's default of 8 at 10 GbE: the default should depend on the link or the files (real-congress mac\u2192apollo xs-rs-j16 1.27\u00d7 [0.36, 4.56]; hs-16x256m apollo\u2192mac xs-rs-j2 1.08\u00d7 [0.89, 1.32]; hs-16x256m mac\u2192apollo xs-rs-j16 1.07\u00d7 [0.09, 12.91])",
+   "decidedUtc": "2026-10-25T02:29:19Z",
    "start": false,
    "promote": null
   },
@@ -504,13 +552,19 @@
    "experiment": "HS2-high-speed-pr34-apollo",
    "title": "Large files with PR #34",
    "question": "On 4 GiB of incompressible data in 1 to 64 files, is PR #34 at least as fast as the xs-rs it changes?",
-   "estimateHours": 2.4,
+   "estimateHours": 9.6,
    "hypothesis": "On 4 GiB of incompressible data, xs-rs at PR #34 is at least as fast as its base in every file count.",
    "design": "screening",
-   "state": "waiting",
-   "runs": [],
-   "decision": null,
-   "decidedUtc": null,
+   "state": "decided",
+   "runs": [
+    {
+     "id": "20261025T022919Z-HS2-high-speed-pr34-apollo",
+     "key": "mac-apollo/HS2-high-speed-pr34-apollo/20261025T022919Z-HS2-high-speed-pr34-apollo",
+     "state": "complete"
+    }
+   ],
+   "decision": "HS2: PR #34 is slower than its base on large incompressible files: check the CPU probe's cost (hs-16x256m apollo\u2192mac xs-rs 0.90\u00d7 [0.72, 1.11]; hs-16x256m mac\u2192apollo xs-rs 0.80\u00d7 [0.18, 3.57])",
+   "decidedUtc": "2026-10-25T02:56:25Z",
    "start": false,
    "promote": null
   },
@@ -520,13 +574,19 @@
    "experiment": "LT3-internet-sync-apollo",
    "title": "An internet-like path",
    "question": "Over a 40 ms, 1 Gb/s path, like a home link to a remote host, does xs-rs -z at its automatic level beat rsync -az and xs-c++ -z?",
-   "estimateHours": 2.2,
+   "estimateHours": 9.0,
    "hypothesis": "Over a 40 ms, 1 Gb/s path, xs-rs -z at its automatic level is at least as fast as rsync -az and xs-c++ -z.",
    "design": "screening",
-   "state": "waiting",
-   "runs": [],
-   "decision": null,
-   "decidedUtc": null,
+   "state": "decided",
+   "runs": [
+    {
+     "id": "20261025T025625Z-LT3-internet-sync-apollo",
+     "key": "mac-apollo/LT3-internet-sync-apollo/20261025T025625Z-LT3-internet-sync-apollo",
+     "state": "complete"
+    }
+   ],
+   "decision": "LT3: otherwise",
+   "decidedUtc": "2026-10-25T05:12:36Z",
    "start": false,
    "promote": null
   },
@@ -536,13 +596,19 @@
    "experiment": "IN2-incremental-psample-apollo",
    "title": "A 1% update of psample",
    "question": "On the 21 GB psample tree with 1% of files edited and hard links kept, does rsync -aH beat xs -aH?",
-   "estimateHours": 0.3,
+   "estimateHours": 1.3,
    "hypothesis": "rsync -aH is at least 5% faster than xs -aH at a 1% update of psample.",
    "design": "screening",
-   "state": "waiting",
-   "runs": [],
-   "decision": null,
-   "decidedUtc": null,
+   "state": "decided",
+   "runs": [
+    {
+     "id": "20261025T051236Z-IN2-incremental-psample-apollo",
+     "key": "mac-apollo/IN2-incremental-psample-apollo/20261025T051236Z-IN2-incremental-psample-apollo",
+     "state": "deadline"
+    }
+   ],
+   "decision": "IN2: otherwise",
+   "decidedUtc": "2026-10-25T06:51:18Z",
    "start": false,
    "promote": null
   },
@@ -552,13 +618,19 @@
    "experiment": "CK1-checksum-noop-more-apollo",
    "title": "Checksum no-ops on large files",
    "question": "With -c on trees of large files (psample, laikav2), where hashing dominates, does rsync beat xs?",
-   "estimateHours": 0.7,
+   "estimateHours": 2.7,
    "hypothesis": "rsync -c is at least 5% faster than xs -c at a no-op on a tree of large files.",
    "design": "screening",
-   "state": "waiting",
-   "runs": [],
-   "decision": null,
-   "decidedUtc": null,
+   "state": "decided",
+   "runs": [
+    {
+     "id": "20261025T065118Z-CK1-checksum-noop-more-apollo",
+     "key": "mac-apollo/CK1-checksum-noop-more-apollo/20261025T065118Z-CK1-checksum-noop-more-apollo",
+     "state": "deadline"
+    }
+   ],
+   "decision": "CK1: otherwise",
+   "decidedUtc": "2026-10-25T08:34:58Z",
    "start": false,
    "promote": null
   },
@@ -568,13 +640,19 @@
    "experiment": "DE1-delete-scale-apollo",
    "title": "Deletes at scale",
    "question": "When 10% of a large tree's files are gone, is xs --delete as fast as rsync --delete?",
-   "estimateHours": 0.7,
+   "estimateHours": 2.7,
    "hypothesis": "rsync --delete is at least 5% faster than xs --delete when 10% of a large tree's files are gone.",
    "design": "screening",
-   "state": "waiting",
-   "runs": [],
-   "decision": null,
-   "decidedUtc": null,
+   "state": "decided",
+   "runs": [
+    {
+     "id": "20261025T083458Z-DE1-delete-scale-apollo",
+     "key": "mac-apollo/DE1-delete-scale-apollo/20261025T083458Z-DE1-delete-scale-apollo",
+     "state": "deadline"
+    }
+   ],
+   "decision": "DE1: otherwise",
+   "decidedUtc": "2026-10-25T10:25:40Z",
    "start": false,
    "promote": null
   },
@@ -584,11 +662,17 @@
    "experiment": "JC1-xs-cpp-workers-apollo",
    "title": "How many xs-c++ workers",
    "question": "Is 4 the best worker count for xs-c++ at 10 GbE, against 1, 2, 8 and 16?",
-   "estimateHours": 2.0,
+   "estimateHours": 8.1,
    "hypothesis": "Some worker count is at least 5% faster than xs-c++'s default of 4 in some cell.",
    "design": "screening",
-   "state": "waiting",
-   "runs": [],
+   "state": "queued",
+   "runs": [
+    {
+     "id": "20261025T102540Z-JC1-xs-cpp-workers-apollo",
+     "key": "mac-apollo/JC1-xs-cpp-workers-apollo/20261025T102540Z-JC1-xs-cpp-workers-apollo",
+     "state": "running"
+    }
+   ],
    "decision": null,
    "decidedUtc": null,
    "start": false,
@@ -600,7 +684,7 @@
    "experiment": "CP1-weak-receiver-apollo",
    "title": "A weak receiver",
    "question": "With the receiver held to 2 cores, like a small NAS, which tool and worker count is fastest?",
-   "estimateHours": 1.1,
+   "estimateHours": 4.5,
    "hypothesis": "With the receiver held to 2 cores, rsync is at least 5% faster than xs in some cell, or fewer xs workers are faster than the default.",
    "design": "screening",
    "state": "waiting",
@@ -616,7 +700,7 @@
    "experiment": "FS1-sentinel-apollo",
    "title": "Congress sentinel",
    "question": "Until Sunday: do rsync, xs-c++ and xs-rs keep their congress ranking, and what is the noise floor at each hour?",
-   "estimateHours": 0.2,
+   "estimateHours": 0.9,
    "hypothesis": "rsync, xs-c++ and xs-rs keep their congress ranking through the weekend.",
    "design": "screening",
    "state": "decided",
@@ -835,157 +919,157 @@
    "from": "PS1",
    "to": "PS1c",
    "label": "a setting recovered the pull",
-   "taken": null
+   "taken": true
   },
   {
    "from": "PS1",
    "to": "WB1",
    "label": "a setting recovered the pull",
-   "taken": null
+   "taken": true
   },
   {
    "from": "PS1",
    "to": "WB1",
    "label": "rsync faster pulling psample",
-   "taken": null
+   "taken": false
   },
   {
    "from": "PS1",
    "to": "WB1",
    "label": "xs's default holds",
-   "taken": null
+   "taken": false
   },
   {
    "from": "WB1",
    "to": "WB1c",
    "label": "eager writeback helps",
-   "taken": null
+   "taken": true
   },
   {
    "from": "WB1",
    "to": "XC1",
    "label": "eager writeback helps",
-   "taken": null
+   "taken": true
   },
   {
    "from": "WB1",
    "to": "LT1",
    "label": "eager writeback helps",
-   "taken": null
+   "taken": true
   },
   {
    "from": "WB1",
    "to": "XC1",
    "label": "no gain from eager writeback",
-   "taken": null
+   "taken": false
   },
   {
    "from": "WB1",
    "to": "LT1",
    "label": "no gain from eager writeback",
-   "taken": null
+   "taken": false
   },
   {
    "from": "LT1",
    "to": "LT2",
    "label": "rsync wins at 20 ms",
-   "taken": null
+   "taken": false
   },
   {
    "from": "LT1",
    "to": "LT2",
    "label": "xs holds at 20 ms",
-   "taken": null
+   "taken": true
   },
   {
    "from": "LT2",
    "to": "CS1",
    "label": "rsync wins at 80 ms",
-   "taken": null
+   "taken": false
   },
   {
    "from": "LT2",
    "to": "CS1",
    "label": "xs holds at 80 ms",
-   "taken": null
+   "taken": true
   },
   {
    "from": "CS1",
    "to": "IN1",
    "label": "rsync wins a csearchv3 cell",
-   "taken": null
+   "taken": false
   },
   {
    "from": "CS1",
    "to": "IN1",
    "label": "xs holds on csearchv3",
-   "taken": null
+   "taken": true
   },
   {
    "from": "IN1",
    "to": "JB1",
    "label": "rsync wins an incremental cell",
-   "taken": null
+   "taken": false
   },
   {
    "from": "IN1",
    "to": "JB1",
    "label": "xs holds incrementally",
-   "taken": null
+   "taken": true
   },
   {
    "from": "JB1",
    "to": "HS2",
    "label": "another worker count won",
-   "taken": null
+   "taken": true
   },
   {
    "from": "JB1",
    "to": "HS2",
    "label": "8 workers hold",
-   "taken": null
+   "taken": false
   },
   {
    "from": "HS2",
    "to": "LT3",
    "label": "PR #34 slower on large files",
-   "taken": null
+   "taken": true
   },
   {
    "from": "HS2",
    "to": "LT3",
    "label": "no large-file cost",
-   "taken": null
+   "taken": false
   },
   {
    "from": "LT3",
    "to": "IN2",
    "label": "rsync -az wins over the WAN",
-   "taken": null
+   "taken": false
   },
   {
    "from": "LT3",
    "to": "IN2",
    "label": "xs holds over the WAN",
-   "taken": null
+   "taken": true
   },
   {
    "from": "IN2",
    "to": "CK1",
    "label": "next: checksum no-ops",
-   "taken": null
+   "taken": true
   },
   {
    "from": "CK1",
    "to": "DE1",
    "label": "next: deletes at scale",
-   "taken": null
+   "taken": true
   },
   {
    "from": "DE1",
    "to": "JC1",
    "label": "next: xs-c++ workers",
-   "taken": null
+   "taken": true
   },
   {
    "from": "JC1",
@@ -996,76 +1080,76 @@
  ],
  "decisions": [
   {
-   "utc": "2026-10-24T10:36:13Z",
-   "node": "PS1",
+   "utc": "2026-10-25T10:25:40Z",
+   "node": "JC1",
    "kind": "queued",
-   "text": "PS1 queued on mac (30 samples): after SM1: skipping the rename or more workers writes small files onto APFS faster: confirm"
+   "text": "JC1 queued on mac (108 samples): after DE1: otherwise"
   },
   {
-   "utc": "2026-10-24T10:36:13Z",
-   "node": "SM1c",
-   "kind": "queued",
-   "text": "SM1c queued on mac (64 samples): after SM1: skipping the rename or more workers writes small files onto APFS faster: confirm; confirming xs-cpp-noatomic against xs-cpp on real-congress, scale-count-1000000"
-  },
-  {
-   "utc": "2026-10-24T10:36:12Z",
-   "node": "SM1",
+   "utc": "2026-10-25T10:25:40Z",
+   "node": "DE1",
    "kind": "decision",
-   "text": "SM1: skipping the rename or more workers writes small files onto APFS faster: confirm (scale-count-1000000 apollo\u2192mac xs-cpp-noatomic 1.76\u00d7 [1.67, 1.86]; real-congress apollo\u2192mac xs-cpp-noatomic 1.42\u00d7 [1.38, 1.45]; real-congress apollo\u2192mac xs-cpp-j8 1.18\u00d7 [0.89, 1.58]; real-congress apollo\u2192mac xs-cpp-noatomic 1.08\u00d7 [0.71, 1.63]) \u2192 SM1c, PS1"
+   "text": "DE1: otherwise \u2192 JC1"
   },
   {
-   "utc": "2026-10-24T08:24:17Z",
-   "node": "SM1",
+   "utc": "2026-10-25T08:34:58Z",
+   "node": "DE1",
    "kind": "queued",
-   "text": "SM1 queued on mac (90 samples): after CZ4: with 2 cores a fixed level beat the automatic one: the CPU veto misjudges this machine"
+   "text": "DE1 queued on mac (36 samples): after CK1: otherwise"
   },
   {
-   "utc": "2026-10-24T08:24:17Z",
-   "node": "CZ4",
+   "utc": "2026-10-25T08:34:58Z",
+   "node": "CK1",
    "kind": "decision",
-   "text": "CZ4: with 2 cores a fixed level beat the automatic one: the CPU veto misjudges this machine (large-text mac\u2192apollo xs-rs-z1 1.44\u00d7 [0.00, 772.06]) \u2192 SM1"
+   "text": "CK1: otherwise \u2192 DE1"
   },
   {
-   "utc": "2026-10-24T07:52:41Z",
-   "node": "CZ4",
+   "utc": "2026-10-25T06:51:19Z",
+   "node": "CK1",
    "kind": "queued",
-   "text": "CZ4 queued on mac (48 samples): after CZ3: at 100 Mb/s a fixed level beat the automatic one: the policy should climb sooner when bytes are the limit"
+   "text": "CK1 queued on mac (36 samples): after IN2: otherwise"
   },
   {
-   "utc": "2026-10-24T07:52:40Z",
-   "node": "CZ3",
+   "utc": "2026-10-25T06:51:18Z",
+   "node": "IN2",
    "kind": "decision",
-   "text": "CZ3: at 100 Mb/s a fixed level beat the automatic one: the policy should climb sooner when bytes are the limit (real-congress mac\u2192apollo xs-rs-z3 1.20\u00d7 [1.00, 1.43]; real-congress mac\u2192apollo xs-rs-z1 1.19\u00d7 [0.58, 2.47]) \u2192 CZ4"
+   "text": "IN2: otherwise \u2192 CK1"
   },
   {
-   "utc": "2026-10-24T07:24:01Z",
-   "node": "CZ3",
+   "utc": "2026-10-25T05:12:36Z",
+   "node": "IN2",
    "kind": "queued",
-   "text": "CZ3 queued on mac (24 samples): after CZ2: at 1 Gb/s a fixed level beat the automatic one: the rate rule's thresholds need moving"
+   "text": "IN2 queued on mac (18 samples): after LT3: otherwise"
   },
   {
-   "utc": "2026-10-24T07:24:01Z",
-   "node": "CZ2",
+   "utc": "2026-10-25T05:12:36Z",
+   "node": "LT3",
    "kind": "decision",
-   "text": "CZ2: at 1 Gb/s a fixed level beat the automatic one: the rate rule's thresholds need moving (large-text apollo\u2192mac xs-rs-z3 1.44\u00d7 [1.44, 1.44]; large-text mac\u2192apollo xs-rs-z3 1.15\u00d7 [0.00, 429.31]) \u2192 CZ3"
+   "text": "LT3: otherwise \u2192 IN2"
   },
   {
-   "utc": "2026-10-24T06:39:16Z",
-   "node": "PR1r",
+   "utc": "2026-10-25T02:56:25Z",
+   "node": "LT3",
+   "kind": "queued",
+   "text": "LT3 queued on mac (120 samples): after HS2: PR #34 is slower than its base on large incompressible files: check the CPU probe's cost"
+  },
+  {
+   "utc": "2026-10-25T02:56:25Z",
+   "node": "HS2",
    "kind": "decision",
-   "text": "PR1r: done (1 run)"
+   "text": "HS2: PR #34 is slower than its base on large incompressible files: check the CPU probe's cost (hs-16x256m apollo\u2192mac xs-rs 0.90\u00d7 [0.72, 1.11]; hs-16x256m mac\u2192apollo xs-rs 0.80\u00d7 [0.18, 3.57]) \u2192 LT3"
   },
   {
-   "utc": "2026-10-24T04:04:05Z",
-   "node": "CZ2",
+   "utc": "2026-10-25T02:29:20Z",
+   "node": "HS2",
    "kind": "queued",
-   "text": "CZ2 queued on mac (48 samples): after PR1: PR #34 is slower than its base in some cell: confirm on fresh blocks before merging"
+   "text": "HS2 queued on mac (128 samples): after JB1: a worker count beat xs-rs's default of 8 at 10 GbE: the default should depend on the link or the files"
   },
   {
-   "utc": "2026-10-24T04:04:04Z",
-   "node": "PR1r",
-   "kind": "queued",
-   "text": "PR1r queued on mac (384 samples): after PR1: PR #34 is slower than its base in some cell: confirm on fresh blocks before merging"
+   "utc": "2026-10-25T02:29:19Z",
+   "node": "JB1",
+   "kind": "decision",
+   "text": "JB1: a worker count beat xs-rs's default of 8 at 10 GbE: the default should depend on the link or the files (real-congress mac\u2192apollo xs-rs-j16 1.27\u00d7 [0.36, 4.56]; hs-16x256m apollo\u2192mac xs-rs-j2 1.08\u00d7 [0.89, 1.32]; hs-16x256m mac\u2192apollo xs-rs-j16 1.07\u00d7 [0.09, 12.91]) \u2192 HS2"
   }
  ]
 }

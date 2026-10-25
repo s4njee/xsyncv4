@@ -1,0 +1,7 @@
+experiment,kind,cell_id,corpus,scenario,sender,receiver,client,link,cache,arm,n_blocks,sigma_d,blocks_for_2pct,blocks_for_3pct,blocks_for_5pct,blocks_for_10pct,blocks_equivalent_2pct,blocks_equivalent_3pct,blocks_equivalent_5pct,blocks_equivalent_10pct
+WB1-eager-writeback-apollo,screening,hs-16x256m.fresh.mac-apollo.sender.warm,hs-16x256m,fresh,mac,apollo,sender,mac-apollo-10g,warm,xs-cpp-eager,3,0.5204866750952121,5419,2433,895,236,7262,3261,1198,316
+WB1-eager-writeback-apollo,screening,hs-16x256m.fresh.mac-apollo.sender.warm,hs-16x256m,fresh,mac,apollo,sender,mac-apollo-10g,warm,rsync,3,0.07093015015743408,103,48,19,8,137,63,25,8
+WB1-eager-writeback-apollo,screening,hs-16x256m.fresh.mac-apollo.sender.warm,hs-16x256m,fresh,mac,apollo,sender,mac-apollo-10g,warm,rsync-eager,3,0.26115907041657055,1366,615,227,61,1830,823,304,81
+WB1-eager-writeback-apollo,screening,real-congress.fresh.mac-apollo.sender.warm,real-congress,fresh,mac,apollo,sender,mac-apollo-10g,warm,xs-cpp-eager,3,0.11185342571381834,253,115,44,13,338,153,58,17
+WB1-eager-writeback-apollo,screening,real-congress.fresh.mac-apollo.sender.warm,real-congress,fresh,mac,apollo,sender,mac-apollo-10g,warm,rsync,3,0.20414141246904138,836,376,140,38,1119,504,186,51
+WB1-eager-writeback-apollo,screening,real-congress.fresh.mac-apollo.sender.warm,real-congress,fresh,mac,apollo,sender,mac-apollo-10g,warm,rsync-eager,3,0.2733104663572955,1496,673,249,67,2004,901,332,89

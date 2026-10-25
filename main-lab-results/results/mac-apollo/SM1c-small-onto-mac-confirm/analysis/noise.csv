@@ -1,0 +1,5 @@
+experiment,kind,cell_id,corpus,scenario,sender,receiver,client,link,cache,arm,n_blocks,sigma_d,blocks_for_2pct,blocks_for_3pct,blocks_for_5pct,blocks_for_10pct,blocks_equivalent_2pct,blocks_equivalent_3pct,blocks_equivalent_5pct,blocks_equivalent_10pct
+SM1c-small-onto-mac-confirm,confirmatory,real-congress.fresh.apollo-mac.receiver.warm,real-congress,fresh,apollo,mac,receiver,mac-apollo-10g,warm,xs-cpp-noatomic,8,0.01858124926775727,9,8,8,8,12,8,8,8
+SM1c-small-onto-mac-confirm,confirmatory,real-congress.noop.apollo-mac.receiver.warm,real-congress,noop,apollo,mac,receiver,mac-apollo-10g,warm,xs-cpp-noatomic,8,0.02756652025730396,18,9,8,8,23,12,8,8
+SM1c-small-onto-mac-confirm,confirmatory,scale-count-1000000.fresh.apollo-mac.receiver.warm,scale-count-1000000,fresh,apollo,mac,receiver,mac-apollo-10g,warm,xs-cpp-noatomic,8,0.02580638012237571,16,8,8,8,20,11,8,8
+SM1c-small-onto-mac-confirm,confirmatory,scale-count-1000000.noop.apollo-mac.receiver.warm,scale-count-1000000,noop,apollo,mac,receiver,mac-apollo-10g,warm,xs-cpp-noatomic,8,0.03564116262873545,28,14,8,8,37,18,8,8

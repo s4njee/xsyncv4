@@ -219,18 +219,234 @@
    }
   },
   "SM1c": {
-   "state": "queued",
+   "state": "decided",
    "runs": [
     "20261024T103613Z-SM1c-small-onto-mac-confirm"
    ],
-   "spec": "generated/SM1c-small-onto-mac-confirm.toml"
+   "spec": "generated/SM1c-small-onto-mac-confirm.toml",
+   "decision": {
+    "utc": "2026-10-24T12:10:40Z",
+    "text": "SM1c: done (1 run)",
+    "next": []
+   }
   },
   "PS1": {
-   "state": "queued",
+   "state": "decided",
    "runs": [
     "20261024T103613Z-PS1-psample-pull-apollo"
    ],
-   "spec": "PS1-psample-pull-apollo.toml"
+   "spec": "PS1-psample-pull-apollo.toml",
+   "decision": {
+    "utc": "2026-10-24T15:48:21Z",
+    "text": "PS1: a setting pulls psample onto the Mac faster than xs's default: confirm (real-psample apollo\u2192mac xs-cpp-j8 1.70\u00d7; real-psample apollo\u2192mac xs-cpp-O 1.58\u00d7; real-psample apollo\u2192mac xs-cpp-noatomic 1.14\u00d7)",
+    "next": [
+     "PS1c",
+     "WB1"
+    ],
+    "branch": 0
+   }
+  },
+  "PS1c": {
+   "state": "skipped",
+   "runs": []
+  },
+  "WB1": {
+   "state": "decided",
+   "runs": [
+    "20261024T154821Z-WB1-eager-writeback-apollo"
+   ],
+   "spec": "WB1-eager-writeback-apollo.toml",
+   "decision": {
+    "utc": "2026-10-24T16:05:01Z",
+    "text": "WB1: eager writeback shortens the time to durable on apollo: confirm, then adopt on Linux receivers (EXA A7) (hs-16x256m mac\u2192apollo xs-cpp-eager 2.04\u00d7 [0.56, 7.42]; real-congress mac\u2192apollo xs-cpp-eager 1.79\u00d7 [1.36, 2.36])",
+    "next": [
+     "WB1c",
+     "XC1",
+     "LT1"
+    ],
+    "branch": 0
+   }
+  },
+  "WB1c": {
+   "state": "decided",
+   "runs": [
+    "20261024T160501Z-WB1c-eager-writeback-confirm"
+   ],
+   "spec": "generated/WB1c-eager-writeback-confirm.toml",
+   "decision": {
+    "utc": "2026-10-24T16:16:53Z",
+    "text": "WB1c: done (1 run)",
+    "next": []
+   }
+  },
+  "XC1": {
+   "state": "decided",
+   "runs": [
+    "20261024T160501Z-XC1-ssh-ceiling-apollo"
+   ],
+   "spec": "XC1-ssh-ceiling-apollo.toml",
+   "decision": {
+    "utc": "2026-10-24T16:27:25Z",
+    "text": "XC1: done (1 run)",
+    "next": []
+   }
+  },
+  "LT1": {
+   "state": "decided",
+   "runs": [
+    "20261024T160502Z-LT1-latency20-apollo"
+   ],
+   "spec": "LT1-latency20-apollo.toml",
+   "decision": {
+    "utc": "2026-10-24T18:25:22Z",
+    "text": "LT1: otherwise",
+    "next": [
+     "LT2"
+    ],
+    "branch": 1
+   }
+  },
+  "LT2": {
+   "state": "decided",
+   "runs": [
+    "20261024T182522Z-LT2-latency80-apollo"
+   ],
+   "spec": "LT2-latency80-apollo.toml",
+   "decision": {
+    "utc": "2026-10-24T20:43:10Z",
+    "text": "LT2: otherwise",
+    "next": [
+     "CS1"
+    ],
+    "branch": 1
+   }
+  },
+  "CS1": {
+   "state": "decided",
+   "runs": [
+    "20261024T204310Z-CS1-csearchv3-pr34-apollo"
+   ],
+   "spec": "CS1-csearchv3-pr34-apollo.toml",
+   "decision": {
+    "utc": "2026-10-25T00:18:15Z",
+    "text": "CS1: otherwise",
+    "next": [
+     "IN1"
+    ],
+    "branch": 1
+   }
+  },
+  "IN1": {
+   "state": "decided",
+   "runs": [
+    "20261025T001815Z-IN1-incremental-real-apollo"
+   ],
+   "spec": "IN1-incremental-real-apollo.toml",
+   "decision": {
+    "utc": "2026-10-25T01:39:58Z",
+    "text": "IN1: otherwise",
+    "next": [
+     "JB1"
+    ],
+    "branch": 1
+   }
+  },
+  "JB1": {
+   "state": "decided",
+   "runs": [
+    "20261025T013958Z-JB1-xs-rs-workers-apollo"
+   ],
+   "spec": "JB1-xs-rs-workers-apollo.toml",
+   "decision": {
+    "utc": "2026-10-25T02:29:19Z",
+    "text": "JB1: a worker count beat xs-rs's default of 8 at 10 GbE: the default should depend on the link or the files (real-congress mac\u2192apollo xs-rs-j16 1.27\u00d7 [0.36, 4.56]; hs-16x256m apollo\u2192mac xs-rs-j2 1.08\u00d7 [0.89, 1.32]; hs-16x256m mac\u2192apollo xs-rs-j16 1.07\u00d7 [0.09, 12.91])",
+    "next": [
+     "HS2"
+    ],
+    "branch": 0
+   }
+  },
+  "HS2": {
+   "state": "decided",
+   "runs": [
+    "20261025T022919Z-HS2-high-speed-pr34-apollo"
+   ],
+   "spec": "HS2-high-speed-pr34-apollo.toml",
+   "decision": {
+    "utc": "2026-10-25T02:56:25Z",
+    "text": "HS2: PR #34 is slower than its base on large incompressible files: check the CPU probe's cost (hs-16x256m apollo\u2192mac xs-rs 0.90\u00d7 [0.72, 1.11]; hs-16x256m mac\u2192apollo xs-rs 0.80\u00d7 [0.18, 3.57])",
+    "next": [
+     "LT3"
+    ],
+    "branch": 0
+   }
+  },
+  "LT3": {
+   "state": "decided",
+   "runs": [
+    "20261025T025625Z-LT3-internet-sync-apollo"
+   ],
+   "spec": "LT3-internet-sync-apollo.toml",
+   "decision": {
+    "utc": "2026-10-25T05:12:36Z",
+    "text": "LT3: otherwise",
+    "next": [
+     "IN2"
+    ],
+    "branch": 1
+   }
+  },
+  "IN2": {
+   "state": "decided",
+   "runs": [
+    "20261025T051236Z-IN2-incremental-psample-apollo"
+   ],
+   "spec": "IN2-incremental-psample-apollo.toml",
+   "decision": {
+    "utc": "2026-10-25T06:51:18Z",
+    "text": "IN2: otherwise",
+    "next": [
+     "CK1"
+    ],
+    "branch": 0
+   }
+  },
+  "CK1": {
+   "state": "decided",
+   "runs": [
+    "20261025T065118Z-CK1-checksum-noop-more-apollo"
+   ],
+   "spec": "CK1-checksum-noop-more-apollo.toml",
+   "decision": {
+    "utc": "2026-10-25T08:34:58Z",
+    "text": "CK1: otherwise",
+    "next": [
+     "DE1"
+    ],
+    "branch": 0
+   }
+  },
+  "DE1": {
+   "state": "decided",
+   "runs": [
+    "20261025T083458Z-DE1-delete-scale-apollo"
+   ],
+   "spec": "DE1-delete-scale-apollo.toml",
+   "decision": {
+    "utc": "2026-10-25T10:25:40Z",
+    "text": "DE1: otherwise",
+    "next": [
+     "JC1"
+    ],
+    "branch": 0
+   }
+  },
+  "JC1": {
+   "state": "queued",
+   "runs": [
+    "20261025T102540Z-JC1-xs-cpp-workers-apollo"
+   ],
+   "spec": "JC1-xs-cpp-workers-apollo.toml"
   }
  },
  "fills": 8

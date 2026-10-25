@@ -1,0 +1,19 @@
+{
+ "experiment": "XC1-ssh-ceiling-apollo",
+ "kind": "screening",
+ "hypothesis": "A bare pipe on 8 streams is at least 5% faster than xs on large files over the cable.",
+ "primary": "durable_s",
+ "control": "xs-cpp",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261024T160501Z-XC1-ssh-ceiling-apollo"
+ ],
+ "spec_sha256": [
+  "dbd5df561613f61ac3c09e1abee65eac565d2800534d2e2802c63168114b46fb"
+ ],
+ "valid_blocks": 6,
+ "void_attempts": 0,
+ "void_reasons": []
+}

@@ -1,0 +1,19 @@
+{
+ "experiment": "CS1-csearchv3-pr34-apollo",
+ "kind": "screening",
+ "hypothesis": "On csearchv3, xs-rs at PR #34 is at least as fast as its base and faster than rsync at fresh, no-op and a 10% update.",
+ "primary": "durable_s",
+ "control": "rsync",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261024T204310Z-CS1-csearchv3-pr34-apollo"
+ ],
+ "spec_sha256": [
+  "778bd073dd886f1cc9e5cabd75b694e4e1bfc397462ef462ac5f7454516a2d2f"
+ ],
+ "valid_blocks": 5,
+ "void_attempts": 0,
+ "void_reasons": []
+}

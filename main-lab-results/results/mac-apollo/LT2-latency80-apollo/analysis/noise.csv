@@ -1,0 +1,9 @@
+experiment,kind,cell_id,corpus,scenario,sender,receiver,client,link,cache,arm,n_blocks,sigma_d,blocks_for_2pct,blocks_for_3pct,blocks_for_5pct,blocks_for_10pct,blocks_equivalent_2pct,blocks_equivalent_3pct,blocks_equivalent_5pct,blocks_equivalent_10pct
+LT2-latency80-apollo,screening,local-laikav2.update-1pct.apollo-mac.receiver.warm,local-laikav2,update-1pct,apollo,mac,receiver,mac-apollo-10g,warm,xs-cpp,2,0.009884699442822623,8,8,8,8,8,8,8,8
+LT2-latency80-apollo,screening,local-laikav2.update-1pct.apollo-mac.receiver.warm,local-laikav2,update-1pct,apollo,mac,receiver,mac-apollo-10g,warm,xs-rs,2,0.019772598504202654,10,8,8,8,13,8,8,8
+LT2-latency80-apollo,screening,real-congress.fresh.apollo-mac.receiver.warm,real-congress,fresh,apollo,mac,receiver,mac-apollo-10g,warm,xs-cpp,2,0.05970363973998788,74,34,14,8,98,45,18,8
+LT2-latency80-apollo,screening,real-congress.fresh.apollo-mac.receiver.warm,real-congress,fresh,apollo,mac,receiver,mac-apollo-10g,warm,xs-rs,2,0.05795043917587693,70,33,14,8,92,43,17,8
+LT2-latency80-apollo,screening,real-congress.noop.apollo-mac.receiver.warm,real-congress,noop,apollo,mac,receiver,mac-apollo-10g,warm,xs-cpp,2,0.0055247976869433404,8,8,8,8,8,8,8,8
+LT2-latency80-apollo,screening,real-congress.noop.apollo-mac.receiver.warm,real-congress,noop,apollo,mac,receiver,mac-apollo-10g,warm,xs-rs,2,0.013492020372212215,8,8,8,8,8,8,8,8
+LT2-latency80-apollo,screening,real-congress.noop.mac-apollo.sender.warm,real-congress,noop,mac,apollo,sender,mac-apollo-10g,warm,xs-cpp,2,0.038740147204125164,33,16,8,8,43,21,9,8
+LT2-latency80-apollo,screening,real-congress.noop.mac-apollo.sender.warm,real-congress,noop,mac,apollo,sender,mac-apollo-10g,warm,xs-rs,2,0.058058063367608784,70,33,14,8,93,43,17,8

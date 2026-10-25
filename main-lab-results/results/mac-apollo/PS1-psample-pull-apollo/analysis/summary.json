@@ -1,0 +1,24 @@
+{
+ "experiment": "PS1-psample-pull-apollo",
+ "kind": "screening",
+ "hypothesis": "Pulling psample onto the Mac, some xs setting is at least 5% faster than xs's default, and xs is at least as fast as rsync.",
+ "primary": "durable_s",
+ "control": "xs-cpp",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261024T103613Z-PS1-psample-pull-apollo"
+ ],
+ "spec_sha256": [
+  "ed919b9fc6192e0c5cb9ee111602f71098a0d95578b311574285f00842ac0ce2"
+ ],
+ "valid_blocks": 1,
+ "void_attempts": 6,
+ "void_reasons": [
+  "xs-cpp-O: the destination does not match the corpus manifest: DIFFERS .xsyncv4-carryover\nDIFFERS .xsyncv4-carryover/corpora\nDIFFERS .xsyncv4-carryover/mac-root\n",
+  "xs-cpp-O: the destination does not match the corpus manifest: DIFFERS .xsyncv4-carryover/mac-root/runs/20261016T113325Z-R4-direct-send-replicate\nDIFFERS audio/p",
+  "xs-cpp-O: the destination does not match the corpus manifest: DIFFERS blackbird/.git/objects/2e\nDIFFERS blackbird/.git/objects/41\nDIFFERS blackbird/.git/objects",
+  "xs-cpp-O: the destination does not match the corpus manifest: DIFFERS blackbird/.git/objects/50\nDIFFERS blackbird/.git/objects/86\nDIFFERS blackbird/.git/objects"
+ ]
+}

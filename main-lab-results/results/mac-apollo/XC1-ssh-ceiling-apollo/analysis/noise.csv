@@ -1,0 +1,9 @@
+experiment,kind,cell_id,corpus,scenario,sender,receiver,client,link,cache,arm,n_blocks,sigma_d,blocks_for_2pct,blocks_for_3pct,blocks_for_5pct,blocks_for_10pct,blocks_equivalent_2pct,blocks_equivalent_3pct,blocks_equivalent_5pct,blocks_equivalent_10pct
+XC1-ssh-ceiling-apollo,screening,hs-16x256m.fresh.mac-apollo.sender.warm,hs-16x256m,fresh,mac,apollo,sender,mac-apollo-10g,warm,xs-rs,3,0.5993198414878095,7184,3225,1185,312,9627,4322,1588,418
+XC1-ssh-ceiling-apollo,screening,hs-16x256m.fresh.mac-apollo.sender.warm,hs-16x256m,fresh,mac,apollo,sender,mac-apollo-10g,warm,rsync,3,0.624258771536998,7794,3499,1286,339,10445,4689,1723,453
+XC1-ssh-ceiling-apollo,screening,hs-16x256m.fresh.mac-apollo.sender.warm,hs-16x256m,fresh,mac,apollo,sender,mac-apollo-10g,warm,pipe-x1,3,0.7276242931991633,10587,4753,1746,459,14189,6370,2339,615
+XC1-ssh-ceiling-apollo,screening,hs-16x256m.fresh.mac-apollo.sender.warm,hs-16x256m,fresh,mac,apollo,sender,mac-apollo-10g,warm,pipe-x8,3,0.9065925717705604,16435,7378,2709,712,22026,9887,3630,953
+XC1-ssh-ceiling-apollo,screening,hs-1x4g.fresh.mac-apollo.sender.warm,hs-1x4g,fresh,mac,apollo,sender,mac-apollo-10g,warm,xs-rs,3,0.5738196634687301,6585,2957,1087,287,8825,3962,1456,383
+XC1-ssh-ceiling-apollo,screening,hs-1x4g.fresh.mac-apollo.sender.warm,hs-1x4g,fresh,mac,apollo,sender,mac-apollo-10g,warm,rsync,3,0.4246183379846373,3607,1620,596,158,4834,2171,798,211
+XC1-ssh-ceiling-apollo,screening,hs-1x4g.fresh.mac-apollo.sender.warm,hs-1x4g,fresh,mac,apollo,sender,mac-apollo-10g,warm,pipe-x1,3,0.3553696714920286,2527,1136,418,111,3386,1521,560,149
+XC1-ssh-ceiling-apollo,screening,hs-1x4g.fresh.mac-apollo.sender.warm,hs-1x4g,fresh,mac,apollo,sender,mac-apollo-10g,warm,pipe-x8,3,1.022112822297282,20889,9377,3443,904,27996,12567,4614,1211

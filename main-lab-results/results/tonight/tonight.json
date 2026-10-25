@@ -1,30 +1,45 @@
 {
  "page": {
-  "generatedUtc": 1792800022.583,
+  "generatedUtc": 1792886437.766,
   "model": "claude-haiku-5-5",
-  "headline": "Do rsync and xs tools hold their ranking through the weekend?",
-  "intro": "The lab is checking whether file-transfer tools keep their relative ranking over time. One runner, Mac to apollo (Linux), is running a sentinel experiment with 12 samples now. No follow-on branches are queued for the day.",
+  "headline": "Does xs-rs PR #34 beat rsync on csearchv3?",
+  "intro": "The lab is checking whether xs-rs at pull request 34 is faster than its base version and than rsync on the user's csearchv3 tree. One runner, mac, drives the work against apollo, a Linux box. The current experiment runs now until about 9:15pm over 72 samples. Either result leads to the same follow-up test on congress, which checks everyday incremental backups.",
   "runners": [
    {
     "id": "mac",
     "title": "Mac \u2194 apollo: mars's box on Linux",
     "items": [
      {
-      "experiment": "FS1-sentinel-apollo",
-      "tree": null,
+      "experiment": "CS1-csearchv3-pr34-apollo",
+      "tree": "T19-until-sunday",
       "running": true,
-      "samples": 12,
-      "when": "running now",
+      "samples": 72,
+      "when": "now \u2192 ~9:15pm",
       "window": null,
-      "asks": "rsync, xs-c++ and xs-rs keep their congress ranking through the weekend.",
-      "hypothesis": "rsync, xs-c++ and xs-rs keep their congress ranking through the weekend.",
-      "why": "It is already running and tests whether the current top tools keep their ranking through the weekend, so the result shows if today's ordering is stable."
+      "asks": "On the user's csearchv3 tree, is xs-rs at PR #34 faster than its base and than rsync, fresh, at a no-op and at a 10% update?",
+      "hypothesis": "On csearchv3, xs-rs at PR #34 is at least as fast as its base and faster than rsync at fresh, no-op and a 10% update.",
+      "why": "It runs now on the user's own tree, so it tests whether PR #34 holds up against its base and rsync in the cases that matter."
      }
     ]
    }
   ],
-  "branches": []
+  "branches": [
+   {
+    "experiment": "CS1-csearchv3-pr34-apollo",
+    "tree": "T19-until-sunday",
+    "outcomes": [
+     {
+      "when": "rsync wins a csearchv3 cell",
+      "then": "IN1-incremental-real-apollo: On congress with 0.1%, 1% and 10% of files edited, the everyday incremental backup, does rsync beat xs?"
+     },
+     {
+      "when": "xs holds on csearchv3",
+      "then": "IN1-incremental-real-apollo: On congress with 0.1%, 1% and 10% of files edited, the everyday incremental backup, does rsync beat xs?"
+     }
+    ]
+   }
+  ]
  },
- "boundary": 1792800000,
- "lastAttempt": 1792800022.583
+ "boundary": 1792886400,
+ "lastAttempt": 1792886437.766
 }

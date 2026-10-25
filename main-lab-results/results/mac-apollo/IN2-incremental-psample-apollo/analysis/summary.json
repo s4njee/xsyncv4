@@ -1,0 +1,19 @@
+{
+ "experiment": "IN2-incremental-psample-apollo",
+ "kind": "screening",
+ "hypothesis": "rsync -aH is at least 5% faster than xs -aH at a 1% update of psample.",
+ "primary": "durable_s",
+ "control": "rsync",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261025T051236Z-IN2-incremental-psample-apollo"
+ ],
+ "spec_sha256": [
+  "4afa17336db89cc4cce95840b37c718187498642f90cb394ed8cc633fef0f391"
+ ],
+ "valid_blocks": 3,
+ "void_attempts": 0,
+ "void_reasons": []
+}

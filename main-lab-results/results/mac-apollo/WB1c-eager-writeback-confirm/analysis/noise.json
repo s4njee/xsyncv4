@@ -1,0 +1,25 @@
+[
+ {
+  "experiment": "WB1c-eager-writeback-confirm",
+  "kind": "confirmatory",
+  "cell_id": "real-congress.fresh.mac-apollo.sender.warm",
+  "corpus": "real-congress",
+  "scenario": "fresh",
+  "sender": "mac",
+  "receiver": "apollo",
+  "client": "sender",
+  "link": "mac-apollo-10g",
+  "cache": "warm",
+  "arm": "xs-cpp-eager",
+  "n_blocks": 8,
+  "sigma_d": 0.24564969873933348,
+  "blocks_for_2pct": 1209,
+  "blocks_for_3pct": 544,
+  "blocks_for_5pct": 201,
+  "blocks_for_10pct": 55,
+  "blocks_equivalent_2pct": 1619,
+  "blocks_equivalent_3pct": 728,
+  "blocks_equivalent_5pct": 269,
+  "blocks_equivalent_10pct": 72
+ }
+]

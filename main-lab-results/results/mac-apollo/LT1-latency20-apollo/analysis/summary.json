@@ -1,0 +1,23 @@
+{
+ "experiment": "LT1-latency20-apollo",
+ "kind": "screening",
+ "hypothesis": "Over a 20 ms round trip, rsync is at least 5% faster than xs in some cell.",
+ "primary": "durable_s",
+ "control": "rsync",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261024T160502Z-LT1-latency20-apollo"
+ ],
+ "spec_sha256": [
+  "300dafe8d1ef372c13ad1cbc8b9f5c41d2a53d1931005865283457b68eb3e620"
+ ],
+ "valid_blocks": 30,
+ "void_attempts": 18,
+ "void_reasons": [
+  "rsync: the destination does not match the corpus manifest: DIFFERS target/debug/incremental/mkit-1kamvep3e62m2/s-hng3ehopvi-1j46563-4fx46mu2g6x7f7kuko4hg7nkg/00",
+  "xs-cpp: the destination does not match the corpus manifest: DIFFERS target/debug/incremental/mkit-1kamvep3e62m2/s-hng3ehopvi-1j46563-4fx46mu2g6x7f7kuko4hg7nkg/0",
+  "xs-rs: the destination does not match the corpus manifest: DIFFERS target/debug/incremental/mkit-1kamvep3e62m2/s-hng3ehopvi-1j46563-4fx46mu2g6x7f7kuko4hg7nkg/00"
+ ]
+}

@@ -1,0 +1,2 @@
+cleanup on mac: Command '['sh', '-c', 'rm -rf -- ~/benchmarks/xsbench.noindex/work/20261024T204310Z-CS1-csearchv3-pr34-apollo']' timed out after 600 seconds
+cleanup on apollo: Command '['ssh', '-oBatchMode=yes', '-oConnectTimeout=10', '-oControlMaster=auto', '-oControlPersist=120', '-oControlPath=~/.ssh/xsbench-agent-%C', '[host]', "sh -c 'rm -rf -- ~/xsbench/work/20261024T204310Z-CS1-csearchv3-pr34-apollo'"]' timed out after 600 seconds

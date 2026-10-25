@@ -1,0 +1,36 @@
+# Part of T19-until-sunday (2026-10-23): one tree for the Mac-apollo runner until Sunday 07:00 Central.
+# The lab2 latency question on the cable: a 20 ms round trip (netem on apollo) on a small-file tree and a project tree, fresh, no-op and a 1% update.
+id = "LT1-latency20-apollo"
+kind = "screening"
+hypothesis = "Over a 20 ms round trip, rsync is at least 5% faster than xs in some cell."
+primary = "durable_s"
+delta = 0.05
+blocks = 3
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+max_hours = 2.5
+sample_timeout_s = 3600
+wan = { host = "apollo", delay_ms = 20 }
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[arms.xs-cpp]
+tool = "xs"
+rev = "cc8288d4f08c"
+flags = ["-a", "-j4"]
+
+[arms.xs-rs]
+tool = "xs"
+rev = "ac1aeef00c80-rs"
+flags = ["-a"]
+
+[matrix]
+link = "mac-apollo-10g"
+corpus = ["real-congress", "local-laikav2"]
+scenario = ["fresh", "noop", "update-1pct"]
+direction = ["mac>apollo", "apollo>mac"]
+client = ["initiator"]
+cache = ["warm"]

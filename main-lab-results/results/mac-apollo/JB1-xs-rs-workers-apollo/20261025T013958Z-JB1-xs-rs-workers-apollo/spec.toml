@@ -1,0 +1,50 @@
+# T19-until-sunday, wave 2 (2026-10-23): new questions in place of repeating the sentinel.
+# PR #34 makes 8 workers xs-rs's sender default. Is 8 right at 10 GbE: 1, 2, 4, 8 and 16 workers, on small files, a project tree and large files.
+id = "JB1-xs-rs-workers-apollo"
+kind = "screening"
+hypothesis = "Some worker count is at least 5% faster than xs-rs's default of 8 in some cell."
+primary = "durable_s"
+delta = 0.05
+blocks = 3
+control = "xs-rs"
+verify = "first-last"
+cleanup = "eager"
+max_hours = 3
+sample_timeout_s = 3600
+
+[arms.xs-rs]
+tool = "xs"
+rev = "ac1aeef00c80-rs"
+flags = ["-a"]
+
+[arms.xs-rs-j1]
+tool = "xs"
+rev = "ac1aeef00c80-rs"
+flags = ["-a", "-j1"]
+
+[arms.xs-rs-j2]
+tool = "xs"
+rev = "ac1aeef00c80-rs"
+flags = ["-a", "-j2"]
+
+[arms.xs-rs-j4]
+tool = "xs"
+rev = "ac1aeef00c80-rs"
+flags = ["-a", "-j4"]
+
+[arms.xs-rs-j16]
+tool = "xs"
+rev = "ac1aeef00c80-rs"
+flags = ["-a", "-j16"]
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[matrix]
+link = "mac-apollo-10g"
+corpus = ["real-congress", "local-laikav2", "hs-16x256m"]
+scenario = ["fresh"]
+direction = ["mac>apollo", "apollo>mac"]
+client = ["initiator"]
+cache = ["warm"]

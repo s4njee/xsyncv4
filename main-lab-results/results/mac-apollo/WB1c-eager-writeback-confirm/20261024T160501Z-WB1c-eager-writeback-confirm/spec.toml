@@ -1,0 +1,30 @@
+# Made by conduct.py for tree T19-until-sunday, node WB1c: confirms xs-cpp-eager from WB1-eager-writeback-apollo,
+# faster there on real-congress: real-congress mac→apollo xs-cpp-eager 1.79×
+id = "WB1c-eager-writeback-confirm"
+kind = "confirmatory"
+hypothesis = "xs-cpp-eager is more than 5% faster than xs-cpp on real-congress (from WB1-eager-writeback-apollo, confirmed with fresh blocks)."
+primary = "durable_s"
+delta = 0.05
+blocks = 8
+control = "xs-cpp"
+verify = "first-last"
+cleanup = "eager"
+
+[arms.xs-cpp]
+tool = "xs"
+rev = "cc8288d4f08c"
+flags = ["-a", "-j4"]
+
+[arms.xs-cpp-eager]
+tool = "xs"
+rev = "cc8288d4f08c"
+flags = ["-a", "-j4"]
+writeback = "eager"
+
+[matrix]
+link = "mac-apollo-10g"
+corpus = ["real-congress"]
+scenario = ["fresh"]
+direction = ["mac>apollo"]
+client = ["initiator"]
+cache = ["warm"]

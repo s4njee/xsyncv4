@@ -1,0 +1,19 @@
+{
+ "experiment": "DE1-delete-scale-apollo",
+ "kind": "screening",
+ "hypothesis": "rsync --delete is at least 5% faster than xs --delete when 10% of a large tree's files are gone.",
+ "primary": "durable_s",
+ "control": "rsync",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261025T083458Z-DE1-delete-scale-apollo"
+ ],
+ "spec_sha256": [
+  "540dc52ee8f9388c42c4c502bc50150fa7a91a918180df91931682af853df00c"
+ ],
+ "valid_blocks": 4,
+ "void_attempts": 0,
+ "void_reasons": []
+}

@@ -1,0 +1,35 @@
+# T19-until-sunday, wave 2 (2026-10-23): new questions in place of repeating the sentinel.
+# RW5 measured one delete cell. Deleting 10% of files with --delete on congress and csearchv3, both ways (xs-rs has no --delete).
+id = "DE1-delete-scale-apollo"
+kind = "screening"
+hypothesis = "rsync --delete is at least 5% faster than xs --delete when 10% of a large tree's files are gone."
+primary = "durable_s"
+delta = 0.05
+blocks = 3
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+max_hours = 2.5
+sample_timeout_s = 3600
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a", "--delete"]
+
+[arms.xs-cpp]
+tool = "xs"
+rev = "cc8288d4f08c"
+flags = ["-a", "--delete", "-j4"]
+
+[arms.xs-cpp-j8]
+tool = "xs"
+rev = "cc8288d4f08c"
+flags = ["-a", "--delete", "-j8"]
+
+[matrix]
+link = "mac-apollo-10g"
+corpus = ["real-congress", "real-csearchv3"]
+scenario = ["delete-10pct"]
+direction = ["mac>apollo", "apollo>mac"]
+client = ["initiator"]
+cache = ["warm"]

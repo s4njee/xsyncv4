@@ -1,0 +1,19 @@
+{
+ "experiment": "WB1c-eager-writeback-confirm",
+ "kind": "confirmatory",
+ "hypothesis": "xs-cpp-eager is more than 5% faster than xs-cpp on real-congress (from WB1-eager-writeback-apollo, confirmed with fresh blocks).",
+ "primary": "durable_s",
+ "control": "xs-cpp",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261024T160501Z-WB1c-eager-writeback-confirm"
+ ],
+ "spec_sha256": [
+  "cdfd268bccebcefd8906fb4674f59f07bd834845de9d9fab209b1647e0cf29f0"
+ ],
+ "valid_blocks": 8,
+ "void_attempts": 0,
+ "void_reasons": []
+}

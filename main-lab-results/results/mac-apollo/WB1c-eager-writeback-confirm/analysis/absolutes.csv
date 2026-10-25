@@ -1,0 +1,9 @@
+experiment,kind,cell_id,corpus,scenario,sender,receiver,client,link,cache,arm,metric,n_blocks,geomean,lo,hi
+WB1c-eager-writeback-confirm,confirmatory,real-congress.fresh.mac-apollo.sender.warm,real-congress,fresh,mac,apollo,sender,mac-apollo-10g,warm,xs-cpp,durable_s,8,12.94200592095621,9.710361722323196,17.249153229071723
+WB1c-eager-writeback-confirm,confirmatory,real-congress.fresh.mac-apollo.sender.warm,real-congress,fresh,mac,apollo,sender,mac-apollo-10g,warm,xs-cpp-eager,durable_s,8,10.51523422231636,9.05638232997101,12.209086003828983
+WB1c-eager-writeback-confirm,confirmatory,real-congress.fresh.mac-apollo.sender.warm,real-congress,fresh,mac,apollo,sender,mac-apollo-10g,warm,xs-cpp,wall_s,8,9.88531718982114,8.741423211735118,11.178900000195348
+WB1c-eager-writeback-confirm,confirmatory,real-congress.fresh.mac-apollo.sender.warm,real-congress,fresh,mac,apollo,sender,mac-apollo-10g,warm,xs-cpp-eager,wall_s,8,9.94855780128397,8.928230323338536,11.085489368119129
+WB1c-eager-writeback-confirm,confirmatory,real-congress.fresh.mac-apollo.sender.warm,real-congress,fresh,mac,apollo,sender,mac-apollo-10g,warm,xs-cpp,cpu_s,8,30.515586245170017,29.690561708608662,31.363536096941257
+WB1c-eager-writeback-confirm,confirmatory,real-congress.fresh.mac-apollo.sender.warm,real-congress,fresh,mac,apollo,sender,mac-apollo-10g,warm,xs-cpp-eager,cpu_s,8,30.67074109867271,29.740659672043584,31.629909017319815
+WB1c-eager-writeback-confirm,confirmatory,real-congress.fresh.mac-apollo.sender.warm,real-congress,fresh,mac,apollo,sender,mac-apollo-10g,warm,xs-cpp,rss_bytes,8,110001071.29668824,93966343.11869593,128772018.62729058
+WB1c-eager-writeback-confirm,confirmatory,real-congress.fresh.mac-apollo.sender.warm,real-congress,fresh,mac,apollo,sender,mac-apollo-10g,warm,xs-cpp-eager,rss_bytes,8,142228008.48308718,109265110.5373445,185135092.9641108

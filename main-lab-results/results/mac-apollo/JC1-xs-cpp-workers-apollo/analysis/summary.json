@@ -1,0 +1,24 @@
+{
+ "experiment": "JC1-xs-cpp-workers-apollo",
+ "kind": "screening",
+ "hypothesis": "Some worker count is at least 5% faster than xs-c++'s default of 4 in some cell.",
+ "primary": "durable_s",
+ "control": "xs-cpp",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261025T102540Z-JC1-xs-cpp-workers-apollo"
+ ],
+ "spec_sha256": [
+  "b60a156220c0f8289960bb49397b0c750a3831f9e319e6f66937993e02036489"
+ ],
+ "valid_blocks": 4,
+ "void_attempts": 6,
+ "void_reasons": [
+  "rsync: the destination does not match the corpus manifest: DIFFERS target/debug/incremental/mkit-1kamvep3e62m2/s-hng3ehopvi-1j46563-4fx46mu2g6x7f7kuko4hg7nkg/00",
+  "xs-cpp-j16: the destination does not match the corpus manifest: DIFFERS target/debug/incremental/mkit-1kamvep3e62m2/s-hng3ehopvi-1j46563-4fx46mu2g6x7f7kuko4hg7n",
+  "xs-cpp-j1: the destination does not match the corpus manifest: DIFFERS target/debug/incremental/mkit-1kamvep3e62m2/s-hng3ehopvi-1j46563-4fx46mu2g6x7f7kuko4hg7nk",
+  "xs-cpp: the destination does not match the corpus manifest: DIFFERS target/debug/incremental/mkit-1kamvep3e62m2/s-hng3ehopvi-1j46563-4fx46mu2g6x7f7kuko4hg7nkg/0"
+ ]
+}
