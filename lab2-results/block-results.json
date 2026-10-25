@@ -2135,10 +2135,10 @@
    "driver": "a"
   },
   "FC-beabaee-fresh": {
-   "run": "20261024T041853Z-FC-beabaee-fresh",
+   "run": "20261025T131728Z-FC-beabaee-fresh",
    "experiment": "FC-beabaee-fresh",
    "key": "congress-sample.fresh.a-aws.sender.warm|2|0",
-   "utc": 1792815629.181,
+   "utc": 1792958272.236,
    "cell": "congress-sample.fresh.a-aws.sender.warm",
    "factors": {
     "corpus": "congress-sample",
@@ -2160,9 +2160,9 @@
      "control": true,
      "valid": true,
      "void": null,
-     "seconds": 3.336,
-     "gbps": 0.523,
-     "files_per_s": 7567,
+     "seconds": 3.144,
+     "gbps": 0.555,
+     "files_per_s": 8030,
      "speed": 1
     },
     {
@@ -2171,10 +2171,10 @@
      "control": false,
      "valid": true,
      "void": null,
-     "seconds": 3.403,
-     "gbps": 0.513,
-     "files_per_s": 7419,
-     "speed": 0.98
+     "seconds": 3.379,
+     "gbps": 0.517,
+     "files_per_s": 7471,
+     "speed": 0.93
     },
     {
      "arm": "xs-rs",
@@ -2182,30 +2182,30 @@
      "control": false,
      "valid": true,
      "void": null,
-     "seconds": 3.234,
-     "gbps": 0.54,
-     "files_per_s": 7807,
-     "speed": 1.03
+     "seconds": 2.934,
+     "gbps": 0.595,
+     "files_per_s": 8604,
+     "speed": 1.07
     }
    ],
    "soFar": [
     {
      "arm": "xs-cpp",
      "label": "xs-c++",
-     "speed": 0.95,
+     "speed": 1.06,
      "blocks": 3
     },
     {
      "arm": "xs-rs",
      "label": "xs-rs",
-     "speed": 1.11,
+     "speed": 1.23,
      "blocks": 3
     }
    ],
    "question": "On congress-sample, fresh copies: how do rsync, xs-c++ and xs-rs at beabaee992b6 compare?",
-   "summary": "In block 2, xs-rs was fastest at 1.03x the rsync control (3.234 s vs 3.336 s), while xs-c++ was 0.98x. Cumulative ratios are 1.11x for xs-rs and 0.95x for xs-c++, each over three blocks, so this cell's evidence is not thin. For the experiment's question, xs-rs is slightly ahead of rsync and xs-c++ slightly behind, but the block's gaps are small.",
+   "summary": "In block 2, xs-rs was fastest at 2.934 s versus rsync\u2019s 3.144 s, a 1.07x speed ratio, while xs-c++ was 0.93x. So far in this cell, the cumulative ratios rest on three blocks: xs-rs 1.23x and xs-c++ 1.06x. That bears on the fresh-copy comparison by favoring xs-rs in this block and cumulatively, while xs-c++ is near control overall but slower here.",
    "model": "opencode/deepseek-v4.1-flash",
-   "summarizedUtc": 1792815670.06,
+   "summarizedUtc": 1792958318.595,
    "driver": "a"
   },
   "AP10222213-PS-beabaee-laikav2-fresh": {

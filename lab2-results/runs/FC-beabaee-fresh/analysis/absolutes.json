@@ -12,10 +12,10 @@
   "cache": "warm",
   "arm": "rsync",
   "metric": "durable_s",
-  "n_blocks": 12,
-  "geomean": 3.2710627671823267,
-  "lo": 3.214045453977024,
-  "hi": 3.329091570129048
+  "n_blocks": 16,
+  "geomean": 3.326031847355131,
+  "lo": 3.185068718416507,
+  "hi": 3.473233649765781
  },
  {
   "experiment": "FC-beabaee-fresh",
@@ -30,10 +30,10 @@
   "cache": "warm",
   "arm": "xs-cpp",
   "metric": "durable_s",
-  "n_blocks": 12,
-  "geomean": 3.401079365562883,
-  "lo": 3.30233554427407,
-  "hi": 3.502775746369647
+  "n_blocks": 16,
+  "geomean": 3.398973116917423,
+  "lo": 3.3262190895472163,
+  "hi": 3.4733184851933507
  },
  {
   "experiment": "FC-beabaee-fresh",
@@ -48,10 +48,10 @@
   "cache": "warm",
   "arm": "xs-rs",
   "metric": "durable_s",
-  "n_blocks": 12,
-  "geomean": 2.885750865336928,
-  "lo": 2.788322528227841,
-  "hi": 2.9865835004695565
+  "n_blocks": 16,
+  "geomean": 2.8980197193509474,
+  "lo": 2.8258623948507937,
+  "hi": 2.972019553765423
  },
  {
   "experiment": "FC-beabaee-fresh",
@@ -66,10 +66,10 @@
   "cache": "warm",
   "arm": "rsync",
   "metric": "wall_s",
-  "n_blocks": 12,
-  "geomean": 3.0223075904234684,
-  "lo": 2.9750210741295127,
-  "hi": 3.070345702947334
+  "n_blocks": 16,
+  "geomean": 3.075750655920787,
+  "lo": 2.9379673250259684,
+  "hi": 3.2199956809640593
  },
  {
   "experiment": "FC-beabaee-fresh",
@@ -84,10 +84,10 @@
   "cache": "warm",
   "arm": "xs-cpp",
   "metric": "wall_s",
-  "n_blocks": 12,
-  "geomean": 2.785848913306386,
-  "lo": 2.6622481076927933,
-  "hi": 2.9151881619689886
+  "n_blocks": 16,
+  "geomean": 2.7665904112929307,
+  "lo": 2.674176355791276,
+  "hi": 2.8621981071974583
  },
  {
   "experiment": "FC-beabaee-fresh",
@@ -102,10 +102,10 @@
   "cache": "warm",
   "arm": "xs-rs",
   "metric": "wall_s",
-  "n_blocks": 12,
-  "geomean": 2.160943831730061,
-  "lo": 2.0461159444940566,
-  "hi": 2.2822158521651468
+  "n_blocks": 16,
+  "geomean": 2.1795108180161096,
+  "lo": 2.092482085986426,
+  "hi": 2.2701591749159022
  },
  {
   "experiment": "FC-beabaee-fresh",
@@ -120,10 +120,10 @@
   "cache": "warm",
   "arm": "rsync",
   "metric": "cpu_s",
-  "n_blocks": 12,
-  "geomean": 4.780131742605069,
-  "lo": 4.71641662428236,
-  "hi": 4.844707602593808
+  "n_blocks": 16,
+  "geomean": 4.79303346197301,
+  "lo": 4.709070959110732,
+  "hi": 4.878493012118736
  },
  {
   "experiment": "FC-beabaee-fresh",
@@ -138,10 +138,10 @@
   "cache": "warm",
   "arm": "xs-cpp",
   "metric": "cpu_s",
-  "n_blocks": 12,
-  "geomean": 5.373252072528572,
-  "lo": 5.16511909208521,
-  "hi": 5.589771953017398
+  "n_blocks": 16,
+  "geomean": 5.31398345956664,
+  "lo": 5.150884780783464,
+  "hi": 5.482246528576533
  },
  {
   "experiment": "FC-beabaee-fresh",
@@ -156,10 +156,10 @@
   "cache": "warm",
   "arm": "xs-rs",
   "metric": "cpu_s",
-  "n_blocks": 12,
-  "geomean": 3.7464971568368837,
-  "lo": 3.6634756207282595,
-  "hi": 3.831400123633578
+  "n_blocks": 16,
+  "geomean": 3.707257105401057,
+  "lo": 3.635767562174914,
+  "hi": 3.7801523366155783
  },
  {
   "experiment": "FC-beabaee-fresh",
@@ -174,10 +174,10 @@
   "cache": "warm",
   "arm": "rsync",
   "metric": "rss_bytes",
-  "n_blocks": 12,
-  "geomean": 13140054.782265473,
-  "lo": 12787131.971226033,
-  "hi": 13502718.206824213
+  "n_blocks": 16,
+  "geomean": 13031165.461163798,
+  "lo": 12759053.945850596,
+  "hi": 13309080.281101333
  },
  {
   "experiment": "FC-beabaee-fresh",
@@ -192,10 +192,10 @@
   "cache": "warm",
   "arm": "xs-cpp",
   "metric": "rss_bytes",
-  "n_blocks": 12,
-  "geomean": 146178411.1052938,
-  "lo": 127206864.69847088,
-  "hi": 167979361.2075807
+  "n_blocks": 16,
+  "geomean": 152734042.61685175,
+  "lo": 136393584.5159326,
+  "hi": 171032148.2999173
  },
  {
   "experiment": "FC-beabaee-fresh",
@@ -210,9 +210,9 @@
   "cache": "warm",
   "arm": "xs-rs",
   "metric": "rss_bytes",
-  "n_blocks": 12,
-  "geomean": 79061831.74830702,
-  "lo": 72454959.33673689,
-  "hi": 86271157.92511766
+  "n_blocks": 16,
+  "geomean": 79879360.69004121,
+  "lo": 74810726.28673291,
+  "hi": 85291409.14624794
  }
 ]
