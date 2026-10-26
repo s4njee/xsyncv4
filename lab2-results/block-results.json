@@ -3766,6 +3766,97 @@
    "model": "opencode/deepseek-v4.1-flash",
    "summarizedUtc": 1793012313.967,
    "driver": "a"
+  },
+  "AP10250454-A1025-lk-u1pct-j2-8b": {
+   "run": "20261025T045421Z-AP10250454-A1025-lk-u1pct-j2-8b",
+   "experiment": "AP10250454-A1025-lk-u1pct-j2-8b",
+   "key": "laikav2-sample.update-1pct.a-aws.sender.warm|6|0",
+   "utc": 1793020529.335,
+   "cell": "laikav2-sample.update-1pct.a-aws.sender.warm",
+   "factors": {
+    "corpus": "laikav2-sample",
+    "scenario": "update-1pct",
+    "sender": "a",
+    "receiver": "aws",
+    "client": "sender",
+    "link": "a-aws",
+    "cache": "warm"
+   },
+   "block": 6,
+   "attempt": 0,
+   "control": "rsync",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.388,
+     "gbps": 0.104,
+     "files_per_s": 3443,
+     "speed": 1.35
+    },
+    {
+     "arm": "xs-rs-j2",
+     "label": "xs-rs -j2",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.416,
+     "gbps": 0.097,
+     "files_per_s": 3211,
+     "speed": 1.26
+    },
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.427,
+     "gbps": 0.094,
+     "files_per_s": 3129,
+     "speed": 1.23
+    },
+    {
+     "arm": "rsync",
+     "label": "rsync",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 0.525,
+     "gbps": 0.077,
+     "files_per_s": 2545,
+     "speed": 1
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "speed": 1.16,
+     "blocks": 7
+    },
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "speed": 1.26,
+     "blocks": 7
+    },
+    {
+     "arm": "xs-rs-j2",
+     "label": "xs-rs -j2",
+     "speed": 1.29,
+     "blocks": 7
+    }
+   ],
+   "question": "On laikav2-sample update-1pct, does reducing xs-rs to two jobs cut scan and metadata overhead after -j8 failed to help?",
+   "summary": "In block 6, xs-rs was fastest at 1.35x the control (0.388s vs 0.525s). Across seven blocks, cumulative speeds are 1.26x for xs-rs, 1.29x for xs-rs -j2, and 1.16x for xs-c++, so the evidence is not thin. This block's -j2 result (1.26x) was below plain xs-rs, but its cumulative 1.29x remains slightly ahead, leaving the two-job question unresolved.",
+   "model": "opencode/deepseek-v4.1-flash",
+   "summarizedUtc": 1793020577.334,
+   "driver": "a"
   }
  }
 }
