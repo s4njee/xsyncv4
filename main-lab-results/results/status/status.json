@@ -1,25 +1,19 @@
 {
- "generatedUtc": 1792922447.546,
- "nextUtc": 1792926000,
+ "generatedUtc": 1793008822.277,
+ "nextUtc": 1793012400,
  "runners": [
   {
    "id": "mac",
-   "state": "running",
+   "state": "idle",
    "reachable": true,
-   "current": {
-    "experiment": "DE1-delete-scale-apollo",
-    "run": "20261025T083458Z-DE1-delete-scale-apollo",
-    "done": 5,
-    "planned": 36,
-    "question": "rsync --delete is at least 5% faster than xs --delete when 10% of a large tree's files are gone."
-   },
+   "current": null,
    "next": [],
    "waiting": 0
   }
  ],
  "loop": null,
  "cases": {
-  "generatedUtc": 1792922447.546,
+  "generatedUtc": 1793008822.277,
   "slot": "2026-10-22T0650",
   "nextUtc": 1792691416,
   "weekUsd": 83,

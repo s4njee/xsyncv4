@@ -105,12 +105,14 @@
     "20261024T002223Z-FS1-sentinel-apollo",
     "20261024T003754Z-FS1-sentinel-apollo",
     "20261024T005242Z-FS1-sentinel-apollo",
-    "20261024T010733Z-FS1-sentinel-apollo"
+    "20261024T010733Z-FS1-sentinel-apollo",
+    "20261025T114038Z-FS1-sentinel-apollo",
+    "20261025T115549Z-FS1-sentinel-apollo"
    ],
    "spec": "FS1-sentinel-apollo.toml",
    "decision": {
-    "utc": "2026-10-24T02:39:10Z",
-    "text": "FS1: done (8 runs)",
+    "utc": "2026-10-25T12:10:41Z",
+    "text": "FS1: done (10 runs)",
     "next": []
    }
   },
@@ -442,12 +444,32 @@
    }
   },
   "JC1": {
-   "state": "queued",
+   "state": "decided",
    "runs": [
     "20261025T102540Z-JC1-xs-cpp-workers-apollo"
    ],
-   "spec": "JC1-xs-cpp-workers-apollo.toml"
+   "spec": "JC1-xs-cpp-workers-apollo.toml",
+   "decision": {
+    "utc": "2026-10-25T11:16:24Z",
+    "text": "JC1: otherwise",
+    "next": [
+     "CP1"
+    ],
+    "branch": 0
+   }
+  },
+  "CP1": {
+   "state": "decided",
+   "runs": [
+    "20261025T111624Z-CP1-weak-receiver-apollo"
+   ],
+   "spec": "CP1-weak-receiver-apollo.toml",
+   "decision": {
+    "utc": "2026-10-25T11:40:38Z",
+    "text": "CP1: done (1 run)",
+    "next": []
+   }
   }
  },
- "fills": 8
+ "fills": 10
 }

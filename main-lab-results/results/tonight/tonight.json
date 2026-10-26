@@ -1,45 +1,12 @@
 {
  "page": {
-  "generatedUtc": 1792886437.766,
-  "model": "claude-haiku-5-5",
-  "headline": "Does xs-rs PR #34 beat rsync on csearchv3?",
-  "intro": "The lab is checking whether xs-rs at pull request 34 is faster than its base version and than rsync on the user's csearchv3 tree. One runner, mac, drives the work against apollo, a Linux box. The current experiment runs now until about 9:15pm over 72 samples. Either result leads to the same follow-up test on congress, which checks everyday incremental backups.",
-  "runners": [
-   {
-    "id": "mac",
-    "title": "Mac \u2194 apollo: mars's box on Linux",
-    "items": [
-     {
-      "experiment": "CS1-csearchv3-pr34-apollo",
-      "tree": "T19-until-sunday",
-      "running": true,
-      "samples": 72,
-      "when": "now \u2192 ~9:15pm",
-      "window": null,
-      "asks": "On the user's csearchv3 tree, is xs-rs at PR #34 faster than its base and than rsync, fresh, at a no-op and at a 10% update?",
-      "hypothesis": "On csearchv3, xs-rs at PR #34 is at least as fast as its base and faster than rsync at fresh, no-op and a 10% update.",
-      "why": "It runs now on the user's own tree, so it tests whether PR #34 holds up against its base and rsync in the cases that matter."
-     }
-    ]
-   }
-  ],
-  "branches": [
-   {
-    "experiment": "CS1-csearchv3-pr34-apollo",
-    "tree": "T19-until-sunday",
-    "outcomes": [
-     {
-      "when": "rsync wins a csearchv3 cell",
-      "then": "IN1-incremental-real-apollo: On congress with 0.1%, 1% and 10% of files edited, the everyday incremental backup, does rsync beat xs?"
-     },
-     {
-      "when": "xs holds on csearchv3",
-      "then": "IN1-incremental-real-apollo: On congress with 0.1%, 1% and 10% of files edited, the everyday incremental backup, does rsync beat xs?"
-     }
-    ]
-   }
-  ]
+  "generatedUtc": 1792972814.326,
+  "model": null,
+  "headline": "What the runners have queued",
+  "intro": "Nothing is queued on any runner this morning.",
+  "runners": [],
+  "branches": []
  },
- "boundary": 1792886400,
- "lastAttempt": 1792886437.766
+ "boundary": 1792972800,
+ "lastAttempt": 1792972814.326
 }

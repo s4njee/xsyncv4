@@ -74,3 +74,10 @@
 {"utc": "2026-10-25T08:34:58Z", "tree": "T19-until-sunday", "node": "DE1", "kind": "queued", "text": "DE1 queued on mac (36 samples): after CK1: otherwise", "run": "20261025T083458Z-DE1-delete-scale-apollo"}
 {"utc": "2026-10-25T10:25:40Z", "tree": "T19-until-sunday", "node": "DE1", "kind": "decision", "text": "DE1: otherwise \u2192 JC1", "next": ["JC1"]}
 {"utc": "2026-10-25T10:25:40Z", "tree": "T19-until-sunday", "node": "JC1", "kind": "queued", "text": "JC1 queued on mac (108 samples): after DE1: otherwise", "run": "20261025T102540Z-JC1-xs-cpp-workers-apollo"}
+{"utc": "2026-10-25T11:16:24Z", "tree": "T19-until-sunday", "node": "JC1", "kind": "decision", "text": "JC1: otherwise \u2192 CP1", "next": ["CP1"]}
+{"utc": "2026-10-25T11:16:24Z", "tree": "T19-until-sunday", "node": "CP1", "kind": "queued", "text": "CP1 queued on mac (60 samples): after JC1: otherwise", "run": "20261025T111624Z-CP1-weak-receiver-apollo"}
+{"utc": "2026-10-25T11:40:38Z", "tree": "T19-until-sunday", "node": "CP1", "kind": "decision", "text": "CP1: done (1 run)"}
+{"utc": "2026-10-25T11:40:38Z", "tree": "T19-until-sunday", "node": "FS1", "kind": "queued", "text": "FS1 queued on mac (12 samples): every branch has ended; filling until 2026-10-25T12:00Z (fill 9)", "run": "20261025T114038Z-FS1-sentinel-apollo"}
+{"utc": "2026-10-25T11:55:49Z", "tree": "T19-until-sunday", "node": "FS1", "kind": "decision", "text": "FS1: done (9 runs)"}
+{"utc": "2026-10-25T11:55:50Z", "tree": "T19-until-sunday", "node": "FS1", "kind": "queued", "text": "FS1 queued on mac (12 samples): every branch has ended; filling until 2026-10-25T12:00Z (fill 10)", "run": "20261025T115549Z-FS1-sentinel-apollo"}
+{"utc": "2026-10-25T12:10:41Z", "tree": "T19-until-sunday", "node": "FS1", "kind": "decision", "text": "FS1: done (10 runs)"}

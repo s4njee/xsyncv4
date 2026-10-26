@@ -1,5 +1,5 @@
 {
- "updated": "2026-10-25T10:44:50+00:00",
+ "updated": "2026-10-26T10:44:22+00:00",
  "enabled": true,
  "cpp_rev": "fe012667764a",
  "rs": {
@@ -1366,55 +1366,6 @@
    "fastest": "xs-rs"
   },
   {
-   "cell": "local-laikav2.noop.apollo-mac.receiver.warm",
-   "corpus": "local-laikav2",
-   "scenario": "noop",
-   "link": "mac-apollo-10g",
-   "metric": "durable_s",
-   "experiment": "MM2b-local-laikav2-apollo",
-   "run": "20261023T040629Z-MM2b-local-laikav2-apollo",
-   "tools": {
-    "rsync": {
-     "arm": "rsync",
-     "flags": [
-      "-a"
-     ],
-     "rev": null,
-     "seconds": 0.436,
-     "lo": 0.411,
-     "hi": 0.462,
-     "blocks": 18
-    },
-    "xs-cpp": {
-     "arm": "xs-cpp",
-     "flags": [
-      "-a",
-      "-j4"
-     ],
-     "rev": "cc8288d4f08c",
-     "seconds": 0.317,
-     "lo": 0.304,
-     "hi": 0.331,
-     "blocks": 18
-    },
-    "xs-rs": {
-     "arm": "xs-rs",
-     "flags": [
-      "-a",
-      "-j4"
-     ],
-     "rev": "e671c84aa680-rs",
-     "seconds": 0.282,
-     "lo": 0.268,
-     "hi": 0.296,
-     "blocks": 18
-    }
-   },
-   "verdict": "xs-rs",
-   "rs_vs_cpp": 0.89,
-   "fastest": "xs-rs"
-  },
-  {
    "cell": "local-laikav2.noop.mac-apollo.sender.warm",
    "corpus": "local-laikav2",
    "scenario": "noop",
@@ -1461,6 +1412,55 @@
    },
    "verdict": "xs-rs",
    "rs_vs_cpp": 0.802,
+   "fastest": "xs-rs"
+  },
+  {
+   "cell": "local-laikav2.noop.apollo-mac.receiver.warm",
+   "corpus": "local-laikav2",
+   "scenario": "noop",
+   "link": "mac-apollo-10g",
+   "metric": "durable_s",
+   "experiment": "MM2b-local-laikav2-apollo",
+   "run": "20261023T040629Z-MM2b-local-laikav2-apollo",
+   "tools": {
+    "rsync": {
+     "arm": "rsync",
+     "flags": [
+      "-a"
+     ],
+     "rev": null,
+     "seconds": 0.436,
+     "lo": 0.411,
+     "hi": 0.462,
+     "blocks": 18
+    },
+    "xs-cpp": {
+     "arm": "xs-cpp",
+     "flags": [
+      "-a",
+      "-j4"
+     ],
+     "rev": "cc8288d4f08c",
+     "seconds": 0.317,
+     "lo": 0.304,
+     "hi": 0.331,
+     "blocks": 18
+    },
+    "xs-rs": {
+     "arm": "xs-rs",
+     "flags": [
+      "-a",
+      "-j4"
+     ],
+     "rev": "e671c84aa680-rs",
+     "seconds": 0.282,
+     "lo": 0.268,
+     "hi": 0.296,
+     "blocks": 18
+    }
+   },
+   "verdict": "xs-rs",
+   "rs_vs_cpp": 0.89,
    "fastest": "xs-rs"
   },
   {
@@ -1776,9 +1776,20 @@
    "scenario": "fresh",
    "link": "mac-apollo-10g",
    "metric": "durable_s",
-   "experiment": "JC1-xs-cpp-workers-apollo",
-   "run": "20261025T102540Z-JC1-xs-cpp-workers-apollo",
+   "experiment": "FS1-sentinel-apollo",
+   "run": "20261025T115549Z-FS1-sentinel-apollo",
    "tools": {
+    "rsync": {
+     "arm": "rsync",
+     "flags": [
+      "-a"
+     ],
+     "rev": null,
+     "seconds": 28.754,
+     "lo": 26.165,
+     "hi": 31.598,
+     "blocks": 10
+    },
     "xs-cpp": {
      "arm": "xs-cpp",
      "flags": [
@@ -1786,21 +1797,10 @@
       "-j4"
      ],
      "rev": "cc8288d4f08c",
-     "seconds": 6.844,
-     "lo": null,
-     "hi": null,
-     "blocks": 1
-    },
-    "rsync": {
-     "arm": "rsync",
-     "flags": [
-      "-a"
-     ],
-     "rev": null,
-     "seconds": 27.241,
-     "lo": null,
-     "hi": null,
-     "blocks": 1
+     "seconds": 8.357,
+     "lo": 6.438,
+     "hi": 10.848,
+     "blocks": 10
     }
    },
    "verdict": "pending",
@@ -1813,8 +1813,8 @@
    "scenario": "fresh",
    "link": "mac-apollo-10g",
    "metric": "durable_s",
-   "experiment": "LT2-latency80-apollo",
-   "run": "20261024T182522Z-LT2-latency80-apollo",
+   "experiment": "FS1-sentinel-apollo",
+   "run": "20261025T115549Z-FS1-sentinel-apollo",
    "tools": {
     "rsync": {
      "arm": "rsync",
@@ -1822,10 +1822,10 @@
       "-a"
      ],
      "rev": null,
-     "seconds": 80.589,
-     "lo": 47.698,
-     "hi": 136.16,
-     "blocks": 2
+     "seconds": 66.015,
+     "lo": 64.05,
+     "hi": 68.04,
+     "blocks": 10
     },
     "xs-cpp": {
      "arm": "xs-cpp",
@@ -1834,47 +1834,10 @@
       "-j4"
      ],
      "rev": "cc8288d4f08c",
-     "seconds": 50.892,
-     "lo": 50.288,
-     "hi": 51.504,
-     "blocks": 2
-    }
-   },
-   "verdict": "pending",
-   "rs_vs_cpp": null,
-   "fastest": "xs-cpp"
-  },
-  {
-   "cell": "real-congress.noop.apollo-mac.receiver.warm",
-   "corpus": "real-congress",
-   "scenario": "noop",
-   "link": "mac-apollo-10g",
-   "metric": "durable_s",
-   "experiment": "LT2-latency80-apollo",
-   "run": "20261024T182522Z-LT2-latency80-apollo",
-   "tools": {
-    "rsync": {
-     "arm": "rsync",
-     "flags": [
-      "-a"
-     ],
-     "rev": null,
-     "seconds": 26.34,
-     "lo": 22.104,
-     "hi": 31.388,
-     "blocks": 2
-    },
-    "xs-cpp": {
-     "arm": "xs-cpp",
-     "flags": [
-      "-a",
-      "-j4"
-     ],
-     "rev": "cc8288d4f08c",
-     "seconds": 4.036,
-     "lo": 3.56,
-     "hi": 4.577,
-     "blocks": 2
+     "seconds": 19.983,
+     "lo": 19.572,
+     "hi": 20.404,
+     "blocks": 10
     }
    },
    "verdict": "pending",
@@ -1887,8 +1850,8 @@
    "scenario": "noop",
    "link": "mac-apollo-10g",
    "metric": "durable_s",
-   "experiment": "LT2-latency80-apollo",
-   "run": "20261024T182522Z-LT2-latency80-apollo",
+   "experiment": "FS1-sentinel-apollo",
+   "run": "20261025T115549Z-FS1-sentinel-apollo",
    "tools": {
     "rsync": {
      "arm": "rsync",
@@ -1896,10 +1859,10 @@
       "-a"
      ],
      "rev": null,
-     "seconds": 31.161,
-     "lo": 29.53,
-     "hi": 32.881,
-     "blocks": 2
+     "seconds": 6.097,
+     "lo": 5.695,
+     "hi": 6.527,
+     "blocks": 10
     },
     "xs-cpp": {
      "arm": "xs-cpp",
@@ -1908,10 +1871,47 @@
       "-j4"
      ],
      "rev": "cc8288d4f08c",
-     "seconds": 3.186,
-     "lo": 2.132,
-     "hi": 4.761,
-     "blocks": 2
+     "seconds": 1.397,
+     "lo": 1.247,
+     "hi": 1.565,
+     "blocks": 10
+    }
+   },
+   "verdict": "pending",
+   "rs_vs_cpp": null,
+   "fastest": "xs-cpp"
+  },
+  {
+   "cell": "real-congress.noop.apollo-mac.receiver.warm",
+   "corpus": "real-congress",
+   "scenario": "noop",
+   "link": "mac-apollo-10g",
+   "metric": "durable_s",
+   "experiment": "FS1-sentinel-apollo",
+   "run": "20261025T115549Z-FS1-sentinel-apollo",
+   "tools": {
+    "rsync": {
+     "arm": "rsync",
+     "flags": [
+      "-a"
+     ],
+     "rev": null,
+     "seconds": 4.27,
+     "lo": 4.039,
+     "hi": 4.513,
+     "blocks": 10
+    },
+    "xs-cpp": {
+     "arm": "xs-cpp",
+     "flags": [
+      "-a",
+      "-j4"
+     ],
+     "rev": "cc8288d4f08c",
+     "seconds": 2.34,
+     "lo": 2.258,
+     "hi": 2.426,
+     "blocks": 10
     }
    },
    "verdict": "pending",

@@ -1,8 +1,8 @@
 {
  "cards": {
   "mac": {
-   "key": "[\"running\",\"Mac \u2194 apollo, mars's box on Linux (direct 10 GbE, X540)\",\"JC1-xs-cpp-workers-apollo\"]",
-   "text": "The Mac, a MacBook Pro with an M1 Max and a Thunderbolt 10 GbE adapter, is wired directly to apollo, a Linux machine with a 10 GbE X540 link. This experiment is checking whether xs-c++'s default of 4 workers is the best choice at 10 GbE, or whether 1, 2, 8 or 16 workers do better, since the question is whether any count beats 4 by at least 5%.",
+   "key": "[\"idle\",\"Mac \u2194 apollo, mars's box on Linux (direct 10 GbE, X540)\",null]",
+   "text": "A wired, direct 10 GbE link joins the Mac, a MacBook Pro with an M1 Max and a Thunderbolt 10 GbE adapter, to apollo, which is mars's Linux box with an X540 card. The pair is idle, with no experiment running at the moment.",
    "model": "claude-haiku-5-5"
   },
   "mars": {

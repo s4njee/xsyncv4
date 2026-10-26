@@ -1,5 +1,5 @@
 {
- "utc": "2026-10-25T10:49:34+00:00",
+ "utc": "2026-10-26T10:47:31+00:00",
  "about": "For each cell lab2 measures, the home lab's measurements of the same scenario on the closest home trees: each tool's geometric-mean durable_s over its blocks, with the conditions (wan_delay_ms added on the home link, cpus the sender was held to; 0 = none). cpp_over_rsync below 1 means the C++ xs was faster.",
  "lab2_snapshot": {
   "utc": "2026-10-21T01:50:40+00:00",
@@ -16,6 +16,266 @@
     "real-congress"
    ],
    "home": [
+    {
+     "home_corpus": "real-congress",
+     "experiment": "FS1-sentinel-apollo",
+     "run": "20261025T115549Z-FS1-sentinel-apollo",
+     "cell": "real-congress.fresh.apollo-mac.receiver.warm",
+     "link": "mac-apollo-10g",
+     "direction": "apollo>mac",
+     "cache": "warm",
+     "conditions": {
+      "wan_delay_ms": 0,
+      "cpus": 0
+     },
+     "tools": {
+      "rsync": {
+       "arm": "rsync",
+       "rev": null,
+       "flags": [
+        "-a"
+       ],
+       "seconds": 66.0146,
+       "lo": 64.0495550238995,
+       "hi": 68.03996003865554,
+       "blocks": 10
+      },
+      "xs-cpp": {
+       "arm": "xs-cpp",
+       "rev": "cc8288d4f08c",
+       "flags": [
+        "-a",
+        "-j4"
+       ],
+       "seconds": 19.9833,
+       "lo": 19.57178336879825,
+       "hi": 20.403508076996,
+       "blocks": 10
+      }
+     },
+     "arms": [
+      {
+       "tool": "rsync",
+       "arm": "rsync",
+       "rev": null,
+       "flags": [
+        "-a"
+       ],
+       "seconds": 66.0146,
+       "lo": 64.0495550238995,
+       "hi": 68.03996003865554,
+       "blocks": 10
+      },
+      {
+       "tool": "xs",
+       "arm": "xs-cpp",
+       "rev": "cc8288d4f08c",
+       "flags": [
+        "-a",
+        "-j4"
+       ],
+       "seconds": 19.9833,
+       "lo": 19.57178336879825,
+       "hi": 20.403508076996,
+       "blocks": 10
+      },
+      {
+       "tool": "xs",
+       "arm": "xs-rs",
+       "rev": "ac1aeef00c80-rs",
+       "flags": [
+        "-a"
+       ],
+       "seconds": 19.8527,
+       "lo": 19.286353701970604,
+       "hi": 20.435683016111994,
+       "blocks": 10
+      }
+     ],
+     "cpp_over_rsync": 0.303
+    },
+    {
+     "home_corpus": "real-congress",
+     "experiment": "FS1-sentinel-apollo",
+     "run": "20261025T115549Z-FS1-sentinel-apollo",
+     "cell": "real-congress.fresh.mac-apollo.sender.warm",
+     "link": "mac-apollo-10g",
+     "direction": "mac>apollo",
+     "cache": "warm",
+     "conditions": {
+      "wan_delay_ms": 0,
+      "cpus": 0
+     },
+     "tools": {
+      "rsync": {
+       "arm": "rsync",
+       "rev": null,
+       "flags": [
+        "-a"
+       ],
+       "seconds": 28.7537,
+       "lo": 26.165041646121193,
+       "hi": 31.598432299004518,
+       "blocks": 10
+      },
+      "xs-cpp": {
+       "arm": "xs-cpp",
+       "rev": "cc8288d4f08c",
+       "flags": [
+        "-a",
+        "-j4"
+       ],
+       "seconds": 8.3569,
+       "lo": 6.437909410494384,
+       "hi": 10.847825345329488,
+       "blocks": 10
+      }
+     },
+     "arms": [
+      {
+       "tool": "rsync",
+       "arm": "rsync",
+       "rev": null,
+       "flags": [
+        "-a"
+       ],
+       "seconds": 28.7537,
+       "lo": 26.165041646121193,
+       "hi": 31.598432299004518,
+       "blocks": 10
+      },
+      {
+       "tool": "xs",
+       "arm": "xs-cpp",
+       "rev": "cc8288d4f08c",
+       "flags": [
+        "-a",
+        "-j4"
+       ],
+       "seconds": 8.3569,
+       "lo": 6.437909410494384,
+       "hi": 10.847825345329488,
+       "blocks": 10
+      },
+      {
+       "tool": "xs",
+       "arm": "xs-rs",
+       "rev": "ac1aeef00c80-rs",
+       "flags": [
+        "-a"
+       ],
+       "seconds": 9.8749,
+       "lo": 7.373513306581546,
+       "hi": 13.22484858385476,
+       "blocks": 10
+      }
+     ],
+     "cpp_over_rsync": 0.291
+    },
+    {
+     "home_corpus": "real-congress",
+     "experiment": "CP1-weak-receiver-apollo",
+     "run": "20261025T111624Z-CP1-weak-receiver-apollo",
+     "cell": "real-congress.fresh.mac-apollo.sender.warm",
+     "link": "mac-apollo-10g",
+     "direction": "mac>apollo",
+     "cache": "warm",
+     "conditions": {
+      "wan_delay_ms": 0,
+      "cpus": 2
+     },
+     "tools": {
+      "rsync": {
+       "arm": "rsync",
+       "rev": null,
+       "flags": [
+        "-a"
+       ],
+       "seconds": 27.62,
+       "lo": 22.41956114345855,
+       "hi": 34.02661313546023,
+       "blocks": 3
+      },
+      "xs-cpp": {
+       "arm": "xs-cpp",
+       "rev": "cc8288d4f08c",
+       "flags": [
+        "-a",
+        "-j4"
+       ],
+       "seconds": 9.7937,
+       "lo": 3.181969524192468,
+       "hi": 30.143840995422526,
+       "blocks": 3
+      }
+     },
+     "arms": [
+      {
+       "tool": "rsync",
+       "arm": "rsync",
+       "rev": null,
+       "flags": [
+        "-a"
+       ],
+       "seconds": 27.62,
+       "lo": 22.41956114345855,
+       "hi": 34.02661313546023,
+       "blocks": 3
+      },
+      {
+       "tool": "xs",
+       "arm": "xs-cpp",
+       "rev": "cc8288d4f08c",
+       "flags": [
+        "-a",
+        "-j4"
+       ],
+       "seconds": 9.7937,
+       "lo": 3.181969524192468,
+       "hi": 30.143840995422526,
+       "blocks": 3
+      },
+      {
+       "tool": "xs",
+       "arm": "xs-cpp-j2",
+       "rev": "cc8288d4f08c",
+       "flags": [
+        "-a",
+        "-j2"
+       ],
+       "seconds": 10.3043,
+       "lo": 4.47439614667578,
+       "hi": 23.73021625202241,
+       "blocks": 3
+      },
+      {
+       "tool": "xs",
+       "arm": "xs-rs",
+       "rev": "ac1aeef00c80-rs",
+       "flags": [
+        "-a"
+       ],
+       "seconds": 10.4938,
+       "lo": 3.6523825425500407,
+       "hi": 30.15007684525886,
+       "blocks": 3
+      },
+      {
+       "tool": "xs",
+       "arm": "xs-rs-j2",
+       "rev": "ac1aeef00c80-rs",
+       "flags": [
+        "-a",
+        "-j2"
+       ],
+       "seconds": 10.8912,
+       "lo": 3.2065234764107555,
+       "hi": 36.9925127583182,
+       "blocks": 3
+      }
+     ],
+     "cpp_over_rsync": 0.355
+    },
     {
      "home_corpus": "real-congress",
      "experiment": "JC1-xs-cpp-workers-apollo",
@@ -35,10 +295,10 @@
        "flags": [
         "-a"
        ],
-       "seconds": 68.543,
-       "lo": null,
-       "hi": null,
-       "blocks": 1
+       "seconds": 83.0613,
+       "lo": 38.893921002002166,
+       "hi": 177.38464234510576,
+       "blocks": 3
       },
       "xs-cpp": {
        "arm": "xs-cpp",
@@ -47,10 +307,10 @@
         "-a",
         "-j4"
        ],
-       "seconds": 20.5755,
-       "lo": null,
-       "hi": null,
-       "blocks": 1
+       "seconds": 24.1875,
+       "lo": 12.366948236931226,
+       "hi": 47.306175049726825,
+       "blocks": 3
       }
      },
      "arms": [
@@ -62,10 +322,10 @@
         "-a",
         "-j4"
        ],
-       "seconds": 20.5755,
-       "lo": null,
-       "hi": null,
-       "blocks": 1
+       "seconds": 24.1875,
+       "lo": 12.366948236931226,
+       "hi": 47.306175049726825,
+       "blocks": 3
       },
       {
        "tool": "xs",
@@ -75,10 +335,10 @@
         "-a",
         "-j1"
        ],
-       "seconds": 39.7394,
-       "lo": null,
-       "hi": null,
-       "blocks": 1
+       "seconds": 39.5947,
+       "lo": 36.900209163276664,
+       "hi": 42.48590274072835,
+       "blocks": 3
       },
       {
        "tool": "xs",
@@ -88,10 +348,10 @@
         "-a",
         "-j2"
        ],
-       "seconds": 39.8551,
-       "lo": null,
-       "hi": null,
-       "blocks": 1
+       "seconds": 30.896,
+       "lo": 17.30840985490587,
+       "hi": 55.150349149911484,
+       "blocks": 3
       },
       {
        "tool": "xs",
@@ -101,10 +361,10 @@
         "-a",
         "-j8"
        ],
-       "seconds": 21.7181,
-       "lo": null,
-       "hi": null,
-       "blocks": 1
+       "seconds": 24.8726,
+       "lo": 13.861582517777942,
+       "hi": 44.63017304273567,
+       "blocks": 3
       },
       {
        "tool": "xs",
@@ -114,10 +374,10 @@
         "-a",
         "-j16"
        ],
-       "seconds": 50.7076,
-       "lo": null,
-       "hi": null,
-       "blocks": 1
+       "seconds": 30.6612,
+       "lo": 10.387964234644976,
+       "hi": 90.4998830578132,
+       "blocks": 3
       },
       {
        "tool": "rsync",
@@ -126,13 +386,13 @@
        "flags": [
         "-a"
        ],
-       "seconds": 68.543,
-       "lo": null,
-       "hi": null,
-       "blocks": 1
+       "seconds": 83.0613,
+       "lo": 38.893921002002166,
+       "hi": 177.38464234510576,
+       "blocks": 3
       }
      ],
-     "cpp_over_rsync": 0.3
+     "cpp_over_rsync": 0.291
     },
     {
      "home_corpus": "real-congress",
@@ -153,10 +413,10 @@
        "flags": [
         "-a"
        ],
-       "seconds": 27.2409,
-       "lo": null,
-       "hi": null,
-       "blocks": 1
+       "seconds": 27.7425,
+       "lo": 24.191757255848167,
+       "hi": 31.814379940552815,
+       "blocks": 3
       },
       "xs-cpp": {
        "arm": "xs-cpp",
@@ -165,10 +425,10 @@
         "-a",
         "-j4"
        ],
-       "seconds": 6.8445,
-       "lo": null,
-       "hi": null,
-       "blocks": 1
+       "seconds": 6.6661,
+       "lo": 5.583835716060187,
+       "hi": 7.9580603872090885,
+       "blocks": 3
       }
      },
      "arms": [
@@ -180,10 +440,10 @@
         "-a",
         "-j4"
        ],
-       "seconds": 6.8445,
-       "lo": null,
-       "hi": null,
-       "blocks": 1
+       "seconds": 6.6661,
+       "lo": 5.583835716060187,
+       "hi": 7.9580603872090885,
+       "blocks": 3
       },
       {
        "tool": "xs",
@@ -193,10 +453,10 @@
         "-a",
         "-j1"
        ],
-       "seconds": 16.7993,
-       "lo": null,
-       "hi": null,
-       "blocks": 1
+       "seconds": 12.8748,
+       "lo": 7.205772293507872,
+       "hi": 23.00393047221405,
+       "blocks": 3
       },
       {
        "tool": "xs",
@@ -206,10 +466,10 @@
         "-a",
         "-j2"
        ],
-       "seconds": 8.9317,
-       "lo": null,
-       "hi": null,
-       "blocks": 1
+       "seconds": 10.6175,
+       "lo": 4.370643458905186,
+       "hi": 25.792884937812882,
+       "blocks": 3
       },
       {
        "tool": "xs",
@@ -219,10 +479,10 @@
         "-a",
         "-j8"
        ],
-       "seconds": 7.0495,
-       "lo": null,
-       "hi": null,
-       "blocks": 1
+       "seconds": 7.1301,
+       "lo": 6.151636344147673,
+       "hi": 8.264198934892393,
+       "blocks": 3
       },
       {
        "tool": "xs",
@@ -232,10 +492,10 @@
         "-a",
         "-j16"
        ],
-       "seconds": 11.2668,
-       "lo": null,
-       "hi": null,
-       "blocks": 1
+       "seconds": 9.2808,
+       "lo": 5.228607209618166,
+       "hi": 16.473542539723752,
+       "blocks": 3
       },
       {
        "tool": "rsync",
@@ -244,13 +504,13 @@
        "flags": [
         "-a"
        ],
-       "seconds": 27.2409,
-       "lo": null,
-       "hi": null,
-       "blocks": 1
+       "seconds": 27.7425,
+       "lo": 24.191757255848167,
+       "hi": 31.814379940552815,
+       "blocks": 3
       }
      ],
-     "cpp_over_rsync": 0.251
+     "cpp_over_rsync": 0.24
     },
     {
      "home_corpus": "real-congress",
@@ -588,12 +848,101 @@
       }
      ],
      "cpp_over_rsync": 0.356
+    }
+   ]
+  },
+  {
+   "lab2_cell": "congress-sample.noop.a-aws.sender.warm",
+   "corpus": "congress-sample",
+   "scenario": "noop",
+   "lab2_cpp_over_rsync": 0.44,
+   "home_corpora": [
+    "real-congress"
+   ],
+   "home": [
+    {
+     "home_corpus": "real-congress",
+     "experiment": "FS1-sentinel-apollo",
+     "run": "20261025T115549Z-FS1-sentinel-apollo",
+     "cell": "real-congress.noop.apollo-mac.receiver.warm",
+     "link": "mac-apollo-10g",
+     "direction": "apollo>mac",
+     "cache": "warm",
+     "conditions": {
+      "wan_delay_ms": 0,
+      "cpus": 0
+     },
+     "tools": {
+      "rsync": {
+       "arm": "rsync",
+       "rev": null,
+       "flags": [
+        "-a"
+       ],
+       "seconds": 4.2697,
+       "lo": 4.03927992112098,
+       "hi": 4.513301363457901,
+       "blocks": 10
+      },
+      "xs-cpp": {
+       "arm": "xs-cpp",
+       "rev": "cc8288d4f08c",
+       "flags": [
+        "-a",
+        "-j4"
+       ],
+       "seconds": 2.3405,
+       "lo": 2.2576358239417558,
+       "hi": 2.4263288086686527,
+       "blocks": 10
+      }
+     },
+     "arms": [
+      {
+       "tool": "rsync",
+       "arm": "rsync",
+       "rev": null,
+       "flags": [
+        "-a"
+       ],
+       "seconds": 4.2697,
+       "lo": 4.03927992112098,
+       "hi": 4.513301363457901,
+       "blocks": 10
+      },
+      {
+       "tool": "xs",
+       "arm": "xs-cpp",
+       "rev": "cc8288d4f08c",
+       "flags": [
+        "-a",
+        "-j4"
+       ],
+       "seconds": 2.3405,
+       "lo": 2.2576358239417558,
+       "hi": 2.4263288086686527,
+       "blocks": 10
+      },
+      {
+       "tool": "xs",
+       "arm": "xs-rs",
+       "rev": "ac1aeef00c80-rs",
+       "flags": [
+        "-a"
+       ],
+       "seconds": 1.3418,
+       "lo": 1.2961603436620583,
+       "hi": 1.389112104313727,
+       "blocks": 10
+      }
+     ],
+     "cpp_over_rsync": 0.548
     },
     {
      "home_corpus": "real-congress",
-     "experiment": "JB1-xs-rs-workers-apollo",
-     "run": "20261025T013958Z-JB1-xs-rs-workers-apollo",
-     "cell": "real-congress.fresh.mac-apollo.sender.warm",
+     "experiment": "FS1-sentinel-apollo",
+     "run": "20261025T115549Z-FS1-sentinel-apollo",
+     "cell": "real-congress.noop.mac-apollo.sender.warm",
      "link": "mac-apollo-10g",
      "direction": "mac>apollo",
      "cache": "warm",
@@ -608,25 +957,50 @@
        "flags": [
         "-a"
        ],
-       "seconds": 27.9237,
-       "lo": 25.247098882340733,
-       "hi": 30.88401955925351,
-       "blocks": 3
+       "seconds": 6.0967,
+       "lo": 5.694910580715516,
+       "hi": 6.526888778853602,
+       "blocks": 10
       },
       "xs-cpp": {
-       "arm": "xs-rs-j4",
-       "rev": "ac1aeef00c80-rs",
+       "arm": "xs-cpp",
+       "rev": "cc8288d4f08c",
        "flags": [
         "-a",
         "-j4"
        ],
-       "seconds": 8.238,
-       "lo": 1.994080451852007,
-       "hi": 34.03274102606588,
-       "blocks": 3
+       "seconds": 1.3973,
+       "lo": 1.2474699492512917,
+       "hi": 1.565220344884227,
+       "blocks": 10
       }
      },
      "arms": [
+      {
+       "tool": "rsync",
+       "arm": "rsync",
+       "rev": null,
+       "flags": [
+        "-a"
+       ],
+       "seconds": 6.0967,
+       "lo": 5.694910580715516,
+       "hi": 6.526888778853602,
+       "blocks": 10
+      },
+      {
+       "tool": "xs",
+       "arm": "xs-cpp",
+       "rev": "cc8288d4f08c",
+       "flags": [
+        "-a",
+        "-j4"
+       ],
+       "seconds": 1.3973,
+       "lo": 1.2474699492512917,
+       "hi": 1.565220344884227,
+       "blocks": 10
+      },
       {
        "tool": "xs",
        "arm": "xs-rs",
@@ -634,22 +1008,100 @@
        "flags": [
         "-a"
        ],
-       "seconds": 7.3544,
-       "lo": 2.5463299675244087,
-       "hi": 21.241159997678093,
+       "seconds": 1.2708,
+       "lo": 1.196004574149665,
+       "hi": 1.3502470783210958,
+       "blocks": 10
+      }
+     ],
+     "cpp_over_rsync": 0.229
+    },
+    {
+     "home_corpus": "real-congress",
+     "experiment": "CP1-weak-receiver-apollo",
+     "run": "20261025T111624Z-CP1-weak-receiver-apollo",
+     "cell": "real-congress.noop.mac-apollo.sender.warm",
+     "link": "mac-apollo-10g",
+     "direction": "mac>apollo",
+     "cache": "warm",
+     "conditions": {
+      "wan_delay_ms": 0,
+      "cpus": 2
+     },
+     "tools": {
+      "rsync": {
+       "arm": "rsync",
+       "rev": null,
+       "flags": [
+        "-a"
+       ],
+       "seconds": 5.6834,
+       "lo": 5.134043948490322,
+       "hi": 6.291555842159404,
+       "blocks": 3
+      },
+      "xs-cpp": {
+       "arm": "xs-cpp",
+       "rev": "cc8288d4f08c",
+       "flags": [
+        "-a",
+        "-j4"
+       ],
+       "seconds": 1.2233,
+       "lo": 1.1526902963136,
+       "hi": 1.2983262282147745,
+       "blocks": 3
+      }
+     },
+     "arms": [
+      {
+       "tool": "rsync",
+       "arm": "rsync",
+       "rev": null,
+       "flags": [
+        "-a"
+       ],
+       "seconds": 5.6834,
+       "lo": 5.134043948490322,
+       "hi": 6.291555842159404,
        "blocks": 3
       },
       {
        "tool": "xs",
-       "arm": "xs-rs-j1",
-       "rev": "ac1aeef00c80-rs",
+       "arm": "xs-cpp",
+       "rev": "cc8288d4f08c",
        "flags": [
         "-a",
-        "-j1"
+        "-j4"
        ],
-       "seconds": 15.1577,
-       "lo": 7.638495126503669,
-       "hi": 30.078789506773145,
+       "seconds": 1.2233,
+       "lo": 1.1526902963136,
+       "hi": 1.2983262282147745,
+       "blocks": 3
+      },
+      {
+       "tool": "xs",
+       "arm": "xs-cpp-j2",
+       "rev": "cc8288d4f08c",
+       "flags": [
+        "-a",
+        "-j2"
+       ],
+       "seconds": 1.7068,
+       "lo": 1.5384620573722154,
+       "hi": 1.8934973309426364,
+       "blocks": 3
+      },
+      {
+       "tool": "xs",
+       "arm": "xs-rs",
+       "rev": "ac1aeef00c80-rs",
+       "flags": [
+        "-a"
+       ],
+       "seconds": 1.1525,
+       "lo": 0.927873224952171,
+       "hi": 1.4315992622000537,
        "blocks": 3
       },
       {
@@ -660,219 +1112,14 @@
         "-a",
         "-j2"
        ],
-       "seconds": 10.3494,
-       "lo": 4.169701428084929,
-       "hi": 25.687577274561306,
-       "blocks": 3
-      },
-      {
-       "tool": "xs",
-       "arm": "xs-rs-j4",
-       "rev": "ac1aeef00c80-rs",
-       "flags": [
-        "-a",
-        "-j4"
-       ],
-       "seconds": 8.238,
-       "lo": 1.994080451852007,
-       "hi": 34.03274102606588,
-       "blocks": 3
-      },
-      {
-       "tool": "xs",
-       "arm": "xs-rs-j16",
-       "rev": "ac1aeef00c80-rs",
-       "flags": [
-        "-a",
-        "-j16"
-       ],
-       "seconds": 5.769,
-       "lo": 4.602394320471089,
-       "hi": 7.2312094418816075,
-       "blocks": 3
-      },
-      {
-       "tool": "rsync",
-       "arm": "rsync",
-       "rev": null,
-       "flags": [
-        "-a"
-       ],
-       "seconds": 27.9237,
-       "lo": 25.247098882340733,
-       "hi": 30.88401955925351,
+       "seconds": 1.6882,
+       "lo": 1.6075279738298045,
+       "hi": 1.7729607041745135,
        "blocks": 3
       }
      ],
-     "cpp_over_rsync": 0.295
+     "cpp_over_rsync": 0.215
     },
-    {
-     "home_corpus": "real-congress",
-     "experiment": "LT2-latency80-apollo",
-     "run": "20261024T182522Z-LT2-latency80-apollo",
-     "cell": "real-congress.fresh.apollo-mac.receiver.warm",
-     "link": "mac-apollo-10g",
-     "direction": "apollo>mac",
-     "cache": "warm",
-     "conditions": {
-      "wan_delay_ms": 80,
-      "cpus": 0
-     },
-     "tools": {
-      "rsync": {
-       "arm": "rsync",
-       "rev": null,
-       "flags": [
-        "-a"
-       ],
-       "seconds": 80.5888,
-       "lo": 47.69813106870027,
-       "hi": 136.15953646184906,
-       "blocks": 2
-      },
-      "xs-cpp": {
-       "arm": "xs-cpp",
-       "rev": "cc8288d4f08c",
-       "flags": [
-        "-a",
-        "-j4"
-       ],
-       "seconds": 50.892,
-       "lo": 50.28757946517052,
-       "hi": 51.50376513824815,
-       "blocks": 2
-      }
-     },
-     "arms": [
-      {
-       "tool": "rsync",
-       "arm": "rsync",
-       "rev": null,
-       "flags": [
-        "-a"
-       ],
-       "seconds": 80.5888,
-       "lo": 47.69813106870027,
-       "hi": 136.15953646184906,
-       "blocks": 2
-      },
-      {
-       "tool": "xs",
-       "arm": "xs-cpp",
-       "rev": "cc8288d4f08c",
-       "flags": [
-        "-a",
-        "-j4"
-       ],
-       "seconds": 50.892,
-       "lo": 50.28757946517052,
-       "hi": 51.50376513824815,
-       "blocks": 2
-      },
-      {
-       "tool": "xs",
-       "arm": "xs-rs",
-       "rev": "ac1aeef00c80-rs",
-       "flags": [
-        "-a"
-       ],
-       "seconds": 50.6546,
-       "lo": 50.46229460439406,
-       "hi": 50.84762335936896,
-       "blocks": 2
-      }
-     ],
-     "cpp_over_rsync": 0.632
-    },
-    {
-     "home_corpus": "real-congress",
-     "experiment": "LT2-latency80-apollo",
-     "run": "20261024T182522Z-LT2-latency80-apollo",
-     "cell": "real-congress.fresh.mac-apollo.sender.warm",
-     "link": "mac-apollo-10g",
-     "direction": "mac>apollo",
-     "cache": "warm",
-     "conditions": {
-      "wan_delay_ms": 80,
-      "cpus": 0
-     },
-     "tools": {
-      "rsync": {
-       "arm": "rsync",
-       "rev": null,
-       "flags": [
-        "-a"
-       ],
-       "seconds": 56.06,
-       "lo": null,
-       "hi": null,
-       "blocks": 1
-      },
-      "xs-cpp": {
-       "arm": "xs-cpp",
-       "rev": "cc8288d4f08c",
-       "flags": [
-        "-a",
-        "-j4"
-       ],
-       "seconds": 49.6527,
-       "lo": null,
-       "hi": null,
-       "blocks": 1
-      }
-     },
-     "arms": [
-      {
-       "tool": "rsync",
-       "arm": "rsync",
-       "rev": null,
-       "flags": [
-        "-a"
-       ],
-       "seconds": 56.06,
-       "lo": null,
-       "hi": null,
-       "blocks": 1
-      },
-      {
-       "tool": "xs",
-       "arm": "xs-cpp",
-       "rev": "cc8288d4f08c",
-       "flags": [
-        "-a",
-        "-j4"
-       ],
-       "seconds": 49.6527,
-       "lo": null,
-       "hi": null,
-       "blocks": 1
-      },
-      {
-       "tool": "xs",
-       "arm": "xs-rs",
-       "rev": "ac1aeef00c80-rs",
-       "flags": [
-        "-a"
-       ],
-       "seconds": 19.8442,
-       "lo": null,
-       "hi": null,
-       "blocks": 1
-      }
-     ],
-     "cpp_over_rsync": 0.886
-    }
-   ]
-  },
-  {
-   "lab2_cell": "congress-sample.noop.a-aws.sender.warm",
-   "corpus": "congress-sample",
-   "scenario": "noop",
-   "lab2_cpp_over_rsync": 0.44,
-   "home_corpora": [
-    "real-congress"
-   ],
-   "home": [
     {
      "home_corpus": "real-congress",
      "experiment": "LT2-latency80-apollo",
@@ -1289,279 +1536,6 @@
       }
      ],
      "cpp_over_rsync": 0.588
-    },
-    {
-     "home_corpus": "real-congress",
-     "experiment": "PR1r-pr34-regression-apollo",
-     "run": "20261024T040403Z-PR1r-pr34-regression-apollo",
-     "cell": "real-congress.noop.apollo-mac.receiver.warm",
-     "link": "mac-apollo-10g",
-     "direction": "apollo>mac",
-     "cache": "warm",
-     "conditions": {
-      "wan_delay_ms": 0,
-      "cpus": 0
-     },
-     "tools": {
-      "rsync": {
-       "arm": "rsync",
-       "rev": null,
-       "flags": [
-        "-a"
-       ],
-       "seconds": 4.6585,
-       "lo": 4.46842555405099,
-       "hi": 4.856555838798086,
-       "blocks": 8
-      },
-      "xs-cpp": {
-       "arm": "xs-rs-base",
-       "rev": "e671c84aa680-rs",
-       "flags": [
-        "-a",
-        "-j4"
-       ],
-       "seconds": 1.6951,
-       "lo": 1.5276654935440233,
-       "hi": 1.8808369415448096,
-       "blocks": 8
-      }
-     },
-     "arms": [
-      {
-       "tool": "xs",
-       "arm": "xs-rs-base",
-       "rev": "e671c84aa680-rs",
-       "flags": [
-        "-a",
-        "-j4"
-       ],
-       "seconds": 1.6951,
-       "lo": 1.5276654935440233,
-       "hi": 1.8808369415448096,
-       "blocks": 8
-      },
-      {
-       "tool": "xs",
-       "arm": "xs-rs",
-       "rev": "ac1aeef00c80-rs",
-       "flags": [
-        "-a"
-       ],
-       "seconds": 1.6199,
-       "lo": 1.4360658583822872,
-       "hi": 1.8272738637005024,
-       "blocks": 8
-      },
-      {
-       "tool": "xs",
-       "arm": "xs-rs-j4",
-       "rev": "ac1aeef00c80-rs",
-       "flags": [
-        "-a",
-        "-j4"
-       ],
-       "seconds": 1.619,
-       "lo": 1.4880929240662601,
-       "hi": 1.7614804462079567,
-       "blocks": 8
-      },
-      {
-       "tool": "rsync",
-       "arm": "rsync",
-       "rev": null,
-       "flags": [
-        "-a"
-       ],
-       "seconds": 4.6585,
-       "lo": 4.46842555405099,
-       "hi": 4.856555838798086,
-       "blocks": 8
-      }
-     ],
-     "cpp_over_rsync": 0.364
-    },
-    {
-     "home_corpus": "real-congress",
-     "experiment": "PR1r-pr34-regression-apollo",
-     "run": "20261024T040403Z-PR1r-pr34-regression-apollo",
-     "cell": "real-congress.noop.mac-apollo.sender.warm",
-     "link": "mac-apollo-10g",
-     "direction": "mac>apollo",
-     "cache": "warm",
-     "conditions": {
-      "wan_delay_ms": 0,
-      "cpus": 0
-     },
-     "tools": {
-      "rsync": {
-       "arm": "rsync",
-       "rev": null,
-       "flags": [
-        "-a"
-       ],
-       "seconds": 6.7031,
-       "lo": 6.10143861674457,
-       "hi": 7.364106743157229,
-       "blocks": 8
-      },
-      "xs-cpp": {
-       "arm": "xs-rs-base",
-       "rev": "e671c84aa680-rs",
-       "flags": [
-        "-a",
-        "-j4"
-       ],
-       "seconds": 1.5619,
-       "lo": 1.3139158486019524,
-       "hi": 1.856799719973431,
-       "blocks": 8
-      }
-     },
-     "arms": [
-      {
-       "tool": "xs",
-       "arm": "xs-rs-base",
-       "rev": "e671c84aa680-rs",
-       "flags": [
-        "-a",
-        "-j4"
-       ],
-       "seconds": 1.5619,
-       "lo": 1.3139158486019524,
-       "hi": 1.856799719973431,
-       "blocks": 8
-      },
-      {
-       "tool": "xs",
-       "arm": "xs-rs",
-       "rev": "ac1aeef00c80-rs",
-       "flags": [
-        "-a"
-       ],
-       "seconds": 1.2669,
-       "lo": 1.1135303634701426,
-       "hi": 1.4414798138110934,
-       "blocks": 8
-      },
-      {
-       "tool": "xs",
-       "arm": "xs-rs-j4",
-       "rev": "ac1aeef00c80-rs",
-       "flags": [
-        "-a",
-        "-j4"
-       ],
-       "seconds": 1.6184,
-       "lo": 1.3961907636211128,
-       "hi": 1.8760367214062155,
-       "blocks": 8
-      },
-      {
-       "tool": "rsync",
-       "arm": "rsync",
-       "rev": null,
-       "flags": [
-        "-a"
-       ],
-       "seconds": 6.7031,
-       "lo": 6.10143861674457,
-       "hi": 7.364106743157229,
-       "blocks": 8
-      }
-     ],
-     "cpp_over_rsync": 0.233
-    },
-    {
-     "home_corpus": "real-congress",
-     "experiment": "PR1-pr34-vs-base-apollo",
-     "run": "20261024T025320Z-PR1-pr34-vs-base-apollo",
-     "cell": "real-congress.noop.apollo-mac.receiver.warm",
-     "link": "mac-apollo-10g",
-     "direction": "apollo>mac",
-     "cache": "warm",
-     "conditions": {
-      "wan_delay_ms": 0,
-      "cpus": 0
-     },
-     "tools": {
-      "rsync": {
-       "arm": "rsync",
-       "rev": null,
-       "flags": [
-        "-a"
-       ],
-       "seconds": 4.5125,
-       "lo": 2.9718439096105778,
-       "hi": 6.85190724958269,
-       "blocks": 3
-      },
-      "xs-cpp": {
-       "arm": "xs-rs-base",
-       "rev": "e671c84aa680-rs",
-       "flags": [
-        "-a",
-        "-j4"
-       ],
-       "seconds": 1.6966,
-       "lo": 1.0895340160107914,
-       "hi": 2.6418369251479286,
-       "blocks": 3
-      }
-     },
-     "arms": [
-      {
-       "tool": "xs",
-       "arm": "xs-rs-base",
-       "rev": "e671c84aa680-rs",
-       "flags": [
-        "-a",
-        "-j4"
-       ],
-       "seconds": 1.6966,
-       "lo": 1.0895340160107914,
-       "hi": 2.6418369251479286,
-       "blocks": 3
-      },
-      {
-       "tool": "xs",
-       "arm": "xs-rs",
-       "rev": "ac1aeef00c80-rs",
-       "flags": [
-        "-a"
-       ],
-       "seconds": 1.6282,
-       "lo": 0.9513329365629687,
-       "hi": 2.786593272377101,
-       "blocks": 3
-      },
-      {
-       "tool": "xs",
-       "arm": "xs-rs-j4",
-       "rev": "ac1aeef00c80-rs",
-       "flags": [
-        "-a",
-        "-j4"
-       ],
-       "seconds": 1.5736,
-       "lo": 1.4096082692760827,
-       "hi": 1.7566846176023532,
-       "blocks": 3
-      },
-      {
-       "tool": "rsync",
-       "arm": "rsync",
-       "rev": null,
-       "flags": [
-        "-a"
-       ],
-       "seconds": 4.5125,
-       "lo": 2.9718439096105778,
-       "hi": 6.85190724958269,
-       "blocks": 3
-      }
-     ],
-     "cpp_over_rsync": 0.376
     }
    ]
   },

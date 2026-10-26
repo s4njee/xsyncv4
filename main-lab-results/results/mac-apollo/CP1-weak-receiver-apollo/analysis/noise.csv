@@ -1,0 +1,13 @@
+experiment,kind,cell_id,corpus,scenario,sender,receiver,client,link,cache,arm,n_blocks,sigma_d,blocks_for_2pct,blocks_for_3pct,blocks_for_5pct,blocks_for_10pct,blocks_equivalent_2pct,blocks_equivalent_3pct,blocks_equivalent_5pct,blocks_equivalent_10pct
+CP1-weak-receiver-apollo,screening,local-laikav2.noop.mac-apollo.sender.warm,local-laikav2,noop,mac,apollo,sender,mac-apollo-10g,warm,xs-cpp,3,0.051000244917586625,55,26,11,8,72,34,14,8
+CP1-weak-receiver-apollo,screening,local-laikav2.noop.mac-apollo.sender.warm,local-laikav2,noop,mac,apollo,sender,mac-apollo-10g,warm,xs-cpp-j2,3,0.02721283572488352,17,9,8,8,22,11,8,8
+CP1-weak-receiver-apollo,screening,local-laikav2.noop.mac-apollo.sender.warm,local-laikav2,noop,mac,apollo,sender,mac-apollo-10g,warm,xs-rs,3,0.15495515415166047,483,218,82,23,646,291,108,30
+CP1-weak-receiver-apollo,screening,local-laikav2.noop.mac-apollo.sender.warm,local-laikav2,noop,mac,apollo,sender,mac-apollo-10g,warm,xs-rs-j2,3,0.006721016221786093,8,8,8,8,8,8,8,8
+CP1-weak-receiver-apollo,screening,real-congress.fresh.mac-apollo.sender.warm,real-congress,fresh,mac,apollo,sender,mac-apollo-10g,warm,xs-cpp,3,0.46983137643874706,4416,1983,730,193,5917,2657,977,258
+CP1-weak-receiver-apollo,screening,real-congress.fresh.mac-apollo.sender.warm,real-congress,fresh,mac,apollo,sender,mac-apollo-10g,warm,xs-cpp-j2,3,0.2577228123288978,1330,599,221,60,1782,801,296,79
+CP1-weak-receiver-apollo,screening,real-congress.fresh.mac-apollo.sender.warm,real-congress,fresh,mac,apollo,sender,mac-apollo-10g,warm,xs-rs,3,0.35343342679143513,2500,1123,414,110,3350,1505,554,147
+CP1-weak-receiver-apollo,screening,real-congress.fresh.mac-apollo.sender.warm,real-congress,fresh,mac,apollo,sender,mac-apollo-10g,warm,xs-rs-j2,3,0.5154844848601552,5315,2387,878,232,7123,3198,1175,310
+CP1-weak-receiver-apollo,screening,real-congress.noop.mac-apollo.sender.warm,real-congress,noop,mac,apollo,sender,mac-apollo-10g,warm,xs-cpp,3,0.052202497569006204,57,27,11,8,76,35,15,8
+CP1-weak-receiver-apollo,screening,real-congress.noop.mac-apollo.sender.warm,real-congress,noop,mac,apollo,sender,mac-apollo-10g,warm,xs-cpp-j2,3,0.07399042316828763,112,52,21,8,149,68,27,9
+CP1-weak-receiver-apollo,screening,real-congress.noop.mac-apollo.sender.warm,real-congress,noop,mac,apollo,sender,mac-apollo-10g,warm,xs-rs,3,0.12105898563383823,295,134,51,15,395,179,67,19
+CP1-weak-receiver-apollo,screening,real-congress.noop.mac-apollo.sender.warm,real-congress,noop,mac,apollo,sender,mac-apollo-10g,warm,xs-rs-j2,3,0.057300915268886844,68,32,13,8,90,42,17,8
