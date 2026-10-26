@@ -1,0 +1,19 @@
+{
+ "experiment": "AP10251655-A10251652-lk-fresh-j2-12b",
+ "kind": "screening",
+ "hypothesis": "On laikav2-sample fresh, lowering xs-rs to -j2 reduces contention on the scan/transfer mix; xs-rs-j2 finishes at or below 0.95 of xs-c++'s durable time while the default -j4 arm remains near 0.97.",
+ "primary": "durable_s",
+ "control": "rsync",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261025T165502Z-AP10251655-A10251652-lk-fresh-j2-12b"
+ ],
+ "spec_sha256": [
+  "c431523848c004333a192f20a24adf82348c35e60b74198abc5e560e12721b66"
+ ],
+ "valid_blocks": 12,
+ "void_attempts": 0,
+ "void_reasons": []
+}

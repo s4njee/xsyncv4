@@ -1,0 +1,38 @@
+# Written by the 6-hourly planner (2026-10-26T04:54Z). Why: Follows the 12-block laikav2 fresh screen where -j2 beat default and xs-c++ by 8-12%; congress-sample fresh is the per-file-bound counterpart, and the queued j8 screen brackets the other direction.
+id = "AP10260454-A1026-cg-fresh-j2-8b"
+kind = "screening"
+hypothesis = "If lower job concurrency reduces scan/transfer contention generally, xs-rs-j2 will finish at or below 0.95 of default xs-rs's durable time and remain faster than xs-c++; if per-file listing dominates congress-sample fresh, the two xs-rs arms will be within noise."
+primary = "durable_s"
+delta = 0.05
+blocks = 8
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+sample_timeout_s = 7200
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[arms.xs-cpp]
+tool = "xs"
+rev = "e104bde552f2"
+flags = ["-a", "-j4"]
+
+[arms.xs-rs]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j4"]
+
+[arms.xs-rs-j2]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j2"]
+
+[matrix]
+link = "a-aws"
+corpus = ["congress-sample"]
+scenario = ["fresh"]
+direction = ["a>aws"]
+client = ["initiator"]
+cache = ["warm"]
