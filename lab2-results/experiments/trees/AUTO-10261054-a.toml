@@ -1,0 +1,13 @@
+# Written by the 6-hourly planner at 2026-10-26T10:54Z for a; nothing is queued after the deadline.
+id = "AUTO-10261054-a"
+question = "Runner a has 4.9 h of measurement room after its 1.1 h backlog, but it is write-budget-bound rather than time-bound. I add only two non-duplicative screens totaling roughly 15 GiB: a 2-block real-projects fresh race against the only transfer cell xs-c++ wins, and an 8-block laikav2 update-0p1pct race testing whether the promising -j2 setting converts a 0.952 near-tie into a clear win. Both avoid the queued default, -j8, and -z pins, leave no-op cells postponed, and set no confirm arm because no absolute speed floor is known; engineering and port are null by the lab rules."
+deadline = "2026-10-26T16:54Z"
+start = ["N0", "N1"]
+
+[nodes.N0]
+spec = "auto/AP10261054-PLAN10261052-a-rp-fresh-j2-2b.toml"
+question = "On real-projects fresh, does lowering xs-rs to -j2 close the gap to xs-c++ that the queued default and -j8 screens leave open?"
+
+[nodes.N1]
+spec = "auto/AP10261054-PLAN10261052-a-lk-u01pct-j2-8b.toml"
+question = "On laikav2-sample update-0p1pct, does the promising -j2 setting turn the current default near-tie against xs-c++ into a clear xs-rs win?"

@@ -1,0 +1,33 @@
+# Written by the 6-hourly planner (2026-10-26T10:54Z). Why: Real-projects fresh is the only transfer cell xs-c++ wins, and the latest laikav2 fresh result makes -j2 the most promising untried setting for the mixed-tree loss. Whitespace added here only for readability in this plan draft does not affect the JSON payload.
+id = "AP10261054-PLAN10261052-a-rp-fresh-j2-2b"
+kind = "screening"
+hypothesis = "If xs-rs's real-projects fresh loss is partly contention from many directories and files, xs-rs-j2 will finish at or below xs-c++'s durable time or at least cut the current 1.461 ratio substantially; if the loss is per-file/scan overhead, lower jobs will be neutral and the cell remains xs-cpp's."
+primary = "durable_s"
+delta = 0.05
+blocks = 2
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+sample_timeout_s = 7200
+
+[arms.xs-rs-j2]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j2"]
+
+[arms.xs-cpp]
+tool = "xs"
+rev = "e104bde552f2"
+flags = ["-a", "-j4"]
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[matrix]
+link = "a-aws"
+corpus = ["real-projects"]
+scenario = ["fresh"]
+direction = ["a>aws"]
+client = ["initiator"]
+cache = ["warm"]

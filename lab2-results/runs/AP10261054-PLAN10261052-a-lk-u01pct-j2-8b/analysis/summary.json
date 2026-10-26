@@ -1,0 +1,19 @@
+{
+ "experiment": "AP10261054-PLAN10261052-a-lk-u01pct-j2-8b",
+ "kind": "screening",
+ "hypothesis": "If the 0.952 default near-tie on laikav2 update-0p1pct is limited by transfer contention during a mostly-scanning update, xs-rs-j2 will finish at or below 0.95 of xs-c++'s durable time with an interval below 1; if scan and metadata dominate, jobs will be neutral and the cell remains a tie.",
+ "primary": "durable_s",
+ "control": "rsync",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261026T105455Z-AP10261054-PLAN10261052-a-lk-u01pct-j2-8b"
+ ],
+ "spec_sha256": [
+  "13fdc8d8ea03b97ce7b859ee5a3507f2efe63cdd6d70bb4a75d6fd1b0eac0f57"
+ ],
+ "valid_blocks": 8,
+ "void_attempts": 0,
+ "void_reasons": []
+}

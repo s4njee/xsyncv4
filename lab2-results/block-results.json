@@ -3692,6 +3692,80 @@
    "model": "opencode/deepseek-v4.1-flash",
    "summarizedUtc": 1792988959.976,
    "driver": "a"
+  },
+  "AP10261054-PLAN10261052-a-lk-u01pct-j2-8b": {
+   "run": "20261026T105455Z-AP10261054-PLAN10261052-a-lk-u01pct-j2-8b",
+   "experiment": "AP10261054-PLAN10261052-a-lk-u01pct-j2-8b",
+   "key": "laikav2-sample.update-0p1pct.a-aws.sender.warm|7|0",
+   "utc": 1793012249.811,
+   "cell": "laikav2-sample.update-0p1pct.a-aws.sender.warm",
+   "factors": {
+    "corpus": "laikav2-sample",
+    "scenario": "update-0p1pct",
+    "sender": "a",
+    "receiver": "aws",
+    "client": "sender",
+    "link": "a-aws",
+    "cache": "warm"
+   },
+   "block": 7,
+   "attempt": 0,
+   "control": "rsync",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "xs-rs-j2",
+     "label": "xs-rs -j2",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.343,
+     "gbps": 0.003,
+     "files_per_s": 3895,
+     "speed": 1.3
+    },
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.42,
+     "gbps": 0.003,
+     "files_per_s": 3186,
+     "speed": 1.06
+    },
+    {
+     "arm": "rsync",
+     "label": "rsync",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 0.446,
+     "gbps": 0.003,
+     "files_per_s": 2997,
+     "speed": 1
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "speed": 1.16,
+     "blocks": 8
+    },
+    {
+     "arm": "xs-rs-j2",
+     "label": "xs-rs -j2",
+     "speed": 1.28,
+     "blocks": 8
+    }
+   ],
+   "question": "On laikav2-sample update-0p1pct, does the promising -j2 setting turn the current default near-tie against xs-c++ into a clear xs-rs win?",
+   "summary": "This block showed xs-rs -j2 fastest at 1.30x versus control, with xs-c++ at 1.06x (0.343s vs 0.420s). Across eight blocks in this cell, cumulative ratios are 1.28x for xs-rs -j2 and 1.16x for xs-c++, so the lead is consistent but modest. It bears on the question by favoring -j2 over xs-c++ in both this block and cumulatively, though the numbers do not show a decisive break from near-tie.",
+   "model": "opencode/deepseek-v4.1-flash",
+   "summarizedUtc": 1793012313.967,
+   "driver": "a"
   }
  }
 }
