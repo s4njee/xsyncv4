@@ -1,5 +1,5 @@
 {
- "updated": "2026-10-26T19:12:27+00:00",
+ "updated": "2026-10-26T20:12:28+00:00",
  "enabled": true,
  "cpp_rev": "e104bde552f2",
  "rs": {
@@ -471,8 +471,8 @@
    "scenario": "update-1pct",
    "link": "a-aws",
    "metric": "durable_s",
-   "experiment": "AP10250454-A1025-lk-u1pct-j2-8b",
-   "run": "20261025T045421Z-AP10250454-A1025-lk-u1pct-j2-8b",
+   "experiment": "AP10251054-AP10251052-A1025-lk-u1pct-z8b",
+   "run": "20261025T105410Z-AP10251054-AP10251052-A1025-lk-u1pct-z8b",
    "tools": {
     "rsync": {
      "arm": "rsync",
@@ -480,20 +480,20 @@
       "-a"
      ],
      "rev": null,
-     "seconds": 0.474,
-     "lo": 0.451,
-     "hi": 0.497,
+     "seconds": 0.479,
+     "lo": 0.467,
+     "hi": 0.491,
      "blocks": 8
     },
     "xs-rs": {
-     "arm": "xs-rs-j2",
+     "arm": "xs-rs",
      "flags": [
       "-a",
-      "-j2"
+      "-j4"
      ],
      "rev": "beabaee992b6-rs",
-     "seconds": 0.37,
-     "lo": 0.352,
+     "seconds": 0.381,
+     "lo": 0.373,
      "hi": 0.389,
      "blocks": 8
     },
@@ -504,15 +504,15 @@
       "-j4"
      ],
      "rev": "e104bde552f2",
-     "seconds": 0.409,
-     "lo": 0.394,
-     "hi": 0.424,
+     "seconds": 0.416,
+     "lo": 0.396,
+     "hi": 0.437,
      "blocks": 8
     }
    },
    "verdict": "xs-rs",
-   "rs_vs_cpp": 0.905,
-   "rs_vs_rsync": 0.781,
+   "rs_vs_cpp": 0.916,
+   "rs_vs_rsync": 0.795,
    "fastest": "xs-rs"
   },
   {

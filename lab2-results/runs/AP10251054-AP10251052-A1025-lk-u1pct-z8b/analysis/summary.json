@@ -1,0 +1,19 @@
+{
+ "experiment": "AP10251054-AP10251052-A1025-lk-u1pct-z8b",
+ "kind": "screening",
+ "hypothesis": "At 1% churn there is little data to compress, so -z adds CPU without shrinking the transfer: xs-rs-z lands within 3% of plain xs-rs and both stay near 0.93 of xs-c++; a larger effect would mean the update path is wire-bound after all.",
+ "primary": "durable_s",
+ "control": "rsync",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261025T105410Z-AP10251054-AP10251052-A1025-lk-u1pct-z8b"
+ ],
+ "spec_sha256": [
+  "1a47f13a323763a5dab08b2be9010f2bf4030a52971c6b440a9f86ba52d072dd"
+ ],
+ "valid_blocks": 8,
+ "void_attempts": 0,
+ "void_reasons": []
+}
