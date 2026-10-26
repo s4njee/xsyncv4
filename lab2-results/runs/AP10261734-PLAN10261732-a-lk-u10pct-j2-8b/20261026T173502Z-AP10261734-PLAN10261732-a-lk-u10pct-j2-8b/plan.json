@@ -1,0 +1,355 @@
+{
+ "schema": 1,
+ "experiment": "AP10261734-PLAN10261732-a-lk-u10pct-j2-8b",
+ "spec_sha256": "3285d7b593754cbc6f51ee5cf2f175c07cf052e3dc960f58abfde45ccd75b4f7",
+ "kind": "screening",
+ "bundle": "8c31998a8567",
+ "writes": {
+  "a": 0,
+  "aws": 6390078388
+ },
+ "hypothesis": "The jobs optimum may depend on churn: -j2 helped low-churn laikav2 updates but -j8 helped update-10pct. A paired 8-block race will show whether -j2 is neutral or worse than default on 10pct churn, which would rule out a universal -j2 default.",
+ "primary": "durable_s",
+ "delta": 0.05,
+ "control": "rsync",
+ "seed": 73640,
+ "run_id": "20261026T173502Z-AP10261734-PLAN10261732-a-lk-u10pct-j2-8b",
+ "driver": "a",
+ "sample_timeout_s": 7200,
+ "results": "vps",
+ "background": false,
+ "local_link": false,
+ "eager_cleanup": true,
+ "hours": null,
+ "hosts": {
+  "a": {
+   "system": "Linux"
+  },
+  "aws": {
+   "system": "Linux"
+  }
+ },
+ "links": {
+  "a-aws": {
+   "hosts": [
+    "a",
+    "aws"
+   ],
+   "medium": "internet",
+   "initiator": "a",
+   "driver": "a",
+   "results": "vps",
+   "directions": [
+    "a>aws"
+   ]
+  }
+ },
+ "arms": [
+  {
+   "name": "xs-rs",
+   "tool": "xs",
+   "flags": [
+    "-a",
+    "-j4"
+   ],
+   "rev": "beabaee992b6-rs",
+   "binary": {
+    "a": "~/benchmarks/lab/bin/xs-beabaee992b6-rs",
+    "aws": "~/benchmarks/lab/bin/xs-beabaee992b6-rs"
+   },
+   "sha256": {
+    "a": "e9e1414ab5187eba59c216c0105ead48cfd29827f3f13c30c2a784abb0b16751",
+    "aws": "dc3a670849354a8ecfa1eead4d021e5373752eae1b90a645d03fe4159376a088"
+   },
+   "artifacts": {
+    "xs-linux-amd64": "e9e1414ab5187eba59c216c0105ead48cfd29827f3f13c30c2a784abb0b16751",
+    "xs-linux-arm64": "dc3a670849354a8ecfa1eead4d021e5373752eae1b90a645d03fe4159376a088"
+   }
+  },
+  {
+   "name": "xs-rs-j2",
+   "tool": "xs",
+   "flags": [
+    "-a",
+    "-j2"
+   ],
+   "rev": "beabaee992b6-rs",
+   "binary": {
+    "a": "~/benchmarks/lab/bin/xs-beabaee992b6-rs",
+    "aws": "~/benchmarks/lab/bin/xs-beabaee992b6-rs"
+   },
+   "sha256": {
+    "a": "e9e1414ab5187eba59c216c0105ead48cfd29827f3f13c30c2a784abb0b16751",
+    "aws": "dc3a670849354a8ecfa1eead4d021e5373752eae1b90a645d03fe4159376a088"
+   },
+   "artifacts": {
+    "xs-linux-amd64": "e9e1414ab5187eba59c216c0105ead48cfd29827f3f13c30c2a784abb0b16751",
+    "xs-linux-arm64": "dc3a670849354a8ecfa1eead4d021e5373752eae1b90a645d03fe4159376a088"
+   }
+  },
+  {
+   "name": "xs-cpp",
+   "tool": "xs",
+   "flags": [
+    "-a",
+    "-j4"
+   ],
+   "rev": "e104bde552f2",
+   "binary": {
+    "a": "~/benchmarks/lab/bin/xs-e104bde552f2",
+    "aws": "~/benchmarks/lab/bin/xs-e104bde552f2"
+   },
+   "sha256": {
+    "a": "48defcf62a87a47219734bfc2df96348cc951ac91c79c3da315eade8996690c7",
+    "aws": "a6ace325e82aea15650fc7700c5d3b5d90c4974e5cac5c31e97a9f3fdd68e924"
+   },
+   "artifacts": {
+    "xs-linux-amd64": "48defcf62a87a47219734bfc2df96348cc951ac91c79c3da315eade8996690c7",
+    "xs-linux-arm64": "a6ace325e82aea15650fc7700c5d3b5d90c4974e5cac5c31e97a9f3fdd68e924"
+   }
+  },
+  {
+   "name": "rsync",
+   "tool": "rsync",
+   "flags": [
+    "-a"
+   ],
+   "binary": {
+    "a": "rsync",
+    "aws": "rsync"
+   }
+  }
+ ],
+ "cells": [
+  {
+   "id": "laikav2-sample.update-10pct.a-aws.sender.warm",
+   "corpus": "laikav2-sample",
+   "scenario": "update-10pct",
+   "sender": "a",
+   "receiver": "aws",
+   "client": "sender",
+   "link": "a-aws",
+   "cache": "warm"
+  }
+ ],
+ "corpora": {
+  "laikav2-sample": {
+   "files": 1337,
+   "directories": 129,
+   "bytes": 93971741,
+   "digest": "8a8a292b04ba5560eea28cbfdb39b07ea11c2a8bf23c0e215095c53fab9932e3",
+   "quick_digest": "ce8f999b0213ad221ccc047c81330378acb07563e106afb6da63ac480fcb40ca"
+  }
+ },
+ "blocks": [
+  {
+   "cell": "laikav2-sample.update-10pct.a-aws.sender.warm",
+   "block": 0,
+   "verify_full": true,
+   "orders": [
+    [
+     "rsync",
+     "xs-rs",
+     "xs-rs-j2",
+     "xs-cpp"
+    ],
+    [
+     "rsync",
+     "xs-rs",
+     "xs-rs-j2",
+     "xs-cpp"
+    ],
+    [
+     "xs-rs-j2",
+     "xs-cpp",
+     "xs-rs",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "laikav2-sample.update-10pct.a-aws.sender.warm",
+   "block": 1,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync",
+     "xs-rs",
+     "xs-cpp",
+     "xs-rs-j2"
+    ],
+    [
+     "xs-cpp",
+     "xs-rs-j2",
+     "rsync",
+     "xs-rs"
+    ],
+    [
+     "xs-rs-j2",
+     "rsync",
+     "xs-cpp",
+     "xs-rs"
+    ]
+   ]
+  },
+  {
+   "cell": "laikav2-sample.update-10pct.a-aws.sender.warm",
+   "block": 2,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-cpp",
+     "rsync",
+     "xs-rs",
+     "xs-rs-j2"
+    ],
+    [
+     "xs-rs-j2",
+     "rsync",
+     "xs-cpp",
+     "xs-rs"
+    ],
+    [
+     "rsync",
+     "xs-rs",
+     "xs-rs-j2",
+     "xs-cpp"
+    ]
+   ]
+  },
+  {
+   "cell": "laikav2-sample.update-10pct.a-aws.sender.warm",
+   "block": 3,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-rs-j2",
+     "rsync",
+     "xs-rs",
+     "xs-cpp"
+    ],
+    [
+     "xs-cpp",
+     "xs-rs",
+     "xs-rs-j2",
+     "rsync"
+    ],
+    [
+     "xs-rs",
+     "rsync",
+     "xs-cpp",
+     "xs-rs-j2"
+    ]
+   ]
+  },
+  {
+   "cell": "laikav2-sample.update-10pct.a-aws.sender.warm",
+   "block": 4,
+   "verify_full": false,
+   "orders": [
+    [
+     "rsync",
+     "xs-rs",
+     "xs-rs-j2",
+     "xs-cpp"
+    ],
+    [
+     "xs-rs-j2",
+     "xs-rs",
+     "rsync",
+     "xs-cpp"
+    ],
+    [
+     "rsync",
+     "xs-cpp",
+     "xs-rs",
+     "xs-rs-j2"
+    ]
+   ]
+  },
+  {
+   "cell": "laikav2-sample.update-10pct.a-aws.sender.warm",
+   "block": 5,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-rs-j2",
+     "xs-rs",
+     "xs-cpp",
+     "rsync"
+    ],
+    [
+     "xs-rs",
+     "xs-cpp",
+     "rsync",
+     "xs-rs-j2"
+    ],
+    [
+     "xs-rs",
+     "xs-cpp",
+     "xs-rs-j2",
+     "rsync"
+    ]
+   ]
+  },
+  {
+   "cell": "laikav2-sample.update-10pct.a-aws.sender.warm",
+   "block": 6,
+   "verify_full": false,
+   "orders": [
+    [
+     "xs-rs",
+     "xs-cpp",
+     "xs-rs-j2",
+     "rsync"
+    ],
+    [
+     "xs-rs-j2",
+     "xs-cpp",
+     "xs-rs",
+     "rsync"
+    ],
+    [
+     "xs-rs-j2",
+     "rsync",
+     "xs-rs",
+     "xs-cpp"
+    ]
+   ]
+  },
+  {
+   "cell": "laikav2-sample.update-10pct.a-aws.sender.warm",
+   "block": 7,
+   "verify_full": true,
+   "orders": [
+    [
+     "xs-rs",
+     "xs-rs-j2",
+     "xs-cpp",
+     "rsync"
+    ],
+    [
+     "xs-cpp",
+     "xs-rs",
+     "xs-rs-j2",
+     "rsync"
+    ],
+    [
+     "xs-cpp",
+     "rsync",
+     "xs-rs-j2",
+     "xs-rs"
+    ]
+   ]
+  }
+ ],
+ "scripts": {
+  "probe.py": "a89b145b8f76fc4d5444cea6af3c124a5b2e5885226998c726ca95fd9d881d36",
+  "corpus.py": "410aa282e29466cbe0b4134c6c520a1eeaded966b1710941382730f89f27125c",
+  "corpora.json": "ea2e4dbcb956564354ed3c254ec38563f44612cf21f4d9b1234822894bfc99bc",
+  "agent.py": "d8e49fdc54233a7a5397e0a87689451ee02cb9225472178044a7e60df3f38120",
+  "runner.py": "2c082a47aa69e051fdfd82f5535959f9e35d7b8b6038ff46db269aa404f151cb",
+  "xspipe.py": "94b3fccfc6e994d227077c453f90323ab55337fd8a98231d16a10696e8ebab6b",
+  "measure.py": "5065310f480ff1cabfa7c645f0db342624a02f9a081b96069d50d52b3d224777"
+ }
+}

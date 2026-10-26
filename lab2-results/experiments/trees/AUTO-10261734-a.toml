@@ -1,0 +1,17 @@
+# Written by the 6-hourly planner at 2026-10-26T17:34Z for a; nothing is queued after the deadline.
+id = "AUTO-10261734-a"
+question = "Runner a has no current run and 1.1 h of queued work, leaving 4.9 h of window room; these three screens cost only about 0.2 h at the listed minutes per sample. The binding constraint is A's 32 GiB/day write budget, so I use only laikav2-sample and congress-sample and add no real-projects or no-op work: the new traffic is roughly 15 GB, well below the heavy queued real-projects fresh copy. I do not duplicate the queued congress fresh -j2, congress update-1pct/10pct, laikav2 update-0p1pct default pin, laikav2 update-1pct -z, laikav2 update-10pct z/-j8 interaction, or any real-projects screening. All experiments are non-fronted because the backlog also contains port/baseline runs, not only earlier planner windows. Engineering is null because engineering.can_open is false and xs-c++ is the fixed reference; port is null because port.next is null."
+deadline = "2026-10-26T23:34Z"
+start = ["N0", "N1", "N2"]
+
+[nodes.N0]
+spec = "auto/AP10261734-PLAN10261732-a-lk-fresh-j2-pin-12b.toml"
+question = "On laikav2-sample fresh, does xs-rs -j2 separate from the default -j4 and beat xs-c++ by at least 5%, or is the earlier -j2 win within noise?"
+
+[nodes.N1]
+spec = "auto/AP10261734-PLAN10261732-a-cg-u01pct-j2-8b.toml"
+question = "On congress-sample update-0p1pct, does xs-rs -j2 beat xs-c++ by at least 5% on a per-file-bound low-churn update, or is the laikav2 -j2 gain specific to larger files?"
+
+[nodes.N2]
+spec = "auto/AP10261734-PLAN10261732-a-lk-u10pct-j2-8b.toml"
+question = "On laikav2-sample update-10pct, does xs-rs -j2 help or hurt relative to the default when churn is high, and does it beat xs-c++?"
