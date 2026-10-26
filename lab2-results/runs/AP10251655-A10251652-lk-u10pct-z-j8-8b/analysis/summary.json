@@ -1,0 +1,19 @@
+{
+ "experiment": "AP10251655-A10251652-lk-u10pct-z-j8-8b",
+ "kind": "screening",
+ "hypothesis": "On laikav2-sample update-10pct, -z at the default -j4 cuts enough changed-byte wire time for xs-rs to clear the 5% margin over xs-c++, and adding -z to the already-winning -j8 arm makes xs-rs-j8z faster than xs-rs-j8.",
+ "primary": "durable_s",
+ "control": "rsync",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261025T165503Z-AP10251655-A10251652-lk-u10pct-z-j8-8b"
+ ],
+ "spec_sha256": [
+  "46017129b63af2419c34a9bd81fb934f9dfb2178c3acd77d5222271d162b9355"
+ ],
+ "valid_blocks": 8,
+ "void_attempts": 0,
+ "void_reasons": []
+}

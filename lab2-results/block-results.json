@@ -3476,6 +3476,131 @@
    "model": "opencode/deepseek-v4.1-flash",
    "summarizedUtc": 1792933965.974,
    "driver": "a"
+  },
+  "AP10251655-A10251652-lk-u10pct-z-j8-8b": {
+   "run": "20261025T165503Z-AP10251655-A10251652-lk-u10pct-z-j8-8b",
+   "experiment": "AP10251655-A10251652-lk-u10pct-z-j8-8b",
+   "key": "laikav2-sample.update-10pct.a-aws.sender.warm|6|0",
+   "utc": 1792982953.683,
+   "cell": "laikav2-sample.update-10pct.a-aws.sender.warm",
+   "factors": {
+    "corpus": "laikav2-sample",
+    "scenario": "update-10pct",
+    "sender": "a",
+    "receiver": "aws",
+    "client": "sender",
+    "link": "a-aws",
+    "cache": "warm"
+   },
+   "block": 6,
+   "attempt": 0,
+   "control": "rsync",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.491,
+     "gbps": 0.046,
+     "files_per_s": 2721,
+     "speed": 1.13
+    },
+    {
+     "arm": "xs-rs-z",
+     "label": "xs-rs -z",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.418,
+     "gbps": 0.054,
+     "files_per_s": 3200,
+     "speed": 1.33
+    },
+    {
+     "arm": "xs-rs-j8",
+     "label": "xs-rs -j8",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.471,
+     "gbps": 0.048,
+     "files_per_s": 2839,
+     "speed": 1.18
+    },
+    {
+     "arm": "xs-rs-j8z",
+     "label": "xs-rs -j8z",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.43,
+     "gbps": 0.052,
+     "files_per_s": 3109,
+     "speed": 1.29
+    },
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.46,
+     "gbps": 0.049,
+     "files_per_s": 2904,
+     "speed": 1.2
+    },
+    {
+     "arm": "rsync",
+     "label": "rsync",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 0.554,
+     "gbps": 0.041,
+     "files_per_s": 2414,
+     "speed": 1
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "speed": 1.16,
+     "blocks": 7
+    },
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "speed": 1.15,
+     "blocks": 7
+    },
+    {
+     "arm": "xs-rs-j8",
+     "label": "xs-rs -j8",
+     "speed": 1.22,
+     "blocks": 7
+    },
+    {
+     "arm": "xs-rs-j8z",
+     "label": "xs-rs -j8z",
+     "speed": 1.16,
+     "blocks": 7
+    },
+    {
+     "arm": "xs-rs-z",
+     "label": "xs-rs -z",
+     "speed": 1.21,
+     "blocks": 7
+    }
+   ],
+   "question": "On laikav2-sample update-10pct, can compression at default -j4 break the near-tie with xs-c++, and does compression add anything to the -j8 arm that already wins?",
+   "summary": "In block 6, xs-rs -z was fastest at 0.418 s, 1.33x the rsync control (33% faster); xs-c++ was 1.20x. Over seven blocks, cumulative ratios are xs-rs -z 1.21x, xs-c++ 1.16x, xs-rs -j8 1.22x, and xs-rs -j8z 1.16x, so evidence is not thin. This block supports default -j4 compression beating xs-c++ (1.33x vs 1.20x), but compression on -j8 is mixed: 1.29x vs 1.18x here, yet 1.16x vs 1.22x cumulatively.",
+   "model": "opencode/deepseek-v4.1-flash",
+   "summarizedUtc": 1792983018.339,
+   "driver": "a"
   }
  }
 }
