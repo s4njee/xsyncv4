@@ -1,0 +1,38 @@
+# Written by the 6-hourly planner (2026-10-26T23:34Z). Why: Pins the only remaining laikav2 update near-tie with more blocks and tests whether the promising -j2 setting survives 12 blocks, without repeating any queued cell.
+id = "AP10262334-PLAN10262332-a-lk-u1pct-pin-j2-12b"
+kind = "screening"
+hypothesis = "The 8-block default runs put xs-rs near 0.92 of xs-c++ but with intervals that still overlap 1; with 12 blocks xs-rs will land at or below 0.95 of xs-c++ with an interval excluding 1. The -j2 screening edge (0.781 vs 0.799 of rsync on the same cell) will persist, so xs-rs-j2 will be at least as fast as default xs-rs."
+primary = "durable_s"
+delta = 0.05
+blocks = 12
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+sample_timeout_s = 7200
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[arms.xs-rs]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j4"]
+
+[arms.xs-rs-j2]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j2"]
+
+[arms.xs-cpp]
+tool = "xs"
+rev = "e104bde552f2"
+flags = ["-a", "-j4"]
+
+[matrix]
+link = "a-aws"
+corpus = ["laikav2-sample"]
+scenario = ["update-1pct"]
+direction = ["a>aws"]
+client = ["initiator"]
+cache = ["warm"]

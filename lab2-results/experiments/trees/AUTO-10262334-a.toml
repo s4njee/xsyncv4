@@ -1,0 +1,9 @@
+# Written by the 6-hourly planner at 2026-10-26T23:34Z for a; nothing is queued after the deadline.
+id = "AUTO-10262334-a"
+question = "Runner a is write-budget-bound rather than time-bound: after its 1.3 h backlog it has 4.7 h of measurement room, but the 32 GiB/day cap is the binding limit. The queued backlog and trees in progress already cover every other non-noop transfer cell (congress fresh/update pins, laikav2 fresh j2, update-0p1pct, update-10pct z/j8/j2, real-projects fresh/update), so I add only the one free cell, laikav2 update-1pct, at 12 blocks and four arms. It costs about 4.5 GB and 0.1 h, pins the 8-block near-tie whose interval still touches 1, and tests the promising -j2 variant; no real-projects verdict-grade run fits the daily cap, no no-op cell is planned, and no confirm target is set because no absolute speed floor is known. Engineering and port are null because xs-c++ is the fixed reference and every port step is merged."
+deadline = "2026-10-27T05:34Z"
+start = ["N0"]
+
+[nodes.N0]
+spec = "auto/AP10262334-PLAN10262332-a-lk-u1pct-pin-j2-12b.toml"
+question = "On laikav2-sample update-1pct, does xs-rs at beabaee992b6-rs beat xs-c++ with 12 paired blocks, and does the -j2 xs-rs arm hold its screening edge over default -j4?"
