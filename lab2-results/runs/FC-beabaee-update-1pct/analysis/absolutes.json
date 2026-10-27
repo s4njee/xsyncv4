@@ -12,10 +12,10 @@
   "cache": "warm",
   "arm": "rsync",
   "metric": "durable_s",
-  "n_blocks": 8,
-  "geomean": 1.772591853541586,
-  "lo": 1.736874466202414,
-  "hi": 1.8090437394200374
+  "n_blocks": 12,
+  "geomean": 1.771931274860139,
+  "lo": 1.7347673634872671,
+  "hi": 1.809891348495226
  },
  {
   "experiment": "FC-beabaee-update-1pct",
@@ -30,10 +30,10 @@
   "cache": "warm",
   "arm": "xs-cpp",
   "metric": "durable_s",
-  "n_blocks": 8,
-  "geomean": 0.948946607034618,
-  "lo": 0.8611427234991956,
-  "hi": 1.0457031551557374
+  "n_blocks": 12,
+  "geomean": 0.9430812833793392,
+  "lo": 0.8737499413218128,
+  "hi": 1.017914010632069
  },
  {
   "experiment": "FC-beabaee-update-1pct",
@@ -48,10 +48,10 @@
   "cache": "warm",
   "arm": "xs-rs",
   "metric": "durable_s",
-  "n_blocks": 8,
-  "geomean": 0.8309741207474691,
-  "lo": 0.7722861490043171,
-  "hi": 0.8941219394421243
+  "n_blocks": 12,
+  "geomean": 0.8182906413251447,
+  "lo": 0.7779435153090932,
+  "hi": 0.8607303236074547
  },
  {
   "experiment": "FC-beabaee-update-1pct",
@@ -66,10 +66,10 @@
   "cache": "warm",
   "arm": "rsync",
   "metric": "wall_s",
-  "n_blocks": 8,
-  "geomean": 1.7127555054616745,
-  "lo": 1.67658910772644,
-  "hi": 1.7497020635350116
+  "n_blocks": 12,
+  "geomean": 1.7125504549788393,
+  "lo": 1.6754206025345937,
+  "hi": 1.750503161063804
  },
  {
   "experiment": "FC-beabaee-update-1pct",
@@ -84,10 +84,10 @@
   "cache": "warm",
   "arm": "xs-cpp",
   "metric": "wall_s",
-  "n_blocks": 8,
-  "geomean": 0.8892659443603037,
-  "lo": 0.8020174780375368,
-  "hi": 0.9860058433315231
+  "n_blocks": 12,
+  "geomean": 0.8835243188651846,
+  "lo": 0.8147418845626682,
+  "hi": 0.9581135287345659
  },
  {
   "experiment": "FC-beabaee-update-1pct",
@@ -102,10 +102,10 @@
   "cache": "warm",
   "arm": "xs-rs",
   "metric": "wall_s",
-  "n_blocks": 8,
-  "geomean": 0.773597722948433,
-  "lo": 0.7153200075027224,
-  "hi": 0.8366233723005754
+  "n_blocks": 12,
+  "geomean": 0.7603166680343276,
+  "lo": 0.7201295514582869,
+  "hi": 0.8027464426646391
  },
  {
   "experiment": "FC-beabaee-update-1pct",
@@ -120,10 +120,10 @@
   "cache": "warm",
   "arm": "rsync",
   "metric": "cpu_s",
-  "n_blocks": 8,
-  "geomean": 0.9733301993927228,
-  "lo": 0.9582396002231026,
-  "hi": 0.988658449128282
+  "n_blocks": 12,
+  "geomean": 0.966362785444062,
+  "lo": 0.9531808012953299,
+  "hi": 0.979727069431252
  },
  {
   "experiment": "FC-beabaee-update-1pct",
@@ -138,10 +138,10 @@
   "cache": "warm",
   "arm": "xs-cpp",
   "metric": "cpu_s",
-  "n_blocks": 8,
-  "geomean": 1.6894302572572035,
-  "lo": 1.5909845991531422,
-  "hi": 1.793967456162289
+  "n_blocks": 12,
+  "geomean": 1.667316819132088,
+  "lo": 1.6018593455796388,
+  "hi": 1.7354491098310567
  },
  {
   "experiment": "FC-beabaee-update-1pct",
@@ -156,10 +156,10 @@
   "cache": "warm",
   "arm": "xs-rs",
   "metric": "cpu_s",
-  "n_blocks": 8,
-  "geomean": 1.1587423423914431,
-  "lo": 1.0796318810778787,
-  "hi": 1.2436496546492357
+  "n_blocks": 12,
+  "geomean": 1.144314935251735,
+  "lo": 1.0925430435477008,
+  "hi": 1.1985401204771948
  },
  {
   "experiment": "FC-beabaee-update-1pct",
@@ -174,7 +174,7 @@
   "cache": "warm",
   "arm": "rsync",
   "metric": "rss_bytes",
-  "n_blocks": 8,
+  "n_blocks": 12,
   "geomean": 12451840.000000007,
   "lo": 0.0,
   "hi": 0.0
@@ -192,10 +192,10 @@
   "cache": "warm",
   "arm": "xs-cpp",
   "metric": "rss_bytes",
-  "n_blocks": 8,
-  "geomean": 18913535.12175137,
-  "lo": 17754756.773552466,
-  "hi": 20147942.06218505
+  "n_blocks": 12,
+  "geomean": 19098437.2715709,
+  "lo": 18323186.35756277,
+  "hi": 19906488.92055722
  },
  {
   "experiment": "FC-beabaee-update-1pct",
@@ -210,9 +210,9 @@
   "cache": "warm",
   "arm": "xs-rs",
   "metric": "rss_bytes",
-  "n_blocks": 8,
-  "geomean": 25413438.612187732,
-  "lo": 25244864.56120703,
-  "hi": 25583138.326195665
+  "n_blocks": 12,
+  "geomean": 25510390.857804127,
+  "lo": 25371510.05168333,
+  "hi": 25650031.881912325
  }
 ]

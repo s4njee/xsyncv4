@@ -1,5 +1,5 @@
 {
- "updated": "2026-10-27T19:12:30+00:00",
+ "updated": "2026-10-27T20:12:30+00:00",
  "enabled": true,
  "cpp_rev": "e104bde552f2",
  "rs": {
@@ -172,7 +172,7 @@
    "link": "a-aws",
    "metric": "durable_s",
    "experiment": "FC-beabaee-update-10pct",
-   "run": "20261025T024910Z-FC-beabaee-update-10pct",
+   "run": "20261027T200204Z-FC-beabaee-update-10pct",
    "tools": {
     "rsync": {
      "arm": "rsync",
@@ -230,10 +230,10 @@
       "-a"
      ],
      "rev": null,
-     "seconds": 1.773,
-     "lo": 1.737,
-     "hi": 1.809,
-     "blocks": 8
+     "seconds": 1.772,
+     "lo": 1.735,
+     "hi": 1.81,
+     "blocks": 12
     },
     "xs-cpp": {
      "arm": "xs-cpp",
@@ -242,10 +242,10 @@
       "-j4"
      ],
      "rev": "e104bde552f2",
-     "seconds": 0.949,
-     "lo": 0.861,
-     "hi": 1.046,
-     "blocks": 8
+     "seconds": 0.943,
+     "lo": 0.874,
+     "hi": 1.018,
+     "blocks": 12
     },
     "xs-rs": {
      "arm": "xs-rs",
@@ -254,15 +254,15 @@
       "-j4"
      ],
      "rev": "beabaee992b6-rs",
-     "seconds": 0.831,
-     "lo": 0.772,
-     "hi": 0.894,
-     "blocks": 8
+     "seconds": 0.818,
+     "lo": 0.778,
+     "hi": 0.861,
+     "blocks": 12
     }
    },
    "verdict": "xs-rs",
-   "rs_vs_cpp": 0.876,
-   "rs_vs_rsync": 0.469,
+   "rs_vs_cpp": 0.867,
+   "rs_vs_rsync": 0.462,
    "fastest": "xs-rs"
   },
   {
