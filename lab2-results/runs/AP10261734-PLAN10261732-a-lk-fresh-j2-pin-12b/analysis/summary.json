@@ -1,0 +1,19 @@
+{
+ "experiment": "AP10261734-PLAN10261732-a-lk-fresh-j2-pin-12b",
+ "kind": "screening",
+ "hypothesis": "The 12-block laikav2 fresh screen left the default -j4 interval overlapping the -j2 interval: default was 0.913 vs rsync and -j2 was 0.804 vs rsync, while xs-c++ sat at 0.879. A paired 12-block race will show whether xs-rs-j2's direct ratio to xs-c++ stays below 0.95 and separates from default; if the intervals merge, -j2 is not a default candidate on this fresh mix.",
+ "primary": "durable_s",
+ "control": "rsync",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261026T173459Z-AP10261734-PLAN10261732-a-lk-fresh-j2-pin-12b"
+ ],
+ "spec_sha256": [
+  "ac39443ce470959c20bf9662ebd35e8cc48733a2e2ae5fcb53a92fa6ef8624b0"
+ ],
+ "valid_blocks": 12,
+ "void_attempts": 0,
+ "void_reasons": []
+}

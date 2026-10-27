@@ -1,10 +1,10 @@
 {
  "experiments": {
   "S0-vps-sentinel": {
-   "run": "20261020T030141Z-S0-vps-sentinel-s0007",
+   "run": "20261020T030142Z-S0-vps-sentinel-s0008",
    "experiment": "S0-vps-sentinel",
-   "key": "real-projects.noop.a-aws.sender.warm|1|0",
-   "utc": 1792988548.006,
+   "key": "real-projects.noop.a-aws.sender.warm|2|0",
+   "utc": 1793075356.574,
    "cell": "real-projects.noop.a-aws.sender.warm",
    "factors": {
     "corpus": "real-projects",
@@ -15,7 +15,7 @@
     "link": "a-aws",
     "cache": "warm"
    },
-   "block": 1,
+   "block": 2,
    "attempt": 0,
    "control": "xs",
    "primary": "wall_s",
@@ -26,9 +26,9 @@
      "control": true,
      "valid": true,
      "void": null,
-     "seconds": 4.471,
-     "gbps": 3.82,
-     "files_per_s": 15503,
+     "seconds": 4.964,
+     "gbps": 3.441,
+     "files_per_s": 13964,
      "speed": 1
     },
     {
@@ -37,10 +37,10 @@
      "control": false,
      "valid": true,
      "void": null,
-     "seconds": 5.353,
-     "gbps": 3.191,
-     "files_per_s": 12949,
-     "speed": 0.84
+     "seconds": 5.188,
+     "gbps": 3.292,
+     "files_per_s": 13360,
+     "speed": 0.96
     },
     {
      "arm": "rsync",
@@ -48,30 +48,30 @@
      "control": false,
      "valid": true,
      "void": null,
-     "seconds": 3.437,
-     "gbps": 4.97,
-     "files_per_s": 20168,
-     "speed": 1.3
+     "seconds": 3.733,
+     "gbps": 4.575,
+     "files_per_s": 18567,
+     "speed": 1.33
     }
    ],
    "soFar": [
     {
      "arm": "again",
      "label": "xs-c++",
-     "speed": 0.98,
-     "blocks": 2
+     "speed": 1.01,
+     "blocks": 3
     },
     {
      "arm": "rsync",
      "label": "rsync",
-     "speed": 1.31,
-     "blocks": 2
+     "speed": 1.34,
+     "blocks": 3
     }
    ],
    "question": null,
-   "summary": "Block 1 showed rsync fastest at 3.437 s versus the control\u2019s 4.471 s, a 1.30x speed ratio (about 30% faster), while the non-control xs-c++ run was 0.84x. So far rsync is 1.31x and xs-c++ 0.98x, each based on two blocks, so the evidence is still thin (under three blocks).",
+   "summary": "In this block rsync was fastest at 3.733 s, 1.33x the xs-c++ control (4.964 s), about 33% faster; the other xs-c++ run was 5.188 s (0.96x). Across this cell, rsync stands at 1.34x over 3 blocks and xs-c++ at 1.01x over 3 blocks, matching the block result. With three blocks, this evidence is not thin, though it covers only one cell.",
    "model": "opencode/deepseek-v4.1-flash",
-   "summarizedUtc": 1792988567.919,
+   "summarizedUtc": 1793075378.27,
    "driver": "a"
   },
   "E1-vps-baseline": {
@@ -4021,6 +4021,97 @@
    "summary": "In block 11, xs-rs was fastest at 0.37 s, 1.30x the rsync control (about 30% faster); xs-c++ took 0.398 s, 1.21x. Cumulatively in this cell, xs-rs stands at 1.27x and xs-c++ at 1.16x over 12 blocks, so the evidence is not thin. For the experiment's xs-rs-versus-xs-c++ question, this block's 0.37/0.398 s ratio is about 0.93, on the at-or-below-0.95 side, but one block does not by itself settle the current 0.952 ratio.",
    "model": "opencode/deepseek-v4.1-flash",
    "summarizedUtc": 1793069411.491,
+   "driver": "a"
+  },
+  "AP10261734-PLAN10261732-a-lk-fresh-j2-pin-12b": {
+   "run": "20261026T173459Z-AP10261734-PLAN10261732-a-lk-fresh-j2-pin-12b",
+   "experiment": "AP10261734-PLAN10261732-a-lk-fresh-j2-pin-12b",
+   "key": "laikav2-sample.fresh.a-aws.sender.warm|11|0",
+   "utc": 1793075032.13,
+   "cell": "laikav2-sample.fresh.a-aws.sender.warm",
+   "factors": {
+    "corpus": "laikav2-sample",
+    "scenario": "fresh",
+    "sender": "a",
+    "receiver": "aws",
+    "client": "sender",
+    "link": "a-aws",
+    "cache": "warm"
+   },
+   "block": 11,
+   "attempt": 0,
+   "control": "rsync",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 1.232,
+     "gbps": 0.61,
+     "files_per_s": 1085,
+     "speed": 1.15
+    },
+    {
+     "arm": "xs-rs-j2",
+     "label": "xs-rs -j2",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 1.051,
+     "gbps": 0.715,
+     "files_per_s": 1272,
+     "speed": 1.34
+    },
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 1.189,
+     "gbps": 0.632,
+     "files_per_s": 1125,
+     "speed": 1.19
+    },
+    {
+     "arm": "rsync",
+     "label": "rsync",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 1.413,
+     "gbps": 0.532,
+     "files_per_s": 946,
+     "speed": 1
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "speed": 1.12,
+     "blocks": 12
+    },
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "speed": 1.08,
+     "blocks": 12
+    },
+    {
+     "arm": "xs-rs-j2",
+     "label": "xs-rs -j2",
+     "speed": 1.22,
+     "blocks": 12
+    }
+   ],
+   "question": "On laikav2-sample fresh, does xs-rs -j2 separate from the default -j4 and beat xs-c++ by at least 5%, or is the earlier -j2 win within noise?",
+   "summary": "In block 11, xs-rs -j2 was fastest at 1.34x control (1.051 vs 1.413 s), ahead of xs-c++ at 1.19x and xs-rs at 1.15x. Cumulative over 12 blocks: xs-rs -j2 1.22x, xs-c++ 1.12x, xs-rs 1.08x, so evidence is not thin. This block puts -j2 about 13% ahead of xs-c++; the cumulative gap is about 9%, supporting but not proving the -j2 question.",
+   "model": "opencode/deepseek-v4.1-flash",
+   "summarizedUtc": 1793075055.269,
    "driver": "a"
   }
  }
