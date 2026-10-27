@@ -3948,6 +3948,80 @@
    "model": "opencode/deepseek-v4.1-flash",
    "summarizedUtc": 1793044801.927,
    "driver": "a"
+  },
+  "AP10241014-AP10241012-lk-u01pct-12b": {
+   "run": "20261024T101438Z-AP10241014-AP10241012-lk-u01pct-12b",
+   "experiment": "AP10241014-AP10241012-lk-u01pct-12b",
+   "key": "laikav2-sample.update-0p1pct.a-aws.sender.warm|11|0",
+   "utc": 1793069327.593,
+   "cell": "laikav2-sample.update-0p1pct.a-aws.sender.warm",
+   "factors": {
+    "corpus": "laikav2-sample",
+    "scenario": "update-0p1pct",
+    "sender": "a",
+    "receiver": "aws",
+    "client": "sender",
+    "link": "a-aws",
+    "cache": "warm"
+   },
+   "block": 11,
+   "attempt": 0,
+   "control": "rsync",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.37,
+     "gbps": 0.005,
+     "files_per_s": 3612,
+     "speed": 1.3
+    },
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.398,
+     "gbps": 0.004,
+     "files_per_s": 3357,
+     "speed": 1.21
+    },
+    {
+     "arm": "rsync",
+     "label": "rsync",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 0.482,
+     "gbps": 0.004,
+     "files_per_s": 2776,
+     "speed": 1
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "speed": 1.16,
+     "blocks": 12
+    },
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "speed": 1.27,
+     "blocks": 12
+    }
+   ],
+   "question": "On laikav2-sample update-0p1pct over a>aws, does xs-rs at -a -j4 stay at or below 0.95 of xs-c++'s durable time with 12 paired blocks, or does the current 0.952 ratio resolve to a tie?",
+   "summary": "In block 11, xs-rs was fastest at 0.37 s, 1.30x the rsync control (about 30% faster); xs-c++ took 0.398 s, 1.21x. Cumulatively in this cell, xs-rs stands at 1.27x and xs-c++ at 1.16x over 12 blocks, so the evidence is not thin. For the experiment's xs-rs-versus-xs-c++ question, this block's 0.37/0.398 s ratio is about 0.93, on the at-or-below-0.95 side, but one block does not by itself settle the current 0.952 ratio.",
+   "model": "opencode/deepseek-v4.1-flash",
+   "summarizedUtc": 1793069411.491,
+   "driver": "a"
   }
  }
 }

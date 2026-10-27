@@ -1,0 +1,19 @@
+{
+ "experiment": "AP10241014-AP10241012-lk-u01pct-12b",
+ "kind": "screening",
+ "hypothesis": "The direct ratio sits just inside the 5% margin; a 12-block interval will either exclude 0.95, certifying xs-rs, or straddle it, making the cell an honest tie \u2014 a tie is the more likely outcome given the 0.952 point estimate.",
+ "primary": "durable_s",
+ "control": "rsync",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261024T101438Z-AP10241014-AP10241012-lk-u01pct-12b"
+ ],
+ "spec_sha256": [
+  "f10cff59b64e315cc84f628f44e37b3e4bb6ea4c83575cafaebc467042797432"
+ ],
+ "valid_blocks": 12,
+ "void_attempts": 0,
+ "void_reasons": []
+}
