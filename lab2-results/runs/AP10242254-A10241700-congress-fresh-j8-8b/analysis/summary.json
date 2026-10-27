@@ -1,0 +1,19 @@
+{
+ "experiment": "AP10242254-A10241700-congress-fresh-j8-8b",
+ "kind": "screening",
+ "hypothesis": "congress-sample fresh is dominated by per-file work (25,246 files moved in about 3 s), so xs-rs-j8 lands within 5% of xs-rs at -j4 and both stay below 0.90 of xs-c++'s durable time; a gain of 5% or more for -j8 would mean the small-file engine, not the scan, is the remaining bottleneck.",
+ "primary": "durable_s",
+ "control": "rsync",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261024T225435Z-AP10242254-A10241700-congress-fresh-j8-8b"
+ ],
+ "spec_sha256": [
+  "22fda0e6f58a826c6182e65d8cda80871820d1e1b259363eefc04dd44e2c238c"
+ ],
+ "valid_blocks": 8,
+ "void_attempts": 0,
+ "void_reasons": []
+}

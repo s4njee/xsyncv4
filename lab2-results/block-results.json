@@ -4113,6 +4113,97 @@
    "model": "opencode/deepseek-v4.1-flash",
    "summarizedUtc": 1793075055.269,
    "driver": "a"
+  },
+  "AP10242254-A10241700-congress-fresh-j8-8b": {
+   "run": "20261024T225435Z-AP10242254-A10241700-congress-fresh-j8-8b",
+   "experiment": "AP10242254-A10241700-congress-fresh-j8-8b",
+   "key": "congress-sample.fresh.a-aws.sender.warm|7|0",
+   "utc": 1793098813.844,
+   "cell": "congress-sample.fresh.a-aws.sender.warm",
+   "factors": {
+    "corpus": "congress-sample",
+    "scenario": "fresh",
+    "sender": "a",
+    "receiver": "aws",
+    "client": "sender",
+    "link": "a-aws",
+    "cache": "warm"
+   },
+   "block": 7,
+   "attempt": 0,
+   "control": "rsync",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "rsync",
+     "label": "rsync",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 3.318,
+     "gbps": 0.526,
+     "files_per_s": 7608,
+     "speed": 1
+    },
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 3.419,
+     "gbps": 0.511,
+     "files_per_s": 7384,
+     "speed": 0.97
+    },
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 2.749,
+     "gbps": 0.635,
+     "files_per_s": 9183,
+     "speed": 1.21
+    },
+    {
+     "arm": "xs-rs-j8",
+     "label": "xs-rs -j8",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 3.086,
+     "gbps": 0.566,
+     "files_per_s": 8182,
+     "speed": 1.08
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "speed": 1.01,
+     "blocks": 8
+    },
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "speed": 1.12,
+     "blocks": 8
+    },
+    {
+     "arm": "xs-rs-j8",
+     "label": "xs-rs -j8",
+     "speed": 1.12,
+     "blocks": 8
+    }
+   ],
+   "question": "Does the -j8 gain xs-rs showed on laikav2-sample update-10pct (0.804 of rsync, against 0.84 at -j4) carry over to the per-file-bound congress-sample fresh copy, or is the fresh path scan-limited there too?",
+   "summary": "xs-rs was fastest in block 7 at 2.749 s versus rsync's 3.318 s, or 1.21x; xs-rs -j8 was 1.08x. Across eight blocks in this cell, cumulative speeds are 1.01x for xs-c++, 1.12x for xs-rs, and 1.12x for xs-rs -j8. Thus -j8 showed no extra gain over plain xs-rs here, so the earlier -j8 advantage is not visibly carried over to this fresh congress cell.",
+   "model": "opencode/deepseek-v4.1-flash",
+   "summarizedUtc": 1793098836.967,
+   "driver": "a"
   }
  }
 }
