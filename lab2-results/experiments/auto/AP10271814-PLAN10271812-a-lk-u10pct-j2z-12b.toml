@@ -1,0 +1,38 @@
+# Written by the 6-hourly planner (2026-10-27T18:14Z). Why: It pins the only threshold-straddling xs-rs win while testing the untried -j2+z interaction on the same cell.
+id = "AP10271814-PLAN10271812-a-lk-u10pct-j2z-12b"
+kind = "screening"
+hypothesis = "The -j2 and -z effects are additive enough that xs-rs-j2z stays at or below 0.95 of xs-c++ with an interval below 1; if the intervals merge, the cell is an honest near-tie and jobs/compression variants should not be promoted."
+primary = "durable_s"
+delta = 0.05
+blocks = 12
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+sample_timeout_s = 7200
+
+[arms.xs-rs]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j4"]
+
+[arms.xs-rs-j2z]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j2", "-z"]
+
+[arms.xs-cpp]
+tool = "xs"
+rev = "e104bde552f2"
+flags = ["-a", "-j4"]
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[matrix]
+link = "a-aws"
+corpus = ["laikav2-sample"]
+scenario = ["update-10pct"]
+direction = ["a>aws"]
+client = ["initiator"]
+cache = ["warm"]

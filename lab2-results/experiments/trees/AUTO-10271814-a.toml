@@ -1,0 +1,21 @@
+# Written by the 6-hourly planner at 2026-10-27T18:14Z for a; nothing is queued after the deadline.
+id = "AUTO-10271814-a"
+question = "Runner a has 5.0 h of measurement room after its 1.0 h queued load, and these four screens use only about 0.3 h. The binding resource is A's 32 GiB/day traffic: the two laikav2 races and the congress race are small, while the real-projects fresh screen uses the minimum two blocks and should sit behind the heavy queued real-projects work, possibly spilling to a later day. I avoid the queued congress update pins, the queued laikav2 update-1pct and update-10pct z/j8/j2 screens, the queued real-projects fresh j2/j8/4-block/default screens, and the three queued real-projects update screens. No no-op cells are planned, no confirm target is set because no absolute speed floor is known, and engineering/port are null by the lab rules."
+deadline = "2026-10-28T00:14Z"
+start = ["N0", "N1", "N2", "N3"]
+
+[nodes.N0]
+spec = "auto/AP10271814-PLAN10271812-a-rp-fresh-z-2b.toml"
+question = "On real-projects fresh, the only transfer cell xs-c++ still wins, does adding -z to the newest xs-rs close the 1.46x gap on paired 2-block screens?"
+
+[nodes.N1]
+spec = "auto/AP10271814-PLAN10271812-a-lk-u10pct-j2z-12b.toml"
+question = "On laikav2-sample update-10pct, where the scored xs-rs-z margin sits at 0.949, does combining the promising -j2 setting with -z hold a durable win and separate from the queued -j8+z and -j2 screens?"
+
+[nodes.N2]
+spec = "auto/AP10271814-PLAN10271812-a-lk-fresh-j2z-8b.toml"
+question = "On laikav2-sample fresh, does adding -z to the winning -j2 setting improve on the 12-block xs-rs-j2 result, or is -z neutral once contention is reduced?"
+
+[nodes.N3]
+spec = "auto/AP10271814-PLAN10271812-a-cg-fresh-j2z-8b.toml"
+question = "On per-file-bound congress-sample fresh, does -j2 plus -z beat either alone and widen xs-rs's lead over xs-c++, or does compression add CPU without reducing the small-file bottleneck?"
