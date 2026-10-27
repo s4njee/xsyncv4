@@ -4204,6 +4204,96 @@
    "model": "opencode/deepseek-v4.1-flash",
    "summarizedUtc": 1793098836.967,
    "driver": "a"
+  },
+  "AP10251054-AP10251052-A1025-cg-fresh-z8b": {
+   "run": "20261025T105408Z-AP10251054-AP10251052-A1025-cg-fresh-z8b",
+   "experiment": "AP10251054-AP10251052-A1025-cg-fresh-z8b",
+   "key": "congress-sample.fresh.a-aws.sender.warm|5|0",
+   "utc": 1793106996.694,
+   "cell": "congress-sample.fresh.a-aws.sender.warm",
+   "factors": {
+    "corpus": "congress-sample",
+    "scenario": "fresh",
+    "sender": "a",
+    "receiver": "aws",
+    "client": "sender",
+    "link": "a-aws",
+    "cache": "warm"
+   },
+   "block": 5,
+   "attempt": 0,
+   "control": "rsync",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 2.693,
+     "gbps": 0.648,
+     "files_per_s": 9375,
+     "speed": 1.23
+    },
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 3.471,
+     "gbps": 0.503,
+     "files_per_s": 7273,
+     "speed": 0.95
+    },
+    {
+     "arm": "rsync",
+     "label": "rsync",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 3.301,
+     "gbps": 0.529,
+     "files_per_s": 7649,
+     "speed": 1
+    },
+    {
+     "arm": "xs-rs-z",
+     "label": "xs-rs -z",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 2.624,
+     "gbps": 0.665,
+     "files_per_s": 9621,
+     "speed": 1.26
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "speed": 0.95,
+     "blocks": 6
+    },
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "speed": 1.04,
+     "blocks": 6
+    },
+    {
+     "arm": "xs-rs-z",
+     "label": "xs-rs -z",
+     "speed": 1.2,
+     "blocks": 6
+    }
+   ],
+   "question": "On the per-file-bound congress-sample fresh copy, does enabling -z change xs-rs's durable time relative to its own -j4 default and to xs-c++?",
+   "summary": null,
+   "model": null,
+   "driver": "a"
   }
  }
 }
