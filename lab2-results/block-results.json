@@ -4208,8 +4208,8 @@
   "AP10251054-AP10251052-A1025-cg-fresh-z8b": {
    "run": "20261025T105408Z-AP10251054-AP10251052-A1025-cg-fresh-z8b",
    "experiment": "AP10251054-AP10251052-A1025-cg-fresh-z8b",
-   "key": "congress-sample.fresh.a-aws.sender.warm|5|0",
-   "utc": 1793106996.694,
+   "key": "congress-sample.fresh.a-aws.sender.warm|6|0",
+   "utc": 1793107033.575,
    "cell": "congress-sample.fresh.a-aws.sender.warm",
    "factors": {
     "corpus": "congress-sample",
@@ -4220,7 +4220,7 @@
     "link": "a-aws",
     "cache": "warm"
    },
-   "block": 5,
+   "block": 6,
    "attempt": 0,
    "control": "rsync",
    "primary": "durable_s",
@@ -4231,10 +4231,10 @@
      "control": false,
      "valid": true,
      "void": null,
-     "seconds": 2.693,
-     "gbps": 0.648,
-     "files_per_s": 9375,
-     "speed": 1.23
+     "seconds": 2.788,
+     "gbps": 0.626,
+     "files_per_s": 9056,
+     "speed": 1.12
     },
     {
      "arm": "xs-cpp",
@@ -4242,10 +4242,10 @@
      "control": false,
      "valid": true,
      "void": null,
-     "seconds": 3.471,
-     "gbps": 0.503,
-     "files_per_s": 7273,
-     "speed": 0.95
+     "seconds": 3.392,
+     "gbps": 0.515,
+     "files_per_s": 7442,
+     "speed": 0.92
     },
     {
      "arm": "rsync",
@@ -4253,9 +4253,9 @@
      "control": true,
      "valid": true,
      "void": null,
-     "seconds": 3.301,
-     "gbps": 0.529,
-     "files_per_s": 7649,
+     "seconds": 3.111,
+     "gbps": 0.561,
+     "files_per_s": 8116,
      "speed": 1
     },
     {
@@ -4264,10 +4264,10 @@
      "control": false,
      "valid": true,
      "void": null,
-     "seconds": 2.624,
-     "gbps": 0.665,
-     "files_per_s": 9621,
-     "speed": 1.26
+     "seconds": 3.317,
+     "gbps": 0.526,
+     "files_per_s": 7611,
+     "speed": 0.94
     }
    ],
    "soFar": [
@@ -4275,24 +4275,25 @@
      "arm": "xs-cpp",
      "label": "xs-c++",
      "speed": 0.95,
-     "blocks": 6
+     "blocks": 7
     },
     {
      "arm": "xs-rs",
      "label": "xs-rs",
-     "speed": 1.04,
-     "blocks": 6
+     "speed": 1.05,
+     "blocks": 7
     },
     {
      "arm": "xs-rs-z",
      "label": "xs-rs -z",
-     "speed": 1.2,
-     "blocks": 6
+     "speed": 1.16,
+     "blocks": 7
     }
    ],
    "question": "On the per-file-bound congress-sample fresh copy, does enabling -z change xs-rs's durable time relative to its own -j4 default and to xs-c++?",
-   "summary": null,
-   "model": null,
+   "summary": "In block 6, xs-rs was fastest at 2.788s versus rsync's 3.111s, or 1.12x; xs-rs -z was 3.317s (0.94x) and xs-c++ 3.392s (0.92x). Across seven blocks, cumulative ratios are 1.05x for xs-rs, 1.16x for xs-rs -z, and 0.95x for xs-c++, so the evidence is not thin. On the -z question, this block has -z slower than xs-rs's default (0.94x versus 1.12x), while the seven-block cumulative has -z ahead, so this block alone does not settle it.",
+   "model": "opencode/deepseek-v4.1-flash",
+   "summarizedUtc": 1793107094.607,
    "driver": "a"
   }
  }

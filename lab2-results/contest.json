@@ -1,5 +1,5 @@
 {
- "updated": "2026-10-27T13:12:30+00:00",
+ "updated": "2026-10-27T14:12:30+00:00",
  "enabled": true,
  "cpp_rev": "e104bde552f2",
  "rs": {
@@ -20,8 +20,8 @@
    "scenario": "fresh",
    "link": "a-aws",
    "metric": "durable_s",
-   "experiment": "AP10242254-A10241700-congress-fresh-j8-8b",
-   "run": "20261024T225435Z-AP10242254-A10241700-congress-fresh-j8-8b",
+   "experiment": "AP10251054-AP10251052-A1025-cg-fresh-z8b",
+   "run": "20261025T105408Z-AP10251054-AP10251052-A1025-cg-fresh-z8b",
    "tools": {
     "rsync": {
      "arm": "rsync",
@@ -29,9 +29,22 @@
       "-a"
      ],
      "rev": null,
-     "seconds": 3.386,
-     "lo": 3.142,
-     "hi": 3.648,
+     "seconds": 3.31,
+     "lo": 3.176,
+     "hi": 3.449,
+     "blocks": 8
+    },
+    "xs-rs": {
+     "arm": "xs-rs-z",
+     "flags": [
+      "-a",
+      "-j4",
+      "-z"
+     ],
+     "rev": "beabaee992b6-rs",
+     "seconds": 2.81,
+     "lo": 2.622,
+     "hi": 3.012,
      "blocks": 8
     },
     "xs-cpp": {
@@ -41,27 +54,15 @@
       "-j4"
      ],
      "rev": "e104bde552f2",
-     "seconds": 3.352,
-     "lo": 3.234,
-     "hi": 3.473,
-     "blocks": 8
-    },
-    "xs-rs": {
-     "arm": "xs-rs-j8",
-     "flags": [
-      "-a",
-      "-j8"
-     ],
-     "rev": "beabaee992b6-rs",
-     "seconds": 3.02,
-     "lo": 2.895,
-     "hi": 3.151,
+     "seconds": 3.444,
+     "lo": 3.334,
+     "hi": 3.557,
      "blocks": 8
     }
    },
    "verdict": "xs-rs",
-   "rs_vs_cpp": 0.901,
-   "rs_vs_rsync": 0.892,
+   "rs_vs_cpp": 0.816,
+   "rs_vs_rsync": 0.849,
    "fastest": "xs-rs"
   },
   {
