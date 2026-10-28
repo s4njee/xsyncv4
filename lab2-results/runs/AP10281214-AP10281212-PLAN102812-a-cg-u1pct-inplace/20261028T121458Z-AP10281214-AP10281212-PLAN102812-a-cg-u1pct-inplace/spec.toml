@@ -1,0 +1,38 @@
+# Written by the 6-hourly planner (2026-10-28T12:14Z). Why: This is an untested per-file update setting on a cell whose queued follow-up tests only -j2.
+id = "AP10281214-AP10281212-PLAN102812-a-cg-u1pct-inplace"
+kind = "screening"
+hypothesis = "Because per-file work dominates congress-sample update-1pct, --inplace will lower xs-rs's durable time by at least 3% versus default and keep the direct ratio to xs-c++ below 0.84. If neutral, atomic publication is not a meaningful small-file update cost."
+primary = "durable_s"
+delta = 0.05
+blocks = 8
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+sample_timeout_s = 7200
+
+[arms.xs-rs]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j4"]
+
+[arms.xs-rs-inplace]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j4", "--inplace"]
+
+[arms.xs-cpp]
+tool = "xs"
+rev = "e104bde552f2"
+flags = ["-a", "-j4"]
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[matrix]
+link = "a-aws"
+corpus = ["congress-sample"]
+scenario = ["update-1pct"]
+direction = ["a>aws"]
+client = ["initiator"]
+cache = ["warm"]

@@ -1,0 +1,17 @@
+# Written by the 6-hourly planner at 2026-10-28T12:14Z for a; nothing is queued after the deadline.
+id = "AUTO-10281214-a"
+question = "Runner a has 4.3 h of measurement room (6.0 h minus its 1.7 h queued backlog), and these three screens need under 0.3 h at the listed sample rates; the binding limit is A's 32 GiB/day write budget and its current wait for write budget. I therefore add only about 16 GB of small congress/laikav2 work, avoid all queued real-projects, -j2/-j8/-z variants, pins, and no-op cells, and leave confirm null because no absolute speed floor is known."
+deadline = "2026-10-28T18:14Z"
+start = ["N0", "N1", "N2"]
+
+[nodes.N0]
+spec = "auto/AP10281214-AP10281212-PLAN102812-a-lk-u10pct-inplac.toml"
+question = "Does --inplace push xs-rs past xs-c++ on laikav2-sample update-10pct, or is the 0.949 near-tie independent of atomic temp-file publication?"
+
+[nodes.N1]
+spec = "auto/AP10281214-AP10281212-PLAN102812-a-lk-fresh-W-12b.toml"
+question = "Does --whole-file reduce fresh-copy overhead enough for xs-rs to separate from xs-c++ on laikav2-sample fresh?"
+
+[nodes.N2]
+spec = "auto/AP10281214-AP10281212-PLAN102812-a-cg-u1pct-inplace.toml"
+question = "Does --inplace improve xs-rs on congress-sample update-1pct, where thousands of small files make rename overhead visible?"
