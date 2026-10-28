@@ -1,0 +1,19 @@
+{
+ "experiment": "AP10262334-PLAN10262332-a-lk-u1pct-pin-j2-12b",
+ "kind": "screening",
+ "hypothesis": "The 8-block default runs put xs-rs near 0.92 of xs-c++ but with intervals that still overlap 1; with 12 blocks xs-rs will land at or below 0.95 of xs-c++ with an interval excluding 1. The -j2 screening edge (0.781 vs 0.799 of rsync on the same cell) will persist, so xs-rs-j2 will be at least as fast as default xs-rs.",
+ "primary": "durable_s",
+ "control": "rsync",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261026T233455Z-AP10262334-PLAN10262332-a-lk-u1pct-pin-j2-12b"
+ ],
+ "spec_sha256": [
+  "20d1d31446b7a133eabdfa7efc824782425b3055e1e80684884582955bfb3317"
+ ],
+ "valid_blocks": 12,
+ "void_attempts": 0,
+ "void_reasons": []
+}
