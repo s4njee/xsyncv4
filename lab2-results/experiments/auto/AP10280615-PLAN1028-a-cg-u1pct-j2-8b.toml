@@ -1,0 +1,38 @@
+# Written by the 6-hourly planner (2026-10-28T06:15Z). Why: The fresh congress cell now favors -j2, but the queued update-1pct work tests only default jobs, so this transfers the promising setting to a small-file update.
+id = "AP10280615-PLAN1028-a-cg-u1pct-j2-8b"
+kind = "screening"
+hypothesis = "If per-file metadata work dominates the 1% update path, xs-rs -j2 will finish at or below plain -j4 and keep xs-rs below xs-c++'s durable time; if scan parallelism already saturates, -j2 will land within noise."
+primary = "durable_s"
+delta = 0.05
+blocks = 8
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+sample_timeout_s = 7200
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[arms.xs-cpp]
+tool = "xs"
+rev = "e104bde552f2"
+flags = ["-a", "-j4"]
+
+[arms.xs-rs]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j4"]
+
+[arms.xs-rs-j2]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j2"]
+
+[matrix]
+link = "a-aws"
+corpus = ["congress-sample"]
+scenario = ["update-1pct"]
+direction = ["a>aws"]
+client = ["initiator"]
+cache = ["warm"]

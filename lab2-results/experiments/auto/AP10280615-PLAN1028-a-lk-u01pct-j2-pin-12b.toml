@@ -1,0 +1,38 @@
+# Written by the 6-hourly planner (2026-10-28T06:15Z). Why: The 8-block laikav2 update-0p1pct cell sits close enough to the 5% line that a 12-block pin can decide whether -j2 should be the default for near-noop updates.
+id = "AP10280615-PLAN1028-a-lk-u01pct-j2-pin-12b"
+kind = "screening"
+hypothesis = "If -j2's edge is real for a mostly-scanning update, the 12-block interval stays below 0.95 and separates from plain -j4; if scan and metadata dominate, the two xs-rs arms converge and the cell remains an honest near-tie."
+primary = "durable_s"
+delta = 0.05
+blocks = 12
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+sample_timeout_s = 7200
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[arms.xs-cpp]
+tool = "xs"
+rev = "e104bde552f2"
+flags = ["-a", "-j4"]
+
+[arms.xs-rs]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j4"]
+
+[arms.xs-rs-j2]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j2"]
+
+[matrix]
+link = "a-aws"
+corpus = ["laikav2-sample"]
+scenario = ["update-0p1pct"]
+direction = ["a>aws"]
+client = ["initiator"]
+cache = ["warm"]

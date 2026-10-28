@@ -1,0 +1,17 @@
+# Written by the 6-hourly planner at 2026-10-28T06:15Z for a; nothing is queued after the deadline.
+id = "AUTO-10280615-a"
+question = "Runner a has a null current run and 1.4 h queued, leaving 4.6 h of measurement room; the three screens use only about 0.3 h at the listed sample rates. It is write-budget-bound, so I add only small laikav2 and congress cells: no new real-projects fresh race because the backlog already holds the newest xs-rs 4-block re-measure plus j2, j8, and -z real-projects screens, and no no-op work. I avoid the queued laikav2 update-10pct variants, the queued laikav2 update-1pct pin, the queued congress fresh and update pins, and the real-projects update screens; engineering and port are null by the lab rules."
+deadline = "2026-10-28T12:15Z"
+start = ["N0", "N1", "N2"]
+
+[nodes.N0]
+spec = "auto/AP10280615-PLAN1028-a-lk-fresh-j2z-pin-12b.toml"
+question = "On laikav2-sample fresh, is xs-rs -j2 -z really faster than xs-c++ and plain -j4 xs-rs, or was the 8-block 0.925 direct ratio noise?"
+
+[nodes.N1]
+spec = "auto/AP10280615-PLAN1028-a-cg-u1pct-j2-8b.toml"
+question = "On congress-sample update-1pct, does the -j2 setting that won fresh small-file copies also beat plain -j4 xs-rs and xs-c++, or does update scanning erase the gain?"
+
+[nodes.N2]
+spec = "auto/AP10280615-PLAN1028-a-lk-u01pct-j2-pin-12b.toml"
+question = "On laikav2 update-0p1pct, is xs-rs -j2's 0.91 direct win over xs-c++ reproducible, and does plain -j4 also clear the 5% line?"
