@@ -1,0 +1,13 @@
+# Written by the 6-hourly planner at 2026-10-28T18:55Z for a; nothing is queued after the deadline.
+id = "AUTO-10281855-a"
+question = "Runner a has 4.1 h of measurement room (6.0 h minus 1.9 h queued) but is waiting on A's 32 GiB/day write budget, so I add only about 15 GB of congress-sample work (~0.2 h at 0.2 min/sample). The 28-run backlog already covers every non-noop transfer cell: congress fresh (j2z, z12), all three congress updates (j2, j8, --inplace), laikav2 fresh (j2z pin, -W), laikav2 update-0p1pct (j2 pin), update-10pct (-z/-j8/-j2z/-inplace), update-1pct (just pinned at 12 blocks) and the real-projects fresh/update screens. What no queued run tests is explicit -z on a small-file update, the one setting that cleared the margin on congress fresh, so these two 4-arm, 8-block races test it at 10% and 1% churn with rsync as control. No real-projects work (a verdict-grade 8-block fresh race is ~51 GB and the newest-build 4-block re-measure is already queued), no no-op cells, no confirm arm because no absolute speed floor is known, and front is false because the backlog contains port/baseline runs (PS, FC, BL3), not only earlier planner windows. Engineering and port stay null by the lab's rules."
+deadline = "2026-10-29T00:55Z"
+start = ["N0", "N1"]
+
+[nodes.N0]
+spec = "auto/AP10281855-PLAN1028-a-cg-u10pct-z-8b.toml"
+question = "On congress-sample update-10pct, does explicit -z make xs-rs faster than plain -a -j4 against xs-c++, or was the congress fresh -z gain a fresh-copy-only effect?"
+
+[nodes.N1]
+spec = "auto/AP10281855-PLAN1028-a-cg-u1pct-z-8b.toml"
+question = "On the listing-dominated congress-sample update-1pct, where almost no file data changes, does explicit -z still help xs-rs against xs-c++, or is it pure CPU overhead?"

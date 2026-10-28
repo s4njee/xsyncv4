@@ -1,0 +1,38 @@
+# Written by the 6-hourly planner (2026-10-28T18:55Z). Why: xs-rs's widest small-file win (0.462 vs 0.532 of rsync at 12 blocks) has never been raced under the compression setting that helped on fresh, and the arms differ only by -z.
+id = "AP10281855-PLAN1028-a-cg-u1pct-z-8b"
+kind = "screening"
+hypothesis = "The 1pct update is almost pure scan and listing work, so if -z's congress gain comes from compressing the updated listings, xs-rs-z will beat plain xs-rs by at least 3% and push the already-large 0.87 win over xs-c++ below 0.80; a tie would mean the fresh gain came from compressing file data instead."
+primary = "durable_s"
+delta = 0.05
+blocks = 8
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+sample_timeout_s = 7200
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[arms.xs-rs]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j4"]
+
+[arms.xs-rs-z]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j4", "-z"]
+
+[arms.xs-cpp]
+tool = "xs"
+rev = "e104bde552f2"
+flags = ["-a", "-j4"]
+
+[matrix]
+link = "a-aws"
+corpus = ["congress-sample"]
+scenario = ["update-1pct"]
+direction = ["a>aws"]
+client = ["initiator"]
+cache = ["warm"]
