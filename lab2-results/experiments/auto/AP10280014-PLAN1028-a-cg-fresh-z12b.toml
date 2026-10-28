@@ -1,0 +1,38 @@
+# Written by the 6-hourly planner (2026-10-28T00:14Z). Why: This pins the only scored small-file win that currently depends on a flag variant and decides whether -z is a real default rather than an 8-block screening artifact.
+id = "AP10280014-PLAN1028-a-cg-fresh-z12b"
+kind = "screening"
+hypothesis = "The 8-block -z screen put xs-rs-z clearly ahead of xs-c++ while plain xs-rs stayed near the 0.95 line; a 12-block direct race will show whether -z is required for the small-file verdict and should be considered a default on per-file-bound corpora."
+primary = "durable_s"
+delta = 0.05
+blocks = 12
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+sample_timeout_s = 7200
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[arms.xs-rs]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j4"]
+
+[arms.xs-rs-z]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j4", "-z"]
+
+[arms.xs-cpp]
+tool = "xs"
+rev = "e104bde552f2"
+flags = ["-a", "-j4"]
+
+[matrix]
+link = "a-aws"
+corpus = ["congress-sample"]
+scenario = ["fresh"]
+direction = ["a>aws"]
+client = ["initiator"]
+cache = ["warm"]
