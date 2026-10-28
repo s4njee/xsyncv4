@@ -4477,6 +4477,97 @@
    "model": "opencode/deepseek-v4.1-flash",
    "summarizedUtc": 1793161368.358,
    "driver": "a"
+  },
+  "AP10261734-PLAN10261732-a-lk-u10pct-j2-8b": {
+   "run": "20261026T173502Z-AP10261734-PLAN10261732-a-lk-u10pct-j2-8b",
+   "experiment": "AP10261734-PLAN10261732-a-lk-u10pct-j2-8b",
+   "key": "laikav2-sample.update-10pct.a-aws.sender.warm|7|0",
+   "utc": 1793185110.66,
+   "cell": "laikav2-sample.update-10pct.a-aws.sender.warm",
+   "factors": {
+    "corpus": "laikav2-sample",
+    "scenario": "update-10pct",
+    "sender": "a",
+    "receiver": "aws",
+    "client": "sender",
+    "link": "a-aws",
+    "cache": "warm"
+   },
+   "block": 7,
+   "attempt": 0,
+   "control": "rsync",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.49,
+     "gbps": 0.275,
+     "files_per_s": 2727,
+     "speed": 1.08
+    },
+    {
+     "arm": "xs-rs-j2",
+     "label": "xs-rs -j2",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.472,
+     "gbps": 0.285,
+     "files_per_s": 2830,
+     "speed": 1.12
+    },
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.534,
+     "gbps": 0.252,
+     "files_per_s": 2505,
+     "speed": 0.99
+    },
+    {
+     "arm": "rsync",
+     "label": "rsync",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 0.53,
+     "gbps": 0.254,
+     "files_per_s": 2525,
+     "speed": 1
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "speed": 1.13,
+     "blocks": 8
+    },
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "speed": 1.2,
+     "blocks": 8
+    },
+    {
+     "arm": "xs-rs-j2",
+     "label": "xs-rs -j2",
+     "speed": 1.18,
+     "blocks": 8
+    }
+   ],
+   "question": "On laikav2-sample update-10pct, does xs-rs -j2 help or hurt relative to the default when churn is high, and does it beat xs-c++?",
+   "summary": "In block 7, xs-rs -j2 was fastest at 0.472 s, 1.12x the 0.53 s rsync control, with xs-rs at 1.08x and xs-c++ at 0.99x. Across 8 blocks in this cell, cumulative speeds are xs-rs 1.20x, xs-rs -j2 1.18x, and xs-c++ 1.13x, so the evidence is not thin. This block favors -j2 over both default xs-rs and xs-c++, but the cumulative gap over xs-rs remains slight.",
+   "model": "opencode/deepseek-v4.1-flash",
+   "summarizedUtc": 1793185130.915,
+   "driver": "a"
   }
  }
 }

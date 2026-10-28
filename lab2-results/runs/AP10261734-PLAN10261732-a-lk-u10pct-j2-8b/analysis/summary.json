@@ -1,0 +1,19 @@
+{
+ "experiment": "AP10261734-PLAN10261732-a-lk-u10pct-j2-8b",
+ "kind": "screening",
+ "hypothesis": "The jobs optimum may depend on churn: -j2 helped low-churn laikav2 updates but -j8 helped update-10pct. A paired 8-block race will show whether -j2 is neutral or worse than default on 10pct churn, which would rule out a universal -j2 default.",
+ "primary": "durable_s",
+ "control": "rsync",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261026T173502Z-AP10261734-PLAN10261732-a-lk-u10pct-j2-8b"
+ ],
+ "spec_sha256": [
+  "3285d7b593754cbc6f51ee5cf2f175c07cf052e3dc960f58abfde45ccd75b4f7"
+ ],
+ "valid_blocks": 8,
+ "void_attempts": 0,
+ "void_reasons": []
+}
