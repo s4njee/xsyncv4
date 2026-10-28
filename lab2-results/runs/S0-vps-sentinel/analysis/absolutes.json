@@ -12,10 +12,10 @@
   "cache": "warm",
   "arm": "xs",
   "metric": "wall_s",
-  "n_blocks": 24,
-  "geomean": 4.714686766783152,
-  "lo": 4.557359231046891,
-  "hi": 4.877445507795534
+  "n_blocks": 27,
+  "geomean": 4.7479047201037,
+  "lo": 4.598879777110529,
+  "hi": 4.90175875946609
  },
  {
   "experiment": "S0-vps-sentinel",
@@ -30,10 +30,10 @@
   "cache": "warm",
   "arm": "again",
   "metric": "wall_s",
-  "n_blocks": 24,
-  "geomean": 4.790339275147927,
-  "lo": 4.5686942252259914,
-  "hi": 5.022737184800253
+  "n_blocks": 27,
+  "geomean": 4.747746491839457,
+  "lo": 4.544415798870267,
+  "hi": 4.960174805390288
  },
  {
   "experiment": "S0-vps-sentinel",
@@ -48,10 +48,10 @@
   "cache": "warm",
   "arm": "rsync",
   "metric": "wall_s",
-  "n_blocks": 24,
-  "geomean": 3.640991206541487,
-  "lo": 3.5152635235805225,
-  "hi": 3.771215693271698
+  "n_blocks": 27,
+  "geomean": 3.679644431997746,
+  "lo": 3.5533860927253755,
+  "hi": 3.810388962137034
  },
  {
   "experiment": "S0-vps-sentinel",
@@ -66,10 +66,10 @@
   "cache": "warm",
   "arm": "xs",
   "metric": "durable_s",
-  "n_blocks": 24,
-  "geomean": 4.746106575913882,
-  "lo": 4.590303859276405,
-  "hi": 4.907197501623305
+  "n_blocks": 27,
+  "geomean": 4.779764921504067,
+  "lo": 4.631867693817601,
+  "hi": 4.932384561703856
  },
  {
   "experiment": "S0-vps-sentinel",
@@ -84,10 +84,10 @@
   "cache": "warm",
   "arm": "again",
   "metric": "durable_s",
-  "n_blocks": 24,
-  "geomean": 4.821577208279692,
-  "lo": 4.599319713721258,
-  "hi": 5.0545750724932335
+  "n_blocks": 27,
+  "geomean": 4.7795952421476615,
+  "lo": 4.575856548898706,
+  "hi": 4.992405341959129
  },
  {
   "experiment": "S0-vps-sentinel",
@@ -102,10 +102,10 @@
   "cache": "warm",
   "arm": "rsync",
   "metric": "durable_s",
-  "n_blocks": 24,
-  "geomean": 3.6699547474189713,
-  "lo": 3.5445272493571283,
-  "hi": 3.7998206532467322
+  "n_blocks": 27,
+  "geomean": 3.709242912841987,
+  "lo": 3.5829714156440367,
+  "hi": 3.8399644848954035
  },
  {
   "experiment": "S0-vps-sentinel",
@@ -120,10 +120,10 @@
   "cache": "warm",
   "arm": "xs",
   "metric": "cpu_s",
-  "n_blocks": 24,
-  "geomean": 10.066342561686302,
-  "lo": 9.75202702596933,
-  "hi": 10.390788735447032
+  "n_blocks": 27,
+  "geomean": 10.147343815049606,
+  "lo": 9.845799539079819,
+  "hi": 10.458123394867417
  },
  {
   "experiment": "S0-vps-sentinel",
@@ -138,10 +138,10 @@
   "cache": "warm",
   "arm": "again",
   "metric": "cpu_s",
-  "n_blocks": 24,
-  "geomean": 10.110710743715542,
-  "lo": 9.751202250961297,
-  "hi": 10.483473638648725
+  "n_blocks": 27,
+  "geomean": 10.057365479568311,
+  "lo": 9.72173897544384,
+  "hi": 10.404578917939356
  },
  {
   "experiment": "S0-vps-sentinel",
@@ -156,10 +156,10 @@
   "cache": "warm",
   "arm": "rsync",
   "metric": "cpu_s",
-  "n_blocks": 24,
-  "geomean": 2.526340240278829,
-  "lo": 2.4813977606985897,
-  "hi": 2.5720967072426357
+  "n_blocks": 27,
+  "geomean": 2.541879854269823,
+  "lo": 2.4961617122128374,
+  "hi": 2.5884353413204906
  },
  {
   "experiment": "S0-vps-sentinel",
@@ -174,10 +174,10 @@
   "cache": "warm",
   "arm": "xs",
   "metric": "rss_bytes",
-  "n_blocks": 24,
-  "geomean": 26985356.853425626,
-  "lo": 26676352.014014233,
-  "hi": 27297941.042469587
+  "n_blocks": 27,
+  "geomean": 26930341.882955514,
+  "lo": 26648961.635229733,
+  "hi": 27214693.159905393
  },
  {
   "experiment": "S0-vps-sentinel",
@@ -192,10 +192,10 @@
   "cache": "warm",
   "arm": "again",
   "metric": "rss_bytes",
-  "n_blocks": 24,
-  "geomean": 26906687.188908234,
-  "lo": 26675512.246888872,
-  "hi": 27139865.53589778
+  "n_blocks": 27,
+  "geomean": 26935291.840726692,
+  "lo": 26726848.86122284,
+  "hi": 27145360.469252244
  },
  {
   "experiment": "S0-vps-sentinel",
@@ -210,9 +210,9 @@
   "cache": "warm",
   "arm": "rsync",
   "metric": "rss_bytes",
-  "n_blocks": 24,
-  "geomean": 13145853.73646388,
-  "lo": 12558134.937454607,
-  "hi": 13761077.685595304
+  "n_blocks": 27,
+  "geomean": 13090103.59850659,
+  "lo": 12569398.797715591,
+  "hi": 13632379.318792649
  }
 ]

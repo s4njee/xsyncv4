@@ -1,0 +1,19 @@
+{
+ "experiment": "AP10271814-PLAN10271812-a-lk-fresh-j2z-8b",
+ "kind": "screening",
+ "hypothesis": "Because -j2 already lowered contention and -z was neutral at -j4, xs-rs-j2z will be within noise of xs-rs-j2 and not change the default decision; a clear improvement would make -j2+z the preferred fresh setting.",
+ "primary": "durable_s",
+ "control": "rsync",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261027T181427Z-AP10271814-PLAN10271812-a-lk-fresh-j2z-8b"
+ ],
+ "spec_sha256": [
+  "0ffe43d2d3190d5412305a90b58589532a071c2ab27a30fa57c75a9302d68ce5"
+ ],
+ "valid_blocks": 8,
+ "void_attempts": 0,
+ "void_reasons": []
+}
