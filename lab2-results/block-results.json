@@ -4295,6 +4295,97 @@
    "model": "opencode/deepseek-v4.1-flash",
    "summarizedUtc": 1793107094.607,
    "driver": "a"
+  },
+  "AP10260454-A1026-cg-fresh-j2-8b": {
+   "run": "20261026T045429Z-AP10260454-A1026-cg-fresh-j2-8b",
+   "experiment": "AP10260454-A1026-cg-fresh-j2-8b",
+   "key": "congress-sample.fresh.a-aws.sender.warm|7|0",
+   "utc": 1793155810.704,
+   "cell": "congress-sample.fresh.a-aws.sender.warm",
+   "factors": {
+    "corpus": "congress-sample",
+    "scenario": "fresh",
+    "sender": "a",
+    "receiver": "aws",
+    "client": "sender",
+    "link": "a-aws",
+    "cache": "warm"
+   },
+   "block": 7,
+   "attempt": 0,
+   "control": "rsync",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "rsync",
+     "label": "rsync",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 3.13,
+     "gbps": 0.558,
+     "files_per_s": 8066,
+     "speed": 1
+    },
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 3.454,
+     "gbps": 0.505,
+     "files_per_s": 7309,
+     "speed": 0.91
+    },
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 2.77,
+     "gbps": 0.63,
+     "files_per_s": 9113,
+     "speed": 1.13
+    },
+    {
+     "arm": "xs-rs-j2",
+     "label": "xs-rs -j2",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 2.887,
+     "gbps": 0.605,
+     "files_per_s": 8745,
+     "speed": 1.08
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "speed": 0.96,
+     "blocks": 8
+    },
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "speed": 1.12,
+     "blocks": 8
+    },
+    {
+     "arm": "xs-rs-j2",
+     "label": "xs-rs -j2",
+     "speed": 1.13,
+     "blocks": 8
+    }
+   ],
+   "question": "On congress-sample fresh, does the -j2 setting that beat default -j4 on laikav2 fresh improve small-file copies, or is the gain corpus-specific?",
+   "summary": "In block 7, xs-rs was fastest at 2.77 s versus rsync\u2019s 3.13 s, or 1.13x (about 13% faster). Across 8 blocks in this cell, xs-rs averages 1.12x, xs-rs -j2 1.13x, and xs-c++ 0.96x versus control, so evidence is not thin. For the question, -j2 was 1.08x this block and 1.13x cumulatively, barely above plain xs-rs and therefore not showing an added small-file benefit here.",
+   "model": "opencode/deepseek-v4.1-flash",
+   "summarizedUtc": 1793155836.127,
+   "driver": "a"
   }
  }
 }

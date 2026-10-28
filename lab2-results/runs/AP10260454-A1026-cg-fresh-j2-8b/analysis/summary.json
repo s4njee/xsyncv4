@@ -1,0 +1,19 @@
+{
+ "experiment": "AP10260454-A1026-cg-fresh-j2-8b",
+ "kind": "screening",
+ "hypothesis": "If lower job concurrency reduces scan/transfer contention generally, xs-rs-j2 will finish at or below 0.95 of default xs-rs's durable time and remain faster than xs-c++; if per-file listing dominates congress-sample fresh, the two xs-rs arms will be within noise.",
+ "primary": "durable_s",
+ "control": "rsync",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261026T045429Z-AP10260454-A1026-cg-fresh-j2-8b"
+ ],
+ "spec_sha256": [
+  "d384a536b84cc0594a10465ffa242d1eb5950dd134d1a89a6c981875d6f60d7f"
+ ],
+ "valid_blocks": 8,
+ "void_attempts": 0,
+ "void_reasons": []
+}
