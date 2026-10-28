@@ -4568,6 +4568,96 @@
    "model": "opencode/deepseek-v4.1-flash",
    "summarizedUtc": 1793185130.915,
    "driver": "a"
+  },
+  "AP10262334-PLAN10262332-a-lk-u1pct-pin-j2-12b": {
+   "run": "20261026T233455Z-AP10262334-PLAN10262332-a-lk-u1pct-pin-j2-12b",
+   "experiment": "AP10262334-PLAN10262332-a-lk-u1pct-pin-j2-12b",
+   "key": "laikav2-sample.update-1pct.a-aws.sender.warm|9|0",
+   "utc": 1793193417.817,
+   "cell": "laikav2-sample.update-1pct.a-aws.sender.warm",
+   "factors": {
+    "corpus": "laikav2-sample",
+    "scenario": "update-1pct",
+    "sender": "a",
+    "receiver": "aws",
+    "client": "sender",
+    "link": "a-aws",
+    "cache": "warm"
+   },
+   "block": 9,
+   "attempt": 0,
+   "control": "rsync",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "rsync",
+     "label": "rsync",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 0.48,
+     "gbps": 0.02,
+     "files_per_s": 2788,
+     "speed": 1
+    },
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.366,
+     "gbps": 0.026,
+     "files_per_s": 3653,
+     "speed": 1.31
+    },
+    {
+     "arm": "xs-rs-j2",
+     "label": "xs-rs -j2",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.406,
+     "gbps": 0.024,
+     "files_per_s": 3290,
+     "speed": 1.18
+    },
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.493,
+     "gbps": 0.019,
+     "files_per_s": 2715,
+     "speed": 0.97
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "speed": 1.13,
+     "blocks": 10
+    },
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "speed": 1.22,
+     "blocks": 10
+    },
+    {
+     "arm": "xs-rs-j2",
+     "label": "xs-rs -j2",
+     "speed": 1.21,
+     "blocks": 10
+    }
+   ],
+   "question": "On laikav2-sample update-1pct, does xs-rs at beabaee992b6-rs beat xs-c++ with 12 paired blocks, and does the -j2 xs-rs arm hold its screening edge over default -j4?",
+   "summary": null,
+   "model": null,
+   "driver": "a"
   }
  }
 }
