@@ -4862,8 +4862,8 @@
   "AP10271814-PLAN10271812-a-lk-u10pct-j2z-12b": {
    "run": "20261027T181426Z-AP10271814-PLAN10271812-a-lk-u10pct-j2z-12b",
    "experiment": "AP10271814-PLAN10271812-a-lk-u10pct-j2z-12b",
-   "key": "laikav2-sample.update-10pct.a-aws.sender.warm|8|0",
-   "utc": 1793279811.881,
+   "key": "laikav2-sample.update-10pct.a-aws.sender.warm|10|0",
+   "utc": 1793279862.771,
    "cell": "laikav2-sample.update-10pct.a-aws.sender.warm",
    "factors": {
     "corpus": "laikav2-sample",
@@ -4874,7 +4874,7 @@
     "link": "a-aws",
     "cache": "warm"
    },
-   "block": 8,
+   "block": 10,
    "attempt": 0,
    "control": "rsync",
    "primary": "durable_s",
@@ -4885,10 +4885,10 @@
      "control": false,
      "valid": true,
      "void": null,
-     "seconds": 0.605,
-     "gbps": 0.592,
-     "files_per_s": 2209,
-     "speed": 1.01
+     "seconds": 0.444,
+     "gbps": 0.043,
+     "files_per_s": 3013,
+     "speed": 1.46
     },
     {
      "arm": "xs-rs-j2z",
@@ -4896,10 +4896,10 @@
      "control": false,
      "valid": true,
      "void": null,
-     "seconds": 0.619,
-     "gbps": 0.579,
-     "files_per_s": 2161,
-     "speed": 0.99
+     "seconds": 0.424,
+     "gbps": 0.044,
+     "files_per_s": 3152,
+     "speed": 1.52
     },
     {
      "arm": "xs-cpp",
@@ -4907,10 +4907,10 @@
      "control": false,
      "valid": true,
      "void": null,
-     "seconds": 0.61,
-     "gbps": 0.587,
-     "files_per_s": 2191,
-     "speed": 1
+     "seconds": 0.45,
+     "gbps": 0.042,
+     "files_per_s": 2970,
+     "speed": 1.44
     },
     {
      "arm": "rsync",
@@ -4918,9 +4918,9 @@
      "control": true,
      "valid": true,
      "void": null,
-     "seconds": 0.612,
-     "gbps": 0.585,
-     "files_per_s": 2183,
+     "seconds": 0.647,
+     "gbps": 0.029,
+     "files_per_s": 2068,
      "speed": 1
     }
    ],
@@ -4928,25 +4928,26 @@
     {
      "arm": "xs-cpp",
      "label": "xs-c++",
-     "speed": 1.12,
-     "blocks": 9
+     "speed": 1.14,
+     "blocks": 11
     },
     {
      "arm": "xs-rs",
      "label": "xs-rs",
-     "speed": 1.17,
-     "blocks": 9
+     "speed": 1.19,
+     "blocks": 11
     },
     {
      "arm": "xs-rs-j2z",
      "label": "xs-rs -j2z",
-     "speed": 1.16,
-     "blocks": 9
+     "speed": 1.18,
+     "blocks": 11
     }
    ],
    "question": "On laikav2-sample update-10pct, where the scored xs-rs-z margin sits at 0.949, does combining the promising -j2 setting with -z hold a durable win and separate from the queued -j8+z and -j2 screens?",
-   "summary": null,
-   "model": null,
+   "summary": "In this block, xs-rs -j2z was fastest at 1.52x the control, 0.424 s versus 0.647 s. Across 11 blocks, cumulative speed is 1.18x for -j2z, 1.19x for xs-rs, and 1.14x for xs-c++. This block\u2019s 1.52x sits above -j2z\u2019s 1.18x cumulative, supporting a win over control but not by itself separating -j2z from the queued screens.",
+   "model": "opencode/deepseek-v4.1-flash",
+   "summarizedUtc": 1793279890.278,
    "driver": "a"
   }
  }

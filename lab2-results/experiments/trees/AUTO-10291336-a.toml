@@ -1,0 +1,17 @@
+# Written by the 6-hourly planner at 2026-10-29T13:36Z for a; nothing is queued after the deadline.
+id = "AUTO-10291336-a"
+question = "Runner a has 3.8 h of measurement room after its 2.2 h queued load, and these three small races cost only about 0.35 h at the listed sample rates, so time is not binding. The binding resource is A's 32 GiB/day write budget, so I use only congress-sample and laikav2-sample and avoid the heavy queued real-projects fresh/update work plus the j2/j8/z/in-place/no-atomic variants already in flight. The three screens follow the strongest open leads: the unpinned -j2 edge on per-file-bound congress fresh, a cheaper compression level on the fragile laikav2 update-10pct -z win, and the untried in-place write path on congress update-10pct. No no-op cells are planned, front is false because the backlog includes hand/port/baseline runs, confirm is null because no absolute speed floor is known, and engineering and port are null by the lab rules."
+deadline = "2026-10-29T19:36Z"
+start = ["N0", "N1", "N2"]
+
+[nodes.N0]
+spec = "auto/AP10291336-PLAN1029-a-cg-fresh-j2-12b.toml"
+question = "Does xs-rs at -j2 beat xs-c++ on congress-sample fresh by more than the 5% margin, or is the 8-block edge over default -j4 noise?"
+
+[nodes.N1]
+spec = "auto/AP10291336-PLAN1029-a-lk-u10pct-z1-8b.toml"
+question = "On laikav2 update-10pct, does fast compression at --compress-level=-1 preserve the near-margin -z win over xs-c++ while avoiding default compression's CPU cost?"
+
+[nodes.N2]
+spec = "auto/AP10291336-PLAN1029-a-cg-u10pct-inplace-8b.toml"
+question = "On congress-sample update-10pct, does --inplace reduce the per-file write and rename cost enough to beat default xs-rs and widen the win over xs-c++?"
