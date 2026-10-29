@@ -1,0 +1,19 @@
+{
+ "experiment": "AP10271814-PLAN10271812-a-cg-fresh-j2z-8b",
+ "kind": "screening",
+ "hypothesis": "Per-file costs dominate, so xs-rs-j2z will stay within about 2% of the best single variant and the cell remains an xs-rs win; a larger gain would justify a -j2+z small-file default.",
+ "primary": "durable_s",
+ "control": "rsync",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261027T181429Z-AP10271814-PLAN10271812-a-cg-fresh-j2z-8b"
+ ],
+ "spec_sha256": [
+  "2ae7f5ddfffdf0dc7af4c85c6c3012126ab2921f02cd3772dad289b65191ea05"
+ ],
+ "valid_blocks": 8,
+ "void_attempts": 0,
+ "void_reasons": []
+}

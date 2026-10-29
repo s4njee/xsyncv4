@@ -4659,6 +4659,97 @@
    "model": "opencode/deepseek-v4.1-flash",
    "summarizedUtc": 1793193484.439,
    "driver": "a"
+  },
+  "AP10271814-PLAN10271812-a-cg-fresh-j2z-8b": {
+   "run": "20261027T181429Z-AP10271814-PLAN10271812-a-cg-fresh-j2z-8b",
+   "experiment": "AP10271814-PLAN10271812-a-cg-fresh-j2z-8b",
+   "key": "congress-sample.fresh.a-aws.sender.warm|6|0",
+   "utc": 1793242179.865,
+   "cell": "congress-sample.fresh.a-aws.sender.warm",
+   "factors": {
+    "corpus": "congress-sample",
+    "scenario": "fresh",
+    "sender": "a",
+    "receiver": "aws",
+    "client": "sender",
+    "link": "a-aws",
+    "cache": "warm"
+   },
+   "block": 6,
+   "attempt": 0,
+   "control": "rsync",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 2.974,
+     "gbps": 0.587,
+     "files_per_s": 8488,
+     "speed": 1.06
+    },
+    {
+     "arm": "xs-rs-j2z",
+     "label": "xs-rs -j2z",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 2.75,
+     "gbps": 0.635,
+     "files_per_s": 9179,
+     "speed": 1.15
+    },
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 3.306,
+     "gbps": 0.528,
+     "files_per_s": 7636,
+     "speed": 0.96
+    },
+    {
+     "arm": "rsync",
+     "label": "rsync",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 3.164,
+     "gbps": 0.552,
+     "files_per_s": 7979,
+     "speed": 1
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "speed": 0.97,
+     "blocks": 7
+    },
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "speed": 1.11,
+     "blocks": 7
+    },
+    {
+     "arm": "xs-rs-j2z",
+     "label": "xs-rs -j2z",
+     "speed": 1,
+     "blocks": 7
+    }
+   ],
+   "question": "On per-file-bound congress-sample fresh, does -j2 plus -z beat either alone and widen xs-rs's lead over xs-c++, or does compression add CPU without reducing the small-file bottleneck?",
+   "summary": "In this block xs-rs -j2z was fastest at 2.75 s, 1.15x the rsync control (about 15% faster); xs-rs was 1.06x and xs-c++ 0.96x. Across seven blocks the cumulative ratios are 1.11x for xs-rs, 1.00x for xs-rs -j2z, and 0.97x for xs-c++, so the evidence is not thin. This block has -j2z ahead, but the cumulative figures do not yet show it widening xs-rs's lead.",
+   "model": "opencode/deepseek-v4.1-flash",
+   "summarizedUtc": 1793242240.572,
+   "driver": "a"
   }
  }
 }
