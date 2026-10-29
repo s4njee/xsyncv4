@@ -1,6 +1,6 @@
 {
- "generatedUtc": 1793181628.445,
- "nextUtc": 1793185200,
+ "generatedUtc": 1793268005.26,
+ "nextUtc": 1793271600,
  "runners": [
   {
    "id": "mac",
@@ -13,11 +13,11 @@
  ],
  "loop": null,
  "cases": {
-  "generatedUtc": 1793181628.445,
+  "generatedUtc": 1793268005.26,
   "slot": "2026-10-22T0650",
   "nextUtc": 1792691416,
   "weekUsd": 83,
-  "spentUsd": 0.61,
+  "spentUsd": 0.06,
   "analysis": {
    "utc": 1792669816,
    "summary": "The small-file limit measurement (A2) stopped before it recorded any times, so we still do not know what limits fresh small-file copies after the receiver-lock change. That change was kept after 'fresh 0.411 (faster)'. xs-rs already beats rsync and xs-c++ on every lab cell, for example 9.84 s against rsync's 26.643 s on small-deep push. No other node is buildable, so the next step is to re-run A2's design (-j1 to -j16 and --no-atomic on small-deep and small-flat, both directions) to completion.",
