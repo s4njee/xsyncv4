@@ -1,0 +1,38 @@
+# Written by the 6-hourly planner (2026-10-29T07:35Z). Why: The latest 8-block result put xs-rs only 5% ahead of xs-c++ on the cell with the smallest margin, and no queued run tests the no-atomic write path.
+id = "AP10290735-PLAN1029-a-lk-u10pct-noatomic-12b"
+kind = "screening"
+hypothesis = "The remaining cost is atomic temp-file replacement on changed files: xs-rs-noatomic should be at least 3% faster than default xs-rs and push the xs-rs-to-xs-c++ ratio at or below 0.93, while plain xs-rs stays near 0.95."
+primary = "durable_s"
+delta = 0.05
+blocks = 12
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+sample_timeout_s = 7200
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[arms.xs-cpp]
+tool = "xs"
+rev = "e104bde552f2"
+flags = ["-a", "-j4"]
+
+[arms.xs-rs]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j4"]
+
+[arms.xs-rs-noatomic]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j4", "--no-atomic"]
+
+[matrix]
+link = "a-aws"
+corpus = ["laikav2-sample"]
+scenario = ["update-10pct"]
+direction = ["a>aws"]
+client = ["initiator"]
+cache = ["warm"]

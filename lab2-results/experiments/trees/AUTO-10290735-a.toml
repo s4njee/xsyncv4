@@ -1,0 +1,13 @@
+# Written by the 6-hourly planner at 2026-10-29T07:35Z for a; nothing is queued after the deadline.
+id = "AUTO-10290735-a"
+question = "Runner a has 3.8 h of measurement room (6.0 h minus its 2.2 h queued load) and is write-budget-bound, so I add only two small races costing about 12 GB and 11 minutes. The first follows the 0.949 laikav2 update-10pct near-tie with the untried --no-atomic write path; the second tests --whole-file on the per-file-bound congress-sample fresh cell where xs-rs already wins but no queued run isolates first-copy overhead. I avoid the queued real-projects fresh/update screens, the queued j2/j8/z/inplace/zpin variants, every pin already in a tree, and all no-op cells. Confirm is null because no absolute speed floor is known, and engineering and port are null by the lab rules."
+deadline = "2026-10-29T13:35Z"
+start = ["N0", "N1"]
+
+[nodes.N0]
+spec = "auto/AP10290735-PLAN1029-a-lk-u10pct-noatomic-12b.toml"
+question = "Does --no-atomic widen xs-rs's 0.949 time ratio to xs-c++ on laikav2-sample update-10pct, or is the cell still a near-tie after 12 paired blocks?"
+
+[nodes.N1]
+spec = "auto/AP10290735-PLAN1029-a-cg-fresh-W-8b.toml"
+question = "On congress-sample fresh, does --whole-file cut per-file setup enough for xs-rs to beat its default arm and keep xs-c++ behind?"
