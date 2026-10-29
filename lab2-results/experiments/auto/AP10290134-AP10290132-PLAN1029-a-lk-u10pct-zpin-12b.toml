@@ -1,0 +1,38 @@
+# Written by the 6-hourly planner (2026-10-29T01:34Z). Why: The latest laikav2 update-10pct result is the closest remaining xs-rs win (0.949), and the queued variants test j8/j2 combinations and in-place, not the plain -z arm that produced it.
+id = "AP10290134-AP10290132-PLAN1029-a-lk-u10pct-zpin-12b"
+kind = "screening"
+hypothesis = "The 8-block screening put xs-rs-z at 0.824 of rsync and xs-c++ at 0.869, a direct ratio near 0.949 that still lacks a clean interval; with 12 paired blocks the direct ratio will stay below 0.95 and its interval will exclude 1, making -z at -j4 a defensible default for high-churn small updates."
+primary = "durable_s"
+delta = 0.05
+blocks = 12
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+sample_timeout_s = 7200
+
+[arms.xs-rs]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j4"]
+
+[arms.xs-rs-z]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j4", "-z"]
+
+[arms.xs-cpp]
+tool = "xs"
+rev = "e104bde552f2"
+flags = ["-a", "-j4"]
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[matrix]
+link = "a-aws"
+corpus = ["laikav2-sample"]
+scenario = ["update-10pct"]
+direction = ["a>aws"]
+client = ["initiator"]
+cache = ["warm"]

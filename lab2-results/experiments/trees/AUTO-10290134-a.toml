@@ -1,0 +1,17 @@
+# Written by the 6-hourly planner at 2026-10-29T01:34Z for a; nothing is queued after the deadline.
+id = "AUTO-10290134-a"
+question = "Runner a has 3.9 h of measurement room after its 2.1 h backlog, but it is write-budget-bound rather than time-bound; these three small races cost about 0.25 h and roughly 15 GB at worst, avoid all queued real-projects work and the j2/j8/z/in-place variants already in flight, and target the 0.949 laikav2 update-10pct near-tie plus two untried write-path interactions. Engineering and port are null because engineering.can_open is false and port.next is null."
+deadline = "2026-10-29T07:34Z"
+start = ["N0", "N1", "N2"]
+
+[nodes.N0]
+spec = "auto/AP10290134-AP10290132-PLAN1029-a-lk-u10pct-zpin-12b.toml"
+question = "Does plain -z at -j4 keep xs-rs below 0.95 of xs-c++ on laikav2 update-10pct once the 0.949 8-block near-tie is pinned at 12 blocks?"
+
+[nodes.N1]
+spec = "auto/AP10290134-AP10290132-PLAN1029-a-cg-u10pct-noatomic.toml"
+question = "Does --no-atomic lower per-file publication overhead enough to beat default xs-rs on congress-sample update-10pct?"
+
+[nodes.N2]
+spec = "auto/AP10290134-AP10290132-PLAN1029-a-lk-u1pct-W-8b.toml"
+question = "Does -W beat the default delta path on laikav2 update-1pct, or does it regress the current 12-block win?"

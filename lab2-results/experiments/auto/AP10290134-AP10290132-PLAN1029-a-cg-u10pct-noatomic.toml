@@ -1,0 +1,38 @@
+# Written by the 6-hourly planner (2026-10-29T01:34Z). Why: The update-10pct small-file cell is already a clear xs-rs win, but no experiment has tested whether --no-atomic's skipped temp-file publication lowers the per-file overhead that dominates congress-sample.
+id = "AP10290134-AP10290132-PLAN1029-a-cg-u10pct-noatomic"
+kind = "screening"
+hypothesis = "Congress update-10pct is per-file-bound; skipping atomic temp-file publication should cut file-level overhead, so xs-rs-noatomic will be at least 5% faster than default xs-rs and extend the lead over xs-c++."
+primary = "durable_s"
+delta = 0.05
+blocks = 8
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+sample_timeout_s = 7200
+
+[arms.xs-rs]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j4"]
+
+[arms.xs-rs-noatomic]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j4", "--no-atomic"]
+
+[arms.xs-cpp]
+tool = "xs"
+rev = "e104bde552f2"
+flags = ["-a", "-j4"]
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[matrix]
+link = "a-aws"
+corpus = ["congress-sample"]
+scenario = ["update-10pct"]
+direction = ["a>aws"]
+client = ["initiator"]
+cache = ["warm"]
