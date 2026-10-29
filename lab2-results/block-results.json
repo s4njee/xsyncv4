@@ -4949,6 +4949,97 @@
    "model": "opencode/deepseek-v4.1-flash",
    "summarizedUtc": 1793279890.278,
    "driver": "a"
+  },
+  "AP10281214-AP10281212-PLAN102812-a-lk-fresh-W-12b": {
+   "run": "20261028T121456Z-AP10281214-AP10281212-PLAN102812-a-lk-fresh-W-12b",
+   "experiment": "AP10281214-AP10281212-PLAN102812-a-lk-fresh-W-12b",
+   "key": "laikav2-sample.fresh.a-aws.sender.warm|10|0",
+   "utc": 1793304066.11,
+   "cell": "laikav2-sample.fresh.a-aws.sender.warm",
+   "factors": {
+    "corpus": "laikav2-sample",
+    "scenario": "fresh",
+    "sender": "a",
+    "receiver": "aws",
+    "client": "sender",
+    "link": "a-aws",
+    "cache": "warm"
+   },
+   "block": 10,
+   "attempt": 0,
+   "control": "rsync",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 1.075,
+     "gbps": 0.699,
+     "files_per_s": 1243,
+     "speed": 1.11
+    },
+    {
+     "arm": "xs-rs-W",
+     "label": "xs-rs-W",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 1.244,
+     "gbps": 0.604,
+     "files_per_s": 1075,
+     "speed": 0.96
+    },
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 1.061,
+     "gbps": 0.709,
+     "files_per_s": 1260,
+     "speed": 1.13
+    },
+    {
+     "arm": "rsync",
+     "label": "rsync",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 1.195,
+     "gbps": 0.629,
+     "files_per_s": 1119,
+     "speed": 1
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "speed": 1.07,
+     "blocks": 11
+    },
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "speed": 1.14,
+     "blocks": 11
+    },
+    {
+     "arm": "xs-rs-W",
+     "label": "xs-rs-W",
+     "speed": 1.18,
+     "blocks": 11
+    }
+   ],
+   "question": "Does --whole-file reduce fresh-copy overhead enough for xs-rs to separate from xs-c++ on laikav2-sample fresh?",
+   "summary": "In block 10, xs-c++ was fastest at 1.13x the rsync control (1.061s versus 1.195s), while xs-rs was 1.11x and xs-rs-W 0.96x. Across 11 blocks the cell stands at xs-c++ 1.07x, xs-rs 1.14x, and xs-rs-W 1.18x, so the evidence is not thin. For the question, this block does not show --whole-file separating xs-rs from xs-c++; xs-rs-W was slower than both xs-rs and xs-c++, though its 11-block ratio is highest.",
+   "model": "opencode/deepseek-v4.1-flash",
+   "summarizedUtc": 1793304113.514,
+   "driver": "a"
   }
  }
 }

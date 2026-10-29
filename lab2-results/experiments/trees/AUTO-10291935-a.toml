@@ -1,0 +1,13 @@
+# Written by the 6-hourly planner at 2026-10-29T19:35Z for a; nothing is queued after the deadline.
+id = "AUTO-10291935-a"
+question = "Runner a has 3.6 h of measurement room after its 2.4 h queued load; time is not binding, but A is waiting on the 32 GiB/day write budget. I add only two small screens (~21 GB together): a 2-block real-projects fresh --whole-file race against the lone xs-c++ win, and an 8-block laikav2 fresh -j2×--whole-file interaction. I avoid all queued cells and variants (congress u0.1pct 8b pin, real-projects default/j2/j8/z and update screens, laikav2 fresh -W, laikav2 update-10pct z/z1/no-atomic/in-place, congress z/in-place/no-atomic/j2), leave no-op cells postponed, and use rsync as the control with xs-c++ fixed at -j4. Confirmation is null because no absolute speed floor is known; engineering and port are null by the lab rules (engineering.can_open false, port.next null)."
+deadline = "2026-10-30T01:35Z"
+start = ["N0", "N1"]
+
+[nodes.N0]
+spec = "auto/AP10291935-AP10291932-PLAN-a-rp-fresh-W-2b.toml"
+question = "On real-projects fresh copies, does xs-rs with --whole-file close the gap to xs-c++ and beat plain xs-rs, or is the remaining deficit outside first-copy delta work?"
+
+[nodes.N1]
+spec = "auto/AP10291935-AP10291932-PLAN-a-lk-fresh-j2W-8b.toml"
+question = "On laikav2 fresh copies, does adding --whole-file to the promising -j2 setting improve xs-rs beyond -j2 alone and keep it clearly ahead of xs-c++?"

@@ -1,0 +1,43 @@
+# Written by the 6-hourly planner (2026-10-29T19:35Z). Why: The latest 12-block screen left laikav2 fresh relying on -j2 (0.861 of xs-c++), while --whole-file is queued alone but has never been combined with -j2; this cheap five-arm interaction screen tests the missing combination without repeating the queued -W-only run.
+id = "AP10291935-AP10291932-PLAN-a-lk-fresh-j2W-8b"
+kind = "screening"
+hypothesis = "If -j2 reduces transfer contention and --whole-file removes first-copy delta overhead, xs-rs-j2W will be at least 3% faster than xs-rs-j2 and its ratio to xs-c++ will stay below 0.90. If the arms merge, the two settings are not additive and -j2 alone remains the fresh-copy candidate."
+primary = "durable_s"
+delta = 0.05
+blocks = 8
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+sample_timeout_s = 7200
+
+[arms.xs-rs]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j4"]
+
+[arms.xs-rs-j2]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j2"]
+
+[arms.xs-rs-j2W]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j2", "-W"]
+
+[arms.xs-cpp]
+tool = "xs"
+rev = "e104bde552f2"
+flags = ["-a", "-j4"]
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[matrix]
+link = "a-aws"
+corpus = ["laikav2-sample"]
+scenario = ["fresh"]
+direction = ["a>aws"]
+client = ["initiator"]
+cache = ["warm"]
