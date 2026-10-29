@@ -1,0 +1,19 @@
+{
+ "experiment": "AP10280615-PLAN1028-a-lk-fresh-j2z-pin-12b",
+ "kind": "screening",
+ "hypothesis": "If -j2 -z is a real fresh-copy setting, its 12-block paired ratio to xs-c++ stays below 0.95 and separates from plain -j4 and -j2; if the arms converge, the 0.925 point is noise and -j2z is not a default candidate.",
+ "primary": "durable_s",
+ "control": "rsync",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261028T061517Z-AP10280615-PLAN1028-a-lk-fresh-j2z-pin-12b"
+ ],
+ "spec_sha256": [
+  "c5bb503dadd4a120bbda32ec12537820c18b113904bb29b9b175ea47f31ba842"
+ ],
+ "valid_blocks": 12,
+ "void_attempts": 0,
+ "void_reasons": []
+}
