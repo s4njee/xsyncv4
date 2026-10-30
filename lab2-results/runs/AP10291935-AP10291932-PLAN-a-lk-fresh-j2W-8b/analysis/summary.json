@@ -1,0 +1,19 @@
+{
+ "experiment": "AP10291935-AP10291932-PLAN-a-lk-fresh-j2W-8b",
+ "kind": "screening",
+ "hypothesis": "If -j2 reduces transfer contention and --whole-file removes first-copy delta overhead, xs-rs-j2W will be at least 3% faster than xs-rs-j2 and its ratio to xs-c++ will stay below 0.90. If the arms merge, the two settings are not additive and -j2 alone remains the fresh-copy candidate.",
+ "primary": "durable_s",
+ "control": "rsync",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261029T193531Z-AP10291935-AP10291932-PLAN-a-lk-fresh-j2W-8b"
+ ],
+ "spec_sha256": [
+  "471824925c5306d1e95a027f49a5643e96bf68d2206f9f3c9986b3744893bcb8"
+ ],
+ "valid_blocks": 8,
+ "void_attempts": 0,
+ "void_reasons": []
+}
