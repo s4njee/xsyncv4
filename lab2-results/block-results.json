@@ -5351,8 +5351,8 @@
   "AP10280615-PLAN1028-a-lk-u01pct-j2-pin-12b": {
    "run": "20261028T061520Z-AP10280615-PLAN1028-a-lk-u01pct-j2-pin-12b",
    "experiment": "AP10280615-PLAN1028-a-lk-u01pct-j2-pin-12b",
-   "key": "laikav2-sample.update-0p1pct.a-aws.sender.warm|8|0",
-   "utc": 1793366218.423,
+   "key": "laikav2-sample.update-0p1pct.a-aws.sender.warm|10|0",
+   "utc": 1793366268.969,
    "cell": "laikav2-sample.update-0p1pct.a-aws.sender.warm",
    "factors": {
     "corpus": "laikav2-sample",
@@ -5363,7 +5363,7 @@
     "link": "a-aws",
     "cache": "warm"
    },
-   "block": 8,
+   "block": 10,
    "attempt": 0,
    "control": "rsync",
    "primary": "durable_s",
@@ -5374,9 +5374,9 @@
      "control": true,
      "valid": true,
      "void": null,
-     "seconds": 0.5,
+     "seconds": 0.483,
      "gbps": 0,
-     "files_per_s": 2673,
+     "files_per_s": 2769,
      "speed": 1
     },
     {
@@ -5385,10 +5385,10 @@
      "control": false,
      "valid": true,
      "void": null,
-     "seconds": 0.4,
+     "seconds": 0.412,
      "gbps": 0,
-     "files_per_s": 3339,
-     "speed": 1.25
+     "files_per_s": 3248,
+     "speed": 1.17
     },
     {
      "arm": "xs-rs",
@@ -5396,10 +5396,10 @@
      "control": false,
      "valid": true,
      "void": null,
-     "seconds": 0.373,
+     "seconds": 0.378,
      "gbps": 0,
-     "files_per_s": 3584,
-     "speed": 1.34
+     "files_per_s": 3542,
+     "speed": 1.28
     },
     {
      "arm": "xs-rs-j2",
@@ -5407,10 +5407,10 @@
      "control": false,
      "valid": true,
      "void": null,
-     "seconds": 0.386,
+     "seconds": 0.378,
      "gbps": 0,
-     "files_per_s": 3460,
-     "speed": 1.29
+     "files_per_s": 3541,
+     "speed": 1.28
     }
    ],
    "soFar": [
@@ -5418,24 +5418,25 @@
      "arm": "xs-cpp",
      "label": "xs-c++",
      "speed": 1.18,
-     "blocks": 9
+     "blocks": 11
     },
     {
      "arm": "xs-rs",
      "label": "xs-rs",
-     "speed": 1.25,
-     "blocks": 9
+     "speed": 1.27,
+     "blocks": 11
     },
     {
      "arm": "xs-rs-j2",
      "label": "xs-rs -j2",
-     "speed": 1.24,
-     "blocks": 9
+     "speed": 1.25,
+     "blocks": 11
     }
    ],
    "question": "On laikav2 update-0p1pct, is xs-rs -j2's 0.91 direct win over xs-c++ reproducible, and does plain -j4 also clear the 5% line?",
-   "summary": null,
-   "model": null,
+   "summary": "This block\u2019s fastest arms were xs-rs and xs-rs -j2, tied at 0.378 s and 1.28x the rsync control; xs-c++ ran 0.412 s at 1.17x. Cumulatively over 11 blocks, xs-c++ sits at 1.18x, xs-rs at 1.27x, and xs-rs -j2 at 1.25x versus control, so the evidence is not thin. For the experiment\u2019s question, xs-rs -j2 beat xs-c++ directly here by about 9% (0.412 vs 0.378 s), but no -j4 arm appears in this block.",
+   "model": "opencode/deepseek-v4.1-flash",
+   "summarizedUtc": 1793366307.772,
    "driver": "a"
   }
  }

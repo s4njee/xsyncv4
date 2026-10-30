@@ -1,0 +1,19 @@
+{
+ "experiment": "AP10280615-PLAN1028-a-lk-u01pct-j2-pin-12b",
+ "kind": "screening",
+ "hypothesis": "If -j2's edge is real for a mostly-scanning update, the 12-block interval stays below 0.95 and separates from plain -j4; if scan and metadata dominate, the two xs-rs arms converge and the cell remains an honest near-tie.",
+ "primary": "durable_s",
+ "control": "rsync",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261028T061520Z-AP10280615-PLAN1028-a-lk-u01pct-j2-pin-12b"
+ ],
+ "spec_sha256": [
+  "58d3413c8cf2e5d41a5b072818adcca3b21210acc78c7c8c8974f0d6fc49e077"
+ ],
+ "valid_blocks": 12,
+ "void_attempts": 0,
+ "void_reasons": []
+}

@@ -1,0 +1,38 @@
+# Written by the 6-hourly planner (2026-10-30T13:34Z). Why: The scoreboard's xs-rs win on this cell is only 0.949 and came from a -z arm; the next tree tests -W with -j2 but no run isolates -W alone.
+id = "AP10301334-P1030-a-lk-u10pct-W-12b"
+kind = "screening"
+hypothesis = "If whole-file handling removes enough per-file delta work, xs-rs-W will be at least 3% faster than default xs-rs and its direct ratio to xs-cpp will fall below 0.94; if it merges with default, -W is not the lever for high-churn updates and the queued -j2W interaction should decide."
+primary = "durable_s"
+delta = 0.05
+blocks = 12
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+sample_timeout_s = 7200
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[arms.xs-rs]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j4"]
+
+[arms.xs-cpp]
+tool = "xs"
+rev = "e104bde552f2"
+flags = ["-a", "-j4"]
+
+[arms.xs-rs-W]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j4", "-W"]
+
+[matrix]
+link = "a-aws"
+corpus = ["laikav2-sample"]
+scenario = ["update-10pct"]
+direction = ["a>aws"]
+client = ["initiator"]
+cache = ["warm"]

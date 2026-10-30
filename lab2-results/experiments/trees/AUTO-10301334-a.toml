@@ -1,0 +1,17 @@
+# Written by the 6-hourly planner at 2026-10-30T13:34Z for a; nothing is queued after the deadline.
+id = "AUTO-10301334-a"
+question = "Runner a has no current run but 2.9 h of queued work, leaving 3.1 h of measurement room; time is ample for these three small races, while the binding resource is A's 32 GiB/day write budget, so I add only laikav2-sample and congress-sample update work (about 17 GB) and no real-projects or no-op cells. The real-projects fresh gap is already covered by queued newest xs-rs re-measures and j2W/z/j8/W variants, and I avoid the queued laikav2 u10pct z/z1/inplace/no-atomic/W-j2 and congress u10pct j2/z/inplace/no-atomic/j8 variants. These screens follow the latest -W screening, the 0.949 near-tie, and the untried -j2W transfer to small-file updates; front is false because the backlog contains PORT/BASELINE and hand runs, and engineering/port are null because xs-c++ is fixed and every port step is merged."
+deadline = "2026-10-30T19:34Z"
+start = ["N0", "N1", "N2"]
+
+[nodes.N0]
+spec = "auto/AP10301334-P1030-a-lk-u1pct-W-pin-12b.toml"
+question = "On laikav2-sample update-1pct, does -W alone keep xs-rs faster than xs-c++ once both are measured head-to-head for 12 paired blocks?"
+
+[nodes.N1]
+spec = "auto/AP10301334-P1030-a-lk-u10pct-W-12b.toml"
+question = "On laikav2-sample update-10pct, can -W alone move the 0.949 xs-rs/xs-c++ near-tie clear of the 5% margin, or does the cell only improve with -j2 added?"
+
+[nodes.N2]
+spec = "auto/AP10301334-P1030-a-cg-u10pct-j2W-8b.toml"
+question = "On per-file-bound congress-sample update-10pct, does the fresh-copy winner -j2 with -W also improve xs-rs over its default -j4 and over xs-c++?"

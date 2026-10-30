@@ -1,0 +1,38 @@
+# Written by the 6-hourly planner (2026-10-30T13:34Z). Why: The latest 8-block screen put xs-rs-W at 0.788 of rsync versus 0.801 for default and 0.844 for xs-c++, leaving -W a promising but unconfirmed update default.
+id = "AP10301334-P1030-a-lk-u1pct-W-pin-12b"
+kind = "screening"
+hypothesis = "If the 8-block -W screen was real, xs-rs-W will finish at least 3% faster than default xs-rs and its ratio to xs-cpp will stay below 0.92 with an interval excluding 1; if the arms merge, the earlier -W edge was noise and default -j4 remains the safer update setting."
+primary = "durable_s"
+delta = 0.05
+blocks = 12
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+sample_timeout_s = 7200
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[arms.xs-rs]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j4"]
+
+[arms.xs-cpp]
+tool = "xs"
+rev = "e104bde552f2"
+flags = ["-a", "-j4"]
+
+[arms.xs-rs-W]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j4", "-W"]
+
+[matrix]
+link = "a-aws"
+corpus = ["laikav2-sample"]
+scenario = ["update-1pct"]
+direction = ["a>aws"]
+client = ["initiator"]
+cache = ["warm"]
