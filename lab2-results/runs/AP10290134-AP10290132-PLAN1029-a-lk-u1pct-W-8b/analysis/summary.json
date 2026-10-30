@@ -1,0 +1,19 @@
+{
+ "experiment": "AP10290134-AP10290132-PLAN1029-a-lk-u1pct-W-8b",
+ "kind": "screening",
+ "hypothesis": "Because 1% churn changes few bytes, bypassing delta for changed files may cut per-file CPU; xs-rs-W will be at least 3% faster than default and stay below 0.95 of xs-c++, while a loss would rule -W out for updates.",
+ "primary": "durable_s",
+ "control": "rsync",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261029T013445Z-AP10290134-AP10290132-PLAN1029-a-lk-u1pct-W-8b"
+ ],
+ "spec_sha256": [
+  "2cd0aa905c26b38fb3bf15c8437620953221fdeb73cf80f1b5868d3b5b6d06a2"
+ ],
+ "valid_blocks": 8,
+ "void_attempts": 0,
+ "void_reasons": []
+}

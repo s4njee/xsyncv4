@@ -5256,6 +5256,97 @@
    "model": "opencode/deepseek-v4.1-flash",
    "summarizedUtc": 1793334197.109,
    "driver": "a"
+  },
+  "AP10290134-AP10290132-PLAN1029-a-lk-u1pct-W-8b": {
+   "run": "20261029T013445Z-AP10290134-AP10290132-PLAN1029-a-lk-u1pct-W-8b",
+   "experiment": "AP10290134-AP10290132-PLAN1029-a-lk-u1pct-W-8b",
+   "key": "laikav2-sample.update-1pct.a-aws.sender.warm|6|0",
+   "utc": 1793357907.574,
+   "cell": "laikav2-sample.update-1pct.a-aws.sender.warm",
+   "factors": {
+    "corpus": "laikav2-sample",
+    "scenario": "update-1pct",
+    "sender": "a",
+    "receiver": "aws",
+    "client": "sender",
+    "link": "a-aws",
+    "cache": "warm"
+   },
+   "block": 6,
+   "attempt": 0,
+   "control": "rsync",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.396,
+     "gbps": 0.016,
+     "files_per_s": 3379,
+     "speed": 1.15
+    },
+    {
+     "arm": "xs-rs-W",
+     "label": "xs-rs-W",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.355,
+     "gbps": 0.018,
+     "files_per_s": 3763,
+     "speed": 1.29
+    },
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.419,
+     "gbps": 0.015,
+     "files_per_s": 3193,
+     "speed": 1.09
+    },
+    {
+     "arm": "rsync",
+     "label": "rsync",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 0.457,
+     "gbps": 0.014,
+     "files_per_s": 2927,
+     "speed": 1
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "speed": 1.18,
+     "blocks": 7
+    },
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "speed": 1.24,
+     "blocks": 7
+    },
+    {
+     "arm": "xs-rs-W",
+     "label": "xs-rs-W",
+     "speed": 1.28,
+     "blocks": 7
+    }
+   ],
+   "question": "Does -W beat the default delta path on laikav2 update-1pct, or does it regress the current 12-block win?",
+   "summary": "In block 6, xs-rs-W was fastest at 1.29x the control (0.355 s vs 0.457 s). Cumulatively it leads this cell at 1.28x across seven blocks, ahead of xs-rs at 1.24x and xs-c++ at 1.18x. That favors the -W win rather than a regression, though its edge over plain xs-rs is small.",
+   "model": "opencode/deepseek-v4.1-flash",
+   "summarizedUtc": 1793357949.448,
+   "driver": "a"
   }
  }
 }
