@@ -1,0 +1,33 @@
+# Written by the 6-hourly planner (2026-10-30T07:36Z). Why: This directly targets the only non-noop transfer cell xs-c++ wins, using the combination that just beat it on laikav2 fresh, at the 2-block minimum and 3 arms to respect A's write cap.
+id = "AP10300736-P1030-a-rp-fresh-j2W-2b"
+kind = "screening"
+hypothesis = "If xs-c++'s real-projects fresh win is from first-copy delta overhead and job contention, xs-rs-j2W will land below 1.0 of xs-c++ on the same blocks; if it stays near the old 1.46 ratio, the gap is an engine or scan issue and flags are not enough."
+primary = "durable_s"
+delta = 0.05
+blocks = 2
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+sample_timeout_s = 7200
+
+[arms.xs-rs-j2W]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j2", "-W"]
+
+[arms.xs-cpp]
+tool = "xs"
+rev = "e104bde552f2"
+flags = ["-a", "-j4"]
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[matrix]
+link = "a-aws"
+corpus = ["real-projects"]
+scenario = ["fresh"]
+direction = ["a>aws"]
+client = ["initiator"]
+cache = ["warm"]

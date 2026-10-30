@@ -1,0 +1,43 @@
+# Written by the 6-hourly planner (2026-10-30T07:36Z). Why: The cell is xs-rs's narrowest transfer verdict (0.949 of xs-c++), and the fresh-copy -W/-j2W wins need a direct update regression check before any default changes.
+id = "AP10300736-P1030-a-lk-u10pct-Wj2W-8b"
+kind = "screening"
+hypothesis = "Because the tree has changed files, xs-rs-W and xs-rs-j2W will be at least 5% slower than default xs-rs and may lose the near 0.95 ratio to xs-c++; if either stays within noise, whole-file is safe on updates and can be considered for the fresh default."
+primary = "durable_s"
+delta = 0.05
+blocks = 8
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+sample_timeout_s = 7200
+
+[arms.xs-rs]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j4"]
+
+[arms.xs-rs-W]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j4", "-W"]
+
+[arms.xs-rs-j2W]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j2", "-W"]
+
+[arms.xs-cpp]
+tool = "xs"
+rev = "e104bde552f2"
+flags = ["-a", "-j4"]
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[matrix]
+link = "a-aws"
+corpus = ["laikav2-sample"]
+scenario = ["update-10pct"]
+direction = ["a>aws"]
+client = ["initiator"]
+cache = ["warm"]

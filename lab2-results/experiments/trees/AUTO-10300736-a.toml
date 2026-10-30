@@ -1,0 +1,21 @@
+# Written by the 6-hourly planner at 2026-10-30T07:36Z for a; nothing is queued after the deadline.
+id = "AUTO-10300736-a"
+question = "Runner a has 3.4 h of measurement room after its 2.6 h queued load, and these four races use only about 0.3 h; the binding risk is A's 32 GiB/day write budget. I therefore use only one real-projects screen, at 2 blocks and 3 arms, because it targets the lone remaining xs-c++ transfer win with the -j2W combination that just won laikav2 fresh, while keeping the rest on small congress/laikav2 cells. I avoid every queued cell/variant (congress fresh -j2/-z/-W/--no-atomic, laikav2 update-10pct -z/-z1/--no-atomic/--inplace/-j2, real-projects default/-j2/-j8/-z/-W, and the update pins), plan no no-op cells, set front false because the backlog contains PORT/BASELINE/hand runs, and leave confirm null because no absolute speed floor is known."
+deadline = "2026-10-30T13:36Z"
+start = ["N0", "N1", "N2", "N3"]
+
+[nodes.N0]
+spec = "auto/AP10300736-P1030-a-rp-fresh-j2W-2b.toml"
+question = "On real-projects fresh copies, does the -j2 + --whole-file combination that just won laikav2 fresh also close xs-c++'s gap, or is xs-rs still slower?"
+
+[nodes.N1]
+spec = "auto/AP10300736-P1030-a-cg-fresh-j2W-8b.toml"
+question = "On per-file-bound congress-sample fresh, does adding --whole-file to -j2 improve on default xs-rs and on the queued -j2 and -W singles, or is the laikav2 -j2W win corpus-specific?"
+
+[nodes.N2]
+spec = "auto/AP10300736-P1030-a-lk-fresh-j1W-8b.toml"
+question = "On laikav2 fresh, does pushing the winning -j2W combination down to -j1W improve further, or is -j2 the jobs floor?"
+
+[nodes.N3]
+spec = "auto/AP10300736-P1030-a-lk-u10pct-Wj2W-8b.toml"
+question = "On laikav2 update-10pct, the near-tie cell, do --whole-file and -j2W preserve or destroy the xs-rs win, and is whole-file safe outside fresh copies?"
