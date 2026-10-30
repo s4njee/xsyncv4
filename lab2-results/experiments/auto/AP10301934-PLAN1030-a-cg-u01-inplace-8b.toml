@@ -1,0 +1,38 @@
+# Written by the 6-hourly planner (2026-10-30T19:34Z). Why: The queued congress update-0p1pct work tests default and -j2, not the in-place write path, and small-file churn makes that path worth ruling in or out.
+id = "AP10301934-PLAN1030-a-cg-u01-inplace-8b"
+kind = "screening"
+hypothesis = "With only 0.1% churn on congress-sample, --inplace will save enough metadata and temp-file work to beat default xs-rs by 3% and preserve xs-rs's lead over xs-c++; no separation means the write path is not the per-file lever."
+primary = "durable_s"
+delta = 0.03
+blocks = 8
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+sample_timeout_s = 7200
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[arms.xs-cpp]
+tool = "xs"
+rev = "e104bde552f2"
+flags = ["-a", "-j4"]
+
+[arms.xs-rs]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j4"]
+
+[arms.xs-rs-inplace]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j4", "--inplace"]
+
+[matrix]
+link = "a-aws"
+corpus = ["congress-sample"]
+scenario = ["update-0p1pct"]
+direction = ["a>aws"]
+client = ["initiator"]
+cache = ["warm"]

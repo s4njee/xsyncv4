@@ -1,0 +1,21 @@
+# Written by the 6-hourly planner at 2026-10-30T19:34Z for a; nothing is queued after the deadline.
+id = "AUTO-10301934-a"
+question = "Runner a has about 2.8 h of measurement room after 3.2 h of queued work, but it is write-budget bound and already waiting, so I add only four small warm congress/laikav2 screens using roughly 0.4 h and about 23 GB at most. These test untried --inplace/--no-atomic write-path variants on update-0p1pct and update-1pct cells; I avoid the queued -W/-j2/-j2W/-z/-z1 pins and the queued in-place/no-atomic runs on laikav2 update-10pct and congress update-1pct/update-10pct, and add no real-projects or no-op work. Confirm is null because no absolute speed floor is known, front is false because the backlog contains hand/PS/FC/BL/PORT runs, and engineering/port are null by the lab rules."
+deadline = "2026-10-31T01:34Z"
+start = ["N0", "N1", "N2", "N3"]
+
+[nodes.N0]
+spec = "auto/AP10301934-PLAN1030-a-lk-u1-writepath-12b.toml"
+question = "Does --inplace or --no-atomic beat default xs-rs on a 1% churn laikav2 update, and is either worth a default?"
+
+[nodes.N1]
+spec = "auto/AP10301934-PLAN1030-a-cg-u1-noatomic-8b.toml"
+question = "Can --no-atomic improve xs-rs on per-file-bound congress update-1pct where an --inplace test is already queued?"
+
+[nodes.N2]
+spec = "auto/AP10301934-PLAN1030-a-cg-u01-inplace-8b.toml"
+question = "Does --inplace help xs-rs on a tiny-churn congress update, or is the default already optimal?"
+
+[nodes.N3]
+spec = "auto/AP10301934-PLAN1030-a-lk-u01-inplace-8b.toml"
+question = "Does --inplace improve laikav2 update-0p1pct enough to challenge xs-c++ by a wider margin?"

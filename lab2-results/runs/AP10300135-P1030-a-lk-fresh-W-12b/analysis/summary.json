@@ -1,0 +1,19 @@
+{
+ "experiment": "AP10300135-P1030-a-lk-fresh-W-12b",
+ "kind": "screening",
+ "hypothesis": "If whole-file handling is the lever the latest screen hinted at, -W cuts xs-rs's durable time by at least 3% versus default -j4 and pulls its direct ratio to xs-c++ from about 0.95 to below 0.90; if the 12-block intervals overlap, the 0.841 point was noise and -W should not become a fresh-copy default.",
+ "primary": "durable_s",
+ "control": "rsync",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261030T013529Z-AP10300135-P1030-a-lk-fresh-W-12b"
+ ],
+ "spec_sha256": [
+  "a4bd67d25e2a0cc8b6c049b090b3d03f93c4858f99b4edbaad2c6026a0a93e4b"
+ ],
+ "valid_blocks": 12,
+ "void_attempts": 0,
+ "void_reasons": []
+}

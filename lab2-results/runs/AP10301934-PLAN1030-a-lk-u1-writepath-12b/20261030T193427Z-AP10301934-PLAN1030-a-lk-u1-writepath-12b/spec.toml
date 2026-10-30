@@ -1,0 +1,43 @@
+# Written by the 6-hourly planner (2026-10-30T19:34Z). Why: This is the weakest small-corpus xs-rs cell not already saturated by queued -W/-j2/-z screens, and it tests the untried write-path settings directly against xs-c++.
+id = "AP10301934-PLAN1030-a-lk-u1-writepath-12b"
+kind = "screening"
+hypothesis = "If atomic temp-file and rename overhead is material on a 1% churn laikav2 update, at least one of xs-rs-inplace or xs-rs-noatomic will cut durable time by 3% versus default xs-rs and move the direct xs-rs/xs-c++ ratio below 0.91; if both merge with default, write-path shortcuts are not the default lever for incremental updates."
+primary = "durable_s"
+delta = 0.03
+blocks = 12
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+sample_timeout_s = 7200
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[arms.xs-cpp]
+tool = "xs"
+rev = "e104bde552f2"
+flags = ["-a", "-j4"]
+
+[arms.xs-rs]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j4"]
+
+[arms.xs-rs-inplace]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j4", "--inplace"]
+
+[arms.xs-rs-noatomic]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j4", "--no-atomic"]
+
+[matrix]
+link = "a-aws"
+corpus = ["laikav2-sample"]
+scenario = ["update-1pct"]
+direction = ["a>aws"]
+client = ["initiator"]
+cache = ["warm"]

@@ -5438,6 +5438,97 @@
    "model": "opencode/deepseek-v4.1-flash",
    "summarizedUtc": 1793366307.772,
    "driver": "a"
+  },
+  "AP10300135-P1030-a-lk-fresh-W-12b": {
+   "run": "20261030T013529Z-AP10300135-P1030-a-lk-fresh-W-12b",
+   "experiment": "AP10300135-P1030-a-lk-fresh-W-12b",
+   "key": "laikav2-sample.fresh.a-aws.sender.warm|10|0",
+   "utc": 1793390472.539,
+   "cell": "laikav2-sample.fresh.a-aws.sender.warm",
+   "factors": {
+    "corpus": "laikav2-sample",
+    "scenario": "fresh",
+    "sender": "a",
+    "receiver": "aws",
+    "client": "sender",
+    "link": "a-aws",
+    "cache": "warm"
+   },
+   "block": 10,
+   "attempt": 0,
+   "control": "rsync",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "rsync",
+     "label": "rsync",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 1.554,
+     "gbps": 0.484,
+     "files_per_s": 860,
+     "speed": 1
+    },
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 1.271,
+     "gbps": 0.591,
+     "files_per_s": 1052,
+     "speed": 1.22
+    },
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.997,
+     "gbps": 0.754,
+     "files_per_s": 1341,
+     "speed": 1.56
+    },
+    {
+     "arm": "xs-rs-W",
+     "label": "xs-rs-W",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 1.082,
+     "gbps": 0.695,
+     "files_per_s": 1235,
+     "speed": 1.44
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "speed": 1.14,
+     "blocks": 11
+    },
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "speed": 1.15,
+     "blocks": 11
+    },
+    {
+     "arm": "xs-rs-W",
+     "label": "xs-rs-W",
+     "speed": 1.11,
+     "blocks": 11
+    }
+   ],
+   "question": "On laikav2-sample fresh copies, does whole-file transfer (-W) at the default -j4 beat xs-c++ directly, or was the 0.841-of-rsync screening just a favorable block?",
+   "summary": "In block 10, xs-c++ was fastest at 1.56x the rsync control (0.997 s versus 1.554 s), ahead of xs-rs-W at 1.44x. Across 11 blocks, cumulative ratios are close: xs-rs 1.15x, xs-c++ 1.14x, and xs-rs-W 1.11x, so the evidence is not thin. This block does not show whole-file -W beating xs-c++ directly; it ran slower, though the cumulative gap is small.",
+   "model": "opencode/deepseek-v4.1-flash",
+   "summarizedUtc": 1793390516.534,
+   "driver": "a"
   }
  }
 }

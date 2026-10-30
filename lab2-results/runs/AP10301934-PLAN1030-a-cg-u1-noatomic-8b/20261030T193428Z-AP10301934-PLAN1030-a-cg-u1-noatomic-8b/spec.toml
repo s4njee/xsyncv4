@@ -1,0 +1,38 @@
+# Written by the 6-hourly planner (2026-10-30T19:34Z). Why: Congress update-1pct has queued -z, -j2, and --inplace work but no --no-atomic screen, so this isolates a still-open write-path question on the small-file corpus.
+id = "AP10301934-PLAN1030-a-cg-u1-noatomic-8b"
+kind = "screening"
+hypothesis = "On per-file-bound congress update-1pct, --no-atomic will reduce durable time by at least 3% versus default xs-rs and keep xs-rs below 0.95 of xs-c++; if it merges, atomic publication is not the small-file update bottleneck."
+primary = "durable_s"
+delta = 0.03
+blocks = 8
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+sample_timeout_s = 7200
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[arms.xs-cpp]
+tool = "xs"
+rev = "e104bde552f2"
+flags = ["-a", "-j4"]
+
+[arms.xs-rs]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j4"]
+
+[arms.xs-rs-noatomic]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j4", "--no-atomic"]
+
+[matrix]
+link = "a-aws"
+corpus = ["congress-sample"]
+scenario = ["update-1pct"]
+direction = ["a>aws"]
+client = ["initiator"]
+cache = ["warm"]
