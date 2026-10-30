@@ -5347,6 +5347,96 @@
    "model": "opencode/deepseek-v4.1-flash",
    "summarizedUtc": 1793357949.448,
    "driver": "a"
+  },
+  "AP10280615-PLAN1028-a-lk-u01pct-j2-pin-12b": {
+   "run": "20261028T061520Z-AP10280615-PLAN1028-a-lk-u01pct-j2-pin-12b",
+   "experiment": "AP10280615-PLAN1028-a-lk-u01pct-j2-pin-12b",
+   "key": "laikav2-sample.update-0p1pct.a-aws.sender.warm|8|0",
+   "utc": 1793366218.423,
+   "cell": "laikav2-sample.update-0p1pct.a-aws.sender.warm",
+   "factors": {
+    "corpus": "laikav2-sample",
+    "scenario": "update-0p1pct",
+    "sender": "a",
+    "receiver": "aws",
+    "client": "sender",
+    "link": "a-aws",
+    "cache": "warm"
+   },
+   "block": 8,
+   "attempt": 0,
+   "control": "rsync",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "rsync",
+     "label": "rsync",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 0.5,
+     "gbps": 0,
+     "files_per_s": 2673,
+     "speed": 1
+    },
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.4,
+     "gbps": 0,
+     "files_per_s": 3339,
+     "speed": 1.25
+    },
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.373,
+     "gbps": 0,
+     "files_per_s": 3584,
+     "speed": 1.34
+    },
+    {
+     "arm": "xs-rs-j2",
+     "label": "xs-rs -j2",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.386,
+     "gbps": 0,
+     "files_per_s": 3460,
+     "speed": 1.29
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "speed": 1.18,
+     "blocks": 9
+    },
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "speed": 1.25,
+     "blocks": 9
+    },
+    {
+     "arm": "xs-rs-j2",
+     "label": "xs-rs -j2",
+     "speed": 1.24,
+     "blocks": 9
+    }
+   ],
+   "question": "On laikav2 update-0p1pct, is xs-rs -j2's 0.91 direct win over xs-c++ reproducible, and does plain -j4 also clear the 5% line?",
+   "summary": null,
+   "model": null,
+   "driver": "a"
   }
  }
 }
