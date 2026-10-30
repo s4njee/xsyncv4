@@ -1,6 +1,1520 @@
 {
  "reports": [
   {
+   "id": "2026-10-30T09:00:00.000Z",
+   "start": 1793264400,
+   "end": 1793350800,
+   "generatedAt": 1793350962.798,
+   "model": "opencode/deepseek-v4.1-flash",
+   "samples": 245,
+   "invalid": 0,
+   "runCount": 6,
+   "runKeys": [
+    "vps/S0-vps-sentinel/20261020T030145Z-S0-vps-sentinel-s0011",
+    "vps/AP10291935-AP10291932-PLAN-a-lk-fresh-j2W-8b/20261029T193531Z-AP10291935-AP10291932-PLAN-a-lk-fresh-j2W-8b",
+    "vps/AP10280014-PLAN1028-a-lk-u10pct-z1-8b/20261028T001426Z-AP10280014-PLAN1028-a-lk-u10pct-z1-8b",
+    "vps/AP10281214-AP10281212-PLAN102812-a-lk-fresh-W-12b/20261028T121456Z-AP10281214-AP10281212-PLAN102812-a-lk-fresh-W-12b",
+    "vps/AP10271814-PLAN10271812-a-lk-u10pct-j2z-12b/20261027T181426Z-AP10271814-PLAN10271812-a-lk-u10pct-j2z-12b",
+    "vps/AP10280615-PLAN1028-a-lk-fresh-j2z-pin-12b/20261028T061517Z-AP10280615-PLAN1028-a-lk-fresh-j2z-pin-12b"
+   ],
+   "evidenceRuns": [
+    {
+     "key": "vps/S0-vps-sentinel/20261020T030145Z-S0-vps-sentinel-s0011",
+     "experiment": "S0-vps-sentinel",
+     "question": null,
+     "state": "complete",
+     "hypothesis": "Hour by hour, the A/A ratio stays within 3% of 1 and the xs to rsync ratio stays where the baseline put it.",
+     "primary": "wall_s",
+     "control": "xs",
+     "revisions": [
+      "a3e52c2c61de"
+     ],
+     "arms": [
+      {
+       "name": "xs",
+       "tool": "xs",
+       "client": null,
+       "scales": [],
+       "tuningFlags": []
+      },
+      {
+       "name": "again",
+       "tool": "xs",
+       "client": null,
+       "scales": [],
+       "tuningFlags": []
+      },
+      {
+       "name": "rsync",
+       "tool": "rsync",
+       "client": null,
+       "scales": [],
+       "tuningFlags": []
+      }
+     ],
+     "samples": 9,
+     "invalid": 0,
+     "cells": [
+      {
+       "factors": {
+        "id": "real-projects.noop.a-aws.sender.warm",
+        "corpus": "real-projects",
+        "scenario": "noop",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 69316,
+        "bytes": 2134981089
+       },
+       "arm": "rsync",
+       "validSamples": 3,
+       "blocks": 3,
+       "medianSeconds": 3.4542,
+       "medianGbps": 4.944661198540907,
+       "medianClientCpuSeconds": 1.942,
+       "pairedBlocks": 3,
+       "medianPairedSpeedVsControl": 1.1766545075560186
+      },
+      {
+       "factors": {
+        "id": "real-projects.noop.a-aws.sender.warm",
+        "corpus": "real-projects",
+        "scenario": "noop",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 69316,
+        "bytes": 2134981089
+       },
+       "arm": "again",
+       "validSamples": 3,
+       "blocks": 3,
+       "medianSeconds": 4.4087,
+       "medianGbps": 3.874123599246944,
+       "medianClientCpuSeconds": 7.719,
+       "pairedBlocks": 3,
+       "medianPairedSpeedVsControl": 0.9551397604107245
+      },
+      {
+       "factors": {
+        "id": "real-projects.noop.a-aws.sender.warm",
+        "corpus": "real-projects",
+        "scenario": "noop",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 69316,
+        "bytes": 2134981089
+       },
+       "arm": "xs",
+       "validSamples": 3,
+       "blocks": 3,
+       "medianSeconds": 4.1859,
+       "medianGbps": 4.080328892711244,
+       "medianClientCpuSeconds": 7.491,
+       "pairedBlocks": 3,
+       "medianPairedSpeedVsControl": 1
+      }
+     ]
+    },
+    {
+     "key": "vps/AP10291935-AP10291932-PLAN-a-lk-fresh-j2W-8b/20261029T193531Z-AP10291935-AP10291932-PLAN-a-lk-fresh-j2W-8b",
+     "experiment": "AP10291935-AP10291932-PLAN-a-lk-fresh-j2W-8b",
+     "question": "On laikav2 fresh copies, does adding --whole-file to the promising -j2 setting improve xs-rs beyond -j2 alone and keep it clearly ahead of xs-c++?",
+     "state": "complete",
+     "hypothesis": "If -j2 reduces transfer contention and --whole-file removes first-copy delta overhead, xs-rs-j2W will be at least 3% faster than xs-rs-j2 and its ratio to xs-c++ will stay below 0.90. If the arms merge, the two settings are not additive and -j2 alone remains the fresh-copy candidate.",
+     "primary": "durable_s",
+     "control": "rsync",
+     "revisions": [
+      "beabaee992b6-rs",
+      "e104bde552f2"
+     ],
+     "arms": [
+      {
+       "name": "xs-rs",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 4,
+         "group": "a43f44991553c47e07a466f3"
+        }
+       ],
+       "tuningFlags": [
+        "-j4"
+       ]
+      },
+      {
+       "name": "xs-rs-j2",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 2,
+         "group": "a43f44991553c47e07a466f3"
+        }
+       ],
+       "tuningFlags": [
+        "-j2"
+       ]
+      },
+      {
+       "name": "xs-rs-j2W",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 2,
+         "group": "cdbbefab7ea937cc638ff6c0"
+        }
+       ],
+       "tuningFlags": [
+        "-j2"
+       ]
+      },
+      {
+       "name": "xs-cpp",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 4,
+         "group": "201f5f0894b3ddc460440d48"
+        }
+       ],
+       "tuningFlags": [
+        "-j4"
+       ]
+      },
+      {
+       "name": "rsync",
+       "tool": "rsync",
+       "client": null,
+       "scales": [],
+       "tuningFlags": []
+      }
+     ],
+     "samples": 40,
+     "invalid": 0,
+     "cells": [
+      {
+       "factors": {
+        "id": "laikav2-sample.fresh.a-aws.sender.warm",
+        "corpus": "laikav2-sample",
+        "scenario": "fresh",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 1337,
+        "bytes": 93971741
+       },
+       "arm": "xs-rs",
+       "validSamples": 8,
+       "blocks": 8,
+       "medianSeconds": 1.09645,
+       "medianGbps": 0.6858377968419341,
+       "medianClientCpuSeconds": 0.5894999999999999,
+       "pairedBlocks": 8,
+       "medianPairedSpeedVsControl": 1.2333917733215194
+      },
+      {
+       "factors": {
+        "id": "laikav2-sample.fresh.a-aws.sender.warm",
+        "corpus": "laikav2-sample",
+        "scenario": "fresh",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 1337,
+        "bytes": 93971741
+       },
+       "arm": "xs-cpp",
+       "validSamples": 8,
+       "blocks": 8,
+       "medianSeconds": 1.1488999999999998,
+       "medianGbps": 0.6543429516422343,
+       "medianClientCpuSeconds": 0.948,
+       "pairedBlocks": 8,
+       "medianPairedSpeedVsControl": 1.1150155428379747
+      },
+      {
+       "factors": {
+        "id": "laikav2-sample.fresh.a-aws.sender.warm",
+        "corpus": "laikav2-sample",
+        "scenario": "fresh",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 1337,
+        "bytes": 93971741
+       },
+       "arm": "xs-rs-j2",
+       "validSamples": 8,
+       "blocks": 8,
+       "medianSeconds": 1.0551,
+       "medianGbps": 0.7125143853663161,
+       "medianClientCpuSeconds": 0.473,
+       "pairedBlocks": 8,
+       "medianPairedSpeedVsControl": 1.189158591713249
+      },
+      {
+       "factors": {
+        "id": "laikav2-sample.fresh.a-aws.sender.warm",
+        "corpus": "laikav2-sample",
+        "scenario": "fresh",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 1337,
+        "bytes": 93971741
+       },
+       "arm": "rsync",
+       "validSamples": 8,
+       "blocks": 8,
+       "medianSeconds": 1.3247,
+       "medianGbps": 0.567517074961918,
+       "medianClientCpuSeconds": 0.602,
+       "pairedBlocks": 8,
+       "medianPairedSpeedVsControl": 1
+      },
+      {
+       "factors": {
+        "id": "laikav2-sample.fresh.a-aws.sender.warm",
+        "corpus": "laikav2-sample",
+        "scenario": "fresh",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 1337,
+        "bytes": 93971741
+       },
+       "arm": "xs-rs-j2W",
+       "validSamples": 8,
+       "blocks": 8,
+       "medianSeconds": 1.0593,
+       "medianGbps": 0.7096901148431023,
+       "medianClientCpuSeconds": 0.479,
+       "pairedBlocks": 8,
+       "medianPairedSpeedVsControl": 1.2248894348894348
+      }
+     ]
+    },
+    {
+     "key": "vps/AP10280014-PLAN1028-a-lk-u10pct-z1-8b/20261028T001426Z-AP10280014-PLAN1028-a-lk-u10pct-z1-8b",
+     "experiment": "AP10280014-PLAN1028-a-lk-u10pct-z1-8b",
+     "question": "On laikav2-sample update-10pct, can a lighter compression level keep -z's wire saving without its CPU cost and move the 0.949 xs-rs win over xs-c++ clear of the margin?",
+     "state": "complete",
+     "hypothesis": "Because only about 10% of this small mixed tree changes, default -z gives a modest gain; --compress-level=1 should match that gain with less CPU, while default -z remains near the 5% line and plain xs-rs stays a tie. If level 1 separates, compression-level tuning is worth a default; if not, the cell is an honest near-tie.",
+     "primary": "durable_s",
+     "control": "rsync",
+     "revisions": [
+      "beabaee992b6-rs",
+      "e104bde552f2"
+     ],
+     "arms": [
+      {
+       "name": "rsync",
+       "tool": "rsync",
+       "client": null,
+       "scales": [],
+       "tuningFlags": []
+      },
+      {
+       "name": "xs-rs",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 4,
+         "group": "a43f44991553c47e07a466f3"
+        }
+       ],
+       "tuningFlags": [
+        "-j4"
+       ]
+      },
+      {
+       "name": "xs-rs-z",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 4,
+         "group": "a60624668f9d0d27211d2d62"
+        }
+       ],
+       "tuningFlags": [
+        "-j4",
+        "-z"
+       ]
+      },
+      {
+       "name": "xs-rs-z1",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 4,
+         "group": "a8461bfe9fb5fa077c83d580"
+        }
+       ],
+       "tuningFlags": [
+        "-j4",
+        "-z",
+        "--compress-level=1"
+       ]
+      },
+      {
+       "name": "xs-cpp",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 4,
+         "group": "201f5f0894b3ddc460440d48"
+        }
+       ],
+       "tuningFlags": [
+        "-j4"
+       ]
+      }
+     ],
+     "samples": 40,
+     "invalid": 0,
+     "cells": [
+      {
+       "factors": {
+        "id": "laikav2-sample.update-10pct.a-aws.sender.warm",
+        "corpus": "laikav2-sample",
+        "scenario": "update-10pct",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 1337,
+        "bytes": 93971741
+       },
+       "arm": "xs-rs-z",
+       "validSamples": 8,
+       "blocks": 8,
+       "medianSeconds": 0.45445,
+       "medianGbps": 1.6542500541319978,
+       "medianClientCpuSeconds": 0.091,
+       "pairedBlocks": 8,
+       "medianPairedSpeedVsControl": 1.166329744928952
+      },
+      {
+       "factors": {
+        "id": "laikav2-sample.update-10pct.a-aws.sender.warm",
+        "corpus": "laikav2-sample",
+        "scenario": "update-10pct",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 1337,
+        "bytes": 93971741
+       },
+       "arm": "xs-rs",
+       "validSamples": 8,
+       "blocks": 8,
+       "medianSeconds": 0.4367,
+       "medianGbps": 1.7226829044913845,
+       "medianClientCpuSeconds": 0.098,
+       "pairedBlocks": 8,
+       "medianPairedSpeedVsControl": 1.2357613143410828
+      },
+      {
+       "factors": {
+        "id": "laikav2-sample.update-10pct.a-aws.sender.warm",
+        "corpus": "laikav2-sample",
+        "scenario": "update-10pct",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 1337,
+        "bytes": 93971741
+       },
+       "arm": "rsync",
+       "validSamples": 8,
+       "blocks": 8,
+       "medianSeconds": 0.5435000000000001,
+       "medianGbps": 1.3840881382997607,
+       "medianClientCpuSeconds": 0.1035,
+       "pairedBlocks": 8,
+       "medianPairedSpeedVsControl": 1
+      },
+      {
+       "factors": {
+        "id": "laikav2-sample.update-10pct.a-aws.sender.warm",
+        "corpus": "laikav2-sample",
+        "scenario": "update-10pct",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 1337,
+        "bytes": 93971741
+       },
+       "arm": "xs-cpp",
+       "validSamples": 8,
+       "blocks": 8,
+       "medianSeconds": 0.4949,
+       "medianGbps": 1.519250750716325,
+       "medianClientCpuSeconds": 0.195,
+       "pairedBlocks": 8,
+       "medianPairedSpeedVsControl": 1.0681807645397614
+      },
+      {
+       "factors": {
+        "id": "laikav2-sample.update-10pct.a-aws.sender.warm",
+        "corpus": "laikav2-sample",
+        "scenario": "update-10pct",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 1337,
+        "bytes": 93971741
+       },
+       "arm": "xs-rs-z1",
+       "validSamples": 8,
+       "blocks": 8,
+       "medianSeconds": 0.43905,
+       "medianGbps": 1.7127672188715235,
+       "medianClientCpuSeconds": 0.093,
+       "pairedBlocks": 8,
+       "medianPairedSpeedVsControl": 1.2002750350298734
+      }
+     ]
+    },
+    {
+     "key": "vps/AP10281214-AP10281212-PLAN102812-a-lk-fresh-W-12b/20261028T121456Z-AP10281214-AP10281212-PLAN102812-a-lk-fresh-W-12b",
+     "experiment": "AP10281214-AP10281212-PLAN102812-a-lk-fresh-W-12b",
+     "question": "Does --whole-file reduce fresh-copy overhead enough for xs-rs to separate from xs-c++ on laikav2-sample fresh?",
+     "state": "complete",
+     "hypothesis": "On laikav2-sample fresh, -W will cut xs-rs's durable time by at least 3% versus default xs-rs and move its direct ratio to xs-c++ below 0.90. If the arms are within noise, whole-file handling is not the likely source of xs-c++'s real-projects fresh win.",
+     "primary": "durable_s",
+     "control": "rsync",
+     "revisions": [
+      "e104bde552f2",
+      "beabaee992b6-rs"
+     ],
+     "arms": [
+      {
+       "name": "xs-rs",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 4,
+         "group": "a43f44991553c47e07a466f3"
+        }
+       ],
+       "tuningFlags": [
+        "-j4"
+       ]
+      },
+      {
+       "name": "xs-rs-W",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 4,
+         "group": "cdbbefab7ea937cc638ff6c0"
+        }
+       ],
+       "tuningFlags": [
+        "-j4"
+       ]
+      },
+      {
+       "name": "xs-cpp",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 4,
+         "group": "201f5f0894b3ddc460440d48"
+        }
+       ],
+       "tuningFlags": [
+        "-j4"
+       ]
+      },
+      {
+       "name": "rsync",
+       "tool": "rsync",
+       "client": null,
+       "scales": [],
+       "tuningFlags": []
+      }
+     ],
+     "samples": 48,
+     "invalid": 0,
+     "cells": [
+      {
+       "factors": {
+        "id": "laikav2-sample.fresh.a-aws.sender.warm",
+        "corpus": "laikav2-sample",
+        "scenario": "fresh",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 1337,
+        "bytes": 93971741
+       },
+       "arm": "xs-cpp",
+       "validSamples": 12,
+       "blocks": 12,
+       "medianSeconds": 1.2053500000000001,
+       "medianGbps": 0.6237247546301142,
+       "medianClientCpuSeconds": 0.983,
+       "pairedBlocks": 12,
+       "medianPairedSpeedVsControl": 1.0672293182688573
+      },
+      {
+       "factors": {
+        "id": "laikav2-sample.fresh.a-aws.sender.warm",
+        "corpus": "laikav2-sample",
+        "scenario": "fresh",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 1337,
+        "bytes": 93971741
+       },
+       "arm": "rsync",
+       "validSamples": 12,
+       "blocks": 12,
+       "medianSeconds": 1.3288,
+       "medianGbps": 0.5657647884885776,
+       "medianClientCpuSeconds": 0.6185,
+       "pairedBlocks": 12,
+       "medianPairedSpeedVsControl": 1
+      },
+      {
+       "factors": {
+        "id": "laikav2-sample.fresh.a-aws.sender.warm",
+        "corpus": "laikav2-sample",
+        "scenario": "fresh",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 1337,
+        "bytes": 93971741
+       },
+       "arm": "xs-rs-W",
+       "validSamples": 12,
+       "blocks": 12,
+       "medianSeconds": 1.0918999999999999,
+       "medianGbps": 0.68850738827934,
+       "medianClientCpuSeconds": 0.5685,
+       "pairedBlocks": 12,
+       "medianPairedSpeedVsControl": 1.2169565195692909
+      },
+      {
+       "factors": {
+        "id": "laikav2-sample.fresh.a-aws.sender.warm",
+        "corpus": "laikav2-sample",
+        "scenario": "fresh",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 1337,
+        "bytes": 93971741
+       },
+       "arm": "xs-rs",
+       "validSamples": 12,
+       "blocks": 12,
+       "medianSeconds": 1.1236000000000002,
+       "medianGbps": 0.6691162355221648,
+       "medianClientCpuSeconds": 0.579,
+       "pairedBlocks": 12,
+       "medianPairedSpeedVsControl": 1.189874489111206
+      }
+     ]
+    },
+    {
+     "key": "vps/AP10271814-PLAN10271812-a-lk-u10pct-j2z-12b/20261027T181426Z-AP10271814-PLAN10271812-a-lk-u10pct-j2z-12b",
+     "experiment": "AP10271814-PLAN10271812-a-lk-u10pct-j2z-12b",
+     "question": "On laikav2-sample update-10pct, where the scored xs-rs-z margin sits at 0.949, does combining the promising -j2 setting with -z hold a durable win and separate from the queued -j8+z and -j2 screens?",
+     "state": "complete",
+     "hypothesis": "The -j2 and -z effects are additive enough that xs-rs-j2z stays at or below 0.95 of xs-c++ with an interval below 1; if the intervals merge, the cell is an honest near-tie and jobs/compression variants should not be promoted.",
+     "primary": "durable_s",
+     "control": "rsync",
+     "revisions": [
+      "beabaee992b6-rs",
+      "e104bde552f2"
+     ],
+     "arms": [
+      {
+       "name": "xs-rs",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 4,
+         "group": "a43f44991553c47e07a466f3"
+        }
+       ],
+       "tuningFlags": [
+        "-j4"
+       ]
+      },
+      {
+       "name": "xs-rs-j2z",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 2,
+         "group": "a60624668f9d0d27211d2d62"
+        }
+       ],
+       "tuningFlags": [
+        "-j2",
+        "-z"
+       ]
+      },
+      {
+       "name": "xs-cpp",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 4,
+         "group": "201f5f0894b3ddc460440d48"
+        }
+       ],
+       "tuningFlags": [
+        "-j4"
+       ]
+      },
+      {
+       "name": "rsync",
+       "tool": "rsync",
+       "client": null,
+       "scales": [],
+       "tuningFlags": []
+      }
+     ],
+     "samples": 48,
+     "invalid": 0,
+     "cells": [
+      {
+       "factors": {
+        "id": "laikav2-sample.update-10pct.a-aws.sender.warm",
+        "corpus": "laikav2-sample",
+        "scenario": "update-10pct",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 1337,
+        "bytes": 93971741
+       },
+       "arm": "xs-rs-j2z",
+       "validSamples": 12,
+       "blocks": 12,
+       "medianSeconds": 0.44845,
+       "medianGbps": 1.676870908266686,
+       "medianClientCpuSeconds": 0.067,
+       "pairedBlocks": 12,
+       "medianPairedSpeedVsControl": 1.185392214536248
+      },
+      {
+       "factors": {
+        "id": "laikav2-sample.update-10pct.a-aws.sender.warm",
+        "corpus": "laikav2-sample",
+        "scenario": "update-10pct",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 1337,
+        "bytes": 93971741
+       },
+       "arm": "xs-rs",
+       "validSamples": 12,
+       "blocks": 12,
+       "medianSeconds": 0.4511,
+       "medianGbps": 1.6665353043122215,
+       "medianClientCpuSeconds": 0.09,
+       "pairedBlocks": 12,
+       "medianPairedSpeedVsControl": 1.1855336486043533
+      },
+      {
+       "factors": {
+        "id": "laikav2-sample.update-10pct.a-aws.sender.warm",
+        "corpus": "laikav2-sample",
+        "scenario": "update-10pct",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 1337,
+        "bytes": 93971741
+       },
+       "arm": "xs-cpp",
+       "validSamples": 12,
+       "blocks": 12,
+       "medianSeconds": 0.48825,
+       "medianGbps": 1.5397470650961136,
+       "medianClientCpuSeconds": 0.1795,
+       "pairedBlocks": 12,
+       "medianPairedSpeedVsControl": 1.159112215105163
+      },
+      {
+       "factors": {
+        "id": "laikav2-sample.update-10pct.a-aws.sender.warm",
+        "corpus": "laikav2-sample",
+        "scenario": "update-10pct",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 1337,
+        "bytes": 93971741
+       },
+       "arm": "rsync",
+       "validSamples": 12,
+       "blocks": 12,
+       "medianSeconds": 0.55425,
+       "medianGbps": 1.3563845496382458,
+       "medianClientCpuSeconds": 0.107,
+       "pairedBlocks": 12,
+       "medianPairedSpeedVsControl": 1
+      }
+     ]
+    },
+    {
+     "key": "vps/AP10280615-PLAN1028-a-lk-fresh-j2z-pin-12b/20261028T061517Z-AP10280615-PLAN1028-a-lk-fresh-j2z-pin-12b",
+     "experiment": "AP10280615-PLAN1028-a-lk-fresh-j2z-pin-12b",
+     "question": "On laikav2-sample fresh, is xs-rs -j2 -z really faster than xs-c++ and plain -j4 xs-rs, or was the 8-block 0.925 direct ratio noise?",
+     "state": "complete",
+     "hypothesis": "If -j2 -z is a real fresh-copy setting, its 12-block paired ratio to xs-c++ stays below 0.95 and separates from plain -j4 and -j2; if the arms converge, the 0.925 point is noise and -j2z is not a default candidate.",
+     "primary": "durable_s",
+     "control": "rsync",
+     "revisions": [
+      "beabaee992b6-rs",
+      "e104bde552f2"
+     ],
+     "arms": [
+      {
+       "name": "rsync",
+       "tool": "rsync",
+       "client": null,
+       "scales": [],
+       "tuningFlags": []
+      },
+      {
+       "name": "xs-cpp",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 4,
+         "group": "201f5f0894b3ddc460440d48"
+        }
+       ],
+       "tuningFlags": [
+        "-j4"
+       ]
+      },
+      {
+       "name": "xs-rs",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 4,
+         "group": "a43f44991553c47e07a466f3"
+        }
+       ],
+       "tuningFlags": [
+        "-j4"
+       ]
+      },
+      {
+       "name": "xs-rs-j2",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 2,
+         "group": "a43f44991553c47e07a466f3"
+        }
+       ],
+       "tuningFlags": [
+        "-j2"
+       ]
+      },
+      {
+       "name": "xs-rs-j2z",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 2,
+         "group": "a60624668f9d0d27211d2d62"
+        }
+       ],
+       "tuningFlags": [
+        "-j2",
+        "-z"
+       ]
+      }
+     ],
+     "samples": 60,
+     "invalid": 0,
+     "cells": [
+      {
+       "factors": {
+        "id": "laikav2-sample.fresh.a-aws.sender.warm",
+        "corpus": "laikav2-sample",
+        "scenario": "fresh",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 1337,
+        "bytes": 93971741
+       },
+       "arm": "xs-rs-j2z",
+       "validSamples": 12,
+       "blocks": 12,
+       "medianSeconds": 1.05555,
+       "medianGbps": 0.7122303177748159,
+       "medianClientCpuSeconds": 0.4895,
+       "pairedBlocks": 12,
+       "medianPairedSpeedVsControl": 1.2716341486623608
+      },
+      {
+       "factors": {
+        "id": "laikav2-sample.fresh.a-aws.sender.warm",
+        "corpus": "laikav2-sample",
+        "scenario": "fresh",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 1337,
+        "bytes": 93971741
+       },
+       "arm": "xs-cpp",
+       "validSamples": 12,
+       "blocks": 12,
+       "medianSeconds": 1.1433,
+       "medianGbps": 0.6575706490010452,
+       "medianClientCpuSeconds": 0.9325000000000001,
+       "pairedBlocks": 12,
+       "medianPairedSpeedVsControl": 1.1608526344583456
+      },
+      {
+       "factors": {
+        "id": "laikav2-sample.fresh.a-aws.sender.warm",
+        "corpus": "laikav2-sample",
+        "scenario": "fresh",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 1337,
+        "bytes": 93971741
+       },
+       "arm": "xs-rs-j2",
+       "validSamples": 12,
+       "blocks": 12,
+       "medianSeconds": 1.02895,
+       "medianGbps": 0.7306853524207174,
+       "medianClientCpuSeconds": 0.4825,
+       "pairedBlocks": 12,
+       "medianPairedSpeedVsControl": 1.3650542160947343
+      },
+      {
+       "factors": {
+        "id": "laikav2-sample.fresh.a-aws.sender.warm",
+        "corpus": "laikav2-sample",
+        "scenario": "fresh",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 1337,
+        "bytes": 93971741
+       },
+       "arm": "xs-rs",
+       "validSamples": 12,
+       "blocks": 12,
+       "medianSeconds": 1.1374,
+       "medianGbps": 0.6610671870262341,
+       "medianClientCpuSeconds": 0.5925,
+       "pairedBlocks": 12,
+       "medianPairedSpeedVsControl": 1.2121659904557114
+      },
+      {
+       "factors": {
+        "id": "laikav2-sample.fresh.a-aws.sender.warm",
+        "corpus": "laikav2-sample",
+        "scenario": "fresh",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 1337,
+        "bytes": 93971741
+       },
+       "arm": "rsync",
+       "validSamples": 12,
+       "blocks": 12,
+       "medianSeconds": 1.34885,
+       "medianGbps": 0.557401434019602,
+       "medianClientCpuSeconds": 0.6405000000000001,
+       "pairedBlocks": 12,
+       "medianPairedSpeedVsControl": 1
+      }
+     ]
+    }
+   ],
+   "commentary": {
+    "headline": "xs-rs wins the small-tree race but real-projects exposes a large gap",
+    "paragraphs": [
+     "The day's scoreboard is clear: xs-rs beat xs-c++ in 10 of 12 contested cells, but both losses are on real-projects. On real-projects fresh, xs-rs took 42.805s against 29.298s for xs-c++ (1.461x slower) and 20.055s for rsync (2.134x slower); on noop it took 2.983s against 1.793s for xs-c++ (1.664x slower), although it still beat rsync at 0.791x. Those are not marginal misses, and they make real-projects the tuning priority. The small-tree wins are real but mostly narrower: laikav2 and congress cells range from about 5% to 15% ahead of xs-c++, with the laikav2 update-10pct cell at 0.949 close to a tie. That contrast matters more than the headline 10-2 score.",
+     "Fresh-copy tests point to worker count more than whole-file or compression. In the fresh pin run, -j2 at 1.029s beat -j4 at 1.137s and xs-c++ at 1.143s, while -j2 -z at 1.056s was slightly slower than -j2. The j2W fresh run found -j2 and -j2W effectively tied, at 1.055s and 1.059s, so whole-file was not additive once workers dropped; a separate -j4 whole-file run improved 1.124s to 1.092s, a 2.8% gain but still not a clear 0.90 ratio to xs-c++. On update-10pct, plain -j4 was fastest at 0.437s, level-1 compression was 0.439s, and default -z was 0.454s; -j2 -z matched -j4 on time (0.448s vs 0.451s) while cutting client CPU from 0.090s to 0.067s. These are single-run medians, so treat them as candidates, not defaults.",
+     "The sentinel adds a caution: its repeated xs arm ran 4.6% slower than baseline and rsync was 17.7% faster, on only three blocks, while xs burned 7.49 CPU seconds against rsync's 1.94 on real-projects noop. That is not the contest setup, but it warns that run noise can rival the small fresh and update effects and that real-projects CPU behaviour deserves attention. Confidence is provisional: 3 to 12 paired blocks, one direction, warm cache, no significance tests."
+    ]
+   },
+   "overview": "These experiments provided useful tuning insights. Here are the insights: xs-rs beat xs-c++ in 10 of 12 scoreboard cells, but both losses are on real-projects: fresh was 1.46x slower than xs-c++ and 2.13x slower than rsync, while noop was 1.66x slower than xs-c++. Small-tree wins were mostly narrower, down to a 0.949 near-tie on laikav2 update-10pct. Fresh tests suggest two workers help more than whole-file, and compression did not add speed. These are provisional medians, not proven defaults, and real-projects is the clear next tuning target.",
+   "insights": [
+    {
+     "caveat": "The BL2 real-projects contest cells do not have run-level records in this window; the sentinel is a different real-projects noop setup and has only 3 blocks.",
+     "evidence": "Contest scoreboard: xs-rs 10 wins, xs-cpp 2. Real-projects fresh xs-rs 42.805s vs xs-cpp 29.298s (rs_vs_cpp 1.461) and rsync 20.055s (rs_vs_rsync 2.134); real-projects noop xs-rs 2.983s vs xs-cpp 1.793s (1.664) and rsync 3.770s (0.791).",
+     "finding": "xs-rs dominates laikav2 and congress but loses both real-projects cells, with the fresh cell losing to xs-c++ and rsync and noop losing heavily to xs-c++.",
+     "runKeys": [
+      "vps/S0-vps-sentinel/20261020T030145Z-S0-vps-sentinel-s0011"
+     ],
+     "title": "Scoreboard: xs-rs 10, xs-cpp 2, but real-projects is the outlier"
+    },
+    {
+     "caveat": "Twelve blocks in one run; direct xs-rs to xs-c++ ratios are derived from medians and have no confidence intervals.",
+     "evidence": "AP10280615 fresh: xs-rs-j2 1.02895s at 0.7307 Gb/s, xs-rs-j2z 1.05555s at 0.7122 Gb/s, xs-rs 1.1374s at 0.6611 Gb/s, xs-cpp 1.1433s at 0.6576 Gb/s. Client CPU: j2 0.4825s, j2z 0.4895s, j4 0.5925s, xs-cpp 0.9325s.",
+     "finding": "Two workers were the fastest fresh-copy arm: -j2 was about 10% faster than xs-c++ and about 9.5% faster than -j4 in the same run, while -j2 -z added no speed.",
+     "runKeys": [
+      "vps/AP10280615-PLAN1028-a-lk-fresh-j2z-pin-12b/20261028T061517Z-AP10280615-PLAN1028-a-lk-fresh-j2z-pin-12b"
+     ],
+     "title": "Two workers look like the fresh-copy lever"
+    },
+    {
+     "caveat": "Different runs and sample counts, 8 vs 12 blocks, so this is an observed pattern rather than a controlled interaction estimate.",
+     "evidence": "AP10281214 fresh: xs-rs-W 1.0919s vs xs-rs 1.1236s, a 2.8% gain, with xs-cpp at 1.20535s. AP10291935 fresh: xs-rs-j2W 1.0593s vs xs-rs-j2 1.0551s, effectively tied.",
+     "finding": "Whole-file improved -j4 by 2.8% but did not separate from -j2 once workers were reduced, so it is not additive with the worker change in these runs.",
+     "runKeys": [
+      "vps/AP10281214-AP10281212-PLAN102812-a-lk-fresh-W-12b/20261028T121456Z-AP10281214-AP10281212-PLAN102812-a-lk-fresh-W-12b",
+      "vps/AP10291935-AP10291932-PLAN-a-lk-fresh-j2W-8b/20261029T193531Z-AP10291935-AP10291932-PLAN-a-lk-fresh-j2W-8b"
+     ],
+     "title": "Whole-file helps j4 slightly, but not after j2"
+    },
+    {
+     "caveat": "Eight blocks, one small mixed tree, warm sender cache; differences of 0.5% to 4% are close to run-noise scale.",
+     "evidence": "AP10280014 update-10pct: xs-rs 0.4367s, xs-rs-z1 0.43905s, xs-rs-z 0.45445s, xs-cpp 0.4949s, rsync 0.5435s. Client CPU: plain 0.098s, z1 0.093s, z 0.091s.",
+     "finding": "Compression level 1 did not buy speed on update-10pct: it was 0.5% slower than plain -j4, while default -z was 4.1% slower; all three beat xs-c++.",
+     "runKeys": [
+      "vps/AP10280014-PLAN1028-a-lk-u10pct-z1-8b/20261028T001426Z-AP10280014-PLAN1028-a-lk-u10pct-z1-8b"
+     ],
+     "title": "Compression level 1 did not buy speed on update-10pct"
+    },
+    {
+     "caveat": "Twelve blocks and one run; do not compare these numbers directly with AP10280014 because the runs and dates differ.",
+     "evidence": "AP10271814 update-10pct: xs-rs-j2z 0.44845s, xs-rs 0.4511s, xs-cpp 0.48825s, rsync 0.55425s. Client CPU: j2z 0.067s vs j4 0.090s, about 26% lower.",
+     "finding": "-j2 -z tied plain -j4 on time, 0.448s vs 0.451s, and beat xs-c++; its clear benefit was lower client CPU, not higher speed.",
+     "runKeys": [
+      "vps/AP10271814-PLAN10271812-a-lk-u10pct-j2z-12b/20261027T181426Z-AP10271814-PLAN10271812-a-lk-u10pct-j2z-12b"
+     ],
+     "title": "j2+z is a CPU trade, not a speed win on update-10pct"
+    },
+    {
+     "caveat": "CPU seconds can reflect parallelism and do not measure energy; cross-run comparisons are not controlled.",
+     "evidence": "Client CPU medians: AP10281214 fresh xs-rs 0.579s vs xs-cpp 0.983s; AP10280014 update xs-rs 0.098s vs xs-cpp 0.195s; AP10271814 update xs-rs 0.090s vs xs-cpp 0.1795s; AP10291935 fresh xs-rs 0.5895s vs xs-cpp 0.948s.",
+     "finding": "Across the small-tree runs, xs-rs consistently used less client CPU than xs-c++, and the j2 variants used less still; this is a recurring tradeoff advantage, not a controlled effect estimate.",
+     "runKeys": [
+      "vps/AP10281214-AP10281212-PLAN102812-a-lk-fresh-W-12b/20261028T121456Z-AP10281214-AP10281212-PLAN102812-a-lk-fresh-W-12b",
+      "vps/AP10280014-PLAN1028-a-lk-u10pct-z1-8b/20261028T001426Z-AP10280014-PLAN1028-a-lk-u10pct-z1-8b",
+      "vps/AP10271814-PLAN10271812-a-lk-u10pct-j2z-12b/20261027T181426Z-AP10271814-PLAN10271812-a-lk-u10pct-j2z-12b",
+      "vps/AP10291935-AP10291932-PLAN-a-lk-fresh-j2W-8b/20261029T193531Z-AP10291935-AP10291932-PLAN-a-lk-fresh-j2W-8b"
+     ],
+     "title": "xs-rs wins with lower client CPU on small trees"
+    },
+    {
+     "caveat": "Only 3 blocks and a sentinel configuration that is not the BL2 contest setup; this is a noise warning, not a real-projects benchmark result.",
+     "evidence": "S0 sentinel real-projects noop: xs 4.1859s at 4.080 Gb/s, again 4.4087s at 3.874 Gb/s (0.955x xs speed), rsync 3.4542s at 4.945 Gb/s (1.177x xs speed). Client CPU: xs 7.491s, again 7.719s, rsync 1.942s.",
+     "finding": "The repeated xs arm was 4.6% slower than baseline, outside the expected 3% A/A band, and rsync was 17.7% faster with much lower CPU on this real-projects noop sentinel.",
+     "runKeys": [
+      "vps/S0-vps-sentinel/20261020T030145Z-S0-vps-sentinel-s0011"
+     ],
+     "title": "A/A sentinel drift is about 4.6%, so small differences are fragile"
+    }
+   ],
+   "limitations": [
+    "All results are medians with 3 to 12 paired blocks; no confidence intervals or significance tests were supplied.",
+    "Run evidence covers only one direction and link (a to aws), sender-side client, and warm cache; cold-cache, reverse-direction, and other storage behaviour are untested here.",
+    "The two real-projects contest losses lack run-level records in this window, and the real-projects sentinel is differently configured.",
+    "Worker, compression, and whole-file changes appear in different runs and dates, so cross-run differences cannot be treated as controlled comparisons.",
+    "Direct ratios between arms are derived from medians, not supplied paired ratios, and rounding plus time-window effects apply.",
+    "Small-tree results may not represent large-file, high-file-count, or real-projects exclusive-file behaviour."
+   ],
+   "nextSteps": [
+    "Tune real-projects fresh first: xs-rs is 2.134x rsync and 1.461x xs-c++ there; rerun matched arms to isolate worker, whole-file, and compression effects, requiring a win against both opponents.",
+    "Tune real-projects noop second: xs-rs is 1.664x xs-c++ there, though it beats rsync at 0.791x; determine whether client CPU or file-count handling drives the xs-c++ gap.",
+    "Validate the laikav2 update-10pct near tie, 0.949 versus xs-c++, with more blocks and matched j2, j2z, and z1 arms before promoting compression.",
+    "Repeat fresh j2 versus j2z versus j4 in one controlled design with at least 12 blocks, and test whether whole-file adds anything after j2.",
+    "Check whether the 4.6% A/A drift predicts run-to-run noise on real-projects and increase block counts before claiming small effects."
+   ],
+   "tuningImplications": [
+    {
+     "evidenceStrength": "Low; 3 blocks and an A/A repeat that drifted about 4.6%.",
+     "experiment": "S0-vps-sentinel",
+     "nextTest": "Repeat the sentinel with more blocks and then mirror the BL2 real-projects fresh and noop conditions to separate sentinel noise from the contest gap.",
+     "recommendation": "Use the sentinel to recalibrate noise, not to select a transfer setting; real-projects CPU and file-count behaviour deserve direct investigation.",
+     "runKeys": [
+      "vps/S0-vps-sentinel/20261020T030145Z-S0-vps-sentinel-s0011"
+     ],
+     "settings": [
+      "xs",
+      "again",
+      "rsync"
+     ],
+     "tradeoffs": "The repeat xs arm was 4.6% slower and rsync was 17.7% faster with much lower CPU, so small arm differences are not trustworthy without more blocks."
+    },
+    {
+     "evidenceStrength": "Provisional; 8 blocks per arm in one fresh run.",
+     "experiment": "AP10291935-AP10291932-PLAN-a-lk-fresh-j2W-8b",
+     "nextTest": "Repeat j2 versus j2W versus j4 with at least 12 blocks and a direct xs-c++ comparison; keep the 0.90 ratio target explicit.",
+     "recommendation": "Keep -j2 as the fresh-copy candidate; do not assume the j2W whole-file variant adds value, because it tied j2 and the j2/cpp ratio remained above 0.90.",
+     "runKeys": [
+      "vps/AP10291935-AP10291932-PLAN-a-lk-fresh-j2W-8b/20261029T193531Z-AP10291935-AP10291932-PLAN-a-lk-fresh-j2W-8b"
+     ],
+     "settings": [
+      "-j2",
+      "xs-rs-j2W arm"
+     ],
+     "tradeoffs": "j2 and j2W were effectively tied, at 1.055s and 1.059s, while both stayed above the experiment's 0.90 ratio target to xs-c++."
+    },
+    {
+     "evidenceStrength": "Moderate but single-run; 8 blocks per arm.",
+     "experiment": "AP10280014-PLAN1028-a-lk-u10pct-z1-8b",
+     "nextTest": "Repeat update-10pct with more blocks and matched plain, z1, and z arms; include j2 variants to test interactions rather than relying on separate runs.",
+     "recommendation": "Do not promote compression for speed on update-10pct; plain -j4 was fastest, and level 1 did not separate from plain while all arms beat xs-c++.",
+     "runKeys": [
+      "vps/AP10280014-PLAN1028-a-lk-u10pct-z1-8b/20261028T001426Z-AP10280014-PLAN1028-a-lk-u10pct-z1-8b"
+     ],
+     "settings": [
+      "-j4",
+      "-j4 -z",
+      "-j4 -z --compress-level=1"
+     ],
+     "tradeoffs": "Level 1 was 0.5% slower than plain and default -z was 4.1% slower; CPU differences were small, so compression adds little here."
+    },
+    {
+     "evidenceStrength": "Provisional; 12 blocks per arm in one run.",
+     "experiment": "AP10281214-AP10281212-PLAN102812-a-lk-fresh-W-12b",
+     "nextTest": "Run a controlled fresh test of whole-file with j4 and j2, with enough blocks to see whether the 2.8% j4 gain is reproducible.",
+     "recommendation": "Keep whole-file as a small j4 fresh-copy candidate, but it is not enough to explain the real-projects fresh loss and should not be treated as a default.",
+     "runKeys": [
+      "vps/AP10281214-AP10281212-PLAN102812-a-lk-fresh-W-12b/20261028T121456Z-AP10281214-AP10281212-PLAN102812-a-lk-fresh-W-12b"
+     ],
+     "settings": [
+      "-j4",
+      "xs-rs-W arm"
+     ],
+     "tradeoffs": "The W arm was 2.8% faster than j4, but its ratio to xs-c++ was about 0.906, just above the 0.90 target, with similar CPU."
+    },
+    {
+     "evidenceStrength": "Moderate but single-run; 12 blocks per arm.",
+     "experiment": "AP10271814-PLAN10271812-a-lk-u10pct-j2z-12b",
+     "nextTest": "Compare j2z against j4 and plain z in one matched update-10pct run with more blocks, measuring both time and CPU.",
+     "recommendation": "Treat -j2 -z as a CPU-efficiency candidate, not a speed winner over -j4; use it only where client CPU is the constraint.",
+     "runKeys": [
+      "vps/AP10271814-PLAN10271812-a-lk-u10pct-j2z-12b/20261027T181426Z-AP10271814-PLAN10271812-a-lk-u10pct-j2z-12b"
+     ],
+     "settings": [
+      "-j4",
+      "-j2 -z"
+     ],
+     "tradeoffs": "Time was nearly identical, 0.448s vs 0.451s, while client CPU fell from 0.090s to 0.067s; speed evidence is not strong."
+    },
+    {
+     "evidenceStrength": "Moderate; 12 blocks per arm in one fresh run.",
+     "experiment": "AP10280615-PLAN1028-a-lk-fresh-j2z-pin-12b",
+     "nextTest": "Repeat -j2, -j2 -z, and -j4 against xs-c++ in one controlled fresh run; require a stable sub-0.90 ratio before calling it a default candidate.",
+     "recommendation": "Advance -j2 as the fresh-copy candidate; -j2 -z was slower than -j2 and plain -j4 was close to xs-c++, so do not promote j2z on speed.",
+     "runKeys": [
+      "vps/AP10280615-PLAN1028-a-lk-fresh-j2z-pin-12b/20261028T061517Z-AP10280615-PLAN1028-a-lk-fresh-j2z-pin-12b"
+     ],
+     "settings": [
+      "-j4",
+      "-j2",
+      "-j2 -z"
+     ],
+     "tradeoffs": "j2 ran 1.029s vs 1.137s for j4 and 1.143s for xs-c++; j2z was 1.056s. Both j2 variants used less CPU, but this is one run."
+    }
+   ],
+   "charts": [
+    {
+     "id": "5-0-medianPairedSpeedVsControl",
+     "title": "Speed vs rsync: laikav2-sample (a \u2192 aws)",
+     "runKey": "vps/AP10280615-PLAN1028-a-lk-fresh-j2z-pin-12b/20261028T061517Z-AP10280615-PLAN1028-a-lk-fresh-j2z-pin-12b",
+     "metric": "medianPairedSpeedVsControl",
+     "unit": "\u00d7 rsync",
+     "primary": "durable_s",
+     "factors": {
+      "id": "laikav2-sample.fresh.a-aws.sender.warm",
+      "corpus": "laikav2-sample",
+      "scenario": "fresh",
+      "sender": "a",
+      "receiver": "aws",
+      "client": "sender",
+      "link": "a-aws",
+      "cache": "warm",
+      "files": 1337,
+      "bytes": 93971741
+     },
+     "values": [
+      {
+       "arm": "xs-rs-j2z",
+       "value": 1.2716341486623608,
+       "samples": 12,
+       "blocks": 12
+      },
+      {
+       "arm": "xs-cpp",
+       "value": 1.1608526344583456,
+       "samples": 12,
+       "blocks": 12
+      },
+      {
+       "arm": "xs-rs-j2",
+       "value": 1.3650542160947343,
+       "samples": 12,
+       "blocks": 12
+      },
+      {
+       "arm": "xs-rs",
+       "value": 1.2121659904557114,
+       "samples": 12,
+       "blocks": 12
+      },
+      {
+       "arm": "rsync",
+       "value": 1,
+       "samples": 12,
+       "blocks": 12
+      }
+     ],
+     "note": "Window-only medians; no confidence intervals. Compare arms within this cell. "
+    },
+    {
+     "id": "3-0-medianPairedSpeedVsControl",
+     "title": "Speed vs rsync: laikav2-sample (a \u2192 aws)",
+     "runKey": "vps/AP10281214-AP10281212-PLAN102812-a-lk-fresh-W-12b/20261028T121456Z-AP10281214-AP10281212-PLAN102812-a-lk-fresh-W-12b",
+     "metric": "medianPairedSpeedVsControl",
+     "unit": "\u00d7 rsync",
+     "primary": "durable_s",
+     "factors": {
+      "id": "laikav2-sample.fresh.a-aws.sender.warm",
+      "corpus": "laikav2-sample",
+      "scenario": "fresh",
+      "sender": "a",
+      "receiver": "aws",
+      "client": "sender",
+      "link": "a-aws",
+      "cache": "warm",
+      "files": 1337,
+      "bytes": 93971741
+     },
+     "values": [
+      {
+       "arm": "xs-cpp",
+       "value": 1.0672293182688573,
+       "samples": 12,
+       "blocks": 12
+      },
+      {
+       "arm": "rsync",
+       "value": 1,
+       "samples": 12,
+       "blocks": 12
+      },
+      {
+       "arm": "xs-rs-W",
+       "value": 1.2169565195692909,
+       "samples": 12,
+       "blocks": 12
+      },
+      {
+       "arm": "xs-rs",
+       "value": 1.189874489111206,
+       "samples": 12,
+       "blocks": 12
+      }
+     ],
+     "note": "Window-only medians; no confidence intervals. Compare arms within this cell. "
+    },
+    {
+     "id": "2-0-medianPairedSpeedVsControl",
+     "title": "Speed vs rsync: laikav2-sample (a \u2192 aws)",
+     "runKey": "vps/AP10280014-PLAN1028-a-lk-u10pct-z1-8b/20261028T001426Z-AP10280014-PLAN1028-a-lk-u10pct-z1-8b",
+     "metric": "medianPairedSpeedVsControl",
+     "unit": "\u00d7 rsync",
+     "primary": "durable_s",
+     "factors": {
+      "id": "laikav2-sample.update-10pct.a-aws.sender.warm",
+      "corpus": "laikav2-sample",
+      "scenario": "update-10pct",
+      "sender": "a",
+      "receiver": "aws",
+      "client": "sender",
+      "link": "a-aws",
+      "cache": "warm",
+      "files": 1337,
+      "bytes": 93971741
+     },
+     "values": [
+      {
+       "arm": "xs-rs-z",
+       "value": 1.166329744928952,
+       "samples": 8,
+       "blocks": 8
+      },
+      {
+       "arm": "xs-rs",
+       "value": 1.2357613143410828,
+       "samples": 8,
+       "blocks": 8
+      },
+      {
+       "arm": "rsync",
+       "value": 1,
+       "samples": 8,
+       "blocks": 8
+      },
+      {
+       "arm": "xs-cpp",
+       "value": 1.0681807645397614,
+       "samples": 8,
+       "blocks": 8
+      },
+      {
+       "arm": "xs-rs-z1",
+       "value": 1.2002750350298734,
+       "samples": 8,
+       "blocks": 8
+      }
+     ],
+     "note": "Window-only medians; no confidence intervals. Compare arms within this cell. "
+    },
+    {
+     "id": "4-0-medianPairedSpeedVsControl",
+     "title": "Speed vs rsync: laikav2-sample (a \u2192 aws)",
+     "runKey": "vps/AP10271814-PLAN10271812-a-lk-u10pct-j2z-12b/20261027T181426Z-AP10271814-PLAN10271812-a-lk-u10pct-j2z-12b",
+     "metric": "medianPairedSpeedVsControl",
+     "unit": "\u00d7 rsync",
+     "primary": "durable_s",
+     "factors": {
+      "id": "laikav2-sample.update-10pct.a-aws.sender.warm",
+      "corpus": "laikav2-sample",
+      "scenario": "update-10pct",
+      "sender": "a",
+      "receiver": "aws",
+      "client": "sender",
+      "link": "a-aws",
+      "cache": "warm",
+      "files": 1337,
+      "bytes": 93971741
+     },
+     "values": [
+      {
+       "arm": "xs-rs-j2z",
+       "value": 1.185392214536248,
+       "samples": 12,
+       "blocks": 12
+      },
+      {
+       "arm": "xs-rs",
+       "value": 1.1855336486043533,
+       "samples": 12,
+       "blocks": 12
+      },
+      {
+       "arm": "xs-cpp",
+       "value": 1.159112215105163,
+       "samples": 12,
+       "blocks": 12
+      },
+      {
+       "arm": "rsync",
+       "value": 1,
+       "samples": 12,
+       "blocks": 12
+      }
+     ],
+     "note": "Window-only medians; no confidence intervals. Compare arms within this cell. "
+    },
+    {
+     "id": "1-0-medianPairedSpeedVsControl",
+     "title": "Speed vs rsync: laikav2-sample (a \u2192 aws)",
+     "runKey": "vps/AP10291935-AP10291932-PLAN-a-lk-fresh-j2W-8b/20261029T193531Z-AP10291935-AP10291932-PLAN-a-lk-fresh-j2W-8b",
+     "metric": "medianPairedSpeedVsControl",
+     "unit": "\u00d7 rsync",
+     "primary": "durable_s",
+     "factors": {
+      "id": "laikav2-sample.fresh.a-aws.sender.warm",
+      "corpus": "laikav2-sample",
+      "scenario": "fresh",
+      "sender": "a",
+      "receiver": "aws",
+      "client": "sender",
+      "link": "a-aws",
+      "cache": "warm",
+      "files": 1337,
+      "bytes": 93971741
+     },
+     "values": [
+      {
+       "arm": "xs-rs",
+       "value": 1.2333917733215194,
+       "samples": 8,
+       "blocks": 8
+      },
+      {
+       "arm": "xs-cpp",
+       "value": 1.1150155428379747,
+       "samples": 8,
+       "blocks": 8
+      },
+      {
+       "arm": "xs-rs-j2",
+       "value": 1.189158591713249,
+       "samples": 8,
+       "blocks": 8
+      },
+      {
+       "arm": "rsync",
+       "value": 1,
+       "samples": 8,
+       "blocks": 8
+      },
+      {
+       "arm": "xs-rs-j2W",
+       "value": 1.2248894348894348,
+       "samples": 8,
+       "blocks": 8
+      }
+     ],
+     "note": "Window-only medians; no confidence intervals. Compare arms within this cell. "
+    },
+    {
+     "id": "0-0-medianGbps",
+     "title": "Delivered throughput: real-projects (a \u2192 aws)",
+     "runKey": "vps/S0-vps-sentinel/20261020T030145Z-S0-vps-sentinel-s0011",
+     "metric": "medianGbps",
+     "unit": "Gb/s",
+     "primary": "wall_s",
+     "factors": {
+      "id": "real-projects.noop.a-aws.sender.warm",
+      "corpus": "real-projects",
+      "scenario": "noop",
+      "sender": "a",
+      "receiver": "aws",
+      "client": "sender",
+      "link": "a-aws",
+      "cache": "warm",
+      "files": 69316,
+      "bytes": 2134981089
+     },
+     "values": [
+      {
+       "arm": "rsync",
+       "value": 4.944661198540907,
+       "samples": 3,
+       "blocks": 3
+      },
+      {
+       "arm": "again",
+       "value": 3.874123599246944,
+       "samples": 3,
+       "blocks": 3
+      },
+      {
+       "arm": "xs",
+       "value": 4.080328892711244,
+       "samples": 3,
+       "blocks": 3
+      }
+     ],
+     "note": "Window-only medians; no confidence intervals. Compare arms within this cell. Corpus bytes divided by wall_s; not instantaneous wire rate."
+    }
+   ]
+  },
+  {
    "id": "2026-10-29T09:00:00.000Z",
    "start": 1793178000,
    "end": 1793264400,
@@ -17105,5 +18619,5 @@
   }
  ],
  "error": null,
- "lastAttempt": 1793264729.395
+ "lastAttempt": 1793350831.985
 }
