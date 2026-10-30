@@ -1,0 +1,17 @@
+# Written by the 6-hourly planner at 2026-10-30T01:35Z for a; nothing is queued after the deadline.
+id = "AUTO-10300135-a"
+question = "Runner a has 3.5 h of measurement room (6.0 h window minus 2.5 h queued) and is waiting on the 32 GiB/day write budget, so the plan adds only three small congress/laikav2 races costing about 18 minutes and roughly 18 GB, all queued behind the heavy real-projects backlog. Real-projects gets nothing new: the lone xs-c++ win is already queued at 4 blocks on the newest rev and behind -j2, -j8, -z and -W screens, and no verdict-grade real-projects update run fits the cap. The first experiment follows the 29 Oct laikav2 fresh -W screening (0.841 of rsync vs 0.902 for default) with a direct 12-block race against xs-c++; the second tests the untried --no-atomic write path on per-file-bound congress fresh; the third fills the only uncovered jobs cell, -j2 on congress update-10pct. Nothing decided or queued is repeated (the laikav2 fresh tree runs -j2 with -W, not -W alone; --no-atomic has only been screened on updates), no no-op cells are planned, front is false because the backlog contains PS/FC/BL3 baseline and port runs, confirm is null because no absolute speed floor is known, and engineering and port are null because xs-c++ is the fixed reference and every port step is merged."
+deadline = "2026-10-30T07:35Z"
+start = ["N0", "N1", "N2"]
+
+[nodes.N0]
+spec = "auto/AP10300135-P1030-a-lk-fresh-W-12b.toml"
+question = "On laikav2-sample fresh copies, does whole-file transfer (-W) at the default -j4 beat xs-c++ directly, or was the 0.841-of-rsync screening just a favorable block?"
+
+[nodes.N1]
+spec = "auto/AP10300135-P1030-a-cg-fresh-noatomic-8b.toml"
+question = "On per-file-bound congress-sample fresh, does skipping the atomic temp-file-and-rename path (--no-atomic) cut per-file overhead enough to widen xs-rs's win over xs-c++?"
+
+[nodes.N2]
+spec = "auto/AP10300135-P1030-a-cg-u10pct-j2-8b.toml"
+question = "On congress-sample update-10pct, does -j2 improve xs-rs over its -j4 default, or does lower concurrency only help fresh and low-churn copies?"

@@ -1,0 +1,38 @@
+# Written by the 6-hourly planner (2026-10-30T01:35Z). Why: Per-file costs dominate congress fresh, --no-atomic has only been screened on update cells (congress update-10pct and laikav2 update-10pct), and if it helps it is the cheapest default lever available for small-file trees.
+id = "AP10300135-P1030-a-cg-fresh-noatomic-8b"
+kind = "screening"
+hypothesis = "If per-file publication costs a real share of a 25k-file fresh copy, xs-rs-noatomic finishes at least 3% faster than default xs-rs and its ratio to xs-c++ falls from about 0.87; if the intervals merge, the remaining per-file cost is in listing/scan and the write path is not a small-file default lever."
+primary = "durable_s"
+delta = 0.05
+blocks = 8
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+sample_timeout_s = 7200
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[arms.xs-rs]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j4"]
+
+[arms.xs-cpp]
+tool = "xs"
+rev = "e104bde552f2"
+flags = ["-a", "-j4"]
+
+[arms.xs-rs-noatomic]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j4", "--no-atomic"]
+
+[matrix]
+link = "a-aws"
+corpus = ["congress-sample"]
+scenario = ["fresh"]
+direction = ["a>aws"]
+client = ["initiator"]
+cache = ["warm"]
