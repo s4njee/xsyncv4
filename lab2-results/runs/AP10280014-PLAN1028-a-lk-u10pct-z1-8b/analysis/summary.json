@@ -1,0 +1,19 @@
+{
+ "experiment": "AP10280014-PLAN1028-a-lk-u10pct-z1-8b",
+ "kind": "screening",
+ "hypothesis": "Because only about 10% of this small mixed tree changes, default -z gives a modest gain; --compress-level=1 should match that gain with less CPU, while default -z remains near the 5% line and plain xs-rs stays a tie. If level 1 separates, compression-level tuning is worth a default; if not, the cell is an honest near-tie.",
+ "primary": "durable_s",
+ "control": "rsync",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261028T001426Z-AP10280014-PLAN1028-a-lk-u10pct-z1-8b"
+ ],
+ "spec_sha256": [
+  "ede524df735d7a7412edc5aabf26e83b21a53e16c4cb6f3c9ea19b44edf714cb"
+ ],
+ "valid_blocks": 8,
+ "void_attempts": 0,
+ "void_reasons": []
+}

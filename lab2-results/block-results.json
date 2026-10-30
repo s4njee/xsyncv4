@@ -5040,6 +5040,114 @@
    "model": "opencode/deepseek-v4.1-flash",
    "summarizedUtc": 1793304113.514,
    "driver": "a"
+  },
+  "AP10280014-PLAN1028-a-lk-u10pct-z1-8b": {
+   "run": "20261028T001426Z-AP10280014-PLAN1028-a-lk-u10pct-z1-8b",
+   "experiment": "AP10280014-PLAN1028-a-lk-u10pct-z1-8b",
+   "key": "laikav2-sample.update-10pct.a-aws.sender.warm|6|0",
+   "utc": 1793328548.397,
+   "cell": "laikav2-sample.update-10pct.a-aws.sender.warm",
+   "factors": {
+    "corpus": "laikav2-sample",
+    "scenario": "update-10pct",
+    "sender": "a",
+    "receiver": "aws",
+    "client": "sender",
+    "link": "a-aws",
+    "cache": "warm"
+   },
+   "block": 6,
+   "attempt": 0,
+   "control": "rsync",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "rsync",
+     "label": "rsync",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 0.53,
+     "gbps": 0.044,
+     "files_per_s": 2523,
+     "speed": 1
+    },
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.39,
+     "gbps": 0.06,
+     "files_per_s": 3431,
+     "speed": 1.36
+    },
+    {
+     "arm": "xs-rs-z",
+     "label": "xs-rs -z",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.454,
+     "gbps": 0.051,
+     "files_per_s": 2942,
+     "speed": 1.17
+    },
+    {
+     "arm": "xs-rs-z1",
+     "label": "xs-rs -z1",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.424,
+     "gbps": 0.055,
+     "files_per_s": 3155,
+     "speed": 1.25
+    },
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.489,
+     "gbps": 0.048,
+     "files_per_s": 2734,
+     "speed": 1.08
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "speed": 1.06,
+     "blocks": 7
+    },
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "speed": 1.18,
+     "blocks": 7
+    },
+    {
+     "arm": "xs-rs-z",
+     "label": "xs-rs -z",
+     "speed": 1.14,
+     "blocks": 7
+    },
+    {
+     "arm": "xs-rs-z1",
+     "label": "xs-rs -z1",
+     "speed": 1.16,
+     "blocks": 7
+    }
+   ],
+   "question": "On laikav2-sample update-10pct, can a lighter compression level keep -z's wire saving without its CPU cost and move the 0.949 xs-rs win over xs-c++ clear of the margin?",
+   "summary": "This block's fastest arm was xs-rs at 0.39 s, 1.36x the rsync control (0.53 s); xs-rs -z1 was 1.25x, xs-rs -z 1.17x, and xs-c++ 1.08x. Across seven blocks, cumulative ratios are xs-rs 1.18x, xs-rs -z1 1.16x, xs-rs -z 1.14x, and xs-c++ 1.06x, so evidence is not thin. On the experiment's question, z1 beat -z and xs-c++ in this block, but it still trails plain xs-rs and does not by itself show the xs-rs-over-xs-c++ margin is clear.",
+   "model": "opencode/deepseek-v4.1-flash",
+   "summarizedUtc": 1793328639.131,
+   "driver": "a"
   }
  }
 }
