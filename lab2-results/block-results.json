@@ -5637,6 +5637,97 @@
    "model": "opencode/deepseek-v4.1-flash",
    "summarizedUtc": 1793420597.299,
    "driver": "a"
+  },
+  "AP10290735-PLAN1029-a-cg-fresh-W-8b": {
+   "run": "20261029T073548Z-AP10290735-PLAN1029-a-cg-fresh-W-8b",
+   "experiment": "AP10290735-PLAN1029-a-cg-fresh-W-8b",
+   "key": "congress-sample.fresh.a-aws.sender.warm|6|0",
+   "utc": 1793444402.95,
+   "cell": "congress-sample.fresh.a-aws.sender.warm",
+   "factors": {
+    "corpus": "congress-sample",
+    "scenario": "fresh",
+    "sender": "a",
+    "receiver": "aws",
+    "client": "sender",
+    "link": "a-aws",
+    "cache": "warm"
+   },
+   "block": 6,
+   "attempt": 0,
+   "control": "rsync",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "rsync",
+     "label": "rsync",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 3.912,
+     "gbps": 0.446,
+     "files_per_s": 6454,
+     "speed": 1
+    },
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 3.365,
+     "gbps": 0.519,
+     "files_per_s": 7502,
+     "speed": 1.16
+    },
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 2.955,
+     "gbps": 0.591,
+     "files_per_s": 8545,
+     "speed": 1.32
+    },
+    {
+     "arm": "xs-rs-W",
+     "label": "xs-rs-W",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 3.267,
+     "gbps": 0.534,
+     "files_per_s": 7727,
+     "speed": 1.2
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "speed": 0.97,
+     "blocks": 7
+    },
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "speed": 1.11,
+     "blocks": 7
+    },
+    {
+     "arm": "xs-rs-W",
+     "label": "xs-rs-W",
+     "speed": 1.05,
+     "blocks": 7
+    }
+   ],
+   "question": "On congress-sample fresh, does --whole-file cut per-file setup enough for xs-rs to beat its default arm and keep xs-c++ behind?",
+   "summary": "This block\u2019s fastest arm was xs-rs at 1.32x the control (2.955s versus 3.912s). Across seven blocks, cumulative speeds are 1.11x for xs-rs, 1.05x for xs-rs-W, and 0.97x for xs-c++, so the evidence is not thin. Here xs-rs-W reached 1.20x, below default xs-rs\u2019s 1.32x, while xs-rs stayed ahead of xs-c++.",
+   "model": "opencode/deepseek-v4.1-flash",
+   "summarizedUtc": 1793444460.815,
+   "driver": "a"
   }
  }
 }

@@ -1,0 +1,19 @@
+{
+ "experiment": "AP10290735-PLAN1029-a-cg-fresh-W-8b",
+ "kind": "screening",
+ "hypothesis": "A fresh destination offers no useful delta basis, so -W should remove per-file index and checksum work; xs-rs-W should be at least 5% faster than default xs-rs and keep the xs-rs-to-xs-c++ ratio below 0.87.",
+ "primary": "durable_s",
+ "control": "rsync",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261029T073548Z-AP10290735-PLAN1029-a-cg-fresh-W-8b"
+ ],
+ "spec_sha256": [
+  "d693bdf5efb4ed215bbffc4a653f9dd059fc719cec7268a942c52e8b1961c8b4"
+ ],
+ "valid_blocks": 8,
+ "void_attempts": 0,
+ "void_reasons": []
+}
