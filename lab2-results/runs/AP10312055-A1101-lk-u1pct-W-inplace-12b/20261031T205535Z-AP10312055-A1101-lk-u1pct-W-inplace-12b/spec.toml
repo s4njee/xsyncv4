@@ -1,0 +1,38 @@
+# Written by the 6-hourly planner (2026-10-31T20:55Z). Why: The update-1pct win is still near the margin, and no queued run combines whole-file and in-place writes.
+id = "AP10312055-A1101-lk-u1pct-W-inplace-12b"
+kind = "screening"
+hypothesis = "The 1% churn changes few bytes, so bypassing delta with -W and writing changed files in place may cut both scan and write overhead; xs-rs-W-inplace should beat default xs-rs by at least 3% and pull the direct ratio below 0.90. If not, the queued W-only and write-path screens should close this cell without a combined setting."
+primary = "durable_s"
+delta = 0.05
+blocks = 12
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+sample_timeout_s = 7200
+
+[arms.xs-rs]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j4"]
+
+[arms.xs-rs-W-inplace]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j4", "-W", "--inplace"]
+
+[arms.xs-cpp]
+tool = "xs"
+rev = "e104bde552f2"
+flags = ["-a", "-j4"]
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[matrix]
+link = "a-aws"
+corpus = ["laikav2-sample"]
+scenario = ["update-1pct"]
+direction = ["a>aws"]
+client = ["initiator"]
+cache = ["warm"]

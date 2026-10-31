@@ -1,0 +1,17 @@
+# Written by the 6-hourly planner at 2026-10-31T20:55Z for a; nothing is queued after the deadline.
+id = "AUTO-10312055-a"
+question = "Runner a has 2.4 h of measurement room (6.0 h minus 3.6 h queued) and is write-budget bound, so I add only three warm congress/laikav2 screens totaling about 0.27 h and 16.6 GB. I do not add real-projects fresh: the only xs-c++ transfer win is already queued at 4 blocks on the newest xs-rs with j2, j2W, z, W and no-atomic variants, and a new heavy copy would crowd the day's 32 GiB budget. The screens target the two closest update near-ties (laikav2 update-10pct and update-1pct) with an untried -W+--inplace interaction and give congress update-1pct its first in-place test; all use rsync as control, xs-rs at beabaee992b6-rs, xs-cpp at e104bde552f2, full verification, warm cache, and no confirm because no absolute speed floor is known. Nothing is fronted because the backlog contains hand, baseline and port runs, not only earlier planner windows."
+deadline = "2026-11-01T02:55Z"
+start = ["N0", "N1", "N2"]
+
+[nodes.N0]
+spec = "auto/AP10312055-A1101-lk-u10pct-W-inplace-12b.toml"
+question = "On laikav2-sample update-10pct, does adding --inplace to -W pull the current 0.949 xs-rs/xs-c++ ratio clearly below the 5% margin?"
+
+[nodes.N1]
+spec = "auto/AP10312055-A1101-lk-u1pct-W-inplace-12b.toml"
+question = "On laikav2-sample update-1pct, does -W plus --inplace move the 0.936 direct ratio away from the margin?"
+
+[nodes.N2]
+spec = "auto/AP10312055-A1101-cg-u1pct-inplace-8b.toml"
+question = "On congress-sample update-1pct, does --inplace improve the small-file update path enough to become a default?"
