@@ -1,0 +1,21 @@
+# Written by the 6-hourly planner at 2026-10-31T01:35Z for a; nothing is queued after the deadline.
+id = "AUTO-10310135-a"
+question = "Runner a has 2.5 h of measurement room (6.0 h window minus 3.5 h queued and no current run), and these four warm races take about 0.35 h at the listed sample rates. Because A is still write-budget-bound, I add only congress-sample and laikav2-sample work (about 20 GB total), avoid new real-projects fresh/update copies and all no-op cells, and steer clear of the queued -W/-j2/-j2W/-z/-z1/--inplace/--no-atomic variants and pins. The screens follow the latest -W regression, the -j2 fresh lead, and the untried --no-atomic write path on the two update-0p1pct cells; confirm is null because no absolute speed floor is known, front is false because the backlog contains hand, baseline and port runs, and engineering/port are null by the lab rules."
+deadline = "2026-10-31T07:35Z"
+start = ["N0", "N1", "N2", "N3"]
+
+[nodes.N0]
+spec = "auto/AP10310135-PLAN1031-a-lk-fresh-j2-vs-j2W-12b.toml"
+question = "On laikav2-sample fresh, is the 8-block -j2W win a real -j2 times -W interaction, or is -j2 alone the better fresh-copy default now that -W alone regressed?"
+
+[nodes.N1]
+spec = "auto/AP10310135-PLAN1031-a-lk-u1pct-j2W-12b.toml"
+question = "On laikav2-sample update-1pct, does combining -j2 with -W beat default -j4 enough to make -j2W the update setting, or does the queued -W pin already capture the gain?"
+
+[nodes.N2]
+spec = "auto/AP10310135-PLAN1031-a-lk-u01pct-noatomic-8b.toml"
+question = "On laikav2-sample update-0p1pct, does --no-atomic cut per-file rename overhead enough to beat default -j4, or is the write path irrelevant on a tiny delta?"
+
+[nodes.N3]
+spec = "auto/AP10310135-PLAN1031-a-cg-u01pct-noatomic-8b.toml"
+question = "On per-file-bound congress-sample update-0p1pct, does --no-atomic widen the 4-block win by reducing small-file write overhead?"
