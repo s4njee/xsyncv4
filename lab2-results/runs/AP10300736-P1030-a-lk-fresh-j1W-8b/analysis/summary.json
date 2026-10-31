@@ -1,0 +1,19 @@
+{
+ "experiment": "AP10300736-P1030-a-lk-fresh-j1W-8b",
+ "kind": "screening",
+ "hypothesis": "If contention still limits laikav2 fresh, xs-rs-j1W will be at least 3% faster than xs-rs-j2W; if the two arms merge or -j1W loses, -j2W is the practical fresh-copy setting and lower job counts are not worth promoting.",
+ "primary": "durable_s",
+ "control": "rsync",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261030T073605Z-AP10300736-P1030-a-lk-fresh-j1W-8b"
+ ],
+ "spec_sha256": [
+  "23921d218b5fc5177fd13c2fdb4c29ec3e233a0f5657723e35f108e21fb76034"
+ ],
+ "valid_blocks": 8,
+ "void_attempts": 0,
+ "void_reasons": []
+}
