@@ -6,4 +6,4 @@ samples, blocks and analysis (runs/), the scoreboard of rsync, xs-c++ and xs-rs 
 and the engineer's case records and DevLog. Host names, addresses and home directories are scrubbed, and no logs or
 agent transcripts are included.
 
-Last published 2026-10-31T17:17:10+00:00.
+Last published 2026-10-31T18:17:27+00:00.
