@@ -1,0 +1,17 @@
+# Written by the 6-hourly planner at 2026-10-31T08:14Z for a; nothing is queued after the deadline.
+id = "AUTO-10310814-a"
+question = "Runner a has no current run and 3.5 h queued, leaving 2.5 h of measurement room; these three 4-arm, 8-block warm races cost about 0.27 h. The link is write-budget bound, so I add only congress-sample and laikav2-sample update work, avoid new real-projects copies and all no-op cells, and do not duplicate the queued default pins or the queued -j2/-j2W/-z/-z1/--inplace/--no-atomic runs. The three screens isolate -W where it is promising on small-file updates (congress update-1pct and laikav2 update-0p1pct) and where it may regress (congress update-10pct); confirm is null because no absolute speed floor is known, and engineering/port are null because xs-c++ is fixed here and no port step is open."
+deadline = "2026-10-31T14:14Z"
+start = ["N0", "N1", "N2"]
+
+[nodes.N0]
+spec = "auto/AP10310814-P10310812-a-cg-u1pct-W-8b.toml"
+question = "On congress-sample update-1pct, does -W cut xs-rs's durable time versus default -j4 and keep it ahead of xs-c++?"
+
+[nodes.N1]
+spec = "auto/AP10310814-P10310812-a-lk-u01pct-W-8b.toml"
+question = "On laikav2-sample update-0p1pct, does -W improve the default xs-rs result without losing to xs-c++?"
+
+[nodes.N2]
+spec = "auto/AP10310814-P10310812-a-cg-u10pct-W-8b.toml"
+question = "On congress-sample update-10pct, does -W regress versus default -j4 enough to rule it out as a general update default?"

@@ -1,0 +1,38 @@
+# Written by the 6-hourly planner (2026-10-31T08:14Z). Why: The existing laikav2 update-0p1pct verdict is only a 0.93 near-tie at default flags, and no queued run isolates -W there.
+id = "AP10310814-P10310812-a-lk-u01pct-W-8b"
+kind = "screening"
+hypothesis = "Because 0.1% churn changes few bytes, xs-rs-W will be at least 3% faster than default xs-rs and keep its ratio to xs-c++ below 0.90; if not, -W's update benefit is limited to the 1pct cell."
+primary = "durable_s"
+delta = 0.03
+blocks = 8
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+sample_timeout_s = 7200
+
+[arms.xs-rs]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j4"]
+
+[arms.xs-rs-W]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j4", "-W"]
+
+[arms.xs-cpp]
+tool = "xs"
+rev = "e104bde552f2"
+flags = ["-a", "-j4"]
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[matrix]
+link = "a-aws"
+corpus = ["laikav2-sample"]
+scenario = ["update-0p1pct"]
+direction = ["a>aws"]
+client = ["initiator"]
+cache = ["warm"]
