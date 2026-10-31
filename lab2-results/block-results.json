@@ -5819,6 +5819,91 @@
    "model": "opencode/deepseek-v4.1-flash",
    "summarizedUtc": 1793452912.36,
    "driver": "a"
+  },
+  "AP10311414-A1031-lk-fresh-writepath-8b": {
+   "run": "20261031T141430Z-AP10311414-A1031-lk-fresh-writepath-8b",
+   "experiment": "AP10311414-A1031-lk-fresh-writepath-8b",
+   "key": "laikav2-sample.fresh.a-aws.sender.warm|7|0",
+   "utc": 1793476977.94,
+   "cell": "laikav2-sample.fresh.a-aws.sender.warm",
+   "factors": {
+    "corpus": "laikav2-sample",
+    "scenario": "fresh",
+    "sender": "a",
+    "receiver": "aws",
+    "client": "sender",
+    "link": "a-aws",
+    "cache": "warm"
+   },
+   "block": 7,
+   "attempt": 0,
+   "control": "rsync",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "xs-rs-noatomic",
+     "label": "xs-rs -noatomic",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 1.294,
+     "gbps": 0.581,
+     "files_per_s": 1034,
+     "speed": 0.97
+    },
+    {
+     "arm": "xs-rs-inplace",
+     "label": "xs-rs -inplace",
+     "control": false,
+     "valid": false,
+     "void": "the transfer exited 1: xs-rs: --inplace: unknown option",
+     "seconds": null,
+     "gbps": null,
+     "files_per_s": null,
+     "speed": null
+    },
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 1.209,
+     "gbps": 0.622,
+     "files_per_s": 1106,
+     "speed": 1.04
+    },
+    {
+     "arm": "rsync",
+     "label": "rsync",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 1.257,
+     "gbps": 0.598,
+     "files_per_s": 1064,
+     "speed": 1
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "speed": 1.08,
+     "blocks": 10
+    },
+    {
+     "arm": "xs-rs-noatomic",
+     "label": "xs-rs -noatomic",
+     "speed": 1.2,
+     "blocks": 11
+    }
+   ],
+   "question": "On laikav2-sample fresh, which write path beats xs-c++: --no-atomic or --inplace?",
+   "summary": "In block 7, xs-c++ was fastest at 1.209 s, or 1.04x versus rsync, while xs-rs -noatomic took 1.294 s (0.97x); xs-rs -inplace did not run because --inplace was an unknown option. Cumulatively, xs-c++ stands at 1.08x over 10 blocks and xs-rs -noatomic at 1.20x over 11 blocks, so the evidence is not thin. For this cell, noatomic did not beat xs-c++ in this block, and inplace has no result here.",
+   "model": "opencode/deepseek-v4.1-flash",
+   "summarizedUtc": 1793477010.918,
+   "driver": "a"
   }
  }
 }

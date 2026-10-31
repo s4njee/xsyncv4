@@ -1,0 +1,21 @@
+{
+ "experiment": "AP10311414-A1031-lk-fresh-writepath-8b",
+ "kind": "screening",
+ "hypothesis": "Both flags bypass the temp-file rename, so at least one should improve xs-rs's direct ratio to xs-c++ below 0.95 and separate from the other; if neither does, fresh write-path flags are not the lever and per-file overhead is not the cause.",
+ "primary": "durable_s",
+ "control": "rsync",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261031T141430Z-AP10311414-A1031-lk-fresh-writepath-8b"
+ ],
+ "spec_sha256": [
+  "fa0be7f28a002de257cdc8201edae42272f99cb915fa12468b382ef869978be8"
+ ],
+ "valid_blocks": 0,
+ "void_attempts": 24,
+ "void_reasons": [
+  "xs-rs-inplace: the transfer exited 1: xs-rs: --inplace: unknown option"
+ ]
+}
