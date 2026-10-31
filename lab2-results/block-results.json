@@ -5732,8 +5732,8 @@
   "AP10280014-PLAN1028-a-cg-fresh-z12b": {
    "run": "20261028T001424Z-AP10280014-PLAN1028-a-cg-fresh-z12b",
    "experiment": "AP10280014-PLAN1028-a-cg-fresh-z12b",
-   "key": "congress-sample.fresh.a-aws.sender.warm|4|0",
-   "utc": 1793452588.367,
+   "key": "congress-sample.fresh.a-aws.sender.warm|10|0",
+   "utc": 1793452816.944,
    "cell": "congress-sample.fresh.a-aws.sender.warm",
    "factors": {
     "corpus": "congress-sample",
@@ -5744,7 +5744,7 @@
     "link": "a-aws",
     "cache": "warm"
    },
-   "block": 4,
+   "block": 10,
    "attempt": 0,
    "control": "rsync",
    "primary": "durable_s",
@@ -5755,9 +5755,9 @@
      "control": true,
      "valid": true,
      "void": null,
-     "seconds": 3.062,
-     "gbps": 0.57,
-     "files_per_s": 8246,
+     "seconds": 3.105,
+     "gbps": 0.562,
+     "files_per_s": 8131,
      "speed": 1
     },
     {
@@ -5766,10 +5766,10 @@
      "control": false,
      "valid": true,
      "void": null,
-     "seconds": 2.909,
-     "gbps": 0.6,
-     "files_per_s": 8678,
-     "speed": 1.05
+     "seconds": 3.014,
+     "gbps": 0.579,
+     "files_per_s": 8377,
+     "speed": 1.03
     },
     {
      "arm": "xs-rs-z",
@@ -5777,10 +5777,10 @@
      "control": false,
      "valid": true,
      "void": null,
-     "seconds": 4.384,
-     "gbps": 0.398,
-     "files_per_s": 5759,
-     "speed": 0.7
+     "seconds": 2.895,
+     "gbps": 0.603,
+     "files_per_s": 8722,
+     "speed": 1.07
     },
     {
      "arm": "xs-cpp",
@@ -5788,35 +5788,36 @@
      "control": false,
      "valid": true,
      "void": null,
-     "seconds": 3.456,
+     "seconds": 3.455,
      "gbps": 0.505,
-     "files_per_s": 7304,
-     "speed": 0.89
+     "files_per_s": 7308,
+     "speed": 0.9
     }
    ],
    "soFar": [
     {
      "arm": "xs-cpp",
      "label": "xs-c++",
-     "speed": 1,
-     "blocks": 5
+     "speed": 0.96,
+     "blocks": 11
     },
     {
      "arm": "xs-rs",
      "label": "xs-rs",
-     "speed": 1.2,
-     "blocks": 5
+     "speed": 1.14,
+     "blocks": 11
     },
     {
      "arm": "xs-rs-z",
      "label": "xs-rs -z",
-     "speed": 1.06,
-     "blocks": 5
+     "speed": 1.1,
+     "blocks": 11
     }
    ],
    "question": "On congress-sample fresh at the newest rev, does plain xs-rs at -j4 beat xs-c++ by 5%, or is the current scoreboard win only from the -z variant?",
-   "summary": null,
-   "model": null,
+   "summary": "Block 10\u2019s fastest arm was xs-rs -z at 1.07x rsync (2.895 s vs 3.105 s); plain xs-rs was 1.03x and xs-c++ 0.90x. Over 11 blocks, cumulative speeds are xs-rs 1.14x, xs-rs -z 1.10x, and xs-c++ 0.96x, so the evidence is not thin. Here plain xs-rs beat xs-c++ (1.03x vs 0.90x), suggesting the -z variant is not the only source of the win, though this block alone cannot settle the 5% question.",
+   "model": "opencode/deepseek-v4.1-flash",
+   "summarizedUtc": 1793452912.36,
    "driver": "a"
   }
  }

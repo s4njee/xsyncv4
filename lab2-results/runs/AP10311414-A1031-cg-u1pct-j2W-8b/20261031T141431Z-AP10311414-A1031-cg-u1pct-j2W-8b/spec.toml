@@ -1,0 +1,33 @@
+# Written by the 6-hourly planner (2026-10-31T14:14Z). Why: Queued tree work runs -W and -j2 separately on congress update-1pct, but no run tests their interaction, which could change a low-churn default.
+id = "AP10311414-A1031-cg-u1pct-j2W-8b"
+kind = "screening"
+hypothesis = "Low churn makes per-file setup dominate; -j2W should cut transfer contention and checksum/index work enough to bring the direct xs-rs-to-xs-c++ ratio below 0.90, while a merge with xs-c++ would mean the interaction is not additive and default -j4 remains."
+primary = "durable_s"
+delta = 0.05
+blocks = 8
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+sample_timeout_s = 7200
+
+[arms.xs-rs-j2W]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j2", "-W"]
+
+[arms.xs-cpp]
+tool = "xs"
+rev = "e104bde552f2"
+flags = ["-a", "-j4"]
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[matrix]
+link = "a-aws"
+corpus = ["congress-sample"]
+scenario = ["update-1pct"]
+direction = ["a>aws"]
+client = ["initiator"]
+cache = ["warm"]

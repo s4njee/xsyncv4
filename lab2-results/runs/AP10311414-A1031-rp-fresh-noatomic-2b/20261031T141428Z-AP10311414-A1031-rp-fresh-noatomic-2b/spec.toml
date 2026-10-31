@@ -1,0 +1,33 @@
+# Written by the 6-hourly planner (2026-10-31T14:14Z). Why: The only non-noop cell xs-c++ still wins is real-projects fresh, and no queued run isolates the fresh atomic-write path.
+id = "AP10311414-A1031-rp-fresh-noatomic-2b"
+kind = "screening"
+hypothesis = "If the atomic temp-file/rename path explains part of xs-rs's real-projects fresh deficit, xs-rs-noatomic will land below 1.00 of xs-c++ on the same blocks; if it stays above 1.0, atomic publication alone does not close the only transfer loss."
+primary = "durable_s"
+delta = 0.05
+blocks = 2
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+sample_timeout_s = 7200
+
+[arms.xs-rs-noatomic]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j4", "--no-atomic"]
+
+[arms.xs-cpp]
+tool = "xs"
+rev = "e104bde552f2"
+flags = ["-a", "-j4"]
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[matrix]
+link = "a-aws"
+corpus = ["real-projects"]
+scenario = ["fresh"]
+direction = ["a>aws"]
+client = ["initiator"]
+cache = ["warm"]

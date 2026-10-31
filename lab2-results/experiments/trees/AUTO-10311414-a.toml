@@ -1,0 +1,17 @@
+# Written by the 6-hourly planner at 2026-10-31T14:14Z for a; nothing is queued after the deadline.
+id = "AUTO-10311414-a"
+question = "Runner a has no current run; 3.5 h of queued work leaves 2.5 h of measurement room, and these three screens take well under 0.3 h at the listed sample rates. It is write-budget-bound, so I add only three non-noop screens (about 20 GB of new writes): one 2-block real-projects fresh no-atomic race because that is the sole non-noop cell xs-c++ wins and no queued run tests the atomic write path; one 8-block laikav2 fresh no-atomic versus inplace race; and one 8-block congress update-1pct -j2W interaction. I avoid the queued real-projects variants, the queued -W/-j2/-z/--inplace/--no-atomic runs on overlapping cells, all no-op cells, and leave confirm null because no absolute speed floor is known; engineering and port are null because xs-c++ is the fixed reference and no port step is open."
+deadline = "2026-10-31T20:14Z"
+start = ["N0", "N1", "N2"]
+
+[nodes.N0]
+spec = "auto/AP10311414-A1031-rp-fresh-noatomic-2b.toml"
+question = "Does --no-atomic reduce xs-rs's real-projects fresh deficit against xs-c++ enough to become a fresh-copy default?"
+
+[nodes.N1]
+spec = "auto/AP10311414-A1031-lk-fresh-writepath-8b.toml"
+question = "On laikav2-sample fresh, which write path beats xs-c++: --no-atomic or --inplace?"
+
+[nodes.N2]
+spec = "auto/AP10311414-A1031-cg-u1pct-j2W-8b.toml"
+question = "Does combining -j2 with -W on congress-sample update-1pct beat xs-c++ and the individual settings?"

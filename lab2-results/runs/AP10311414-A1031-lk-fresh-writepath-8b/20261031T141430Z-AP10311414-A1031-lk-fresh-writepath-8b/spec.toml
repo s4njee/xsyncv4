@@ -1,0 +1,38 @@
+# Written by the 6-hourly planner (2026-10-31T14:14Z). Why: Fresh-copy write-path flags are untested on laikav2 fresh, where xs-rs's status rests on -j2W and -W rather than a clear default.
+id = "AP10311414-A1031-lk-fresh-writepath-8b"
+kind = "screening"
+hypothesis = "Both flags bypass the temp-file rename, so at least one should improve xs-rs's direct ratio to xs-c++ below 0.95 and separate from the other; if neither does, fresh write-path flags are not the lever and per-file overhead is not the cause."
+primary = "durable_s"
+delta = 0.05
+blocks = 8
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+sample_timeout_s = 7200
+
+[arms.xs-rs-noatomic]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j4", "--no-atomic"]
+
+[arms.xs-rs-inplace]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j4", "--inplace"]
+
+[arms.xs-cpp]
+tool = "xs"
+rev = "e104bde552f2"
+flags = ["-a", "-j4"]
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[matrix]
+link = "a-aws"
+corpus = ["laikav2-sample"]
+scenario = ["fresh"]
+direction = ["a>aws"]
+client = ["initiator"]
+cache = ["warm"]
