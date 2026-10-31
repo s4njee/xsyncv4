@@ -5728,6 +5728,96 @@
    "model": "opencode/deepseek-v4.1-flash",
    "summarizedUtc": 1793444460.815,
    "driver": "a"
+  },
+  "AP10280014-PLAN1028-a-cg-fresh-z12b": {
+   "run": "20261028T001424Z-AP10280014-PLAN1028-a-cg-fresh-z12b",
+   "experiment": "AP10280014-PLAN1028-a-cg-fresh-z12b",
+   "key": "congress-sample.fresh.a-aws.sender.warm|4|0",
+   "utc": 1793452588.367,
+   "cell": "congress-sample.fresh.a-aws.sender.warm",
+   "factors": {
+    "corpus": "congress-sample",
+    "scenario": "fresh",
+    "sender": "a",
+    "receiver": "aws",
+    "client": "sender",
+    "link": "a-aws",
+    "cache": "warm"
+   },
+   "block": 4,
+   "attempt": 0,
+   "control": "rsync",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "rsync",
+     "label": "rsync",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 3.062,
+     "gbps": 0.57,
+     "files_per_s": 8246,
+     "speed": 1
+    },
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 2.909,
+     "gbps": 0.6,
+     "files_per_s": 8678,
+     "speed": 1.05
+    },
+    {
+     "arm": "xs-rs-z",
+     "label": "xs-rs -z",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 4.384,
+     "gbps": 0.398,
+     "files_per_s": 5759,
+     "speed": 0.7
+    },
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 3.456,
+     "gbps": 0.505,
+     "files_per_s": 7304,
+     "speed": 0.89
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "speed": 1,
+     "blocks": 5
+    },
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "speed": 1.2,
+     "blocks": 5
+    },
+    {
+     "arm": "xs-rs-z",
+     "label": "xs-rs -z",
+     "speed": 1.06,
+     "blocks": 5
+    }
+   ],
+   "question": "On congress-sample fresh at the newest rev, does plain xs-rs at -j4 beat xs-c++ by 5%, or is the current scoreboard win only from the -z variant?",
+   "summary": null,
+   "model": null,
+   "driver": "a"
   }
  }
 }
