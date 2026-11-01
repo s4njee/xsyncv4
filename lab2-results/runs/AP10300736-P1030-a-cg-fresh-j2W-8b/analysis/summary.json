@@ -1,0 +1,19 @@
+{
+ "experiment": "AP10300736-P1030-a-cg-fresh-j2W-8b",
+ "kind": "screening",
+ "hypothesis": "Because per-file costs dominate, xs-rs-j2W will be within 3% of default xs-rs, and both will stay below 0.90 of xs-c++; a clear 3% gain would make -j2W a fresh-copy default candidate for small-file trees, while a loss would keep it laikav2-specific.",
+ "primary": "durable_s",
+ "control": "rsync",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261030T073604Z-AP10300736-P1030-a-cg-fresh-j2W-8b"
+ ],
+ "spec_sha256": [
+  "ea1784fa02d3a8a5c9cdd626033b717d662b9946530f44c6f6350b4736148b2b"
+ ],
+ "valid_blocks": 8,
+ "void_attempts": 0,
+ "void_reasons": []
+}

@@ -6160,6 +6160,97 @@
    "model": "opencode/deepseek-v4.1-flash",
    "summarizedUtc": 1793539327.308,
    "driver": "a"
+  },
+  "AP10300736-P1030-a-cg-fresh-j2W-8b": {
+   "run": "20261030T073604Z-AP10300736-P1030-a-cg-fresh-j2W-8b",
+   "experiment": "AP10300736-P1030-a-cg-fresh-j2W-8b",
+   "key": "congress-sample.fresh.a-aws.sender.warm|6|0",
+   "utc": 1793563283.744,
+   "cell": "congress-sample.fresh.a-aws.sender.warm",
+   "factors": {
+    "corpus": "congress-sample",
+    "scenario": "fresh",
+    "sender": "a",
+    "receiver": "aws",
+    "client": "sender",
+    "link": "a-aws",
+    "cache": "warm"
+   },
+   "block": 6,
+   "attempt": 0,
+   "control": "rsync",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 3.095,
+     "gbps": 0.564,
+     "files_per_s": 8158,
+     "speed": 1.05
+    },
+    {
+     "arm": "xs-rs-j2W",
+     "label": "xs-rs -j2W",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 4.439,
+     "gbps": 0.393,
+     "files_per_s": 5687,
+     "speed": 0.73
+    },
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 3.381,
+     "gbps": 0.516,
+     "files_per_s": 7466,
+     "speed": 0.96
+    },
+    {
+     "arm": "rsync",
+     "label": "rsync",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 3.259,
+     "gbps": 0.536,
+     "files_per_s": 7746,
+     "speed": 1
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "speed": 1.02,
+     "blocks": 7
+    },
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "speed": 1.19,
+     "blocks": 7
+    },
+    {
+     "arm": "xs-rs-j2W",
+     "label": "xs-rs -j2W",
+     "speed": 1.1,
+     "blocks": 7
+    }
+   ],
+   "question": "On per-file-bound congress-sample fresh, does adding --whole-file to -j2 improve on default xs-rs and on the queued -j2 and -W singles, or is the laikav2 -j2W win corpus-specific?",
+   "summary": "In block 6, xs-rs was fastest at 3.095 s, 1.05x the rsync control (3.259 s); xs-rs -j2W ran 4.439 s (0.73x) and xs-c++ 3.381 s (0.96x). Cumulatively over 7 blocks, xs-rs stands at 1.19x, xs-rs -j2W at 1.10x, and xs-c++ at 1.02x versus control. For the experiment's question, this block shows no -j2W gain over default xs-rs or control, though the cumulative -j2W ratio remains above control.",
+   "model": "opencode/deepseek-v4.1-flash",
+   "summarizedUtc": 1793563343.539,
+   "driver": "a"
   }
  }
 }
