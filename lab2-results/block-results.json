@@ -5904,6 +5904,97 @@
    "model": "opencode/deepseek-v4.1-flash",
    "summarizedUtc": 1793477010.918,
    "driver": "a"
+  },
+  "AP10291336-PLAN1029-a-lk-u10pct-z1-8b": {
+   "run": "20261029T133609Z-AP10291336-PLAN1029-a-lk-u10pct-z1-8b",
+   "experiment": "AP10291336-PLAN1029-a-lk-u10pct-z1-8b",
+   "key": "laikav2-sample.update-10pct.a-aws.sender.warm|6|0",
+   "utc": 1793501312.086,
+   "cell": "laikav2-sample.update-10pct.a-aws.sender.warm",
+   "factors": {
+    "corpus": "laikav2-sample",
+    "scenario": "update-10pct",
+    "sender": "a",
+    "receiver": "aws",
+    "client": "sender",
+    "link": "a-aws",
+    "cache": "warm"
+   },
+   "block": 6,
+   "attempt": 0,
+   "control": "rsync",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.433,
+     "gbps": 0.047,
+     "files_per_s": 3090,
+     "speed": 1.27
+    },
+    {
+     "arm": "xs-rs-z1",
+     "label": "xs-rs -z1",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.448,
+     "gbps": 0.046,
+     "files_per_s": 2981,
+     "speed": 1.22
+    },
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.453,
+     "gbps": 0.045,
+     "files_per_s": 2953,
+     "speed": 1.21
+    },
+    {
+     "arm": "rsync",
+     "label": "rsync",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 0.548,
+     "gbps": 0.037,
+     "files_per_s": 2438,
+     "speed": 1
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "speed": 1.15,
+     "blocks": 7
+    },
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "speed": 1.21,
+     "blocks": 7
+    },
+    {
+     "arm": "xs-rs-z1",
+     "label": "xs-rs -z1",
+     "speed": 1.15,
+     "blocks": 7
+    }
+   ],
+   "question": "On laikav2 update-10pct, does fast compression at --compress-level=-1 preserve the near-margin -z win over xs-c++ while avoiding default compression's CPU cost?",
+   "summary": "In block 6, xs-rs was fastest at 0.433 s, 1.27x the rsync control (0.548 s); xs-rs -z1 ran 1.22x and xs-c++ 1.21x. Across 7 blocks, cumulative ratios are xs-rs 1.21x, xs-rs -z1 1.15x, and xs-c++ 1.15x, so this cell rests on more than three blocks. For the experiment question, this block's 1.22x for -z1 versus 1.21x for xs-c++ shows a near-margin z advantage, but the cumulative 1.15x tie does not establish it.",
+   "model": "opencode/deepseek-v4.1-flash",
+   "summarizedUtc": 1793501356.308,
+   "driver": "a"
   }
  }
 }

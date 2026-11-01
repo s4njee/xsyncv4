@@ -1,0 +1,17 @@
+# Written by the 6-hourly planner at 2026-11-01T02:55Z for a; nothing is queued after the deadline.
+id = "AUTO-11010255-a"
+question = "Runner a has 2.1 h of measurement room (6.0 h window minus its 3.9 h backlog) and is still waiting on the 32 GiB/day write budget, so the binding resource is traffic, not hours: these three 4-arm, 8-block congress races cost about 0.32 h and roughly 21 GB total. Its ~50 queued runs already cover every non-noop cell at the contest revs — every real-projects fresh variant (default 4-block, j2, j8, z, W, j2W, no-atomic at 2-4 blocks), the real-projects update screens, and default xs-rs arms at 8-12 blocks on every congress/laikav2 cell — so I add nothing there and only pick the untried write-path combinations: --inplace on the per-file-bound fresh cell and the -W x --inplace interaction at 1% and 10% churn. No no-op cells, no real-projects copies, no repeated queued cells or pins; front is false because the backlog contains baseline/PS/FC/BL3/port runs, not only earlier planner windows; confirm is null because no absolute speed floor is known; engineering and port are null by the lab rules (xs-c++ is the fixed reference and every port step is merged)."
+deadline = "2026-11-01T08:55Z"
+start = ["N0", "N1", "N2"]
+
+[nodes.N0]
+spec = "auto/AP11010255-a1101-cg-fresh-inplace-8b.toml"
+question = "On the per-file-bound congress-sample fresh copy, does writing destination files in place instead of temp-file-plus-rename cut enough per-file overhead to gain 3% over default xs-rs and push its lead over xs-c++ past 0.85?"
+
+[nodes.N1]
+spec = "auto/AP11010255-a1101-cg-u1pct-W-inplace-8b.toml"
+question = "On congress-sample update-1pct, do the two per-file levers — whole-file transfer of changed files and in-place writes — combine, or is the measured 0.89 win over xs-c++ already fully explained by skipping delta?"
+
+[nodes.N2]
+spec = "auto/AP11010255-a1101-cg-u10pct-W-inplace-8b.toml"
+question = "Does the whole-file-plus-in-place combination still hold at 10% churn on congress-sample, where much more data moves per changed file, or does it regress and need compressing/delta work?"

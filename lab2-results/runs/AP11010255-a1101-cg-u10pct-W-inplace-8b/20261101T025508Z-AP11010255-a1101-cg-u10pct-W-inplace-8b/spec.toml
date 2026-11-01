@@ -1,0 +1,38 @@
+# Written by the 6-hourly planner (2026-11-01T02:55Z). Why: This is the small-file update cell where xs-c++ came closest (0.871), so any write-path default has to be shown not to regress there.
+id = "AP11010255-a1101-cg-u10pct-W-inplace-8b"
+kind = "screening"
+hypothesis = "At 10% churn roughly ten times more bytes move per changed file, so skipping delta should pay less; xs-rs-W-inplace will be within noise of default xs-rs and keep the ratio to xs-c++ below 0.90. A clear regression would bound -W+--inplace to low-churn small-file cells instead of making it a general update default."
+primary = "durable_s"
+delta = 0.05
+blocks = 8
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+sample_timeout_s = 7200
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[arms.xs-cpp]
+tool = "xs"
+rev = "e104bde552f2"
+flags = ["-a", "-j4"]
+
+[arms.xs-rs]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j4"]
+
+[arms.xs-rs-W-inplace]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j4", "-W", "--inplace"]
+
+[matrix]
+link = "a-aws"
+corpus = ["congress-sample"]
+scenario = ["update-10pct"]
+direction = ["a>aws"]
+client = ["initiator"]
+cache = ["warm"]
