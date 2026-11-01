@@ -1,0 +1,38 @@
+# Written by the 6-hourly planner (2026-11-01T14:54Z). Why: It targets the only non-noop transfer cell xs-c++ still wins with an untested interaction, at the minimum two fresh blocks.
+id = "AP11011454-A1101-rp-fresh-Wnoatomic-2b"
+kind = "screening"
+hypothesis = "Because a fresh destination has no useful delta basis and atomic publication adds per-file work, combining -W with --no-atomic will narrow xs-rs's real-projects fresh gap; if it does not separate from default xs-rs, the remaining xs-c++ advantage is not in the write path."
+primary = "durable_s"
+delta = 0.05
+blocks = 2
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+sample_timeout_s = 7200
+
+[arms.xs-rs]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j4"]
+
+[arms.xs-cpp]
+tool = "xs"
+rev = "e104bde552f2"
+flags = ["-a", "-j4"]
+
+[arms.xs-rs-Wnoatomic]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j4", "-W", "--no-atomic"]
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[matrix]
+link = "a-aws"
+corpus = ["real-projects"]
+scenario = ["fresh"]
+direction = ["a>aws"]
+client = ["initiator"]
+cache = ["warm"]

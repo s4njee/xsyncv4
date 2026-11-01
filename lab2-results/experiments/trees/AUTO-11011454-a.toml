@@ -1,0 +1,9 @@
+# Written by the 6-hourly planner at 2026-11-01T14:54Z for a; nothing is queued after the deadline.
+id = "AUTO-11011454-a"
+question = "Runner a has 6.0 h minus 5.2 h queued, leaving only 0.8 h, and it is already waiting on the 32 GiB/day write budget. The backlog already covers every non-noop cell plus the important j2/j8/z/W/inplace/no-atomic variants, so I add only one non-duplicative 2-block screening on the sole xs-c++ transfer win, real-projects fresh, using whole-file plus no-atomic; everything else would duplicate queued work or spend too much traffic. The run is warm, fully verified, and not fronted because the backlog includes hand, baseline, PS/FC and port runs, not only earlier planner windows; confirm is null because no absolute speed floor is known."
+deadline = "2026-11-01T20:54Z"
+start = ["N0"]
+
+[nodes.N0]
+spec = "auto/AP11011454-A1101-rp-fresh-Wnoatomic-2b.toml"
+question = "On real-projects fresh copies, does combining --whole-file with --no-atomic reduce xs-rs's time enough to close the gap to xs-c++ and rsync?"
