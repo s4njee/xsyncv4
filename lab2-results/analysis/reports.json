@@ -1,6 +1,1213 @@
 {
  "reports": [
   {
+   "id": "2026-11-01T10:00:00.000Z",
+   "start": 1793437200,
+   "end": 1793527200,
+   "generatedAt": 1793527308.514,
+   "model": "opencode/deepseek-v4.1-flash",
+   "samples": 213,
+   "invalid": 24,
+   "runCount": 5,
+   "runKeys": [
+    "vps/AP10300135-P1030-a-cg-fresh-noatomic-8b/20261030T013530Z-AP10300135-P1030-a-cg-fresh-noatomic-8b",
+    "vps/AP10291336-PLAN1029-a-lk-u10pct-z1-8b/20261029T133609Z-AP10291336-PLAN1029-a-lk-u10pct-z1-8b",
+    "vps/AP10311414-A1031-lk-fresh-writepath-8b/20261031T141430Z-AP10311414-A1031-lk-fresh-writepath-8b",
+    "vps/AP10280014-PLAN1028-a-cg-fresh-z12b/20261028T001424Z-AP10280014-PLAN1028-a-cg-fresh-z12b",
+    "vps/AP10290735-PLAN1029-a-cg-fresh-W-8b/20261029T073548Z-AP10290735-PLAN1029-a-cg-fresh-W-8b"
+   ],
+   "evidenceRuns": [
+    {
+     "key": "vps/AP10300135-P1030-a-cg-fresh-noatomic-8b/20261030T013530Z-AP10300135-P1030-a-cg-fresh-noatomic-8b",
+     "experiment": "AP10300135-P1030-a-cg-fresh-noatomic-8b",
+     "question": "On per-file-bound congress-sample fresh, does skipping the atomic temp-file-and-rename path (--no-atomic) cut per-file overhead enough to widen xs-rs's win over xs-c++?",
+     "state": "complete",
+     "hypothesis": "If per-file publication costs a real share of a 25k-file fresh copy, xs-rs-noatomic finishes at least 3% faster than default xs-rs and its ratio to xs-c++ falls from about 0.87; if the intervals merge, the remaining per-file cost is in listing/scan and the write path is not a small-file default lever.",
+     "primary": "durable_s",
+     "control": "rsync",
+     "revisions": [
+      "beabaee992b6-rs",
+      "e104bde552f2"
+     ],
+     "arms": [
+      {
+       "name": "rsync",
+       "tool": "rsync",
+       "client": null,
+       "scales": [],
+       "tuningFlags": []
+      },
+      {
+       "name": "xs-rs",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 4,
+         "group": "a43f44991553c47e07a466f3"
+        }
+       ],
+       "tuningFlags": [
+        "-j4"
+       ]
+      },
+      {
+       "name": "xs-cpp",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 4,
+         "group": "201f5f0894b3ddc460440d48"
+        }
+       ],
+       "tuningFlags": [
+        "-j4"
+       ]
+      },
+      {
+       "name": "xs-rs-noatomic",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 4,
+         "group": "dfc3e35d2cc5339b1cd0abfb"
+        }
+       ],
+       "tuningFlags": [
+        "-j4",
+        "--no-atomic"
+       ]
+      }
+     ],
+     "samples": 32,
+     "invalid": 0,
+     "cells": [
+      {
+       "factors": {
+        "id": "congress-sample.fresh.a-aws.sender.warm",
+        "corpus": "congress-sample",
+        "scenario": "fresh",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 25246,
+        "bytes": 218210440
+       },
+       "arm": "rsync",
+       "validSamples": 8,
+       "blocks": 8,
+       "medianSeconds": 3.1895499999999997,
+       "medianGbps": 0.5473271074274164,
+       "medianClientCpuSeconds": 2.5145,
+       "pairedBlocks": 8,
+       "medianPairedSpeedVsControl": 1
+      },
+      {
+       "factors": {
+        "id": "congress-sample.fresh.a-aws.sender.warm",
+        "corpus": "congress-sample",
+        "scenario": "fresh",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 25246,
+        "bytes": 218210440
+       },
+       "arm": "xs-rs-noatomic",
+       "validSamples": 8,
+       "blocks": 8,
+       "medianSeconds": 2.86355,
+       "medianGbps": 0.6098402280980733,
+       "medianClientCpuSeconds": 1.9765000000000001,
+       "pairedBlocks": 8,
+       "medianPairedSpeedVsControl": 1.1621506046077639
+      },
+      {
+       "factors": {
+        "id": "congress-sample.fresh.a-aws.sender.warm",
+        "corpus": "congress-sample",
+        "scenario": "fresh",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 25246,
+        "bytes": 218210440
+       },
+       "arm": "xs-rs",
+       "validSamples": 8,
+       "blocks": 8,
+       "medianSeconds": 2.98985,
+       "medianGbps": 0.5839898854630216,
+       "medianClientCpuSeconds": 2.012,
+       "pairedBlocks": 8,
+       "medianPairedSpeedVsControl": 1.1323273376505507
+      },
+      {
+       "factors": {
+        "id": "congress-sample.fresh.a-aws.sender.warm",
+        "corpus": "congress-sample",
+        "scenario": "fresh",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 25246,
+        "bytes": 218210440
+       },
+       "arm": "xs-cpp",
+       "validSamples": 8,
+       "blocks": 8,
+       "medianSeconds": 3.4049,
+       "medianGbps": 0.5127955663984868,
+       "medianClientCpuSeconds": 2.9825,
+       "pairedBlocks": 8,
+       "medianPairedSpeedVsControl": 0.9551748552886749
+      }
+     ]
+    },
+    {
+     "key": "vps/AP10291336-PLAN1029-a-lk-u10pct-z1-8b/20261029T133609Z-AP10291336-PLAN1029-a-lk-u10pct-z1-8b",
+     "experiment": "AP10291336-PLAN1029-a-lk-u10pct-z1-8b",
+     "question": "On laikav2 update-10pct, does fast compression at --compress-level=-1 preserve the near-margin -z win over xs-c++ while avoiding default compression's CPU cost?",
+     "state": "complete",
+     "hypothesis": "The cell's scored win is only 0.949 using -z, so wire reduction matters; if --compress-level=-1 keeps the ratio below 0.95 and separates from plain xs-rs, a faster compression default is justified for mixed updates; if it merges with plain -j4, default -z's gain is not from cheap compression.",
+     "primary": "durable_s",
+     "control": "rsync",
+     "revisions": [
+      "beabaee992b6-rs",
+      "e104bde552f2"
+     ],
+     "arms": [
+      {
+       "name": "xs-rs",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 4,
+         "group": "a43f44991553c47e07a466f3"
+        }
+       ],
+       "tuningFlags": [
+        "-j4"
+       ]
+      },
+      {
+       "name": "xs-rs-z1",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 4,
+         "group": "bb24e9c1c23d887f482f7cd8"
+        }
+       ],
+       "tuningFlags": [
+        "-j4",
+        "-z",
+        "--compress-level=-1"
+       ]
+      },
+      {
+       "name": "xs-cpp",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 4,
+         "group": "201f5f0894b3ddc460440d48"
+        }
+       ],
+       "tuningFlags": [
+        "-j4"
+       ]
+      },
+      {
+       "name": "rsync",
+       "tool": "rsync",
+       "client": null,
+       "scales": [],
+       "tuningFlags": []
+      }
+     ],
+     "samples": 32,
+     "invalid": 0,
+     "cells": [
+      {
+       "factors": {
+        "id": "laikav2-sample.update-10pct.a-aws.sender.warm",
+        "corpus": "laikav2-sample",
+        "scenario": "update-10pct",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 1337,
+        "bytes": 93971741
+       },
+       "arm": "xs-rs",
+       "validSamples": 8,
+       "blocks": 8,
+       "medianSeconds": 0.4687,
+       "medianGbps": 1.6041605891038353,
+       "medianClientCpuSeconds": 0.0945,
+       "pairedBlocks": 8,
+       "medianPairedSpeedVsControl": 1.2062143036651984
+      },
+      {
+       "factors": {
+        "id": "laikav2-sample.update-10pct.a-aws.sender.warm",
+        "corpus": "laikav2-sample",
+        "scenario": "update-10pct",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 1337,
+        "bytes": 93971741
+       },
+       "arm": "xs-cpp",
+       "validSamples": 8,
+       "blocks": 8,
+       "medianSeconds": 0.48424999999999996,
+       "medianGbps": 1.5534441285353406,
+       "medianClientCpuSeconds": 0.1725,
+       "pairedBlocks": 8,
+       "medianPairedSpeedVsControl": 1.1550124553191652
+      },
+      {
+       "factors": {
+        "id": "laikav2-sample.update-10pct.a-aws.sender.warm",
+        "corpus": "laikav2-sample",
+        "scenario": "update-10pct",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 1337,
+        "bytes": 93971741
+       },
+       "arm": "rsync",
+       "validSamples": 8,
+       "blocks": 8,
+       "medianSeconds": 0.55035,
+       "medianGbps": 1.3660078547987546,
+       "medianClientCpuSeconds": 0.1035,
+       "pairedBlocks": 8,
+       "medianPairedSpeedVsControl": 1
+      },
+      {
+       "factors": {
+        "id": "laikav2-sample.update-10pct.a-aws.sender.warm",
+        "corpus": "laikav2-sample",
+        "scenario": "update-10pct",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 1337,
+        "bytes": 93971741
+       },
+       "arm": "xs-rs-z1",
+       "validSamples": 8,
+       "blocks": 8,
+       "medianSeconds": 0.45289999999999997,
+       "medianGbps": 1.6600050753604767,
+       "medianClientCpuSeconds": 0.08549999999999999,
+       "pairedBlocks": 8,
+       "medianPairedSpeedVsControl": 1.2077007402006195
+      }
+     ]
+    },
+    {
+     "key": "vps/AP10311414-A1031-lk-fresh-writepath-8b/20261031T141430Z-AP10311414-A1031-lk-fresh-writepath-8b",
+     "experiment": "AP10311414-A1031-lk-fresh-writepath-8b",
+     "question": "On laikav2-sample fresh, which write path beats xs-c++: --no-atomic or --inplace?",
+     "state": "complete",
+     "hypothesis": "Both flags bypass the temp-file rename, so at least one should improve xs-rs's direct ratio to xs-c++ below 0.95 and separate from the other; if neither does, fresh write-path flags are not the lever and per-file overhead is not the cause.",
+     "primary": "durable_s",
+     "control": "rsync",
+     "revisions": [
+      "beabaee992b6-rs",
+      "e104bde552f2"
+     ],
+     "arms": [
+      {
+       "name": "xs-rs-noatomic",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 4,
+         "group": "dfc3e35d2cc5339b1cd0abfb"
+        }
+       ],
+       "tuningFlags": [
+        "-j4",
+        "--no-atomic"
+       ]
+      },
+      {
+       "name": "xs-rs-inplace",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 4,
+         "group": "0e2b41498587d64bccc2cd63"
+        }
+       ],
+       "tuningFlags": [
+        "-j4"
+       ]
+      },
+      {
+       "name": "xs-cpp",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 4,
+         "group": "201f5f0894b3ddc460440d48"
+        }
+       ],
+       "tuningFlags": [
+        "-j4"
+       ]
+      },
+      {
+       "name": "rsync",
+       "tool": "rsync",
+       "client": null,
+       "scales": [],
+       "tuningFlags": []
+      }
+     ],
+     "samples": 69,
+     "invalid": 24,
+     "cells": [
+      {
+       "factors": {
+        "id": "laikav2-sample.fresh.a-aws.sender.warm",
+        "corpus": "laikav2-sample",
+        "scenario": "fresh",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 1337,
+        "bytes": 93971741
+       },
+       "arm": "xs-rs-noatomic",
+       "validSamples": 17,
+       "blocks": 8,
+       "medianSeconds": 1.128,
+       "medianGbps": 0.6664662482269504,
+       "medianClientCpuSeconds": 0.572,
+       "pairedBlocks": 11,
+       "medianPairedSpeedVsControl": 1.2237346976064314
+      },
+      {
+       "factors": {
+        "id": "laikav2-sample.fresh.a-aws.sender.warm",
+        "corpus": "laikav2-sample",
+        "scenario": "fresh",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 1337,
+        "bytes": 93971741
+       },
+       "arm": "xs-cpp",
+       "validSamples": 16,
+       "blocks": 8,
+       "medianSeconds": 1.2284,
+       "medianGbps": 0.6119954439968085,
+       "medianClientCpuSeconds": 0.9455,
+       "pairedBlocks": 10,
+       "medianPairedSpeedVsControl": 1.056183331265475
+      },
+      {
+       "factors": {
+        "id": "laikav2-sample.fresh.a-aws.sender.warm",
+        "corpus": "laikav2-sample",
+        "scenario": "fresh",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 1337,
+        "bytes": 93971741
+       },
+       "arm": "rsync",
+       "validSamples": 12,
+       "blocks": 7,
+       "medianSeconds": 1.3452,
+       "medianGbps": 0.5588666562969054,
+       "medianClientCpuSeconds": 0.619,
+       "pairedBlocks": 12,
+       "medianPairedSpeedVsControl": 1
+      }
+     ]
+    },
+    {
+     "key": "vps/AP10280014-PLAN1028-a-cg-fresh-z12b/20261028T001424Z-AP10280014-PLAN1028-a-cg-fresh-z12b",
+     "experiment": "AP10280014-PLAN1028-a-cg-fresh-z12b",
+     "question": "On congress-sample fresh at the newest rev, does plain xs-rs at -j4 beat xs-c++ by 5%, or is the current scoreboard win only from the -z variant?",
+     "state": "complete",
+     "hypothesis": "The 8-block -z screen put xs-rs-z clearly ahead of xs-c++ while plain xs-rs stayed near the 0.95 line; a 12-block direct race will show whether -z is required for the small-file verdict and should be considered a default on per-file-bound corpora.",
+     "primary": "durable_s",
+     "control": "rsync",
+     "revisions": [
+      "e104bde552f2",
+      "beabaee992b6-rs"
+     ],
+     "arms": [
+      {
+       "name": "rsync",
+       "tool": "rsync",
+       "client": null,
+       "scales": [],
+       "tuningFlags": []
+      },
+      {
+       "name": "xs-rs",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 4,
+         "group": "a43f44991553c47e07a466f3"
+        }
+       ],
+       "tuningFlags": [
+        "-j4"
+       ]
+      },
+      {
+       "name": "xs-rs-z",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 4,
+         "group": "a60624668f9d0d27211d2d62"
+        }
+       ],
+       "tuningFlags": [
+        "-j4",
+        "-z"
+       ]
+      },
+      {
+       "name": "xs-cpp",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 4,
+         "group": "201f5f0894b3ddc460440d48"
+        }
+       ],
+       "tuningFlags": [
+        "-j4"
+       ]
+      }
+     ],
+     "samples": 48,
+     "invalid": 0,
+     "cells": [
+      {
+       "factors": {
+        "id": "congress-sample.fresh.a-aws.sender.warm",
+        "corpus": "congress-sample",
+        "scenario": "fresh",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 25246,
+        "bytes": 218210440
+       },
+       "arm": "rsync",
+       "validSamples": 12,
+       "blocks": 12,
+       "medianSeconds": 3.22125,
+       "medianGbps": 0.5420010133241336,
+       "medianClientCpuSeconds": 2.5185,
+       "pairedBlocks": 12,
+       "medianPairedSpeedVsControl": 1
+      },
+      {
+       "factors": {
+        "id": "congress-sample.fresh.a-aws.sender.warm",
+        "corpus": "congress-sample",
+        "scenario": "fresh",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 25246,
+        "bytes": 218210440
+       },
+       "arm": "xs-cpp",
+       "validSamples": 12,
+       "blocks": 12,
+       "medianSeconds": 3.4412000000000003,
+       "medianGbps": 0.5072969856576517,
+       "medianClientCpuSeconds": 3.0185,
+       "pairedBlocks": 12,
+       "medianPairedSpeedVsControl": 0.9496606089089632
+      },
+      {
+       "factors": {
+        "id": "congress-sample.fresh.a-aws.sender.warm",
+        "corpus": "congress-sample",
+        "scenario": "fresh",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 25246,
+        "bytes": 218210440
+       },
+       "arm": "xs-rs",
+       "validSamples": 12,
+       "blocks": 12,
+       "medianSeconds": 2.95335,
+       "medianGbps": 0.5912186148712721,
+       "medianClientCpuSeconds": 1.9104999999999999,
+       "pairedBlocks": 12,
+       "medianPairedSpeedVsControl": 1.1024426352221854
+      },
+      {
+       "factors": {
+        "id": "congress-sample.fresh.a-aws.sender.warm",
+        "corpus": "congress-sample",
+        "scenario": "fresh",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 25246,
+        "bytes": 218210440
+       },
+       "arm": "xs-rs-z",
+       "validSamples": 12,
+       "blocks": 12,
+       "medianSeconds": 2.85645,
+       "medianGbps": 0.6111651894631104,
+       "medianClientCpuSeconds": 2.0105,
+       "pairedBlocks": 12,
+       "medianPairedSpeedVsControl": 1.1934697372310756
+      }
+     ]
+    },
+    {
+     "key": "vps/AP10290735-PLAN1029-a-cg-fresh-W-8b/20261029T073548Z-AP10290735-PLAN1029-a-cg-fresh-W-8b",
+     "experiment": "AP10290735-PLAN1029-a-cg-fresh-W-8b",
+     "question": "On congress-sample fresh, does --whole-file cut per-file setup enough for xs-rs to beat its default arm and keep xs-c++ behind?",
+     "state": "complete",
+     "hypothesis": "A fresh destination offers no useful delta basis, so -W should remove per-file index and checksum work; xs-rs-W should be at least 5% faster than default xs-rs and keep the xs-rs-to-xs-c++ ratio below 0.87.",
+     "primary": "durable_s",
+     "control": "rsync",
+     "revisions": [
+      "e104bde552f2",
+      "beabaee992b6-rs"
+     ],
+     "arms": [
+      {
+       "name": "rsync",
+       "tool": "rsync",
+       "client": null,
+       "scales": [],
+       "tuningFlags": []
+      },
+      {
+       "name": "xs-cpp",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 4,
+         "group": "201f5f0894b3ddc460440d48"
+        }
+       ],
+       "tuningFlags": [
+        "-j4"
+       ]
+      },
+      {
+       "name": "xs-rs",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 4,
+         "group": "a43f44991553c47e07a466f3"
+        }
+       ],
+       "tuningFlags": [
+        "-j4"
+       ]
+      },
+      {
+       "name": "xs-rs-W",
+       "tool": "xs",
+       "client": null,
+       "scales": [
+        {
+         "dimension": "workers",
+         "count": 4,
+         "group": "cdbbefab7ea937cc638ff6c0"
+        }
+       ],
+       "tuningFlags": [
+        "-j4"
+       ]
+      }
+     ],
+     "samples": 32,
+     "invalid": 0,
+     "cells": [
+      {
+       "factors": {
+        "id": "congress-sample.fresh.a-aws.sender.warm",
+        "corpus": "congress-sample",
+        "scenario": "fresh",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 25246,
+        "bytes": 218210440
+       },
+       "arm": "xs-cpp",
+       "validSamples": 8,
+       "blocks": 8,
+       "medianSeconds": 3.39095,
+       "medianGbps": 0.5148360813555539,
+       "medianClientCpuSeconds": 3.0195,
+       "pairedBlocks": 8,
+       "medianPairedSpeedVsControl": 0.9349363733327583
+      },
+      {
+       "factors": {
+        "id": "congress-sample.fresh.a-aws.sender.warm",
+        "corpus": "congress-sample",
+        "scenario": "fresh",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 25246,
+        "bytes": 218210440
+       },
+       "arm": "xs-rs",
+       "validSamples": 8,
+       "blocks": 8,
+       "medianSeconds": 2.95805,
+       "medianGbps": 0.5901475278022192,
+       "medianClientCpuSeconds": 1.944,
+       "pairedBlocks": 8,
+       "medianPairedSpeedVsControl": 1.08053643723825
+      },
+      {
+       "factors": {
+        "id": "congress-sample.fresh.a-aws.sender.warm",
+        "corpus": "congress-sample",
+        "scenario": "fresh",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 25246,
+        "bytes": 218210440
+       },
+       "arm": "rsync",
+       "validSamples": 8,
+       "blocks": 8,
+       "medianSeconds": 3.2265499999999996,
+       "medianGbps": 0.5410412525579421,
+       "medianClientCpuSeconds": 2.529,
+       "pairedBlocks": 8,
+       "medianPairedSpeedVsControl": 1
+      },
+      {
+       "factors": {
+        "id": "congress-sample.fresh.a-aws.sender.warm",
+        "corpus": "congress-sample",
+        "scenario": "fresh",
+        "sender": "a",
+        "receiver": "aws",
+        "client": "sender",
+        "link": "a-aws",
+        "cache": "warm",
+        "files": 25246,
+        "bytes": 218210440
+       },
+       "arm": "xs-rs-W",
+       "validSamples": 8,
+       "blocks": 8,
+       "medianSeconds": 3.0134499999999997,
+       "medianGbps": 0.5792974233422642,
+       "medianClientCpuSeconds": 2.0115,
+       "pairedBlocks": 8,
+       "medianPairedSpeedVsControl": 1.06978595341742
+      }
+     ]
+    }
+   ],
+   "commentary": {
+    "headline": "xs-rs ends the day 10\u20132 up, but real-projects is still the open wound",
+    "paragraphs": [
+     "xs-rs took ten of the twelve scoreboard cells, and both losses come from the same corpus in the same direction. On real-projects to aws it finished fresh in 42.8s against xs-c++'s 29.3s, a ratio of 1.46, and noop in 2.98s against 1.79s, a ratio of 1.66. The fresh loss is worse than it looks because rsync, the control, beat xs-rs there too at 20.1s, the only cell where the yardstick is more than twice as fast as us. The wins are real but uneven: congress noop and small-update cells sit at 0.85\u20130.94 of xs-c++'s time, while laikav2 update-10pct is still a thin 0.949 and update-1pct 0.936.",
+     "The surprise of the day was on the 25k-file congress fresh cell, where three unrelated levers each moved xs-rs by only a few percent and two of them landed in the same place. Skipping the atomic rename gave 2.864s against a 2.990s default, 4.2% faster and 0.841 of xs-c++, and -z over twelve blocks gave 2.856s against 2.953s, 3.3% faster and 0.830 of xs-c++. Meanwhile the whole-file variant went backwards, 3.013s against 2.958s. That pattern looks less like three independent wins and more like a per-file floor around 2.85s, which matters because it says the headroom left in this cell is small and stacking flags is unlikely to add up.",
+     "On laikav2, fast compression at level -1 edged the mixed-update ratio to 0.935 against xs-c++ (0.453s against 0.469s plain), which is the first variant to push a thin cell clearly past the 0.95 line. xs-rs's CPU advantage is consistent: 2.01 versus 2.98 client-CPU seconds on congress fresh and 0.57 versus 0.95 on laikav2 fresh. Confidence stays moderate: eight to twelve paired blocks per arm, no intervals, and one run threw 24 invalid samples out of 69 while never reporting its --inplace arm at all."
+    ]
+   },
+   "overview": "These experiments provided useful tuning insights. Here are the insights: xs-rs leads the day ten cells to two, losing only on real-projects, where it is 1.46x xs-c++ on fresh and 1.66x on noop. On the 25k-file congress copy, skipping the atomic rename gave a provisional 4% gain and -z about 3%, while whole-file was slightly slower; all three cluster near 2.85s, hinting at a per-file floor. On laikav2 updates, fast compression is the first variant to push a thin cell below 0.95. These are provisional, from single runs with few blocks.",
+   "insights": [
+    {
+     "caveat": "The scoreboard blends experiments from different days, flag sets and block counts, and no per-block detail is supplied for the real-projects cells, so this is a ranking, not a controlled comparison.",
+     "evidence": "Contest score xs-rs 10, xs-cpp 2. real-projects fresh: xs-rs 42.805s, xs-cpp 29.298s, rsync 20.055s (rs_vs_cpp 1.461, rs_vs_rsync 2.134). real-projects noop: 2.983s vs 1.793s vs rsync 3.770s (rs_vs_cpp 1.664, rs_vs_rsync 0.791). Mixed-update wins: laikav2 update-10pct 0.949, update-1pct 0.936, update-0.1pct 0.930; congress update-0.1pct rs_vs_rsync 0.447.",
+     "finding": "xs-rs wins ten of twelve cells and loses only on real-projects, where xs-c++ is 1.46x faster on fresh and 1.66x faster on noop. The same fresh cell is the only one where rsync also beats xs-rs, by 2.13x. Most wins are comfortable in ratio terms, but the laikav2 update cells at 0.930 to 0.949 are the ones with almost no margin.",
+     "runKeys": [
+      "vps/AP10300135-P1030-a-cg-fresh-noatomic-8b/20261030T013530Z-AP10300135-P1030-a-cg-fresh-noatomic-8b",
+      "vps/AP10291336-PLAN1029-a-lk-u10pct-z1-8b/20261029T133609Z-AP10291336-PLAN1029-a-lk-u10pct-z1-8b",
+      "vps/AP10311414-A1031-lk-fresh-writepath-8b/20261031T141430Z-AP10311414-A1031-lk-fresh-writepath-8b"
+     ],
+     "title": "The race: xs-rs 10, xs-c++ 2, and both losses are real-projects"
+    },
+    {
+     "caveat": "One run, eight paired blocks, single corpus and direction; the 4.2% separation is close to the spread between same-configuration runs seen elsewhere, so treat it as a candidate, not a proven default. Skipping the atomic rename also changes crash semantics.",
+     "evidence": "congress-sample fresh, 25246 files, 218210440 bytes, 8 blocks per arm: xs-rs-noatomic 2.86355s and 1.9765 client-CPU s; xs-rs 2.98985s and 2.012 CPU s; xs-cpp 3.4049s and 2.9825 CPU s; rsync 3.18955s. Speed vs rsync 1.1622 for noatomic, 1.1323 for default. xs-rs-noatomic / xs-cpp = 0.841.",
+     "finding": "Dropping the atomic temp-file-and-rename path made xs-rs about 4.2% faster than the same build's default arm on the per-file-bound congress fresh copy (2.864s vs 2.990s) with slightly lower client CPU, and put it 15.9% ahead of xs-c++ (3.405s). That is the largest single-flag gain recorded on this cell today.",
+     "runKeys": [
+      "vps/AP10300135-P1030-a-cg-fresh-noatomic-8b/20261030T013530Z-AP10300135-P1030-a-cg-fresh-noatomic-8b"
+     ],
+     "title": "--no-atomic is the biggest lever on congress fresh: about 4% over default xs-rs"
+    },
+    {
+     "caveat": "Twelve blocks in one run on one corpus; the extra CPU (about 5%) is small in absolute terms and measured on a 3-second transfer. Additivity with --no-atomic is untested.",
+     "evidence": "congress-sample fresh, 12 blocks: xs-rs-z 2.85645s and 2.0105 CPU s; xs-rs 2.95335s and 1.9105 CPU s; xs-cpp 3.4412s and 3.0185 CPU s; rsync 3.22125s. Computed ratios: xs-rs-z / xs-cpp = 0.830 (xs-rs 0.858); speed vs rsync 1.1935 (xs-rs 1.1024).",
+     "finding": "Compression at -z cut congress fresh from 2.953s to 2.856s, 3.3% faster than plain xs-rs and 0.830 of xs-c++'s time, while also beating default on speed relative to rsync (1.19x vs 1.10x). The cost is about 5% more client CPU (2.0105s vs 1.9105s), still a third below xs-c++'s 3.0185s.",
+     "runKeys": [
+      "vps/AP10280014-PLAN1028-a-cg-fresh-z12b/20261028T001424Z-AP10280014-PLAN1028-a-cg-fresh-z12b"
+     ],
+     "title": "-z on congress fresh: 0.830 of xs-c++, paid for with a little CPU"
+    },
+    {
+     "caveat": "This is a stability observation across three separately launched runs on different days, not a controlled replication; the convergence of two different flags at about 2.86s is a hypothesis about a floor and must be tested by stacking or combining them.",
+     "evidence": "Default xs-rs at -j4 on congress fresh: 2.98985s, 2.95335s, 2.95805s; xs-cpp: 3.4049s, 3.4412s, 3.39095s; rsync: 3.18955s, 3.22125s, 3.22655s. Computed xs-rs / xs-cpp ratios: 0.878, 0.858, 0.872. Throughput medians 0.5128-0.6112 Gb/s across all arms.",
+     "finding": "Three consensus-quality runs of the same cell tell the same story: default xs-rs lands within 1.2% of itself (2.953-2.990s), xs-c++ within 1.5% (3.391-3.441s), and the advantage holds at 0.858-0.878. Aggregate throughput sits near 0.51-0.61 Gb/s for every tool, roughly 8,400 files per second, which points to per-file setup rather than wire rate as the ceiling.",
+     "runKeys": [
+      "vps/AP10300135-P1030-a-cg-fresh-noatomic-8b/20261030T013530Z-AP10300135-P1030-a-cg-fresh-noatomic-8b",
+      "vps/AP10280014-PLAN1028-a-cg-fresh-z12b/20261028T001424Z-AP10280014-PLAN1028-a-cg-fresh-z12b",
+      "vps/AP10290735-PLAN1029-a-cg-fresh-W-8b/20261029T073548Z-AP10290735-PLAN1029-a-cg-fresh-W-8b"
+     ],
+     "title": "Congress fresh is reproducible at about 0.87 of xs-c++, against a shared throughput ceiling"
+    },
+    {
+     "caveat": "Eight blocks, one corpus, and the arm's tuningFlags record only -j4, so the whole-file setting is known from the variant name and experiment question rather than the flags field. This is a null result, not proof that whole-file never helps, especially on large-file corpora.",
+     "evidence": "congress-sample fresh, 8 blocks: xs-rs-W 3.01345s and 2.0115 CPU s; xs-rs 2.95805s and 1.944 CPU s; xs-cpp 3.39095s and 3.0195 CPU s; rsync 3.22655s. Speed vs rsync 1.0698 for xs-rs-W versus 1.0805 for default.",
+     "finding": "The whole-file variant was about 1.9% slower than default xs-rs (3.013s vs 2.958s) and used marginally more client CPU, so the hypothesis that it would deliver at least a 5% gain on a fresh destination was not supported. It still beat xs-c++, but at 0.889 of its time rather than the 0.858 the default arm managed.",
+     "runKeys": [
+      "vps/AP10290735-PLAN1029-a-cg-fresh-W-8b/20261029T073548Z-AP10290735-PLAN1029-a-cg-fresh-W-8b"
+     ],
+     "title": "Whole-file on fresh is a dead end: 1.9% slower than default, not 5% faster"
+    },
+    {
+     "caveat": "Sub-half-second medians with eight blocks in a single run; CPU differences are in hundredths of a second and should be treated as suggestive only. Compression behaviour on other corpora and larger transfers is untested.",
+     "evidence": "laikav2-sample update-10pct, 1337 files, 93971741 bytes, 8 blocks: xs-rs-z1 0.45290s and 0.0855 CPU s; xs-rs 0.46870s and 0.0945 CPU s; xs-cpp 0.48425s and 0.1725 CPU s; rsync 0.55035s. Speed vs rsync 1.2077 for z1, 1.2062 for plain. Computed xs-rs-z1 / xs-cpp = 0.935 (plain 0.968).",
+     "finding": "Fast compression at level -1 is the first variant to push the thin laikav2 update-10pct cell clearly below the 0.95 line: 0.453s against 0.469s for plain xs-rs and 0.484s for xs-c++, a ratio of 0.935 against 0.968. It also used less client CPU than both xs-rs plain and, by roughly half, xs-c++.",
+     "runKeys": [
+      "vps/AP10291336-PLAN1029-a-lk-u10pct-z1-8b/20261029T133609Z-AP10291336-PLAN1029-a-lk-u10pct-z1-8b"
+     ],
+     "title": "Fast compression widens the narrowest laikav2 update win from 0.968 to 0.935"
+    },
+    {
+     "caveat": "Thirty-five percent of samples were invalid (24 of 69), paired block counts differ (11, 10 and 12), and the in-place arm produced no comparable cell at all. Do not treat --no-atomic as the confirmed write-path winner on laikav2 until cleansed data exists.",
+     "evidence": "laikav2-sample fresh, 69 samples, 24 invalid: xs-rs-noatomic 1.128s and 0.572 CPU s (17 valid samples, 8 blocks, 11 paired blocks); xs-cpp 1.2284s and 0.9455 CPU s (16 valid, 10 paired); rsync 1.3452s and 0.619 CPU s (12 valid, 12 paired). No factors or timings reported for the in-place arm.",
+     "finding": "On laikav2 fresh the no-atomic arm is the fastest recorded configuration at 1.128s, 0.918 of xs-c++'s 1.228s and 1.22x rsync, at 61% of xs-c++'s client CPU. But the run is not clean enough to rank write paths: the in-place arm has no reported cell and a quarter of the samples were invalid.",
+     "runKeys": [
+      "vps/AP10311414-A1031-lk-fresh-writepath-8b/20261031T141430Z-AP10311414-A1031-lk-fresh-writepath-8b"
+     ],
+     "title": "laikav2 fresh: no-atomic leads, but the in-place arm never reported and 35% of samples were invalid"
+    },
+    {
+     "caveat": "CPU is client-side only, from a single direction and link with warm cache, and no CPU figure is supplied for the real-projects cells where xs-rs loses on time, so this does not explain that regression.",
+     "evidence": "Client-CPU medians: congress fresh 2.012 (xs-rs), 1.9765 (noatomic), 2.9825 (xs-cpp), 2.5145 (rsync); laikav2 fresh 0.572 (noatomic), 0.9455 (xs-cpp), 0.619 (rsync); laikav2 update-10pct 0.0945 (xs-rs), 0.0855 (z1), 0.1725 (xs-cpp), 0.1035 (rsync).",
+     "finding": "Across all three corpora with CPU data, xs-rs finishes using meaningfully less client CPU than xs-c++, about 33% less on congress fresh and 39% less on laikav2 fresh, and is roughly level with or below rsync. The wins therefore are not CPU-budget wins by a thin margin; the tradeoff is that on the one cell where xs-rs loses badly on time, no CPU data is supplied.",
+     "runKeys": [
+      "vps/AP10300135-P1030-a-cg-fresh-noatomic-8b/20261030T013530Z-AP10300135-P1030-a-cg-fresh-noatomic-8b",
+      "vps/AP10291336-PLAN1029-a-lk-u10pct-z1-8b/20261029T133609Z-AP10291336-PLAN1029-a-lk-u10pct-z1-8b",
+      "vps/AP10311414-A1031-lk-fresh-writepath-8b/20261031T141430Z-AP10311414-A1031-lk-fresh-writepath-8b"
+     ],
+     "title": "xs-rs wins on CPU as well as clock in every cell where CPU was recorded"
+    }
+   ],
+   "limitations": [
+    "All figures are medians of 8 to 12 paired blocks per arm with no confidence intervals and no significance testing; differences of a few percent should be read as provisional.",
+    "The supplied runs carry timestamps spanning 28 to 31 October while the stated window is 24 hours, so cross-run comparisons mix flag effects with day and time effects.",
+    "Every measured cell is sender-a to aws with the client on the sender and a warm cache; receiver-side clients, other links, other directions and cold-cache behaviour are unmeasured.",
+    "Two very different corpora dominate the evidence: congress-sample with 25,246 files and 218 MB, and laikav2 with 1,337 files and 94 MB; nothing here establishes how results scale between them.",
+    "The laikav2 fresh writepath run lost 24 of 69 samples as invalid, paired block counts are unequal (11, 10, 12), and the in-place arm has no reported cell, so write-path ranking there is unresolved.",
+    "The arms named xs-rs-W and xs-rs-inplace list only -j4 in tuningFlags, so the intended flag change is known from naming and experiment questions, not from recorded flags; no numeric settings were inferred.",
+    "Contest cells such as real-projects come from experiments outside this run set and have no per-block, CPU or factor detail here, so the two losses can be located but not diagnosed.",
+    "Several experiments mix control and variant arms in the same run but on different days or block counts, so none of these is a strictly controlled A/B comparison."
+   ],
+   "nextSteps": [
+    "Tune real-projects fresh first: xs-rs at 42.805s versus xs-c++ at 29.298s (1.461) and rsync at 20.055s (2.134) is the largest loss on the board and needs a dedicated stream/worker sweep on that corpus.",
+    "Tune real-projects noop second: 2.983s versus xs-c++ at 1.793s (1.664), the second-largest loss, to find whether the penalty is per-file setup or something that also affects small no-op workloads.",
+    "Defend the thin laikav2 update cells: update-10pct at 0.949, update-1pct at 0.936 and update-0.1pct at 0.930 are wins with almost no margin, so rerun the level -1 compression variant there with more blocks.",
+    "Rerun laikav2 fresh with balanced pairing, diagnose the 24 invalid samples, and get a valid in-place cell so no-atomic can be compared against the alternative rather than against nothing.",
+    "Test whether -z and --no-atomic are additive on congress fresh, since both landed near 2.86s independently; if they are not, prefer the cheaper flag rather than stacking.",
+    "Repeat the winning congress fresh configuration with at least 12 blocks on a second day to confirm the roughly 0.83-0.84 ratio to xs-c++ is not a one-day artefact."
+   ],
+   "tuningImplications": [
+    {
+     "evidenceStrength": "Provisional: one run, 8 valid samples and 8 paired blocks per arm, single corpus and direction.",
+     "experiment": "AP10300135-P1030-a-cg-fresh-noatomic-8b",
+     "nextTest": "Repeat with 12 or more blocks on a separate day, interleaving default xs-rs and xs-cpp in the same run, and add an interrupted-transfer check to quantify the durability exposure of the non-atomic path.",
+     "recommendation": "Keep --no-atomic as the leading support candidate for per-file-bound fresh copies of many small files; it was the largest gain recorded on congress fresh and cost nothing in CPU. Do not declare it a default on this evidence.",
+     "runKeys": [
+      "vps/AP10300135-P1030-a-cg-fresh-noatomic-8b/20261030T013530Z-AP10300135-P1030-a-cg-fresh-noatomic-8b"
+     ],
+     "settings": [
+      "-j4",
+      "--no-atomic"
+     ],
+     "tradeoffs": "Skips the atomic temp-file-and-rename publication, so an interrupted transfer can leave partially written files visible at the destination; the 0.13s gain on a 2.99s baseline is small in absolute terms."
+    },
+    {
+     "evidenceStrength": "Provisional: one run, 8 blocks, sub-half-second medians; gains are a few percent.",
+     "experiment": "AP10291336-PLAN1029-a-lk-u10pct-z1-8b",
+     "nextTest": "Rerun the level -1 compression arm with at least 12 blocks and add a congress-sample update-10pct cell with the same arm to see whether the gain is laikav2-specific or general to mixed updates.",
+     "recommendation": "Keep -z with --compress-level=-1 as a supported candidate for mixed small updates; it is the only variant so far to move the laikav2 update-10pct ratio clearly below 0.95, and it did not cost CPU.",
+     "runKeys": [
+      "vps/AP10291336-PLAN1029-a-lk-u10pct-z1-8b/20261029T133609Z-AP10291336-PLAN1029-a-lk-u10pct-z1-8b"
+     ],
+     "settings": [
+      "-j4",
+      "-z",
+      "--compress-level=-1"
+     ],
+     "tradeoffs": "Compression spends CPU to save wire time; here client CPU was slightly lower than plain xs-rs, but absolute times are under half a second and compression cost on larger or less compressible corpora is unmeasured."
+    },
+    {
+     "evidenceStrength": "Weak: 24 of 69 samples invalid, unequal paired blocks, and no in-place cell reported.",
+     "experiment": "AP10311414-A1031-lk-fresh-writepath-8b",
+     "nextTest": "Diagnose the invalid samples, rerun with balanced pairing, and compare --no-atomic against the in-place variant head to head at 12 or more blocks before choosing between them.",
+     "recommendation": "Treat --no-atomic as the leading but unconfirmed write-path candidate on laikav2 fresh. Do not choose between no-atomic and in-place yet; the in-place arm produced no comparable measurement.",
+     "runKeys": [
+      "vps/AP10311414-A1031-lk-fresh-writepath-8b/20261031T141430Z-AP10311414-A1031-lk-fresh-writepath-8b"
+     ],
+     "settings": [
+      "-j4",
+      "--no-atomic"
+     ],
+     "tradeoffs": "Non-atomic publication weakens crash safety, and this run is not clean enough to tell whether the 0.918 ratio to xs-c++ comes from the flag or from the missing samples."
+    },
+    {
+     "evidenceStrength": "Moderate for this cell: 12 blocks in one run plus two independent default-arm runs agreeing within 1.2%.",
+     "experiment": "AP10280014-PLAN1028-a-cg-fresh-z12b",
+     "nextTest": "Test whether -z and --no-atomic combine on congress fresh; both landed near 2.86s separately, so a joint arm will show whether the gains are additive or both are relieving the same per-file cost.",
+     "recommendation": "Keep -z as a supported candidate on small-file fresh copies, but check it does not stack with --no-atomic before making either a default; both appear to relieve the same per-file overhead.",
+     "runKeys": [
+      "vps/AP10280014-PLAN1028-a-cg-fresh-z12b/20261028T001424Z-AP10280014-PLAN1028-a-cg-fresh-z12b"
+     ],
+     "settings": [
+      "-j4",
+      "-z"
+     ],
+     "tradeoffs": "About 5% more client CPU (2.0105s versus 1.9105s) for a 3.3% time gain; plain xs-rs already beats xs-c++ by about 14% on this cell without it."
+    },
+    {
+     "evidenceStrength": "Provisional null: one run, 8 blocks, and the flag is known from the variant name rather than the recorded tuningFlags.",
+     "experiment": "AP10290735-PLAN1029-a-cg-fresh-W-8b",
+     "nextTest": "No further work on whole-file for small-file fresh copies; if the large-file real-projects regression is suspected to be delta or index cost, test whole-file there instead, with the flag properly recorded.",
+     "recommendation": "Avoid the whole-file variant on per-file-bound fresh copies; it was slower than the plain arm and did not deliver the expected reduction in per-file setup. Deprioritise it unless a large-file cell suggests otherwise.",
+     "runKeys": [
+      "vps/AP10290735-PLAN1029-a-cg-fresh-W-8b/20261029T073548Z-AP10290735-PLAN1029-a-cg-fresh-W-8b"
+     ],
+     "settings": [
+      "-j4"
+     ],
+     "tradeoffs": "Slightly higher client CPU (2.0115s versus 1.944s) and 1.9% more wall time than default, so it buys nothing measurable on this workload."
+    }
+   ],
+   "charts": [
+    {
+     "id": "0-0-medianPairedSpeedVsControl",
+     "title": "Speed vs rsync: congress-sample (a \u2192 aws)",
+     "runKey": "vps/AP10300135-P1030-a-cg-fresh-noatomic-8b/20261030T013530Z-AP10300135-P1030-a-cg-fresh-noatomic-8b",
+     "metric": "medianPairedSpeedVsControl",
+     "unit": "\u00d7 rsync",
+     "primary": "durable_s",
+     "factors": {
+      "id": "congress-sample.fresh.a-aws.sender.warm",
+      "corpus": "congress-sample",
+      "scenario": "fresh",
+      "sender": "a",
+      "receiver": "aws",
+      "client": "sender",
+      "link": "a-aws",
+      "cache": "warm",
+      "files": 25246,
+      "bytes": 218210440
+     },
+     "values": [
+      {
+       "arm": "rsync",
+       "value": 1,
+       "samples": 8,
+       "blocks": 8
+      },
+      {
+       "arm": "xs-rs-noatomic",
+       "value": 1.1621506046077639,
+       "samples": 8,
+       "blocks": 8
+      },
+      {
+       "arm": "xs-rs",
+       "value": 1.1323273376505507,
+       "samples": 8,
+       "blocks": 8
+      },
+      {
+       "arm": "xs-cpp",
+       "value": 0.9551748552886749,
+       "samples": 8,
+       "blocks": 8
+      }
+     ],
+     "note": "Window-only medians; no confidence intervals. Compare arms within this cell. "
+    },
+    {
+     "id": "3-0-medianGbps",
+     "title": "Delivered throughput: congress-sample (a \u2192 aws)",
+     "runKey": "vps/AP10280014-PLAN1028-a-cg-fresh-z12b/20261028T001424Z-AP10280014-PLAN1028-a-cg-fresh-z12b",
+     "metric": "medianGbps",
+     "unit": "Gb/s",
+     "primary": "durable_s",
+     "factors": {
+      "id": "congress-sample.fresh.a-aws.sender.warm",
+      "corpus": "congress-sample",
+      "scenario": "fresh",
+      "sender": "a",
+      "receiver": "aws",
+      "client": "sender",
+      "link": "a-aws",
+      "cache": "warm",
+      "files": 25246,
+      "bytes": 218210440
+     },
+     "values": [
+      {
+       "arm": "rsync",
+       "value": 0.5420010133241336,
+       "samples": 12,
+       "blocks": 12
+      },
+      {
+       "arm": "xs-cpp",
+       "value": 0.5072969856576517,
+       "samples": 12,
+       "blocks": 12
+      },
+      {
+       "arm": "xs-rs",
+       "value": 0.5912186148712721,
+       "samples": 12,
+       "blocks": 12
+      },
+      {
+       "arm": "xs-rs-z",
+       "value": 0.6111651894631104,
+       "samples": 12,
+       "blocks": 12
+      }
+     ],
+     "note": "Window-only medians; no confidence intervals. Compare arms within this cell. Corpus bytes divided by durable_s; not instantaneous wire rate."
+    },
+    {
+     "id": "1-0-medianPairedSpeedVsControl",
+     "title": "Speed vs rsync: laikav2-sample (a \u2192 aws)",
+     "runKey": "vps/AP10291336-PLAN1029-a-lk-u10pct-z1-8b/20261029T133609Z-AP10291336-PLAN1029-a-lk-u10pct-z1-8b",
+     "metric": "medianPairedSpeedVsControl",
+     "unit": "\u00d7 rsync",
+     "primary": "durable_s",
+     "factors": {
+      "id": "laikav2-sample.update-10pct.a-aws.sender.warm",
+      "corpus": "laikav2-sample",
+      "scenario": "update-10pct",
+      "sender": "a",
+      "receiver": "aws",
+      "client": "sender",
+      "link": "a-aws",
+      "cache": "warm",
+      "files": 1337,
+      "bytes": 93971741
+     },
+     "values": [
+      {
+       "arm": "xs-rs",
+       "value": 1.2062143036651984,
+       "samples": 8,
+       "blocks": 8
+      },
+      {
+       "arm": "xs-cpp",
+       "value": 1.1550124553191652,
+       "samples": 8,
+       "blocks": 8
+      },
+      {
+       "arm": "rsync",
+       "value": 1,
+       "samples": 8,
+       "blocks": 8
+      },
+      {
+       "arm": "xs-rs-z1",
+       "value": 1.2077007402006195,
+       "samples": 8,
+       "blocks": 8
+      }
+     ],
+     "note": "Window-only medians; no confidence intervals. Compare arms within this cell. "
+    },
+    {
+     "id": "2-0-medianSeconds",
+     "title": "Transfer duration: laikav2-sample (a \u2192 aws)",
+     "runKey": "vps/AP10311414-A1031-lk-fresh-writepath-8b/20261031T141430Z-AP10311414-A1031-lk-fresh-writepath-8b",
+     "metric": "medianSeconds",
+     "unit": "s",
+     "primary": "durable_s",
+     "factors": {
+      "id": "laikav2-sample.fresh.a-aws.sender.warm",
+      "corpus": "laikav2-sample",
+      "scenario": "fresh",
+      "sender": "a",
+      "receiver": "aws",
+      "client": "sender",
+      "link": "a-aws",
+      "cache": "warm",
+      "files": 1337,
+      "bytes": 93971741
+     },
+     "values": [
+      {
+       "arm": "xs-rs-noatomic",
+       "value": 1.128,
+       "samples": 17,
+       "blocks": 8
+      },
+      {
+       "arm": "xs-cpp",
+       "value": 1.2284,
+       "samples": 16,
+       "blocks": 8
+      },
+      {
+       "arm": "rsync",
+       "value": 1.3452,
+       "samples": 12,
+       "blocks": 7
+      }
+     ],
+     "note": "Window-only medians; no confidence intervals. Compare arms within this cell. "
+    },
+    {
+     "id": "4-0-medianPairedSpeedVsControl",
+     "title": "Speed vs rsync: congress-sample (a \u2192 aws)",
+     "runKey": "vps/AP10290735-PLAN1029-a-cg-fresh-W-8b/20261029T073548Z-AP10290735-PLAN1029-a-cg-fresh-W-8b",
+     "metric": "medianPairedSpeedVsControl",
+     "unit": "\u00d7 rsync",
+     "primary": "durable_s",
+     "factors": {
+      "id": "congress-sample.fresh.a-aws.sender.warm",
+      "corpus": "congress-sample",
+      "scenario": "fresh",
+      "sender": "a",
+      "receiver": "aws",
+      "client": "sender",
+      "link": "a-aws",
+      "cache": "warm",
+      "files": 25246,
+      "bytes": 218210440
+     },
+     "values": [
+      {
+       "arm": "xs-cpp",
+       "value": 0.9349363733327583,
+       "samples": 8,
+       "blocks": 8
+      },
+      {
+       "arm": "xs-rs",
+       "value": 1.08053643723825,
+       "samples": 8,
+       "blocks": 8
+      },
+      {
+       "arm": "rsync",
+       "value": 1,
+       "samples": 8,
+       "blocks": 8
+      },
+      {
+       "arm": "xs-rs-W",
+       "value": 1.06978595341742,
+       "samples": 8,
+       "blocks": 8
+      }
+     ],
+     "note": "Window-only medians; no confidence intervals. Compare arms within this cell. "
+    }
+   ]
+  },
+  {
    "id": "2026-10-31T09:00:00.000Z",
    "start": 1793350800,
    "end": 1793437200,
@@ -20007,5 +21214,5 @@
   }
  ],
  "error": null,
- "lastAttempt": 1793437235.098
+ "lastAttempt": 1793527237.945
 }
