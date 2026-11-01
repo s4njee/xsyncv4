@@ -1,0 +1,38 @@
+# Written by the 6-hourly planner (2026-11-01T08:55Z). Why: This is xs-rs's weakest scored win, sitting exactly on the 5% margin, and -W combined with -z has never been raced on an update cell.
+id = "AP11010855-A1101-lk-u10pct-Wz-12b"
+kind = "screening"
+hypothesis = "The 0.949 and 0.953 readings are a genuine near-tie: at 12 blocks plain xs-rs stays within about 2% of xs-c++ and its interval still touches 1. Because a tenth of this 94 MB tree changes, -W -z removes per-file delta and index work while compressing only about 9 MB of changed files, so it should finish at least 3% faster than plain -j4 and pull the ratio clearly below 0.95."
+primary = "durable_s"
+delta = 0.03
+blocks = 12
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+sample_timeout_s = 7200
+
+[arms.xs-rs]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j4"]
+
+[arms.xs-rs-Wz]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j4", "-W", "-z"]
+
+[arms.xs-cpp]
+tool = "xs"
+rev = "e104bde552f2"
+flags = ["-a", "-j4"]
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[matrix]
+link = "a-aws"
+corpus = ["laikav2-sample"]
+scenario = ["update-10pct"]
+direction = ["a>aws"]
+client = ["initiator"]
+cache = ["warm"]

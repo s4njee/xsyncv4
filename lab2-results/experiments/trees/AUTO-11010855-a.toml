@@ -1,0 +1,17 @@
+# Written by the 6-hourly planner at 2026-11-01T08:55Z for a; nothing is queued after the deadline.
+id = "AUTO-11010855-a"
+question = "Runner a has no current run, 4.1 h of queued work and therefore only 1.9 h of measurement room; the binding resource is still A's 32 GiB/day write budget, so these three warm races cost about 0.27 h and roughly 16 GB, all on laikav2-sample and congress-sample. Its ~50-run backlog already contains a default-flag race on every non-noop congress and laikav2 cell plus j2, j8, z, z1, W, j2W, --inplace, --no-atomic and -W x --inplace variants and pins, so I add no repeated cell/variant and instead race the one interaction nothing has tried, -W with -z, along the churn axis: 12 blocks at 10% churn (which also pins xs-rs's weakest win, 0.949, whose 8-block interval touches the 5% margin), 8 blocks cross-checked on the per-file-bound congress tree, and 12 blocks at 1% churn as a regression rule-out and a pin of the 0.936 win. No new real-projects copies: the only transfer cell xs-c++ wins is already queued at the newest rev at 4 blocks and with j2, j8, z, W, j2W and --no-atomic variants, a verdict-grade 8-block race there needs about 51 GB against a 32 GiB/day cap, and the A link is already waiting on budget. No no-op cells are planned, nothing is fronted because the backlog contains hand, baseline and port runs rather than only earlier planner windows, and confirm is null because no absolute speed floor is known."
+deadline = "2026-11-01T14:55Z"
+start = ["N0", "N1", "N2"]
+
+[nodes.N0]
+spec = "auto/AP11010855-A1101-lk-u10pct-Wz-12b.toml"
+question = "On laikav2-sample update-10pct, is xs-rs's 0.949 win over xs-c++ real, and does sending changed files whole with compression (xs-rs -W -z) beat plain -j4 on the same paired blocks?"
+
+[nodes.N1]
+spec = "auto/AP11010855-A1101-cg-u10pct-Wz-8b.toml"
+question = "Does the -W -z combination also help on the per-file-bound congress-sample update-10pct cell, where xs-rs leads xs-c++ by only about 13%, or does it just add compression CPU to small listings?"
+
+[nodes.N2]
+spec = "auto/AP11010855-A1101-lk-u1pct-Wz-12b.toml"
+question = "At 1% churn on laikav2-sample, does -W -z regress against plain -j4, and does xs-rs's 0.936 win over xs-c++ survive 12 blocks or resolve to a tie?"
