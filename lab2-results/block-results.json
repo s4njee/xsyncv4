@@ -1,10 +1,10 @@
 {
  "experiments": {
   "S0-vps-sentinel": {
-   "run": "20261020T030146Z-S0-vps-sentinel-s0012",
+   "run": "20261020T030147Z-S0-vps-sentinel-s0013",
    "experiment": "S0-vps-sentinel",
    "key": "real-projects.noop.a-aws.sender.warm|1|0",
-   "utc": 1793422151.812,
+   "utc": 1793530754.715,
    "cell": "real-projects.noop.a-aws.sender.warm",
    "factors": {
     "corpus": "real-projects",
@@ -26,9 +26,9 @@
      "control": true,
      "valid": true,
      "void": null,
-     "seconds": 4.333,
-     "gbps": 3.942,
-     "files_per_s": 15999,
+     "seconds": 4.452,
+     "gbps": 3.837,
+     "files_per_s": 15571,
      "speed": 1
     },
     {
@@ -37,10 +37,10 @@
      "control": false,
      "valid": true,
      "void": null,
-     "seconds": 4.292,
-     "gbps": 3.98,
-     "files_per_s": 16151,
-     "speed": 1.01
+     "seconds": 4.351,
+     "gbps": 3.925,
+     "files_per_s": 15931,
+     "speed": 1.02
     },
     {
      "arm": "rsync",
@@ -48,30 +48,30 @@
      "control": false,
      "valid": true,
      "void": null,
-     "seconds": 4.048,
-     "gbps": 4.22,
-     "files_per_s": 17125,
-     "speed": 1.07
+     "seconds": 3.709,
+     "gbps": 4.605,
+     "files_per_s": 18688,
+     "speed": 1.2
     }
    ],
    "soFar": [
     {
      "arm": "again",
      "label": "xs-c++",
-     "speed": 0.94,
+     "speed": 0.96,
      "blocks": 2
     },
     {
      "arm": "rsync",
      "label": "rsync",
-     "speed": 1.15,
+     "speed": 0.97,
      "blocks": 2
     }
    ],
    "question": null,
-   "summary": "In this block rsync was fastest at 1.07x the control, finishing in 4.048 s versus xs-c++\u2019s 4.333 s. The running cell picture is xs-c++ at 0.94x and rsync at 1.15x, each cumulative ratio resting on two blocks. With only two blocks per arm, the evidence remains thin.",
+   "summary": "In this block rsync was fastest, at 1.20x the control (3.709 s vs 4.452 s, about 20% faster). The running picture for this cell shows cumulative ratios of 0.96x for xs-c++ and 0.97x for rsync, each based on two blocks, so the evidence is still thin. With no experiment question stated, this block does not resolve one.",
    "model": "opencode/deepseek-v4.1-flash",
-   "summarizedUtc": 1793422166.72,
+   "summarizedUtc": 1793530771.587,
    "driver": "a"
   },
   "E1-vps-baseline": {
