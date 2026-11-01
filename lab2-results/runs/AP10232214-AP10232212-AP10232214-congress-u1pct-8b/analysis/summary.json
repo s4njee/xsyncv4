@@ -1,0 +1,19 @@
+{
+ "experiment": "AP10232214-AP10232212-AP10232214-congress-u1pct-8b",
+ "kind": "screening",
+ "hypothesis": "The 4-block 0.842 xs-rs over xs-c++ ratio is real: at 8 paired blocks xs-rs's interval stays below 0.95 and excludes 1, certifying a new xs-rs win while rsync stays behind both xs builds.",
+ "primary": "durable_s",
+ "control": "rsync",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261023T221445Z-AP10232214-AP10232212-AP10232214-congress-u1pct-8b"
+ ],
+ "spec_sha256": [
+  "3959039bb7c65244116867c771ad41cbdf7c731422191cbff4bb2fce4cc6cf85"
+ ],
+ "valid_blocks": 8,
+ "void_attempts": 0,
+ "void_reasons": []
+}
