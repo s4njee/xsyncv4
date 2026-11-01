@@ -1,0 +1,19 @@
+{
+ "experiment": "AP10300135-P1030-a-cg-fresh-noatomic-8b",
+ "kind": "screening",
+ "hypothesis": "If per-file publication costs a real share of a 25k-file fresh copy, xs-rs-noatomic finishes at least 3% faster than default xs-rs and its ratio to xs-c++ falls from about 0.87; if the intervals merge, the remaining per-file cost is in listing/scan and the write path is not a small-file default lever.",
+ "primary": "durable_s",
+ "control": "rsync",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261030T013530Z-AP10300135-P1030-a-cg-fresh-noatomic-8b"
+ ],
+ "spec_sha256": [
+  "ebc104af025fdec1bf1888c0acc430c5e742c1434f6989d55ab8d01ffdaea92e"
+ ],
+ "valid_blocks": 8,
+ "void_attempts": 0,
+ "void_reasons": []
+}

@@ -1,0 +1,17 @@
+experiment,kind,cell_id,corpus,scenario,sender,receiver,client,link,cache,arm,metric,n_blocks,geomean,lo,hi
+AP10300135-P1030-a-cg-fresh-noatomic-8b,screening,congress-sample.fresh.a-aws.sender.warm,congress-sample,fresh,a,aws,sender,a-aws,warm,rsync,durable_s,8,3.574359143154168,2.913818555903311,4.384639276308371
+AP10300135-P1030-a-cg-fresh-noatomic-8b,screening,congress-sample.fresh.a-aws.sender.warm,congress-sample,fresh,a,aws,sender,a-aws,warm,xs-rs,durable_s,8,2.953237585045424,2.7911343116344054,3.12475547929394
+AP10300135-P1030-a-cg-fresh-noatomic-8b,screening,congress-sample.fresh.a-aws.sender.warm,congress-sample,fresh,a,aws,sender,a-aws,warm,xs-cpp,durable_s,8,3.401353125624095,3.350578989266735,3.452896685096413
+AP10300135-P1030-a-cg-fresh-noatomic-8b,screening,congress-sample.fresh.a-aws.sender.warm,congress-sample,fresh,a,aws,sender,a-aws,warm,xs-rs-noatomic,durable_s,8,2.9770749536901895,2.648219918533033,3.3467670935724407
+AP10300135-P1030-a-cg-fresh-noatomic-8b,screening,congress-sample.fresh.a-aws.sender.warm,congress-sample,fresh,a,aws,sender,a-aws,warm,rsync,wall_s,8,3.3273574640987467,2.6843015844513394,4.1244649103601265
+AP10300135-P1030-a-cg-fresh-noatomic-8b,screening,congress-sample.fresh.a-aws.sender.warm,congress-sample,fresh,a,aws,sender,a-aws,warm,xs-rs,wall_s,8,2.2857822735626474,2.1110376329597638,2.474991691553994
+AP10300135-P1030-a-cg-fresh-noatomic-8b,screening,congress-sample.fresh.a-aws.sender.warm,congress-sample,fresh,a,aws,sender,a-aws,warm,xs-cpp,wall_s,8,2.7694431611158024,2.7105830216680658,2.8295814447812635
+AP10300135-P1030-a-cg-fresh-noatomic-8b,screening,congress-sample.fresh.a-aws.sender.warm,congress-sample,fresh,a,aws,sender,a-aws,warm,xs-rs-noatomic,wall_s,8,2.3326378885370507,2.0285329830345726,2.682332288676351
+AP10300135-P1030-a-cg-fresh-noatomic-8b,screening,congress-sample.fresh.a-aws.sender.warm,congress-sample,fresh,a,aws,sender,a-aws,warm,rsync,cpu_s,8,4.938940998576785,4.5076644306098395,5.411480504577517
+AP10300135-P1030-a-cg-fresh-noatomic-8b,screening,congress-sample.fresh.a-aws.sender.warm,congress-sample,fresh,a,aws,sender,a-aws,warm,xs-rs,cpu_s,8,3.745102477133374,3.6786972522488597,3.8127064018807992
+AP10300135-P1030-a-cg-fresh-noatomic-8b,screening,congress-sample.fresh.a-aws.sender.warm,congress-sample,fresh,a,aws,sender,a-aws,warm,xs-cpp,cpu_s,8,5.147097518685259,5.059739029057108,5.235964288812913
+AP10300135-P1030-a-cg-fresh-noatomic-8b,screening,congress-sample.fresh.a-aws.sender.warm,congress-sample,fresh,a,aws,sender,a-aws,warm,xs-rs-noatomic,cpu_s,8,3.769494469039856,3.677516854703441,3.863772516487326
+AP10300135-P1030-a-cg-fresh-noatomic-8b,screening,congress-sample.fresh.a-aws.sender.warm,congress-sample,fresh,a,aws,sender,a-aws,warm,rsync,rss_bytes,8,13035775.57637985,12203016.728982272,13925363.5926068
+AP10300135-P1030-a-cg-fresh-noatomic-8b,screening,congress-sample.fresh.a-aws.sender.warm,congress-sample,fresh,a,aws,sender,a-aws,warm,xs-rs,rss_bytes,8,81243101.39549772,71999256.40728399,91673745.72623186
+AP10300135-P1030-a-cg-fresh-noatomic-8b,screening,congress-sample.fresh.a-aws.sender.warm,congress-sample,fresh,a,aws,sender,a-aws,warm,xs-cpp,rss_bytes,8,172278762.6912461,163745078.22146,181257185.84521648
+AP10300135-P1030-a-cg-fresh-noatomic-8b,screening,congress-sample.fresh.a-aws.sender.warm,congress-sample,fresh,a,aws,sender,a-aws,warm,xs-rs-noatomic,rss_bytes,8,77096369.88359818,71023933.45051788,83687990.23739855

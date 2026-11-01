@@ -5995,6 +5995,97 @@
    "model": "opencode/deepseek-v4.1-flash",
    "summarizedUtc": 1793501356.308,
    "driver": "a"
+  },
+  "AP10300135-P1030-a-cg-fresh-noatomic-8b": {
+   "run": "20261030T013530Z-AP10300135-P1030-a-cg-fresh-noatomic-8b",
+   "experiment": "AP10300135-P1030-a-cg-fresh-noatomic-8b",
+   "key": "congress-sample.fresh.a-aws.sender.warm|6|0",
+   "utc": 1793508606.963,
+   "cell": "congress-sample.fresh.a-aws.sender.warm",
+   "factors": {
+    "corpus": "congress-sample",
+    "scenario": "fresh",
+    "sender": "a",
+    "receiver": "aws",
+    "client": "sender",
+    "link": "a-aws",
+    "cache": "warm"
+   },
+   "block": 6,
+   "attempt": 0,
+   "control": "rsync",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "rsync",
+     "label": "rsync",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 3.229,
+     "gbps": 0.541,
+     "files_per_s": 7818,
+     "speed": 1
+    },
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 2.646,
+     "gbps": 0.66,
+     "files_per_s": 9541,
+     "speed": 1.22
+    },
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 3.358,
+     "gbps": 0.52,
+     "files_per_s": 7519,
+     "speed": 0.96
+    },
+    {
+     "arm": "xs-rs-noatomic",
+     "label": "xs-rs -noatomic",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 2.918,
+     "gbps": 0.598,
+     "files_per_s": 8653,
+     "speed": 1.11
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "speed": 1.03,
+     "blocks": 7
+    },
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "speed": 1.19,
+     "blocks": 7
+    },
+    {
+     "arm": "xs-rs-noatomic",
+     "label": "xs-rs -noatomic",
+     "speed": 1.17,
+     "blocks": 7
+    }
+   ],
+   "question": "On per-file-bound congress-sample fresh, does skipping the atomic temp-file-and-rename path (--no-atomic) cut per-file overhead enough to widen xs-rs's win over xs-c++?",
+   "summary": "xs-rs was fastest at 2.646 s, 1.22x the rsync control (3.229 s), while xs-c++ ran 0.96x and xs-rs -noatomic 1.11x. Over seven blocks the cell has averaged 1.19x for xs-rs, 1.17x for -noatomic and 1.03x for xs-c++, so the evidence is no longer thin. Skipping the atomic path did not widen xs-rs's lead over xs-c++ here: -noatomic trailed plain xs-rs in this block and slightly cumulatively.",
+   "model": "opencode/deepseek-v4.1-flash",
+   "summarizedUtc": 1793508664.289,
+   "driver": "a"
   }
  }
 }
