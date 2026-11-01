@@ -6086,6 +6086,79 @@
    "model": "opencode/deepseek-v4.1-flash",
    "summarizedUtc": 1793508664.289,
    "driver": "a"
+  },
+  "AP10232214-AP10232212-AP10232214-congress-u1pct-8b": {
+   "run": "20261023T221445Z-AP10232214-AP10232212-AP10232214-congress-u1pct-8b",
+   "experiment": "AP10232214-AP10232212-AP10232214-congress-u1pct-8b",
+   "key": "congress-sample.update-1pct.a-aws.sender.warm|2|0",
+   "utc": 1793538980.979,
+   "cell": "congress-sample.update-1pct.a-aws.sender.warm",
+   "factors": {
+    "corpus": "congress-sample",
+    "scenario": "update-1pct",
+    "sender": "a",
+    "receiver": "aws",
+    "client": "sender",
+    "link": "a-aws",
+    "cache": "warm"
+   },
+   "block": 2,
+   "attempt": 0,
+   "control": "rsync",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.804,
+     "gbps": 0.021,
+     "files_per_s": 31416,
+     "speed": 2.15
+    },
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.903,
+     "gbps": 0.019,
+     "files_per_s": 27944,
+     "speed": 1.91
+    },
+    {
+     "arm": "rsync",
+     "label": "rsync",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 1.728,
+     "gbps": 0.01,
+     "files_per_s": 14607,
+     "speed": 1
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "speed": 1.89,
+     "blocks": 3
+    },
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "speed": 2.21,
+     "blocks": 3
+    }
+   ],
+   "question": "Does the newest xs-rs (beabaee992b6) still finish at or below 0.95 of xs-c++ on congress-sample update-1pct when the 4-block screening is extended to 8 paired blocks, with an interval that excludes 1?",
+   "summary": null,
+   "model": null,
+   "driver": "a"
   }
  }
 }
