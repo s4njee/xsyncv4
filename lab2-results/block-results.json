@@ -6518,6 +6518,114 @@
    "model": "opencode/deepseek-v4.1-flash",
    "summarizedUtc": 1793625895.417,
    "driver": "a"
+  },
+  "AP10300736-P1030-a-lk-u10pct-Wj2W-8b": {
+   "run": "20261030T073606Z-AP10300736-P1030-a-lk-u10pct-Wj2W-8b",
+   "experiment": "AP10300736-P1030-a-lk-u10pct-Wj2W-8b",
+   "key": "laikav2-sample.update-10pct.a-aws.sender.warm|6|0",
+   "utc": 1793649637.593,
+   "cell": "laikav2-sample.update-10pct.a-aws.sender.warm",
+   "factors": {
+    "corpus": "laikav2-sample",
+    "scenario": "update-10pct",
+    "sender": "a",
+    "receiver": "aws",
+    "client": "sender",
+    "link": "a-aws",
+    "cache": "warm"
+   },
+   "block": 6,
+   "attempt": 0,
+   "control": "rsync",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.458,
+     "gbps": 0.085,
+     "files_per_s": 2918,
+     "speed": 1.22
+    },
+    {
+     "arm": "xs-rs-W",
+     "label": "xs-rs-W",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.38,
+     "gbps": 0.102,
+     "files_per_s": 3516,
+     "speed": 1.48
+    },
+    {
+     "arm": "xs-rs-j2W",
+     "label": "xs-rs -j2W",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.435,
+     "gbps": 0.089,
+     "files_per_s": 3074,
+     "speed": 1.29
+    },
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.466,
+     "gbps": 0.083,
+     "files_per_s": 2869,
+     "speed": 1.2
+    },
+    {
+     "arm": "rsync",
+     "label": "rsync",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 0.561,
+     "gbps": 0.069,
+     "files_per_s": 2384,
+     "speed": 1
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "speed": 1.16,
+     "blocks": 7
+    },
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "speed": 1.26,
+     "blocks": 7
+    },
+    {
+     "arm": "xs-rs-W",
+     "label": "xs-rs-W",
+     "speed": 1.26,
+     "blocks": 7
+    },
+    {
+     "arm": "xs-rs-j2W",
+     "label": "xs-rs -j2W",
+     "speed": 1.21,
+     "blocks": 7
+    }
+   ],
+   "question": "On laikav2 update-10pct, the near-tie cell, do --whole-file and -j2W preserve or destroy the xs-rs win, and is whole-file safe outside fresh copies?",
+   "summary": "xs-rs-W was fastest at 1.48x the control (0.38s vs 0.561s), with xs-rs -j2W at 1.29x and plain xs-rs at 1.22x. Over seven blocks the cumulative ratios are xs-rs 1.26, xs-rs-W 1.26, -j2W 1.21 and xs-c++ 1.16, so the evidence is not thin. Whole-file preserves the xs-rs win here, but these numbers do not address whether it is safe outside fresh copies.",
+   "model": "opencode/deepseek-v4.1-flash",
+   "summarizedUtc": 1793649647.945,
+   "driver": "a"
   }
  }
 }
