@@ -6448,8 +6448,8 @@
   "AP10231614-AP10231612-congress-u01pct-8b-pin": {
    "run": "20261023T161458Z-AP10231614-AP10231612-congress-u01pct-8b-pin",
    "experiment": "AP10231614-AP10231612-congress-u01pct-8b-pin",
-   "key": "congress-sample.update-0p1pct.a-aws.sender.warm|2|0",
-   "utc": 1793625397.622,
+   "key": "congress-sample.update-0p1pct.a-aws.sender.warm|7|0",
+   "utc": 1793625795.944,
    "cell": "congress-sample.update-0p1pct.a-aws.sender.warm",
    "factors": {
     "corpus": "congress-sample",
@@ -6460,7 +6460,7 @@
     "link": "a-aws",
     "cache": "warm"
    },
-   "block": 2,
+   "block": 7,
    "attempt": 0,
    "control": "rsync",
    "primary": "durable_s",
@@ -6471,10 +6471,10 @@
      "control": false,
      "valid": true,
      "void": null,
-     "seconds": 1.041,
+     "seconds": 0.841,
      "gbps": 0.001,
-     "files_per_s": 24255,
-     "speed": 1.7
+     "files_per_s": 30020,
+     "speed": 1.93
     },
     {
      "arm": "xs-cpp",
@@ -6482,10 +6482,10 @@
      "control": false,
      "valid": true,
      "void": null,
-     "seconds": 0.855,
+     "seconds": 0.827,
      "gbps": 0.001,
-     "files_per_s": 29520,
-     "speed": 2.07
+     "files_per_s": 30510,
+     "speed": 1.96
     },
     {
      "arm": "rsync",
@@ -6493,9 +6493,9 @@
      "control": true,
      "valid": true,
      "void": null,
-     "seconds": 1.774,
+     "seconds": 1.621,
      "gbps": 0.001,
-     "files_per_s": 14229,
+     "files_per_s": 15574,
      "speed": 1
     }
    ],
@@ -6503,19 +6503,20 @@
     {
      "arm": "xs-cpp",
      "label": "xs-c++",
-     "speed": 2.05,
-     "blocks": 3
+     "speed": 2.03,
+     "blocks": 8
     },
     {
      "arm": "xs-rs",
      "label": "xs-rs",
-     "speed": 2.18,
-     "blocks": 3
+     "speed": 2.16,
+     "blocks": 8
     }
    ],
    "question": "Does xs-rs at beabaee992b6 with -a -j4 beat xs-c++ at e104bde552f2 with -a -j4 by at least 5% in durable time on congress-sample update-0p1pct, over 8 paired blocks, with rsync as the reference?",
-   "summary": null,
-   "model": null,
+   "summary": "xs-c++ was fastest this block at 0.827 s, 1.96x rsync, with xs-rs at 0.841 s, 1.93x. Cumulatively, xs-rs is 2.16x and xs-c++ 2.03x over 8 blocks each, so the evidence is not thin. This block had xs-c++ slightly ahead, but the cumulative gap corresponds to xs-rs being roughly 6% faster than xs-c++ (2.16 vs 2.03), just above the 5% threshold.",
+   "model": "opencode/deepseek-v4.1-flash",
+   "summarizedUtc": 1793625895.417,
    "driver": "a"
   }
  }

@@ -1,0 +1,19 @@
+{
+ "experiment": "AP10231614-AP10231612-congress-u01pct-8b-pin",
+ "kind": "screening",
+ "hypothesis": "The 4-block screening put xs-rs at 0.448 of rsync and xs-c++ at 0.525, an xs-rs/xs-c++ ratio of about 0.85; over 8 blocks the xs-rs advantage will persist, its interval will exclude 1.0, and rsync will remain slower than both.",
+ "primary": "durable_s",
+ "control": "rsync",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261023T161458Z-AP10231614-AP10231612-congress-u01pct-8b-pin"
+ ],
+ "spec_sha256": [
+  "52d57d203a9679d6247fd1ead1b7e8e38c866de46a6b1f6ff294b02ab4e6af99"
+ ],
+ "valid_blocks": 8,
+ "void_attempts": 0,
+ "void_reasons": []
+}

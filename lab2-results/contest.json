@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-02T13:12:49+00:00",
+ "updated": "2026-11-02T14:12:49+00:00",
  "enabled": true,
  "cpp_rev": "e104bde552f2",
  "rs": {
@@ -120,8 +120,8 @@
    "scenario": "update-0p1pct",
    "link": "a-aws",
    "metric": "durable_s",
-   "experiment": "AP10222213-PS-beabaee-update-0p1pct",
-   "run": "20261022T221402Z-AP10222213-PS-beabaee-update-0p1pct",
+   "experiment": "AP10231614-AP10231612-congress-u01pct-8b-pin",
+   "run": "20261023T161458Z-AP10231614-AP10231612-congress-u01pct-8b-pin",
    "tools": {
     "rsync": {
      "arm": "rsync",
@@ -129,10 +129,10 @@
       "-a"
      ],
      "rev": null,
-     "seconds": 1.614,
-     "lo": 1.48,
-     "hi": 1.759,
-     "blocks": 4
+     "seconds": 1.697,
+     "lo": 1.616,
+     "hi": 1.783,
+     "blocks": 8
     },
     "xs-rs": {
      "arm": "xs-rs",
@@ -141,10 +141,10 @@
       "-j4"
      ],
      "rev": "beabaee992b6-rs",
-     "seconds": 0.722,
-     "lo": 0.655,
-     "hi": 0.797,
-     "blocks": 4
+     "seconds": 0.786,
+     "lo": 0.706,
+     "hi": 0.874,
+     "blocks": 8
     },
     "xs-cpp": {
      "arm": "xs-cpp",
@@ -153,15 +153,15 @@
       "-j4"
      ],
      "rev": "e104bde552f2",
-     "seconds": 0.848,
-     "lo": 0.775,
-     "hi": 0.927,
-     "blocks": 4
+     "seconds": 0.837,
+     "lo": 0.815,
+     "hi": 0.859,
+     "blocks": 8
     }
    },
    "verdict": "xs-rs",
-   "rs_vs_cpp": 0.851,
-   "rs_vs_rsync": 0.447,
+   "rs_vs_cpp": 0.939,
+   "rs_vs_rsync": 0.463,
    "fastest": "xs-rs"
   },
   {
