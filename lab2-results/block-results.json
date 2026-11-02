@@ -6444,6 +6444,79 @@
    "model": "opencode/deepseek-v4.1-flash",
    "summarizedUtc": 1793595143.856,
    "driver": "a"
+  },
+  "AP10231614-AP10231612-congress-u01pct-8b-pin": {
+   "run": "20261023T161458Z-AP10231614-AP10231612-congress-u01pct-8b-pin",
+   "experiment": "AP10231614-AP10231612-congress-u01pct-8b-pin",
+   "key": "congress-sample.update-0p1pct.a-aws.sender.warm|2|0",
+   "utc": 1793625397.622,
+   "cell": "congress-sample.update-0p1pct.a-aws.sender.warm",
+   "factors": {
+    "corpus": "congress-sample",
+    "scenario": "update-0p1pct",
+    "sender": "a",
+    "receiver": "aws",
+    "client": "sender",
+    "link": "a-aws",
+    "cache": "warm"
+   },
+   "block": 2,
+   "attempt": 0,
+   "control": "rsync",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 1.041,
+     "gbps": 0.001,
+     "files_per_s": 24255,
+     "speed": 1.7
+    },
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.855,
+     "gbps": 0.001,
+     "files_per_s": 29520,
+     "speed": 2.07
+    },
+    {
+     "arm": "rsync",
+     "label": "rsync",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 1.774,
+     "gbps": 0.001,
+     "files_per_s": 14229,
+     "speed": 1
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "speed": 2.05,
+     "blocks": 3
+    },
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "speed": 2.18,
+     "blocks": 3
+    }
+   ],
+   "question": "Does xs-rs at beabaee992b6 with -a -j4 beat xs-c++ at e104bde552f2 with -a -j4 by at least 5% in durable time on congress-sample update-0p1pct, over 8 paired blocks, with rsync as the reference?",
+   "summary": null,
+   "model": null,
+   "driver": "a"
   }
  }
 }
