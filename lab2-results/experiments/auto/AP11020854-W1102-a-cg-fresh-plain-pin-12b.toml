@@ -1,0 +1,33 @@
+# Written by the 6-hourly planner (2026-11-02T08:54Z). Why: The current congress fresh verdict is an 8-block 0.859 from a j2W run, while the earlier 12-block plain race left xs-rs's interval touching the margin.
+id = "AP11020854-W1102-a-cg-fresh-plain-pin-12b"
+kind = "screening"
+hypothesis = "The direct plain-flag ratio stays below 0.95 (around 0.86) with a 12-block interval that excludes 1, so the small-file fresh win needs neither j2W nor -z to be certified."
+primary = "durable_s"
+delta = 0.05
+blocks = 12
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+sample_timeout_s = 7200
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[arms.xs-rs]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j4"]
+
+[arms.xs-cpp]
+tool = "xs"
+rev = "e104bde552f2"
+flags = ["-a", "-j4"]
+
+[matrix]
+link = "a-aws"
+corpus = ["congress-sample"]
+scenario = ["fresh"]
+direction = ["a>aws"]
+client = ["initiator"]
+cache = ["warm"]

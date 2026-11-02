@@ -1,0 +1,17 @@
+# Written by the 6-hourly planner at 2026-11-02T08:54Z for a; nothing is queued after the deadline.
+id = "AUTO-11020854-a"
+question = "Runner a has 0.6 h of measurement room (6.0 h window minus 5.4 h of queued work) and is already waiting on the 32 GiB/day write budget, so I add only three warm laikav2/congress races costing about 17 minutes and roughly 17 GB. The backlog and trees in progress already queue plain-flag and variant runs (j2, j8, z, z1, W, j2W, inplace, no-atomic, W with z, W with inplace, z with no-atomic) on nearly every cell, plus real-projects fresh re-measures at the newest rev, so I add no real-projects copies: the lone xs-c++ transfer win is already queued at 4 blocks with j2/j8/z/W/j2W/no-atomic variants, and an 8-block verdict there would need about 51 GB against the daily cap. No no-op cells are planned. The three chosen races pin the thinnest xs-rs wins and settle whether the variants that produced them are needed: laikav2 update-10pct (0.949, from an 8-block z arm), laikav2 update-1pct (0.936, from an 8-block W arm), and congress fresh (0.859 at 8 blocks, where the earlier 12-block plain interval touched the margin). front is false because the backlog contains hand, baseline, FC/PS and port runs rather than only earlier planner windows; confirm is null because no absolute speed floor is known; engineering and port are null because xs-c++ is the fixed champion and no port step is open."
+deadline = "2026-11-02T14:54Z"
+start = ["N0", "N1", "N2"]
+
+[nodes.N0]
+spec = "auto/AP11020854-W1102-a-lk-u10pct-default-vs-z-12b.toml"
+question = "Does plain xs-rs (-a -j4) beat xs-c++ on laikav2-sample update-10pct at 12 paired blocks, or does the 0.949 win depend on the -z arm?"
+
+[nodes.N1]
+spec = "auto/AP11020854-W1102-a-lk-u1pct-default-vs-W-12b.toml"
+question = "On laikav2-sample update-1pct, does plain -a -j4 beat xs-c++ at 12 blocks, or is -W required to hold the 0.936 win?"
+
+[nodes.N2]
+spec = "auto/AP11020854-W1102-a-cg-fresh-plain-pin-12b.toml"
+question = "On the per-file-bound congress-sample fresh copy, does plain xs-rs -a -j4 beat xs-c++ by more than 5% at 12 paired blocks?"

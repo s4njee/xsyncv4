@@ -1,0 +1,38 @@
+# Written by the 6-hourly planner (2026-11-02T08:54Z). Why: The scored 0.949 win came from an xs-rs-z arm at only 8 blocks and no 12-block race has separated plain -j4 from -z on this cell.
+id = "AP11020854-W1102-a-lk-u10pct-default-vs-z-12b"
+kind = "screening"
+hypothesis = "Plain -j4 lands within the 5% margin of xs-c++ (near 0.95) while xs-rs-z stays clearly below it, so -z is the lever that cleared this cell at 8 blocks and should be promoted for update-10pct only if it holds at 12 blocks."
+primary = "durable_s"
+delta = 0.05
+blocks = 12
+control = "rsync"
+verify = "first-last"
+cleanup = "eager"
+sample_timeout_s = 7200
+
+[arms.rsync]
+tool = "rsync"
+flags = ["-a"]
+
+[arms.xs-rs]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j4"]
+
+[arms.xs-cpp]
+tool = "xs"
+rev = "e104bde552f2"
+flags = ["-a", "-j4"]
+
+[arms.xs-rs-z]
+tool = "xs"
+rev = "beabaee992b6-rs"
+flags = ["-a", "-j4", "-z"]
+
+[matrix]
+link = "a-aws"
+corpus = ["laikav2-sample"]
+scenario = ["update-10pct"]
+direction = ["a>aws"]
+client = ["initiator"]
+cache = ["warm"]
