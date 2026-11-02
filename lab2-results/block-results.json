@@ -6251,6 +6251,91 @@
    "model": "opencode/deepseek-v4.1-flash",
    "summarizedUtc": 1793563343.539,
    "driver": "a"
+  },
+  "AP10301934-PLAN1030-a-lk-u01-inplace-8b": {
+   "run": "20261030T193431Z-AP10301934-PLAN1030-a-lk-u01-inplace-8b",
+   "experiment": "AP10301934-PLAN1030-a-lk-u01-inplace-8b",
+   "key": "laikav2-sample.update-0p1pct.a-aws.sender.warm|7|1",
+   "utc": 1793587911.021,
+   "cell": "laikav2-sample.update-0p1pct.a-aws.sender.warm",
+   "factors": {
+    "corpus": "laikav2-sample",
+    "scenario": "update-0p1pct",
+    "sender": "a",
+    "receiver": "aws",
+    "client": "sender",
+    "link": "a-aws",
+    "cache": "warm"
+   },
+   "block": 7,
+   "attempt": 1,
+   "control": "rsync",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "rsync",
+     "label": "rsync",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 0.467,
+     "gbps": 0,
+     "files_per_s": 2861,
+     "speed": 1
+    },
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.435,
+     "gbps": 0,
+     "files_per_s": 3075,
+     "speed": 1.07
+    },
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.419,
+     "gbps": 0,
+     "files_per_s": 3193,
+     "speed": 1.12
+    },
+    {
+     "arm": "xs-rs-inplace",
+     "label": "xs-rs -inplace",
+     "control": false,
+     "valid": false,
+     "void": "the transfer exited 1: xs-rs: --inplace: unknown option",
+     "seconds": null,
+     "gbps": null,
+     "files_per_s": null,
+     "speed": null
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "speed": 1.15,
+     "blocks": 9
+    },
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "speed": 1.22,
+     "blocks": 12
+    }
+   ],
+   "question": "Does --inplace improve laikav2 update-0p1pct enough to challenge xs-c++ by a wider margin?",
+   "summary": "In block 7, xs-rs was fastest at 0.419 s, 1.12x the rsync control (12% faster); xs-c++ was 1.07x. Cumulatively, xs-rs stands at 1.22x across 12 blocks and xs-c++ at 1.15x across 9, so this cell\u2019s evidence is not thin. The --inplace question is untested here: xs-rs -inplace was void because the option was unknown.",
+   "model": "opencode/deepseek-v4.1-flash",
+   "summarizedUtc": 1793587965.48,
+   "driver": "a"
   }
  }
 }

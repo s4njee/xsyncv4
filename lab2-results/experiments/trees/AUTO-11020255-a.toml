@@ -1,0 +1,17 @@
+# Written by the 6-hourly planner at 2026-11-02T02:55Z for a; nothing is queued after the deadline.
+id = "AUTO-11020255-a"
+question = "Runner a has only 0.8 h of measurement room (6.0 h minus 5.2 h queued) and is already waiting on the 32 GiB/day write budget. Its backlog already covers every non-noop cell and most flag variants, including the weak scored wins and the only non-noop xs-c++ win, so I add only three small laikav2-sample update screens (~0.24 h, ~14 GB) that fill untried compression/write-path corners: -z+--no-atomic on update-10pct, -z alone on update-1pct, and -z on update-0p1pct. No real-projects fresh work, no no-op cells, and no queued variant is repeated; front is false because the backlog contains hand, PS/FC/BL3 and port runs, and confirm is null because no absolute speed floor is known. Engineering and port stay null by the lab rules."
+deadline = "2026-11-02T08:55Z"
+start = ["N0", "N1", "N2"]
+
+[nodes.N0]
+spec = "auto/AP11020255-A1102-lk-u10pct-z-noatomic-12b.toml"
+question = "Does adding --no-atomic to -z make xs-rs's weakest laikav2 update-10pct win clearly beat xs-c++ at 12 blocks?"
+
+[nodes.N1]
+spec = "auto/AP11020255-A1102-lk-u1pct-z-12b.toml"
+question = "Can -z alone, without -W, hold the laikav2 update-1pct win against xs-c++ at 12 blocks?"
+
+[nodes.N2]
+spec = "auto/AP11020255-A1102-lk-u01pct-z-12b.toml"
+question = "Does -z help or hurt on laikav2 update-0p1pct, where almost all files are unchanged and scanning dominates?"
