@@ -6336,6 +6336,114 @@
    "model": "opencode/deepseek-v4.1-flash",
    "summarizedUtc": 1793587965.48,
    "driver": "a"
+  },
+  "AP10310135-PLAN1031-a-lk-fresh-j2-vs-j2W-12b": {
+   "run": "20261031T013529Z-AP10310135-PLAN1031-a-lk-fresh-j2-vs-j2W-12b",
+   "experiment": "AP10310135-PLAN1031-a-lk-fresh-j2-vs-j2W-12b",
+   "key": "laikav2-sample.fresh.a-aws.sender.warm|10|0",
+   "utc": 1793595061.308,
+   "cell": "laikav2-sample.fresh.a-aws.sender.warm",
+   "factors": {
+    "corpus": "laikav2-sample",
+    "scenario": "fresh",
+    "sender": "a",
+    "receiver": "aws",
+    "client": "sender",
+    "link": "a-aws",
+    "cache": "warm"
+   },
+   "block": 10,
+   "attempt": 0,
+   "control": "rsync",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 1.088,
+     "gbps": 0.691,
+     "files_per_s": 1228,
+     "speed": 1.26
+    },
+    {
+     "arm": "xs-rs-j2",
+     "label": "xs-rs -j2",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 1.057,
+     "gbps": 0.711,
+     "files_per_s": 1265,
+     "speed": 1.3
+    },
+    {
+     "arm": "xs-rs-j2W",
+     "label": "xs-rs -j2W",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 1.063,
+     "gbps": 0.707,
+     "files_per_s": 1258,
+     "speed": 1.3
+    },
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 1.014,
+     "gbps": 0.742,
+     "files_per_s": 1319,
+     "speed": 1.36
+    },
+    {
+     "arm": "rsync",
+     "label": "rsync",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 1.377,
+     "gbps": 0.546,
+     "files_per_s": 971,
+     "speed": 1
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "speed": 1.18,
+     "blocks": 11
+    },
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "speed": 1.28,
+     "blocks": 11
+    },
+    {
+     "arm": "xs-rs-j2",
+     "label": "xs-rs -j2",
+     "speed": 1.36,
+     "blocks": 11
+    },
+    {
+     "arm": "xs-rs-j2W",
+     "label": "xs-rs -j2W",
+     "speed": 1.29,
+     "blocks": 11
+    }
+   ],
+   "question": "On laikav2-sample fresh, is the 8-block -j2W win a real -j2 times -W interaction, or is -j2 alone the better fresh-copy default now that -W alone regressed?",
+   "summary": "On this block xs-c++ was fastest at 1.36x the rsync control (1.014 s vs 1.377 s); xs-rs -j2 and xs-rs -j2W tied at 1.30x, and xs-rs was 1.26x. Across 11 blocks the cumulative ratios are xs-rs -j2 1.36x, xs-rs -j2W 1.29x, xs-rs 1.28x and xs-c++ 1.18x, so the evidence is not thin. This block shows no -j2W gain over -j2 (both 1.30x), while the cumulative -j2 lead fits -j2 alone rather than a -j2\u00d7-W interaction, without proving it.",
+   "model": "opencode/deepseek-v4.1-flash",
+   "summarizedUtc": 1793595143.856,
+   "driver": "a"
   }
  }
 }
