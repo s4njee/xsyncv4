@@ -2801,10 +2801,10 @@
    "driver": "a"
   },
   "FC-beabaee-update-10pct": {
-   "run": "20261027T200204Z-FC-beabaee-update-10pct",
+   "run": "20261031T025049Z-FC-beabaee-update-10pct",
    "experiment": "FC-beabaee-update-10pct",
-   "key": "congress-sample.update-10pct.a-aws.sender.warm|3|0",
-   "utc": 1793217680.615,
+   "key": "congress-sample.update-10pct.a-aws.sender.warm|2|0",
+   "utc": 1793681345.27,
    "cell": "congress-sample.update-10pct.a-aws.sender.warm",
    "factors": {
     "corpus": "congress-sample",
@@ -2815,7 +2815,7 @@
     "link": "a-aws",
     "cache": "warm"
    },
-   "block": 3,
+   "block": 2,
    "attempt": 0,
    "control": "rsync",
    "primary": "durable_s",
@@ -2826,9 +2826,9 @@
      "control": true,
      "valid": true,
      "void": null,
-     "seconds": 1.591,
-     "gbps": 0.17,
-     "files_per_s": 15863,
+     "seconds": 1.599,
+     "gbps": 0.162,
+     "files_per_s": 15784,
      "speed": 1
     },
     {
@@ -2837,10 +2837,10 @@
      "control": false,
      "valid": true,
      "void": null,
-     "seconds": 1.166,
-     "gbps": 0.232,
-     "files_per_s": 21657,
-     "speed": 1.37
+     "seconds": 1.103,
+     "gbps": 0.234,
+     "files_per_s": 22893,
+     "speed": 1.45
     },
     {
      "arm": "xs-rs",
@@ -2848,30 +2848,30 @@
      "control": false,
      "valid": true,
      "void": null,
-     "seconds": 0.993,
-     "gbps": 0.273,
-     "files_per_s": 25425,
-     "speed": 1.6
+     "seconds": 1.046,
+     "gbps": 0.247,
+     "files_per_s": 24135,
+     "speed": 1.53
     }
    ],
    "soFar": [
     {
      "arm": "xs-cpp",
      "label": "xs-c++",
-     "speed": 1.29,
-     "blocks": 4
+     "speed": 1.3,
+     "blocks": 3
     },
     {
      "arm": "xs-rs",
      "label": "xs-rs",
-     "speed": 1.5,
-     "blocks": 4
+     "speed": 1.41,
+     "blocks": 3
     }
    ],
    "question": "On congress-sample, update-10pct copies: how do rsync, xs-c++ and xs-rs at beabaee992b6 compare?",
-   "summary": "In block 3, xs-rs was fastest at 0.993 s, 1.60x the rsync control (1.591 s); xs-c++ took 1.166 s, 1.37x. Cumulatively for this cell, xs-rs stands at 1.50x and xs-c++ at 1.29x, each over four blocks, so the evidence is not thin. Both variants beat rsync here, with xs-rs ahead, which answers the comparison without proving a cause.",
+   "summary": "In block 2, xs-rs was fastest at 1.53x the control (1.046s versus rsync's 1.599s), with xs-c++ at 1.45x. Cumulatively xs-rs sits at 1.41x and xs-c++ at 1.30x, each across three blocks, so the evidence is no longer thin. Both xs variants beat rsync here, though xs-rs's edge over xs-c++ in this block is modest.",
    "model": "opencode/deepseek-v4.1-flash",
-   "summarizedUtc": 1793217728.983,
+   "summarizedUtc": 1793681386.184,
    "driver": "a"
   },
   "AP10231014-AP10231012-lk-u10pct-j8": {

@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-03T04:12:50+00:00",
+ "updated": "2026-11-03T05:12:51+00:00",
  "enabled": true,
  "cpp_rev": "e104bde552f2",
  "rs": {
@@ -179,10 +179,10 @@
       "-a"
      ],
      "rev": null,
-     "seconds": 1.494,
-     "lo": 1.455,
-     "hi": 1.535,
-     "blocks": 12
+     "seconds": 1.488,
+     "lo": 1.45,
+     "hi": 1.528,
+     "blocks": 16
     },
     "xs-cpp": {
      "arm": "xs-cpp",
@@ -191,10 +191,10 @@
       "-j4"
      ],
      "rev": "e104bde552f2",
-     "seconds": 1.177,
-     "lo": 1.112,
-     "hi": 1.245,
-     "blocks": 12
+     "seconds": 1.163,
+     "lo": 1.114,
+     "hi": 1.214,
+     "blocks": 16
     },
     "xs-rs": {
      "arm": "xs-rs",
@@ -203,15 +203,15 @@
       "-j4"
      ],
      "rev": "beabaee992b6-rs",
-     "seconds": 1.025,
-     "lo": 0.945,
-     "hi": 1.113,
-     "blocks": 12
+     "seconds": 1.026,
+     "lo": 0.964,
+     "hi": 1.092,
+     "blocks": 16
     }
    },
    "verdict": "xs-rs",
-   "rs_vs_cpp": 0.871,
-   "rs_vs_rsync": 0.686,
+   "rs_vs_cpp": 0.882,
+   "rs_vs_rsync": 0.69,
    "fastest": "xs-rs"
   },
   {
