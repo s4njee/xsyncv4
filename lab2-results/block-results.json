@@ -6808,6 +6808,91 @@
    "model": "opencode/deepseek-v4.1-flash",
    "summarizedUtc": 1793712123.8,
    "driver": "a"
+  },
+  "AP10281214-AP10281212-PLAN102812-a-lk-u10pct-inplac": {
+   "run": "20261028T121455Z-AP10281214-AP10281212-PLAN102812-a-lk-u10pct-inplac",
+   "experiment": "AP10281214-AP10281212-PLAN102812-a-lk-u10pct-inplac",
+   "key": "laikav2-sample.update-10pct.a-aws.sender.warm|11|1",
+   "utc": 1793736340.362,
+   "cell": "laikav2-sample.update-10pct.a-aws.sender.warm",
+   "factors": {
+    "corpus": "laikav2-sample",
+    "scenario": "update-10pct",
+    "sender": "a",
+    "receiver": "aws",
+    "client": "sender",
+    "link": "a-aws",
+    "cache": "warm"
+   },
+   "block": 11,
+   "attempt": 1,
+   "control": "rsync",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.614,
+     "gbps": 0.576,
+     "files_per_s": 2179,
+     "speed": 1.09
+    },
+    {
+     "arm": "xs-rs-inplace",
+     "label": "xs-rs -inplace",
+     "control": false,
+     "valid": false,
+     "void": "the transfer exited 1: xs-rs: --inplace: unknown option",
+     "seconds": null,
+     "gbps": null,
+     "files_per_s": null,
+     "speed": null
+    },
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.583,
+     "gbps": 0.605,
+     "files_per_s": 2291,
+     "speed": 1.15
+    },
+    {
+     "arm": "rsync",
+     "label": "rsync",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 0.67,
+     "gbps": 0.527,
+     "files_per_s": 1997,
+     "speed": 1
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "speed": 1.13,
+     "blocks": 9
+    },
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "speed": 1.21,
+     "blocks": 12
+    }
+   ],
+   "question": "Does --inplace push xs-rs past xs-c++ on laikav2-sample update-10pct, or is the 0.949 near-tie independent of atomic temp-file publication?",
+   "summary": "In block 11, xs-c++ was fastest at 0.583 s, 1.15x the rsync control (0.67 s), with xs-rs at 1.09x. Cumulatively xs-rs is 1.21x over 12 blocks and xs-c++ 1.13x over 9, so this cell\u2019s evidence is not thin. The --inplace arm was void because xs-rs reported an unknown option, so this block does not test whether --inplace affects the near-tie.",
+   "model": "opencode/deepseek-v4.1-flash",
+   "summarizedUtc": 1793736403.87,
+   "driver": "a"
   }
  }
 }

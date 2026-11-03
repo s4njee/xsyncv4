@@ -1,0 +1,21 @@
+{
+ "experiment": "AP10281214-AP10281212-PLAN102812-a-lk-u10pct-inplac",
+ "kind": "screening",
+ "hypothesis": "On laikav2-sample update-10pct, the current 0.949 ratio sits only just inside the 5% margin; if atomic temp-file publication is the remaining overhead, xs-rs-inplace will lower xs-rs time-to-durable by at least 3% versus default xs-rs and move the direct ratio to xs-c++ to about 0.92 or below. If the interval is neutral, --inplace is not an update-default candidate and the near-tie is engine-bound.",
+ "primary": "durable_s",
+ "control": "rsync",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261028T121455Z-AP10281214-AP10281212-PLAN102812-a-lk-u10pct-inplac"
+ ],
+ "spec_sha256": [
+  "51f8d64daa12f03d30adaddbefb8c458d4ccdb52d440faec828bb98dd0cf8036"
+ ],
+ "valid_blocks": 0,
+ "void_attempts": 36,
+ "void_reasons": [
+  "xs-rs-inplace: the transfer exited 1: xs-rs: --inplace: unknown option"
+ ]
+}
