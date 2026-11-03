@@ -12,10 +12,10 @@
   "cache": "warm",
   "arm": "rsync",
   "metric": "durable_s",
-  "n_blocks": 20,
-  "geomean": 3.3146829615765205,
-  "lo": 3.2010626919898684,
-  "hi": 3.4323361311414353
+  "n_blocks": 24,
+  "geomean": 3.4492799066268165,
+  "lo": 3.219543703716241,
+  "hi": 3.695409340313184
  },
  {
   "experiment": "FC-beabaee-fresh",
@@ -30,10 +30,10 @@
   "cache": "warm",
   "arm": "xs-cpp",
   "metric": "durable_s",
-  "n_blocks": 20,
-  "geomean": 3.3887321418554883,
-  "lo": 3.3281531934661484,
-  "hi": 3.4504137465153275
+  "n_blocks": 24,
+  "geomean": 3.3728994206675575,
+  "lo": 3.31700445146883,
+  "hi": 3.4297362781354863
  },
  {
   "experiment": "FC-beabaee-fresh",
@@ -48,10 +48,10 @@
   "cache": "warm",
   "arm": "xs-rs",
   "metric": "durable_s",
-  "n_blocks": 20,
-  "geomean": 2.883710825795027,
-  "lo": 2.8231024425797,
-  "hi": 2.9456203931475535
+  "n_blocks": 24,
+  "geomean": 2.9336762862067487,
+  "lo": 2.8293018835888795,
+  "hi": 3.04190111425466
  },
  {
   "experiment": "FC-beabaee-fresh",
@@ -66,10 +66,10 @@
   "cache": "warm",
   "arm": "rsync",
   "metric": "wall_s",
-  "n_blocks": 20,
-  "geomean": 3.0709645979680347,
-  "lo": 2.9600578717132726,
-  "hi": 3.186026750387296
+  "n_blocks": 24,
+  "geomean": 3.198963509260685,
+  "lo": 2.974351750324088,
+  "hi": 3.4405370960130726
  },
  {
   "experiment": "FC-beabaee-fresh",
@@ -84,10 +84,10 @@
   "cache": "warm",
   "arm": "xs-cpp",
   "metric": "wall_s",
-  "n_blocks": 20,
-  "geomean": 2.7504094364567444,
-  "lo": 2.6739038561672053,
-  "hi": 2.8291039899219417
+  "n_blocks": 24,
+  "geomean": 2.7347399064848767,
+  "lo": 2.6671647217213637,
+  "hi": 2.804027173580101
  },
  {
   "experiment": "FC-beabaee-fresh",
@@ -102,10 +102,10 @@
   "cache": "warm",
   "arm": "xs-rs",
   "metric": "wall_s",
-  "n_blocks": 20,
-  "geomean": 2.168796269414282,
-  "lo": 2.0998518710818805,
-  "hi": 2.2400043179245257
+  "n_blocks": 24,
+  "geomean": 2.2358268148620235,
+  "lo": 2.126426507508534,
+  "hi": 2.350855544926938
  },
  {
   "experiment": "FC-beabaee-fresh",
@@ -120,10 +120,10 @@
   "cache": "warm",
   "arm": "rsync",
   "metric": "cpu_s",
-  "n_blocks": 20,
-  "geomean": 4.79879515256812,
-  "lo": 4.732822092631543,
-  "hi": 4.86568784238983
+  "n_blocks": 24,
+  "geomean": 4.891872001905282,
+  "lo": 4.744830620543317,
+  "hi": 5.0434701671784
  },
  {
   "experiment": "FC-beabaee-fresh",
@@ -138,10 +138,10 @@
   "cache": "warm",
   "arm": "xs-cpp",
   "metric": "cpu_s",
-  "n_blocks": 20,
-  "geomean": 5.293772890122207,
-  "lo": 5.163214630730533,
-  "hi": 5.427632476364393
+  "n_blocks": 24,
+  "geomean": 5.29294917242752,
+  "lo": 5.178493205793214,
+  "hi": 5.409934864944934
  },
  {
   "experiment": "FC-beabaee-fresh",
@@ -156,10 +156,10 @@
   "cache": "warm",
   "arm": "xs-rs",
   "metric": "cpu_s",
-  "n_blocks": 20,
-  "geomean": 3.725310906843783,
-  "lo": 3.6525368750981064,
-  "hi": 3.799534906071685
+  "n_blocks": 24,
+  "geomean": 3.753663434122971,
+  "lo": 3.675583868913908,
+  "hi": 3.833401625205
  },
  {
   "experiment": "FC-beabaee-fresh",
@@ -174,10 +174,10 @@
   "cache": "warm",
   "arm": "rsync",
   "metric": "rss_bytes",
-  "n_blocks": 20,
-  "geomean": 12994608.637090392,
-  "lo": 12777447.891662207,
-  "hi": 13215460.16566673
+  "n_blocks": 24,
+  "geomean": 12962175.40033412,
+  "lo": 12777574.196048789,
+  "hi": 13149443.590081692
  },
  {
   "experiment": "FC-beabaee-fresh",
@@ -192,10 +192,10 @@
   "cache": "warm",
   "arm": "xs-cpp",
   "metric": "rss_bytes",
-  "n_blocks": 20,
-  "geomean": 152281064.88082257,
-  "lo": 138733854.68671933,
-  "hi": 167151145.433121
+  "n_blocks": 24,
+  "geomean": 153249262.10327938,
+  "lo": 140212149.85761365,
+  "hi": 167498582.39139143
  },
  {
   "experiment": "FC-beabaee-fresh",
@@ -210,9 +210,9 @@
   "cache": "warm",
   "arm": "xs-rs",
   "metric": "rss_bytes",
-  "n_blocks": 20,
-  "geomean": 78964012.38299485,
-  "lo": 74831891.50630847,
-  "hi": 83324303.6639815
+  "n_blocks": 24,
+  "geomean": 79263025.33502069,
+  "lo": 74177649.32136926,
+  "hi": 84697038.02611901
  }
 ]
