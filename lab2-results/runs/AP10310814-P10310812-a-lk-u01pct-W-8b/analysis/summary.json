@@ -1,0 +1,19 @@
+{
+ "experiment": "AP10310814-P10310812-a-lk-u01pct-W-8b",
+ "kind": "screening",
+ "hypothesis": "Because 0.1% churn changes few bytes, xs-rs-W will be at least 3% faster than default xs-rs and keep its ratio to xs-c++ below 0.90; if not, -W's update benefit is limited to the 1pct cell.",
+ "primary": "durable_s",
+ "control": "rsync",
+ "delta": 0.03,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261031T081418Z-AP10310814-P10310812-a-lk-u01pct-W-8b"
+ ],
+ "spec_sha256": [
+  "e0affefda5fa318082f4b3ce251f8be506c19d07ed454825b38cffc0d550cc37"
+ ],
+ "valid_blocks": 8,
+ "void_attempts": 0,
+ "void_reasons": []
+}
