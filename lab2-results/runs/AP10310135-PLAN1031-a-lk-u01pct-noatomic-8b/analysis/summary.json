@@ -1,0 +1,19 @@
+{
+ "experiment": "AP10310135-PLAN1031-a-lk-u01pct-noatomic-8b",
+ "kind": "screening",
+ "hypothesis": "If atomic rename dominates the 1,337-file update, xs-rs-noatomic will be at least 3% faster than default and keep rs_vs_cpp below 0.91; if the arms merge, --no-atomic should not become an update default.",
+ "primary": "durable_s",
+ "control": "rsync",
+ "delta": 0.03,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261031T013532Z-AP10310135-PLAN1031-a-lk-u01pct-noatomic-8b"
+ ],
+ "spec_sha256": [
+  "ece75a70bb6612c8c5ca98621906afa9516d9aef330888480bd4bf59762e9a93"
+ ],
+ "valid_blocks": 8,
+ "void_attempts": 0,
+ "void_reasons": []
+}

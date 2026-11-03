@@ -6626,6 +6626,97 @@
    "model": "opencode/deepseek-v4.1-flash",
    "summarizedUtc": 1793649647.945,
    "driver": "a"
+  },
+  "AP10310135-PLAN1031-a-lk-u01pct-noatomic-8b": {
+   "run": "20261031T013532Z-AP10310135-PLAN1031-a-lk-u01pct-noatomic-8b",
+   "experiment": "AP10310135-PLAN1031-a-lk-u01pct-noatomic-8b",
+   "key": "laikav2-sample.update-0p1pct.a-aws.sender.warm|6|0",
+   "utc": 1793674118.85,
+   "cell": "laikav2-sample.update-0p1pct.a-aws.sender.warm",
+   "factors": {
+    "corpus": "laikav2-sample",
+    "scenario": "update-0p1pct",
+    "sender": "a",
+    "receiver": "aws",
+    "client": "sender",
+    "link": "a-aws",
+    "cache": "warm"
+   },
+   "block": 6,
+   "attempt": 0,
+   "control": "rsync",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.378,
+     "gbps": 0.001,
+     "files_per_s": 3542,
+     "speed": 1.28
+    },
+    {
+     "arm": "xs-rs-noatomic",
+     "label": "xs-rs -noatomic",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.372,
+     "gbps": 0.001,
+     "files_per_s": 3594,
+     "speed": 1.3
+    },
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.385,
+     "gbps": 0.001,
+     "files_per_s": 3471,
+     "speed": 1.25
+    },
+    {
+     "arm": "rsync",
+     "label": "rsync",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 0.482,
+     "gbps": 0,
+     "files_per_s": 2773,
+     "speed": 1
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "speed": 1.09,
+     "blocks": 7
+    },
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "speed": 1.25,
+     "blocks": 7
+    },
+    {
+     "arm": "xs-rs-noatomic",
+     "label": "xs-rs -noatomic",
+     "speed": 1.21,
+     "blocks": 7
+    }
+   ],
+   "question": "On laikav2-sample update-0p1pct, does --no-atomic cut per-file rename overhead enough to beat default -j4, or is the write path irrelevant on a tiny delta?",
+   "summary": "This block's fastest arm was xs-rs -noatomic at 0.372 s, 1.30x the rsync control, just ahead of xs-rs at 1.28x. Over 7 blocks in this cell, cumulative ratios are 1.25x for xs-rs, 1.21x for xs-rs -noatomic, and 1.09x for xs-c++, so the evidence is not thin but does not show --no-atomic beating the default. For the experiment question, this block gives --no-atomic only a small edge, not a cumulative win.",
+   "model": "opencode/deepseek-v4.1-flash",
+   "summarizedUtc": 1793674173.726,
+   "driver": "a"
   }
  }
 }
