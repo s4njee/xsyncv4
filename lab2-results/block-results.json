@@ -1,10 +1,10 @@
 {
  "experiments": {
   "S0-vps-sentinel": {
-   "run": "20261020T030149Z-S0-vps-sentinel-s0015",
+   "run": "20261020T030150Z-S0-vps-sentinel-s0016",
    "experiment": "S0-vps-sentinel",
-   "key": "real-projects.noop.a-aws.sender.warm|2|0",
-   "utc": 1793711929.813,
+   "key": "real-projects.noop.a-aws.sender.warm|1|0",
+   "utc": 1793798562.917,
    "cell": "real-projects.noop.a-aws.sender.warm",
    "factors": {
     "corpus": "real-projects",
@@ -15,7 +15,7 @@
     "link": "a-aws",
     "cache": "warm"
    },
-   "block": 2,
+   "block": 1,
    "attempt": 0,
    "control": "xs",
    "primary": "wall_s",
@@ -26,9 +26,9 @@
      "control": true,
      "valid": true,
      "void": null,
-     "seconds": 4.917,
-     "gbps": 3.474,
-     "files_per_s": 14098,
+     "seconds": 4.851,
+     "gbps": 3.521,
+     "files_per_s": 14288,
      "speed": 1
     },
     {
@@ -37,10 +37,10 @@
      "control": false,
      "valid": true,
      "void": null,
-     "seconds": 3.882,
-     "gbps": 4.4,
-     "files_per_s": 17855,
-     "speed": 1.27
+     "seconds": 4.716,
+     "gbps": 3.622,
+     "files_per_s": 14699,
+     "speed": 1.03
     },
     {
      "arm": "rsync",
@@ -48,30 +48,29 @@
      "control": false,
      "valid": true,
      "void": null,
-     "seconds": 3.955,
-     "gbps": 4.319,
-     "files_per_s": 17526,
-     "speed": 1.24
+     "seconds": 4.294,
+     "gbps": 3.977,
+     "files_per_s": 16141,
+     "speed": 1.13
     }
    ],
    "soFar": [
     {
      "arm": "again",
      "label": "xs-c++",
-     "speed": 1.1,
-     "blocks": 3
+     "speed": 0.99,
+     "blocks": 2
     },
     {
      "arm": "rsync",
      "label": "rsync",
-     "speed": 1.39,
-     "blocks": 3
+     "speed": 1.22,
+     "blocks": 2
     }
    ],
    "question": null,
-   "summary": "This block\u2019s non-control xs-c++ run was fastest at 3.882 s, 1.27x the 4.917 s control; rsync was close at 3.955 s, 1.24x. So far this cell shows xs-c++ at 1.10x and rsync at 1.39x cumulative, each over three blocks. With three blocks, evidence is not thin under the fewer-than-three rule, and no experiment question was stated, so no further inference is drawn.",
-   "model": "opencode/deepseek-v4.1-flash",
-   "summarizedUtc": 1793711947.679,
+   "summary": null,
+   "model": null,
    "driver": "a"
   },
   "E1-vps-baseline": {
@@ -6977,6 +6976,96 @@
    "summary": "In block 7 rsync was fastest at 3.137 s, with xs-rs essentially tied (3.151 s, 1.00x) and xs-c++ at 0.89x; xs-rs -inplace was void because --inplace is unknown. Across nine blocks, xs-rs stands at 1.10x and xs-c++ at 1.03x, so the evidence is not thin but this block is near parity. The inplace question cannot be assessed from this block, since that arm did not run.",
    "model": "opencode/deepseek-v4.1-flash",
    "summarizedUtc": 1793760919.666,
+   "driver": "a"
+  },
+  "AP10290134-AP10290132-PLAN1029-a-lk-u10pct-zpin-12b": {
+   "run": "20261029T013442Z-AP10290134-AP10290132-PLAN1029-a-lk-u10pct-zpin-12b",
+   "experiment": "AP10290134-AP10290132-PLAN1029-a-lk-u10pct-zpin-12b",
+   "key": "laikav2-sample.update-10pct.a-aws.sender.warm|10|0",
+   "utc": 1793798937.047,
+   "cell": "laikav2-sample.update-10pct.a-aws.sender.warm",
+   "factors": {
+    "corpus": "laikav2-sample",
+    "scenario": "update-10pct",
+    "sender": "a",
+    "receiver": "aws",
+    "client": "sender",
+    "link": "a-aws",
+    "cache": "warm"
+   },
+   "block": 10,
+   "attempt": 0,
+   "control": "rsync",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.538,
+     "gbps": 0.087,
+     "files_per_s": 2486,
+     "speed": 1.03
+    },
+    {
+     "arm": "xs-rs-z",
+     "label": "xs-rs -z",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.464,
+     "gbps": 0.101,
+     "files_per_s": 2881,
+     "speed": 1.2
+    },
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 0.462,
+     "gbps": 0.101,
+     "files_per_s": 2895,
+     "speed": 1.2
+    },
+    {
+     "arm": "rsync",
+     "label": "rsync",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 0.555,
+     "gbps": 0.084,
+     "files_per_s": 2411,
+     "speed": 1
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "speed": 1.15,
+     "blocks": 11
+    },
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "speed": 1.25,
+     "blocks": 11
+    },
+    {
+     "arm": "xs-rs-z",
+     "label": "xs-rs -z",
+     "speed": 1.28,
+     "blocks": 11
+    }
+   ],
+   "question": "Does plain -z at -j4 keep xs-rs below 0.95 of xs-c++ on laikav2 update-10pct once the 0.949 8-block near-tie is pinned at 12 blocks?",
+   "summary": null,
+   "model": null,
    "driver": "a"
   }
  }

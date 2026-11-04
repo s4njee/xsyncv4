@@ -1,0 +1,19 @@
+{
+ "experiment": "AP10290134-AP10290132-PLAN1029-a-lk-u10pct-zpin-12b",
+ "kind": "screening",
+ "hypothesis": "The 8-block screening put xs-rs-z at 0.824 of rsync and xs-c++ at 0.869, a direct ratio near 0.949 that still lacks a clean interval; with 12 paired blocks the direct ratio will stay below 0.95 and its interval will exclude 1, making -z at -j4 a defensible default for high-churn small updates.",
+ "primary": "durable_s",
+ "control": "rsync",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261029T013442Z-AP10290134-AP10290132-PLAN1029-a-lk-u10pct-zpin-12b"
+ ],
+ "spec_sha256": [
+  "5008aad396dbe7bf0a0e8143765adc12136fa2608a15d9409f4b6c473f3e455e"
+ ],
+ "valid_blocks": 12,
+ "void_attempts": 0,
+ "void_reasons": []
+}
