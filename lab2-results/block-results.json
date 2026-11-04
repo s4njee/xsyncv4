@@ -6893,6 +6893,91 @@
    "model": "opencode/deepseek-v4.1-flash",
    "summarizedUtc": 1793736403.87,
    "driver": "a"
+  },
+  "AP11010255-a1101-cg-fresh-inplace-8b": {
+   "run": "20261101T025505Z-AP11010255-a1101-cg-fresh-inplace-8b",
+   "experiment": "AP11010255-a1101-cg-fresh-inplace-8b",
+   "key": "congress-sample.fresh.a-aws.sender.warm|7|0",
+   "utc": 1793760850.477,
+   "cell": "congress-sample.fresh.a-aws.sender.warm",
+   "factors": {
+    "corpus": "congress-sample",
+    "scenario": "fresh",
+    "sender": "a",
+    "receiver": "aws",
+    "client": "sender",
+    "link": "a-aws",
+    "cache": "warm"
+   },
+   "block": 7,
+   "attempt": 0,
+   "control": "rsync",
+   "primary": "durable_s",
+   "arms": [
+    {
+     "arm": "rsync",
+     "label": "rsync",
+     "control": true,
+     "valid": true,
+     "void": null,
+     "seconds": 3.137,
+     "gbps": 0.556,
+     "files_per_s": 8048,
+     "speed": 1
+    },
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 3.516,
+     "gbps": 0.496,
+     "files_per_s": 7180,
+     "speed": 0.89
+    },
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "control": false,
+     "valid": true,
+     "void": null,
+     "seconds": 3.151,
+     "gbps": 0.554,
+     "files_per_s": 8013,
+     "speed": 1
+    },
+    {
+     "arm": "xs-rs-inplace",
+     "label": "xs-rs -inplace",
+     "control": false,
+     "valid": false,
+     "void": "the transfer exited 1: xs-rs: --inplace: unknown option",
+     "seconds": null,
+     "gbps": null,
+     "files_per_s": null,
+     "speed": null
+    }
+   ],
+   "soFar": [
+    {
+     "arm": "xs-cpp",
+     "label": "xs-c++",
+     "speed": 1.03,
+     "blocks": 9
+    },
+    {
+     "arm": "xs-rs",
+     "label": "xs-rs",
+     "speed": 1.1,
+     "blocks": 9
+    }
+   ],
+   "question": "On the per-file-bound congress-sample fresh copy, does writing destination files in place instead of temp-file-plus-rename cut enough per-file overhead to gain 3% over default xs-rs and push its lead over xs-c++ past 0.85?",
+   "summary": "In block 7 rsync was fastest at 3.137 s, with xs-rs essentially tied (3.151 s, 1.00x) and xs-c++ at 0.89x; xs-rs -inplace was void because --inplace is unknown. Across nine blocks, xs-rs stands at 1.10x and xs-c++ at 1.03x, so the evidence is not thin but this block is near parity. The inplace question cannot be assessed from this block, since that arm did not run.",
+   "model": "opencode/deepseek-v4.1-flash",
+   "summarizedUtc": 1793760919.666,
+   "driver": "a"
   }
  }
 }
