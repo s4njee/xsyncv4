@@ -1,0 +1,19 @@
+{
+ "experiment": "AP10290735-PLAN1029-a-lk-u10pct-noatomic-12b",
+ "kind": "screening",
+ "hypothesis": "The remaining cost is atomic temp-file replacement on changed files: xs-rs-noatomic should be at least 3% faster than default xs-rs and push the xs-rs-to-xs-c++ ratio at or below 0.93, while plain xs-rs stays near 0.95.",
+ "primary": "durable_s",
+ "control": "rsync",
+ "delta": 0.05,
+ "level": 0.95,
+ "looks": 1,
+ "runs": [
+  "20261029T073547Z-AP10290735-PLAN1029-a-lk-u10pct-noatomic-12b"
+ ],
+ "spec_sha256": [
+  "b84a545704e117c72ddef8c639296a9763659a52b58b39258d2826606f8ed6d9"
+ ],
+ "valid_blocks": 12,
+ "void_attempts": 0,
+ "void_reasons": []
+}
