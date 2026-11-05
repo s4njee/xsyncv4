@@ -12,10 +12,10 @@
   "cache": "warm",
   "arm": "rsync",
   "metric": "durable_s",
-  "n_blocks": 24,
-  "geomean": 3.4492799066268165,
-  "lo": 3.219543703716241,
-  "hi": 3.695409340313184
+  "n_blocks": 28,
+  "geomean": 3.412627626941648,
+  "lo": 3.2158453750807983,
+  "hi": 3.621451270763532
  },
  {
   "experiment": "FC-beabaee-fresh",
@@ -30,10 +30,10 @@
   "cache": "warm",
   "arm": "xs-cpp",
   "metric": "durable_s",
-  "n_blocks": 24,
-  "geomean": 3.3728994206675575,
-  "lo": 3.31700445146883,
-  "hi": 3.4297362781354863
+  "n_blocks": 28,
+  "geomean": 3.3720231015308717,
+  "lo": 3.323034907430976,
+  "hi": 3.421733479787125
  },
  {
   "experiment": "FC-beabaee-fresh",
@@ -48,10 +48,10 @@
   "cache": "warm",
   "arm": "xs-rs",
   "metric": "durable_s",
-  "n_blocks": 24,
-  "geomean": 2.9336762862067487,
-  "lo": 2.8293018835888795,
-  "hi": 3.04190111425466
+  "n_blocks": 28,
+  "geomean": 2.9352758700437076,
+  "lo": 2.844198825868275,
+  "hi": 3.0292693868300873
  },
  {
   "experiment": "FC-beabaee-fresh",
@@ -66,10 +66,10 @@
   "cache": "warm",
   "arm": "rsync",
   "metric": "wall_s",
-  "n_blocks": 24,
-  "geomean": 3.198963509260685,
-  "lo": 2.974351750324088,
-  "hi": 3.4405370960130726
+  "n_blocks": 28,
+  "geomean": 3.161291407921994,
+  "lo": 2.968978673462759,
+  "hi": 3.366061014559449
  },
  {
   "experiment": "FC-beabaee-fresh",
@@ -84,10 +84,10 @@
   "cache": "warm",
   "arm": "xs-cpp",
   "metric": "wall_s",
-  "n_blocks": 24,
-  "geomean": 2.7347399064848767,
-  "lo": 2.6671647217213637,
-  "hi": 2.804027173580101
+  "n_blocks": 28,
+  "geomean": 2.7297081291281224,
+  "lo": 2.6717224239016355,
+  "hi": 2.7889523266218204
  },
  {
   "experiment": "FC-beabaee-fresh",
@@ -102,10 +102,10 @@
   "cache": "warm",
   "arm": "xs-rs",
   "metric": "wall_s",
-  "n_blocks": 24,
-  "geomean": 2.2358268148620235,
-  "lo": 2.126426507508534,
-  "hi": 2.350855544926938
+  "n_blocks": 28,
+  "geomean": 2.2446564100521162,
+  "lo": 2.147102922471141,
+  "hi": 2.346642234266614
  },
  {
   "experiment": "FC-beabaee-fresh",
@@ -120,10 +120,10 @@
   "cache": "warm",
   "arm": "rsync",
   "metric": "cpu_s",
-  "n_blocks": 24,
-  "geomean": 4.891872001905282,
-  "lo": 4.744830620543317,
-  "hi": 5.0434701671784
+  "n_blocks": 28,
+  "geomean": 4.86616860219368,
+  "lo": 4.739290422097798,
+  "hi": 4.9964435086242425
  },
  {
   "experiment": "FC-beabaee-fresh",
@@ -138,10 +138,10 @@
   "cache": "warm",
   "arm": "xs-cpp",
   "metric": "cpu_s",
-  "n_blocks": 24,
-  "geomean": 5.29294917242752,
-  "lo": 5.178493205793214,
-  "hi": 5.409934864944934
+  "n_blocks": 28,
+  "geomean": 5.262813110391401,
+  "lo": 5.1611260750298715,
+  "hi": 5.366503633559719
  },
  {
   "experiment": "FC-beabaee-fresh",
@@ -156,10 +156,10 @@
   "cache": "warm",
   "arm": "xs-rs",
   "metric": "cpu_s",
-  "n_blocks": 24,
-  "geomean": 3.753663434122971,
-  "lo": 3.675583868913908,
-  "hi": 3.833401625205
+  "n_blocks": 28,
+  "geomean": 3.753710483331775,
+  "lo": 3.6850136839034375,
+  "hi": 3.823687942930334
  },
  {
   "experiment": "FC-beabaee-fresh",
@@ -174,10 +174,10 @@
   "cache": "warm",
   "arm": "rsync",
   "metric": "rss_bytes",
-  "n_blocks": 24,
-  "geomean": 12962175.40033412,
-  "lo": 12777574.196048789,
-  "hi": 13149443.590081692
+  "n_blocks": 28,
+  "geomean": 13040764.808676844,
+  "lo": 12841211.483962763,
+  "hi": 13243419.206015904
  },
  {
   "experiment": "FC-beabaee-fresh",
@@ -192,10 +192,10 @@
   "cache": "warm",
   "arm": "xs-cpp",
   "metric": "rss_bytes",
-  "n_blocks": 24,
-  "geomean": 153249262.10327938,
-  "lo": 140212149.85761365,
-  "hi": 167498582.39139143
+  "n_blocks": 28,
+  "geomean": 156215002.1440387,
+  "lo": 144176478.01117417,
+  "hi": 169258725.35858926
  },
  {
   "experiment": "FC-beabaee-fresh",
@@ -210,9 +210,9 @@
   "cache": "warm",
   "arm": "xs-rs",
   "metric": "rss_bytes",
-  "n_blocks": 24,
-  "geomean": 79263025.33502069,
-  "lo": 74177649.32136926,
-  "hi": 84697038.02611901
+  "n_blocks": 28,
+  "geomean": 79478983.99212135,
+  "lo": 75057617.45713367,
+  "hi": 84160796.87085119
  }
 ]

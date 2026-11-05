@@ -2134,10 +2134,10 @@
    "driver": "a"
   },
   "FC-beabaee-fresh": {
-   "run": "20261103T045053Z-FC-beabaee-fresh",
+   "run": "20261105T025110Z-FC-beabaee-fresh",
    "experiment": "FC-beabaee-fresh",
    "key": "congress-sample.fresh.a-aws.sender.warm|2|0",
-   "utc": 1793703759.982,
+   "utc": 1793854047.709,
    "cell": "congress-sample.fresh.a-aws.sender.warm",
    "factors": {
     "corpus": "congress-sample",
@@ -2159,9 +2159,9 @@
      "control": true,
      "valid": true,
      "void": null,
-     "seconds": 3.167,
-     "gbps": 0.551,
-     "files_per_s": 7972,
+     "seconds": 3.297,
+     "gbps": 0.529,
+     "files_per_s": 7657,
      "speed": 1
     },
     {
@@ -2170,9 +2170,9 @@
      "control": false,
      "valid": true,
      "void": null,
-     "seconds": 3.324,
-     "gbps": 0.525,
-     "files_per_s": 7595,
+     "seconds": 3.473,
+     "gbps": 0.503,
+     "files_per_s": 7268,
      "speed": 0.95
     },
     {
@@ -2181,30 +2181,29 @@
      "control": false,
      "valid": true,
      "void": null,
-     "seconds": 2.886,
-     "gbps": 0.605,
-     "files_per_s": 8746,
-     "speed": 1.1
+     "seconds": 2.939,
+     "gbps": 0.594,
+     "files_per_s": 8590,
+     "speed": 1.12
     }
    ],
    "soFar": [
     {
      "arm": "xs-cpp",
      "label": "xs-c++",
-     "speed": 1.42,
+     "speed": 0.95,
      "blocks": 3
     },
     {
      "arm": "xs-rs",
      "label": "xs-rs",
-     "speed": 1.43,
+     "speed": 1.12,
      "blocks": 3
     }
    ],
    "question": "On congress-sample, fresh copies: how do rsync, xs-c++ and xs-rs at beabaee992b6 compare?",
-   "summary": "In block 2, xs-rs was fastest at 2.886 s versus rsync\u2019s 3.167 s, about 1.10x (10% faster); xs-c++ was 0.95x (5% slower) at 3.324 s. Cumulatively for this cell, xs-c++ stands at 1.42x and xs-rs at 1.43x versus control, each from three blocks. That bears on the comparison by showing xs-rs ahead on this block and both alternatives ahead over three blocks, though the block-level gap here is small.",
-   "model": "opencode/deepseek-v4.1-flash",
-   "summarizedUtc": 1793703801.872,
+   "summary": null,
+   "model": null,
    "driver": "a"
   },
   "AP10222213-PS-beabaee-laikav2-fresh": {
