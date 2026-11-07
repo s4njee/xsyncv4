@@ -391,7 +391,13 @@ fn flush_data(s: &Sending, block: &mut Vec<u8>, compress: bool) -> io::Result<()
     let records = &block[DATA_HEADER..];
     let digest = ffi::xxh3_64(records);
     let level = s.level();
-    if let Some(compressed) = (compress && s.compressing()).then(|| protocol::compress_body(records, level)).flatten() {
+    let started = std::time::Instant::now();
+    let compressed = (compress && s.compressing()).then(|| protocol::compress_body(records, level)).flatten();
+    if let Some(compressed) = &compressed {
+        // What this machine's workers manage at this level, for choosing the next level.
+        s.link.record_compression(level, records.len() as u64, compressed.len() as u64, started.elapsed().as_nanos() as u64);
+    }
+    if let Some(compressed) = compressed {
         let mut payload = Encoder { bytes: Vec::with_capacity(DATA_HEADER + 10 + compressed.len()) };
         payload.byte(1).raw(&digest.to_le_bytes()).var(records.len() as u64).raw(&compressed);
         s.link.set_last_level(level);
@@ -910,8 +916,9 @@ pub fn run_sender<R: Read, W: Write + Send + 'static>(
         next_dir: AtomicU32::new(0),
         ids: Mutex::new(idmap::Sender::default()),
     };
-    let jobs = crate::parallel::effective_jobs(opts.jobs);
+    let jobs = crate::parallel::sender_jobs(opts.jobs);
     s.work.lock().unwrap().workers = jobs;
+    link.set_workers(jobs);
     s.push_walks(vec![WalkTask {
         parent_plus1: 0,
         pidx: 0,
