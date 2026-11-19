@@ -19,12 +19,25 @@ use std::thread::JoinHandle;
 
 /// The port's default worker budget when `-j` was not given.
 pub const DEFAULT_JOBS: usize = 4;
+/// A sender's default workers when `-j` was not given: more than the CPU budget, because a sender
+/// mostly waits on opening and reading files. Eight readers read many small files 3-4x faster than
+/// one on both Raspberry Pis in the compression study, and sixteen no faster than eight.
+pub const DEFAULT_SENDER_JOBS: usize = 8;
 /// `MAX_WORKERS` in `src/progress.h`.
 pub const MAX_WORKERS: usize = 64;
 /// The C++ sender uses this range size for remote transfers (`remote.cpp:1562`).
 pub const RANGE_SPAN: u64 = 4 << 20;
 /// A file this size or larger may be split across ranges (`fs.cpp:1765`).
 pub const RANGE_MIN: u64 = 32 << 20;
+
+/// The sending side's workers: `-j` when given, else `DEFAULT_SENDER_JOBS`.
+pub fn sender_jobs(jobs: i64) -> usize {
+    if jobs > 0 {
+        (jobs as usize).min(MAX_WORKERS)
+    } else {
+        DEFAULT_SENDER_JOBS
+    }
+}
 
 pub fn effective_jobs(jobs: i64) -> usize {
     if jobs > 0 {
